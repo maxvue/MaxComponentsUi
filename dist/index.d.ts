@@ -16,6 +16,8 @@ loading: boolean;
 iconPos: "left" | "right";
 }, {}, {}, {}, string, ComponentProvideOptions, false, {}, any>;
 
+declare const __VLS_component_2: DefineComponent<    {}, {}, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {}, string, PublicProps, Readonly<{}> & Readonly<{}>, {}, {}, {}, {}, string, ComponentProvideOptions, true, {}, HTMLDivElement>;
+
 declare type __VLS_Props = {
     icon?: string;
     i?: string;
@@ -54,9 +56,26 @@ declare function __VLS_template(): {
     rootEl: any;
 };
 
+declare function __VLS_template_2(): {
+    attrs: Partial<{}>;
+    slots: {
+        default?(_: {}): any;
+    };
+    refs: {};
+    rootEl: HTMLDivElement;
+};
+
 declare type __VLS_TemplateResult = ReturnType<typeof __VLS_template>;
 
+declare type __VLS_TemplateResult_2 = ReturnType<typeof __VLS_template_2>;
+
 declare type __VLS_WithTemplateSlots<T, S> = T & {
+    new (): {
+        $slots: S;
+    };
+};
+
+declare type __VLS_WithTemplateSlots_2<T, S> = T & {
     new (): {
         $slots: S;
     };
@@ -97,6 +116,8 @@ required: boolean;
 }, {}, {}, {}, string, ComponentProvideOptions, false, {}, any>;
 export { _default_2 as InputText }
 export { _default_2 as MaxInputText }
+
+export declare const Grid: __VLS_WithTemplateSlots_2<typeof __VLS_component_2, __VLS_TemplateResult_2["slots"]>;
 
 declare function install(app: App): any;
 export default install;

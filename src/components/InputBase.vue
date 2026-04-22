@@ -21,7 +21,7 @@
         <div class="is-done" v-if="done">
             <MaxIcon icon="lets-icons:check-fill" :size="0.9" />
         </div>
-        <div class="required" v-else-if="required">*</div>
+        <div class="required" v-else-if="required">**a</div>
     </FloatLabel>
 </template>
 
