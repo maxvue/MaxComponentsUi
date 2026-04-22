@@ -3521,7 +3521,7 @@ const Rp = ["innerHTML"], So = /* @__PURE__ */ ee({
       style: qr({ width: i.value, height: i.value })
     }, null, 12, Rp));
   }
-}), Op = { class: "max-button__icon" }, Tp = { class: "max-button__icon-loading" }, T0 = /* @__PURE__ */ ee({
+}), Op = { class: "max-button__icon" }, Tp = { class: "max-button__icon-loading" }, O0 = /* @__PURE__ */ ee({
   __name: "MaxButton",
   props: {
     label: {},
@@ -4865,7 +4865,7 @@ Br.render = P0;
 function qe(o) {
   return o ? o.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]/g, "").replace(/\s+/g, "").toLowerCase() : "";
 }
-const z0 = /* @__PURE__ */ ee({
+const T0 = /* @__PURE__ */ ee({
   __name: "MaxInputText",
   props: {
     modelValue: { default: "" },
@@ -4913,31 +4913,31 @@ const z0 = /* @__PURE__ */ ee({
       _: 1
     }, 16, ["value", "done", "error", "caution"]));
   }
-}), R0 = (o, e = {}) => {
-  var r, t;
-  o.use(on, {
-    ...e,
-    locale: e.locale || _g,
-    theme: {
-      preset: ((r = e.theme) == null ? void 0 : r.preset) ?? Bg,
-      options: {
-        darkModeSelector: ".dark",
-        ...((t = e.theme) == null ? void 0 : t.options) ?? {},
-        prefix: "max"
-      }
-    },
-    ripple: !0
-  });
-}, j0 = {
-  install: R0
+}), z0 = {
+  install(o, e = { unocss: !0, locale: _g }) {
+    var r, t;
+    o.use(on, {
+      ...e,
+      unocss: e.unocss,
+      locale: e.locale,
+      theme: {
+        preset: ((r = e.theme) == null ? void 0 : r.preset) ?? Bg,
+        options: {
+          darkModeSelector: ".dark",
+          ...((t = e.theme) == null ? void 0 : t.options) ?? {},
+          prefix: "max"
+        }
+      },
+      ripple: !0
+    });
+  }
 };
 export {
-  T0 as Button,
-  z0 as InputText,
-  T0 as MaxButton,
+  O0 as Button,
+  T0 as InputText,
+  O0 as MaxButton,
   So as MaxIcon,
-  z0 as MaxInputText,
-  j0 as default,
-  R0 as install
+  T0 as MaxInputText,
+  z0 as default
 };
 //# sourceMappingURL=index.es.js.map
