@@ -1,8 +1,7 @@
-import { App } from 'vue';
 import { ComponentOptionsMixin } from 'vue';
 import { ComponentProvideOptions } from 'vue';
 import { DefineComponent } from 'vue';
-import { PrimeVueConfiguration } from 'primevue/config';
+import { Plugin as Plugin_2 } from 'vue';
 import { PublicProps } from 'vue';
 
 declare const __VLS_component: DefineComponent<Props, {}, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {} & {
@@ -99,8 +98,8 @@ required: boolean;
 export { _default_2 as InputText }
 export { _default_2 as MaxInputText }
 
-declare function install(app: App, options?: PrimeVueConfiguration): void;
-export default install;
+declare const MaxComponentsUi: Plugin_2<any[], any[]>;
+export default MaxComponentsUi;
 
 export declare const MaxIcon: DefineComponent<__VLS_Props, {}, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {}, string, PublicProps, Readonly<__VLS_Props> & Readonly<{}>, {}, {}, {}, {}, string, ComponentProvideOptions, false, {}, HTMLDivElement>;
 
