@@ -1,7 +1,7 @@
 import 'virtual:uno.css';
 // import '@unocss/reset/normalize.css';
 
-import PrimeVue, { PrimeVueConfiguration } from 'primevue/config';
+import PrimeVue from 'primevue/config';
 import type { Plugin } from 'vue';
 
 import { MaxStyle } from './styles/style';
