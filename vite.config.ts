@@ -3,9 +3,10 @@ import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import UnoCSS from 'unocss/vite';
 import dts from 'vite-plugin-dts';
+import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
 
 export default defineConfig({
-    plugins: [vue(), UnoCSS(), dts({ rollupTypes: true })],
+    plugins: [vue(), UnoCSS(), dts({ rollupTypes: true }), cssInjectedByJsPlugin()],
     build: {
         lib: {
             entry: './src/index.ts',

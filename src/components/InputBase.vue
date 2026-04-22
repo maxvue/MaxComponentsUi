@@ -1,5 +1,5 @@
 <template>
-    <FloatLabel variant="on" class="max-input" :class="{ float: attrs.float !== undefined, done: done, caution: caution || done === false }">
+    <FloatLabel variant="on" class="max-input-base" :class="{ float: attrs.float !== undefined, done: done, caution: caution || done === false }">
         <IconField>
             <InputIcon v-if="icon ?? iconLeft ?? i">
                 <MaxIcon :icon="icon ?? iconLeft ?? i" />
