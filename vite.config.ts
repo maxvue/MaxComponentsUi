@@ -5,13 +5,14 @@ import UnoCSS from 'unocss/vite';
 import dts from 'vite-plugin-dts';
 
 export default defineConfig({
-    plugins: [vue(), UnoCSS(), dts({ rollupTypes: true })],
+    plugins: [vue(), UnoCSS(), dts({ rollupTypes: true })], // rollupTypes: false é mais estável no Vite 8
     build: {
         lib: {
             entry: './src/index.ts',
             name: 'MaxComponentsUi',
             fileName: (format: string) => `index.${format}.js`,
             formats: ['es', 'umd'],
+            cssFileName: 'style',
         },
         rollupOptions: {
             external: ['vue'],
@@ -19,15 +20,12 @@ export default defineConfig({
                 globals: {
                     vue: 'Vue',
                 },
-                assetFileNames: (assetInfo: any) => {
-                    if (assetInfo.name === 'style.css') return 'style.css';
-                    return assetInfo.name;
-                },
+                // Mantenha ou simplifique isto:
+                assetFileNames: 'style.[ext]',
             },
         },
-        cssCodeSplit: false,
+        cssTarget: 'esnext',
         sourcemap: true,
-        minify: 'esbuild',
     },
     resolve: {
         alias: {

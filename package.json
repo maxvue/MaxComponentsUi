@@ -1,11 +1,10 @@
 {
     "name": "max-components-ui",
-    "version": "0.1.2",
+    "version": "0.1.7",
     "description": "Biblioteca de componentes Vue baseada em PrimeVue",
     "main": "./dist/index.js",
     "module": "./dist/index.es.js",
     "types": "./dist/index.d.ts",
-    "type": "module",
     "exports": {
         ".": {
             "types": "./dist/index.d.ts",
@@ -45,8 +44,7 @@
         "sass-embedded": "^1.99.0",
         "typescript": "~5.7.2",
         "unocss": "^66.6.8",
-        "vite": "^6.0.0",
-        "vite-plugin-css-injected-by-js": "^5.0.1",
+        "vite": "^8.0.9",
         "vite-plugin-dts": "^4.5.4",
         "vue": "^3.5.13",
         "vue-tsc": "^2.1.10"
