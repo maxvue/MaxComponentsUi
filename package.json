@@ -1,6 +1,6 @@
 {
     "name": "max-components-ui",
-    "version": "0.0.9",
+    "version": "0.0.10",
     "description": "Biblioteca de componentes Vue baseada em PrimeVue",
     "main": "./dist/index.js",
     "module": "./dist/index.es.js",
@@ -27,12 +27,9 @@
     },
     "dependencies": {
         "@iconify/vue": "^5.0.0",
-        "@primeuix/themes": "^2.0.3",
         "@unocss/reset": "^66.6.8",
         "@vueuse/core": "^14.2.1",
-        "primeicons": "^7.0.0",
-        "primevue": "^4.5.5",
-        "vue": "^3.5.13"
+        "primeicons": "^7.0.0"
     },
     "devDependencies": {
         "@types/node": "^22.10.5",
@@ -47,7 +44,10 @@
         "unocss": "^66.6.8",
         "vite": "^6.0.0",
         "vite-plugin-dts": "^4.5.4",
-        "vue-tsc": "^2.1.10"
+        "vue-tsc": "^2.1.10",
+        "vue": "^3.5.13",
+        "primevue": "^4.5.5",
+        "@primeuix/themes": "^2.0.3"
     },
     "keywords": [
         "vue",
@@ -64,6 +64,8 @@
         "url": "https://github.com/johnattas/MaxComponentsUi.git"
     },
     "peerDependencies": {
-        "vue": "^3.5.13"
+        "vue": "^3.5.13",
+        "primevue": "^4.5.0",
+        "@primeuix/themes": "^2.0.0"
     }
 }
