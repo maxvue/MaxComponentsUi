@@ -98,7 +98,7 @@ required: boolean;
 export { _default_2 as InputText }
 export { _default_2 as MaxInputText }
 
-declare function install(app: App): void;
+declare function install(app: App): any;
 export default install;
 
 export declare const MaxIcon: DefineComponent<__VLS_Props, {}, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {}, string, PublicProps, Readonly<__VLS_Props> & Readonly<{}>, {}, {}, {}, {}, string, ComponentProvideOptions, false, {}, HTMLDivElement>;
