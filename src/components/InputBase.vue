@@ -23,6 +23,13 @@
         </div>
         <div class="required" v-else-if="required">**a</div>
     </FloatLabel>
+    <div style="color: green" class="no-style">
+        Texto Verde (sem classe)
+    </div>
+
+    <div class="in-style">
+        Texto Laranja no Style
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -67,7 +74,7 @@
     });
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
     .max-input {
         .max-input-label {
             &.active {
@@ -115,5 +122,8 @@
                 color: darkorange !important;
             }
         }
+    }
+    .in-style {
+        color: orange;
     }
 </style>

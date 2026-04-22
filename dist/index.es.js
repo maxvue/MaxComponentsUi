@@ -1,4 +1,3 @@
-(function(){try{if(typeof document<`u`){var e=document.createElement(`style`);e.appendChild(document.createTextNode(`*,:before,:after,::backdrop{--un-rotate:0;--un-rotate-x:0;--un-rotate-y:0;--un-rotate-z:0;--un-scale-x:1;--un-scale-y:1;--un-scale-z:1;--un-skew-x:0;--un-skew-y:0;--un-translate-x:0;--un-translate-y:0;--un-translate-z:0;--un-pan-x: ;--un-pan-y: ;--un-pinch-zoom: ;--un-scroll-snap-strictness:proximity;--un-ordinal: ;--un-slashed-zero: ;--un-numeric-figure: ;--un-numeric-spacing: ;--un-numeric-fraction: ;--un-border-spacing-x:0;--un-border-spacing-y:0;--un-ring-offset-shadow:0 0 #0000;--un-ring-shadow:0 0 #0000;--un-shadow-inset: ;--un-shadow:0 0 #0000;--un-ring-inset: ;--un-ring-offset-width:0px;--un-ring-offset-color:#fff;--un-ring-width:0px;--un-ring-color:#93c5fd80;--un-blur: ;--un-brightness: ;--un-contrast: ;--un-drop-shadow: ;--un-grayscale: ;--un-hue-rotate: ;--un-invert: ;--un-saturate: ;--un-sepia: ;--un-backdrop-blur: ;--un-backdrop-brightness: ;--un-backdrop-contrast: ;--un-backdrop-grayscale: ;--un-backdrop-hue-rotate: ;--un-backdrop-invert: ;--un-backdrop-opacity: ;--un-backdrop-saturate: ;--un-backdrop-sepia: }.col-gap-8,[col-gap-8=""]{gap:8px}.pt14,[pt14=""]{padding-top:14px}.row-gap-18,[row-gap-18=""]{row-gap:18px}.absolute{position:absolute}.grid{display:grid}[size~="0.9"]{width:.225rem;height:.225rem}.flex{display:flex}.flex-wrap{flex-wrap:wrap}.transform{transform:translateX(var(--un-translate-x)) translateY(var(--un-translate-y)) translateZ(var(--un-translate-z)) rotate(var(--un-rotate)) rotateX(var(--un-rotate-x)) rotateY(var(--un-rotate-y)) rotateZ(var(--un-rotate-z)) skewX(var(--un-skew-x)) skewY(var(--un-skew-y)) scaleX(var(--un-scale-x)) scaleY(var(--un-scale-y)) scaleZ(var(--un-scale-z))}[stroke-width~="2"]{stroke-width:2px}.px{padding-left:1rem;padding-right:1rem}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-duration:.15s;transition-timing-function:cubic-bezier(.4,0,.2,1)}.ease-in-out{transition-timing-function:cubic-bezier(.4,0,.2,1)}.max-icon-div{place-items:center;display:grid}.max-icon-div svg{width:100%!important;height:100%!important}.max-button{transition:all .2s ease-in-out}.max-button--small{padding:.375rem .75rem;font-size:.875rem}.max-button--large{padding:.75rem 1.5rem;font-size:1.125rem}.max-button:hover{transform:translateY(-1px);box-shadow:0 4px 8px #0000001a}.max-button:active{transform:translateY(0)}.max-button .max-button__icon{place-items:center;display:grid}.max-button.icon-pos-right{flex-direction:row-reverse}.max-button.icon-pos-left{flex-direction:row}.max-input .max-input-label.active[data-v-ba3e7561]{border-radius:var(--max-floatlabel-on-border-radius);background:var(--max-floatlabel-on-active-background);font-size:var(--max-floatlabel-active-font-size);font-weight:var(--max-floatlabel-active-font-weight);top:0;transform:translateY(-50%);padding:0 5px!important;inset-inline-start:15px!important}.max-input .required[data-v-ba3e7561]{color:#369;position:absolute;top:3px;right:5px}.max-input .is-done[data-v-ba3e7561]{color:#16a34a;position:absolute;top:3px;right:5px}.max-input.caution label[data-v-ba3e7561]{color:#ff8c00}.max-input.caution input[data-v-ba3e7561]{border-color:#ff8c00}.max-input .input-message .p-message-content[data-v-ba3e7561]{color:var(--max-surface-400);justify-content:flex-end;padding:4px 6px 0}.max-input .input-message .p-message-text[data-v-ba3e7561]{font-size:10px!important}.max-input .input-message.error[data-v-ba3e7561]{color:#ff8c00!important}.max-input .max-input-label.active{border-radius:var(--max-floatlabel-on-border-radius);background:var(--max-floatlabel-on-active-background);padding:var(--max-floatlabel-on-active-padding);font-size:var(--max-floatlabel-active-font-size);font-weight:var(--max-floatlabel-active-font-weight);top:0;transform:translateY(-50%)}.max-input .required{color:#8b0000;position:absolute;top:3px;right:5px}.max-grid-cols{flex-wrap:wrap;display:flex}.in-style{color:#00f}/*$vite$:1*/`)),document.head.appendChild(e)}}catch(e){console.error(`vite-plugin-css-injected-by-js`,e)}})();
 import { Fragment as e, Transition as t, computed as n, createBlock as r, createCommentVNode as i, createElementBlock as a, createElementVNode as o, createTextVNode as s, createVNode as c, defineComponent as l, getCurrentInstance as u, mergeProps as d, nextTick as f, normalizeClass as p, normalizeStyle as m, onMounted as h, openBlock as g, reactive as _, readonly as v, ref as y, renderSlot as b, resolveComponent as x, resolveDirective as S, resolveDynamicComponent as ee, toDisplayString as C, unref as w, useAttrs as T, useId as te, watch as E, withCtx as D, withDirectives as O } from "vue";
 //#region node_modules/@primeuix/utils/dist/object/index.mjs
 var ne = Object.defineProperty, re = Object.getOwnPropertySymbols, ie = Object.prototype.hasOwnProperty, ae = Object.prototype.propertyIsEnumerable, oe = (e, t, n) => t in e ? ne(e, t, {
@@ -8156,59 +8155,62 @@ var $a = {
 		caution: { type: [String, Boolean] },
 		required: { type: Boolean }
 	},
-	setup(e) {
-		let t = T(), o = e, l = n(() => Qa(o.message ?? o.msg) ? o.message ?? o.msg : typeof o.error == "string" && Qa(o.error) ? o.error : typeof o.caution == "string" && Qa(o.caution) ? o.caution : !1);
-		return (n, o) => (g(), r(w(ya), {
-			variant: "on",
-			class: p(["max-input-base", {
-				float: w(t).float !== void 0,
-				done: e.done,
-				caution: e.caution || e.done === !1
-			}])
-		}, {
-			default: D(() => [
-				c(w(Ja), null, {
-					default: D(() => [
-						e.icon ?? e.iconLeft ?? e.i ? (g(), r(w(Xa), { key: 0 }, {
-							default: D(() => [c($, { icon: e.icon ?? e.iconLeft ?? e.i }, null, 8, ["icon"])]),
-							_: 1
-						})) : i("", !0),
-						b(n.$slots, "default", {}, void 0, !0),
-						e.iconRight ? (g(), r(w(Xa), { key: 1 }, {
-							default: D(() => [c($, { icon: e.iconRight }, null, 8, ["icon"])]),
-							_: 1
-						})) : i("", !0)
-					]),
-					_: 3
-				}),
-				e.label ? (g(), a("label", $a, C(e.label), 1)) : i("", !0),
-				l.value ? (g(), r(w(Fa), {
-					key: 1,
-					size: "small",
-					class: p(`input-message ${e.done === !1 ? "error" : ""}`),
-					variant: "simple"
-				}, {
-					icon: D(() => [e.iconMessage ? (g(), r($, {
-						key: 0,
-						icon: e.iconMessage,
+	setup(t) {
+		let l = T(), u = t, d = n(() => Qa(u.message ?? u.msg) ? u.message ?? u.msg : typeof u.error == "string" && Qa(u.error) ? u.error : typeof u.caution == "string" && Qa(u.caution) ? u.caution : !1);
+		return (n, u) => (g(), a(e, null, [
+			c(w(ya), {
+				variant: "on",
+				class: p(["max-input-base", {
+					float: w(l).float !== void 0,
+					done: t.done,
+					caution: t.caution || t.done === !1
+				}])
+			}, {
+				default: D(() => [
+					c(w(Ja), null, {
+						default: D(() => [
+							t.icon ?? t.iconLeft ?? t.i ? (g(), r(w(Xa), { key: 0 }, {
+								default: D(() => [c($, { icon: t.icon ?? t.iconLeft ?? t.i }, null, 8, ["icon"])]),
+								_: 1
+							})) : i("", !0),
+							b(n.$slots, "default"),
+							t.iconRight ? (g(), r(w(Xa), { key: 1 }, {
+								default: D(() => [c($, { icon: t.iconRight }, null, 8, ["icon"])]),
+								_: 1
+							})) : i("", !0)
+						]),
+						_: 3
+					}),
+					t.label ? (g(), a("label", $a, C(t.label), 1)) : i("", !0),
+					d.value ? (g(), r(w(Fa), {
+						key: 1,
+						size: "small",
+						class: p(`input-message ${t.done === !1 ? "error" : ""}`),
+						variant: "simple"
+					}, {
+						icon: D(() => [t.iconMessage ? (g(), r($, {
+							key: 0,
+							icon: t.iconMessage,
+							size: .9
+						}, null, 8, ["icon"])) : i("", !0)]),
+						default: D(() => [s(" " + C(d.value), 1)]),
+						_: 1
+					}, 8, ["class"])) : (g(), a("div", eo)),
+					t.done ? (g(), a("div", to, [c($, {
+						icon: "lets-icons:check-fill",
 						size: .9
-					}, null, 8, ["icon"])) : i("", !0)]),
-					default: D(() => [s(" " + C(l.value), 1)]),
-					_: 1
-				}, 8, ["class"])) : (g(), a("div", eo)),
-				e.done ? (g(), a("div", to, [c($, {
-					icon: "lets-icons:check-fill",
-					size: .9
-				})])) : e.required ? (g(), a("div", no, "**a")) : i("", !0)
-			]),
-			_: 3
-		}, 8, ["class"]));
+					})])) : t.required ? (g(), a("div", no, "**a")) : i("", !0)
+				]),
+				_: 3
+			}, 8, ["class"]),
+			u[0] ||= o("div", {
+				style: { color: "green" },
+				class: "no-style"
+			}, " Texto Verde (sem classe) ", -1),
+			u[1] ||= o("div", { class: "in-style" }, " Texto Laranja no Style ", -1)
+		], 64));
 	}
-}), io = (e, t) => {
-	let n = e.__vccOpts || e;
-	for (let [e, r] of t) n[e] = r;
-	return n;
-}, ao = /* @__PURE__ */ io(ro, [["__scopeId", "data-v-ba3e7561"]]), oo = {
+}), io = {
 	name: "BaseInputText",
 	extends: {
 		name: "BaseInput",
@@ -8386,39 +8388,39 @@ var $a = {
 		};
 	}
 };
-function so(e) {
+function ao(e) {
 	"@babel/helpers - typeof";
-	return so = typeof Symbol == "function" && typeof Symbol.iterator == "symbol" ? function(e) {
+	return ao = typeof Symbol == "function" && typeof Symbol.iterator == "symbol" ? function(e) {
 		return typeof e;
 	} : function(e) {
 		return e && typeof Symbol == "function" && e.constructor === Symbol && e !== Symbol.prototype ? "symbol" : typeof e;
-	}, so(e);
+	}, ao(e);
 }
-function co(e, t, n) {
-	return (t = lo(t)) in e ? Object.defineProperty(e, t, {
+function oo(e, t, n) {
+	return (t = so(t)) in e ? Object.defineProperty(e, t, {
 		value: n,
 		enumerable: !0,
 		configurable: !0,
 		writable: !0
 	}) : e[t] = n, e;
 }
-function lo(e) {
-	var t = uo(e, "string");
-	return so(t) == "symbol" ? t : t + "";
+function so(e) {
+	var t = co(e, "string");
+	return ao(t) == "symbol" ? t : t + "";
 }
-function uo(e, t) {
-	if (so(e) != "object" || !e) return e;
+function co(e, t) {
+	if (ao(e) != "object" || !e) return e;
 	var n = e[Symbol.toPrimitive];
 	if (n !== void 0) {
 		var r = n.call(e, t);
-		if (so(r) != "object") return r;
+		if (ao(r) != "object") return r;
 		throw TypeError("@@toPrimitive must return a primitive value.");
 	}
 	return (t === "string" ? String : Number)(e);
 }
-var fo = {
+var lo = {
 	name: "InputText",
-	extends: oo,
+	extends: io,
 	inheritAttrs: !1,
 	methods: { onInput: function(e) {
 		this.writeValue(e.target.value, e);
@@ -8431,21 +8433,21 @@ var fo = {
 			} }), this.formField);
 		},
 		dataP: function() {
-			return I(co({
+			return I(oo({
 				invalid: this.$invalid,
 				fluid: this.$fluid,
 				filled: this.$variant === "filled"
 			}, this.size, this.size));
 		}
 	}
-}, po = [
+}, uo = [
 	"value",
 	"name",
 	"disabled",
 	"aria-invalid",
 	"data-p"
 ];
-function mo(e, t, n, r, i, o) {
+function fo(e, t, n, r, i, o) {
 	return g(), a("input", d({
 		type: "text",
 		class: e.cx("root"),
@@ -8457,17 +8459,17 @@ function mo(e, t, n, r, i, o) {
 		onInput: t[0] ||= function() {
 			return o.onInput && o.onInput.apply(o, arguments);
 		}
-	}, o.attrs), null, 16, po);
+	}, o.attrs), null, 16, uo);
 }
-fo.render = mo;
+lo.render = fo;
 //#endregion
 //#region src/helpers/normalizeToSearch.ts
-function ho(e) {
+function po(e) {
 	return e ? e.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]/g, "").replace(/\s+/g, "").toLowerCase() : "";
 }
 //#endregion
 //#region src/components/MaxInputText.vue
-var go = /* @__PURE__ */ l({
+var mo = /* @__PURE__ */ l({
 	__name: "MaxInputText",
 	props: {
 		modelValue: { default: "" },
@@ -8496,20 +8498,20 @@ var go = /* @__PURE__ */ l({
 	},
 	emits: ["update:modelValue"],
 	setup(e, { emit: t }) {
-		let i = T(), a = e, o = y(a.modelValue), s = y(a.done ?? null), l = n(() => typeof a.targetValue == "string" && Qa(a.targetValue) ? ho(a.targetValue) === ho(o.value) : null), u = n(() => a.required ? Qa(o.value) : null), f = () => a.done === void 0 ? l.value === null ? u.value === null ? a.caution === void 0 ? null : !a.caution : u.value : l.value : a.done, p = n(() => (a.caution === void 0 || a.caution) && s.value === !1), m = n(() => {
+		let i = T(), a = e, o = y(a.modelValue), s = y(a.done ?? null), l = n(() => typeof a.targetValue == "string" && Qa(a.targetValue) ? po(a.targetValue) === po(o.value) : null), u = n(() => a.required ? Qa(o.value) : null), f = () => a.done === void 0 ? l.value === null ? u.value === null ? a.caution === void 0 ? null : !a.caution : u.value : l.value : a.done, p = n(() => (a.caution === void 0 || a.caution) && s.value === !1), m = n(() => {
 			if (!p.value) return null;
 			let e = i.errMsg ?? i.error_message ?? i.error_msg ?? null;
 			return l.value === !1 ? e ?? "Valor esperado: " + (i.target_value ?? i.targetValue ?? i["target-value"]) : u.value === !1 ? e ?? "Campo obrigatório" : e ?? "Valor inválido";
 		}), h = t;
 		return E(o, () => {
 			s.value = f(), h("update:modelValue", o.value);
-		}), E(() => a.modelValue, () => o.value = a.modelValue), (e, t) => (g(), r(ao, d(a, {
+		}), E(() => a.modelValue, () => o.value = a.modelValue), (e, t) => (g(), r(ro, d(a, {
 			value: o.value,
 			done: s.value,
 			error: m.value,
 			caution: p.value
 		}), {
-			default: D(() => [c(w(fo), {
+			default: D(() => [c(w(lo), {
 				type: "text",
 				modelValue: o.value,
 				"onUpdate:modelValue": t[0] ||= (e) => o.value = e,
@@ -8524,7 +8526,7 @@ var go = /* @__PURE__ */ l({
 			"caution"
 		]));
 	}
-}), _o = /* @__PURE__ */ l({
+}), ho = /* @__PURE__ */ l({
 	__name: "Grid",
 	setup(e) {
 		let t = T();
@@ -8534,17 +8536,21 @@ var go = /* @__PURE__ */ l({
 			pt14: ""
 		}), [b(e.$slots, "default")], 16)]));
 	}
-}), vo = {};
-function yo(t, n) {
+}), go = (e, t) => {
+	let n = e.__vccOpts || e;
+	for (let [e, r] of t) n[e] = r;
+	return n;
+}, _o = {};
+function vo(t, n) {
 	return g(), a(e, null, [n[0] ||= o("div", {
 		style: { color: "green" },
 		class: "no-style"
 	}, " Meu texto Verde ", -1), n[1] ||= o("div", { class: "in-style" }, " Meu texto azul no Style ", -1)], 64);
 }
-var bo = /* @__PURE__ */ io(vo, [["render", yo]]);
+var yo = /* @__PURE__ */ go(_o, [["render", vo]]);
 //#endregion
 //#region src/index.ts
-function xo(e) {
+function bo(e) {
 	e.use(Yt, {
 		locale: Hr,
 		theme: {
@@ -8558,6 +8564,6 @@ function xo(e) {
 	});
 }
 //#endregion
-export { _a as Button, _a as MaxButton, _o as Grid, go as InputText, go as MaxInputText, $ as MaxIcon, bo as TextFormat, xo as default };
+export { _a as Button, _a as MaxButton, ho as Grid, mo as InputText, mo as MaxInputText, $ as MaxIcon, yo as TextFormat, bo as default };
 
 //# sourceMappingURL=index.es.js.map

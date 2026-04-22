@@ -3,11 +3,11 @@ import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import UnoCSS from 'unocss/vite';
 import dts from 'vite-plugin-dts';
-import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
 
 export default defineConfig({
-    plugins: [vue(), UnoCSS(), dts({ rollupTypes: false }), cssInjectedByJsPlugin()],
+    plugins: [vue(), UnoCSS(), dts({ rollupTypes: false })],
     build: {
+        cssCodeSplit: false,
         lib: {
             entry: path.resolve(__dirname, './src/index.ts'),
             name: 'MaxComponentsUi',
@@ -16,7 +16,7 @@ export default defineConfig({
             cssFileName: 'style',
         },
         rollupOptions: {
-            external: ['vue'],
+            external: ['vue', 'primevue'],
             output: {
                 globals: {
                     vue: 'Vue',
