@@ -4913,21 +4913,20 @@ const T0 = /* @__PURE__ */ ee({
       _: 1
     }, 16, ["value", "done", "error", "caution"]));
   }
-}), z0 = {
-  install(o) {
-    o.use(on, {
-      locale: _g,
-      theme: {
-        preset: Bg,
-        options: {
-          darkModeSelector: ".dark",
-          prefix: "max"
-        }
-      },
-      ripple: !0
-    });
-  }
-};
+});
+function z0(o) {
+  o.use(on, {
+    locale: _g,
+    theme: {
+      preset: Bg,
+      options: {
+        darkModeSelector: ".dark",
+        prefix: "max"
+      }
+    },
+    ripple: !0
+  });
+}
 export {
   O0 as Button,
   T0 as InputText,
