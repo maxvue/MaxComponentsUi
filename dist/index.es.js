@@ -4913,25 +4913,24 @@ const T0 = /* @__PURE__ */ ee({
       _: 1
     }, 16, ["value", "done", "error", "caution"]));
   }
-}), z0 = {
-  install(o, e = { unocss: !0, locale: _g }) {
-    var r, t;
-    o.use(on, {
-      ...e,
-      unocss: e.unocss,
-      locale: e.locale,
-      theme: {
-        preset: ((r = e.theme) == null ? void 0 : r.preset) ?? Bg,
-        options: {
-          darkModeSelector: ".dark",
-          ...((t = e.theme) == null ? void 0 : t.options) ?? {},
-          prefix: "max"
-        }
-      },
-      ripple: !0
-    });
-  }
-};
+});
+function z0(o, e = {}) {
+  var r, t;
+  o.use(on, {
+    ...e,
+    locale: e.locale,
+    theme: {
+      preset: ((r = e.theme) == null ? void 0 : r.preset) ?? Bg,
+      locale: e.locale || _g,
+      options: {
+        darkModeSelector: ".dark",
+        ...((t = e.theme) == null ? void 0 : t.options) ?? {},
+        prefix: "max"
+      }
+    },
+    ripple: !0
+  });
+}
 export {
   O0 as Button,
   T0 as InputText,
