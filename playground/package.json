@@ -1,0 +1,26 @@
+{
+    "name": "max-components-ui-playground",
+    "version": "1.0.0",
+    "description": "Playground para testar componentes MaxComponentsUi",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vue-tsc && vite build",
+        "preview": "vite preview"
+    },
+    "dependencies": {
+        "@iconify/vue": "^5.0.0",
+        "@primeuix/themes": "^2.0.3",
+        "primeicons": "^7.0.0",
+        "primevue": "^4.5.5",
+        "vue": "^3.5.13"
+    },
+    "devDependencies": {
+        "@types/node": "^22.10.5",
+        "@vitejs/plugin-vue": "^5.2.1",
+        "typescript": "~5.7.2",
+        "unocss": "^66.6.8",
+        "vite": "^6.0.0",
+        "vue-tsc": "^2.1.10"
+    }
+}
