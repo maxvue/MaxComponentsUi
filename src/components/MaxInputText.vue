@@ -25,11 +25,12 @@
     </FloatLabel>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts" >
     import InputText from 'primevue/inputtext';
     import { hasContent } from '@/helpers/hasContent';
     import { normalizeToSearch } from '@/helpers/normalizeToSearch';
     import { computed, Ref, ref, useAttrs, watch } from 'vue';
+    import MaxIcon from './MaxIcon.vue';
 
     const attrs: any = useAttrs();
 
@@ -93,7 +94,7 @@
     );
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .max-input {
         .max-input-label {
             &.active {

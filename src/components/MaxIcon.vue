@@ -74,8 +74,9 @@
     );
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .max-icon-div {
+        background-color: violet;
         display: grid;
         place-items: center;
         svg {

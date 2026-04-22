@@ -4,7 +4,7 @@
     </div>
 
     <div class="in-style">
-        Meu texto azul no Style
+        Meu texto RED no Style
     </div>
 </template>
 
