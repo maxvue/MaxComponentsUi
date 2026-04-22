@@ -12,8 +12,8 @@
     
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .in-style {
-        color: blue;
+        color: red;
     }
 </style>

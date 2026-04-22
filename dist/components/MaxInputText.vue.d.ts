@@ -2,6 +2,8 @@ type __VLS_Props = {
     modelValue: string;
     icon?: string | undefined;
     i?: string | undefined;
+    iconLeft?: string | undefined;
+    iconRight?: string | undefined;
     disabled?: boolean | undefined;
     float?: boolean | undefined;
     msg?: string | undefined;
