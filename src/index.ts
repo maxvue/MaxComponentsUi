@@ -7,13 +7,11 @@ import PrimeVue, { PrimeVueConfiguration } from 'primevue/config';
 import { MaxStyle } from './styles/style';
 import ptBR from './locales/pt-br';
 
-import MaxButton from './components/MaxButton.vue';
-import Button from './components/MaxButton.vue';
-import MaxIcon from './components/MaxIcon.vue';
-import MaxInputText from './components/MaxInputText.vue';
-import InputText from './components/MaxInputText.vue';
-
-export { MaxButton, Button, MaxIcon, MaxInputText, InputText };
+export { default as MaxButton } from './components/MaxButton.vue';
+export { default as Button } from './components/MaxButton.vue';
+export { default as MaxIcon } from './components/MaxIcon.vue';
+export { default as MaxInputText } from './components/MaxInputText.vue';
+export { default as InputText } from './components/MaxInputText.vue';
 
 export const install = (app: App, options: PrimeVueConfiguration = {}) => {
     app.use(PrimeVue, {

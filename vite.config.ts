@@ -5,7 +5,7 @@ import UnoCSS from 'unocss/vite';
 import dts from 'vite-plugin-dts';
 
 export default defineConfig({
-    plugins: [vue(), UnoCSS(), dts({ rollupTypes: false })],
+    plugins: [vue(), UnoCSS(), dts({ rollupTypes: true })],
     build: {
         lib: {
             entry: './src/index.ts',
