@@ -3,12 +3,13 @@ import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import UnoCSS from 'unocss/vite';
 import dts from 'vite-plugin-dts';
+import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
 
 export default defineConfig({
-    plugins: [vue(), UnoCSS(), dts({ rollupTypes: true })], // rollupTypes: false é mais estável no Vite 8
+    plugins: [vue(), UnoCSS(), dts({ rollupTypes: false }), cssInjectedByJsPlugin()],
     build: {
         lib: {
-            entry: './src/index.ts',
+            entry: path.resolve(__dirname, './src/index.ts'),
             name: 'MaxComponentsUi',
             fileName: (format: string) => `index.${format}.js`,
             formats: ['es', 'umd'],
@@ -20,8 +21,6 @@ export default defineConfig({
                 globals: {
                     vue: 'Vue',
                 },
-                // Mantenha ou simplifique isto:
-                assetFileNames: 'style.[ext]',
             },
         },
         cssTarget: 'esnext',

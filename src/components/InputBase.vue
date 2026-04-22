@@ -67,7 +67,7 @@
     });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .max-input {
         .max-input-label {
             &.active {
@@ -85,7 +85,7 @@
             position: absolute;
             top: 3px;
             right: 5px;
-            color: darkred;
+            color: #336699;
         }
         .is-done {
             position: absolute;
