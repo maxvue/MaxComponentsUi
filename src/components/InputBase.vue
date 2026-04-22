@@ -27,7 +27,7 @@
         Texto Verde (sem classe)
     </div>
 
-    <div class="in-style">
+    <div class="in-stylex">
         Texto Laranja no Style
     </div>
 </template>
@@ -123,7 +123,7 @@
             }
         }
     }
-    .in-style {
+    .in-stylex {
         color: orange;
     }
 </style>
