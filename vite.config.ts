@@ -2,9 +2,10 @@ import path from 'node:path';
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import UnoCSS from 'unocss/vite';
+import dts from 'vite-plugin-dts';
 
 export default defineConfig({
-    plugins: [vue(), UnoCSS()],
+    plugins: [vue(), UnoCSS(), dts({ rollupTypes: false })],
     build: {
         lib: {
             entry: './src/index.ts',
