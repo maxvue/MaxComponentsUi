@@ -30,7 +30,7 @@
             caution?: string | boolean | undefined;
             required?: boolean;
         }>(),
-        { modelValue: '', done: undefined, required: false, caution: undefined },
+        { modelValue: '', done: undefined, required: false, caution: undefined }
     );
 
     const temp_value = ref(props.modelValue);
@@ -68,10 +68,10 @@
     });
     watch(
         () => props.modelValue,
-        () => (temp_value.value = props.modelValue),
+        () => (temp_value.value = props.modelValue)
     );
 </script>
 
 <style lang="scss">
-    
+
 </style>

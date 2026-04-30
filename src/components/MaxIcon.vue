@@ -4,8 +4,8 @@
 
 <script setup lang="ts">
     import { computed, ref, watch } from 'vue';
-    import { getCached } from '@/helpers/getCached';
-    import { setCached } from '@/helpers/setCached';
+    import { getCached } from '../helpers/getCached';
+    import { setCached } from '../helpers/setCached';
 
     const props = defineProps<{
         icon?: string;

@@ -33,7 +33,7 @@
     import IconField from 'primevue/iconfield';
     import InputIcon from 'primevue/inputicon';
 
-    import { hasContent } from '@/helpers/hasContent';
+    import { hasContent } from '../helpers/hasContent';
     import { computed, useAttrs } from 'vue';
 
     const attrs: any = useAttrs();
