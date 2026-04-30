@@ -16,6 +16,7 @@ const componentNames = files.filter((file) => file.endsWith('.vue')).map((file) 
 const aliases: Record<string, string> = {
     'Botao': 'MaxButton',
     'InputField': 'MaxInputText',
+
     'InputPhone': 'MaxPhoneField'
 };
 
