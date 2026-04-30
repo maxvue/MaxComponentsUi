@@ -22,7 +22,7 @@
         "dev": "vite",
         "dev:playground": "vite --config playground/vite.config.ts",
         "prebuild": "npx tsx src/scripts/generateResolver.ts",
-        "build": "vue-tsc && vite build",/home/johnattas/GitHub/MaxUse/.vscode/tasks.json
+        "build": "vue-tsc && vite build",
         "preview": "vite preview",
         "type-check": "vue-tsc --noEmit",
         "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
