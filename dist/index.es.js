@@ -76229,7 +76229,7 @@ var MaxInputText_default = /* @__PURE__ */ defineComponent({
 		const temp_value = ref(props.modelValue);
 		const isDone = ref(props.done ?? null);
 		const isEqual = computed(() => {
-			return typeof props.targetValue === "string" && hasContent(props.targetValue) ? normalizeToSearch(props.targetValue) === normalizeToSearch(temp_value.value) : null;
+			return typeof props.targetValue === "string" && hasContent(props.targetValue) ? toSearchableString(props.targetValue) === toSearchableString(temp_value.value) : null;
 		});
 		const isRequiredDone = computed(() => props.required ? hasContent(temp_value.value) : null);
 		const testIsDone = () => {

@@ -76229,7 +76229,7 @@
 			const temp_value = (0, vue.ref)(props.modelValue);
 			const isDone = (0, vue.ref)(props.done ?? null);
 			const isEqual = (0, vue.computed)(() => {
-				return typeof props.targetValue === "string" && hasContent(props.targetValue) ? normalizeToSearch(props.targetValue) === normalizeToSearch(temp_value.value) : null;
+				return typeof props.targetValue === "string" && hasContent(props.targetValue) ? toSearchableString(props.targetValue) === toSearchableString(temp_value.value) : null;
 			});
 			const isRequiredDone = (0, vue.computed)(() => props.required ? hasContent(temp_value.value) : null);
 			const testIsDone = () => {
