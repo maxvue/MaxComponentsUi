@@ -1,9 +1,8 @@
 import { definePreset } from 'unocss';
-import { hasContent } from 'max-use';
+import { hasContent } from './helpers/hasContent';
 import { gap } from './helpers/gap';
 import { paddingMargin } from './helpers/paddingMargin';
 import { getCssSize } from './helpers/getCssSize';
-
 export const presetMaxUno = () => {
     return definePreset(() => {
         return {

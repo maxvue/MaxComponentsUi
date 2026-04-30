@@ -26,16 +26,6 @@
 </template>
 
 <script setup lang="ts">
-    import MaxIcon from './MaxIcon.vue';
-    import FloatLabel from 'primevue/floatlabel';
-    import Message from 'primevue/message';
-
-    import IconField from 'primevue/iconfield';
-    import InputIcon from 'primevue/inputicon';
-
-    import { hasContent } from '../helpers/hasContent';
-    import { computed, useAttrs } from 'vue';
-
     const attrs: any = useAttrs();
 
     interface Props {

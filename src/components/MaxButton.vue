@@ -23,8 +23,6 @@
 </template>
 
 <script setup lang="ts">
-    import { computed, useAttrs } from 'vue';
-
     const attrs: any = useAttrs();
     const valueBadge = computed(() => attrs['number'] ?? attrs.badge ?? false);
     const icon_left = computed(() => attrs.icon ?? attrs.iconLeft ?? attrs['icon-left'] ?? attrs.icon_left ?? null);

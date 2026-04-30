@@ -3,23 +3,17 @@ import path from 'node:path';
 import { snakeCase } from 'max-use';
 import { kebabCase } from 'max-use';
 import { fileURLToPath } from 'node:url';
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 const componentsDir = path.resolve(__dirname, '../components');
 const outputFile = path.resolve(__dirname, '../components-manifest.json');
-
 const files = fs.readdirSync(componentsDir);
 const componentNames = files.filter((file) => file.endsWith('.vue')).map((file) => file.replace('.vue', ''));
-
-const aliases: Record<string, string> = {
+const aliases = {
     'Botao': 'MaxButton',
     'InputField': 'MaxInputText',
-
     'InputPhone': 'MaxPhoneField'
 };
-
 for (const k of Object.keys(aliases)) {
     aliases[snakeCase(k)] = aliases[k];
     aliases[kebabCase(k)] = aliases[k];
@@ -30,13 +24,10 @@ for (const k of Object.keys(aliases)) {
         aliases[kebabCase(noMax)] = aliases[k];
     }
 }
-
-componentNames.forEach((name: string) => {
-
+componentNames.forEach((name) => {
     aliases[name] = name;
     aliases[snakeCase(name)] = name;
     aliases[kebabCase(name)] = name;
-
     const noMax = name.replace(/^Max/, '');
     if (noMax !== name) {
         aliases[noMax] = name;
@@ -44,10 +35,8 @@ componentNames.forEach((name: string) => {
         aliases[kebabCase(noMax)] = name;
     }
 });
-
 const manifest = {
     components: componentNames,
     aliases: aliases
 };
-
 fs.writeFileSync(outputFile, JSON.stringify(manifest, null, 2));

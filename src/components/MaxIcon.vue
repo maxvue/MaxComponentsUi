@@ -3,7 +3,6 @@
 </template>
 
 <script setup lang="ts">
-    import { computed, ref, watch } from 'vue';
     import { getCached } from '../helpers/getCached';
     import { setCached } from '../helpers/setCached';
 

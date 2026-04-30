@@ -110,12 +110,6 @@
 </template>
 
 <script setup lang="ts">
-    import { ref } from 'vue';
-    import MaxInputText from '@/components/MaxInputText.vue';
-    import Button from '@/components/MaxButton.vue';
-    import Grid from '@/components/Grid.vue';
-    import MaxPhoneField from '@/components/MaxPhoneField.vue';
-
     const lastClickEvent = ref<string>('');
 
     const value = ref({

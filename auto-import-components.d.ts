@@ -11,8 +11,6 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    Badge: typeof import('primevue/badge')['default']
-    Button: typeof import('primevue/button')['default']
     Grid: typeof import('./src/components/Grid.vue')['default']
     InputBase: typeof import('./src/components/InputBase.vue')['default']
     MaxButton: typeof import('./src/components/MaxButton.vue')['default']

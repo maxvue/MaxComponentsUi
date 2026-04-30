@@ -1,5 +1,5 @@
 import { getCssSize } from './getCssSize';
-import { hasContent } from './hasContent';
+import { hasContent } from 'max-use';
 
 type Params = (number | string)[];
 

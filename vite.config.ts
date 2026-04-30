@@ -7,6 +7,7 @@ import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
 import AutoImport from 'unplugin-auto-import/vite';
 import Components from 'unplugin-vue-components/vite';
 import { PrimeVueResolver } from '@primevue/auto-import-resolver';
+import { maxUseItems } from 'max-use';
 
 
 export default defineConfig({
@@ -18,14 +19,13 @@ export default defineConfig({
         AutoImport({
             imports: [
                 'vue',
-                { 'max-use': ['maxUse'] },
+                { 'max-use': maxUseItems() },
                 {
                     from: 'vue',
                     imports: ['Ref', 'ComputedRef', 'ShallowRef', 'ShallowComputedRef', 'PropType', 'WatchStopHandle', 'Watch'],
                     type: true
                 },
-                { 'maska/vue': ['vMaska'] },
-                '@vueuse/core'
+                { 'maska/vue': ['vMaska'] }
             ],
             ignore: ['useTimeAgo'],
             dts: './auto-import.d.ts',
@@ -42,7 +42,7 @@ export default defineConfig({
             dirs: ['./src/helpers/**']
         }),
         Components({
-            dirs: ['./src/components'],
+            dirs: ['./src/components/**'],
             extensions: ['vue'],
             directoryAsNamespace: false,
             deep: true,
