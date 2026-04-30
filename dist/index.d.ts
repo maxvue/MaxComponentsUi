@@ -1,6 +1,5 @@
-import 'virtual:uno.css';
-export { presetMaxUno } from './unoCssPreset';
 import { MaxComponentsUiResolver } from './helpers/resolver';
+export { presetMaxUno } from './unoCssPreset';
 export { MaxComponentsUiResolver };
 export * from './components/_primeVue';
 export { default as MaxIcon } from './components/MaxIcon.vue';
