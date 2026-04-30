@@ -27,7 +27,6 @@ export default defineConfig({
                 },
                 { 'maska/vue': ['vMaska'] }
             ],
-            ignore: ['useTimeAgo'],
             dts: './auto-import.d.ts',
             dtsMode: 'overwrite',
             dtsPreserveExts: true,
@@ -39,7 +38,7 @@ export default defineConfig({
             dirsScanOptions: {
                 types: true
             },
-            dirs: ['./src/helpers/**']
+            dirs: ['./src/**']
         }),
         Components({
             dirs: ['./src/components/**'],

@@ -11,12 +11,20 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    Badge: typeof import('primevue/badge')['default']
+    Button: typeof import('primevue/button')['default']
+    FloatLabel: typeof import('primevue/floatlabel')['default']
     Grid: typeof import('./src/components/Grid.vue')['default']
+    IconField: typeof import('primevue/iconfield')['default']
     InputBase: typeof import('./src/components/InputBase.vue')['default']
+    InputIcon: typeof import('primevue/inputicon')['default']
+    InputText: typeof import('primevue/inputtext')['default']
     MaxButton: typeof import('./src/components/MaxButton.vue')['default']
     MaxIcon: typeof import('./src/components/MaxIcon.vue')['default']
     MaxInputText: typeof import('./src/components/MaxInputText.vue')['default']
     MaxPhoneField: typeof import('./src/components/MaxPhoneField.vue')['default']
+    Message: typeof import('primevue/message')['default']
+    Select: typeof import('primevue/select')['default']
     TextFormat: typeof import('./src/components/TextFormat.vue')['default']
     TransitionFade: typeof import('./src/components/TransitionFade.vue')['default']
   }
