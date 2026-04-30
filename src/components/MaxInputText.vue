@@ -5,12 +5,6 @@
 </template>
 
 <script setup lang="ts">
-    import InputBase from './InputBase.vue';
-    import InputText from 'primevue/inputtext';
-    import { hasContent } from '../helpers/hasContent';
-    import { normalizeToSearch } from '../helpers/normalizeToSearch';
-    import { computed, Ref, ref, useAttrs, watch } from 'vue';
-
     const attrs: any = useAttrs();
 
     const props = withDefaults(

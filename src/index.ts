@@ -32,19 +32,26 @@ export { default as InputPhone } from './components/MaxPhoneField.vue';
 
 export * from './components/_primeVue';
 
-export default function install(app: any): any {
+export const install = (app: any, options: any = {}) => {
     app.use(PrimeVue, {
-        locale: ptBR,
+        locale: options.locale || ptBR,
         theme: {
             preset: MaxStyle,
             options: {
                 darkModeSelector: '.dark',
-                prefix: 'max'
-            }
+                prefix: 'max',
+                ...options.theme?.options
+            },
+            ...options.theme
         },
-        ripple: true
+        ripple: true,
+        ...options
     });
-}
+};
+
+export default {
+    install
+};
 
 
 export * from './types';
