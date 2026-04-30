@@ -1,36 +1,15 @@
 <template>
-        <FloatLabel variant="on" class="max-input-base" :class="{ float: attrs.float !== undefined, done: done, caution: caution || done === false }">
-        <IconField>
-            <InputIcon v-if="icon ?? iconLeft ?? i">
-                <MaxIcon :icon="icon ?? iconLeft ?? i" />
-            </InputIcon>
-            <InputText type="text" v-model="temp_value" fluid @blur="isDone = testIsDone()" />
-            <InputIcon v-if="iconRight">
-                <MaxIcon :icon="iconRight" />
-            </InputIcon>
-        </IconField>
-
-        <label for="in_label" v-if="label" class="max-input-label active">{{ label }}</label>
-        <Message size="small" :class="`input-message ${done === false ? 'error' : ''}`" variant="simple" v-if="message">
-            <template #icon>
-                <MaxIcon :icon="iconMessage" v-if="iconMessage" :size="0.9" />
-            </template>
-            {{ message }}
-        </Message>
-        <div v-else style="height: 16px; width: 100%"></div>
-        <div class="is-done" v-if="done">
-            <MaxIcon icon="lets-icons:check-fill" :size="0.9" />
-        </div>
-        <div class="required" v-else-if="required">**a</div>
-    </FloatLabel>
+    <InputBase v-bind="props" :value="temp_value" :done="isDone" :error="error_msg" :caution="caution">
+        <InputText type="text" v-model="temp_value" fluid @blur="isDone = testIsDone()" />
+    </InputBase>
 </template>
 
-<script setup lang="ts" >
+<script setup lang="ts">
+    import InputBase from './InputBase.vue';
     import InputText from 'primevue/inputtext';
     import { hasContent } from '@/helpers/hasContent';
     import { normalizeToSearch } from '@/helpers/normalizeToSearch';
     import { computed, Ref, ref, useAttrs, watch } from 'vue';
-    import MaxIcon from './MaxIcon.vue';
 
     const attrs: any = useAttrs();
 
@@ -39,8 +18,6 @@
             modelValue: string;
             icon?: string | undefined;
             i?: string | undefined;
-            iconLeft?: string | undefined;
-            iconRight?: string | undefined;
             disabled?: boolean | undefined;
             float?: boolean | undefined;
             msg?: string | undefined;
@@ -76,11 +53,12 @@
 
     const caution = computed(() => (props.caution !== undefined ? props.caution && isDone.value === false : isDone.value === false));
 
-    const message = computed(() => {
-        if (hasContent(props.message ?? props.msg)) return props.message ?? props.msg;
-        if (typeof props.error === 'string' && hasContent(props.error)) return props.error;
-        if (typeof props.caution === 'string' && hasContent(props.caution)) return props.caution;
-        return false;
+    const error_msg = computed(() => {
+        if (!caution.value) return null;
+        const attrs_error_message = attrs.errMsg ?? attrs.error_message ?? attrs.error_msg ?? null;
+        if (isEqual.value === false) return attrs_error_message ?? 'Valor esperado: ' + (attrs.target_value ?? attrs.targetValue ?? attrs['target-value']);
+        if (isRequiredDone.value === false) return attrs_error_message ?? 'Campo obrigatório';
+        return attrs_error_message ?? 'Valor inválido';
     });
 
     const emit = defineEmits(['update:modelValue']);
@@ -94,24 +72,6 @@
     );
 </script>
 
-<style lang="scss" scoped>
-    .max-input {
-        .max-input-label {
-            &.active {
-                top: 0;
-                transform: translateY(-50%);
-                border-radius: var(--max-floatlabel-on-border-radius);
-                background: var(--max-floatlabel-on-active-background);
-                padding: var(--max-floatlabel-on-active-padding);
-                font-size: var(--max-floatlabel-active-font-size);
-                font-weight: var(--max-floatlabel-active-font-weight);
-            }
-        }
-        .required {
-            position: absolute;
-            top: 3px;
-            right: 5px;
-            color: darkred;
-        }
-    }
+<style lang="scss">
+    
 </style>

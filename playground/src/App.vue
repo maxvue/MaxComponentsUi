@@ -31,6 +31,12 @@
                             <MaxInputText label="Mensagem com icone 20%" v-model="value.e" s20 message="Mensagem com ícone" icon-message="humbleicons:box" />
                             <div s60></div>
                         </Grid>
+
+                        <h3>Especiais</h3>
+                        <Grid>
+                            <MaxPhoneField v-model="value.e" s80 message="Mensagem simples" />
+                            <div s60></div>
+                        </Grid>
                     </div>
                 </div>
             </section>
@@ -108,6 +114,7 @@
     import MaxInputText from '@/components/MaxInputText.vue';
     import Button from '@/components/MaxButton.vue';
     import Grid from '@/components/Grid.vue';
+    import MaxPhoneField from '@/components/MaxPhoneField.vue';
 
     const lastClickEvent = ref<string>('');
 
@@ -116,7 +123,7 @@
         b: '',
         c: '',
         d: '',
-        e: '',
+        e: ''
     });
 
     const handleClick = () => {

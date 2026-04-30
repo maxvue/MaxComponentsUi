@@ -5,6 +5,7 @@
     "main": "./dist/index.js",
     "module": "./dist/index.es.js",
     "types": "./dist/index.d.ts",
+    "type": "module",
     "exports": {
         ".": {
             "types": "./dist/index.d.ts",
@@ -19,35 +20,46 @@
     "scripts": {
         "dev": "vite",
         "dev:playground": "vite --config playground/vite.config.ts",
-        "build": "vue-tsc && vite build",
-        "build:uno": "node scripts/build-uno.mjs",
+        "prebuild": "npx tsx src/scripts/generateResolver.ts",
+        "build": "vue-tsc && vite build",/home/johnattas/GitHub/MaxUse/.vscode/tasks.json
         "preview": "vite preview",
         "type-check": "vue-tsc --noEmit",
-        "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
+        "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
+        "postbuild": "git add dist tsconfig.tsbuildinfo && git commit -m 'chore: atualiza artefatos do build' || true && npm version patch -m 'Upgrade to %s' && git push origin main --follow-tags"
     },
     "dependencies": {
         "@iconify/vue": "^5.0.0",
+        "@primeuix/themes": "^2.0.3",
         "@unocss/reset": "^66.6.8",
         "@vueuse/core": "^14.2.1",
-        "primeicons": "^7.0.0"
+        "maska": "^3.2.0",
+        "max-use": "file:../MaxUse",
+        "primevue": "^4.5.5",
+        "vite-plugin-css-injected-by-js": "^5.0.1"
     },
     "devDependencies": {
         "@primeuix/themes": "^2.0.3",
-        "@types/node": "^22.10.5",
-        "@vitejs/plugin-vue": "^5.2.1",
-        "@vue/eslint-config-typescript": "^14.1.3",
-        "@vue/tsconfig": "^0.7.0",
-        "ajv": "^8.18.0",
-        "eslint": "^9.17.0",
-        "eslint-plugin-vue": "^9.32.0",
+        "@primevue/auto-import-resolver": "^4.5.5",
+        "@stylistic/eslint-plugin": "^5.10.0",
+        "@types/node": "^25.6.0",
+        "@vitejs/plugin-vue": "^6.0.6",
+        "@vue/eslint-config-typescript": "^14.7.0",
+        "@vue/tsconfig": "^0.9.1",
+        "ajv": "^8.20.0",
+        "eslint": "^10.2.1",
+        "eslint-plugin-vue": "^10.9.0",
         "primevue": "^4.5.5",
         "sass-embedded": "^1.99.0",
-        "typescript": "~5.7.2",
+        "typescript": "~6.0.3",
+        "typescript-eslint": "^8.59.1",
         "unocss": "^66.6.8",
-        "vite": "^8.0.9",
+        "unplugin-auto-import": "^21.0.0",
+        "unplugin-vue-components": "^32.0.0",
+        "vite": "^8.0.10",
         "vite-plugin-dts": "^4.5.4",
-        "vue": "^3.5.13",
-        "vue-tsc": "^2.1.10"
+        "vue": "^3.5.33",
+        "vue-eslint-parser": "^10.4.0",
+        "vue-tsc": "^3.2.7"
     },
     "keywords": [
         "vue",
@@ -64,8 +76,6 @@
         "url": "https://github.com/johnattas/MaxComponentsUi.git"
     },
     "peerDependencies": {
-        "@primeuix/themes": "^2.0.0",
-        "primevue": "^4.5.0",
-        "vue": "^3.5.13"
+        "vue": "^3.5.33"
     }
 }

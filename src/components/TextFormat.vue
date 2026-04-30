@@ -1,6 +1,6 @@
 <template>
     <div style="color: green" class="no-style">
-        Meu texto Verde
+        Meu texto Verdes
     </div>
 
     <div class="in-style">
@@ -12,8 +12,8 @@
     
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
     .in-style {
-        color: red;
+        color: red !important;
     }
 </style>

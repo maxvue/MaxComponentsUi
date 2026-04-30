@@ -1,8 +1,6 @@
 <template>
-    <div>
-        <div class="max-grid-cols" v-bind="attrs" col-gap-8 row-gap-18 pt14>
-            <slot></slot>
-        </div>
+    <div class="max-grid-cols" v-bind="attrs">
+        <slot></slot>
     </div>
 </template>
 
@@ -16,5 +14,8 @@
     .max-grid-cols {
         display: flex;
         flex-wrap: wrap;
+        column-gap: 8px;
+        row-gap: 13px;
+        padding-top: 14px;
     }
 </style>

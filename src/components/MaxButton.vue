@@ -1,96 +1,114 @@
 <template>
-    <Button :class="`max-button ${'icon-pos-' + iconPos} ${buttonClass}`" :label="label" :icon="icon" :severity="severity" :size="size" :disabled="disabled" :loading="loading" @click="handleClick" :iconPos="iconPos">
-        <template #icon>
-            <slot name="icon">
-                <div class="max-button__icon">
-                    <MaxIcon :icon="icon ?? i" v-if="icon || i" />
+    <Button v-bind="attrs" class="button-main-div" :loading="false">
+        <template #default>
+            <TransitionFade>
+                <Icon icon="line-md:loading-twotone-loop" size="1.6" v-if="attrs.loading" />
+                <div class="content-button" v-else>
+                    <div class="btn-icon-left" >
+                        <IconButton :icon="icon_left" :size="attrs.size ?? attrs.sizeIcon ?? attrs.iconSize ?? attrs['size-icon'] ?? attrs['icon-size'] ?? '1.8'" class="content-button-icon" v-if="icon_left" flex color="var(--background-0)" />
+                    </div>
+                    <div v-if="attrs.labelhtml || attrs.label || attrs['label-html']" :class="`btn-label ${attrs.textLeft !== undefined ? 'text-left' : ''}`" v-html="attrs.label ?? attrs.labelhtml ?? attrs['label-html']"></div>
+                    <div class="btn-icon-right">
+                        <IconButton :icon="icon_right" :size="attrs.size ?? attrs.sizeIcon ?? attrs.iconSize ?? attrs['size-icon'] ?? attrs['icon-size'] ?? '1.8'" class="content-button-icon" v-if="icon_right" flex color="var(--background-0)" />
+                    </div>
+                    <Badge v-if="valueBadge" :size="attrs['size_badge'] ?? ''" :value="parseInt(valueBadge) > 99 ? '99+' : valueBadge" :severity="attrs['badge_severity'] ?? attrs['severity_badge'] ?? 'default'"></Badge>
+                    <slot></slot>
                 </div>
-            </slot>
-        </template>
-        <template #loadingicon>
-            <slot name="icon">
-                <div class="max-button__icon-loading">
-                    <MaxIcon icon="eos-icons:loading" />
-                </div>
-            </slot>
+            </TransitionFade>
+            <div class="countdown-botao" v-if="attrs.countdown !== undefined">
+                {{ attrs.countdown > 0 ? attrs.countdown : '0' }}
+            </div>
         </template>
     </Button>
 </template>
 
 <script setup lang="ts">
-    import { computed } from 'vue';
-    import Button from 'primevue/button';
-    import MaxIcon from './MaxIcon.vue';
+    import { computed, useAttrs } from 'vue';
 
-    interface Props {
-        label?: string;
-        icon?: string;
-        i?: string;
-        severity?: 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'help' | 'danger' | 'contrast';
-        size?: 'small' | 'large';
-        disabled?: boolean;
-        loading?: boolean;
-        variant?: 'outlined' | 'text' | 'link';
-        iconPos?: 'left' | 'right';
-    }
-
-    interface Emits {
-        (e: 'click', event: MouseEvent): void;
-    }
-
-    const props = withDefaults(defineProps<Props>(), {
-        severity: 'primary',
-        size: undefined,
-        disabled: false,
-        loading: false,
-        iconPos: 'left',
-    });
-
-    const emit = defineEmits<Emits>();
-
-    const buttonClass = computed(() => ({
-        'max-button': true,
-        [`max-button--${props.variant}`]: props.variant,
-        [`max-button--${props.severity}`]: props.severity,
-        [`max-button--${props.size}`]: props.size,
-    }));
-
-    const handleClick = (event: MouseEvent) => {
-        emit('click', event);
-    };
+    const attrs: any = useAttrs();
+    const valueBadge = computed(() => attrs['number'] ?? attrs.badge ?? false);
+    const icon_left = computed(() => attrs.icon ?? attrs.iconLeft ?? attrs['icon-left'] ?? attrs.icon_left ?? null);
+    const icon_right = computed(() => attrs.iconRight ?? attrs['icon-right'] ?? attrs.IconRight ?? attrs.icon_right ?? null);
 </script>
 
 <style lang="scss">
-    .max-button {
-        transition: all 0.2s ease-in-out;
-
-        &--small {
-            font-size: 0.875rem;
-            padding: 0.375rem 0.75rem;
-        }
-
-        &--large {
-            font-size: 1.125rem;
-            padding: 0.75rem 1.5rem;
-        }
-
+    .p-button {
+        font-weight: 400 !important;
+        text-transform: uppercase;
+        padding: 0 !important;
+        position: relative !important;
+        height: 36px;
+        min-width: 40px;
+        border-radius: 10px;
+        border: none !important;
         &:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: var(--blue-600);
+            border: none !important;
+        }
+        &.p-button-icon-only {
+            min-width: unset;
+            .content-button {
+                grid-template-columns: auto;
+                .btn-icon-left {
+                    padding: 0;
+                    width: 24px;
+                    height: 24px;
+                }
+                .btn-icon-right {
+                    padding: 0;
+                    width: 24px;
+                    height: 24px;
+                }
+            }
         }
 
-        &:active {
-            transform: translateY(0);
-        }
-        .max-button__icon {
+        .content-button {
             display: grid;
+            grid-template-columns: auto 1fr auto;
             place-items: center;
+            width: 100%;
+            padding: 0 8px;
+            .btn-icon-left {
+                width: 24px;
+                height: 24px;
+                overflow: hidden;
+                display: grid;
+                place-items: center;
+            }
+            .btn-icon-right {
+                width: 24px;
+                height: 24px;
+                overflow: hidden;
+                display: grid;
+                place-items: center;
+            }
+            .btn-label {
+                width: 100%;
+                padding: 0 20px;
+                &.text-left {
+                    text-align: left !important;
+                }
+            }
+            .icon-div {
+                color: white;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 24px !important;
+                height: 24px !important;
+                .content-button-icon {
+                    width: 24px !important;
+                    height: 24px !important;
+                }
+            }
         }
-        &.icon-pos-right {
-            flex-direction: row-reverse;
+        &[transparent] {
+            .icon-div {
+                color: var(--background-650);
+            }
         }
-        &.icon-pos-left {
-            flex-direction: row;
+        .countdown-botao {
+            width: 20px;
+            padding: 0 22px;
         }
     }
 </style>

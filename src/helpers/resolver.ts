@@ -1,0 +1,28 @@
+import type { ComponentResolver } from 'unplugin-vue-components/types';
+import manifest from '../components-manifest.json';
+import { PrimeVueResolver } from '@primevue/auto-import-resolver';
+
+type ResultResolver = { name: string; from: string } | undefined | null;
+
+export function MaxComponentsUiResolver(): ComponentResolver {
+    return {
+        type: 'component',
+        resolve: (name: string) => {
+            console.log(name);
+            const originalName = (manifest.aliases as Record<string, string>)[name];
+            if (originalName) return {
+                name: originalName,
+                from: 'max-components-ui'
+            };
+
+            const primeVueResolvers = PrimeVueResolver();
+            for (const resolver of primeVueResolvers) {
+                const result = (typeof resolver === 'function' ? resolver(name) : resolver.resolve(name)) as ResultResolver;
+                if (result) return {
+                    name: result.name,
+                    from: 'max-components-ui'
+                };
+            }
+        }
+    };
+}

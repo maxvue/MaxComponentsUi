@@ -1,0 +1,43 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "  ▶️    DEV",
+            "options": {
+                "statusbar": {    
+                    "hide": false
+                }
+            },
+            "type": "npm",
+            "script": "dev",
+            "isBackground": true,
+            "presentation": {
+                "reveal": "silent",
+                "panel": "new",
+                "focus": false,
+                "clear": true
+            },
+            "runOptions": {
+                "runOn": "folderOpen"
+            }
+        },
+        {
+            "label": "✅  BUILD & COMMIT",
+            "type": "shell",
+            "command": "git add . && git commit -m 'feat: atualizando componentes' && npm run build",
+            "isBackground": true,
+            "presentation": {
+                "reveal": "silent",
+                "panel": "new",
+                "focus": false,
+                "clear": true
+            },
+            "options": {
+                "statusbar": {
+                    "label": "✅ BUILD & COMMIT",
+                    "hide": false
+                }
+            }
+        }
+    ]
+}

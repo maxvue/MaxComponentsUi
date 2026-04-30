@@ -22,8 +22,6 @@
         return props.icon || props.i || '';
     });
 
-    const STORAGE_KEY = computed(() => 'max-icon-' + iconName.value);
-
     const iconData = ref('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="18" d="M12 3c4.97 0 9 4.03 9 9"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="18;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path><path stroke-dasharray="60" d="M12 3c4.97 0 9 4.03 9 9c0 4.97 -4.03 9 -9 9c-4.97 0 -9 -4.03 -9 -9c0 -4.97 4.03 -9 9 -9Z" opacity="0.3"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.2s" values="60;0"/></path></g></svg>');
 
     const size = computed(() => {
@@ -31,14 +29,15 @@
         const props_size = props.size ?? props.scale ?? null;
         const size_prop = props_wh ?? props_size;
 
-        if (!size_prop) {
-            return '16px';
-        }
+        if (!size_prop) return '16px';
+
 
         if (typeof props_size === 'number') return `${16 * props_size}px`;
         if (typeof size_prop === 'number') return `${size_prop}px`;
         return /^[0-9.]+$/.test(size_prop) ? `${size_prop}px` : size_prop;
     });
+
+    const STORAGE_KEY = computed(() => 'max-icon-' + iconName.value + '-' + size.value);
 
     watch(
         STORAGE_KEY,
@@ -53,35 +52,35 @@
             const prefix = iconName.value.split(':')[0];
             const name = iconName.value.split(':')[1];
 
-            fetch('https://api.iconify.design/' + prefix + '/' + name + '.svg', {
+            fetch('https://api.iconify.design/' + prefix + '/' + name + '.svg?height=' + size.value, {
                 method: 'GET',
-                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                headers: { 'Content-Type': 'application/json', Accept: 'application/json' }
             })
                 .then((response) => {
-                    if (response.ok) {
-                        response.text().then((data) => {
-                            console.log(data);
-                            iconData.value = data;
-                            setCached(STORAGE_KEY.value, data);
-                        });
-                    }
+                    if (response.ok) response.text().then((data) => {
+                        console.log(data);
+                        iconData.value = data;
+                        setCached(STORAGE_KEY.value, data);
+                    });
+
                 })
                 .catch((error) => {
                     console.error(error);
                 });
         },
-        { immediate: true },
+        { immediate: true }
     );
 </script>
 
 <style lang="scss" scoped>
     .max-icon-div {
-        background-color: violet;
         display: grid;
         place-items: center;
         svg {
-            width: 100% !important;
-            height: 100% !important;
+            min-width: 100% !important;
+            min-height: 100% !important;
+            max-width: 100% !important;
+            max-height: 100% !important;
         }
     }
 </style>
