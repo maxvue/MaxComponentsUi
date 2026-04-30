@@ -9,6 +9,8 @@ import Components from 'unplugin-vue-components/vite';
 import { PrimeVueResolver } from '@primevue/auto-import-resolver';
 import { maxUseItems } from 'max-use';
 
+const items = maxUseItems();
+// console.log(items);
 
 export default defineConfig({
     plugins: [
@@ -19,7 +21,7 @@ export default defineConfig({
         AutoImport({
             imports: [
                 'vue',
-                { 'max-use': maxUseItems() },
+                { 'max-use': items },
                 {
                     from: 'vue',
                     imports: ['Ref', 'ComputedRef', 'ShallowRef', 'ShallowComputedRef', 'PropType', 'WatchStopHandle', 'Watch'],
@@ -38,7 +40,12 @@ export default defineConfig({
             dirsScanOptions: {
                 types: true
             },
-            dirs: ['./src/**']
+            dirs: [
+                './src/helpers/**',
+                './src/components/**',
+                './src/utils/**',
+                './src/types/**'
+            ]
         }),
         Components({
             dirs: ['./src/components/**'],

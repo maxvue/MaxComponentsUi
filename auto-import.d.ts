@@ -15,9 +15,7 @@ declare global {
   const AvatarGroup: typeof import('./src/components/_primeVue.ts').AvatarGroup
   const Badge: typeof import('./src/components/_primeVue.ts').Badge
   const BlockUI: typeof import('./src/components/_primeVue.ts').BlockUI
-  const Botao: typeof import('./src/index.ts').Botao
   const Breadcrumb: typeof import('./src/components/_primeVue.ts').Breadcrumb
-  const Button: typeof import('./src/index.ts').Button
   const Card: typeof import('./src/components/_primeVue.ts').Card
   const Carousel: typeof import('./src/components/_primeVue.ts').Carousel
   const CascadeSelect: typeof import('./src/components/_primeVue.ts').CascadeSelect
@@ -44,21 +42,12 @@ declare global {
   const Fieldset: typeof import('./src/components/_primeVue.ts').Fieldset
   const Format: typeof import('max-use').Format
   const Galleria: typeof import('./src/components/_primeVue.ts').Galleria
-  const Grid: typeof import('./src/index.ts').Grid
   const Image: typeof import('./src/components/_primeVue.ts').Image
   const ImageCompare: typeof import('./src/components/_primeVue.ts').ImageCompare
-  const InputField: typeof import('./src/index.ts').InputField
   const InputOtp: typeof import('./src/components/_primeVue.ts').InputOtp
-  const InputPhone: typeof import('./src/index.ts').InputPhone
-  const InputText: typeof import('./src/index.ts').InputText
   const Knob: typeof import('./src/components/_primeVue.ts').Knob
   const Listbox: typeof import('./src/components/_primeVue.ts').Listbox
-  const MaxButton: typeof import('./src/index.ts').MaxButton
-  const MaxComponentsUiResolver: typeof import('./src/index.ts').MaxComponentsUiResolver
-  const MaxIcon: typeof import('./src/index.ts').MaxIcon
-  const MaxInputText: typeof import('./src/index.ts').MaxInputText
-  const MaxPhoneField: typeof import('./src/index.ts').MaxPhoneField
-  const MaxStyle: typeof import('./src/styles/style.ts').MaxStyle
+  const MaxComponentsUiResolver: typeof import('./src/helpers/resolver.ts').MaxComponentsUiResolver
   const MegaMenu: typeof import('./src/components/_primeVue.ts').MegaMenu
   const Menu: typeof import('./src/components/_primeVue.ts').Menu
   const Menubar: typeof import('./src/components/_primeVue.ts').Menubar
@@ -72,7 +61,6 @@ declare global {
   const Panel: typeof import('./src/components/_primeVue.ts').Panel
   const PanelMenu: typeof import('./src/components/_primeVue.ts').PanelMenu
   const Password: typeof import('./src/components/_primeVue.ts').Password
-  const PhoneField: typeof import('./src/index.ts').PhoneField
   const PickList: typeof import('./src/components/_primeVue.ts').PickList
   const Popover: typeof import('./src/components/_primeVue.ts').Popover
   const ProgressBar: typeof import('./src/components/_primeVue.ts').ProgressBar
@@ -182,7 +170,6 @@ declare global {
   const increaseWithUnit: typeof import('max-use').increaseWithUnit
   const inject: typeof import('vue').inject
   const injectLocal: typeof import('max-use').injectLocal
-  const install: typeof import('./src/index.ts').install
   const intervalRandom: typeof import('max-use').intervalRandom
   const invoke: typeof import('max-use').invoke
   const isBlank: typeof import('max-use').isBlank
@@ -250,12 +237,10 @@ declare global {
   const orderByWithKey: typeof import('max-use').orderByWithKey
   const paddingMargin: typeof import('./src/helpers/paddingMargin.ts').paddingMargin
   const pausableFilter: typeof import('max-use').pausableFilter
-  const presetMaxUno: typeof import('./src/unoCssPreset.ts').presetMaxUno
   const promiseTimeout: typeof import('max-use').promiseTimeout
   const provide: typeof import('vue').provide
   const provideLocal: typeof import('max-use').provideLocal
   const provideSSRWidth: typeof import('max-use').provideSSRWidth
-  const ptBr: typeof import('./src/locales/pt-br.ts').default
   const pxValue: typeof import('max-use').pxValue
   const rand: typeof import('max-use').rand
   const reactify: typeof import('max-use').reactify
@@ -282,7 +267,6 @@ declare global {
   const shallowRef: typeof import('vue').shallowRef
   const size: typeof import('max-use').size
   const snakeCase: typeof import('max-use').snakeCase
-  const src: typeof import('./src/index.ts').default
   const sumBy: typeof import('max-use').sumBy
   const syncRef: typeof import('max-use').syncRef
   const syncRefs: typeof import('max-use').syncRefs
@@ -519,9 +503,7 @@ declare module 'vue' {
     readonly AvatarGroup: UnwrapRef<typeof import('./src/components/_primeVue.ts')['AvatarGroup']>
     readonly Badge: UnwrapRef<typeof import('./src/components/_primeVue.ts')['Badge']>
     readonly BlockUI: UnwrapRef<typeof import('./src/components/_primeVue.ts')['BlockUI']>
-    readonly Botao: UnwrapRef<typeof import('./src/index.ts')['Botao']>
     readonly Breadcrumb: UnwrapRef<typeof import('./src/components/_primeVue.ts')['Breadcrumb']>
-    readonly Button: UnwrapRef<typeof import('./src/index.ts')['Button']>
     readonly Card: UnwrapRef<typeof import('./src/components/_primeVue.ts')['Card']>
     readonly Carousel: UnwrapRef<typeof import('./src/components/_primeVue.ts')['Carousel']>
     readonly CascadeSelect: UnwrapRef<typeof import('./src/components/_primeVue.ts')['CascadeSelect']>
@@ -548,21 +530,12 @@ declare module 'vue' {
     readonly Fieldset: UnwrapRef<typeof import('./src/components/_primeVue.ts')['Fieldset']>
     readonly Format: UnwrapRef<typeof import('max-use')['Format']>
     readonly Galleria: UnwrapRef<typeof import('./src/components/_primeVue.ts')['Galleria']>
-    readonly Grid: UnwrapRef<typeof import('./src/index.ts')['Grid']>
     readonly Image: UnwrapRef<typeof import('./src/components/_primeVue.ts')['Image']>
     readonly ImageCompare: UnwrapRef<typeof import('./src/components/_primeVue.ts')['ImageCompare']>
-    readonly InputField: UnwrapRef<typeof import('./src/index.ts')['InputField']>
     readonly InputOtp: UnwrapRef<typeof import('./src/components/_primeVue.ts')['InputOtp']>
-    readonly InputPhone: UnwrapRef<typeof import('./src/index.ts')['InputPhone']>
-    readonly InputText: UnwrapRef<typeof import('./src/index.ts')['InputText']>
     readonly Knob: UnwrapRef<typeof import('./src/components/_primeVue.ts')['Knob']>
     readonly Listbox: UnwrapRef<typeof import('./src/components/_primeVue.ts')['Listbox']>
-    readonly MaxButton: UnwrapRef<typeof import('./src/index.ts')['MaxButton']>
-    readonly MaxComponentsUiResolver: UnwrapRef<typeof import('./src/index.ts')['MaxComponentsUiResolver']>
-    readonly MaxIcon: UnwrapRef<typeof import('./src/index.ts')['MaxIcon']>
-    readonly MaxInputText: UnwrapRef<typeof import('./src/index.ts')['MaxInputText']>
-    readonly MaxPhoneField: UnwrapRef<typeof import('./src/index.ts')['MaxPhoneField']>
-    readonly MaxStyle: UnwrapRef<typeof import('./src/styles/style.ts')['MaxStyle']>
+    readonly MaxComponentsUiResolver: UnwrapRef<typeof import('./src/helpers/resolver.ts')['MaxComponentsUiResolver']>
     readonly MegaMenu: UnwrapRef<typeof import('./src/components/_primeVue.ts')['MegaMenu']>
     readonly Menu: UnwrapRef<typeof import('./src/components/_primeVue.ts')['Menu']>
     readonly Menubar: UnwrapRef<typeof import('./src/components/_primeVue.ts')['Menubar']>
@@ -576,7 +549,6 @@ declare module 'vue' {
     readonly Panel: UnwrapRef<typeof import('./src/components/_primeVue.ts')['Panel']>
     readonly PanelMenu: UnwrapRef<typeof import('./src/components/_primeVue.ts')['PanelMenu']>
     readonly Password: UnwrapRef<typeof import('./src/components/_primeVue.ts')['Password']>
-    readonly PhoneField: UnwrapRef<typeof import('./src/index.ts')['PhoneField']>
     readonly PickList: UnwrapRef<typeof import('./src/components/_primeVue.ts')['PickList']>
     readonly Popover: UnwrapRef<typeof import('./src/components/_primeVue.ts')['Popover']>
     readonly ProgressBar: UnwrapRef<typeof import('./src/components/_primeVue.ts')['ProgressBar']>
@@ -686,7 +658,6 @@ declare module 'vue' {
     readonly increaseWithUnit: UnwrapRef<typeof import('max-use')['increaseWithUnit']>
     readonly inject: UnwrapRef<typeof import('vue')['inject']>
     readonly injectLocal: UnwrapRef<typeof import('max-use')['injectLocal']>
-    readonly install: UnwrapRef<typeof import('./src/index.ts')['install']>
     readonly intervalRandom: UnwrapRef<typeof import('max-use')['intervalRandom']>
     readonly invoke: UnwrapRef<typeof import('max-use')['invoke']>
     readonly isBlank: UnwrapRef<typeof import('max-use')['isBlank']>
@@ -754,12 +725,10 @@ declare module 'vue' {
     readonly orderByWithKey: UnwrapRef<typeof import('max-use')['orderByWithKey']>
     readonly paddingMargin: UnwrapRef<typeof import('./src/helpers/paddingMargin.ts')['paddingMargin']>
     readonly pausableFilter: UnwrapRef<typeof import('max-use')['pausableFilter']>
-    readonly presetMaxUno: UnwrapRef<typeof import('./src/unoCssPreset.ts')['presetMaxUno']>
     readonly promiseTimeout: UnwrapRef<typeof import('max-use')['promiseTimeout']>
     readonly provide: UnwrapRef<typeof import('vue')['provide']>
     readonly provideLocal: UnwrapRef<typeof import('max-use')['provideLocal']>
     readonly provideSSRWidth: UnwrapRef<typeof import('max-use')['provideSSRWidth']>
-    readonly ptBr: UnwrapRef<typeof import('./src/locales/pt-br.ts')['default']>
     readonly pxValue: UnwrapRef<typeof import('max-use')['pxValue']>
     readonly rand: UnwrapRef<typeof import('max-use')['rand']>
     readonly reactify: UnwrapRef<typeof import('max-use')['reactify']>
@@ -786,7 +755,6 @@ declare module 'vue' {
     readonly shallowRef: UnwrapRef<typeof import('vue')['shallowRef']>
     readonly size: UnwrapRef<typeof import('max-use')['size']>
     readonly snakeCase: UnwrapRef<typeof import('max-use')['snakeCase']>
-    readonly src: UnwrapRef<typeof import('./src/index.ts')['default']>
     readonly sumBy: UnwrapRef<typeof import('max-use')['sumBy']>
     readonly syncRef: UnwrapRef<typeof import('max-use')['syncRef']>
     readonly syncRefs: UnwrapRef<typeof import('max-use')['syncRefs']>
