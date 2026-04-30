@@ -69835,7 +69835,7 @@
 		watchDebounced$1(state, () => import_localforage.default.setItem(key, JSON.parse(JSON.stringify(state.value))), { debounce: 600 });
 		return state;
 	}
-	var timeAgoBr = {
+	var ptBr = {
 		justNow: "agora",
 		past: (n) => n.toString().match(/\d/) ? `${n}` : n,
 		future: (n) => n.toString().match(/\d/) ? `Em ${n}` : n,
@@ -69862,9 +69862,7 @@
 	var timeAgoAction = {
 		justNow: "Realizar Hoje",
 		past: (n) => n.toString().match(/\d/) ? `Atrasado: ${n}` : n,
-		future: (n) => n.toString().match(/\d/) ? `Realizarpast4 chars
-    language	typescript
-    standard token type	Other em ${n}` : n,
+		future: (n) => n.toString().match(/\d/) ? `Realizar em ${n}` : n,
 		month: (n, past) => n === 1 ? past ? "Atrasado (1 Mês)" : "Próximo mês" : `${n} M${n > 1 ? "eses" : "ês"}`,
 		year: (n, past) => n === 1 ? past ? "Ano passado" : "Próximo ano" : `${n} year${n > 1 ? "s" : ""}`,
 		day: (n, past) => n === 1 ? past ? "Atrasado (Ontem)" : "Realizar até amanhã" : `${n} dia${n > 1 ? "s" : ""}`,
@@ -69886,7 +69884,7 @@
 		second: (n) => `${n}s${n > 1 ? "s" : ""}`
 	};
 	var FORMAT_MAP = {
-		br: timeAgoBr,
+		br: ptBr,
 		abbrev: timeAgoAbbrev,
 		action: timeAgoAction,
 		limit: {
@@ -69905,7 +69903,7 @@
 		limit_abbrev: timeAgoLimitAbrev,
 		future: timeAgoLimitAbrev
 	};
-	var timeAgo = (initialDate, format = "br") => useTimeAgo$1(initialDate, { messages: FORMAT_MAP[format] ?? timeAgoBr });
+	var timeAgo = (initialDate, format = "br") => useTimeAgo$1(initialDate, { messages: FORMAT_MAP[format] ?? ptBr });
 	var useTimeAgo = (initialDate, format = "br") => timeAgo(initialDate, format);
 	var Composables_exports = /* @__PURE__ */ __exportAll({
 		useDefaultReset: () => useDefaultReset,
