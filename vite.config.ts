@@ -8,6 +8,9 @@ import AutoImport from 'unplugin-auto-import/vite';
 import Components from 'unplugin-vue-components/vite';
 import { PrimeVueResolver } from '@primevue/auto-import-resolver';
 import { maxUseAutoImport } from '@maxvue/max-use';
+import fs from 'node:fs';
+
+const pkg = JSON.parse(fs.readFileSync(new URL('./package.json', import.meta.url), 'utf-8'));
 
 export default defineConfig({
     plugins: [
@@ -68,7 +71,13 @@ export default defineConfig({
             external: [
                 'vue',
                 '@iconify/vue',
-                '@oxc-parser/binding-wasm32-wasi'
+                'sass',
+                'node:path',
+                'node:url',
+                'node:fs',
+                '@oxc-parser/binding-wasm32-wasi',
+                ...Object.keys(pkg.dependencies || {}),
+                ...Object.keys(pkg.peerDependencies || {})
             ],
             output: {
                 exports: 'named',

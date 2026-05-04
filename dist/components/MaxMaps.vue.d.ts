@@ -236,7 +236,7 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
         map: import('vue').Ref<google.maps.Map | undefined, google.maps.Map | undefined>;
         api: import('vue').Ref<typeof google.maps | undefined, typeof google.maps | undefined>;
         mapTilesLoaded: import('vue').Ref<boolean, boolean>;
-    }, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, ("drag" | "contextmenu" | "click" | "dblclick" | "dragend" | "dragstart" | "mousemove" | "mouseout" | "mouseover" | "rightclick" | "bounds_changed" | "center_changed" | "heading_changed" | "idle" | "isfractionalzoomenabled_changed" | "mapcapabilities_changed" | "maptypeid_changed" | "projection_changed" | "renderingtype_changed" | "tilesloaded" | "tilt_changed" | "zoom_changed")[], import('vue').PublicProps, {
+    }, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, ("drag" | "contextmenu" | "click" | "dragstart" | "dragend" | "dblclick" | "mousemove" | "mouseout" | "mouseover" | "rightclick" | "bounds_changed" | "center_changed" | "heading_changed" | "idle" | "isfractionalzoomenabled_changed" | "mapcapabilities_changed" | "maptypeid_changed" | "projection_changed" | "renderingtype_changed" | "tilesloaded" | "tilt_changed" | "zoom_changed")[], import('vue').PublicProps, {
         apiKey: string;
         version: string;
         libraries: string[];
@@ -540,7 +540,7 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
     }>, {
         hasCustomSlotContent: import('vue').ComputedRef<boolean | undefined>;
         markerRef: Ref<HTMLElement | undefined, HTMLElement | undefined>;
-    }, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, ("drag" | "click" | "dragend" | "dragstart" | "gmp-click")[], import('vue').PublicProps, {}, true, {}, {}, import('vue').GlobalComponents, import('vue').GlobalDirectives, string, {}, any, import('vue').ComponentProvideOptions, {
+    }, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, ("drag" | "click" | "dragstart" | "dragend" | "gmp-click")[], import('vue').PublicProps, {}, true, {}, {}, import('vue').GlobalComponents, import('vue').GlobalDirectives, string, {}, any, import('vue').ComponentProvideOptions, {
         P: {};
         B: {};
         D: {};
