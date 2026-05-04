@@ -1,6 +1,6 @@
 interface Props {
-    value?: string;
-    modelValue?: string | undefined;
+    value?: any;
+    modelValue?: any;
     icon?: string | undefined;
     iconLeft?: string | undefined;
     iconRight?: string | undefined;
@@ -26,7 +26,7 @@ declare function __VLS_template(): {
 };
 type __VLS_TemplateResult = ReturnType<typeof __VLS_template>;
 declare const __VLS_component: import('vue').DefineComponent<Props, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {}, string, import('vue').PublicProps, Readonly<Props> & Readonly<{}>, {
-    value: string;
+    value: any;
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {}, any>;
 declare const _default: __VLS_WithTemplateSlots<typeof __VLS_component, __VLS_TemplateResult["slots"]>;
 export default _default;

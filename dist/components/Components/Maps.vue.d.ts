@@ -1,0 +1,571 @@
+declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {}, string, import('vue').PublicProps, Readonly<{}> & Readonly<{}>, {}, {}, {}, {}, string, import('vue').ComponentProvideOptions, true, {
+    mapDiv: HTMLDivElement;
+    mapRef: import('vue').CreateComponentPublicInstanceWithMixins<Readonly<globalThis.ExtractPropTypes<{
+        apiPromise: {
+            type: PropType<Promise<typeof google>>;
+        };
+        apiKey: {
+            type: StringConstructor;
+            default: string;
+        };
+        version: {
+            type: StringConstructor;
+            default: string;
+        };
+        libraries: {
+            type: PropType<string[]>;
+            default: () => string[];
+        };
+        region: {
+            type: StringConstructor;
+            required: false;
+        };
+        language: {
+            type: StringConstructor;
+            required: false;
+        };
+        backgroundColor: {
+            type: StringConstructor;
+            required: false;
+        };
+        center: {
+            type: PropType<google.maps.LatLng | google.maps.LatLngLiteral>;
+            default: () => {
+                lat: number;
+                lng: number;
+            };
+        };
+        clickableIcons: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        colorScheme: {
+            type: PropType<keyof typeof google.maps.ColorScheme>;
+            required: false;
+        };
+        controlSize: {
+            type: NumberConstructor;
+            required: false;
+        };
+        disableDefaultUi: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        disableDoubleClickZoom: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        draggable: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        draggableCursor: {
+            type: StringConstructor;
+            required: false;
+        };
+        draggingCursor: {
+            type: StringConstructor;
+            required: false;
+        };
+        fullscreenControl: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        fullscreenControlPosition: {
+            type: PropType<string | number | symbol>;
+            required: false;
+        };
+        gestureHandling: {
+            type: PropType<"cooperative" | "greedy" | "none" | "auto">;
+            required: false;
+        };
+        heading: {
+            type: NumberConstructor;
+            required: false;
+        };
+        isFractionalZoomEnabled: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        keyboardShortcuts: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        mapTypeControl: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        mapTypeControlOptions: {
+            type: PropType<google.maps.MapTypeControlOptions>;
+            required: false;
+        };
+        mapTypeId: {
+            type: PropType<google.maps.MapTypeId | string>;
+            required: false;
+        };
+        mapId: {
+            type: StringConstructor;
+            required: false;
+        };
+        maxZoom: {
+            type: NumberConstructor;
+            required: false;
+        };
+        minZoom: {
+            type: NumberConstructor;
+            required: false;
+        };
+        noClear: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        panControl: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        panControlPosition: {
+            type: PropType<string | number | symbol>;
+            required: false;
+        };
+        restriction: {
+            type: PropType<google.maps.MapRestriction>;
+            required: false;
+        };
+        rotateControl: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        rotateControlPosition: {
+            type: PropType<string | number | symbol>;
+            required: false;
+        };
+        scaleControl: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        scaleControlStyle: {
+            type: PropType<google.maps.ScaleControlStyle>;
+            required: false;
+        };
+        scrollwheel: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        streetView: {
+            type: PropType<google.maps.StreetViewPanorama>;
+            required: false;
+        };
+        streetViewControl: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        streetViewControlPosition: {
+            type: PropType<string | number | symbol>;
+            required: false;
+        };
+        styles: {
+            type: PropType<google.maps.MapTypeStyle[]>;
+            required: false;
+        };
+        tilt: {
+            type: NumberConstructor;
+            required: false;
+        };
+        zoom: {
+            type: NumberConstructor;
+            required: false;
+        };
+        zoomControl: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        zoomControlPosition: {
+            type: PropType<string | number | symbol>;
+            required: false;
+        };
+        cameraControl: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        cameraControlPosition: {
+            type: PropType<string | number | symbol>;
+            required: false;
+        };
+    }>> & Readonly<{
+        onClick?: ((...args: any[]) => any) | undefined;
+        onDblclick?: ((...args: any[]) => any) | undefined;
+        onDrag?: ((...args: any[]) => any) | undefined;
+        onDragend?: ((...args: any[]) => any) | undefined;
+        onDragstart?: ((...args: any[]) => any) | undefined;
+        onMousemove?: ((...args: any[]) => any) | undefined;
+        onMouseout?: ((...args: any[]) => any) | undefined;
+        onMouseover?: ((...args: any[]) => any) | undefined;
+        onRightclick?: ((...args: any[]) => any) | undefined;
+        onBounds_changed?: ((...args: any[]) => any) | undefined;
+        onCenter_changed?: ((...args: any[]) => any) | undefined;
+        onContextmenu?: ((...args: any[]) => any) | undefined;
+        onHeading_changed?: ((...args: any[]) => any) | undefined;
+        onIdle?: ((...args: any[]) => any) | undefined;
+        onIsfractionalzoomenabled_changed?: ((...args: any[]) => any) | undefined;
+        onMapcapabilities_changed?: ((...args: any[]) => any) | undefined;
+        onMaptypeid_changed?: ((...args: any[]) => any) | undefined;
+        onProjection_changed?: ((...args: any[]) => any) | undefined;
+        onRenderingtype_changed?: ((...args: any[]) => any) | undefined;
+        onTilesloaded?: ((...args: any[]) => any) | undefined;
+        onTilt_changed?: ((...args: any[]) => any) | undefined;
+        onZoom_changed?: ((...args: any[]) => any) | undefined;
+    }>, {
+        mapRef: import('vue').Ref<HTMLElement | undefined, HTMLElement | undefined>;
+        ready: import('vue').Ref<boolean, boolean>;
+        map: import('vue').Ref<google.maps.Map | undefined, google.maps.Map | undefined>;
+        api: import('vue').Ref<typeof google.maps | undefined, typeof google.maps | undefined>;
+        mapTilesLoaded: import('vue').Ref<boolean, boolean>;
+    }, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, ("drag" | "contextmenu" | "click" | "dblclick" | "dragend" | "dragstart" | "mousemove" | "mouseout" | "mouseover" | "rightclick" | "bounds_changed" | "center_changed" | "heading_changed" | "idle" | "isfractionalzoomenabled_changed" | "mapcapabilities_changed" | "maptypeid_changed" | "projection_changed" | "renderingtype_changed" | "tilesloaded" | "tilt_changed" | "zoom_changed")[], import('vue').PublicProps, {
+        apiKey: string;
+        version: string;
+        libraries: string[];
+        center: google.maps.LatLng | google.maps.LatLngLiteral;
+        clickableIcons: boolean;
+        disableDefaultUi: boolean;
+        disableDoubleClickZoom: boolean;
+        draggable: boolean;
+        fullscreenControl: boolean;
+        isFractionalZoomEnabled: boolean;
+        keyboardShortcuts: boolean;
+        mapTypeControl: boolean;
+        noClear: boolean;
+        panControl: boolean;
+        rotateControl: boolean;
+        scaleControl: boolean;
+        scrollwheel: boolean;
+        streetViewControl: boolean;
+        zoomControl: boolean;
+        cameraControl: boolean;
+    }, true, {}, {}, import('vue').GlobalComponents, import('vue').GlobalDirectives, string, {}, any, import('vue').ComponentProvideOptions, {
+        P: {};
+        B: {};
+        D: {};
+        C: {};
+        M: {};
+        Defaults: {};
+    }, Readonly<globalThis.ExtractPropTypes<{
+        apiPromise: {
+            type: PropType<Promise<typeof google>>;
+        };
+        apiKey: {
+            type: StringConstructor;
+            default: string;
+        };
+        version: {
+            type: StringConstructor;
+            default: string;
+        };
+        libraries: {
+            type: PropType<string[]>;
+            default: () => string[];
+        };
+        region: {
+            type: StringConstructor;
+            required: false;
+        };
+        language: {
+            type: StringConstructor;
+            required: false;
+        };
+        backgroundColor: {
+            type: StringConstructor;
+            required: false;
+        };
+        center: {
+            type: PropType<google.maps.LatLng | google.maps.LatLngLiteral>;
+            default: () => {
+                lat: number;
+                lng: number;
+            };
+        };
+        clickableIcons: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        colorScheme: {
+            type: PropType<keyof typeof google.maps.ColorScheme>;
+            required: false;
+        };
+        controlSize: {
+            type: NumberConstructor;
+            required: false;
+        };
+        disableDefaultUi: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        disableDoubleClickZoom: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        draggable: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        draggableCursor: {
+            type: StringConstructor;
+            required: false;
+        };
+        draggingCursor: {
+            type: StringConstructor;
+            required: false;
+        };
+        fullscreenControl: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        fullscreenControlPosition: {
+            type: PropType<string | number | symbol>;
+            required: false;
+        };
+        gestureHandling: {
+            type: PropType<"cooperative" | "greedy" | "none" | "auto">;
+            required: false;
+        };
+        heading: {
+            type: NumberConstructor;
+            required: false;
+        };
+        isFractionalZoomEnabled: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        keyboardShortcuts: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        mapTypeControl: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        mapTypeControlOptions: {
+            type: PropType<google.maps.MapTypeControlOptions>;
+            required: false;
+        };
+        mapTypeId: {
+            type: PropType<google.maps.MapTypeId | string>;
+            required: false;
+        };
+        mapId: {
+            type: StringConstructor;
+            required: false;
+        };
+        maxZoom: {
+            type: NumberConstructor;
+            required: false;
+        };
+        minZoom: {
+            type: NumberConstructor;
+            required: false;
+        };
+        noClear: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        panControl: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        panControlPosition: {
+            type: PropType<string | number | symbol>;
+            required: false;
+        };
+        restriction: {
+            type: PropType<google.maps.MapRestriction>;
+            required: false;
+        };
+        rotateControl: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        rotateControlPosition: {
+            type: PropType<string | number | symbol>;
+            required: false;
+        };
+        scaleControl: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        scaleControlStyle: {
+            type: PropType<google.maps.ScaleControlStyle>;
+            required: false;
+        };
+        scrollwheel: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        streetView: {
+            type: PropType<google.maps.StreetViewPanorama>;
+            required: false;
+        };
+        streetViewControl: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        streetViewControlPosition: {
+            type: PropType<string | number | symbol>;
+            required: false;
+        };
+        styles: {
+            type: PropType<google.maps.MapTypeStyle[]>;
+            required: false;
+        };
+        tilt: {
+            type: NumberConstructor;
+            required: false;
+        };
+        zoom: {
+            type: NumberConstructor;
+            required: false;
+        };
+        zoomControl: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        zoomControlPosition: {
+            type: PropType<string | number | symbol>;
+            required: false;
+        };
+        cameraControl: {
+            type: BooleanConstructor;
+            required: false;
+            default: undefined;
+        };
+        cameraControlPosition: {
+            type: PropType<string | number | symbol>;
+            required: false;
+        };
+    }>> & Readonly<{
+        onClick?: ((...args: any[]) => any) | undefined;
+        onDblclick?: ((...args: any[]) => any) | undefined;
+        onDrag?: ((...args: any[]) => any) | undefined;
+        onDragend?: ((...args: any[]) => any) | undefined;
+        onDragstart?: ((...args: any[]) => any) | undefined;
+        onMousemove?: ((...args: any[]) => any) | undefined;
+        onMouseout?: ((...args: any[]) => any) | undefined;
+        onMouseover?: ((...args: any[]) => any) | undefined;
+        onRightclick?: ((...args: any[]) => any) | undefined;
+        onBounds_changed?: ((...args: any[]) => any) | undefined;
+        onCenter_changed?: ((...args: any[]) => any) | undefined;
+        onContextmenu?: ((...args: any[]) => any) | undefined;
+        onHeading_changed?: ((...args: any[]) => any) | undefined;
+        onIdle?: ((...args: any[]) => any) | undefined;
+        onIsfractionalzoomenabled_changed?: ((...args: any[]) => any) | undefined;
+        onMapcapabilities_changed?: ((...args: any[]) => any) | undefined;
+        onMaptypeid_changed?: ((...args: any[]) => any) | undefined;
+        onProjection_changed?: ((...args: any[]) => any) | undefined;
+        onRenderingtype_changed?: ((...args: any[]) => any) | undefined;
+        onTilesloaded?: ((...args: any[]) => any) | undefined;
+        onTilt_changed?: ((...args: any[]) => any) | undefined;
+        onZoom_changed?: ((...args: any[]) => any) | undefined;
+    }>, {
+        mapRef: import('vue').Ref<HTMLElement | undefined, HTMLElement | undefined>;
+        ready: import('vue').Ref<boolean, boolean>;
+        map: import('vue').Ref<google.maps.Map | undefined, google.maps.Map | undefined>;
+        api: import('vue').Ref<typeof google.maps | undefined, typeof google.maps | undefined>;
+        mapTilesLoaded: import('vue').Ref<boolean, boolean>;
+    }, {}, {}, {}, {
+        apiKey: string;
+        version: string;
+        libraries: string[];
+        center: google.maps.LatLng | google.maps.LatLngLiteral;
+        clickableIcons: boolean;
+        disableDefaultUi: boolean;
+        disableDoubleClickZoom: boolean;
+        draggable: boolean;
+        fullscreenControl: boolean;
+        isFractionalZoomEnabled: boolean;
+        keyboardShortcuts: boolean;
+        mapTypeControl: boolean;
+        noClear: boolean;
+        panControl: boolean;
+        rotateControl: boolean;
+        scaleControl: boolean;
+        scrollwheel: boolean;
+        streetViewControl: boolean;
+        zoomControl: boolean;
+        cameraControl: boolean;
+    }> | null;
+    markerRef: import('vue').CreateComponentPublicInstanceWithMixins<Readonly<globalThis.ExtractPropTypes<{
+        options: {
+            type: PropType<google.maps.marker.AdvancedMarkerElementOptions>;
+            required: true;
+        };
+        pinOptions: {
+            type: PropType<google.maps.marker.PinElementOptions>;
+            required: false;
+        };
+    }>> & Readonly<{
+        onClick?: ((...args: any[]) => any) | undefined;
+        onDrag?: ((...args: any[]) => any) | undefined;
+        onDragend?: ((...args: any[]) => any) | undefined;
+        onDragstart?: ((...args: any[]) => any) | undefined;
+        "onGmp-click"?: ((...args: any[]) => any) | undefined;
+    }>, {
+        hasCustomSlotContent: import('vue').ComputedRef<boolean | undefined>;
+        markerRef: Ref<HTMLElement | undefined, HTMLElement | undefined>;
+    }, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, ("drag" | "click" | "dragend" | "dragstart" | "gmp-click")[], import('vue').PublicProps, {}, true, {}, {}, import('vue').GlobalComponents, import('vue').GlobalDirectives, string, {}, any, import('vue').ComponentProvideOptions, {
+        P: {};
+        B: {};
+        D: {};
+        C: {};
+        M: {};
+        Defaults: {};
+    }, Readonly<globalThis.ExtractPropTypes<{
+        options: {
+            type: PropType<google.maps.marker.AdvancedMarkerElementOptions>;
+            required: true;
+        };
+        pinOptions: {
+            type: PropType<google.maps.marker.PinElementOptions>;
+            required: false;
+        };
+    }>> & Readonly<{
+        onClick?: ((...args: any[]) => any) | undefined;
+        onDrag?: ((...args: any[]) => any) | undefined;
+        onDragend?: ((...args: any[]) => any) | undefined;
+        onDragstart?: ((...args: any[]) => any) | undefined;
+        "onGmp-click"?: ((...args: any[]) => any) | undefined;
+    }>, {
+        hasCustomSlotContent: import('vue').ComputedRef<boolean | undefined>;
+        markerRef: Ref<HTMLElement | undefined, HTMLElement | undefined>;
+    }, {}, {}, {}, {}> | null;
+}, any>;
+export default _default;
+//# sourceMappingURL=Maps.vue.d.ts.map
