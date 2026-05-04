@@ -17,4 +17,4 @@ type __VLS_WithTemplateSlots<T, S> = T & {
         $slots: S;
     };
 };
-//# sourceMappingURL=EmptyDiv.vue.d.ts.map
+//# sourceMappingURL=MaxEmptyDiv.vue.d.ts.map

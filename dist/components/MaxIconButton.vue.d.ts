@@ -2,4 +2,4 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
     icon_ref: HTMLDivElement;
 }, HTMLDivElement>;
 export default _default;
-//# sourceMappingURL=IconButton.vue.d.ts.map
+//# sourceMappingURL=MaxIconButton.vue.d.ts.map

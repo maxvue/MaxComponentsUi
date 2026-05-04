@@ -568,4 +568,4 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
     }, {}, {}, {}, {}> | null;
 }, any>;
 export default _default;
-//# sourceMappingURL=Maps.vue.d.ts.map
+//# sourceMappingURL=MaxMaps.vue.d.ts.map

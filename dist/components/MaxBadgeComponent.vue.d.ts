@@ -11,4 +11,4 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
     } | null;
 }, HTMLDivElement>;
 export default _default;
-//# sourceMappingURL=BadgeComponent.vue.d.ts.map
+//# sourceMappingURL=MaxBadgeComponent.vue.d.ts.map
