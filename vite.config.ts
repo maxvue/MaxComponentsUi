@@ -85,7 +85,7 @@ export default defineConfig({
         },
         cssTarget: 'esnext',
         sourcemap: true,
-        minify: false
+        minify: 'terser',
     },
     resolve: {
         alias: {
