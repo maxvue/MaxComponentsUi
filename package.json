@@ -1,8 +1,8 @@
 {
-    "name": "max-components-ui",
-    "version": "0.1.19",
+    "name": "@maxvue/max-components-ui",
+    "version": "1.0.12",
     "description": "Biblioteca de componentes Vue baseada em PrimeVue",
-    "main": "./dist/index.js",
+    "main": "./dist/index.umd.js",
     "module": "./dist/index.es.js",
     "types": "./dist/index.d.ts",
     "type": "module",
@@ -17,6 +17,9 @@
     "files": [
         "dist"
     ],
+    "publishConfig": {
+        "access": "public"
+    },
     "scripts": {
         "dev": "vite",
         "dev:playground": "vite --config playground/vite.config.ts",
@@ -25,12 +28,13 @@
         "preview": "vite preview",
         "type-check": "vue-tsc --noEmit",
         "lint": "eslint . --fix && stylelint \"**/*.{scss,vue}\" --fix",
-        "postbuild": "git add dist tsconfig.tsbuildinfo && git commit -m 'chore: atualiza artefatos do build' || true && npm version patch -m 'Upgrade to %s' && git push origin main --follow-tags"
+        "postbuild": "git add dist tsconfig.tsbuildinfo && git commit -m 'chore: atualiza artefatos do build' || true",
+        "release": "npm run build && npm version patch -m 'Upgrade to %s' && git push origin main --follow-tags && npm publish --access public"
     },
     "dependencies": {
         "@iconify/vue": "^5.0.0",
         "@lottiefiles/dotlottie-vue": "^0.11.12",
-        "@maxvue/max-use": "file:../MaxUse",
+        "@maxvue/max-use": "^1.0.8",
         "@primeuix/themes": "^2.0.3",
         "@unocss/reset": "^66.6.8",
         "@vueuse/core": "^14.2.1",
@@ -83,7 +87,7 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/johnattas/MaxComponentsUi.git"
+        "url": "https://github.com/maxvue/MaxComponentsUi.git"
     },
     "peerDependencies": {
         "vue": "^3.5.33"

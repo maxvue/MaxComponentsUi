@@ -1,0 +1,23 @@
+export { countBy } from './countBy';
+export { filter } from './filter';
+export { filterBy } from './filterBy';
+export { filterByNot } from './filterByNot';
+export { groupBy } from './groupBy';
+export { keyBy } from './keyBy';
+export { orderBy } from './orderBy';
+export { orderByWithKey } from './orderByWithKey';
+export { sortBy } from './sortBy';
+export { sum } from './sum';
+export { sumBy } from './sumBy';
+export { uniq } from './uniq';
+export { valuesInKey } from './valuesInKey';
+export { size } from './size';
+export { sample } from './sample';
+export { shuffle } from './shuffle';
+export { chunk } from './chunk';
+export { uniqueBy } from './uniqueBy';
+export { findLast } from './findLast';
+export { sortByMulti } from './sortByMulti';
+export { first } from './first';
+export { last } from './last';
+//# sourceMappingURL=index.d.ts.map

@@ -1,0 +1,1 @@
+{"version":3,"file":"useDefaultReset.d.ts","sourceRoot":"","sources":["../../src/Composables/useDefaultReset.ts"],"names":[],"mappings":"AAAA,OAAO,EAAO,KAAK,GAAG,EAAE,MAAM,KAAK,CAAC;AAGpC,KAAK,QAAQ,CAAC,CAAC,IAAI,GAAG,CAAC,CAAC,CAAC,GAAG;IAAE,KAAK,IAAI,IAAI,CAAC;IAAC,WAAW,EAAE,CAAC,CAAA;CAAE,CAAC;AAE9D,wBAAgB,eAAe,CAAC,CAAC,EAAE,WAAW,EAAE,CAAC,GAAG,QAAQ,CAAC,CAAC,CAAC,CAe9D"}

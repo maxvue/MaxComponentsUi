@@ -5,7 +5,7 @@ Biblioteca de componentes Vue 3 baseada em PrimeVue, construída com TypeScript 
 ## Instalação
 
 ```bash
-npm install max-components-ui
+npm install @maxvue/max-components-ui
 ```
 
 ## Dependências
@@ -22,7 +22,7 @@ npm install vue@^3.6.0 primevue@^4.2.4
 
 ```typescript
 import { createApp } from 'vue'
-import MaxComponentsUi from 'max-components-ui'
+import MaxComponentsUi from '@maxvue/max-components-ui'
 import PrimeVue from 'primevue/config'
 import 'primevue/resources/themes/aura-light-green/theme.css'
 
@@ -40,7 +40,7 @@ app.use(MaxComponentsUi)
 </template>
 
 <script setup lang="ts">
-import { MaxButton } from 'max-components-ui'
+import { MaxButton } from '@maxvue/max-components-ui'
 
 const handleClick = () => {
   console.log('Botão clicado!')

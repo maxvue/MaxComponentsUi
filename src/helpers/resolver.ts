@@ -8,11 +8,10 @@ export function MaxComponentsUiResolver(): ComponentResolver {
     return {
         type: 'component',
         resolve: (name: string) => {
-            console.log(name);
             const originalName = (manifest.aliases as Record<string, string>)[name];
             if (originalName) return {
                 name: originalName,
-                from: 'max-components-ui'
+                from: '@maxvue/max-components-ui'
             };
 
             const primeVueResolvers = PrimeVueResolver();
@@ -20,7 +19,7 @@ export function MaxComponentsUiResolver(): ComponentResolver {
                 const result = (typeof resolver === 'function' ? resolver(name) : resolver.resolve(name)) as ResultResolver;
                 if (result) return {
                     name: result.name,
-                    from: 'max-components-ui'
+                    from: '@maxvue/max-components-ui'
                 };
             }
         }

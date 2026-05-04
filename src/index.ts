@@ -13,7 +13,8 @@ export { MaxComponentsUiResolver };
 export * from './components/_primeVue';
 
 export { default as MaxIcon } from './components/MaxIcon.vue';
-export { default as Grid } from './components/Grid.vue';
+export { default as MaxGrid } from './components/MaxGrid.vue';
+export { default as Grid } from './components/MaxGrid.vue';
 
 // Button
 export { default as MaxButton } from './components/MaxButton.vue';
