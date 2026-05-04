@@ -24,7 +24,7 @@
         "dev": "vite",
         "dev:playground": "vite --config playground/vite.config.ts",
         "prebuild": "npx tsx src/scripts/generateResolver.ts",
-        "build": "vue-tsc && vite build",
+        "build": "vue-tsc && vite build && cp -r src/themes dist/",
         "preview": "vite preview",
         "type-check": "vue-tsc --noEmit",
         "lint": "eslint . --fix && stylelint \"**/*.{scss,vue}\" --fix",
