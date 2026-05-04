@@ -29,8 +29,8 @@
     .badge-component-main-div {
         position: relative;
         display: grid;
-        grid-template-columns: auto 1fr;
         place-items: center start;
+        grid-template-columns: auto 1fr;
 
         .p-badge {
             font-size: 0.6rem;
