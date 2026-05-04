@@ -1,37 +1,44 @@
 type __VLS_Props = {
-    modelValue: any[];
+    /** Token CSRF para autenticação no upload */
     token?: string;
+    /** Dados adicionais para enviar via FormData no upload */
     uploadData?: Record<string, any>;
+    /** Rótulo descritivo do campo */
     label?: string;
+    /** Campo da resposta da API que contém os dados do arquivo (vazio para usar a resposta completa) */
+    responseField?: string;
 };
-declare function __VLS_template(): {
-    attrs: Partial<{}>;
-    slots: {
-        default?(_: {}): any;
-        default?(_: {}): any;
-        error?(_: {}): any;
-        error?(_: {}): any;
-    };
-    refs: {};
-    rootEl: HTMLDivElement;
+type __VLS_ModelProps = {
+    modelValue?: any[];
 };
-type __VLS_TemplateResult = ReturnType<typeof __VLS_template>;
-declare const __VLS_component: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {
-    "update:modelValue": (...args: any[]) => void;
+type __VLS_PublicProps = __VLS_Props & __VLS_ModelProps;
+declare var __VLS_15: {}, __VLS_22: {}, __VLS_25: {}, __VLS_27: {};
+type __VLS_Slots = {} & {
+    default?: (props: typeof __VLS_15) => any;
+} & {
+    error?: (props: typeof __VLS_22) => any;
+} & {
+    default?: (props: typeof __VLS_25) => any;
+} & {
+    error?: (props: typeof __VLS_27) => any;
+};
+declare const __VLS_base: import("vue").DefineComponent<__VLS_PublicProps, {}, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {
     "file-click": (...args: any[]) => void;
     "upload-error": (...args: any[]) => void;
-}, string, import('vue').PublicProps, Readonly<__VLS_Props> & Readonly<{
-    "onUpdate:modelValue"?: ((...args: any[]) => any) | undefined;
+    "update:modelValue": (value: any[]) => void;
+}, string, import("vue").PublicProps, Readonly<__VLS_PublicProps> & Readonly<{
+    "onUpdate:modelValue"?: ((value: any[]) => any) | undefined;
     "onFile-click"?: ((...args: any[]) => any) | undefined;
     "onUpload-error"?: ((...args: any[]) => any) | undefined;
 }>, {
     label: string;
-    modelValue: any[];
     uploadData: Record<string, any>;
-}, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {}, HTMLDivElement>;
-declare const _default: __VLS_WithTemplateSlots<typeof __VLS_component, __VLS_TemplateResult["slots"]>;
+    responseField: string;
+}, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;
+declare const __VLS_export: __VLS_WithSlots<typeof __VLS_base, __VLS_Slots>;
+declare const _default: typeof __VLS_export;
 export default _default;
-type __VLS_WithTemplateSlots<T, S> = T & {
+type __VLS_WithSlots<T, S> = T & {
     new (): {
         $slots: S;
     };

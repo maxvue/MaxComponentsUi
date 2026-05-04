@@ -1,1 +1,1 @@
-{"version":3,"file":"TransitionFade.vue.d.ts","sourceRoot":"","sources":["../../src/components/TransitionFade.vue"],"names":[],"mappings":"AAKA;AA4BA,iBAAS,cAAc;WAkCT,OAAO,IAA6B;;yBAVrB,GAAG;;;;EAe/B;AACD,QAAA,IAAI,UAAU,EAAG,cAAc,sBAAsB,EAAE,OAAO,CAAC"}
+{"version":3,"file":"TransitionFade.vue.d.ts","sourceRoot":"","sources":["../../src/components/TransitionFade.vue"],"names":[],"mappings":"AAAA,QAAA,MA4BM,YAAY,+QAA4C,CAAC;wBA0B1C,OAAO,YAAY;AAAxC,wBAAyC"}

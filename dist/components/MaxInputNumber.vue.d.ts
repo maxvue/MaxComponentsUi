@@ -14,23 +14,16 @@ type __VLS_Props = {
     caution?: string | boolean | undefined;
     required?: boolean;
 };
-declare const _default: import('vue').DefineComponent<__VLS_Props, {
-    setFocus: () => void;
-}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {
+declare const __VLS_export: import("vue").DefineComponent<__VLS_Props, () => void, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {
     "update:modelValue": (...args: any[]) => void;
-}, string, import('vue').PublicProps, Readonly<__VLS_Props> & Readonly<{
+}, string, import("vue").PublicProps, Readonly<__VLS_Props> & Readonly<{
     "onUpdate:modelValue"?: ((...args: any[]) => any) | undefined;
 }>, {
     done: boolean;
     modelValue: number | null;
     caution: string | boolean;
     required: boolean;
-}, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {
-    primevueInput: ({
-        $props: import('primevue/inputnumber').InputNumberProps & import('vue').VNodeProps & import('vue').AllowedComponentProps & import('vue').ComponentCustomProps;
-        $slots: import('primevue/inputnumber').InputNumberSlots;
-        $emit: ((e: "input", event: import('primevue/inputnumber').InputNumberInputEvent) => void) & ((e: "update:modelValue", value: number) => void) & ((e: "value-change", value: number) => void) & ((e: "blur", event: import('primevue/inputnumber').InputNumberBlurEvent) => void) & ((e: "focus", event: Event) => void);
-    } & import('primevue/inputnumber').InputNumberMethods) | null;
-}, any>;
+}, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;
+declare const _default: typeof __VLS_export;
 export default _default;
 //# sourceMappingURL=MaxInputNumber.vue.d.ts.map

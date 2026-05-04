@@ -1,19 +1,19 @@
 <template>
     <div class="input-upload-file-main-div" v-bind="attrs">
-        <FileUpload 
+        <FileUpload
             ref="fileUploadRef"
-            name="file" 
-            v-bind="attrs" 
-            :disabled="attrs.disabled ?? false" 
-            :accept="attrs.accept ?? '.pdf, .jpg, .jpeg, .png, .doc, .docx'" 
-            :auto="attrs.auto ?? true" 
-            :multiple="attrs.multiple ?? true"  
-            :showCancelButton="false" 
-            :showUploadButton="attrs.showUploadButton !== undefined && attrs.showUploadButton !== false" 
-            :withCredentials="true" 
-            @error="onError" 
-            @before-send="onBeforeUpload" 
-            @upload="onUploadHandler" 
+            name="file"
+            v-bind="attrs"
+            :disabled="attrs.disabled ?? false"
+            :accept="attrs.accept ?? '.pdf, .jpg, .jpeg, .png, .doc, .docx'"
+            :auto="attrs.auto ?? true"
+            :multiple="attrs.multiple ?? true"
+            :showCancelButton="false"
+            :showUploadButton="attrs.showUploadButton !== undefined && attrs.showUploadButton !== false"
+            :withCredentials="true"
+            @error="onError"
+            @before-send="onBeforeUpload"
+            @upload="onUploadHandler"
             @select="onSelectHandler"
         >
             <template #content="{ files, uploadedFiles }">
@@ -61,7 +61,7 @@
                 </div>
             </template>
         </FileUpload>
-        
+
         <div class="file-upload-content-div" :disabled="attrs.disabled ?? false">
             <div class="files-icons" v-if="modelValue.length > 0">
                 <div v-for="(file, index) in modelValue" :key="file.id || index" class="file-icon" @click="$emit('file-click', file)">
@@ -99,7 +99,7 @@
     );
 
     const modelValue = defineModel<any[]>({ default: () => [] });
-    
+
     const files = ref<any[]>([]);
     const uploading = ref(false);
     const showError = ref(false);
@@ -113,12 +113,11 @@
     });
 
     watch(showError, (val) => {
-        if (val) {
-            setTimeout(() => {
-                showError.value = false;
-                files.value = [];
-            }, 3000);
-        }
+        if (val) setTimeout(() => {
+            showError.value = false;
+            files.value = [];
+        }, 3000);
+
     });
 
     const triggerChoose = () => {
@@ -137,14 +136,13 @@
 
     const onUploadHandler = (event: any) => {
         if (attrs.onUpload) return attrs.onUpload(event);
-        
+
         uploading.value = false;
         try {
             const response = JSON.parse(event.xhr.response);
             const fileData = props.responseField ? response[props.responseField] : response;
-            if (fileData) {
-                modelValue.value = [...modelValue.value, fileData];
-            }
+            if (fileData) modelValue.value = [...modelValue.value, fileData];
+
         } catch (e) {
             console.error('MaxInputFileUpload: Erro ao processar resposta de upload', e);
         }
@@ -159,10 +157,9 @@
     const onBeforeUpload = (event: any) => {
         if (event.xhr) {
             if (props.token) event.xhr.setRequestHeader('X-CSRF-TOKEN', props.token);
-            
-            for (const key in props.uploadData) {
-                event.formData.append(key, props.uploadData[key]);
-            }
+
+            for (const key in props.uploadData) event.formData.append(key, props.uploadData[key]);
+
 
             if (files.value.length > 0) {
                 const extension = files.value[0].name.split('.').pop();
