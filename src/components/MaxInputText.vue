@@ -31,9 +31,7 @@
 
     const isDone: Ref = ref(props.done ?? null);
 
-    const isEqual = computed(() => {
-        return typeof props.targetValue === 'string' && hasContent(props.targetValue) ? toSearchableString(props.targetValue) === toSearchableString(temp_value.value) : null;
-    });
+    const isEqual = computed(() => typeof props.targetValue === 'string' && hasContent(props.targetValue) ? toSearchableString(props.targetValue) === toSearchableString(temp_value.value) : null);
 
     const isRequiredDone = computed(() => (props.required ? hasContent(temp_value.value) : null));
 
@@ -65,7 +63,3 @@
         () => (temp_value.value = props.modelValue)
     );
 </script>
-
-<style lang="scss">
-
-</style>

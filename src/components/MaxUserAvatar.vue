@@ -1,0 +1,16 @@
+<template>
+    <Avatar :image="props.imageUrl" shape="circle" v-if="props.imageUrl" v-tooltip.top="showTooltip ? name : null" v-bind="attrs" />
+    <Avatar :label="name?.substring(0, 2).toUpperCase() ?? '' " style="background-color: #ece9fc; color: #2a1261;" shape="circle" pointer v-else v-tooltip.top="showTooltip ? name : null" v-bind="attrs"/>
+</template>
+
+<script setup lang="ts">
+    const attrs = useAttrs();
+
+    const props = withDefaults(defineProps<{
+        imageUrl?: string;
+        name?: string;
+        showTooltip?: boolean;
+    }>(), {
+        showTooltip: true
+    });
+</script>

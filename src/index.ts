@@ -30,8 +30,39 @@ export { default as MaxPhoneField } from './components/MaxPhoneField.vue';
 export { default as PhoneField } from './components/MaxPhoneField.vue';
 export { default as InputPhone } from './components/MaxPhoneField.vue';
 
-export * from './components/_primeVue';
+// Inputs
+export { default as MaxInputAutoComplete } from './components/MaxInputAutoComplete.vue';
+export { default as MaxInputAutoCompleteApi } from './components/MaxInputAutoCompleteApi.vue';
+export { default as MaxInputCep } from './components/MaxInputCep.vue';
+export { default as MaxInputCheckbox } from './components/MaxInputCheckbox.vue';
+export { default as MaxInputCoordinateDecimalLat } from './components/MaxInputCoordinateDecimalLat.vue';
+export { default as MaxInputCoordinateDecimalLng } from './components/MaxInputCoordinateDecimalLng.vue';
+export { default as MaxInputCpfCnpj } from './components/MaxInputCpfCnpj.vue';
+export { default as MaxInputDatePicker } from './components/MaxInputDatePicker.vue';
+export { default as MaxInputField } from './components/MaxInputField.vue';
+export { default as MaxInputFile } from './components/MaxInputFile.vue';
+export { default as MaxInputFileProject } from './components/MaxInputFileProject.vue';
+export { default as MaxInputFileUpload } from './components/MaxInputFileUpload.vue';
+export { default as MaxInputFileUploadBig } from './components/MaxInputFileUploadBig.vue';
+export { default as MaxInputFileUploadButton } from './components/MaxInputFileUploadButton.vue';
+export { default as MaxInputNumber } from './components/MaxInputNumber.vue';
+export { default as MaxInputPhone } from './components/MaxInputPhone.vue';
+export { default as MaxInputPhoneMail } from './components/MaxInputPhoneMail.vue';
+export { default as MaxInputRadio } from './components/MaxInputRadio.vue';
+export { default as MaxInputSearch } from './components/MaxInputSearch.vue';
+export { default as MaxInputSelect } from './components/MaxInputSelect.vue';
+export { default as MaxInputSwitch } from './components/MaxInputSwitch.vue';
+export { default as MaxInputTextArea } from './components/MaxInputTextArea.vue';
+export { default as MaxInputToggle } from './components/MaxInputToggle.vue';
+export { default as MaxInputTypeAddress } from './components/MaxInputTypeAddress.vue';
 
+// Utils / Others
+export { default as MaxMsgLabels } from './components/MaxMsgLabels.vue';
+export { default as MaxTableData } from './components/MaxTableData.vue';
+export { default as MaxTextInputFloatLabel } from './components/MaxTextInputFloatLabel.vue';
+export { default as MaxTransitionFadeLight } from './components/MaxTransitionFadeLight.vue';
+export { default as MaxTransitionUp } from './components/MaxTransitionUp.vue';
+export { default as MaxUserAvatar } from './components/MaxUserAvatar.vue';
 export const install = (app: any, options: any = {}) => {
     app.use(PrimeVue, {
         locale: options.locale || ptBR,

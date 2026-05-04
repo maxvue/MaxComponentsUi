@@ -115,6 +115,7 @@ declare global {
   const camelize: typeof import('@maxvue/max-use').camelize
   const canIterate: typeof import('@maxvue/max-use').canIterate
   const capitalize: typeof import('@maxvue/max-use').capitalize
+  const cepIsValid: typeof import('@maxvue/max-use').cepIsValid
   const chunk: typeof import('@maxvue/max-use').chunk
   const clamp: typeof import('@maxvue/max-use').clamp
   const cloneDeep: typeof import('@maxvue/max-use').cloneDeep
@@ -655,6 +656,7 @@ declare module 'vue' {
     readonly camelize: UnwrapRef<typeof import('@maxvue/max-use')['camelize']>
     readonly canIterate: UnwrapRef<typeof import('@maxvue/max-use')['canIterate']>
     readonly capitalize: UnwrapRef<typeof import('@maxvue/max-use')['capitalize']>
+    readonly cepIsValid: UnwrapRef<typeof import('@maxvue/max-use')['cepIsValid']>
     readonly chunk: UnwrapRef<typeof import('@maxvue/max-use')['chunk']>
     readonly clamp: UnwrapRef<typeof import('@maxvue/max-use')['clamp']>
     readonly cloneDeep: UnwrapRef<typeof import('@maxvue/max-use')['cloneDeep']>

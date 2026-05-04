@@ -29,8 +29,8 @@
     const attrs: any = useAttrs();
 
     interface Props {
-        value?: string;
-        modelValue?: string | undefined;
+        value?: any;
+        modelValue?: any;
         icon?: string | undefined;
         iconLeft?: string | undefined;
         iconRight?: string | undefined;
