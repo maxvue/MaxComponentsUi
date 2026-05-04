@@ -33,9 +33,7 @@
 
     const isDone: Ref = ref(props.done ?? null);
 
-    const checkDone = () => {
-        isDone.value = done.value;
-    };
+    const checkDone = () => isDone.value = done.value;
 
     const done = computed(() => {
         if (props.done !== undefined) return props.done;
@@ -61,26 +59,16 @@
         isDone.value = done.value;
     });
 
-    watch(
-        () => props.modelValue,
-        () => {
-            temp_value.value = props.modelValue;
-        }
-    );
+    watch( () => props.modelValue, () => temp_value.value = props.modelValue );
 
-    onMounted(() => {
-        temp_value.value = props.modelValue;
-    });
+    onMounted(() => temp_value.value = props.modelValue);
 
     const setFocus = () => {
         if (primevueInput.value) if (typeof primevueInput.value.focus === 'function') primevueInput.value.focus();
         else primevueInput.value.$el.focus();
-
     };
 
-    defineExpose({
-        setFocus
-    });
+    defineExpose(setFocus);
 </script>
 
 <style lang="scss">

@@ -4,6 +4,10 @@
     </div>
 </template>
 
+/**
+ * Sistema de grid flexível para organizar componentes.
+ * Utiliza flexbox com wrap e gap padronizado.
+ */
 <script setup lang="ts">
     import { useAttrs } from 'vue';
 

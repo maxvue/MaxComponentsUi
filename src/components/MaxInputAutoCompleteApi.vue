@@ -21,6 +21,10 @@
     </InputBase>
 </template>
 
+/**
+ * Componente Autocomplete que busca sugestões de uma API.
+ * Integra-se com as rotas do backend Max para busca dinâmica.
+ */
 <script setup lang="ts">
     // @ts-ignore
     const router = typeof useRouter !== 'undefined' ? useRouter() : null;
@@ -28,21 +32,37 @@
 
     const props = withDefaults(
         defineProps<{
+            /** Valor selecionado */
             modelValue: any;
+            /** Rota da API para busca */
             route: string;
+            /** Dados adicionais para enviar no corpo da requisição */
             data?: any;
+            /** Ícone opcional */
             icon?: string | undefined;
+            /** Alias para o ícone */
             i?: string | undefined;
+            /** Desabilita o campo */
             disabled?: boolean | undefined;
+            /** Ativa estilo FloatLabel */
             float?: boolean | undefined;
+            /** Mensagem de feedback (alias) */
             msg?: string | undefined;
+            /** Mensagem de feedback */
             message?: string | undefined;
+            /** Ícone da mensagem de feedback */
             iconMessage?: string | undefined;
+            /** Rótulo do campo */
             label?: string | undefined;
+            /** Estado de conclusão/validação manual */
             done?: boolean | undefined;
+            /** Mensagem ou estado de erro */
             error?: string | boolean | undefined;
+            /** Valor para comparação (opcional) */
             targetValue?: string;
+            /** Mensagem ou estado de atenção */
             caution?: string | boolean | undefined;
+            /** Define se o campo é obrigatório */
             required?: boolean;
         }>(),
         { modelValue: '', done: undefined, required: false, caution: undefined }

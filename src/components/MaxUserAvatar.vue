@@ -3,12 +3,19 @@
     <Avatar :label="name?.substring(0, 2).toUpperCase() ?? '' " style="background-color: #ece9fc; color: #2a1261;" shape="circle" pointer v-else v-tooltip.top="showTooltip ? name : null" v-bind="attrs"/>
 </template>
 
+/**
+ * Componente de avatar do usuário.
+ * Exibe a imagem do usuário ou as iniciais baseadas no nome.
+ */
 <script setup lang="ts">
     const attrs = useAttrs();
 
     const props = withDefaults(defineProps<{
+        /** URL da imagem do avatar */
         imageUrl?: string;
+        /** Nome do usuário (usado para gerar iniciais ou tooltip) */
         name?: string;
+        /** Define se exibe um tooltip com o nome ao passar o mouse */
         showTooltip?: boolean;
     }>(), {
         showTooltip: true

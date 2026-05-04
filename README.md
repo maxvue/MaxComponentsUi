@@ -66,11 +66,31 @@ Botão estilizado baseado no PrimeVue Button com customizações adicionais.
 | loading | boolean | false | Estado de carregamento |
 | variant | 'outlined' \| 'text' \| 'link' | - | Variante do botão |
 
-#### Eventos
+#### Outros Componentes
+Para uma lista completa de todos os componentes disponíveis, veja o [Catálogo de Componentes](COMPONENTS.md).
 
-| Evento | Parâmetros | Descrição |
-|--------|------------|-----------|
-| click | MouseEvent | Disparado ao clicar no botão |
+Principais categorias:
+- **Inputs:** `MaxInputText`, `MaxInputCep`, `MaxInputCpfCnpj`, `MaxInputSelect`, `MaxInputPhone`.
+- **Layout:** `Grid`, `MaxTable`.
+- **Feedback:** `Loader`, `MaxUserAvatar`, `MaxIcon`.
+
+---
+
+## Configuração Avançada
+
+A função `install` permite passar opções para o PrimeVue e para o tema Max:
+
+```typescript
+app.use(MaxComponentsUi, {
+    locale: myCustomLocale,
+    theme: {
+        preset: MyCustomPreset,
+        options: {
+            darkModeSelector: '.my-dark-class'
+        }
+    }
+})
+```
 
 ## Desenvolvimento
 

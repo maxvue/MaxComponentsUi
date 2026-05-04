@@ -4,6 +4,11 @@
     </InputBase>
 </template>
 
+/**
+ * Componente de entrada para CPF ou CNPJ.
+ * Detecta automaticamente o tipo de documento pelo tamanho ou pode ser fixado via props.
+ * Possui máscara dinâmica e validação de dígito verificador.
+ */
 <script setup lang="ts">
     import { isCpf as isCPF, isCnpj as isCNPJ } from '@maxvue/max-use';
 
@@ -11,21 +16,37 @@
 
     const props = withDefaults(
         defineProps<{
+            /** Valor do documento (apenas números) */
             modelValue: string;
+            /** Força a máscara e validação de CPF */
             cpf?: boolean;
+            /** Força a máscara e validação de CNPJ */
             cnpj?: boolean;
+            /** Ícone opcional */
             icon?: string | undefined;
+            /** Alias para o ícone */
             i?: string | undefined;
+            /** Desabilita o campo */
             disabled?: boolean | undefined;
+            /** Estilo FloatLabel */
             float?: boolean | undefined;
+            /** Mensagem de feedback (alias) */
             msg?: string | undefined;
+            /** Mensagem de feedback */
             message?: string | undefined;
+            /** Ícone da mensagem de feedback */
             iconMessage?: string | undefined;
+            /** Rótulo do campo */
             label?: string | undefined;
+            /** Estado de conclusão/validação manual */
             done?: boolean | undefined;
+            /** Mensagem ou estado de erro */
             error?: string | boolean | undefined;
+            /** Valor para comparação (opcional) */
             targetValue?: string;
+            /** Mensagem ou estado de atenção */
             caution?: string | boolean | undefined;
+            /** Define se o campo é obrigatório */
             required?: boolean;
         }>(),
         { modelValue: '', done: undefined, required: false, caution: undefined }
@@ -48,25 +69,18 @@
     };
 
     // ATUALIZA O VALOR DO INPUT COM O VALOR DO MODEL E VICE-VERSA
-    watchDebounced(
-        temp_value,
-        () => {
-            const only_numbers: string = onlyNumbers(temp_value.value);
-            if (only_numbers.length === 11 || only_numbers.length === 14) {
-                emit('update:modelValue', onlyNumbers(temp_value.value));
-                if (done.value) emit('complete', onlyNumbers(temp_value.value));
+    watchDebounced( temp_value, () => {
+        const only_numbers: string = onlyNumbers(temp_value.value);
+        if (only_numbers.length === 11 || only_numbers.length === 14) {
+            emit('update:modelValue', onlyNumbers(temp_value.value));
+            if (done.value) emit('complete', onlyNumbers(temp_value.value));
 
-            }
-        },
-        { debounce: 500 }
-    );
-
-    watch(
-        () => props.modelValue,
-        (newValue) => {
-            if (props.modelValue !== temp_value.value) temp_value.value = onlyNumbers(props.modelValue);
         }
-    );
+    }, { debounce: 500 });
+
+    watch(() => props.modelValue,() => {
+        if (props.modelValue !== temp_value.value) temp_value.value = onlyNumbers(props.modelValue);
+    });
 
     // CALCULA A MÁSCARA DO INPUT
     const maskValue = computed(() => {
@@ -118,5 +132,3 @@
         return attrs_error_message ?? 'Documento inválido';
     });
 </script>
-
-<style lang="scss" scoped></style>

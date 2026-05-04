@@ -1,79 +1,79 @@
 <template>
-    <InputBase v-bind="props" class="input-base-date-picker" :error="error_msg" :caution="caution" :done="isDone" :icon-right="icon ?? 'solar:calendar-line-duotone'" textCenter>
-        <DatePicker v-bind="attrs" dateFormat="dd/mm/yy" v-maska="maskValue" v-model="temp_value" @blur="checkDone()" />
+    <InputBase v-bind="props" class="input-base-date-picker" :error="errorMessage" :caution="isCaution" :done="isDone" :icon-right="icon ?? 'solar:calendar-line-duotone'" textCenter>
+        <DatePicker v-bind="attrs" dateFormat="dd/mm/yy" v-maska="maskValue" v-model="internalDate" @blur="validate" />
     </InputBase>
 </template>
 
 <script setup lang="ts">
-    const attrs: any = useAttrs();
+    import { useDateFormat } from '@vueuse/core';
 
+    const attrs: any = useAttrs();
     const props = withDefaults(
         defineProps<{
-            modelValue: string | Date;
-            icon?: string | undefined;
-            i?: string | undefined;
-            disabled?: boolean | undefined;
-            float?: boolean | undefined;
-            msg?: string | undefined;
-            message?: string | undefined;
-            iconMessage?: string | undefined;
-            label?: string | undefined;
-            done?: boolean | undefined;
-            error?: string | boolean | undefined;
-            targetValue?: string;
-            caution?: string | boolean | undefined;
+            icon?: string;
+            label?: string;
             required?: boolean;
+            disabled?: boolean;
+            done?: boolean;
+            error?: string | boolean;
+            caution?: string | boolean;
         }>(),
-        { modelValue: '', done: undefined, required: false, caution: undefined }
+        { required: false }
     );
 
-    const emit = defineEmits(['update:modelValue']);
+    const modelValue = defineModel<string | Date>({ default: '' });
+    const internalDate = ref<Date | null>(null);
+    const hasBeenTouched = ref(false);
 
-    const maskValue = computed(() => {
-        return '##/##/####';
+    // Máscara para o input de texto do DatePicker
+    const maskValue = '##/##/####';
+
+    // Sincroniza modelValue -> internalDate
+    watch(modelValue, (val) => {
+        if (!val) {
+            internalDate.value = null;
+            return;
+        }
+        const dateObj = val instanceof Date ? val : new Date(val);
+        if (!isNaN(dateObj.getTime())) {
+            // Só atualiza se for realmente diferente para evitar loops
+            if (!internalDate.value || internalDate.value.getTime() !== dateObj.getTime()) internalDate.value = dateObj;
+
+        } else internalDate.value = null;
+
+    }, { immediate: true });
+
+    // Sincroniza internalDate -> modelValue
+    watch(internalDate, (newDate) => {
+        if (!newDate) {
+            if (modelValue.value !== '') modelValue.value = '';
+            return;
+        }
+        const formatted = useDateFormat(newDate, 'YYYY-MM-DD HH:mm:ss').value;
+        if (formatted !== modelValue.value) modelValue.value = formatted;
+
     });
 
-    const model_formatted: Ref = computed(() => (props.modelValue ? useDateFormat(props.modelValue, 'YYYY-MM-DD HH:mm:ss').value : ''));
-
-    const temp_value: Ref = ref(hasContent(model_formatted.value) ? new Date(model_formatted.value) : '');
-    const temp_formatted: Ref = computed(() => (hasContent(temp_value.value) ? useDateFormat(temp_value.value, 'YYYY-MM-DD HH:mm:ss').value : ''));
-
-    const isDone: Ref = ref(props.done ?? null);
-
-    const checkDone = () => {
-        isDone.value = done.value;
+    const validate = () => {
+        hasBeenTouched.value = true;
     };
 
-    const done = computed(() => {
+    const isDone = computed(() => {
         if (props.done !== undefined) return props.done;
-        if (props.required) return hasContent(temp_formatted.value);
-        return null;
+        return internalDate.value !== null;
     });
 
-    const caution = computed(() => {
+    const isCaution = computed(() => {
         if (props.caution !== undefined) return props.caution;
-        if (temp_value.value === '' && !props.required) return false;
-        return done.value === false;
+        if (!hasBeenTouched.value && !modelValue.value) return false;
+        return props.required && !internalDate.value;
     });
 
-    const error_msg = computed(() => {
-        if (!caution.value) return null;
-        const attrs_error_message = attrs.errMsg ?? attrs.error_message ?? attrs.error_msg ?? null;
-        if (props.required && temp_value.value === '') return attrs_error_message ?? 'Data é obrigatória';
-        return attrs_error_message ?? 'Data inválida';
-    });
+    const errorMessage = computed(() => {
+        if (typeof props.error === 'string') return props.error;
+        if (isCaution.value) return (attrs.errMsg || attrs.error_message || 'Data é obrigatória');
 
-    watch(
-        temp_value,
-        () => {
-            if (model_formatted.value !== temp_formatted.value) emit('update:modelValue', temp_formatted.value);
-            isDone.value = done.value;
-        },
-        { immediate: true }
-    );
-
-    watch(model_formatted, () => {
-        if (model_formatted.value !== temp_formatted.value) temp_value.value = hasContent(model_formatted.value) ? new Date(model_formatted.value) : '';
+        return null;
     });
 </script>
 
@@ -82,3 +82,4 @@
         transform: translateX(-10px);
     }
 </style>
+

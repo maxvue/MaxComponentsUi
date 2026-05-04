@@ -22,7 +22,16 @@
     </Button>
 </template>
 
+/**
+ * Componente de botão altamente customizável que estende o Button do PrimeVue.
+ *
+ * Suporta ícones em ambos os lados, badges numéricos, estados de carregamento animados
+ * e contagem regressiva integrada.
+ *
+ * @slot default Conteúdo personalizado dentro do botão.
+ */
 <script setup lang="ts">
+    /** Atributos capturados via v-bind, incluindo props do PrimeVue Button */
     const attrs: any = useAttrs();
     const valueBadge = computed(() => attrs['number'] ?? attrs.badge ?? false);
     const icon_left = computed(() => attrs.icon ?? attrs.iconLeft ?? attrs['icon-left'] ?? attrs.icon_left ?? null);

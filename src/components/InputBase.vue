@@ -1,23 +1,23 @@
 <template>
-    <FloatLabel variant="on" class="max-input" :class="{ float: attrs.float !== undefined, done: done, caution: caution || done === false }">
+    <FloatLabel variant="on" class="max-input" :class="{ float: attrs.float !== undefined, done: done, caution: caution || done === false, 'text-center': textCenter }">
         <IconField>
             <InputIcon v-if="icon ?? iconLeft ?? i">
                 <MaxIcon :icon="icon ?? iconLeft ?? i" :size="1.2" />
             </InputIcon>
             <slot></slot>
             <InputIcon v-if="iconRight">
-                <MaxIcon :icon="iconRight" :size="1.2"/>
+                <MaxIcon :icon="iconRight" :size="1.2" />
             </InputIcon>
         </IconField>
 
         <label for="in_label" v-if="label" class="max-input-label active">{{ label }}</label>
-        <Message size="small" :class="`input-message ${done === false ? 'error' : ''}`" variant="simple" v-if="message">
+        <Message size="small" :class="`input-message ${isError ? 'error' : ''}`" variant="simple" v-if="displayMessage">
             <template #icon>
                 <MaxIcon :icon="iconMessage" v-if="iconMessage" :size="0.9" />
             </template>
-            {{ message }}
+            {{ displayMessage }}
         </Message>
-        <div v-else style="height: 16px; width: 100%;"></div>
+        <div v-else class="message-spacer"></div>
         <div class="is-done" v-if="done">
             <MaxIcon icon="lets-icons:check-fill" :size="0.9" />
         </div>
@@ -28,29 +28,59 @@
 <script setup lang="ts">
     const attrs: any = useAttrs();
 
+    /**
+     * Propriedades base para componentes de entrada (inputs).
+     * Este componente serve como wrapper para padronizar o layout, ícones e mensagens.
+     */
     interface Props {
+        /** Valor do input (suporta v-model) */
         value?: any;
+        /** Valor do input para v-model no Vue 3 */
         modelValue?: any;
+        /** Ícone principal (ex: 'mdi:user') */
         icon?: string | undefined;
+        /** Ícone posicionado à esquerda */
         iconLeft?: string | undefined;
+        /** Ícone posicionado à direita (ex: ícone de carregamento ou olho para senha) */
         iconRight?: string | undefined;
+        /** Alias para o ícone principal */
         i?: string | undefined;
+        /** Estado desabilitado do componente */
         disabled?: boolean | undefined;
+        /** Ativa o estilo de label flutuante (FloatLabel) */
         float?: boolean | undefined;
+        /** Mensagem de feedback ou instrução (alias para message) */
         msg?: string | undefined;
+        /** Mensagem de feedback, erro ou aviso exibida abaixo do input */
         message?: string | undefined;
+        /** Ícone exibido ao lado da mensagem de feedback */
         iconMessage?: string | undefined;
+        /** Rótulo (label) exibido acima ou dentro do campo */
         label?: string | undefined;
+        /** Define se o campo foi preenchido corretamente (exibe ícone de check) */
         done?: boolean | undefined;
+        /** Mensagem de erro ou estado de erro (exibe em destaque) */
         error?: string | boolean | undefined;
+        /** Mensagem de atenção ou estado de alerta (exibe em laranja) */
         caution?: string | boolean | undefined;
+        /** Indica se o preenchimento deste campo é obrigatório (exibe asterisco) */
         required?: boolean | undefined;
+        /** Alinha o texto do input ao centro */
+        textCenter?: boolean | undefined;
     }
 
-    const props = withDefaults(defineProps<Props>(), { value: '' });
+    const props = withDefaults(defineProps<Props>(), {
+        value: '',
+        textCenter: false
+    });
 
-    const message = computed(() => {
-        if (hasContent(props.message ?? props.msg)) return props.message ?? props.msg;
+    const isError = computed(() => {
+        return (typeof props.error === 'string' && hasContent(props.error)) || props.error === true || props.done === false;
+    });
+
+    const displayMessage = computed(() => {
+        const mainMsg = props.message ?? props.msg;
+        if (hasContent(mainMsg)) return mainMsg;
         if (typeof props.error === 'string' && hasContent(props.error)) return props.error;
         if (typeof props.caution === 'string' && hasContent(props.caution)) return props.caution;
         return false;
@@ -75,6 +105,11 @@
             }
         }
 
+        .message-spacer {
+            height: 16px;
+            width: 100%;
+        }
+
         .required {
             position: absolute;
             top: 3px;
@@ -87,6 +122,12 @@
             top: 3px;
             right: 5px;
             color: #16a34a;
+        }
+
+        &.text-center {
+            input {
+                text-align: center !important;
+            }
         }
 
         &.caution {
@@ -112,7 +153,7 @@
             }
 
             &.error {
-                color: darkorange !important;
+                color: darkorange !important; // Mantido por consistência, mas o nome é erro.
             }
         }
     }

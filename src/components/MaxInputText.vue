@@ -4,24 +4,42 @@
     </InputBase>
 </template>
 
+/**
+ * Componente de entrada de texto padrão.
+ * Oferece suporte a validação de obrigatoriedade e comparação de valores.
+ */
 <script setup lang="ts">
     const attrs: any = useAttrs();
 
     const props = withDefaults(
         defineProps<{
+            /** Valor atual do input */
             modelValue: string;
+            /** Ícone opcional (ex: 'mdi:email') */
             icon?: string | undefined;
+            /** Alias para o ícone */
             i?: string | undefined;
+            /** Desabilita o campo */
             disabled?: boolean | undefined;
+            /** Ativa estilo FloatLabel */
             float?: boolean | undefined;
+            /** Mensagem de feedback (alias) */
             msg?: string | undefined;
+            /** Mensagem de feedback */
             message?: string | undefined;
+            /** Ícone da mensagem de feedback */
             iconMessage?: string | undefined;
+            /** Rótulo do campo */
             label?: string | undefined;
+            /** Estado de conclusão/validação manual */
             done?: boolean | undefined;
+            /** Mensagem ou estado de erro */
             error?: string | boolean | undefined;
+            /** Valor para comparação (valida se o input é igual a este valor) */
             targetValue?: string;
+            /** Mensagem ou estado de atenção */
             caution?: string | boolean | undefined;
+            /** Define se o campo é obrigatório */
             required?: boolean;
         }>(),
         { modelValue: '', done: undefined, required: false, caution: undefined }

@@ -1,32 +1,34 @@
 <template>
     <div class="tabela-main-div">
-        <DataTable v-model:expandedRows="expandedRows" id="SectionDashboardWidgetDataTable" v-bind="attrs" v-if="!attrs.loading" ref="element_ref">
+        <DataTable v-model:expandedRows="expandedRows" v-bind="attrs" v-if="!attrs.loading">
             <slot></slot>
             <template #expansion="slotProps">
                 <slot name="expansion" v-bind="slotProps">
                 </slot>
             </template>
-
         </DataTable>
-        <InternalLoading v-else msg="Carregando integradores" />
+        <InternalLoading v-else :msg="loadingMessage" />
     </div>
 </template>
 
+/**
+ * Componente de tabela estendido do PrimeVue DataTable.
+ * Aplica estilos personalizados do ecossistema Max e simplifica o uso de expansão de linhas.
+ */
 <script setup lang="ts">
-
     const attrs = useAttrs();
     const props = defineProps({
-        modelValue: { default: '' }
-    });
-    const expandedRows: Ref = ref(props.modelValue);
-
-    watch(
-        () => props.modelValue,
-        (newValue) => {
-            expandedRows.value = newValue;
+        /** Mensagem exibida durante o carregamento */
+        loadingMessage: {
+            type: String,
+            default: 'Carregando dados...'
         }
-    );
+    });
+
+    /** Linhas expandidas na tabela (suporta v-model) */
+    const expandedRows = defineModel<any[]>({ default: () => [] });
 </script>
+
 
 <style lang="scss">
     .tabela-main-div {

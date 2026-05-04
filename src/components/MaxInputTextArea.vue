@@ -4,19 +4,25 @@
     </InputBase>
 </template>
 
+/**
+ * Componente de área de texto multi-linha.
+ * Suporta redimensionamento automático e integração com InputBase.
+ */
 <script setup lang="ts">
     const attrs = useAttrs();
 
     const props = withDefaults(
         defineProps<{
+            /** Valor do texto */
             modelValue: string;
+            /** Estado de conclusão/validação */
             done?: boolean;
         }>(),
         { modelValue: '' }
     );
 
     const isDone = ref(props.done ?? null);
-    
+
     const checkDone = () => {
         isDone.value = props.done ?? null;
     };
@@ -33,16 +39,6 @@
     );
 
     watch(() => props.modelValue, (val) => temp_value.value = val);
-
-    const countLines = computed(() => {
-        const min_linest = attrs.minLines ? Number(attrs.minLines) : 1;
-        if (!temp_value.value || temp_value.value.length === 0) return min_linest;
-
-        const lines = temp_value.value.split(/\r\n|\r|\n/).length > min_linest ? temp_value.value.split(/\r\n|\r|\n/).length : min_linest;
-        return lines > 13 ? 13 : lines;
-    });
-
-    const rows = computed(() => attrs.numLines ?? attrs.rows ?? countLines.value);
 </script>
 
 <style lang="scss">

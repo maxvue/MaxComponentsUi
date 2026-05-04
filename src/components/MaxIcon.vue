@@ -2,18 +2,31 @@
     <div class="max-icon-div" v-html="iconData" :style="{ width: size, height: size }"></div>
 </template>
 
+/**
+ * Componente de ícone padronizado.
+ * Busca ícones do ecossistema Iconify e os exibe como SVG.
+ * Possui sistema de cache local para performance.
+ */
 <script setup lang="ts">
     import { getCached } from '../helpers/getCached';
     import { setCached } from '../helpers/setCached';
 
     const props = defineProps<{
+        /** Nome do ícone (ex: 'mdi:home') */
         icon?: string;
+        /** Alias para o nome do ícone */
         i?: string;
+        /** Rotação do ícone em graus */
         rotate?: number;
+        /** Inversão do ícone */
         flip?: 'horizontal' | 'vertical' | 'h' | 'v' | 'x' | 'y' | 'xy';
+        /** Tamanho do ícone (em px ou multiplicador) */
         size?: string | number;
+        /** Alias para o tamanho */
         scale?: string | number;
+        /** Largura específica */
         width?: string | number;
+        /** Altura específica */
         height?: string | number;
     }>();
 

@@ -33,13 +33,17 @@
     </div>
 </template>
 
+/**
+ * Componente visualizador de PDF.
+ * Exibe um modal em tela cheia com ferramentas de zoom e paginação.
+ */
 <script setup lang="ts">
-
     import VuePdfEmbed from 'vue-pdf-embed';
 
     const { width: screen_width, height: screen_height } = useWindowSize();
 
     const props = defineProps({
+        /** URL ou fonte do arquivo PDF */
         file: { default: '' }
     });
 

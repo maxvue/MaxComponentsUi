@@ -27,6 +27,10 @@
     </InputBase>
 </template>
 
+/**
+ * Componente de entrada para telefone internacional.
+ * Suporta seleção de país, máscara automática baseada no DDI e detecção de nono dígito para o Brasil.
+ */
 <script setup lang="ts">
     import { watchDebounced } from '@vueuse/core';
 
@@ -34,7 +38,9 @@
 
     const props = withDefaults(
         defineProps<{
+            /** Valor do telefone (incluindo DDI, apenas números) */
             modelValue: string;
+            /** Lista personalizada de países [{ name, value (DDI), sigla }] */
             countries?: any[];
         }>(),
         { modelValue: '' }
@@ -62,60 +68,51 @@
     });
 
     const { ctrl, v } = useMagicKeys();
-    watch(
-        () => [ctrl.value, v.value],
-        () => {
-            if (ctrl.value && v.value && onFocus.value) {
-                noMask.value = true;
-                setTimeout(() => {
-                    noMask.value = false;
-                }, 30);
-            }
+    watch( () => [ctrl.value, v.value], () => {
+        if (ctrl.value && v.value && onFocus.value) {
+            noMask.value = true;
+            setTimeout(() => {
+                noMask.value = false;
+            }, 30);
         }
-    );
+    });
 
     const item_selected = computed(() => countryOptions.value.find((item: any) => item.value === country.value.value) ?? null);
 
-    const onlyNumbersStr = (str: string) => {
-        return str ? String(str).replace(/\D/g, '') : '';
-    };
+    const onlyNumbersStr = (str: string) => str ? String(str).replace(/\D/g, '') : '';
 
-    watch(
-        () => props.modelValue,
-        () => {
-            if (!props.modelValue?.length || props.modelValue?.length === 0) {
-                phone.value = '';
-                return;
-            }
-            const model_value = onlyNumbersStr(props.modelValue);
-            country.value = { value: parseInt(model_value.substring(0, 1)) };
+    watch(() => props.modelValue, () => {
+        if (!props.modelValue?.length || props.modelValue?.length === 0) {
+            phone.value = '';
+            return;
+        }
+        const model_value = onlyNumbersStr(props.modelValue);
+        country.value = { value: parseInt(model_value.substring(0, 1)) };
 
+        if (item_selected.value) {
+            country.value = item_selected.value;
+            phone.value = model_value.substring(1);
+            return;
+        }
+
+        if (props.modelValue?.length > 1) {
+            country.value = { value: parseInt(model_value.substring(0, 2)) };
             if (item_selected.value) {
                 country.value = item_selected.value;
-                phone.value = model_value.substring(1);
+                phone.value = model_value.substring(2);
                 return;
             }
-
-            if (props.modelValue?.length > 1) {
-                country.value = { value: parseInt(model_value.substring(0, 2)) };
-                if (item_selected.value) {
-                    country.value = item_selected.value;
-                    phone.value = model_value.substring(2);
-                    return;
-                }
+        }
+        if (props.modelValue?.length > 2) {
+            country.value = { value: parseInt(model_value.substring(0, 3)) };
+            if (item_selected.value) {
+                country.value = item_selected.value;
+                phone.value = model_value.substring(3);
+                return;
             }
-            if (props.modelValue?.length > 2) {
-                country.value = { value: parseInt(model_value.substring(0, 3)) };
-                if (item_selected.value) {
-                    country.value = item_selected.value;
-                    phone.value = model_value.substring(3);
-                    return;
-                }
-            }
-            country.value = { value: 55, sigla: 'br' };
-        },
-        { immediate: true }
-    );
+        }
+        country.value = { value: 55, sigla: 'br' };
+    }, { immediate: true });
 
     const temp_value = computed(() => country.value.value + onlyNumbersStr(phone.value));
     const only_numbers = computed(() => onlyNumbersStr(temp_value.value));

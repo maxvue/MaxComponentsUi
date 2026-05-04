@@ -48,14 +48,22 @@
     </InputBase>
 </template>
 
+/**
+ * Componente de seleção (dropdown).
+ * Suporta opções simples, agrupadas e carregamento dinâmico via callback.
+ */
 <script setup lang="ts">
     const attrs: any = useAttrs();
 
     const props = withDefaults(
         defineProps<{
+            /** Valor selecionado */
             modelValue: any;
+            /** Lista de opções simples [{ name, value, icon, sub_label }] */
             options?: any[];
+            /** Lista de opções agrupadas [{ label, items: [] }] */
             groupOptions?: any[];
+            /** Função assíncrona para carregar opções ao abrir o select */
             loadOptions?: () => Promise<any[]>;
         }>(),
         { modelValue: null }

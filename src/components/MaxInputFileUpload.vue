@@ -1,11 +1,25 @@
 <template>
     <div class="input-upload-file-main-div" v-bind="attrs">
-        <FileUpload name="file" v-bind="attrs" :disabled="attrs.disabled ?? false" :accept="attrs.accept ?? '.pdf, .jpg, .jpeg, .png, .doc, .docx'" :auto="attrs.auto ?? true" :multiple="attrs.multiple ?? true"  :showCancelButton="false" :showUploadButton="attrs.showUploadButton !== undefined && attrs.showUploadButton !== false" :withCredentials="true" @error="onError" @before-send="onBeforeUpload" @upload="attrs.onUpload ?? attrs.upload ?? onUpload" @select="attrs.onSelect ?? attrs.select ?? onSelect">
+        <FileUpload 
+            ref="fileUploadRef"
+            name="file" 
+            v-bind="attrs" 
+            :disabled="attrs.disabled ?? false" 
+            :accept="attrs.accept ?? '.pdf, .jpg, .jpeg, .png, .doc, .docx'" 
+            :auto="attrs.auto ?? true" 
+            :multiple="attrs.multiple ?? true"  
+            :showCancelButton="false" 
+            :showUploadButton="attrs.showUploadButton !== undefined && attrs.showUploadButton !== false" 
+            :withCredentials="true" 
+            @error="onError" 
+            @before-send="onBeforeUpload" 
+            @upload="onUploadHandler" 
+            @select="onSelectHandler"
+        >
             <template #content="{ files, uploadedFiles }">
-                <div @click.stop="openFolder" class="label-file-upload" v-if="(files.length > 0 || uploadedFiles.length > 0) && !uploading && !show_error && (attrs.uploading === false || attrs.uploading === undefined)">
+                <div @click.stop="triggerChoose" class="label-file-upload" v-if="(files.length > 0 || uploadedFiles.length > 0) && !uploading && !showError && (attrs.uploading === false || attrs.uploading === undefined)">
                     <slot>
-                        <span class="text" v-if="attrs.disabled !== undefined && attrs.disabled !== false">{{ attrs['label-disabled'] ?? attrs.labelDisabled ?? attrs.label_disabled ?? label }}</span>
-                        <span class="text" v-else>{{ label ?? '' }}</span>
+                        <span class="text">{{ displayLabel }}</span>
                     </slot>
                 </div>
                 <div v-else-if="uploading || attrs.uploading">
@@ -14,19 +28,18 @@
                         <div>Carregando arquivos</div>
                     </div>
                 </div>
-                <div v-else-if="show_error">
+                <div v-else-if="showError">
                     <slot name="error">
                         Ocorreu um erro ao fazer o upload.
                     </slot>
                 </div>
             </template>
             <template #empty>
-                <div @click.stop="openFolder" class="label-file-upload" v-if="files.length === 0 && (attrs.uploading === false || attrs.uploading === undefined)">
+                <div @click.stop="triggerChoose" class="label-file-upload" v-if="files.length === 0 && (attrs.uploading === false || attrs.uploading === undefined)">
                     <slot>
-                        <span class="text" v-if="attrs.disabled !== undefined && attrs.disabled !== false">{{ attrs['label-disabled'] ?? attrs.labelDisabled ?? attrs.label_disabled ?? label }}</span>
-                        <span class="text" v-else>{{ label ?? '' }}</span>
+                        <span class="text">{{ displayLabel }}</span>
                     </slot>
-                    <slot name="error" v-if="show_error">
+                    <slot name="error" v-if="showError">
                         Ocorreu um erro ao fazer o upload.
                     </slot>
                 </div>
@@ -34,9 +47,9 @@
             <template #chooseicon>
                 <div class="chose-icon-div">
                     <Icon icon="line-md:loading-loop" size="2" v-if="uploading"/>
-                    <Icon icon="quill:folder-open" size="2" :id="`btn_open_${id}`" v-else />
+                    <Icon icon="quill:folder-open" size="2" v-else />
                 </div>
-            </template>'
+            </template>
             <template #uploadicon>
                 <div class="chose-icon-div" v-tooltip="'Enviar arquivo'">
                     <Icon icon="ic:baseline-file-upload" size="2" />
@@ -47,21 +60,14 @@
                     <Icon icon="icons8:cancel" size="2" />
                 </div>
             </template>
-            <template #fileremoveicon>
-                <div>
-                    ok
-                </div>
-            </template>
-            <template #filelabel>
-                <div>ok2</div>
-            </template>
         </FileUpload>
+        
         <div class="file-upload-content-div" :disabled="attrs.disabled ?? false">
-            <div class="files-icons" v-if="files_uploaded.length > 0">
-                <div v-for="(file, index) in files_uploaded" :key="file.id" class="file-icon" @click="$emit('file-click', file)">
-                    <icon i="ph:file-pdf-light" v-if="extension(file?.file_name) === 'pdf'" size="1.8" p0/>
-                    <icon i="ph:file-jpg-light" v-if="extension(file?.file_name) === 'jpg' || file?.file_name?.split('.')?.pop() === 'jpeg'" size="1.8" p0 />
-                    <icon i="ph:file-png-light" v-if="extension(file?.file_name) === 'png'" size="1.8" />
+            <div class="files-icons" v-if="modelValue.length > 0">
+                <div v-for="(file, index) in modelValue" :key="file.id || index" class="file-icon" @click="$emit('file-click', file)">
+                    <icon i="ph:file-pdf-light" v-if="getFileExtension(file?.file_name) === 'pdf'" size="1.8" p0/>
+                    <icon i="ph:file-jpg-light" v-if="['jpg', 'jpeg'].includes(getFileExtension(file?.file_name))" size="1.8" p0 />
+                    <icon i="ph:file-png-light" v-if="getFileExtension(file?.file_name) === 'png'" size="1.8" />
                     <icon i="fa:check-circle" class="file-check" size="0.7" />
                     <img :src="file?.thumbnail ? `/media/thumbnails/${file.thumbnail}` : file?.src" alt="Image" v-show="!file.file_name" />
                 </div>
@@ -69,71 +75,83 @@
         </div>
     </div>
 </template>
+
 <script setup lang="ts">
+    /**
+     * Componente avançado para upload de arquivos.
+     * Suporta múltiplos arquivos, pré-visualização (thumbnails), progresso de upload e integração com backend.
+     */
     const attrs: any = useAttrs();
+    const fileUploadRef = ref<any>(null);
 
     const props = withDefaults(
         defineProps<{
-            modelValue: any[];
+            /** Token CSRF para autenticação no upload */
             token?: string;
+            /** Dados adicionais para enviar via FormData no upload */
             uploadData?: Record<string, any>;
+            /** Rótulo descritivo do campo */
             label?: string;
+            /** Campo da resposta da API que contém os dados do arquivo (vazio para usar a resposta completa) */
+            responseField?: string;
         }>(),
-        { modelValue: () => [], uploadData: () => ({}), label: '' }
+        { uploadData: () => ({}), label: '', responseField: 'file' }
     );
 
-    const id: string = Random();
-    const files: Ref = ref([]);
-    const label = ref(props.label);
+    const modelValue = defineModel<any[]>({ default: () => [] });
+    
+    const files = ref<any[]>([]);
     const uploading = ref(false);
-    const show_error = ref(false);
+    const showError = ref(false);
 
-    const emit = defineEmits(['update:modelValue', 'file-click', 'upload-error']);
+    const emit = defineEmits(['file-click', 'upload-error']);
 
-    watch(show_error, () => {
-        if (show_error.value) setTimeout(() => {
-            show_error.value = false;
-            files.value = [];
-        }, 3000);
+    const displayLabel = computed(() => {
+        const isDisabled = attrs.disabled !== undefined && attrs.disabled !== false;
+        if (isDisabled) return attrs['label-disabled'] ?? attrs.labelDisabled ?? attrs.label_disabled ?? props.label;
+        return props.label;
     });
 
-    const files_uploaded: Ref = ref(props.modelValue);
-
-    watch(
-        () => props.modelValue,
-        () => {
-            files_uploaded.value = props.modelValue;
+    watch(showError, (val) => {
+        if (val) {
+            setTimeout(() => {
+                showError.value = false;
+                files.value = [];
+            }, 3000);
         }
-    );
+    });
 
-    watch(
-        files_uploaded,
-        () => {
-            emit('update:modelValue', files_uploaded.value);
-        },
-        { deep: true }
-    );
+    const triggerChoose = () => {
+        if (fileUploadRef.value) {
+            // Tenta disparar o seletor de arquivos através da API do PrimeVue ou fallback
+            const chooseButton = fileUploadRef.value.$el.querySelector('.p-fileupload-choose');
+            chooseButton?.click();
+        }
+    };
 
-    const onSelect = (event: any) => {
+    const onSelectHandler = (event: any) => {
+        if (attrs.onSelect) return attrs.onSelect(event);
         uploading.value = true;
         files.value = event.files;
     };
 
-    const openFolder = () => {
-        document.getElementById(`btn_open_${id}`)?.parentElement?.click();
-    };
-
-    const onUpload = (event: any) => {
+    const onUploadHandler = (event: any) => {
+        if (attrs.onUpload) return attrs.onUpload(event);
+        
         uploading.value = false;
-        label.value = props.label ?? '';
         try {
-            const serverResponse = JSON.parse(event.xhr.response);
-            if(serverResponse.file) files_uploaded.value.push(serverResponse.file);
-        } catch {}
+            const response = JSON.parse(event.xhr.response);
+            const fileData = props.responseField ? response[props.responseField] : response;
+            if (fileData) {
+                modelValue.value = [...modelValue.value, fileData];
+            }
+        } catch (e) {
+            console.error('MaxInputFileUpload: Erro ao processar resposta de upload', e);
+        }
     };
 
     const onError = (event: any) => {
-        show_error.value = true;
+        showError.value = true;
         uploading.value = false;
         emit('upload-error', event);
     };
@@ -141,20 +159,21 @@
     const onBeforeUpload = (event: any) => {
         if (event.xhr) {
             if (props.token) event.xhr.setRequestHeader('X-CSRF-TOKEN', props.token);
+            
+            for (const key in props.uploadData) {
+                event.formData.append(key, props.uploadData[key]);
+            }
 
-
-            for (const key in props.uploadData) event.formData.append(key, props.uploadData[key]);
-
-
-            if (files.value.length > 0) event.formData.append('extension', files.value[0].name.split('.').pop());
-
+            if (files.value.length > 0) {
+                const extension = files.value[0].name.split('.').pop();
+                event.formData.append('extension', extension);
+            }
         }
     };
 
-    const extension = (fileName: string) => {
-        return fileName ? fileName.split('.').pop()?.toLowerCase() : '';
-    };
+    const getFileExtension = (fileName: string) => fileName ? fileName.split('.').pop()?.toLowerCase() : '';
 </script>
+
 <style lang="scss">
     .input-upload-file-main-div {
         &:not(.no-style) {
@@ -224,17 +243,7 @@
                     .label-file-upload {
                         font-weight: 400;
                         color: var(--background-400);
-                    }
-                }
-
-                &[disabled='false'] {
-                    .label-file-upload {
-                        font-weight: 400;
-                        color: var(--background-600);
-
-                        &:hover {
-                            color: var(--blue-700) !important;
-                        }
+                        cursor: not-allowed;
                     }
                 }
 
@@ -244,6 +253,7 @@
                     place-items: center start !important;
                     height: auto;
                     color: var(--background-600);
+                    cursor: pointer;
 
                     &:hover {
                         color: var(--blue-700) !important;
@@ -309,7 +319,7 @@
                 right: 0;
                 display: grid;
                 width: auto;
-
+                pointer-events: none; // Permite clicar no botão de upload por baixo se necessário
 
                 .files-icons {
                     display: flex;
@@ -317,6 +327,7 @@
                     gap: 18px;
                     padding: 0 10px;
                     height: 30px;
+                    pointer-events: auto;
 
                     .icon-div {
                         height: calc(100% - 20px);
@@ -331,6 +342,7 @@
                         display: grid;
                         gap: 0;
                         place-items: center;
+                        cursor: pointer;
 
                         &:hover {
                             .icon-div {
@@ -340,14 +352,6 @@
                                     color: var(--green-b-800) !important;
                                 }
                             }
-
-                            .file-size {
-                                color: var(--blue-600) !important;
-                            }
-                        }
-
-                        .icon-div {
-                            height: 30px;
                         }
 
                         .file-check {
@@ -358,22 +362,9 @@
                             width: 16px;
                             height: 16px;
                         }
-
-                        .file-size {
-                            font-size: 9px;
-                            color: var(--background-600);
-                            text-align: center;
-                            width: 100%;
-                        }
                     }
                 }
             }
-        }
-
-        .empty-file-upload {
-            top: 0;
-            width: 100%;
-            height: 100%;
         }
 
         .p-fileupload-highlight {
