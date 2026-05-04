@@ -1,6 +1,6 @@
 {
     "name": "@maxvue/max-components-ui",
-    "version": "1.0.12",
+    "version": "1.0.13",
     "description": "Biblioteca de componentes Vue baseada em PrimeVue",
     "main": "./dist/index.umd.js",
     "module": "./dist/index.es.js",
