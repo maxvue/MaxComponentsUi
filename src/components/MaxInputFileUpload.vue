@@ -65,10 +65,10 @@
         <div class="file-upload-content-div" :disabled="attrs.disabled ?? false">
             <div class="files-icons" v-if="modelValue.length > 0">
                 <div v-for="(file, index) in modelValue" :key="file.id || index" class="file-icon" @click="$emit('file-click', file)">
-                    <icon i="ph:file-pdf-light" v-if="getFileExtension(file?.file_name) === 'pdf'" size="1.8" p0/>
-                    <icon i="ph:file-jpg-light" v-if="['jpg', 'jpeg'].includes(getFileExtension(file?.file_name))" size="1.8" p0 />
-                    <icon i="ph:file-png-light" v-if="getFileExtension(file?.file_name) === 'png'" size="1.8" />
-                    <icon i="fa:check-circle" class="file-check" size="0.7" />
+                    <Icon icon="ph:file-pdf-light" v-if="getFileExtension(file?.file_name || '') === 'pdf'" size="1.8" p0/>
+                    <Icon icon="ph:file-jpg-light" v-if="['jpg', 'jpeg'].includes(getFileExtension(file?.file_name || ''))" size="1.8" p0 />
+                    <Icon icon="ph:file-png-light" v-if="getFileExtension(file?.file_name || '') === 'png'" size="1.8" />
+                    <Icon icon="fa:check-circle" class="file-check" size="0.7" />
                     <img :src="file?.thumbnail ? `/media/thumbnails/${file.thumbnail}` : file?.src" alt="Image" v-show="!file.file_name" />
                 </div>
             </div>
@@ -168,7 +168,7 @@
         }
     };
 
-    const getFileExtension = (fileName: string) => fileName ? fileName.split('.').pop()?.toLowerCase() : '';
+    const getFileExtension = (fileName: string) => (fileName ? fileName.split('.').pop()?.toLowerCase() : '') || '';
 </script>
 
 <style lang="scss">

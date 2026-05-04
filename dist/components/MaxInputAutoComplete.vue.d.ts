@@ -20,10 +20,10 @@ declare const __VLS_export: import("vue").DefineComponent<__VLS_Props, {}, {}, {
 }, string, import("vue").PublicProps, Readonly<__VLS_Props> & Readonly<{
     "onUpdate:modelValue"?: ((...args: any[]) => any) | undefined;
 }>, {
-    done: boolean;
     modelValue: any;
-    caution: string | boolean;
+    done: boolean;
     required: boolean;
+    caution: string | boolean;
     options: Record<string, any>[];
 }, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;
 declare const _default: typeof __VLS_export;

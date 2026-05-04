@@ -31,8 +31,8 @@ declare const __VLS_base: import("vue").DefineComponent<__VLS_PublicProps, {}, {
     "onFile-click"?: ((...args: any[]) => any) | undefined;
     "onUpload-error"?: ((...args: any[]) => any) | undefined;
 }>, {
-    label: string;
     uploadData: Record<string, any>;
+    label: string;
     responseField: string;
 }, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;
 declare const __VLS_export: __VLS_WithSlots<typeof __VLS_base, __VLS_Slots>;

@@ -13,12 +13,11 @@ const displayLabel = computed(() => {
     return props.label;
 });
 watch(showError, (val) => {
-    if (val) {
+    if (val)
         setTimeout(() => {
             showError.value = false;
             files.value = [];
         }, 3000);
-    }
 });
 const triggerChoose = () => {
     if (fileUploadRef.value) {
@@ -40,9 +39,8 @@ const onUploadHandler = (event) => {
     try {
         const response = JSON.parse(event.xhr.response);
         const fileData = props.responseField ? response[props.responseField] : response;
-        if (fileData) {
+        if (fileData)
             modelValue.value = [...modelValue.value, fileData];
-        }
     }
     catch (e) {
         console.error('MaxInputFileUpload: Erro ao processar resposta de upload', e);
@@ -57,16 +55,15 @@ const onBeforeUpload = (event) => {
     if (event.xhr) {
         if (props.token)
             event.xhr.setRequestHeader('X-CSRF-TOKEN', props.token);
-        for (const key in props.uploadData) {
+        for (const key in props.uploadData)
             event.formData.append(key, props.uploadData[key]);
-        }
         if (files.value.length > 0) {
             const extension = files.value[0].name.split('.').pop();
             event.formData.append('extension', extension);
         }
     }
 };
-const getFileExtension = (fileName) => fileName ? fileName.split('.').pop()?.toLowerCase() : '';
+const getFileExtension = (fileName) => (fileName ? fileName.split('.').pop()?.toLowerCase() : '') || '';
 const __VLS_defaultModels = {
     'modelValue': () => [],
 };
@@ -306,63 +303,63 @@ if (__VLS_ctx.modelValue.length > 0) {
             ...{ class: "file-icon" },
         });
         /** @type {__VLS_StyleScopedClasses['file-icon']} */ ;
-        if (__VLS_ctx.getFileExtension(file?.file_name) === 'pdf') {
+        if (__VLS_ctx.getFileExtension(file?.file_name || '') === 'pdf') {
             let __VLS_51;
-            /** @ts-ignore @type { | typeof __VLS_components.icon | typeof __VLS_components.Icon} */
-            icon;
+            /** @ts-ignore @type { | typeof __VLS_components.Icon} */
+            Icon;
             // @ts-ignore
             const __VLS_52 = __VLS_asFunctionalComponent1(__VLS_51, new __VLS_51({
-                i: "ph:file-pdf-light",
+                icon: "ph:file-pdf-light",
                 size: "1.8",
                 p0: true,
             }));
             const __VLS_53 = __VLS_52({
-                i: "ph:file-pdf-light",
+                icon: "ph:file-pdf-light",
                 size: "1.8",
                 p0: true,
             }, ...__VLS_functionalComponentArgsRest(__VLS_52));
         }
-        if (['jpg', 'jpeg'].includes(__VLS_ctx.getFileExtension(file?.file_name))) {
+        if (['jpg', 'jpeg'].includes(__VLS_ctx.getFileExtension(file?.file_name || ''))) {
             let __VLS_56;
-            /** @ts-ignore @type { | typeof __VLS_components.icon | typeof __VLS_components.Icon} */
-            icon;
+            /** @ts-ignore @type { | typeof __VLS_components.Icon} */
+            Icon;
             // @ts-ignore
             const __VLS_57 = __VLS_asFunctionalComponent1(__VLS_56, new __VLS_56({
-                i: "ph:file-jpg-light",
+                icon: "ph:file-jpg-light",
                 size: "1.8",
                 p0: true,
             }));
             const __VLS_58 = __VLS_57({
-                i: "ph:file-jpg-light",
+                icon: "ph:file-jpg-light",
                 size: "1.8",
                 p0: true,
             }, ...__VLS_functionalComponentArgsRest(__VLS_57));
         }
-        if (__VLS_ctx.getFileExtension(file?.file_name) === 'png') {
+        if (__VLS_ctx.getFileExtension(file?.file_name || '') === 'png') {
             let __VLS_61;
-            /** @ts-ignore @type { | typeof __VLS_components.icon | typeof __VLS_components.Icon} */
-            icon;
+            /** @ts-ignore @type { | typeof __VLS_components.Icon} */
+            Icon;
             // @ts-ignore
             const __VLS_62 = __VLS_asFunctionalComponent1(__VLS_61, new __VLS_61({
-                i: "ph:file-png-light",
+                icon: "ph:file-png-light",
                 size: "1.8",
             }));
             const __VLS_63 = __VLS_62({
-                i: "ph:file-png-light",
+                icon: "ph:file-png-light",
                 size: "1.8",
             }, ...__VLS_functionalComponentArgsRest(__VLS_62));
         }
         let __VLS_66;
-        /** @ts-ignore @type { | typeof __VLS_components.icon | typeof __VLS_components.Icon} */
-        icon;
+        /** @ts-ignore @type { | typeof __VLS_components.Icon} */
+        Icon;
         // @ts-ignore
         const __VLS_67 = __VLS_asFunctionalComponent1(__VLS_66, new __VLS_66({
-            i: "fa:check-circle",
+            icon: "fa:check-circle",
             ...{ class: "file-check" },
             size: "0.7",
         }));
         const __VLS_68 = __VLS_67({
-            i: "fa:check-circle",
+            icon: "fa:check-circle",
             ...{ class: "file-check" },
             size: "0.7",
         }, ...__VLS_functionalComponentArgsRest(__VLS_67));

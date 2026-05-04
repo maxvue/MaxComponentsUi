@@ -31,8 +31,8 @@ declare const __VLS_base: import("vue").DefineComponent<__VLS_PublicProps, {}, {
     "onUpdate:modelValue"?: ((value: string) => any) | undefined;
 }>, {
     done: boolean;
-    caution: string | boolean;
     required: boolean;
+    caution: string | boolean;
 }, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;
 declare const __VLS_export: __VLS_WithSlots<typeof __VLS_base, __VLS_Slots>;
 declare const _default: typeof __VLS_export;

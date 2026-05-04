@@ -21,10 +21,10 @@ declare const __VLS_export: import("vue").DefineComponent<__VLS_Props, {}, {}, {
     "onUpdate:modelValue"?: ((...args: any[]) => any) | undefined;
     onComplete?: ((...args: any[]) => any) | undefined;
 }>, {
-    done: boolean;
     modelValue: string | number;
-    caution: string | boolean;
+    done: boolean;
     required: boolean;
+    caution: string | boolean;
 }, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;
 declare const _default: typeof __VLS_export;
 export default _default;
