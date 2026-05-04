@@ -14,8 +14,7 @@
     .max-grid-cols {
         display: flex;
         flex-wrap: wrap;
-        column-gap: 8px;
-        row-gap: 13px;
+        gap: 13px 8px;
         padding-top: 14px;
     }
 </style>

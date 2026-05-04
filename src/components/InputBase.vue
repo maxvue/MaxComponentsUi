@@ -17,7 +17,7 @@
             </template>
             {{ message }}
         </Message>
-        <div v-else style="height: 16px; width: 100%"></div>
+        <div v-else style="height: 16px; width: 100%;"></div>
         <div class="is-done" v-if="done">
             <MaxIcon icon="lets-icons:check-fill" :size="0.9" />
         </div>
@@ -61,6 +61,7 @@
     .max-input {
         display: grid !important;
         grid-template-rows: 36px 19px;
+
         .max-input-label {
             &.active {
                 top: 0;
@@ -73,26 +74,31 @@
                 inset-inline-start: 15px !important;
             }
         }
+
         .required {
             position: absolute;
             top: 3px;
             right: 5px;
             color: darkred;
         }
+
         .is-done {
             position: absolute;
             top: 3px;
             right: 5px;
             color: #16a34a;
         }
+
         &.caution {
             label {
                 color: darkorange;
             }
+
             input {
                 border-color: darkorange;
             }
         }
+
         .input-message {
             .p-message-content {
                 justify-content: flex-end;
@@ -100,9 +106,11 @@
                 padding-top: 4px;
                 color: var(--max-surface-400);
             }
+
             .p-message-text {
                 font-size: 10px !important;
             }
+
             &.error {
                 color: darkorange !important;
             }

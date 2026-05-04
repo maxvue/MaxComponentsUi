@@ -1,5 +1,5 @@
 import { getCssSize } from './getCssSize';
-import { hasContent } from 'max-use';
+import { hasContent } from '@maxvue/max-use';
 
 type Params = (number | string)[];
 

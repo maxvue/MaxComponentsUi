@@ -167,7 +167,7 @@
         border-radius: 12px;
         padding: 2rem;
         margin-bottom: 2rem;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 10px 30px rgb(0 0 0 / 10%);
 
         h2 {
             color: #333;

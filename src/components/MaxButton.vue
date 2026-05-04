@@ -39,19 +39,24 @@
         min-width: 40px;
         border-radius: 10px;
         border: none !important;
+
         &:hover {
             background-color: var(--blue-600);
             border: none !important;
         }
+
         &.p-button-icon-only {
             min-width: unset;
+
             .content-button {
                 grid-template-columns: auto;
+
                 .btn-icon-left {
                     padding: 0;
                     width: 24px;
                     height: 24px;
                 }
+
                 .btn-icon-right {
                     padding: 0;
                     width: 24px;
@@ -66,6 +71,7 @@
             place-items: center;
             width: 100%;
             padding: 0 8px;
+
             .btn-icon-left {
                 width: 24px;
                 height: 24px;
@@ -73,6 +79,7 @@
                 display: grid;
                 place-items: center;
             }
+
             .btn-icon-right {
                 width: 24px;
                 height: 24px;
@@ -80,30 +87,36 @@
                 display: grid;
                 place-items: center;
             }
+
             .btn-label {
                 width: 100%;
                 padding: 0 20px;
+
                 &.text-left {
                     text-align: left !important;
                 }
             }
+
             .icon-div {
                 color: white;
                 padding: 0 !important;
                 margin: 0 !important;
                 width: 24px !important;
                 height: 24px !important;
+
                 .content-button-icon {
                     width: 24px !important;
                     height: 24px !important;
                 }
             }
         }
+
         &[transparent] {
             .icon-div {
                 color: var(--background-650);
             }
         }
+
         .countdown-botao {
             width: 20px;
             padding: 0 22px;

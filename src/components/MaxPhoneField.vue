@@ -19,7 +19,7 @@
                         <div class="item-flag">
                             <img :src="'https://flagcdn.com/w40/' + value.value.sigla.toLowerCase() + '.png'" alt="bandeira" flex />
                         </div>
-                        <div pl9 style="color: var(--max-inputtext-color)">+ {{ value.value.value }}</div>
+                        <div pl9 style="color: var(--max-inputtext-color);">+ {{ value.value.value }}</div>
                     </div>
                 </template>
             </Select>
@@ -372,82 +372,97 @@
 
 <style lang="scss">
 .input-phone {
-        .input-slot {
-            grid-template-columns: 1fr;
-        }
-        .inputs-div {
-            display: grid;
-            grid-template-columns: auto 1fr;
-            width: 100%;
-            position: relative;
-            grid-column: 1 !important;
-            place-items: center;
-            height: 36px !important;
-            border: 1px solid red;
-            border-radius: var(--max-inputtext-border-radius);
-            border-color: var(--max-inputtext-focus-border-color);
-            .p-select{
+    .input-slot {
+        grid-template-columns: 1fr;
+    }
+
+    .inputs-div {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        width: 100%;
+        position: relative;
+        grid-column: 1 !important;
+        place-items: center;
+        height: 36px !important;
+        border: 1px solid red;
+        border-radius: var(--max-inputtext-border-radius);
+        border-color: var(--max-inputtext-focus-border-color);
+
+        .p-select {
+            height: 36px;
+            background-color: transparent !important;
+            border: none !important;
+            width: 90px;
+
+            .p-select-label {
                 height: 36px;
                 background-color: transparent !important;
-                border: none !important;
-                width: 90px;
-                .p-select-label{
-                    height: 36px;
-                    background-color: transparent !important;
-                    .item-selected{
+
+                .item-selected {
+                    display: grid;
+                    grid-template-columns: 21px 1fr;
+                    place-items: center;
+                    height: 100%;
+                    padding-left: 5px;
+
+                    .item-flag {
+                        width: 21px;
+                        aspect-ratio: 3/2;
                         display: grid;
-                        grid-template-columns: 21px 1fr;
                         place-items: center;
-                        height: 100%;
-                        padding-left: 5px;
-                        .item-flag {
+                        border-radius: 5px;
+                        overflow: hidden;
+                        left: 0;
+                        font-size: 1rem;
+
+                        img {
                             width: 21px;
                             aspect-ratio: 3/2;
-                            display: grid;
-                            place-items: center;
-                            border-radius: 5px;
-                            overflow: hidden;
-                            left: 0;
-                            font-size: 1rem;
-                            img{
-                                width: 21px;
-                                aspect-ratio: 3/2;
-                            }
                         }
                     }
                 }
             }
-            input{
-                border: none !important;
-                box-shadow: none !important;
-                background-color: transparent !important;
-            }
         }
-        .p-inputicon{
-            transform: translateY(-2px) !important;
-        }
-        [slot-a] {
-            grid-column: 1 !important;
-        }
-        [slot-b] {
-            grid-column: 2 !important;
-        }
-        .p-select-dropdown {
-            display: none;
-        }
-        .p-select-label {
-            padding: 0 !important;
-            position: relative;
-        }
-        .p-inputtext {
-            padding: 0 2px !important;
+
+        input {
+            border: none !important;
+            box-shadow: none !important;
+            background-color: transparent !important;
         }
     }
-    .p-select-overlay {
-        display: grid;
-        grid-template-rows: auto 1fr;
-        overflow: hidden;
-        .p-select-list-container {
-        }
+
+    .p-inputicon {
+        transform: translateY(-2px) !important;
     }
+
+    [slot-a] {
+        grid-column: 1 !important;
+    }
+
+    [slot-b] {
+        grid-column: 2 !important;
+    }
+
+    .p-select-dropdown {
+        display: none;
+    }
+
+    .p-select-label {
+        padding: 0 !important;
+        position: relative;
+    }
+
+    .p-inputtext {
+        padding: 0 2px !important;
+    }
+}
+
+.p-select-overlay {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    overflow: hidden;
+
+    .p-select-list-container {
+    }
+}
 </style>

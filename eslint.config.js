@@ -3,7 +3,6 @@ import typescriptEslint from 'typescript-eslint';
 import vueParser from 'vue-eslint-parser';
 import eslintPluginVue from 'eslint-plugin-vue';
 
-
 export default [
     // 1º Bloco: Configuração Base (Aplica-se a TS, JS e Vue)
     {

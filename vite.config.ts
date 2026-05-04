@@ -7,10 +7,7 @@ import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
 import AutoImport from 'unplugin-auto-import/vite';
 import Components from 'unplugin-vue-components/vite';
 import { PrimeVueResolver } from '@primevue/auto-import-resolver';
-import { maxUseItems } from 'max-use';
-
-const items = maxUseItems();
-// console.log(items);
+import { maxUseAutoImport } from '@maxvue/max-use';
 
 export default defineConfig({
     plugins: [
@@ -21,7 +18,7 @@ export default defineConfig({
         AutoImport({
             imports: [
                 'vue',
-                { 'max-use': items },
+                maxUseAutoImport,
                 {
                     from: 'vue',
                     imports: ['Ref', 'ComputedRef', 'ShallowRef', 'ShallowComputedRef', 'PropType', 'WatchStopHandle', 'Watch'],
@@ -85,7 +82,7 @@ export default defineConfig({
         },
         cssTarget: 'esnext',
         sourcemap: true,
-        minify: 'terser',
+        minify: 'terser'
     },
     resolve: {
         alias: {

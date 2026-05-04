@@ -29,7 +29,6 @@ declare global {
   const ConfirmDialog: typeof import('./src/components/_primeVue.ts').ConfirmDialog
   const ConfirmPopup: typeof import('./src/components/_primeVue.ts').ConfirmPopup
   const ContextMenu: typeof import('./src/components/_primeVue.ts').ContextMenu
-  const Convert: typeof import('max-use').Convert
   const DataTable: typeof import('./src/components/_primeVue.ts').DataTable
   const DataView: typeof import('./src/components/_primeVue.ts').DataView
   const DatePicker: typeof import('./src/components/_primeVue.ts').DatePicker
@@ -40,7 +39,6 @@ declare global {
   const DynamicDialog: typeof import('./src/components/_primeVue.ts').DynamicDialog
   const EffectScope: typeof import('vue').EffectScope
   const Fieldset: typeof import('./src/components/_primeVue.ts').Fieldset
-  const Format: typeof import('max-use').Format
   const Galleria: typeof import('./src/components/_primeVue.ts').Galleria
   const Image: typeof import('./src/components/_primeVue.ts').Image
   const ImageCompare: typeof import('./src/components/_primeVue.ts').ImageCompare
@@ -54,6 +52,7 @@ declare global {
   const Message: typeof import('./src/components/_primeVue.ts').Message
   const MeterGroup: typeof import('./src/components/_primeVue.ts').MeterGroup
   const MultiSelect: typeof import('./src/components/_primeVue.ts').MultiSelect
+  const Obj: typeof import('@maxvue/max-use').Obj
   const OrderList: typeof import('./src/components/_primeVue.ts').OrderList
   const OrganizationChart: typeof import('./src/components/_primeVue.ts').OrganizationChart
   const OverlayBadge: typeof import('./src/components/_primeVue.ts').OverlayBadge
@@ -65,7 +64,7 @@ declare global {
   const Popover: typeof import('./src/components/_primeVue.ts').Popover
   const ProgressBar: typeof import('./src/components/_primeVue.ts').ProgressBar
   const ProgressSpinner: typeof import('./src/components/_primeVue.ts').ProgressSpinner
-  const Random: typeof import('max-use').Random
+  const Random: typeof import('@maxvue/max-use').Random
   const Rating: typeof import('./src/components/_primeVue.ts').Rating
   const Row: typeof import('./src/components/_primeVue.ts').Row
   const ScrollPanel: typeof import('./src/components/_primeVue.ts').ScrollPanel
@@ -84,8 +83,9 @@ declare global {
   const StepPanel: typeof import('./src/components/_primeVue.ts').StepPanel
   const StepPanels: typeof import('./src/components/_primeVue.ts').StepPanels
   const Stepper: typeof import('./src/components/_primeVue.ts').Stepper
-  const Str: typeof import('max-use').Str
-  const StrFilter: typeof import('max-use').StrFilter
+  const Str: typeof import('@maxvue/max-use').Str
+  const StrCase: typeof import('@maxvue/max-use').StrCase
+  const StrFilter: typeof import('@maxvue/max-use').StrFilter
   const Tab: typeof import('./src/components/_primeVue.ts').Tab
   const TabList: typeof import('./src/components/_primeVue.ts').TabList
   const TabPanel: typeof import('./src/components/_primeVue.ts').TabPanel
@@ -103,381 +103,433 @@ declare global {
   const TreeSelect: typeof import('./src/components/_primeVue.ts').TreeSelect
   const TreeTable: typeof import('./src/components/_primeVue.ts').TreeTable
   const VirtualScroller: typeof import('./src/components/_primeVue.ts').VirtualScroller
-  const apiDeleteRoute: typeof import('max-use').apiDeleteRoute
-  const apiGetRoute: typeof import('max-use').apiGetRoute
-  const apiUploadRoute: typeof import('max-use').apiUploadRoute
-  const assert: typeof import('max-use').assert
-  const bypassFilter: typeof import('max-use').bypassFilter
-  const camelize: typeof import('max-use').camelize
-  const canIterate: typeof import('max-use').canIterate
-  const clamp: typeof import('max-use').clamp
-  const cloneFnJSON: typeof import('max-use').cloneFnJSON
+  const _: typeof import('@maxvue/max-use')._
+  const addTime: typeof import('@maxvue/max-use').addTime
+  const apiDeleteRoute: typeof import('@maxvue/max-use').apiDeleteRoute
+  const apiGetRoute: typeof import('@maxvue/max-use').apiGetRoute
+  const apiUploadRoute: typeof import('@maxvue/max-use').apiUploadRoute
+  const assert: typeof import('@maxvue/max-use').assert
+  const average: typeof import('@maxvue/max-use').average
+  const bypassFilter: typeof import('@maxvue/max-use').bypassFilter
+  const camelCase: typeof import('@maxvue/max-use').camelCase
+  const camelize: typeof import('@maxvue/max-use').camelize
+  const canIterate: typeof import('@maxvue/max-use').canIterate
+  const capitalize: typeof import('@maxvue/max-use').capitalize
+  const chunk: typeof import('@maxvue/max-use').chunk
+  const clamp: typeof import('@maxvue/max-use').clamp
+  const cloneDeep: typeof import('@maxvue/max-use').cloneDeep
+  const cloneFnJSON: typeof import('@maxvue/max-use').cloneFnJSON
   const computed: typeof import('vue').computed
-  const computedAsync: typeof import('max-use').computedAsync
-  const computedInject: typeof import('max-use').computedInject
-  const computedWithControl: typeof import('max-use').computedWithControl
-  const containsProp: typeof import('max-use').containsProp
-  const countBy: typeof import('max-use').countBy
+  const computedAsync: typeof import('@maxvue/max-use').computedAsync
+  const computedInject: typeof import('@maxvue/max-use').computedInject
+  const computedWithControl: typeof import('@maxvue/max-use').computedWithControl
+  const containsProp: typeof import('@maxvue/max-use').containsProp
+  const countBy: typeof import('@maxvue/max-use').countBy
   const createApp: typeof import('vue').createApp
-  const createEventHook: typeof import('max-use').createEventHook
-  const createFetch: typeof import('max-use').createFetch
-  const createFilterWrapper: typeof import('max-use').createFilterWrapper
-  const createGlobalState: typeof import('max-use').createGlobalState
-  const createInjectionState: typeof import('max-use').createInjectionState
-  const createRef: typeof import('max-use').createRef
-  const createReusableTemplate: typeof import('max-use').createReusableTemplate
-  const createSharedComposable: typeof import('max-use').createSharedComposable
-  const createSingletonPromise: typeof import('max-use').createSingletonPromise
-  const createTemplatePromise: typeof import('max-use').createTemplatePromise
-  const createUnrefFn: typeof import('max-use').createUnrefFn
+  const createEventHook: typeof import('@maxvue/max-use').createEventHook
+  const createFetch: typeof import('@maxvue/max-use').createFetch
+  const createFilterWrapper: typeof import('@maxvue/max-use').createFilterWrapper
+  const createGlobalState: typeof import('@maxvue/max-use').createGlobalState
+  const createInjectionState: typeof import('@maxvue/max-use').createInjectionState
+  const createRef: typeof import('@maxvue/max-use').createRef
+  const createReusableTemplate: typeof import('@maxvue/max-use').createReusableTemplate
+  const createSharedComposable: typeof import('@maxvue/max-use').createSharedComposable
+  const createSingletonPromise: typeof import('@maxvue/max-use').createSingletonPromise
+  const createTemplatePromise: typeof import('@maxvue/max-use').createTemplatePromise
+  const createUnrefFn: typeof import('@maxvue/max-use').createUnrefFn
   const customRef: typeof import('vue').customRef
-  const debounceFilter: typeof import('max-use').debounceFilter
+  const debounceFilter: typeof import('@maxvue/max-use').debounceFilter
+  const deepClone: typeof import('@maxvue/max-use').deepClone
+  const deepMerge: typeof import('@maxvue/max-use').deepMerge
   const defineAsyncComponent: typeof import('vue').defineAsyncComponent
   const defineComponent: typeof import('vue').defineComponent
+  const diff: typeof import('@maxvue/max-use').diff
+  const diffInDays: typeof import('@maxvue/max-use').diffInDays
+  const diffInHours: typeof import('@maxvue/max-use').diffInHours
+  const diffInMinutes: typeof import('@maxvue/max-use').diffInMinutes
+  const diffInMonths: typeof import('@maxvue/max-use').diffInMonths
+  const diffInSeconds: typeof import('@maxvue/max-use').diffInSeconds
+  const diffInYears: typeof import('@maxvue/max-use').diffInYears
   const effectScope: typeof import('vue').effectScope
-  const electric: typeof import('max-use').electric
-  const electrical: typeof import('max-use').electrical
-  const extendRef: typeof import('max-use').extendRef
-  const filter: typeof import('max-use').filter
-  const filterBy: typeof import('max-use').filterBy
-  const filterByNot: typeof import('max-use').filterByNot
-  const formatCep: typeof import('max-use').formatCep
-  const formatCnpj: typeof import('max-use').formatCnpj
-  const formatCpf: typeof import('max-use').formatCpf
-  const formatCpfCnpj: typeof import('max-use').formatCpfCnpj
-  const formatDate: typeof import('max-use').formatDate
-  const formatPhone: typeof import('max-use').formatPhone
-  const formatTimeAgo: typeof import('max-use').formatTimeAgo
-  const formatTimeAgoIntl: typeof import('max-use').formatTimeAgoIntl
-  const formatTimeAgoIntlParts: typeof import('max-use').formatTimeAgoIntlParts
+  const electric: typeof import('@maxvue/max-use').electric
+  const electrical: typeof import('@maxvue/max-use').electrical
+  const extendRef: typeof import('@maxvue/max-use').extendRef
+  const filter: typeof import('@maxvue/max-use').filter
+  const filterBy: typeof import('@maxvue/max-use').filterBy
+  const filterByNot: typeof import('@maxvue/max-use').filterByNot
+  const findLast: typeof import('@maxvue/max-use').findLast
+  const first: typeof import('@maxvue/max-use').first
+  const format: typeof import('@maxvue/max-use').format
+  const formatBytes: typeof import('@maxvue/max-use').formatBytes
+  const formatCep: typeof import('@maxvue/max-use').formatCep
+  const formatCnpj: typeof import('@maxvue/max-use').formatCnpj
+  const formatCpf: typeof import('@maxvue/max-use').formatCpf
+  const formatCpfCnpj: typeof import('@maxvue/max-use').formatCpfCnpj
+  const formatCurrency: typeof import('@maxvue/max-use').formatCurrency
+  const formatDate: typeof import('@maxvue/max-use').formatDate
+  const formatPhone: typeof import('@maxvue/max-use').formatPhone
+  const formatTimeAgo: typeof import('@maxvue/max-use').formatTimeAgo
+  const formatTimeAgoIntl: typeof import('@maxvue/max-use').formatTimeAgoIntl
+  const formatTimeAgoIntlParts: typeof import('@maxvue/max-use').formatTimeAgoIntlParts
   const gap: typeof import('./src/helpers/gap.ts').gap
+  const get: typeof import('@maxvue/max-use').get
   const getCached: typeof import('./src/helpers/getCached.ts').getCached
   const getCssSize: typeof import('./src/helpers/getCssSize.ts').getCssSize
   const getCurrentInstance: typeof import('vue').getCurrentInstance
   const getCurrentScope: typeof import('vue').getCurrentScope
   const getCurrentWatcher: typeof import('vue').getCurrentWatcher
-  const getLifeCycleTarget: typeof import('max-use').getLifeCycleTarget
-  const getSSRHandler: typeof import('max-use').getSSRHandler
+  const getLifeCycleTarget: typeof import('@maxvue/max-use').getLifeCycleTarget
+  const getSSRHandler: typeof import('@maxvue/max-use').getSSRHandler
+  const groupBy: typeof import('@maxvue/max-use').groupBy
   const h: typeof import('vue').h
-  const hasContent: typeof import('max-use').hasContent
-  const hasOwn: typeof import('max-use').hasOwn
-  const hasPassedDays: typeof import('max-use').hasPassedDays
-  const hasPassedHours: typeof import('max-use').hasPassedHours
-  const hasPassedMinutes: typeof import('max-use').hasPassedMinutes
-  const hyphenate: typeof import('max-use').hyphenate
-  const identity: typeof import('max-use').identity
-  const inDateInterval: typeof import('max-use').inDateInterval
-  const increaseWithUnit: typeof import('max-use').increaseWithUnit
+  const hasContent: typeof import('@maxvue/max-use').hasContent
+  const hasOwn: typeof import('@maxvue/max-use').hasOwn
+  const hasPassedDays: typeof import('@maxvue/max-use').hasPassedDays
+  const hasPassedHours: typeof import('@maxvue/max-use').hasPassedHours
+  const hasPassedMinutes: typeof import('@maxvue/max-use').hasPassedMinutes
+  const hyphenate: typeof import('@maxvue/max-use').hyphenate
+  const identity: typeof import('@maxvue/max-use').identity
+  const inDateInterval: typeof import('@maxvue/max-use').inDateInterval
+  const increaseWithUnit: typeof import('@maxvue/max-use').increaseWithUnit
+  const initials: typeof import('@maxvue/max-use').initials
   const inject: typeof import('vue').inject
-  const injectLocal: typeof import('max-use').injectLocal
-  const intervalRandom: typeof import('max-use').intervalRandom
-  const invoke: typeof import('max-use').invoke
-  const isBlank: typeof import('max-use').isBlank
-  const isCnpj: typeof import('max-use').isCnpj
-  const isCpf: typeof import('max-use').isCpf
-  const isCpfCnpj: typeof import('max-use').isCpfCnpj
-  const isDate: typeof import('max-use').isDate
-  const isDef: typeof import('max-use').isDef
-  const isDefined: typeof import('max-use').isDefined
-  const isInDateInterval: typeof import('max-use').isInDateInterval
-  const isNumber: typeof import('max-use').isNumber
-  const isNumeric: typeof import('max-use').isNumeric
-  const isObject: typeof import('max-use').isObject
+  const injectLocal: typeof import('@maxvue/max-use').injectLocal
+  const intervalRandom: typeof import('@maxvue/max-use').intervalRandom
+  const invoke: typeof import('@maxvue/max-use').invoke
+  const isArray: typeof import('@maxvue/max-use').isArray
+  const isBlank: typeof import('@maxvue/max-use').isBlank
+  const isCnpj: typeof import('@maxvue/max-use').isCnpj
+  const isCpf: typeof import('@maxvue/max-use').isCpf
+  const isCpfCnpj: typeof import('@maxvue/max-use').isCpfCnpj
+  const isDate: typeof import('@maxvue/max-use').isDate
+  const isDef: typeof import('@maxvue/max-use').isDef
+  const isDefined: typeof import('@maxvue/max-use').isDefined
+  const isEmail: typeof import('@maxvue/max-use').isEmail
+  const isEqual: typeof import('@maxvue/max-use').isEqual
+  const isFuture: typeof import('@maxvue/max-use').isFuture
+  const isInDateInterval: typeof import('@maxvue/max-use').isInDateInterval
+  const isIterable: typeof import('@maxvue/max-use').isIterable
+  const isNumber: typeof import('@maxvue/max-use').isNumber
+  const isNumeric: typeof import('@maxvue/max-use').isNumeric
+  const isObject: typeof import('@maxvue/max-use').isObject
+  const isPast: typeof import('@maxvue/max-use').isPast
   const isProxy: typeof import('vue').isProxy
   const isReactive: typeof import('vue').isReactive
   const isReadonly: typeof import('vue').isReadonly
   const isRef: typeof import('vue').isRef
-  const isSameDay: typeof import('max-use').isSameDay
+  const isSameDay: typeof import('@maxvue/max-use').isSameDay
   const isShallow: typeof import('vue').isShallow
-  const isValid: typeof import('max-use').isValid
-  const kebabCase: typeof import('max-use').kebabCase
-  const keyBy: typeof import('max-use').keyBy
-  const makeDestructurable: typeof import('max-use').makeDestructurable
-  const mapGamepadToXbox360Controller: typeof import('max-use').mapGamepadToXbox360Controller
+  const isTouchDevice: typeof import('@maxvue/max-use').isTouchDevice
+  const isValid: typeof import('@maxvue/max-use').isValid
+  const isWeekend: typeof import('@maxvue/max-use').isWeekend
+  const kebabCase: typeof import('@maxvue/max-use').kebabCase
+  const keyBy: typeof import('@maxvue/max-use').keyBy
+  const last: typeof import('@maxvue/max-use').last
+  const makeDestructurable: typeof import('@maxvue/max-use').makeDestructurable
+  const mapGamepadToXbox360Controller: typeof import('@maxvue/max-use').mapGamepadToXbox360Controller
+  const mapValues: typeof import('@maxvue/max-use').mapValues
   const markRaw: typeof import('vue').markRaw
-  const maxUse: typeof import('max-use').maxUse
-  const maxUseItems: typeof import('max-use').maxUseItems
+  const maskSensitive: typeof import('@maxvue/max-use').maskSensitive
+  const median: typeof import('@maxvue/max-use').median
   const nextTick: typeof import('vue').nextTick
-  const noop: typeof import('max-use').noop
-  const normalizeDate: typeof import('max-use').normalizeDate
-  const normalizeToSearch: typeof import('max-use').normalizeToSearch
-  const notNullish: typeof import('max-use').notNullish
-  const now: typeof import('max-use').now
-  const numeric: typeof import('max-use').numeric
-  const objectEntries: typeof import('max-use').objectEntries
-  const objectOmit: typeof import('max-use').objectOmit
-  const objectPick: typeof import('max-use').objectPick
+  const noHtml: typeof import('@maxvue/max-use').noHtml
+  const noop: typeof import('@maxvue/max-use').noop
+  const normalizeDate: typeof import('@maxvue/max-use').normalizeDate
+  const normalizeToSearch: typeof import('@maxvue/max-use').normalizeToSearch
+  const notNullish: typeof import('@maxvue/max-use').notNullish
+  const now: typeof import('@maxvue/max-use').now
+  const numeric: typeof import('@maxvue/max-use').numeric
+  const objectEntries: typeof import('@maxvue/max-use').objectEntries
+  const objectOmit: typeof import('@maxvue/max-use').objectOmit
+  const objectPick: typeof import('@maxvue/max-use').objectPick
+  const omit: typeof import('@maxvue/max-use').omit
   const onActivated: typeof import('vue').onActivated
   const onBeforeMount: typeof import('vue').onBeforeMount
   const onBeforeUnmount: typeof import('vue').onBeforeUnmount
   const onBeforeUpdate: typeof import('vue').onBeforeUpdate
-  const onClickOutside: typeof import('max-use').onClickOutside
+  const onClickOutside: typeof import('@maxvue/max-use').onClickOutside
   const onDeactivated: typeof import('vue').onDeactivated
-  const onElementRemoval: typeof import('max-use').onElementRemoval
+  const onElementRemoval: typeof import('@maxvue/max-use').onElementRemoval
   const onErrorCaptured: typeof import('vue').onErrorCaptured
-  const onKeyDown: typeof import('max-use').onKeyDown
-  const onKeyPressed: typeof import('max-use').onKeyPressed
-  const onKeyStroke: typeof import('max-use').onKeyStroke
-  const onKeyUp: typeof import('max-use').onKeyUp
-  const onLongPress: typeof import('max-use').onLongPress
+  const onKeyDown: typeof import('@maxvue/max-use').onKeyDown
+  const onKeyPressed: typeof import('@maxvue/max-use').onKeyPressed
+  const onKeyStroke: typeof import('@maxvue/max-use').onKeyStroke
+  const onKeyUp: typeof import('@maxvue/max-use').onKeyUp
+  const onLongPress: typeof import('@maxvue/max-use').onLongPress
   const onMounted: typeof import('vue').onMounted
   const onRenderTracked: typeof import('vue').onRenderTracked
   const onRenderTriggered: typeof import('vue').onRenderTriggered
   const onScopeDispose: typeof import('vue').onScopeDispose
   const onServerPrefetch: typeof import('vue').onServerPrefetch
-  const onStartTyping: typeof import('max-use').onStartTyping
+  const onStartTyping: typeof import('@maxvue/max-use').onStartTyping
   const onUnmounted: typeof import('vue').onUnmounted
   const onUpdated: typeof import('vue').onUpdated
   const onWatcherCleanup: typeof import('vue').onWatcherCleanup
-  const onlyLetters: typeof import('max-use').onlyLetters
-  const onlyLettersAndNumbers: typeof import('max-use').onlyLettersAndNumbers
-  const onlyNumbers: typeof import('max-use').onlyNumbers
-  const onlySymbols: typeof import('max-use').onlySymbols
-  const orderBy: typeof import('max-use').orderBy
-  const orderByWithKey: typeof import('max-use').orderByWithKey
+  const onlyLetters: typeof import('@maxvue/max-use').onlyLetters
+  const onlyLettersAndNumbers: typeof import('@maxvue/max-use').onlyLettersAndNumbers
+  const onlyNumbers: typeof import('@maxvue/max-use').onlyNumbers
+  const onlySymbols: typeof import('@maxvue/max-use').onlySymbols
+  const orderBy: typeof import('@maxvue/max-use').orderBy
+  const orderByWithKey: typeof import('@maxvue/max-use').orderByWithKey
   const paddingMargin: typeof import('./src/helpers/paddingMargin.ts').paddingMargin
-  const pausableFilter: typeof import('max-use').pausableFilter
-  const promiseTimeout: typeof import('max-use').promiseTimeout
+  const pausableFilter: typeof import('@maxvue/max-use').pausableFilter
+  const pick: typeof import('@maxvue/max-use').pick
+  const promiseTimeout: typeof import('@maxvue/max-use').promiseTimeout
   const provide: typeof import('vue').provide
-  const provideLocal: typeof import('max-use').provideLocal
-  const provideSSRWidth: typeof import('max-use').provideSSRWidth
-  const pxValue: typeof import('max-use').pxValue
-  const rand: typeof import('max-use').rand
-  const reactify: typeof import('max-use').reactify
-  const reactifyObject: typeof import('max-use').reactifyObject
+  const provideLocal: typeof import('@maxvue/max-use').provideLocal
+  const provideSSRWidth: typeof import('@maxvue/max-use').provideSSRWidth
+  const pxValue: typeof import('@maxvue/max-use').pxValue
+  const rand: typeof import('@maxvue/max-use').rand
+  const reactify: typeof import('@maxvue/max-use').reactify
+  const reactifyObject: typeof import('@maxvue/max-use').reactifyObject
   const reactive: typeof import('vue').reactive
-  const reactiveComputed: typeof import('max-use').reactiveComputed
-  const reactiveOmit: typeof import('max-use').reactiveOmit
-  const reactivePick: typeof import('max-use').reactivePick
+  const reactiveComputed: typeof import('@maxvue/max-use').reactiveComputed
+  const reactiveOmit: typeof import('@maxvue/max-use').reactiveOmit
+  const reactivePick: typeof import('@maxvue/max-use').reactivePick
+  const readingTime: typeof import('@maxvue/max-use').readingTime
   const readonly: typeof import('vue').readonly
   const ref: typeof import('vue').ref
-  const refAutoReset: typeof import('max-use').refAutoReset
-  const refDebounced: typeof import('max-use').refDebounced
-  const refDefault: typeof import('max-use').refDefault
-  const refManualReset: typeof import('max-use').refManualReset
-  const refThrottled: typeof import('max-use').refThrottled
-  const refWithControl: typeof import('max-use').refWithControl
-  const removeSpaces: typeof import('max-use').removeSpaces
+  const refAutoReset: typeof import('@maxvue/max-use').refAutoReset
+  const refDebounced: typeof import('@maxvue/max-use').refDebounced
+  const refDefault: typeof import('@maxvue/max-use').refDefault
+  const refManualReset: typeof import('@maxvue/max-use').refManualReset
+  const refThrottled: typeof import('@maxvue/max-use').refThrottled
+  const refWithControl: typeof import('@maxvue/max-use').refWithControl
+  const removeSpaces: typeof import('@maxvue/max-use').removeSpaces
+  const renameKeys: typeof import('@maxvue/max-use').renameKeys
   const resolveComponent: typeof import('vue').resolveComponent
-  const set: typeof import('max-use').set
+  const roundDown: typeof import('@maxvue/max-use').roundDown
+  const roundUp: typeof import('@maxvue/max-use').roundUp
+  const sample: typeof import('@maxvue/max-use').sample
+  const set: typeof import('@maxvue/max-use').set
   const setCached: typeof import('./src/helpers/setCached.ts').setCached
-  const setSSRHandler: typeof import('max-use').setSSRHandler
+  const setSSRHandler: typeof import('@maxvue/max-use').setSSRHandler
   const shallowReactive: typeof import('vue').shallowReactive
   const shallowReadonly: typeof import('vue').shallowReadonly
   const shallowRef: typeof import('vue').shallowRef
-  const size: typeof import('max-use').size
-  const snakeCase: typeof import('max-use').snakeCase
-  const sumBy: typeof import('max-use').sumBy
-  const syncRef: typeof import('max-use').syncRef
-  const syncRefs: typeof import('max-use').syncRefs
-  const throttleFilter: typeof import('max-use').throttleFilter
-  const timestamp: typeof import('max-use').timestamp
-  const toArray: typeof import('max-use').toArray
-  const toNumber: typeof import('max-use').toNumber
+  const shuffle: typeof import('@maxvue/max-use').shuffle
+  const size: typeof import('@maxvue/max-use').size
+  const slugify: typeof import('@maxvue/max-use').slugify
+  const snakeCase: typeof import('@maxvue/max-use').snakeCase
+  const sortBy: typeof import('@maxvue/max-use').sortBy
+  const sortByMulti: typeof import('@maxvue/max-use').sortByMulti
+  const stripHtml: typeof import('@maxvue/max-use').stripHtml
+  const sum: typeof import('@maxvue/max-use').sum
+  const sumBy: typeof import('@maxvue/max-use').sumBy
+  const syncRef: typeof import('@maxvue/max-use').syncRef
+  const syncRefs: typeof import('@maxvue/max-use').syncRefs
+  const throttleFilter: typeof import('@maxvue/max-use').throttleFilter
+  const timestamp: typeof import('@maxvue/max-use').timestamp
+  const toArray: typeof import('@maxvue/max-use').toArray
+  const toNumber: typeof import('@maxvue/max-use').toNumber
   const toRaw: typeof import('vue').toRaw
-  const toReactive: typeof import('max-use').toReactive
+  const toReactive: typeof import('@maxvue/max-use').toReactive
   const toRef: typeof import('vue').toRef
   const toRefs: typeof import('vue').toRefs
-  const toSearchableString: typeof import('max-use').toSearchableString
+  const toSearchableString: typeof import('@maxvue/max-use').toSearchableString
   const toValue: typeof import('vue').toValue
-  const transition: typeof import('max-use').transition
+  const transition: typeof import('@maxvue/max-use').transition
   const triggerRef: typeof import('vue').triggerRef
-  const tryOnBeforeMount: typeof import('max-use').tryOnBeforeMount
-  const tryOnBeforeUnmount: typeof import('max-use').tryOnBeforeUnmount
-  const tryOnMounted: typeof import('max-use').tryOnMounted
-  const tryOnScopeDispose: typeof import('max-use').tryOnScopeDispose
-  const tryOnUnmounted: typeof import('max-use').tryOnUnmounted
-  const ulid: typeof import('max-use').ulid
+  const truncate: typeof import('@maxvue/max-use').truncate
+  const tryOnBeforeMount: typeof import('@maxvue/max-use').tryOnBeforeMount
+  const tryOnBeforeUnmount: typeof import('@maxvue/max-use').tryOnBeforeUnmount
+  const tryOnMounted: typeof import('@maxvue/max-use').tryOnMounted
+  const tryOnScopeDispose: typeof import('@maxvue/max-use').tryOnScopeDispose
+  const tryOnUnmounted: typeof import('@maxvue/max-use').tryOnUnmounted
+  const ulid: typeof import('@maxvue/max-use').ulid
+  const uniq: typeof import('@maxvue/max-use').uniq
+  const uniqueBy: typeof import('@maxvue/max-use').uniqueBy
   const unref: typeof import('vue').unref
-  const unrefElement: typeof import('max-use').unrefElement
-  const until: typeof import('max-use').until
-  const useActiveElement: typeof import('max-use').useActiveElement
-  const useAnimate: typeof import('max-use').useAnimate
-  const useArrayDifference: typeof import('max-use').useArrayDifference
-  const useArrayEvery: typeof import('max-use').useArrayEvery
-  const useArrayFilter: typeof import('max-use').useArrayFilter
-  const useArrayFind: typeof import('max-use').useArrayFind
-  const useArrayFindIndex: typeof import('max-use').useArrayFindIndex
-  const useArrayFindLast: typeof import('max-use').useArrayFindLast
-  const useArrayIncludes: typeof import('max-use').useArrayIncludes
-  const useArrayJoin: typeof import('max-use').useArrayJoin
-  const useArrayMap: typeof import('max-use').useArrayMap
-  const useArrayReduce: typeof import('max-use').useArrayReduce
-  const useArraySome: typeof import('max-use').useArraySome
-  const useArrayUnique: typeof import('max-use').useArrayUnique
-  const useAsyncQueue: typeof import('max-use').useAsyncQueue
-  const useAsyncState: typeof import('max-use').useAsyncState
+  const unrefElement: typeof import('@maxvue/max-use').unrefElement
+  const unset: typeof import('@maxvue/max-use').unset
+  const until: typeof import('@maxvue/max-use').until
+  const useActiveElement: typeof import('@maxvue/max-use').useActiveElement
+  const useAnimate: typeof import('@maxvue/max-use').useAnimate
+  const useArrayDifference: typeof import('@maxvue/max-use').useArrayDifference
+  const useArrayEvery: typeof import('@maxvue/max-use').useArrayEvery
+  const useArrayFilter: typeof import('@maxvue/max-use').useArrayFilter
+  const useArrayFind: typeof import('@maxvue/max-use').useArrayFind
+  const useArrayFindIndex: typeof import('@maxvue/max-use').useArrayFindIndex
+  const useArrayFindLast: typeof import('@maxvue/max-use').useArrayFindLast
+  const useArrayIncludes: typeof import('@maxvue/max-use').useArrayIncludes
+  const useArrayJoin: typeof import('@maxvue/max-use').useArrayJoin
+  const useArrayMap: typeof import('@maxvue/max-use').useArrayMap
+  const useArrayReduce: typeof import('@maxvue/max-use').useArrayReduce
+  const useArraySome: typeof import('@maxvue/max-use').useArraySome
+  const useArrayUnique: typeof import('@maxvue/max-use').useArrayUnique
+  const useAsyncQueue: typeof import('@maxvue/max-use').useAsyncQueue
+  const useAsyncState: typeof import('@maxvue/max-use').useAsyncState
   const useAttrs: typeof import('vue').useAttrs
-  const useBase64: typeof import('max-use').useBase64
-  const useBattery: typeof import('max-use').useBattery
-  const useBluetooth: typeof import('max-use').useBluetooth
-  const useBreakpoints: typeof import('max-use').useBreakpoints
-  const useBroadcastChannel: typeof import('max-use').useBroadcastChannel
-  const useBrowserLocation: typeof import('max-use').useBrowserLocation
-  const useCached: typeof import('max-use').useCached
-  const useClipboard: typeof import('max-use').useClipboard
-  const useClipboardItems: typeof import('max-use').useClipboardItems
-  const useCloned: typeof import('max-use').useCloned
-  const useColorMode: typeof import('max-use').useColorMode
-  const useConfirmDialog: typeof import('max-use').useConfirmDialog
-  const useCountdown: typeof import('max-use').useCountdown
-  const useCounter: typeof import('max-use').useCounter
+  const useBase64: typeof import('@maxvue/max-use').useBase64
+  const useBattery: typeof import('@maxvue/max-use').useBattery
+  const useBluetooth: typeof import('@maxvue/max-use').useBluetooth
+  const useBreakpoints: typeof import('@maxvue/max-use').useBreakpoints
+  const useBroadcastChannel: typeof import('@maxvue/max-use').useBroadcastChannel
+  const useBrowserLocation: typeof import('@maxvue/max-use').useBrowserLocation
+  const useCached: typeof import('@maxvue/max-use').useCached
+  const useClipboard: typeof import('@maxvue/max-use').useClipboard
+  const useClipboardItems: typeof import('@maxvue/max-use').useClipboardItems
+  const useCloned: typeof import('@maxvue/max-use').useCloned
+  const useColorMode: typeof import('@maxvue/max-use').useColorMode
+  const useConfirmDialog: typeof import('@maxvue/max-use').useConfirmDialog
+  const useCountdown: typeof import('@maxvue/max-use').useCountdown
+  const useCounter: typeof import('@maxvue/max-use').useCounter
   const useCssModule: typeof import('vue').useCssModule
-  const useCssSupports: typeof import('max-use').useCssSupports
-  const useCssVar: typeof import('max-use').useCssVar
+  const useCssSupports: typeof import('@maxvue/max-use').useCssSupports
+  const useCssVar: typeof import('@maxvue/max-use').useCssVar
   const useCssVars: typeof import('vue').useCssVars
-  const useCurrentElement: typeof import('max-use').useCurrentElement
-  const useCycleList: typeof import('max-use').useCycleList
-  const useDark: typeof import('max-use').useDark
-  const useDateFormat: typeof import('max-use').useDateFormat
-  const useDebounceFn: typeof import('max-use').useDebounceFn
-  const useDebouncedRefHistory: typeof import('max-use').useDebouncedRefHistory
-  const useDefaultReset: typeof import('max-use').useDefaultReset
-  const useDeviceMotion: typeof import('max-use').useDeviceMotion
-  const useDeviceOrientation: typeof import('max-use').useDeviceOrientation
-  const useDevicePixelRatio: typeof import('max-use').useDevicePixelRatio
-  const useDevicesList: typeof import('max-use').useDevicesList
-  const useDisplayMedia: typeof import('max-use').useDisplayMedia
-  const useDocumentVisibility: typeof import('max-use').useDocumentVisibility
-  const useDraggable: typeof import('max-use').useDraggable
-  const useDropZone: typeof import('max-use').useDropZone
-  const useElementBounding: typeof import('max-use').useElementBounding
-  const useElementByPoint: typeof import('max-use').useElementByPoint
-  const useElementHover: typeof import('max-use').useElementHover
-  const useElementSize: typeof import('max-use').useElementSize
-  const useElementVisibility: typeof import('max-use').useElementVisibility
-  const useEventBus: typeof import('max-use').useEventBus
-  const useEventListener: typeof import('max-use').useEventListener
-  const useEventSource: typeof import('max-use').useEventSource
-  const useEyeDropper: typeof import('max-use').useEyeDropper
-  const useFavicon: typeof import('max-use').useFavicon
-  const useFetch: typeof import('max-use').useFetch
-  const useFileDialog: typeof import('max-use').useFileDialog
-  const useFileSystemAccess: typeof import('max-use').useFileSystemAccess
-  const useFocus: typeof import('max-use').useFocus
-  const useFocusWithin: typeof import('max-use').useFocusWithin
-  const useFps: typeof import('max-use').useFps
-  const useFullscreen: typeof import('max-use').useFullscreen
-  const useGamepad: typeof import('max-use').useGamepad
-  const useGeolocation: typeof import('max-use').useGeolocation
+  const useCurrentElement: typeof import('@maxvue/max-use').useCurrentElement
+  const useCycleList: typeof import('@maxvue/max-use').useCycleList
+  const useDark: typeof import('@maxvue/max-use').useDark
+  const useDateFormat: typeof import('@maxvue/max-use').useDateFormat
+  const useDebounceFn: typeof import('@maxvue/max-use').useDebounceFn
+  const useDebouncedRefHistory: typeof import('@maxvue/max-use').useDebouncedRefHistory
+  const useDefaultReset: typeof import('@maxvue/max-use').useDefaultReset
+  const useDeviceMotion: typeof import('@maxvue/max-use').useDeviceMotion
+  const useDeviceOrientation: typeof import('@maxvue/max-use').useDeviceOrientation
+  const useDevicePixelRatio: typeof import('@maxvue/max-use').useDevicePixelRatio
+  const useDevicesList: typeof import('@maxvue/max-use').useDevicesList
+  const useDisplayMedia: typeof import('@maxvue/max-use').useDisplayMedia
+  const useDocumentVisibility: typeof import('@maxvue/max-use').useDocumentVisibility
+  const useDraggable: typeof import('@maxvue/max-use').useDraggable
+  const useDropZone: typeof import('@maxvue/max-use').useDropZone
+  const useElementBounding: typeof import('@maxvue/max-use').useElementBounding
+  const useElementByPoint: typeof import('@maxvue/max-use').useElementByPoint
+  const useElementHover: typeof import('@maxvue/max-use').useElementHover
+  const useElementSize: typeof import('@maxvue/max-use').useElementSize
+  const useElementVisibility: typeof import('@maxvue/max-use').useElementVisibility
+  const useEventBus: typeof import('@maxvue/max-use').useEventBus
+  const useEventListener: typeof import('@maxvue/max-use').useEventListener
+  const useEventSource: typeof import('@maxvue/max-use').useEventSource
+  const useEyeDropper: typeof import('@maxvue/max-use').useEyeDropper
+  const useFavicon: typeof import('@maxvue/max-use').useFavicon
+  const useFetch: typeof import('@maxvue/max-use').useFetch
+  const useFileDialog: typeof import('@maxvue/max-use').useFileDialog
+  const useFileSystemAccess: typeof import('@maxvue/max-use').useFileSystemAccess
+  const useFocus: typeof import('@maxvue/max-use').useFocus
+  const useFocusWithin: typeof import('@maxvue/max-use').useFocusWithin
+  const useFps: typeof import('@maxvue/max-use').useFps
+  const useFullscreen: typeof import('@maxvue/max-use').useFullscreen
+  const useGamepad: typeof import('@maxvue/max-use').useGamepad
+  const useGeolocation: typeof import('@maxvue/max-use').useGeolocation
   const useId: typeof import('vue').useId
-  const useIdle: typeof import('max-use').useIdle
-  const useImage: typeof import('max-use').useImage
-  const useInCache: typeof import('max-use').useInCache
-  const useInfiniteScroll: typeof import('max-use').useInfiniteScroll
-  const useIntersectionObserver: typeof import('max-use').useIntersectionObserver
-  const useInterval: typeof import('max-use').useInterval
-  const useIntervalFn: typeof import('max-use').useIntervalFn
-  const useKeyModifier: typeof import('max-use').useKeyModifier
-  const useLastChanged: typeof import('max-use').useLastChanged
-  const useLocalStorage: typeof import('max-use').useLocalStorage
-  const useMagicKeys: typeof import('max-use').useMagicKeys
-  const useManualRefHistory: typeof import('max-use').useManualRefHistory
-  const useMediaControls: typeof import('max-use').useMediaControls
-  const useMediaQuery: typeof import('max-use').useMediaQuery
-  const useMemoize: typeof import('max-use').useMemoize
-  const useMemory: typeof import('max-use').useMemory
+  const useIdle: typeof import('@maxvue/max-use').useIdle
+  const useImage: typeof import('@maxvue/max-use').useImage
+  const useInCache: typeof import('@maxvue/max-use').useInCache
+  const useInfiniteScroll: typeof import('@maxvue/max-use').useInfiniteScroll
+  const useIntersectionObserver: typeof import('@maxvue/max-use').useIntersectionObserver
+  const useInterval: typeof import('@maxvue/max-use').useInterval
+  const useIntervalFn: typeof import('@maxvue/max-use').useIntervalFn
+  const useKeyModifier: typeof import('@maxvue/max-use').useKeyModifier
+  const useLastChanged: typeof import('@maxvue/max-use').useLastChanged
+  const useLocalStorage: typeof import('@maxvue/max-use').useLocalStorage
+  const useMagicKeys: typeof import('@maxvue/max-use').useMagicKeys
+  const useManualRefHistory: typeof import('@maxvue/max-use').useManualRefHistory
+  const useMediaControls: typeof import('@maxvue/max-use').useMediaControls
+  const useMediaQuery: typeof import('@maxvue/max-use').useMediaQuery
+  const useMemoize: typeof import('@maxvue/max-use').useMemoize
+  const useMemory: typeof import('@maxvue/max-use').useMemory
   const useModel: typeof import('vue').useModel
-  const useMounted: typeof import('max-use').useMounted
-  const useMouse: typeof import('max-use').useMouse
-  const useMouseInElement: typeof import('max-use').useMouseInElement
-  const useMousePressed: typeof import('max-use').useMousePressed
-  const useMutationObserver: typeof import('max-use').useMutationObserver
-  const useNavigatorLanguage: typeof import('max-use').useNavigatorLanguage
-  const useNetwork: typeof import('max-use').useNetwork
-  const useNow: typeof import('max-use').useNow
-  const useObjectUrl: typeof import('max-use').useObjectUrl
-  const useOffsetPagination: typeof import('max-use').useOffsetPagination
-  const useOnline: typeof import('max-use').useOnline
-  const usePageLeave: typeof import('max-use').usePageLeave
-  const useParallax: typeof import('max-use').useParallax
-  const useParentElement: typeof import('max-use').useParentElement
-  const usePerformanceObserver: typeof import('max-use').usePerformanceObserver
-  const usePermission: typeof import('max-use').usePermission
-  const usePointer: typeof import('max-use').usePointer
-  const usePointerLock: typeof import('max-use').usePointerLock
-  const usePointerSwipe: typeof import('max-use').usePointerSwipe
-  const usePreferredColorScheme: typeof import('max-use').usePreferredColorScheme
-  const usePreferredContrast: typeof import('max-use').usePreferredContrast
-  const usePreferredDark: typeof import('max-use').usePreferredDark
-  const usePreferredLanguages: typeof import('max-use').usePreferredLanguages
-  const usePreferredReducedMotion: typeof import('max-use').usePreferredReducedMotion
-  const usePreferredReducedTransparency: typeof import('max-use').usePreferredReducedTransparency
-  const usePrevious: typeof import('max-use').usePrevious
-  const useRafFn: typeof import('max-use').useRafFn
-  const useRefCached: typeof import('max-use').useRefCached
-  const useRefHistory: typeof import('max-use').useRefHistory
-  const useRefStorage: typeof import('max-use').useRefStorage
-  const useResizeObserver: typeof import('max-use').useResizeObserver
-  const useSSRWidth: typeof import('max-use').useSSRWidth
-  const useScreenOrientation: typeof import('max-use').useScreenOrientation
-  const useScreenSafeArea: typeof import('max-use').useScreenSafeArea
-  const useScriptTag: typeof import('max-use').useScriptTag
-  const useScroll: typeof import('max-use').useScroll
-  const useScrollLock: typeof import('max-use').useScrollLock
-  const useSessionStorage: typeof import('max-use').useSessionStorage
-  const useShare: typeof import('max-use').useShare
+  const useMounted: typeof import('@maxvue/max-use').useMounted
+  const useMouse: typeof import('@maxvue/max-use').useMouse
+  const useMouseInElement: typeof import('@maxvue/max-use').useMouseInElement
+  const useMousePressed: typeof import('@maxvue/max-use').useMousePressed
+  const useMutationObserver: typeof import('@maxvue/max-use').useMutationObserver
+  const useNavigatorLanguage: typeof import('@maxvue/max-use').useNavigatorLanguage
+  const useNetwork: typeof import('@maxvue/max-use').useNetwork
+  const useNow: typeof import('@maxvue/max-use').useNow
+  const useObjectUrl: typeof import('@maxvue/max-use').useObjectUrl
+  const useOffsetPagination: typeof import('@maxvue/max-use').useOffsetPagination
+  const useOnline: typeof import('@maxvue/max-use').useOnline
+  const usePageLeave: typeof import('@maxvue/max-use').usePageLeave
+  const useParallax: typeof import('@maxvue/max-use').useParallax
+  const useParentElement: typeof import('@maxvue/max-use').useParentElement
+  const usePerformanceObserver: typeof import('@maxvue/max-use').usePerformanceObserver
+  const usePermission: typeof import('@maxvue/max-use').usePermission
+  const usePointer: typeof import('@maxvue/max-use').usePointer
+  const usePointerLock: typeof import('@maxvue/max-use').usePointerLock
+  const usePointerSwipe: typeof import('@maxvue/max-use').usePointerSwipe
+  const usePreferredColorScheme: typeof import('@maxvue/max-use').usePreferredColorScheme
+  const usePreferredContrast: typeof import('@maxvue/max-use').usePreferredContrast
+  const usePreferredDark: typeof import('@maxvue/max-use').usePreferredDark
+  const usePreferredLanguages: typeof import('@maxvue/max-use').usePreferredLanguages
+  const usePreferredReducedMotion: typeof import('@maxvue/max-use').usePreferredReducedMotion
+  const usePreferredReducedTransparency: typeof import('@maxvue/max-use').usePreferredReducedTransparency
+  const usePrevious: typeof import('@maxvue/max-use').usePrevious
+  const useRafFn: typeof import('@maxvue/max-use').useRafFn
+  const useRefCached: typeof import('@maxvue/max-use').useRefCached
+  const useRefHistory: typeof import('@maxvue/max-use').useRefHistory
+  const useRefStorage: typeof import('@maxvue/max-use').useRefStorage
+  const useResizeObserver: typeof import('@maxvue/max-use').useResizeObserver
+  const useSSRWidth: typeof import('@maxvue/max-use').useSSRWidth
+  const useScreenOrientation: typeof import('@maxvue/max-use').useScreenOrientation
+  const useScreenSafeArea: typeof import('@maxvue/max-use').useScreenSafeArea
+  const useScriptTag: typeof import('@maxvue/max-use').useScriptTag
+  const useScroll: typeof import('@maxvue/max-use').useScroll
+  const useScrollLock: typeof import('@maxvue/max-use').useScrollLock
+  const useSessionStorage: typeof import('@maxvue/max-use').useSessionStorage
+  const useShare: typeof import('@maxvue/max-use').useShare
   const useSlots: typeof import('vue').useSlots
-  const useSorted: typeof import('max-use').useSorted
-  const useSpeechRecognition: typeof import('max-use').useSpeechRecognition
-  const useSpeechSynthesis: typeof import('max-use').useSpeechSynthesis
-  const useStepper: typeof import('max-use').useStepper
-  const useStorage: typeof import('max-use').useStorage
-  const useStorageAsync: typeof import('max-use').useStorageAsync
-  const useStyleTag: typeof import('max-use').useStyleTag
-  const useSupported: typeof import('max-use').useSupported
-  const useSwipe: typeof import('max-use').useSwipe
+  const useSorted: typeof import('@maxvue/max-use').useSorted
+  const useSpeechRecognition: typeof import('@maxvue/max-use').useSpeechRecognition
+  const useSpeechSynthesis: typeof import('@maxvue/max-use').useSpeechSynthesis
+  const useStepper: typeof import('@maxvue/max-use').useStepper
+  const useStorage: typeof import('@maxvue/max-use').useStorage
+  const useStorageAsync: typeof import('@maxvue/max-use').useStorageAsync
+  const useStyleTag: typeof import('@maxvue/max-use').useStyleTag
+  const useSupported: typeof import('@maxvue/max-use').useSupported
+  const useSwipe: typeof import('@maxvue/max-use').useSwipe
   const useTemplateRef: typeof import('vue').useTemplateRef
-  const useTemplateRefsList: typeof import('max-use').useTemplateRefsList
-  const useTextDirection: typeof import('max-use').useTextDirection
-  const useTextSelection: typeof import('max-use').useTextSelection
-  const useTextareaAutosize: typeof import('max-use').useTextareaAutosize
-  const useThrottleFn: typeof import('max-use').useThrottleFn
-  const useThrottledRefHistory: typeof import('max-use').useThrottledRefHistory
-  const useTimeAgo: typeof import('max-use').useTimeAgo
-  const useTimeAgoIntl: typeof import('max-use').useTimeAgoIntl
-  const useTimeout: typeof import('max-use').useTimeout
-  const useTimeoutFn: typeof import('max-use').useTimeoutFn
-  const useTimeoutPoll: typeof import('max-use').useTimeoutPoll
-  const useTimestamp: typeof import('max-use').useTimestamp
-  const useTitle: typeof import('max-use').useTitle
-  const useToNumber: typeof import('max-use').useToNumber
-  const useToString: typeof import('max-use').useToString
-  const useToggle: typeof import('max-use').useToggle
-  const useTransition: typeof import('max-use').useTransition
-  const useUrlSearchParams: typeof import('max-use').useUrlSearchParams
-  const useUserMedia: typeof import('max-use').useUserMedia
-  const useVModel: typeof import('max-use').useVModel
-  const useVModels: typeof import('max-use').useVModels
-  const useVibrate: typeof import('max-use').useVibrate
-  const useVirtualList: typeof import('max-use').useVirtualList
-  const useWakeLock: typeof import('max-use').useWakeLock
-  const useWebNotification: typeof import('max-use').useWebNotification
-  const useWebSocket: typeof import('max-use').useWebSocket
-  const useWebWorker: typeof import('max-use').useWebWorker
-  const useWebWorkerFn: typeof import('max-use').useWebWorkerFn
-  const useWindowFocus: typeof import('max-use').useWindowFocus
-  const useWindowScroll: typeof import('max-use').useWindowScroll
-  const useWindowSize: typeof import('max-use').useWindowSize
+  const useTemplateRefsList: typeof import('@maxvue/max-use').useTemplateRefsList
+  const useTextDirection: typeof import('@maxvue/max-use').useTextDirection
+  const useTextSelection: typeof import('@maxvue/max-use').useTextSelection
+  const useTextareaAutosize: typeof import('@maxvue/max-use').useTextareaAutosize
+  const useThrottleFn: typeof import('@maxvue/max-use').useThrottleFn
+  const useThrottledRefHistory: typeof import('@maxvue/max-use').useThrottledRefHistory
+  const useTimeAgo: typeof import('@maxvue/max-use').useTimeAgo
+  const useTimeAgoIntl: typeof import('@maxvue/max-use').useTimeAgoIntl
+  const useTimeout: typeof import('@maxvue/max-use').useTimeout
+  const useTimeoutFn: typeof import('@maxvue/max-use').useTimeoutFn
+  const useTimeoutPoll: typeof import('@maxvue/max-use').useTimeoutPoll
+  const useTimestamp: typeof import('@maxvue/max-use').useTimestamp
+  const useTitle: typeof import('@maxvue/max-use').useTitle
+  const useToNumber: typeof import('@maxvue/max-use').useToNumber
+  const useToString: typeof import('@maxvue/max-use').useToString
+  const useToggle: typeof import('@maxvue/max-use').useToggle
+  const useTransition: typeof import('@maxvue/max-use').useTransition
+  const useUrlSearchParams: typeof import('@maxvue/max-use').useUrlSearchParams
+  const useUserMedia: typeof import('@maxvue/max-use').useUserMedia
+  const useVModel: typeof import('@maxvue/max-use').useVModel
+  const useVModels: typeof import('@maxvue/max-use').useVModels
+  const useVibrate: typeof import('@maxvue/max-use').useVibrate
+  const useVirtualList: typeof import('@maxvue/max-use').useVirtualList
+  const useWakeLock: typeof import('@maxvue/max-use').useWakeLock
+  const useWebNotification: typeof import('@maxvue/max-use').useWebNotification
+  const useWebSocket: typeof import('@maxvue/max-use').useWebSocket
+  const useWebWorker: typeof import('@maxvue/max-use').useWebWorker
+  const useWebWorkerFn: typeof import('@maxvue/max-use').useWebWorkerFn
+  const useWindowFocus: typeof import('@maxvue/max-use').useWindowFocus
+  const useWindowScroll: typeof import('@maxvue/max-use').useWindowScroll
+  const useWindowSize: typeof import('@maxvue/max-use').useWindowSize
   const vMaska: typeof import('maska/vue').vMaska
-  const validate: typeof import('max-use').validate
-  const valuesInKey: typeof import('max-use').valuesInKey
-  const vueUse: typeof import('max-use').vueUse
+  const validate: typeof import('@maxvue/max-use').validate
+  const valuesInKey: typeof import('@maxvue/max-use').valuesInKey
   const watch: typeof import('vue').watch
-  const watchArray: typeof import('max-use').watchArray
-  const watchAtMost: typeof import('max-use').watchAtMost
-  const watchDebounced: typeof import('max-use').watchDebounced
-  const watchDeep: typeof import('max-use').watchDeep
+  const watchArray: typeof import('@maxvue/max-use').watchArray
+  const watchAtMost: typeof import('@maxvue/max-use').watchAtMost
+  const watchDebounced: typeof import('@maxvue/max-use').watchDebounced
+  const watchDeep: typeof import('@maxvue/max-use').watchDeep
   const watchEffect: typeof import('vue').watchEffect
-  const watchIgnorable: typeof import('max-use').watchIgnorable
-  const watchImmediate: typeof import('max-use').watchImmediate
-  const watchOnce: typeof import('max-use').watchOnce
+  const watchIgnorable: typeof import('@maxvue/max-use').watchIgnorable
+  const watchImmediate: typeof import('@maxvue/max-use').watchImmediate
+  const watchOnce: typeof import('@maxvue/max-use').watchOnce
   const watchPostEffect: typeof import('vue').watchPostEffect
   const watchSyncEffect: typeof import('vue').watchSyncEffect
-  const watchThrottled: typeof import('max-use').watchThrottled
-  const watchTriggerable: typeof import('max-use').watchTriggerable
-  const watchWithFilter: typeof import('max-use').watchWithFilter
-  const whenever: typeof import('max-use').whenever
+  const watchThrottled: typeof import('@maxvue/max-use').watchThrottled
+  const watchTriggerable: typeof import('@maxvue/max-use').watchTriggerable
+  const watchWithFilter: typeof import('@maxvue/max-use').watchWithFilter
+  const whenever: typeof import('@maxvue/max-use').whenever
+  const wireSize: typeof import('@maxvue/max-use').wireSize
 }
 // for type re-export
 declare global {
@@ -517,7 +569,6 @@ declare module 'vue' {
     readonly ConfirmDialog: UnwrapRef<typeof import('./src/components/_primeVue.ts')['ConfirmDialog']>
     readonly ConfirmPopup: UnwrapRef<typeof import('./src/components/_primeVue.ts')['ConfirmPopup']>
     readonly ContextMenu: UnwrapRef<typeof import('./src/components/_primeVue.ts')['ContextMenu']>
-    readonly Convert: UnwrapRef<typeof import('max-use')['Convert']>
     readonly DataTable: UnwrapRef<typeof import('./src/components/_primeVue.ts')['DataTable']>
     readonly DataView: UnwrapRef<typeof import('./src/components/_primeVue.ts')['DataView']>
     readonly DatePicker: UnwrapRef<typeof import('./src/components/_primeVue.ts')['DatePicker']>
@@ -528,7 +579,6 @@ declare module 'vue' {
     readonly DynamicDialog: UnwrapRef<typeof import('./src/components/_primeVue.ts')['DynamicDialog']>
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
     readonly Fieldset: UnwrapRef<typeof import('./src/components/_primeVue.ts')['Fieldset']>
-    readonly Format: UnwrapRef<typeof import('max-use')['Format']>
     readonly Galleria: UnwrapRef<typeof import('./src/components/_primeVue.ts')['Galleria']>
     readonly Image: UnwrapRef<typeof import('./src/components/_primeVue.ts')['Image']>
     readonly ImageCompare: UnwrapRef<typeof import('./src/components/_primeVue.ts')['ImageCompare']>
@@ -542,6 +592,7 @@ declare module 'vue' {
     readonly Message: UnwrapRef<typeof import('./src/components/_primeVue.ts')['Message']>
     readonly MeterGroup: UnwrapRef<typeof import('./src/components/_primeVue.ts')['MeterGroup']>
     readonly MultiSelect: UnwrapRef<typeof import('./src/components/_primeVue.ts')['MultiSelect']>
+    readonly Obj: UnwrapRef<typeof import('@maxvue/max-use')['Obj']>
     readonly OrderList: UnwrapRef<typeof import('./src/components/_primeVue.ts')['OrderList']>
     readonly OrganizationChart: UnwrapRef<typeof import('./src/components/_primeVue.ts')['OrganizationChart']>
     readonly OverlayBadge: UnwrapRef<typeof import('./src/components/_primeVue.ts')['OverlayBadge']>
@@ -553,7 +604,7 @@ declare module 'vue' {
     readonly Popover: UnwrapRef<typeof import('./src/components/_primeVue.ts')['Popover']>
     readonly ProgressBar: UnwrapRef<typeof import('./src/components/_primeVue.ts')['ProgressBar']>
     readonly ProgressSpinner: UnwrapRef<typeof import('./src/components/_primeVue.ts')['ProgressSpinner']>
-    readonly Random: UnwrapRef<typeof import('max-use')['Random']>
+    readonly Random: UnwrapRef<typeof import('@maxvue/max-use')['Random']>
     readonly Rating: UnwrapRef<typeof import('./src/components/_primeVue.ts')['Rating']>
     readonly Row: UnwrapRef<typeof import('./src/components/_primeVue.ts')['Row']>
     readonly ScrollPanel: UnwrapRef<typeof import('./src/components/_primeVue.ts')['ScrollPanel']>
@@ -572,8 +623,9 @@ declare module 'vue' {
     readonly StepPanel: UnwrapRef<typeof import('./src/components/_primeVue.ts')['StepPanel']>
     readonly StepPanels: UnwrapRef<typeof import('./src/components/_primeVue.ts')['StepPanels']>
     readonly Stepper: UnwrapRef<typeof import('./src/components/_primeVue.ts')['Stepper']>
-    readonly Str: UnwrapRef<typeof import('max-use')['Str']>
-    readonly StrFilter: UnwrapRef<typeof import('max-use')['StrFilter']>
+    readonly Str: UnwrapRef<typeof import('@maxvue/max-use')['Str']>
+    readonly StrCase: UnwrapRef<typeof import('@maxvue/max-use')['StrCase']>
+    readonly StrFilter: UnwrapRef<typeof import('@maxvue/max-use')['StrFilter']>
     readonly Tab: UnwrapRef<typeof import('./src/components/_primeVue.ts')['Tab']>
     readonly TabList: UnwrapRef<typeof import('./src/components/_primeVue.ts')['TabList']>
     readonly TabPanel: UnwrapRef<typeof import('./src/components/_primeVue.ts')['TabPanel']>
@@ -591,380 +643,432 @@ declare module 'vue' {
     readonly TreeSelect: UnwrapRef<typeof import('./src/components/_primeVue.ts')['TreeSelect']>
     readonly TreeTable: UnwrapRef<typeof import('./src/components/_primeVue.ts')['TreeTable']>
     readonly VirtualScroller: UnwrapRef<typeof import('./src/components/_primeVue.ts')['VirtualScroller']>
-    readonly apiDeleteRoute: UnwrapRef<typeof import('max-use')['apiDeleteRoute']>
-    readonly apiGetRoute: UnwrapRef<typeof import('max-use')['apiGetRoute']>
-    readonly apiUploadRoute: UnwrapRef<typeof import('max-use')['apiUploadRoute']>
-    readonly assert: UnwrapRef<typeof import('max-use')['assert']>
-    readonly bypassFilter: UnwrapRef<typeof import('max-use')['bypassFilter']>
-    readonly camelize: UnwrapRef<typeof import('max-use')['camelize']>
-    readonly canIterate: UnwrapRef<typeof import('max-use')['canIterate']>
-    readonly clamp: UnwrapRef<typeof import('max-use')['clamp']>
-    readonly cloneFnJSON: UnwrapRef<typeof import('max-use')['cloneFnJSON']>
+    readonly _: UnwrapRef<typeof import('@maxvue/max-use')['_']>
+    readonly addTime: UnwrapRef<typeof import('@maxvue/max-use')['addTime']>
+    readonly apiDeleteRoute: UnwrapRef<typeof import('@maxvue/max-use')['apiDeleteRoute']>
+    readonly apiGetRoute: UnwrapRef<typeof import('@maxvue/max-use')['apiGetRoute']>
+    readonly apiUploadRoute: UnwrapRef<typeof import('@maxvue/max-use')['apiUploadRoute']>
+    readonly assert: UnwrapRef<typeof import('@maxvue/max-use')['assert']>
+    readonly average: UnwrapRef<typeof import('@maxvue/max-use')['average']>
+    readonly bypassFilter: UnwrapRef<typeof import('@maxvue/max-use')['bypassFilter']>
+    readonly camelCase: UnwrapRef<typeof import('@maxvue/max-use')['camelCase']>
+    readonly camelize: UnwrapRef<typeof import('@maxvue/max-use')['camelize']>
+    readonly canIterate: UnwrapRef<typeof import('@maxvue/max-use')['canIterate']>
+    readonly capitalize: UnwrapRef<typeof import('@maxvue/max-use')['capitalize']>
+    readonly chunk: UnwrapRef<typeof import('@maxvue/max-use')['chunk']>
+    readonly clamp: UnwrapRef<typeof import('@maxvue/max-use')['clamp']>
+    readonly cloneDeep: UnwrapRef<typeof import('@maxvue/max-use')['cloneDeep']>
+    readonly cloneFnJSON: UnwrapRef<typeof import('@maxvue/max-use')['cloneFnJSON']>
     readonly computed: UnwrapRef<typeof import('vue')['computed']>
-    readonly computedAsync: UnwrapRef<typeof import('max-use')['computedAsync']>
-    readonly computedInject: UnwrapRef<typeof import('max-use')['computedInject']>
-    readonly computedWithControl: UnwrapRef<typeof import('max-use')['computedWithControl']>
-    readonly containsProp: UnwrapRef<typeof import('max-use')['containsProp']>
-    readonly countBy: UnwrapRef<typeof import('max-use')['countBy']>
+    readonly computedAsync: UnwrapRef<typeof import('@maxvue/max-use')['computedAsync']>
+    readonly computedInject: UnwrapRef<typeof import('@maxvue/max-use')['computedInject']>
+    readonly computedWithControl: UnwrapRef<typeof import('@maxvue/max-use')['computedWithControl']>
+    readonly containsProp: UnwrapRef<typeof import('@maxvue/max-use')['containsProp']>
+    readonly countBy: UnwrapRef<typeof import('@maxvue/max-use')['countBy']>
     readonly createApp: UnwrapRef<typeof import('vue')['createApp']>
-    readonly createEventHook: UnwrapRef<typeof import('max-use')['createEventHook']>
-    readonly createFetch: UnwrapRef<typeof import('max-use')['createFetch']>
-    readonly createFilterWrapper: UnwrapRef<typeof import('max-use')['createFilterWrapper']>
-    readonly createGlobalState: UnwrapRef<typeof import('max-use')['createGlobalState']>
-    readonly createInjectionState: UnwrapRef<typeof import('max-use')['createInjectionState']>
-    readonly createRef: UnwrapRef<typeof import('max-use')['createRef']>
-    readonly createReusableTemplate: UnwrapRef<typeof import('max-use')['createReusableTemplate']>
-    readonly createSharedComposable: UnwrapRef<typeof import('max-use')['createSharedComposable']>
-    readonly createSingletonPromise: UnwrapRef<typeof import('max-use')['createSingletonPromise']>
-    readonly createTemplatePromise: UnwrapRef<typeof import('max-use')['createTemplatePromise']>
-    readonly createUnrefFn: UnwrapRef<typeof import('max-use')['createUnrefFn']>
+    readonly createEventHook: UnwrapRef<typeof import('@maxvue/max-use')['createEventHook']>
+    readonly createFetch: UnwrapRef<typeof import('@maxvue/max-use')['createFetch']>
+    readonly createFilterWrapper: UnwrapRef<typeof import('@maxvue/max-use')['createFilterWrapper']>
+    readonly createGlobalState: UnwrapRef<typeof import('@maxvue/max-use')['createGlobalState']>
+    readonly createInjectionState: UnwrapRef<typeof import('@maxvue/max-use')['createInjectionState']>
+    readonly createRef: UnwrapRef<typeof import('@maxvue/max-use')['createRef']>
+    readonly createReusableTemplate: UnwrapRef<typeof import('@maxvue/max-use')['createReusableTemplate']>
+    readonly createSharedComposable: UnwrapRef<typeof import('@maxvue/max-use')['createSharedComposable']>
+    readonly createSingletonPromise: UnwrapRef<typeof import('@maxvue/max-use')['createSingletonPromise']>
+    readonly createTemplatePromise: UnwrapRef<typeof import('@maxvue/max-use')['createTemplatePromise']>
+    readonly createUnrefFn: UnwrapRef<typeof import('@maxvue/max-use')['createUnrefFn']>
     readonly customRef: UnwrapRef<typeof import('vue')['customRef']>
-    readonly debounceFilter: UnwrapRef<typeof import('max-use')['debounceFilter']>
+    readonly debounceFilter: UnwrapRef<typeof import('@maxvue/max-use')['debounceFilter']>
+    readonly deepClone: UnwrapRef<typeof import('@maxvue/max-use')['deepClone']>
+    readonly deepMerge: UnwrapRef<typeof import('@maxvue/max-use')['deepMerge']>
     readonly defineAsyncComponent: UnwrapRef<typeof import('vue')['defineAsyncComponent']>
     readonly defineComponent: UnwrapRef<typeof import('vue')['defineComponent']>
+    readonly diff: UnwrapRef<typeof import('@maxvue/max-use')['diff']>
+    readonly diffInDays: UnwrapRef<typeof import('@maxvue/max-use')['diffInDays']>
+    readonly diffInHours: UnwrapRef<typeof import('@maxvue/max-use')['diffInHours']>
+    readonly diffInMinutes: UnwrapRef<typeof import('@maxvue/max-use')['diffInMinutes']>
+    readonly diffInMonths: UnwrapRef<typeof import('@maxvue/max-use')['diffInMonths']>
+    readonly diffInSeconds: UnwrapRef<typeof import('@maxvue/max-use')['diffInSeconds']>
+    readonly diffInYears: UnwrapRef<typeof import('@maxvue/max-use')['diffInYears']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
-    readonly electric: UnwrapRef<typeof import('max-use')['electric']>
-    readonly electrical: UnwrapRef<typeof import('max-use')['electrical']>
-    readonly extendRef: UnwrapRef<typeof import('max-use')['extendRef']>
-    readonly filter: UnwrapRef<typeof import('max-use')['filter']>
-    readonly filterBy: UnwrapRef<typeof import('max-use')['filterBy']>
-    readonly filterByNot: UnwrapRef<typeof import('max-use')['filterByNot']>
-    readonly formatCep: UnwrapRef<typeof import('max-use')['formatCep']>
-    readonly formatCnpj: UnwrapRef<typeof import('max-use')['formatCnpj']>
-    readonly formatCpf: UnwrapRef<typeof import('max-use')['formatCpf']>
-    readonly formatCpfCnpj: UnwrapRef<typeof import('max-use')['formatCpfCnpj']>
-    readonly formatDate: UnwrapRef<typeof import('max-use')['formatDate']>
-    readonly formatPhone: UnwrapRef<typeof import('max-use')['formatPhone']>
-    readonly formatTimeAgo: UnwrapRef<typeof import('max-use')['formatTimeAgo']>
-    readonly formatTimeAgoIntl: UnwrapRef<typeof import('max-use')['formatTimeAgoIntl']>
-    readonly formatTimeAgoIntlParts: UnwrapRef<typeof import('max-use')['formatTimeAgoIntlParts']>
+    readonly electric: UnwrapRef<typeof import('@maxvue/max-use')['electric']>
+    readonly electrical: UnwrapRef<typeof import('@maxvue/max-use')['electrical']>
+    readonly extendRef: UnwrapRef<typeof import('@maxvue/max-use')['extendRef']>
+    readonly filter: UnwrapRef<typeof import('@maxvue/max-use')['filter']>
+    readonly filterBy: UnwrapRef<typeof import('@maxvue/max-use')['filterBy']>
+    readonly filterByNot: UnwrapRef<typeof import('@maxvue/max-use')['filterByNot']>
+    readonly findLast: UnwrapRef<typeof import('@maxvue/max-use')['findLast']>
+    readonly first: UnwrapRef<typeof import('@maxvue/max-use')['first']>
+    readonly format: UnwrapRef<typeof import('@maxvue/max-use')['format']>
+    readonly formatBytes: UnwrapRef<typeof import('@maxvue/max-use')['formatBytes']>
+    readonly formatCep: UnwrapRef<typeof import('@maxvue/max-use')['formatCep']>
+    readonly formatCnpj: UnwrapRef<typeof import('@maxvue/max-use')['formatCnpj']>
+    readonly formatCpf: UnwrapRef<typeof import('@maxvue/max-use')['formatCpf']>
+    readonly formatCpfCnpj: UnwrapRef<typeof import('@maxvue/max-use')['formatCpfCnpj']>
+    readonly formatCurrency: UnwrapRef<typeof import('@maxvue/max-use')['formatCurrency']>
+    readonly formatDate: UnwrapRef<typeof import('@maxvue/max-use')['formatDate']>
+    readonly formatPhone: UnwrapRef<typeof import('@maxvue/max-use')['formatPhone']>
+    readonly formatTimeAgo: UnwrapRef<typeof import('@maxvue/max-use')['formatTimeAgo']>
+    readonly formatTimeAgoIntl: UnwrapRef<typeof import('@maxvue/max-use')['formatTimeAgoIntl']>
+    readonly formatTimeAgoIntlParts: UnwrapRef<typeof import('@maxvue/max-use')['formatTimeAgoIntlParts']>
     readonly gap: UnwrapRef<typeof import('./src/helpers/gap.ts')['gap']>
+    readonly get: UnwrapRef<typeof import('@maxvue/max-use')['get']>
     readonly getCached: UnwrapRef<typeof import('./src/helpers/getCached.ts')['getCached']>
     readonly getCssSize: UnwrapRef<typeof import('./src/helpers/getCssSize.ts')['getCssSize']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
     readonly getCurrentWatcher: UnwrapRef<typeof import('vue')['getCurrentWatcher']>
-    readonly getLifeCycleTarget: UnwrapRef<typeof import('max-use')['getLifeCycleTarget']>
-    readonly getSSRHandler: UnwrapRef<typeof import('max-use')['getSSRHandler']>
+    readonly getLifeCycleTarget: UnwrapRef<typeof import('@maxvue/max-use')['getLifeCycleTarget']>
+    readonly getSSRHandler: UnwrapRef<typeof import('@maxvue/max-use')['getSSRHandler']>
+    readonly groupBy: UnwrapRef<typeof import('@maxvue/max-use')['groupBy']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
-    readonly hasContent: UnwrapRef<typeof import('max-use')['hasContent']>
-    readonly hasOwn: UnwrapRef<typeof import('max-use')['hasOwn']>
-    readonly hasPassedDays: UnwrapRef<typeof import('max-use')['hasPassedDays']>
-    readonly hasPassedHours: UnwrapRef<typeof import('max-use')['hasPassedHours']>
-    readonly hasPassedMinutes: UnwrapRef<typeof import('max-use')['hasPassedMinutes']>
-    readonly hyphenate: UnwrapRef<typeof import('max-use')['hyphenate']>
-    readonly identity: UnwrapRef<typeof import('max-use')['identity']>
-    readonly inDateInterval: UnwrapRef<typeof import('max-use')['inDateInterval']>
-    readonly increaseWithUnit: UnwrapRef<typeof import('max-use')['increaseWithUnit']>
+    readonly hasContent: UnwrapRef<typeof import('@maxvue/max-use')['hasContent']>
+    readonly hasOwn: UnwrapRef<typeof import('@maxvue/max-use')['hasOwn']>
+    readonly hasPassedDays: UnwrapRef<typeof import('@maxvue/max-use')['hasPassedDays']>
+    readonly hasPassedHours: UnwrapRef<typeof import('@maxvue/max-use')['hasPassedHours']>
+    readonly hasPassedMinutes: UnwrapRef<typeof import('@maxvue/max-use')['hasPassedMinutes']>
+    readonly hyphenate: UnwrapRef<typeof import('@maxvue/max-use')['hyphenate']>
+    readonly identity: UnwrapRef<typeof import('@maxvue/max-use')['identity']>
+    readonly inDateInterval: UnwrapRef<typeof import('@maxvue/max-use')['inDateInterval']>
+    readonly increaseWithUnit: UnwrapRef<typeof import('@maxvue/max-use')['increaseWithUnit']>
+    readonly initials: UnwrapRef<typeof import('@maxvue/max-use')['initials']>
     readonly inject: UnwrapRef<typeof import('vue')['inject']>
-    readonly injectLocal: UnwrapRef<typeof import('max-use')['injectLocal']>
-    readonly intervalRandom: UnwrapRef<typeof import('max-use')['intervalRandom']>
-    readonly invoke: UnwrapRef<typeof import('max-use')['invoke']>
-    readonly isBlank: UnwrapRef<typeof import('max-use')['isBlank']>
-    readonly isCnpj: UnwrapRef<typeof import('max-use')['isCnpj']>
-    readonly isCpf: UnwrapRef<typeof import('max-use')['isCpf']>
-    readonly isCpfCnpj: UnwrapRef<typeof import('max-use')['isCpfCnpj']>
-    readonly isDate: UnwrapRef<typeof import('max-use')['isDate']>
-    readonly isDef: UnwrapRef<typeof import('max-use')['isDef']>
-    readonly isDefined: UnwrapRef<typeof import('max-use')['isDefined']>
-    readonly isInDateInterval: UnwrapRef<typeof import('max-use')['isInDateInterval']>
-    readonly isNumber: UnwrapRef<typeof import('max-use')['isNumber']>
-    readonly isNumeric: UnwrapRef<typeof import('max-use')['isNumeric']>
-    readonly isObject: UnwrapRef<typeof import('max-use')['isObject']>
+    readonly injectLocal: UnwrapRef<typeof import('@maxvue/max-use')['injectLocal']>
+    readonly intervalRandom: UnwrapRef<typeof import('@maxvue/max-use')['intervalRandom']>
+    readonly invoke: UnwrapRef<typeof import('@maxvue/max-use')['invoke']>
+    readonly isArray: UnwrapRef<typeof import('@maxvue/max-use')['isArray']>
+    readonly isBlank: UnwrapRef<typeof import('@maxvue/max-use')['isBlank']>
+    readonly isCnpj: UnwrapRef<typeof import('@maxvue/max-use')['isCnpj']>
+    readonly isCpf: UnwrapRef<typeof import('@maxvue/max-use')['isCpf']>
+    readonly isCpfCnpj: UnwrapRef<typeof import('@maxvue/max-use')['isCpfCnpj']>
+    readonly isDate: UnwrapRef<typeof import('@maxvue/max-use')['isDate']>
+    readonly isDef: UnwrapRef<typeof import('@maxvue/max-use')['isDef']>
+    readonly isDefined: UnwrapRef<typeof import('@maxvue/max-use')['isDefined']>
+    readonly isEmail: UnwrapRef<typeof import('@maxvue/max-use')['isEmail']>
+    readonly isEqual: UnwrapRef<typeof import('@maxvue/max-use')['isEqual']>
+    readonly isFuture: UnwrapRef<typeof import('@maxvue/max-use')['isFuture']>
+    readonly isInDateInterval: UnwrapRef<typeof import('@maxvue/max-use')['isInDateInterval']>
+    readonly isIterable: UnwrapRef<typeof import('@maxvue/max-use')['isIterable']>
+    readonly isNumber: UnwrapRef<typeof import('@maxvue/max-use')['isNumber']>
+    readonly isNumeric: UnwrapRef<typeof import('@maxvue/max-use')['isNumeric']>
+    readonly isObject: UnwrapRef<typeof import('@maxvue/max-use')['isObject']>
+    readonly isPast: UnwrapRef<typeof import('@maxvue/max-use')['isPast']>
     readonly isProxy: UnwrapRef<typeof import('vue')['isProxy']>
     readonly isReactive: UnwrapRef<typeof import('vue')['isReactive']>
     readonly isReadonly: UnwrapRef<typeof import('vue')['isReadonly']>
     readonly isRef: UnwrapRef<typeof import('vue')['isRef']>
-    readonly isSameDay: UnwrapRef<typeof import('max-use')['isSameDay']>
+    readonly isSameDay: UnwrapRef<typeof import('@maxvue/max-use')['isSameDay']>
     readonly isShallow: UnwrapRef<typeof import('vue')['isShallow']>
-    readonly isValid: UnwrapRef<typeof import('max-use')['isValid']>
-    readonly kebabCase: UnwrapRef<typeof import('max-use')['kebabCase']>
-    readonly keyBy: UnwrapRef<typeof import('max-use')['keyBy']>
-    readonly makeDestructurable: UnwrapRef<typeof import('max-use')['makeDestructurable']>
-    readonly mapGamepadToXbox360Controller: UnwrapRef<typeof import('max-use')['mapGamepadToXbox360Controller']>
+    readonly isTouchDevice: UnwrapRef<typeof import('@maxvue/max-use')['isTouchDevice']>
+    readonly isValid: UnwrapRef<typeof import('@maxvue/max-use')['isValid']>
+    readonly isWeekend: UnwrapRef<typeof import('@maxvue/max-use')['isWeekend']>
+    readonly kebabCase: UnwrapRef<typeof import('@maxvue/max-use')['kebabCase']>
+    readonly keyBy: UnwrapRef<typeof import('@maxvue/max-use')['keyBy']>
+    readonly last: UnwrapRef<typeof import('@maxvue/max-use')['last']>
+    readonly makeDestructurable: UnwrapRef<typeof import('@maxvue/max-use')['makeDestructurable']>
+    readonly mapGamepadToXbox360Controller: UnwrapRef<typeof import('@maxvue/max-use')['mapGamepadToXbox360Controller']>
+    readonly mapValues: UnwrapRef<typeof import('@maxvue/max-use')['mapValues']>
     readonly markRaw: UnwrapRef<typeof import('vue')['markRaw']>
-    readonly maxUse: UnwrapRef<typeof import('max-use')['maxUse']>
-    readonly maxUseItems: UnwrapRef<typeof import('max-use')['maxUseItems']>
+    readonly maskSensitive: UnwrapRef<typeof import('@maxvue/max-use')['maskSensitive']>
+    readonly median: UnwrapRef<typeof import('@maxvue/max-use')['median']>
     readonly nextTick: UnwrapRef<typeof import('vue')['nextTick']>
-    readonly noop: UnwrapRef<typeof import('max-use')['noop']>
-    readonly normalizeDate: UnwrapRef<typeof import('max-use')['normalizeDate']>
-    readonly normalizeToSearch: UnwrapRef<typeof import('max-use')['normalizeToSearch']>
-    readonly notNullish: UnwrapRef<typeof import('max-use')['notNullish']>
-    readonly now: UnwrapRef<typeof import('max-use')['now']>
-    readonly numeric: UnwrapRef<typeof import('max-use')['numeric']>
-    readonly objectEntries: UnwrapRef<typeof import('max-use')['objectEntries']>
-    readonly objectOmit: UnwrapRef<typeof import('max-use')['objectOmit']>
-    readonly objectPick: UnwrapRef<typeof import('max-use')['objectPick']>
+    readonly noHtml: UnwrapRef<typeof import('@maxvue/max-use')['noHtml']>
+    readonly noop: UnwrapRef<typeof import('@maxvue/max-use')['noop']>
+    readonly normalizeDate: UnwrapRef<typeof import('@maxvue/max-use')['normalizeDate']>
+    readonly normalizeToSearch: UnwrapRef<typeof import('@maxvue/max-use')['normalizeToSearch']>
+    readonly notNullish: UnwrapRef<typeof import('@maxvue/max-use')['notNullish']>
+    readonly now: UnwrapRef<typeof import('@maxvue/max-use')['now']>
+    readonly numeric: UnwrapRef<typeof import('@maxvue/max-use')['numeric']>
+    readonly objectEntries: UnwrapRef<typeof import('@maxvue/max-use')['objectEntries']>
+    readonly objectOmit: UnwrapRef<typeof import('@maxvue/max-use')['objectOmit']>
+    readonly objectPick: UnwrapRef<typeof import('@maxvue/max-use')['objectPick']>
+    readonly omit: UnwrapRef<typeof import('@maxvue/max-use')['omit']>
     readonly onActivated: UnwrapRef<typeof import('vue')['onActivated']>
     readonly onBeforeMount: UnwrapRef<typeof import('vue')['onBeforeMount']>
     readonly onBeforeUnmount: UnwrapRef<typeof import('vue')['onBeforeUnmount']>
     readonly onBeforeUpdate: UnwrapRef<typeof import('vue')['onBeforeUpdate']>
-    readonly onClickOutside: UnwrapRef<typeof import('max-use')['onClickOutside']>
+    readonly onClickOutside: UnwrapRef<typeof import('@maxvue/max-use')['onClickOutside']>
     readonly onDeactivated: UnwrapRef<typeof import('vue')['onDeactivated']>
-    readonly onElementRemoval: UnwrapRef<typeof import('max-use')['onElementRemoval']>
+    readonly onElementRemoval: UnwrapRef<typeof import('@maxvue/max-use')['onElementRemoval']>
     readonly onErrorCaptured: UnwrapRef<typeof import('vue')['onErrorCaptured']>
-    readonly onKeyDown: UnwrapRef<typeof import('max-use')['onKeyDown']>
-    readonly onKeyPressed: UnwrapRef<typeof import('max-use')['onKeyPressed']>
-    readonly onKeyStroke: UnwrapRef<typeof import('max-use')['onKeyStroke']>
-    readonly onKeyUp: UnwrapRef<typeof import('max-use')['onKeyUp']>
-    readonly onLongPress: UnwrapRef<typeof import('max-use')['onLongPress']>
+    readonly onKeyDown: UnwrapRef<typeof import('@maxvue/max-use')['onKeyDown']>
+    readonly onKeyPressed: UnwrapRef<typeof import('@maxvue/max-use')['onKeyPressed']>
+    readonly onKeyStroke: UnwrapRef<typeof import('@maxvue/max-use')['onKeyStroke']>
+    readonly onKeyUp: UnwrapRef<typeof import('@maxvue/max-use')['onKeyUp']>
+    readonly onLongPress: UnwrapRef<typeof import('@maxvue/max-use')['onLongPress']>
     readonly onMounted: UnwrapRef<typeof import('vue')['onMounted']>
     readonly onRenderTracked: UnwrapRef<typeof import('vue')['onRenderTracked']>
     readonly onRenderTriggered: UnwrapRef<typeof import('vue')['onRenderTriggered']>
     readonly onScopeDispose: UnwrapRef<typeof import('vue')['onScopeDispose']>
     readonly onServerPrefetch: UnwrapRef<typeof import('vue')['onServerPrefetch']>
-    readonly onStartTyping: UnwrapRef<typeof import('max-use')['onStartTyping']>
+    readonly onStartTyping: UnwrapRef<typeof import('@maxvue/max-use')['onStartTyping']>
     readonly onUnmounted: UnwrapRef<typeof import('vue')['onUnmounted']>
     readonly onUpdated: UnwrapRef<typeof import('vue')['onUpdated']>
     readonly onWatcherCleanup: UnwrapRef<typeof import('vue')['onWatcherCleanup']>
-    readonly onlyLetters: UnwrapRef<typeof import('max-use')['onlyLetters']>
-    readonly onlyLettersAndNumbers: UnwrapRef<typeof import('max-use')['onlyLettersAndNumbers']>
-    readonly onlyNumbers: UnwrapRef<typeof import('max-use')['onlyNumbers']>
-    readonly onlySymbols: UnwrapRef<typeof import('max-use')['onlySymbols']>
-    readonly orderBy: UnwrapRef<typeof import('max-use')['orderBy']>
-    readonly orderByWithKey: UnwrapRef<typeof import('max-use')['orderByWithKey']>
+    readonly onlyLetters: UnwrapRef<typeof import('@maxvue/max-use')['onlyLetters']>
+    readonly onlyLettersAndNumbers: UnwrapRef<typeof import('@maxvue/max-use')['onlyLettersAndNumbers']>
+    readonly onlyNumbers: UnwrapRef<typeof import('@maxvue/max-use')['onlyNumbers']>
+    readonly onlySymbols: UnwrapRef<typeof import('@maxvue/max-use')['onlySymbols']>
+    readonly orderBy: UnwrapRef<typeof import('@maxvue/max-use')['orderBy']>
+    readonly orderByWithKey: UnwrapRef<typeof import('@maxvue/max-use')['orderByWithKey']>
     readonly paddingMargin: UnwrapRef<typeof import('./src/helpers/paddingMargin.ts')['paddingMargin']>
-    readonly pausableFilter: UnwrapRef<typeof import('max-use')['pausableFilter']>
-    readonly promiseTimeout: UnwrapRef<typeof import('max-use')['promiseTimeout']>
+    readonly pausableFilter: UnwrapRef<typeof import('@maxvue/max-use')['pausableFilter']>
+    readonly pick: UnwrapRef<typeof import('@maxvue/max-use')['pick']>
+    readonly promiseTimeout: UnwrapRef<typeof import('@maxvue/max-use')['promiseTimeout']>
     readonly provide: UnwrapRef<typeof import('vue')['provide']>
-    readonly provideLocal: UnwrapRef<typeof import('max-use')['provideLocal']>
-    readonly provideSSRWidth: UnwrapRef<typeof import('max-use')['provideSSRWidth']>
-    readonly pxValue: UnwrapRef<typeof import('max-use')['pxValue']>
-    readonly rand: UnwrapRef<typeof import('max-use')['rand']>
-    readonly reactify: UnwrapRef<typeof import('max-use')['reactify']>
-    readonly reactifyObject: UnwrapRef<typeof import('max-use')['reactifyObject']>
+    readonly provideLocal: UnwrapRef<typeof import('@maxvue/max-use')['provideLocal']>
+    readonly provideSSRWidth: UnwrapRef<typeof import('@maxvue/max-use')['provideSSRWidth']>
+    readonly pxValue: UnwrapRef<typeof import('@maxvue/max-use')['pxValue']>
+    readonly rand: UnwrapRef<typeof import('@maxvue/max-use')['rand']>
+    readonly reactify: UnwrapRef<typeof import('@maxvue/max-use')['reactify']>
+    readonly reactifyObject: UnwrapRef<typeof import('@maxvue/max-use')['reactifyObject']>
     readonly reactive: UnwrapRef<typeof import('vue')['reactive']>
-    readonly reactiveComputed: UnwrapRef<typeof import('max-use')['reactiveComputed']>
-    readonly reactiveOmit: UnwrapRef<typeof import('max-use')['reactiveOmit']>
-    readonly reactivePick: UnwrapRef<typeof import('max-use')['reactivePick']>
+    readonly reactiveComputed: UnwrapRef<typeof import('@maxvue/max-use')['reactiveComputed']>
+    readonly reactiveOmit: UnwrapRef<typeof import('@maxvue/max-use')['reactiveOmit']>
+    readonly reactivePick: UnwrapRef<typeof import('@maxvue/max-use')['reactivePick']>
+    readonly readingTime: UnwrapRef<typeof import('@maxvue/max-use')['readingTime']>
     readonly readonly: UnwrapRef<typeof import('vue')['readonly']>
     readonly ref: UnwrapRef<typeof import('vue')['ref']>
-    readonly refAutoReset: UnwrapRef<typeof import('max-use')['refAutoReset']>
-    readonly refDebounced: UnwrapRef<typeof import('max-use')['refDebounced']>
-    readonly refDefault: UnwrapRef<typeof import('max-use')['refDefault']>
-    readonly refManualReset: UnwrapRef<typeof import('max-use')['refManualReset']>
-    readonly refThrottled: UnwrapRef<typeof import('max-use')['refThrottled']>
-    readonly refWithControl: UnwrapRef<typeof import('max-use')['refWithControl']>
-    readonly removeSpaces: UnwrapRef<typeof import('max-use')['removeSpaces']>
+    readonly refAutoReset: UnwrapRef<typeof import('@maxvue/max-use')['refAutoReset']>
+    readonly refDebounced: UnwrapRef<typeof import('@maxvue/max-use')['refDebounced']>
+    readonly refDefault: UnwrapRef<typeof import('@maxvue/max-use')['refDefault']>
+    readonly refManualReset: UnwrapRef<typeof import('@maxvue/max-use')['refManualReset']>
+    readonly refThrottled: UnwrapRef<typeof import('@maxvue/max-use')['refThrottled']>
+    readonly refWithControl: UnwrapRef<typeof import('@maxvue/max-use')['refWithControl']>
+    readonly removeSpaces: UnwrapRef<typeof import('@maxvue/max-use')['removeSpaces']>
+    readonly renameKeys: UnwrapRef<typeof import('@maxvue/max-use')['renameKeys']>
     readonly resolveComponent: UnwrapRef<typeof import('vue')['resolveComponent']>
-    readonly set: UnwrapRef<typeof import('max-use')['set']>
+    readonly roundDown: UnwrapRef<typeof import('@maxvue/max-use')['roundDown']>
+    readonly roundUp: UnwrapRef<typeof import('@maxvue/max-use')['roundUp']>
+    readonly sample: UnwrapRef<typeof import('@maxvue/max-use')['sample']>
+    readonly set: UnwrapRef<typeof import('@maxvue/max-use')['set']>
     readonly setCached: UnwrapRef<typeof import('./src/helpers/setCached.ts')['setCached']>
-    readonly setSSRHandler: UnwrapRef<typeof import('max-use')['setSSRHandler']>
+    readonly setSSRHandler: UnwrapRef<typeof import('@maxvue/max-use')['setSSRHandler']>
     readonly shallowReactive: UnwrapRef<typeof import('vue')['shallowReactive']>
     readonly shallowReadonly: UnwrapRef<typeof import('vue')['shallowReadonly']>
     readonly shallowRef: UnwrapRef<typeof import('vue')['shallowRef']>
-    readonly size: UnwrapRef<typeof import('max-use')['size']>
-    readonly snakeCase: UnwrapRef<typeof import('max-use')['snakeCase']>
-    readonly sumBy: UnwrapRef<typeof import('max-use')['sumBy']>
-    readonly syncRef: UnwrapRef<typeof import('max-use')['syncRef']>
-    readonly syncRefs: UnwrapRef<typeof import('max-use')['syncRefs']>
-    readonly throttleFilter: UnwrapRef<typeof import('max-use')['throttleFilter']>
-    readonly timestamp: UnwrapRef<typeof import('max-use')['timestamp']>
-    readonly toArray: UnwrapRef<typeof import('max-use')['toArray']>
-    readonly toNumber: UnwrapRef<typeof import('max-use')['toNumber']>
+    readonly shuffle: UnwrapRef<typeof import('@maxvue/max-use')['shuffle']>
+    readonly size: UnwrapRef<typeof import('@maxvue/max-use')['size']>
+    readonly slugify: UnwrapRef<typeof import('@maxvue/max-use')['slugify']>
+    readonly snakeCase: UnwrapRef<typeof import('@maxvue/max-use')['snakeCase']>
+    readonly sortBy: UnwrapRef<typeof import('@maxvue/max-use')['sortBy']>
+    readonly sortByMulti: UnwrapRef<typeof import('@maxvue/max-use')['sortByMulti']>
+    readonly stripHtml: UnwrapRef<typeof import('@maxvue/max-use')['stripHtml']>
+    readonly sum: UnwrapRef<typeof import('@maxvue/max-use')['sum']>
+    readonly sumBy: UnwrapRef<typeof import('@maxvue/max-use')['sumBy']>
+    readonly syncRef: UnwrapRef<typeof import('@maxvue/max-use')['syncRef']>
+    readonly syncRefs: UnwrapRef<typeof import('@maxvue/max-use')['syncRefs']>
+    readonly throttleFilter: UnwrapRef<typeof import('@maxvue/max-use')['throttleFilter']>
+    readonly timestamp: UnwrapRef<typeof import('@maxvue/max-use')['timestamp']>
+    readonly toArray: UnwrapRef<typeof import('@maxvue/max-use')['toArray']>
+    readonly toNumber: UnwrapRef<typeof import('@maxvue/max-use')['toNumber']>
     readonly toRaw: UnwrapRef<typeof import('vue')['toRaw']>
-    readonly toReactive: UnwrapRef<typeof import('max-use')['toReactive']>
+    readonly toReactive: UnwrapRef<typeof import('@maxvue/max-use')['toReactive']>
     readonly toRef: UnwrapRef<typeof import('vue')['toRef']>
     readonly toRefs: UnwrapRef<typeof import('vue')['toRefs']>
-    readonly toSearchableString: UnwrapRef<typeof import('max-use')['toSearchableString']>
+    readonly toSearchableString: UnwrapRef<typeof import('@maxvue/max-use')['toSearchableString']>
     readonly toValue: UnwrapRef<typeof import('vue')['toValue']>
-    readonly transition: UnwrapRef<typeof import('max-use')['transition']>
+    readonly transition: UnwrapRef<typeof import('@maxvue/max-use')['transition']>
     readonly triggerRef: UnwrapRef<typeof import('vue')['triggerRef']>
-    readonly tryOnBeforeMount: UnwrapRef<typeof import('max-use')['tryOnBeforeMount']>
-    readonly tryOnBeforeUnmount: UnwrapRef<typeof import('max-use')['tryOnBeforeUnmount']>
-    readonly tryOnMounted: UnwrapRef<typeof import('max-use')['tryOnMounted']>
-    readonly tryOnScopeDispose: UnwrapRef<typeof import('max-use')['tryOnScopeDispose']>
-    readonly tryOnUnmounted: UnwrapRef<typeof import('max-use')['tryOnUnmounted']>
-    readonly ulid: UnwrapRef<typeof import('max-use')['ulid']>
+    readonly truncate: UnwrapRef<typeof import('@maxvue/max-use')['truncate']>
+    readonly tryOnBeforeMount: UnwrapRef<typeof import('@maxvue/max-use')['tryOnBeforeMount']>
+    readonly tryOnBeforeUnmount: UnwrapRef<typeof import('@maxvue/max-use')['tryOnBeforeUnmount']>
+    readonly tryOnMounted: UnwrapRef<typeof import('@maxvue/max-use')['tryOnMounted']>
+    readonly tryOnScopeDispose: UnwrapRef<typeof import('@maxvue/max-use')['tryOnScopeDispose']>
+    readonly tryOnUnmounted: UnwrapRef<typeof import('@maxvue/max-use')['tryOnUnmounted']>
+    readonly ulid: UnwrapRef<typeof import('@maxvue/max-use')['ulid']>
+    readonly uniq: UnwrapRef<typeof import('@maxvue/max-use')['uniq']>
+    readonly uniqueBy: UnwrapRef<typeof import('@maxvue/max-use')['uniqueBy']>
     readonly unref: UnwrapRef<typeof import('vue')['unref']>
-    readonly unrefElement: UnwrapRef<typeof import('max-use')['unrefElement']>
-    readonly until: UnwrapRef<typeof import('max-use')['until']>
-    readonly useActiveElement: UnwrapRef<typeof import('max-use')['useActiveElement']>
-    readonly useAnimate: UnwrapRef<typeof import('max-use')['useAnimate']>
-    readonly useArrayDifference: UnwrapRef<typeof import('max-use')['useArrayDifference']>
-    readonly useArrayEvery: UnwrapRef<typeof import('max-use')['useArrayEvery']>
-    readonly useArrayFilter: UnwrapRef<typeof import('max-use')['useArrayFilter']>
-    readonly useArrayFind: UnwrapRef<typeof import('max-use')['useArrayFind']>
-    readonly useArrayFindIndex: UnwrapRef<typeof import('max-use')['useArrayFindIndex']>
-    readonly useArrayFindLast: UnwrapRef<typeof import('max-use')['useArrayFindLast']>
-    readonly useArrayIncludes: UnwrapRef<typeof import('max-use')['useArrayIncludes']>
-    readonly useArrayJoin: UnwrapRef<typeof import('max-use')['useArrayJoin']>
-    readonly useArrayMap: UnwrapRef<typeof import('max-use')['useArrayMap']>
-    readonly useArrayReduce: UnwrapRef<typeof import('max-use')['useArrayReduce']>
-    readonly useArraySome: UnwrapRef<typeof import('max-use')['useArraySome']>
-    readonly useArrayUnique: UnwrapRef<typeof import('max-use')['useArrayUnique']>
-    readonly useAsyncQueue: UnwrapRef<typeof import('max-use')['useAsyncQueue']>
-    readonly useAsyncState: UnwrapRef<typeof import('max-use')['useAsyncState']>
+    readonly unrefElement: UnwrapRef<typeof import('@maxvue/max-use')['unrefElement']>
+    readonly unset: UnwrapRef<typeof import('@maxvue/max-use')['unset']>
+    readonly until: UnwrapRef<typeof import('@maxvue/max-use')['until']>
+    readonly useActiveElement: UnwrapRef<typeof import('@maxvue/max-use')['useActiveElement']>
+    readonly useAnimate: UnwrapRef<typeof import('@maxvue/max-use')['useAnimate']>
+    readonly useArrayDifference: UnwrapRef<typeof import('@maxvue/max-use')['useArrayDifference']>
+    readonly useArrayEvery: UnwrapRef<typeof import('@maxvue/max-use')['useArrayEvery']>
+    readonly useArrayFilter: UnwrapRef<typeof import('@maxvue/max-use')['useArrayFilter']>
+    readonly useArrayFind: UnwrapRef<typeof import('@maxvue/max-use')['useArrayFind']>
+    readonly useArrayFindIndex: UnwrapRef<typeof import('@maxvue/max-use')['useArrayFindIndex']>
+    readonly useArrayFindLast: UnwrapRef<typeof import('@maxvue/max-use')['useArrayFindLast']>
+    readonly useArrayIncludes: UnwrapRef<typeof import('@maxvue/max-use')['useArrayIncludes']>
+    readonly useArrayJoin: UnwrapRef<typeof import('@maxvue/max-use')['useArrayJoin']>
+    readonly useArrayMap: UnwrapRef<typeof import('@maxvue/max-use')['useArrayMap']>
+    readonly useArrayReduce: UnwrapRef<typeof import('@maxvue/max-use')['useArrayReduce']>
+    readonly useArraySome: UnwrapRef<typeof import('@maxvue/max-use')['useArraySome']>
+    readonly useArrayUnique: UnwrapRef<typeof import('@maxvue/max-use')['useArrayUnique']>
+    readonly useAsyncQueue: UnwrapRef<typeof import('@maxvue/max-use')['useAsyncQueue']>
+    readonly useAsyncState: UnwrapRef<typeof import('@maxvue/max-use')['useAsyncState']>
     readonly useAttrs: UnwrapRef<typeof import('vue')['useAttrs']>
-    readonly useBase64: UnwrapRef<typeof import('max-use')['useBase64']>
-    readonly useBattery: UnwrapRef<typeof import('max-use')['useBattery']>
-    readonly useBluetooth: UnwrapRef<typeof import('max-use')['useBluetooth']>
-    readonly useBreakpoints: UnwrapRef<typeof import('max-use')['useBreakpoints']>
-    readonly useBroadcastChannel: UnwrapRef<typeof import('max-use')['useBroadcastChannel']>
-    readonly useBrowserLocation: UnwrapRef<typeof import('max-use')['useBrowserLocation']>
-    readonly useCached: UnwrapRef<typeof import('max-use')['useCached']>
-    readonly useClipboard: UnwrapRef<typeof import('max-use')['useClipboard']>
-    readonly useClipboardItems: UnwrapRef<typeof import('max-use')['useClipboardItems']>
-    readonly useCloned: UnwrapRef<typeof import('max-use')['useCloned']>
-    readonly useColorMode: UnwrapRef<typeof import('max-use')['useColorMode']>
-    readonly useConfirmDialog: UnwrapRef<typeof import('max-use')['useConfirmDialog']>
-    readonly useCountdown: UnwrapRef<typeof import('max-use')['useCountdown']>
-    readonly useCounter: UnwrapRef<typeof import('max-use')['useCounter']>
+    readonly useBase64: UnwrapRef<typeof import('@maxvue/max-use')['useBase64']>
+    readonly useBattery: UnwrapRef<typeof import('@maxvue/max-use')['useBattery']>
+    readonly useBluetooth: UnwrapRef<typeof import('@maxvue/max-use')['useBluetooth']>
+    readonly useBreakpoints: UnwrapRef<typeof import('@maxvue/max-use')['useBreakpoints']>
+    readonly useBroadcastChannel: UnwrapRef<typeof import('@maxvue/max-use')['useBroadcastChannel']>
+    readonly useBrowserLocation: UnwrapRef<typeof import('@maxvue/max-use')['useBrowserLocation']>
+    readonly useCached: UnwrapRef<typeof import('@maxvue/max-use')['useCached']>
+    readonly useClipboard: UnwrapRef<typeof import('@maxvue/max-use')['useClipboard']>
+    readonly useClipboardItems: UnwrapRef<typeof import('@maxvue/max-use')['useClipboardItems']>
+    readonly useCloned: UnwrapRef<typeof import('@maxvue/max-use')['useCloned']>
+    readonly useColorMode: UnwrapRef<typeof import('@maxvue/max-use')['useColorMode']>
+    readonly useConfirmDialog: UnwrapRef<typeof import('@maxvue/max-use')['useConfirmDialog']>
+    readonly useCountdown: UnwrapRef<typeof import('@maxvue/max-use')['useCountdown']>
+    readonly useCounter: UnwrapRef<typeof import('@maxvue/max-use')['useCounter']>
     readonly useCssModule: UnwrapRef<typeof import('vue')['useCssModule']>
-    readonly useCssSupports: UnwrapRef<typeof import('max-use')['useCssSupports']>
-    readonly useCssVar: UnwrapRef<typeof import('max-use')['useCssVar']>
+    readonly useCssSupports: UnwrapRef<typeof import('@maxvue/max-use')['useCssSupports']>
+    readonly useCssVar: UnwrapRef<typeof import('@maxvue/max-use')['useCssVar']>
     readonly useCssVars: UnwrapRef<typeof import('vue')['useCssVars']>
-    readonly useCurrentElement: UnwrapRef<typeof import('max-use')['useCurrentElement']>
-    readonly useCycleList: UnwrapRef<typeof import('max-use')['useCycleList']>
-    readonly useDark: UnwrapRef<typeof import('max-use')['useDark']>
-    readonly useDateFormat: UnwrapRef<typeof import('max-use')['useDateFormat']>
-    readonly useDebounceFn: UnwrapRef<typeof import('max-use')['useDebounceFn']>
-    readonly useDebouncedRefHistory: UnwrapRef<typeof import('max-use')['useDebouncedRefHistory']>
-    readonly useDefaultReset: UnwrapRef<typeof import('max-use')['useDefaultReset']>
-    readonly useDeviceMotion: UnwrapRef<typeof import('max-use')['useDeviceMotion']>
-    readonly useDeviceOrientation: UnwrapRef<typeof import('max-use')['useDeviceOrientation']>
-    readonly useDevicePixelRatio: UnwrapRef<typeof import('max-use')['useDevicePixelRatio']>
-    readonly useDevicesList: UnwrapRef<typeof import('max-use')['useDevicesList']>
-    readonly useDisplayMedia: UnwrapRef<typeof import('max-use')['useDisplayMedia']>
-    readonly useDocumentVisibility: UnwrapRef<typeof import('max-use')['useDocumentVisibility']>
-    readonly useDraggable: UnwrapRef<typeof import('max-use')['useDraggable']>
-    readonly useDropZone: UnwrapRef<typeof import('max-use')['useDropZone']>
-    readonly useElementBounding: UnwrapRef<typeof import('max-use')['useElementBounding']>
-    readonly useElementByPoint: UnwrapRef<typeof import('max-use')['useElementByPoint']>
-    readonly useElementHover: UnwrapRef<typeof import('max-use')['useElementHover']>
-    readonly useElementSize: UnwrapRef<typeof import('max-use')['useElementSize']>
-    readonly useElementVisibility: UnwrapRef<typeof import('max-use')['useElementVisibility']>
-    readonly useEventBus: UnwrapRef<typeof import('max-use')['useEventBus']>
-    readonly useEventListener: UnwrapRef<typeof import('max-use')['useEventListener']>
-    readonly useEventSource: UnwrapRef<typeof import('max-use')['useEventSource']>
-    readonly useEyeDropper: UnwrapRef<typeof import('max-use')['useEyeDropper']>
-    readonly useFavicon: UnwrapRef<typeof import('max-use')['useFavicon']>
-    readonly useFetch: UnwrapRef<typeof import('max-use')['useFetch']>
-    readonly useFileDialog: UnwrapRef<typeof import('max-use')['useFileDialog']>
-    readonly useFileSystemAccess: UnwrapRef<typeof import('max-use')['useFileSystemAccess']>
-    readonly useFocus: UnwrapRef<typeof import('max-use')['useFocus']>
-    readonly useFocusWithin: UnwrapRef<typeof import('max-use')['useFocusWithin']>
-    readonly useFps: UnwrapRef<typeof import('max-use')['useFps']>
-    readonly useFullscreen: UnwrapRef<typeof import('max-use')['useFullscreen']>
-    readonly useGamepad: UnwrapRef<typeof import('max-use')['useGamepad']>
-    readonly useGeolocation: UnwrapRef<typeof import('max-use')['useGeolocation']>
+    readonly useCurrentElement: UnwrapRef<typeof import('@maxvue/max-use')['useCurrentElement']>
+    readonly useCycleList: UnwrapRef<typeof import('@maxvue/max-use')['useCycleList']>
+    readonly useDark: UnwrapRef<typeof import('@maxvue/max-use')['useDark']>
+    readonly useDateFormat: UnwrapRef<typeof import('@maxvue/max-use')['useDateFormat']>
+    readonly useDebounceFn: UnwrapRef<typeof import('@maxvue/max-use')['useDebounceFn']>
+    readonly useDebouncedRefHistory: UnwrapRef<typeof import('@maxvue/max-use')['useDebouncedRefHistory']>
+    readonly useDefaultReset: UnwrapRef<typeof import('@maxvue/max-use')['useDefaultReset']>
+    readonly useDeviceMotion: UnwrapRef<typeof import('@maxvue/max-use')['useDeviceMotion']>
+    readonly useDeviceOrientation: UnwrapRef<typeof import('@maxvue/max-use')['useDeviceOrientation']>
+    readonly useDevicePixelRatio: UnwrapRef<typeof import('@maxvue/max-use')['useDevicePixelRatio']>
+    readonly useDevicesList: UnwrapRef<typeof import('@maxvue/max-use')['useDevicesList']>
+    readonly useDisplayMedia: UnwrapRef<typeof import('@maxvue/max-use')['useDisplayMedia']>
+    readonly useDocumentVisibility: UnwrapRef<typeof import('@maxvue/max-use')['useDocumentVisibility']>
+    readonly useDraggable: UnwrapRef<typeof import('@maxvue/max-use')['useDraggable']>
+    readonly useDropZone: UnwrapRef<typeof import('@maxvue/max-use')['useDropZone']>
+    readonly useElementBounding: UnwrapRef<typeof import('@maxvue/max-use')['useElementBounding']>
+    readonly useElementByPoint: UnwrapRef<typeof import('@maxvue/max-use')['useElementByPoint']>
+    readonly useElementHover: UnwrapRef<typeof import('@maxvue/max-use')['useElementHover']>
+    readonly useElementSize: UnwrapRef<typeof import('@maxvue/max-use')['useElementSize']>
+    readonly useElementVisibility: UnwrapRef<typeof import('@maxvue/max-use')['useElementVisibility']>
+    readonly useEventBus: UnwrapRef<typeof import('@maxvue/max-use')['useEventBus']>
+    readonly useEventListener: UnwrapRef<typeof import('@maxvue/max-use')['useEventListener']>
+    readonly useEventSource: UnwrapRef<typeof import('@maxvue/max-use')['useEventSource']>
+    readonly useEyeDropper: UnwrapRef<typeof import('@maxvue/max-use')['useEyeDropper']>
+    readonly useFavicon: UnwrapRef<typeof import('@maxvue/max-use')['useFavicon']>
+    readonly useFetch: UnwrapRef<typeof import('@maxvue/max-use')['useFetch']>
+    readonly useFileDialog: UnwrapRef<typeof import('@maxvue/max-use')['useFileDialog']>
+    readonly useFileSystemAccess: UnwrapRef<typeof import('@maxvue/max-use')['useFileSystemAccess']>
+    readonly useFocus: UnwrapRef<typeof import('@maxvue/max-use')['useFocus']>
+    readonly useFocusWithin: UnwrapRef<typeof import('@maxvue/max-use')['useFocusWithin']>
+    readonly useFps: UnwrapRef<typeof import('@maxvue/max-use')['useFps']>
+    readonly useFullscreen: UnwrapRef<typeof import('@maxvue/max-use')['useFullscreen']>
+    readonly useGamepad: UnwrapRef<typeof import('@maxvue/max-use')['useGamepad']>
+    readonly useGeolocation: UnwrapRef<typeof import('@maxvue/max-use')['useGeolocation']>
     readonly useId: UnwrapRef<typeof import('vue')['useId']>
-    readonly useIdle: UnwrapRef<typeof import('max-use')['useIdle']>
-    readonly useImage: UnwrapRef<typeof import('max-use')['useImage']>
-    readonly useInCache: UnwrapRef<typeof import('max-use')['useInCache']>
-    readonly useInfiniteScroll: UnwrapRef<typeof import('max-use')['useInfiniteScroll']>
-    readonly useIntersectionObserver: UnwrapRef<typeof import('max-use')['useIntersectionObserver']>
-    readonly useInterval: UnwrapRef<typeof import('max-use')['useInterval']>
-    readonly useIntervalFn: UnwrapRef<typeof import('max-use')['useIntervalFn']>
-    readonly useKeyModifier: UnwrapRef<typeof import('max-use')['useKeyModifier']>
-    readonly useLastChanged: UnwrapRef<typeof import('max-use')['useLastChanged']>
-    readonly useLocalStorage: UnwrapRef<typeof import('max-use')['useLocalStorage']>
-    readonly useMagicKeys: UnwrapRef<typeof import('max-use')['useMagicKeys']>
-    readonly useManualRefHistory: UnwrapRef<typeof import('max-use')['useManualRefHistory']>
-    readonly useMediaControls: UnwrapRef<typeof import('max-use')['useMediaControls']>
-    readonly useMediaQuery: UnwrapRef<typeof import('max-use')['useMediaQuery']>
-    readonly useMemoize: UnwrapRef<typeof import('max-use')['useMemoize']>
-    readonly useMemory: UnwrapRef<typeof import('max-use')['useMemory']>
+    readonly useIdle: UnwrapRef<typeof import('@maxvue/max-use')['useIdle']>
+    readonly useImage: UnwrapRef<typeof import('@maxvue/max-use')['useImage']>
+    readonly useInCache: UnwrapRef<typeof import('@maxvue/max-use')['useInCache']>
+    readonly useInfiniteScroll: UnwrapRef<typeof import('@maxvue/max-use')['useInfiniteScroll']>
+    readonly useIntersectionObserver: UnwrapRef<typeof import('@maxvue/max-use')['useIntersectionObserver']>
+    readonly useInterval: UnwrapRef<typeof import('@maxvue/max-use')['useInterval']>
+    readonly useIntervalFn: UnwrapRef<typeof import('@maxvue/max-use')['useIntervalFn']>
+    readonly useKeyModifier: UnwrapRef<typeof import('@maxvue/max-use')['useKeyModifier']>
+    readonly useLastChanged: UnwrapRef<typeof import('@maxvue/max-use')['useLastChanged']>
+    readonly useLocalStorage: UnwrapRef<typeof import('@maxvue/max-use')['useLocalStorage']>
+    readonly useMagicKeys: UnwrapRef<typeof import('@maxvue/max-use')['useMagicKeys']>
+    readonly useManualRefHistory: UnwrapRef<typeof import('@maxvue/max-use')['useManualRefHistory']>
+    readonly useMediaControls: UnwrapRef<typeof import('@maxvue/max-use')['useMediaControls']>
+    readonly useMediaQuery: UnwrapRef<typeof import('@maxvue/max-use')['useMediaQuery']>
+    readonly useMemoize: UnwrapRef<typeof import('@maxvue/max-use')['useMemoize']>
+    readonly useMemory: UnwrapRef<typeof import('@maxvue/max-use')['useMemory']>
     readonly useModel: UnwrapRef<typeof import('vue')['useModel']>
-    readonly useMounted: UnwrapRef<typeof import('max-use')['useMounted']>
-    readonly useMouse: UnwrapRef<typeof import('max-use')['useMouse']>
-    readonly useMouseInElement: UnwrapRef<typeof import('max-use')['useMouseInElement']>
-    readonly useMousePressed: UnwrapRef<typeof import('max-use')['useMousePressed']>
-    readonly useMutationObserver: UnwrapRef<typeof import('max-use')['useMutationObserver']>
-    readonly useNavigatorLanguage: UnwrapRef<typeof import('max-use')['useNavigatorLanguage']>
-    readonly useNetwork: UnwrapRef<typeof import('max-use')['useNetwork']>
-    readonly useNow: UnwrapRef<typeof import('max-use')['useNow']>
-    readonly useObjectUrl: UnwrapRef<typeof import('max-use')['useObjectUrl']>
-    readonly useOffsetPagination: UnwrapRef<typeof import('max-use')['useOffsetPagination']>
-    readonly useOnline: UnwrapRef<typeof import('max-use')['useOnline']>
-    readonly usePageLeave: UnwrapRef<typeof import('max-use')['usePageLeave']>
-    readonly useParallax: UnwrapRef<typeof import('max-use')['useParallax']>
-    readonly useParentElement: UnwrapRef<typeof import('max-use')['useParentElement']>
-    readonly usePerformanceObserver: UnwrapRef<typeof import('max-use')['usePerformanceObserver']>
-    readonly usePermission: UnwrapRef<typeof import('max-use')['usePermission']>
-    readonly usePointer: UnwrapRef<typeof import('max-use')['usePointer']>
-    readonly usePointerLock: UnwrapRef<typeof import('max-use')['usePointerLock']>
-    readonly usePointerSwipe: UnwrapRef<typeof import('max-use')['usePointerSwipe']>
-    readonly usePreferredColorScheme: UnwrapRef<typeof import('max-use')['usePreferredColorScheme']>
-    readonly usePreferredContrast: UnwrapRef<typeof import('max-use')['usePreferredContrast']>
-    readonly usePreferredDark: UnwrapRef<typeof import('max-use')['usePreferredDark']>
-    readonly usePreferredLanguages: UnwrapRef<typeof import('max-use')['usePreferredLanguages']>
-    readonly usePreferredReducedMotion: UnwrapRef<typeof import('max-use')['usePreferredReducedMotion']>
-    readonly usePreferredReducedTransparency: UnwrapRef<typeof import('max-use')['usePreferredReducedTransparency']>
-    readonly usePrevious: UnwrapRef<typeof import('max-use')['usePrevious']>
-    readonly useRafFn: UnwrapRef<typeof import('max-use')['useRafFn']>
-    readonly useRefCached: UnwrapRef<typeof import('max-use')['useRefCached']>
-    readonly useRefHistory: UnwrapRef<typeof import('max-use')['useRefHistory']>
-    readonly useRefStorage: UnwrapRef<typeof import('max-use')['useRefStorage']>
-    readonly useResizeObserver: UnwrapRef<typeof import('max-use')['useResizeObserver']>
-    readonly useSSRWidth: UnwrapRef<typeof import('max-use')['useSSRWidth']>
-    readonly useScreenOrientation: UnwrapRef<typeof import('max-use')['useScreenOrientation']>
-    readonly useScreenSafeArea: UnwrapRef<typeof import('max-use')['useScreenSafeArea']>
-    readonly useScriptTag: UnwrapRef<typeof import('max-use')['useScriptTag']>
-    readonly useScroll: UnwrapRef<typeof import('max-use')['useScroll']>
-    readonly useScrollLock: UnwrapRef<typeof import('max-use')['useScrollLock']>
-    readonly useSessionStorage: UnwrapRef<typeof import('max-use')['useSessionStorage']>
-    readonly useShare: UnwrapRef<typeof import('max-use')['useShare']>
+    readonly useMounted: UnwrapRef<typeof import('@maxvue/max-use')['useMounted']>
+    readonly useMouse: UnwrapRef<typeof import('@maxvue/max-use')['useMouse']>
+    readonly useMouseInElement: UnwrapRef<typeof import('@maxvue/max-use')['useMouseInElement']>
+    readonly useMousePressed: UnwrapRef<typeof import('@maxvue/max-use')['useMousePressed']>
+    readonly useMutationObserver: UnwrapRef<typeof import('@maxvue/max-use')['useMutationObserver']>
+    readonly useNavigatorLanguage: UnwrapRef<typeof import('@maxvue/max-use')['useNavigatorLanguage']>
+    readonly useNetwork: UnwrapRef<typeof import('@maxvue/max-use')['useNetwork']>
+    readonly useNow: UnwrapRef<typeof import('@maxvue/max-use')['useNow']>
+    readonly useObjectUrl: UnwrapRef<typeof import('@maxvue/max-use')['useObjectUrl']>
+    readonly useOffsetPagination: UnwrapRef<typeof import('@maxvue/max-use')['useOffsetPagination']>
+    readonly useOnline: UnwrapRef<typeof import('@maxvue/max-use')['useOnline']>
+    readonly usePageLeave: UnwrapRef<typeof import('@maxvue/max-use')['usePageLeave']>
+    readonly useParallax: UnwrapRef<typeof import('@maxvue/max-use')['useParallax']>
+    readonly useParentElement: UnwrapRef<typeof import('@maxvue/max-use')['useParentElement']>
+    readonly usePerformanceObserver: UnwrapRef<typeof import('@maxvue/max-use')['usePerformanceObserver']>
+    readonly usePermission: UnwrapRef<typeof import('@maxvue/max-use')['usePermission']>
+    readonly usePointer: UnwrapRef<typeof import('@maxvue/max-use')['usePointer']>
+    readonly usePointerLock: UnwrapRef<typeof import('@maxvue/max-use')['usePointerLock']>
+    readonly usePointerSwipe: UnwrapRef<typeof import('@maxvue/max-use')['usePointerSwipe']>
+    readonly usePreferredColorScheme: UnwrapRef<typeof import('@maxvue/max-use')['usePreferredColorScheme']>
+    readonly usePreferredContrast: UnwrapRef<typeof import('@maxvue/max-use')['usePreferredContrast']>
+    readonly usePreferredDark: UnwrapRef<typeof import('@maxvue/max-use')['usePreferredDark']>
+    readonly usePreferredLanguages: UnwrapRef<typeof import('@maxvue/max-use')['usePreferredLanguages']>
+    readonly usePreferredReducedMotion: UnwrapRef<typeof import('@maxvue/max-use')['usePreferredReducedMotion']>
+    readonly usePreferredReducedTransparency: UnwrapRef<typeof import('@maxvue/max-use')['usePreferredReducedTransparency']>
+    readonly usePrevious: UnwrapRef<typeof import('@maxvue/max-use')['usePrevious']>
+    readonly useRafFn: UnwrapRef<typeof import('@maxvue/max-use')['useRafFn']>
+    readonly useRefCached: UnwrapRef<typeof import('@maxvue/max-use')['useRefCached']>
+    readonly useRefHistory: UnwrapRef<typeof import('@maxvue/max-use')['useRefHistory']>
+    readonly useRefStorage: UnwrapRef<typeof import('@maxvue/max-use')['useRefStorage']>
+    readonly useResizeObserver: UnwrapRef<typeof import('@maxvue/max-use')['useResizeObserver']>
+    readonly useSSRWidth: UnwrapRef<typeof import('@maxvue/max-use')['useSSRWidth']>
+    readonly useScreenOrientation: UnwrapRef<typeof import('@maxvue/max-use')['useScreenOrientation']>
+    readonly useScreenSafeArea: UnwrapRef<typeof import('@maxvue/max-use')['useScreenSafeArea']>
+    readonly useScriptTag: UnwrapRef<typeof import('@maxvue/max-use')['useScriptTag']>
+    readonly useScroll: UnwrapRef<typeof import('@maxvue/max-use')['useScroll']>
+    readonly useScrollLock: UnwrapRef<typeof import('@maxvue/max-use')['useScrollLock']>
+    readonly useSessionStorage: UnwrapRef<typeof import('@maxvue/max-use')['useSessionStorage']>
+    readonly useShare: UnwrapRef<typeof import('@maxvue/max-use')['useShare']>
     readonly useSlots: UnwrapRef<typeof import('vue')['useSlots']>
-    readonly useSorted: UnwrapRef<typeof import('max-use')['useSorted']>
-    readonly useSpeechRecognition: UnwrapRef<typeof import('max-use')['useSpeechRecognition']>
-    readonly useSpeechSynthesis: UnwrapRef<typeof import('max-use')['useSpeechSynthesis']>
-    readonly useStepper: UnwrapRef<typeof import('max-use')['useStepper']>
-    readonly useStorage: UnwrapRef<typeof import('max-use')['useStorage']>
-    readonly useStorageAsync: UnwrapRef<typeof import('max-use')['useStorageAsync']>
-    readonly useStyleTag: UnwrapRef<typeof import('max-use')['useStyleTag']>
-    readonly useSupported: UnwrapRef<typeof import('max-use')['useSupported']>
-    readonly useSwipe: UnwrapRef<typeof import('max-use')['useSwipe']>
+    readonly useSorted: UnwrapRef<typeof import('@maxvue/max-use')['useSorted']>
+    readonly useSpeechRecognition: UnwrapRef<typeof import('@maxvue/max-use')['useSpeechRecognition']>
+    readonly useSpeechSynthesis: UnwrapRef<typeof import('@maxvue/max-use')['useSpeechSynthesis']>
+    readonly useStepper: UnwrapRef<typeof import('@maxvue/max-use')['useStepper']>
+    readonly useStorage: UnwrapRef<typeof import('@maxvue/max-use')['useStorage']>
+    readonly useStorageAsync: UnwrapRef<typeof import('@maxvue/max-use')['useStorageAsync']>
+    readonly useStyleTag: UnwrapRef<typeof import('@maxvue/max-use')['useStyleTag']>
+    readonly useSupported: UnwrapRef<typeof import('@maxvue/max-use')['useSupported']>
+    readonly useSwipe: UnwrapRef<typeof import('@maxvue/max-use')['useSwipe']>
     readonly useTemplateRef: UnwrapRef<typeof import('vue')['useTemplateRef']>
-    readonly useTemplateRefsList: UnwrapRef<typeof import('max-use')['useTemplateRefsList']>
-    readonly useTextDirection: UnwrapRef<typeof import('max-use')['useTextDirection']>
-    readonly useTextSelection: UnwrapRef<typeof import('max-use')['useTextSelection']>
-    readonly useTextareaAutosize: UnwrapRef<typeof import('max-use')['useTextareaAutosize']>
-    readonly useThrottleFn: UnwrapRef<typeof import('max-use')['useThrottleFn']>
-    readonly useThrottledRefHistory: UnwrapRef<typeof import('max-use')['useThrottledRefHistory']>
-    readonly useTimeAgo: UnwrapRef<typeof import('max-use')['useTimeAgo']>
-    readonly useTimeAgoIntl: UnwrapRef<typeof import('max-use')['useTimeAgoIntl']>
-    readonly useTimeout: UnwrapRef<typeof import('max-use')['useTimeout']>
-    readonly useTimeoutFn: UnwrapRef<typeof import('max-use')['useTimeoutFn']>
-    readonly useTimeoutPoll: UnwrapRef<typeof import('max-use')['useTimeoutPoll']>
-    readonly useTimestamp: UnwrapRef<typeof import('max-use')['useTimestamp']>
-    readonly useTitle: UnwrapRef<typeof import('max-use')['useTitle']>
-    readonly useToNumber: UnwrapRef<typeof import('max-use')['useToNumber']>
-    readonly useToString: UnwrapRef<typeof import('max-use')['useToString']>
-    readonly useToggle: UnwrapRef<typeof import('max-use')['useToggle']>
-    readonly useTransition: UnwrapRef<typeof import('max-use')['useTransition']>
-    readonly useUrlSearchParams: UnwrapRef<typeof import('max-use')['useUrlSearchParams']>
-    readonly useUserMedia: UnwrapRef<typeof import('max-use')['useUserMedia']>
-    readonly useVModel: UnwrapRef<typeof import('max-use')['useVModel']>
-    readonly useVModels: UnwrapRef<typeof import('max-use')['useVModels']>
-    readonly useVibrate: UnwrapRef<typeof import('max-use')['useVibrate']>
-    readonly useVirtualList: UnwrapRef<typeof import('max-use')['useVirtualList']>
-    readonly useWakeLock: UnwrapRef<typeof import('max-use')['useWakeLock']>
-    readonly useWebNotification: UnwrapRef<typeof import('max-use')['useWebNotification']>
-    readonly useWebSocket: UnwrapRef<typeof import('max-use')['useWebSocket']>
-    readonly useWebWorker: UnwrapRef<typeof import('max-use')['useWebWorker']>
-    readonly useWebWorkerFn: UnwrapRef<typeof import('max-use')['useWebWorkerFn']>
-    readonly useWindowFocus: UnwrapRef<typeof import('max-use')['useWindowFocus']>
-    readonly useWindowScroll: UnwrapRef<typeof import('max-use')['useWindowScroll']>
-    readonly useWindowSize: UnwrapRef<typeof import('max-use')['useWindowSize']>
+    readonly useTemplateRefsList: UnwrapRef<typeof import('@maxvue/max-use')['useTemplateRefsList']>
+    readonly useTextDirection: UnwrapRef<typeof import('@maxvue/max-use')['useTextDirection']>
+    readonly useTextSelection: UnwrapRef<typeof import('@maxvue/max-use')['useTextSelection']>
+    readonly useTextareaAutosize: UnwrapRef<typeof import('@maxvue/max-use')['useTextareaAutosize']>
+    readonly useThrottleFn: UnwrapRef<typeof import('@maxvue/max-use')['useThrottleFn']>
+    readonly useThrottledRefHistory: UnwrapRef<typeof import('@maxvue/max-use')['useThrottledRefHistory']>
+    readonly useTimeAgo: UnwrapRef<typeof import('@maxvue/max-use')['useTimeAgo']>
+    readonly useTimeAgoIntl: UnwrapRef<typeof import('@maxvue/max-use')['useTimeAgoIntl']>
+    readonly useTimeout: UnwrapRef<typeof import('@maxvue/max-use')['useTimeout']>
+    readonly useTimeoutFn: UnwrapRef<typeof import('@maxvue/max-use')['useTimeoutFn']>
+    readonly useTimeoutPoll: UnwrapRef<typeof import('@maxvue/max-use')['useTimeoutPoll']>
+    readonly useTimestamp: UnwrapRef<typeof import('@maxvue/max-use')['useTimestamp']>
+    readonly useTitle: UnwrapRef<typeof import('@maxvue/max-use')['useTitle']>
+    readonly useToNumber: UnwrapRef<typeof import('@maxvue/max-use')['useToNumber']>
+    readonly useToString: UnwrapRef<typeof import('@maxvue/max-use')['useToString']>
+    readonly useToggle: UnwrapRef<typeof import('@maxvue/max-use')['useToggle']>
+    readonly useTransition: UnwrapRef<typeof import('@maxvue/max-use')['useTransition']>
+    readonly useUrlSearchParams: UnwrapRef<typeof import('@maxvue/max-use')['useUrlSearchParams']>
+    readonly useUserMedia: UnwrapRef<typeof import('@maxvue/max-use')['useUserMedia']>
+    readonly useVModel: UnwrapRef<typeof import('@maxvue/max-use')['useVModel']>
+    readonly useVModels: UnwrapRef<typeof import('@maxvue/max-use')['useVModels']>
+    readonly useVibrate: UnwrapRef<typeof import('@maxvue/max-use')['useVibrate']>
+    readonly useVirtualList: UnwrapRef<typeof import('@maxvue/max-use')['useVirtualList']>
+    readonly useWakeLock: UnwrapRef<typeof import('@maxvue/max-use')['useWakeLock']>
+    readonly useWebNotification: UnwrapRef<typeof import('@maxvue/max-use')['useWebNotification']>
+    readonly useWebSocket: UnwrapRef<typeof import('@maxvue/max-use')['useWebSocket']>
+    readonly useWebWorker: UnwrapRef<typeof import('@maxvue/max-use')['useWebWorker']>
+    readonly useWebWorkerFn: UnwrapRef<typeof import('@maxvue/max-use')['useWebWorkerFn']>
+    readonly useWindowFocus: UnwrapRef<typeof import('@maxvue/max-use')['useWindowFocus']>
+    readonly useWindowScroll: UnwrapRef<typeof import('@maxvue/max-use')['useWindowScroll']>
+    readonly useWindowSize: UnwrapRef<typeof import('@maxvue/max-use')['useWindowSize']>
     readonly vMaska: UnwrapRef<typeof import('maska/vue')['vMaska']>
-    readonly validate: UnwrapRef<typeof import('max-use')['validate']>
-    readonly valuesInKey: UnwrapRef<typeof import('max-use')['valuesInKey']>
-    readonly vueUse: UnwrapRef<typeof import('max-use')['vueUse']>
+    readonly validate: UnwrapRef<typeof import('@maxvue/max-use')['validate']>
+    readonly valuesInKey: UnwrapRef<typeof import('@maxvue/max-use')['valuesInKey']>
     readonly watch: UnwrapRef<typeof import('vue')['watch']>
-    readonly watchArray: UnwrapRef<typeof import('max-use')['watchArray']>
-    readonly watchAtMost: UnwrapRef<typeof import('max-use')['watchAtMost']>
-    readonly watchDebounced: UnwrapRef<typeof import('max-use')['watchDebounced']>
-    readonly watchDeep: UnwrapRef<typeof import('max-use')['watchDeep']>
+    readonly watchArray: UnwrapRef<typeof import('@maxvue/max-use')['watchArray']>
+    readonly watchAtMost: UnwrapRef<typeof import('@maxvue/max-use')['watchAtMost']>
+    readonly watchDebounced: UnwrapRef<typeof import('@maxvue/max-use')['watchDebounced']>
+    readonly watchDeep: UnwrapRef<typeof import('@maxvue/max-use')['watchDeep']>
     readonly watchEffect: UnwrapRef<typeof import('vue')['watchEffect']>
-    readonly watchIgnorable: UnwrapRef<typeof import('max-use')['watchIgnorable']>
-    readonly watchImmediate: UnwrapRef<typeof import('max-use')['watchImmediate']>
-    readonly watchOnce: UnwrapRef<typeof import('max-use')['watchOnce']>
+    readonly watchIgnorable: UnwrapRef<typeof import('@maxvue/max-use')['watchIgnorable']>
+    readonly watchImmediate: UnwrapRef<typeof import('@maxvue/max-use')['watchImmediate']>
+    readonly watchOnce: UnwrapRef<typeof import('@maxvue/max-use')['watchOnce']>
     readonly watchPostEffect: UnwrapRef<typeof import('vue')['watchPostEffect']>
     readonly watchSyncEffect: UnwrapRef<typeof import('vue')['watchSyncEffect']>
-    readonly watchThrottled: UnwrapRef<typeof import('max-use')['watchThrottled']>
-    readonly watchTriggerable: UnwrapRef<typeof import('max-use')['watchTriggerable']>
-    readonly watchWithFilter: UnwrapRef<typeof import('max-use')['watchWithFilter']>
-    readonly whenever: UnwrapRef<typeof import('max-use')['whenever']>
+    readonly watchThrottled: UnwrapRef<typeof import('@maxvue/max-use')['watchThrottled']>
+    readonly watchTriggerable: UnwrapRef<typeof import('@maxvue/max-use')['watchTriggerable']>
+    readonly watchWithFilter: UnwrapRef<typeof import('@maxvue/max-use')['watchWithFilter']>
+    readonly whenever: UnwrapRef<typeof import('@maxvue/max-use')['whenever']>
+    readonly wireSize: UnwrapRef<typeof import('@maxvue/max-use')['wireSize']>
   }
 }

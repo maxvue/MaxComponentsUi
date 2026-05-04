@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { snakeCase } from 'max-use';
-import { kebabCase } from 'max-use';
+import { snakeCase } from '@maxvue/max-use';
+import { kebabCase } from '@maxvue/max-use';
 import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);

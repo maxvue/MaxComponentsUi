@@ -1,0 +1,34 @@
+{
+    "extends": [
+        "stylelint-config-standard-scss"
+    ],
+    "plugins": [
+        "stylelint-scss",
+        "@stylistic/stylelint-plugin"
+    ],
+    "rules": {
+        "@stylistic/indentation": 4,
+        "@stylistic/string-quotes": "single",
+        "@stylistic/declaration-block-trailing-semicolon": "always",
+        "scss/at-rule-no-unknown": true,
+        "selector-class-pattern": null,
+        "no-descending-specificity": null,
+        "declaration-block-single-line-max-declarations": null,
+        "@stylistic/block-opening-brace-newline-after": null,
+        "@stylistic/block-closing-brace-newline-before": null,
+        "@stylistic/block-opening-brace-space-before": "always",
+        "@stylistic/declaration-block-semicolon-newline-after": null,
+        "selector-pseudo-element-no-unknown": [
+            true,
+            {
+                "ignorePseudoElements": ["v-deep", "v-global", "v-slotted"]
+            }
+        ]
+    },
+    "overrides": [
+        {
+            "files": ["**/*.vue"],
+            "customSyntax": "postcss-html"
+        }
+    ]
+}

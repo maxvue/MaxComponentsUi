@@ -75,6 +75,7 @@
     .max-icon-div {
         display: grid;
         place-items: center;
+
         svg {
             min-width: 100% !important;
             min-height: 100% !important;

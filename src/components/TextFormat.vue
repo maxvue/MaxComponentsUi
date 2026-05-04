@@ -1,5 +1,5 @@
 <template>
-    <div style="color: green" class="no-style">
+    <div style="color: green;" class="no-style">
         Meu texto Verdes
     </div>
 
@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-    
+
 </script>
 
 <style lang="scss">
