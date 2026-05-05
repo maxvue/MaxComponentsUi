@@ -10,6 +10,7 @@
 <style>
     .slide-vertical-animation-enter-active {
         animation: slide-up-in 0.3s ease-out forwards;
+        animation-delay: 0.3s;
     }
 
     .slide-vertical-animation-leave-active {

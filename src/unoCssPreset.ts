@@ -6,6 +6,7 @@ import { getCssSize } from './helpers/getCssSize';
 import * as sass from 'sass';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { existsSync } from 'node:fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -42,7 +43,19 @@ export const presetMaxUno = () => {
                 {
                     getCSS: () => {
                         try {
-                            const scssPath = resolve(__dirname, './themes/all.scss');
+                            let scssPath = resolve(__dirname, './themes/all.scss');
+
+                            // Fallback para o diretório src se não encontrado no dist (útil para desenvolvimento local)
+                            if (!existsSync(scssPath)) {
+                                const fallbackPath = resolve(__dirname, '../src/themes/all.scss');
+                                if (existsSync(fallbackPath)) {
+                                    scssPath = fallbackPath;
+                                } else {
+                                    console.warn(`[MaxPreset] Arquivo de tema não encontrado em: ${scssPath}`);
+                                    return '';
+                                }
+                            }
+
                             const result = sass.compile(scssPath);
                             return result.css;
                         } catch (error) {

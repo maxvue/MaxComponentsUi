@@ -1,14 +1,10 @@
 import 'virtual:uno.css';
 
-export { presetMaxUno } from './unoCssPreset';
 
 import PrimeVue from 'primevue/config';
 
 import { MaxStyle } from './styles/style';
 import ptBR from './locales/pt-br';
-import { MaxComponentsUiResolver } from './helpers/resolver';
-
-export { MaxComponentsUiResolver };
 
 export * from './components/_primeVue';
 
@@ -20,6 +16,7 @@ export { default as Grid } from './components/MaxGrid.vue';
 export { default as MaxButton } from './components/MaxButton.vue';
 export { default as Button } from './components/MaxButton.vue';
 export { default as Botao } from './components/MaxButton.vue';
+export { default as MaxIconButton } from './components/MaxIconButton.vue';
 
 // Input Text
 export { default as MaxInputText } from './components/MaxInputText.vue';
@@ -57,12 +54,32 @@ export { default as MaxInputTextArea } from './components/MaxInputTextArea.vue';
 export { default as MaxInputToggle } from './components/MaxInputToggle.vue';
 export { default as MaxInputTypeAddress } from './components/MaxInputTypeAddress.vue';
 
+// Loaders
+export { default as MaxLoader } from './components/MaxLoader.vue';
+export { default as MaxLoaderAi } from './components/MaxLoaderAi.vue';
+export { default as MaxLoaderIcon } from './components/MaxLoaderIcon.vue';
+
+// Data & Display
+export { default as MaxTable } from './components/MaxTable.vue';
+export { default as MaxTableData } from './components/MaxTableData.vue';
+export { default as MaxBadgeComponent } from './components/MaxBadgeComponent.vue';
+export { default as MaxEmptyDiv } from './components/MaxEmptyDiv.vue';
+export { default as MaxLink } from './components/MaxLink.vue';
+export { default as MaxLogo } from './components/MaxLogo.vue';
+export { default as MaxMaps } from './components/MaxMaps.vue';
+export { default as MaxPdfView } from './components/MaxPdfView.vue';
+
+// Typography
+export { default as T1 } from './components/Text/T1.vue';
+export { default as T2 } from './components/Text/T2.vue';
+
 // Utils / Others
 export { default as MaxMsgLabels } from './components/MaxMsgLabels.vue';
-export { default as MaxTableData } from './components/MaxTableData.vue';
 export { default as MaxTextInputFloatLabel } from './components/MaxTextInputFloatLabel.vue';
 export { default as MaxTransitionFadeLight } from './components/MaxTransitionFadeLight.vue';
 export { default as MaxTransitionUp } from './components/MaxTransitionUp.vue';
+export { default as TransitionFade } from './components/TransitionFade.vue';
+export { default as AnimateFade } from './components/Animations/AnimateFade.vue';
 export { default as MaxUserAvatar } from './components/MaxUserAvatar.vue';
 export const install = (app: any, options: any = {}) => {
     app.use(PrimeVue, {

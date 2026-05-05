@@ -2,15 +2,21 @@
     "name": "@maxvue/max-components-ui",
     "version": "1.0.14",
     "description": "Biblioteca de componentes Vue baseada em PrimeVue",
-    "main": "./dist/index.umd.js",
     "module": "./dist/index.es.js",
     "types": "./dist/index.d.ts",
     "type": "module",
     "exports": {
         ".": {
             "types": "./dist/index.d.ts",
-            "import": "./dist/index.es.js",
-            "require": "./dist/index.js"
+            "import": "./dist/index.es.js"
+        },
+        "./preset": {
+            "types": "./dist/unoCssPreset.d.ts",
+            "import": "./dist/preset.es.js"
+        },
+        "./resolver": {
+            "types": "./dist/helpers/resolver.d.ts",
+            "import": "./dist/resolver.es.js"
         },
         "./dist/style.css": "./dist/style.css"
     },

@@ -61,10 +61,14 @@ export default defineConfig({
     ],
     build: {
         lib: {
-            entry: path.resolve(__dirname, './src/index.ts'),
+            entry: {
+                index: path.resolve(__dirname, './src/index.ts'),
+                preset: path.resolve(__dirname, './src/unoCssPreset.ts'),
+                resolver: path.resolve(__dirname, './src/helpers/resolver.ts')
+            },
             name: 'MaxComponentsUi',
-            fileName: (format: string) => `index.${format}.js`,
-            formats: ['es', 'umd'],
+            fileName: (format, entryName) => `${entryName}.${format === 'es' ? 'es.js' : 'js'}`,
+            formats: ['es'],
             cssFileName: 'style'
         },
         rollupOptions: {
