@@ -32,6 +32,7 @@
  * Suporta seleção de país, máscara automática baseada no DDI e detecção de nono dígito para o Brasil.
  */
 <script setup lang="ts">
+    import { vMaska } from 'maska/vue';
     import { watchDebounced } from '@vueuse/core';
 
     const attrs = useAttrs();

@@ -56,7 +56,6 @@
             place-items: center;
 
             &.plus {
-                position: absolute;
                 color: var(--blue-0);
                 width: 13px;
                 height: 13px;

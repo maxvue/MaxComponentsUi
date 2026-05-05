@@ -1,6 +1,5 @@
 import 'virtual:uno.css';
 
-
 import PrimeVue from 'primevue/config';
 
 import { MaxStyle } from './styles/style';

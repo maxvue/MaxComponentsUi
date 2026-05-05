@@ -8,7 +8,7 @@ import { transformerVariantGroup } from 'unocss';
 
 export default defineConfig({
     shortcuts: [],
-    transformers: [transformerVariantGroup()],
+    transformers: [ transformerVariantGroup() ],
     presets: [
         presetMaxUno(),
         presetWind3(),

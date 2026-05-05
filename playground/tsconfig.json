@@ -1,8 +1,12 @@
 {
     "compilerOptions": {
-        "target": "ES2020",
+        "target": "ESNext",
         "useDefineForClassFields": true,
-        "lib": ["ES2020", "DOM", "DOM.Iterable"],
+        "lib": [
+            "ES2020",
+            "DOM",
+            "DOM.Iterable"
+        ],
         "module": "ESNext",
         "skipLibCheck": true,
         "moduleResolution": "bundler",
@@ -17,9 +21,22 @@
         "noFallthroughCasesInSwitch": true,
         // "baseUrl": ".",
         "paths": {
-            "@/*": ["../src/*"]
+            "@/*": [
+                "../src/*"
+            ]
         }
     },
-    "include": ["src/**/*", "src/**/*.vue", "../src/**/*", "../src/**/*.vue", "../scripts"],
-    "exclude": ["node_modules", "dist"]
+    "include": [
+        "src/**/*",
+        "src/**/*.vue",
+        "../src/**/*",
+        "../src/**/*.vue",
+        "../scripts/**/*",
+        "../src/scripts/**/*",
+        "env.d.ts"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist"
+    ]
 }

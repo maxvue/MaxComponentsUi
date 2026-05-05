@@ -10,6 +10,7 @@
  * Possui máscara dinâmica e validação de dígito verificador.
  */
 <script setup lang="ts">
+    import { vMaska } from 'maska/vue';
     import { isCpf as isCPF, isCnpj as isCNPJ } from '@maxvue/max-use';
 
     const attrs: any = useAttrs();

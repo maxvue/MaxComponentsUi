@@ -9,9 +9,9 @@
             <section class="component-section">
                 <h2>Inputs</h2>
                 <div class="component-grid">
-                    <div class="component-item bg-red-100 p-4">
+                    <div class="component-item">
                         <h3>Básico</h3>
-                        <Grid>
+                        <Grid >
                             <MaxInputText label="Input text required 50%" v-model="value.a" required s50 />
                             <MaxInputText label="Input text required 25%" v-model="value.b" required s25 />
                             <div s25></div>
@@ -44,55 +44,55 @@
 
         <main class="playground__main">
             <section class="component-section">
-                <h2>Button</h2>
+                <T1 h1="Button" h2="Botões" />
                 <div class="component-grid">
                     <div class="component-item">
                         <h3>Básico</h3>
-                        <Button label="Botão Primário" @click="handleClick" />
+                        <MaxButton label="Botão Primário" @click="handleClick" />
                     </div>
 
                     <div class="component-item">
                         <h3>Severidades</h3>
                         <div class="button-group">
-                            <Button label="Successs" severity="success" @click="handleClick" />
-                            <Button label="Info" severity="info" @click="handleClick" />
-                            <Button label="Warning" severity="warning" @click="handleClick" />
-                            <Button label="Danger" severity="danger" @click="handleClick" />
+                            <MaxButton label="Successs" severity="success" @click="handleClick" />
+                            <MaxButton label="Info" severity="info" @click="handleClick" />
+                            <MaxButton label="Warning" severity="warning" @click="handleClick" />
+                            <MaxButton label="Danger" severity="danger" @click="handleClick" />
                         </div>
                     </div>
 
                     <div class="component-item">
                         <h3>Tamanhos</h3>
                         <div class="button-group">
-                            <Button label="Pequeno" size="small" @click="handleClick" />
-                            <Button label="Normal" @click="handleClick" />
-                            <Button label="Grande" size="large" @click="handleClick" />
+                            <MaxButton label="Pequeno" size="small" @click="handleClick" />
+                            <MaxButton label="Normal" @click="handleClick" />
+                            <MaxButton label="Grande" size="large" @click="handleClick" />
                         </div>
                     </div>
 
                     <div class="component-item">
                         <h3>Variantes</h3>
                         <div class="button-group">
-                            <Button label="Outlined" variant="outlined" @click="handleClick" />
-                            <Button label="Text" variant="text" @click="handleClick" />
-                            <Button label="Link" variant="link" @click="handleClick" />
+                            <MaxButton label="Outlined" variant="outlined" @click="handleClick" />
+                            <MaxButton label="Text" variant="text" @click="handleClick" />
+                            <MaxButton label="Link" variant="link" @click="handleClick" />
                         </div>
                     </div>
 
                     <div class="component-item">
                         <h3>Com Ícones</h3>
                         <div class="button-group">
-                            <Button label="Salvar" :icon="icont" @click="icont = icont === 'tdesign:icon' ? 'la:truck-loading' : 'tdesign:icon'" iconPos="right" />
-                            <Button label="Excluir" icon="tdesign:icon" severity="danger" @click="handleClick" />
+                            <MaxButton label="Salvar" :icon="icont" @click="icont = icont === 'tdesign:icon' ? 'la:truck-loading' : 'tdesign:icon'" iconPos="right" />
+                            <MaxButton label="Excluir" icon="tdesign:icon" severity="danger" @click="handleClick" />
                         </div>
                     </div>
 
                     <div class="component-item">
                         <h3>Estados</h3>
                         <div class="button-group">
-                            <Button label="Normal" @click="handleClick" />
-                            <Button label="Carregando" loading @click="handleClick" iconPos="right" />
-                            <Button label="Desabilitado" disabled @click="handleClick" />
+                            <MaxButton label="Normal" @click="handleClick" />
+                            <MaxButton label="Carregando" loading @click="handleClick" iconPos="right" />
+                            <MaxButton label="Desabilitado" disabled @click="handleClick" />
                         </div>
                     </div>
                 </div>
@@ -110,6 +110,10 @@
 </template>
 
 <script setup lang="ts">
+    import { MaxButton } from '@/index';
+    import { Grid } from '@/index';
+    import { ref } from 'vue';
+    import { RouterView } from 'vue-router';
     const lastClickEvent = ref<string>('');
 
     const value = ref({
@@ -134,10 +138,12 @@
 
 <style lang="scss">
     .playground {
-        min-height: 100vh;
         padding: 2rem;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        overflow: auto;
+        width: 100vw;
+        height: 100vh;
 
         &__header {
             text-align: center;
@@ -189,15 +195,6 @@
             font-size: 1.2rem;
             margin-bottom: 1rem;
             font-weight: 600;
-        }
-
-        p {
-            color: #666;
-            margin-bottom: 1rem;
-            font-family: monospace;
-            background: #f5f5f5;
-            padding: 0.5rem;
-            border-radius: 4px;
         }
     }
 

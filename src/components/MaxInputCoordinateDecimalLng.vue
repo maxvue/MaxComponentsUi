@@ -5,6 +5,7 @@
 </template>
 
 <script setup lang="ts">
+    import { vMaska } from 'maska/vue';
     const attrs: any = useAttrs();
 
     const props = withDefaults(

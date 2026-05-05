@@ -1,15 +1,28 @@
 <template>
-    <Button v-bind="attrs" class="button-main-div" :loading="false">
+    <Button
+        v-bind="attrs"
+        :loading="attrs.loading"
+        pointer
+        :danger="attrs.severity === 'danger' || attrs.danger !== undefined"
+        :success="attrs.severity === 'success' || attrs.success !== undefined"
+        :confirm="attrs.severity === 'success' || attrs.confirm !== undefined"
+        :cancel="attrs.cancel !== undefined"
+        :info="attrs.severity === 'info' || attrs.info !== undefined"
+        :warn="attrs.severity === 'warn' || attrs.warn !== undefined"
+        :help="attrs.severity === 'help' || attrs.help !== undefined"
+        :secondary="attrs.severity === 'secondary' || attrs.secondary !== undefined"
+        :contrast="attrs.severity === 'contrast' || attrs.contrast !== undefined"
+    >
         <template #default>
             <TransitionFade>
                 <MaxIcon icon="line-md:loading-twotone-loop" size="1.6" v-if="attrs.loading" />
                 <div class="content-button" v-else>
                     <div class="btn-icon-left" >
-                        <MaxIconButton :icon="icon_left" :size="attrs.size ?? attrs.sizeIcon ?? attrs.iconSize ?? attrs['size-icon'] ?? attrs['icon-size'] ?? '1.8'" class="content-button-icon" v-if="icon_left" flex color="background-0" />
+                        <MaxIconButton :icon="icon_left" :size="attrs.size ?? attrs.sizeIcon ?? attrs.iconSize ?? attrs['size-icon'] ?? attrs['icon-size'] ?? '1.8'" class="content-button-icon" v-if="icon_left" flex />
                     </div>
                     <div v-if="attrs.labelhtml || attrs.label || attrs['label-html']" :class="`btn-label ${attrs.textLeft !== undefined ? 'text-left' : ''}`" v-html="attrs.label ?? attrs.labelhtml ?? attrs['label-html']"></div>
                     <div class="btn-icon-right">
-                        <MaxIconButton :icon="icon_right" :size="attrs.size ?? attrs.sizeIcon ?? attrs.iconSize ?? attrs['size-icon'] ?? attrs['icon-size'] ?? '1.8'" class="content-button-icon" v-if="icon_right" flex color="background-0" />
+                        <MaxIconButton :icon="icon_right" :size="attrs.size ?? attrs.sizeIcon ?? attrs.iconSize ?? attrs['size-icon'] ?? attrs['icon-size'] ?? '1.8'" class="content-button-icon" v-if="icon_right" flex />
                     </div>
                     <Badge v-if="valueBadge" :size="attrs['size_badge'] ?? ''" :value="parseInt(valueBadge) > 99 ? '99+' : valueBadge" :severity="attrs['badge_severity'] ?? attrs['severity_badge'] ?? 'default'"></Badge>
                     <slot></slot>
@@ -31,6 +44,7 @@
  * @slot default Conteúdo personalizado dentro do botão.
  */
 <script setup lang="ts">
+    import Button from 'primevue/button';
     /** Atributos capturados via v-bind, incluindo props do PrimeVue Button */
     const attrs: any = useAttrs();
     const valueBadge = computed(() => attrs['number'] ?? attrs.badge ?? false);
@@ -47,12 +61,6 @@
         height: 36px;
         min-width: 40px;
         border-radius: 10px;
-        border: none !important;
-
-        &:hover {
-            background-color: var(--blue-600);
-            border: none !important;
-        }
 
         &.p-button-icon-only {
             min-width: unset;
@@ -107,7 +115,6 @@
             }
 
             .icon-div {
-                color: white;
                 padding: 0 !important;
                 margin: 0 !important;
                 width: 24px !important;
@@ -117,12 +124,6 @@
                     width: 24px !important;
                     height: 24px !important;
                 }
-            }
-        }
-
-        &[transparent] {
-            .icon-div {
-                color: var(--background-650);
             }
         }
 

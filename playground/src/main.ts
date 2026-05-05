@@ -1,16 +1,17 @@
-// import 'virtual:uno.css';
-// import '@unocss/reset/normalize.css';
+import 'virtual:uno.css';
 
 import { createApp } from 'vue';
+import { createRouter, createWebHistory } from 'vue-router';
 import MaxComponentsUi from '../../src/index';
+
+
 import App from './App.vue';
-import ptBR from '../../src/locales/pt-br';
 
-const app = createApp(App);
-
-// Configurar MaxComponentsUi (inclui PrimeVue automaticamente)
-app.use(MaxComponentsUi, {
-    locale: ptBR
+const router = createRouter({
+    history: createWebHistory(),
+    routes: [
+        { path: '/', component: App }
+    ]
 });
 
-app.mount('#app');
+createApp(App).use(router).use(MaxComponentsUi).mount('#app');

@@ -1,5 +1,5 @@
 <template>
-    <div class="max-grid-cols" v-bind="attrs">
+    <div class="max-grid-cols" >
         <slot></slot>
     </div>
 </template>

@@ -5,6 +5,7 @@
 </template>
 
 <script setup lang="ts">
+    import { vMaska } from 'maska/vue';
     import { useDateFormat } from '@vueuse/core';
 
     const attrs: any = useAttrs();

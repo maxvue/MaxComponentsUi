@@ -9,6 +9,8 @@
  * Possui máscara automática (00.000-000) e validação integrada.
  */
 <script setup lang="ts">
+    import { vMaska } from 'maska/vue';
+
     const attrs: any = useAttrs();
 
     const props = withDefaults(

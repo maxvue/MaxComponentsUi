@@ -5,6 +5,7 @@
 </template>
 
 <script setup lang="ts">
+    import { vMaska } from 'maska/vue';
     import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
     const attrs: any = useAttrs();

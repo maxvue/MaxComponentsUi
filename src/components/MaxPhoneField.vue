@@ -29,6 +29,7 @@
 </template>
 
 <script setup lang="ts">
+    import { vMaska } from 'maska/vue';
     import { country_ddi_flags } from '@/constants/ddiFlags';
 
     const props = withDefaults(
