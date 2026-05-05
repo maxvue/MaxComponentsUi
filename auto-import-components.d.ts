@@ -76,6 +76,8 @@ declare module 'vue' {
     OverlayBadge: typeof import('primevue/overlaybadge')['default']
     ProgressSpinner: typeof import('primevue/progressspinner')['default']
     RadioButton: typeof import('primevue/radiobutton')['default']
+    RouterLink: typeof import('vue-router')['RouterLink']
+    RouterView: typeof import('vue-router')['RouterView']
     Select: typeof import('primevue/select')['default']
     T1: typeof import('./src/components/Text/T1.vue')['default']
     T2: typeof import('./src/components/Text/T2.vue')['default']

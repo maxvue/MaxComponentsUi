@@ -2,14 +2,14 @@
     <Button v-bind="attrs" class="button-main-div" :loading="false">
         <template #default>
             <TransitionFade>
-                <Icon icon="line-md:loading-twotone-loop" size="1.6" v-if="attrs.loading" />
+                <MaxIcon icon="line-md:loading-twotone-loop" size="1.6" v-if="attrs.loading" />
                 <div class="content-button" v-else>
                     <div class="btn-icon-left" >
-                        <IconButton :icon="icon_left" :size="attrs.size ?? attrs.sizeIcon ?? attrs.iconSize ?? attrs['size-icon'] ?? attrs['icon-size'] ?? '1.8'" class="content-button-icon" v-if="icon_left" flex color="background-0" />
+                        <MaxIconButton :icon="icon_left" :size="attrs.size ?? attrs.sizeIcon ?? attrs.iconSize ?? attrs['size-icon'] ?? attrs['icon-size'] ?? '1.8'" class="content-button-icon" v-if="icon_left" flex color="background-0" />
                     </div>
                     <div v-if="attrs.labelhtml || attrs.label || attrs['label-html']" :class="`btn-label ${attrs.textLeft !== undefined ? 'text-left' : ''}`" v-html="attrs.label ?? attrs.labelhtml ?? attrs['label-html']"></div>
                     <div class="btn-icon-right">
-                        <IconButton :icon="icon_right" :size="attrs.size ?? attrs.sizeIcon ?? attrs.iconSize ?? attrs['size-icon'] ?? attrs['icon-size'] ?? '1.8'" class="content-button-icon" v-if="icon_right" flex color="background-0" />
+                        <MaxIconButton :icon="icon_right" :size="attrs.size ?? attrs.sizeIcon ?? attrs.iconSize ?? attrs['size-icon'] ?? attrs['icon-size'] ?? '1.8'" class="content-button-icon" v-if="icon_right" flex color="background-0" />
                     </div>
                     <Badge v-if="valueBadge" :size="attrs['size_badge'] ?? ''" :value="parseInt(valueBadge) > 99 ? '99+' : valueBadge" :severity="attrs['badge_severity'] ?? attrs['severity_badge'] ?? 'default'"></Badge>
                     <slot></slot>
