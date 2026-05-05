@@ -73,6 +73,7 @@ declare module 'vue' {
     MaxTransitionUp: typeof import('./src/components/MaxTransitionUp.vue')['default']
     MaxUserAvatar: typeof import('./src/components/MaxUserAvatar.vue')['default']
     Message: typeof import('primevue/message')['default']
+    OverlayBadge: typeof import('primevue/overlaybadge')['default']
     ProgressSpinner: typeof import('primevue/progressspinner')['default']
     RadioButton: typeof import('primevue/radiobutton')['default']
     Select: typeof import('primevue/select')['default']
