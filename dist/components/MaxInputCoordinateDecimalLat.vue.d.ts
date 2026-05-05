@@ -22,9 +22,9 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
     onComplete?: ((...args: any[]) => any) | undefined;
 }>, {
     done: boolean;
-    modelValue: string | number;
     caution: string | boolean;
     required: boolean;
+    modelValue: string | number;
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {}, any>;
 export default _default;
 //# sourceMappingURL=MaxInputCoordinateDecimalLat.vue.d.ts.map

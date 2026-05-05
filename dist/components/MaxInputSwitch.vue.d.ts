@@ -36,9 +36,9 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
     "onUpdate:modelValue"?: ((...args: any[]) => any) | undefined;
 }>, {
     done: boolean;
-    modelValue: boolean;
     caution: string | boolean;
     required: boolean;
+    modelValue: boolean;
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {}, any>;
 export default _default;
 //# sourceMappingURL=MaxInputSwitch.vue.d.ts.map

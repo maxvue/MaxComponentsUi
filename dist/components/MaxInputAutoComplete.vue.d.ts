@@ -21,9 +21,9 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
     "onUpdate:modelValue"?: ((...args: any[]) => any) | undefined;
 }>, {
     done: boolean;
-    modelValue: any;
     caution: string | boolean;
     required: boolean;
+    modelValue: any;
     options: Record<string, any>[];
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {}, any>;
 export default _default;
