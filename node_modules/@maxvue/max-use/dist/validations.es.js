@@ -1,28 +1,27 @@
-import { n as __exportAll } from "./chunk-C-Qwzh9l.js";
-import { t as require_dist } from "./dist-NYeC31V0.js";
+import { t as __exportAll } from "./chunk-pbuEa-1d.js";
 import { toValue } from "vue";
+import { validateBr } from "js-brasil";
 //#region src/Helpers/Validations/documents.ts
-var import_dist = require_dist();
 /**
 * Valida se uma string é um CPF válido.
 */
 function isCpf(value) {
 	const data = toValue(value);
-	return import_dist.validateBr.cpf(data);
+	return validateBr.cpf(data);
 }
 /**
 * Valida se uma string é um CNPJ válido.
 */
 function isCnpj(value) {
 	const data = toValue(value);
-	return import_dist.validateBr.cnpj(data);
+	return validateBr.cnpj(data);
 }
 /**
 * Valida se uma string é um CPF ou CNPJ válido.
 */
 function isCpfCnpj(value) {
 	const data = toValue(value);
-	return import_dist.validateBr.cpfcnpj(data);
+	return validateBr.cpfcnpj(data);
 }
 //#endregion
 //#region src/Helpers/Validations/isEmail.ts
@@ -47,7 +46,7 @@ function isEmail(value) {
 */
 function cepIsValid(value) {
 	const data = toValue(value);
-	return import_dist.validateBr.cep(data);
+	return validateBr.cep(data);
 }
 //#endregion
 //#region src/Helpers/Validations/index.ts

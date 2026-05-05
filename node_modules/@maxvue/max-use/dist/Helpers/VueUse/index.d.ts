@@ -28,7 +28,7 @@ export declare const formatTimeAgoIntl: typeof vueUseCore.formatTimeAgoIntl;
 export declare const formatTimeAgoIntlParts: typeof vueUseCore.formatTimeAgoIntlParts;
 export declare const getLifeCycleTarget: typeof vueUseCore.getLifeCycleTarget;
 export declare const getSSRHandler: typeof vueUseCore.getSSRHandler;
-export declare const hasOwn: <T extends object, K$1 extends keyof T>(val: T, key: K$1) => key is K$1;
+export declare const hasOwn: <T extends object, K extends keyof T>(val: T, key: K) => key is K;
 export declare const hyphenate: (str: string) => string;
 export declare const identity: typeof vueUseCore.identity;
 export declare const increaseWithUnit: typeof vueUseCore.increaseWithUnit;

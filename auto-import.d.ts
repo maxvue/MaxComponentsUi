@@ -107,6 +107,8 @@ declare global {
   const addTime: typeof import('@maxvue/max-use').addTime
   const apiDeleteRoute: typeof import('@maxvue/max-use').apiDeleteRoute
   const apiGetRoute: typeof import('@maxvue/max-use').apiGetRoute
+  const apiPostRoute: typeof import('@maxvue/max-use').apiPostRoute
+  const apiPutRoute: typeof import('@maxvue/max-use').apiPutRoute
   const apiUploadRoute: typeof import('@maxvue/max-use').apiUploadRoute
   const assert: typeof import('@maxvue/max-use').assert
   const average: typeof import('@maxvue/max-use').average
@@ -175,11 +177,14 @@ declare global {
   const gap: typeof import('./src/helpers/gap.ts').gap
   const get: typeof import('@maxvue/max-use').get
   const getCached: typeof import('./src/helpers/getCached.ts').getCached
+  const getColorFromVar: typeof import('@maxvue/max-use').getColorFromVar
   const getCssSize: typeof import('./src/helpers/getCssSize.ts').getCssSize
   const getCurrentInstance: typeof import('vue').getCurrentInstance
   const getCurrentScope: typeof import('vue').getCurrentScope
   const getCurrentWatcher: typeof import('vue').getCurrentWatcher
   const getLifeCycleTarget: typeof import('@maxvue/max-use').getLifeCycleTarget
+  const getRoute: typeof import('@maxvue/max-use').getRoute
+  const getRouteByName: typeof import('@maxvue/max-use').getRouteByName
   const getSSRHandler: typeof import('@maxvue/max-use').getSSRHandler
   const groupBy: typeof import('@maxvue/max-use').groupBy
   const h: typeof import('vue').h
@@ -515,6 +520,7 @@ declare global {
   const vMaska: typeof import('maska/vue').vMaska
   const validate: typeof import('@maxvue/max-use').validate
   const valuesInKey: typeof import('@maxvue/max-use').valuesInKey
+  const vueUse: typeof import('@maxvue/max-use').vueUse
   const watch: typeof import('vue').watch
   const watchArray: typeof import('@maxvue/max-use').watchArray
   const watchAtMost: typeof import('@maxvue/max-use').watchAtMost
@@ -648,6 +654,8 @@ declare module 'vue' {
     readonly addTime: UnwrapRef<typeof import('@maxvue/max-use')['addTime']>
     readonly apiDeleteRoute: UnwrapRef<typeof import('@maxvue/max-use')['apiDeleteRoute']>
     readonly apiGetRoute: UnwrapRef<typeof import('@maxvue/max-use')['apiGetRoute']>
+    readonly apiPostRoute: UnwrapRef<typeof import('@maxvue/max-use')['apiPostRoute']>
+    readonly apiPutRoute: UnwrapRef<typeof import('@maxvue/max-use')['apiPutRoute']>
     readonly apiUploadRoute: UnwrapRef<typeof import('@maxvue/max-use')['apiUploadRoute']>
     readonly assert: UnwrapRef<typeof import('@maxvue/max-use')['assert']>
     readonly average: UnwrapRef<typeof import('@maxvue/max-use')['average']>
@@ -716,11 +724,14 @@ declare module 'vue' {
     readonly gap: UnwrapRef<typeof import('./src/helpers/gap.ts')['gap']>
     readonly get: UnwrapRef<typeof import('@maxvue/max-use')['get']>
     readonly getCached: UnwrapRef<typeof import('./src/helpers/getCached.ts')['getCached']>
+    readonly getColorFromVar: UnwrapRef<typeof import('@maxvue/max-use')['getColorFromVar']>
     readonly getCssSize: UnwrapRef<typeof import('./src/helpers/getCssSize.ts')['getCssSize']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
     readonly getCurrentWatcher: UnwrapRef<typeof import('vue')['getCurrentWatcher']>
     readonly getLifeCycleTarget: UnwrapRef<typeof import('@maxvue/max-use')['getLifeCycleTarget']>
+    readonly getRoute: UnwrapRef<typeof import('@maxvue/max-use')['getRoute']>
+    readonly getRouteByName: UnwrapRef<typeof import('@maxvue/max-use')['getRouteByName']>
     readonly getSSRHandler: UnwrapRef<typeof import('@maxvue/max-use')['getSSRHandler']>
     readonly groupBy: UnwrapRef<typeof import('@maxvue/max-use')['groupBy']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
@@ -1056,6 +1067,7 @@ declare module 'vue' {
     readonly vMaska: UnwrapRef<typeof import('maska/vue')['vMaska']>
     readonly validate: UnwrapRef<typeof import('@maxvue/max-use')['validate']>
     readonly valuesInKey: UnwrapRef<typeof import('@maxvue/max-use')['valuesInKey']>
+    readonly vueUse: UnwrapRef<typeof import('@maxvue/max-use')['vueUse']>
     readonly watch: UnwrapRef<typeof import('vue')['watch']>
     readonly watchArray: UnwrapRef<typeof import('@maxvue/max-use')['watchArray']>
     readonly watchAtMost: UnwrapRef<typeof import('@maxvue/max-use')['watchAtMost']>
