@@ -23,9 +23,9 @@
         if (attrs.blank) window.open(attrs.blank as any, '_blank');
 
         if (attrs.route && typeof attrs.route === 'string' && hasContent(attrs.route)) {
-            const route = getRoutByName(attrs.route) ?? attrs.route;
-            const data: any = { name: route };
-            if (attrs.data ?? attrs.params) data['query'] = attrs.data ?? attrs.params;
+            const data: { name: string; query?: any } = { name: getRouteByName(attrs.route) ?? attrs.route };
+
+            if (attrs.data ?? attrs.params) data.query = attrs.data ?? attrs.params;
             router.push(data);
         }
     };

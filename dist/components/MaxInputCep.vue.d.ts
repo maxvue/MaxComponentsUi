@@ -30,18 +30,19 @@ type __VLS_Props = {
     /** Define se o campo é obrigatório */
     required?: boolean;
 };
-declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {
+declare const __VLS_export: import("vue").DefineComponent<__VLS_Props, {}, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {
     "update:modelValue": (...args: any[]) => void;
     complete: (...args: any[]) => void;
-}, string, import('vue').PublicProps, Readonly<__VLS_Props> & Readonly<{
+}, string, import("vue").PublicProps, Readonly<__VLS_Props> & Readonly<{
     "onUpdate:modelValue"?: ((...args: any[]) => any) | undefined;
     onComplete?: ((...args: any[]) => any) | undefined;
 }>, {
-    done: boolean;
-    caution: string | boolean;
     loading: boolean;
+    done: boolean;
     required: boolean;
     modelValue: string;
-}, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {}, any>;
+    caution: string | boolean;
+}, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;
+declare const _default: typeof __VLS_export;
 export default _default;
 //# sourceMappingURL=MaxInputCep.vue.d.ts.map
