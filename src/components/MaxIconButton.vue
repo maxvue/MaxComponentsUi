@@ -46,7 +46,7 @@
 
         &.ico-btn {
             &:hover {
-                transform: scale(1.3);
+                transform: scale(1.3) !important;
             }
         }
 
@@ -92,6 +92,10 @@
             svg {
                 position: absolute;
             }
+        }
+
+        .max-icon-div {
+            color: red !important;
         }
     }
 </style>
