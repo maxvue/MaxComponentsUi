@@ -1,6 +1,3 @@
-import { MaxComponentsUiResolver } from './helpers/resolver';
-export { presetMaxUno } from './unoCssPreset';
-export { MaxComponentsUiResolver };
 export * from './components/_primeVue';
 export { default as MaxIcon } from './components/MaxIcon.vue';
 export { default as MaxGrid } from './components/MaxGrid.vue';
