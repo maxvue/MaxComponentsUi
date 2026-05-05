@@ -56,11 +56,12 @@
             place-items: center;
 
             &.plus {
+                position: absolute;
                 color: var(--blue-0);
                 width: 13px;
                 height: 13px;
                 bottom: -2px;
-                right: 0;
+                right: 3px;
 
                 .background-icon {
                     height: 15px;
@@ -92,10 +93,6 @@
             svg {
                 position: absolute;
             }
-        }
-
-        .max-icon-div {
-            color: red !important;
         }
     }
 </style>
