@@ -5,10 +5,9 @@ const execute = () => {
     if (attrs.blank)
         window.open(attrs.blank, '_blank');
     if (attrs.route && typeof attrs.route === 'string' && hasContent(attrs.route)) {
-        const route = getRoutByName(attrs.route) ?? attrs.route;
-        const data = { name: route };
+        const data = { name: getRouteByName(attrs.route) ?? attrs.route };
         if (attrs.data ?? attrs.params)
-            data['query'] = attrs.data ?? attrs.params;
+            data.query = attrs.data ?? attrs.params;
         router.push(data);
     }
 };

@@ -1,9 +1,15 @@
 <template>
-    <router-link :to="{ name: attrs.route_name }">
+    <router-link :to="{ name: props.route_name ?? props.route }">
         <slot></slot>
     </router-link>
 </template>
 
 <script setup lang="ts">
-    const attrs = useAttrs();
+    interface Props {
+        route_name?: string;
+        route?: string;
+    }
+
+    const props = defineProps<Props>();
+
 </script>
