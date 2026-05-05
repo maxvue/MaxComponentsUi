@@ -15,7 +15,6 @@ declare module 'vue' {
     AutoComplete: typeof import('primevue/autocomplete')['default']
     Avatar: typeof import('primevue/avatar')['default']
     Badge: typeof import('primevue/badge')['default']
-    Button: typeof import('primevue/button')['default']
     Checkbox: typeof import('primevue/checkbox')['default']
     DataTable: typeof import('primevue/datatable')['default']
     DatePicker: typeof import('primevue/datepicker')['default']

@@ -9,9 +9,7 @@
  * Utiliza flexbox com wrap e gap padronizado.
  */
 <script setup lang="ts">
-    import { useAttrs } from 'vue';
 
-    const attrs: any = useAttrs();
 </script>
 
 <style lang="scss">
