@@ -1,5 +1,5 @@
 <template>
-    <InputBase v-bind="attrs" class="select_input_div" :options="resolvedOptions">
+    <InputBase v-bind="props" class="select_input_div" :options="resolvedOptions">
         <!-- SELECT EM GRUPO -->
         <div v-if="attrs.placeholder !== undefined && (!temp_value || temp_value === '')" class="placeholder-select">
             {{ attrs.placeholder }}
@@ -40,8 +40,9 @@
                 </slot>
             </template>
             <template #value="value">
-                <div :style="{ color: resolvedOptions.find((option: any) => option[attrs.optionValue ?? 'value'] === value.value)?.color }">
-                    {{ resolvedOptions.find((option: any) => option[attrs.optionValue ?? 'value'] === value.value)?.[attrs.optionLabel ?? 'name'] ?? resolvedOptions.find((option: any) => option[attrs.optionValue ?? 'value'] === value.value)?.label }}
+                <div class="value-div" :style="{ color: resolvedOptions.find((option: any) => option[attrs.optionValue ?? 'value'] === value.value)?.color }">
+                    <Icon :icon="resolvedOptions.find((option: any) => option[attrs.optionValue ?? 'value'] === value.value)?.['icon']" v-if="resolvedOptions.find((option: any) => option[attrs.optionValue ?? 'value'] === value.value)?.['icon']" :size="resolvedOptions.find((option: any) => option[attrs.optionValue ?? 'value'] === value.value)?.['iconSize'] ?? '1'" :style="{ width: '30px' }" />
+                    <span class="value-text">{{ resolvedOptions.find((option: any) => option[attrs.optionValue ?? 'value'] === value.value)?.[attrs.optionLabel ?? 'name'] ?? resolvedOptions.find((option: any) => option[attrs.optionValue ?? 'value'] === value.value)?.label }}</span>
                 </div>
             </template>
         </Select>
@@ -53,6 +54,27 @@
  * Suporta opções simples, agrupadas e carregamento dinâmico via callback.
  */
 <script setup lang="ts">
+    interface SelectOption {
+        value: any;
+        label?: string;
+        name?: string;
+        icon?: string;
+        iconSize?: string;
+        sub_label?: string;
+        sub?: string;
+        subLabel?: string;
+        img?: string;
+        color?: string;
+        category?: string;
+        [key: string]: any;
+    }
+
+    interface GroupOption {
+        label: string;
+        items: SelectOption[];
+        [key: string]: any;
+    }
+
     const attrs: any = useAttrs();
 
     const props = withDefaults(
@@ -60,13 +82,35 @@
             /** Valor selecionado */
             modelValue: any;
             /** Lista de opções simples [{ name, value, icon, sub_label }] */
-            options?: any[];
+            options?: SelectOption[];
             /** Lista de opções agrupadas [{ label, items: [] }] */
-            groupOptions?: any[];
+            groupOptions?: GroupOption[];
             /** Função assíncrona para carregar opções ao abrir o select */
-            loadOptions?: () => Promise<any[]>;
+            loadOptions?: () => Promise<SelectOption[]>;
+            /** Ícone principal (ex: 'mdi:user') */
+            icon?: string | undefined;
+            /** Ícone posicionado à esquerda */
+            iconLeft?: string | undefined;
+            /** Ícone posicionado à direita */
+            iconRight?: string | undefined;
+            /** Alias para o ícone principal */
+            i?: string | undefined;
+            /** Ícone escuro comparado ao fundo */
+            iconDark?: boolean | undefined | number | string;
+            /** Ícone claro comparado ao fundo */
+            iconLight?: boolean | undefined | number | string;
+            /** Estado de conclusão/validação */
+            done?: boolean | undefined;
+            /** Mensagem ou estado de erro */
+            error?: string | boolean | undefined;
+            /** Mensagem ou estado de atenção */
+            caution?: string | boolean | undefined;
+            /** Indica se o campo é obrigatório */
+            required?: boolean | undefined;
+            /** Ícone da mensagem de feedback */
+            iconMessage?: string | undefined;
         }>(),
-        { modelValue: null }
+        { modelValue: null, done: undefined, caution: undefined, required: false }
     );
 
     const emit = defineEmits(['update:modelValue', 'before-show']);
@@ -84,7 +128,7 @@
     );
 
     const loading = ref(false);
-    const optionsField = ref<any[]>([]);
+    const optionsField = ref<SelectOption[]>([]);
 
     const resolvedOptions = computed(() => {
         if (optionsField.value && optionsField.value.length > 0) return optionsField.value;
@@ -126,14 +170,16 @@
 
         .p-select {
             width: 100%;
+            height: 36px !important;
         }
 
         .p-select-label {
             border: none !important;
-            padding: 0 !important;
+            padding: 0 10px !important;
             display: grid;
             place-items: center start;
             outline: none !important;
+            height: 36px !important;
 
             &:focus {
                 border: none !important;
@@ -183,6 +229,17 @@
 
         img {
             max-height: 20px;
+        }
+    }
+
+    .value-div {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        place-items: center;
+        gap: 10px;
+
+        .value-text {
+            color: var(--background-750);
         }
     }
 

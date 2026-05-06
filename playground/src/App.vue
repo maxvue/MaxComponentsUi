@@ -35,6 +35,8 @@
                         <h3>Especiais</h3>
                         <Grid>
                             <MaxPhoneField v-model="value.e" s80 message="Mensagem simples" />
+                            <MaxInputSelect v-model="selectValue" :options="options" s40 label="Select básico" />
+                            <MaxInputSelect v-model="selectValue" :options="optionsWithIcons" s40 label="Select com ícones" icon="humbleicons:box" />
                             <div s60></div>
                         </Grid>
                     </div>
@@ -113,7 +115,6 @@
     import { MaxButton } from '@/index';
     import { Grid } from '@/index';
     import { ref } from 'vue';
-    import { RouterView } from 'vue-router';
     const lastClickEvent = ref<string>('');
 
     const value = ref({
@@ -123,6 +124,20 @@
         d: '',
         e: ''
     });
+
+    const selectValue = ref();
+
+    const options = ref([
+        { name: 'Opção1', label: 'Opção1 Label', value: 1 },
+        { name: 'Opção2', label: 'Opção2 Label', value: 2 },
+        { name: 'Opção3', label: 'Opção3 Label', value: 3 }
+    ]);
+
+    const optionsWithIcons = ref([
+        { name: 'Opção1', label: 'Opção1 Label', value: 1, icon: 'humbleicons:box' },
+        { name: 'Opção2', label: 'Opção2 Label', value: 2, icon: 'humbleicons:user' },
+        { name: 'Opção3', label: 'Opção3 Label', value: 3, icon: 'humbleicons:star' }
+    ]);
 
     const handleClick = () => {
         console.log('Botão clicado!');
