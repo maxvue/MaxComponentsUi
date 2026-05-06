@@ -1,1 +1,1 @@
-import{t as o}from"./MaxComponentsUiResolver-BeFkB4ls.js";export{o as MaxComponentsUiResolver};
+import{t as o}from"./MaxComponentsUiResolver-DxpbnVFz.js";export{o as MaxComponentsUiResolver};

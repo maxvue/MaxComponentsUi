@@ -18,6 +18,5 @@
         flex-wrap: wrap;
         gap: 13px 8px;
         padding-top: 14px;
-        background-color: red !important;
     }
 </style>

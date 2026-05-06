@@ -23,6 +23,12 @@ export { default as Button } from './components/MaxButton.vue';
 export { default as Botao } from './components/MaxButton.vue';
 export { default as MaxIconButton } from './components/MaxIconButton.vue';
 
+// Titles && Strings
+export { default as MaxTitle1 } from './components/MaxTitle1.vue';
+export { default as T1 } from './components/MaxTitle1.vue';
+export { default as MaxTitle2 } from './components/MaxTitle2.vue';
+export { default as T2 } from './components/MaxTitle2.vue';
+
 // Input Text
 export { default as MaxInputText } from './components/MaxInputText.vue';
 export { default as InputText } from './components/MaxInputText.vue';
@@ -73,10 +79,6 @@ export { default as MaxLink } from './components/MaxLink.vue';
 export { default as MaxLogo } from './components/MaxLogo.vue';
 export { default as MaxMaps } from './components/MaxMaps.vue';
 export { default as MaxPdfView } from './components/MaxPdfView.vue';
-
-// Typography
-export { default as T1 } from './components/Text/T1.vue';
-export { default as T2 } from './components/Text/T2.vue';
 
 // Utils / Others
 export { default as MaxMsgLabels } from './components/MaxMsgLabels.vue';
