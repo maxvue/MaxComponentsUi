@@ -16,7 +16,9 @@ const componentNames = files.filter((file) => file.endsWith('.vue')).map((file) 
 const aliases: Record<string, string> = {
     'Botao': 'MaxButton',
     'InputField': 'MaxInputText',
-    'InputPhone': 'MaxPhoneField'
+    'InputPhone': 'MaxPhoneField',
+    'T1': 'MaxTitle1',
+    'T2': 'MaxTitle2'
 };
 
 for (const k of Object.keys(aliases)) {

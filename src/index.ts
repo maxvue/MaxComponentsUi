@@ -15,19 +15,14 @@ export { default as InputBase } from './components/InputBase.vue';
 
 export { default as MaxIcon } from './components/MaxIcon.vue';
 export { default as MaxGrid } from './components/MaxGrid.vue';
-export { default as Grid } from './components/MaxGrid.vue';
 
 // Button
 export { default as MaxButton } from './components/MaxButton.vue';
-export { default as Button } from './components/MaxButton.vue';
-export { default as Botao } from './components/MaxButton.vue';
 export { default as MaxIconButton } from './components/MaxIconButton.vue';
 
 // Titles && Strings
 export { default as MaxTitle1 } from './components/MaxTitle1.vue';
-export { default as T1 } from './components/MaxTitle1.vue';
 export { default as MaxTitle2 } from './components/MaxTitle2.vue';
-export { default as T2 } from './components/MaxTitle2.vue';
 
 // Input Text
 export { default as MaxInputText } from './components/MaxInputText.vue';
