@@ -17,8 +17,7 @@
         "./resolver": {
             "types": "./dist/helpers/resolver.d.ts",
             "import": "./dist/resolver.es.js"
-        },
-        "./dist/style.css": "./dist/style.css"
+        }
     },
     "files": [
         "dist"

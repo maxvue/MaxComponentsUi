@@ -17,7 +17,11 @@ export default defineConfig({
         vue(),
         UnoCSS({ inspector: false }),
         dts({ rollupTypes: false }),
-        cssInjectedByJsPlugin(),
+        cssInjectedByJsPlugin({
+            jsAssetsFilterFunction: (outputChunk) => {
+                return outputChunk.fileName === 'index.es.js';
+            }
+        }),
         AutoImport({
             imports: [
                 'vue',

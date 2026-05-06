@@ -7,7 +7,7 @@
             "command": "npx tsx src/scripts/generateResolver.ts && npm run build && git add . && git commit -m 'feat: atualizando componentes' && git push && notify-send 'VS Code' '✅ Build, Commit e Push realizados!' -i software-update-available",
             "isBackground": false,
             "presentation": {
-                "reveal": "silent",
+                "reveal": "",
                 "panel": "new",
                 "focus": false,
                 "clear": true,
