@@ -29,6 +29,7 @@ declare module 'vue' {
     MaxButton: typeof import('./src/components/MaxButton.vue')['default']
     MaxEmptyDiv: typeof import('./src/components/MaxEmptyDiv.vue')['default']
     MaxGrid: typeof import('./src/components/MaxGrid.vue')['default']
+    MaxGridCols: typeof import('./src/components/MaxGridCols.vue')['default']
     MaxIcon: typeof import('./src/components/MaxIcon.vue')['default']
     MaxIconButton: typeof import('./src/components/MaxIconButton.vue')['default']
     MaxInputAutoComplete: typeof import('./src/components/MaxInputAutoComplete.vue')['default']

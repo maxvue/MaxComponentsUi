@@ -12,12 +12,7 @@ export default defineConfig({
     presets: [
         presetMaxUno(),
         presetWind3(),
-        presetAttributify({
-            extraProperties: {}
-        }),
-        presetIcons({
-            extraProperties: {},
-            prefix: ''
-        })
+        presetAttributify(),
+        presetIcons()
     ]
 });

@@ -45,7 +45,7 @@ declare global {
   const InputOtp: typeof import('./src/components/_primeVue.ts').InputOtp
   const Knob: typeof import('./src/components/_primeVue.ts').Knob
   const Listbox: typeof import('./src/components/_primeVue.ts').Listbox
-  const MaxComponentsUiResolver: typeof import('./src/helpers/resolver.ts').MaxComponentsUiResolver
+  const MaxComponentsUiResolver: typeof import('./src/helpers/MaxComponentsUiResolver.js').MaxComponentsUiResolver
   const MegaMenu: typeof import('./src/components/_primeVue.ts').MegaMenu
   const Menu: typeof import('./src/components/_primeVue.ts').Menu
   const Menubar: typeof import('./src/components/_primeVue.ts').Menubar
@@ -592,7 +592,7 @@ declare module 'vue' {
     readonly InputOtp: UnwrapRef<typeof import('./src/components/_primeVue.ts')['InputOtp']>
     readonly Knob: UnwrapRef<typeof import('./src/components/_primeVue.ts')['Knob']>
     readonly Listbox: UnwrapRef<typeof import('./src/components/_primeVue.ts')['Listbox']>
-    readonly MaxComponentsUiResolver: UnwrapRef<typeof import('./src/helpers/resolver.ts')['MaxComponentsUiResolver']>
+    readonly MaxComponentsUiResolver: UnwrapRef<typeof import('./src/helpers/MaxComponentsUiResolver.js')['MaxComponentsUiResolver']>
     readonly MegaMenu: UnwrapRef<typeof import('./src/components/_primeVue.ts')['MegaMenu']>
     readonly Menu: UnwrapRef<typeof import('./src/components/_primeVue.ts')['Menu']>
     readonly Menubar: UnwrapRef<typeof import('./src/components/_primeVue.ts')['Menubar']>

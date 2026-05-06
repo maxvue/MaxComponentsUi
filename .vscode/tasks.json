@@ -18,6 +18,24 @@
                     "hide": false
                 }
             }
+        },
+        {
+            "label": "⬆️  RELEASE",
+            "type": "shell",
+            "command": "git add . && git commit -m 'feat: atualizando componentes' && npm run build && npm run release",
+            "isBackground": true,
+            "presentation": {
+                "reveal": "silent",
+                "panel": "new",
+                "focus": false,
+                "clear": true
+            },
+            "options": {
+                "statusbar": {
+                    "label": "⬆️  RELEASE",
+                    "hide": false
+                }
+            }
         }
     ]
 }
