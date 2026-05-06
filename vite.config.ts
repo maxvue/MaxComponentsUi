@@ -14,10 +14,10 @@ const pkg = JSON.parse(fs.readFileSync(new URL('./package.json', import.meta.url
 
 export default defineConfig({
     plugins: [
-        cssInjectedByJsPlugin(),
         vue(),
         UnoCSS({ inspector: false }),
         dts({ rollupTypes: false }),
+        cssInjectedByJsPlugin(),
         AutoImport({
             imports: [
                 'vue',
