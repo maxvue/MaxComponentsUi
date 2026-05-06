@@ -34,7 +34,6 @@
         "preview": "vite preview",
         "type-check": "vue-tsc --noEmit",
         "lint": "eslint . --fix && stylelint \"**/*.{scss,vue}\" --fix",
-        "postbuild": "git add dist tsconfig.tsbuildinfo && git commit -m 'chore: atualiza artefatos do build' || true",
         "release": "npm run build && npm version patch -m 'Upgrade to %s' && git push origin main --follow-tags && npm publish --access public"
     },
     "dependencies": {
