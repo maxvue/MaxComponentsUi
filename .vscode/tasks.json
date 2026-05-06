@@ -10,7 +10,8 @@
                 "reveal": "silent",
                 "panel": "new",
                 "focus": false,
-                "clear": true
+                "clear": true,
+                "close": true,
             },
             "options": {
                 "statusbar": {
@@ -28,7 +29,8 @@
                 "reveal": "silent",
                 "panel": "new",
                 "focus": false,
-                "clear": true
+                "clear": true,
+                "close": true
             },
             "options": {
                 "statusbar": {
