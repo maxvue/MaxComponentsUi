@@ -16,11 +16,11 @@
                 </Transition>
 
                 <div class="pdfDiv">
-                    <VuePdfEmbed :annotation-layer="false" :textLayer="false" :source="props.file" :width="size.width" :height="size.height" @rendered="rendered" @loaded="loaded" @progress="progressPdf">
-                        <template #before-page="slotProps">
+                    <!-- <VuePdfEmbed :annotation-layer="false" :textLayer="false" :source="props.file" :width="size.width" :height="size.height" @rendered="rendered" @loaded="loaded" @progress="progressPdf"> -->
+                    <!-- <template #before-page="slotProps">
                             <div class="header-page">Página {{ slotProps.page }} de {{ total }}</div>
                         </template>
-                    </VuePdfEmbed>
+                    </VuePdfEmbed> -->
                 </div>
             </div>
             <div class="space" @click="closePDF" />
@@ -38,7 +38,7 @@
  * Exibe um modal em tela cheia com ferramentas de zoom e paginação.
  */
 <script setup lang="ts">
-    import VuePdfEmbed from 'vue-pdf-embed';
+    // import VuePdfEmbed from 'vue-pdf-embed';
 
     const { width: screen_width, height: screen_height } = useWindowSize();
 
