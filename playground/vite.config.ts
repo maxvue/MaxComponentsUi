@@ -39,11 +39,7 @@ export default defineConfig({
                 types: true
             },
             dirs: [
-                '../src/**',
-                '../src/helpers/**',
-                '../src/components/**',
-                '../src/utils/**',
-                '../src/types/**'
+                '../src/*.ts'
             ]
         }),
         Components({

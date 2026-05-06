@@ -11,34 +11,34 @@
                 <div class="component-grid">
                     <div class="component-item">
                         <h3>Básico</h3>
-                        <Grid >
+                        <MaxGrid >
                             <MaxInputText label="Input text required 50%" v-model="value.a" required s50 />
                             <MaxInputText label="Input text required 25%" v-model="value.b" required s25 />
                             <div s25></div>
-                        </Grid>
+                        </MaxGrid>
 
                         <h3>Icon</h3>
-                        <Grid>
+                        <MaxGrid>
                             <MaxInputText label="Icon Left 20%" v-model="value.e" s20 icon="humbleicons:box" />
                             <MaxInputText label="Icon Right 20%" v-model="value.e" s20 iconRight="humbleicons:box" />
                             <MaxInputText label="Icon Left Right 10%" v-model="value.e" s10 icon="humbleicons:box" iconRight="humbleicons:box" />
                             <MaxInputText label="Icon Loading 10%" v-model="value.e" s10 iconRight="loading" />
-                        </Grid>
+                        </MaxGrid>
 
                         <h3>Message</h3>
-                        <Grid>
+                        <MaxGrid>
                             <MaxInputText label="Mensagem 20%" v-model="value.e" s20 message="Mensagem simples" />
                             <MaxInputText label="Mensagem com icone 20%" v-model="value.e" s20 message="Mensagem com ícone" icon-message="humbleicons:box" />
                             <div s60></div>
-                        </Grid>
+                        </MaxGrid>
 
                         <h3>Especiais</h3>
-                        <Grid>
+                        <MaxGrid>
                             <MaxPhoneField v-model="value.e" s80 message="Mensagem simples" />
                             <MaxInputSelect v-model="selectValue" :options="options" s40 label="Select básico" />
                             <MaxInputSelect v-model="selectValue" :options="optionsWithIcons" s40 label="Select com ícones" icon="humbleicons:box" />
                             <div s60></div>
-                        </Grid>
+                        </MaxGrid>
                     </div>
                 </div>
             </section>
@@ -113,8 +113,7 @@
 </template>
 
 <script setup lang="ts">
-    import { MaxButton } from '@/index';
-    import { Grid } from '@/index';
+
     import { ref } from 'vue';
     const lastClickEvent = ref<string>('');
 

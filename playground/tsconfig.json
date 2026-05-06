@@ -27,12 +27,11 @@
         }
     },
     "include": [
-        "src/**/*",
-        "src/**/*.vue",
-        "../src/**/*",
-        "../src/**/*.vue",
+        "../src/index.ts",
         "../scripts/**/*",
         "../src/scripts/**/*",
+        "./auto-import.d.ts",
+        "./auto-import-components.d.ts",
         "env.d.ts"
     ],
     "exclude": [

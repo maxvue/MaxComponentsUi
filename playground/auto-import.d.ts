@@ -6,7 +6,6 @@
 // biome-ignore lint: disable
 export {}
 declare global {
-  const 900: typeof import('../src/styles/style.ts')['900']
   const Accordion: typeof import('../src/components/_primeVue.ts').Accordion
   const AccordionContent: typeof import('../src/components/_primeVue.ts').AccordionContent
   const AccordionHeader: typeof import('../src/components/_primeVue.ts').AccordionHeader
@@ -76,7 +75,6 @@ declare global {
   const MaxInputFileUploadBig: typeof import('../src/index.ts').MaxInputFileUploadBig
   const MaxInputFileUploadButton: typeof import('../src/index.ts').MaxInputFileUploadButton
   const MaxInputNumber: typeof import('../src/index.ts').MaxInputNumber
-  const MaxInputPhone: typeof import('../src/index.ts').MaxInputPhone
   const MaxInputPhoneMail: typeof import('../src/index.ts').MaxInputPhoneMail
   const MaxInputRadio: typeof import('../src/index.ts').MaxInputRadio
   const MaxInputSearch: typeof import('../src/index.ts').MaxInputSearch
@@ -95,7 +93,6 @@ declare global {
   const MaxMsgLabels: typeof import('../src/index.ts').MaxMsgLabels
   const MaxPdfView: typeof import('../src/index.ts').MaxPdfView
   const MaxPhoneField: typeof import('../src/index.ts').MaxPhoneField
-  const MaxStyle: typeof import('../src/styles/style.ts').MaxStyle
   const MaxTable: typeof import('../src/index.ts').MaxTable
   const MaxTableData: typeof import('../src/index.ts').MaxTableData
   const MaxTextInputFloatLabel: typeof import('../src/index.ts').MaxTextInputFloatLabel
@@ -188,7 +185,6 @@ declare global {
   const computedWithControl: typeof import('@maxvue/max-use').computedWithControl
   const containsProp: typeof import('@maxvue/max-use').containsProp
   const countBy: typeof import('@maxvue/max-use').countBy
-  const country_ddi_flags: typeof import('../src/constants/ddiFlags.ts').country_ddi_flags
   const createApp: typeof import('vue').createApp
   const createEventHook: typeof import('@maxvue/max-use').createEventHook
   const createFetch: typeof import('@maxvue/max-use').createFetch
@@ -235,11 +231,8 @@ declare global {
   const formatTimeAgo: typeof import('@maxvue/max-use').formatTimeAgo
   const formatTimeAgoIntl: typeof import('@maxvue/max-use').formatTimeAgoIntl
   const formatTimeAgoIntlParts: typeof import('@maxvue/max-use').formatTimeAgoIntlParts
-  const gap: typeof import('../src/helpers/gap.ts').gap
   const get: typeof import('@maxvue/max-use').get
-  const getCached: typeof import('../src/helpers/getCached.ts').getCached
   const getColorFromVar: typeof import('@maxvue/max-use').getColorFromVar
-  const getCssSize: typeof import('../src/helpers/getCssSize.ts').getCssSize
   const getCurrentInstance: typeof import('vue').getCurrentInstance
   const getCurrentScope: typeof import('vue').getCurrentScope
   const getCurrentWatcher: typeof import('vue').getCurrentWatcher
@@ -339,7 +332,6 @@ declare global {
   const onlySymbols: typeof import('@maxvue/max-use').onlySymbols
   const orderBy: typeof import('@maxvue/max-use').orderBy
   const orderByWithKey: typeof import('@maxvue/max-use').orderByWithKey
-  const paddingMargin: typeof import('../src/helpers/paddingMargin.ts').paddingMargin
   const pausableFilter: typeof import('@maxvue/max-use').pausableFilter
   const pick: typeof import('@maxvue/max-use').pick
   const presetMaxUno: typeof import('../src/unoCssPreset.ts').presetMaxUno
@@ -347,7 +339,6 @@ declare global {
   const provide: typeof import('vue').provide
   const provideLocal: typeof import('@maxvue/max-use').provideLocal
   const provideSSRWidth: typeof import('@maxvue/max-use').provideSSRWidth
-  const ptBr: typeof import('../src/locales/pt-br.ts').default
   const pxValue: typeof import('@maxvue/max-use').pxValue
   const rand: typeof import('@maxvue/max-use').rand
   const reactify: typeof import('@maxvue/max-use').reactify
@@ -372,7 +363,6 @@ declare global {
   const roundUp: typeof import('@maxvue/max-use').roundUp
   const sample: typeof import('@maxvue/max-use').sample
   const set: typeof import('@maxvue/max-use').set
-  const setCached: typeof import('../src/helpers/setCached.ts').setCached
   const setSSRHandler: typeof import('@maxvue/max-use').setSSRHandler
   const shallowReactive: typeof import('vue').shallowReactive
   const shallowReadonly: typeof import('vue').shallowReadonly
@@ -608,9 +598,6 @@ declare global {
   export type { Component, Slot, Slots, ComponentPublicInstance, ComputedRef, DirectiveBinding, ExtractDefaultPropTypes, ExtractPropTypes, ExtractPublicPropTypes, InjectionKey, PropType, Ref, ShallowRef, MaybeRef, MaybeRefOrGetter, VNode, WritableComputedRef, ShallowComputedRef, WatchStopHandle, Watch } from 'vue'
   import('vue')
   // @ts-ignore
-  export type { DDIFlag } from '../src/constants/ddiFlags.ts'
-  import('../src/constants/ddiFlags.ts')
-  // @ts-ignore
   export type { BaseComponentProps, ButtonProps, ComponentEmits } from '../src/types/index.ts'
   import('../src/types/index.ts')
 }
@@ -620,7 +607,6 @@ import { UnwrapRef } from 'vue'
 declare module 'vue' {
   interface GlobalComponents {}
   interface ComponentCustomProperties {
-    readonly 900: UnwrapRef<typeof import('../src/styles/style.ts')['900']>
     readonly Accordion: UnwrapRef<typeof import('../src/components/_primeVue.ts')['Accordion']>
     readonly AccordionContent: UnwrapRef<typeof import('../src/components/_primeVue.ts')['AccordionContent']>
     readonly AccordionHeader: UnwrapRef<typeof import('../src/components/_primeVue.ts')['AccordionHeader']>
@@ -690,7 +676,6 @@ declare module 'vue' {
     readonly MaxInputFileUploadBig: UnwrapRef<typeof import('../src/index.ts')['MaxInputFileUploadBig']>
     readonly MaxInputFileUploadButton: UnwrapRef<typeof import('../src/index.ts')['MaxInputFileUploadButton']>
     readonly MaxInputNumber: UnwrapRef<typeof import('../src/index.ts')['MaxInputNumber']>
-    readonly MaxInputPhone: UnwrapRef<typeof import('../src/index.ts')['MaxInputPhone']>
     readonly MaxInputPhoneMail: UnwrapRef<typeof import('../src/index.ts')['MaxInputPhoneMail']>
     readonly MaxInputRadio: UnwrapRef<typeof import('../src/index.ts')['MaxInputRadio']>
     readonly MaxInputSearch: UnwrapRef<typeof import('../src/index.ts')['MaxInputSearch']>
@@ -709,7 +694,6 @@ declare module 'vue' {
     readonly MaxMsgLabels: UnwrapRef<typeof import('../src/index.ts')['MaxMsgLabels']>
     readonly MaxPdfView: UnwrapRef<typeof import('../src/index.ts')['MaxPdfView']>
     readonly MaxPhoneField: UnwrapRef<typeof import('../src/index.ts')['MaxPhoneField']>
-    readonly MaxStyle: UnwrapRef<typeof import('../src/styles/style.ts')['MaxStyle']>
     readonly MaxTable: UnwrapRef<typeof import('../src/index.ts')['MaxTable']>
     readonly MaxTableData: UnwrapRef<typeof import('../src/index.ts')['MaxTableData']>
     readonly MaxTextInputFloatLabel: UnwrapRef<typeof import('../src/index.ts')['MaxTextInputFloatLabel']>
@@ -802,7 +786,6 @@ declare module 'vue' {
     readonly computedWithControl: UnwrapRef<typeof import('@maxvue/max-use')['computedWithControl']>
     readonly containsProp: UnwrapRef<typeof import('@maxvue/max-use')['containsProp']>
     readonly countBy: UnwrapRef<typeof import('@maxvue/max-use')['countBy']>
-    readonly country_ddi_flags: UnwrapRef<typeof import('../src/constants/ddiFlags.ts')['country_ddi_flags']>
     readonly createApp: UnwrapRef<typeof import('vue')['createApp']>
     readonly createEventHook: UnwrapRef<typeof import('@maxvue/max-use')['createEventHook']>
     readonly createFetch: UnwrapRef<typeof import('@maxvue/max-use')['createFetch']>
@@ -849,11 +832,8 @@ declare module 'vue' {
     readonly formatTimeAgo: UnwrapRef<typeof import('@maxvue/max-use')['formatTimeAgo']>
     readonly formatTimeAgoIntl: UnwrapRef<typeof import('@maxvue/max-use')['formatTimeAgoIntl']>
     readonly formatTimeAgoIntlParts: UnwrapRef<typeof import('@maxvue/max-use')['formatTimeAgoIntlParts']>
-    readonly gap: UnwrapRef<typeof import('../src/helpers/gap.ts')['gap']>
     readonly get: UnwrapRef<typeof import('@maxvue/max-use')['get']>
-    readonly getCached: UnwrapRef<typeof import('../src/helpers/getCached.ts')['getCached']>
     readonly getColorFromVar: UnwrapRef<typeof import('@maxvue/max-use')['getColorFromVar']>
-    readonly getCssSize: UnwrapRef<typeof import('../src/helpers/getCssSize.ts')['getCssSize']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
     readonly getCurrentWatcher: UnwrapRef<typeof import('vue')['getCurrentWatcher']>
@@ -953,7 +933,6 @@ declare module 'vue' {
     readonly onlySymbols: UnwrapRef<typeof import('@maxvue/max-use')['onlySymbols']>
     readonly orderBy: UnwrapRef<typeof import('@maxvue/max-use')['orderBy']>
     readonly orderByWithKey: UnwrapRef<typeof import('@maxvue/max-use')['orderByWithKey']>
-    readonly paddingMargin: UnwrapRef<typeof import('../src/helpers/paddingMargin.ts')['paddingMargin']>
     readonly pausableFilter: UnwrapRef<typeof import('@maxvue/max-use')['pausableFilter']>
     readonly pick: UnwrapRef<typeof import('@maxvue/max-use')['pick']>
     readonly presetMaxUno: UnwrapRef<typeof import('../src/unoCssPreset.ts')['presetMaxUno']>
@@ -961,7 +940,6 @@ declare module 'vue' {
     readonly provide: UnwrapRef<typeof import('vue')['provide']>
     readonly provideLocal: UnwrapRef<typeof import('@maxvue/max-use')['provideLocal']>
     readonly provideSSRWidth: UnwrapRef<typeof import('@maxvue/max-use')['provideSSRWidth']>
-    readonly ptBr: UnwrapRef<typeof import('../src/locales/pt-br.ts')['default']>
     readonly pxValue: UnwrapRef<typeof import('@maxvue/max-use')['pxValue']>
     readonly rand: UnwrapRef<typeof import('@maxvue/max-use')['rand']>
     readonly reactify: UnwrapRef<typeof import('@maxvue/max-use')['reactify']>
@@ -986,7 +964,6 @@ declare module 'vue' {
     readonly roundUp: UnwrapRef<typeof import('@maxvue/max-use')['roundUp']>
     readonly sample: UnwrapRef<typeof import('@maxvue/max-use')['sample']>
     readonly set: UnwrapRef<typeof import('@maxvue/max-use')['set']>
-    readonly setCached: UnwrapRef<typeof import('../src/helpers/setCached.ts')['setCached']>
     readonly setSSRHandler: UnwrapRef<typeof import('@maxvue/max-use')['setSSRHandler']>
     readonly shallowReactive: UnwrapRef<typeof import('vue')['shallowReactive']>
     readonly shallowReadonly: UnwrapRef<typeof import('vue')['shallowReadonly']>

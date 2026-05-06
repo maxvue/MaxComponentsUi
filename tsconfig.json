@@ -1,6 +1,18 @@
 {
-    "include": ["env.d.ts", "auto-import.d.ts", "auto-import-components.d.ts", "src/**/*", "src/**/*.vue", "src/**/*.json", "scripts"],
-    "exclude": ["src/**/__tests__/*", "node_modules", "dist"],
+    "include": [
+        "env.d.ts",
+        "./auto-import.d.ts",
+        "./auto-import-components.d.ts",
+        "./src/**/*",
+        "./src/**/*.vue",
+        "./src/**/*.json",
+        "scripts"
+    ],
+    "exclude": [
+        "src/**/__tests__/*",
+        "node_modules",
+        "dist"
+    ],
     "compilerOptions": {
         "composite": true,
         "declaration": true,
@@ -20,10 +32,16 @@
         "module": "ESNext",
         "target": "ESNext",
         "useDefineForClassFields": true,
-        "lib": ["ES2020", "DOM", "DOM.Iterable"],
+        "lib": [
+            "ES2020",
+            "DOM",
+            "DOM.Iterable"
+        ],
         // "baseUrl": ".",
         "paths": {
-            "@/*": ["./src/*"]
+            "@/*": [
+                "./src/*"
+            ]
         }
     }
 }
