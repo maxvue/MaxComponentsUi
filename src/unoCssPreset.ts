@@ -26,10 +26,10 @@ export const presetMaxUno = () => {
                 // Tipografia
                 [/^font-size-(.+)$/, ([, s]) => ({ 'font-size': `${s}rem` })],
                 [/^font-weight-(.+)$/, ([, s]) => ({ 'font-weight': s })],
-                [/^w-max-(.+)$/, ([, s]) => ({ 'max-width': s + 'px' })],
-                [/^h-max-(.+)$/, ([, s]) => ({ 'max-height': s + 'px' })],
-                [/^w-min-(.+)$/, ([, s]) => ({ 'min-width': s + 'px' })],
-                [/^h-min-(.+)$/, ([, s]) => ({ 'min-height': s + 'px' })],
+                [/^w-?max-(.+)$/, ([, s]) => ({ 'max-width': s + 'px' })],
+                [/^h-?max-(.+)$/, ([, s]) => ({ 'max-height': s + 'px' })],
+                [/^w-?min-(.+)$/, ([, s]) => ({ 'min-width': s + 'px' })],
+                [/^h-?min-(.+)$/, ([, s]) => ({ 'min-height': s + 'px' })],
 
                 // Cores dinâmicas
                 [/^color-(.+)$/, ([, s]) => ({ color: s.startsWith('var(') || s.startsWith('#') || s.startsWith('rgb') || s.startsWith('hsl') ? s : `var(--${s})` })],
