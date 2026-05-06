@@ -8,7 +8,7 @@ import ptBR from './locales/pt-br';
 export * from './components/_primeVue';
 
 // NÃO REMOVER O RESOLVER DO INDEX.TS
-// (Removido conforme solicitado)
+export { MaxComponentsUiResolver } from './helpers/MaxComponentsUiResolver';
 
 // NÃO REMOVER O INPUTBASE DO INDEX.TS
 export { default as InputBase } from './components/InputBase.vue';
@@ -23,6 +23,7 @@ export { default as MaxIconButton } from './components/MaxIconButton.vue';
 // Titles && Strings
 export { default as MaxTitle1 } from './components/MaxTitle1.vue';
 export { default as MaxTitle2 } from './components/MaxTitle2.vue';
+
 
 // Input Text
 export { default as MaxInputText } from './components/MaxInputText.vue';
