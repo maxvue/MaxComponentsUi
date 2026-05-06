@@ -2,20 +2,20 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "✅  BUILD & COMMIT",
+            "label": "✅  BUILD, COMMIT & PUSH",
             "type": "shell",
-            "command": "git add . && git commit -m 'feat: atualizando componentes' && npm run build",
-            "isBackground": true,
+            "command": "npm run build && git add . && git commit -m 'feat: atualizando componentes' && git push && notify-send 'VS Code' '✅ Build, Commit e Push realizados!' -i software-update-available",
+            "isBackground": false,
             "presentation": {
                 "reveal": "silent",
                 "panel": "new",
                 "focus": false,
                 "clear": true,
-                "close": true,
+                "close": true
             },
             "options": {
                 "statusbar": {
-                    "label": "✅ BUILD & COMMIT",
+                    "label": "✅ BUILD, COMMIT & PUSH",
                     "hide": false
                 }
             }
@@ -23,8 +23,9 @@
         {
             "label": "⬆️  RELEASE",
             "type": "shell",
-            "command": "git add . && git commit -m 'feat: atualizando componentes' && npm run build && npm run release",
-            "isBackground": true,
+            // Adicionado: && notify-send ...
+            "command": "git add . && git commit -m 'feat: atualizando componentes' && npm run build && npm run release && notify-send 'VS Code' '🚀 Release enviado com sucesso!' -i emblem-package-updated",
+            "isBackground": false,
             "presentation": {
                 "reveal": "silent",
                 "panel": "new",
