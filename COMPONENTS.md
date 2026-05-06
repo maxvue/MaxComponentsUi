@@ -54,9 +54,6 @@ Input com máscara para CEP (00.000-000) e validação automática.
 ### [MaxInputCpfCnpj.vue](src/components/MaxInputCpfCnpj.vue)
 Input dinâmico para CPF ou CNPJ com máscara e validação conforme o tamanho do dado.
 
-### [MaxInputPhone](src/components/MaxInputPhone.vue)
-Input para telefones brasileiros com máscara dinâmica (fixo/celular).
-
 ### [MaxInputDatePicker](src/components/MaxInputDatePicker.vue)
 Selecionador de data.
 

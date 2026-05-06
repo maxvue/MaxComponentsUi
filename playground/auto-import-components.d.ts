@@ -12,7 +12,20 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AnimateFade: typeof import('./../src/components/Animations/AnimateFade.vue')['default']
+    AutoComplete: typeof import('primevue/autocomplete')['default']
+    Avatar: typeof import('primevue/avatar')['default']
+    Badge: typeof import('primevue/badge')['default']
+    Button: typeof import('primevue/button')['default']
+    Checkbox: typeof import('primevue/checkbox')['default']
+    DataTable: typeof import('primevue/datatable')['default']
+    DatePicker: typeof import('primevue/datepicker')['default']
+    FileUpload: typeof import('primevue/fileupload')['default']
+    FloatLabel: typeof import('primevue/floatlabel')['default']
+    IconField: typeof import('primevue/iconfield')['default']
     InputBase: typeof import('./../src/components/InputBase.vue')['default']
+    InputIcon: typeof import('primevue/inputicon')['default']
+    InputNumber: typeof import('primevue/inputnumber')['default']
+    InputText: typeof import('primevue/inputtext')['default']
     MaxBadgeComponent: typeof import('./../src/components/MaxBadgeComponent.vue')['default']
     MaxButton: typeof import('./../src/components/MaxButton.vue')['default']
     MaxEmptyDiv: typeof import('./../src/components/MaxEmptyDiv.vue')['default']
@@ -59,10 +72,20 @@ declare module 'vue' {
     MaxTransitionFadeLight: typeof import('./../src/components/MaxTransitionFadeLight.vue')['default']
     MaxTransitionUp: typeof import('./../src/components/MaxTransitionUp.vue')['default']
     MaxUserAvatar: typeof import('./../src/components/MaxUserAvatar.vue')['default']
+    Message: typeof import('primevue/message')['default']
+    OverlayBadge: typeof import('primevue/overlaybadge')['default']
+    ProgressSpinner: typeof import('primevue/progressspinner')['default']
+    RadioButton: typeof import('primevue/radiobutton')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    Select: typeof import('primevue/select')['default']
     T1: typeof import('./../src/components/Text/T1.vue')['default']
     T2: typeof import('./../src/components/Text/T2.vue')['default']
+    Textarea: typeof import('primevue/textarea')['default']
+    ToggleSwitch: typeof import('primevue/toggleswitch')['default']
     TransitionFade: typeof import('./../src/components/TransitionFade.vue')['default']
+  }
+  export interface GlobalDirectives {
+    Tooltip: typeof import('primevue/tooltip')['default']
   }
 }

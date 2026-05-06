@@ -47,7 +47,6 @@ declare module 'vue' {
     MaxInputFileUploadBig: typeof import('./src/components/MaxInputFileUploadBig.vue')['default']
     MaxInputFileUploadButton: typeof import('./src/components/MaxInputFileUploadButton.vue')['default']
     MaxInputNumber: typeof import('./src/components/MaxInputNumber.vue')['default']
-    MaxInputPhone: typeof import('./src/components/MaxInputPhone.vue')['default']
     MaxInputPhoneMail: typeof import('./src/components/MaxInputPhoneMail.vue')['default']
     MaxInputRadio: typeof import('./src/components/MaxInputRadio.vue')['default']
     MaxInputSearch: typeof import('./src/components/MaxInputSearch.vue')['default']
