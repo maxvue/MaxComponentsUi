@@ -1,4 +1,5 @@
 export * from './components/_primeVue';
+export * from './helpers/resolver';
 export { default as MaxIcon } from './components/MaxIcon.vue';
 export { default as MaxGrid } from './components/MaxGrid.vue';
 export { default as Grid } from './components/MaxGrid.vue';
