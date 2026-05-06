@@ -1,5 +1,6 @@
 export * from './components/_primeVue';
 export { MaxComponentsUiResolver } from './helpers/MaxComponentsUiResolver';
+export { default as InputBase } from './components/InputBase.vue';
 export { default as MaxIcon } from './components/MaxIcon.vue';
 export { default as MaxGrid } from './components/MaxGrid.vue';
 export { default as Grid } from './components/MaxGrid.vue';

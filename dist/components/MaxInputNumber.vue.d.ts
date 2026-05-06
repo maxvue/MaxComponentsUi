@@ -19,10 +19,10 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
 }, string, import('vue').PublicProps, Readonly<__VLS_Props> & Readonly<{
     "onUpdate:modelValue"?: ((...args: any[]) => any) | undefined;
 }>, {
+    modelValue: number | null;
     done: boolean;
     caution: string | boolean;
     required: boolean;
-    modelValue: number | null;
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {
     primevueInput: ({
         $props: import('primevue/inputnumber').InputNumberProps & import('vue').VNodeProps & import('vue').AllowedComponentProps & import('vue').ComponentCustomProps;
