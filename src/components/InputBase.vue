@@ -33,6 +33,7 @@
     import InputIcon from 'primevue/inputicon';
     import MaxIcon from './MaxIcon.vue';
     import Message from 'primevue/message';
+
     const attrs: any = useAttrs();
 
     /**
@@ -162,7 +163,7 @@
             }
         }
 
-        .p-inputtext {
+        .p-inputtext, .p-datepicker {
             width: 100% !important;
         }
     }

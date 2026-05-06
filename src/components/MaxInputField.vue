@@ -1,7 +1,5 @@
 <template>
-    A
     <InputBase v-bind="attrs" :done="done" :caution="caution" :error="error_msg ? (attrs.error ?? error_msg) : false">
-        B
         <InputText ref="primevueInput" v-if="!is_number" type="text" v-bind="attrs" v-model="temp_value" @focus="focused++" @blur="blured++" v-tooltip.focus.top="attrs.tooltipFocus" />
         <InputNumber v-else v-bind="attrs" fluid v-model="temp_value" />
     </InputBase>
