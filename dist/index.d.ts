@@ -36,6 +36,7 @@ export { default as MaxInputSwitch } from './components/MaxInputSwitch.vue';
 export { default as MaxInputTextArea } from './components/MaxInputTextArea.vue';
 export { default as MaxInputToggle } from './components/MaxInputToggle.vue';
 export { default as MaxInputTypeAddress } from './components/MaxInputTypeAddress.vue';
+export { default as MaxGridCols } from './components/MaxGridCols.vue';
 export { default as MaxLoader } from './components/MaxLoader.vue';
 export { default as MaxLoaderAi } from './components/MaxLoaderAi.vue';
 export { default as MaxLoaderIcon } from './components/MaxLoaderIcon.vue';
