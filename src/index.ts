@@ -7,6 +7,7 @@ import ptBR from './locales/pt-br';
 
 export * from './components/_primeVue';
 export * from './helpers/resolver';
+export * from './unoCssPreset';
 
 export { default as MaxIcon } from './components/MaxIcon.vue';
 export { default as MaxGrid } from './components/MaxGrid.vue';
