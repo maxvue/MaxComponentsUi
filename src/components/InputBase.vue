@@ -74,9 +74,7 @@
         textCenter: false
     });
 
-    const isError = computed(() => {
-        return (typeof props.error === 'string' && hasContent(props.error)) || props.error === true || props.done === false;
-    });
+    const isError = computed(() => (typeof props.error === 'string' && hasContent(props.error)) || props.error === true || props.done === false);
 
     const displayMessage = computed(() => {
         const mainMsg = props.message ?? props.msg;
