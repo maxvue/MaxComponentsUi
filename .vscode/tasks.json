@@ -23,8 +23,7 @@
         {
             "label": "⬆️  RELEASE NPM",
             "type": "shell",
-            // Adicionado: && notify-send ...
-            "command": "git add . && git commit -m 'feat: atualizando componentes' && npm run build && npm run release && notify-send 'VS Code' '🚀 Release enviado com sucesso!' -i emblem-package-updated",
+            "command": "npm run build && git add . && git commit -m 'feat: atualizando componentes' && npm run release && notify-send 'VS Code' '🚀 Release enviado com sucesso!' -i emblem-package-updated",
             "isBackground": false,
             "presentation": {
                 "reveal": "silent",
@@ -35,7 +34,7 @@
             },
             "options": {
                 "statusbar": {
-                    "label": "⬆️  RELEASE",
+                    "label": "⬆️  RELEASE NPM",
                     "hide": false
                 }
             }
