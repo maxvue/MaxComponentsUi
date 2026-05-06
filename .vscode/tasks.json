@@ -4,7 +4,7 @@
         {
             "label": "✅  BUILD, COMMIT & PUSH",
             "type": "shell",
-            "command": "npm run build && git add . && git commit -m 'feat: atualizando componentes' && git push && notify-send 'VS Code' '✅ Build, Commit e Push realizados!' -i software-update-available",
+            "command": "npx tsx src/scripts/generateResolver.ts && npm run build && git add . && git commit -m 'feat: atualizando componentes' && git push && notify-send 'VS Code' '✅ Build, Commit e Push realizados!' -i software-update-available",
             "isBackground": false,
             "presentation": {
                 "reveal": "silent",
@@ -23,7 +23,7 @@
         {
             "label": "⬆️  RELEASE NPM",
             "type": "shell",
-            "command": "npm run build && git add . && git commit -m 'feat: atualizando componentes' && npm run release && notify-send 'VS Code' '🚀 Release enviado com sucesso!' -i emblem-package-updated",
+            "command": "npx tsx src/scripts/generateResolver.ts && npm run build && git add . && git commit -m 'feat: atualizando componentes' && npm run release && notify-send 'VS Code' '🚀 Release enviado com sucesso!' -i emblem-package-updated",
             "isBackground": false,
             "presentation": {
                 "reveal": "silent",
