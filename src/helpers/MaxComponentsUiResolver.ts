@@ -4,6 +4,7 @@ import { PrimeVueResolver } from '@primevue/auto-import-resolver';
 
 type ResultResolver = { name: string; from: string } | undefined | null;
 
+// NÃO MODIFICAR ESTE RESOLVER SEM QUE HAJA UMA INSTRUÇÃO DIRETA PARA ISSO.
 export function MaxComponentsUiResolver(): ComponentResolver {
     return {
         type: 'component',

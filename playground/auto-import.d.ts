@@ -55,7 +55,7 @@ declare global {
   const Listbox: typeof import('../src/components/_primeVue.ts').Listbox
   const MaxBadgeComponent: typeof import('../src/index.ts').MaxBadgeComponent
   const MaxButton: typeof import('../src/index.ts').MaxButton
-  const MaxComponentsUiResolver: typeof import('../src/helpers/MaxComponentsUiResolver.ts').MaxComponentsUiResolver
+  const MaxComponentsUiResolver: typeof import('../src/index.ts').MaxComponentsUiResolver
   const MaxEmptyDiv: typeof import('../src/index.ts').MaxEmptyDiv
   const MaxGrid: typeof import('../src/index.ts').MaxGrid
   const MaxGridCols: typeof import('../src/index.ts').MaxGridCols
@@ -669,7 +669,7 @@ declare module 'vue' {
     readonly Listbox: UnwrapRef<typeof import('../src/components/_primeVue.ts')['Listbox']>
     readonly MaxBadgeComponent: UnwrapRef<typeof import('../src/index.ts')['MaxBadgeComponent']>
     readonly MaxButton: UnwrapRef<typeof import('../src/index.ts')['MaxButton']>
-    readonly MaxComponentsUiResolver: UnwrapRef<typeof import('../src/helpers/MaxComponentsUiResolver.ts')['MaxComponentsUiResolver']>
+    readonly MaxComponentsUiResolver: UnwrapRef<typeof import('../src/index.ts')['MaxComponentsUiResolver']>
     readonly MaxEmptyDiv: UnwrapRef<typeof import('../src/index.ts')['MaxEmptyDiv']>
     readonly MaxGrid: UnwrapRef<typeof import('../src/index.ts')['MaxGrid']>
     readonly MaxGridCols: UnwrapRef<typeof import('../src/index.ts')['MaxGridCols']>
