@@ -154,5 +154,9 @@
                 color: darkorange !important; // Mantido por consistência, mas o nome é erro.
             }
         }
+
+        .p-inputtext {
+            width: 100% !important;
+        }
     }
 </style>

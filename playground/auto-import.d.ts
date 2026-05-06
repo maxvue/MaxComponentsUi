@@ -46,6 +46,7 @@ declare global {
   const Grid: typeof import('../src/index.ts').Grid
   const Image: typeof import('../src/components/_primeVue.ts').Image
   const ImageCompare: typeof import('../src/components/_primeVue.ts').ImageCompare
+  const InputBase: typeof import('../src/index.ts').InputBase
   const InputField: typeof import('../src/index.ts').InputField
   const InputOtp: typeof import('../src/components/_primeVue.ts').InputOtp
   const InputPhone: typeof import('../src/index.ts').InputPhone
@@ -647,6 +648,7 @@ declare module 'vue' {
     readonly Grid: UnwrapRef<typeof import('../src/index.ts')['Grid']>
     readonly Image: UnwrapRef<typeof import('../src/components/_primeVue.ts')['Image']>
     readonly ImageCompare: UnwrapRef<typeof import('../src/components/_primeVue.ts')['ImageCompare']>
+    readonly InputBase: UnwrapRef<typeof import('../src/index.ts')['InputBase']>
     readonly InputField: UnwrapRef<typeof import('../src/index.ts')['InputField']>
     readonly InputOtp: UnwrapRef<typeof import('../src/components/_primeVue.ts')['InputOtp']>
     readonly InputPhone: UnwrapRef<typeof import('../src/index.ts')['InputPhone']>
