@@ -16,6 +16,8 @@
 </template>
 
 <script setup lang="ts">
+    import { useAttrs } from 'vue';
+    import DataTable from 'primevue/datatable';
     const attrs = useAttrs();
 </script>
 

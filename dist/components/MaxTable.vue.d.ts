@@ -11,25 +11,25 @@ declare function __VLS_template(): {
     rootEl: HTMLDivElement;
 };
 type __VLS_TemplateResult = ReturnType<typeof __VLS_template>;
-declare const __VLS_component: import('vue').DefineComponent<globalThis.ExtractPropTypes<{
+declare const __VLS_component: import('vue').DefineComponent<import('vue').ExtractPropTypes<{
     /** Mensagem exibida durante o carregamento */
     loadingMessage: {
         type: StringConstructor;
         default: string;
     };
     modelValue: {
-        type: globalThis.PropType<any[]>;
+        type: import('vue').PropType<any[]>;
     };
 }>, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {
     "update:modelValue": (value: any[]) => any;
-}, string, import('vue').PublicProps, Readonly<globalThis.ExtractPropTypes<{
+}, string, import('vue').PublicProps, Readonly<import('vue').ExtractPropTypes<{
     /** Mensagem exibida durante o carregamento */
     loadingMessage: {
         type: StringConstructor;
         default: string;
     };
     modelValue: {
-        type: globalThis.PropType<any[]>;
+        type: import('vue').PropType<any[]>;
     };
 }>> & Readonly<{
     "onUpdate:modelValue"?: ((value: any[]) => any) | undefined;

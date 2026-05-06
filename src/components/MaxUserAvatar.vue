@@ -8,6 +8,9 @@
  * Exibe a imagem do usuário ou as iniciais baseadas no nome.
  */
 <script setup lang="ts">
+    import { useAttrs } from 'vue';
+    import Avatar from 'primevue/avatar';
+
     const attrs = useAttrs();
 
     const props = withDefaults(defineProps<{

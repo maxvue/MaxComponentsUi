@@ -5,6 +5,11 @@
 </template>
 
 <script setup lang="ts">
+    import { toNumber } from '@maxvue/max-use';
+    import type { Ref } from 'vue';
+    import { ref, computed, watch, useAttrs } from 'vue';
+    import InputBase from './InputBase.vue';
+    import InputText from 'primevue/inputtext';
     import { vMaska } from 'maska/vue';
     const attrs: any = useAttrs();
 

@@ -57,7 +57,12 @@ export default [
             'vue/script-indent': ['error', 4, {
                 'baseIndent': 1,
                 'switchCase': 1
-            }]
+            }],
+            '@stylistic/padding-line-between-statements': [
+                'error',
+                { blankLine: 'always', prev: 'import', next: '*' },
+                { blankLine: 'never', prev: 'import', next: 'import' }
+            ]
         }
     }
 ];

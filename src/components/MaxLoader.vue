@@ -8,6 +8,7 @@
 </template>
 
 <script setup lang="ts" vapor>
+    import { useAttrs } from 'vue';
     const attrs = useAttrs();
 </script>
 

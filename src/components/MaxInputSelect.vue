@@ -54,6 +54,9 @@
  * Suporta opções simples, agrupadas e carregamento dinâmico via callback.
  */
 <script setup lang="ts">
+    import { ref, computed, watch, useAttrs } from 'vue';
+    import InputBase from './InputBase.vue';
+    import Select from 'primevue/select';
     interface SelectOption {
         value: any;
         label?: string;
@@ -64,6 +67,7 @@
         sub?: string;
         subLabel?: string;
         img?: string;
+        options: any[];
         color?: string;
         category?: string;
         [key: string]: any;

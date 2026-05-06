@@ -44,6 +44,11 @@
  * @slot default Conteúdo personalizado dentro do botão.
  */
 <script setup lang="ts">
+    import { computed, useAttrs } from 'vue';
+    import TransitionFade from './TransitionFade.vue';
+    import MaxIcon from './MaxIcon.vue';
+    import MaxIconButton from './MaxIconButton.vue';
+    import Badge from 'primevue/badge';
     import Button from 'primevue/button';
     /** Atributos capturados via v-bind, incluindo props do PrimeVue Button */
     const attrs: any = useAttrs();

@@ -3,6 +3,7 @@
 </template>
 
 <script setup lang="ts">
+    import { ref, computed, watch, useAttrs } from 'vue';
     import MaxInputSelect from './MaxInputSelect.vue';
 
     const attrs: any = useAttrs();

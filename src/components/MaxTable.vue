@@ -16,6 +16,8 @@
  * Aplica estilos personalizados do ecossistema Max e simplifica o uso de expansão de linhas.
  */
 <script setup lang="ts">
+    import { useAttrs } from 'vue';
+    import DataTable from 'primevue/datatable';
     const attrs = useAttrs();
     const props = defineProps({
         /** Mensagem exibida durante o carregamento */

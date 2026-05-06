@@ -54,6 +54,10 @@
     </div>
 </template>
 <script setup lang="ts">
+    import type { Ref } from 'vue';
+    import { useDropZone } from '@vueuse/core';
+    import { useFileDialog } from '@vueuse/core';
+    import { ref } from 'vue';
     const props = withDefaults(
         defineProps<{
             filesRg?: any[];

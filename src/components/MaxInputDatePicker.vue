@@ -5,6 +5,9 @@
 </template>
 
 <script setup lang="ts">
+    import { ref, computed, watch, useAttrs } from 'vue';
+    import InputBase from './InputBase.vue';
+    import DatePicker from 'primevue/datepicker';
     import { vMaska } from 'maska/vue';
     import { useDateFormat } from '@vueuse/core';
 

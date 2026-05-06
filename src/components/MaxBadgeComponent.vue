@@ -12,6 +12,9 @@
 </template>
 
 <script setup lang="ts">
+    import { ref, onMounted, useAttrs } from 'vue';
+    import Badge from 'primevue/badge';
+    import OverlayBadge from 'primevue/overlaybadge';
     const attrs = useAttrs();
     const badgeElem = ref(null);
 

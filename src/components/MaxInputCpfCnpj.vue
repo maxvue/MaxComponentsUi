@@ -10,6 +10,13 @@
  * Possui máscara dinâmica e validação de dígito verificador.
  */
 <script setup lang="ts">
+    import { onlyNumbers } from '@maxvue/max-use';
+    import { watchDebounced } from '@vueuse/core';
+    import type { Ref } from 'vue';
+    import { useElementSize } from '@vueuse/core';
+    import { useTemplateRef,  ref, computed, watch, useAttrs } from 'vue';
+    import InputBase from './InputBase.vue';
+    import InputText from 'primevue/inputtext';
     import { vMaska } from 'maska/vue';
     import { isCpf as isCPF, isCnpj as isCNPJ } from '@maxvue/max-use';
 

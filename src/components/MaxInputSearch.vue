@@ -5,6 +5,9 @@
 </template>
 
 <script setup lang="ts">
+    import { ref, watch, useAttrs } from 'vue';
+    import InputBase from './InputBase.vue';
+    import InputText from 'primevue/inputtext';
     const attrs = useAttrs();
 
     const props = withDefaults(

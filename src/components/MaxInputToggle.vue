@@ -22,6 +22,8 @@
 </template>
 
 <script setup lang="ts">
+    import { ref, computed, watch, useAttrs } from 'vue';
+    import ToggleSwitch from 'primevue/toggleswitch';
     const attrs: any = useAttrs();
 
     const props = withDefaults(

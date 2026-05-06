@@ -9,6 +9,9 @@
 </template>
 
 <script setup lang="ts">
+    import { toNumber } from '@maxvue/max-use';
+    import type { Ref } from 'vue';
+    import { ref, watch, onMounted } from 'vue';
     import { GoogleMap, AdvancedMarker } from 'vue3-google-map';
 
     const coordinates = ref({ latitude: 0, longitude: 0 });

@@ -5,6 +5,11 @@
 </template>
 
 <script setup lang="ts">
+    import { onlyNumbers, onlyLetters } from '@maxvue/max-use';
+    import type { Ref } from 'vue';
+    import { ref, computed, watch, onMounted, useAttrs } from 'vue';
+    import InputBase from './InputBase.vue';
+    import InputText from 'primevue/inputtext';
     import { vMaska } from 'maska/vue';
     import { parsePhoneNumberFromString } from 'libphonenumber-js';
 

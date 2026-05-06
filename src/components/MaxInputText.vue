@@ -9,6 +9,11 @@
  * Oferece suporte a validação de obrigatoriedade e comparação de valores.
  */
 <script setup lang="ts">
+    import { toSearchableString, hasContent } from '@maxvue/max-use';
+    import type { Ref } from 'vue';
+    import { ref, computed, watch, useAttrs } from 'vue';
+    import InputBase from './InputBase.vue';
+    import InputText from 'primevue/inputtext';
     const attrs: any = useAttrs();
 
     const props = withDefaults(

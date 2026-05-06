@@ -26,6 +26,12 @@
  * Integra-se com as rotas do backend Max para busca dinâmica.
  */
 <script setup lang="ts">
+    import { hasContent, toSearchableString, apiGetRoute, toArray, isBlank, size } from '@maxvue/max-use';
+    import type { Ref } from 'vue';
+    import { useRouter } from 'vue-router';
+    import { ref, computed, watch, useAttrs } from 'vue';
+    import InputBase from './InputBase.vue';
+    import AutoComplete from 'primevue/autocomplete';
     // @ts-ignore
     const router = typeof useRouter !== 'undefined' ? useRouter() : null;
     const attrs: any = useAttrs();

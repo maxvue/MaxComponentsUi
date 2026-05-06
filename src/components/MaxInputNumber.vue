@@ -5,6 +5,10 @@
 </template>
 
 <script setup lang="ts">
+    import type { Ref } from 'vue';
+    import { ref, computed, watch, onMounted, useAttrs } from 'vue';
+    import InputBase from './InputBase.vue';
+    import InputNumber from 'primevue/inputnumber';
     const attrs: any = useAttrs();
 
     const props = withDefaults(

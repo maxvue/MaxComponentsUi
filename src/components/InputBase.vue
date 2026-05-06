@@ -26,6 +26,13 @@
 </template>
 
 <script setup lang="ts">
+    import { hasContent } from '@maxvue/max-use';
+    import { computed, useAttrs } from 'vue';
+    import FloatLabel from 'primevue/floatlabel';
+    import IconField from 'primevue/iconfield';
+    import InputIcon from 'primevue/inputicon';
+    import MaxIcon from './MaxIcon.vue';
+    import Message from 'primevue/message';
     const attrs: any = useAttrs();
 
     /**

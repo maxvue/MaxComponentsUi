@@ -1,8 +1,9 @@
+import { Ref } from 'vue';
 declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {}, string, import('vue').PublicProps, Readonly<{}> & Readonly<{}>, {}, {}, {}, {}, string, import('vue').ComponentProvideOptions, true, {
     mapDiv: HTMLDivElement;
-    mapRef: import('vue').CreateComponentPublicInstanceWithMixins<Readonly<globalThis.ExtractPropTypes<{
+    mapRef: import('vue').CreateComponentPublicInstanceWithMixins<Readonly<import('vue').ExtractPropTypes<{
         apiPromise: {
-            type: PropType<Promise<typeof google>>;
+            type: import('vue').PropType<Promise<typeof google>>;
         };
         apiKey: {
             type: StringConstructor;
@@ -13,7 +14,7 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
             default: string;
         };
         libraries: {
-            type: PropType<string[]>;
+            type: import('vue').PropType<string[]>;
             default: () => string[];
         };
         region: {
@@ -29,7 +30,7 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
             required: false;
         };
         center: {
-            type: PropType<google.maps.LatLng | google.maps.LatLngLiteral>;
+            type: import('vue').PropType<google.maps.LatLng | google.maps.LatLngLiteral>;
             default: () => {
                 lat: number;
                 lng: number;
@@ -41,7 +42,7 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
             default: undefined;
         };
         colorScheme: {
-            type: PropType<keyof typeof google.maps.ColorScheme>;
+            type: import('vue').PropType<keyof typeof google.maps.ColorScheme>;
             required: false;
         };
         controlSize: {
@@ -77,11 +78,11 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
             default: undefined;
         };
         fullscreenControlPosition: {
-            type: PropType<string | number | symbol>;
+            type: import('vue').PropType<string | number | symbol>;
             required: false;
         };
         gestureHandling: {
-            type: PropType<"cooperative" | "greedy" | "none" | "auto">;
+            type: import('vue').PropType<"cooperative" | "greedy" | "none" | "auto">;
             required: false;
         };
         heading: {
@@ -104,11 +105,11 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
             default: undefined;
         };
         mapTypeControlOptions: {
-            type: PropType<google.maps.MapTypeControlOptions>;
+            type: import('vue').PropType<google.maps.MapTypeControlOptions>;
             required: false;
         };
         mapTypeId: {
-            type: PropType<google.maps.MapTypeId | string>;
+            type: import('vue').PropType<google.maps.MapTypeId | string>;
             required: false;
         };
         mapId: {
@@ -134,11 +135,11 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
             default: undefined;
         };
         panControlPosition: {
-            type: PropType<string | number | symbol>;
+            type: import('vue').PropType<string | number | symbol>;
             required: false;
         };
         restriction: {
-            type: PropType<google.maps.MapRestriction>;
+            type: import('vue').PropType<google.maps.MapRestriction>;
             required: false;
         };
         rotateControl: {
@@ -147,7 +148,7 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
             default: undefined;
         };
         rotateControlPosition: {
-            type: PropType<string | number | symbol>;
+            type: import('vue').PropType<string | number | symbol>;
             required: false;
         };
         scaleControl: {
@@ -156,7 +157,7 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
             default: undefined;
         };
         scaleControlStyle: {
-            type: PropType<google.maps.ScaleControlStyle>;
+            type: import('vue').PropType<google.maps.ScaleControlStyle>;
             required: false;
         };
         scrollwheel: {
@@ -165,7 +166,7 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
             default: undefined;
         };
         streetView: {
-            type: PropType<google.maps.StreetViewPanorama>;
+            type: import('vue').PropType<google.maps.StreetViewPanorama>;
             required: false;
         };
         streetViewControl: {
@@ -174,11 +175,11 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
             default: undefined;
         };
         streetViewControlPosition: {
-            type: PropType<string | number | symbol>;
+            type: import('vue').PropType<string | number | symbol>;
             required: false;
         };
         styles: {
-            type: PropType<google.maps.MapTypeStyle[]>;
+            type: import('vue').PropType<google.maps.MapTypeStyle[]>;
             required: false;
         };
         tilt: {
@@ -195,7 +196,7 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
             default: undefined;
         };
         zoomControlPosition: {
-            type: PropType<string | number | symbol>;
+            type: import('vue').PropType<string | number | symbol>;
             required: false;
         };
         cameraControl: {
@@ -204,7 +205,7 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
             default: undefined;
         };
         cameraControlPosition: {
-            type: PropType<string | number | symbol>;
+            type: import('vue').PropType<string | number | symbol>;
             required: false;
         };
     }>> & Readonly<{
@@ -264,9 +265,9 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
         C: {};
         M: {};
         Defaults: {};
-    }, Readonly<globalThis.ExtractPropTypes<{
+    }, Readonly<import('vue').ExtractPropTypes<{
         apiPromise: {
-            type: PropType<Promise<typeof google>>;
+            type: import('vue').PropType<Promise<typeof google>>;
         };
         apiKey: {
             type: StringConstructor;
@@ -277,7 +278,7 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
             default: string;
         };
         libraries: {
-            type: PropType<string[]>;
+            type: import('vue').PropType<string[]>;
             default: () => string[];
         };
         region: {
@@ -293,7 +294,7 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
             required: false;
         };
         center: {
-            type: PropType<google.maps.LatLng | google.maps.LatLngLiteral>;
+            type: import('vue').PropType<google.maps.LatLng | google.maps.LatLngLiteral>;
             default: () => {
                 lat: number;
                 lng: number;
@@ -305,7 +306,7 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
             default: undefined;
         };
         colorScheme: {
-            type: PropType<keyof typeof google.maps.ColorScheme>;
+            type: import('vue').PropType<keyof typeof google.maps.ColorScheme>;
             required: false;
         };
         controlSize: {
@@ -341,11 +342,11 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
             default: undefined;
         };
         fullscreenControlPosition: {
-            type: PropType<string | number | symbol>;
+            type: import('vue').PropType<string | number | symbol>;
             required: false;
         };
         gestureHandling: {
-            type: PropType<"cooperative" | "greedy" | "none" | "auto">;
+            type: import('vue').PropType<"cooperative" | "greedy" | "none" | "auto">;
             required: false;
         };
         heading: {
@@ -368,11 +369,11 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
             default: undefined;
         };
         mapTypeControlOptions: {
-            type: PropType<google.maps.MapTypeControlOptions>;
+            type: import('vue').PropType<google.maps.MapTypeControlOptions>;
             required: false;
         };
         mapTypeId: {
-            type: PropType<google.maps.MapTypeId | string>;
+            type: import('vue').PropType<google.maps.MapTypeId | string>;
             required: false;
         };
         mapId: {
@@ -398,11 +399,11 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
             default: undefined;
         };
         panControlPosition: {
-            type: PropType<string | number | symbol>;
+            type: import('vue').PropType<string | number | symbol>;
             required: false;
         };
         restriction: {
-            type: PropType<google.maps.MapRestriction>;
+            type: import('vue').PropType<google.maps.MapRestriction>;
             required: false;
         };
         rotateControl: {
@@ -411,7 +412,7 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
             default: undefined;
         };
         rotateControlPosition: {
-            type: PropType<string | number | symbol>;
+            type: import('vue').PropType<string | number | symbol>;
             required: false;
         };
         scaleControl: {
@@ -420,7 +421,7 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
             default: undefined;
         };
         scaleControlStyle: {
-            type: PropType<google.maps.ScaleControlStyle>;
+            type: import('vue').PropType<google.maps.ScaleControlStyle>;
             required: false;
         };
         scrollwheel: {
@@ -429,7 +430,7 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
             default: undefined;
         };
         streetView: {
-            type: PropType<google.maps.StreetViewPanorama>;
+            type: import('vue').PropType<google.maps.StreetViewPanorama>;
             required: false;
         };
         streetViewControl: {
@@ -438,11 +439,11 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
             default: undefined;
         };
         streetViewControlPosition: {
-            type: PropType<string | number | symbol>;
+            type: import('vue').PropType<string | number | symbol>;
             required: false;
         };
         styles: {
-            type: PropType<google.maps.MapTypeStyle[]>;
+            type: import('vue').PropType<google.maps.MapTypeStyle[]>;
             required: false;
         };
         tilt: {
@@ -459,7 +460,7 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
             default: undefined;
         };
         zoomControlPosition: {
-            type: PropType<string | number | symbol>;
+            type: import('vue').PropType<string | number | symbol>;
             required: false;
         };
         cameraControl: {
@@ -468,7 +469,7 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
             default: undefined;
         };
         cameraControlPosition: {
-            type: PropType<string | number | symbol>;
+            type: import('vue').PropType<string | number | symbol>;
             required: false;
         };
     }>> & Readonly<{
@@ -522,13 +523,13 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
         zoomControl: boolean;
         cameraControl: boolean;
     }> | null;
-    markerRef: import('vue').CreateComponentPublicInstanceWithMixins<Readonly<globalThis.ExtractPropTypes<{
+    markerRef: import('vue').CreateComponentPublicInstanceWithMixins<Readonly<import('vue').ExtractPropTypes<{
         options: {
-            type: PropType<google.maps.marker.AdvancedMarkerElementOptions>;
+            type: import('vue').PropType<google.maps.marker.AdvancedMarkerElementOptions>;
             required: true;
         };
         pinOptions: {
-            type: PropType<google.maps.marker.PinElementOptions>;
+            type: import('vue').PropType<google.maps.marker.PinElementOptions>;
             required: false;
         };
     }>> & Readonly<{
@@ -547,13 +548,13 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
         C: {};
         M: {};
         Defaults: {};
-    }, Readonly<globalThis.ExtractPropTypes<{
+    }, Readonly<import('vue').ExtractPropTypes<{
         options: {
-            type: PropType<google.maps.marker.AdvancedMarkerElementOptions>;
+            type: import('vue').PropType<google.maps.marker.AdvancedMarkerElementOptions>;
             required: true;
         };
         pinOptions: {
-            type: PropType<google.maps.marker.PinElementOptions>;
+            type: import('vue').PropType<google.maps.marker.PinElementOptions>;
             required: false;
         };
     }>> & Readonly<{

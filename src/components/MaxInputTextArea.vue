@@ -9,6 +9,9 @@
  * Suporta redimensionamento automático e integração com InputBase.
  */
 <script setup lang="ts">
+    import { ref, watch, useAttrs } from 'vue';
+    import InputBase from './InputBase.vue';
+    import Textarea from 'primevue/textarea';
     const attrs = useAttrs();
 
     const props = withDefaults(

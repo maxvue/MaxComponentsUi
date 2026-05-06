@@ -8,6 +8,7 @@
  * Possui sistema de cache local para performance.
  */
 <script setup lang="ts">
+    import { ref, computed, watch } from 'vue';
     import { getCached } from '../helpers/getCached';
     import { setCached } from '../helpers/setCached';
 

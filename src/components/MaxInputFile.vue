@@ -41,6 +41,10 @@
     </div>
 </template>
 <script setup lang="ts">
+    import type { Ref } from 'vue';
+    import { useEventListener } from '@vueuse/core';
+    import { useDropZone } from '@vueuse/core';
+    import { ref, computed, watch, useAttrs } from 'vue';
     const attrs: any = useAttrs();
 
     const props = withDefaults(

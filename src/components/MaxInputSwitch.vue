@@ -13,6 +13,9 @@
  * Exibe uma pergunta ou rótulo ao lado do switch.
  */
 <script setup lang="ts">
+    import { ref, computed, watch, useAttrs } from 'vue';
+    import InputBase from './InputBase.vue';
+    import ToggleSwitch from 'primevue/toggleswitch';
     const attrs = useAttrs();
 
     const props = withDefaults(

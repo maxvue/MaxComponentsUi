@@ -14,6 +14,9 @@
 </template>
 
 <script setup lang="ts">
+    import { hasContent, getRouteByName } from '@maxvue/max-use';
+    import { computed, useAttrs } from 'vue';
+    import MaxIcon from './MaxIcon.vue';
     import { useRouter } from 'vue-router';
 
     const router = useRouter();

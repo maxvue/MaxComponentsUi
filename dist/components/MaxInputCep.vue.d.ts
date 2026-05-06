@@ -37,11 +37,11 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
     "onUpdate:modelValue"?: ((...args: any[]) => any) | undefined;
     onComplete?: ((...args: any[]) => any) | undefined;
 }>, {
-    modelValue: string;
     done: boolean;
     caution: string | boolean;
-    required: boolean;
     loading: boolean;
+    required: boolean;
+    modelValue: string;
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {}, any>;
 export default _default;
 //# sourceMappingURL=MaxInputCep.vue.d.ts.map
