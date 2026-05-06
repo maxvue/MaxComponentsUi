@@ -194,7 +194,7 @@
             color: #555;
             font-size: 1.2rem;
             margin-bottom: 1rem;
-            font-weight: 600;
+            font-weight: 600 ;
         }
     }
 
