@@ -6,11 +6,7 @@ import { MaxStyle } from './styles/style';
 import ptBR from './locales/pt-br';
 
 export * from './components/_primeVue';
-
-// NÃO REMOVER O RESOLVER DO INDEX.TS
-export { MaxComponentsUiResolver } from './helpers/MaxComponentsUiResolver';
-
-export { presetMaxUno } from './presetMaxUno';
+export * from './presetMaxUno';
 
 // NÃO REMOVER O INPUTBASE DO INDEX.TS
 export { default as InputBase } from './components/InputBase.vue';
