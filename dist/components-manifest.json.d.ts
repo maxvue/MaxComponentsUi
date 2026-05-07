@@ -1,6 +1,7 @@
 declare const _default: {
   "components": [
     "InputBase",
+    "MaxAnimateFade",
     "MaxBadgeComponent",
     "MaxButton",
     "MaxEmptyDiv",
@@ -81,6 +82,12 @@ declare const _default: {
     "InputBase": "InputBase",
     "input_base": "InputBase",
     "input-base": "InputBase",
+    "MaxAnimateFade": "MaxAnimateFade",
+    "max_animate_fade": "MaxAnimateFade",
+    "max-animate-fade": "MaxAnimateFade",
+    "AnimateFade": "MaxAnimateFade",
+    "animate_fade": "MaxAnimateFade",
+    "animate-fade": "MaxAnimateFade",
     "MaxBadgeComponent": "MaxBadgeComponent",
     "max_badge_component": "MaxBadgeComponent",
     "max-badge-component": "MaxBadgeComponent",

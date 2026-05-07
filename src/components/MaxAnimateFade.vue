@@ -20,8 +20,8 @@
 <script setup lang="ts">
     import { AnimatePresence } from 'motion-v';
     import { Motion } from 'motion-v';
-    import MaxLoader from '../MaxLoader.vue';
-    import MaxIcon from '../MaxIcon.vue';
+    import MaxLoader from './MaxLoader.vue';
+    import MaxIcon from './MaxIcon.vue';
 
     const props = withDefaults(defineProps<{
         duration?: number;

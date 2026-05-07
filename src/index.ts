@@ -79,7 +79,7 @@ export { default as MaxTextInputFloatLabel } from './components/MaxTextInputFloa
 export { default as MaxTransitionFadeLight } from './components/MaxTransitionFadeLight.vue';
 export { default as MaxTransitionUp } from './components/MaxTransitionUp.vue';
 export { default as TransitionFade } from './components/TransitionFade.vue';
-export { default as MaxAnimateFade } from './components/Animations/MaxAnimateFade.vue';
+export { default as MaxAnimateFade } from './components/MaxAnimateFade.vue';
 export { default as MaxUserAvatar } from './components/MaxUserAvatar.vue';
 export const install = (app: any, options: any = {}) => {
     app.use(PrimeVue, {
