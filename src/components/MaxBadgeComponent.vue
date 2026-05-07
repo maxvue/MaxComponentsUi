@@ -1,8 +1,8 @@
 <template>
     <div :class="`badge-component-main-div ${props.size ?? ''}`">
-        <MaxIcon v-if="props.icon || props.i" :icon="props.icon ?? props.i" class="icon-badge" size="1.1" />
-        <Badge :value="(props.label ?? props.msg ?? props.value ?? props.mensagem ?? props.text ?? props.txt ?? props.number) as any" v-if="props.overlay === undefined" :class="`${props.icon || props.iconColor ? 'with-icon' : ''} ${props.iconValue ? 'with-icon-value' : ''}`" ref="badgeElem" />
-        <OverlayBadge v-if="props.overlay" />
+        <MaxIcon v-if="props.icon || props.i" :icon="props.icon ?? props.i" class="icon-badge" dark="0.3"/>
+        <Badge :value="(props.label ?? props.msg ?? props.value ?? props.mensagem ?? props.text ?? props.txt ?? props.number) as any" v-if="props.overlay === undefined || props.overlay === false" :class="`${props.icon || props.iconColor ? 'with-icon' : ''} ${props.iconValue ? 'with-icon-value' : ''}`" ref="badgeElem" />
+        <OverlayBadge v-else />
         <div class="circle-color-badge">
             <div :style="{ background: (props.iconColor ?? 'none') as string }" class="circle-color-badge-text">
                 {{ props.iconValue ?? '' }}
@@ -109,13 +109,6 @@
             }
         }
 
-        .icon-badge {
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            left: 3px;
-            color: var(--background-0) !important;
-        }
 
         .circle-color-badge {
             position: absolute;
@@ -136,6 +129,11 @@
                 font-size: 9px;
                 color: white;
             }
+        }
+
+        .icon-badge {
+            position: absolute;
+            left: 4px;
         }
     }
 </style>

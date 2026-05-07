@@ -54,30 +54,9 @@
  * Suporta opções simples, agrupadas e carregamento dinâmico via callback.
  */
 <script setup lang="ts">
-    import { ref, computed, watch, useAttrs } from 'vue';
+    import { ref, computed, watch, useAttrs, Ref } from 'vue';
     import InputBase from './InputBase.vue';
     import Select from 'primevue/select';
-    interface SelectOption {
-        value: any;
-        label?: string;
-        name?: string;
-        icon?: string;
-        iconSize?: string;
-        sub_label?: string;
-        sub?: string;
-        subLabel?: string;
-        img?: string;
-        options: any[];
-        color?: string;
-        category?: string;
-        [key: string]: any;
-    }
-
-    interface GroupOption {
-        label: string;
-        items: SelectOption[];
-        [key: string]: any;
-    }
 
     const attrs: any = useAttrs();
 
@@ -86,11 +65,11 @@
             /** Valor selecionado */
             modelValue: any;
             /** Lista de opções simples [{ name, value, icon, sub_label }] */
-            options?: SelectOption[];
+            options: any[];
             /** Lista de opções agrupadas [{ label, items: [] }] */
-            groupOptions?: GroupOption[];
+            groupOptions?: any[];
             /** Função assíncrona para carregar opções ao abrir o select */
-            loadOptions?: () => Promise<SelectOption[]>;
+            loadOptions?: () => Promise<any[]>;
             /** Ícone principal (ex: 'mdi:user') */
             icon?: string | undefined;
             /** Ícone posicionado à esquerda */
@@ -120,19 +99,11 @@
     const emit = defineEmits(['update:modelValue', 'before-show']);
     const temp_value = ref(props.modelValue);
 
-    watch(temp_value, (val) => {
-        emit('update:modelValue', val);
-    });
-
-    watch(
-        () => props.modelValue,
-        (val) => {
-            temp_value.value = val;
-        }
-    );
+    watch(temp_value, (val) => emit('update:modelValue', val));
+    watch(() => props.modelValue, (val) => temp_value.value = val);
 
     const loading = ref(false);
-    const optionsField = ref<SelectOption[]>([]);
+    const optionsField: Ref<any[]> = ref([]);
 
     const resolvedOptions = computed(() => {
         if (optionsField.value && optionsField.value.length > 0) return optionsField.value;

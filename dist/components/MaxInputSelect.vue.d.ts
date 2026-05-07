@@ -1,32 +1,12 @@
-interface SelectOption {
-    value: any;
-    label?: string;
-    name?: string;
-    icon?: string;
-    iconSize?: string;
-    sub_label?: string;
-    sub?: string;
-    subLabel?: string;
-    img?: string;
-    options: any[];
-    color?: string;
-    category?: string;
-    [key: string]: any;
-}
-interface GroupOption {
-    label: string;
-    items: SelectOption[];
-    [key: string]: any;
-}
 type __VLS_Props = {
     /** Valor selecionado */
     modelValue: any;
     /** Lista de opções simples [{ name, value, icon, sub_label }] */
-    options?: SelectOption[];
+    options: any[];
     /** Lista de opções agrupadas [{ label, items: [] }] */
-    groupOptions?: GroupOption[];
+    groupOptions?: any[];
     /** Função assíncrona para carregar opções ao abrir o select */
-    loadOptions?: () => Promise<SelectOption[]>;
+    loadOptions?: () => Promise<any[]>;
     /** Ícone principal (ex: 'mdi:user') */
     icon?: string | undefined;
     /** Ícone posicionado à esquerda */

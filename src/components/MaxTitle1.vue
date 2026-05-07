@@ -7,6 +7,7 @@
 
 <script setup lang="ts">
     import { computed, useAttrs } from 'vue';
+
     const attrs = useAttrs();
     const center = computed(() => (attrs.center !== undefined ? 'center' : ''));
 </script>

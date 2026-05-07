@@ -14,6 +14,7 @@
     import { ref, computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
     import InputText from 'primevue/inputtext';
+
     const attrs: any = useAttrs();
 
     const props = withDefaults(
