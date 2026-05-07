@@ -26,3 +26,5 @@ export function MaxComponentsUiResolver(): ComponentResolver {
         }
     };
 }
+
+export const resolver = MaxComponentsUiResolver;
