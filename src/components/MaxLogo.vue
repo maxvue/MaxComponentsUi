@@ -1,8 +1,8 @@
 <template>
     <div class="logo" pointer >
-        <!-- <RouterLink to="/"> -->
-        <img :src="`/${props.src}`" alt="Image" />
-        <!-- </RouterLink> -->
+        <RouterLink to="/">
+            <img :src="`${props.src}`" alt="Image" />
+        </RouterLink>
     </div>
 
 </template>
