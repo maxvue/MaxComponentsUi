@@ -32,6 +32,7 @@
     import { ref, computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
     import AutoComplete from 'primevue/autocomplete';
+
     // @ts-ignore
     const router = typeof useRouter !== 'undefined' ? useRouter() : null;
     const attrs: any = useAttrs();

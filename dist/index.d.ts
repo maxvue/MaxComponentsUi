@@ -1,5 +1,6 @@
 export * from './components/_primeVue';
 export { MaxComponentsUiResolver } from './helpers/MaxComponentsUiResolver';
+export { presetMaxUno } from './presetMaxUno';
 export { default as InputBase } from './components/InputBase.vue';
 export { default as MaxIcon } from './components/MaxIcon.vue';
 export { default as MaxGrid } from './components/MaxGrid.vue';
@@ -53,7 +54,7 @@ export { default as MaxTextInputFloatLabel } from './components/MaxTextInputFloa
 export { default as MaxTransitionFadeLight } from './components/MaxTransitionFadeLight.vue';
 export { default as MaxTransitionUp } from './components/MaxTransitionUp.vue';
 export { default as TransitionFade } from './components/TransitionFade.vue';
-export { default as AnimateFade } from './components/Animations/AnimateFade.vue';
+export { default as MaxAnimateFade } from './components/Animations/MaxAnimateFade.vue';
 export { default as MaxUserAvatar } from './components/MaxUserAvatar.vue';
 export declare const install: (app: any, options?: any) => void;
 declare const _default: {

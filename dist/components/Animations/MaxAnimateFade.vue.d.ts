@@ -30,4 +30,4 @@ type __VLS_WithTemplateSlots<T, S> = T & {
         $slots: S;
     };
 };
-//# sourceMappingURL=AnimateFade.vue.d.ts.map
+//# sourceMappingURL=MaxAnimateFade.vue.d.ts.map

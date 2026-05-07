@@ -1,14 +1,23 @@
 <template>
-    <RouterLink to="/">
-        <div class="logo" v-bind="attrs" pointer >
-            <img :src="`/${attrs.src ?? 'get_file?file=logo.svg'}`" alt="Image" />
-        </div>
-    </RouterLink>
+    <div class="logo" pointer >
+        <!-- <RouterLink to="/"> -->
+        <img :src="`/${props.src}`" alt="Image" />
+        <!-- </RouterLink> -->
+    </div>
+
 </template>
 
 <script setup lang="ts">
-    import { useAttrs } from 'vue';
-    const attrs = useAttrs();
+    import { RouterLink } from 'vue-router';
+
+
+    const props = withDefaults(
+        defineProps<{
+            src?: string;
+            rounded?: boolean;
+        }>(),
+        { src: '/get_file?file=logo.svg', rounded: false }
+    );
 </script>
 
 <style scoped lang="scss">
