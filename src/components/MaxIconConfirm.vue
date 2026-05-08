@@ -51,7 +51,7 @@
         light?: boolean | string | number | undefined;
         /** Icone de checagem */
         checked?: boolean | string | number | undefined;
-        /** Icone de adição */
+        /** Icone de adição opcional */
         plus?: boolean | string | number | undefined;
     }>(), {
         dark: 0.4,

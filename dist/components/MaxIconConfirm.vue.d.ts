@@ -29,7 +29,7 @@ type __VLS_Props = {
     light?: boolean | string | number | undefined;
     /** Icone de checagem */
     checked?: boolean | string | number | undefined;
-    /** Icone de adição */
+    /** Icone de adição opcional */
     plus?: boolean | string | number | undefined;
 };
 declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {
