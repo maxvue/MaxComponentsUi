@@ -42,9 +42,10 @@
 </template>
 <script setup lang="ts">
     import type { Ref } from 'vue';
-    import { useEventListener } from '@vueuse/core';
-    import { useDropZone } from '@vueuse/core';
+    import { useEventListener } from '@maxvue/max-use';
+    import { useDropZone } from '@maxvue/max-use';
     import { ref, computed, watch, useAttrs } from 'vue';
+
     const attrs: any = useAttrs();
 
     const props = withDefaults(
@@ -102,7 +103,7 @@
 
     useEventListener(window, 'paste', handlePaste);
 
-    const { isOverDropZone } = useDropZone(dropZoneRef, {
+    const { isOverDropZone } = useDropZone(dropZoneRef as any, {
         onDrop,
         multiple: true,
         preventDefaultForUnhandled: false

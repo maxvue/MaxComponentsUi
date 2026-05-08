@@ -55,9 +55,10 @@
 </template>
 <script setup lang="ts">
     import type { Ref } from 'vue';
-    import { useDropZone } from '@vueuse/core';
-    import { useFileDialog } from '@vueuse/core';
+    import { useDropZone } from '@maxvue/max-use';
+    import { useFileDialog } from '@maxvue/max-use';
     import { ref } from 'vue';
+
     const props = withDefaults(
         defineProps<{
             filesRg?: any[];
@@ -82,7 +83,7 @@
     // REFS
     const drop_zone_ref: Ref = ref(null);
 
-    const { isOverDropZone } = useDropZone(drop_zone_ref, {
+    const { isOverDropZone } = useDropZone(drop_zone_ref as any, {
         onDrop,
         multiple: true,
         preventDefaultForUnhandled: false

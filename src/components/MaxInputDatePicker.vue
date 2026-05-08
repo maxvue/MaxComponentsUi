@@ -9,7 +9,7 @@
     import InputBase from './InputBase.vue';
     import DatePicker from 'primevue/datepicker';
     import { vMaska } from 'maska/vue';
-    import { useDateFormat } from '@vueuse/core';
+    import { useDateFormat } from '@maxvue/max-use';
 
     const attrs: any = useAttrs();
     const props = withDefaults(

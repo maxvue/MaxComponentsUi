@@ -1,5 +1,15 @@
 <template>
-    <div class="max-icon-div" v-html="iconData" :style="{ width: size, height: size, color: color }" />
+    <div class="max-icon-div">
+        <div class="max-icon" v-html="iconData" :style="{ width: size, height: size, color: color }" :color="color" />
+        <div class="sub-icon checked" v-if="props.checked === true">
+            <div class="background-icon"></div>
+            <svg full xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="m10.6 13.8l-2.15-2.15q-.275-.275-.7-.275t-.7.275t-.275.7t.275.7L9.9 15.9q.3.3.7.3t.7-.3l5.65-5.65q.275-.275.275-.7t-.275-.7t-.7-.275t-.7.275zM12 22q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22" /></svg>
+        </div>
+        <div class="sub-icon plus" v-if="props.plus === true">
+            <div class="background-icon"></div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 448 512"><path fill="currentColor" d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32v144H48c-17.7 0-32 14.3-32 32s14.3 32 32 32h144v144c0 17.7 14.3 32 32 32s32-14.3 32-32V288h144c17.7 0 32-14.3 32-32s-14.3-32-32-32H256z" /></svg>
+        </div>
+    </div>
 </template>
 
 /**
@@ -34,17 +44,30 @@
         dark?: boolean | string | number | undefined;
         /** Icone claro referente ao fundo */
         light?: boolean | string | number | undefined;
+        /** Icone de checagem */
+        checked?: boolean | string | number | undefined;
+        /** Icone de adição */
+        plus?: boolean | string | number | undefined;
     }>(), {
         dark: undefined,
         light: undefined
     });
 
+    const value_dark = computed(() => {
+        if (isNumber(props.dark)) return props.dark;
+        if (props.dark) return 0.5;
+        return null;
+    });
+
+    const value_light = computed(() => {
+        if (isNumber(props.light)) return props.light;
+        if (props.light) return 0.5;
+        return null;
+    });
 
     const color = computed(() => {
-        const value_dark = isNumber(props.dark) ? props.dark : null;
-        const value_light = isNumber(props.light) ? props.light : null;
-        if (props.dark) return `rgba(0,0,0, ${value_dark})`;
-        if (props.light) return `rgba(255,255,255, ${value_light})`;
+        if (value_light.value) return `rgba(255,255,255, ${value_light.value})`;
+        if (value_dark.value) return `rgba(0,0,0, ${value_dark.value})`;
         return 'var(--blue-600)';
     });
 
@@ -106,14 +129,63 @@
 
 <style lang="scss" scoped>
     .max-icon-div {
-        display: grid;
-        place-items: center;
+        position: relative;
+        z-index: 1;
 
-        svg {
-            min-width: 100% !important;
-            min-height: 100% !important;
-            max-width: 100% !important;
-            max-height: 100% !important;
+        .max-icon {
+            display: grid;
+            place-items: center;
+
+            svg {
+                min-width: 100% !important;
+                min-height: 100% !important;
+                max-width: 100% !important;
+                max-height: 100% !important;
+            }
+        }
+
+        .sub-icon {
+            position: absolute;
+            display: grid;
+            place-items: center;
+
+            &.plus {
+                color: var(--blue-0);
+                width: 13px;
+                height: 13px;
+                bottom: -2px;
+                right: 0;
+
+                .background-icon {
+                    height: 15px;
+                    width: 15px;
+                    background-color: var(--blue-750);
+                }
+            }
+
+            &.checked {
+                color: var(--green-600);
+                width: 15px;
+                height: 15px;
+                bottom: 0;
+                right: 0;
+
+                .background-icon {
+                    width: 15px;
+                    height: 15px;
+                    background-color: rgb(255 255 255);
+                }
+            }
+
+            .background-icon {
+                content: '';
+                position: absolute;
+                border-radius: 50%;
+            }
+
+            svg {
+                position: absolute;
+            }
         }
     }
 </style>

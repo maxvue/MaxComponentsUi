@@ -38,7 +38,7 @@
  * Exibe um modal em tela cheia com ferramentas de zoom e paginação.
  */
 <script setup lang="ts">
-    import { useWindowSize } from '@vueuse/core';
+    import { useWindowSize } from '@maxvue/max-use';
     import { ref, watch } from 'vue';
     import ProgressSpinner from 'primevue/progressspinner';
     // import VuePdfEmbed from 'vue-pdf-embed';

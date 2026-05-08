@@ -19,6 +19,10 @@ type __VLS_Props = {
     dark?: boolean | string | number | undefined;
     /** Icone claro referente ao fundo */
     light?: boolean | string | number | undefined;
+    /** Icone de checagem */
+    checked?: boolean | string | number | undefined;
+    /** Icone de adição */
+    plus?: boolean | string | number | undefined;
 };
 declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {}, string, import('vue').PublicProps, Readonly<__VLS_Props> & Readonly<{}>, {
     dark: string | number | boolean;

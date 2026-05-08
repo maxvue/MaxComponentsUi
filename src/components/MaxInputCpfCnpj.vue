@@ -11,10 +11,10 @@
  */
 <script setup lang="ts">
     import { onlyNumbers } from '@maxvue/max-use';
-    import { watchDebounced } from '@vueuse/core';
+    import { watchDebounced } from '@maxvue/max-use';
     import type { Ref } from 'vue';
-    import { useElementSize } from '@vueuse/core';
-    import { useTemplateRef,  ref, computed, watch, useAttrs } from 'vue';
+    import { useElementSize } from '@maxvue/max-use';
+    import { useTemplateRef, ref, computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
     import InputText from 'primevue/inputtext';
     import { vMaska } from 'maska/vue';
@@ -69,7 +69,7 @@
 
     // CALCULA LARGURA DO INPUT E ESPAÇAMENTO DAS LETRAS
     const el = useTemplateRef<any>('el');
-    const { width } = useElementSize(el);
+    const { width } = useElementSize(el as any);
     const space_letters = computed(() => (width.value ? (width.value - 100) / 30 : 0));
 
     const checkDone = () => {

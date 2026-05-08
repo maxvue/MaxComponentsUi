@@ -29,8 +29,8 @@
 </template>
 
 <script setup lang="ts">
-    import { watchDebounced, refAutoReset } from '@vueuse/core';
-    import { useMagicKeys } from '@vueuse/core';
+    import { watchDebounced, refAutoReset } from '@maxvue/max-use';
+    import { useMagicKeys } from '@maxvue/max-use';
     import { ref, computed, watch } from 'vue';
     import InputBase from './InputBase.vue';
     import Select from 'primevue/select';
@@ -99,8 +99,8 @@
     const temp_value = computed(() => country.value.value + phone.value.replace(/\D/g, ''));
     const only_numbers = computed(() => String(temp_value.value).replace(/\D/g, ''));
 
-    watchDebounced(temp_value, (newVal) => {
-        if (newVal !== modelValue.value) modelValue.value = newVal;
+    watchDebounced(temp_value, () => {
+        if (temp_value.value !== modelValue.value) modelValue.value = temp_value.value;
     }, { debounce: 500 });
 
     const maskValue = computed(() => {

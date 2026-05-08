@@ -4,6 +4,9 @@
     </Transition>
 </template>
 
+/**
+ * Componente de transição de fade.
+ */
 <script setup lang="ts">
 
 </script>

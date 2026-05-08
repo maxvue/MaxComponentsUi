@@ -1,24 +1,20 @@
 <template>
     <div class="div-table-data-main">
-        <DataTable v-bind="attrs" stripedRows>
-            <template #empty>
-                <slot name="empty"></slot>
-            </template>
-            <template #header>
-                <slot name="header"></slot>
+        <DataTable v-bind="$attrs" stripedRows>
+            <template v-for="(_, name) in $slots" #[name]="slotProps">
+                <slot :name="name" v-bind="slotProps || {}"></slot>
             </template>
             <slot></slot>
-            <template #footer>
-                <slot name="footer"></slot>
-            </template>
         </DataTable>
     </div>
 </template>
 
 <script setup lang="ts">
-    import { useAttrs } from 'vue';
     import DataTable from 'primevue/datatable';
-    const attrs = useAttrs();
+
+    defineOptions({
+        inheritAttrs: false
+    });
 </script>
 
 <style lang="scss">
