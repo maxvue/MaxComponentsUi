@@ -5,7 +5,7 @@ import PrimeVue from 'primevue/config';
 import { MaxStyle } from './styles/style';
 import ptBR from './locales/pt-br';
 
-export * as Prime from './components/_primeVue';
+export * from './components/_primeVue';
 
 // NÃO REMOVER O INPUTBASE DO INDEX.TS
 export { default as InputBase } from './components/InputBase.vue';

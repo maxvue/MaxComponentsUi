@@ -21,7 +21,7 @@ export function MaxComponentsUiResolver(): ComponentResolver {
                 console.log(name, result);
                 if (result) return {
                     name: result.name,
-                    from: '@maxvue/max-components-ui/Prime'
+                    from: '@maxvue/max-components-ui/prime'
                 };
             }
         }
