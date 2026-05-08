@@ -60,7 +60,8 @@ export default defineConfig({
     resolve: {
         alias: {
             '@': path.resolve(__dirname, './src'),
-            '@helpers': path.resolve(__dirname, './src/helpers')
+            '@helpers': path.resolve(__dirname, './src/helpers'),
+            '@maxvue/max-use': path.resolve(__dirname, '../MaxUse/src/index.ts')
         }
     }
 });
