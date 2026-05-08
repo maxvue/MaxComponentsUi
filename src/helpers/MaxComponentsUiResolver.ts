@@ -18,6 +18,7 @@ export function MaxComponentsUiResolver(): ComponentResolver {
             const primeVueResolvers = PrimeVueResolver();
             for (const resolver of primeVueResolvers) {
                 const result = (typeof resolver === 'function' ? resolver(name) : resolver.resolve(name)) as ResultResolver;
+                console.log('result', result);
                 if (result) return {
                     name: result.name,
                     from: '@maxvue/max-components-ui'
