@@ -41,10 +41,11 @@
 
 
     const color = computed(() => {
-        // const value_dark = isNumber(props.dark) ? props.dark : null;
-        // if (props.dark) return rgba(0,0,0, value_dark);
-        // const light = props.light ?? props.dark ?? null;
-        return '';
+        const value_dark = isNumber(props.dark) ? props.dark : null;
+        const value_light = isNumber(props.light) ? props.light : null;
+        if (props.dark) return `rgba(0,0,0, ${value_dark})`;
+        if (props.light) return `rgba(255,255,255, ${value_light})`;
+        return 'var(--blue-600)';
     });
 
     const iconName = computed(() => alias[props.icon ?? props.i ?? ''] ? alias[props.icon ?? props.i ?? ''] : props.icon ?? props.i ?? '');

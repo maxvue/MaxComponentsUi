@@ -30,7 +30,7 @@ export { maxUseItems, maxUseAutoImport } from './Helpers/maxUseItems';
 export declare const vueUse: typeof vueUseCore;
 /**
  * Objeto centralizado de helpers, semelhante ao Lodash (_).
- * Contém os helpers próprios e os do VueUse (sem duplicatas).
+ * Contém os helpers próprios, os do VueUse e os do Lodash (sem duplicatas).
  */
 export declare const _: {
     DefaultMagicKeysAliasMap: Readonly<Record<string, string>>;

@@ -1,6 +1,6 @@
 import { MaybeRefOrGetter } from 'vue';
 /**
- * Divide um array em sub-arrays de um tamanho específico.
+ * Divide um array em sub-arrays de um tamanho específicado.
  *
  * @param array O array a ser dividido.
  * @param size O tamanho de cada pedaço.

@@ -8,7 +8,7 @@ async function apiPostRoute(RouteName, data = null, options = null) {
 	const system_options = apiRoute(RouteName, data, options, "POST");
 	if (!system_options) return false;
 	try {
-		const token = system_options.system.token;
+		const token = document.head.querySelector("meta[name=\"csrf-token\"]")?.getAttribute("content") || "";
 		return (await axios.post(system_options.routeURL, data, {
 			headers: {
 				Accept: "application/json",
@@ -29,7 +29,7 @@ async function apiPutRoute(RouteName, data = null, options = null) {
 	const system_options = apiRoute(RouteName, data, options, "PUT");
 	if (!system_options) return false;
 	try {
-		const token = system_options.system.token;
+		const token = document.head.querySelector("meta[name=\"csrf-token\"]")?.getAttribute("content") || "";
 		return (await axios.put(system_options.routeURL, data, {
 			headers: {
 				Accept: "application/json",
@@ -50,7 +50,7 @@ async function apiDeleteRoute(RouteName, data = null, options = null) {
 	const system_options = apiRoute(RouteName, data, options, "DELETE");
 	if (!system_options) return false;
 	try {
-		const token = system_options.system.token;
+		const token = document.head.querySelector("meta[name=\"csrf-token\"]")?.getAttribute("content") || "";
 		return (await axios.delete(system_options.routeURL, {
 			data,
 			headers: {
@@ -86,7 +86,7 @@ async function apiUploadRoute(RouteName, files = null, data = {}, options = null
 		formData.append(`files[${index}]`, file.blob, file.name);
 	});
 	try {
-		const token = system_options.system.token;
+		const token = document.head.querySelector("meta[name=\"csrf-token\"]")?.getAttribute("content") || "";
 		return (await axios.post(system_options.routeURL, formData, {
 			headers: {
 				Accept: "application/json",
