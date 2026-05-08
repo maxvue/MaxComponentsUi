@@ -35,9 +35,13 @@ type __VLS_Props = {
 declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {
     confirm: (value: boolean) => any;
     cancel: (value: boolean) => any;
+    accept: (value: boolean) => any;
+    reject: (value: boolean) => any;
 }, string, import('vue').PublicProps, Readonly<__VLS_Props> & Readonly<{
     onConfirm?: ((value: boolean) => any) | undefined;
     onCancel?: ((value: boolean) => any) | undefined;
+    onAccept?: ((value: boolean) => any) | undefined;
+    onReject?: ((value: boolean) => any) | undefined;
 }>, {
     dark: string | number | boolean;
     light: string | number | boolean;

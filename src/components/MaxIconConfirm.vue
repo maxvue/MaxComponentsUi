@@ -65,12 +65,20 @@
     // Define os eventos e os tipos dos argumentos (payload) que eles enviam
     const emit = defineEmits<{
         confirm: [value: boolean];
+        accept: [value: boolean];
         cancel: [value: boolean];
+        reject: [value: boolean];
     }>();
 
-    const confirm = () => emit('confirm', true);
+    const confirm = () => {
+        emit('confirm', true);
+        emit('accept', true);
+    };
 
-    const cancel = () => emit('cancel', false);
+    const cancel = () => {
+        emit('cancel', false);
+        emit('reject', false);
+    };
 </script>
 
 <style lang="scss">
