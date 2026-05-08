@@ -1,4 +1,4 @@
-export * from './components/_primeVue';
+export * as Prime from './components/_primeVue';
 export { default as InputBase } from './components/InputBase.vue';
 export { default as MaxIcon } from './components/MaxIcon.vue';
 export { default as MaxGrid } from './components/MaxGrid.vue';
