@@ -19,12 +19,13 @@ export const presetMaxUno = () => {
             shortcuts: [
                 [/^[pm][tblrwhyx]?-?(\d+)$/, (params) => paddingMargin(params)],
                 [/^h[-_]?[fF](?:ull|lex)$/, () => ({ height: '100% !important' })],
-                [/^w[-_]?[fF](?:ull|lex)$/, () => ({ width: '100% !important' })]
+                [/^w[-_]?[fF](?:ull|lex)$/, () => ({ width: '100% !important' })],
+                [/^font-size-(.+)$/, ([, s]) => ({ 'font-size': `${s}rem !important` })],
+                [/^f-size-(.+)$/, ([, s]) => ({ 'font-size': `${s}rem !important` })]
             ],
             // RULES: CSS customizado que não existe no UnoCSS padrão
             rules: [
                 // Tipografia
-                [/^font-size-(.+)$/, ([, s]) => ({ 'font-size': `${s}rem` })],
                 [/^font-weight-(.+)$/, ([, s]) => ({ 'font-weight': s })],
                 [/^w-?max-(.+)$/, ([, s]) => ({ 'max-width': s + 'px' })],
                 [/^h-?max-(.+)$/, ([, s]) => ({ 'max-height': s + 'px' })],

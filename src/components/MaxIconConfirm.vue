@@ -1,12 +1,12 @@
 <template>
     <MaxIconButton v-bind="props" v-tooltip="null" pointer @click.stop="toggle" />
     <Popover ref="op">
-        <div class="flex flex-col gap-4 w-[25rem]">
-            <div p10>
+        <div min-w-80>
+            <div p20 grid-center full pb-10 font-size-2>
                 {{ props.message ?? 'Você confirma a operação?' }}
             </div>
             <grid full pw10 pb10>
-                <MaxButton s50 @click.stop="confirm" info :label="props.acceptLabel ?? 'Sim'" :icon="props.acceptIcon" />
+                <MaxButton s50 @click.stop="confirm" info :label="props.acceptLabel ?? 'Sim'" :icon="props.acceptIcon" dark="0.8"  />
                 <MaxButton s50 @click.stop="cancel" :label="props.cancelLabel ?? 'Não'" :icon="props.cancelIcon" />
             </grid>
         </div>
@@ -50,6 +50,7 @@
         cancelLabel?: string;
         /** Icone do botão de não */
         cancelIcon?: string;
+        loading?: boolean;
         /** Largura específica */
         width?: string | number;
         /** Altura específica */
@@ -64,7 +65,8 @@
         plus?: boolean | string | number | undefined;
     }>(), {
         dark: 0.4,
-        light: undefined
+        light: undefined,
+        loading: false
     });
 
     const op = ref();

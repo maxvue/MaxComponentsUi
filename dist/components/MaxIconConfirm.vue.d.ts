@@ -29,6 +29,7 @@ type __VLS_Props = {
     cancelLabel?: string;
     /** Icone do botão de não */
     cancelIcon?: string;
+    loading?: boolean;
     /** Largura específica */
     width?: string | number;
     /** Altura específica */
@@ -55,6 +56,7 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
 }>, {
     dark: string | number | boolean;
     light: string | number | boolean;
+    loading: boolean;
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {
     op: ({
         $props: import('primevue/popover').PopoverProps & import('vue').VNodeProps & import('vue').AllowedComponentProps & import('vue').ComponentCustomProps;
