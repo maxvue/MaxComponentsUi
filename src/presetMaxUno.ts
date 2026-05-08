@@ -21,7 +21,7 @@ export const presetMaxUno = () => {
                 [/^h[-_]?[fF](?:ull|lex)$/, () => ({ height: '100% !important' })],
                 [/^w[-_]?[fF](?:ull|lex)$/, () => ({ width: '100% !important' })],
                 [/^font-size-(.+)$/, ([, s]) => ({ 'font-size': `${s}rem !important` })],
-                [/^f-size-(.+)$/, ([, s]) => ({ 'font-size': `${s}rem !important` })]
+                [/^fs-(.+)$/, ([, s]) => ({ 'font-size': `${s}rem !important` })]
             ],
             // RULES: CSS customizado que não existe no UnoCSS padrão
             rules: [
