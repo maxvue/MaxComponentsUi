@@ -1,10 +1,3 @@
-// ESTE ARQUIVO CONTÉM OS COMPONENTES DO PRIME VUE QUE NÃO EXISTEM NO MAX COMPONENTS UI
-// ESTE ARQUIVO É USADO PARA EXPORTAR OS COMPONENTES DO PRIME VUE PARA SEREM ACESSADOS COMO SE FOSSEM DO MAX COMPONENTS UI
-// IMPORTAÇÃO DEFAULT NÃO FUNCIONA POIS OS COMPONENTES SÃO EXPORTADOS COM DEFAULT DO VITE
-// NÃO TEM REFERÊNCIA COM AUTOIMPORT. O AUTOIMPORT USA A BIBLIOTECA COMPLETA DO PRIMEVUE...
-
-
-// FORM
 export { default as AutoComplete } from 'primevue/autocomplete';
 export { default as CascadeSelect } from 'primevue/cascadeselect';
 export { default as Checkbox } from 'primevue/checkbox';
@@ -24,14 +17,8 @@ export { default as Textarea } from 'primevue/textarea';
 export { default as ToggleButton } from 'primevue/togglebutton';
 export { default as ToggleSwitch } from 'primevue/toggleswitch';
 export { default as TreeSelect } from 'primevue/treeselect';
-
-
-// BUTTON
 export { default as SpeedDial } from 'primevue/speeddial';
 export { default as SplitButton } from 'primevue/splitbutton';
-
-
-// DATA
 export { default as DataTable } from 'primevue/datatable';
 export { default as Column } from 'primevue/column';
 export { default as ColumnGroup } from 'primevue/columngroup';
@@ -45,8 +32,6 @@ export { default as Timeline } from 'primevue/timeline';
 export { default as Tree } from 'primevue/tree';
 export { default as TreeTable } from 'primevue/treetable';
 export { default as VirtualScroller } from 'primevue/virtualscroller';
-
-// PANEL
 export { default as Accordion } from 'primevue/accordion';
 export { default as AccordionPanel } from 'primevue/accordionpanel';
 export { default as AccordionHeader } from 'primevue/accordionheader';
@@ -70,18 +55,12 @@ export { default as Tab } from 'primevue/tab';
 export { default as TabPanels } from 'primevue/tabpanels';
 export { default as TabPanel } from 'primevue/tabpanel';
 export { default as Toolbar } from 'primevue/toolbar';
-
-
-// OVERLAYS
 export { default as ConfirmDialog } from 'primevue/confirmdialog';
 export { default as ConfirmPopup } from 'primevue/confirmpopup';
 export { default as Dialog } from 'primevue/dialog';
 export { default as Drawer } from 'primevue/drawer';
 export { default as DynamicDialog } from 'primevue/dynamicdialog';
 export { default as Popover } from 'primevue/popover';
-
-
-// MENUS
 export { default as Breadcrumb } from 'primevue/breadcrumb';
 export { default as ContextMenu } from 'primevue/contextmenu';
 export { default as Dock } from 'primevue/dock';
@@ -90,8 +69,6 @@ export { default as Menubar } from 'primevue/menubar';
 export { default as MegaMenu } from 'primevue/megamenu';
 export { default as PanelMenu } from 'primevue/panelmenu';
 export { default as TieredMenu } from 'primevue/tieredmenu';
-
-// OTHERS
 export { default as Badge } from 'primevue/badge';
 export { default as Message } from 'primevue/message';
 export { default as Carousel } from 'primevue/carousel';
@@ -99,7 +76,7 @@ export { default as Galleria } from 'primevue/galleria';
 export { default as Image } from 'primevue/image';
 export { default as ImageCompare } from 'primevue/imagecompare';
 export { default as Avatar } from 'primevue/avatar';
-export { default as AvatarGroup } from 'primevue/avatargroup'; //Optional for grouping
+export { default as AvatarGroup } from 'primevue/avatargroup';
 export { default as OverlayBadge } from 'primevue/overlaybadge';
 export { default as BlockUI } from 'primevue/blockui';
 export { default as Chip } from 'primevue/chip';
@@ -111,3 +88,4 @@ export { default as Skeleton } from 'primevue/skeleton';
 export { default as Tag } from 'primevue/tag';
 export { default as Terminal } from 'primevue/terminal';
 export { default as Chips } from 'primevue/chips';
+//# sourceMappingURL=index.d.ts.map
