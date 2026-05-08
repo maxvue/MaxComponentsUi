@@ -19,6 +19,16 @@ type __VLS_Props = {
     size?: string | number;
     /** Alias para o tamanho */
     scale?: string | number;
+    /** Mensagem de confirmação */
+    message?: string;
+    /** Label do botão de sim */
+    acceptLabel?: string;
+    /** Icone do botão de sim */
+    acceptIcon?: string;
+    /** Label do botão de não */
+    cancelLabel?: string;
+    /** Icone do botão de não */
+    cancelIcon?: string;
     /** Largura específica */
     width?: string | number;
     /** Altura específica */
@@ -34,19 +44,18 @@ type __VLS_Props = {
 };
 declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {
     confirm: (value: boolean) => any;
-    cancel: (value: boolean) => any;
     accept: (value: boolean) => any;
+    cancel: (value: boolean) => any;
     reject: (value: boolean) => any;
 }, string, import('vue').PublicProps, Readonly<__VLS_Props> & Readonly<{
     onConfirm?: ((value: boolean) => any) | undefined;
-    onCancel?: ((value: boolean) => any) | undefined;
     onAccept?: ((value: boolean) => any) | undefined;
+    onCancel?: ((value: boolean) => any) | undefined;
     onReject?: ((value: boolean) => any) | undefined;
 }>, {
     dark: string | number | boolean;
     light: string | number | boolean;
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {
-    icon_ref: HTMLDivElement;
     op: ({
         $props: import('primevue/popover').PopoverProps & import('vue').VNodeProps & import('vue').AllowedComponentProps & import('vue').ComponentCustomProps;
         $slots: import('primevue/popover').PopoverSlots;

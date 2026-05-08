@@ -13,6 +13,7 @@
         "scss/at-rule-no-unknown": true,
         "selector-class-pattern": null,
         "no-descending-specificity": null,
+        "no-empty-source": null,
         "declaration-block-single-line-max-declarations": null,
         "@stylistic/block-opening-brace-newline-after": null,
         "@stylistic/block-closing-brace-newline-before": null,
@@ -21,13 +22,19 @@
         "selector-pseudo-element-no-unknown": [
             true,
             {
-                "ignorePseudoElements": ["v-deep", "v-global", "v-slotted"]
+                "ignorePseudoElements": [
+                    "v-deep",
+                    "v-global",
+                    "v-slotted"
+                ]
             }
         ]
     },
     "overrides": [
         {
-            "files": ["**/*.vue"],
+            "files": [
+                "**/*.vue"
+            ],
             "customSyntax": "postcss-html"
         }
     ]

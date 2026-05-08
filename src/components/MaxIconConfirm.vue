@@ -1,24 +1,23 @@
 <template>
-    <div class="icon-div ico-btn" ref="icon_ref" v-bind="props" :style="{width: size, height: size}" @click.stop="toggle">
-        <MaxIcon v-bind="props" v-tooltip="null" pointer />
-    </div>
+    <MaxIconButton v-bind="props" v-tooltip="null" pointer @click.stop="toggle" />
     <Popover ref="op">
         <div class="flex flex-col gap-4 w-[25rem]">
-            Você confirma a operação?
-            <div @click.stop="confirm">
-                Sim
+            <div p10>
+                {{ props.message ?? 'Você confirma a operação?' }}
             </div>
-            <div @click.stop="cancel">
-                Não
-            </div>
+            <grid full pw10 pb10>
+                <MaxButton s50 @click.stop="confirm" info :label="props.acceptLabel ?? 'Sim'" :icon="props.acceptIcon" />
+                <MaxButton s50 @click.stop="cancel" :label="props.cancelLabel ?? 'Não'" :icon="props.cancelIcon" />
+            </grid>
         </div>
     </Popover>
 </template>
 
 <script setup lang="ts">
-    import MaxIcon from './MaxIcon.vue';
+    import MaxIconButton from './MaxIconButton.vue';
+    import MaxButton from './MaxButton.vue';
     import Popover from 'primevue/popover';
-    import { ref } from 'vue';
+    import { ref, computed } from 'vue';
 
     const props = withDefaults(defineProps<{
         /** Nome do ícone (ex: 'mdi:home') */
@@ -41,6 +40,16 @@
         size?: string | number;
         /** Alias para o tamanho */
         scale?: string | number;
+        /** Mensagem de confirmação */
+        message?: string;
+        /** Label do botão de sim */
+        acceptLabel?: string;
+        /** Icone do botão de sim */
+        acceptIcon?: string;
+        /** Label do botão de não */
+        cancelLabel?: string;
+        /** Icone do botão de não */
+        cancelIcon?: string;
         /** Largura específica */
         width?: string | number;
         /** Altura específica */
@@ -79,6 +88,8 @@
         emit('cancel', false);
         emit('reject', false);
     };
+
+    const size = computed(() => 16 * Number(props.size ?? 1) + 'px');
 </script>
 
 <style lang="scss">
