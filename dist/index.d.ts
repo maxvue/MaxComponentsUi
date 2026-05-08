@@ -39,8 +39,6 @@ export { default as MaxGridCols } from './components/MaxGridCols.vue';
 export { default as MaxLoader } from './components/MaxLoader.vue';
 export { default as MaxLoaderAi } from './components/MaxLoaderAi.vue';
 export { default as MaxLoaderIcon } from './components/MaxLoaderIcon.vue';
-export { default as MaxTable } from './components/MaxTable.vue';
-export { default as MaxTableData } from './components/MaxTableData.vue';
 export { default as MaxBadgeComponent } from './components/MaxBadgeComponent.vue';
 export { default as MaxEmptyDiv } from './components/MaxEmptyDiv.vue';
 export { default as MaxLink } from './components/MaxLink.vue';

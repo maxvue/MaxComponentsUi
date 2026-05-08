@@ -64,8 +64,6 @@ export { default as MaxLoaderAi } from './components/MaxLoaderAi.vue';
 export { default as MaxLoaderIcon } from './components/MaxLoaderIcon.vue';
 
 // Data & Display
-export { default as MaxTable } from './components/MaxTable.vue';
-export { default as MaxTableData } from './components/MaxTableData.vue';
 export { default as MaxBadgeComponent } from './components/MaxBadgeComponent.vue';
 export { default as MaxEmptyDiv } from './components/MaxEmptyDiv.vue';
 export { default as MaxLink } from './components/MaxLink.vue';
