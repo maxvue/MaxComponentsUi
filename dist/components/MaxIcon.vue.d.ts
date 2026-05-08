@@ -15,7 +15,14 @@ type __VLS_Props = {
     width?: string | number;
     /** Altura específica */
     height?: string | number;
+    /** Icone escuro referente ao fundo */
+    dark?: boolean | string | number | undefined;
+    /** Icone claro referente ao fundo */
+    light?: boolean | string | number | undefined;
 };
-declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {}, string, import('vue').PublicProps, Readonly<__VLS_Props> & Readonly<{}>, {}, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {}, HTMLDivElement>;
+declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {}, string, import('vue').PublicProps, Readonly<__VLS_Props> & Readonly<{}>, {
+    dark: string | number | boolean;
+    light: string | number | boolean;
+}, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {}, HTMLDivElement>;
 export default _default;
 //# sourceMappingURL=MaxIcon.vue.d.ts.map

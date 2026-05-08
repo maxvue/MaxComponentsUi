@@ -1,1 +1,1 @@
-{"version":3,"file":"MaxComponentsUiResolver.d.ts","sourceRoot":"","sources":["../../src/helpers/MaxComponentsUiResolver.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,iBAAiB,EAAE,MAAM,+BAA+B,CAAC;AAOvE,wBAAgB,uBAAuB,IAAI,iBAAiB,CAoB3D;AAED,eAAO,MAAM,QAAQ,gCAA0B,CAAC"}
+{"version":3,"file":"MaxComponentsUiResolver.d.ts","sourceRoot":"","sources":["../../src/helpers/MaxComponentsUiResolver.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,iBAAiB,EAAE,MAAM,+BAA+B,CAAC;AAOvE,wBAAgB,uBAAuB,IAAI,iBAAiB,CAqB3D;AAED,eAAO,MAAM,QAAQ,gCAA0B,CAAC"}

@@ -1,5 +1,5 @@
 <template>
-    <div class="max-icon-div" v-html="iconData" :style="{ width: size, height: size }"></div>
+    <div class="max-icon-div" v-html="iconData" :style="{ width: size, height: size, color: color }" />
 </template>
 
 /**
@@ -11,8 +11,9 @@
     import { ref, computed, watch } from 'vue';
     import { getCached } from '../helpers/getCached';
     import { setCached } from '../helpers/setCached';
+    import { isNumber } from '@maxvue/max-use';
 
-    const props = defineProps<{
+    const props = withDefaults(defineProps<{
         /** Nome do ícone (ex: 'mdi:home') */
         icon?: string;
         /** Alias para o nome do ícone */
@@ -29,7 +30,22 @@
         width?: string | number;
         /** Altura específica */
         height?: string | number;
-    }>();
+        /** Icone escuro referente ao fundo */
+        dark?: boolean | string | number | undefined;
+        /** Icone claro referente ao fundo */
+        light?: boolean | string | number | undefined;
+    }>(), {
+        dark: undefined,
+        light: undefined
+    });
+
+
+    const color = computed(() => {
+        // const value_dark = isNumber(props.dark) ? props.dark : null;
+        // if (props.dark) return rgba(0,0,0, value_dark);
+        // const light = props.light ?? props.dark ?? null;
+        return '';
+    });
 
     const iconName = computed(() => alias[props.icon ?? props.i ?? ''] ? alias[props.icon ?? props.i ?? ''] : props.icon ?? props.i ?? '');
 
