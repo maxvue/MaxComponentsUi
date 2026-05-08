@@ -24,6 +24,7 @@ export { default as Textarea } from 'primevue/textarea';
 export { default as ToggleButton } from 'primevue/togglebutton';
 export { default as ToggleSwitch } from 'primevue/toggleswitch';
 export { default as TreeSelect } from 'primevue/treeselect';
+export { default as RadioButton } from 'primevue/radiobutton';
 
 
 // BUTTON

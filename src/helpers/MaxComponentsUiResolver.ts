@@ -23,7 +23,7 @@ export function MaxComponentsUiResolver(): ComponentResolver {
                 const result = (typeof resolver === 'function' ? resolver(name) : resolver.resolve(name)) as ResultResolver;
                 if (result) {
                     const return_result = {
-                        name: result.name,
+                        name: name,
                         from: '@maxvue/max-components-ui/prime'
                     };
                     console.log('Prime Resolved', { name: name, primeResult: result, return_result: return_result });
