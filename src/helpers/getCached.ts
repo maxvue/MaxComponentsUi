@@ -1,9 +1,13 @@
-export function getCached(key: string | null): any | null {
+export async function getCached(key: string | null): Promise<any> {
     if (!key) return null;
 
-    const data = localStorage.getItem(key);
+    try {
+        const data = localStorage.getItem(key);
+        if (!data) return null;
 
-    if (!data) return null;
-
-    return JSON.parse(data).data;
+        return JSON.parse(data).data;
+    } catch (error) {
+        console.error('Erro ao ler localStorage:', error);
+        return null;
+    }
 }

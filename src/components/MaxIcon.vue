@@ -1,6 +1,6 @@
 <template>
     <div class="max-icon-div">
-        <div class="max-icon" v-html="iconData" :style="{ width: size, height: size, color: color }" :color="color" />
+        <div class="max-icon" :style="style" v-html="svgContent" />
         <div class="sub-icon checked" v-if="props.checked === true">
             <div class="background-icon"></div>
             <svg full xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="m10.6 13.8l-2.15-2.15q-.275-.275-.7-.275t-.7.275t-.275.7t.275.7L9.9 15.9q.3.3.7.3t.7-.3l5.65-5.65q.275-.275.275-.7t-.275-.7t-.7-.275t-.7.275zM12 22q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22" /></svg>
@@ -18,11 +18,18 @@
  * Possui sistema de cache local para performance.
  */
 <script setup lang="ts">
-    import { ref, computed, watch } from 'vue';
-    import { getCached } from '../helpers/getCached';
-    import { setCached } from '../helpers/setCached';
-    import { isNumber } from '@maxvue/max-use';
+    import { useIconStore } from '../stores/useIcon.Store';
+    import { ref, computed, useAttrs, watch } from 'vue';
+    import { useElementHover, isNumber } from '@maxvue/max-use';
+    import { getColorFromVar } from '../helpers/getColorFromVar';
+    import type { ComputedRef, Ref } from 'vue';
+    import Color from 'color';
 
+    const icon_store = useIconStore();
+    const icon_ref = ref<HTMLElement | null>(null);
+    const isHovered = useElementHover(icon_ref as any);
+
+    const attrs: any = useAttrs();
     const props = withDefaults(defineProps<{
         /** Nome do ícone (ex: 'mdi:home') */
         icon?: string;
@@ -48,10 +55,16 @@
         checked?: boolean | string | number | undefined;
         /** Icone de adição */
         plus?: boolean | string | number | undefined;
+        /** Icone de adição */
+        color?: string;
+        /** Icone de adição */
+        colorHover?: string;
     }>(), {
         dark: undefined,
-        light: undefined
+        light: undefined,
+        color: 'var(--blue-600)'
     });
+    const icon_name: ComputedRef<string | null> = computed(() => props.i ?? props.icon ?? null);
 
     const value_dark = computed(() => {
         if (isNumber(props.dark)) return props.dark;
@@ -66,65 +79,61 @@
     });
 
     const color = computed(() => {
-        if (value_light.value) return `rgba(255,255,255, ${value_light.value})`;
-        if (value_dark.value) return `rgba(0,0,0, ${value_dark.value})`;
-        return 'var(--blue-600)';
+        if (value_light.value) return { color: `rgba(255,255,255, ${value_light.value})` };
+        if (value_dark.value) return { color: `rgba(0,0,0, ${value_dark.value})` };
+        return colorStyle.value;
     });
 
-    const iconName = computed(() => alias[props.icon ?? props.i ?? ''] ? alias[props.icon ?? props.i ?? ''] : props.icon ?? props.i ?? '');
+    const colorStyle = computed<Record<'color', string>>(() => {
+        const baseColor = getColorFromVar(props.color);
+        let finalColor = baseColor;
 
-    const iconData = ref('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="18" d="M12 3c4.97 0 9 4.03 9 9"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="18;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path><path stroke-dasharray="60" d="M12 3c4.97 0 9 4.03 9 9c0 4.97 -4.03 9 -9 9c-4.97 0 -9 -4.03 -9 -9c0 -4.97 4.03 -9 9 -9Z" opacity="0.3"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.2s" values="60;0"/></path></g></svg>');
+        if (isHovered.value && attrs.pointer !== undefined) {
+            const customHoverColor = props.colorHover;
+            finalColor = customHoverColor ? getColorFromVar(customHoverColor) : Color(baseColor).darken(0.35).hex();
+        }
 
-    const size = computed(() => {
-        const props_wh = props.width ?? props.height ?? null;
-        const props_size = props.size ?? props.scale ?? null;
-        const size_prop = props_wh ?? props_size;
-
-        if (!size_prop) return '16px';
-
-
-        if (typeof props_size === 'number') return `${16 * props_size}px`;
-        if (typeof size_prop === 'number') return `${size_prop}px`;
-        return /^[0-9.]+$/.test(size_prop) ? `${size_prop}px` : size_prop;
+        return { color: finalColor };
     });
 
-    const alias: Record<string, string> = { 'arrow':'majesticons:arrow-up-line','arrows':'material-symbols:compare-arrows-rounded','audio':'tdesign:sound-filled','sound':'tdesign:sound-filled','bell':'mdi-light:bell','binocul':'fa6-solid:binoculars','chat-check':'garden:check-sm-fill-16','chat-check-double':'garden:check-double-fill-16','check-double':'garden:check-double-fill-16','double-check':'garden:check-double-fill-16','check-two':'garden:check-double-fill-16','two-check':'garden:check-double-fill-16','check-circle':'material-symbols:check-circle-outline-rounded','done':'material-symbols:check-circle-outline-rounded','circle-check':'material-symbols:check-circle-outline-rounded','check-circle-fill':'material-symbols:check-circle-rounded','check-fill':'material-symbols:check-circle-rounded','chevron-right':'ic:round-chevron-right','right-chevron':'ic:round-chevron-right','chev-right':'ic:round-chevron-right','right-chev':'ic:round-chevron-right','circle-plus':'akar-icons:circle-plus','plus-circle':'akar-icons:circle-plus','circle plus':'akar-icons:circle-plus','plus circle':'akar-icons:circle-plus','contact':'hugeicons:contact-01','copy':'mingcute:copy-line','created':'custom:created','dashboard':'bi:grid-1x2-fill','denied':'mdi:denied','proibido':'mdi:denied','doc-sign':'bitcoin-icons:sign-filled','procuracao':'bitcoin-icons:sign-filled','power-attorney':'bitcoin-icons:sign-filled','dollar-circle':'iconoir:dollar-circle','circle-dollar':'iconoir:dollar-circle','dots-horizontal':'tabler:dots-filled','horizontal-dots':'tabler:dots-filled','other':'tabler:dots-filled','dots-y':'mage:dots','dots-v':'mage:dots','y-dots':'mage:dots','download':'material-symbols:download-rounded','downloading':'line-md:downloading-loop','emojis':'fluent:emoji-24-regular','emoji':'fluent:emoji-24-regular','exclamation':'humbleicons:exclamation','caution':'humbleicons:exclamation','exclamation-circle':'stash:exclamation-circle','circle-exclamation':'stash:exclamation-circle','error':'stash:exclamation-circle','icon-fail':'stash:exclamation-circle','file-arrow':'prime:file-arrow-up','arrow-file':'prime:file-arrow-up','document-arrow':'prime:file-arrow-up','arrow-document':'prime:file-arrow-up','folder-arrow':'fluent:folder-arrow-up-32-regular','arrow-folder':'fluent:folder-arrow-up-32-regular','folder-open':'material-symbols-light:folder-open','open-folder':'material-symbols-light:folder-open','hourglass':'prime:hourglass','hour-glass':'prime:hourglass','id-card':'mage:id-card-fill','user-doc':'mage:id-card-fill','doc-user':'mage:id-card-fill','identifi':'mage:id-card-fill','inmetro':'custom:inmetro','load':'material-symbols:refresh-rounded','refresh':'material-symbols:refresh-rounded','spinner':'material-symbols:refresh-rounded','reload':'material-symbols:refresh-rounded','loading':'line-md:loading-loop','lock':'material-symbols:lock-outline','message':'teenyicons:message-solid','no-message':'teenyicons:message-no-access-outline','plant':'ph:plant-light','plus':'ic:round-plus','projects':'fluent:task-list-square-20-regular','required':'fa7-solid:star-of-life','star-of-life':'fa7-solid:star-of-life','search':'ic:round-search','send':'material-symbols:send-rounded','settings':'mdi:cog','cog':'mdi:cog','siren':'ph:siren','alarm':'ph:siren','timer':'ri:timer-line','transform':'custom:transformer','trash':'tabler:trash','delete':'tabler:trash','lixeira':'tabler:trash','excluir':'tabler:trash','exclude':'tabler:trash','trello':'mdi:trello','board':'mdi:trello','upload':'bi:cloud-upload','user-plus':'lucide:user-plus','plus-user':'lucide:user-plus','users-crown':'iconoir:user-crown','integrator':'iconoir:user-crown','user-solar-company':'iconoir:user-crown','xmark':'fa7-solid:xmark','x-mark':'fa7-solid:xmark','mark-x':'fa7-solid:xmark','close':'fa7-solid:xmark' };
+    const sizeStyles = computed(() => {
+        const value = String(props.size ?? '1rem');
+        const formattedValue = /[a-z|%]$/i.test(value) ? value : `${value}rem`;
+        return { width: formattedValue, height: formattedValue };
+    });
 
-    const STORAGE_KEY = computed(() => 'max-icon-' + iconName.value + '-' + size.value);
+    const style: Ref<Record<string, string>> = computed(() => ({ ...sizeStyles.value, ...color.value }));
 
-    watch(
-        STORAGE_KEY,
+    const defaultSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="color: var(--background-400)"><g fill="#FF0000"><path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z" /><path fill="currentColor" d="M13 21a1 1 0 1 1-2 0v-3a1 1 0 1 1 2 0zm0-15a1 1 0 1 1-2 0V3a1 1 0 1 1 2 0zm9 6a1 1 0 0 0-1-1h-3a1 1 0 1 0 0 2h3a1 1 0 0 0 1-1M6 11a1 1 0 1 1 0 2H3a1 1 0 1 1 0-2zm13.071 8.071a1 1 0 0 0 0-1.414l-2.121-2.121a1 1 0 0 0-1.414 1.414l2.12 2.121a1 1 0 0 0 1.415 0M8.464 7.051A1 1 0 1 1 7.05 8.463L4.93 6.344a1 1 0 1 1 1.414-1.415zm10.607-2.122a1 1 0 0 0-1.414 0L15.536 7.05a1 1 0 0 0 1.414 1.414l2.121-2.12a1 1 0 0 0 0-1.415M7.051 15.536a1 1 0 1 1 1.413 1.414l-2.12 2.121a1 1 0 0 1-1.415-1.414z" /></g></svg>';
+    const svgContent: Ref = ref(defaultSvg);
+    const temp_icon: Ref<boolean> = ref(true);
+
+    const request = () => {
+        if (!icon_name.value) return;
+
+        const icon_svg = icon_store.getIcon(icon_name.value);
+
+        if (icon_svg === false) temp_icon.value = false;
+        else if (icon_svg !== null) {
+            svgContent.value = icon_svg;
+            temp_icon.value = false;
+        }
+    };
+
+    watch(icon_name, () => request(), { immediate: true });
+
+    const { stop: stopWatch } = watch(
+        () => [icon_store.icons_updated, temp_icon.value],
         () => {
-            const data = getCached(STORAGE_KEY.value);
-
-            if (data) {
-                iconData.value = data;
+            request();
+            if (!temp_icon.value) {
+                setTimeout(() => {
+                    stopWatch();
+                }, 10);
                 return;
             }
-
-            const prefix = iconName.value.split(':')[0];
-            const name = iconName.value.split(':')[1];
-
-            fetch('https://api.iconify.design/' + prefix + '/' + name + '.svg?height=' + size.value, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json', Accept: 'application/json' }
-            })
-                .then((response) => {
-                    if (response.ok) response.text().then((data) => {
-                        console.log(data);
-                        iconData.value = data;
-                        setCached(STORAGE_KEY.value, data);
-                    });
-
-                })
-                .catch((error) => {
-                    console.error(error);
-                });
-        },
-        { immediate: true }
+        }, { immediate: true }
     );
-
-
 </script>
 
 <style lang="scss" scoped>

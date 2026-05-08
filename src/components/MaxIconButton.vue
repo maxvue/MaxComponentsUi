@@ -1,7 +1,7 @@
 <template>
     <div class="icon-div ico-btn" ref="icon_ref" v-bind="props" :style="{width: size, height: size}">
-        <MaxIcon v-bind="props" v-tooltip="null" pointer @click.stop="execute" v-if="props.blank || props.route" :size="size" :light="props.light" :dark="props.dark ?? 0.4" />
-        <MaxIcon v-bind="props" v-tooltip="null" pointer v-else :size="size" :light="props.light" :dark="props.dark ?? 0.4" />
+        <MaxIcon />
+        <!-- as -->
     </div>
 </template>
 
@@ -9,9 +9,7 @@
     import { hasContent, getRouteByName } from '@maxvue/max-use';
     import { computed } from 'vue';
     import MaxIcon from './MaxIcon.vue';
-    import { useRouter } from 'vue-router';
 
-    const router = useRouter();
     const props = withDefaults(defineProps<{
         /** Nome do ícone (ex: 'mdi:home') */
         icon?: string;
@@ -50,16 +48,6 @@
         light: undefined
     });
 
-    const execute = () => {
-        if (props.blank) window.open(props.blank as any, '_blank');
-
-        if (props.route && typeof props.route === 'string' && hasContent(props.route)) {
-            const data: { name: string; query?: any } = { name: getRouteByName(props.route) ?? props.route };
-
-            if (props.data ?? props.params) data.query = props.data ?? props.params;
-            router.push(data);
-        }
-    };
 
     const size = computed(() => 16 * Number(props.size ?? 1) + 'px');
 </script>

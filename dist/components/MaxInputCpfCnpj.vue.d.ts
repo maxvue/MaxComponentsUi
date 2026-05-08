@@ -40,9 +40,9 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
     onComplete?: ((...args: any[]) => any) | undefined;
 }>, {
     done: boolean;
+    modelValue: string;
     caution: string | boolean;
     required: boolean;
-    modelValue: string;
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {
     el: {
         $props: import('primevue/inputtext').InputTextProps & import('vue').VNodeProps & import('vue').AllowedComponentProps & import('vue').ComponentCustomProps;

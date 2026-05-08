@@ -6,6 +6,7 @@ export { default as MaxIconButton } from './components/MaxIconButton.vue';
 export { default as MaxIconConfirm } from './components/MaxIconConfirm.vue';
 export { default as MaxTitle1 } from './components/MaxTitle1.vue';
 export { default as MaxTitle2 } from './components/MaxTitle2.vue';
+export * from './stores';
 export { default as MaxInputText } from './components/MaxInputText.vue';
 export { default as InputText } from './components/MaxInputText.vue';
 export { default as InputField } from './components/MaxInputText.vue';

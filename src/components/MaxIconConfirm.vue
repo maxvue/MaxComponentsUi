@@ -2,7 +2,7 @@
     <MaxIconButton v-bind="props" v-tooltip="null" pointer @click.stop="toggle" />
     <Popover ref="op">
         <div min-w-80>
-            <div p20 grid-center full pb-10 font-size-2>
+            <div p20 grid-center full pb-10 font-size-1 color-gray-600 >
                 {{ props.message ?? 'Você confirma a operação?' }}
             </div>
             <grid full pw10 pb10>

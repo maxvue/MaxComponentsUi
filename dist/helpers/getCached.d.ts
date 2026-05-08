@@ -1,2 +1,2 @@
-export declare function getCached(key: string | null): any | null;
+export declare function getCached(key: string | null): Promise<any>;
 //# sourceMappingURL=getCached.d.ts.map

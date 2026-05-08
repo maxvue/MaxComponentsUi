@@ -62,9 +62,9 @@ declare const __VLS_component: import('vue').DefineComponent<__VLS_Props, {}, {}
     "onBefore-show"?: ((...args: any[]) => any) | undefined;
 }>, {
     done: boolean;
+    modelValue: any;
     caution: string | boolean;
     required: boolean;
-    modelValue: any;
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {
     elem: ({
         $props: import('primevue/select').SelectProps & import('vue').VNodeProps & import('vue').AllowedComponentProps & import('vue').ComponentCustomProps;
