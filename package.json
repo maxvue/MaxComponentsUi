@@ -17,6 +17,10 @@
         "./resolver": {
             "types": "./dist/helpers/resolver.d.ts",
             "import": "./dist/resolver.es.js"
+        },
+        "./prime": {
+            "types": "./dist/prime/index.d.ts",
+            "import": "./dist/prime.es.js"
         }
     },
     "files": [

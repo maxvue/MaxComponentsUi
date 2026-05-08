@@ -9,6 +9,7 @@
 <script setup lang="ts">
     import { Random } from '@maxvue/max-use';
     import { ref, watch, useAttrs } from 'vue';
+
     const attrs = useAttrs();
 
     const props = withDefaults(
