@@ -10,13 +10,11 @@ export function MaxComponentsUiResolver(): ComponentResolver {
         type: 'component',
         resolve: (name: string) => {
             const originalName = (manifest.aliases as Record<string, string>)[name];
-            if (originalName){
-                console.log('Max Resolved', { name: name, result: originalName });
-                return {
-                    name: originalName,
-                    from: '@maxvue/max-components-ui'
-                };
-            }
+            if (originalName) return {
+                name: originalName,
+                from: '@maxvue/max-components-ui'
+            };
+
 
             const primeVueResolvers = PrimeVueResolver();
             for (const resolver of primeVueResolvers) {
@@ -26,7 +24,6 @@ export function MaxComponentsUiResolver(): ComponentResolver {
                         name: name,
                         from: '@maxvue/max-components-ui/prime'
                     };
-                    console.log('Prime Resolved', { name: name, primeResult: result, return_result: return_result });
                     return return_result;
                 }
             }
