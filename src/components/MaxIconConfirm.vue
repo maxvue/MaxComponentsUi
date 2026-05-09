@@ -1,6 +1,6 @@
 <template>
-    <MaxIconButton v-bind="props" v-tooltip="null" pointer @click.stop="toggle" />
-    <Popover ref="op">
+    <MaxIconButton v-bind="props" v-tooltip="null" pointer @click.stop="toggle" @mouseenter="show = true" @mouseleave="show = false" />
+    <!-- <Popover ref="op" v-if="show">
         <div min-w-80>
             <div p20 grid-center full pb-10 font-size-1 color-gray-600 >
                 {{ props.message ?? 'Você confirma a operação?' }}
@@ -10,7 +10,7 @@
                 <MaxButton s50 @click.stop="cancel" :label="props.cancelLabel ?? 'Não'" :icon="props.cancelIcon" />
             </grid>
         </div>
-    </Popover>
+    </Popover> -->
 </template>
 
 <script setup lang="ts">
@@ -70,8 +70,12 @@
     });
 
     const op = ref();
+    const show = ref(true);
 
-    const toggle = (event: any) => op.value.toggle(event);
+    const toggle = (event: any) => {
+        show.value = !show.value;
+        setTimeout(() => op.value.toggle(event), 50);
+    };
 
     // Define os eventos e os tipos dos argumentos (payload) que eles enviam
     const emit = defineEmits<{

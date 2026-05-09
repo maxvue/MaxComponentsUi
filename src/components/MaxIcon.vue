@@ -1,5 +1,6 @@
 <template>
-    <div class="max-icon-div">
+
+    <div class="max-icon-div" :k="icon_name ?? 'nono'" :vh="svgContent" :ii="String(icon_name)" :i="String(props.i)" :icon="String(props.icon)">
         <div class="max-icon" :style="style" v-html="svgContent" />
         <div class="sub-icon checked" v-if="props.checked === true">
             <div class="background-icon"></div>
@@ -64,7 +65,7 @@
         light: undefined,
         color: 'var(--blue-600)'
     });
-    const icon_name: ComputedRef<string | null> = computed(() => props.i ?? props.icon ?? null);
+    const icon_name = computed(() => props.i ?? props.icon ?? null);
 
     const value_dark = computed(() => {
         if (isNumber(props.dark)) return props.dark;
@@ -104,36 +105,11 @@
 
     const style: Ref<Record<string, string>> = computed(() => ({ ...sizeStyles.value, ...color.value }));
 
-    const defaultSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="color: var(--background-400)"><g fill="#FF0000"><path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z" /><path fill="currentColor" d="M13 21a1 1 0 1 1-2 0v-3a1 1 0 1 1 2 0zm0-15a1 1 0 1 1-2 0V3a1 1 0 1 1 2 0zm9 6a1 1 0 0 0-1-1h-3a1 1 0 1 0 0 2h3a1 1 0 0 0 1-1M6 11a1 1 0 1 1 0 2H3a1 1 0 1 1 0-2zm13.071 8.071a1 1 0 0 0 0-1.414l-2.121-2.121a1 1 0 0 0-1.414 1.414l2.12 2.121a1 1 0 0 0 1.415 0M8.464 7.051A1 1 0 1 1 7.05 8.463L4.93 6.344a1 1 0 1 1 1.414-1.415zm10.607-2.122a1 1 0 0 0-1.414 0L15.536 7.05a1 1 0 0 0 1.414 1.414l2.121-2.12a1 1 0 0 0 0-1.415M7.051 15.536a1 1 0 1 1 1.413 1.414l-2.12 2.121a1 1 0 0 1-1.415-1.414z" /></g></svg>';
-    const svgContent: Ref = ref(defaultSvg);
-    const temp_icon: Ref<boolean> = ref(true);
+    const svgContent: Ref = computed(() => {
+        if (icon_name.value && icon_store.icons_data[icon_name.value] && icon_store.icons_data[icon_name.value] !== 'requesting') return icon_store.icons_data[icon_name.value];
+        return icon_name.value ? icon_store.getIcon(icon_name.value) : 'C';
+    });
 
-    const request = () => {
-        if (!icon_name.value) return;
-
-        const icon_svg = icon_store.getIcon(icon_name.value);
-
-        if (icon_svg === false) temp_icon.value = false;
-        else if (icon_svg !== null) {
-            svgContent.value = icon_svg;
-            temp_icon.value = false;
-        }
-    };
-
-    watch(icon_name, () => request(), { immediate: true });
-
-    const { stop: stopWatch } = watch(
-        () => [icon_store.icons_updated, temp_icon.value],
-        () => {
-            request();
-            if (!temp_icon.value) {
-                setTimeout(() => {
-                    stopWatch();
-                }, 10);
-                return;
-            }
-        }, { immediate: true }
-    );
 </script>
 
 <style lang="scss" scoped>
