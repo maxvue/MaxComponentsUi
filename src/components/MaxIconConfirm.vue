@@ -15,8 +15,6 @@
 
 <script setup lang="ts">
     import MaxIconButton from './MaxIconButton.vue';
-    import MaxButton from './MaxButton.vue';
-    import Popover from 'primevue/popover';
     import { ref, computed } from 'vue';
 
     const props = withDefaults(defineProps<{

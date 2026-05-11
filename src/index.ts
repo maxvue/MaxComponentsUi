@@ -79,6 +79,10 @@ export { default as MaxTransitionUp } from './components/MaxTransitionUp.vue';
 export { default as TransitionFade } from './components/TransitionFade.vue';
 export { default as MaxAnimateFade } from './components/MaxAnimateFade.vue';
 export { default as MaxUserAvatar } from './components/MaxUserAvatar.vue';
+export { default as MaxPopover } from './components/MaxPopover.vue';
+
+import ConfirmationService from 'primevue/confirmationservice';
+
 
 export const install = (app: any, options: any = {}) => {
     app.use(PrimeVue, {
@@ -95,6 +99,7 @@ export const install = (app: any, options: any = {}) => {
         ripple: true,
         ...options
     });
+    app.use(ConfirmationService);
 };
 
 export default {
