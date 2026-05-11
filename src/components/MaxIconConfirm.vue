@@ -104,15 +104,5 @@
         }
     }
 
-    .max-icon-confirm-dialog {
-        position: fixed;
-        min-width: 100px;
-        min-height: 100px;
-        background-color: var(--background-0);
-        z-index: 2;
-        border: 1px solid var(--surface-border);
-        box-shadow: 0 1px 6px 3px var(--primary-500);
-        border-radius: 0.75rem;
-        padding: 5px 15px;
-    }
+
 </style>

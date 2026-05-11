@@ -36,6 +36,7 @@
         showTooltip?: boolean;
         transparent?: boolean;
     }>(), {
-        showTooltip: true
+        showTooltip: true,
+        show: false
     });
 </script>
