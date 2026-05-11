@@ -69,7 +69,7 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
         action: Function;
     };
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {
-    el: import('vue').CreateComponentPublicInstanceWithMixins<Readonly<{
+    btn_el: import('vue').CreateComponentPublicInstanceWithMixins<Readonly<{
         icon?: string;
         i?: string;
         blank?: string;
@@ -119,6 +119,6 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
         dark: string | number | boolean;
         light: string | number | boolean;
     }> | null;
-}, any>;
+}, HTMLDivElement>;
 export default _default;
 //# sourceMappingURL=MaxIconConfirm.vue.d.ts.map

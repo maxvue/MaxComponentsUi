@@ -20,10 +20,10 @@
  */
 <script setup lang="ts">
     import { useIconStore } from '../stores/useIcon.Store';
-    import { ref, computed, useAttrs, watch } from 'vue';
+    import { ref, computed, useAttrs } from 'vue';
     import { useElementHover, isNumber } from '@maxvue/max-use';
     import { getColorFromVar } from '../helpers/getColorFromVar';
-    import type { ComputedRef, Ref } from 'vue';
+    import type { Ref } from 'vue';
     import Color from 'color';
 
     const icon_store = useIconStore();

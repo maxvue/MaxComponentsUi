@@ -1,18 +1,12 @@
 <template>
-    <MaxIconButton v-bind="props" v-tooltip="null" pointer @click.stop="onClickToggle" ref="el" />
-    <div class="max-icon-confirm-dialog" v-if="show">
-        <div>
-            <MaxIcon :icon="props.messageIcon" :style="`left: ${element_x}px; top: ${element_y}px;`" />
-            <div>{{ props.message }}</div>
-        </div>
-    </div>
+    <MaxIconButton v-bind="props" v-tooltip="null" pointer @click.stop="onClickToggle" ref="btn_el" />
 </template>
 
 <script setup lang="ts">;
     import MaxIconButton from './MaxIconButton.vue';
-    import { ref, useTemplateRef } from 'vue';
+    import { useTemplateRef } from 'vue';
     import { useElementBounding } from '@maxvue/max-use';
-    import MaxIcon from './MaxIcon.vue';
+    import { useConfirmStore } from '../stores/useConfirm.Store';
 
     const props = withDefaults(defineProps<{
         /** Nome do ícone (ex: 'mdi:home') */
@@ -77,19 +71,17 @@
         acceptProps: () => ({ label: 'Sim', action: () => {} })
     });
 
-    const show = ref(false);
-    const element_x = ref(0);
-    const element_y = ref(0);
-    const el = useTemplateRef('el');
+    const confirm_store = useConfirmStore();
 
+    const btn_el = useTemplateRef('btn_el');
 
     const onClickToggle = () => {
-        const { x, y, height } = useElementBounding(el as any);
-        show.value = !show.value;
-        if (show.value) {
-            element_x.value = x.value + 10;
-            element_y.value = y.value + height.value + 10;
-        }
+        const { x, y, height, width } = useElementBounding(btn_el as any);
+        confirm_store.x = x.value;
+        confirm_store.y = y.value;
+        confirm_store.height = height.value;
+        confirm_store.width = width.value;
+        confirm_store.show = !confirm_store.show;
     };
 
 </script>

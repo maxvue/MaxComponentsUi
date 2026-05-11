@@ -1,63 +1,13 @@
 <template>
-    <div class="max-popover-div" ref="icon_ref" v-bind="props" :style="{width: size, height: size}">
+    <div class="max-popover-div" ref="icon_ref" :style="{top: confirm_store.y + 'px', left: confirm_store.x + 'px'}" v-if="confirm_store.show">
         MaxPopover
     </div>
 </template>
 
 <script setup lang="ts">
-    import { computed } from 'vue';
+    import { useConfirmStore } from '../stores/useConfirm.Store';
 
-    const props = withDefaults(defineProps<{
-        /** Nome do ícone (ex: 'mdi:home') */
-        icon?: string;
-        /** Alias para o nome do ícone */
-        i?: string;
-        /** link para abrir em nova aba */
-        blank?: string;
-        /** Rotação do ícone em graus */
-        route?: string;
-        /** Query data */
-        data?: any;
-        /** params data */
-        params?: any;
-        /** Rotação do ícone em graus */
-        rotate?: number;
-        /** Inversão do ícone */
-        flip?: 'horizontal' | 'vertical' | 'h' | 'v' | 'x' | 'y' | 'xy';
-        /** Tamanho do ícone (em px ou multiplicador) */
-        size?: string | number;
-        /** Alias para o tamanho */
-        scale?: string | number;
-        /** Largura específica */
-        width?: string | number;
-        /** Altura específica */
-        height?: string | number;
-        /** Icone escuro referente ao fundo */
-        dark?: boolean | string | number | undefined;
-        /** Icone claro referente ao fundo */
-        light?: boolean | string | number | undefined;
-        /** Icone de checagem */
-        checked?: boolean | string | number | undefined;
-        /** Icone de adição */
-        plus?: boolean | string | number | undefined;
-        /** Element Click */
-        element?: HTMLElement | null;
-        /** Position Right */
-    }>(), {
-        dark: undefined,
-        light: undefined
-    });
-
-    const size = computed(() => 16 * Number(props.size ?? 1) + 'px');
-
-
-    const toggle = () => {
-        console.log('toggle');
-    };
-
-    defineExpose({
-        toggle
-    });
+    const confirm_store = useConfirmStore();
 </script>
 
 <style lang="scss">
