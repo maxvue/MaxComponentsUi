@@ -1,6 +1,6 @@
 <template>
     <div class="icon-div ico-btn" ref="icon_ref" v-bind="props" :style="{width: size, height: size}">
-        <MaxIcon pointer :size="size" :light="props.light" :dark="props.dark ?? 0.4" v-bind="props" />
+        <MaxIcon pointer v-bind="props" :size="size" :light="props.light" :dark="props.dark ?? 0.4"/>
     </div>
 </template>
 

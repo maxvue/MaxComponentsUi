@@ -57,12 +57,6 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
     dark: string | number | boolean;
     light: string | number | boolean;
     loading: boolean;
-}, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {
-    op: ({
-        $props: import('primevue/popover').PopoverProps & import('vue').VNodeProps & import('vue').AllowedComponentProps & import('vue').ComponentCustomProps;
-        $slots: import('primevue/popover').PopoverSlots;
-        $emit: ((e: "show") => void) & ((e: "hide") => void);
-    } & import('primevue/popover').PopoverMethods) | null;
-}, any>;
+}, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {}, any>;
 export default _default;
 //# sourceMappingURL=MaxIconConfirm.vue.d.ts.map

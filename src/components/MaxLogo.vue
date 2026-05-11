@@ -16,7 +16,7 @@
             src?: string;
             rounded?: boolean;
         }>(),
-        { src: '/get_file?file=logo.svg', rounded: false }
+        { src: 'get_file?file=logo.svg', rounded: false }
     );
 </script>
 
