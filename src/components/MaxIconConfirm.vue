@@ -1,21 +1,18 @@
 <template>
-    <MaxIconButton v-bind="props" v-tooltip="null" pointer @click.stop="toggle" @mouseenter="show = true" @mouseleave="show = false" />
-    <!-- <Popover ref="op" v-if="show">
-        <div min-w-80>
-            <div p20 grid-center full pb-10 font-size-1 color-gray-600 >
-                {{ props.message ?? 'Você confirma a operação?' }}
-            </div>
-            <grid full pw10 pb10>
-                <MaxButton s50 @click.stop="confirm" info :label="props.acceptLabel ?? 'Sim'" :icon="props.acceptIcon" dark="0.8"  />
-                <MaxButton s50 @click.stop="cancel" :label="props.cancelLabel ?? 'Não'" :icon="props.cancelIcon" />
-            </grid>
+    <MaxIconButton v-bind="props" v-tooltip="null" pointer @click.stop="onClickToggle" ref="el" />
+    <div class="max-icon-confirm-dialog" v-if="show">
+        <div>
+            <MaxIcon :icon="props.messageIcon" :style="`left: ${element_x}px; top: ${element_y}px;`" />
+            <div>{{ props.message }}</div>
         </div>
-    </Popover> -->
+    </div>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts">;
     import MaxIconButton from './MaxIconButton.vue';
-    import { ref, computed } from 'vue';
+    import { ref, useTemplateRef } from 'vue';
+    import { useElementBounding } from '@maxvue/max-use';
+    import MaxIcon from './MaxIcon.vue';
 
     const props = withDefaults(defineProps<{
         /** Nome do ícone (ex: 'mdi:home') */
@@ -40,12 +37,23 @@
         scale?: string | number;
         /** Mensagem de confirmação */
         message?: string;
+        /** Icone de mensagem de confirmação */
+        messageIcon?: string;
         /** Label do botão de sim */
         acceptLabel?: string;
         /** Icone do botão de sim */
         acceptIcon?: string;
         /** Label do botão de não */
-        cancelLabel?: string;
+        rejectProps?: {
+            label: string;
+            icon?: string;
+            action: Function;
+        };
+        acceptProps?: {
+            label: string;
+            icon?: string;
+            action: Function;
+        };
         /** Icone do botão de não */
         cancelIcon?: string;
         loading?: boolean;
@@ -64,36 +72,26 @@
     }>(), {
         dark: 0.4,
         light: undefined,
-        loading: false
+        loading: false,
+        rejectProps: () => ({ label: 'Não', action: () => {} }),
+        acceptProps: () => ({ label: 'Sim', action: () => {} })
     });
 
-    const op = ref();
-    const show = ref(true);
+    const show = ref(false);
+    const element_x = ref(0);
+    const element_y = ref(0);
+    const el = useTemplateRef('el');
 
-    const toggle = (event: any) => {
+
+    const onClickToggle = () => {
+        const { x, y, height } = useElementBounding(el as any);
         show.value = !show.value;
-        setTimeout(() => op.value.toggle(event), 50);
+        if (show.value) {
+            element_x.value = x.value + 10;
+            element_y.value = y.value + height.value + 10;
+        }
     };
 
-    // Define os eventos e os tipos dos argumentos (payload) que eles enviam
-    const emit = defineEmits<{
-        confirm: [value: boolean];
-        accept: [value: boolean];
-        cancel: [value: boolean];
-        reject: [value: boolean];
-    }>();
-
-    const confirm = () => {
-        emit('confirm', true);
-        emit('accept', true);
-    };
-
-    const cancel = () => {
-        emit('cancel', false);
-        emit('reject', false);
-    };
-
-    const size = computed(() => 16 * Number(props.size ?? 1) + 'px');
 </script>
 
 <style lang="scss">
@@ -112,5 +110,17 @@
                 transform: scale(1.3) !important;
             }
         }
+    }
+
+    .max-icon-confirm-dialog {
+        position: fixed;
+        min-width: 100px;
+        min-height: 100px;
+        background-color: var(--background-0);
+        z-index: 2;
+        border: 1px solid var(--surface-border);
+        box-shadow: 0 1px 6px 3px var(--primary-500);
+        border-radius: 0.75rem;
+        padding: 5px 15px;
     }
 </style>
