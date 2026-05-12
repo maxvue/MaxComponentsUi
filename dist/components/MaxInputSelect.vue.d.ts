@@ -48,7 +48,7 @@ declare function __VLS_template(): {
         elem: ({
             $props: import('primevue/select').SelectProps & import('vue').VNodeProps & import('vue').AllowedComponentProps & import('vue').ComponentCustomProps;
             $slots: import('primevue/select').SelectSlots;
-            $emit: ((e: "filter", event: import('primevue/select').SelectFilterEvent) => void) & ((e: "show") => void) & ((e: "update:modelValue", value: any) => void) & ((e: "value-change", value: any) => void) & ((e: "blur", event: Event) => void) & ((e: "change", event: import('primevue/select').SelectChangeEvent) => void) & ((e: "focus", event: Event) => void) & ((e: "before-show") => void) & ((e: "before-hide") => void) & ((e: "hide") => void);
+            $emit: ((e: "filter", event: import('primevue/select').SelectFilterEvent) => void) & ((e: "show") => void) & ((e: "hide") => void) & ((e: "update:modelValue", value: any) => void) & ((e: "value-change", value: any) => void) & ((e: "blur", event: Event) => void) & ((e: "change", event: import('primevue/select').SelectChangeEvent) => void) & ((e: "focus", event: Event) => void) & ((e: "before-show") => void) & ((e: "before-hide") => void);
         } & import('primevue/select').SelectMethods) | null;
     };
     rootEl: any;
@@ -69,7 +69,7 @@ declare const __VLS_component: import('vue').DefineComponent<__VLS_Props, {}, {}
     elem: ({
         $props: import('primevue/select').SelectProps & import('vue').VNodeProps & import('vue').AllowedComponentProps & import('vue').ComponentCustomProps;
         $slots: import('primevue/select').SelectSlots;
-        $emit: ((e: "filter", event: import('primevue/select').SelectFilterEvent) => void) & ((e: "show") => void) & ((e: "update:modelValue", value: any) => void) & ((e: "value-change", value: any) => void) & ((e: "blur", event: Event) => void) & ((e: "change", event: import('primevue/select').SelectChangeEvent) => void) & ((e: "focus", event: Event) => void) & ((e: "before-show") => void) & ((e: "before-hide") => void) & ((e: "hide") => void);
+        $emit: ((e: "filter", event: import('primevue/select').SelectFilterEvent) => void) & ((e: "show") => void) & ((e: "hide") => void) & ((e: "update:modelValue", value: any) => void) & ((e: "value-change", value: any) => void) & ((e: "blur", event: Event) => void) & ((e: "change", event: import('primevue/select').SelectChangeEvent) => void) & ((e: "focus", event: Event) => void) & ((e: "before-show") => void) & ((e: "before-hide") => void);
     } & import('primevue/select').SelectMethods) | null;
 }, any>;
 declare const _default: __VLS_WithTemplateSlots<typeof __VLS_component, __VLS_TemplateResult["slots"]>;

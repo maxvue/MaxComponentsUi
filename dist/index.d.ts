@@ -53,7 +53,7 @@ export { default as MaxTransitionUp } from './components/MaxTransitionUp.vue';
 export { default as TransitionFade } from './components/TransitionFade.vue';
 export { default as MaxAnimateFade } from './components/MaxAnimateFade.vue';
 export { default as MaxUserAvatar } from './components/MaxUserAvatar.vue';
-export { default as MaxPopover } from './components/MaxPopover.vue';
+export { default as MaxPopoverConfirm } from './components/MaxPopoverConfirm.vue';
 export declare const install: (app: any, options?: any) => void;
 declare const _default: {
     install: (app: any, options?: any) => void;

@@ -14,12 +14,12 @@
 <style>
     .fade-enter-active,
     .fade-leave-active {
-        transition: opacity 0.5s ease;
+        transition: opacity 0.2s ease;
     }
 
     .fade-enter-from,
     .fade-leave-to {
         opacity: 0;
-        transition-delay: 0.3s;
+        transition-delay: 0.2s;
     }
 </style>

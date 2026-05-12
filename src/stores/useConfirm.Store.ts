@@ -6,14 +6,14 @@ export const useConfirmStore = defineStore('confirm.popover', () => {
 
     const message: Ref<string> = ref('Deseja continuar?');
     const messageIcon: Ref<string | null> = ref(null);
-    const rejectProps: Ref<{ label: string; icon: string | null; action: Function }> = ref({
+    const rejectProps: Ref<{ label: string; icon?: string; action: (event?: any) => void }> = ref({
         label: 'Não',
-        icon: null,
+        icon: undefined,
         action: () => {}
     });
-    const acceptProps: Ref<{ label: string; icon: string | null; action: Function }> = ref({
+    const acceptProps: Ref<{ label: string;icon?: string; action: (event?: any) => void }> = ref({
         label: 'Sim',
-        icon: null,
+        icon: undefined,
         action: () => {}
     });
     const count_loadeds = ref(0);
@@ -25,5 +25,9 @@ export const useConfirmStore = defineStore('confirm.popover', () => {
     const width: Ref<number> = ref(0);
     const height: Ref<number> = ref(0);
 
-    return { message, messageIcon, rejectProps, acceptProps, show, x, y, width, height, count_loadeds };
+    const hide = () => {
+        show.value = false;
+    };
+
+    return { message, messageIcon, rejectProps, acceptProps, show, x, y, width, height, count_loadeds, hide };
 });

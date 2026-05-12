@@ -21,7 +21,10 @@ export const presetMaxUno = () => {
                 [/^h[-_]?[fF](?:ull|lex)$/, () => ({ height: '100% !important' })],
                 [/^w[-_]?[fF](?:ull|lex)$/, () => ({ width: '100% !important' })],
                 [/^font-size-(.+)$/, ([, s]) => ({ 'font-size': `${s}rem !important` })],
-                [/^fs-(.+)$/, ([, s]) => ({ 'font-size': `${s}rem !important` })]
+                [/^fs-(.+)$/, ([, s]) => ({ 'font-size': `${s}rem !important` })],
+                // Cores dinâmicas
+                [/^color-(.+)$/, ([, s]) => ({ color: `var(--${s})` })],
+                [/^bg-(.+)$/, ([, s]) => ({ 'background-color': s.startsWith('var(') || s.startsWith('#') || s.startsWith('rgb') || s.startsWith('hsl') ? s : `var(--${s})` })]
             ],
             // RULES: CSS customizado que não existe no UnoCSS padrão
             rules: [
@@ -31,10 +34,6 @@ export const presetMaxUno = () => {
                 [/^h-?max-(.+)$/, ([, s]) => ({ 'max-height': s + 'px' })],
                 [/^w-?min-(.+)$/, ([, s]) => ({ 'min-width': s + 'px' })],
                 [/^h-?min-(.+)$/, ([, s]) => ({ 'min-height': s + 'px' })],
-
-                // Cores dinâmicas
-                [/^color-(.+)$/, ([, s]) => ({ color: s.startsWith('var(') || s.startsWith('#') || s.startsWith('rgb') || s.startsWith('hsl') ? s : `var(--${s})` })],
-                [/^bg-(.+)$/, ([, s]) => ({ 'background-color': s.startsWith('var(') || s.startsWith('#') || s.startsWith('rgb') || s.startsWith('hsl') ? s : `var(--${s})` })],
 
                 // Grid system
                 [/^grid-?(cols|rows)-?(.+)$/i, ([, tp, vl]) => ({ ['grid-template-' + (tp.toLowerCase() === 'cols' ? 'columns' : 'rows')]: vl.replace(/-/g, ' ') })],

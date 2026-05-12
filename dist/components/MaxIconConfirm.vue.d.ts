@@ -31,12 +31,12 @@ type __VLS_Props = {
     rejectProps?: {
         label: string;
         icon?: string;
-        action: Function;
+        action: (event?: any) => void;
     };
     acceptProps?: {
         label: string;
         icon?: string;
-        action: Function;
+        action: (event?: any) => void;
     };
     /** Icone do botão de não */
     cancelIcon?: string;
@@ -57,16 +57,17 @@ type __VLS_Props = {
 declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {}, string, import('vue').PublicProps, Readonly<__VLS_Props> & Readonly<{}>, {
     dark: string | number | boolean;
     light: string | number | boolean;
+    message: string;
     loading: boolean;
     rejectProps: {
         label: string;
         icon?: string;
-        action: Function;
+        action: (event?: any) => void;
     };
     acceptProps: {
         label: string;
         icon?: string;
-        action: Function;
+        action: (event?: any) => void;
     };
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {
     btn_el: import('vue').CreateComponentPublicInstanceWithMixins<Readonly<{

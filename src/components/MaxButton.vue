@@ -1,13 +1,13 @@
 <template>
-    <Button :iconPos="iconPos" uppercase >
+    <Button :iconPos="iconPos" uppercase>
         <template #default>
             <slot></slot>
         </template>
         <template #icon>
-            <MaxIcon v-if="props.icon ?? props.i" :icon="props.icon ?? props.i" :size="props.size ?? props.sizeIcon ?? props.iconSize ?? '1.4'" class="content-button-icon" flex :dark="props.dark" :light="props.light" />
+            <MaxIcon v-if="props.icon ?? props.i" :icon="props.icon ?? props.i" :size="props.size ?? props.sizeIcon ?? props.iconSize ?? '1'" class="content-button-icon" flex :dark="props.dark" :light="props.light" />
         </template>
         <template #loadingicon>
-            <MaxIcon icon="loading" :size="props.size ?? props.sizeIcon ?? props.iconSize ?? '1.4'" class="content-button-icon" flex />
+            <MaxIcon icon="loading" :size="props.size ?? props.sizeIcon ?? props.iconSize ?? '1'" class="content-button-icon" flex />
         </template>
     </Button>
 </template>

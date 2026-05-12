@@ -8,6 +8,8 @@
     import { useElementBounding } from '@maxvue/max-use';
     import { useConfirmStore } from '../stores/useConfirm.Store';
 
+    const confirm_store = useConfirmStore();
+
     const props = withDefaults(defineProps<{
         /** Nome do ícone (ex: 'mdi:home') */
         icon?: string;
@@ -41,12 +43,12 @@
         rejectProps?: {
             label: string;
             icon?: string;
-            action: Function;
+            action: (event?: any) => void;
         };
         acceptProps?: {
             label: string;
             icon?: string;
-            action: Function;
+            action: (event?: any) => void;
         };
         /** Icone do botão de não */
         cancelIcon?: string;
@@ -67,11 +69,11 @@
         dark: 0.4,
         light: undefined,
         loading: false,
-        rejectProps: () => ({ label: 'Não', action: () => {} }),
-        acceptProps: () => ({ label: 'Sim', action: () => {} })
+        message: 'Deseja continuar?',
+        rejectProps: () => ({ label: 'Não', icon: undefined, action: () => {} }),
+        acceptProps: () => ({ label: 'Sim', icon: undefined, action: () => {} })
     });
 
-    const confirm_store = useConfirmStore();
 
     const btn_el = useTemplateRef('btn_el');
 
@@ -82,6 +84,9 @@
         confirm_store.height = height.value;
         confirm_store.width = width.value;
         confirm_store.show = !confirm_store.show;
+        confirm_store.message = props.message;
+        confirm_store.rejectProps = props.rejectProps;
+        confirm_store.acceptProps = props.acceptProps;
     };
 
 </script>
@@ -106,3 +111,4 @@
 
 
 </style>
+reject

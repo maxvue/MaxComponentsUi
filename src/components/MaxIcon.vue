@@ -112,7 +112,7 @@
 
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
     .max-icon-div {
         position: relative;
         z-index: 1;
@@ -120,13 +120,13 @@
         .max-icon {
             display: grid;
             place-items: center;
+        }
 
-            svg {
-                min-width: 100% !important;
-                min-height: 100% !important;
-                max-width: 100% !important;
-                max-height: 100% !important;
-            }
+        svg {
+            min-width: 100% !important;
+            min-height: 100% !important;
+            max-width: 100% !important;
+            max-height: 100% !important;
         }
 
         .sub-icon {
