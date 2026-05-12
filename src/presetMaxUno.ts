@@ -28,10 +28,22 @@ export const presetMaxUno = () => {
                     '&:hover': {
                         'color': `var(--${s}) !important`,
                         '.max-icon-div': {
-                            'color': `var(--${s}) !important`
+                            'color': `var(--${s}) !important`,
+                            '.max-icon': {
+                                'color': `var(--${s}) !important`,
+                                'svg': {
+                                    'color': `var(--${s}) !important`
+                                }
+                            },
+                            'svg': {
+                                'color': `var(--${s}) !important`
+                            }
                         },
                         '.max-icon': {
-                            'color': `var(--${s}) !important`
+                            'color': `var(--${s}) !important`,
+                            'svg': {
+                                'color': `var(--${s}) !important`
+                            }
                         },
                         'svg': {
                             'color': `var(--${s}) !important`
