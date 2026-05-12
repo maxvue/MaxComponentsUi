@@ -23,7 +23,18 @@ export const presetMaxUno = () => {
                 [/^font-size-(.+)$/, ([, s]) => ({ 'font-size': `${s}rem !important` })],
                 [/^fs-(.+)$/, ([, s]) => ({ 'font-size': `${s}rem !important` })],
                 // Cores dinâmicas
-                [/^color-(.+)$/, ([, s]) => ({ color: `var(--${s})` })],
+                [/^color-(.+)$/, ([, s]) => ({ color: `var(--${s}) !important` })],
+                [/^bg-(.+)$/, ([, s]) => ({ 'background-color': s.startsWith('var(') || s.startsWith('#') || s.startsWith('rgb') || s.startsWith('hsl') ? s : `var(--${s})` })]
+            ],
+            // RULES: CSS customizado que não existe no UnoCSS padrão
+            rules: [
+                // Tipografia
+                [/^font-weight-(.+)$/, ([, s]) => ({ 'font-weight': s })],
+                [/^w-?max-(.+)$/, ([, s]) => ({ 'max-width': s + 'px' })],
+                [/^h-?max-(.+)$/, ([, s]) => ({ 'max-height': s + 'px' })],
+                [/^w-?min-(.+)$/, ([, s]) => ({ 'min-width': s + 'px' })],
+                [/^h-?min-(.+)$/, ([, s]) => ({ 'min-height': s + 'px' })],
+
                 [/^hover-(.+)$/, ([, s]) => ({
                     '&:hover': {
                         'color': `var(--${s}) !important`,
@@ -50,16 +61,6 @@ export const presetMaxUno = () => {
                         }
                     }
                 })],
-                [/^bg-(.+)$/, ([, s]) => ({ 'background-color': s.startsWith('var(') || s.startsWith('#') || s.startsWith('rgb') || s.startsWith('hsl') ? s : `var(--${s})` })]
-            ],
-            // RULES: CSS customizado que não existe no UnoCSS padrão
-            rules: [
-                // Tipografia
-                [/^font-weight-(.+)$/, ([, s]) => ({ 'font-weight': s })],
-                [/^w-?max-(.+)$/, ([, s]) => ({ 'max-width': s + 'px' })],
-                [/^h-?max-(.+)$/, ([, s]) => ({ 'max-height': s + 'px' })],
-                [/^w-?min-(.+)$/, ([, s]) => ({ 'min-width': s + 'px' })],
-                [/^h-?min-(.+)$/, ([, s]) => ({ 'min-height': s + 'px' })],
 
                 // Grid system
                 [/^grid-?(cols|rows)-?(.+)$/i, ([, tp, vl]) => ({ ['grid-template-' + (tp.toLowerCase() === 'cols' ? 'columns' : 'rows')]: vl.replace(/-/g, ' ') })],

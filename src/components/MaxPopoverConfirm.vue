@@ -2,8 +2,8 @@
     <TransitionFade>
         <div class="background-popover" @click.stop="confirm_store.hide" v-if="confirm_store.show">
             <div class="max-icon-confirm-dialog" ref="el" :style="{top: position.top + 'px', left: position.left + 'px'}"  :class="[position.isTop ? 'is-top' : 'is-bottom', position.isLeft ? 'is-left' : 'is-right']">
-                <div pw4 pt-4 full text-center color-background-750 class="popover-confirm-content"  hover-red-700 >
-                    <MaxIcon i="mingcute:question-fill" size="1.2" hover-red-700 pointer />
+                <div pw4 pt-4 full text-center color-background-750 class="popover-confirm-content" >
+                    <MaxIcon i="mingcute:question-fill" size="1.2" color-red-600 />
                     <div>
                         {{confirm_store.message}}
                     </div>

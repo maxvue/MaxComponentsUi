@@ -1,7 +1,7 @@
 <template>
 
-    <div class="max-icon-div" :k="icon_name ?? 'nono'" :vh="svgContent" :ii="String(icon_name)" :i="String(props.i)" :icon="String(props.icon)">
-        <div class="max-icon" :style="style" v-html="svgContent" :v-bind="attrs" />
+    <div class="max-icon-div" :k="icon_name ?? 'nono'" :vh="svgContent" :ii="String(icon_name)" :i="String(props.i)" :icon="String(props.icon)" :style="style">
+        <div class="max-icon" v-html="svgContent" :v-bind="attrs" />
         <div class="sub-icon checked" v-if="props.checked === true">
             <div class="background-icon"></div>
             <svg full xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="m10.6 13.8l-2.15-2.15q-.275-.275-.7-.275t-.7.275t-.275.7t.275.7L9.9 15.9q.3.3.7.3t.7-.3l5.65-5.65q.275-.275.275-.7t-.275-.7t-.7-.275t-.7.275zM12 22q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22" /></svg>
@@ -23,7 +23,6 @@
     import { ref, computed, useAttrs } from 'vue';
     import { useElementHover, isNumber } from '@maxvue/max-use';
     import { getColorFromVar } from '../helpers/getColorFromVar';
-    import type { Ref } from 'vue';
     import Color from 'color';
 
     const icon_store = useIconStore();
@@ -79,7 +78,19 @@
         return null;
     });
 
+    const hover_color = computed(() => {
+        for (const key in attrs) if (key.startsWith('hover-')) {
+            const color = key.replace('hover-', '');
+            return { '&:hover': { color: `var(--${color}) !important` } };
+        }
+    });
+
     const color = computed(() => {
+        for (const key in attrs) if (key.startsWith('color-')) {
+            const color = key.replace('color-', '');
+            return { color: `var(--${color}) !important` };
+        }
+
         if (value_light.value) return { color: `rgba(255,255,255, ${value_light.value})` };
         if (value_dark.value) return { color: `rgba(0,0,0, ${value_dark.value})` };
         return colorStyle.value;
@@ -95,7 +106,7 @@
         }
 
         return { color: finalColor };
-    });
+    });'';
 
     const sizeStyles = computed(() => {
         const value = String(props.size ?? '1rem');
@@ -103,9 +114,9 @@
         return { width: formattedValue, height: formattedValue };
     });
 
-    const style: Ref<Record<string, string>> = computed(() => ({ ...sizeStyles.value, ...color.value }));
+    const style = computed(() => ({ ...sizeStyles.value, ...color.value, ...hover_color.value }));
 
-    const svgContent: Ref = computed(() => {
+    const svgContent = computed(() => {
         if (icon_name.value && icon_store.icons_data[icon_name.value] && icon_store.icons_data[icon_name.value] !== 'waiting') return icon_store.icons_data[icon_name.value];
         return icon_name.value ? icon_store.getIcon(icon_name.value) : 'C';
     });

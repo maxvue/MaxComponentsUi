@@ -1,5 +1,5 @@
 <template>
-    <div class="icon-div ico-btn" ref="icon_ref" v-bind="props" :style="{width: size, height: size}">
+    <div class="icon-div ico-btn" ref="icon_ref" v-bind="props" :style="{width: size, height: size}" @click.stop="onClick">
         <MaxIcon pointer v-bind="props" :size="size" :light="props.light" :dark="props.dark ?? 0.4"/>
     </div>
 </template>
@@ -7,6 +7,8 @@
 <script setup lang="ts">
     import { computed } from 'vue';
     import MaxIcon from './MaxIcon.vue';
+    import { goToRoute } from '@maxvue/max-use';
+    import { useRouter } from 'vue-router';
 
     const props = withDefaults(defineProps<{
         /** Nome do ícone (ex: 'mdi:home') */
@@ -16,11 +18,13 @@
         /** link para abrir em nova aba */
         blank?: string;
         /** Rotação do ícone em graus */
-        route?: string;
+        route?: string | null;
         /** Query data */
         data?: any;
-        /** params data */
+        /** Params data */
         params?: any;
+        /** Query data */
+        query?: any;
         /** Rotação do ícone em graus */
         rotate?: number;
         /** Inversão do ícone */
@@ -43,11 +47,31 @@
         plus?: boolean | string | number | undefined;
     }>(), {
         dark: undefined,
-        light: undefined
+        light: undefined,
+        route: null,
+        params: null,
+        data: null,
+        query: null
     });
 
 
     const size = computed(() => 16 * Number(props.size ?? 1) + 'px');
+
+
+    const emit = defineEmits<{
+        click: [value: boolean];
+    }>();
+
+    const onClick = () => {
+        if (props.route) {
+            const router = useRouter();
+            console.log('goingToRoute', router);
+            goToRoute(props.route, { ...(props.params ?? {}), ...(props.data ?? {}), ...(props.query ?? {}) });
+            return;
+        }
+
+        emit('click', true);
+    };
 </script>
 
 <style lang="scss">

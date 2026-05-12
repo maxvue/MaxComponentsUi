@@ -6,11 +6,13 @@ type __VLS_Props = {
     /** link para abrir em nova aba */
     blank?: string;
     /** Rotação do ícone em graus */
-    route?: string;
+    route?: string | null;
     /** Query data */
     data?: any;
-    /** params data */
+    /** Params data */
     params?: any;
+    /** Query data */
+    query?: any;
     /** Rotação do ícone em graus */
     rotate?: number;
     /** Inversão do ícone */
@@ -32,9 +34,17 @@ type __VLS_Props = {
     /** Icone de adição */
     plus?: boolean | string | number | undefined;
 };
-declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {}, string, import('vue').PublicProps, Readonly<__VLS_Props> & Readonly<{}>, {
+declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {
+    click: (value: boolean) => any;
+}, string, import('vue').PublicProps, Readonly<__VLS_Props> & Readonly<{
+    onClick?: ((value: boolean) => any) | undefined;
+}>, {
     dark: string | number | boolean;
     light: string | number | boolean;
+    data: any;
+    route: string | null;
+    params: any;
+    query: any;
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {
     icon_ref: HTMLDivElement;
 }, HTMLDivElement>;

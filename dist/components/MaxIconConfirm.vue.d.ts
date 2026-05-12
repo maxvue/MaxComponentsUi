@@ -74,9 +74,10 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
         icon?: string;
         i?: string;
         blank?: string;
-        route?: string;
+        route?: string | null;
         data?: any;
         params?: any;
+        query?: any;
         rotate?: number;
         flip?: "horizontal" | "vertical" | "h" | "v" | "x" | "y" | "xy";
         size?: string | number;
@@ -87,9 +88,17 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
         light?: boolean | string | number | undefined;
         checked?: boolean | string | number | undefined;
         plus?: boolean | string | number | undefined;
-    }> & Readonly<{}>, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {}, import('vue').PublicProps, {
+    }> & Readonly<{
+        onClick?: ((value: boolean) => any) | undefined;
+    }>, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {
+        click: (value: boolean) => any;
+    }, import('vue').PublicProps, {
         dark: string | number | boolean;
         light: string | number | boolean;
+        data: any;
+        route: string | null;
+        params: any;
+        query: any;
     }, false, {}, {}, import('vue').GlobalComponents, import('vue').GlobalDirectives, string, {
         icon_ref: HTMLDivElement;
     }, HTMLDivElement, import('vue').ComponentProvideOptions, {
@@ -103,9 +112,10 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
         icon?: string;
         i?: string;
         blank?: string;
-        route?: string;
+        route?: string | null;
         data?: any;
         params?: any;
+        query?: any;
         rotate?: number;
         flip?: "horizontal" | "vertical" | "h" | "v" | "x" | "y" | "xy";
         size?: string | number;
@@ -116,9 +126,15 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
         light?: boolean | string | number | undefined;
         checked?: boolean | string | number | undefined;
         plus?: boolean | string | number | undefined;
-    }> & Readonly<{}>, {}, {}, {}, {}, {
+    }> & Readonly<{
+        onClick?: ((value: boolean) => any) | undefined;
+    }>, {}, {}, {}, {}, {
         dark: string | number | boolean;
         light: string | number | boolean;
+        data: any;
+        route: string | null;
+        params: any;
+        query: any;
     }> | null;
 }, HTMLDivElement>;
 export default _default;
