@@ -106,7 +106,7 @@
     const style: Ref<Record<string, string>> = computed(() => ({ ...sizeStyles.value, ...color.value }));
 
     const svgContent: Ref = computed(() => {
-        if (icon_name.value && icon_store.icons_data[icon_name.value] && icon_store.icons_data[icon_name.value] !== 'requesting') return icon_store.icons_data[icon_name.value];
+        if (icon_name.value && icon_store.icons_data[icon_name.value] && icon_store.icons_data[icon_name.value] !== 'waiting') return icon_store.icons_data[icon_name.value];
         return icon_name.value ? icon_store.getIcon(icon_name.value) : 'C';
     });
 
