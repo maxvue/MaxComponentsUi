@@ -56,6 +56,7 @@ export { default as Tab } from 'primevue/tab';
 export { default as TabPanels } from 'primevue/tabpanels';
 export { default as TabPanel } from 'primevue/tabpanel';
 export { default as Toolbar } from 'primevue/toolbar';
+export { default as Editor } from 'primevue/editor';
 export { default as ConfirmDialog } from 'primevue/confirmdialog';
 export { default as ConfirmPopup } from 'primevue/confirmpopup';
 export { default as Dialog } from 'primevue/dialog';
