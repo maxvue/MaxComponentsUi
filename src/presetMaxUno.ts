@@ -26,9 +26,9 @@ export const presetMaxUno = () => {
                 [/^color-(.+)$/, ([, s]) => ({ color: `var(--${s})` })],
                 [/^hover-(.+)$/, ([, s]) => ({
                     '&:hover': {
-                        'color': `var(--${s})`,
-                        'svg': {
-                            'color': `var(--${s})`
+                        'color': `var(--${s}) !important`,
+                        '.max-icon': {
+                            'color': `var(--${s}) !important`
                         }
                     }
                 })],
