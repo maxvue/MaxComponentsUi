@@ -34,6 +34,7 @@ export default defineConfig({
         },
         rollupOptions: {
             external: [
+                'vue-router',
                 'vue',
                 '@iconify/vue',
                 'sass',
