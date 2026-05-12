@@ -1,5 +1,8 @@
 export { default as InputBase } from './components/InputBase.vue';
 export { default as MaxIcon } from './components/MaxIcon.vue';
+export { default as MaxDoneIcon } from './components/MaxDoneIcon.vue';
+export { default as MaxWaitIcon } from './components/MaxWaitIcon.vue';
+export { default as MaxErrorIcon } from './components/MaxErrorIcon.vue';
 export { default as MaxGrid } from './components/MaxGrid.vue';
 export { default as MaxButton } from './components/MaxButton.vue';
 export { default as MaxIconButton } from './components/MaxIconButton.vue';

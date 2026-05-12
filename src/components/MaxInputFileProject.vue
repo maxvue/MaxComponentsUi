@@ -7,9 +7,9 @@
                 para registrar os dados automaticamente.
             </div>
             <div>Clique aqui ou arraste e solte os documentos para carregar.</div>
-            <Icon icon="material-symbols:folder-open" size="2" />
+            <Icon icon="material-symbols:folder-open" size="4" color-gray />
         </div>
-        <div class="file-list">
+        <!-- <div class="file-list">
             <div v-for="file in filesRg" :key="file.name" class="file-item" pointer>
                 <div v-tooltip.top="'Documento de identificação'">
                     <Icon i="mdi:identification-card" size="2" />
@@ -25,9 +25,9 @@
                     <Icon i="mingcute:solar-panel-line" size="2" />
                 </div>
             </div>
-        </div>
+        </div> -->
         <div class="check-list-upload-files" v-if="ready">
-            <div class="item">
+            <!-- <div class="item">
                 <IconCheck :value="filesRg.length > 0" />
                 <div>Documento de identificação (RG ou CNH)</div>
             </div>
@@ -46,7 +46,7 @@
             <div class="item">
                 <IconCheck :value="filesListaEquipamentos.length > 0" />
                 <div>Lista de Equipamentos do kit fotovoltaico</div>
-            </div>
+            </div> -->
         </div>
         <div class="icon-make-ai" @click.stop="$emit('process-ai')">
             <IconButton i="hugeicons:ai-file" size="1.3" v-tooltip.left="'Processar arquivos'" />
@@ -61,11 +61,7 @@
 
     const props = withDefaults(
         defineProps<{
-            filesRg?: any[];
-            filesFatura?: any[];
-            filesQuadroAberto?: any[];
-            filesQuadroFechado?: any[];
-            filesListaEquipamentos?: any[];
+            filesCheck?: any;
             ready?: boolean;
         }>(),
         {

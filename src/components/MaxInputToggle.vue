@@ -24,6 +24,7 @@
 <script setup lang="ts">
     import { ref, computed, watch, useAttrs } from 'vue';
     import ToggleSwitch from 'primevue/toggleswitch';
+
     const attrs: any = useAttrs();
 
     const props = withDefaults(
@@ -65,8 +66,9 @@
     .input-toggle-field-main-div {
         display: grid;
         place-items: start center;
-        height: 100%;
+        height: 39px;
         position: relative;
+        background-color: var(--background-0);
 
         &.labeled {
             width: 100%;
@@ -123,8 +125,8 @@
             &.labeled {
                 padding-top: 10px;
                 width: 100%;
-                border-radius: 10px;
-                border: 1px solid var(--background-200);
+                border-radius: 0.5rem;
+                border: 1px solid var(--max-inputtext-border-color);
             }
 
             .input-toggle-field {

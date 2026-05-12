@@ -2,7 +2,7 @@
     <FloatLabel variant="on" class="max-input" :class="{ float: attrs.float !== undefined, done: done, caution: caution || done === false, 'text-center': textCenter }">
         <IconField>
             <InputIcon v-if="icon ?? iconLeft ?? i">
-                <MaxIcon :icon="icon ?? iconLeft ?? i" :size="1.2" />
+                <MaxIcon :icon="icon ?? iconLeft ?? i" :size="1.2" :light="light" :dark="dark" />
             </InputIcon>
             <slot></slot>
             <InputIcon v-if="iconRight">
@@ -13,13 +13,13 @@
         <label for="in_label" v-if="label" class="max-input-label active">{{ label }}</label>
         <Message size="small" :class="`input-message ${isError ? 'error' : ''}`" variant="simple" v-if="displayMessage">
             <template #icon>
-                <MaxIcon :icon="iconMessage" v-if="iconMessage" :size="0.9" />
+                <MaxIcon :icon="iconMessage" v-if="iconMessage" :size="0.9" :light="light" :dark="dark"  />
             </template>
             {{ displayMessage }}
         </Message>
         <div v-else class="message-spacer"></div>
         <div class="is-done" v-if="done">
-            <MaxIcon icon="lets-icons:check-fill" :size="0.9" />
+            <MaxIcon icon="lets-icons:check-fill" :size="0.9" :light="light" :dark="dark"  />
         </div>
         <div class="required" v-else-if="required">*</div>
     </FloatLabel>
@@ -75,11 +75,17 @@
         required?: boolean | undefined;
         /** Alinha o texto do input ao centro */
         textCenter?: boolean | undefined;
+        /** Icone escuro referente ao fundo */
+        dark?: boolean | string | number | undefined;
+        /** Icone claro referente ao fundo */
+        light?: boolean | string | number | undefined;
     }
 
     const props = withDefaults(defineProps<Props>(), {
         value: '',
-        textCenter: false
+        textCenter: false,
+        dark: 0.5,
+        light: false
     });
 
     const isError = computed(() => (typeof props.error === 'string' && hasContent(props.error)) || props.error === true || props.done === false);

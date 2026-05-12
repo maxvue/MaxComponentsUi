@@ -37,6 +37,10 @@ interface Props {
     required?: boolean | undefined;
     /** Alinha o texto do input ao centro */
     textCenter?: boolean | undefined;
+    /** Icone escuro referente ao fundo */
+    dark?: boolean | string | number | undefined;
+    /** Icone claro referente ao fundo */
+    light?: boolean | string | number | undefined;
 }
 declare function __VLS_template(): {
     attrs: Partial<{}>;
@@ -49,6 +53,8 @@ declare function __VLS_template(): {
 type __VLS_TemplateResult = ReturnType<typeof __VLS_template>;
 declare const __VLS_component: import('vue').DefineComponent<Props, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {}, string, import('vue').PublicProps, Readonly<Props> & Readonly<{}>, {
     value: any;
+    dark: string | number | boolean;
+    light: string | number | boolean;
     textCenter: boolean;
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {}, any>;
 declare const _default: __VLS_WithTemplateSlots<typeof __VLS_component, __VLS_TemplateResult["slots"]>;
