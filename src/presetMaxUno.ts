@@ -24,7 +24,14 @@ export const presetMaxUno = () => {
                 [/^fs-(.+)$/, ([, s]) => ({ 'font-size': `${s}rem !important` })],
                 // Cores dinâmicas
                 [/^color-(.+)$/, ([, s]) => ({ color: `var(--${s})` })],
-                [/^hover-(.+)$/, ([, s]) => ({ '&:hover': { color: `var(--${s}) !important` } })],
+                [/^hover-(.+)$/, ([, s]) => ({
+                    '&:hover': {
+                        'color': `var(--${s})`,
+                        'svg': {
+                            'color': `var(--${s})`
+                        }
+                    }
+                })],
                 [/^bg-(.+)$/, ([, s]) => ({ 'background-color': s.startsWith('var(') || s.startsWith('#') || s.startsWith('rgb') || s.startsWith('hsl') ? s : `var(--${s})` })]
             ],
             // RULES: CSS customizado que não existe no UnoCSS padrão
