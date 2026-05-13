@@ -1,16 +1,19 @@
 <template>
-    <FloatLabel variant="on" class="max-input-main-div" :class="`${props.float !== undefined ? 'float' : ''} ${done ? 'done' : ''} ${caution ? 'caution' : ''} ${textCenter ? 'text-center' : ''} ${props.class ? props.class : ''} ${isError ? 'error' : ''} ${caution ? 'caution' : ''}`">
-        <IconField>
-            <InputIcon v-if="icon ?? iconLeft ?? i">
-                <MaxIcon :icon="icon ?? iconLeft ?? i" :size="1.2" :light="light" :dark="dark" />
+    <FloatLabel variant="on" class="max-input-main-div" :class="`${props.float !== undefined ? 'float' : ''} ${done ? 'done' : ''} ${caution ? 'caution' : ''} ${textCenter ? 'text-center' : ''} ${props.class ? props.class : ''} ${isError ? 'error' : ''} ${caution ? 'caution' : ''} ${inLine ? 'in-line' : ''}`">
+        <div v-if="props.label && props.inLine">
+            {{ props.label }}
+        </div>
+        <IconField v-if="props.icon ?? props.i ?? props.iconLeft ?? props.iconRight">
+            <InputIcon v-if="props.iconLeft || props.iconPos === 'left'">
+                <MaxIcon :icon="props.iconLeft ?? props.icon ?? props.i" :size="1.2" :light="light" :dark="dark" />
             </InputIcon>
             <slot></slot>
-            <InputIcon v-if="iconRight">
-                <MaxIcon :icon="iconRight" :size="1.2" />
+            <InputIcon v-if="props.iconRight || props.iconPos === 'right'">
+                <MaxIcon :icon="props.iconRight ?? props.icon ?? props.i" :size="1.2" :light="light" :dark="dark"  />
             </InputIcon>
         </IconField>
-
-        <label for="in_label" v-if="label" class="max-input-label active">{{ label }}</label>
+        <slot v-else></slot>
+        <label for="in_label" v-if="props.label && !props.inLine" class="max-input-label active">{{ props.label }}</label>
         <Message size="small" class="input-message" variant="simple" v-if="displayMessage">
             <template #icon>
                 <MaxIcon :icon="iconMessage" v-if="iconMessage" :size="0.9" :light="light" :dark="dark"  />
@@ -29,6 +32,7 @@
         </div>
         <div class="required" v-else-if="required">*</div>
     </FloatLabel>
+
 </template>
 
 <script setup lang="ts">
@@ -69,13 +73,13 @@
         /** Rótulo (label) exibido acima ou dentro do campo */
         label?: string | undefined;
         /** Define se o campo foi preenchido corretamente (exibe ícone de check) */
-        done?: boolean | undefined;
+        done?: string | boolean | null | undefined;
         /** Mensagem de erro ou estado de erro (exibe em destaque) */
         error?: string | boolean | null | undefined;
         /** Mensagem de atenção ou estado de alerta (exibe em laranja) */
         caution?: string | boolean | null | undefined;
         /** Indica se o preenchimento deste campo é obrigatório (exibe asterisco) */
-        required?: boolean | undefined;
+        required?: boolean | null | undefined;
         /** Alinha o texto do input ao centro */
         textCenter?: boolean | undefined;
         /** Icone escuro referente ao fundo */
@@ -104,13 +108,19 @@
         iconDark?: boolean | undefined | number | string;
         /** Ícone claro comparado ao fundo */
         iconLight?: boolean | undefined | number | string;
+        /** Ícone claro comparado ao fundo */
+        iconPos?: 'left' | 'right';
+        /** Ícone claro comparado ao fundo */
+        inLine?: boolean;
     }
 
     const props = withDefaults(defineProps<Props>(), {
         value: '',
         textCenter: false,
         dark: 0.5,
-        light: false
+        light: false,
+        iconPos: 'left',
+        inLine: false
     });
 
     const isError = computed(() => (typeof props.error === 'string' && hasContent(props.error)) || props.error === true || props.done === false);
@@ -125,136 +135,189 @@
 </script>
 
 <style lang="scss">
-    .max-input-main-div {
-        display: grid !important;
-        grid-template-rows: 36px 19px;
+.max-input-main-div {
+    display: grid !important;
+    grid-template-rows: 36px 19px;
 
-        .max-input-label {
-            &.active {
-                top: 0;
-                transform: translateY(-50%);
-                border-radius: var(--max-floatlabel-on-border-radius);
-                background: var(--max-floatlabel-on-active-background);
-                padding: 0 5px !important;
-                font-size: var(--max-floatlabel-active-font-size);
-                font-weight: var(--max-floatlabel-active-font-weight);
-                inset-inline-start: 15px !important;
-            }
+    .max-input-label {
+        &.active {
+            top: 0;
+            transform: translateY(-50%);
+            border-radius: var(--max-floatlabel-on-border-radius);
+            background: var(--max-floatlabel-on-active-background);
+            padding: 0 5px !important;
+            font-size: var(--max-floatlabel-active-font-size);
+            font-weight: var(--max-floatlabel-active-font-weight);
+            inset-inline-start: 15px !important;
+        }
+    }
+
+    .message-spacer {
+        height: 16px;
+        width: 100%;
+    }
+
+    .required {
+        position: absolute;
+        top: 1px;
+        right: 3px;
+        color: darkred;
+    }
+
+    .is-done {
+        position: absolute;
+        top: 2px;
+        right: 3px;
+        color: #16a34a !important;
+    }
+
+    .is-caution {
+        position: absolute;
+        top: 2px;
+        right: 3px;
+    }
+
+    &.text-center {
+        input {
+            text-align: center !important;
+        }
+    }
+
+    &.caution {
+        label, .max-input-label {
+            color: var(--orange-600);
         }
 
-        .message-spacer {
-            height: 16px;
-            width: 100%;
+        input {
+            border-color: var(--orange-600);
         }
 
-        .required {
-            position: absolute;
-            top: 1px;
-            right: 3px;
-            color: darkred;
-        }
-
-        .is-done {
-            position: absolute;
-            top: 2px;
-            right: 3px;
-            color: #16a34a !important;
-        }
-
-        .is-caution {
-            position: absolute;
-            top: 2px;
-            right: 3px;
-        }
-
-        &.text-center {
-            input {
-                text-align: center !important;
-            }
-        }
-
-        &.caution {
-            label, .max-input-label {
-                color: var(--orange-600);
-            }
-
-            input {
-                border-color: var(--orange-600);
-            }
-
-            .p-select {
-                border-color: var(--orange-600) !important;
-            }
-
-            .input-message {
-                .p-message-content {
-                    color: var(--max-orange-500) !important;
-                }
-
-                .p-message-text {
-                    color: var(--orange-600) !important;
-                }
-            }
-        }
-
-        &.error {
-            label, .max-input-label {
-                color: var(--max-red-600) !important;
-            }
-
-            input {
-                border-color: var(--max-red-600) !important;
-            }
-
-            .p-select {
-                border-color: var(--max-red-600) !important;
-            }
-
-            .input-message {
-                .p-message-content {
-                    color: var(--max-red-600) !important;
-                }
-
-                .p-message-text {
-                    color: var(--max-red-600) !important;
-                }
-            }
+        .p-select {
+            border-color: var(--orange-600) !important;
         }
 
         .input-message {
             .p-message-content {
-                justify-content: flex-end;
-                padding: 0 6px;
-                padding-top: 4px;
-                color: var(--max-surface-400);
+                color: var(--max-orange-500) !important;
             }
 
             .p-message-text {
-                font-size: 10px !important;
+                color: var(--orange-600) !important;
             }
         }
+    }
 
-        .p-inputtext, .p-datepicker {
-            width: 100% !important;
+    &.error {
+        label, .max-input-label {
+            color: var(--max-red-600) !important;
         }
 
-        &.text-center {
-            .value-div, .p-select-label {
-                width: 100%;
+        input {
+            border-color: var(--max-red-600) !important;
+        }
+
+        .p-select {
+            border-color: var(--max-red-600) !important;
+        }
+
+        .input-message {
+            .p-message-content {
+                color: var(--max-red-600) !important;
             }
 
-            input, .p-select-label {
+            .p-message-text {
+                color: var(--max-red-600) !important;
+            }
+        }
+    }
+
+    &[input-click] {
+        grid-template-rows: 20px;
+
+        div, span, input, select, .p-select-label {
+            max-height: 20px;
+            border: none !important;
+            padding: 0 !important;;
+        }
+
+        .message-spacer {
+            display: none !important;
+        }
+    }
+
+    &.in-line {
+        grid-template-columns: auto 1fr !important;
+        grid-template-rows: 1fr !important;
+        place-items: center start;
+        gap: 4px !important;
+
+        .p-select-label, input {
+            background-color: var(--background-100) !important;
+            border-radius: 4px;
+
+            .value-div {
+                width: 100% !important;
                 text-align: center !important;
             }
         }
     }
 
-    .p-inputtext {
-        height: 36px;
+    .input-message {
+        .p-message-content {
+            justify-content: flex-end;
+            padding: 0 6px;
+            padding-top: 4px;
+            color: var(--max-surface-400);
+        }
 
-        &[disabled] {
-            background: var(--background-75) !important;
-            color: var(--background-400) !important;
+        .p-message-text {
+            font-size: 10px !important;
         }
     }
+
+    .p-inputtext, .p-datepicker, .p-autocomplete {
+        width: 100% !important;
+    }
+
+    &.no-dropdown, &[no-dropdown] {
+        .p-select-dropdown {
+            display: none !important;
+        }
+
+        &.text-center {
+            .value-div, .p-select-label {
+                padding: 0 !important;
+            }
+        }
+    }
+
+    &.text-center {
+        .value-div, .p-select-label {
+            width: 100%;
+        }
+
+        .value-text, .p-select-label {
+            padding-left: 2.5rem;
+        }
+
+        &.no-dropdown {
+            .value-div, .p-select-label {
+                padding-left: 0 !important;
+            }
+        }
+
+        input, .p-select-label {
+            text-align: center !important;
+        }
+    }
+}
+
+.p-inputtext {
+    height: 36px;
+
+    &[disabled] {
+        background: var(--background-75) !important;
+        color: var(--background-400) !important;
+    }
+}
 </style>

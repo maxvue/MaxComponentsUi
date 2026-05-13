@@ -27,13 +27,13 @@ interface Props {
     /** Rótulo (label) exibido acima ou dentro do campo */
     label?: string | undefined;
     /** Define se o campo foi preenchido corretamente (exibe ícone de check) */
-    done?: boolean | undefined;
+    done?: string | boolean | null | undefined;
     /** Mensagem de erro ou estado de erro (exibe em destaque) */
     error?: string | boolean | null | undefined;
     /** Mensagem de atenção ou estado de alerta (exibe em laranja) */
     caution?: string | boolean | null | undefined;
     /** Indica se o preenchimento deste campo é obrigatório (exibe asterisco) */
-    required?: boolean | undefined;
+    required?: boolean | null | undefined;
     /** Alinha o texto do input ao centro */
     textCenter?: boolean | undefined;
     /** Icone escuro referente ao fundo */
@@ -62,10 +62,15 @@ interface Props {
     iconDark?: boolean | undefined | number | string;
     /** Ícone claro comparado ao fundo */
     iconLight?: boolean | undefined | number | string;
+    /** Ícone claro comparado ao fundo */
+    iconPos?: 'left' | 'right';
+    /** Ícone claro comparado ao fundo */
+    inLine?: boolean;
 }
 declare function __VLS_template(): {
     attrs: Partial<{}>;
     slots: {
+        default?(_: {}): any;
         default?(_: {}): any;
     };
     refs: {};
@@ -77,6 +82,8 @@ declare const __VLS_component: import('vue').DefineComponent<Props, {}, {}, {}, 
     dark: string | number | boolean;
     light: string | number | boolean;
     textCenter: boolean;
+    iconPos: "left" | "right";
+    inLine: boolean;
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {}, any>;
 declare const _default: __VLS_WithTemplateSlots<typeof __VLS_component, __VLS_TemplateResult["slots"]>;
 export default _default;

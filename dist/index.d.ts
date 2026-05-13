@@ -24,7 +24,7 @@ export { default as MaxInputCoordinateDecimalLat } from './components/MaxInputCo
 export { default as MaxInputCoordinateDecimalLng } from './components/MaxInputCoordinateDecimalLng.vue';
 export { default as MaxInputCpfCnpj } from './components/MaxInputCpfCnpj.vue';
 export { default as MaxInputDatePicker } from './components/MaxInputDatePicker.vue';
-export { default as MaxInputField } from './components/MaxInputField.vue';
+export { default as MaxInputField } from './components/MaxInputText.vue';
 export { default as MaxInputFile } from './components/MaxInputFile.vue';
 export { default as MaxInputFileProject } from './components/MaxInputFileProject.vue';
 export { default as MaxInputFileUpload } from './components/MaxInputFileUpload.vue';

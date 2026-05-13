@@ -1,46 +1,129 @@
-type __VLS_Props = {
-    /** Valor selecionado */
-    modelValue: any;
-    /** Rota da API para busca */
+import { AutoCompleteProps } from 'primevue/autocomplete';
+interface props extends AutoCompleteProps {
     route: string;
-    /** Dados adicionais para enviar no corpo da requisição */
-    data?: any;
-    /** Ícone opcional */
-    icon?: string | undefined;
-    /** Alias para o ícone */
     i?: string | undefined;
-    /** Desabilita o campo */
-    disabled?: boolean | undefined;
-    /** Ativa estilo FloatLabel */
-    float?: boolean | undefined;
-    /** Mensagem de feedback (alias) */
+    data?: any;
+    icon?: string | undefined;
     msg?: string | undefined;
-    /** Mensagem de feedback */
     message?: string | undefined;
-    /** Ícone da mensagem de feedback */
     iconMessage?: string | undefined;
-    /** Rótulo do campo */
-    label?: string | undefined;
-    /** Estado de conclusão/validação manual */
-    done?: boolean | undefined;
-    /** Mensagem ou estado de erro */
-    error?: string | boolean | undefined;
-    /** Valor para comparação (opcional) */
-    targetValue?: string;
-    /** Mensagem ou estado de atenção */
-    caution?: string | boolean | undefined;
-    /** Define se o campo é obrigatório */
-    required?: boolean;
+    done?: string | boolean | null | undefined;
+    error?: string | boolean | null | undefined;
+    caution?: string | boolean | null | undefined;
+    required?: boolean | null | undefined;
+    optionValue?: string | undefined;
+    optionLabel?: string | undefined;
+}
+declare const props: Readonly<{
+    route: string;
+    i: string | undefined;
+    icon: string | undefined;
+    msg: string | undefined;
+    message: string | undefined;
+    iconMessage: string | undefined;
+    error: string | boolean | null | undefined;
+    optionValue: string | undefined;
+    defaultValue: any;
+    name: string | undefined;
+    suggestions: any[];
+    optionDisabled: string | ((data: any) => boolean) | undefined;
+    optionGroupLabel: string | ((data: any) => string) | undefined;
+    optionGroupChildren: string | ((data: any) => any[]) | undefined;
+    typeahead: boolean | undefined;
+    scrollHeight: string | undefined;
+    dropdown: boolean | undefined;
+    showClear: boolean | undefined;
+    placeholder: string | undefined;
+    loading: boolean | undefined;
+    size: import('@primevue/core').HintedString<"small" | "large"> | undefined;
+    invalid: boolean | undefined;
+    disabled: boolean | undefined;
+    dataKey: string | undefined;
+    appendTo: import('@primevue/core').HintedString<"body" | "self"> | undefined | HTMLElement;
+    completeOnFocus: boolean | undefined;
+    inputId: string | undefined;
+    inputStyle: object | undefined;
+    inputClass: string | object | undefined;
+    panelStyle: object | undefined;
+    panelClass: string | object | undefined;
+    overlayStyle: object | undefined;
+    overlayClass: string | object | undefined;
+    dropdownIcon: string | undefined;
+    dropdownClass: string | object | undefined;
+    loadingIcon: string | undefined;
+    loader: string | undefined;
+    removeTokenIcon: string | undefined;
+    chipIcon: string | undefined;
+    virtualScrollerOptions: import('primevue/virtualscroller').VirtualScrollerProps;
+    autoOptionFocus: boolean | undefined;
+    selectOnFocus: boolean | undefined;
+    focusOnHover: boolean | undefined;
+    searchLocale: string | undefined;
+    searchMessage: string | undefined;
+    selectionMessage: string | undefined;
+    emptySelectionMessage: string | undefined;
+    emptySearchMessage: string | undefined;
+    showEmptyMessage: boolean | undefined;
+    tabindex: number | string | undefined;
+    fluid: boolean | undefined;
+    ariaLabel: string | undefined;
+    ariaLabelledby: string | undefined;
+    formControl: Record<string, any> | undefined;
+    dt: import('@primevue/core').DesignToken<any>;
+    pt: import('@primevue/core').PassThrough<import('primevue/autocomplete').AutoCompletePassThroughOptions>;
+    ptOptions: import('primevue/passthrough').PassThroughOptions;
+    unstyled: boolean;
+}> & {
+    readonly modelValue: any;
+    readonly done: string | boolean | null | undefined;
+    readonly data: any;
+    readonly required: boolean | null;
+    readonly caution: string | boolean | null | undefined;
+    readonly dropdownMode: import('@primevue/core').HintedString<"blank" | "current">;
+    readonly optionLabel: string;
+    readonly multiple: boolean;
+    readonly variant: import('@primevue/core').HintedString<"outlined" | "filled"> | null;
+    readonly minLength: number;
+    readonly delay: number;
+    readonly forceSelection: boolean;
+} & {
+    readonly data: boolean;
+    readonly dt: boolean;
+    readonly disabled: boolean;
+    readonly loading: boolean;
+    readonly modelValue: boolean;
+    readonly fluid: boolean;
+    readonly unstyled: boolean;
+    readonly multiple: boolean;
+    readonly defaultValue: boolean;
+    readonly invalid: boolean;
+    readonly forceSelection: boolean;
+    readonly typeahead: boolean;
+    readonly dropdown: boolean;
+    readonly showClear: boolean;
+    readonly completeOnFocus: boolean;
+    readonly autoOptionFocus: boolean;
+    readonly selectOnFocus: boolean;
+    readonly focusOnHover: boolean;
+    readonly showEmptyMessage: boolean;
 };
-declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {
+declare const _default: import('vue').DefineComponent<props, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {
     "update:modelValue": (...args: any[]) => void;
-}, string, import('vue').PublicProps, Readonly<__VLS_Props> & Readonly<{
+}, string, import('vue').PublicProps, Readonly<props> & Readonly<{
     "onUpdate:modelValue"?: ((...args: any[]) => any) | undefined;
 }>, {
-    done: boolean;
+    done: string | boolean | null;
+    data: any;
+    variant: import('@primevue/core').HintedString<"outlined" | "filled"> | null;
     modelValue: any;
-    caution: string | boolean;
-    required: boolean;
+    caution: string | boolean | null;
+    required: boolean | null;
+    optionLabel: string;
+    multiple: boolean;
+    forceSelection: boolean;
+    dropdownMode: import('@primevue/core').HintedString<"blank" | "current">;
+    minLength: number;
+    delay: number;
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {}, any>;
 export default _default;
 //# sourceMappingURL=MaxInputAutoCompleteApi.vue.d.ts.map

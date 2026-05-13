@@ -1,19 +1,9 @@
 <template>
-    <InputBase v-bind="props" class="if" :value="search_value" :done="isDone" :error="error_msg" :caution="caution">
-        <AutoComplete
-            v-bind="attrs"
-            optionLabel="name"
-            :suggestions="filtered_values"
-            @complete="search"
-            :forceSelection="true"
-            :virtualScrollerOptions="{ itemSize: 40 }"
-            v-model="search_value"
-            :placeholder="attrs.placeholder ?? 'SELECIONE'"
-            @blur="isDone = testIsDone()"
-        >
+    <InputBase v-bind="props" class="if" :value="temp_value" :done="isDone" :error="props.error" :caution="caution">
+        <AutoComplete v-bind="props" optionLabel="name" :suggestions="filtered_values" @complete="search" :forceSelection="true" :virtualScrollerOptions="{ itemSize: 40 }" v-model="temp_value" :placeholder="props.placeholder ?? 'SELECIONE'" @blur="isDone = testIsDone()" >
             <template #option="slotProps">
                 <div class="autocomplete-item-select">
-                    <div class="autocomplete-item-select-label">{{ slotProps.option[attrs.optionLabel ?? 'label'] ?? slotProps.option.label }}</div>
+                    <div class="autocomplete-item-select-label">{{ slotProps.option[props.optionLabel ?? 'label'] ?? slotProps.option.label }}</div>
                     <div class="autocomplete-item-select-sub-label">{{ slotProps.option.subLabel ?? slotProps.option.sublabel ?? slotProps.option['sub-label'] }}</div>
                 </div>
             </template>
@@ -25,22 +15,24 @@
 <script setup lang="ts">
     import { hasContent, toSearchableString } from '@maxvue/max-use';
     import type { Ref } from 'vue';
-    import { ref, computed, watch, useAttrs } from 'vue';
+    import { ref, computed, watch } from 'vue';
     import InputBase from './InputBase.vue';
     import AutoComplete from 'primevue/autocomplete';
-    const attrs: any = useAttrs();
 
     const props = withDefaults(
         defineProps<{
             modelValue: any;
-            options: Record<string, any>[];
+            options: any;
             icon?: string | undefined;
             i?: string | undefined;
             disabled?: boolean | undefined;
+            optionLabel?: string | undefined;
+            optionValue?: string | undefined;
             float?: boolean | undefined;
             msg?: string | undefined;
             message?: string | undefined;
             iconMessage?: string | undefined;
+            placeholder?: string | undefined;
             label?: string | undefined;
             done?: boolean | undefined;
             error?: string | boolean | undefined;
@@ -48,21 +40,21 @@
             caution?: string | boolean | undefined;
             required?: boolean;
         }>(),
-        { modelValue: '', options: () => [], done: undefined, required: false, caution: undefined }
+        { modelValue: '', options: () => [], done: undefined, error: undefined, required: false, caution: undefined }
     );
 
     const list = computed(() => props.options ?? []);
-    const search_value: Ref = ref(props.modelValue);
+    const temp_value: Ref = ref(props.modelValue);
     const filtered_values: Ref = ref([]);
-    
-    const search_value_string = computed(() => {
-        if (search_value.value && typeof search_value.value === 'string') return search_value.value;
-        if (search_value.value && typeof search_value.value === 'object') return search_value.value?.value ?? search_value.value?.label ?? search_value.value?.id ?? search_value.value[attrs.optionValue ?? 'value'] ?? '';
+
+    const temp_value_string = computed(() => {
+        if (temp_value.value && typeof temp_value.value === 'string') return temp_value.value;
+        if (temp_value.value && typeof temp_value.value === 'object') return temp_value.value?.value ?? temp_value.value?.label ?? temp_value.value?.id ?? temp_value.value[props.optionValue ?? 'value'] ?? '';
         return '';
     });
 
     const isDone: Ref = ref(props.done ?? null);
-    const isRequiredDone = computed(() => (props.required ? hasContent(search_value_string.value) : null));
+    const isRequiredDone = computed(() => (props.required ? hasContent(temp_value_string.value) : null));
 
     const testIsDone = () => {
         if (props.done !== undefined) return props.done;
@@ -73,31 +65,19 @@
 
     const caution = computed(() => (props.caution !== undefined ? props.caution && isDone.value === false : isDone.value === false));
 
-    const error_msg = computed(() => {
-        if (!caution.value) return null;
-        const attrs_error_message = attrs.errMsg ?? attrs.error_message ?? attrs.error_msg ?? null;
-        if (isRequiredDone.value === false) return attrs_error_message ?? 'Campo obrigatório';
-        return attrs_error_message ?? 'Valor inválido';
-    });
-
     const emit = defineEmits(['update:modelValue']);
-    
-    watch(search_value, () => {
+
+    watch(temp_value, () => {
         isDone.value = testIsDone();
-        if (search_value.value && typeof search_value.value !== 'string') emit('update:modelValue', search_value.value);
+        if (temp_value.value && typeof temp_value.value !== 'string') emit('update:modelValue', temp_value.value);
     });
 
-    watch(
-        () => props.modelValue,
-        () => {
-            search_value.value = props.modelValue;
-        }
-    );
+    watch( () => props.modelValue, () => temp_value.value = props.modelValue );
 
     const search = () => {
         filtered_values.value = list.value.filter((item: any) => {
-            const search = (item.value ?? '') + (item.label ?? '') + (item.name ?? '') + (item[attrs.optionValue ?? 'value'] ?? '');
-            return toSearchableString(search).toLowerCase().includes(toSearchableString(search_value_string.value));
+            const search = (item.value ?? '') + (item.label ?? '') + (item.name ?? '') + (item[props.optionValue ?? 'value'] ?? '');
+            return toSearchableString(search).toLowerCase().includes(toSearchableString(temp_value_string.value));
         });
     };
 </script>

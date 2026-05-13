@@ -1,41 +1,15 @@
 <template>
-    <div class="max-table-main-div" >
-        <DataTable v-bind="attrs" stripedRows >
-            <template v-for="name in slotNames" #[name]="slotProps" :key="name">
-                <slot :name="name" v-bind="slotProps || {}" v-if="name !== 'buttons'"></slot>
-                <Column header="" v-if="slotNames.includes('buttons')" :style="`width: ${width}px; max-width: ${width}px;`">
-                    <template #body="{ data, index }">
-                        <div class="max-table-buttons" ref="el">
-                            <slot name="buttons" v-bind="{ data, index }" ></slot>
-                        </div>
-                    </template>
-                </Column>
-            </template>
-        </DataTable>
-    </div>
+
+ 
 </template>
 
 <script setup lang="ts">
-    import DataTable from 'primevue/datatable';
     import Column from 'primevue/column';
-    import { useAttrs, useSlots, computed, ref, watch, useTemplateRef } from 'vue';
+    import { ref } from 'vue';
     import { useElementSize } from '@maxvue/max-use';
 
-    const attrs = useAttrs();
-    const slots = useSlots();
-
-    const slotNames = computed<string[]>(() => Object.keys(slots || {}));
-
-    const el = useTemplateRef('el');
-    const width = ref(0);
-
-    const stop = watch(el, () => {
-        const { width: calculated_width } = useElementSize(el as any);
-        if (width.value > 0) stop();
-        else if (width.value === 0 && calculated_width.value > 0) width.value = calculated_width.value + 10;
-        console.log('calculated_width', calculated_width.value);
-
-    });
+    const el = ref('el');
+    const { width } = useElementSize(el as any);
 
 </script>
 
@@ -45,8 +19,8 @@
     border-radius: 1rem;
     overflow: hidden !important;
     max-height: 100%;
-    width: 100%;
-    height: 100%;
+    width: calc(100% - 4px);
+    height: calc(100% - 4px);
     border: 1px solid var(--background-300) !important;
     position: relative;
 
@@ -91,7 +65,6 @@
                             font-weight: 400 !important;
                             flex-grow: 1;
                             border: none !important;
-                            height: 100%;
 
                             .p-datatable-column-header-content {
                                 position: relative;
@@ -124,16 +97,8 @@
                         width: 100% !important;
                         display: flex;
                         height: auto !important;
-                        gap: 0 6px;
-                        padding: 3px 6px !important;
-
-                        &:first-of-type {
-                            padding-top: 6px !important;
-                        }
-
-                        &:last-of-type {
-                            padding-bottom: 6px !important;
-                        }
+                        padding: 0 6px !important;
+                        gap: 6px;
 
                         // LINHA IMPAR
                         &.p-row-even {
@@ -150,9 +115,6 @@
                             padding: 0 !important;
                             display: grid;
                             place-items: center;
-                            outline: none !important;
-                            border: none !important;
-                            border-radius: 0 !important;
 
                             .max-input-main-div {
                                 grid-template-rows: 1fr !important;
@@ -166,9 +128,12 @@
                         .max-table-buttons {
                             display: flex;
                             flex-direction: row;
-                            gap: 8px;
-                            width: auto;
-                            padding: 0 6px;
+                            gap: 5px;
+                            width: 100%;
+
+                            .icon-div {
+                                flex-grow: 1;
+                            }
                         }
                     }
                 }

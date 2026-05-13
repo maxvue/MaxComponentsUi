@@ -1,22 +1,16 @@
-type __VLS_Props = {
-    icon?: string;
-    label?: string;
-    required?: boolean;
-    disabled?: boolean;
-    done?: boolean;
-    error?: string | boolean;
-    caution?: string | boolean;
-};
 type __VLS_PublicProps = {
     modelValue?: string | Date;
-} & __VLS_Props;
+};
 declare const _default: import('vue').DefineComponent<__VLS_PublicProps, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {
     "update:modelValue": (value: string | Date) => any;
 }, string, import('vue').PublicProps, Readonly<__VLS_PublicProps> & Readonly<{
     "onUpdate:modelValue"?: ((value: string | Date) => any) | undefined;
-}>, {
-    done: boolean;
-    required: boolean;
-}, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {}, any>;
+}>, {}, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {
+    element: {
+        $props: import('primevue/datepicker').DatePickerProps & import('vue').VNodeProps & import('vue').AllowedComponentProps & import('vue').ComponentCustomProps;
+        $slots: import('primevue/datepicker').DatePickerSlots;
+        $emit: ((e: "input", event: Event) => void) & ((e: "show") => void) & ((e: "hide") => void) & ((e: "update:modelValue", value: Date | Date[] | (Date | null)[] | null | undefined) => void) & ((e: "value-change", value: Date | Date[] | (Date | null)[] | null | undefined) => void) & ((e: "blur", event: import('primevue/datepicker').DatePickerBlurEvent) => void) & ((e: "focus", event: Event) => void) & ((e: "date-select", value: Date) => void) & ((e: "today-click", date: Date) => void) & ((e: "clear-click", event: Event) => void) & ((e: "month-change", event: import('primevue/datepicker').DatePickerMonthChangeEvent) => void) & ((e: "year-change", event: import('primevue/datepicker').DatePickerYearChangeEvent) => void) & ((e: "keydown", event: Event) => void);
+    } | null;
+}, any>;
 export default _default;
 //# sourceMappingURL=MaxInputDatePicker.vue.d.ts.map

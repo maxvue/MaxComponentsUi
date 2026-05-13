@@ -1,13 +1,16 @@
 type __VLS_Props = {
     modelValue: any;
-    options: Record<string, any>[];
+    options: any;
     icon?: string | undefined;
     i?: string | undefined;
     disabled?: boolean | undefined;
+    optionLabel?: string | undefined;
+    optionValue?: string | undefined;
     float?: boolean | undefined;
     msg?: string | undefined;
     message?: string | undefined;
     iconMessage?: string | undefined;
+    placeholder?: string | undefined;
     label?: string | undefined;
     done?: boolean | undefined;
     error?: string | boolean | undefined;
@@ -22,9 +25,10 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
 }>, {
     done: boolean;
     modelValue: any;
+    error: string | boolean;
     caution: string | boolean;
     required: boolean;
-    options: Record<string, any>[];
+    options: any;
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {}, any>;
 export default _default;
 //# sourceMappingURL=MaxInputAutoComplete.vue.d.ts.map

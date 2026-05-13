@@ -89,9 +89,9 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
         checked?: boolean | string | number | undefined;
         plus?: boolean | string | number | undefined;
     }> & Readonly<{
-        onClick?: ((value: boolean) => any) | undefined;
+        onAction?: ((value: boolean) => any) | undefined;
     }>, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {
-        click: (value: boolean) => any;
+        action: (value: boolean) => any;
     }, import('vue').PublicProps, {
         dark: string | number | boolean;
         light: string | number | boolean;
@@ -127,7 +127,7 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
         checked?: boolean | string | number | undefined;
         plus?: boolean | string | number | undefined;
     }> & Readonly<{
-        onClick?: ((value: boolean) => any) | undefined;
+        onAction?: ((value: boolean) => any) | undefined;
     }>, {}, {}, {}, {}, {
         dark: string | number | boolean;
         light: string | number | boolean;

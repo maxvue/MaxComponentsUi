@@ -25,7 +25,7 @@
             </template>
             <template #value="value">
                 <div class="value-div" :style="{ color: options.find((option: any) => option[props.optionValue ] === value.value)?.color }">
-                    <Icon :icon="option_selected.icon ?? null" :size="option_selected.icon_size ?? undefined" :style="{ width: '30px' }" />
+                    <Icon :icon="option_selected.icon ?? null" :size="option_selected.icon_size ?? undefined" />
                     <span class="value-text">{{ option_selected[props.optionName] ?? option_selected.name ?? option_selected.label }}</span>
                 </div>
             </template>
@@ -47,7 +47,7 @@
             </template>
             <template #value="value">
                 <div class="value-div" :style="{ color: options.find((option: any) => option[props.optionValue] === value.value)?.color }">
-                    <Icon :icon="option_selected.icon ?? null" :size="option_selected.icon_size ?? undefined" :style="{ width: '30px' }" />
+                    <Icon :icon="option_selected.icon ?? null" :size="option_selected.icon_size ?? undefined" pr10/>
                     <span class="value-text">{{ option_selected[props.optionName] ?? option_selected.name ?? option_selected.label }}</span>
                 </div>
             </template>
@@ -253,7 +253,6 @@
         display: grid;
         grid-template-columns: auto 1fr;
         place-items: center;
-        gap: 10px;
 
         .value-text {
             color: var(--background-750);

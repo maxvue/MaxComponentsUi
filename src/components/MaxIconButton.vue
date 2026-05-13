@@ -59,7 +59,7 @@
 
 
     const emit = defineEmits<{
-        click: [value: boolean];
+        action: [value: boolean];
     }>();
 
     const onClick = () => {
@@ -70,7 +70,7 @@
             return;
         }
 
-        emit('click', true);
+        emit('action', true);
     };
 </script>
 

@@ -1,6 +1,6 @@
 <template>
     <InputBase v-bind="props" :error="error_msg" :caution="caution" :done="isDone">
-        <InputText ref="el" type="text" v-model="temp_value" v-maska="maskValue" autoClear="false" :style="`letter-spacing: 2px; padding-left: ${space_letters + 8}px`" @blur="checkDone()" />
+        <InputText ref="el" type="text" v-model="temp_value" v-maska="maskValue" autoClear="false" :style="`letter-spacing: 2.5px;`" @blur="checkDone()" />
     </InputBase>
 </template>
 

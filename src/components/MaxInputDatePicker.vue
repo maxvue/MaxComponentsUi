@@ -1,6 +1,6 @@
 <template>
-    <InputBase v-bind="props" class="input-base-date-picker" :error="errorMessage" :caution="isCaution" :done="isDone" :icon-right="icon ?? 'solar:calendar-line-duotone'" textCenter>
-        <DatePicker v-bind="attrs" dateFormat="dd/mm/yy" v-maska="maskValue" v-model="internalDate" @blur="validate" />
+    <InputBase v-bind="attrs" class="input-base-date-picker" :error="errorMessage" :caution="isCaution" :done="isDone" :icon="attrs.icon ?? 'solar:calendar-line-duotone'">
+        <DatePicker v-bind="attrs" :dateFormat="attrs.dateFormat ?? 'dd/mm/yy'" v-model="internalDate" @blur="validate" ref="element" />
     </InputBase>
 </template>
 
@@ -8,29 +8,17 @@
     import { ref, computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
     import DatePicker from 'primevue/datepicker';
-    import { vMaska } from 'maska/vue';
     import { useDateFormat } from '@maxvue/max-use';
 
     const attrs: any = useAttrs();
-    const props = withDefaults(
-        defineProps<{
-            icon?: string;
-            label?: string;
-            required?: boolean;
-            disabled?: boolean;
-            done?: boolean;
-            error?: string | boolean;
-            caution?: string | boolean;
-        }>(),
-        { required: false, done: undefined }
-    );
+
+    const element = ref();
+    const default_props = computed(() => { return { ...attrs, ...(element.value?.$params.props ?? {}) }; });
+
 
     const modelValue = defineModel<string | Date>({ default: '' });
     const internalDate = ref<Date | null>(null);
     const hasBeenTouched = ref(false);
-
-    // Máscara para o input de texto do DatePicker
-    const maskValue = '##/##/####';
 
     // Sincroniza modelValue -> internalDate
     watch(modelValue, (val) => {
@@ -63,18 +51,18 @@
     };
 
     const isDone = computed(() => {
-        if (props.done !== undefined) return props.done;
+        if (attrs.done !== undefined) return attrs.done;
         return internalDate.value !== null;
     });
 
     const isCaution = computed(() => {
-        if (props.caution !== undefined) return props.caution;
+        if (attrs.caution !== undefined) return attrs.caution;
         if (!hasBeenTouched.value && !modelValue.value) return false;
-        return props.required && !internalDate.value;
+        return attrs.required && !internalDate.value;
     });
 
     const errorMessage = computed(() => {
-        if (typeof props.error === 'string') return props.error;
+        if (typeof attrs.error === 'string') return attrs.error;
         if (isCaution.value) return (attrs.errMsg || attrs.error_message || 'Data é obrigatória');
 
         return null;

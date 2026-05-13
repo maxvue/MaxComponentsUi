@@ -9,8 +9,8 @@
                     </div>
                 </div>
                 <MaxGrid>
-                    <MaxButton s50 @click="confirm_store.rejectProps.action" :label="confirm_store.rejectProps.label" :icon="confirm_store.rejectProps.icon" />
-                    <MaxButton s50 @click="confirm_store.acceptProps.action" :label="confirm_store.acceptProps.label" :icon="confirm_store.acceptProps.icon"  />
+                    <MaxButton s50 @click="reject" :label="confirm_store.rejectProps.label" :icon="confirm_store.rejectProps.icon" />
+                    <MaxButton s50 @click="accept" :label="confirm_store.acceptProps.label" :icon="confirm_store.acceptProps.icon"  />
                 </MaxGrid>
             </div>
         </div>
@@ -32,6 +32,15 @@
 
     const el = useTemplateRef('el');
     const { width, height } = useElementSize(el as any);
+
+    const accept = () => {
+        confirm_store.acceptProps.action();
+        confirm_store.hide();
+    };
+    const reject = () => {
+        confirm_store.rejectProps.action();
+        confirm_store.hide();
+    };
 
 
     const position = computed(() => {

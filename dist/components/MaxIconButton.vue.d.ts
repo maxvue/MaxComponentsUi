@@ -35,9 +35,9 @@ type __VLS_Props = {
     plus?: boolean | string | number | undefined;
 };
 declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {
-    click: (value: boolean) => any;
+    action: (value: boolean) => any;
 }, string, import('vue').PublicProps, Readonly<__VLS_Props> & Readonly<{
-    onClick?: ((value: boolean) => any) | undefined;
+    onAction?: ((value: boolean) => any) | undefined;
 }>, {
     dark: string | number | boolean;
     light: string | number | boolean;
