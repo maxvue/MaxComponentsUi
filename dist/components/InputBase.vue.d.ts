@@ -1,3 +1,4 @@
+import { SelectGroupOptions } from '../types';
 /**
  * Propriedades base para componentes de entrada (inputs).
  * Este componente serve como wrapper para padronizar o layout, ícones e mensagens.
@@ -11,10 +12,6 @@ interface Props {
     class?: string;
     /** Ícone principal (ex: 'mdi:user') */
     icon?: string | undefined;
-    /** Ícone posicionado à esquerda */
-    iconLeft?: string | undefined;
-    /** Ícone posicionado à direita (ex: ícone de carregamento ou olho para senha) */
-    iconRight?: string | undefined;
     /** Alias para o ícone principal */
     i?: string | undefined;
     /** Estado desabilitado do componente */
@@ -32,9 +29,9 @@ interface Props {
     /** Define se o campo foi preenchido corretamente (exibe ícone de check) */
     done?: boolean | undefined;
     /** Mensagem de erro ou estado de erro (exibe em destaque) */
-    error?: string | boolean | undefined;
+    error?: string | boolean | null | undefined;
     /** Mensagem de atenção ou estado de alerta (exibe em laranja) */
-    caution?: string | boolean | undefined;
+    caution?: string | boolean | null | undefined;
     /** Indica se o preenchimento deste campo é obrigatório (exibe asterisco) */
     required?: boolean | undefined;
     /** Alinha o texto do input ao centro */
@@ -43,6 +40,28 @@ interface Props {
     dark?: boolean | string | number | undefined;
     /** Icone claro referente ao fundo */
     light?: boolean | string | number | undefined;
+    /** Default Value */
+    default?: string | number | boolean | null | undefined;
+    /** Lista de opções simples [{ name, value, icon, sub_label }] */
+    options?: any[];
+    /** Lista de opções agrupadas [{ label, items: [] }] */
+    groupOptions?: SelectGroupOptions;
+    /** Ícone posicionado à esquerda */
+    iconLeft?: string | undefined;
+    /** Ícone posicionado à direita */
+    iconRight?: string | undefined;
+    /** Valor selecionado */
+    loadOptions?: () => Promise<any[]>;
+    /** Flag que informa o campo do valor */
+    optionValue?: string;
+    /** Flag que informa o campo do label */
+    optionLabel?: string;
+    /** Flag que informa o campo do name */
+    optionName?: string;
+    /** Ícone escuro comparado ao fundo */
+    iconDark?: boolean | undefined | number | string;
+    /** Ícone claro comparado ao fundo */
+    iconLight?: boolean | undefined | number | string;
 }
 declare function __VLS_template(): {
     attrs: Partial<{}>;

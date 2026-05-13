@@ -1,10 +1,10 @@
 <template>
-    <InputBase class="select_input_div" >
+    <InputBase class="select_input_div" v-bind="props" >
         <!-- SELECT EM GRUPO -->
         <div v-if="attrs.placeholder !== undefined && (!temp_value || temp_value === '')" class="placeholder-select">
             {{ attrs.placeholder }}
         </div>
-        <Select v-if="props.groupOptions !== undefined" v-bind="attrs" v-model="temp_value" :loading="loading" @before-show="(before_show as any)" :options="resolvedOptions" optionGroupLabel="label" optionGroupChildren="items" :optionValue="'value'" :optionLabel="'label'" ref="elem" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false">
+        <Select v-if="props.groupOptions !== undefined" v-bind="attrs" v-model="temp_value" :loading="loading" @before-show="(before_show as any)" :options="options" optionGroupLabel="label" optionGroupChildren="items" :optionValue="'value'" :optionLabel="'label'" ref="elem" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false">
             <template #option="slotProps">
                 <slot name="option" :option="slotProps.option" :selected="slotProps.selected" :index="slotProps.index">
                     <div class="label_div">
@@ -23,16 +23,22 @@
                     </div>
                 </div>
             </template>
+            <template #value="value">
+                <div class="value-div" :style="{ color: options.find((option: any) => option[props.optionValue ] === value.value)?.color }">
+                    <Icon :icon="option_selected.icon ?? null" :size="option_selected.icon_size ?? undefined" :style="{ width: '30px' }" />
+                    <span class="value-text">{{ option_selected[props.optionName] ?? option_selected.name ?? option_selected.label }}</span>
+                </div>
+            </template>
         </Select>
         <!-- SELECT NORMAL -->
-        <Select v-else v-bind="attrs" v-model="temp_value" :loading="loading" @before-show="(before_show as any)" :options="resolvedOptions" :optionLabel="attrs.optionLabel ?? 'name'" :optionValue="attrs.optionValue ?? 'value'" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false">
+        <Select v-else v-bind="attrs" v-model="temp_value" :loading="loading" @before-show="(before_show as any)" :options="options" :optionLabel="attrs.optionLabel" :optionValue="props.optionValue" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false">
             <template #option="slotProps">
                 <slot name="option" :option="slotProps.option" :selected="slotProps.selected" :index="slotProps.index">
                     <div :class="`category ${slotProps.option.category}`" v-if="attrs.category === true">{{ slotProps.option.category === 'UTILITY' ? 'A' : '' }}{{ slotProps.option.category === 'MARKETING' ? 'B' : '' }}</div>
                     <div class="label_div">
-                        <Icon :icon="slotProps.option['icon']" v-if="slotProps.option['icon']" :size="slotProps.option['iconSize'] ?? '1'" :style="{ width: '30px' }" />
+                        <Icon :icon="slotProps.option['icon']" v-if="slotProps.option['icon']" :size="slotProps.option?.['iconSize'] ?? '1'" :style="{ width: '30px' }" />
                         <div class="labelz">
-                            <div v-html="slotProps.option[attrs.optionLabel ?? 'name'] ?? slotProps.option.label" :style="{ color: attrs.color }"></div>
+                            <div v-html="slotProps.option[attrs.optionLabel] ?? slotProps.option.label" :style="{ color: attrs.color }"></div>
                         </div>
                         <div class="subLabel" v-html="slotProps.option?.sub_label ?? slotProps.option?.sub ?? slotProps.option?.subLabel"></div>
                         <img v-if="slotProps.option['img']" :src="`/media/images/${slotProps.option['img']}`" alt="Image" class="img-label" />
@@ -40,9 +46,9 @@
                 </slot>
             </template>
             <template #value="value">
-                <div class="value-div" :style="{ color: resolvedOptions.find((option: any) => option[attrs.optionValue ?? 'value'] === value.value)?.color }">
-                    <Icon :icon="resolvedOptions.find((option: any) => option[attrs.optionValue ?? 'value'] === value.value)?.['icon']" v-if="resolvedOptions.find((option: any) => option[attrs.optionValue ?? 'value'] === value.value)?.['icon']" :size="resolvedOptions.find((option: any) => option[attrs.optionValue ?? 'value'] === value.value)?.['iconSize'] ?? '1'" :style="{ width: '30px' }" />
-                    <span class="value-text">{{ resolvedOptions.find((option: any) => option[attrs.optionValue ?? 'value'] === value.value)?.[attrs.optionLabel ?? 'name'] ?? resolvedOptions.find((option: any) => option[attrs.optionValue ?? 'value'] === value.value)?.label }}</span>
+                <div class="value-div" :style="{ color: options.find((option: any) => option[props.optionValue] === value.value)?.color }">
+                    <Icon :icon="option_selected.icon ?? null" :size="option_selected.icon_size ?? undefined" :style="{ width: '30px' }" />
+                    <span class="value-text">{{ option_selected[props.optionName] ?? option_selected.name ?? option_selected.label }}</span>
                 </div>
             </template>
         </Select>
@@ -66,14 +72,16 @@
         defineProps<{
             /** Valor selecionado */
             modelValue: any;
-            /** Lista de opções simples [{ name, value, icon, sub_label }] */
-            options?: any[];
-            /** Lista de opções agrupadas [{ label, items: [] }] */
-            groupOptions?: SelectGroupOptions;
             /** Função assíncrona para carregar opções ao abrir o select */
             loadOptions?: () => Promise<any[]>;
             /** Ícone principal (ex: 'mdi:user') */
             icon?: string | undefined;
+            /** Flag que informa o campo do valor */
+            optionValue?: string;
+            /** Flag que informa o campo do label */
+            optionLabel?: string;
+            /** Flag que informa o campo do name */
+            optionName?: string;
             /** Ícone posicionado à esquerda */
             iconLeft?: string | undefined;
             /** Ícone posicionado à direita */
@@ -96,8 +104,12 @@
             iconMessage?: string | undefined;
             /** Default Value */
             default?: string | number | boolean | null | undefined;
+            /** Lista de opções simples [{ name, value, icon, sub_label }] */
+            options?: any[];
+            /** Lista de opções agrupadas [{ label, items: [] }] */
+            groupOptions?: SelectGroupOptions;
         }>(),
-        { modelValue: null, done: undefined, error: undefined, caution: undefined, required: false, default: undefined }
+        { modelValue: null, done: undefined, optionValue: 'value', optionName: 'name', optionLabel: 'label', error: undefined, caution: undefined, required: false, default: undefined }
     );
 
     const emit = defineEmits(['update:modelValue', 'before-show']);
@@ -109,13 +121,25 @@
     const loading = ref(false);
     const optionsField: Ref<any[]> = ref([]);
 
-    const resolvedOptions = computed(() => {
+    const options = computed(() => {
         if (optionsField.value && optionsField.value.length > 0) return optionsField.value;
         if (props.options) return props.options;
         if (props.groupOptions) return props.groupOptions;
-        if (attrs.options) return attrs.options;
-        if (attrs.groupOptions) return attrs.groupOptions;
         return [];
+    });
+
+    const option_selected = computed(() => {
+        const valueKey = props.optionValue;
+
+        if (props.options) return props.options.find((opt: any) => opt[valueKey] === temp_value.value) ?? {};
+
+        const groups = Object.values(options.value) as any[];
+        for (const group of groups) {
+            const found = group.items.find((opt: any) => opt[valueKey] === temp_value.value);
+            if (found) return found;
+        }
+
+        return {};
     });
 
     async function before_show(event: any) {

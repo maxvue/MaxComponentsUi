@@ -32,6 +32,6 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
     dark: string | number | boolean;
     light: string | number | boolean;
     color: string;
-}, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {}, HTMLDivElement>;
+}, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {}, any>;
 export default _default;
 //# sourceMappingURL=MaxIcon.vue.d.ts.map

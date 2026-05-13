@@ -1,17 +1,16 @@
 <template>
-    <InputBase v-bind="props" :error="error_msg" :caution="caution" :done="isDone">
+    <InputBase v-bind="props" :error="error" :caution="caution" :done="isDone">
         <InputText number type="text" v-model="temp_value" v-maska="maskValue" autoClear="false" slotChar=" " fluid @blur="checkDone()" :placeholder="`00,000000`" />
     </InputBase>
 </template>
 
 <script setup lang="ts">
-    import { toNumber } from '@maxvue/max-use';
+    import { toNumber, isBlank } from '@maxvue/max-use';
     import type { Ref } from 'vue';
-    import { ref, computed, watch, useAttrs } from 'vue';
+    import { ref, computed, watch } from 'vue';
     import InputBase from './InputBase.vue';
     import InputText from 'primevue/inputtext';
     import { vMaska } from 'maska/vue';
-    const attrs: any = useAttrs();
 
     const props = withDefaults(
         defineProps<{
@@ -47,6 +46,7 @@
 
     const done = computed(() => {
         if (props.done !== undefined) return props.done;
+        if (isBlank(temp_value.value) && props.required) return true;
         return !(only_numbers.value <= -74 || only_numbers.value > -32.4 || only_numbers.value === 0 || isNaN(only_numbers.value));
     });
 
@@ -56,11 +56,10 @@
         return !done.value;
     });
 
-    const error_msg = computed(() => {
-        if (!caution.value) return null;
-        const attrs_error_message = attrs.errMsg ?? attrs.error_message ?? attrs.error_msg ?? null;
-        if (temp_value.value === '' && props.required) return attrs_error_message ?? 'Campo obrigatório';
-        return attrs_error_message ?? 'Longitude inválida (Brasil)';
+    const error = computed(() => {
+        if (isBlank(temp_value.value) && props.required) return 'Campo obrigatório';
+        if (!done.value) return 'Longitude inválida.';
+        return false;
     });
 
     const maskValue = computed(() => {

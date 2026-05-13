@@ -2,14 +2,16 @@ import { SelectGroupOptions } from '../types';
 type __VLS_Props = {
     /** Valor selecionado */
     modelValue: any;
-    /** Lista de opções simples [{ name, value, icon, sub_label }] */
-    options?: any[];
-    /** Lista de opções agrupadas [{ label, items: [] }] */
-    groupOptions?: SelectGroupOptions;
     /** Função assíncrona para carregar opções ao abrir o select */
     loadOptions?: () => Promise<any[]>;
     /** Ícone principal (ex: 'mdi:user') */
     icon?: string | undefined;
+    /** Flag que informa o campo do valor */
+    optionValue?: string;
+    /** Flag que informa o campo do label */
+    optionLabel?: string;
+    /** Flag que informa o campo do name */
+    optionName?: string;
     /** Ícone posicionado à esquerda */
     iconLeft?: string | undefined;
     /** Ícone posicionado à direita */
@@ -32,6 +34,10 @@ type __VLS_Props = {
     iconMessage?: string | undefined;
     /** Default Value */
     default?: string | number | boolean | null | undefined;
+    /** Lista de opções simples [{ name, value, icon, sub_label }] */
+    options?: any[];
+    /** Lista de opções agrupadas [{ label, items: [] }] */
+    groupOptions?: SelectGroupOptions;
 };
 declare function __VLS_template(): {
     attrs: Partial<{}>;
@@ -70,6 +76,9 @@ declare const __VLS_component: import('vue').DefineComponent<__VLS_Props, {}, {}
     error: string | false | null;
     caution: string | false | null;
     required: boolean;
+    optionValue: string;
+    optionLabel: string;
+    optionName: string;
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {
     elem: ({
         $props: import('primevue/select').SelectProps & import('vue').VNodeProps & import('vue').AllowedComponentProps & import('vue').ComponentCustomProps;
