@@ -22,7 +22,7 @@
             error?: string | boolean;
             caution?: string | boolean;
         }>(),
-        { required: false }
+        { required: false, done: undefined }
     );
 
     const modelValue = defineModel<string | Date>({ default: '' });

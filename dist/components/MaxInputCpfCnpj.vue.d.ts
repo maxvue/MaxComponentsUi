@@ -1,6 +1,6 @@
 type __VLS_Props = {
     /** Valor do documento (apenas números) */
-    modelValue: string;
+    modelValue: string | null;
     /** Força a máscara e validação de CPF */
     cpf?: boolean;
     /** Força a máscara e validação de CNPJ */
@@ -40,7 +40,7 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
     onComplete?: ((...args: any[]) => any) | undefined;
 }>, {
     done: boolean;
-    modelValue: string;
+    modelValue: string | null;
     caution: string | boolean;
     required: boolean;
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {

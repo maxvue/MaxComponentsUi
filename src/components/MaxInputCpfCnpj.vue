@@ -25,7 +25,7 @@
     const props = withDefaults(
         defineProps<{
             /** Valor do documento (apenas números) */
-            modelValue: string;
+            modelValue: string | null;
             /** Força a máscara e validação de CPF */
             cpf?: boolean;
             /** Força a máscara e validação de CNPJ */
@@ -87,7 +87,7 @@
     }, { debounce: 500 });
 
     watch(() => props.modelValue,() => {
-        if (props.modelValue !== temp_value.value) temp_value.value = onlyNumbers(props.modelValue);
+        if (props.modelValue !== temp_value.value) temp_value.value = onlyNumbers(props.modelValue ?? '');
     });
 
     // CALCULA A MÁSCARA DO INPUT

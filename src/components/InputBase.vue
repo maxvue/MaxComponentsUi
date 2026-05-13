@@ -19,7 +19,10 @@
         </Message>
         <div v-else class="message-spacer"></div>
         <div class="is-done" v-if="done">
-            <MaxIcon icon="lets-icons:check-fill" :size="0.9" :light="light" :dark="dark"  />
+            <MaxIcon icon="lets-icons:check-fill" :size="0.8" :light="light" :dark="dark" color-green-700 />
+        </div>
+        <div class="is-caution" v-else-if="caution && !done">
+            <MaxIcon icon="humbleicons:exclamation" :size="0.8" :light="light" :dark="dark" color-red-700 />
         </div>
         <div class="required" v-else-if="required">*</div>
     </FloatLabel>
@@ -124,16 +127,22 @@
 
         .required {
             position: absolute;
-            top: 3px;
-            right: 5px;
+            top: 1px;
+            right: 3px;
             color: darkred;
         }
 
         .is-done {
             position: absolute;
-            top: 3px;
-            right: 5px;
-            color: #16a34a;
+            top: 2px;
+            right: 3px;
+            color: #16a34a !important;
+        }
+
+        .is-caution {
+            position: absolute;
+            top: 2px;
+            right: 3px;
         }
 
         &.text-center {

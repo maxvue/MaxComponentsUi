@@ -15,6 +15,7 @@ declare const _default: import('vue').DefineComponent<__VLS_PublicProps, {}, {},
 }, string, import('vue').PublicProps, Readonly<__VLS_PublicProps> & Readonly<{
     "onUpdate:modelValue"?: ((value: string | Date) => any) | undefined;
 }>, {
+    done: boolean;
     required: boolean;
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {}, any>;
 export default _default;
