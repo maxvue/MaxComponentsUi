@@ -27,6 +27,12 @@ type __VLS_Props = {
     caution?: string | boolean | undefined;
     /** Define se o campo é obrigatório */
     required?: boolean;
+    /** Prefixo do campo */
+    prefix?: string | undefined;
+    /** Sufixo do campo */
+    suffix?: string | undefined;
+    /** Placeholder do campo */
+    placeholder?: string | undefined;
 };
 declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {
     "update:modelValue": (...args: any[]) => void;
@@ -37,6 +43,9 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
     modelValue: any;
     caution: string | boolean;
     required: boolean;
+    placeholder: string;
+    prefix: string;
+    suffix: string;
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {}, any>;
 export default _default;
 //# sourceMappingURL=MaxInputNumber.vue.d.ts.map

@@ -25,9 +25,9 @@ type __VLS_Props = {
     /** Estado de conclusão/validação */
     done?: boolean | undefined;
     /** Mensagem ou estado de erro */
-    error?: string | null | false | undefined;
+    error?: string | null | boolean | undefined;
     /** Mensagem ou estado de atenção */
-    caution?: string | null | false | undefined;
+    caution?: string | null | boolean | undefined;
     /** Indica se o campo é obrigatório */
     required?: boolean | undefined;
     /** Ícone da mensagem de feedback */
@@ -73,8 +73,8 @@ declare const __VLS_component: import('vue').DefineComponent<__VLS_Props, {}, {}
     default: string | number | boolean | null;
     done: boolean;
     modelValue: any;
-    error: string | false | null;
-    caution: string | false | null;
+    error: string | boolean | null;
+    caution: string | boolean | null;
     required: boolean;
     optionValue: string;
     optionLabel: string;

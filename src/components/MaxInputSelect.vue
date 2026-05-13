@@ -95,9 +95,9 @@
             /** Estado de conclusão/validação */
             done?: boolean | undefined;
             /** Mensagem ou estado de erro */
-            error?: string | null | false | undefined;
+            error?: string | null | boolean | undefined;
             /** Mensagem ou estado de atenção */
-            caution?: string | null | false | undefined;
+            caution?: string | null | boolean | undefined;
             /** Indica se o campo é obrigatório */
             required?: boolean | undefined;
             /** Ícone da mensagem de feedback */
@@ -161,12 +161,6 @@
         }
 
     }, { deep: true, debounce: 500 });
-
-    const message = computed(() => {
-        if (props.error) return props.error;
-        if (props.caution) return props.caution;
-        return '';
-    });
 </script>
 
 <style lang="scss">

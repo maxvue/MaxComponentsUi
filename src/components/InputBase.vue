@@ -24,10 +24,10 @@
         <div class="is-done" v-if="done">
             <MaxIcon icon="lets-icons:check-fill" :size="0.8" :light="light" :dark="dark" color-green-700 />
         </div>
-        <div class="is-caution" v-else-if="caution && !done">
+        <div class="is-caution" v-else-if="caution">
             <MaxIcon icon="humbleicons:exclamation" :size="0.8" :light="light" :dark="dark" color-orange-600 />
         </div>
-        <div class="is-caution" v-else-if="error && !done">
+        <div class="is-caution" v-else-if="error">
             <MaxIcon icon="humbleicons:exclamation" :size="0.8" :light="light" :dark="dark" color-red-700 />
         </div>
         <div class="required" v-else-if="required">*</div>
@@ -233,11 +233,20 @@
 
     &[input-click] {
         grid-template-rows: 20px;
+        height: 20px;
+        padding: 0 4px !important;
 
-        div, span, input, select, .p-select-label {
+        div, span, input, select, .p-select-label, .value-div {
             max-height: 20px;
             border: none !important;
-            padding: 0 !important;;
+            border-color: transparent !important;
+            padding: 0 !important;
+            outline: none !important;
+            outline-color: transparent !important;
+            box-shadow: none !important;
+            font-size: 0.9rem;
+            color: rgb(66 54 54) !important;
+            font-weight: 450;
         }
 
         .message-spacer {
@@ -319,5 +328,9 @@
         background: var(--background-75) !important;
         color: var(--background-400) !important;
     }
+}
+
+.p-disabled {
+    background-color: unset !important;
 }
 </style>

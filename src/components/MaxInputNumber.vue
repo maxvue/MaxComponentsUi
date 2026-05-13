@@ -1,6 +1,6 @@
 <template>
     <InputBase v-bind="props" :value="temp_value" :done="isDone" :error="error_msg" :caution="caution">
-        <InputNumber type="text" v-model="temp_value" fluid @blur="isDone = testIsDone()" />
+        <InputNumber v-bind="props" v-model="temp_value" fluid @blur="isDone = testIsDone()" />
     </InputBase>
 </template>
 
@@ -47,8 +47,14 @@
             caution?: string | boolean | undefined;
             /** Define se o campo é obrigatório */
             required?: boolean;
+            /** Prefixo do campo */
+            prefix?: string | undefined;
+            /** Sufixo do campo */
+            suffix?: string | undefined;
+            /** Placeholder do campo */
+            placeholder?: string | undefined;
         }>(),
-        { modelValue: '', done: undefined, required: false, caution: undefined }
+        { modelValue: '', done: undefined, required: false, caution: undefined, prefix: undefined, suffix: undefined, placeholder: undefined }
     );
 
     const temp_value = ref(props.modelValue);
