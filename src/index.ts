@@ -73,6 +73,7 @@ export { default as MaxLink } from './components/MaxLink.vue';
 export { default as MaxLogo } from './components/MaxLogo.vue';
 export { default as MaxMaps } from './components/MaxMaps.vue';
 export { default as MaxPdfView } from './components/MaxPdfView.vue';
+export { default as MaxTable } from './components/MaxTable.vue';
 
 // Utils / Others
 export { default as MaxMsgLabels } from './components/MaxMsgLabels.vue';
