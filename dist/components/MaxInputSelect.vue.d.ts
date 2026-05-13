@@ -1,10 +1,11 @@
+import { SelectGroupOptions } from '../types';
 type __VLS_Props = {
     /** Valor selecionado */
     modelValue: any;
     /** Lista de opções simples [{ name, value, icon, sub_label }] */
-    options: any[];
+    options?: any[];
     /** Lista de opções agrupadas [{ label, items: [] }] */
-    groupOptions?: any[];
+    groupOptions?: SelectGroupOptions;
     /** Função assíncrona para carregar opções ao abrir o select */
     loadOptions?: () => Promise<any[]>;
     /** Ícone principal (ex: 'mdi:user') */

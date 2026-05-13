@@ -4,7 +4,7 @@
         <div v-if="attrs.placeholder !== undefined && (!temp_value || temp_value === '')" class="placeholder-select">
             {{ attrs.placeholder }}
         </div>
-        <Select v-if="attrs.groupOptions || (resolvedOptions.length > 0 && resolvedOptions[0]?.items)" v-bind="attrs" v-model="temp_value" :loading="loading" @before-show="(before_show as any)" :options="resolvedOptions" optionGroupLabel="label" optionGroupChildren="items" :optionValue="attrs.optionValue ?? 'value'" ref="elem" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false">
+        <Select v-if="attrs.groupOptions !== undefined" v-bind="attrs" v-model="temp_value" :loading="loading" @before-show="(before_show as any)" :options="resolvedOptions" optionGroupLabel="label" optionGroupChildren="items" :optionValue="attrs.optionValue ?? 'value'" ref="elem" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false">
             <template #option="slotProps">
                 <slot name="option" :option="slotProps.option" :selected="slotProps.selected" :index="slotProps.index">
                     <div class="label_div">
@@ -57,6 +57,7 @@
     import { ref, computed, watch, useAttrs, Ref } from 'vue';
     import InputBase from './InputBase.vue';
     import Select from 'primevue/select';
+    import { SelectGroupOptions } from '../types';
 
     const attrs: any = useAttrs();
 
@@ -65,9 +66,9 @@
             /** Valor selecionado */
             modelValue: any;
             /** Lista de opções simples [{ name, value, icon, sub_label }] */
-            options: any[];
+            options?: any[];
             /** Lista de opções agrupadas [{ label, items: [] }] */
-            groupOptions?: any[];
+            groupOptions?: SelectGroupOptions;
             /** Função assíncrona para carregar opções ao abrir o select */
             loadOptions?: () => Promise<any[]>;
             /** Ícone principal (ex: 'mdi:user') */

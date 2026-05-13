@@ -173,4 +173,13 @@
             width: 100% !important;
         }
     }
+
+    .p-inputtext {
+        height: 36px;
+
+        &[disabled] {
+            background: var(--background-75) !important;
+            color: var(--background-400) !important;
+        }
+    }
 </style>

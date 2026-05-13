@@ -27,16 +27,9 @@
     const temp_value = ref(props.modelValue);
     const emit = defineEmits(['update:modelValue']);
 
-    watch(temp_value, () => {
-        emit('update:modelValue', temp_value.value);
-    });
+    watch(temp_value, () => emit('update:modelValue', temp_value.value));
 
-    watch(
-        () => props.modelValue,
-        () => {
-            temp_value.value = props.modelValue;
-        }
-    );
+    watch(() => props.modelValue,() => temp_value.value = props.modelValue);
 
     const focused: Ref<number> = ref(0);
     const blured: Ref<number> = ref(0);

@@ -35,3 +35,30 @@ export interface ComponentEmits {
     /** Emitido quando o componente é clicado */
     click: [event: MouseEvent];
 }
+
+export interface SelectItem {
+    value: string | number | null | boolean;
+    name?: string | null;
+    label?: string | null;
+    subLabel?: string | null;
+    icon?: string | null;
+    disabled?: boolean;
+    selected?: boolean;
+    color?: string | null;
+    size?: string | null;
+    text_align?: 'left' | 'center' | 'right';
+    ddi?: string | number | null;
+    sigla?: string | null;
+    min?: string | number | null;
+    max?: string | number | null;
+    fases?: string | number | null;
+}
+
+export interface SelectGroupOptionsElement {
+    label: string;
+    items: SelectItem[];
+}[];
+
+export interface SelectGroupOptions extends Array<SelectGroupOptionsElement> {}
+
+export interface SelectOptions extends Array<SelectItem> {}

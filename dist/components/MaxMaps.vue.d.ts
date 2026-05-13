@@ -1,5 +1,20 @@
 import { Ref } from 'vue';
-declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {}, string, import('vue').PublicProps, Readonly<{}> & Readonly<{}>, {}, {}, {}, {}, string, import('vue').ComponentProvideOptions, true, {
+type __VLS_Props = {
+    modelValue: {
+        latitude: number;
+        longitude: number;
+    } | null;
+};
+declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {
+    "update:modelValue": (...args: any[]) => void;
+}, string, import('vue').PublicProps, Readonly<__VLS_Props> & Readonly<{
+    "onUpdate:modelValue"?: ((...args: any[]) => any) | undefined;
+}>, {
+    modelValue: {
+        latitude: number;
+        longitude: number;
+    } | null;
+}, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {
     mapDiv: HTMLDivElement;
     mapRef: import('vue').CreateComponentPublicInstanceWithMixins<Readonly<import('vue').ExtractPropTypes<{
         apiPromise: {

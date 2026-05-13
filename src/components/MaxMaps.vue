@@ -14,7 +14,20 @@
     import { ref, watch, onMounted } from 'vue';
     import { GoogleMap, AdvancedMarker } from 'vue3-google-map';
 
-    const coordinates = ref({ latitude: 0, longitude: 0 });
+    const props = withDefaults(defineProps<{ modelValue: { latitude: number; longitude: number } | null }>(),{ modelValue: null });
+
+    const coordinates = ref({ latitude: Number(props.modelValue?.latitude ?? 0),longitude: Number(props.modelValue?.longitude ?? 0) });
+
+    const emit = defineEmits(['update:modelValue']);
+
+    watch(() => [coordinates.value.latitude, coordinates.value.longitude], () => emit('update:modelValue', coordinates.value));
+
+    watch(() => props.modelValue,() => {
+        const is_valid = props.modelValue?.latitude && props.modelValue?.longitude;
+        const is_different = coordinates.value.latitude !== Number(props.modelValue?.latitude) || coordinates.value.longitude !== Number(props.modelValue?.longitude);
+
+        if (is_valid && is_different) coordinates.value = { latitude: Number(props.modelValue?.latitude), longitude: Number(props.modelValue?.longitude) };
+    });
 
     const center: Ref = ref({ lat: coordinates.value.latitude, lng: coordinates.value.longitude });
     const zoom: Ref = ref(20);
@@ -33,24 +46,20 @@
 
 
     function onDrag(event: any) {
-        coordinates.value.latitude = parseFloat(event.latLng.lat().toFixed(7));
-        coordinates.value.longitude = parseFloat(event.latLng.lng().toFixed(7));
+        coordinates.value.latitude = Number(event.latLng.lat().toFixed(7));
+        coordinates.value.longitude = Number(event.latLng.lng().toFixed(7));
     }
 
-    watch(
-        () => [coordinates.value.latitude, coordinates.value.longitude],
-        () => {
-            center.value = { lat: toNumber(coordinates.value.latitude), lng: toNumber(coordinates.value.longitude) };
-            marker_options.value = {
-                position: center.value,
-                gmpDraggable: true,
-                click: function (e: any) {
-                    console.log('click', e);
-                }
-            };
-        },
-        { immediate: true }
-    );
+    watch( () => [coordinates.value.latitude, coordinates.value.longitude], () => {
+        center.value = { lat: toNumber(coordinates.value.latitude), lng: toNumber(coordinates.value.longitude) };
+        marker_options.value = {
+            position: center.value,
+            gmpDraggable: true,
+            click: function (e: any) {
+                console.log('click', e);
+            }
+        };
+    },{ immediate: true });
 
     const isMounted = ref<boolean>(false);
     onMounted(() => {
@@ -68,12 +77,11 @@
         grid-column: span 24 !important;
         border-radius: 1rem;
         position: relative;
-        padding-top: 10px;
+        overflow: hidden;
 
         .mapa {
             height: 100%;
             width: 100%;
-            padding: 0.1rem;
 
             .map {
                 height: calc(100%);

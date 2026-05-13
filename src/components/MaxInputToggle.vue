@@ -11,7 +11,7 @@
                     {{ falseLabel ?? '' }}
                 </div>
                 <div class="input-toggle-field-input">
-                    <ToggleSwitch v-bind="attrs" v-model="modelvalue" @change="update_value" />
+                    <ToggleSwitch v-model="modelvalue" @change="update_value" />
                 </div>
                 <div :class="`input-toggle-field-label ${trueValue === modelvalue ? 'active' : ''}`" v-if="trueLabel">
                     {{ trueLabel ?? '' }}
@@ -66,7 +66,7 @@
     .input-toggle-field-main-div {
         display: grid;
         place-items: start center;
-        height: 39px;
+        height: 36px;
         position: relative;
         background-color: var(--background-0);
 
@@ -103,8 +103,8 @@
                 &::after {
                     content: '';
                     position: absolute;
-                    width: calc(100% + 16px);
-                    left: -8px;
+                    width: calc(100% + 12px);
+                    left: -6px;
                     top: calc(50% + 1px);
                     transform: translateY(-50%);
                     height: 3px;
@@ -120,7 +120,7 @@
             place-items: start center;
             padding-top: 7px;
             height: 100%;
-            max-height: 39px;
+            max-height: 36px;
 
             &.labeled {
                 padding-top: 10px;
