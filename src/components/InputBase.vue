@@ -1,5 +1,5 @@
 <template>
-    <FloatLabel variant="on" class="max-input" :class="{ float: attrs.float !== undefined, done: done, caution: caution || done === false, 'text-center': textCenter }">
+    <FloatLabel variant="on" class="max-input" :class="`${props.float !== undefined ? 'float' : ''} ${done ? 'done' : ''} ${caution ? 'caution' : ''} ${textCenter ? 'text-center' : ''} ${props.class ? props.class : ''}`">
         <IconField>
             <InputIcon v-if="icon ?? iconLeft ?? i">
                 <MaxIcon :icon="icon ?? iconLeft ?? i" :size="1.2" :light="light" :dark="dark" />
@@ -48,6 +48,8 @@
         value?: any;
         /** Valor do input para v-model no Vue 3 */
         modelValue?: any;
+        /** Lista de opções simples [{ name, value, icon, sub_label }] */
+        class?: string;
         /** Ícone principal (ex: 'mdi:user') */
         icon?: string | undefined;
         /** Ícone posicionado à esquerda */

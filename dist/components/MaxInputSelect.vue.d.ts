@@ -23,13 +23,15 @@ type __VLS_Props = {
     /** Estado de conclusão/validação */
     done?: boolean | undefined;
     /** Mensagem ou estado de erro */
-    error?: string | boolean | undefined;
+    error?: string | null | false | undefined;
     /** Mensagem ou estado de atenção */
-    caution?: string | boolean | undefined;
+    caution?: string | null | false | undefined;
     /** Indica se o campo é obrigatório */
     required?: boolean | undefined;
     /** Ícone da mensagem de feedback */
     iconMessage?: string | undefined;
+    /** Default Value */
+    default?: string | number | boolean | null | undefined;
 };
 declare function __VLS_template(): {
     attrs: Partial<{}>;
@@ -62,9 +64,11 @@ declare const __VLS_component: import('vue').DefineComponent<__VLS_Props, {}, {}
     "onUpdate:modelValue"?: ((...args: any[]) => any) | undefined;
     "onBefore-show"?: ((...args: any[]) => any) | undefined;
 }>, {
+    default: string | number | boolean | null;
     done: boolean;
     modelValue: any;
-    caution: string | boolean;
+    error: string | false | null;
+    caution: string | false | null;
     required: boolean;
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {
     elem: ({

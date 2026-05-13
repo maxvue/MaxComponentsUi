@@ -1,10 +1,10 @@
 <template>
-    <InputBase v-bind="props" class="select_input_div" :options="resolvedOptions">
+    <InputBase class="select_input_div" >
         <!-- SELECT EM GRUPO -->
         <div v-if="attrs.placeholder !== undefined && (!temp_value || temp_value === '')" class="placeholder-select">
             {{ attrs.placeholder }}
         </div>
-        <Select v-if="attrs.groupOptions !== undefined" v-bind="attrs" v-model="temp_value" :loading="loading" @before-show="(before_show as any)" :options="resolvedOptions" optionGroupLabel="label" optionGroupChildren="items" :optionValue="attrs.optionValue ?? 'value'" ref="elem" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false">
+        <Select v-if="props.groupOptions !== undefined" v-bind="attrs" v-model="temp_value" :loading="loading" @before-show="(before_show as any)" :options="resolvedOptions" optionGroupLabel="label" optionGroupChildren="items" :optionValue="'value'" :optionLabel="'label'" ref="elem" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false">
             <template #option="slotProps">
                 <slot name="option" :option="slotProps.option" :selected="slotProps.selected" :index="slotProps.index">
                     <div class="label_div">
@@ -58,6 +58,7 @@
     import InputBase from './InputBase.vue';
     import Select from 'primevue/select';
     import { SelectGroupOptions } from '../types';
+    import { isBlank, watchDebounced } from '@maxvue/max-use';
 
     const attrs: any = useAttrs();
 
@@ -86,15 +87,17 @@
             /** Estado de conclusão/validação */
             done?: boolean | undefined;
             /** Mensagem ou estado de erro */
-            error?: string | boolean | undefined;
+            error?: string | null | false | undefined;
             /** Mensagem ou estado de atenção */
-            caution?: string | boolean | undefined;
+            caution?: string | null | false | undefined;
             /** Indica se o campo é obrigatório */
             required?: boolean | undefined;
             /** Ícone da mensagem de feedback */
             iconMessage?: string | undefined;
+            /** Default Value */
+            default?: string | number | boolean | null | undefined;
         }>(),
-        { modelValue: null, done: undefined, caution: undefined, required: false }
+        { modelValue: null, done: undefined, error: undefined, caution: undefined, required: false, default: undefined }
     );
 
     const emit = defineEmits(['update:modelValue', 'before-show']);
@@ -126,6 +129,20 @@
             }
         }
     }
+
+    watchDebounced(() => props.modelValue, () => {
+        if (isBlank(props.modelValue) && props.default !== undefined){
+            console.log(temp_value.value, props.modelValue);
+            temp_value.value = props.default;
+        }
+
+    }, { deep: true, debounce: 500 });
+
+    const message = computed(() => {
+        if (props.error) return props.error;
+        if (props.caution) return props.caution;
+        return '';
+    });
 </script>
 
 <style lang="scss">

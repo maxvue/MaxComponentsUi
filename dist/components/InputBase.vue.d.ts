@@ -7,6 +7,8 @@ interface Props {
     value?: any;
     /** Valor do input para v-model no Vue 3 */
     modelValue?: any;
+    /** Lista de opções simples [{ name, value, icon, sub_label }] */
+    class?: string;
     /** Ícone principal (ex: 'mdi:user') */
     icon?: string | undefined;
     /** Ícone posicionado à esquerda */
