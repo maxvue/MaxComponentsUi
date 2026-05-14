@@ -7,13 +7,13 @@
             <MaxButton :label="props.label" :icon="props.i ?? props.icon" :size-icon="props.size" @click.stop="toggle" />
         </slot>
         <div style="position: fixed; z-index: 999;">
-            <MaxAnimateFade :show="popover_store.show_id === id" :duration="0.3">
-                <div class="background-popover" @click.stop="popover_store.hide" v-if="popover_store.show_id === id" :style="{opacity: style.opacity}">
-                    <div class="max-popover-dialog" ref="el" :style="{top: style.top + 'px', left: style.left + 'px'}"  :class="[style.isTop ? 'is-top' : 'is-bottom', style.isLeft ? 'is-left' : 'is-right']" @click.stop="() => {}">
+            <MaxAnimateFade :show="modal_store.show_id === id" :duration="0.3">
+                <div class="background-modal" @click.stop="modal_store.hide" v-if="modal_store.show_id === id" :style="{opacity: style.opacity}">
+                    <div class="max-modal" ref="el" :style="{top: style.top + 'px', left: style.left + 'px'}"  :class="[style.isTop ? 'is-top' : 'is-bottom', style.isLeft ? 'is-left' : 'is-right']" @click.stop="() => {}">
                         <slot name="header">
-                            <MaxGrid s100 class="max-popover-header" pt0 mt0 mb-15>
+                            <MaxGrid s100 class="max-modal-header" pt0 mt0 mb-15>
                                 <MaxTitle1 s90  :h1="props.title ?? 'Titulo'" :h2="props.subtitle ?? 'Sub Titulo'" p0 m0 />
-                                <MaxIconButton s10 i="iconoir:xmark" size="1.3" @click.stop="popover_store.hide" />
+                                <MaxIconButton s10 i="iconoir:xmark" size="1.3" @click.stop="modal_store.hide" />
                             </MaxGrid>
                         </slot>
                         <div class="max-popover-content">
@@ -28,17 +28,15 @@
 </template>
 
 <script setup lang="ts">
-    import { usePopoverStore } from '../stores/usePopover.Store';
-    import { useElementSize, useWindowSize, Random, useElementBounding, useDefaultReset, watchDebounced } from '@maxvue/max-use';
+    import { useModalStore } from '../stores/useModal.Store';
+    import { useElementSize, useWindowSize, Random, useDefaultReset } from '@maxvue/max-use';
     import { useTemplateRef, ref } from 'vue';
     import MaxIconButton from './MaxIconButton.vue';
     import MaxButton from './MaxButton.vue';
     import MaxTitle1 from './MaxTitle1.vue';
     import MaxGrid from './MaxGrid.vue';
     import MaxAnimateFade from './MaxAnimateFade.vue';
-    import { useAttrs } from 'vue';
 
-    const attrs = useAttrs();
 
     const props = withDefaults(defineProps<{
         /** Nome do ícone (ex: 'mdi:home') */
@@ -84,12 +82,11 @@
         message: 'Deseja continuar?'
     });
 
-    const popover_store = usePopoverStore();
+    const modal_store = useModalStore();
 
     const id = ref(Random());
 
     const el = useTemplateRef('el');
-    const btn_el = useTemplateRef('btn_el');
 
     const style = useDefaultReset({
         top: 0,
@@ -105,42 +102,20 @@
         if (style.value.opacity !== 0) style.reset();
 
 
-        popover_store.toggle(id.value);
+        modal_store.toggle(id.value);
 
         setTimeout(() => {
-            const { x, y, width: width_btn, height: height_btn } = useElementBounding(btn_el as any);
             const { width: width_el, height: height_el } = useElementSize(el as any);
             const { width: window_width, height: window_height } = useWindowSize();
             const data = {
-                top: y.value + height_btn.value + 15,
-                left: x.value + (width_btn.value / 2) - (width_el.value / 2),
+                top: (window_height.value - height_el.value) / 2,
+                left: (window_width.value - width_el.value) / 2,
                 isTop: false,
                 isLeft: false,
                 opacity: 0
             };
 
-            console.log({
-                x: x.value,
-                y: y.value,
-                width_el: width_el.value,
-                window_width: window_width.value,
-                width_btn: width_btn.value,
-                height_btn: height_btn.value
-            });
-
-            if (data.top + height_el.value + 15 > window_height.value) {
-                data.top = y.value - height_btn.value - height_el.value;
-                data.isTop = true;
-            }
-
-            if (data.left + width_el.value + 15 > window_width.value) {
-                data.left = x.value + (width_btn.value) - (width_el.value) + 10;
-                data.isLeft = true;
-            }
-
             style.value = data;
-
-
             style.value.opacity = 1;
         }, 1);
     };
@@ -149,7 +124,7 @@
 </script>
 
 <style lang="scss">
-.background-popover {
+.background-modal {
     background-color: rgb(0 0 0 / 10%);
     height: 100vh;
     width: 100vw;
@@ -160,7 +135,7 @@
     transition: opacity 0.3s ease;
 }
 
-.max-popover-dialog {
+.max-modal {
     position: fixed;
     min-width: 300px;
     min-height: 60px;
@@ -205,7 +180,7 @@
         left: 15px;
     }
 
-    .max-popover-header {
+    .max-modal-header {
         width: 100%;
     }
 }

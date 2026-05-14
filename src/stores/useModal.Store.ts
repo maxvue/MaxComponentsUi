@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import type { Ref } from 'vue';
 import { ref } from 'vue';
 
-export const usePopoverStore = defineStore('popover', () => {
+export const useModalStore = defineStore('modal', () => {
 
     const show_id: Ref<string | null> = ref(null);
 

@@ -1,5 +1,5 @@
 import { Ref } from 'vue';
-export declare const usePopoverStore: import('pinia').StoreDefinition<"popover", Pick<{
+export declare const useModalStore: import('pinia').StoreDefinition<"modal", Pick<{
     show_id: Ref<string | null, string | null>;
     hide: () => void;
     show: (id: string) => void;
@@ -15,4 +15,4 @@ export declare const usePopoverStore: import('pinia').StoreDefinition<"popover",
     show: (id: string) => void;
     toggle: (id: string) => void;
 }, "show" | "hide" | "toggle">>;
-//# sourceMappingURL=usePopover.Store.d.ts.map
+//# sourceMappingURL=useModal.Store.d.ts.map

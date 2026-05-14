@@ -67,4 +67,4 @@ type __VLS_WithTemplateSlots<T, S> = T & {
         $slots: S;
     };
 };
-//# sourceMappingURL=MaxPopover.vue.d.ts.map
+//# sourceMappingURL=MaxModal.vue.d.ts.map
