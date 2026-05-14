@@ -234,23 +234,56 @@
     &[input-click] {
         grid-template-rows: 20px;
         height: 20px;
-        padding: 0 4px !important;
 
         div, span, input, select, .p-select-label, .value-div {
+            width: 100%;
             max-height: 20px;
             border: none !important;
             border-color: transparent !important;
-            padding: 0 !important;
             outline: none !important;
             outline-color: transparent !important;
             box-shadow: none !important;
             font-size: 0.9rem;
             color: rgb(66 54 54);
             font-weight: 450;
+            padding: 0 2px !important;
         }
 
         .message-spacer {
             display: none !important;
+        }
+    }
+
+    &[no-message], &[no-messages] {
+        grid-template-rows: 1fr;
+
+        .message-spacer {
+            display: none !important;
+        }
+    }
+
+    &[slim] {
+        grid-template-rows: 24px;
+        height: 22px;
+
+        div, span, input, select, .p-select-label, .value-div, .value-text {
+            height: 21px !important;
+            max-height: 21px !important;
+            font-size: 0.8rem;
+
+            :not(.p-inputnumber) {
+                padding: 0 4px !important;
+            }
+        }
+
+        .message-spacer {
+            display: none !important;
+        }
+
+        .placeholder-select {
+            left: 5px;
+            top: 2px;
+            z-index: 3;
         }
     }
 

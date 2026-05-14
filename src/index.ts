@@ -84,6 +84,7 @@ export { default as TransitionFade } from './components/TransitionFade.vue';
 export { default as MaxAnimateFade } from './components/MaxAnimateFade.vue';
 export { default as MaxUserAvatar } from './components/MaxUserAvatar.vue';
 export { default as MaxPopoverConfirm } from './components/MaxPopoverConfirm.vue';
+export { default as MaxPopover } from './components/MaxPopover.vue';
 
 import Tooltip from 'primevue/tooltip';
 
