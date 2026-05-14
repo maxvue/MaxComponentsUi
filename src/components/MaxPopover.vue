@@ -1,61 +1,44 @@
 <template>
     <TransitionFade>
-        <div class="background-popover" @click.stop="confirm_store.hide" v-if="confirm_store.show">
+        <div class="background-popover" @click.stop="popover_store.hide" v-if="popover_store.show">
             <div class="max-icon-confirm-dialog" ref="el" :style="{top: position.top + 'px', left: position.left + 'px'}"  :class="[position.isTop ? 'is-top' : 'is-bottom', position.isLeft ? 'is-left' : 'is-right']">
                 <div pw4 pt-4 full text-center color-background-750 class="popover-confirm-content" >
-                    <MaxIcon i="mingcute:question-fill" size="1.2" color-red-600 />
                     <div>
-                        {{confirm_store.message}}
+                        <slot></slot>
                     </div>
                 </div>
-                <MaxGrid>
-                    <MaxButton s50 @click="reject" :label="confirm_store.rejectProps.label" :icon="confirm_store.rejectProps.icon" />
-                    <MaxButton s50 @click="accept" :label="confirm_store.acceptProps.label" :icon="confirm_store.acceptProps.icon"  />
-                </MaxGrid>
             </div>
         </div>
     </TransitionFade>
 </template>
 
 <script setup lang="ts">
-    import { useConfirmStore } from '../stores/useConfirm.Store';
-    import MaxGrid from './MaxGrid.vue';
-    import MaxButton from './MaxButton.vue';
-    import MaxIcon from './MaxIcon.vue';
+    import { usePopoverStore } from '../stores/usePopover.Store';
     import { useElementSize, useWindowSize } from '@maxvue/max-use';
     import { useTemplateRef, computed } from 'vue';
     import TransitionFade from './TransitionFade.vue';
 
-    const confirm_store = useConfirmStore();
+    const popover_store = usePopoverStore();
     const { width: window_width, height: window_height } = useWindowSize();
 
 
     const el = useTemplateRef('el');
     const { width, height } = useElementSize(el as any);
 
-    const accept = () => {
-        confirm_store.acceptProps.action();
-        confirm_store.hide();
-    };
-    const reject = () => {
-        confirm_store.rejectProps.action();
-        confirm_store.hide();
-    };
-
 
     const position = computed(() => {
         const data ={
-            top: confirm_store.y + confirm_store.height + 15,
-            left: confirm_store.x,
+            top: popover_store.y + popover_store.height + 15,
+            left: popover_store.x,
             isTop: false,
             isLeft: false
         };
         if (data.top + height.value + 15 > window_height.value) {
-            data.top = confirm_store.y - height.value - 30;
+            data.top = popover_store.y - height.value - 30;
             data.isTop = true;
         }
         if (data.left + width.value + 15 > window_width.value) {
-            data.left = confirm_store.x - width.value + 20;
+            data.left = popover_store.x - width.value + 20;
             data.isLeft = true;
         }
         return data;
