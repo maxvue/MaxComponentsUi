@@ -1,6 +1,6 @@
 type __VLS_Props = {
     /** Valor atual do input */
-    modelValue: string;
+    modelValue: any;
     /** Ícone opcional (ex: 'mdi:email') */
     icon?: string | undefined;
     /** Alias para o ícone */
@@ -34,7 +34,8 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
     "onUpdate:modelValue"?: ((...args: any[]) => any) | undefined;
 }>, {
     done: boolean;
-    modelValue: string;
+    disabled: boolean;
+    modelValue: any;
     caution: string | boolean;
     required: boolean;
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {}, any>;

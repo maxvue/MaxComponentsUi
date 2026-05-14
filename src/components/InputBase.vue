@@ -1,6 +1,6 @@
 <template>
     <FloatLabel variant="on" class="max-input-main-div" :class="`${props.float !== undefined ? 'float' : ''} ${done ? 'done' : ''} ${caution ? 'caution' : ''} ${textCenter ? 'text-center' : ''} ${props.class ? props.class : ''} ${isError ? 'error' : ''} ${caution ? 'caution' : ''} ${inLine ? 'in-line' : ''}`">
-        <div v-if="props.label && props.inLine">
+        <div v-if="props.label && props.inLine" class="in-line-label">
             {{ props.label }}
         </div>
         <IconField v-if="props.icon ?? props.i ?? props.iconLeft ?? props.iconRight">
@@ -168,7 +168,7 @@
         position: absolute;
         top: 2px;
         right: 3px;
-        color: #16a34a !important;
+        color: #16a34a;
     }
 
     .is-caution {
@@ -193,40 +193,40 @@
         }
 
         .p-select {
-            border-color: var(--orange-600) !important;
+            border-color: var(--orange-600);
         }
 
         .input-message {
             .p-message-content {
-                color: var(--max-orange-500) !important;
+                color: var(--max-orange-500);
             }
 
             .p-message-text {
-                color: var(--orange-600) !important;
+                color: var(--orange-600);
             }
         }
     }
 
     &.error {
         label, .max-input-label {
-            color: var(--max-red-600) !important;
+            color: var(--max-red-600);
         }
 
         input {
-            border-color: var(--max-red-600) !important;
+            border-color: var(--max-red-600);
         }
 
         .p-select {
-            border-color: var(--max-red-600) !important;
+            border-color: var(--max-red-600);
         }
 
         .input-message {
             .p-message-content {
-                color: var(--max-red-600) !important;
+                color: var(--max-red-600);
             }
 
             .p-message-text {
-                color: var(--max-red-600) !important;
+                color: var(--max-red-600);
             }
         }
     }
@@ -245,7 +245,7 @@
             outline-color: transparent !important;
             box-shadow: none !important;
             font-size: 0.9rem;
-            color: rgb(66 54 54) !important;
+            color: rgb(66 54 54);
             font-weight: 450;
         }
 
@@ -259,15 +259,27 @@
         grid-template-rows: 1fr !important;
         place-items: center start;
         gap: 4px !important;
+        padding: 0 !important;
 
-        .p-select-label, input {
+        div, span, input, select, .p-select-label, .p-inputtext, .p-component, .value-div {
             background-color: var(--background-100) !important;
             border-radius: 4px;
+            padding: 0 0 0 4px !important;
 
             .value-div {
                 width: 100% !important;
                 text-align: center !important;
             }
+        }
+
+        .in-line-label {
+            font-size: 12px;
+            font-weight: 500;
+            background-color: transparent !important;
+            color: var(--background-650);
+            text-align: left !important;
+            width: fit-content !important;
+            padding: 0 !important;
         }
     }
 
@@ -330,7 +342,19 @@
     }
 }
 
-.p-disabled {
+.p-disabled, [disabled='true'], [disabled] {
     background-color: unset !important;
+
+    input, span, .p-floatlabel .p-select-label, .p-inputtext {
+        color: var(--background-575) !important;
+    }
 }
+
+.p-inputtext[disabled] {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--background-575) !important;
+}
+
+
 </style>

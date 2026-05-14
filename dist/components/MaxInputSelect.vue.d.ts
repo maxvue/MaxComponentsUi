@@ -38,6 +38,7 @@ type __VLS_Props = {
     options?: any[];
     /** Lista de opções agrupadas [{ label, items: [] }] */
     groupOptions?: SelectGroupOptions;
+    disabled?: boolean | undefined;
 };
 declare function __VLS_template(): {
     attrs: Partial<{}>;
@@ -72,6 +73,7 @@ declare const __VLS_component: import('vue').DefineComponent<__VLS_Props, {}, {}
 }>, {
     default: string | number | boolean | null;
     done: boolean;
+    disabled: boolean;
     modelValue: any;
     error: string | boolean | null;
     caution: string | boolean | null;

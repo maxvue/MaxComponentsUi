@@ -25,7 +25,8 @@ export const presetMaxUno = () => {
                 // Cores dinâmicas
                 [/^color-(.+)$/, ([, s]) => ({ color: `var(--${s}) !important` })],
                 [/^text-(center|left|right)$/, ([, s]) => ({ 'text-align': s + ' !important' })],
-                [/^bg-(.+)$/, ([, s]) => ({ 'background-color': s.startsWith('var(') || s.startsWith('#') || s.startsWith('rgb') || s.startsWith('hsl') ? s : `var(--${s})` })]
+                [/^bg-(.+)$/, ([, s]) => ({ 'background-color': s.startsWith('var(') || s.startsWith('#') || s.startsWith('rgb') || s.startsWith('hsl') ? s : `var(--${s})` })],
+                [/^(?:(row|col|column))?-gap-(.+)$/i, (params) => (hasContent(params[1]) ? gap(params) : { gap: getCssSize(params[2]) + ' !important' })]
             ],
             // RULES: CSS customizado que não existe no UnoCSS padrão
             rules: [
@@ -69,7 +70,6 @@ export const presetMaxUno = () => {
 
                 // Grid system
                 [/^grid-?(cols|rows)-?(.+)$/i, ([, tp, vl]) => ({ ['grid-template-' + (tp.toLowerCase() === 'cols' ? 'columns' : 'rows')]: vl.replace(/-/g, ' ') })],
-                [/^(?:(row|col|column))?-gap-(.+)$/i, (params) => (hasContent(params[1]) ? gap(params) : { gap: getCssSize(params[2]) })],
                 [/^grid-?(center|end|start)-?(center|end|start)?$/i, ([, first, second]) => ({ display: 'grid', 'place-items': second ? `${first} ${second}` : first })],
 
                 // Utilitários

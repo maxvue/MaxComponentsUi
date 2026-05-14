@@ -1,10 +1,10 @@
 <template>
-    <InputBase class="select_input_div" v-bind="props" >
+    <InputBase class="select_input_div"  >
         <!-- SELECT EM GRUPO -->
         <div v-if="attrs.placeholder !== undefined && (!temp_value || temp_value === '')" class="placeholder-select">
             {{ attrs.placeholder }}
         </div>
-        <Select v-if="props.groupOptions !== undefined" v-bind="attrs" v-model="temp_value" :loading="loading" @before-show="(before_show as any)" :options="options" optionGroupLabel="label" optionGroupChildren="items" :optionValue="'value'" :optionLabel="'label'" ref="elem" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false">
+        <Select v-if="props.groupOptions !== undefined" v-bind="props" v-model="temp_value" :loading="loading" @before-show="(before_show as any)" :options="options" optionGroupLabel="label" optionGroupChildren="items" :optionValue="'value'" :optionLabel="'label'" ref="elem" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false" :disabled="props.disabled">
             <template #option="slotProps">
                 <slot name="option" :option="slotProps.option" :selected="slotProps.selected" :index="slotProps.index">
                     <div class="label_div">
@@ -31,7 +31,7 @@
             </template>
         </Select>
         <!-- SELECT NORMAL -->
-        <Select v-else v-bind="attrs" v-model="temp_value" :loading="loading" @before-show="(before_show as any)" :options="options" :optionLabel="attrs.optionLabel" :optionValue="props.optionValue" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false">
+        <Select v-else v-bind="props" v-model="temp_value"  :loading="loading" @before-show="(before_show as any)" :options="options" :optionLabel="attrs.optionLabel" :optionValue="props.optionValue" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false" :disabled="props.disabled">
             <template #option="slotProps">
                 <slot name="option" :option="slotProps.option" :selected="slotProps.selected" :index="slotProps.index">
                     <div :class="`category ${slotProps.option.category}`" v-if="attrs.category === true">{{ slotProps.option.category === 'UTILITY' ? 'A' : '' }}{{ slotProps.option.category === 'MARKETING' ? 'B' : '' }}</div>
@@ -108,12 +108,14 @@
             options?: any[];
             /** Lista de opções agrupadas [{ label, items: [] }] */
             groupOptions?: SelectGroupOptions;
+            disabled?: boolean | undefined;
+
         }>(),
-        { modelValue: null, done: undefined, optionValue: 'value', optionName: 'name', optionLabel: 'label', error: undefined, caution: undefined, required: false, default: undefined }
+        { modelValue: null, done: undefined, optionValue: 'value', optionName: 'name', optionLabel: 'label', error: undefined, caution: undefined, required: false, default: undefined, disabled: false }
     );
 
     const emit = defineEmits(['update:modelValue', 'before-show']);
-    const temp_value = ref(props.modelValue);
+    const temp_value = ref<any>(props.modelValue);
 
     watch(temp_value, (val) => emit('update:modelValue', val));
     watch(() => props.modelValue, (val) => temp_value.value = val);
