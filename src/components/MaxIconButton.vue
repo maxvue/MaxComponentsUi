@@ -1,14 +1,16 @@
 <template>
-    <div class="icon-div ico-btn" ref="icon_ref" v-bind="props" :style="{width: size, height: size}" @click.stop="onClick">
-        <MaxIcon pointer v-bind="props" :size="size" :light="props.light" :dark="props.dark ?? 0.4"/>
+    <div v-bind="{...props, ...attrs}" class="icon-div ico-btn" ref="icon_ref" :style="{width: size, height: size}" :class="attrs.class ?? {}" >
+        <MaxIcon pointer v-bind="{...props, ...attrs}" :size="size" :light="props.light" :dark="props.dark ?? 0.4" @click="onClick" />
     </div>
 </template>
 
 <script setup lang="ts">
-    import { computed } from 'vue';
+    import { computed, useAttrs } from 'vue';
     import MaxIcon from './MaxIcon.vue';
-    import { goToRoute } from '@maxvue/max-use';
+    import { goToRoute, useDefaultReset } from '@maxvue/max-use';
     import { useRouter } from 'vue-router';
+
+    const attrs = useAttrs();
 
     const props = withDefaults(defineProps<{
         /** Nome do ícone (ex: 'mdi:home') */
@@ -45,13 +47,18 @@
         checked?: boolean | string | number | undefined;
         /** Icone de adição */
         plus?: boolean | string | number | undefined;
+        /** Hover color */
+        hoverColor?: string | undefined;
+        /** Action */
+        action?: (() => void) | undefined;
     }>(), {
         dark: undefined,
         light: undefined,
         route: null,
         params: null,
         data: null,
-        query: null
+        query: null,
+        hoverColor: undefined
     });
 
 
@@ -62,11 +69,24 @@
         action: [value: boolean];
     }>();
 
+    const executing = useDefaultReset(false, 200);
+
     const onClick = () => {
+        console.log(123, executing.value);
+        if (executing.value) return;
+        console.log(12223, executing.value);
+        executing.value = true;
+
         if (props.route) {
             const router = useRouter();
             console.log('goingToRoute', router);
             goToRoute(props.route, { ...(props.params ?? {}), ...(props.data ?? {}), ...(props.query ?? {}) });
+            return;
+        }
+
+        if (props.action) {
+            console.log('actionm', props.action);
+            props.action();
             return;
         }
 

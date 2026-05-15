@@ -18,23 +18,26 @@
 <script setup lang="ts">
     import DataTable from 'primevue/datatable';
     import Column from 'primevue/column';
-    import { useAttrs, useSlots, computed, ref, watch, useTemplateRef } from 'vue';
+    import { useAttrs, useSlots, computed, ref, useTemplateRef, watch } from 'vue';
     import { useElementSize } from '@maxvue/max-use';
 
     const attrs = useAttrs();
-    const slots = useSlots();
+    const slots: Record<string, any> = useSlots() as Record<string, any>;
 
     const slotNames = computed<string[]>(() => Object.keys(slots || {}));
 
     const el = useTemplateRef('el');
-    const width = ref(0);
+    const width = ref(1);
+    const { width: calculated_width } = useElementSize(el as any);
 
-    const stop = watch(el, () => {
-        const { width: calculated_width } = useElementSize(el as any);
-        if (width.value > 0) stop();
-        else if (width.value === 0 && calculated_width.value > 0) width.value = calculated_width.value + 10;
-        console.log('calculated_width', calculated_width.value);
+    watch(calculated_width, () => {
+        if (calculated_width.value === 0) return;
+        if (width.value > 1) return;
+        else if (width.value === 1 && calculated_width.value > 0) width.value = calculated_width.value + 10;
+    }, { immediate: true });
 
+    defineExpose({
+        width
     });
 
 </script>

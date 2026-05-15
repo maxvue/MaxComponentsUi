@@ -1,6 +1,10 @@
 <template>
-    <div class="icon-done-max">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12.713 16.713Q13 16.425 13 16t-.288-.712T12 15t-.712.288T11 16t.288.713T12 17t.713-.288m0-4Q13 12.425 13 12V8q0-.425-.288-.712T12 7t-.712.288T11 8v4q0 .425.288.713T12 13t.713-.288M12 22q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12t-2.325-5.675T12 4T6.325 6.325T4 12t2.325 5.675T12 20m0-8"/></svg>
+    <div class="icon-error-max" color-red-b-575 >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 512 512">
+            <path d="M0 0h512v512H0z" fill="none" />
+            <path fill="currentColor" fill-rule="evenodd" d="M256 42.667c117.803 0 213.334 95.53 213.334 213.333S373.803 469.334 256 469.334S42.667 373.803 42.667 256S138.197 42.667 256 42.667m48.918 134.25L256 225.836l-48.917-48.917l-30.165 30.165L225.835 256l-48.917 48.918l30.165 30.165L256 286.166l48.918 48.917l30.165-30.165L286.166 256l48.917-48.917z" />
+        </svg>
+
     </div>
 </template>
 
@@ -9,4 +13,25 @@
 </script>
 
 <style lang="scss">
+.icon-error-max {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    position: relative;
+
+    &::before {
+        position: absolute;
+        content: '';
+        width: 15px;
+        height: 15px;
+        background-color: white;
+        border-radius: 50%;
+        box-shadow: 0 0 10px 5px rgb(0 0 0 / 15%);
+    }
+
+    svg {
+        z-index: 1;
+    }
+}
 </style>

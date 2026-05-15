@@ -21,7 +21,7 @@
     const props = withDefaults(
         defineProps<{
             /** Valor do CEP (apenas números) */
-            modelValue: string;
+            modelValue: any;
             /** Estado de carregamento */
             loading?: boolean;
             /** Ícone opcional */

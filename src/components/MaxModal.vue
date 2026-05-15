@@ -9,7 +9,7 @@
         <div style="position: fixed; z-index: 999;">
             <MaxAnimateFade :show="modal_store.show_id === id" :duration="0.3">
                 <div class="background-modal" @click.stop="modal_store.hide" v-if="modal_store.show_id === id" :style="{opacity: style.opacity}">
-                    <div class="max-modal" ref="el" :style="{top: style.top + 'px', left: style.left + 'px'}"  :class="[style.isTop ? 'is-top' : 'is-bottom', style.isLeft ? 'is-left' : 'is-right']" @click.stop="() => {}">
+                    <div class="max-modal" ref="el" :style="{top: style.top + 'px', left: style.left + 'px'}"  @click.stop="() => {}">
                         <slot name="header">
                             <MaxGrid s100 class="max-modal-header" pt0 mt0 mb-15>
                                 <MaxTitle1 s90  :h1="props.title ?? 'Titulo'" :h2="props.subtitle ?? 'Sub Titulo'" p0 m0 />
@@ -125,7 +125,7 @@
 
 <style lang="scss">
 .background-modal {
-    background-color: rgb(0 0 0 / 10%);
+    background-color: rgb(0 0 0 / 60%);
     height: 100vh;
     width: 100vw;
     position: fixed;
@@ -150,35 +150,6 @@
     border-radius: 0.75rem;
     padding: 10px;
 
-    &::before {
-        content: '';
-        position: absolute;
-        width: 14px;
-        height: 14px;
-        background-color: var(--background-0);
-        transform: rotate(45deg);
-        z-index: 1; /* Cobre a borda principal para unificar o desenho */
-    }
-
-    &.is-bottom::before {
-        top: -7px;
-        border-top: 1px solid var(--surface-border);
-        border-left: 1px solid var(--surface-border);
-    }
-
-    &.is-top::before {
-        bottom: -7px;
-        border-bottom: 1px solid var(--surface-border);
-        border-right: 1px solid var(--surface-border);
-    }
-
-    &.is-left::before {
-        right: 15px;
-    }
-
-    &.is-right::before {
-        left: 15px;
-    }
 
     .max-modal-header {
         width: 100%;

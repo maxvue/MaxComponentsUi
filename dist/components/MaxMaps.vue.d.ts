@@ -252,7 +252,7 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
         map: import('vue').Ref<google.maps.Map | undefined, google.maps.Map | undefined>;
         api: import('vue').Ref<typeof google.maps | undefined, typeof google.maps | undefined>;
         mapTilesLoaded: import('vue').Ref<boolean, boolean>;
-    }, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, ("drag" | "contextmenu" | "click" | "dblclick" | "dragend" | "dragstart" | "mousemove" | "mouseout" | "mouseover" | "rightclick" | "bounds_changed" | "center_changed" | "heading_changed" | "idle" | "isfractionalzoomenabled_changed" | "mapcapabilities_changed" | "maptypeid_changed" | "projection_changed" | "renderingtype_changed" | "tilesloaded" | "tilt_changed" | "zoom_changed")[], import('vue').PublicProps, {
+    }, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, ("drag" | "click" | "contextmenu" | "dblclick" | "dragend" | "dragstart" | "mousemove" | "mouseout" | "mouseover" | "rightclick" | "bounds_changed" | "center_changed" | "heading_changed" | "idle" | "isfractionalzoomenabled_changed" | "mapcapabilities_changed" | "maptypeid_changed" | "projection_changed" | "renderingtype_changed" | "tilesloaded" | "tilt_changed" | "zoom_changed")[], import('vue').PublicProps, {
         apiKey: string;
         version: string;
         libraries: string[];

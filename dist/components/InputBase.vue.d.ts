@@ -81,6 +81,9 @@ declare const __VLS_component: import('vue').DefineComponent<Props, {}, {}, {}, 
     value: any;
     dark: string | number | boolean;
     light: string | number | boolean;
+    done: string | boolean | null;
+    error: string | boolean | null;
+    caution: string | boolean | null;
     textCenter: boolean;
     iconPos: "left" | "right";
     inLine: boolean;

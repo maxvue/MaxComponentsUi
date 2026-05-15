@@ -88,6 +88,8 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
         light?: boolean | string | number | undefined;
         checked?: boolean | string | number | undefined;
         plus?: boolean | string | number | undefined;
+        hoverColor?: string | undefined;
+        action?: (() => void) | undefined;
     }> & Readonly<{
         onAction?: ((value: boolean) => any) | undefined;
     }>, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {
@@ -95,6 +97,7 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
     }, import('vue').PublicProps, {
         dark: string | number | boolean;
         light: string | number | boolean;
+        hoverColor: string;
         data: any;
         route: string | null;
         params: any;
@@ -126,11 +129,14 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
         light?: boolean | string | number | undefined;
         checked?: boolean | string | number | undefined;
         plus?: boolean | string | number | undefined;
+        hoverColor?: string | undefined;
+        action?: (() => void) | undefined;
     }> & Readonly<{
         onAction?: ((value: boolean) => any) | undefined;
     }>, {}, {}, {}, {}, {
         dark: string | number | boolean;
         light: string | number | boolean;
+        hoverColor: string;
         data: any;
         route: string | null;
         params: any;

@@ -1,6 +1,6 @@
 <template>
 
-    <div class="max-icon-div" :k="icon_name ?? 'nono'" :vh="svgContent" :ii="String(icon_name)" :i="String(props.i)" :icon="String(props.icon)" :style="style" v-if="icon_name">
+    <div class="max-icon-div" :k="icon_name ?? 'nono'" :vh="svgContent" :ii="String(icon_name)" :i="String(props.i)" :icon="String(props.icon)" :style="style" v-if="icon_name" :cc="JSON.stringify(hover_color) + isHovered" ref="icon_ref">
         <div class="max-icon" v-html="svgContent" :v-bind="attrs" />
         <div class="sub-icon checked" v-if="props.checked === true">
             <div class="background-icon"></div>
@@ -24,7 +24,6 @@
     import { ref, computed, useAttrs } from 'vue';
     import { useElementHover, isNumber } from '@maxvue/max-use';
     import { getColorFromVar } from '../helpers/getColorFromVar';
-    import Color from 'color';
 
     const icon_store = useIconStore();
     const icon_ref = ref<HTMLElement | null>(null);
@@ -60,10 +59,13 @@
         color?: string;
         /** Icone de adição */
         colorHover?: string;
+        /** Hover color */
+        hoverColor?: string | undefined;
     }>(), {
         dark: undefined,
         light: undefined,
-        color: 'var(--blue-600)'
+        color: undefined,
+        hoverColor: undefined
     });
     const icon_name = computed(() => props.i ?? props.icon ?? null);
 
@@ -79,35 +81,44 @@
         return null;
     });
 
-    const hover_color = computed(() => {
-        for (const key in attrs) if (key.startsWith('hover-')) {
-            const color = key.replace('hover-', '');
-            return { '&:hover': { color: `var(--${color}) !important` } };
+    const color = computed<string>(() => {
+        if (props.color) return props.color;
+
+        for (const key in attrs) if (key.startsWith('color-') && ! key.startsWith('color-hover-')) {
+            const color = key.replace('color-hover-', '').replace('color-', '');
+            return `var(--${color}) !important`;
         }
+
+        if (value_light.value) return `rgba(255,255,255, ${value_light.value})` ;
+        if (value_dark.value) return `rgba(0,0,0, ${value_dark.value})`;
+
+        return 'rgba(0,0,0, 0.4)';
     });
 
-    const color = computed(() => {
-        for (const key in attrs) if (key.startsWith('color-')) {
-            const color = key.replace('color-', '');
-            return { color: `var(--${color}) !important` };
+    const hover_color = computed<string>(() => {
+
+        for (const key in attrs) if (key.startsWith('hover-') || key.startsWith('color-hover-')) {
+            const color = key.replace('color-hover-', '').replace('hover-', '');
+            return `var(--${color}) !important`;
         }
 
-        if (value_light.value) return { color: `rgba(255,255,255, ${value_light.value})` };
-        if (value_dark.value) return { color: `rgba(0,0,0, ${value_dark.value})` };
-        return colorStyle.value;
+        if (attrs.pointer === undefined && props.hoverColor === undefined) return color.value;
+
+        if (props.hoverColor) return props.hoverColor;
+
+        const Color = getColorFromVar(color.value);
+
+        const value = 13;
+
+        const alpha = Color.object().alpha;
+        if (alpha && alpha > 0) return Color.alpha(alpha + 0.2).hexa();
+
+        return Color.darken(value).hexa();
     });
 
-    const colorStyle = computed<Record<'color', string>>(() => {
-        const baseColor = getColorFromVar(props.color);
-        let finalColor = baseColor;
-
-        if (isHovered.value && attrs.pointer !== undefined) {
-            const customHoverColor = props.colorHover;
-            finalColor = customHoverColor ? getColorFromVar(customHoverColor) : Color(baseColor).darken(0.35).hex();
-        }
-
-        return { color: finalColor };
-    });'';
+    const colorStyle = computed<Record<string, string>>(() => {
+        return { color: isHovered.value ? hover_color.value : color.value };
+    });
 
     const sizeStyles = computed(() => {
         const value = String(props.size ?? '1rem');
@@ -115,7 +126,7 @@
         return { width: formattedValue, height: formattedValue };
     });
 
-    const style = computed(() => ({ ...sizeStyles.value, ...color.value, ...hover_color.value }));
+    const style = computed(() => ({ ...sizeStyles.value, ...colorStyle.value }));
 
     const svgContent = computed(() => {
         if (icon_name.value && icon_store.icons_data[icon_name.value] && icon_store.icons_data[icon_name.value] !== 'waiting') return icon_store.icons_data[icon_name.value];

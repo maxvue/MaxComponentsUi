@@ -1,5 +1,5 @@
 <template>
-    <Button :iconPos="iconPos" uppercase @click.stop="onClick">
+    <Button v-bind="{...props, ...attrs}" :iconPos="iconPos" uppercase v-if="props.label" @click="onClick">
         <template #default>
             <slot></slot>
         </template>
@@ -10,14 +10,18 @@
             <MaxIcon icon="loading" :size="props.size ?? props.sizeIcon ?? props.iconSize ?? '1'" class="content-button-icon" flex />
         </template>
     </Button>
+    <MaxIconButton  v-bind="{...props, ...attrs}" />
 </template>
 
 <script setup lang="ts">
-    import { computed } from 'vue';
+    import { computed, useAttrs } from 'vue';
     import MaxIcon from './MaxIcon.vue';
+    import MaxIconButton from './MaxIconButton.vue';
     import Button from 'primevue/button';
     import type { ButtonProps } from 'primevue/button';
     import { goToRoute } from '@maxvue/max-use';
+
+    const attrs = useAttrs();
 
     interface btnProps extends /* @vue-ignore */ ButtonProps {
         icon?: string;
@@ -32,6 +36,7 @@
         query?: any;
         dark?: boolean | string | number | undefined;
         light?: boolean | string | number | undefined;
+        label: string | undefined;
     }
 
 
@@ -56,6 +61,7 @@
     }>();
 
     const onClick = () => {
+        console.log(312);
         if (props.route) {
             console.log('goingToRoute', props.route);
             goToRoute(props.route, { ...(props.params ?? {}), ...(props.data ?? {}), ...(props.query ?? {}) });

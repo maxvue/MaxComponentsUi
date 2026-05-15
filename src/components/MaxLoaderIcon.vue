@@ -1,6 +1,6 @@
 <template>
-    <div class="my-spinner">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" flex>
+    <div class="my-spinner" color-orange-300 >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" flex >
             <defs>
                 <linearGradient id="SVGw6R8JeYL" x1="50%" x2="50%" y1="5.271%" y2="91.793%">
                     <stop offset="0%" stop-color="currentColor" />

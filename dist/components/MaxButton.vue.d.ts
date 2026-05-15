@@ -12,6 +12,7 @@ interface btnProps extends /* @vue-ignore */ ButtonProps {
     query?: any;
     dark?: boolean | string | number | undefined;
     light?: boolean | string | number | undefined;
+    label: string | undefined;
 }
 declare function __VLS_template(): {
     attrs: Partial<{}>;
@@ -30,10 +31,10 @@ declare const __VLS_component: import('vue').DefineComponent<btnProps, {}, {}, {
     dark: string | number | boolean;
     light: string | number | boolean;
     data: any;
-    iconSize: number | string;
     route: string | null;
     params: any;
     query: any;
+    iconSize: number | string;
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {}, any>;
 declare const _default: __VLS_WithTemplateSlots<typeof __VLS_component, __VLS_TemplateResult["slots"]>;
 export default _default;

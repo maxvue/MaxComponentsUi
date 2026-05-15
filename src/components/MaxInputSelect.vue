@@ -1,5 +1,5 @@
 <template>
-    <InputBase class="select_input_div"  >
+    <InputBase class="select_input_div" >
         <!-- SELECT EM GRUPO -->
         <div v-if="attrs.placeholder !== undefined && (!temp_value || temp_value === '')" class="placeholder-select">
             {{ attrs.placeholder }}

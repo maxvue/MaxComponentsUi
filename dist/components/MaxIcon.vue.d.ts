@@ -27,11 +27,16 @@ type __VLS_Props = {
     color?: string;
     /** Icone de adição */
     colorHover?: string;
+    /** Hover color */
+    hoverColor?: string | undefined;
 };
 declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {}, string, import('vue').PublicProps, Readonly<__VLS_Props> & Readonly<{}>, {
     dark: string | number | boolean;
     light: string | number | boolean;
     color: string;
-}, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {}, any>;
+    hoverColor: string;
+}, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {
+    icon_ref: HTMLDivElement;
+}, any>;
 export default _default;
 //# sourceMappingURL=MaxIcon.vue.d.ts.map

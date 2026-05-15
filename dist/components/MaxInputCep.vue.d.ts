@@ -1,6 +1,6 @@
 type __VLS_Props = {
     /** Valor do CEP (apenas números) */
-    modelValue: string;
+    modelValue: any;
     /** Estado de carregamento */
     loading?: boolean;
     /** Ícone opcional */
@@ -39,7 +39,7 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
 }>, {
     done: boolean;
     loading: boolean;
-    modelValue: string;
+    modelValue: any;
     caution: string | boolean;
     required: boolean;
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {}, any>;

@@ -1,8 +1,8 @@
 <template>
-    <div :class="`badge-component-main-div ${props.size ?? ''}`">
-        <MaxIcon v-if="props.icon || props.i" :icon="props.icon ?? props.i" class="icon-badge" dark="0.3"/>
-        <Badge :value="(props.label ?? props.msg ?? props.value ?? props.mensagem ?? props.text ?? props.txt ?? props.number) as any" v-if="props.overlay === undefined || props.overlay === false" :class="`${props.icon || props.iconColor ? 'with-icon' : ''} ${props.iconValue ? 'with-icon-value' : ''}`" ref="badgeElem" />
-        <OverlayBadge v-else />
+    <div :class="`badge-component-main-div ${props.size ?? ''}`"  >
+        <MaxIcon v-if="props.icon || props.i" :icon="props.icon ?? props.i" class="icon-badge" dark="0.3" :color="icon_color"/>
+        <OverlayBadge v-if="is_overlay" />
+        <Badge :value="message" v-else :class="`${props.icon || props.iconColor ? 'with-icon' : ''} ${props.iconValue ? 'with-icon-value' : ''}`" ref="badgeElem" :style="{backgroundColor: bg_color, color: text_color}" />
         <div class="circle-color-badge">
             <div :style="{ background: (props.iconColor ?? 'none') as string }" class="circle-color-badge-text">
                 {{ props.iconValue ?? '' }}
@@ -15,8 +15,12 @@
     import Badge from 'primevue/badge';
     import OverlayBadge from 'primevue/overlaybadge';
     import MaxIcon from './MaxIcon.vue';
+    import { useAttrs, computed } from 'vue';
+    import { getColorFromVar } from '../helpers/getColorFromVar';
 
-    const props = defineProps<{
+    const attrs = useAttrs();
+
+    const props = withDefaults(defineProps<{
         /** Nome do ícone (ex: 'mdi:home') */
         icon?: string;
         /** Alias para o nome do ícone */
@@ -55,8 +59,47 @@
         badge?: any;
         /** Apenas se estiver usando overlay = true */
         overlay?: boolean | undefined;
+        /** Cor do Fundo */
+        color?: string;
+        /** Cor do Fundo */
+        bgColor?: string;
+        /** Cor da Texto */
+        textColor?: string;
+    }>(), {});
 
-    }>();
+    const message = computed<string>(() => String(props.label ?? props.msg ?? props.value ?? props.mensagem ?? props.text ?? props.txt ?? props.number ?? ''));
+    const is_overlay = computed(() => props.overlay === true );
+
+    const bg_color = computed<string>(() => {
+        if (props.bgColor) return props.bgColor;
+        if (props.color) return props.color;
+
+        for (const key in attrs) if (key.startsWith('color-')) {
+            const color = key.replace('color-hover-', '').replace('color-', '');
+            return `var(--${color}) !important`;
+        }
+
+        return 'var(--orange-600)';
+    });
+
+    const text_color = computed(() => {
+        if (props.textColor) return props.textColor;
+
+        const Color = getColorFromVar(bg_color.value);
+        if (Color.isLight()) return Color.darken(0.5).hexa();
+
+        return Color.lighten(0.6).hexa();
+    });
+
+    const icon_color = computed(() => {
+        if (props.iconColor) return props.iconColor;
+        const Color = getColorFromVar(text_color.value);
+        if (Color.isDark()) return Color.darken(0.5).hexa();
+
+        return Color.lighten(0.6).hexa();
+    });
+
+
 </script>
 
 <style lang="scss">

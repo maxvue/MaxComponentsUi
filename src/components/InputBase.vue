@@ -118,6 +118,9 @@
         value: '',
         textCenter: false,
         dark: 0.5,
+        done: undefined,
+        caution: undefined,
+        error: undefined,
         light: false,
         iconPos: 'left',
         inLine: false

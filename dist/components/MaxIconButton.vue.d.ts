@@ -33,6 +33,10 @@ type __VLS_Props = {
     checked?: boolean | string | number | undefined;
     /** Icone de adição */
     plus?: boolean | string | number | undefined;
+    /** Hover color */
+    hoverColor?: string | undefined;
+    /** Action */
+    action?: (() => void) | undefined;
 };
 declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {
     action: (value: boolean) => any;
@@ -41,6 +45,7 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
 }>, {
     dark: string | number | boolean;
     light: string | number | boolean;
+    hoverColor: string;
     data: any;
     route: string | null;
     params: any;
