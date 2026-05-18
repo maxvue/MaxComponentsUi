@@ -18,6 +18,7 @@ export default defineConfig({
                 return outputChunk.fileName === 'index.es.js';
             }
         })
+
     ],
     build: {
         lib: {
