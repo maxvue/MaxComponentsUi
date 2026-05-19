@@ -8,7 +8,6 @@
     import { computed, useAttrs } from 'vue';
     import MaxIcon from './MaxIcon.vue';
     import { goToRoute, useDefaultReset } from '@maxvue/max-use';
-    import { useRouter } from 'vue-router';
 
     const attrs = useAttrs();
 
@@ -75,7 +74,6 @@
             executing.value = true;
 
             if (props.route) {
-                const router = useRouter();
                 goToRoute(props.route, { ...(props.params ?? {}), ...(props.data ?? {}), ...(props.query ?? {}) });
                 return;
             }
