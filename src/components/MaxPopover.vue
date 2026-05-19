@@ -29,16 +29,13 @@
 
 <script setup lang="ts">
     import { usePopoverStore } from '../stores/usePopover.Store';
-    import { useElementSize, useWindowSize, Random, useElementBounding, watchDebounced } from '@maxvue/max-use';
+    import { useElementSize, useWindowSize, Random, useElementBounding, useDefaultReset, watchDebounced } from '@maxvue/max-use';
     import { useTemplateRef, ref } from 'vue';
     import MaxIconButton from './MaxIconButton.vue';
     import MaxButton from './MaxButton.vue';
     import MaxTitle1 from './MaxTitle1.vue';
     import MaxGrid from './MaxGrid.vue';
     import MaxAnimateFade from './MaxAnimateFade.vue';
-    import { useAttrs } from 'vue';
-
-    const attrs = useAttrs();
 
     const props = withDefaults(defineProps<{
         /** Nome do ícone (ex: 'mdi:home') */
@@ -91,7 +88,7 @@
     const el = useTemplateRef('el');
     const btn_el = useTemplateRef('btn_el');
 
-    const style = ref({
+    const style: any = useDefaultReset({
         top: 0,
         left: 0,
         isTop: false,
@@ -99,21 +96,8 @@
         opacity: 0
     });
 
-    const resetStyle = () => {
-        style.value = {
-            top: 0,
-            left: 0,
-            isTop: false,
-            isLeft: false,
-            opacity: 0
-        };
-    };
-
     const toggle = () => {
         console.log('toggling', id.value);
-
-        if (style.value.opacity !== 0) resetStyle();
-
 
         popover_store.toggle(id.value);
 

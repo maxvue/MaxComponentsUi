@@ -8,7 +8,7 @@
         </slot>
         <div style="position: fixed; z-index: 999;">
             <MaxAnimateFade :show="modal_store.show_id === id" :duration="0.3">
-                <div class="background-modal" @click.stop="modal_store.hide" v-if="modal_store.show_id === id" :style="{opacity: style.opacity}">
+                <div class="background-modal" @click.stop="modal_store.hide" v-if="modal_store.show_id === id" :style="{opacity: style?.opacity}">
                     <div class="max-modal" ref="el" :style="{top: style.top + 'px', left: style.left + 'px'}"  @click.stop="() => {}">
                         <slot name="header">
                             <MaxGrid s100 class="max-modal-header" pt0 mt0 mb-15>
@@ -29,7 +29,7 @@
 
 <script setup lang="ts">
     import { useModalStore } from '../stores/useModal.Store';
-    import { useElementSize, useWindowSize, Random } from '@maxvue/max-use';
+    import { useElementSize, useWindowSize, Random, useDefaultReset } from '@maxvue/max-use';
     import { useTemplateRef, ref } from 'vue';
     import MaxIconButton from './MaxIconButton.vue';
     import MaxButton from './MaxButton.vue';
@@ -88,7 +88,7 @@
 
     const el = useTemplateRef('el');
 
-    const style = ref({
+    const style: any = useDefaultReset({
         top: 0,
         left: 0,
         isTop: false,
@@ -96,20 +96,10 @@
         opacity: 0
     });
 
-    const resetStyle = () => {
-        style.value = {
-            top: 0,
-            left: 0,
-            isTop: false,
-            isLeft: false,
-            opacity: 0
-        };
-    };
-
     const toggle = () => {
         console.log('toggling', id.value);
 
-        if (style.value.opacity !== 0) resetStyle();
+        if (style.value.opacity !== 0) style.reset();
 
 
         modal_store.toggle(id.value);

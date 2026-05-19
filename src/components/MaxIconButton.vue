@@ -64,33 +64,30 @@
 
     const size = computed(() => 16 * Number(props.size ?? 1) + 'px');
 
-
     const emit = defineEmits<{
         action: [value: boolean];
     }>();
 
-    const executing = useDefaultReset(false, 200);
+    const executing = useDefaultReset<boolean>(false, 200);
 
     const onClick = () => {
-        console.log(123, executing.value);
-        if (executing.value) return;
-        console.log(12223, executing.value);
-        executing.value = true;
+        if (! executing.value) {
+            executing.value = true;
 
-        if (props.route) {
-            const router = useRouter();
-            console.log('goingToRoute', router);
-            goToRoute(props.route, { ...(props.params ?? {}), ...(props.data ?? {}), ...(props.query ?? {}) });
-            return;
+            if (props.route) {
+                const router = useRouter();
+                goToRoute(props.route, { ...(props.params ?? {}), ...(props.data ?? {}), ...(props.query ?? {}) });
+                return;
+            }
+
+            if (props.action) {
+                console.log('actionm', props.action);
+                props.action();
+                return;
+            }
+
+            emit('action', true);
         }
-
-        if (props.action) {
-            console.log('actionm', props.action);
-            props.action();
-            return;
-        }
-
-        emit('action', true);
     };
 </script>
 
