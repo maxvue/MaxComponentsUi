@@ -14,7 +14,7 @@ type __VLS_Props = {
     required?: boolean;
 };
 type __VLS_PublicProps = {
-    modelValue?: string;
+    modelValue?: any;
 } & __VLS_Props;
 declare function __VLS_template(): {
     attrs: Partial<{}>;
@@ -30,9 +30,9 @@ declare function __VLS_template(): {
 };
 type __VLS_TemplateResult = ReturnType<typeof __VLS_template>;
 declare const __VLS_component: import('vue').DefineComponent<__VLS_PublicProps, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {
-    "update:modelValue": (value: string) => any;
+    "update:modelValue": (value: any) => any;
 }, string, import('vue').PublicProps, Readonly<__VLS_PublicProps> & Readonly<{
-    "onUpdate:modelValue"?: ((value: string) => any) | undefined;
+    "onUpdate:modelValue"?: ((value: any) => any) | undefined;
 }>, {
     done: boolean;
     caution: string | boolean;

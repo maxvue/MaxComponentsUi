@@ -16,7 +16,7 @@
     const default_props = computed(() => { return { ...attrs, ...(element.value?.$params.props ?? {}) }; });
 
 
-    const modelValue = defineModel<string | Date>({ default: '' });
+    const modelValue = defineModel<any>({ default: '' });
     const internalDate = ref<Date | null>(null);
     const hasBeenTouched = ref(false);
 

@@ -1,10 +1,10 @@
 type __VLS_PublicProps = {
-    modelValue?: string | Date;
+    modelValue?: any;
 };
 declare const _default: import('vue').DefineComponent<__VLS_PublicProps, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {
-    "update:modelValue": (value: string | Date) => any;
+    "update:modelValue": (value: any) => any;
 }, string, import('vue').PublicProps, Readonly<__VLS_PublicProps> & Readonly<{
-    "onUpdate:modelValue"?: ((value: string | Date) => any) | undefined;
+    "onUpdate:modelValue"?: ((value: any) => any) | undefined;
 }>, {}, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {
     element: {
         $props: import('primevue/datepicker').DatePickerProps & import('vue').VNodeProps & import('vue').AllowedComponentProps & import('vue').ComponentCustomProps;

@@ -58,7 +58,7 @@
     );
 
     const temp_value = computed(() => country.value.value + phone.value.replace(/\D/g, ''));
-    const modelValue = defineModel<string>({ default: '' });
+    const modelValue = defineModel<any>({ default: '' });
     const only_numbers = computed(() => String(temp_value.value).replace(/\D/g, ''));
 
     const country = ref(country_ddi_flags.find((f) => f.ddi === 55) || country_ddi_flags[0]);

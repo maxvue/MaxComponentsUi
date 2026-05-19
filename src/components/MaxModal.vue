@@ -29,7 +29,7 @@
 
 <script setup lang="ts">
     import { useModalStore } from '../stores/useModal.Store';
-    import { useElementSize, useWindowSize, Random, useDefaultReset } from '@maxvue/max-use';
+    import { useElementSize, useWindowSize, Random } from '@maxvue/max-use';
     import { useTemplateRef, ref } from 'vue';
     import MaxIconButton from './MaxIconButton.vue';
     import MaxButton from './MaxButton.vue';
@@ -88,7 +88,7 @@
 
     const el = useTemplateRef('el');
 
-    const style = useDefaultReset({
+    const style = ref({
         top: 0,
         left: 0,
         isTop: false,
@@ -96,10 +96,20 @@
         opacity: 0
     });
 
+    const resetStyle = () => {
+        style.value = {
+            top: 0,
+            left: 0,
+            isTop: false,
+            isLeft: false,
+            opacity: 0
+        };
+    };
+
     const toggle = () => {
         console.log('toggling', id.value);
 
-        if (style.value.opacity !== 0) style.reset();
+        if (style.value.opacity !== 0) resetStyle();
 
 
         modal_store.toggle(id.value);

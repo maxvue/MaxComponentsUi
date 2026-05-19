@@ -1,5 +1,5 @@
 <template>
-    <div v-bind="attrs" v-if="attrs.show !== undefined ? attrs.show : true" class="loader-main-div">
+    <div v-bind="attrs" v-if="attrs.show !== undefined ? attrs.show : true" class="max-loader-main-div">
         <div class="items">
             <LoaderIcon />
             <div v-if="attrs.label" class="item-label">{{ attrs.label }}</div>
@@ -9,16 +9,18 @@
 
 <script setup lang="ts" vapor>
     import { useAttrs } from 'vue';
-    const attrs = useAttrs();
+
+    const attrs: any = useAttrs();
 </script>
 
 <style lang="scss">
-    .loader-main-div {
+    .max-loader-main-div {
         height: 100%;
         width: 100%;
         display: grid;
         place-items: center;
         color: blue !important;
+        background-color: var(--background-0);
 
         .items {
             display: grid;
