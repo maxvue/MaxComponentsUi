@@ -26,7 +26,8 @@
             internalDate.value = null;
             return;
         }
-        const dateObj = val instanceof Date ? val : new Date(val);
+        // Adiciona 'T00:00:00' para strings date-only (YYYY-MM-DD) evitando interpretação UTC
+        const dateObj = val instanceof Date ? val : new Date(typeof val === 'string' && !val.includes('T') && !val.includes(' ') ? val + 'T00:00:00' : val);
         if (!isNaN(dateObj.getTime())) {
             // Só atualiza se for realmente diferente para evitar loops
             if (!internalDate.value || internalDate.value.getTime() !== dateObj.getTime()) internalDate.value = dateObj;
