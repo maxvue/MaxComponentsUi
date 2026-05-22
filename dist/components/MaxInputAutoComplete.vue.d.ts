@@ -29,6 +29,7 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
     caution: string | boolean;
     required: boolean;
     options: any;
+    optionLabel: string;
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {}, any>;
 export default _default;
 //# sourceMappingURL=MaxInputAutoComplete.vue.d.ts.map
