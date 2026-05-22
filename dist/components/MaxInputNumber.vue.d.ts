@@ -33,6 +33,8 @@ type __VLS_Props = {
     suffix?: string | undefined;
     /** Placeholder do campo */
     placeholder?: string | undefined;
+    /** Número de casas decimais */
+    minFractionDigits?: number | undefined;
 };
 declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {
     "update:modelValue": (...args: any[]) => void;
@@ -46,6 +48,7 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
     placeholder: string;
     prefix: string;
     suffix: string;
+    minFractionDigits: number;
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {}, any>;
 export default _default;
 //# sourceMappingURL=MaxInputNumber.vue.d.ts.map

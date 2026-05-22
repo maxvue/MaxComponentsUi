@@ -1,20 +1,25 @@
 <template>
+
     <Transition name="slide-vertical-animation">
         <slot></slot>
     </Transition>
+
 </template>
 
 <script setup lang="ts">
 </script>
 
 <style>
+
     .slide-vertical-animation-enter-active {
-        animation: slide-up-in 0.3s ease-out forwards;
-        animation-delay: 0.3s;
+        animation: slide-up-in 0.2s ease-out forwards;
+        animation-delay: 0.2s;
+        opacity: 0;
     }
 
     .slide-vertical-animation-leave-active {
-        animation: slide-down-out 0.3s ease-in forwards;
+        animation: slide-down-out 0.2s ease-in forwards;
+        opacity: 1;
     }
 
     @keyframes slide-up-in {

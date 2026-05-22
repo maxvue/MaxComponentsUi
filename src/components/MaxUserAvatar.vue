@@ -1,6 +1,6 @@
 <template>
-    <Avatar :image="props.imageUrl" shape="circle" v-if="props.imageUrl" v-tooltip.top="showTooltip ? name : null" v-bind="attrs" />
-    <Avatar :label="name?.substring(0, 2).toUpperCase() ?? '' " style="background-color: #ece9fc; color: #2a1261;" shape="circle" pointer v-else v-tooltip.top="showTooltip ? name : null" v-bind="attrs"/>
+    <Avatar :image="props.imageUrl" shape="circle" v-if="props.imageUrl" v-tooltip.top="showTooltip ? name : null" />
+    <Avatar :label="name?.substring(0, 2).toUpperCase() ?? '' " style="background-color: #ece9fc; color: #2a1261;" shape="circle" pointer v-else v-tooltip.top="showTooltip ? name : null" />
 </template>
 
 /**
@@ -8,10 +8,8 @@
  * Exibe a imagem do usuário ou as iniciais baseadas no nome.
  */
 <script setup lang="ts">
-    import { useAttrs } from 'vue';
-    import Avatar from 'primevue/avatar';
 
-    const attrs = useAttrs();
+    import Avatar from 'primevue/avatar';
 
     const props = withDefaults(defineProps<{
         /** URL da imagem do avatar */
@@ -20,7 +18,15 @@
         name?: string;
         /** Define se exibe um tooltip com o nome ao passar o mouse */
         showTooltip?: boolean;
+        /** Define a rota que deve ser chamada para carregar a imagem */
+        routeImage?: string | null | undefined;
+        /** Define a rota que deve ser chamada para carregar a imagem */
+        requestImageData?: string | null | undefined;
+
     }>(), {
-        showTooltip: true
+        showTooltip: true,
+        route: null
     });
+
+
 </script>

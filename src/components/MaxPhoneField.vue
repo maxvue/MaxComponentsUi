@@ -1,5 +1,5 @@
 <template>
-    <InputBase class="input-phone" v-bind="props" :value="temp_value" :done="done" :error="error" :caution="caution" :label="props.label ?? 'Telefone'" iconRight="ic:baseline-whatsapp">
+    <InputBase class="input-phone" v-bind="props" :value="temp_value" :done="done" :error="error" :caution="caution" :label="props.noLabel ? undefined : props.label ?? ('Telefone' + String(props.noLabel)) " :icon="props.noIcon ? undefined : 'ic:baseline-whatsapp'">
         <div class="inputs-div">
             <Select v-model="country" :options="country_ddi_flags" filter :filterFields="['name', 'value']">
                 <template #option="slotProps">
@@ -19,7 +19,7 @@
                         <div class="item-flag">
                             <img :src="'https://flagcdn.com/w40/' + value.value.sigla.toLowerCase() + '.png'" alt="bandeira" flex />
                         </div>
-                        <div pl9 style="color: var(--max-inputtext-color);">+ {{ value.value.value }}</div>
+                        <div pl9 style="color: var(--background-600);">+ {{ value.value.value }}</div>
                     </div>
                 </template>
             </Select>
@@ -53,8 +53,10 @@
             targetValue?: string;
             caution?: string | boolean | undefined;
             required?: boolean;
+            noLabel?: boolean;
+            noIcon?: boolean;
         }>(),
-        { done: undefined, required: false, caution: undefined }
+        { done: undefined, required: false, caution: undefined, noLabel: false, noIcon: false }
     );
 
     const temp_value = computed(() => country.value.value + phone.value.replace(/\D/g, ''));
@@ -155,7 +157,7 @@
             height: 36px;
             background-color: transparent !important;
             border: none !important;
-            width: 90px;
+            width: 60px;
 
             .p-select-label {
                 height: 36px;
@@ -169,8 +171,8 @@
                     padding-left: 5px;
 
                     .item-flag {
-                        width: 21px;
-                        aspect-ratio: 3/2;
+                        width: 22px;
+                        height: 13px;
                         display: grid;
                         place-items: center;
                         border-radius: 5px;

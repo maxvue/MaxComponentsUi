@@ -1,19 +1,21 @@
 <template>
-    <div ref="btn_el" pointer >
-        <slot name="button" v-if="! props.label">
-            <MaxIconButton :icon="props.i ?? props.icon" :size="props.size" @click.stop="toggle" />
-        </slot>
-        <slot name="button" v-else>
-            <MaxButton :label="props.label" :icon="props.i ?? props.icon" :size-icon="props.size" @click.stop="toggle" />
-        </slot>
-        <div style="position: fixed; z-index: 999;">
-            <MaxAnimateFade :show="popover_store.show_id === id" :duration="0.3">
-                <div class="background-popover" @click.stop="popover_store.hide" v-if="popover_store.show_id === id" :style="{opacity: style.opacity}">
+    <div ref="btn_el" pointer v-tooltip="null">
+        <div v-tooltip="null" v-if="props.label || props.i || props.icon">
+            <slot name="button" v-if="! props.label">
+                <MaxIconButton :icon="props.i ?? props.icon" :size="props.size ?? props.sizeIcon" @click.stop="toggle" />
+            </slot>
+            <slot name="button" v-else v-bind="attrs">
+                <MaxButton :label="props.label" :icon="props.i ?? props.icon" :size-icon="props.size ?? props.sizeIcon" @click.stop="toggle" />
+            </slot>
+        </div>
+        <div style="position: fixed;" v-tooltip="null" class="popover-item">
+            <MaxAnimateFade :show="isOpen" :duration="0.3">
+                <div class="background-popover" @click.stop="hide" v-if="isOpen" :style="{opacity: style.opacity}">
                     <div class="max-popover-dialog" ref="el" :style="{top: style.top + 'px', left: style.left + 'px'}"  :class="[style.isTop ? 'is-top' : 'is-bottom', style.isLeft ? 'is-left' : 'is-right']" @click.stop="() => {}">
                         <slot name="header">
                             <MaxGrid s100 class="max-popover-header" pt0 mt0 mb-15>
-                                <MaxTitle1 s90  :h1="props.title ?? 'Titulo'" :h2="props.subtitle ?? 'Sub Titulo'" p0 m0 />
-                                <MaxIconButton s10 i="iconoir:xmark" size="1.3" @click.stop="popover_store.hide" />
+                                <MaxTitle1 s90  :h1="props.title ?? 'Titulo'" :h2="props.subTitle ?? 'Sub Titulo'" p0 m0 />
+                                <MaxIconButton s10 i="iconoir:xmark" size="1.3" @click.stop="hide" />
                             </MaxGrid>
                         </slot>
                         <div class="max-popover-content">
@@ -28,14 +30,15 @@
 </template>
 
 <script setup lang="ts">
-    import { usePopoverStore } from '../stores/usePopover.Store';
-    import { useElementSize, useWindowSize, Random, useElementBounding, useDefaultReset, watchDebounced } from '@maxvue/max-use';
-    import { useTemplateRef, ref } from 'vue';
+    import { useElementSize, useWindowSize, useElementBounding, useDefaultReset } from '@maxvue/max-use';
+    import { useTemplateRef, ref, useAttrs } from 'vue';
     import MaxIconButton from './MaxIconButton.vue';
     import MaxButton from './MaxButton.vue';
     import MaxTitle1 from './MaxTitle1.vue';
     import MaxGrid from './MaxGrid.vue';
     import MaxAnimateFade from './MaxAnimateFade.vue';
+
+    const attrs = useAttrs();
 
     const props = withDefaults(defineProps<{
         /** Nome do ícone (ex: 'mdi:home') */
@@ -51,13 +54,14 @@
         /** Titulo do popover */
         title?: string;
         /** Subtitulo do popover */
-        subtitle?: string;
+        subTitle?: string;
         /** Rotação do ícone em graus */
         rotate?: number;
         /** Inversão do ícone */
         flip?: 'horizontal' | 'vertical' | 'h' | 'v' | 'x' | 'y' | 'xy';
         /** Tamanho do ícone (em px ou multiplicador) */
         size?: string | number;
+        sizeIcon?: string | number;
         /** Alias para o tamanho */
         scale?: string | number;
         /** Mensagem de confirmação */
@@ -81,9 +85,7 @@
         message: 'Deseja continuar?'
     });
 
-    const popover_store = usePopoverStore();
-
-    const id = ref(Random());
+    const isOpen = ref(false);
 
     const el = useTemplateRef('el');
     const btn_el = useTemplateRef('btn_el');
@@ -97,9 +99,7 @@
     });
 
     const toggle = () => {
-        console.log('toggling', id.value);
-
-        popover_store.toggle(id.value);
+        isOpen.value = !isOpen.value;
 
         setTimeout(() => {
             const { x, y, width: width_btn, height: height_btn } = useElementBounding(btn_el as any);
@@ -139,6 +139,18 @@
         }, 1);
     };
 
+    const hide = () => {
+        isOpen.value = false;
+    };
+
+    const show = toggle;
+
+    defineExpose({
+        hide,
+        show,
+        toggle
+    });
+
 
 </script>
 
@@ -148,7 +160,7 @@
     height: 100vh;
     width: 100vw;
     position: fixed;
-    z-index: 5;
+    z-index: 99999 !important;
     top: 0;
     left: 0;
     transition: opacity 0.3s ease;
@@ -202,5 +214,9 @@
     .max-popover-header {
         width: 100%;
     }
+}
+
+.popover-item {
+    z-index: 9999 !important;
 }
 </style>

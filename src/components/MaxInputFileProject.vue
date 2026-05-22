@@ -7,7 +7,7 @@
                 para registrar os dados automaticamente.
             </div>
             <div>Clique aqui ou arraste e solte os documentos para carregar.</div>
-            <Icon icon="material-symbols:folder-open" size="4" color-gray />
+            <MaxIcon icon="material-symbols:folder-open" size="4" color-gray />
         </div>
         <!-- <div class="file-list">
             <div v-for="file in filesRg" :key="file.name" class="file-item" pointer>
@@ -58,6 +58,7 @@
     import { useDropZone } from '@maxvue/max-use';
     import { useFileDialog } from '@maxvue/max-use';
     import { ref } from 'vue';
+    import MaxIcon from './MaxIcon.vue';
 
     const props = withDefaults(
         defineProps<{

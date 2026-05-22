@@ -117,24 +117,27 @@
 
         .input-toggle-field-input-div {
             display: grid;
-            place-items: start center;
-            padding-top: 7px;
+            place-items: center;
+            padding-top: 3px;
             height: 100%;
             max-height: 36px;
 
             &.labeled {
-                padding-top: 10px;
+                padding-top: 6px;
                 width: 100%;
                 border-radius: 0.5rem;
                 border: 1px solid var(--max-inputtext-border-color);
             }
 
             .input-toggle-field {
+                max-height: 26px;
                 display: grid;
                 grid-template-columns: auto auto 1fr;
+                place-items: center;
 
                 .input-toggle-field-input {
                     padding: 0 10px;
+                    height: 17px;
                 }
 
                 .input-toggle-field-label {
@@ -144,6 +147,23 @@
                     &.active {
                         color: var(--blue-800);
                     }
+                }
+            }
+
+            .p-toggleswitch {
+                max-height: 18px;
+            }
+
+            .p-toggleswitch-handle {
+                top: 11px;
+                width: 12px;
+                height: 12px;
+                left: 4px;
+            }
+
+            .p-toggleswitch-checked {
+                .p-toggleswitch-handle {
+                    left: calc(100% - 16px);
                 }
             }
         }

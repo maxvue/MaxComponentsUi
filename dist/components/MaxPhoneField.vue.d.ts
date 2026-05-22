@@ -12,6 +12,8 @@ type __VLS_Props = {
     targetValue?: string;
     caution?: string | boolean | undefined;
     required?: boolean;
+    noLabel?: boolean;
+    noIcon?: boolean;
 };
 type __VLS_PublicProps = {
     modelValue?: any;
@@ -37,6 +39,8 @@ declare const __VLS_component: import('vue').DefineComponent<__VLS_PublicProps, 
     done: boolean;
     caution: string | boolean;
     required: boolean;
+    noLabel: boolean;
+    noIcon: boolean;
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {}, any>;
 declare const _default: __VLS_WithTemplateSlots<typeof __VLS_component, __VLS_TemplateResult["slots"]>;
 export default _default;

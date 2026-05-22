@@ -12,13 +12,14 @@ type __VLS_Props = {
     /** Titulo do popover */
     title?: string;
     /** Subtitulo do popover */
-    subtitle?: string;
+    subTitle?: string;
     /** Rotação do ícone em graus */
     rotate?: number;
     /** Inversão do ícone */
     flip?: 'horizontal' | 'vertical' | 'h' | 'v' | 'x' | 'y' | 'xy';
     /** Tamanho do ícone (em px ou multiplicador) */
     size?: string | number;
+    sizeIcon?: string | number;
     /** Alias para o tamanho */
     scale?: string | number;
     /** Mensagem de confirmação */
@@ -40,7 +41,11 @@ declare function __VLS_template(): {
     attrs: Partial<{}>;
     slots: {
         button?(_: {}): any;
-        button?(_: {}): any;
+        button?(_: {
+            [x: string]: unknown;
+            class?: import('vue').ClassValue;
+            style?: import('vue').StyleValue;
+        }): any;
         header?(_: {}): any;
         content?(_: {}): any;
         default?(_: {}): any;
@@ -52,7 +57,11 @@ declare function __VLS_template(): {
     rootEl: HTMLDivElement;
 };
 type __VLS_TemplateResult = ReturnType<typeof __VLS_template>;
-declare const __VLS_component: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {}, string, import('vue').PublicProps, Readonly<__VLS_Props> & Readonly<{}>, {
+declare const __VLS_component: import('vue').DefineComponent<__VLS_Props, {
+    hide: () => void;
+    show: () => void;
+    toggle: () => void;
+}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {}, string, import('vue').PublicProps, Readonly<__VLS_Props> & Readonly<{}>, {
     dark: string | number | boolean;
     light: string | number | boolean;
     loading: boolean;

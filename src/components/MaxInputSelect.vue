@@ -1,6 +1,5 @@
 <template>
-    <InputBase class="select_input_div" >
-        <!-- SELECT EM GRUPO -->
+    <InputBase v-bind="{...props, ...attrs}" class="select_input_div" >
         <div v-if="attrs.placeholder !== undefined && (!temp_value || temp_value === '')" class="placeholder-select">
             {{ attrs.placeholder }}
         </div>
@@ -48,7 +47,7 @@
             <template #value="value">
                 <div class="value-div" :style="{ color: options.find((option: any) => option[props.optionValue] === value.value)?.color }">
                     <Icon :icon="option_selected.icon ?? null" :size="option_selected.icon_size ?? undefined" pr10/>
-                    <span class="value-text">{{ option_selected[props.optionName] ?? option_selected.name ?? option_selected.label }}</span>
+                    <span class="value-text" elipsis>{{ option_selected[props.optionName] ?? option_selected.name ?? option_selected.label }}</span>
                 </div>
             </template>
         </Select>

@@ -286,7 +286,7 @@
         .placeholder-select {
             left: 5px;
             top: 2px;
-            z-index: 3;
+
         }
     }
 

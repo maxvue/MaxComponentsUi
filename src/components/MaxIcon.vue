@@ -1,5 +1,4 @@
 <template>
-
     <div class="max-icon-div" :k="icon_name ?? 'nono'" :vh="svgContent" :ii="String(icon_name)" :i="String(props.i)" :icon="String(props.icon)" :style="style" v-if="icon_name" :cc="JSON.stringify(hover_color) + isHovered" ref="icon_ref">
         <div class="max-icon" v-html="svgContent" :v-bind="attrs" />
         <div class="sub-icon checked" v-if="props.checked === true">
@@ -138,7 +137,6 @@
 <style lang="scss">
     .max-icon-div {
         position: relative;
-        z-index: 1;
 
         .max-icon {
             display: grid;

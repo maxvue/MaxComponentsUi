@@ -13,6 +13,12 @@ type __VLS_Props = {
     targetValue?: string;
     caution?: string | boolean | undefined;
     required?: boolean;
+    autoResize?: boolean;
+    rows?: number;
+    minRows?: number;
+    autofocus?: boolean;
+    maxRows?: number;
+    wrap?: string;
 };
 declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {
     "update:modelValue": (...args: any[]) => void;
@@ -20,6 +26,9 @@ declare const _default: import('vue').DefineComponent<__VLS_Props, {}, {}, {}, {
     "onUpdate:modelValue"?: ((...args: any[]) => any) | undefined;
 }>, {
     modelValue: any;
+    autoResize: boolean;
+    rows: number;
+    maxRows: number;
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {}, any>;
 export default _default;
 //# sourceMappingURL=MaxInputTextArea.vue.d.ts.map

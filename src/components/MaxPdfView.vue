@@ -112,7 +112,6 @@
         display: grid;
         grid-template-columns: 1fr calc(0.6 * 100vw) 1fr;
         place-items: start center;
-        z-index: 9999;
         backdrop-filter: blur(10px);
 
         .space {
@@ -165,7 +164,6 @@
         display: grid;
         place-items: center;
         grid-template-columns: 1fr 1fr 1fr;
-        z-index: 999999;
         border-radius: 10px;
     }
 

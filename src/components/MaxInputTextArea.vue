@@ -1,6 +1,6 @@
 <template>
     <InputBase v-bind="{...props, ...attrs}" class="input-text-area-main-div">
-        <Textarea v-bind="{...props, ...attrs}" :autoResize="attrs.autoResize !== false && attrs['auto-resize'] !== false" :rows="(attrs.rows as any) ?? 3" v-model="temp_value" @blur="checkDone()"/>
+        <Textarea v-bind="{...props, ...attrs}" :autoResize="props.autoResize" v-model="temp_value" @blur="checkDone()"/>
     </InputBase>
 </template>
 
@@ -31,8 +31,14 @@
             targetValue?: string;
             caution?: string | boolean | undefined;
             required?: boolean;
+            autoResize?: boolean;
+            rows?: number;
+            minRows?: number;
+            autofocus?: boolean;
+            maxRows?: number;
+            wrap?: string;
         }>(),
-        { modelValue: '' }
+        { modelValue: '', autoResize: true, rows: 3, maxRows: 10 }
     );
 
     const isDone = ref(props.done ?? null);
@@ -44,13 +50,7 @@
     const emit = defineEmits(['update:modelValue']);
     const temp_value = ref(props.modelValue);
 
-    watch(
-        temp_value,
-        () => {
-            emit('update:modelValue', temp_value.value);
-        },
-        { immediate: true }
-    );
+    watch( temp_value, () => emit('update:modelValue', temp_value.value),{ immediate: true });
 
     watch(() => props.modelValue, (val) => temp_value.value = val);
 </script>
@@ -58,12 +58,15 @@
 <style lang="scss">
     .input-text-area-main-div {
         textarea {
-            border: none !important;
             box-shadow: none !important;
             width: 100%;
             background: transparent;
             outline: none;
             resize: none;
+
+            &[no-border] {
+                border: none !important;
+            }
         }
     }
 </style>
