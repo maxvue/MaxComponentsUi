@@ -77,4 +77,14 @@ export interface TableColumn {
     /** Alinhamento do conteúdo da célula */
     align?: 'left' | 'center' | 'right';
 }
+export interface MaxNewTableColumn {
+    field?: string;
+    type?: 'default' | 'input' | 'checkbox' | 'select' | 'date' | 'number' | 'textarea';
+    required?: boolean;
+    width?: string | number;
+    minWidth?: string | number;
+    maxWidth?: string | number;
+    align?: 'left' | 'center' | 'right';
+    onChange?: (event: any) => void;
+}
 //# sourceMappingURL=index.d.ts.map
