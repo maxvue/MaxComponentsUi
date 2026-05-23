@@ -81,11 +81,20 @@ export interface MaxTableColumn {
     maxWidth?: string;
     /** Alinhamento do conteúdo da célula */
     align?: 'left' | 'center' | 'right';
-    type?: 'default' | 'input' | 'checkbox' | 'select' | 'date' | 'number' | 'textarea';
-    name?: string;
+    /** Tipo de imput */
+    input?: 'text' | 'input' | 'checkbox' | 'select' | 'date' | 'number' | 'textarea' | 'phone-number';
+    /** Texto do placeholder a ser exibido  */
+    placeholder?: string;
+    /** Título a ser exibido no cabeçalho  */
     title?: string;
+    /** Estilo a ser exibido no cabeçalho  */
     style?: string | object;
+    /** Classe a ser exibido no cabeçalho  */
     class?: string | object;
+    /** Indica se o campo é obrigatório  */
     required?: boolean;
+    /** Tooltip a ser exibido ao passar o mouse */
+    tooltip?: boolean;
+    /** Função a ser executada quando o valor do campo mudar  */
     onChange?: (event: any) => void;
 }
