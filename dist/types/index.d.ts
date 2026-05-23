@@ -61,7 +61,7 @@ export interface SelectOptions extends Array<SelectItem> {
 /**
  * Definição de uma coluna para o componente MaxNewTable.
  */
-export interface TableColumn {
+export interface MaxTableColumn {
     /** Texto do cabeçalho da coluna */
     header: string;
     /** Campo do objeto a ser exibido na célula */
@@ -76,15 +76,12 @@ export interface TableColumn {
     maxWidth?: string;
     /** Alinhamento do conteúdo da célula */
     align?: 'left' | 'center' | 'right';
-}
-export interface MaxNewTableColumn {
-    field?: string;
     type?: 'default' | 'input' | 'checkbox' | 'select' | 'date' | 'number' | 'textarea';
+    name?: string;
+    title?: string;
+    style?: string | object;
+    class?: string | object;
     required?: boolean;
-    width?: string | number;
-    minWidth?: string | number;
-    maxWidth?: string | number;
-    align?: 'left' | 'center' | 'right';
     onChange?: (event: any) => void;
 }
 //# sourceMappingURL=index.d.ts.map

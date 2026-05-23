@@ -1,9 +1,9 @@
-import { TableColumn } from '../types';
+import { MaxTableColumn } from '../types';
 type __VLS_Props = {
     /** Lista de valores para preencher a tabela */
     list: any[] | Record<string, any>;
     /** Definição das colunas */
-    columns: TableColumn[];
+    columns: MaxTableColumn[];
     /** Identificador único da tabela */
     id?: string;
     /** Mensagem exibida quando a lista está vazia */
@@ -16,7 +16,7 @@ type __VLS_TemplateResult = ReturnType<typeof __VLS_template>;
 declare const __VLS_component: import('vue').DefineComponent<__VLS_Props, {
     tableId: import('vue').ComputedRef<string>;
 }, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {}, string, import('vue').PublicProps, Readonly<__VLS_Props> & Readonly<{}>, {
-    columns: TableColumn[];
+    columns: MaxTableColumn[];
     list: any[] | Record<string, any>;
     emptyMessage: string;
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {}, any>;

@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-    import type { TableColumn } from '../types';
+    import type { MaxTableColumn } from '../types';
     import { computed, useSlots } from 'vue';
     import { ulid } from '@maxvue/max-use';
 
@@ -72,7 +72,7 @@
             /** Lista de valores para preencher a tabela */
             list: any[] | Record<string, any>;
             /** Definição das colunas */
-            columns: TableColumn[];
+            columns: MaxTableColumn[];
             /** Identificador único da tabela */
             id?: string;
             /** Mensagem exibida quando a lista está vazia */
@@ -108,7 +108,7 @@
     }
 
     /** Gera o estilo inline de uma coluna baseado nas suas propriedades */
-    function getColumnStyle(col: TableColumn): Record<string, string> {
+    function getColumnStyle(col: MaxTableColumn): Record<string, string> {
         const style: Record<string, string> = {};
         if (col.width) {
             style.width = col.width;
