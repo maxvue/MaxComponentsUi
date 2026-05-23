@@ -15,7 +15,21 @@ declare function __VLS_template(): any;
 type __VLS_TemplateResult = ReturnType<typeof __VLS_template>;
 declare const __VLS_component: import('vue').DefineComponent<__VLS_Props, {
     tableId: import('vue').ComputedRef<string>;
-}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {}, string, import('vue').PublicProps, Readonly<__VLS_Props> & Readonly<{}>, {
+}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {
+    "update:field": (payload: {
+        row: any;
+        field: string;
+        value: any;
+        index?: number;
+    }) => any;
+}, string, import('vue').PublicProps, Readonly<__VLS_Props> & Readonly<{
+    "onUpdate:field"?: ((payload: {
+        row: any;
+        field: string;
+        value: any;
+        index?: number;
+    }) => any) | undefined;
+}>, {
     columns: MaxTableColumn[];
     list: any[] | Record<string, any>;
     emptyMessage: string;

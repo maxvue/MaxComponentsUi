@@ -59,7 +59,7 @@ export interface SelectGroupOptions extends Array<SelectGroupOptionsElement> {
 export interface SelectOptions extends Array<SelectItem> {
 }
 /**
- * Definição de uma coluna para o componente MaxNewTable.
+ * Definição de uma coluna para o componente MaxTableFields.
  */
 export interface MaxTableColumn {
     /** Texto do cabeçalho da coluna */
@@ -76,8 +76,14 @@ export interface MaxTableColumn {
     maxWidth?: string;
     /** Alinhamento do conteúdo da célula */
     align?: 'left' | 'center' | 'right';
-    /** Tipo de imput */
-    input?: 'text' | 'input' | 'checkbox' | 'select' | 'date' | 'number' | 'textarea' | 'phone-number';
+    /** Tipo de input a ser renderizado na célula */
+    input?: 'text' | 'input' | 'checkbox' | 'select' | 'date' | 'number' | 'increment' | 'textarea' | 'phone-number' | 'auto-complete' | 'auto-complete-api';
+    /** Lista de opções para o select */
+    options?: any[];
+    /** Rota para navegação ao clicar */
+    route?: string;
+    /** Dados extras: string com caminho (ex: 'brand.id') ou objeto com caminhos (ex: { brand_id: 'brand.id' }) — resolvidos da linha atual */
+    data?: string | Record<string, any>;
     /** Texto do placeholder a ser exibido  */
     placeholder?: string;
     /** Título a ser exibido no cabeçalho  */
