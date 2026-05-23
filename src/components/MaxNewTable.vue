@@ -1,182 +1,273 @@
 <template>
-    <div class="max-table-main-div" >
-        <table v-bind="attrs" stripedRows >
-            <template v-for="name in slotNames" #[name]="slotProps" :key="name">
-                <slot :name="name" v-bind="slotProps || {}" v-if="name !== 'buttons'"></slot>
-                <Column header="" v-if="slotNames.includes('buttons')" :style="`width: ${width}px; max-width: ${width}px;`">
-                    <template #body="{ data, index }">
-                        <div class="max-table-buttons" ref="el">
-                            <slot name="buttons" v-bind="{ data, index }" ></slot>
-                        </div>
-                    </template>
-                </Column>
-            </template>
+    <div class="max-new-table-wrapper" :id="tableId">
+        <table class="max-new-table">
+            <!-- Cabeçalho -->
+            <thead class="max-new-table-head">
+                <tr class="max-new-table-head-row">
+                    <th
+                        v-for="col in columns"
+                        :key="col.field"
+                        class="max-new-table-th"
+                        :style="getColumnStyle(col)"
+                    >
+                        <!-- Slot para customizar o cabeçalho de uma coluna específica -->
+                        <slot :name="`header-${col.field}`" :column="col">
+                            {{ col.header }}
+                        </slot>
+                    </th>
+                    <!-- Coluna extra para botões de ação -->
+                    <th
+                        v-if="hasButtons"
+                        class="max-new-table-th max-new-table-th-buttons"
+                        :style="buttonsWidth ? `width: ${buttonsWidth}; max-width: ${buttonsWidth};` : undefined"
+                    >
+                        <slot name="buttons-header">
+                            <!-- Vazio por padrão -->
+                        </slot>
+                    </th>
+                </tr>
+            </thead>
+
+            <!-- Corpo -->
+            <tbody class="max-new-table-body">
+                <template v-if="normalizedList.length > 0">
+                    <tr
+                        v-for="(row, index) in normalizedList"
+                        :key="index"
+                        class="max-new-table-row"
+                        :class="{ 'max-new-table-row-even': index % 2 === 0, 'max-new-table-row-odd': index % 2 !== 0 }"
+                    >
+                        <td
+                            v-for="col in columns"
+                            :key="col.field"
+                            class="max-new-table-td"
+                            :style="getColumnStyle(col)"
+                        >
+                            <!-- Se a coluna tem slot customizado, usa ele -->
+                            <slot
+                                v-if="col.slot"
+                                :name="col.slot"
+                                :data="row"
+                                :value="getFieldValue(row, col.field)"
+                                :index="index"
+                                :field="col.field"
+                            >
+                                {{ getFieldValue(row, col.field) }}
+                            </slot>
+                            <!-- Senão exibe o valor diretamente -->
+                            <template v-else>
+                                {{ getFieldValue(row, col.field) }}
+                            </template>
+                        </td>
+                        <!-- Coluna de botões -->
+                        <td
+                            v-if="hasButtons"
+                            class="max-new-table-td max-new-table-buttons"
+                        >
+                            <slot name="buttons" :data="row" :index="index"></slot>
+                        </td>
+                    </tr>
+                </template>
+
+                <!-- Estado vazio -->
+                <tr v-else class="max-new-table-row max-new-table-empty">
+                    <td :colspan="totalColspan" class="max-new-table-td max-new-table-empty-cell">
+                        <slot name="empty">
+                            {{ emptyMessage }}
+                        </slot>
+                    </td>
+                </tr>
+            </tbody>
         </table>
     </div>
 </template>
 
 <script setup lang="ts">
-    import DataTable from 'primevue/datatable';
-    import Column from 'primevue/column';
-    import { useAttrs, useSlots, computed, ref, useTemplateRef, watch } from 'vue';
-    import { useElementSize } from '@maxvue/max-use';
+    import type { TableColumn } from '../types';
+    import { computed, useSlots } from 'vue';
+    import { ulid } from '@maxvue/max-use';
 
-    const attrs = useAttrs();
-    const slots: Record<string, any> = useSlots() as Record<string, any>;
+    const props = withDefaults(
+        defineProps<{
+            /** Lista de valores para preencher a tabela */
+            list: any[] | Record<string, any>;
+            /** Definição das colunas */
+            columns: TableColumn[];
+            /** Identificador único da tabela */
+            id?: string;
+            /** Mensagem exibida quando a lista está vazia */
+            emptyMessage?: string;
+            /** Largura da coluna de botões (ex: '120px') */
+            buttonsWidth?: string;
+        }>(),
+        {
+            list: () => [],
+            columns: () => [],
+            emptyMessage: 'Nenhum registro encontrado'
+        }
+    );
 
-    const slotNames = computed<string[]>(() => Object.keys(slots || {}));
+    const slots = useSlots();
+    const tableId = computed(() => props.id ?? ulid());
 
-    const el = useTemplateRef('el');
-    const width = ref(1);
-    const { width: calculated_width } = useElementSize(el as any);
+    /** Verifica se o slot de botões foi fornecido */
+    const hasButtons = computed(() => !!slots['buttons']);
 
-    watch(calculated_width, () => {
-        if (calculated_width.value === 0) return;
-        if (width.value > 1) return;
-        else if (width.value === 1 && calculated_width.value > 0) width.value = calculated_width.value + 10;
-    }, { immediate: true });
+    /** Total de colunas para o colspan do estado vazio */
+    const totalColspan = computed(() => props.columns.length + (hasButtons.value ? 1 : 0));
 
-    defineExpose({
-        width
+    /** Normaliza a lista: se for Record converte para array */
+    const normalizedList = computed<any[]>(() => {
+        if (Array.isArray(props.list)) return props.list;
+        return Object.values(props.list);
     });
 
+    /** Acessa o valor de um campo, suportando notação com ponto (ex: 'user.name') */
+    function getFieldValue(row: any, field: string): any {
+        return field.split('.').reduce((obj, key) => obj?.[key], row);
+    }
+
+    /** Gera o estilo inline de uma coluna baseado nas suas propriedades */
+    function getColumnStyle(col: TableColumn): Record<string, string> {
+        const style: Record<string, string> = {};
+        if (col.width) {
+            style.width = col.width;
+            style.maxWidth = col.width;
+        }
+        if (col.minWidth) style.minWidth = col.minWidth;
+        if (col.maxWidth) style.maxWidth = col.maxWidth;
+        if (col.align) style.textAlign = col.align;
+        return style;
+    }
+
+    defineExpose({ tableId });
 </script>
 
 
 <style lang="scss">
-.max-table-main-div {
+.max-new-table-wrapper {
     border-radius: 1rem;
-    overflow: hidden !important;
+    overflow: hidden;
     max-height: 100%;
     width: 100%;
     height: 100%;
-    border: 1px solid var(--background-300) !important;
+    border: 1px solid var(--background-300);
     position: relative;
+    display: grid;
+    grid-template-rows: 1fr;
+}
 
-    .p-datatable {
+.max-new-table {
+    width: 100%;
+    height: 100%;
+    border-collapse: collapse;
+    display: grid;
+    grid-template-rows: auto 1fr;
+}
+
+// CABEÇALHO
+.max-new-table-head {
+    display: grid;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+
+    .max-new-table-head-row {
+        display: flex;
+        height: 40px;
+        padding: 0 6px;
+        gap: 6px;
+        background-color: var(--blue-800);
+    }
+
+    .max-new-table-th {
+        padding: 0;
+        background-color: transparent;
+        color: var(--blue-200);
+        font-family: Jost, sans-serif;
+        font-weight: 400;
+        flex-grow: 1;
+        border: none;
         height: 100%;
+        display: grid;
+        place-items: center;
+        text-align: center;
+    }
 
-        .p-datatable-table-container {
-            height: 100%;
-            background-color: transparent;
-            display: grid;
-            padding: 0;
+    .max-new-table-th-buttons {
+        flex-grow: 0;
+        width: auto;
+    }
+}
 
-            table {
-                padding: 0 !important;
-                display: grid !important;
-                grid-template-rows: 40px 1fr;
-                height: 100% !important;
-                width: 100% !important;
+// CORPO DA TABELA
+.max-new-table-body {
+    display: grid;
+    align-content: start;
+    overflow-y: auto;
+    font-family: Jost, sans-serif;
 
-                thead {
-                    height: 100% !important;
-                    width: 100% !important;
-                    z-index: 1 !important;
-                    font-family: Jost, sans-serif;
-                    display: grid;
-                    background-color: transparent !important;
+    .max-new-table-row {
+        display: flex;
+        width: 100%;
+        height: auto;
+        gap: 0 6px;
+        padding: 3px 6px;
 
-                    tr {
-                        position: sticky !important;
-                        height: 40px !important;
-                        min-width: 100% !important;
-                        display: flex;
-                        padding: 0 6px !important;
-                        gap: 6px;
-                        background-color: var(--blue-800) !important;
+        &:first-of-type {
+            padding-top: 6px;
+        }
 
-                        th {
-                            padding: 0;
-                            background-color: transparent !important;
-                            color: var(--blue-200) !important;
-                            position: relative;
-                            font-weight: 400 !important;
-                            flex-grow: 1;
-                            border: none !important;
-                            height: 100%;
+        &:last-of-type {
+            padding-bottom: 6px;
+        }
 
-                            .p-datatable-column-header-content {
-                                position: relative;
-                                display: grid;
-                                grid-template-columns: 1fr !important;
-                                height: 100%;
-                                place-items: center;
-                                width: 100%;
+        // Linhas listradas
+        &.max-new-table-row-even {
+            background-color: var(--primary-25);
+        }
 
-                                .p-datatable-column-title {
-                                    width: 100%;
-                                    height: 100%;
-                                    text-align: center;
-                                    display: grid;
-                                    place-items: center;
-                                }
-                            }
-                        }
-                    }
-                }
+        &.max-new-table-row-odd {
+            background-color: var(--primary-100);
+        }
+    }
 
-                // LINHAS COM OS DADOS
-                tbody {
-                    width: 100% !important;
-                    z-index: 1 !important;
-                    font-family: Jost, sans-serif;
-                    display: grid;
+    .max-new-table-td {
+        flex-grow: 1;
+        padding: 0;
+        display: grid;
+        place-items: center;
+        outline: none;
+        border: none;
+        border-radius: 0;
 
-                    tr {
-                        width: 100% !important;
-                        display: flex;
-                        height: auto !important;
-                        gap: 0 6px;
-                        padding: 3px 6px !important;
+        // Quando inputs estão dentro da célula
+        .max-input-main-div {
+            grid-template-rows: 1fr;
 
-                        &:first-of-type {
-                            padding-top: 6px !important;
-                        }
-
-                        &:last-of-type {
-                            padding-bottom: 6px !important;
-                        }
-
-                        // LINHA IMPAR
-                        &.p-row-even {
-                            background-color: var(--primary-25) !important;
-                        }
-
-                        // LINHA PAR
-                        &.p-row-odd {
-                            background-color: var(--primary-100) !important;
-                        }
-
-                        td {
-                            flex-grow: 1;
-                            padding: 0 !important;
-                            display: grid;
-                            place-items: center;
-                            outline: none !important;
-                            border: none !important;
-                            border-radius: 0 !important;
-
-                            .max-input-main-div {
-                                grid-template-rows: 1fr !important;
-
-                                .message-spacer, .input-message {
-                                    display: none !important;
-                                }
-                            }
-                        }
-
-                        .max-table-buttons {
-                            display: flex;
-                            flex-direction: row;
-                            gap: 8px;
-                            width: auto;
-                            padding: 0 6px;
-                        }
-                    }
-                }
+            .message-spacer, .input-message {
+                display: none;
             }
         }
+    }
+
+    // Botões de ação
+    .max-new-table-buttons {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+        width: auto;
+        flex-grow: 0;
+        padding: 0 6px;
+    }
+
+    // Estado vazio
+    .max-new-table-empty-cell {
+        padding: 24px;
+        text-align: center;
+        color: var(--text-400);
+        font-style: italic;
     }
 }
 </style>

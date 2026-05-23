@@ -58,4 +58,23 @@ export interface SelectGroupOptions extends Array<SelectGroupOptionsElement> {
 }
 export interface SelectOptions extends Array<SelectItem> {
 }
+/**
+ * Definição de uma coluna para o componente MaxNewTable.
+ */
+export interface TableColumn {
+    /** Texto do cabeçalho da coluna */
+    header: string;
+    /** Campo do objeto a ser exibido na célula */
+    field: string;
+    /** Nome do slot customizado para renderizar o conteúdo da célula */
+    slot?: string;
+    /** Largura da coluna (ex: '100px', '20%') */
+    width?: string;
+    /** Largura mínima da coluna */
+    minWidth?: string;
+    /** Largura máxima da coluna */
+    maxWidth?: string;
+    /** Alinhamento do conteúdo da célula */
+    align?: 'left' | 'center' | 'right';
+}
 //# sourceMappingURL=index.d.ts.map
