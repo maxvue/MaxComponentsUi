@@ -1,6 +1,6 @@
 <template>
     <InputBase v-bind="props" class="if" :value="temp_value" :done="isDone" :error="props.error" :caution="caution">
-        <AutoComplete v-bind="props" optionLabel="name" :suggestions="filtered_values" @complete="search" :forceSelection="true" :virtualScrollerOptions="{ itemSize: 40 }" v-model="temp_value" :placeholder="props.placeholder ?? 'SELECIONE'" @blur="isDone = testIsDone()" >
+        <AutoComplete v-bind="props" :optionLabel="props.optionLabel" :suggestions="filtered_values" @complete="search" :forceSelection="true" :virtualScrollerOptions="{ itemSize: 40 }" v-model="temp_value" :placeholder="props.placeholder ?? 'SELECIONE'" @blur="isDone = testIsDone()" >
             <template #option="slotProps">
                 <div class="autocomplete-item-select">
                     <div class="autocomplete-item-select-label">{{ slotProps.option[props.optionLabel ?? 'label'] ?? slotProps.option.label }}</div>
@@ -40,7 +40,7 @@
             caution?: string | boolean | undefined;
             required?: boolean;
         }>(),
-        { modelValue: '', options: () => [], done: undefined, error: undefined, required: false, caution: undefined }
+        { modelValue: '', options: () => [], done: undefined, error: undefined, required: false, caution: undefined, optionLabel: 'name' }
     );
 
     const list = computed(() => props.options ?? []);

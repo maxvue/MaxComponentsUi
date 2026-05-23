@@ -1,6 +1,6 @@
 <template>
     <InputBase v-bind="props" :done="isDone" :error="props.error" :caution="props.caution">
-        <AutoComplete optionLabel="label" :suggestions="filtered_values" @complete="search" :forceSelection="true" :virtualScrollerOptions="{ itemSize: 40 }" v-model="temp_value" :placeholder="props.placeholder ?? 'SELECIONE'" @blur="isDone = testIsDone()" >
+        <AutoComplete optionLabel="label" :suggestions="filtered_values" @complete="search" :virtualScrollerOptions="{ itemSize: 40 }" v-model="temp_value" :placeholder="props.placeholder ?? 'SELECIONE'" @blur="isDone = testIsDone()" >
             <template #option="slotProps">
                 <div class="autocomplete-item-select">
                     <div class="autocomplete-item-select-label">{{ slotProps.option.model }}</div>
@@ -17,14 +17,12 @@
      * Componente Autocomplete que busca sugestões de uma API.
      * Integra-se com as rotas do backend Max para busca dinâmica.
      */
-    import { hasContent, toSearchableString, apiGetRoute, toArray, isBlank, size } from '@maxvue/max-use';
+    import { hasContent, toSearchableString, getCachedApi, toArray, isBlank, size } from '@maxvue/max-use';
     import type { Ref } from 'vue';
     import { ref, computed, watch } from 'vue';
     import InputBase from './InputBase.vue';
     import AutoComplete from 'primevue/autocomplete';
     import type { AutoCompleteProps } from 'primevue/autocomplete';
-
-    const tst = ref();
 
     interface props extends AutoCompleteProps {
         route: string;
@@ -63,7 +61,10 @@
 
     watch( () => props.data, (value) => {
         if (hasContent(value)) {
-            apiGetRoute(props.route, { ...(props.data ?? {}), input_value: temp_value.value }).then((res: any) => {
+            console.log('changed here');
+
+            getCachedApi(props.route, { ...(props.data ?? {}), input_value: temp_value.value }).then((res: any) => {
+                console.log('Is Done here');
                 if (isBlank(res) || size(res) === 0) return;
                 list.value = res;
             });

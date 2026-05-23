@@ -142,6 +142,11 @@
     display: grid !important;
     grid-template-rows: 36px 19px;
 
+    /* Override do z-index do PrimeVue (.p-inputicon) que sobrepõe o MaxPopover */
+    .p-inputicon {
+        z-index: unset;
+    }
+
     .max-input-label {
         &.active {
             top: 0;
