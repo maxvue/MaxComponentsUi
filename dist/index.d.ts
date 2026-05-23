@@ -50,7 +50,7 @@ export { default as MaxLogo } from './components/MaxLogo.vue';
 export { default as MaxMaps } from './components/MaxMaps.vue';
 export { default as MaxPdfView } from './components/MaxPdfView.vue';
 export { default as MaxTable } from './components/MaxTable.vue';
-export { default as MaxNewTable } from './components/MaxNewTable.vue';
+export { default as MaxTableFields } from './components/MaxTableFields.vue';
 export { default as MaxMsgLabels } from './components/MaxMsgLabels.vue';
 export { default as MaxTextInputFloatLabel } from './components/MaxTextInputFloatLabel.vue';
 export { default as MaxTransitionFadeLight } from './components/MaxTransitionFadeLight.vue';

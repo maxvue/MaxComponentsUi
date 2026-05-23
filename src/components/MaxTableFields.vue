@@ -4,23 +4,13 @@
             <!-- Cabeçalho -->
             <thead class="max-new-table-head">
                 <tr class="max-new-table-head-row">
-                    <th
-                        v-for="col in columns"
-                        :key="col.field"
-                        class="max-new-table-th"
-                        :style="getColumnStyle(col)"
-                    >
-                        <!-- Slot para customizar o cabeçalho de uma coluna específica -->
+                    <th v-for="col in columns" :key="col.field" class="max-new-table-th" :style="getColumnStyle(col)" >
                         <slot :name="`header-${col.field}`" :column="col">
                             {{ col.header }}
                         </slot>
                     </th>
                     <!-- Coluna extra para botões de ação -->
-                    <th
-                        v-if="hasButtons"
-                        class="max-new-table-th max-new-table-th-buttons"
-                        :style="buttonsWidth ? `width: ${buttonsWidth}; max-width: ${buttonsWidth};` : undefined"
-                    >
+                    <th v-if="hasButtons" class="max-new-table-th max-new-table-th-buttons" :style="buttonsWidth ? `width: ${buttonsWidth}; max-width: ${buttonsWidth};` : undefined" >
                         <slot name="buttons-header">
                             <!-- Vazio por padrão -->
                         </slot>
@@ -31,19 +21,9 @@
             <!-- Corpo -->
             <tbody class="max-new-table-body">
                 <template v-if="normalizedList.length > 0">
-                    <tr
-                        v-for="(row, index) in normalizedList"
-                        :key="index"
-                        class="max-new-table-row"
-                        :class="{ 'max-new-table-row-even': index % 2 === 0, 'max-new-table-row-odd': index % 2 !== 0 }"
-                    >
-                        <td
-                            v-for="col in columns"
-                            :key="col.field"
-                            class="max-new-table-td"
-                            :style="getColumnStyle(col)"
-                        >
-                            <!-- Se a coluna tem slot customizado, usa ele -->
+                    <tr v-for="(row, index) in normalizedList" :key="index" class="max-new-table-row" :class="{ 'max-new-table-row-even': index % 2 === 0, 'max-new-table-row-odd': index % 2 !== 0 }" >
+                        <td v-for="col in columns" :key="col.field" class="max-new-table-td" :style="getColumnStyle(col)" >
+
                             <slot
                                 v-if="col.slot"
                                 :name="col.slot"
@@ -101,7 +81,7 @@
             buttonsWidth?: string;
         }>(),
         {
-            list: () => [],
+            list: () => ({}),
             columns: () => [],
             emptyMessage: 'Nenhum registro encontrado'
         }

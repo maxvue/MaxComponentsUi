@@ -27,4 +27,4 @@ type __VLS_WithTemplateSlots<T, S> = T & {
         $slots: S;
     };
 };
-//# sourceMappingURL=MaxNewTable.vue.d.ts.map
+//# sourceMappingURL=MaxTableFields.vue.d.ts.map
