@@ -10,6 +10,7 @@
             <MaxIcon icon="loading" :size="props.size ?? props.sizeIcon ?? props.iconSize ?? '1'" class="content-button-icon" flex />
         </template>
     </Button>
+
     <MaxIconButton  v-bind="{...props, ...attrs}" v-else />
 </template>
 
