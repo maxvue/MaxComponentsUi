@@ -52,3 +52,4 @@ ehthumbs.db
 
 # Playground
 playground/dist/
+playground/.valet-phoenix.json
