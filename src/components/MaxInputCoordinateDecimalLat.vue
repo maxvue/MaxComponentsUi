@@ -57,7 +57,7 @@
 
     const error = computed(() => {
         if (isBlank(temp_value.value) && props.required) return 'Campo obrigatório';
-        if (!done.value) return 'Longitude inválida.';
+        if (!done.value) return 'Latitude inválida.';
         return false;
     });
 

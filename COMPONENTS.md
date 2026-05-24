@@ -331,12 +331,39 @@ Possui validação de **dígito verificador** integrada.
 
 ### MaxInputDatePicker
 
-Selecionador de data baseado no DatePicker do PrimeVue.
+Selecionador de data baseado no **DatePicker do PrimeVue** com conversão automática entre `string` e `Date`.
+Formato de saída: `YYYY-MM-DD HH:mm:ss`. Validação de obrigatoriedade ao perder o foco.
 
 **Arquivo:** [`src/components/MaxInputDatePicker.vue`](src/components/MaxInputDatePicker.vue)
 **Aliases:** `InputDatePicker`
 
-Herda todas as props do `InputBase` + props do DatePicker PrimeVue.
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `modelValue` | `string \| Date` | `''` | Valor da data (v-model). Aceita `Date`, `string` ISO ou `YYYY-MM-DD` |
+| `dateFormat` | `string` | `'dd/mm/yy'` | Formato de exibição no campo (sintaxe PrimeVue) |
+| `required` | `boolean` | `false` | Campo obrigatório (valida ao blur) |
+| `icon` | `string` | `'solar:calendar-line-duotone'` | Ícone do campo |
+| `done` | `boolean` | (auto) | Estado de validação manual |
+| `error` | `string \| boolean` | — | Mensagem/estado de erro |
+| `caution` | `string \| boolean` | — | Mensagem/estado de atenção |
+| + todas as props do `InputBase` e `DatePicker` PrimeVue | | |
+
+**Eventos:** `update:modelValue` (string formatada `YYYY-MM-DD HH:mm:ss`)
+
+**Funcionalidades:**
+- Conversão automática `string` → `Date` (entrada) e `Date` → `string` (saída)
+- Tratamento de strings date-only (`YYYY-MM-DD`) com `T00:00:00` para evitar interpretação UTC
+- Validação de obrigatoriedade ao perder o foco (`blur`)
+
+**Exemplo:**
+```vue
+<MaxInputDatePicker
+  v-model="dataInicio"
+  label="Data de Início"
+  required
+  dateFormat="dd/mm/yy"
+/>
+```
 
 ---
 
@@ -364,95 +391,404 @@ Campo de seleção (dropdown) com suporte a opções simples, agrupadas e carreg
 
 ### MaxInputAutoComplete
 
-Campo de autocomplete com opções locais.
+Campo de **autocomplete com busca local** (client-side). Filtra opções com normalização de acentos.
+Suporte a `subLabel` nas opções e virtualização de lista para grandes volumes.
 
 **Arquivo:** [`src/components/MaxInputAutoComplete.vue`](src/components/MaxInputAutoComplete.vue)
 **Aliases:** `InputAutoComplete`
 
-Herda props do `InputBase` + props do AutoComplete PrimeVue.
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `modelValue` | `any` | `''` | Valor selecionado (v-model) |
+| `options` | `any[]` | `[]` | Lista de opções para busca local |
+| `optionLabel` | `string` | `'name'` | Campo exibido como label da opção |
+| `optionValue` | `string` | — | Campo usado como valor da opção |
+| `placeholder` | `string` | `'SELECIONE'` | Texto de placeholder |
+| `required` | `boolean` | `false` | Campo obrigatório |
+| + todas as props do `InputBase` | | |
+
+**Eventos:** `update:modelValue` (emitido apenas quando o valor é um objeto, não string parcial)
+
+**Funcionalidades:**
+- Busca local com normalização de acentos (`toSearchableString`)
+- Suporte a `subLabel` na lista de opções (campos: `subLabel`, `sublabel` ou `sub-label`)
+- Virtualização de lista (`itemSize: 40`) para performance com muitas opções
+- `forceSelection` habilitado por padrão (só aceita valores da lista)
+
+**Exemplo:**
+```vue
+<MaxInputAutoComplete
+  v-model="cidadeSelecionada"
+  :options="listaCidades"
+  optionLabel="name"
+  label="Cidade"
+  required
+/>
+```
+
+**Formato das opções:**
+```typescript
+const listaCidades = [
+  { name: 'São Paulo', value: 'sp', subLabel: 'Capital' },
+  { name: 'Campinas', value: 'cps', subLabel: 'Interior' },
+];
+```
 
 ---
 
 ### MaxInputAutoCompleteApi
 
-Autocomplete que busca dados de uma **API externa** conforme o usuário digita.
+Autocomplete que busca sugestões de uma **API externa** via `getCachedApi`.
+As opções são carregadas reativamente quando `data` muda e filtradas localmente conforme o usuário digita.
 
 **Arquivo:** [`src/components/MaxInputAutoCompleteApi.vue`](src/components/MaxInputAutoCompleteApi.vue)
 **Aliases:** `InputAutoCompleteApi`
 
-Herda props do `InputBase` + props do AutoComplete PrimeVue.
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `modelValue` | `any` | `''` | Valor selecionado (v-model) |
+| `route` | `string` | — | **Obrigatório.** Rota da API para buscar sugestões |
+| `data` | `any` | `{}` | Dados extras enviados na requisição (reativo — recarrega ao mudar) |
+| `optionLabel` | `string` | `'label'` | Campo exibido como label da opção |
+| `optionValue` | `string` | — | Campo usado como valor da opção |
+| `delay` | `number` | `300` | Delay em ms antes de buscar |
+| `minLength` | `number` | `1` | Caracteres mínimos para iniciar busca |
+| `forceSelection` | `boolean` | `false` | Força seleção de um item da lista |
+| `multiple` | `boolean` | `false` | Permite seleção múltipla |
+| + todas as props do `InputBase` e `AutoComplete` PrimeVue | | |
+
+**Eventos:** `update:modelValue` (emitido apenas quando o valor é um objeto, não string parcial)
+
+**Funcionalidades:**
+- Carregamento reativo via `getCachedApi` com cache automático
+- Recarrega dados automaticamente quando `data` muda
+- Filtragem local após carregamento (busca em `value`, `label`, `sub_label`, `name`)
+- Exibe `model` como label principal e `sub_label` como informação secundária
+
+**Exemplo:**
+```vue
+<MaxInputAutoCompleteApi
+  v-model="inversorSelecionado"
+  route="api/inverters/search"
+  :data="{ manufacturer_id: fabricanteId }"
+  label="Inversor"
+  required
+/>
+```
 
 ---
 
 ### MaxInputCheckbox
 
-Checkbox estilizado com integração ao `InputBase`.
+Checkbox estilizado baseado no **Checkbox do PrimeVue** com label opcional.
+Layout em grid (ícone + label lado a lado).
 
 **Arquivo:** [`src/components/MaxInputCheckbox.vue`](src/components/MaxInputCheckbox.vue)
 **Aliases:** `InputCheckbox`
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `modelValue` | `boolean` | `false` | Estado do checkbox (v-model) |
+| `label` | `string` | — | Texto exibido ao lado do checkbox |
+
+**Atributos HTML especiais:**
+- `circle` — Aplica borda arredondada ao checkbox (estilo radio)
+
+**Eventos:** `update:modelValue` (`boolean`)
+
+**Exemplo:**
+```vue
+<MaxInputCheckbox v-model="aceitaTermos" label="Aceito os termos de uso" />
+
+<!-- Checkbox circular sem label -->
+<MaxInputCheckbox v-model="selecionado" circle />
+```
 
 ---
 
 ### MaxInputRadio
 
-Grupo de radio buttons.
+Radio button individual baseado no **RadioButton do PrimeVue**.
+Pode exibir label e/ou ícone ao lado. Toda a área é clicável (não apenas o círculo).
 
 **Arquivo:** [`src/components/MaxInputRadio.vue`](src/components/MaxInputRadio.vue)
 **Aliases:** `InputRadio`
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `modelValue` | `any` | `null` | Valor do grupo de radio (v-model) |
+| `value` | `any` | `null` | Valor emitido quando este radio é selecionado |
+| `name` | `string` | `'radio-group'` | Nome do grupo de radio buttons |
+
+**Atributos HTML (via `useAttrs`):**
+- `label` — Texto exibido ao lado do radio
+- `icon` — Ícone Iconify exibido ao lado
+
+**Eventos:** `update:modelValue` (`any`)
+
+**Exemplo:**
+```vue
+<MaxInputRadio v-model="tipoInstalacao" value="telhado" label="Telhado" name="tipo" />
+<MaxInputRadio v-model="tipoInstalacao" value="solo" label="Solo" name="tipo" />
+<MaxInputRadio v-model="tipoInstalacao" value="carport" label="Carport" name="tipo" />
+```
 
 ---
 
 ### MaxInputSwitch
 
-Switch (interruptor) on/off.
+Interruptor (Toggle Switch) on/off com **pergunta ou rótulo** exibido ao lado.
+Integrado ao `InputBase` para suporte a label, ícone, validação e mensagens de feedback.
 
 **Arquivo:** [`src/components/MaxInputSwitch.vue`](src/components/MaxInputSwitch.vue)
 **Aliases:** `InputSwitch`
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `modelValue` | `boolean` | `false` | Estado do switch (v-model) |
+| `question` | `string` | — | Pergunta ou rótulo exibido ao lado do switch |
+| `icon` / `i` | `string` | `'ph:toggle-right-duotone'` | Ícone do campo (exibido via InputBase) |
+| `required` | `boolean` | `false` | Campo obrigatório |
+| `done` | `boolean` | (auto) | Estado de validação manual |
+| `error` | `string \| boolean` | — | Mensagem/estado de erro |
+| `caution` | `string \| boolean` | (auto) | Mensagem/estado de atenção |
+| + todas as props do `InputBase` | | |
+
+**Eventos:** `update:modelValue` (`boolean`)
+
+**Exemplo:**
+```vue
+<MaxInputSwitch
+  v-model="possuiGerador"
+  label="Gerador"
+  question="O local possui gerador de energia?"
+/>
+```
 
 ---
 
 ### MaxInputToggle
 
-Toggle com opções visuais (botões segmentados, similar ao `SelectButton`).
+Toggle com **labels para os estados ativo e inativo** exibidos ao lado do switch.
+Ideal para seleção entre duas opções nomeadas (ex: Monofásico/Trifásico).
 
 **Arquivo:** [`src/components/MaxInputToggle.vue`](src/components/MaxInputToggle.vue)
 **Aliases:** `InputToggle`
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `modelValue` | `any` | `false` | Valor atual (v-model) |
+| `trueLabel` | `string` | — | Label exibido quando o toggle está ativo |
+| `falseLabel` | `string` | — | Label exibido quando o toggle está inativo |
+| `trueValue` | `any` | `true` | Valor emitido quando ativo |
+| `falseValue` | `any` | `false` | Valor emitido quando inativo |
+
+**Atributos HTML (via `useAttrs`):**
+- `label` — Rótulo flutuante estilo fieldset (com borda ao redor)
+- `labelCenter` — Centraliza o label horizontalmente
+- `leftalign` — Alinha o toggle à esquerda (padrão: centralizado)
+
+**Aliases de atributos:**
+- `labelTrue` / `true-label` → equivale a `trueLabel`
+- `labelFalse` / `false-label` → equivale a `falseLabel`
+
+**Eventos:** `update:modelValue` (`any`)
+
+**Exemplo:**
+```vue
+<!-- Toggle simples com labels -->
+<MaxInputToggle
+  v-model="fase"
+  trueLabel="Trifásico"
+  falseLabel="Monofásico"
+  :trueValue="3"
+  :falseValue="1"
+  label="Tipo de Fase"
+/>
+
+<!-- Toggle com valores booleanos -->
+<MaxInputToggle
+  v-model="ativo"
+  trueLabel="Ativo"
+  falseLabel="Inativo"
+/>
+```
 
 ---
 
 ### MaxInputCoordinateDecimalLat
 
-Input para **latitude** em formato decimal com validação de faixa (-90 a 90).
+Input para **latitude** em formato decimal com máscara e validação para o **território brasileiro** (faixa: -33.8 a 5.3).
 
 **Arquivo:** [`src/components/MaxInputCoordinateDecimalLat.vue`](src/components/MaxInputCoordinateDecimalLat.vue)
 **Aliases:** `InputCoordinateDecimalLat`
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `modelValue` | `string \| number` | `''` | Valor da latitude (v-model) |
+| `required` | `boolean` | `false` | Campo obrigatório |
+| `done` | `boolean` | (auto) | Estado de validação manual |
+| `error` | `string \| boolean` | (auto) | Mensagem de erro |
+| `caution` | `string \| boolean` | (auto) | Mensagem de atenção |
+| + todas as props do `InputBase` | | |
+
+**Máscara:** `33.######` (positivo) ou `-39.######` (negativo)
+**Validação:** Faixa de -33.8 a 5.3 (Brasil). Valores fora dessa faixa exibem erro.
+**Placeholder:** `00,000000`
+
+**Eventos:**
+- `update:modelValue` — Emitido ao alterar o valor
+- `complete` — Emitido quando a latitude é válida
+
+**Erros automáticos:** "Campo obrigatório", "Latitude inválida."
+
+**Exemplo:**
+```vue
+<MaxInputCoordinateDecimalLat
+  v-model="coordenadas.latitude"
+  label="Latitude"
+  icon="mdi:crosshairs-gps"
+  required
+/>
+```
 
 ---
 
 ### MaxInputCoordinateDecimalLng
 
-Input para **longitude** em formato decimal com validação de faixa (-180 a 180).
+Input para **longitude** em formato decimal com máscara e validação para o **território brasileiro** (faixa: -74 a -32.4).
 
 **Arquivo:** [`src/components/MaxInputCoordinateDecimalLng.vue`](src/components/MaxInputCoordinateDecimalLng.vue)
 **Aliases:** `InputCoordinateDecimalLng`
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `modelValue` | `string \| number` | `''` | Valor da longitude (v-model) |
+| `required` | `boolean` | `false` | Campo obrigatório |
+| `done` | `boolean` | (auto) | Estado de validação manual |
+| `error` | `string \| boolean` | (auto) | Mensagem de erro |
+| `caution` | `string \| boolean` | (auto) | Mensagem de atenção |
+| + todas as props do `InputBase` | | |
+
+**Máscara:** `-7#.######` (aceita apenas valores entre -30 e -79)
+**Validação:** Faixa de -74 a -32.4 (Brasil). Valores fora dessa faixa exibem erro.
+**Placeholder:** `00,000000`
+
+**Eventos:**
+- `update:modelValue` — Emitido ao alterar o valor (6 casas decimais)
+- `complete` — Emitido quando a longitude é válida
+
+**Erros automáticos:** "Campo obrigatório", "Longitude inválida."
+
+**Exemplo:**
+```vue
+<MaxInputCoordinateDecimalLng
+  v-model="coordenadas.longitude"
+  label="Longitude"
+  icon="mdi:crosshairs-gps"
+  required
+/>
+```
 
 ---
 
 ### MaxInputPhoneMail
 
-Input combinado para **telefone ou e-mail** com detecção automática do tipo.
+Input combinado para **telefone ou e-mail** com **detecção automática** do tipo.
+Altera máscara, ícone e validação dinamicamente conforme o conteúdo digitado.
 
 **Arquivo:** [`src/components/MaxInputPhoneMail.vue`](src/components/MaxInputPhoneMail.vue)
 **Aliases:** `InputPhoneMail`
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `modelValue` | `string` | `''` | Valor do campo (v-model) |
+| `required` | `boolean` | `false` | Campo obrigatório |
+| `done` | `boolean` | (auto) | Estado de validação manual |
+| `error` | `string \| boolean` | — | Mensagem de erro |
+| `caution` | `string \| boolean` | (auto) | Mensagem de atenção |
+| + todas as props do `InputBase` | | |
+
+**Atributos HTML (via `useAttrs`):**
+- `phone` / `whatsapp` / `zap` — Força modo telefone
+- `email` / `e-mail` / `mail` — Força modo email
+- `errMsg` / `error_message` / `error_msg` — Mensagem de erro personalizada
+
+**Detecção automática:**
+- Se o valor contém **mais de 1 letra** → modo email (ícone `prime:at`)
+- Se o valor contém **mais de 1 número** → modo telefone (ícone `ic:baseline-whatsapp`)
+
+**Máscaras:**
+- Telefone celular: `+55 (##) 9 #### - ####`
+- Telefone fixo: `+55 (##) #### - ####`
+- Email: sem máscara (texto livre)
+
+**Validação:**
+- Telefone: via `libphonenumber-js` (validação internacional)
+- Email: via regex (`/^[^\s@]+@[^\s@]+\.[^\s@]+$/`)
+
+**Eventos:** `update:modelValue` (`string`)
+
+**Erros automáticos:** "Campo obrigatório", "Valor inválido"
+
+**Exemplo:**
+```vue
+<!-- Detecção automática -->
+<MaxInputPhoneMail v-model="contato" label="Contato" required />
+
+<!-- Forçar modo WhatsApp -->
+<MaxInputPhoneMail v-model="whatsapp" whatsapp label="WhatsApp" />
+
+<!-- Forçar modo email -->
+<MaxInputPhoneMail v-model="email" email label="E-mail" />
+```
 
 ---
 
 ### MaxInputTypeAddress
 
-Input para endereço com formatação de tipo (rua, avenida, etc.).
+Select para **tipo de logradouro** (Rua, Avenida, Alameda, etc.) com **auto-detecção** baseada no nome da rua.
+Ao receber um endereço via prop `street`, identifica automaticamente o tipo pelo primeiro termo.
 
 **Arquivo:** [`src/components/MaxInputTypeAddress.vue`](src/components/MaxInputTypeAddress.vue)
 **Aliases:** `InputTypeAddress`
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `modelValue` | `string` | `''` | Tipo de logradouro selecionado (v-model) |
+| `street` | `string` | — | Endereço para auto-detecção do tipo |
+
+**Tipos suportados (12):**
+
+| Tipo | Aliases reconhecidos |
+|------|---------------------|
+| Rua | `rua`, `r` |
+| Avenida | `avenida`, `av`, `ave` |
+| Alameda | `alameda`, `al` |
+| Praça | `praca`, `pra`, `pca` |
+| Rodovia | `rodovia`, `rod` |
+| Travessa | `travessa`, `trav`, `trv` |
+| Vila | `vila`, `vl` |
+| Estrada | `estrada`, `est` |
+| Viela | `viela` |
+| Beco | `beco` |
+| Caminho | `caminho` |
+| Largo | `largo` |
+
+**Funcionalidades:**
+- Auto-detecção com normalização de acentos (ex: "praça" → "Praça")
+- Renderiza um `MaxInputSelect` internamente
+
+**Eventos:** `update:modelValue` (`string`)
+
+**Exemplo:**
+```vue
+<MaxInputTypeAddress
+  v-model="tipoLogradouro"
+  :street="enderecoCompleto"
+  label="Tipo"
+/>
+```
 
 ---
 
