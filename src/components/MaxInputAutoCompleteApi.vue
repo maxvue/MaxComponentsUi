@@ -61,8 +61,9 @@
 
     watch( () => props.data, (value) => {
         if (hasContent(value)) {
+            console.log('Is GETTING ROUTE: ' + props.route, props.data);
             getCachedApi(props.route, { ...(props.data ?? {}), input_value: temp_value.value }).then((res: any) => {
-                console.log('Is Done here');
+                console.log('Is Done here', res);
                 if (isBlank(res) || size(res) === 0) return;
                 list.value = res;
             });

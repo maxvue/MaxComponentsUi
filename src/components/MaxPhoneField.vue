@@ -1,16 +1,15 @@
 <template>
-    <InputBase class="input-phone" v-bind="props" :value="temp_value" :done="done" :error="error" :caution="caution" :label="props.noLabel ? undefined : props.label ?? ('Telefone' + String(props.noLabel)) " :icon="props.noIcon ? undefined : 'ic:baseline-whatsapp'">
+    <InputBase class="input-phone" v-bind="props" :value="temp_value" :done="done" :error="error" :caution="caution" :label="props.noLabel ? undefined : props.label ?? ('Telefone' + String(props.noLabel)) " :icon-right="props.noIcon ? undefined : 'ic:baseline-whatsapp'" >
         <div class="inputs-div">
             <Select v-model="country" :options="country_ddi_flags" filter :filterFields="['name', 'value']">
                 <template #option="slotProps">
                     <slot name="option" :option="slotProps.option" :selected="slotProps.selected" :index="slotProps.index">
-                        <div class="label_div">
+                        <div class="input-phone-label-div">
                             <img :src="'https://flagcdn.com/w40/' + slotProps.option.sigla.toLowerCase() + '.png'" alt="flag" />
                             <div class="labelz">
-                                <div pt2>{{ slotProps.option.label }}</div>
+                                <div pt2 elipsis >{{ slotProps.option.label }}</div>
                             </div>
                             <div class="subLabel">( +{{ slotProps.option?.value }} )</div>
-                            <img v-if="slotProps.option['img']" :src="`/media/images/${slotProps.option['img']}`" alt="Image" class="img-label" />
                         </div>
                     </slot>
                 </template>
@@ -19,7 +18,7 @@
                         <div class="item-flag">
                             <img :src="'https://flagcdn.com/w40/' + value.value.sigla.toLowerCase() + '.png'" alt="bandeira" flex />
                         </div>
-                        <div pl9 style="color: var(--background-600);">+ {{ value.value.value }}</div>
+                        <div style="color: var(--background-600);">+ {{ value.value.value }}</div>
                     </div>
                 </template>
             </Select>
@@ -157,7 +156,7 @@
             height: 36px;
             background-color: transparent !important;
             border: none !important;
-            width: 60px;
+            width: 80px;
 
             .p-select-label {
                 height: 36px;
@@ -165,14 +164,14 @@
 
                 .item-selected {
                     display: grid;
-                    grid-template-columns: 21px 1fr;
+                    grid-template-columns: 25px 1fr;
                     place-items: center;
                     height: 100%;
                     padding-left: 5px;
 
                     .item-flag {
-                        width: 22px;
-                        height: 13px;
+                        width: 20px;
+                        height: 14px;
                         display: grid;
                         place-items: center;
                         border-radius: 5px;
@@ -226,5 +225,49 @@
     display: grid;
     grid-template-rows: auto 1fr;
     overflow: hidden;
+}
+
+.input-phone-label-div {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    width: 100% !important;
+    place-items: center start;
+    gap: 10px;
+
+    .icon-div {
+        color: var(--background-650) !important;
+    }
+
+    &:hover {
+        .icon-div {
+            color: var(--background-650) !important;
+        }
+    }
+
+    .subLabel {
+        color: var(--background-600);
+        padding-left: 1rem;
+        text-align: right;
+        width: 100%;
+        font-size: 0.85rem;
+    }
+
+    .labelz {
+        display: grid;
+        place-items: center;
+        color: var(--background-750);
+    }
+
+    img {
+        width: 40px;
+        height: 28px;
+        border-radius: 5px;
+        border: 1px solid rgb(0 0 0 / 20%);
+    }
+}
+
+.p-select-option {
+    gap: 0 !important;
+    display: grid !important;
 }
 </style>
