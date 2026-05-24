@@ -14,6 +14,7 @@
                         <slot name="buttons-header">
                             {{props.headerButton}}
                         </slot>
+
                     </th>
                 </tr>
             </thead>
