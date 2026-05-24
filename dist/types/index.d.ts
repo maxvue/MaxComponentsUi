@@ -98,8 +98,12 @@ export interface MaxTableColumn {
     required?: boolean;
     /** Tooltip a ser exibido ao passar o mouse */
     tooltip?: boolean;
-    /** Função a ser executada quando o valor do campo mudar  */
-    onChange?: (event: any) => void;
+    /** Função a ser executada quando o valor do campo mudar */
+    action?: (data: {
+        row: any;
+        field: string;
+        value: any;
+    }) => void;
 }
 export interface MaxTableButtons {
     /** Identificador único do botão (usado como key no v-for) */

@@ -165,7 +165,8 @@
 
         if (target) {
             target[keys[keys.length - 1]] = value;
-            col?.onChange?.(value);
+
+            col?.action?.({ row, field, value });
             emit('update:field', { row, field, value });
         }
     }
