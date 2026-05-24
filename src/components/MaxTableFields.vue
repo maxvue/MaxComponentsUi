@@ -10,8 +10,10 @@
                         </slot>
                     </th>
                     <!-- Coluna extra para botões de ação -->
-                    <th v-if="hasButtons" class="max-table-fields-th max-table-fields-th-buttons" :style="buttonsWidth ? `width: ${buttonsWidth}; max-width: ${buttonsWidth};` : undefined" >
-                        <slot name="buttons-header" />
+                    <th v-if="size(props.buttons) > 0" class="max-table-fields-th max-table-fields-th-buttons" :style="`width: ${size(props.buttons) * 32}px`" >
+                        <slot name="buttons-header">
+                            {{props.headerButton}}
+                        </slot>
                     </th>
                 </tr>
             </thead>
@@ -67,8 +69,10 @@
                         </td>
 
                         <!-- Coluna de botões -->
-                        <td v-if="hasButtons" class="max-table-fields-td max-table-fields-buttons" >
-                            <slot name="buttons" :data="row" :index="index" />
+                        <td v-if="size(props.buttons) > 0" class="max-table-fields-td max-table-fields-buttons" :style="`width: ${size(props.buttons) * 32}px`" >
+                            <slot name="buttons" :data="row" :index="index">
+                                <MaxIconButton v-for="btn in props.buttons" v-bind="btn" :key="btn.id" :data="btn.data ? resolveData(row, btn.data) : row" :size="btn.size ?? 1.2" v-tooltip.left="btn.tooltip ?? null"/>
+                            </slot>
                         </td>
                     </tr>
                 </template>
@@ -87,9 +91,9 @@
 </template>
 
 <script setup lang="ts">
-    import type { MaxTableColumn } from '../types';
-    import { computed, useSlots } from 'vue';
-    import { ulid } from '@maxvue/max-use';
+    import type { MaxTableColumn, MaxTableButtons } from '../types';
+    import { computed, useSlots, type Slots, type ComputedRef } from 'vue';
+    import { ulid, size } from '@maxvue/max-use';
     // Componentes de input
     import MaxInputText from './MaxInputText.vue';
     import MaxInputNumber from './MaxInputNumber.vue';
@@ -109,12 +113,16 @@
             list: any[] | Record<string, any>;
             /** Definição das colunas */
             columns: MaxTableColumn[];
+            /** Texto do cabeçalho de ações */
+            headerButton?: string;
             /** Identificador único da tabela */
             id?: string;
             /** Mensagem exibida quando a lista está vazia */
             emptyMessage?: string;
             /** Largura da coluna de botões (ex: '120px') */
             buttonsWidth?: string;
+            /** Lista de botões */
+            buttons?: MaxTableButtons[];
         }>(),
         {
             list: () => ({}),
@@ -123,14 +131,14 @@
         }
     );
 
-    const slots = useSlots();
+    const slots: Slots = useSlots();
     const tableId = computed(() => props.id ?? ulid());
 
     /** Verifica se o slot de botões foi fornecido */
-    const hasButtons = computed(() => !!slots['buttons']);
+    const hasButtons: ComputedRef<boolean> = computed((): boolean => !!slots['buttons']);
 
     /** Total de colunas para o colspan do estado vazio */
-    const totalColspan = computed(() => props.columns.length + (hasButtons.value ? 1 : 0));
+    const totalColspan: ComputedRef<number> = computed((): number => props.columns.length + (hasButtons.value ? 1 : 0));
 
     const emit = defineEmits<{
         /** Emitido quando o valor de um campo é alterado */
@@ -207,9 +215,6 @@
         if (col.minWidth) style.minWidth = getCssSize(col.minWidth);
         if (col.maxWidth) style.maxWidth = getCssSize(col.maxWidth);
         if (col.align) style.textAlign = col.align;
-
-
-        console.log('STYLE', style);
 
         return style;
     }

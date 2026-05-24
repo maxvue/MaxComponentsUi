@@ -13,6 +13,7 @@ interface btnProps extends /* @vue-ignore */ ButtonProps {
     dark?: boolean | string | number | undefined;
     light?: boolean | string | number | undefined;
     label: string | undefined;
+    action?: () => void;
 }
 declare function __VLS_template(): {
     attrs: Partial<{}>;

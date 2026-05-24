@@ -106,3 +106,26 @@ export interface MaxTableColumn {
     /** Função a ser executada quando o valor do campo mudar  */
     onChange?: (event: any) => void;
 }
+
+export interface MaxTableButtons {
+    /** Identificador único do botão (usado como key no v-for) */
+    id?: string | number;
+    /** Tamanho do ícone do botão */
+    size?: number | string;
+    icon?: string;
+    i?: string;
+    iconLeft?: string;
+    iconRight?: string;
+    sizeIcon?: number | string;
+    iconSize?: number | string;
+    route?: string | null;
+    params?: any;
+    data?: any;
+    query?: any;
+    dark?: boolean | string | number | undefined;
+    light?: boolean | string | number | undefined;
+    label?: string | undefined;
+    tooltip?: string | null;
+    /** Função a ser executada ao clicar no botão */
+    action?: (data?: any) => void;
+}

@@ -37,6 +37,7 @@
         dark?: boolean | string | number | undefined;
         light?: boolean | string | number | undefined;
         label: string | undefined;
+        action?: () => void;
     }
 
 
@@ -61,10 +62,14 @@
     }>();
 
     const onClick = () => {
-        console.log(312);
         if (props.route) {
             console.log('goingToRoute', props.route);
             goToRoute(props.route, { ...(props.params ?? {}), ...(props.data ?? {}), ...(props.query ?? {}) });
+            return;
+        }
+
+        if (props.action) {
+            props.action();
             return;
         }
 
