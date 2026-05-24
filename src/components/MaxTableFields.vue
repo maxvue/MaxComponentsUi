@@ -101,6 +101,7 @@
     import MaxInputAutoCompleteApi from './MaxInputAutoCompleteApi.vue';
     import MaxPhoneField from './MaxPhoneField.vue';
     import MaxIconButton from './MaxIconButton.vue';
+    import { getCssSize } from '../helpers/getCssSize';
 
     const props = withDefaults(
         defineProps<{
@@ -181,26 +182,35 @@
      */
     function resolveData(row: any, data: any): any {
         if (!data) return data;
-        if (typeof data === 'string') return getFieldValue(row, data) ?? data;
+        if (typeof data === 'string') return getFieldValue(row, data);
         if (typeof data === 'object' && !Array.isArray(data)) {
             const resolved: Record<string, any> = {};
-            for (const key in data) resolved[key] = typeof data[key] === 'string' ? (getFieldValue(row, data[key]) ?? data[key]) : data[key];
+            for (const key in data) resolved[key] = typeof data[key] === 'string' ? (getFieldValue(row, data[key])) ?? data[key] : data[key];
 
-            return resolved ?? data;
+
+            return resolved;
         }
         return data;
     }
 
     /** Gera o estilo inline de uma coluna baseado nas suas propriedades */
-    function getColumnStyle(col: MaxTableColumn): Record<string, string> {
-        const style: Record<string, string> = {};
+    function getColumnStyle(col: MaxTableColumn): Record<string, any> {
+        const style: Record<string, any> = { ...(col.style ?? {}) };
         if (col.width) {
-            style.width = col.width;
-            style.maxWidth = col.width;
+            style.width = getCssSize(col.width);
+            style.maxWidth = getCssSize(col.width);
         }
-        if (col.minWidth) style.minWidth = col.minWidth;
-        if (col.maxWidth) style.maxWidth = col.maxWidth;
+        if (col.size) {
+            style.width = getCssSize(col.size);
+            style.maxWidth = getCssSize(col.size);
+        }
+        if (col.minWidth) style.minWidth = getCssSize(col.minWidth);
+        if (col.maxWidth) style.maxWidth = getCssSize(col.maxWidth);
         if (col.align) style.textAlign = col.align;
+
+
+        console.log('STYLE', style);
+
         return style;
     }
 

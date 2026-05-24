@@ -79,6 +79,8 @@ export interface MaxTableColumn {
     minWidth?: string;
     /** Largura máxima da coluna */
     maxWidth?: string;
+    /** Largura máxima da coluna */
+    size?: string;
     /** Alinhamento do conteúdo da célula */
     align?: 'left' | 'center' | 'right';
     /** Tipo de input a ser renderizado na célula */
@@ -94,7 +96,7 @@ export interface MaxTableColumn {
     /** Título a ser exibido no cabeçalho  */
     title?: string;
     /** Estilo a ser exibido no cabeçalho  */
-    style?: string | object;
+    style?: object;
     /** Classe a ser exibido no cabeçalho  */
     class?: string | object;
     /** Indica se o campo é obrigatório  */

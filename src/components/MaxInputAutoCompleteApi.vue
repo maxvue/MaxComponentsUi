@@ -61,8 +61,6 @@
 
     watch( () => props.data, (value) => {
         if (hasContent(value)) {
-            console.log('changed here', props.data);
-
             getCachedApi(props.route, { ...(props.data ?? {}), input_value: temp_value.value }).then((res: any) => {
                 console.log('Is Done here');
                 if (isBlank(res) || size(res) === 0) return;
