@@ -155,6 +155,7 @@
     /** Acessa o valor de um campo, suportando notação com ponto (ex: 'user.name') */
     function getFieldValue(row: any, field: string): any {
         return field.split('.').reduce((obj, key) => obj?.[key], row);
+
     }
 
     /** Define o valor de um campo no objeto da linha, suportando notação com ponto */
