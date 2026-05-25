@@ -17,7 +17,7 @@
      * Componente Autocomplete que busca sugestões de uma API.
      * Integra-se com as rotas do backend Max para busca dinâmica.
      */
-    import { hasContent, toSearchableString, getCachedApi, toArray, isBlank, size } from '@maxvue/max-use';
+    import { hasContent, toSearchableString, getCachedApi, toArray, isBlank, size, isEqual } from '@maxvue/max-use';
     import type { Ref } from 'vue';
     import { ref, computed, watch } from 'vue';
     import InputBase from './InputBase.vue';
@@ -59,16 +59,14 @@
     const temp_value: Ref = ref(props.modelValue);
     const list: Ref<any[]> = ref([]);
 
-    watch( () => props.data, (value) => {
-        if (hasContent(value)) {
-            console.log('Is GETTING ROUTE: ' + props.route, props.data);
-            getCachedApi(props.route, { ...(props.data ?? {}), input_value: temp_value.value }).then((res: any) => {
-                console.log('Is Done here', res);
-                if (isBlank(res) || size(res) === 0) return;
-                list.value = res;
-            });
-            return;
-        }
+    watch( () => props.data, (newValue, oldValue) => {
+        if (isBlank(newValue) || isEqual(newValue, oldValue)) return;
+
+        getCachedApi(props.route, { ...(props.data ?? {}), input_value: temp_value.value }).then((res: any) => {
+            if (isBlank(res) || size(res) === 0) return;
+            list.value = res;
+        });
+        return;
     }, { deep: true, immediate: true } );
 
     const filtered_values: Ref<any[]> = ref([]);

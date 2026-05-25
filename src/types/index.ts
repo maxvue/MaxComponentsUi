@@ -129,3 +129,25 @@ export interface MaxTableButtons {
     /** Função a ser executada ao clicar no botão */
     action?: (data?: any) => void;
 }
+
+export type DBFile = {
+    id: string;
+    name?: string | null;
+    file_name: string | null;
+    label_file_name: string | null;
+    extension: string | null;
+    thumbnail: string | null;
+    disk: string | null;
+    blob?: any;
+    objectURL?: string | null;
+    src?: string | null;
+    file_bloob?: string | null;
+    message_type?: string | null;
+    data_ai_a: object | null;
+    pdf_count_pages: number | null;
+    error_pdf: boolean | null;
+    image_inspection: boolean;
+    is_send_to_project: boolean | null;
+    type: string;
+    in_server: boolean | null;
+};

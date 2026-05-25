@@ -165,129 +165,110 @@
 </script>
 
 <style lang="scss">
-    .select_input_div {
-        &[small] {
-            padding: 0 !important;
-
-            .p-select {
-                padding: 0 5px 0 0 !important;
-
-                span {
-                    font-size: 0.85rem !important;
-
-                    // color: var(--background-600) !important;
-                }
-            }
-        }
+.select_input_div {
+    &[small] {
+        padding: 0 !important;
 
         .p-select {
-            width: 100%;
-            height: 36px !important;
-        }
+            padding: 0 5px 0 0 !important;
 
-        .p-select-label {
-            border: none !important;
-            padding: 0 10px !important;
-            display: grid;
-            place-items: center start;
-            outline: none !important;
-            height: 36px !important;
+            span {
+                font-size: 0.85rem !important;
 
-            &:focus {
-                border: none !important;
-                outline: none !important;
-                outline-offset: 0 !important;
-                box-shadow: none;
+                // color: var(--background-600) !important;
             }
-        }
-
-        .placeholder-select {
-            position: absolute;
-            color: var(--background-600);
-            font-size: 0.9rem;
         }
     }
 
-    .label_div {
-        display: grid;
-        grid-template-columns: auto 1fr auto;
-        width: 100% !important;
-        place-items: center start;
-        gap: 10px;
+    .p-select {
+        width: 100%;
+        height: 36px !important;
+    }
 
+    .p-select-label {
+        border: none !important;
+        padding: 0 10px !important;
+        display: grid;
+        place-items: center start;
+        outline: none !important;
+        height: 36px !important;
+
+        &:focus {
+            border: none !important;
+            outline: none !important;
+            outline-offset: 0 !important;
+            box-shadow: none;
+        }
+    }
+
+    .placeholder-select {
+        position: absolute;
+        color: var(--background-600);
+        font-size: 0.9rem;
+    }
+}
+
+.label_div {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    width: 100% !important;
+    place-items: center start;
+    gap: 10px;
+
+    .icon-div {
+        color: var(--background-650) !important;
+    }
+
+    &:hover {
         .icon-div {
             color: var(--background-650) !important;
         }
-
-        &:hover {
-            .icon-div {
-                color: var(--background-650) !important;
-            }
-        }
-
-        .subLabel {
-            color: var(--background-600);
-            padding-left: 1rem;
-            text-align: right;
-            width: 100%;
-            font-size: 0.85rem;
-        }
-
-        .labelz {
-            display: grid;
-            place-items: center;
-            color: var(--background-750);
-        }
-
-        img {
-            max-height: 20px;
-        }
     }
 
-    .value-div {
+    .subLabel {
+        color: var(--background-600);
+        padding-left: 1rem;
+        text-align: right;
+        width: 100%;
+        font-size: 0.85rem;
+    }
+
+    .labelz {
         display: grid;
-        grid-template-columns: auto 1fr;
         place-items: center;
-
-        .value-text {
-            color: var(--background-750);
-        }
+        color: var(--background-750);
     }
 
-    .p-select-list-container {
-        .p-virtualscroller {
-            max-height: 250px !important;
-            overflow: hidden !important;
-            overflow-y: auto !important;
-        }
+    img {
+        max-height: 20px;
     }
+}
 
-    .p-select-option {
-        &:hover {
-            background-color: var(--background-300) !important;
+.value-div {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    place-items: center;
 
-            &.p-select-option-selected {
-                background-color: var(--blue-700) !important;
-                color: var(--background-0) !important;
+    .value-text {
+        color: var(--background-750);
+    }
+}
 
-                .icon-div {
-                    color: var(--background-200) !important;
-                }
+.p-select-list-container {
+    .p-virtualscroller {
+        max-height: 250px !important;
+        overflow: hidden !important;
+        overflow-y: auto !important;
+    }
+}
 
-                .labelz,
-                .subLabel {
-                    color: var(--background-0);
-                }
-            }
-        }
+.p-select-option {
+    &:hover {
+        background-color: var(--background-300) !important;
 
-        // SEM MOUSE EM CIMA
         &.p-select-option-selected {
-            background-color: var(--blue-600) !important;
-
-            &:hover {
-                background-color: var(--blue-700) !important;
-            }
+            background-color: var(--blue-700) !important;
+            color: var(--background-0) !important;
 
             .icon-div {
                 color: var(--background-200) !important;
@@ -298,28 +279,54 @@
                 color: var(--background-0);
             }
         }
+    }
+
+    // SEM MOUSE EM CIMA
+    &.p-select-option-selected {
+        background-color: var(--blue-600) !important;
+
+        &:hover {
+            background-color: var(--blue-700) !important;
+        }
+
+        .icon-div {
+            color: var(--background-200) !important;
+        }
 
         .labelz,
         .subLabel {
-            color: var(--background-650);
-        }
-
-        .category {
-            width: 20px;
-            margin-right: 10px;
-            display: grid;
-            place-items: center;
-            border-radius: 5px;
-
-            &.UTILITY {
-                background-color: var(--blue-200);
-                color: var(--blue-600);
-            }
-
-            &.MARKETING {
-                background-color: var(--orange-200);
-                color: var(--red-b-500);
-            }
+            color: var(--background-0);
         }
     }
+
+    .labelz,
+    .subLabel {
+        color: var(--background-650);
+    }
+
+    .category {
+        width: 20px;
+        margin-right: 10px;
+        display: grid;
+        place-items: center;
+        border-radius: 5px;
+
+        &.UTILITY {
+            background-color: var(--blue-200);
+            color: var(--blue-600);
+        }
+
+        &.MARKETING {
+            background-color: var(--orange-200);
+            color: var(--red-b-500);
+        }
+    }
+}
+
+
+[transparent] {
+    .p-floatlabel, .p-select {
+        background-color: transparent !important;
+    }
+}
 </style>

@@ -23,10 +23,14 @@
             <tbody class="max-table-fields-body">
                 <template v-if="normalizedList.length > 0">
                     <tr v-for="(row, index) in normalizedList" :key="index" class="max-table-fields-row" :class="{ 'max-table-fields-row-even': index % 2 === 0, 'max-table-fields-row-odd': index % 2 !== 0 }" >
+
+                        
                         <td v-for="col in columns" :key="col.field" class="max-table-fields-td" :style="getColumnStyle(col)" >
                             <!-- Slot customizado tem prioridade -->
-                            <slot v-if="col.slot" :name="col.slot" :data="row" :value="getFieldValue(row, col.field)" :index="index" :field="col.field" >
-                                {{ getFieldValue(row, col.field) }}
+                            <slot v-if="col.slot && !col.input" :name="col.slot ?? col.field" :data="row" :value="getFieldValue(row, col.field)" :index="index" :field="col.field" >
+                                <div class="default-slot">
+                                    {{ getFieldValue(row, col.field) }} {{ col.slot }} {{ col.field }}
+                                </div>
                             </slot>
 
                             <!-- Input de incremento (+/-) -->
@@ -94,7 +98,7 @@
 <script setup lang="ts">
     import type { MaxTableColumn, MaxTableButtons } from '../types';
     import { computed, useSlots, type Slots, type ComputedRef } from 'vue';
-    import { ulid, size } from '@maxvue/max-use';
+    import { ulid, size, refAutoReset } from '@maxvue/max-use';
     // Componentes de input
     import MaxInputText from './MaxInputText.vue';
     import MaxInputNumber from './MaxInputNumber.vue';
@@ -153,10 +157,14 @@
     });
 
     /** Acessa o valor de um campo, suportando notação com ponto (ex: 'user.name') */
-    function getFieldValue(row: any, field: string): any {
+    function getFieldValue(row: any, field: string | null | undefined): any {
+        if (!field) return '';
+
         return field.split('.').reduce((obj, key) => obj?.[key], row);
 
     }
+
+    const action_click = refAutoReset(false, 100);
 
     /** Define o valor de um campo no objeto da linha, suportando notação com ponto */
     function setFieldValue(row: any, field: string, value: any, col?: MaxTableColumn): void {
@@ -167,6 +175,9 @@
         if (target) {
             target[keys[keys.length - 1]] = value;
 
+            if (action_click.value) return;
+            action_click.value = true;
+
             col?.action?.({ row, field, value });
             emit('update:field', { row, field, value });
         }
@@ -175,6 +186,7 @@
     /** Incrementa o valor numérico do campo */
     function incrementValue(row: any, col: MaxTableColumn): void {
         const current = Number(getFieldValue(row, col.field)) || 0;
+        console.log('increment');
         setFieldValue(row, col.field, current + 1, col);
     }
 
@@ -318,7 +330,7 @@
         flex-grow: 1;
         padding: 0;
         display: grid;
-        place-items: center;
+        place-items: center start;
         outline: none;
         border: none;
         border-radius: 0;
@@ -360,6 +372,12 @@
         text-align: center;
         color: var(--text-400);
         font-style: italic;
+    }
+
+    .default-slot {
+        width: 100%;
+        display: grid;
+        place-items: center start;
     }
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-    <div :class="`input-project-div ${isOverDropZone ? 'in-drop' : 'not-in-drop'}`" ref="drop_zone_ref" @click.stop="() => open()">
+    <div :class="`input-project-div ${isOverDropZone ? 'in-drop' : 'not-in-drop'}`" ref="drop_zone_ref" >
         <div class="open-files" pointer>
             <div class="instruction">
                 Insira fotos dos documentos ou Documentos em PDF aqui
@@ -9,73 +9,62 @@
             <div>Clique aqui ou arraste e solte os documentos para carregar.</div>
             <MaxIcon icon="material-symbols:folder-open" size="4" color-gray />
         </div>
-        <!-- <div class="file-list">
-            <div v-for="file in filesRg" :key="file.name" class="file-item" pointer>
+        <div class="file-list">
+            <div v-for="file in temp_files" :key="file.id" class="file-item" pointer>
                 <div v-tooltip.top="'Documento de identificação'">
                     <Icon i="mdi:identification-card" size="2" />
                 </div>
             </div>
-            <div v-for="file in filesFatura" :key="file.name" pointer>
-                <div v-tooltip.top="'Fatura de Energia'">
-                    <Icon i="fa7-solid:file-invoice-dollar" size="2" />
-                </div>
-            </div>
-            <div v-for="file in filesListaEquipamentos" :key="file.name" pointer>
-                <div v-tooltip.top="'Kit Fotovoltaico'">
-                    <Icon i="mingcute:solar-panel-line" size="2" />
-                </div>
-            </div>
-        </div> -->
-        <div class="check-list-upload-files" v-if="ready">
-            <!-- <div class="item">
-                <IconCheck :value="filesRg.length > 0" />
-                <div>Documento de identificação (RG ou CNH)</div>
-            </div>
-            <div class="item">
-                <IconCheck :value="filesFatura.length > 0" />
-                <div>Fatura de Energia</div>
-            </div>
-            <div class="item">
-                <IconCheck :value="filesQuadroAberto.length > 0" />
-                <div>Foto do quadro medidor aberto</div>
-            </div>
-            <div class="item">
-                <IconCheck :value="filesQuadroFechado.length > 0" />
-                <div>Foto do quadro medidor fechado</div>
-            </div>
-            <div class="item">
-                <IconCheck :value="filesListaEquipamentos.length > 0" />
-                <div>Lista de Equipamentos do kit fotovoltaico</div>
-            </div> -->
         </div>
-        <div class="icon-make-ai" @click.stop="$emit('process-ai')">
+        <div>
             <IconButton i="hugeicons:ai-file" size="1.3" v-tooltip.left="'Processar arquivos'" />
         </div>
     </div>
 </template>
 <script setup lang="ts">
-    import type { Ref } from 'vue';
+    import { type Ref, watch, computed } from 'vue';
     import { useDropZone } from '@maxvue/max-use';
     import { useFileDialog } from '@maxvue/max-use';
     import { ref } from 'vue';
     import MaxIcon from './MaxIcon.vue';
+    import { DBFile } from '../types/index.js';
+    import { isBlank, ulid, size } from '@maxvue/max-use';
+    import IconButton from './MaxIconButton.vue';
 
-    const props = withDefaults(
-        defineProps<{
-            filesCheck?: any;
-            ready?: boolean;
-        }>(),
-        {
-            filesRg: () => [],
-            filesFatura: () => [],
-            filesQuadroAberto: () => [],
-            filesQuadroFechado: () => [],
-            filesListaEquipamentos: () => [],
-            ready: false
-        }
-    );
+    const props = withDefaults(defineProps<{ files: DBFile[]; ready?: boolean; route_upload?: string }>(), { files: () => [] });
 
-    const emit = defineEmits(['files-selected', 'process-ai']);
+    const emit = defineEmits(['change-files']);
+
+    const temp_files = ref<DBFile[]>(props.files);
+    const count_files = computed(() => size(temp_files.value));
+    const files_to_upload = computed(() => temp_files.value.filter((file: DBFile) => ! file.in_server) );
+    const count_to_upload = computed(() => size(files_to_upload.value));
+
+
+    watch(count_files, () => temp_files.value.forEach((file: DBFile) => convertItem(file)), { deep: true, immediate: true });
+
+    const convertItem = (item: DBFile) => {
+        item.id ??= ulid();
+        item.name ??= item.file_name ?? item.label_file_name;
+        item.extension ??= item.name?.split('.')?.pop() ?? null;
+        item.blob ??= new Blob([ item as any ], { type: item.type });
+        item.objectURL ??= URL.createObjectURL(item.blob);
+        item.src ??= item.objectURL;
+        item.file_bloob ??= item.objectURL;
+        item.message_type ??= checkFileType(item.extension) ?? 'document';
+        item.in_server ??= false;
+    };
+
+    function checkFileType (extension: string | null): string | null {
+        if (isBlank(extension) || extension === 'svg') return null;
+        else if (extension === 'jpg' || extension === 'jpeg' || extension === 'png' || extension === 'gif' || extension === 'webp' || extension === 'bmp') return 'image';
+        else if (extension === 'mp3' || extension === 'ogg' || extension === 'aac' || extension === 'wav' || extension === 'flac' || extension === 'wma' || extension === 'm4a') return 'audio';
+        else if (extension === 'mp4' || extension === 'avi' || extension === 'mov' || extension === 'webm' || extension === 'mkv' || extension === 'flv' || extension === '3gp' || extension === 'wmv' || extension === 'mpg' || extension === 'mpeg') return 'video';
+        else if (extension === 'docx' || extension === 'doc' || extension === 'pdf' || extension === 'txt' || extension === 'pptx' || extension === 'ppt' || extension === 'xlsx' || extension === 'xls' || extension === 'csv') return 'document';
+
+        return null;
+    }
+
 
     // REFS
     const drop_zone_ref: Ref = ref(null);
@@ -91,12 +80,12 @@
     });
 
     onChange((files) => {
-        if (files) emit('files-selected', Array.from(files));
+        // if (files) emit('files-selected', Array.from(files));
         reset();
     });
 
     function onDrop(files: File[] | null) {
-        if (files) emit('files-selected', files);
+        // if (files) emit('files-selected', files);
     }
 </script>
 
