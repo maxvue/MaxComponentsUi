@@ -10,7 +10,7 @@
                 <template #item="{ item }">
                     <div class="max-popover-menu-item" @click.stop="(e) => item.command?.({ originalEvent: e, item })">
                         <MaxIcon :icon="item.icon ?? item.i" v-if="item.icon || item.i" size="1.1" />
-                        <div>{{ item.label }}</div>
+                        <div class="max-popover-menu-label">{{ item.label }}</div>
                     </div>
                 </template>
             </Menu>
