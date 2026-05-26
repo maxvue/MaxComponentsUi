@@ -16,9 +16,7 @@ export const presetMaxUno = () => {
         return {
             name: 'max-css-preset',
             // SHORTCUTS: Classes que precisam de !important ou são atalhos complexos
-            shortcuts: [
-
-            ],
+            shortcuts: [],
             // RULES: CSS customizado que não existe no UnoCSS padrão
             rules: [
 
