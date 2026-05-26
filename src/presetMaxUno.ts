@@ -11,35 +11,34 @@ import { existsSync } from 'node:fs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-export const presetMaxUno = definePreset(() => {
-    console.log('MAX UNOOOO');
+export const presetMaxUno = () => definePreset(() => {
     return {
         name: 'max-css-preset',
+        // SHORTCUTS: Classes que precisam de !important ou são atalhos complexos
+        shortcuts: [
+            [/^ [pm][tblrwhyx]?-?(\d+)$/, (params) => paddingMargin(params)],
+            [/^ h[-_]?[fF](?:ull|lex)$/, () => ({ height: '100% !important' })],
+            [/^ font-size-(.+)$/, ([, s]) => ({ 'font-size': `${s}rem !important` })],
+            [/^ w[-_]?[fF](?:ull|lex)$/, () => ({ width: '100% !important' })],
+            [/^ fs-(.+)$/, ([, s]) => ({ 'font-size': `${s}rem !important` })],
+            // Cores dinâmicas
+            [/^ text-(center|left|right)$/, ([, s]) => ({ 'text-align': s + ' !important' })],
+            [/^ color-(.+)$/, ([, s]) => ({ color: `var(--${String(s).length > 3 ? s : 'gray-300'}) !important` })],
+            [/^ bg-(.+)$/, ([, s]) => ({ 'background-color': s.startsWith('var(') || s.startsWith('#') || s.startsWith('rgb') || s.startsWith('hsl') ? s : `var(--${s})` })],
+            [/^ (?:(row|col|column))?-gap-(.+)$/i, (params) => (hasContent(params[1]) ? gap(params) : { gap: getCssSize(params[2]) + ' !important' })]
+        ],
         // RULES: CSS customizado que não existe no UnoCSS padrão
-        // Nota: Todas as regras retornam objetos CSS, por isso devem estar em `rules` (não `shortcuts`).
-        // No UnoCSS, `shortcuts` devem retornar strings de classes utilitárias.
         rules: [
-            // Padding e Margin com !important
-            [/^[pm][tblrwhyx]?-?(\d+)$/, (params) => paddingMargin(params)],
-            [/^h[-_]?[fF](?:ull|lex)$/, () => ({ height: '100% !important' })],
-            [/^font-size-(.+)$/, ([, s]) => ({ 'font-size': `${s}rem !important` })],
-            [/^w[-_]?[fF](?:ull|lex)$/, () => ({ width: '100% !important' })],
-            [/^fs-(.+)$/, ([, s]) => ({ 'font-size': `${s}rem !important` })],
-            [/^text-(center|left|right)$/, ([, s]) => ({ 'text-align': s + ' !important' })],
-            [/^color-(.+)$/, ([, s]) => ({ color: `var(--${String(s).length > 3 ? s : 'gray-300'}) !important` })],
-            [/^bg-(.+)$/, ([, s]) => ({ 'background-color': s.startsWith('var(') || s.startsWith('#') || s.startsWith('rgb') || s.startsWith('hsl') ? s : `var(--${s})` })],
-            [/^(?:(row|col|column))?-gap-(.+)$/i, (params) => (hasContent(params[1]) ? gap(params) : { gap: getCssSize(params[2]) + ' !important' })],
-
             // Tipografia
-            [/^font-weight-(.+)$/, ([, s]) => ({ 'font-weight': s })],
-            [/^w-?max-(.+)$/, ([, s]) => ({ 'max-width': s + 'px' })],
-            [/^max-w-(.+)$/, ([, s]) => ({ 'max-width': s + 'px' })],
-            [/^h-?max-(.+)$/, ([, s]) => ({ 'max-height': s + 'px' })],
-            [/^max-h-(.+)$/, ([, s]) => ({ 'max-height': s + 'px' })],
-            [/^min-w-(.+)$/, ([, s]) => ({ 'min-width': s + 'px' })],
-            [/^w-?min-(.+)$/, ([, s]) => ({ 'min-width': s + 'px' })],
-            [/^h-?min-(.+)$/, ([, s]) => ({ 'min-height': s + 'px' })],
-            [/^min-h-(.+)$/, ([, s]) => ({ 'min-height': s + 'px' })],
+            [/^ font-weight-(.+)$/, ([, s]) => ({ 'font-weight': s })],
+            [/^ w-?max-(.+)$/, ([, s]) => ({ 'max-width': s + 'px' })],
+            [/^ max-w-(.+)$/, ([, s]) => ({ 'max-width': s + 'px' })],
+            [/^ h-?max-(.+)$/, ([, s]) => ({ 'max-height': s + 'px' })],
+            [/^ max-h-(.+)$/, ([, s]) => ({ 'max-height': s + 'px' })],
+            [/^ min-w-(.+)$/, ([, s]) => ({ 'min-width': s + 'px' })],
+            [/^ w-?min-(.+)$/, ([, s]) => ({ 'min-width': s + 'px' })],
+            [/^ h-?min-(.+)$/, ([, s]) => ({ 'min-height': s + 'px' })],
+            [/^ min-h-(.+)$/, ([, s]) => ({ 'min-height': s + 'px' })],
 
             [/^hover-(.+)$/, ([, s]) => ({
                 '&:hover': {
@@ -110,5 +109,6 @@ export const presetMaxUno = definePreset(() => {
         ]
     };
 });
+
 
 export const maxUnoPreset = presetMaxUno;
