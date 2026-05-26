@@ -257,8 +257,8 @@
             display: grid;
             place-items: center;
             position: absolute;
-            bottom: -5px;
-            right: -3px;
+            bottom: -3px;
+            right: -5px;
             border-radius: 50%;
             border: 1px solid var(--background-400);
 
