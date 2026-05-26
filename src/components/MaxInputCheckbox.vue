@@ -1,15 +1,15 @@
 <template>
-    <div :class="`checkbox-input-main-div ${!label ? 'no-label' : ''}`" >
-        <Checkbox v-model="temp_value" :inputId="id" binary v-bind="attrs" />
+    <div :class="`max-check-box ${!label ? 'no-label' : ''}`" >
+        <Checkbox v-bind="props" v-model="temp_value" :inputId="id" binary class="check-box" />
         <div class="label-checkbox" v-if="label">{{ label }}</div>
     </div>
 </template>
 
 <script setup lang="ts">
     import { Random } from '@maxvue/max-use';
-    import { ref, watch, useAttrs } from 'vue';
+    import { ref, watch } from 'vue';
     import Checkbox from 'primevue/checkbox';
-    const attrs = useAttrs();
+
     const id = Random();
 
     const props = withDefaults(
@@ -23,20 +23,13 @@
     const temp_value = ref(props.modelValue);
     const emit = defineEmits(['update:modelValue']);
 
-    watch(temp_value, (val) => {
-        emit('update:modelValue', val);
-    });
+    watch(temp_value, (val) => emit('update:modelValue', val));
 
-    watch(
-        () => props.modelValue,
-        (val) => {
-            temp_value.value = val;
-        }
-    );
+    watch( () => props.modelValue, (val) => temp_value.value = val);
 </script>
 
 <style lang="scss">
-    .checkbox-input-main-div {
+    .max-check-box {
         display: grid;
         grid-template-columns: auto 1fr;
         place-items: center start;

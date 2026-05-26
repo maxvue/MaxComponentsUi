@@ -1,6 +1,7 @@
 <template>
     <InputBase v-bind="props" :done="isDone" :error="error_msg" :caution="caution">
         <InputText v-bind="props" type="text" v-model="temp_value" fluid @blur="isDone = testIsDone()"  />
+        <slot></slot>
     </InputBase>
 </template>
 

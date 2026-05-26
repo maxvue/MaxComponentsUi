@@ -12,10 +12,10 @@
         <div class="file-list">
             <div v-for="file in temp_files" :key="file.id" class="file-item" pointer>
                 <div relative class="icons-file">
-                    <Icon :i="fileIcon(file)" size="2" v-i="file.file_name?.includes('cnh') ?? file.file_name?.includes('cnh')" />
+                    <Icon :i="fileIcon(file)" size="2" />
                     <MaxLoaderIcon i="loading" size="2" style="position: absolute; top: 0;" class="loading-icon" v-if="file.to_request_ai && !file.data_ai"/>
-                    <div class="ai-icon" >
-                        <MaxIcon i="material-icon-theme:gemini-ai" size="1.1" color-blue-700 />
+                    <div class="ai-icon" v-if="file.data_ai !== null" >
+                        <MaxIcon i="material-icon-theme:gemini-ai" size="0.9" color-blue-700 />
                     </div>
                 </div>
             </div>
@@ -42,6 +42,11 @@
     const props = withDefaults(defineProps<{ files: DBFile[]; uploadData: any; auto: boolean; url?: string; route?:string; ready?: boolean; uploadRoute?: string; buttons?: MaxButtonsType[] }>(), { files: () => [], buttons: () => [], auto: true });
 
     const temp_files = ref<DBFile[]>(props.files);
+
+    watch(() => props.files, (files) => {
+        temp_files.value = files;
+    }, { deep: true, immediate: true });
+
     const count_files = computed(() => size(temp_files.value));
     const files_to_upload = computed(() => temp_files.value.filter((file: DBFile) => ! file.in_server) );
     const count_to_upload = computed(() => size(files_to_upload.value));
@@ -77,9 +82,10 @@
         const file_names = [file?.file_name?.toLowerCase() ?? '', file?.name?.toLowerCase() ?? '', file?.label_file_name?.toLowerCase() ?? ''];
         console.log('file_name', file_names, file);
 
-        file_names.forEach((name: any) => {
+        for (const name of file_names){
             if (name && name.includes('cnh') || name.includes('identidade')|| name.includes('rg') || name.includes('carteira') ) return 'mdi:identification-card';
-        });
+            return 'mdi:identification-card';
+        }
 
         return 'mdi:file';
     }
@@ -245,8 +251,8 @@
         }
 
         .ai-icon {
-            width: 20px;
-            height: 20px;
+            width: 15.5px;
+            height: 15.5px;
             background-color: var(--background-200);
             display: grid;
             place-items: center;
@@ -255,6 +261,11 @@
             right: -3px;
             border-radius: 50%;
             border: 1px solid var(--background-400);
+
+            svg {
+                width: 10px !important;
+                height: 10px !important;
+            }
         }
 
         .make-form {
