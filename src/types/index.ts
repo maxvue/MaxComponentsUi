@@ -107,7 +107,8 @@ export interface MaxTableColumn {
     action?: (data: { row: any; field: string; value: any }) => void;
 }
 
-export interface MaxButtonsType {
+
+export interface MaxButtonsType extends Omit<ButtonProps, 'size'> {
     /** Identificador único do botão (usado como key no v-for) */
     id?: string | number;
     /** Tamanho do ícone do botão */
@@ -126,8 +127,10 @@ export interface MaxButtonsType {
     light?: boolean | string | number | undefined;
     label?: string | undefined;
     tooltip?: string | null;
+    iconPos?: 'left' | 'right';
+    uppercase?: boolean;
     /** Função a ser executada ao clicar no botão */
-    action?: (data?: any) => void;
+    action?: (data?: any) => any;
 }
 
 export type DBFile = {
@@ -161,5 +164,5 @@ export type MenuItem = {
     icon?: string;
     active?: boolean;
     url?: string;
-    
+
 };

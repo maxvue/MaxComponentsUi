@@ -1,5 +1,5 @@
 <template>
-    <Button v-bind="{...props, ...attrs}" :iconPos="iconPos" uppercase v-if="props.label" @click="onClick">
+    <Button v-bind="buttonProps" :iconPos="iconPos" uppercase v-if="props.label" @click.stop="(event) => props.action?.({ event, data: props.data ?? {} }) ?? onClick">
         <template #default>
             <slot></slot>
         </template>
@@ -19,37 +19,26 @@
     import MaxIcon from './MaxIcon.vue';
     import MaxIconButton from './MaxIconButton.vue';
     import Button from 'primevue/button';
-    import type { ButtonProps } from 'primevue/button';
     import { goToRoute } from '@maxvue/max-use';
+    import { MaxButtonsType } from '../types';
 
     const attrs = useAttrs();
 
-    interface btnProps extends /* @vue-ignore */ ButtonProps {
-        icon?: string;
-        i?: string;
-        iconLeft?: string;
-        iconRight?: string;
-        sizeIcon?: number | string;
-        iconSize?: number | string;
-        route?: string | null;
-        params?: any;
-        data?: any;
-        query?: any;
-        dark?: boolean | string | number | undefined;
-        light?: boolean | string | number | undefined;
-        label?: string | undefined;
-        action?: () => void;
-    }
-
-
-    const props = withDefaults(defineProps<btnProps>(), {
+    const props = withDefaults(defineProps<MaxButtonsType>(), {
         iconSize: 1.4,
         dark: undefined,
         light: 0.6,
         route: null,
         params: null,
         data: null,
-        query: null
+        query: null,
+        uppercase: false
+    });
+
+    /** Props filtradas para o componente Button do PrimeVue, excluindo props customizadas incompatíveis */
+    const buttonProps = computed(() => {
+        const { id, size, ...rest } = props;
+        return { ...rest, size: size?.toString(), id: id?.toString() };
     });
 
     const iconPos = computed(() => {
@@ -62,7 +51,7 @@
         click: [value: boolean];
     }>();
 
-    const onClick = () => {
+    const onClick = (event: any) => {
         if (props.route) {
             console.log('goingToRoute', props.route);
             goToRoute(props.route, { ...(props.params ?? {}), ...(props.data ?? {}), ...(props.query ?? {}) });
@@ -70,7 +59,7 @@
         }
 
         if (props.action) {
-            props.action();
+            props.action(event);
             return;
         }
 

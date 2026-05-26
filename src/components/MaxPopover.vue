@@ -1,8 +1,8 @@
 <template>
     <div ref="btn_el" pointer v-tooltip="null">
-        <div v-tooltip="null" >
-            <slot name="button" v-bind="attrs">
-                <MaxButton v-bind="props" @click.stop="toggle" :size="props.size || props.sizeIcon ? String(props.size ?? props.sizeIcon) : ''" />
+        <div v-tooltip="null" @click.stop="toggle" flex>
+            <slot name="button" v-bind="props">
+                <MaxButton v-bind="props" :size="props.size || props.sizeIcon ? String(props.size ?? props.sizeIcon) : ''" />
             </slot>
         </div>
         <div style="position: fixed;" v-tooltip="null" class="popover-item">
@@ -34,8 +34,6 @@
     import MaxTitle1 from './MaxTitle1.vue';
     import MaxGrid from './MaxGrid.vue';
     import MaxAnimateFade from './MaxAnimateFade.vue';
-
-    const attrs = useAttrs();
 
     const props = withDefaults(defineProps<{
         /** Nome do ícone (ex: 'mdi:home') */

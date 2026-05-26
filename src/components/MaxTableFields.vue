@@ -24,7 +24,7 @@
                 <template v-if="normalizedList.length > 0">
                     <tr v-for="(row, index) in normalizedList" :key="index" class="max-table-fields-row" :class="{ 'max-table-fields-row-even': index % 2 === 0, 'max-table-fields-row-odd': index % 2 !== 0 }" >
 
-                        
+
                         <td v-for="col in columns" :key="col.field" class="max-table-fields-td" :style="getColumnStyle(col)" >
                             <!-- Slot customizado tem prioridade -->
                             <slot v-if="col.slot && !col.input" :name="col.slot ?? col.field" :data="row" :value="getFieldValue(row, col.field)" :index="index" :field="col.field" >
@@ -69,14 +69,14 @@
 
                             <!-- Sem input: exibe o valor como texto -->
                             <template v-else>
-                                {{ getFieldValue(row, col.field) }}
+                                <!-- {{ getFieldValue(row, col.field) }} {{ col.field }} -->
                             </template>
                         </td>
 
                         <!-- Coluna de botões -->
                         <td v-if="size(props.buttons) > 0" class="max-table-fields-td max-table-fields-buttons" :style="`width: ${size(props.buttons) * 32}px`" >
                             <slot name="buttons" :data="row" :index="index">
-                                <MaxIconButton v-for="btn in props.buttons" v-bind="btn" :key="btn.id" :data="btn.data ? resolveData(row, btn.data) : row" :size="btn.size ?? 1.2" v-tooltip.left="btn.tooltip ?? null"/>
+                                <MaxIconButton v-for="btn in props.buttons" v-bind="btn" :key="btn.id" :data="btn.data ? resolveData(row, btn.data) : row" :size="btn.size ?? 1.2" v-tooltip.left="btn.tooltip ?? null" class="table-icon-button"/>
                             </slot>
                         </td>
                     </tr>
@@ -195,7 +195,6 @@
         const current = Number(getFieldValue(row, col.field)) || 0;
         setFieldValue(row, col.field, current - 1, col);
     }
-    
 
     /**
      * Resolve o campo 'data' da coluna usando os valores da linha atual.
@@ -208,12 +207,20 @@
         if (!data) return data;
         if (typeof data === 'string') return getFieldValue(row, data);
         if (typeof data === 'object' && !Array.isArray(data)) {
-            const resolved: Record<string, any> = {};
-            for (const key in data) resolved[key] = typeof data[key] === 'string' ? (getFieldValue(row, data[key])) ?? data[key] : data[key];
+            const resolved: Record<string, any> | string = {};
+            for (const key in data){
+                const value = typeof data[key] === 'string' ? (getFieldValue(row, data[key])) ?? data[key] : data[key];
+                const keys = typeof resolved === 'string' ? String(resolved).split('.') : [];
+                if (keys.includes('id')) resolved[key] = value;
+            }
 
-
+            console.log({ 'DATA RESOLVED NONE': resolved });
             return resolved;
         }
+        console.log({ 'DATA RESOLVED FINAL': data });
+
+        const keys = typeof data === 'string' ? data.split('.') : [];
+        if (keys.includes('id')) return null;
         return data;
     }
 
@@ -379,6 +386,13 @@
         width: 100%;
         display: grid;
         place-items: center start;
+    }
+
+    .table-icon-button {
+        svg {
+            width: 20px;
+            height: 20px;
+        }
     }
 }
 </style>

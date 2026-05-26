@@ -1,20 +1,19 @@
 <template>
-    <div class="max-popover-menu" ref="btn_el" pointer v-tooltip="null">
-        <div v-tooltip="null" >
-            <slot name="button" v-bind="attrs">
-                <MaxButton v-bind="props" @click.stop="toggle" :size="props.size || props.sizeIcon ? String(props.size ?? props.sizeIcon) : ''" />
+    <div class="max-popover-menu" ref="btn_el" pointer v-tooltip="null" flex>
+        <div v-tooltip="null" @click.stop="toggle" flex class="botao">
+            <slot name="button" >
+                <MaxButton v-bind="props" :size="props.size || props.sizeIcon ? String(props.size ?? props.sizeIcon) : ''" />
             </slot>
         </div>
-        <div style="position: fixed;" v-tooltip="null" class="popover-item">
-            <Menu ref="menu" id="overlay_menu" :model="props.items" :popup="true">
-                <template #item="{ item }">
-                    <div class="max-popover-menu-item" @click.stop="(e) => item.command?.({ originalEvent: e, item })">
-                        <MaxIcon :icon="item.icon ?? item.i" v-if="item.icon || item.i" size="1.1" />
-                        <div class="max-popover-menu-label">{{ item.label }}</div>
-                    </div>
-                </template>
-            </Menu>
-        </div>
+
+        <Menu ref="menu" id="overlay_menu" :model="props.items ?? props.model" :popup="true">
+            <template #item="{ item }">
+                <div class="max-popover-menu-item" @click.stop="(event) => item.action?.({ event, data: item.data ?? {} }) ?? onClick(item)" >
+                    <MaxIcon :icon="item.icon ?? item.i" v-if="item.icon || item.i" size="1.1" />
+                    <div class="max-popover-menu-label">{{ item.label }}</div>
+                </div>
+            </template>
+        </Menu>
     </div>
 </template>
 
@@ -24,8 +23,7 @@
     import type { MenuItem } from 'primevue/menuitem';
     import MaxButton from './MaxButton.vue';
     import MaxIcon from './MaxIcon.vue';
-
-    const attrs = useAttrs();
+    import { goToRoute } from '@maxvue/max-use';
 
     const props = withDefaults(defineProps<{
         /** Texto do botão */
@@ -71,16 +69,47 @@
     const menu = ref();
 
     const toggle = (event: any) => {
+        console.log('TOGLANDO');
         menu.value.toggle(event);
+    };
+
+    const onClick = (item: any) => {
+        if (item.route) {
+            goToRoute(item.route, { ...(item.params ?? {}), ...(item.data ?? {}), ...(item.query ?? {}) });
+            return;
+        }
+
+        if (item.action) {
+            item.action(item);
+            return;
+        }
     };
 </script>
 
 <style lang="scss">
 
+.max-popover-menu {
+    max-height: 40px;
+    max-width: 40px;
+
+    .botao {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        place-items: center;
+        gap: 8px;
+        height: 2rem;
+        cursor: pointer;
+        padding: 0 8px;
+    }
+}
+
 .max-popover-menu-item {
     display: grid;
     grid-template-columns: auto 1fr;
     place-items: center start;
-    gap: 5px;
+    gap: 8px;
+    height: 2rem;
+    cursor: pointer;
+    padding: 0 8px;
 }
 </style>

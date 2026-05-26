@@ -1,6 +1,6 @@
 <template>
-    <InputBase v-bind="{...props, ...attrs}" class="input-text-area-main-div">
-        <Textarea v-bind="{...props, ...attrs}" :autoResize="props.autoResize" v-model="temp_value" @blur="checkDone()"/>
+    <InputBase v-bind="{...props}" class="input-text-area-main-div">
+        <Textarea v-bind="{...props, ...attrs}" :autoResize="props.autoResize" v-model="temp_value" @blur="checkDone()" :rows="lines" :minLines="props.minLines ?? props.minRows ?? 1"/>
     </InputBase>
 </template>
 
@@ -9,7 +9,7 @@
  * Suporta redimensionamento automático e integração com InputBase.
  */
 <script setup lang="ts">
-    import { ref, watch, useAttrs } from 'vue';
+    import { ref, computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
     import Textarea from 'primevue/textarea';
 
@@ -32,13 +32,14 @@
             caution?: string | boolean | undefined;
             required?: boolean;
             autoResize?: boolean;
-            rows?: number;
-            minRows?: number;
+            rows?: string | number;
+            minRows?: number | string;
+            minLines?: string | number;
             autofocus?: boolean;
             maxRows?: number;
             wrap?: string;
         }>(),
-        { modelValue: '', autoResize: true, rows: 3, maxRows: 10 }
+        { modelValue: '', autoResize: true, maxRows: 10, minRows: 1, done: undefined }
     );
 
     const isDone = ref(props.done ?? null);
@@ -49,6 +50,11 @@
 
     const emit = defineEmits(['update:modelValue']);
     const temp_value = ref(props.modelValue);
+
+
+    const computedLines = computed(() => temp_value.value.split(/\r\n|\r|\n/).length);
+
+    const lines = computed(() => props.rows ?? (computedLines.value > (props.minLines ?? props.minRows) ? computedLines.value : (props.minLines ?? props.minRows)));
 
     watch( temp_value, () => emit('update:modelValue', temp_value.value),{ immediate: true });
 
