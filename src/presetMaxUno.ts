@@ -32,7 +32,7 @@ export const presetMaxUno = definePreset(() => {
 
             // Tipografia
             [/^font-weight-(.+)$/, ([, s]) => ({ 'font-weight': s })],
-            [/^w-?max-(.+)$/, ([, s]) => ({ 'max-width': s + 'px' })],
+            [/^w-?max-(.+)$/, ([, s]) => ({ 'max-width': s + 'px' })],S
             [/^max-w-(.+)$/, ([, s]) => ({ 'max-width': s + 'px' })],
             [/^h-?max-(.+)$/, ([, s]) => ({ 'max-height': s + 'px' })],
             [/^max-h-(.+)$/, ([, s]) => ({ 'max-height': s + 'px' })],
