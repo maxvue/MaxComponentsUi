@@ -83,7 +83,7 @@ export const useToastStore = defineStore('max-toast', () => {
             createdAt: Date.now(),
             paused: false,
             remaining: duration,
-            timerId: null,
+            timerId: null
         };
 
         items.value.push(toast);

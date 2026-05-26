@@ -1,39 +1,31 @@
 <template>
-    <Teleport to="body">
-        <TransitionGroup name="max-toast" tag="div" class="max-toast-container">
-            <div
-                v-for="toast in toastStore.items"
-                :key="toast.id"
-                :class="['max-toast-item', `severity-${toast.severity}`]"
-                @mouseenter="toastStore.pause(toast.id)"
-                @mouseleave="toastStore.resume(toast.id)"
-            >
-                <!-- Ícone da severidade -->
-                <div :class="['max-toast-icon', `severity-${toast.severity}`]">
-                    <MaxIcon :i="resolveIcon(toast)" size="1.2" color="inherit" />
-                </div>
-
-                <!-- Conteúdo -->
-                <div class="max-toast-content">
-                    <div class="max-toast-title">{{ toast.title }}</div>
-                    <div class="max-toast-message" v-if="toast.message">{{ toast.message }}</div>
-                </div>
-
-                <!-- Botão fechar -->
-                <button class="max-toast-close" @click="toastStore.remove(toast.id)" aria-label="Fechar">
-                    <MaxIcon i="mdi:close" size="0.85" color="inherit" />
-                </button>
-
-                <!-- Barra de progresso -->
-                <div class="max-toast-progress">
-                    <div
-                        :class="['max-toast-progress-bar', { paused: toast.paused }]"
-                        :style="{ animationDuration: `${toast.duration}ms` }"
-                    />
-                </div>
+    <TransitionGroup name="max-toast" tag="div" class="max-toast-container">
+        <div v-for="toast in toastStore.items" :key="toast.id" :class="['max-toast-item', `severity-${toast.severity}`]" @mouseenter="toastStore.pause(toast.id)" @mouseleave="toastStore.resume(toast.id)" >
+            <!-- Ícone da severidade -->
+            <div :class="['max-toast-icon', `severity-${toast.severity}`]">
+                <MaxIcon :i="resolveIcon(toast)" size="1.2" color="inherit" />
             </div>
-        </TransitionGroup>
-    </Teleport>
+
+            <!-- Conteúdo -->
+            <div class="max-toast-content">
+                <div class="max-toast-title">{{ toast.title }}</div>
+                <div class="max-toast-message" v-if="toast.message">{{ toast.message }}</div>
+            </div>
+
+            <!-- Botão fechar -->
+            <button class="max-toast-close" @click="toastStore.remove(toast.id)" aria-label="Fechar">
+                <MaxIcon i="mdi:close" size="0.85" color="inherit" />
+            </button>
+
+            <!-- Barra de progresso -->
+            <div class="max-toast-progress">
+                <div
+                    :class="['max-toast-progress-bar', { paused: toast.paused }]"
+                    :style="{ animationDuration: `${toast.duration}ms` }"
+                />
+            </div>
+        </div>
+    </TransitionGroup>
 </template>
 
 <script setup lang="ts">
@@ -48,7 +40,7 @@
         success: 'material-symbols:check-circle',
         info: 'material-symbols:info',
         warning: 'material-symbols:warning',
-        error: 'material-symbols:error',
+        error: 'material-symbols:error'
     };
 
     /** Retorna o ícone adequado para o toast */
@@ -91,23 +83,23 @@
         overflow: hidden;
 
         &.severity-success {
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.12) 0%, rgba(20, 20, 30, 0.92) 100%);
-            border-color: rgba(34, 197, 94, 0.2);
+            background: linear-gradient(135deg, rgb(34 197 94 / 12%) 0%, rgb(20 20 30 / 92%) 100%);
+            border-color: rgb(34 197 94 / 20%);
         }
 
         &.severity-info {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(20, 20, 30, 0.92) 100%);
-            border-color: rgba(59, 130, 246, 0.2);
+            background: linear-gradient(135deg, rgb(59 130 246 / 12%) 0%, rgb(20 20 30 / 92%) 100%);
+            border-color: rgb(59 130 246 / 20%);
         }
 
         &.severity-warning {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(20, 20, 30, 0.92) 100%);
-            border-color: rgba(245, 158, 11, 0.2);
+            background: linear-gradient(135deg, rgb(245 158 11 / 12%) 0%, rgb(20 20 30 / 92%) 100%);
+            border-color: rgb(245 158 11 / 20%);
         }
 
         &.severity-error {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(20, 20, 30, 0.92) 100%);
-            border-color: rgba(239, 68, 68, 0.2);
+            background: linear-gradient(135deg, rgb(239 68 68 / 12%) 0%, rgb(20 20 30 / 92%) 100%);
+            border-color: rgb(239 68 68 / 20%);
         }
     }
 
@@ -121,22 +113,22 @@
         margin-top: 1px;
 
         &.severity-success {
-            background-color: rgba(34, 197, 94, 0.18);
+            background-color: rgb(34 197 94 / 18%);
             color: #4ade80;
         }
 
         &.severity-info {
-            background-color: rgba(59, 130, 246, 0.18);
+            background-color: rgb(59 130 246 / 18%);
             color: #60a5fa;
         }
 
         &.severity-warning {
-            background-color: rgba(245, 158, 11, 0.18);
+            background-color: rgb(245 158 11 / 18%);
             color: #fbbf24;
         }
 
         &.severity-error {
-            background-color: rgba(239, 68, 68, 0.18);
+            background-color: rgb(239 68 68 / 18%);
             color: #f87171;
         }
     }
@@ -148,7 +140,7 @@
         .max-toast-title {
             font-size: 0.85rem;
             font-weight: 600;
-            color: rgba(255, 255, 255, 0.9);
+            color: rgb(255 255 255 / 90%);
             line-height: 1.35;
             white-space: nowrap;
             overflow: hidden;
@@ -157,7 +149,7 @@
 
         .max-toast-message {
             font-size: 0.78rem;
-            color: rgba(255, 255, 255, 0.55);
+            color: rgb(255 255 255 / 55%);
             margin-top: 3px;
             line-height: 1.4;
             display: -webkit-box;
@@ -170,7 +162,7 @@
     .max-toast-close {
         background: none;
         border: none;
-        color: rgba(255, 255, 255, 0.35);
+        color: rgb(255 255 255 / 35%);
         cursor: pointer;
         width: 24px;
         height: 24px;
@@ -181,8 +173,8 @@
         padding: 0;
 
         &:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.7);
+            background-color: rgb(255 255 255 / 10%);
+            color: rgb(255 255 255 / 70%);
         }
     }
 
@@ -190,7 +182,7 @@
     .max-toast-progress {
         grid-column: 1 / -1;
         height: 3px;
-        background: rgba(255, 255, 255, 0.06);
+        background: rgb(255 255 255 / 6%);
         border-radius: 0 0 10px 10px;
         overflow: hidden;
     }
