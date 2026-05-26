@@ -36,8 +36,8 @@ export const presetMaxUno = () => {
                 [/^max-w-(.+)$/, ([, s]) => ({ 'max-width': s + 'px' })],
                 [/^h-?max-(.+)$/, ([, s]) => ({ 'max-height': s + 'px' })],
                 [/^max-h-(.+)$/, ([, s]) => ({ 'max-height': s + 'px' })],
-                [/^w-?min-(.+)$/, ([, s]) => ({ 'min-width': s + 'px' })],
                 [/^min-w-(.+)$/, ([, s]) => ({ 'min-width': s + 'px' })],
+                [/^w-?min-(.+)$/, ([, s]) => ({ 'min-width': s + 'px' })],
                 [/^h-?min-(.+)$/, ([, s]) => ({ 'min-height': s + 'px' })],
                 [/^min-h-(.+)$/, ([, s]) => ({ 'min-height': s + 'px' })],
 
