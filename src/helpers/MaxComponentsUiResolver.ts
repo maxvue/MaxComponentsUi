@@ -27,7 +27,6 @@ export function MaxComponentsUiResolver(): ComponentResolver {
                     return return_result;
                 }
             }
-            console.log('Not Resolved', { name: name });
         }
     };
 }

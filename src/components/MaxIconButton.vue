@@ -79,7 +79,6 @@
             }
 
             if (props.action) {
-                console.log('actionm', props.action);
                 props.action();
                 return;
             }

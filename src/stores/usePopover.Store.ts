@@ -15,7 +15,6 @@ export const usePopoverStore = defineStore('popover', () => {
     };
 
     const toggle = (id: string) => {
-        console.log('id: ', show_id.value);
         show_id.value = show_id.value !== id ? id : null;
     };
 

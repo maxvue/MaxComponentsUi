@@ -53,7 +53,6 @@
 
     const onClick = (event: any) => {
         if (props.route) {
-            console.log('goingToRoute', props.route);
             goToRoute(props.route, { ...(props.params ?? {}), ...(props.data ?? {}), ...(props.query ?? {}) });
             return;
         }

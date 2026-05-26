@@ -157,7 +157,6 @@
 
     watchDebounced(() => props.modelValue, () => {
         if (isBlank(props.modelValue) && props.default !== undefined){
-            console.log(temp_value.value, props.modelValue);
             temp_value.value = props.default;
         }
 

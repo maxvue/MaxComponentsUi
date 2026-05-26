@@ -80,7 +80,6 @@
     function fileIcon (file: DBFile): string | null {
 
         const file_names = [file?.file_name?.toLowerCase() ?? '', file?.name?.toLowerCase() ?? '', file?.label_file_name?.toLowerCase() ?? ''];
-        console.log('file_name', file_names, file);
 
         for (const name of file_names){
             if (name && name.includes('cnh') || name.includes('identidade')|| name.includes('rg') || name.includes('carteira') ) return 'mdi:identification-card';
@@ -112,14 +111,12 @@
     });
 
     watch(count_to_upload, () => {
-        console.log(count_to_upload.value, props.auto);
         if (props.auto && count_to_upload.value > 0) sendFile(files_to_upload.value);
 
     });
 
 
     const sendFile = (files: any) => {
-        console.log('requesting file upload');
         if (! props.uploadRoute && !props.url && !props.route) return;
 
         const route_url = props.url
@@ -160,8 +157,7 @@
                 'X-Requested-With': 'XMLHttpRequest'
             },
             withCredentials: true
-        }).then((response) => console.log(response.data))
-            .catch( (error) => console.error('Erro ao enviar arquivo. ', error));
+        }).catch( (error) => console.error('Erro ao enviar arquivo. ', error));
     };
 
     function onDrop(files: File[] | null) {

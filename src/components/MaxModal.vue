@@ -100,7 +100,6 @@
     });
 
     const toggle = () => {
-        console.log('toggling', id.value);
 
         if (style.value.opacity !== 0) style.reset();
 

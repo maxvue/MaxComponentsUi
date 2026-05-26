@@ -186,7 +186,6 @@
     /** Incrementa o valor numérico do campo */
     function incrementValue(row: any, col: MaxTableColumn): void {
         const current = Number(getFieldValue(row, col.field)) || 0;
-        console.log('increment');
         setFieldValue(row, col.field, current + 1, col);
     }
 
@@ -214,10 +213,8 @@
                 if (keys.includes('id')) resolved[key] = value;
             }
 
-            console.log({ 'DATA RESOLVED NONE': resolved });
             return resolved;
         }
-        console.log({ 'DATA RESOLVED FINAL': data });
 
         const keys = typeof data === 'string' ? data.split('.') : [];
         if (keys.includes('id')) return null;

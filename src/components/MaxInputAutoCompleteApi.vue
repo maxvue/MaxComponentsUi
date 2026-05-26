@@ -89,7 +89,6 @@
     };
 
     watch(temp_value, () => {
-        console.log(temp_value.value);
         search();
         isDone.value = testIsDone();
         if (temp_value.value && typeof temp_value.value !== 'string') emit('update:modelValue', temp_value.value);

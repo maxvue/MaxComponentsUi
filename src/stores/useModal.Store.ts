@@ -15,7 +15,6 @@ export const useModalStore = defineStore('modal', () => {
     };
 
     const toggle = (id: string) => {
-        console.log('id: ', show_id.value);
         show_id.value = show_id.value !== id ? id : null;
     };
 

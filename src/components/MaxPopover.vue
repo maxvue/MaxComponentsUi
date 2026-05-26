@@ -111,14 +111,6 @@
                 opacity: 0
             };
 
-            console.log({
-                x: x.value,
-                y: y.value,
-                width_el: width_el.value,
-                window_width: window_width.value,
-                width_btn: width_btn.value,
-                height_btn: height_btn.value
-            });
 
             if (data.top + height_el.value + 15 > window_height.value) {
                 data.top = y.value - height_btn.value - height_el.value;

@@ -69,7 +69,6 @@
     const menu = ref();
 
     const toggle = (event: any) => {
-        console.log('TOGLANDO');
         menu.value.toggle(event);
     };
 

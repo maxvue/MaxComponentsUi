@@ -35,7 +35,6 @@
         position: center.value,
         gmpDraggable: true,
         click: function (e: any) {
-            console.log('click', e);
         }
     });
     const pinOptions = ref({
@@ -56,7 +55,6 @@
             position: center.value,
             gmpDraggable: true,
             click: function (e: any) {
-                console.log('click', e);
             }
         };
     },{ immediate: true });
