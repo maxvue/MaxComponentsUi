@@ -7,12 +7,10 @@
         </div>
         <div style="position: fixed;" v-tooltip="null" class="popover-item">
             <Menu ref="menu" id="overlay_menu" :model="props.items" :popup="true">
-                <template #item="{ item, props }">
-                    <div class="max-popover-menu-item" v-bind="props.action">
-                        <span :class="item.icon" />
-                        <span>{{ item.label }}</span>
-                        <Badge v-if="item.badge" class="ml-auto" :value="item.badge" />
-                        <span v-if="item.shortcut" class="ml-auto border border-surface rounded bg-emphasis text-muted-color text-xs p-1">{{ item.shortcut }}</span>
+                <template #item="{ item }">
+                    <div class="max-popover-menu-item" @click.stop="(e) => item.command?.({ originalEvent: e, item })">
+                        <MaxIcon :icon="item.icon ?? item.i" v-if="item.icon || item.i" size="1.1" />
+                        <div>{{ item.label }}</div>
                     </div>
                 </template>
             </Menu>
@@ -25,6 +23,7 @@
     import Menu from 'primevue/menu';
     import type { MenuItem } from 'primevue/menuitem';
     import MaxButton from './MaxButton.vue';
+    import MaxIcon from './MaxIcon.vue';
 
     const attrs = useAttrs();
 
