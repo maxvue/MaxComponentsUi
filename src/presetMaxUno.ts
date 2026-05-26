@@ -17,6 +17,11 @@ export const presetMaxUno = () => {
             name: 'max-css-preset',
             // SHORTCUTS: Classes que precisam de !important ou são atalhos complexos
             shortcuts: [
+
+            ],
+            // RULES: CSS customizado que não existe no UnoCSS padrão
+            rules: [
+
                 [/^[pm][tblrwhyx]?-?(\d+)$/, (params) => paddingMargin(params)],
                 [/^h[-_]?[fF](?:ull|lex)$/, () => ({ height: '100% !important' })],
                 [/^font-size-(.+)$/, ([, s]) => ({ 'font-size': `${s}rem !important` })],
@@ -26,10 +31,8 @@ export const presetMaxUno = () => {
                 [/^ color-(.+)$/, ([, s]) => ({ color: `var(--${String(s).length > 3 ? s : 'gray-300'}) !important` })],
                 [/^text-(center|left|right)$/, ([, s]) => ({ 'text-align': s + ' !important' })],
                 [/^bg-(.+)$/, ([, s]) => ({ 'background-color': s.startsWith('var(') || s.startsWith('#') || s.startsWith('rgb') || s.startsWith('hsl') ? s : `var(--${s})` })],
-                [/^(?:(row|col|column))?-gap-(.+)$/i, (params) => (hasContent(params[1]) ? gap(params) : { gap: getCssSize(params[2]) + ' !important' })]
-            ],
-            // RULES: CSS customizado que não existe no UnoCSS padrão
-            rules: [
+                [/^(?:(row|col|column))?-gap-(.+)$/i, (params) => (hasContent(params[1]) ? gap(params) : { gap: getCssSize(params[2]) + ' !important' })],
+
                 // Tipografia
                 [/^font-weight-(.+)$/, ([, s]) => ({ 'font-weight': s })],
                 [/^w-?max-(.+)$/, ([, s]) => ({ 'max-width': s + 'px' })],
