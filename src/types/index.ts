@@ -107,7 +107,7 @@ export interface MaxTableColumn {
     action?: (data: { row: any; field: string; value: any }) => void;
 }
 
-export interface MaxTableButtons {
+export interface MaxButtonsType {
     /** Identificador único do botão (usado como key no v-for) */
     id?: string | number;
     /** Tamanho do ícone do botão */
@@ -137,17 +137,29 @@ export type DBFile = {
     label_file_name: string | null;
     extension: string | null;
     thumbnail: string | null;
+    document_type: string | null;
     disk: string | null;
     blob?: any;
     objectURL?: string | null;
     src?: string | null;
     file_bloob?: string | null;
     message_type?: string | null;
-    data_ai_a: object | null;
+    data_ai: object | null;
     pdf_count_pages: number | null;
     error_pdf: boolean | null;
+    to_request_ai: boolean | null;
     image_inspection: boolean;
     is_send_to_project: boolean | null;
     type: string;
     in_server: boolean | null;
+};
+
+export type MenuItem = {
+    label?: string;
+    items?: MenuItem[];
+    command?: string;
+    icon?: string;
+    active?: boolean;
+    url?: string;
+    
 };

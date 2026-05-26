@@ -49,6 +49,7 @@
         "@primeuix/themes": "^2.0.3",
         "@tanstack/vue-virtual": "^3.13.25",
         "@unocss/reset": "^66.6.8",
+        "axios": "^1.16.1",
         "color": "^5.0.3",
         "libphonenumber-js": "^1.12.42",
         "maska": "^3.2.0",

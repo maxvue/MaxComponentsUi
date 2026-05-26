@@ -1,5 +1,5 @@
 <template>
-    <div :class="`input-project-div ${isOverDropZone ? 'in-drop' : 'not-in-drop'}`" ref="drop_zone_ref" >
+    <div :class="`input-project-div ${isOverDropZone ? 'in-drop' : 'not-in-drop'}`" ref="drop_zone_ref" @click="() => open()" relative>
         <div class="open-files" pointer>
             <div class="instruction">
                 Insira fotos dos documentos ou Documentos em PDF aqui
@@ -11,29 +11,35 @@
         </div>
         <div class="file-list">
             <div v-for="file in temp_files" :key="file.id" class="file-item" pointer>
-                <div v-tooltip.top="'Documento de identificação'">
-                    <Icon i="mdi:identification-card" size="2" />
+                <div relative class="icons-file">
+                    <Icon :i="fileIcon(file)" size="2" v-i="file.file_name?.includes('cnh') ?? file.file_name?.includes('cnh')" />
+                    <MaxLoaderIcon i="loading" size="2" style="position: absolute; top: 0;" class="loading-icon" v-if="file.to_request_ai && !file.data_ai"/>
+                    <div class="ai-icon" >
+                        <MaxIcon i="material-icon-theme:gemini-ai" size="1.1" color-blue-700 />
+                    </div>
                 </div>
             </div>
         </div>
-        <div>
-            <IconButton i="hugeicons:ai-file" size="1.3" v-tooltip.left="'Processar arquivos'" />
+        <div class="make-form">
+            <div v-for="button in props.buttons">
+                <MaxButton i="hugeicons:ai-file"  v-tooltip.left="' arquivos'" label="Preencher" @click="button.action ? button.action({ files: temp_files, open, reset }) : (() => {})"/>
+            </div>
         </div>
     </div>
 </template>
 <script setup lang="ts">
     import { type Ref, watch, computed } from 'vue';
-    import { useDropZone } from '@maxvue/max-use';
+    import { getRoute, useDropZone } from '@maxvue/max-use';
     import { useFileDialog } from '@maxvue/max-use';
     import { ref } from 'vue';
     import MaxIcon from './MaxIcon.vue';
     import { DBFile } from '../types/index.js';
-    import { isBlank, ulid, size } from '@maxvue/max-use';
-    import IconButton from './MaxIconButton.vue';
+    import { isBlank, ulid, size, apiUploadRoute } from '@maxvue/max-use';
+    import MaxLoaderIcon from './MaxLoaderIcon.vue';
+    import type { MaxButtonsType } from '../types/index.js';
+    import axios from 'axios';
 
-    const props = withDefaults(defineProps<{ files: DBFile[]; ready?: boolean; route_upload?: string }>(), { files: () => [] });
-
-    const emit = defineEmits(['change-files']);
+    const props = withDefaults(defineProps<{ files: DBFile[]; uploadData: any; auto: boolean; url?: string; route?:string; ready?: boolean; uploadRoute?: string; buttons?: MaxButtonsType[] }>(), { files: () => [], buttons: () => [], auto: true });
 
     const temp_files = ref<DBFile[]>(props.files);
     const count_files = computed(() => size(temp_files.value));
@@ -53,6 +59,7 @@
         item.file_bloob ??= item.objectURL;
         item.message_type ??= checkFileType(item.extension) ?? 'document';
         item.in_server ??= false;
+        item.to_request_ai ??= ! item.in_server;
     };
 
     function checkFileType (extension: string | null): string | null {
@@ -63,6 +70,18 @@
         else if (extension === 'docx' || extension === 'doc' || extension === 'pdf' || extension === 'txt' || extension === 'pptx' || extension === 'ppt' || extension === 'xlsx' || extension === 'xls' || extension === 'csv') return 'document';
 
         return null;
+    }
+
+    function fileIcon (file: DBFile): string | null {
+
+        const file_names = [file?.file_name?.toLowerCase() ?? '', file?.name?.toLowerCase() ?? '', file?.label_file_name?.toLowerCase() ?? ''];
+        console.log('file_name', file_names, file);
+
+        file_names.forEach((name: any) => {
+            if (name && name.includes('cnh') || name.includes('identidade')|| name.includes('rg') || name.includes('carteira') ) return 'mdi:identification-card';
+        });
+
+        return 'mdi:file';
     }
 
 
@@ -79,10 +98,65 @@
         directory: false
     });
 
-    onChange((files) => {
-        // if (files) emit('files-selected', Array.from(files));
-        reset();
+    onChange((files: any) => {
+        if (files && size(files) > 0){
+            temp_files.value = [...temp_files.value, ...(files ?? [])];
+            reset();
+        }
     });
+
+    watch(count_to_upload, () => {
+        console.log(count_to_upload.value, props.auto);
+        if (props.auto && count_to_upload.value > 0) sendFile(files_to_upload.value);
+
+    });
+
+
+    const sendFile = (files: any) => {
+        console.log('requesting file upload');
+        if (! props.uploadRoute && !props.url && !props.route) return;
+
+        const route_url = props.url
+            ?? (props.route ? getRoute(props.route) ?? props.route : null)
+            ?? (props.uploadRoute ? getRoute(props.uploadRoute) ?? props.uploadRoute : null);
+
+        if (!route_url) return;
+
+        // Criando o FormData
+        const formData = new FormData();
+
+        const data = props.uploadData ?? {};
+
+        // Adicionando os dados ao FormData
+        for (const key in data) if (Object.prototype.hasOwnProperty.call(data, key)) {
+            const value = data[key];
+            if (typeof value === 'object' && value !== null) formData.append(key, JSON.stringify(value));
+            else formData.append(key, value);
+        }
+
+
+        files = { files: files['files'] ?? files };
+
+        // Adicionando os arquivos ao FormData
+        files['files'].forEach((fileItem: any, index: number) => {
+            const file = fileItem;
+            file['target'] = null;
+            file['blob'] ??= new Blob([file], { type: file.type });
+            file['objectURL'] ??= URL.createObjectURL(file.blob);
+            formData.append(`files[${index}]`, file.blob, file.name);
+        });
+
+        const token: string = document.head.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        axios.post(route_url, formData, {
+            headers: {
+                Accept: 'application/json',
+                'X-CSRF-TOKEN': token,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            withCredentials: true
+        }).then((response) => console.log(response.data))
+            .catch( (error) => console.error('Erro ao enviar arquivo. ', error));
+    };
 
     function onDrop(files: File[] | null) {
         // if (files) emit('files-selected', files);
@@ -156,6 +230,37 @@
             position: absolute;
             bottom: 10px;
             right: 10px;
+        }
+
+        .icons-file {
+            display: grid;
+            place-items: center;
+
+            .loading-icon {
+                position: absolute;
+                top: unset !important;
+                color: var(--background-200) !important;
+                left: unset !important;
+            }
+        }
+
+        .ai-icon {
+            width: 20px;
+            height: 20px;
+            background-color: var(--background-200);
+            display: grid;
+            place-items: center;
+            position: absolute;
+            bottom: -5px;
+            right: -3px;
+            border-radius: 50%;
+            border: 1px solid var(--background-400);
+        }
+
+        .make-form {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
         }
     }
 </style>

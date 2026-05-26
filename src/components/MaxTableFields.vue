@@ -96,7 +96,7 @@
 </template>
 
 <script setup lang="ts">
-    import type { MaxTableColumn, MaxTableButtons } from '../types';
+    import type { MaxTableColumn, MaxButtonsType } from '../types';
     import { computed, useSlots, type Slots, type ComputedRef } from 'vue';
     import { ulid, size, refAutoReset } from '@maxvue/max-use';
     // Componentes de input
@@ -127,7 +127,7 @@
             /** Largura da coluna de botões (ex: '120px') */
             buttonsWidth?: string;
             /** Lista de botões */
-            buttons?: MaxTableButtons[];
+            buttons?: MaxButtonsType[];
         }>(),
         {
             list: () => ({}),
@@ -195,6 +195,7 @@
         const current = Number(getFieldValue(row, col.field)) || 0;
         setFieldValue(row, col.field, current - 1, col);
     }
+    
 
     /**
      * Resolve o campo 'data' da coluna usando os valores da linha atual.

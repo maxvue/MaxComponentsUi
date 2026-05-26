@@ -1,11 +1,8 @@
 <template>
     <div ref="btn_el" pointer v-tooltip="null">
-        <div v-tooltip="null" v-if="props.label || props.i || props.icon">
-            <slot name="button" v-if="! props.label">
-                <MaxIconButton :icon="props.i ?? props.icon" :size="props.size ?? props.sizeIcon" @click.stop="toggle" />
-            </slot>
-            <slot name="button" v-else v-bind="attrs">
-                <MaxButton :label="props.label" :icon="props.i ?? props.icon" :size-icon="props.size ?? props.sizeIcon" @click.stop="toggle" />
+        <div v-tooltip="null" >
+            <slot name="button" v-bind="attrs">
+                <MaxButton v-bind="props" @click.stop="toggle" :size="props.size || props.sizeIcon ? String(props.size ?? props.sizeIcon) : ''" />
             </slot>
         </div>
         <div style="position: fixed;" v-tooltip="null" class="popover-item">

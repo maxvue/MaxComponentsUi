@@ -37,7 +37,7 @@
         query?: any;
         dark?: boolean | string | number | undefined;
         light?: boolean | string | number | undefined;
-        label: string | undefined;
+        label?: string | undefined;
         action?: () => void;
     }
 
