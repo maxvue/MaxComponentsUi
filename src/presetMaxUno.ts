@@ -31,15 +31,15 @@ export const presetMaxUno = () => {
             // RULES: CSS customizado que não existe no UnoCSS padrão
             rules: [
                 // Tipografia
-                [/^ font-weight-(.+)$/, ([, s]) => ({ 'font-weight': s })],
-                [/^ w-?max-(.+)$/, ([, s]) => ({ 'max-width': s + 'px' })],
-                [/^ max-w-(.+)$/, ([, s]) => ({ 'max-width': s + 'px' })],
-                [/^ h-?max-(.+)$/, ([, s]) => ({ 'max-height': s + 'px' })],
-                [/^ max-h-(.+)$/, ([, s]) => ({ 'max-height': s + 'px' })],
-                [/^ min-w-(.+)$/, ([, s]) => ({ 'min-width': s + 'px' })],
-                [/^ w-?min-(.+)$/, ([, s]) => ({ 'min-width': s + 'px' })],
-                [/^ h-?min-(.+)$/, ([, s]) => ({ 'min-height': s + 'px' })],
-                [/^ min-h-(.+)$/, ([, s]) => ({ 'min-height': s + 'px' })],
+                [/^font-weight-(.+)$/, ([, s]) => ({ 'font-weight': s })],
+                [/^w-?max-(.+)$/, ([, s]) => ({ 'max-width': s + 'px' })],
+                [/^max-w-(.+)$/, ([, s]) => ({ 'max-width': s + 'px' })],
+                [/^h-?max-(.+)$/, ([, s]) => ({ 'max-height': s + 'px' })],
+                [/^max-h-(.+)$/, ([, s]) => ({ 'max-height': s + 'px' })],
+                [/^min-w-(.+)$/, ([, s]) => ({ 'min-width': s + 'px' })],
+                [/^w-?min-(.+)$/, ([, s]) => ({ 'min-width': s + 'px' })],
+                [/^h-?min-(.+)$/, ([, s]) => ({ 'min-height': s + 'px' })],
+                [/^min-h-(.+)$/, ([, s]) => ({ 'min-height': s + 'px' })],
 
                 [/^hover-(.+)$/, ([, s]) => ({
                     '&:hover': {
