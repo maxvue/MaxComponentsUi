@@ -23,7 +23,7 @@ export const presetMaxUno = () => {
                 [/^w[-_]?[fF](?:ull|lex)$/, () => ({ width: '100% !important' })],
                 [/^fs-(.+)$/, ([, s]) => ({ 'font-size': `${s}rem !important` })],
                 // Cores dinâmicas
-                [/^color-(.+)$/, ([, s]) => ({ color: `var(--${String(s).length > 3 ? s : 'gray-300'}) !important` })],
+                [/^ color-(.+)$/, ([, s]) => ({ color: `var(--${String(s).length > 3 ? s : 'gray-300'}) !important` })],
                 [/^text-(center|left|right)$/, ([, s]) => ({ 'text-align': s + ' !important' })],
                 [/^bg-(.+)$/, ([, s]) => ({ 'background-color': s.startsWith('var(') || s.startsWith('#') || s.startsWith('rgb') || s.startsWith('hsl') ? s : `var(--${s})` })],
                 [/^(?:(row|col|column))?-gap-(.+)$/i, (params) => (hasContent(params[1]) ? gap(params) : { gap: getCssSize(params[2]) + ' !important' })]
