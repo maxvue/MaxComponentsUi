@@ -16,8 +16,8 @@ export const presetMaxUno = () => {
         name: 'max-css-preset',
         // SHORTCUTS: Classes que precisam de !important ou são atalhos complexos
         shortcuts: [
-            [/^[pm][tblrwhyx]?-?(\d+)$/, (params) => paddingMargin(params)],
             [/^h[-_]?[fF](?:ull|lex)$/, () => ({ height: '100% !important' })],
+            [/^[pm][tblrwhyx]?-?(\d+)$/, (params) => paddingMargin(params)],
             [/^font-size-(.+)$/, ([, s]) => ({ 'font-size': `${s}rem !important` })],
             [/^w[-_]?[fF](?:ull|lex)$/, () => ({ width: '100% !important' })],
             [/^fs-(.+)$/, ([, s]) => ({ 'font-size': `${s}rem !important` })],
