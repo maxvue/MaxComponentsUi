@@ -18,7 +18,6 @@ export interface MaxButtonsType extends /* @vue-ignore */ Omit<PrimeButtonProps,
     /** Ícone a ser exibido no botão */
     icon?: string;
     /** Classe do icone  */
-    class?: any;
     /** Ícone a ser exibido à esquerda do botão */
     iconRight?: string;
     /** Posição do ícone no botão */
@@ -43,6 +42,7 @@ export interface MaxButtonsType extends /* @vue-ignore */ Omit<PrimeButtonProps,
     route?: string | null;
     /** Query data */
     data?: any;
+    transparent?: boolean;
     /** Params data */
     params?: any;
     /** Query data */

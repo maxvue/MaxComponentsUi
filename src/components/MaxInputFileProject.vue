@@ -1,7 +1,7 @@
 <template>
     <div :class="`input-project-div ${isOverDropZone ? 'in-drop' : 'not-in-drop'}`" ref="drop_zone_ref" relative>
-        <MaxIconButton class="open-files-btn"  :hoverScale="0.3">
-            <div class="open-files" pointer @click.stop="() => open()">
+        <MaxIconButton class="open-files-btn"  :hoverScale="1.06" @click.stop="() => open()">
+            <div class="open-files" pointer >
                 <div class="instruction">
                     Insira fotos dos documentos ou Documentos em PDF aqui
                     <br />

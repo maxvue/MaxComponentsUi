@@ -5,24 +5,26 @@
                 <MaxButton v-bind="props" :size="String(props.size ?? props.sizeIcon ?? props.iconSize ?? 1.1)" :action="undefined" />
             </slot>
         </div>
-        <div style="position: fixed;" v-tooltip="null" class="popover-item" >
-            <MaxAnimateFade :show="isOpen" :duration="0.3">
-                <div class="background-popover" @click.stop="hide" v-if="isOpen" :style="{opacity: style.opacity}">
-                    <div class="max-popover-dialog" ref="el" :style="{top: style.top + 'px', left: style.left + 'px'}"  :class="[style.isTop ? 'is-top' : 'is-bottom', style.isLeft ? 'is-left' : 'is-right', props.noPicker ? 'no-picker' : '']" @click.stop="() => {}" >
-                        <slot name="header">
-                            <MaxGrid s100 class="max-popover-header" pt0 mt0 mb-15>
-                                <MaxTitle1 s90  :h1="props.title ?? 'Titulo'" :h2="props.subTitle ?? 'Sub Titulo'" p0 m0 />
-                                <MaxIconButton s10 i="iconoir:xmark" size="1.3" @click.stop="hide" />
-                            </MaxGrid>
-                        </slot>
-                        <div class="max-popover-content">
-                            <slot name="content"></slot>
-                            <slot></slot>
+        <Teleport to="body" :disabled="! isOpen">
+            <div style="position: fixed;" v-tooltip="null" class="popover-item" >
+                <MaxAnimateFade :show="isOpen" :duration="0.3">
+                    <div class="background-popover" @click.stop="hide" v-if="isOpen" :style="{opacity: style.opacity}">
+                        <div class="max-popover-dialog" ref="el" :style="{top: style.top + 'px', left: style.left + 'px'}"  :class="[style.isTop ? 'is-top' : 'is-bottom', style.isLeft ? 'is-left' : 'is-right', props.noPicker ? 'no-picker' : '']" @click.stop="() => {}" >
+                            <slot name="header">
+                                <MaxGrid s100 class="max-popover-header" pt0 mt0 mb-15>
+                                    <MaxTitle1 s90  :h1="props.title ?? 'Titulo'" :h2="props.subTitle ?? 'Sub Titulo'" p0 m0 />
+                                    <MaxIconButton s10 i="iconoir:xmark" size="1.3" @click.stop="hide" />
+                                </MaxGrid>
+                            </slot>
+                            <div class="max-popover-content">
+                                <slot name="content"></slot>
+                                <slot></slot>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </MaxAnimateFade>
-        </div>
+                </MaxAnimateFade>
+            </div>
+        </Teleport>
     </div>
 </template>
 
@@ -155,7 +157,7 @@
     height: 100vh;
     width: 100vw;
     position: fixed;
-    z-index: 99999 !important;
+    z-index: 99 !important;
     top: 0;
     left: 0;
     transition: opacity 0.3s ease;
