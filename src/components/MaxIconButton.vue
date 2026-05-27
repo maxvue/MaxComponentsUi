@@ -1,6 +1,8 @@
 <template>
     <div v-bind="{...props, ...attrs}" class="icon-div ico-btn" ref="icon_ref" :style="{width: size, height: size}" :class="attrs.class ?? {}" @click.stop="props.action?.({event: $event, data: data}) ?? onClick">
-        <MaxIcon pointer v-bind="{...props, ...attrs}" :size="size" :light="props.light" :dark="props.dark ?? 0.4" />
+        <slot>
+            <MaxIcon pointer v-bind="{...props, ...attrs}" :size="size" :light="props.light" :dark="props.dark ?? 0.4" />
+        </slot>
     </div>
 </template>
 

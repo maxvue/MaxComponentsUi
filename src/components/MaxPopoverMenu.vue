@@ -1,14 +1,14 @@
 <template>
     <div class="max-popover-menu" ref="btn_el" pointer v-tooltip="null" flex>
-        <div v-tooltip="null" @click.stop="toggle" flex class="botao">
+        <div v-tooltip="null" flex class="botao" :style="{width: size_icon, height: size_icon} ">
             <slot name="button" >
-                <MaxButton v-bind="props" :size="props.size || props.sizeIcon ? String(props.size ?? props.sizeIcon) : ''" />
+                <MaxButton v-bind="props" :size="String(props.size ?? props.sizeIcon ?? props.iconSize ?? 1.1)" :action="toggle"/>
             </slot>
         </div>
 
         <Menu ref="menu" id="overlay_menu" :model="props.items ?? props.model" :popup="true">
             <template #item="{ item }">
-                <div class="max-popover-menu-item" @click.stop="(event) => item.action?.({ event, data: item.data ?? {} }) ?? onClick(item)" >
+                <div class="max-popover-menu-item" @click.stop="(event) => item.action ? item.action({ event, data: item.data ?? {} }) : onClick(item)" >
                     <MaxIcon :icon="item.icon ?? item.i" v-if="item.icon || item.i" size="1.1" />
                     <div class="max-popover-menu-label">{{ item.label }}</div>
                 </div>
@@ -18,12 +18,13 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, useAttrs } from 'vue';
+    import { computed, ref, useAttrs } from 'vue';
     import Menu from 'primevue/menu';
     import type { MenuItem } from 'primevue/menuitem';
     import MaxButton from './MaxButton.vue';
     import MaxIcon from './MaxIcon.vue';
     import { goToRoute } from '@maxvue/max-use';
+    import { getCssSize } from '../helpers/getCssSize.js';
 
     const props = withDefaults(defineProps<{
         /** Texto do botão */
@@ -42,8 +43,8 @@
         flip?: 'horizontal' | 'vertical' | 'h' | 'v' | 'x' | 'y' | 'xy';
         /** Tamanho do ícone (em px ou multiplicador) */
         size?: string | number;
-
         sizeIcon?: string | number;
+        iconSize?: string | number;
         /** Alias para o tamanho */
         scale?: string | number;
         /** Mensagem de confirmação */
@@ -65,6 +66,7 @@
         message: 'Deseja continuar?'
     });
 
+    const size_icon = computed(() => getCssSize(String(props.size ?? props.sizeIcon ?? props.iconSize ?? 1.1)) );
 
     const menu = ref();
 

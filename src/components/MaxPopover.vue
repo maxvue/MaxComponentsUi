@@ -1,8 +1,8 @@
 <template>
     <div ref="btn_el" pointer v-tooltip="null">
-        <div v-tooltip="null" @click.stop="toggle" flex>
+        <div v-tooltip="null" @click.stop="toggle" flex :style="{width: size_icon, height: size_icon} ">
             <slot name="button" v-bind="props">
-                <MaxButton v-bind="props" :size="props.size || props.sizeIcon ? String(props.size ?? props.sizeIcon) : ''" />
+                <MaxButton v-bind="props" :size="String(props.size ?? props.sizeIcon ?? props.iconSize ?? 1.1)" />
             </slot>
         </div>
         <div style="position: fixed;" v-tooltip="null" class="popover-item" >
@@ -28,12 +28,13 @@
 
 <script setup lang="ts">
     import { useElementSize, useWindowSize, useElementBounding, useDefaultReset } from '@maxvue/max-use';
-    import { useTemplateRef, ref, useAttrs } from 'vue';
+    import { useTemplateRef, ref, useAttrs, computed } from 'vue';
     import MaxIconButton from './MaxIconButton.vue';
     import MaxButton from './MaxButton.vue';
     import MaxTitle1 from './MaxTitle1.vue';
     import MaxGrid from './MaxGrid.vue';
     import MaxAnimateFade from './MaxAnimateFade.vue';
+    import { getCssSize } from '../helpers/getCssSize';
 
     const props = withDefaults(defineProps<{
         /** Nome do ícone (ex: 'mdi:home') */
@@ -57,6 +58,7 @@
         /** Tamanho do ícone (em px ou multiplicador) */
         size?: string | number;
         sizeIcon?: string | number;
+        iconSize?: string | number;
         /** Alias para o tamanho */
         scale?: string | number;
         /** Mensagem de confirmação */
@@ -82,6 +84,8 @@
         message: 'Deseja continuar?',
         noPicker: false
     });
+
+    const size_icon = computed(() => getCssSize(String(props.size ?? props.sizeIcon ?? props.iconSize ?? 1.1)) );
 
     const isOpen = ref(false);
 

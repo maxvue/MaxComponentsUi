@@ -1,5 +1,5 @@
 <template>
-    <Button v-bind="props as PrimeButtonProps" :iconPos="iconPos" uppercase v-if="props.label" @click.stop="props.action?.({event: $event, data: data}) ?? onClick">
+    <Button v-bind="props as PrimeButtonProps" :iconPos="iconPos" uppercase @click.stop="props.action?.({event: $event, data: data}) ?? onClick" v-if="hasContent(props.label)">
         <template #default>
             <slot></slot>
         </template>
@@ -7,11 +7,13 @@
             <MaxIcon v-if="props.icon ?? props.i" :icon="props.icon ?? props.i" :size="props.size ?? props.sizeIcon ?? props.iconSize ?? '1'" class="content-button-icon" :dark="props.dark" :light="props.light" />
         </template>
         <template #loadingicon>
-            <MaxIcon icon="loading" :size="props.size ?? props.sizeIcon ?? props.iconSize ?? '1'" class="content-button-icon" flex />
+            <MaxIcon  icon="loading" :size="props.size ?? props.sizeIcon ?? props.iconSize ?? '1'" class="content-button-icon" flex />
         </template>
     </Button>
 
-    <MaxIconButton  v-bind="{...props}" v-else />
+    <MaxIconButton  v-bind="props" v-else dark class="icon-button-b">
+
+    </MaxIconButton>
 </template>
 
 <script setup lang="ts">
@@ -19,11 +21,11 @@
     import MaxIcon from './MaxIcon.vue';
     import MaxIconButton from './MaxIconButton.vue';
     import Button from 'primevue/button';
-    import { goToRoute } from '@maxvue/max-use';
+    import { goToRoute, hasContent } from '@maxvue/max-use';
     import { MaxButtonsType } from '../types';
     import type { ButtonProps as PrimeButtonProps } from 'primevue/button';
 
-    const props = withDefaults(defineProps<MaxButtonsType>(), { iconSize: 1.4, dark: undefined, light: 0.6, route: null, params: {}, data: {}, query: {}, uppercase: false });
+    const props = withDefaults(defineProps<MaxButtonsType>(), { iconSize: 1.4, dark: undefined, route: null, params: {}, data: {}, query: {}, uppercase: false });
 
     const iconPos = computed<'left' | 'right'>(() => {
         if (props.iconRight) return 'right';
@@ -52,3 +54,11 @@
     };
 
 </script>
+<style lang="scss">
+    .icon-button-b {
+        /* min-width: 15px; */
+
+        /* min-height: 15px; */
+    }
+
+</style>
