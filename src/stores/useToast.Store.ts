@@ -3,7 +3,7 @@ import type { Ref } from 'vue';
 import { ref } from 'vue';
 
 /** Severidades suportadas pelo toast */
-export type ToastSeverity = 'success' | 'info' | 'warning' | 'error';
+export type ToastSeverity = 'success' | 'info' | 'warning' | 'error' | 'whatsapp';
 
 /** Estrutura de um toast individual */
 export interface ToastItem {
@@ -71,7 +71,7 @@ export const useToastStore = defineStore('max-toast', () => {
     /** Adiciona um novo toast à fila */
     const add = (payload: ToastPayload): string => {
         const id = generateId();
-        const duration = payload.duration ?? 5000;
+        const duration = payload.duration ?? 4000;
 
         const toast: ToastItem = {
             id,

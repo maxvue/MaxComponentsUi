@@ -1,9 +1,15 @@
 <template>
     <TransitionGroup name="max-toast" tag="div" class="max-toast-container">
-        <div v-for="toast in toastStore.items" :key="toast.id" :class="['max-toast-item', `severity-${toast.severity}`]" @mouseenter="toastStore.pause(toast.id)" @mouseleave="toastStore.resume(toast.id)" >
+        <div
+            v-for="toast in toastStore.items"
+            :key="toast.id"
+            :class="['max-toast-item', `severity-${toast.severity}`]"
+            @mouseenter="toastStore.pause(toast.id)"
+            @mouseleave="toastStore.resume(toast.id)"
+        >
             <!-- Ícone da severidade -->
-            <div :class="['max-toast-icon', `severity-${toast.severity}`]">
-                <MaxIcon :i="resolveIcon(toast)" size="1.2" color="inherit" />
+            <div class="max-toast-icon">
+                <MaxIcon :i="resolveIcon(toast)" size="1.6" color="inherit" />
             </div>
 
             <!-- Conteúdo -->
@@ -14,7 +20,7 @@
 
             <!-- Botão fechar -->
             <button class="max-toast-close" @click="toastStore.remove(toast.id)" aria-label="Fechar">
-                <MaxIcon i="mdi:close" size="0.85" color="inherit" />
+                <MaxIcon i="mdi:close" size="1.1" color="inherit" />
             </button>
 
             <!-- Barra de progresso -->
@@ -37,10 +43,11 @@
 
     /** Mapa de ícones padrão por severidade */
     const severityIconMap: Record<string, string> = {
-        success: 'material-symbols:check-circle',
-        info: 'material-symbols:info',
-        warning: 'material-symbols:warning',
-        error: 'material-symbols:error'
+        success: 'mdi:check-circle-outline',
+        info: 'mdi:information-outline',
+        warning: 'mdi:alert-outline',
+        error: 'mdi:close-circle-outline',
+        whatsapp: 'mdi:whatsapp'
     };
 
     /** Retorna o ícone adequado para o toast */
@@ -50,6 +57,7 @@
 </script>
 
 <style lang="scss">
+    /* ─── Container principal ─── */
     .max-toast-container {
         position: fixed;
         top: 74px;
@@ -57,91 +65,77 @@
         z-index: 9999;
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        align-items: flex-end;
+        gap: 10px;
         pointer-events: none;
         max-height: calc(100vh - 90px);
         overflow: hidden;
     }
 
+    /* ─── Card do toast ─── */
     .max-toast-item {
         pointer-events: auto;
         display: grid;
-        grid-template-columns: 36px 1fr 28px;
+        grid-template-columns: auto 1fr auto;
         grid-template-rows: 1fr auto;
-        align-items: start;
-        gap: 10px;
-        width: 360px;
-        padding: 12px 14px 0;
+        align-items: center;
+        column-gap: 10px;
+        min-width: 320px;
+        max-width: 420px;
+        width: fit-content;
+        padding: 14px 16px 0;
         border-radius: 10px;
-        backdrop-filter: blur(16px);
-        border: 1px solid rgb(255 255 255 / 8%);
-        box-shadow:
-            0 8px 32px rgb(0 0 0 / 25%),
-            0 2px 8px rgb(0 0 0 / 15%);
         cursor: default;
         position: relative;
         overflow: hidden;
+        color: #fff;
+        box-shadow:
+            0 4px 16px rgb(0 0 0 / 25%),
+            0 1px 4px rgb(0 0 0 / 15%);
+        transition: box-shadow 0.2s ease;
 
+        /* ── Cores por severidade ── */
         &.severity-success {
-            background: linear-gradient(135deg, rgb(34 197 94 / 12%) 0%, rgb(20 20 30 / 92%) 100%);
-            border-color: rgb(34 197 94 / 20%);
+            background: var(--success-650, #0f766e);
         }
 
         &.severity-info {
-            background: linear-gradient(135deg, rgb(59 130 246 / 12%) 0%, rgb(20 20 30 / 92%) 100%);
-            border-color: rgb(59 130 246 / 20%);
+            background: var(--info-600, #2563eb);
         }
 
         &.severity-warning {
-            background: linear-gradient(135deg, rgb(245 158 11 / 12%) 0%, rgb(20 20 30 / 92%) 100%);
-            border-color: rgb(245 158 11 / 20%);
+            background: var(--warn-600, #b45309);
         }
 
         &.severity-error {
-            background: linear-gradient(135deg, rgb(239 68 68 / 12%) 0%, rgb(20 20 30 / 92%) 100%);
-            border-color: rgb(239 68 68 / 20%);
+            background: var(--danger-600, #dc2626);
+        }
+
+        &.severity-whatsapp {
+            background: #128C7E;
         }
     }
 
+    /* ─── Ícone ─── */
     .max-toast-icon {
-        width: 32px;
-        height: 32px;
-        border-radius: 8px;
         display: grid;
         place-items: center;
-        flex-shrink: 0;
-        margin-top: 1px;
-
-        &.severity-success {
-            background-color: rgb(34 197 94 / 18%);
-            color: #4ade80;
-        }
-
-        &.severity-info {
-            background-color: rgb(59 130 246 / 18%);
-            color: #60a5fa;
-        }
-
-        &.severity-warning {
-            background-color: rgb(245 158 11 / 18%);
-            color: #fbbf24;
-        }
-
-        &.severity-error {
-            background-color: rgb(239 68 68 / 18%);
-            color: #f87171;
-        }
+        color: inherit;
+        opacity: 0.95;
     }
 
+    /* ─── Conteúdo de texto ─── */
     .max-toast-content {
         min-width: 0;
-        padding-bottom: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
 
         .max-toast-title {
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             font-weight: 600;
-            color: rgb(255 255 255 / 90%);
-            line-height: 1.35;
+            color: inherit;
+            line-height: 1.3;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -149,9 +143,9 @@
 
         .max-toast-message {
             font-size: 0.78rem;
-            color: rgb(255 255 255 / 55%);
-            margin-top: 3px;
-            line-height: 1.4;
+            font-weight: 400;
+            color: rgb(255 255 255 / 75%);
+            line-height: 1.35;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
@@ -159,13 +153,14 @@
         }
     }
 
+    /* ─── Botão fechar ─── */
     .max-toast-close {
         background: none;
         border: none;
-        color: rgb(255 255 255 / 35%);
+        color: rgb(255 255 255 / 70%);
         cursor: pointer;
-        width: 24px;
-        height: 24px;
+        width: 26px;
+        height: 26px;
         display: grid;
         place-items: center;
         border-radius: 6px;
@@ -173,40 +168,27 @@
         padding: 0;
 
         &:hover {
-            background-color: rgb(255 255 255 / 10%);
-            color: rgb(255 255 255 / 70%);
+            background-color: rgb(255 255 255 / 15%);
+            color: #fff;
         }
     }
 
-    /* Barra de progresso */
+    /* ─── Barra de progresso (edge-to-edge) ─── */
     .max-toast-progress {
         grid-column: 1 / -1;
         height: 3px;
-        background: rgb(255 255 255 / 6%);
+        background: rgb(255 255 255 / 15%);
         border-radius: 0 0 10px 10px;
         overflow: hidden;
+        margin: 12px -16px 0;
+        width: calc(100% + 32px);
     }
 
     .max-toast-progress-bar {
         height: 100%;
         border-radius: 3px;
+        background: rgb(255 255 255 / 50%);
         animation: max-toast-shrink linear forwards;
-
-        .severity-success & {
-            background: linear-gradient(90deg, #4ade80, #22c55e);
-        }
-
-        .severity-info & {
-            background: linear-gradient(90deg, #60a5fa, #3b82f6);
-        }
-
-        .severity-warning & {
-            background: linear-gradient(90deg, #fbbf24, #f59e0b);
-        }
-
-        .severity-error & {
-            background: linear-gradient(90deg, #f87171, #ef4444);
-        }
 
         &.paused {
             animation-play-state: paused;
@@ -214,18 +196,13 @@
     }
 
     @keyframes max-toast-shrink {
-        from {
-            width: 100%;
-        }
-
-        to {
-            width: 0%;
-        }
+        from { width: 100%; }
+        to   { width: 0%; }
     }
 
-    /* Animações de entrada e saída (TransitionGroup) */
+    /* ─── Animações de entrada e saída ─── */
     .max-toast-enter-active {
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .max-toast-leave-active {
@@ -234,12 +211,12 @@
 
     .max-toast-enter-from {
         opacity: 0;
-        transform: translateX(80px) scale(0.95);
+        transform: translateX(60px) scale(0.96);
     }
 
     .max-toast-leave-to {
         opacity: 0;
-        transform: translateX(80px) scale(0.95);
+        transform: translateX(60px) scale(0.96);
     }
 
     .max-toast-move {

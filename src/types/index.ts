@@ -17,7 +17,7 @@ export interface ButtonProps extends BaseComponentProps {
     /** Ícone a ser exibido no botão */
     icon?: string;
     /** Estilo de severidade do botão */
-    severity?: 'secondary' | 'success' | 'info' | 'warning' | 'help' | 'danger' | 'contrast';
+    severity?: 'secondary' | 'success' | 'info' | 'whatsapp' | 'warning' | 'help' | 'danger' | 'contrast';
     /** Tamanho do botão */
     size?: 'small' | 'large';
     /** Define se o botão está desabilitado */
