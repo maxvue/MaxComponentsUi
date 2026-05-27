@@ -17,8 +17,8 @@ export const presetMaxUno = () => {
         // SHORTCUTS: Classes que precisam de !important ou são atalhos complexos
         shortcuts: [
             [/^h[-_]?[fF](?:ull|lex)$/, () => ({ height: '100% !important' })],
-            [/^[pm][tblrwhyx]?-?(\d+)$/, (params) => paddingMargin(params)],
             [/^font-size-(.+)$/, ([, s]) => ({ 'font-size': `${s}rem !important` })],
+            [/^[pm][tblrwhyx]?-?(\d+)$/, (params) => paddingMargin(params)],
             [/^w[-_]?[fF](?:ull|lex)$/, () => ({ width: '100% !important' })],
             [/^fs-(.+)$/, ([, s]) => ({ 'font-size': `${s}rem !important` })],
             [/^color-(.+)$/, ([, s]) => ({ color: `var(--${String(s).length > 3 ? s : 'gray-300'}) !important` })],
