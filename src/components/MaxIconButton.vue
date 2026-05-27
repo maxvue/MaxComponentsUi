@@ -1,6 +1,6 @@
 <template>
-    <div v-bind="{...props, ...attrs}" class="icon-div ico-btn" ref="icon_ref" :style="{width: size, height: size}" :class="attrs.class ?? {}" >
-        <MaxIcon pointer v-bind="{...props, ...attrs}" :size="size" :light="props.light" :dark="props.dark ?? 0.4" @click="onClick" />
+    <div v-bind="{...props, ...attrs}" class="icon-div ico-btn" ref="icon_ref" :style="{width: size, height: size}" :class="attrs.class ?? {}" @click.stop="props.action?.({event: $event, data: data}) ?? onClick">
+        <MaxIcon pointer v-bind="{...props, ...attrs}" :size="size" :light="props.light" :dark="props.dark ?? 0.4" />
     </div>
 </template>
 
@@ -8,58 +8,13 @@
     import { computed, useAttrs } from 'vue';
     import MaxIcon from './MaxIcon.vue';
     import { goToRoute, useDefaultReset } from '@maxvue/max-use';
+    import type { MaxButtonsType } from '../types';
 
     const attrs = useAttrs();
 
-    const props = withDefaults(defineProps<{
-        /** Nome do ícone (ex: 'mdi:home') */
-        icon?: string;
-        /** Alias para o nome do ícone */
-        i?: string;
-        /** link para abrir em nova aba */
-        blank?: string;
-        /** Rotação do ícone em graus */
-        route?: string | null;
-        /** Query data */
-        data?: any;
-        /** Params data */
-        params?: any;
-        /** Query data */
-        query?: any;
-        /** Rotação do ícone em graus */
-        rotate?: number;
-        /** Inversão do ícone */
-        flip?: 'horizontal' | 'vertical' | 'h' | 'v' | 'x' | 'y' | 'xy';
-        /** Tamanho do ícone (em px ou multiplicador) */
-        size?: string | number;
-        /** Alias para o tamanho */
-        scale?: string | number;
-        /** Largura específica */
-        width?: string | number;
-        /** Altura específica */
-        height?: string | number;
-        /** Icone escuro referente ao fundo */
-        dark?: boolean | string | number | undefined;
-        /** Icone claro referente ao fundo */
-        light?: boolean | string | number | undefined;
-        /** Icone de checagem */
-        checked?: boolean | string | number | undefined;
-        /** Icone de adição */
-        plus?: boolean | string | number | undefined;
-        /** Hover color */
-        hoverColor?: string | undefined;
-        /** Action */
-        action?: (() => void) | undefined;
-    }>(), {
-        dark: undefined,
-        light: undefined,
-        route: null,
-        params: null,
-        data: null,
-        query: null,
-        hoverColor: undefined
-    });
+    const props = withDefaults(defineProps<MaxButtonsType>(), { data: {}, params: {}, query: {} });
 
+    const data = computed(() => ({ ...(props.data ?? {}), ...(props.query ?? {}), ...(props.params ?? {}) }));
 
     const size = computed(() => 16 * Number(props.size ?? 1) + 'px');
 
@@ -69,7 +24,7 @@
 
     const executing = useDefaultReset<boolean>(false, 200);
 
-    const onClick = () => {
+    const onClick = (event: any) => {
         if (! executing.value) {
             executing.value = true;
 
@@ -79,7 +34,7 @@
             }
 
             if (props.action) {
-                props.action();
+                props.action({ event: event, data: data.value });
                 return;
             }
 

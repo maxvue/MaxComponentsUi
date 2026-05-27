@@ -76,7 +76,7 @@
                         <!-- Coluna de botões -->
                         <td v-if="size(props.buttons) > 0" class="max-table-fields-td max-table-fields-buttons" :style="`width: ${size(props.buttons) * 32}px`" >
                             <slot name="buttons" :data="row" :index="index">
-                                <MaxIconButton v-for="btn in props.buttons" v-bind="btn" :key="btn.id" :data="btn.data ? resolveData(row, btn.data) : row" :size="btn.size ?? 1.2" v-tooltip.left="btn.tooltip ?? null" class="table-icon-button"/>
+                                <MaxIconButton v-for="btn in props.buttons" v-bind="btn" :key="btn.id" :data="btn.data ? resolveData(row, btn.data) : row" :size="btn.size ?? 1.2" class="table-icon-button"/>
                             </slot>
                         </td>
                     </tr>

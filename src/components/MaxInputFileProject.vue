@@ -22,7 +22,7 @@
         </div>
         <div class="make-form">
             <div v-for="button in props.buttons">
-                <MaxButton i="hugeicons:ai-file"  v-tooltip.left="' arquivos'" label="Preencher" @click="button.action ? button.action({ files: temp_files, open, reset }) : (() => {})"/>
+                <MaxButton i="hugeicons:ai-file"  v-tooltip.left="' arquivos'" label="Preencher" @click.stop="button.action?.({event: $event, data: button.data ?? {}}) ?? onClick($event, button ?? {})" />
             </div>
         </div>
     </div>
@@ -33,13 +33,15 @@
     import { useFileDialog } from '@maxvue/max-use';
     import { ref } from 'vue';
     import MaxIcon from './MaxIcon.vue';
+    import MaxButton from './MaxButton.vue';
     import { DBFile } from '../types/index.js';
-    import { isBlank, ulid, size, apiUploadRoute } from '@maxvue/max-use';
+    import { isBlank, ulid, size } from '@maxvue/max-use';
     import MaxLoaderIcon from './MaxLoaderIcon.vue';
     import type { MaxButtonsType } from '../types/index.js';
     import axios from 'axios';
+    import { goToRoute } from '@maxvue/max-use';
 
-    const props = withDefaults(defineProps<{ files: DBFile[]; uploadData: any; auto: boolean; url?: string; route?:string; ready?: boolean; uploadRoute?: string; buttons?: MaxButtonsType[] }>(), { files: () => [], buttons: () => [], auto: true });
+    const props = withDefaults(defineProps<{ files: DBFile[]; uploadData?: any; auto?: boolean; url?: string; route?:string; ready?: boolean; uploadRoute?: string; buttons?: MaxButtonsType[] }>(), { files: () => [], buttons: () => [], auto: true });
 
     const temp_files = ref<DBFile[]>(props.files);
 
@@ -54,7 +56,7 @@
 
     watch(count_files, () => temp_files.value.forEach((file: DBFile) => convertItem(file)), { deep: true, immediate: true });
 
-    const convertItem = (item: DBFile) => {
+    function convertItem (item: DBFile) {
         item.id ??= ulid();
         item.name ??= item.file_name ?? item.label_file_name;
         item.extension ??= item.name?.split('.')?.pop() ?? null;
@@ -163,6 +165,19 @@
     function onDrop(files: File[] | null) {
         // if (files) emit('files-selected', files);
     }
+
+    const onClick = (event: any, button: MaxButtonsType) => {
+        if (button.route) {
+            goToRoute(button.route, { ...(button.params ?? {}), ...(button.data ?? {}), ...(button.query ?? {}) });
+            return;
+        }
+
+        if (button.action) {
+            const data = { ...(button.data ?? {}), ...(button.query ?? {}), ...(button.params ?? {}) };
+            button.action({ event: event, data: data });
+            return;
+        }
+    };
 </script>
 
 <style lang="scss">

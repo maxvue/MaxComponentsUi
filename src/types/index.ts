@@ -1,3 +1,4 @@
+import type { ButtonProps as PrimeButtonProps } from 'primevue/button';
 /**
  * Propriedades base para todos os componentes da biblioteca.
  */
@@ -11,21 +12,63 @@ export interface BaseComponentProps {
 /**
  * Propriedades específicas para o componente de botão.
  */
-export interface ButtonProps extends BaseComponentProps {
+export interface MaxButtonsType extends /* @vue-ignore */ Omit<PrimeButtonProps, 'size' | 'iconPos'> {
     /** Texto de exibição do botão */
     label?: string;
     /** Ícone a ser exibido no botão */
     icon?: string;
+    /** Ícone a ser exibido à esquerda do botão */
+    iconRight?: string;
+    /** Posição do ícone no botão */
+    iconPos?: 'left' | 'right';
     /** Estilo de severidade do botão */
     severity?: 'secondary' | 'success' | 'info' | 'whatsapp' | 'warning' | 'help' | 'danger' | 'contrast';
     /** Tamanho do botão */
-    size?: 'small' | 'large';
-    /** Define se o botão está desabilitado */
-    disabled?: boolean;
+    size?: string | undefined | number | null;
+    /** Tamanho do ícone do botão */
+    sizeIcon?: string | undefined | number | null;
     /** Estado de carregamento do botão */
     loading?: boolean;
     /** Variante visual do botão */
     variant?: 'outlined' | 'text' | 'link';
+    /** Alias para o nome do ícone */
+    i?: string;
+    /** link para abrir em nova aba */
+    blank?: string;
+    /** Rotação do ícone em graus */
+    route?: string | null;
+    /** Query data */
+    data?: any;
+    /** Params data */
+    params?: any;
+    /** Query data */
+    query?: any;
+    /** Rotação do ícone em graus */
+    rotate?: number;
+    /** Inversão do ícone */
+    flip?: 'horizontal' | 'vertical' | 'h' | 'v' | 'x' | 'y' | 'xy';
+    /** Alias para o tamanho */
+    scale?: string | number;
+    /** Largura específica */
+    width?: string | number;
+    /** Altura específica */
+    height?: string | number;
+    /** Icone escuro referente ao fundo */
+    dark?: boolean | string | number | undefined;
+    /** Icone claro referente ao fundo */
+    light?: boolean | string | number | undefined;
+    /** Icone de checagem */
+    checked?: boolean | string | number | undefined;
+    /** Icone de adição */
+    plus?: boolean | string | number | undefined;
+    /** Hover color */
+    hoverColor?: string | undefined;
+    /** Action */
+    action?: (data: { event: any; data?: any }) => void;
+    /** Tamanho do icone */
+    iconSize?: number | string | undefined | null;
+    /** Coloca texto em maiúsculo */
+    uppercase?: boolean;
 }
 
 /**
@@ -105,33 +148,7 @@ export interface MaxTableColumn {
     tooltip?: boolean;
     /** Função a ser executada quando o valor do campo mudar */
     action?: (data: { row: any; field: string; value: any }) => void;
-}
-
-
-export interface MaxButtonsType extends Omit<ButtonProps, 'size'> {
-    /** Identificador único do botão (usado como key no v-for) */
-    id?: string | number;
-    /** Tamanho do ícone do botão */
-    size?: number | string;
-    icon?: string;
-    i?: string;
-    iconLeft?: string;
-    iconRight?: string;
-    sizeIcon?: number | string;
-    iconSize?: number | string;
-    route?: string | null;
-    params?: any;
-    data?: any;
-    query?: any;
-    dark?: boolean | string | number | undefined;
-    light?: boolean | string | number | undefined;
-    label?: string | undefined;
-    tooltip?: string | null;
-    iconPos?: 'left' | 'right';
-    uppercase?: boolean;
-    /** Função a ser executada ao clicar no botão */
-    action?: (data?: any) => any;
-}
+};
 
 export type DBFile = {
     id: string;

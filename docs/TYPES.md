@@ -5,7 +5,7 @@ Tipos e interfaces exportados por `@maxvue/max-components-ui`.
 ```typescript
 import type {
   BaseComponentProps,
-  ButtonProps,
+  MaxButtonsType,
   ComponentEmits,
   SelectItem,
   SelectOptions,

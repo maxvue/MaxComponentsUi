@@ -599,7 +599,7 @@ declare global {
   export type { Component, Slot, Slots, ComponentPublicInstance, ComputedRef, DirectiveBinding, ExtractDefaultPropTypes, ExtractPropTypes, ExtractPublicPropTypes, InjectionKey, PropType, Ref, ShallowRef, MaybeRef, MaybeRefOrGetter, VNode, WritableComputedRef, ShallowComputedRef, WatchStopHandle, Watch } from 'vue'
   import('vue')
   // @ts-ignore
-  export type { BaseComponentProps, ButtonProps, ComponentEmits } from '../src/types/index.ts'
+  export type { BaseComponentProps, MaxButtonsType, ComponentEmits } from '../src/types/index.ts'
   import('../src/types/index.ts')
 }
 

@@ -1,5 +1,5 @@
 <template>
-    <Button v-bind="buttonProps" :iconPos="iconPos" uppercase v-if="props.label" @click.stop="(event) => props.action?.({ event, data: props.data ?? {} }) ?? onClick">
+    <Button v-bind="props as PrimeButtonProps" :iconPos="iconPos" uppercase v-if="props.label" @click.stop="props.action?.({event: $event, data: data}) ?? onClick">
         <template #default>
             <slot></slot>
         </template>
@@ -11,41 +11,27 @@
         </template>
     </Button>
 
-    <MaxIconButton  v-bind="{...props, ...attrs}" v-else />
+    <MaxIconButton  v-bind="{...props}" v-else />
 </template>
 
 <script setup lang="ts">
-    import { computed, useAttrs } from 'vue';
+    import { computed } from 'vue';
     import MaxIcon from './MaxIcon.vue';
     import MaxIconButton from './MaxIconButton.vue';
     import Button from 'primevue/button';
     import { goToRoute } from '@maxvue/max-use';
     import { MaxButtonsType } from '../types';
+    import type { ButtonProps as PrimeButtonProps } from 'primevue/button';
 
-    const attrs = useAttrs();
+    const props = withDefaults(defineProps<MaxButtonsType>(), { iconSize: 1.4, dark: undefined, light: 0.6, route: null, params: {}, data: {}, query: {}, uppercase: false });
 
-    const props = withDefaults(defineProps<MaxButtonsType>(), {
-        iconSize: 1.4,
-        dark: undefined,
-        light: 0.6,
-        route: null,
-        params: null,
-        data: null,
-        query: null,
-        uppercase: false
-    });
-
-    /** Props filtradas para o componente Button do PrimeVue, excluindo props customizadas incompatíveis */
-    const buttonProps = computed(() => {
-        const { id, size, ...rest } = props;
-        return { ...rest, size: size?.toString(), id: id?.toString() };
-    });
-
-    const iconPos = computed(() => {
-        if (props.iconPos) return props.iconPos;
+    const iconPos = computed<'left' | 'right'>(() => {
         if (props.iconRight) return 'right';
+        if (props.iconPos) return props.iconPos;
         return 'left';
     });
+
+    const data = computed(() => ({ ...(props.data ?? {}), ...(props.query ?? {}), ...(props.params ?? {}) }));
 
     const emit = defineEmits<{
         click: [value: boolean];
@@ -58,7 +44,7 @@
         }
 
         if (props.action) {
-            props.action(event);
+            props.action({ event: event, data: data.value });
             return;
         }
 
