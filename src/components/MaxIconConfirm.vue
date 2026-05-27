@@ -90,25 +90,3 @@
     };
 
 </script>
-
-<style lang="scss">
-    .icon-div {
-        display: grid;
-        place-items: center;
-        width: auto;
-        height: 100%;
-        max-width: 100%;
-        max-height: 100%;
-        transition: transform 0.3s ease, color 0.2s ease-in-out;
-        position: relative;
-
-        &.ico-btn {
-            &:hover {
-                transform: scale(1.3) !important;
-            }
-        }
-    }
-
-
-</style>
-reject

@@ -1,5 +1,5 @@
 <template>
-    <div v-bind="{...props, ...attrs}" :class="`icon-div ico-btn ${hover ? 'hover' : ''}`" ref="icon_ref" :style="{width: size, height: size, transform: hover ? 'scale('+ (1) +')' : 'scale(1)'}" @click="props.action ? props.action({event: $event, data: data}) : onClick" @mouseenter="hover = true" @mouseleave="hover = false">
+    <div v-bind="{...props, ...attrs}" :class="`icon-div ico-btn ${hover ? 'hover' : ''}`" ref="icon_ref" :style="{width: size, height: size, transform: 'scale('+ (hover? 1.1 : 1) +')' : 'scale(1)'}" @click="props.action ? props.action({event: $event, data: data}) : onClick" @mouseenter="hover = true" @mouseleave="hover = false">
         <slot>
             <MaxIcon pointer v-bind="{...props, ...attrs}" :size="size" :light="props.light" :dark="props.dark ?? 0.4" />
         </slot>
