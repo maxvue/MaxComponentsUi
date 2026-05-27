@@ -1,5 +1,5 @@
 <template>
-    <div ref="btn_el" pointer v-tooltip="null">
+    <div ref="btn_el" pointer v-tooltip="null" >
         <div v-tooltip="null" @click.stop="toggle" flex :style="{width: size_icon, height: size_icon} ">
             <slot name="button" v-bind="props">
                 <MaxButton v-bind="props" :size="String(props.size ?? props.sizeIcon ?? props.iconSize ?? 1.1)" :action="undefined" />
@@ -9,7 +9,7 @@
             <div style="position: fixed;" v-tooltip="null" class="popover-item" >
                 <MaxAnimateFade :show="isOpen" :duration="0.3">
                     <div class="background-popover" @click.stop="hide" v-if="isOpen" :style="{opacity: style.opacity}">
-                        <div class="max-popover-dialog" ref="el" :style="{top: style.top + 'px', left: style.left + 'px'}"  :class="[style.isTop ? 'is-top' : 'is-bottom', style.isLeft ? 'is-left' : 'is-right', props.noPicker ? 'no-picker' : '']" @click.stop="() => {}" >
+                        <div class="max-popover-dialog" ref="el" :style="{top: style.top + 'px', left: style.left + 'px'}"  :class="[style.isTop ? 'is-top' : 'is-bottom', style.isLeft ? 'is-left' : 'is-right', props.noPicker ? 'no-picker' : '', props.class]" @click.stop="() => {}" >
                             <slot name="header">
                                 <MaxGrid s100 class="max-popover-header" pt0 mt0 mb-15>
                                     <MaxTitle1 s90  :h1="props.title ?? 'Titulo'" :h2="props.subTitle ?? 'Sub Titulo'" p0 m0 />
@@ -39,6 +39,8 @@
     import { getCssSize } from '../helpers/getCssSize';
 
     const props = withDefaults(defineProps<{
+        /** Classes passadas ao componente */
+        class?: string;
         /** Nome do ícone (ex: 'mdi:home') */
         icon?: string;
         /** Alias para o nome do ícone */
@@ -167,6 +169,7 @@
     position: fixed;
     min-width: 300px;
     min-height: 60px;
+    max-height: 100vh;
     background-color: var(--background-0);
     z-index: 2;
     border: 1px solid var(--surface-border);
