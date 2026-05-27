@@ -8,6 +8,7 @@
                 {{ props.iconValue ?? '' }}
             </div>
         </div>
+
     </div>
 </template>
 
@@ -60,8 +61,6 @@
         /** Apenas se estiver usando overlay = true */
         overlay?: boolean | undefined;
         /** Cor do Fundo */
-        color?: string;
-        /** Cor do Fundo */
         bgColor?: string;
         /** Cor da Texto */
         textColor?: string;
@@ -72,7 +71,6 @@
 
     const bg_color = computed<string>(() => {
         if (props.bgColor) return props.bgColor;
-        if (props.color) return props.color;
 
         for (const key in attrs) if (key.startsWith('color-')) {
             const color = key.replace('color-hover-', '').replace('color-', '');

@@ -1,5 +1,5 @@
 <template>
-    <Button v-bind="props as PrimeButtonProps" :iconPos="iconPos" uppercase @click.stop="props.action?.({event: $event, data: data}) ?? onClick" v-if="hasContent(props.label)">
+    <Button v-bind="props as PrimeButtonProps" :iconPos="iconPos" uppercase @click="props.action?.({event: $event, data: data}) ?? onClick" v-if="props.label" >
         <template #default>
             <slot></slot>
         </template>
@@ -10,10 +10,8 @@
             <MaxIcon  icon="loading" :size="props.size ?? props.sizeIcon ?? props.iconSize ?? '1'" class="content-button-icon" flex />
         </template>
     </Button>
+    <MaxIconButton  v-bind="props" v-else class="icon-button-b" ></MaxIconButton>
 
-    <MaxIconButton  v-bind="props" v-else dark class="icon-button-b">
-
-    </MaxIconButton>
 </template>
 
 <script setup lang="ts">

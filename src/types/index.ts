@@ -17,6 +17,8 @@ export interface MaxButtonsType extends /* @vue-ignore */ Omit<PrimeButtonProps,
     label?: string;
     /** Ícone a ser exibido no botão */
     icon?: string;
+    /** Classe do icone  */
+    class?: any;
     /** Ícone a ser exibido à esquerda do botão */
     iconRight?: string;
     /** Posição do ícone no botão */
@@ -29,6 +31,8 @@ export interface MaxButtonsType extends /* @vue-ignore */ Omit<PrimeButtonProps,
     sizeIcon?: string | undefined | number | null;
     /** Estado de carregamento do botão */
     loading?: boolean;
+    /** Escala de Ampliação ao passar o mouse */
+    hoverScale?: number | null | undefined;
     /** Variante visual do botão */
     variant?: 'outlined' | 'text' | 'link';
     /** Alias para o nome do ícone */

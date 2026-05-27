@@ -1,14 +1,14 @@
 <template>
-    <div class="max-popover-menu" ref="btn_el" pointer v-tooltip="null" flex>
-        <div v-tooltip="null" flex class="botao" :style="{width: size_icon, height: size_icon} ">
+    <div class="max-popover-menu" ref="btn_el" pointer v-tooltip="null" :style="{width: size_icon, height: size_icon} ">
+        <div v-tooltip="null" @click.stop="toggle" class="botao" :style="{width: size_icon, height: size_icon} ">
             <slot name="button" >
-                <MaxButton v-bind="props" :size="String(props.size ?? props.sizeIcon ?? props.iconSize ?? 1.1)" :action="toggle"/>
+                <MaxButton v-bind="props" :size="props.size || props.sizeIcon ? String(props.size ?? props.sizeIcon) : ''" flex/>
             </slot>
         </div>
 
         <Menu ref="menu" id="overlay_menu" :model="props.items ?? props.model" :popup="true">
             <template #item="{ item }">
-                <div class="max-popover-menu-item" @click.stop="(event) => item.action ? item.action({ event, data: item.data ?? {} }) : onClick(item)" >
+                <div class="max-popover-menu-item" @click.stop="(event) => item.action?.({ event, data: item.data ?? {} }) ?? onClick(item)" >
                     <MaxIcon :icon="item.icon ?? item.i" v-if="item.icon || item.i" size="1.1" />
                     <div class="max-popover-menu-label">{{ item.label }}</div>
                 </div>
@@ -43,8 +43,8 @@
         flip?: 'horizontal' | 'vertical' | 'h' | 'v' | 'x' | 'y' | 'xy';
         /** Tamanho do ícone (em px ou multiplicador) */
         size?: string | number;
-        sizeIcon?: string | number;
         iconSize?: string | number;
+        sizeIcon?: string | number;
         /** Alias para o tamanho */
         scale?: string | number;
         /** Mensagem de confirmação */
@@ -66,15 +66,16 @@
         message: 'Deseja continuar?'
     });
 
-    const size_icon = computed(() => getCssSize(String(props.size ?? props.sizeIcon ?? props.iconSize ?? 1.1)) );
+    const size_icon = computed(() => getCssSize(Number(props.size ?? props.sizeIcon ?? props.iconSize ?? 1.1) + 'rem') );
 
     const menu = ref();
 
-    const toggle = (event: any) => {
+    const toggle = (event?: any) => {
         menu.value.toggle(event);
     };
 
     const onClick = (item: any) => {
+        toggle();
         if (item.route) {
             goToRoute(item.route, { ...(item.params ?? {}), ...(item.data ?? {}), ...(item.query ?? {}) });
             return;
@@ -95,12 +96,10 @@
 
     .botao {
         display: grid;
-        grid-template-columns: auto 1fr;
+        grid-template-columns: 1fr;
         place-items: center;
         gap: 8px;
-        height: 2rem;
         cursor: pointer;
-        padding: 0 8px;
     }
 }
 

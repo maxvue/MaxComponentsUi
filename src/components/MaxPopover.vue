@@ -2,7 +2,7 @@
     <div ref="btn_el" pointer v-tooltip="null">
         <div v-tooltip="null" @click.stop="toggle" flex :style="{width: size_icon, height: size_icon} ">
             <slot name="button" v-bind="props">
-                <MaxButton v-bind="props" :size="String(props.size ?? props.sizeIcon ?? props.iconSize ?? 1.1)" />
+                <MaxButton v-bind="props" :size="String(props.size ?? props.sizeIcon ?? props.iconSize ?? 1.1)" :action="undefined" />
             </slot>
         </div>
         <div style="position: fixed;" v-tooltip="null" class="popover-item" >

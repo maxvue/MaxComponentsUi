@@ -1,5 +1,5 @@
 <template>
-    <div v-bind="{...props, ...attrs}" class="icon-div ico-btn" ref="icon_ref" :style="{width: size, height: size}" :class="attrs.class ?? {}" @click.stop="props.action?.({event: $event, data: data}) ?? onClick">
+    <div v-bind="{...props, ...attrs}" :class="`icon-div ico-btn ${hover ? 'hover' : ''}`" ref="icon_ref" :style="{width: size, height: size, transform: hover ? 'scale('+ (1) +')' : 'scale(1)'}" @click="props.action ? props.action({event: $event, data: data}) : onClick" @mouseenter="hover = true" @mouseleave="hover = false">
         <slot>
             <MaxIcon pointer v-bind="{...props, ...attrs}" :size="size" :light="props.light" :dark="props.dark ?? 0.4" />
         </slot>
@@ -7,14 +7,16 @@
 </template>
 
 <script setup lang="ts">
-    import { computed, useAttrs } from 'vue';
+    import { computed, ref, useAttrs } from 'vue';
     import MaxIcon from './MaxIcon.vue';
     import { goToRoute, useDefaultReset } from '@maxvue/max-use';
     import type { MaxButtonsType } from '../types';
 
     const attrs = useAttrs();
 
-    const props = withDefaults(defineProps<MaxButtonsType>(), { data: {}, params: {}, query: {} });
+    const hover = ref(false);
+
+    const props = withDefaults(defineProps<MaxButtonsType>(), { data: {}, params: {}, query: {}, class: {}, hoverScale: 1.1 });
 
     const data = computed(() => ({ ...(props.data ?? {}), ...(props.query ?? {}), ...(props.params ?? {}) }));
 
@@ -55,12 +57,5 @@
         max-height: 100%;
         transition: transform 0.3s ease, color 0.2s ease-in-out;
         position: relative;
-
-
-        &.ico-btn {
-            &:hover {
-                transform: scale(1.3) !important;
-            }
-        }
     }
 </style>

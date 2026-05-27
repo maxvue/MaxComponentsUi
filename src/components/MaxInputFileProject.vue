@@ -1,14 +1,16 @@
 <template>
-    <div :class="`input-project-div ${isOverDropZone ? 'in-drop' : 'not-in-drop'}`" ref="drop_zone_ref" @click="() => open()" relative>
-        <div class="open-files" pointer>
-            <div class="instruction">
-                Insira fotos dos documentos ou Documentos em PDF aqui
-                <br />
-                para registrar os dados automaticamente.
+    <div :class="`input-project-div ${isOverDropZone ? 'in-drop' : 'not-in-drop'}`" ref="drop_zone_ref" relative>
+        <MaxIconButton class="open-files-btn"  :hoverScale="0.3">
+            <div class="open-files" pointer @click.stop="() => open()">
+                <div class="instruction">
+                    Insira fotos dos documentos ou Documentos em PDF aqui
+                    <br />
+                    para registrar os dados automaticamente.
+                </div>
+                <div>Clique aqui ou arraste e solte os documentos para carregar.</div>
+                <MaxIcon icon="material-symbols:folder-open" size="4" color-gray />
             </div>
-            <div>Clique aqui ou arraste e solte os documentos para carregar.</div>
-            <MaxIcon icon="material-symbols:folder-open" size="4" color-gray />
-        </div>
+        </MaxIconButton>
         <div class="file-list">
             <div v-for="file in temp_files" :key="file.id" class="file-item" pointer>
                 <div relative class="icons-file">
@@ -22,7 +24,7 @@
         </div>
         <div class="make-form">
             <div v-for="button in props.buttons">
-                <MaxButton i="hugeicons:ai-file"  v-tooltip.left="' arquivos'" label="Preencher" @click.stop="button.action?.({event: $event, data: button.data ?? {}}) ?? onClick($event, button ?? {})" />
+                <MaxButton i="hugeicons:ai-file" light="0.7" label="Preencher" :action="button.action" :data="button" />
             </div>
         </div>
     </div>
@@ -40,6 +42,7 @@
     import type { MaxButtonsType } from '../types/index.js';
     import axios from 'axios';
     import { goToRoute } from '@maxvue/max-use';
+    import MaxIconButton from './MaxIconButton.vue';
 
     const props = withDefaults(defineProps<{ files: DBFile[]; uploadData?: any; auto?: boolean; url?: string; route?:string; ready?: boolean; uploadRoute?: string; buttons?: MaxButtonsType[] }>(), { files: () => [], buttons: () => [], auto: true });
 
@@ -284,5 +287,10 @@
             right: 10px;
             bottom: 10px;
         }
+    }
+
+    .open-files-btn {
+        width: 100% !important;
+        height: 100% !important;
     }
 </style>
