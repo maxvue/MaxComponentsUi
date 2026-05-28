@@ -32,36 +32,41 @@ export const useIconStore = defineStore('icons', () => {
         // Captura snapshot da lista no momento da requisição para evitar condição de corrida
         const icons_to_fetch = [...list_icons_waiting_request.value];
 
-        if (size(icons_to_fetch) > 0 && errors.value['fetch'] < MAX_FETCH_RETRIES) fetch('https://engeapp.com.br/icons', {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: JSON.stringify({ icons: icons_to_fetch })
-        }).then((res) => res.json()).then((data) => {
+        if (size(icons_to_fetch) > 0 && errors.value['fetch'] < MAX_FETCH_RETRIES) {
+            const params = new URLSearchParams();
+            icons_to_fetch.forEach((icon) => params.append('icons[]', icon));
 
-            const updated_data = { ...icons_data.value };
+            fetch(`https://engeapp.com.br/icons?${params.toString()}`, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            }).then((res) => res.json()).then((data) => {
 
-            for (const icon_name of icons_to_fetch) {
+                console.trace('Ícones requisitados com sucesso', icons_to_fetch);
+                const updated_data = { ...icons_data.value };
 
-                if (data && data[icon_name]) {
-                    updated_data[icon_name] = data[icon_name];
-                    continue;
+                for (const icon_name of icons_to_fetch) {
+
+                    if (data && data[icon_name]) {
+                        updated_data[icon_name] = data[icon_name];
+                        continue;
+                    }
+
+                    errors.value[icon_name] = (errors.value[icon_name] ?? 0) + 1;
+                    console.error('Erro na obtenção do ícone', icon_name);
+
+                    if (errors.value[icon_name] >= 4) updated_data[icon_name] = '';
+
                 }
 
-                errors.value[icon_name] = (errors.value[icon_name] ?? 0) + 1;
-                console.error('Erro na obtenção do ícone', icon_name);
+                errors.value['fetch'] = 0;
 
-                if (errors.value[icon_name] >= 4) updated_data[icon_name] = '';
-
-            }
-
-            errors.value['fetch'] = 0;
-
-            icons_data.value = updated_data;
-            saveCache();
-        }).catch((error) => {
-            console.error('Erro na Requisição dos ícones', error);
-            errors.value['fetch'] += 1;
-        });
+                icons_data.value = updated_data;
+                saveCache();
+            }).catch((error) => {
+                console.error('Erro na Requisição dos ícones', error);
+                errors.value['fetch'] += 1;
+            });
+        }
 
     }, { debounce: 50, maxWait: 150, deep: true });
 
