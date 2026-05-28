@@ -14,7 +14,7 @@
         <div class="file-list">
             <div v-for="file in temp_files" :key="file.id" class="file-item" pointer>
                 <div relative class="icons-file">
-                    <Icon :i="fileIcon(file)" size="2" />
+                    <MaxIcon :icon="fileIcon(file)" size="2" />
                     <MaxLoaderIcon i="loading" size="2" style="position: absolute; top: 0;" class="loading-icon" v-if="file.to_request_ai && !file.data_ai"/>
                     <div class="ai-icon" v-if="file.data_ai !== null" >
                         <MaxIcon i="material-icon-theme:gemini-ai" size="0.9" color-blue-700 />
@@ -82,7 +82,7 @@
         return null;
     }
 
-    function fileIcon (file: DBFile): string | null {
+    function fileIcon (file: DBFile): string {
 
         const file_names = [file?.file_name?.toLowerCase() ?? '', file?.name?.toLowerCase() ?? '', file?.label_file_name?.toLowerCase() ?? ''];
 
