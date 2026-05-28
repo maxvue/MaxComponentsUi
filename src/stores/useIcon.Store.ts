@@ -33,7 +33,7 @@ export const useIconStore = defineStore('icons', () => {
         const icons_to_fetch = [...list_icons_waiting_request.value];
 
         if (size(icons_to_fetch) > 0 && errors.value['fetch'] < MAX_FETCH_RETRIES) fetch('https://engeapp.com.br/icons', {
-            method: 'POST',
+            method: 'GET',
             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
             body: JSON.stringify({ icons: icons_to_fetch })
         }).then((res) => res.json()).then((data) => {
