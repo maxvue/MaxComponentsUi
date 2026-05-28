@@ -8,7 +8,7 @@
 
         <Menu ref="menu" id="overlay_menu" :model="props.items ?? props.model" :popup="true">
             <template #item="{ item }">
-                <div class="max-popover-menu-item" @click.stop="(event) => item.action?.({ event, data: item.data ?? {} }) ?? onClick(item)" >
+                <div class="max-popover-menu-item" @click.stop="(event) => item.action ? item.action({ event, data: item.data ?? {} }) : onClick(event, item)" >
                     <MaxIcon :icon="item.icon ?? item.i" v-if="item.icon || item.i" size="1.1" />
                     <div class="max-popover-menu-label">{{ item.label }}</div>
                 </div>
@@ -23,7 +23,7 @@
     import type { MenuItem } from 'primevue/menuitem';
     import MaxButton from './MaxButton.vue';
     import MaxIcon from './MaxIcon.vue';
-    import { goToRoute } from '@maxvue/max-use';
+    import { goToRoute, useDefaultReset } from '@maxvue/max-use';
     import { getCssSize } from '../helpers/getCssSize.js';
 
     const props = withDefaults(defineProps<{
@@ -74,16 +74,27 @@
         menu.value.toggle(event);
     };
 
-    const onClick = (item: any) => {
-        toggle();
-        if (item.route) {
-            goToRoute(item.route, { ...(item.params ?? {}), ...(item.data ?? {}), ...(item.query ?? {}) });
-            return;
-        }
+    const executing = useDefaultReset<boolean>(false, 200);
 
-        if (item.action) {
-            item.action(item);
-            return;
+    const onClick = (event: any, item: any) => {
+        console.log('exec');
+        if (! executing.value) {
+            console.log('exec2');
+            executing.value = true;
+            console.log('exec3', item.action);
+
+            const data = item.data ?? item.props ?? item.params ?? item.query ?? {};
+
+            if (item.route) {
+                console.log('exec4');
+                goToRoute(item.route, data);
+                return;
+            }
+
+            if (item.action) {
+                item.action({ event: event, data: data });
+                return;
+            }
         }
     };
 </script>

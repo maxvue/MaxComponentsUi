@@ -30,7 +30,7 @@
 
 <script setup lang="ts">
     import { useElementSize, useWindowSize, useElementBounding, useDefaultReset } from '@maxvue/max-use';
-    import { useTemplateRef, ref, useAttrs, computed } from 'vue';
+    import { useTemplateRef, ref, computed } from 'vue';
     import MaxIconButton from './MaxIconButton.vue';
     import MaxButton from './MaxButton.vue';
     import MaxTitle1 from './MaxTitle1.vue';
@@ -103,6 +103,7 @@
         isLeft: false,
         opacity: 0
     });
+
 
     const toggle = () => {
         isOpen.value = !isOpen.value;
