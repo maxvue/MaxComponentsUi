@@ -6,7 +6,6 @@
             </slot>
         </div>
         <teleport to="body">
-            <!-- <MaxAnimateFade :show="modal_store.show_id === id" :duration="0.3"> -->
             <div class="background-modal" @click.stop="modal_store.hide" v-if="modal_store.show_id === id" :style="{opacity: style?.opacity}">
                 <div class="max-modal" ref="el" :style="{top: style.top + 'px', left: style.left + 'px'}"  @click.stop="() => {}">
                     <slot name="header">
@@ -23,7 +22,6 @@
                     </div>
                 </div>
             </div>
-            <!-- </MaxAnimateFade> -->
         </teleport>
     </div>
 </template>
