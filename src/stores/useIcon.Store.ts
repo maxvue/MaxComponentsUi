@@ -63,7 +63,7 @@ export const useIconStore = defineStore('icons', () => {
                 icons_data.value = updated_data;
                 saveCache();
             }).catch((error) => {
-                console.error('Erro na Requisição dos ícones', error);
+                console.error('Erro na Requisição dos ícones', { 'url': `https://engeapp.com.br/api/icons?${params.toString()}`, 'error': error });
                 errors.value['fetch'] += 1;
             });
         }
