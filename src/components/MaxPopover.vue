@@ -170,7 +170,6 @@
     position: fixed;
     min-width: 300px;
     min-height: 60px;
-    max-height: 100vhma;
     background-color: var(--background-0);
     z-index: 2;
     border: 1px solid var(--surface-border);
