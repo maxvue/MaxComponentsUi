@@ -48,10 +48,10 @@ export const useIconStore = defineStore('icons', () => {
                 }
 
                 errors.value[icon_name] = (errors.value[icon_name] ?? 0) + 1;
-                if (errors.value[icon_name] >= 4) {
-                    console.error('Erro na obtenção do ícone', icon_name);
-                    updated_data[icon_name] = '';
-                }
+                console.error('Erro na obtenção do ícone', icon_name);
+
+                if (errors.value[icon_name] >= 4) updated_data[icon_name] = '';
+
             }
 
             errors.value['fetch'] = 0;
