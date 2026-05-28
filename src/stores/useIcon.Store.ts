@@ -36,7 +36,7 @@ export const useIconStore = defineStore('icons', () => {
             const params = new URLSearchParams();
             icons_to_fetch.forEach((icon) => params.append('icons[]', icon));
 
-            fetch(`https://engeapp.com.br/icons?${params.toString()}`, {
+            fetch(`https://engeapp.com.br/api/icons?${params.toString()}`, {
                 method: 'GET',
                 headers: { 'Accept': 'application/json' }
             }).then((res) => res.json()).then((data) => {
