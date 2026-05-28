@@ -255,6 +255,8 @@
         .icons-file {
             display: grid;
             place-items: center;
+            width: 29px;
+            height: 29px;
 
             .loading-icon {
                 position: absolute;
