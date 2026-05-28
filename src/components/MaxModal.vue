@@ -5,38 +5,37 @@
                 <MaxButton v-bind="props" :size="props.size || props.sizeIcon ? String(props.size ?? props.sizeIcon) : ''" />
             </slot>
         </div>
-        <div style="position: fixed; z-index: 999;">
-            <MaxAnimateFade :show="modal_store.show_id === id" :duration="0.3">
-                <div class="background-modal" @click.stop="modal_store.hide" v-if="modal_store.show_id === id" :style="{opacity: style?.opacity}">
-                    <div class="max-modal" ref="el" :style="{top: style.top + 'px', left: style.left + 'px'}"  @click.stop="() => {}">
-                        <slot name="header">
-                            <MaxGrid s100 class="max-modal-header" pt0 mt0 mb-15>
-                                <MaxTitle1 s90  :h1="props.title ?? 'Titulo'" :h2="props.subTitle ?? 'Sub Titulo'" p0 m0 />
-                                <div s1>
-                                    <MaxIconButton i="iconoir:xmark" size="1.3" @click.stop="modal_store.hide" class="close-btn" />
-                                </div>
-                            </MaxGrid>
-                        </slot>
-                        <div class="max-modal-content">
-                            <slot name="content"></slot>
-                            <slot></slot>
-                        </div>
+        <teleport to="body">
+            <!-- <MaxAnimateFade :show="modal_store.show_id === id" :duration="0.3"> -->
+            <div class="background-modal" @click.stop="modal_store.hide" v-if="modal_store.show_id === id" :style="{opacity: style?.opacity}">
+                <div class="max-modal" ref="el" :style="{top: style.top + 'px', left: style.left + 'px'}"  @click.stop="() => {}">
+                    <slot name="header">
+                        <MaxGrid s100 class="max-modal-header" pt0 mt0 mb-15>
+                            <MaxTitle1 s90  :h1="props.title ?? 'Titulo'" :h2="props.subTitle ?? 'Sub Titulo'" p0 m0 />
+                            <div s1>
+                                <MaxIconButton i="iconoir:xmark" size="1.3" @click.stop="modal_store.hide" class="close-btn" />
+                            </div>
+                        </MaxGrid>
+                    </slot>
+                    <div class="max-modal-content">
+                        <slot name="content"></slot>
+                        <slot></slot>
                     </div>
                 </div>
-            </MaxAnimateFade>
-        </div>
+            </div>
+            <!-- </MaxAnimateFade> -->
+        </teleport>
     </div>
 </template>
 
 <script setup lang="ts">
     import { useModalStore } from '../stores/useModal.Store';
-    import { useElementSize, useWindowSize, Random, useDefaultReset } from '@maxvue/max-use';
+    import { useElementSize, useWindowSize, Random, useDefaultReset, refAutoReset } from '@maxvue/max-use';
     import { useTemplateRef, ref } from 'vue';
     import MaxIconButton from './MaxIconButton.vue';
     import MaxButton from './MaxButton.vue';
     import MaxTitle1 from './MaxTitle1.vue';
     import MaxGrid from './MaxGrid.vue';
-    import MaxAnimateFade from './MaxAnimateFade.vue';
 
 
     const props = withDefaults(defineProps<{
@@ -99,27 +98,50 @@
         opacity: 0
     });
 
+    const is_changing = refAutoReset(false, 400);
+
     const toggle = () => {
+
+        if (is_changing.value) return;
+
+        is_changing.value = true;
 
         if (style.value.opacity !== 0) style.reset();
 
+        // ADICIONA MODAL
+        if (modal_store.show_id !== id.value) {
 
-        modal_store.toggle(id.value);
+            console.trace('adicionando');
 
-        setTimeout(() => {
-            const { width: width_el, height: height_el } = useElementSize(el as any);
-            const { width: window_width, height: window_height } = useWindowSize();
-            const data = {
-                top: (window_height.value - height_el.value) / 2,
-                left: (window_width.value - width_el.value) / 2,
-                isTop: false,
-                isLeft: false,
-                opacity: 0
-            };
+            modal_store.toggle(id.value);
+            setTimeout(() => {
+                const { width: width_el, height: height_el } = useElementSize(el as any);
+                const { width: window_width, height: window_height } = useWindowSize();
+                const data = {
+                    top: (window_height.value - height_el.value) / 2,
+                    left: (window_width.value - width_el.value) / 2,
+                    isTop: false,
+                    isLeft: false,
+                    opacity: 0
+                };
 
-            style.value = data;
-            style.value.opacity = 1;
+                style.value = data;
+                style.value.opacity = 1;
+            }, 1);
+
+            return;
+        }
+
+        // REMOVE MODAL
+        else if (modal_store.show_id === id.value) setTimeout(() => {
+            console.trace('Removendo');
+            style.value.opacity = 0;
+            setTimeout(() => {
+                modal_store.toggle(id.value);
+            }, 300);
         }, 1);
+
+
     };
 
     defineExpose({
@@ -129,36 +151,35 @@
 </script>
 
 <style lang="scss">
-.report-bugs-popover {
+
     .background-modal {
         background-color: rgb(0 0 0 / 60%);
         height: 100vh;
         width: 100vw;
         position: fixed;
-        z-index: 5;
+        z-index: 59;
         top: 0;
         left: 0;
         transition: opacity 0.3s ease;
-    }
 
-    .max-modal {
-        position: fixed;
-        background-color: var(--background-0);
-        z-index: 2;
-        border: 1px solid var(--surface-border);
-        display: grid;
-        grid-template-rows: auto 1fr;
+        .max-modal {
+            position: fixed;
+            background-color: var(--background-0);
+            z-index: 2;
+            border: 1px solid var(--surface-border);
+            display: grid;
+            grid-template-rows: auto 1fr;
 
-        /* O drop-shadow traça o contorno real do elemento + seus ::before, criando o balão perfeito */
-        filter: drop-shadow(0 4px 8px rgb(0 0 0 / 20%));
-        border-radius: 0.75rem;
-        padding: 10px;
+            /* O drop-shadow traça o contorno real do elemento + seus ::before, criando o balão perfeito */
+            filter: drop-shadow(0 4px 8px rgb(0 0 0 / 20%));
+            border-radius: 0.75rem;
+            padding: 10px;
 
-        .max-modal-content {
-            width: auto;
-            position: relative;
+            .max-modal-content {
+                width: auto;
+                position: relative;
+            }
+
         }
-
     }
-}
 </style>

@@ -1,5 +1,5 @@
 <template>
-    <div class="my-spinner" color-orange-300 >
+    <div class="max-loader-icon-div"  v-bind="attrs" >
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" flex >
             <defs>
                 <linearGradient id="SVGw6R8JeYL" x1="50%" x2="50%" y1="5.271%" y2="91.793%">
@@ -21,7 +21,9 @@
 </template>
 
 <script setup lang="ts" vapor>
+    import { useAttrs } from 'vue';
 
+    const attrs = useAttrs;
 </script>
 
 <style lang="scss">
@@ -35,7 +37,7 @@
         }
     }
 
-    .my-spinner {
+    .max-loader-icon-div {
         position: relative;
         width: 55px;
         height: 55px;

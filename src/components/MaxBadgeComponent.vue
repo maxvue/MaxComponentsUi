@@ -61,7 +61,7 @@
         /** Apenas se estiver usando overlay = true */
         overlay?: boolean | undefined;
         /** Cor do Fundo */
-        bgColor?: string;
+        background?: string;
         /** Cor da Texto */
         textColor?: string;
     }>(), {});
@@ -70,7 +70,7 @@
     const is_overlay = computed(() => props.overlay === true );
 
     const bg_color = computed<string>(() => {
-        if (props.bgColor) return props.bgColor;
+        if (props.background) return props.background;
 
         for (const key in attrs) if (key.startsWith('color-')) {
             const color = key.replace('color-hover-', '').replace('color-', '');
