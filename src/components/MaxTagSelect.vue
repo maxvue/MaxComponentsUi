@@ -1,13 +1,13 @@
 <template>
-    <InputBase v-bind="{...props, ...attrs}" class="max-select-tag" >
+    <InputBase v-bind="{...props, ...attrs}" class="max-select-tag" input-click no-dropdown >
         <div v-if="attrs.placeholder !== undefined && (!temp_value || temp_value === '')" class="placeholder-select">
             {{ attrs.placeholder }}
         </div>
         <Select v-bind="{...props, ...attrs}" v-model="temp_value" :filter="props.filter"  :loading="loading" @before-show="(before_show as any)" :options="options" :optionLabel="attrs.optionLabel" :optionValue="props.optionValue" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false" :disabled="props.disabled">
             <template #option="slotProps">
                 <slot name="option" :option="slotProps.option" :selected="slotProps.selected" :index="slotProps.index">
-                    <div class="label-tag-div" :style="getStyleColor(String(slotProps.option.background_color ?? slotProps.option.backgroundColor ?? slotProps.option.tag_color ?? slotProps.option.tagColor ?? slotProps.option['tag-color'] ?? slotProps.option['background-color'] ?? 'unset'), slotProps.option['hover'] ?? false)" @mouseenter="options.find(o => o['value'] === slotProps.option['value'])['hover'] = true" @mouseleave="options.find(o => o['value'] === slotProps.option['value'])['hover'] = false">
-                        <Icon :icon="slotProps.option['icon']" v-if="slotProps.option['icon']" :size="slotProps.option?.['iconSize'] ?? '1'" :style="{ width: '30px' }" />
+                    <div class="label-tag-div" :style="getStyleColor(slotProps.option, slotProps.option['hover'] ?? false, false)" @mouseenter="options.find(o => o['value'] === slotProps.option['value'])['hover'] = true" @mouseleave="options.find(o => o['value'] === slotProps.option['value'])['hover'] = false">
+                        <MaxIcon :icon="slotProps.option['icon']" v-if="slotProps.option['icon']" :size="slotProps.option?.['iconSize'] ?? '1'" :style="{ width: '30px'}" :icon-color="getStyleColor(slotProps.option, false, true).color"/>
                         <div class="label-tag">
                             <div v-html="slotProps.option[attrs.optionLabel] ?? slotProps.option.label" :style="{ color: attrs.color }"></div>
                         </div>
@@ -17,9 +17,12 @@
                 </slot>
             </template>
             <template #value="value">
-                <div class="value-tag-div" :style="getStyleColor(String(option_selected?.background_color ?? option_selected?.backgroundColor ?? option_selected.tag_color ?? option_selected?.tagColor ?? option_selected?.['tag-color'] ?? option_selected?.['background-color'] ?? 'unset'), false, true)" >
-                    <Icon :icon="option_selected?.icon ?? null" :size="option_selected?.icon_size ?? 1.4" pr10 v-if="option_selected.icon"/>
-                    <div class="tag-value-text" elipsis>{{ option_selected?.[props.optionName] ?? option_selected?.name ?? option_selected?.label }}</div>
+                <div class="value-tag-div" :style="getStyleColor(option_selected, false, true)" :color-string="getColorString(option_selected)" >
+                    <MaxIcon :icon="option_selected?.icon ?? null" :size="option_selected?.icon_size ?? 1.4" pr10 v-if="option_selected.icon" :icon-color="getStyleColor(option_selected, false, true).color" />
+                    <div class="tag-value-text" :style="{color: getStyleColor(option_selected, false, true).color}" >{{ option_selected?.[props.optionName] ?? option_selected?.name ?? option_selected?.label }}</div>
+                    <slot name="btn-right">
+
+                    </slot>
                 </div>
             </template>
         </Select>
@@ -36,6 +39,7 @@
     import Select from 'primevue/select';
     import { SelectGroupOptions } from '../types';
     import { getColorFromVar, contrastColor, isBlank, watchDebounced } from '@maxvue/max-use';
+    import MaxIcon from './MaxIcon.vue';
 
     const attrs: any = useAttrs();
 
@@ -81,12 +85,19 @@
             groupOptions?: SelectGroupOptions;
             disabled?: boolean | undefined;
             filter?: boolean | undefined;
+            hasRemove?: boolean | undefined;
 
         }>(),
         { modelValue: null, done: undefined, optionValue: 'value', optionName: 'name', filter: false, optionLabel: 'label', error: undefined, caution: undefined, required: false, default: undefined, disabled: false }
     );
 
-    const getStyleColor = (color_string: string, hover: boolean = false, is_value: boolean = false) => {
+    const getColorString = (item: any) => {
+        if (!item) return 'unset';
+        return item.background_color ?? item.backgroundColor ?? item.tag_color ?? item.tagColor ?? item['tag-color'] ?? item['background-color'] ?? 'unset';
+    };
+
+    const getStyleColor = (item: any, hover: boolean = false, is_value: boolean = false) => {
+        const color_string = getColorString(item);
 
         const color = color_string === 'unset' ? getColorFromVar('var(--background-500)') : getColorFromVar(color_string);
 
@@ -236,15 +247,14 @@
 }
 
 .value-tag-div {
-    grid-template-columns: auto 1fr;
+    grid-template-columns: auto 1fr auto;
     place-items: center;
-    padding: unset !important;
+    padding: unset;
     display: grid;
     overflow: hidden;
     position: relative;
 
     .tag-value-text {
-        color: unset !important;
         width: 100% !important;
         max-width: 100% !important;
         position: relative;
@@ -288,12 +298,6 @@
         &:has(.p-select-header) {
             .p-select-list-container {
                 padding-top: 14px !important;
-            }
-        }
-
-        .p-select-option-selected {
-            .label-tag {
-                color: var(--background-0) !important;
             }
         }
     }

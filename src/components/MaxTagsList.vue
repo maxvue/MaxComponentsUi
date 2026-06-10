@@ -1,10 +1,16 @@
 <template>
-    <MaxGrid class="max-tag-list">
-        <div v-for="item in items_array">
-            <MaxTagSelect :modelValue="item.value" :options="getOptions(item)" />
-            {{ item }}
+    <div class="max-tag-list" v-bind="attrs">
+        <div v-for="item in items_array" >
+            <MaxTagSelect flex :modelValue="item.value" :options="getOptions(item)" no-dropdown uppercase >
+                <template #btn-right>
+                    <div style="opacity: 0.4;" v-tooltip="'Remover'">
+                        <MaxIconButton i="mynaui:x-circle" size="1.3"/>
+                    </div>
+                </template>
+            </MaxTagSelect>
+            <!-- {{ item }} -->
         </div>
-    </MaxGrid>
+    </div>
 </template>
 
 
@@ -13,6 +19,9 @@
     import { getColorFromVar, contrastColor, isBlank, watchDebounced } from '@maxvue/max-use';
     import MaxGrid from './MaxGrid.vue';
     import MaxTagSelect from './MaxTagSelect.vue';
+    import MaxIconButton from './MaxIconButton.vue';
+
+    const attrs = useAttrs();
 
     const props = withDefaults(defineProps<{
         list: any[] | Record<string, any>;
@@ -35,7 +44,11 @@
 </script>
 
 <style lang="scss">
-.max-tag-list {
-    display: flex;
-}
+    .max-tag-list {
+        display: flex;
+
+        .tag-value-text {
+            padding: 0 0 0 30px !important;
+        }
+    }
 </style>

@@ -21,7 +21,7 @@ export const presetMaxUno = () => {
             [/^[pm][tblrwhyx]?-?(\d+)$/, (params) => paddingMargin(params)],
             [/^w[-_]?[fF](?:ull|lex)$/, () => ({ width: '100% !important' })],
             [/^fs-(.+)$/, ([, s]) => ({ 'font-size': `${s}rem !important` })],
-            [/^color-(.+)$/, ([, s]) => ({ color: `var(--${String(s).length > 3 ? s : 'gray-300'}) !important` })],
+            [/^ color-(.+)$/, ([, s]) => ({ color: `var(--${String(s).length > 3 ? s : 'gray-300'}) !important` })],
             // Cores dinâmicas
             [/^text-(center|left|right)$/, ([, s]) => ({ 'text-align': s + ' !important' })],
             [/^bg-(.+)$/, ([, s]) => ({ 'background-color': s.startsWith('var(') || s.startsWith('#') || s.startsWith('rgb') || s.startsWith('hsl') ? s : `var(--${s})` })],

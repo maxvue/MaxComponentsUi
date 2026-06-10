@@ -55,6 +55,7 @@
         plus?: boolean | string | number | undefined;
         /** Icone de adição */
         color?: string;
+        iconColor?: string;
         /** Icone de adição */
         colorHover?: string;
         /** Hover color */
