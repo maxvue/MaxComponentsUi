@@ -6,7 +6,7 @@
         <Select v-bind="{...props, ...attrs}" v-model="temp_value" :filter="props.filter"  :loading="loading" @before-show="(before_show as any)" :options="options" :optionLabel="attrs.optionLabel" :optionValue="props.optionValue" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false" :disabled="props.disabled">
             <template #option="slotProps">
                 <slot name="option" :option="slotProps.option" :selected="slotProps.selected" :index="slotProps.index">
-                    <div class="label_div" :style="getStyleColor(String(slotProps.option.background_color ?? slotProps.option.backgroundColor ?? slotProps.option['background-color'] ?? 'unset'))">
+                    <div class="label_div" :style="getStyleColor(String(slotProps.option.background_color ?? slotProps.option.backgroundColor ?? slotProps.option.tag_color ?? slotProps.option.tagColor ?? slotProps.option['tag-color'] ?? slotProps.option['background-color'] ?? 'unset'))">
                         <Icon :icon="slotProps.option['icon']" v-if="slotProps.option['icon']" :size="slotProps.option?.['iconSize'] ?? '1'" :style="{ width: '30px' }" />
                         <div class="labelz">
                             <div v-html="slotProps.option[attrs.optionLabel] ?? slotProps.option.label" :style="{ color: attrs.color }"></div>
@@ -17,7 +17,7 @@
                 </slot>
             </template>
             <template #value="value">
-                <div class="value-div" :style="getStyleColor(String(option_selected?.background_color ?? option_selected?.backgroundColor ?? option_selected?.['background-color'] ?? 'unset'))" >
+                <div class="value-div" :style="getStyleColor(String(option_selected?.background_color ?? option_selected?.backgroundColor ?? option_selected.tag_color ?? option_selected?.tagColor ?? option_selected?.['tag-color'] ?? option_selected?.['background-color'] ?? 'unset'))" >
                     <Icon :icon="option_selected?.icon ?? null" :size="option_selected?.icon_size ?? undefined" pr10/>
                     <span class="value-text" elipsis>{{ option_selected?.[props.optionName] ?? option_selected?.name ?? option_selected?.label }}</span>
                 </div>
