@@ -195,16 +195,6 @@
     place-items: center start;
     gap: 10px;
 
-    .icon-div {
-        color: var(--background-650) !important;
-    }
-
-    &:hover {
-        .icon-div {
-            color: var(--background-650) !important;
-        }
-    }
-
     .sub-label-tag {
         color: var(--background-600);
         padding-left: 1rem;
@@ -276,11 +266,6 @@
         .sub-label-tag {
             color: var(--background-0);
         }
-    }
-
-    .label-tag,
-    .sub-label-tag {
-        color: var(--background-650);
     }
 
     .category {
