@@ -17,28 +17,24 @@
 
 
 <script setup lang="ts">
-    import { ref, computed, watch, useAttrs, Ref } from 'vue';
-    import { getColorFromVar, contrastColor } from '@maxvue/max-use';
+    import { ref, computed, useAttrs, Ref } from 'vue';
+    import { getColorFromVar, contrastColor, watchTrue } from '@maxvue/max-use';
     import MaxTagSelect from './MaxTagSelect.vue';
     import MaxIconButton from './MaxIconButton.vue';
 
     const attrs = useAttrs();
 
     const props = withDefaults(defineProps<{
-        list: any[] | Record<string, any>;
         options: any[] | Record<string, any>;
-    }>(),{ list: () => [], options: () => [] });
+    }>(),{ options: () => [] });
 
-    const emit = defineEmits<{
-        remove: [item: any];
-    }>();
+    const model = defineModel<any[] | Record<string, any>>({ default: () => [] });
 
     const add_tag: Ref = ref(null);
 
-    const new_items = ref<any[]>([]);
     const items_array = computed(() =>{
-        const values = Array.isArray(props.list) ? props.list : Object.values(props.list);
-        return [...values, ...new_items.value];
+        const values = Array.isArray(model.value) ? model.value : Object.values(model.value);
+        return [...values];
     } );
 
     const options_array = computed(() =>{
@@ -51,20 +47,14 @@
     defineExpose({ count });
 
 
-    watch(add_tag, () => {
-        if (add_tag.value) {
-
-            const data: any[] | null = options_array.value.find((opt: any) => opt.value === add_tag || opt.value === add_tag.value) ?? null;
-            if (data) new_items.value.push(data);
-
-            add_tag.value = null;
-        }
+    watchTrue(add_tag, () => {
+        const data: any = options_array.value.find((opt: any) => opt.value === add_tag.value?.value || opt.value === add_tag.value) ?? null;
+        if (data && !items_array.value.some((item: any) => item.value === data.value)) model.value = [...items_array.value, data];
+        add_tag.value = null;
     });
 
     const removeItem = (item: any) => {
-        const index = new_items.value.indexOf(item);
-        if (index !== -1) new_items.value.splice(index, 1);
-        else emit('remove', item);
+        model.value = items_array.value.filter((i: any) => i !== item);
     };
 
     const getColorString = (item: any) => {
