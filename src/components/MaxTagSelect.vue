@@ -120,7 +120,6 @@
             const found = group.items.find((opt: any) => opt[valueKey] === temp_value.value);
             if (found) return found;
         }
-
         return {};
     });
 
