@@ -6,12 +6,12 @@
         <Select v-bind="{...props, ...attrs}" v-model="temp_value" :filter="props.filter"  :loading="loading" @before-show="(before_show as any)" :options="options" :optionLabel="attrs.optionLabel" :optionValue="props.optionValue" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false" :disabled="props.disabled">
             <template #option="slotProps">
                 <slot name="option" :option="slotProps.option" :selected="slotProps.selected" :index="slotProps.index">
-                    <div class="label_div" :style="getStyleColor(String(slotProps.option.background_color ?? slotProps.option.backgroundColor ?? slotProps.option.tag_color ?? slotProps.option.tagColor ?? slotProps.option['tag-color'] ?? slotProps.option['background-color'] ?? 'unset'))">
+                    <div class="label-tag-div" :style="getStyleColor(String(slotProps.option.background_color ?? slotProps.option.backgroundColor ?? slotProps.option.tag_color ?? slotProps.option.tagColor ?? slotProps.option['tag-color'] ?? slotProps.option['background-color'] ?? 'unset'))">
                         <Icon :icon="slotProps.option['icon']" v-if="slotProps.option['icon']" :size="slotProps.option?.['iconSize'] ?? '1'" :style="{ width: '30px' }" />
-                        <div class="labelz">
+                        <div class="label-tag">
                             <div v-html="slotProps.option[attrs.optionLabel] ?? slotProps.option.label" :style="{ color: attrs.color }"></div>
                         </div>
-                        <div class="subLabel" v-html="slotProps.option?.sub_label ?? slotProps.option?.sub ?? slotProps.option?.subLabel"></div>
+                        <div class="sub-label-tag" v-html="slotProps.option?.sub_label ?? slotProps.option?.sub ?? slotProps.option?.subLabel"></div>
                         <img v-if="slotProps.option['img']" :src="`/media/images/${slotProps.option['img']}`" alt="Image" class="img-label" />
                     </div>
                 </slot>
@@ -188,7 +188,7 @@
     }
 }
 
-.label_div {
+.label-tag-div {
     display: grid;
     grid-template-columns: auto 1fr auto;
     width: 100% !important;
@@ -205,7 +205,7 @@
         }
     }
 
-    .subLabel {
+    .sub-label-tag {
         color: var(--background-600);
         padding-left: 1rem;
         text-align: right;
@@ -213,7 +213,7 @@
         font-size: 0.85rem;
     }
 
-    .labelz {
+    .label-tag {
         display: grid;
         place-items: center;
     }
@@ -253,8 +253,8 @@
                 color: var(--background-200) !important;
             }
 
-            .labelz,
-            .subLabel {
+            .label-tag,
+            .sub-label-tag {
                 color: var(--background-0);
             }
         }
@@ -272,14 +272,14 @@
             color: var(--background-200) !important;
         }
 
-        .labelz,
-        .subLabel {
+        .label-tag,
+        .sub-label-tag {
             color: var(--background-0);
         }
     }
 
-    .labelz,
-    .subLabel {
+    .label-tag,
+    .sub-label-tag {
         color: var(--background-650);
     }
 
