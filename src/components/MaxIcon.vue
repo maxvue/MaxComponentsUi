@@ -21,8 +21,7 @@
 <script setup lang="ts">
     import { useIconStore } from '../stores/useIcon.Store';
     import { ref, computed, useAttrs } from 'vue';
-    import { useElementHover, isNumber } from '@maxvue/max-use';
-    import { getColorFromVar } from '../helpers/getColorFromVar';
+    import { useElementHover, isNumber, getColorFromVar } from '@maxvue/max-use';
 
     const icon_store = useIconStore();
     const icon_ref = ref<HTMLElement | null>(null);

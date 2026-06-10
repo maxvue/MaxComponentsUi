@@ -17,7 +17,7 @@
     import OverlayBadge from 'primevue/overlaybadge';
     import MaxIcon from './MaxIcon.vue';
     import { useAttrs, computed } from 'vue';
-    import { getColorFromVar } from '../helpers/getColorFromVar';
+    import { getColorFromVar } from '@maxvue/max-use';
 
     const attrs = useAttrs();
 

@@ -35,8 +35,7 @@
     import InputBase from './InputBase.vue';
     import Select from 'primevue/select';
     import { SelectGroupOptions } from '../types';
-    import { getColorFromVar, isBlank, watchDebounced } from '@maxvue/max-use';
-    import { contrastColor } from '@/helpers/getColorFromVar.js';
+    import { getColorFromVar, contrastColor, isBlank, watchDebounced } from '@maxvue/max-use';
 
     const attrs: any = useAttrs();
 
@@ -90,7 +89,7 @@
     const getStyleColor = (color: string) => {
         if (color === 'unset') return {};
         return {
-            backgroundColor: getColorFromVar(color),
+            backgroundColor: getColorFromVar(color).hexa(),
             color: contrastColor(color)
         };
     };
