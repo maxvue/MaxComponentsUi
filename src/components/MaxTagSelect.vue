@@ -1,5 +1,5 @@
 <template>
-    <InputBase v-bind="{...props, ...attrs}" class="select_input_div" >
+    <InputBase v-bind="{...props, ...attrs}" class="max-select-tag" >
         <div v-if="attrs.placeholder !== undefined && (!temp_value || temp_value === '')" class="placeholder-select">
             {{ attrs.placeholder }}
         </div>
@@ -87,7 +87,9 @@
     );
 
     const getStyleColor = (color: string) => {
-        if (color === 'unset') return {};
+        if (color === 'unset') return {
+            color: 'var(--background-750)'
+        };
         return {
             backgroundColor: getColorFromVar(color).hexa(),
             color: contrastColor(color)
@@ -143,7 +145,7 @@
 </script>
 
 <style lang="scss">
-.select_input_div {
+.max-select-tag {
     &[small] {
         padding: 0 !important;
 
@@ -214,7 +216,6 @@
     .labelz {
         display: grid;
         place-items: center;
-        color: var(--background-750);
     }
 
     img {
