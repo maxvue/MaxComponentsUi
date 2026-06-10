@@ -78,7 +78,6 @@
         else if (extension === 'mp3' || extension === 'ogg' || extension === 'aac' || extension === 'wav' || extension === 'flac' || extension === 'wma' || extension === 'm4a') return 'audio';
         else if (extension === 'mp4' || extension === 'avi' || extension === 'mov' || extension === 'webm' || extension === 'mkv' || extension === 'flv' || extension === '3gp' || extension === 'wmv' || extension === 'mpg' || extension === 'mpeg') return 'video';
         else if (extension === 'docx' || extension === 'doc' || extension === 'pdf' || extension === 'txt' || extension === 'pptx' || extension === 'ppt' || extension === 'xlsx' || extension === 'xls' || extension === 'csv') return 'document';
-
         return null;
     }
 
