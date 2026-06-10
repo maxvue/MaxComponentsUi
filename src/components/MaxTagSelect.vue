@@ -19,7 +19,7 @@
             <template #value="value">
                 <div class="value-div" :style="getStyleColor(String(option_selected?.background_color ?? option_selected?.backgroundColor ?? option_selected.tag_color ?? option_selected?.tagColor ?? option_selected?.['tag-color'] ?? option_selected?.['background-color'] ?? 'unset'))" >
                     <Icon :icon="option_selected?.icon ?? null" :size="option_selected?.icon_size ?? undefined" pr10/>
-                    <span class="value-text" elipsis>{{ option_selected?.[props.optionName] ?? option_selected?.name ?? option_selected?.label }}</span>
+                    <span class="tag-value-text" elipsis>{{ option_selected?.[props.optionName] ?? option_selected?.name ?? option_selected?.label }}</span>
                 </div>
             </template>
         </Select>
@@ -95,7 +95,9 @@
 
         return {
             backgroundColor: background,
-            color: text
+            color: text,
+            borderRadius: '6px',
+            padding: '0 6px'
         };
     };
 
@@ -235,6 +237,10 @@
     box-shadow: 0 7px 12px 5px #fff !important;
     padding-bottom: 0 !important;
     z-index: 1 !important;
+}
+
+.tag-value-text {
+    color: unset !important;
 }
 
 .p-select-overlay {
