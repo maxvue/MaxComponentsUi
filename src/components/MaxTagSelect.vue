@@ -7,7 +7,7 @@
             <template #option="slotProps">
                 <slot name="option" :option="slotProps.option" :selected="slotProps.selected" :index="slotProps.index">
                     <div class="label-tag-div" :style="getStyleColor(slotProps.option, slotProps.option['hover'] ?? false, false)" @mouseenter="options.find(o => o['value'] === slotProps.option['value'])['hover'] = true" @mouseleave="options.find(o => o['value'] === slotProps.option['value'])['hover'] = false">
-                        <MaxIcon :icon="slotProps.option['icon']" v-if="slotProps.option['icon']" :size="slotProps.option?.['iconSize'] ?? '1'" :style="{ width: '30px'}" :icon-color="getStyleColor(slotProps.option, false, true).color"/>
+                        <MaxIcon :icon="slotProps.option['icon']" v-if="slotProps.option['icon']" :size="slotProps.option?.['iconSize'] ?? '1'" :style="{ width: '30px'}" :color="getStyleColor(slotProps.option, false, true).color"/>
                         <div class="label-tag">
                             <div v-html="slotProps.option[attrs.optionLabel] ?? slotProps.option.label" :style="{ color: attrs.color }"></div>
                         </div>
@@ -17,12 +17,14 @@
                 </slot>
             </template>
             <template #value="value">
-                <div class="value-tag-div" :style="getStyleColor(option_selected, false, true)" :color-string="getColorString(option_selected)" >
-                    <MaxIcon :icon="option_selected?.icon ?? null" :size="option_selected?.icon_size ?? 1.4" pr10 v-if="option_selected.icon" :icon-color="getStyleColor(option_selected, false, true).color" />
+                <div class="value-tag-div" :style="getStyleColor(option_selected, false, true)" :color-string="getColorString(option_selected)" v-if="! isButton" >
+                    <MaxIcon :icon="option_selected?.icon ?? null" :size="option_selected?.icon_size ?? 1.4" pr10 v-if="option_selected.icon" :color="getStyleColor(option_selected, false, true).color" />
                     <div class="tag-value-text" :style="{color: getStyleColor(option_selected, false, true).color}" >{{ option_selected?.[props.optionName] ?? option_selected?.name ?? option_selected?.label }}</div>
                     <slot name="btn-right">
-
                     </slot>
+                </div>
+                <div v-else>
+                    <MaxIconButton :icon="props.i ?? props.icon ?? props.iconLeft" :size="option_selected?.icon_size ?? 1.8" />
                 </div>
             </template>
         </Select>
@@ -86,9 +88,10 @@
             disabled?: boolean | undefined;
             filter?: boolean | undefined;
             hasRemove?: boolean | undefined;
+            isButton?: boolean | undefined;
 
         }>(),
-        { modelValue: null, done: undefined, optionValue: 'value', optionName: 'name', filter: false, optionLabel: 'label', error: undefined, caution: undefined, required: false, default: undefined, disabled: false }
+        { modelValue: null, done: undefined, optionValue: 'value', optionName: 'name', filter: false, optionLabel: 'label', error: undefined, caution: undefined, required: false, default: undefined, disabled: false, isButton: false }
     );
 
     const getColorString = (item: any) => {
@@ -101,7 +104,7 @@
 
         const color = color_string === 'unset' ? getColorFromVar('var(--background-500)') : getColorFromVar(color_string);
 
-        let background = hover ? (color.isDark() ? color.lighten(0.3).hexa() : color.darken(0.3).hexa()) : color.hexa();
+        let background = hover ? color.darken(0.2).hexa() : color.hexa();
         let text = contrastColor(background);
         if (color_string === 'unset' && ! is_value) {
             background = hover ? 'rgba(0,0,0, 0.1)' : 'transparent';
