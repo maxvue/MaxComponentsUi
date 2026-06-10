@@ -262,10 +262,6 @@
             color: var(--background-200) !important;
         }
 
-        .label-tag,
-        .sub-label-tag {
-            color: var(--background-0);
-        }
     }
 
     .category {
