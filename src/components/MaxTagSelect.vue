@@ -6,7 +6,7 @@
         <Select v-bind="{...props, ...attrs}" v-model="temp_value" :filter="props.filter"  :loading="loading" @before-show="(before_show as any)" :options="options" :optionLabel="attrs.optionLabel" :optionValue="props.optionValue" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false" :disabled="props.disabled">
             <template #option="slotProps">
                 <slot name="option" :option="slotProps.option" :selected="slotProps.selected" :index="slotProps.index">
-                    <div class="label-tag-div" :style="getStyleColor(String(slotProps.option.background_color ?? slotProps.option.backgroundColor ?? slotProps.option.tag_color ?? slotProps.option.tagColor ?? slotProps.option['tag-color'] ?? slotProps.option['background-color'] ?? 'unset'))">
+                    <div class="label-tag-div" :style="getStyleColor(String(slotProps.option.background_color ?? slotProps.option.backgroundColor ?? slotProps.option.tag_color ?? slotProps.option.tagColor ?? slotProps.option['tag-color'] ?? slotProps.option['background-color'] ?? 'unset'), slotProps.option['hover'] ?? false)" @mouseenter="options.find(o => o['value'] === slotProps.option['value'])['hover'] = true" @mouseleave="options.find(o => o['value'] === slotProps.option['value'])['hover'] = false">
                         <Icon :icon="slotProps.option['icon']" v-if="slotProps.option['icon']" :size="slotProps.option?.['iconSize'] ?? '1'" :style="{ width: '30px' }" />
                         <div class="label-tag">
                             <div v-html="slotProps.option[attrs.optionLabel] ?? slotProps.option.label" :style="{ color: attrs.color }"></div>
@@ -86,13 +86,16 @@
         { modelValue: null, done: undefined, optionValue: 'value', optionName: 'name', filter: false, optionLabel: 'label', error: undefined, caution: undefined, required: false, default: undefined, disabled: false }
     );
 
-    const getStyleColor = (color: string) => {
-        if (color === 'unset') return {
-            color: 'var(--background-750)'
-        };
+    const getStyleColor = (color_string: string, hover: boolean = false) => {
+
+        const color = color_string === 'unset' ? getColorFromVar('var(--background-500)') : getColorFromVar(color_string);
+
+        const background = hover ? (color.isDark() ? color.lighten(0.3).hexa() : color.darken(0.3).hexa()) : color.hexa();
+        const text = contrastColor(background);
+
         return {
-            backgroundColor: getColorFromVar(color).hexa(),
-            color: contrastColor(color)
+            backgroundColor: background,
+            color: text
         };
     };
 
@@ -106,10 +109,10 @@
     const optionsField: Ref<any[]> = ref([]);
 
     const options = computed(() => {
-        if (optionsField.value && optionsField.value.length > 0) return optionsField.value;
-        if (props.options) return props.options;
-        if (props.groupOptions) return props.groupOptions;
-        return [];
+        const options = (optionsField.value && optionsField.value.length > 0) ? optionsField.value : (props.options ?? props.groupOptions ?? []);
+        options?.map((option: any) => option.hover ??= false);
+
+        return options;
     });
 
     const option_selected = computed(() => {
@@ -154,8 +157,6 @@
 
             span {
                 font-size: 0.85rem !important;
-
-                // color: var(--background-600) !important;
             }
         }
     }
@@ -194,9 +195,9 @@
     width: 100% !important;
     place-items: center start;
     gap: 10px;
+    height: 30px;
 
     .sub-label-tag {
-        color: var(--background-600);
         padding-left: 1rem;
         text-align: right;
         width: 100%;
@@ -217,69 +218,15 @@
     display: grid;
     grid-template-columns: auto 1fr;
     place-items: center;
-
-    .value-text {
-        color: var(--background-750);
-    }
-}
-
-.p-select-list-container {
-    .p-virtualscroller {
-        max-height: 250px !important;
-        overflow: hidden !important;
-        overflow-y: auto !important;
-    }
 }
 
 .p-select-option {
-    &:hover {
-        background-color: var(--background-300) !important;
-
-        &.p-select-option-selected {
-            background-color: var(--blue-700) !important;
-            color: var(--background-0) !important;
-
-            .icon-div {
-                color: var(--background-200) !important;
-            }
-
-            .label-tag,
-            .sub-label-tag {
-                color: var(--background-0);
-            }
-        }
-    }
-
-    // SEM MOUSE EM CIMA
-    &.p-select-option-selected {
-        background-color: var(--blue-600) !important;
-
-        &:hover {
-            background-color: var(--blue-700) !important;
-        }
-
-        .icon-div {
-            color: var(--background-200) !important;
-        }
-
-    }
-
     .category {
         width: 20px;
         margin-right: 10px;
         display: grid;
         place-items: center;
         border-radius: 5px;
-
-        &.UTILITY {
-            background-color: var(--blue-200);
-            color: var(--blue-600);
-        }
-
-        &.MARKETING {
-            background-color: var(--orange-200);
-            color: var(--red-b-500);
-        }
     }
 }
 
@@ -291,9 +238,25 @@
 }
 
 .p-select-overlay {
-    &:has(.p-select-header) {
+    transform: translateY(-10px);
+
+    &:has(.label-tag-div) {
+        .p-select-option {
+            padding: 0 !important;
+        }
+
+        .p-select-list {
+            gap: 5px !important;
+        }
+
         .p-select-list-container {
-            padding-top: 14px !important;
+            max-height: 635px !important;
+        }
+
+        &:has(.p-select-header) {
+            .p-select-list-container {
+                padding-top: 14px !important;
+            }
         }
     }
 }
@@ -304,6 +267,12 @@
     ::-webkit-scrollbar {
         width: 3px;  /* Define a largura como 0 */
         height: 3px; /* Altura da barra horizontal */
+    }
+
+    .p-virtualscroller {
+        max-height: 250px !important;
+        overflow: hidden !important;
+        overflow-y: auto !important;
     }
 }
 
