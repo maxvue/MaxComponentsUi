@@ -1,277 +1,161 @@
 <template>
-    <div class="input-upload-file-big-main-div">
-        <MaxInputFileUpload v-bind="attrs" :modelValue="(attrs.modelValue as any)" class="no-style" customUpload >
+    <div ref="drop_zone_ref" :class="`input-upload-file-big-main-div ${isOverDropZone ? 'in-drop' : 'not-in-drop'}`" @click="onAreaClick" >
+        <!-- Área principal clicável -->
+        <div class="upload-area" v-if="!uploading && !showError">
             <slot>
-                <Icon i="lets-icons:upload-light" size="1.5"/>
-                <div v-html="attrs.label"></div>
+                <MaxIcon i="lets-icons:upload-light" size="3" />
+                <div v-if="label" v-html="label"></div>
             </slot>
-            <template #uploading>
-                <slot name="uploading">
-                    <div class="screen-animation">
-                        <DotLottieVue style="height: 300px; width: 300px;"   background="red" autoplay loop src="https://lottie.host/1c897063-7dec-4b92-b8db-ecd2cd67f48e/ofrND79jXr.lottie" />
+        </div>
+
+        <!-- Estado de upload em progresso -->
+        <div v-else-if="uploading" class="upload-state">
+            <slot name="uploading">
+                <div class="screen-animation">
+                    <DotLottieVue style="height: 300px; width: 300px;" background="red" autoplay loop src="https://lottie.host/1c897063-7dec-4b92-b8db-ecd2cd67f48e/ofrND79jXr.lottie" />
+                </div>
+            </slot>
+        </div>
+
+        <!-- Estado de erro -->
+        <div v-else-if="showError" class="upload-state">
+            <slot name="error">
+                <div class="screen-animation">
+                    <DotLottieVue style="height: 300px; width: 300px;" background="red" autoplay src="https://lottie.host/b1aebee5-5e8b-4008-acd5-fc651795bbf6/ghW5oHG5ml.lottie" />
+                    <div class="screen-animation-label">
+                        Erro ao enviar o arquivo.
                     </div>
-                </slot>
-            </template>
-            <template #error>
-                <slot name="error">
-                    <div class="screen-animation">
-                        <DotLottieVue style="height: 300px; width: 300px;"   background="red" autoplay src="https://lottie.host/b1aebee5-5e8b-4008-acd5-fc651795bbf6/ghW5oHG5ml.lottie" />
-                        <div class="screen-animation-label">
-                            Erro ao enviar o arquivo.
-                        </div>
-                    </div>
-                </slot>
-            </template>
-        </MaxInputFileUpload>
+                </div>
+            </slot>
+        </div>
     </div>
 </template>
 <script setup lang="ts">
-    import { useAttrs } from 'vue';
-    import MaxInputFileUpload from './MaxInputFileUpload.vue';
+    import { ref, watch } from 'vue';
+    import { useFileDialog, useDropZone } from '@maxvue/max-use';
     import { DotLottieVue } from '@lottiefiles/dotlottie-vue';
-    const attrs = useAttrs();
-</script>
+    import MaxIcon from './MaxIcon.vue';
 
+    const props = withDefaults(defineProps<{
+        /** Tipos de arquivo aceitos (ex: '.pdf, .jpg, .png') */
+        accept?: string;
+        /** Permitir múltiplos arquivos */
+        multiple?: boolean;
+        /** Desabilitar o componente */
+        disabled?: boolean;
+        /** Rótulo descritivo */
+        label?: string;
+        /** Callback chamado ao selecionar arquivos */
+        onSelect?: (event: { files: File[] }) => void;
+        /** Callback chamado após upload concluído */
+        onUpload?: () => void;
+        /** Indicar externamente que está em upload */
+        uploading?: boolean;
+    }>(), {
+        accept: '.pdf, .jpg, .jpeg, .png, .doc, .docx',
+        multiple: true,
+        disabled: false,
+        label: '',
+        uploading: false
+    });
+
+    const showError = ref(false);
+    const drop_zone_ref = ref<HTMLElement | null>(null);
+
+    watch(showError, (val) => {
+        if (val) setTimeout(() => { showError.value = false; }, 3000);
+
+    });
+
+    // Configura o drop zone para arrastar e soltar arquivos
+    const { isOverDropZone } = useDropZone(drop_zone_ref as any, {
+        onDrop: onFilesDropped,
+        multiple: true,
+        preventDefaultForUnhandled: false
+    });
+
+    // Configura o file dialog para selecionar arquivos via clique
+    const { open, reset, onChange } = useFileDialog({
+        accept: props.accept,
+        multiple: props.multiple,
+        directory: false
+    });
+
+    // Quando arquivos são selecionados via file dialog
+    onChange((fileList: FileList | null) => {
+        if (fileList && fileList.length > 0) {
+            const filesArray = Array.from(fileList);
+            handleFiles(filesArray);
+            reset();
+        }
+    });
+
+    /** Processa os arquivos selecionados ou arrastados */
+    function handleFiles(files: File[]) {
+        if (props.onSelect) props.onSelect({ files });
+
+    }
+
+    /** Callback quando arquivos são soltos na drop zone */
+    function onFilesDropped(files: File[] | null) {
+        if (props.disabled || !files || files.length === 0) return;
+        handleFiles(files);
+    }
+
+    /** Abre o file dialog ao clicar na área */
+    function onAreaClick() {
+        if (!props.disabled) open();
+
+    }
+</script>
 <style lang="scss">
     .input-upload-file-big-main-div {
         height: 100%;
         width: 100%;
+        border-radius: calc(1rem - 5px);
+        outline: 1px dashed var(--background-600);
+        background-color: var(--background-0);
+        position: relative;
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        transition: outline-color 0.2s, background-color 0.2s;
 
-        .input-upload-file-main-div {
-            height: 100%;
-            width: 100%;
-            border-radius: calc(1rem - 5px);
-            padding-left: 0;
-            outline: 1px dashed var(--background-600);
-            background-color: var(--background-0);
-            position: relative;
+        &.not-in-drop {
+            &:hover {
+                outline: 2px dashed var(--blue-700);
 
-            .p-fileupload {
-                display: grid;
-                grid-template-columns: auto 1fr;
-                place-items: center;
-                border: none;
-                height: 100% !important;
-                gap: 1rem;
-                background-color: transparent;
-                padding: 0 10px;
-                position: relative;
-
-                .p-fileupload-header {
-                    display: grid;
-                    grid-template-columns: auto auto 1fr;
-                    height: 100%;
-                    gap: 0;
-
-                    span {
-                        display: none;
-                    }
-                }
-
-                .p-fileupload-file, .chose-icon-div {
-                    display: none;
-                }
-
-                .label-file-upload {
-                    transform: translateY(1px);
-                    display: grid;
-                    place-items: center !important;
-                    height: auto;
-                    color: var(--background-600);
-                    gap: 10px;
-                    text-align: center;
-                    font-size: 1rem;
-
-                }
-            }
-
-            .p-fileupload-content {
-                height: 100%;
-                display: grid;
-                grid-template-rows: 1fr auto;
-                gap: 0;
-                place-items: center;
-                padding: 0 !important;
-                width: 100%;
-                font-size: 0.95rem;
-                font-weight: 300 !important;
-                color: var(--text-c);
-                cursor: pointer;
-                border: none !important;
-                position: absolute;
-                border-radius: calc(1rem - 5px);
-
-                &:hover {
-                    .icon-div, .label-file-upload {
+                .upload-area {
+                    .max-icon, .label-file-upload {
                         color: var(--blue-700) !important;
-                    }
-                }
-            }
-
-            .p-fileupload-cancel-button {
-                display: none;
-            }
-
-            .p-button {
-                width: auto !important;
-                height: auto !important;
-                min-width: 0 !important;
-                min-height: 0 !important;
-                padding: 0 !important;
-
-                &[disabled] {
-                    .chose-icon-div {
-                        display: none;
-                    }
-                }
-            }
-
-            .chose-icon-div {
-                width: 40px;
-                height: 30px;
-                padding: 0 5px;
-
-                .icon-div {
-                    color: var(--background-600) !important;
-                }
-
-                &:hover {
-                    .icon-div {
-                        color: var(--blue-700) !important;
-                    }
-                }
-            }
-
-            .file-upload-content-div {
-                position: absolute;
-                top: 0;
-                height: 100%;
-                right: 0;
-                display: grid;
-                width: auto;
-
-                .files-icons {
-                    display: flex;
-                    width: auto;
-                    gap: 18px;
-                    padding: 0 10px;
-                    height: 50px;
-
-                    .icon-div {
-                        height: calc(100% - 20px);
-                        padding-top: 5px;
-                    }
-
-                    .file-icon {
-                        position: relative;
-                        width: 35px;
-                        text-align: center;
-                        display: grid;
-                        gap: 0;
-                        place-items: center;
-                        padding-bottom: 5px;
-
-                        &:hover {
-                            .icon-div {
-                                color: var(--blue-600) !important;
-
-                                &.file-check {
-                                    color: var(--green-b-800) !important;
-                                }
-                            }
-
-                            .file-size {
-                                color: var(--blue-600) !important;
-                            }
-                        }
-
-                        .icon-div {
-                            height: calc(100%);
-                        }
-
-                        .file-check {
-                            position: absolute;
-                            color: green !important;
-                            top: 0;
-                            left: -2px;
-                            width: 16px;
-                            height: 16px;
-                        }
-
-                        .file-size {
-                            font-size: 9px;
-                            color: var(--background-600);
-                            text-align: center;
-                            width: 100%;
-                        }
                     }
                 }
             }
         }
 
-        .item-thumbnail {
-            max-width: 300px;
+        &.in-drop {
+            outline: 3px dashed var(--blue-700);
+            background-color: var(--background-100);
+        }
+
+        .upload-area {
             display: grid;
             place-items: center;
-            gap: 8px;
-
-            .file-image {
-                padding: 10px 10px 0;
-                position: relative;
-
-                .file-image-img-div {
-                    max-height: 160px;
-                    overflow: hidden;
-                    border: 1px solid var(--background-300);
-                    border-radius: 7px;
-                }
-
-                .not-found {
-                    height: 300px;
-                    width: 270px;
-                    display: grid;
-                    place-items: center;
-                }
-
-                .open-file {
-                    position: absolute;
-                    top: 10px;
-                    left: 10px;
-                    width: calc(100% - 20px);
-                    height: calc(100% - 10px);
-                    display: grid;
-                    place-items: center;
-                    cursor: pointer;
-                    background-color: rgb(0 0 0);
-                    opacity: 0;
-                    transition: opacity 0.2s;
-                    border-radius: 7px;
-
-                    &:hover {
-                        opacity: 0.5;
-                    }
-
-                    .icon-div {
-                        color: var(--background-0) !important;
-                    }
-                }
-            }
-        }
-
-        .empty-file-upload {
-            top: 0;
+            text-align: center;
+            gap: 10px;
+            color: var(--background-600);
+            font-size: 1rem;
+            font-weight: 300;
             width: 100%;
             height: 100%;
+            padding: 1rem;
         }
 
-        .p-fileupload-highlight {
-            position: absolute;
-            top: 0;
-            left: 0;
+        .upload-state {
+            display: grid;
+            place-items: center;
             width: 100%;
             height: 100%;
-            border-radius: calc(1rem - 5px);
-            outline: 3px dashed var(--blue-700);
         }
 
         .screen-animation {

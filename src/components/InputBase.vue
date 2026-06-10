@@ -1,14 +1,14 @@
 <template>
-    <FloatLabel variant="on" class="max-input-main-div" :class="`${props.float !== undefined ? 'float' : ''} ${done ? 'done' : ''} ${caution ? 'caution' : ''} ${textCenter ? 'text-center' : ''} ${props.class ? props.class : ''} ${isError ? 'error' : ''} ${caution ? 'caution' : ''} ${inLine ? 'in-line' : ''}`">
+    <FloatLabel variant="on" class="max-input-main-div" :class="`${props.float !== undefined ? 'float' : ''} ${done ? 'done' : ''} ${!noStatus && caution ? 'caution' : ''} ${textCenter ? 'text-center' : ''} ${textRight ? 'text-right' : ''} ${props.class ? props.class : ''} ${!noStatus &&  isError ? 'error' : ''} ${!noStatus && caution ? 'caution' : ''} ${inLine ? 'in-line' : ''}`">
         <div v-if="props.label && props.inLine" class="in-line-label">
             {{ props.label }}
         </div>
         <IconField v-if="props.icon ?? props.i ?? props.iconLeft ?? props.iconRight">
-            <InputIcon v-if="props.iconLeft || props.iconPos === 'left'">
+            <InputIcon v-if="!props.noIcon && (props.iconLeft || props.iconPos === 'left')">
                 <MaxIcon :icon="props.iconLeft ?? props.icon ?? props.i" :size="1.2" :light="light" :dark="dark" />
             </InputIcon>
             <slot></slot>
-            <InputIcon v-if="props.iconRight || props.iconPos === 'right'">
+            <InputIcon v-if="!props.noIcon && (props.iconRight || props.iconPos === 'right')">
                 <MaxIcon :icon="props.iconRight ?? props.icon ?? props.i" :size="1.2" :light="light" :dark="dark"  />
             </InputIcon>
         </IconField>
@@ -21,16 +21,16 @@
             {{ displayMessage }}
         </Message>
         <div v-else class="message-spacer"></div>
-        <div class="is-done" v-if="done">
+        <div class="is-done" v-if="done && !noDone && !noStatus">
             <MaxIcon icon="lets-icons:check-fill" :size="0.8" :light="light" :dark="dark" color-green-700 />
         </div>
-        <div class="is-caution" v-else-if="caution">
+        <div class="is-caution" v-else-if="caution && !noCaution && !noStatus">
             <MaxIcon icon="humbleicons:exclamation" :size="0.8" :light="light" :dark="dark" color-orange-600 />
         </div>
-        <div class="is-caution" v-else-if="error">
+        <div class="is-error" v-else-if="error && !noError && !noStatus">
             <MaxIcon icon="humbleicons:exclamation" :size="0.8" :light="light" :dark="dark" color-red-700 />
         </div>
-        <div class="required" v-else-if="required">*</div>
+        <div class="required" v-else-if="required && !noStatus">*</div>
     </FloatLabel>
 
 </template>
@@ -82,6 +82,8 @@
         required?: boolean | null | undefined;
         /** Alinha o texto do input ao centro */
         textCenter?: boolean | undefined;
+        /** Alinha o texto do input à direita */
+        textRight?: boolean | undefined;
         /** Icone escuro referente ao fundo */
         dark?: boolean | string | number | undefined;
         /** Icone claro referente ao fundo */
@@ -112,6 +114,16 @@
         iconPos?: 'left' | 'right';
         /** Ícone claro comparado ao fundo */
         inLine?: boolean;
+        /** Flag que força ocultar o icone done */
+        noDone?: boolean;
+        /** Flag que força ocultar o icone done */
+        noCaution?: boolean;
+        /** Flag que força ocultar o icone error */
+        noError?: boolean;
+        /** Flag que força ocultar os icones done, caution e error */
+        noStatus?: boolean;
+        /** Flag que força ocultar o icone */
+        noIcon?: boolean;
     }
 
     const props = withDefaults(defineProps<Props>(), {
@@ -126,7 +138,7 @@
         inLine: false
     });
 
-    const isError = computed(() => (typeof props.error === 'string' && hasContent(props.error)) || props.error === true || props.done === false);
+    const isError = computed(() => (!props.noStatus && typeof props.error === 'string' && hasContent(props.error)) || props.error === true || props.done === false);
 
     const displayMessage = computed(() => {
         if (typeof props.error === 'string' && hasContent(props.error)) return props.error;
@@ -191,6 +203,12 @@
         }
     }
 
+    &.text-right {
+        input {
+            text-align: right !important;
+        }
+    }
+
     &.caution {
         label, .max-input-label {
             color: var(--orange-600);
@@ -240,25 +258,27 @@
     }
 
     &[input-click] {
-        grid-template-rows: 20px;
-        height: 20px;
+        &:not([input-click='false']) {
+            grid-template-rows: 1fr;
+            height: 20px;
 
-        div, span, input, select, .p-select-label, .value-div {
-            width: 100%;
-            max-height: 20px;
-            border: none !important;
-            border-color: transparent !important;
-            outline: none !important;
-            outline-color: transparent !important;
-            box-shadow: none !important;
-            font-size: 0.9rem;
-            color: rgb(66 54 54);
-            font-weight: 450;
-            padding: 0 2px !important;
-        }
+            div, span, input, select, .p-select-label, .value-div {
+                width: 100%;
+                max-height: 20px;
+                border: none !important;
+                border-color: transparent !important;
+                outline: none !important;
+                outline-color: transparent !important;
+                box-shadow: none !important;
+                font-size: 0.9rem;
+                color: rgb(66 54 54);
+                font-weight: 450;
+                padding: 0 2px !important;
+            }
 
-        .message-spacer {
-            display: none !important;
+            .message-spacer {
+                display: none !important;
+            }
         }
     }
 
@@ -267,6 +287,19 @@
 
         .message-spacer {
             display: none !important;
+        }
+    }
+
+    &[full], &[flex] {
+        width: 100% !important;
+        height: 100% !important;
+
+        input {
+            width: 100% !important;
+            height: 100% !important;
+            max-width: 100% !important;
+            max-height: 100% !important;
+            padding: 0 10px !important;
         }
     }
 

@@ -1,6 +1,6 @@
 <template>
     <div :class="`input-project-div ${isOverDropZone ? 'in-drop' : 'not-in-drop'}`" ref="drop_zone_ref" relative>
-        <MaxIconButton class="open-files-btn"  :hoverScale="1.06" @click.stop="() => open()">
+        <MaxIconButton class="open-files-btn"  :hoverScale="1.06" @click="() => open()">
             <div class="open-files" pointer >
                 <div class="instruction">
                     Insira fotos dos documentos ou Documentos em PDF aqui
@@ -83,13 +83,9 @@
     }
 
     function fileIcon (file: DBFile): string {
-
         const file_names = [file?.file_name?.toLowerCase() ?? '', file?.name?.toLowerCase() ?? '', file?.label_file_name?.toLowerCase() ?? ''];
 
-        for (const name of file_names){
-            if (name && name.includes('cnh') || name.includes('identidade')|| name.includes('rg') || name.includes('carteira') ) return 'mdi:identification-card';
-            return 'mdi:identification-card';
-        }
+        for (const name of file_names) if (name && name.includes('cnh') || name.includes('identidade')|| name.includes('rg') || name.includes('carteira') ) return 'mdi:identification-card';
 
         return 'mdi:file';
     }

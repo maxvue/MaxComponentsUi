@@ -55,6 +55,9 @@ export { default as MaxInputPhoneMail } from './components/MaxInputPhoneMail.vue
 export { default as MaxInputRadio } from './components/MaxInputRadio.vue';
 export { default as MaxInputSearch } from './components/MaxInputSearch.vue';
 export { default as MaxInputSelect } from './components/MaxInputSelect.vue';
+export { default as MaxTagSelect } from './components/MaxTagSelect.vue';
+export { default as MaxInputSelectTag } from './components/MaxTagSelect.vue';
+export { default as MaxSelectTag } from './components/MaxTagSelect.vue';
 export { default as MaxInputSwitch } from './components/MaxInputSwitch.vue';
 export { default as MaxInputTextArea } from './components/MaxInputTextArea.vue';
 export { default as MaxInputToggle } from './components/MaxInputToggle.vue';
@@ -95,6 +98,10 @@ export { Toast } from './helpers/Toast';
 import Tooltip from 'primevue/tooltip';
 
 
+/**
+ * @param {import('vue').App} app
+ * @param {any} options
+ */
 export const install = (app: any, options: any = {}) => {
     app.use(PrimeVue, {
         locale: options.locale || ptBR,

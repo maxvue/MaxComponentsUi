@@ -3,7 +3,7 @@
         <div v-if="attrs.placeholder !== undefined && (!temp_value || temp_value === '')" class="placeholder-select">
             {{ attrs.placeholder }}
         </div>
-        <Select v-if="props.groupOptions !== undefined" v-bind="props" v-model="temp_value" :loading="loading" @before-show="(before_show as any)" :options="options" optionGroupLabel="label" optionGroupChildren="items" :optionValue="'value'" :optionLabel="'label'" ref="elem" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false" :disabled="props.disabled">
+        <Select v-bind="{...props, ...attrs}" v-if="props.groupOptions !== undefined" :filter="props.filter"  v-model="temp_value" :loading="loading" @before-show="(before_show as any)" :options="options" optionGroupLabel="label" optionGroupChildren="items" :optionValue="'value'" :optionLabel="'label'" ref="elem" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false" :disabled="props.disabled">
             <template #option="slotProps">
                 <slot name="option" :option="slotProps.option" :selected="slotProps.selected" :index="slotProps.index">
                     <div class="label_div">
@@ -30,7 +30,7 @@
             </template>
         </Select>
         <!-- SELECT NORMAL -->
-        <Select v-else v-bind="props" v-model="temp_value"  :loading="loading" @before-show="(before_show as any)" :options="options" :optionLabel="attrs.optionLabel" :optionValue="props.optionValue" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false" :disabled="props.disabled">
+        <Select v-bind="{...props, ...attrs}" v-else " v-model="temp_value" :filter="props.filter"  :loading="loading" @before-show="(before_show as any)" :options="options" :optionLabel="attrs.optionLabel" :optionValue="props.optionValue" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false" :disabled="props.disabled">
             <template #option="slotProps">
                 <slot name="option" :option="slotProps.option" :selected="slotProps.selected" :index="slotProps.index">
                     <div :class="`category ${slotProps.option.category}`" v-if="attrs.category === true">{{ slotProps.option.category === 'UTILITY' ? 'A' : '' }}{{ slotProps.option.category === 'MARKETING' ? 'B' : '' }}</div>
@@ -108,9 +108,10 @@
             /** Lista de opções agrupadas [{ label, items: [] }] */
             groupOptions?: SelectGroupOptions;
             disabled?: boolean | undefined;
+            filter?: boolean | undefined;
 
         }>(),
-        { modelValue: null, done: undefined, optionValue: 'value', optionName: 'name', optionLabel: 'label', error: undefined, caution: undefined, required: false, default: undefined, disabled: false }
+        { modelValue: null, done: undefined, optionValue: 'value', optionName: 'name', filter: false, optionLabel: 'label', error: undefined, caution: undefined, required: false, default: undefined, disabled: false }
     );
 
     const emit = defineEmits(['update:modelValue', 'before-show']);
@@ -156,9 +157,8 @@
     }
 
     watchDebounced(() => props.modelValue, () => {
-        if (isBlank(props.modelValue) && props.default !== undefined){
-            temp_value.value = props.default;
-        }
+        if (isBlank(props.modelValue) && props.default !== undefined) temp_value.value = props.default;
+
 
     }, { deep: true, debounce: 500 });
 </script>
@@ -322,6 +322,29 @@
     }
 }
 
+
+.p-select-header {
+    box-shadow: 0 7px 12px 5px #fff !important;
+    padding-bottom: 0 !important;
+    z-index: 1 !important;
+}
+
+.p-select-overlay {
+    &:has(.p-select-header) {
+        .p-select-list-container {
+            padding-top: 14px !important;
+        }
+    }
+}
+
+.p-select-list-container {
+    scrollbar-width: thin;
+
+    ::-webkit-scrollbar {
+        width: 3px;  /* Define a largura como 0 */
+        height: 3px; /* Altura da barra horizontal */
+    }
+}
 
 [transparent] {
     .p-floatlabel, .p-select {

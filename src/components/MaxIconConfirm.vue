@@ -1,5 +1,5 @@
 <template>
-    <MaxIconButton v-bind="props" v-tooltip="null" pointer @click.stop="onClickToggle" ref="btn_el" />
+    <MaxIconButton v-bind="props" v-tooltip="null" pointer :action="onClickToggle" ref="btn_el" />
 </template>
 
 <script setup lang="ts">;
@@ -34,7 +34,7 @@
         /** Mensagem de confirmação */
         message?: string;
         /** Icone de mensagem de confirmação */
-        messageIcon?: string;
+        messageIcon?: string | null;
         /** Label do botão de sim */
         acceptLabel?: string;
         /** Icone do botão de sim */
@@ -43,12 +43,12 @@
         rejectProps?: {
             label: string;
             icon?: string;
-            action: (event?: any) => void;
+            action?: ((event?: any) => void) | undefined;
         };
         acceptProps?: {
             label: string;
             icon?: string;
-            action: (event?: any) => void;
+            action?: ((event?: any) => void) | undefined;
         };
         /** Icone do botão de não */
         cancelIcon?: string;
@@ -70,6 +70,7 @@
         light: undefined,
         loading: false,
         message: 'Deseja continuar?',
+        messageIcon: null,
         rejectProps: () => ({ label: 'Não', icon: undefined, action: () => {} }),
         acceptProps: () => ({ label: 'Sim', icon: undefined, action: () => {} })
     });
@@ -85,6 +86,7 @@
         confirm_store.width = width.value;
         confirm_store.show = !confirm_store.show;
         confirm_store.message = props.message;
+        confirm_store.messageIcon = props.messageIcon;
         confirm_store.rejectProps = props.rejectProps;
         confirm_store.acceptProps = props.acceptProps;
     };

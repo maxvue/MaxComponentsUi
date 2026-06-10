@@ -8,10 +8,12 @@
 
         <Menu ref="menu" id="overlay_menu" :model="props.items ?? props.model" :popup="true">
             <template #item="{ item }">
-                <div class="max-popover-menu-item" @click.stop="(event) => item.action ? item.action({ event, data: item.data ?? {} }) : onClick(event, item)" >
-                    <MaxIcon :icon="item.icon ?? item.i" v-if="item.icon || item.i" size="1.1" />
-                    <div class="max-popover-menu-label">{{ item.label }}</div>
-                </div>
+                <slot name="item" :data="item">
+                    <div class="max-popover-menu-item" @click.stop="(event) => item.action ? item.action({ event, data: item.data ?? {} }) : onClick(event, item)" >
+                        <MaxIcon :icon="item.icon ?? item.i" v-if="item.icon || item.i" size="1.1" />
+                        <div class="max-popover-menu-label">{{ item.label }}</div>
+                    </div>
+                </slot>
             </template>
         </Menu>
     </div>

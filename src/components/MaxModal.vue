@@ -1,17 +1,17 @@
 <template>
-    <div ref="btn_el" pointer class="max-modal-item" :class="props.class">
-        <div v-tooltip="null" @click.stop="toggle" flex>
+    <div ref="btn_el" pointer :class="['max-modal-item', { 'no-button': props.noButton }, props.class]">
+        <div v-tooltip="null" @click.stop="toggle" flex v-if="! props.noButton">
             <slot name="button" v-bind="props">
                 <MaxButton v-bind="props" :size="props.size || props.sizeIcon ? String(props.size ?? props.sizeIcon) : ''" />
             </slot>
         </div>
         <teleport to="body">
-            <div class="background-modal" @click.stop="modal_store.hide" v-if="modal_store.show_id === id" :style="{opacity: style?.opacity}">
+            <div class="background-modal" @click.stop="modal_store.hide" v-if="modal_store.show_id === id" :style="{opacity: style?.opacity}" :data-html2canvas-ignore="props.ignoreCanvas">
                 <div class="max-modal" ref="el" :style="{top: style.top + 'px', left: style.left + 'px'}"  @click.stop="() => {}" :class="props.class">
-                    <slot name="header">
+                    <slot name="header" v-if="!props.noHeader">
                         <MaxGrid s100 class="max-modal-header" pt0 mt0 mb-15>
                             <MaxTitle1 s90  :h1="props.title ?? 'Titulo'" :h2="props.subTitle ?? 'Sub Titulo'" p0 m0 />
-                            <div s1>
+                            <div s1 w-max-23>
                                 <MaxIconButton i="iconoir:xmark" size="1.3" @click.stop="modal_store.hide" class="close-btn" />
                             </div>
                         </MaxGrid>
@@ -29,7 +29,7 @@
 <script setup lang="ts">
     import { useModalStore } from '../stores/useModal.Store';
     import { useElementSize, useWindowSize, Random, useDefaultReset, refAutoReset } from '@maxvue/max-use';
-    import { useTemplateRef, ref } from 'vue';
+    import { useTemplateRef, computed, ref } from 'vue';
     import MaxIconButton from './MaxIconButton.vue';
     import MaxButton from './MaxButton.vue';
     import MaxTitle1 from './MaxTitle1.vue';
@@ -75,18 +75,34 @@
         checked?: boolean | string | number | undefined;
         /** Icone de adição opcional */
         plus?: boolean | string | number | undefined;
+        /** IgnoreCanvas */
+        ignoreCanvas?: boolean;
+        /** No Button Flag */
+        noButton?: boolean;
+        /** No Header Flag */
+        noHeader?: boolean;
     }>(), {
         dark: 0.4,
         light: undefined,
         loading: false,
-        message: 'Deseja continuar?'
+        message: 'Deseja continuar?',
+        ignoreCanvas: false,
+        noButton: false,
+        noHeader: false
+
     });
+
+    const is_show = computed(() => modal_store.show_id === id.value);
 
     const modal_store = useModalStore();
 
     const id = ref(Random());
 
     const el = useTemplateRef('el');
+
+    const hide = modal_store.hide;
+
+    const show = modal_store.show;
 
     const style: any = useDefaultReset({
         top: 0,
@@ -143,12 +159,25 @@
     };
 
     defineExpose({
-        toggle
+        toggle,
+        is_show,
+        show,
+        hide
     });
 
 </script>
 
 <style lang="scss">
+
+    .max-modal-item {
+        &.no-button {
+            position: fixed !important;
+            width: 0  !important;
+            height: 0 !important;
+            top: 0 !important;
+            left: 0 !important;
+        }
+    }
 
     .background-modal {
         background-color: rgb(0 0 0 / 60%);

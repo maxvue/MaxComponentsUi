@@ -1,6 +1,6 @@
 <template>
-    <div ref="btn_el" pointer v-tooltip="null" >
-        <div v-tooltip="null" @click.stop="toggle" flex :style="{width: size_icon, height: size_icon} ">
+    <div ref="btn_el" pointer v-tooltip="null" class="max-popover-main">
+        <div v-tooltip="null" @click.stop="toggle" flex :style="{width: size_icon, height: size_icon} " class="max-popover-icon">
             <slot name="button" v-bind="props">
                 <MaxButton v-bind="props" :size="String(props.size ?? props.sizeIcon ?? props.iconSize ?? 1.1)" :action="undefined" />
             </slot>
@@ -155,6 +155,16 @@
 </script>
 
 <style lang="scss">
+.max-popover-main {
+    display: grid;
+    place-items: center;
+
+    .max-popover-icon {
+        display: grid;
+        place-items: center;
+    }
+}
+
 .background-popover {
     background-color: rgb(0 0 0 / 10%);
     height: 100vh;

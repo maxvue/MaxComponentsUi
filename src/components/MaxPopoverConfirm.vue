@@ -3,14 +3,14 @@
         <div class="background-popover" @click.stop="confirm_store.hide" v-if="confirm_store.show">
             <div class="max-icon-confirm-dialog" ref="el" :style="{top: position.top + 'px', left: position.left + 'px'}"  :class="[position.isTop ? 'is-top' : 'is-bottom', position.isLeft ? 'is-left' : 'is-right']">
                 <div pw4 pt-4 full text-center color-background-750 class="popover-confirm-content" >
-                    <MaxIcon i="mingcute:question-fill" size="1.2" color-red-600 />
+                    <MaxIcon :i="confirm_store.messageIcon ?? 'mingcute:question-fill'" size="1.2" color-red-600 />
                     <div>
                         {{confirm_store.message}}
                     </div>
                 </div>
                 <MaxGrid>
-                    <MaxButton s50 @click="reject" :label="confirm_store.rejectProps.label" :icon="confirm_store.rejectProps.icon" />
-                    <MaxButton s50 @click="accept" :label="confirm_store.acceptProps.label" :icon="confirm_store.acceptProps.icon"  />
+                    <MaxButton s50 :action="reject" :label="confirm_store.rejectProps.label" :icon="confirm_store.rejectProps.icon" />
+                    <MaxButton s50 :action="accept" :label="confirm_store.acceptProps.label" :icon="confirm_store.acceptProps.icon"  />
                 </MaxGrid>
             </div>
         </div>
@@ -34,11 +34,11 @@
     const { width, height } = useElementSize(el as any);
 
     const accept = () => {
-        confirm_store.acceptProps.action();
+        confirm_store.acceptProps.action?.();
         confirm_store.hide();
     };
     const reject = () => {
-        confirm_store.rejectProps.action();
+        confirm_store.rejectProps.action?.();
         confirm_store.hide();
     };
 

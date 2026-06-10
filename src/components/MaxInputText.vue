@@ -1,6 +1,6 @@
 <template>
-    <InputBase v-bind="props" :done="isDone" :error="error_msg" :caution="caution">
-        <InputText v-bind="props" type="text" v-model="temp_value" fluid @blur="isDone = testIsDone()"  />
+    <InputBase v-bind="props" :done="props.done ?? isDone" :error="props.error ?? error_msg" :caution="caution">
+        <InputText v-bind="props" :type="props.type" :placeholder="props.placeholder" v-model="temp_value" fluid @blur="isDone = testIsDone()" />
         <slot></slot>
     </InputBase>
 </template>
@@ -20,6 +20,7 @@
 
     const props = withDefaults(
         defineProps<{
+            type?: string;
             /** Valor atual do input */
             modelValue: any;
             /** Ícone opcional (ex: 'mdi:email') */
@@ -48,9 +49,10 @@
             caution?: string | boolean | undefined;
             /** Define se o campo é obrigatório */
             required?: boolean;
-            /** Define se o campo é obrigatório */
+            /** Texto de placeholder do campo */
+            placeholder?: string | undefined;
         }>(),
-        { modelValue: '', done: undefined, required: false, caution: undefined, disabled: false }
+        { modelValue: '', done: undefined, required: false, type: 'text', caution: undefined, disabled: false, error: undefined }
     );
 
     const temp_value = ref<any>(props.modelValue);

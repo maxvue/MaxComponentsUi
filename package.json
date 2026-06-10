@@ -1,6 +1,6 @@
 {
     "name": "@maxvue/max-components-ui",
-    "version": "1.0.51",
+    "version": "1.0.53",
     "description": "Biblioteca de componentes Vue baseada em PrimeVue",
     "module": "./dist/index.es.js",
     "types": "./dist/index.d.ts",
@@ -41,7 +41,10 @@
         "type-check": "vue-tsc --noEmit",
         "lint": "eslint . --fix && stylelint \"**/*.{scss,vue}\" --fix",
         "release": "npm run build && npm version patch -m 'Upgrade to %s' && git push origin main --follow-tags && npm publish --access public",
-        "typecheck:tsgo": "tsgo --noEmit"
+        "typecheck:tsgo": "tsgo --noEmit",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "test:coverage": "vitest run --coverage"
     },
     "dependencies": {
         "@iconify/vue": "^5.0.1",
@@ -62,18 +65,22 @@
         "vue3-google-map": "^0.27.1"
     },
     "devDependencies": {
+        "@pinia/testing": "^1.0.3",
         "@primeuix/themes": "^2.0.3",
         "@primevue/auto-import-resolver": "^4.5.5",
         "@stylistic/eslint-plugin": "^5.10.0",
         "@stylistic/stylelint-plugin": "^5.2.0",
         "@types/node": "^25.9.1",
-        "@vitejs/plugin-vue": "^6.0.7",
         "@typescript/native-preview": "^7.0.0-dev.20260527.2",
+        "@vitejs/plugin-vue": "^6.0.7",
+        "@vitest/coverage-v8": "^4.1.7",
         "@vue/eslint-config-typescript": "^14.7.0",
+        "@vue/test-utils": "^2.4.10",
         "@vue/tsconfig": "^0.9.1",
         "ajv": "^8.20.0",
         "eslint": "^10.4.0",
         "eslint-plugin-vue": "^10.9.1",
+        "happy-dom": "^20.9.0",
         "postcss-html": "^1.8.1",
         "primevue": "^4.5.5",
         "sass-embedded": "^1.100.0",
@@ -87,7 +94,8 @@
         "unplugin-vue-components": "^32.1.0",
         "vite": "^8.0.14",
         "vite-plugin-dts": "^5.0.1",
-        "vue": "^3.6.0-beta.13",
+        "vitest": "^4.1.7",
+        "vue": "^3.6.0-beta.14",
         "vue-eslint-parser": "^10.4.0",
         "vue-router": "^5.1.0",
         "vue-tsc": "^3.3.2"

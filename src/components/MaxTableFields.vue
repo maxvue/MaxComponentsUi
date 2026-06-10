@@ -14,7 +14,6 @@
                         <slot name="buttons-header">
                             {{props.headerButton}}
                         </slot>
-
                     </th>
                 </tr>
             </thead>
@@ -63,7 +62,6 @@
 
                             <!-- AutoComplete via API -->
                             <MaxInputAutoCompleteApi v-else-if="col.input === 'auto-complete-api'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" w-full :route="col.route ?? ''" :data="resolveData(row, col.data)" :placeholder="col.placeholder" :required="col.required" />
-
                             <!-- Phone Number -->
                             <MaxPhoneField v-else-if="col.input === 'phone-number'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" w-full :placeholder="col.placeholder" :required="col.required" />
 
@@ -206,18 +204,13 @@
         if (!data) return data;
         if (typeof data === 'string') return getFieldValue(row, data);
         if (typeof data === 'object' && !Array.isArray(data)) {
-            const resolved: Record<string, any> | string = {};
-            for (const key in data){
-                const value = typeof data[key] === 'string' ? (getFieldValue(row, data[key])) ?? data[key] : data[key];
-                const keys = typeof resolved === 'string' ? String(resolved).split('.') : [];
-                if (keys.includes('id')) resolved[key] = value;
-            }
+            const resolved: Record<string, any> = {};
+            for (const key in data) resolved[key] = typeof data[key] === 'string'
+                ? getFieldValue(row, data[key]) ?? data[key]
+                : data[key];
 
             return resolved;
         }
-
-        const keys = typeof data === 'string' ? data.split('.') : [];
-        if (keys.includes('id')) return null;
         return data;
     }
 

@@ -20,7 +20,7 @@
     </div>
 </template>
 
-<script setup lang="ts" vapor>
+<script setup lang="ts">
     import { useAttrs } from 'vue';
 
     const attrs = useAttrs;

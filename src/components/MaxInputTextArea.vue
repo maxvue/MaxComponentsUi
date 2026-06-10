@@ -1,6 +1,6 @@
 <template>
     <InputBase v-bind="{...props}" class="input-text-area-main-div">
-        <Textarea v-bind="{...props, ...attrs}" :autoResize="props.autoResize" v-model="temp_value" @blur="checkDone()" :rows="lines" :minLines="props.minLines ?? props.minRows ?? 1"/>
+        <Textarea v-bind="{...props, ...attrs}" :autoResize="props.autoResize" v-model="temp_value" @blur="checkDone()" :rows="lines" :minLines="props.minLines ?? props.minRows ?? 1" />
     </InputBase>
 </template>
 

@@ -31,7 +31,8 @@
     const id = Random();
     const button = ref();
 
-    const onClick = () => {
+    const onClick = (e: Event) => {
+        if(e && (e.target as HTMLElement).tagName === 'INPUT') return;
         if(button.value && button.value.$el) {
             const input = button.value.$el.querySelector('input');
             if(input) input.click();

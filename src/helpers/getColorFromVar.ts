@@ -2,7 +2,7 @@ import Color from 'color';
 import type { ColorInstance } from 'color';
 
 export function getColorFromVar(color_var_value: string): ColorInstance {
-    color_var_value = String(color_var_value).trim();
+    color_var_value = String(color_var_value).trim().replace(/\s*!important\s*$/, '');
 
     if (color_var_value.startsWith('rgb')) return Color(color_var_value);
 
@@ -14,3 +14,11 @@ export function getColorFromVar(color_var_value: string): ColorInstance {
     const style: CSSStyleDeclaration = window.getComputedStyle(root);
     return Color(style.getPropertyValue(color_var_value).trim());
 }
+
+export const contrastColor = (color_var_value: string): string => {
+    const Color = getColorFromVar(color_var_value);
+    if (Color.isLight()) return Color.darken(0.5).hexa();
+
+    return Color.lighten(0.6).hexa();
+};
+

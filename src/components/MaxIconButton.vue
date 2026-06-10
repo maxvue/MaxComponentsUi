@@ -29,14 +29,10 @@
     const executing = useDefaultReset<boolean>(false, 200);
 
     const onClick = (event: any) => {
-        console.log('exec');
         if (! executing.value) {
-            console.log('exec2');
             executing.value = true;
-            console.log('exec3', props.action);
 
             if (props.route) {
-                console.log('exec4');
                 goToRoute(props.route, data.value);
                 return;
             }

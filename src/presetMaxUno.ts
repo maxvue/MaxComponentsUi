@@ -97,7 +97,8 @@ export const presetMaxUno = () => {
                         if (!existsSync(scssPath)) {
                             const fallbackPath = resolve(__dirname, '../src/themes/all.scss');
                             if (existsSync(fallbackPath)) scssPath = fallbackPath;
-                            return '';
+                            else return '';
+
                         }
 
                         const result = sass.compile(scssPath);
