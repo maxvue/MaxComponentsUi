@@ -17,9 +17,9 @@
                 </slot>
             </template>
             <template #value="value">
-                <div class="value-div" :style="getStyleColor(String(option_selected?.background_color ?? option_selected?.backgroundColor ?? option_selected.tag_color ?? option_selected?.tagColor ?? option_selected?.['tag-color'] ?? option_selected?.['background-color'] ?? 'unset'))" >
-                    <Icon :icon="option_selected?.icon ?? null" :size="option_selected?.icon_size ?? undefined" pr10/>
-                    <span class="tag-value-text" elipsis>{{ option_selected?.[props.optionName] ?? option_selected?.name ?? option_selected?.label }}</span>
+                <div class="value-tag-div" :style="getStyleColor(String(option_selected?.background_color ?? option_selected?.backgroundColor ?? option_selected.tag_color ?? option_selected?.tagColor ?? option_selected?.['tag-color'] ?? option_selected?.['background-color'] ?? 'unset'), false, true)" >
+                    <Icon :icon="option_selected?.icon ?? null" :size="option_selected?.icon_size ?? 1.4" pr10 v-if="option_selected.icon"/>
+                    <div class="tag-value-text" elipsis>{{ option_selected?.[props.optionName] ?? option_selected?.name ?? option_selected?.label }}</div>
                 </div>
             </template>
         </Select>
@@ -86,18 +86,24 @@
         { modelValue: null, done: undefined, optionValue: 'value', optionName: 'name', filter: false, optionLabel: 'label', error: undefined, caution: undefined, required: false, default: undefined, disabled: false }
     );
 
-    const getStyleColor = (color_string: string, hover: boolean = false) => {
+    const getStyleColor = (color_string: string, hover: boolean = false, is_value: boolean = false) => {
 
         const color = color_string === 'unset' ? getColorFromVar('var(--background-500)') : getColorFromVar(color_string);
 
-        const background = hover ? (color.isDark() ? color.lighten(0.3).hexa() : color.darken(0.3).hexa()) : color.hexa();
-        const text = contrastColor(background);
+        let background = hover ? (color.isDark() ? color.lighten(0.3).hexa() : color.darken(0.3).hexa()) : color.hexa();
+        let text = contrastColor(background);
+        if (color_string === 'unset' && ! is_value) {
+            background = hover ? 'rgba(0,0,0, 0.1)' : 'transparent';
+            text = hover ? 'var(--background-600)' : 'var(--background-650)';
+        }
+
 
         return {
             backgroundColor: background,
             color: text,
             borderRadius: '6px',
-            padding: '0 6px'
+            padding: '0 6px !important',
+            gap: 0
         };
     };
 
@@ -174,7 +180,7 @@
         display: grid;
         place-items: center start;
         outline: none !important;
-        height: 36px !important;
+        height: 32px !important;
 
         &:focus {
             border: none !important;
@@ -188,6 +194,19 @@
         position: absolute;
         color: var(--background-600);
         font-size: 0.9rem;
+    }
+
+    &[flex], &[full] {
+        .p-select, .p-select-label, .value-tag-div, .tag-value-text {
+            height: 100% !important;
+            max-height: 100% !important;
+            display: grid;
+        }
+
+        .tag-value-text {
+            display: grid;
+            place-items: center start;
+        }
     }
 }
 
@@ -216,10 +235,20 @@
     }
 }
 
-.value-div {
-    display: grid;
+.value-tag-div {
     grid-template-columns: auto 1fr;
     place-items: center;
+    padding: unset !important;
+    display: grid;
+    overflow: hidden;
+    position: relative;
+
+    .tag-value-text {
+        color: unset !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        position: relative;
+    }
 }
 
 .p-select-option {
@@ -239,9 +268,6 @@
     z-index: 1 !important;
 }
 
-.tag-value-text {
-    color: unset !important;
-}
 
 .p-select-overlay {
     transform: translateY(-10px);
@@ -262,6 +288,12 @@
         &:has(.p-select-header) {
             .p-select-list-container {
                 padding-top: 14px !important;
+            }
+        }
+
+        .p-select-option-selected {
+            .label-tag {
+                color: var(--background-0) !important;
             }
         }
     }

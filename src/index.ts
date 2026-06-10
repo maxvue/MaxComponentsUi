@@ -55,6 +55,7 @@ export { default as MaxInputPhoneMail } from './components/MaxInputPhoneMail.vue
 export { default as MaxInputRadio } from './components/MaxInputRadio.vue';
 export { default as MaxInputSearch } from './components/MaxInputSearch.vue';
 export { default as MaxInputSelect } from './components/MaxInputSelect.vue';
+export { default as MaxTagsList } from './components/MaxTagsList.vue';
 export { default as MaxTagSelect } from './components/MaxTagSelect.vue';
 export { default as MaxInputSelectTag } from './components/MaxTagSelect.vue';
 export { default as MaxSelectTag } from './components/MaxTagSelect.vue';
