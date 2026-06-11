@@ -22,7 +22,6 @@
 <script setup lang="ts">
     import { computed, ref, useAttrs } from 'vue';
     import Menu from 'primevue/menu';
-    import type { MenuItem } from 'primevue/menuitem';
     import MaxButton from './MaxButton.vue';
     import MaxIcon from './MaxIcon.vue';
     import { goToRoute, useDefaultReset } from '@maxvue/max-use';
@@ -36,9 +35,9 @@
         /** Alias para o nome do ícone */
         i?: string;
         /** Array de items para o menu */
-        items?: MenuItem[];
+        items?: any[];
         /** Array de items para o menu ( Alias) */
-        model?: MenuItem[] | undefined;
+        model?: any[] | undefined;
         /** se o ícone deve rotacionar */
         rotate?: number;
         /** Inversão do ícone */

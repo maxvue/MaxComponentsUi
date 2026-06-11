@@ -1,7 +1,7 @@
 <template>
     <div class="max-tag-list" v-bind="attrs">
         <div v-for="item in items_array" >
-            <MaxTagSelect flex :modelValue="item.value" :options="options_array" no-dropdown uppercase >
+            <MaxTagSelect flex :modelValue="item.value" :options="options_array" no-dropdown uppercase @update:modelValue="(val: any) => replaceItem(item, val)" >
                 <template #btn-right>
                     <div v-tooltip="'Remover'" style="opacity: 0.5;" @click.stop="removeItem(item)">
                         <MaxIconButton i="mynaui:x-circle" size="1.3" :color="getStyleColor(item, false, true).color"/>
@@ -30,6 +30,8 @@
 
     const model = defineModel<any[] | Record<string, any>>({ default: () => [] });
 
+    const emit = defineEmits<{ change: [value: any[]] }>();
+
     const add_tag: Ref = ref(null);
 
     const items_array = computed(() =>{
@@ -49,12 +51,28 @@
 
     watchTrue(add_tag, () => {
         const data: any = options_array.value.find((opt: any) => opt.value === add_tag.value?.value || opt.value === add_tag.value) ?? null;
-        if (data && !items_array.value.some((item: any) => item.value === data.value)) model.value = [...items_array.value, data];
+        if (data && !items_array.value.some((item: any) => item.value === data.value)) {
+            const new_value = [...items_array.value, data];
+            model.value = new_value;
+            emit('change', new_value);
+        }
         add_tag.value = null;
     });
 
+    const replaceItem = (item: any, value: any) => {
+        const option: any = options_array.value.find((o: any) => o.value === (value?.value ?? value)) ?? null;
+        if (! option || option.value === item.value) return;
+        // Evita duplicar uma tag que já está na lista
+        if (items_array.value.some((i: any) => i !== item && i.value === option.value)) return;
+        const new_value = items_array.value.map((i: any) => (i === item ? option : i));
+        model.value = new_value;
+        emit('change', new_value);
+    };
+
     const removeItem = (item: any) => {
-        model.value = items_array.value.filter((i: any) => i !== item);
+        const new_value = items_array.value.filter((i: any) => i !== item);
+        model.value = new_value;
+        emit('change', new_value);
     };
 
     const getColorString = (item: any) => {

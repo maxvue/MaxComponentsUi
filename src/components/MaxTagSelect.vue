@@ -1,13 +1,13 @@
 <template>
     <InputBase v-bind="{...props, ...attrs}" class="max-select-tag" input-click no-dropdown >
-        <div v-if="attrs.placeholder !== undefined && (!temp_value || temp_value === '')" class="placeholder-select">
+        <tadiv v-if="attrs.placeholder !== undefined && (!temp_value || temp_value === '')" class="tab-placeholder-select">
             {{ attrs.placeholder }}
-        </div>
+        </tadiv>
         <Select v-bind="{...props, ...attrs}" v-model="temp_value" :filter="props.filter"  :loading="loading" @before-show="(before_show as any)" :options="options" :optionLabel="attrs.optionLabel" :optionValue="props.optionValue" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false" :disabled="props.disabled">
             <template #option="slotProps">
                 <slot name="option" :option="slotProps.option" :selected="slotProps.selected" :index="slotProps.index">
                     <div class="label-tag-div" :style="getStyleColor(slotProps.option, slotProps.option['hover'] ?? false, false)" @mouseenter="options.find(o => o['value'] === slotProps.option['value'])['hover'] = true" @mouseleave="options.find(o => o['value'] === slotProps.option['value'])['hover'] = false">
-                        <MaxIcon :icon="slotProps.option['icon']" v-if="slotProps.option['icon']" :size="slotProps.option?.['iconSize'] ?? '1'" :style="{ width: '30px'}" :color="getStyleColor(slotProps.option, false, true).color"/>
+                        <MaxIcon :icon="slotProps.option['icon']" v-if="slotProps.option['icon']" :size="slotProps.option?.['iconSize'] ?? '1'" :style="{ width: '30px'}" :color="getStyleColor(slotProps.option, false, false).color"/>
                         <div class="label-tag">
                             <div v-html="slotProps.option[attrs.optionLabel] ?? slotProps.option.label" :style="{ color: attrs.color }"></div>
                         </div>
@@ -89,9 +89,10 @@
             filter?: boolean | undefined;
             hasRemove?: boolean | undefined;
             isButton?: boolean | undefined;
+            backgroundColor?: string;
 
         }>(),
-        { modelValue: null, done: undefined, optionValue: 'value', optionName: 'name', filter: false, optionLabel: 'label', error: undefined, caution: undefined, required: false, default: undefined, disabled: false, isButton: false }
+        { modelValue: null, done: undefined, optionValue: 'value', optionName: 'name', filter: false, optionLabel: 'label', error: undefined, caution: undefined, required: false, default: undefined, disabled: false, isButton: false, backgroundColor: 'var(--background-500)' }
     );
 
     const getColorString = (item: any) => {
@@ -102,7 +103,9 @@
     const getStyleColor = (item: any, hover: boolean = false, is_value: boolean = false) => {
         const color_string = getColorString(item);
 
-        const color = color_string === 'unset' ? getColorFromVar('var(--background-500)') : getColorFromVar(color_string);
+        const default_color = is_value ? props.backgroundColor : 'var(--background-500)';
+
+        const color = getColorFromVar(color_string === 'unset' ? default_color : color_string);
 
         let background = hover ? color.darken(0.2).hexa() : color.hexa();
         let text = contrastColor(background);
@@ -204,10 +207,16 @@
         }
     }
 
-    .placeholder-select {
+    .tab-placeholder-select {
         position: absolute;
-        color: var(--background-600);
+        color: var(--background-650);
         font-size: 0.9rem;
+        z-index: 1;
+        display: grid;
+        place-items: center;
+        width: 100%;
+        height: 100%;
+        pointer-events: none; /* O clique atravessa a div */
     }
 
     &[flex], &[full] {
