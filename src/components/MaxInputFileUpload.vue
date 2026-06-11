@@ -80,6 +80,7 @@
     import { ref, computed, watch, useAttrs } from 'vue';
     import FileUpload from 'primevue/fileupload';
     import ProgressSpinner from 'primevue/progressspinner';
+
     /**
      * Componente avançado para upload de arquivos.
      * Suporta múltiplos arquivos, pré-visualização (thumbnails), progresso de upload e integração com backend.
