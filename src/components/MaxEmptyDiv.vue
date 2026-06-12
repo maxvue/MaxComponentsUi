@@ -3,7 +3,7 @@
         <div class="inner">
             <slot>
                 <slot name="icon">
-                    <Icon :icon="attrs.icon ?? 'ph:empty'" :size="attrs.iconSize ?? 2" />
+                    <MaxIcon :icon="String(attrs.icon ?? attrs.i ?? 'ph:empty')" :size="Number(attrs.iconSize ?? 2)" />
                 </slot>
                 <slot name="label">
                     <div v-html="attrs.label" v-if="attrs.label" />
@@ -16,6 +16,8 @@
 
 <script setup lang="ts">
     import { useAttrs } from 'vue';
+    import MaxIcon from './MaxIcon.vue';
+
     const attrs = useAttrs();
 </script>
 

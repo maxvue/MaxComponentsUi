@@ -328,6 +328,12 @@
         }
     }
 
+    input {
+        &::placeholder {
+            color: var(--background-625);
+        }
+    }
+
     &.in-line {
         grid-template-columns: auto 1fr !important;
         grid-template-rows: 1fr !important;
