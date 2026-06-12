@@ -1,12 +1,12 @@
 <template>
-    <div class="empty-main-div">
+    <div class="max-empty-div">
         <div class="inner">
             <slot>
                 <slot name="icon">
                     <MaxIcon :icon="String(attrs.icon ?? attrs.i ?? 'ph:empty')" :size="Number(attrs.iconSize ?? 2)" />
                 </slot>
                 <slot name="label">
-                    <div v-html="attrs.label" v-if="attrs.label" />
+                    <div v-html="attrs.label ?? 'Sem Registros' " class="label" />
                 </slot>
             </slot>
 
@@ -22,7 +22,7 @@
 </script>
 
 <style scoped lang="scss">
-    .empty-main-div {
+    .max-empty-div {
         background-color: var(--background-100);
         width: 100%;
         height: 100%;
@@ -47,7 +47,7 @@
             display: grid;
             place-items: center;
             text-align: center;
-            gap: 1.5rem;
+            gap: 10px;
 
             .icon-div {
                 position: relative;
