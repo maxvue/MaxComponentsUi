@@ -1,6 +1,7 @@
 {
   "components": [
     "InputBase",
+    "MaxAiIcon",
     "MaxAnimateFade",
     "MaxBadgeComponent",
     "MaxButton",
@@ -94,6 +95,12 @@
     "InputBase": "InputBase",
     "input_base": "InputBase",
     "input-base": "InputBase",
+    "MaxAiIcon": "MaxAiIcon",
+    "max_ai_icon": "MaxAiIcon",
+    "max-ai-icon": "MaxAiIcon",
+    "AiIcon": "MaxAiIcon",
+    "ai_icon": "MaxAiIcon",
+    "ai-icon": "MaxAiIcon",
     "MaxAnimateFade": "MaxAnimateFade",
     "max_animate_fade": "MaxAnimateFade",
     "max-animate-fade": "MaxAnimateFade",

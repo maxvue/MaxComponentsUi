@@ -5,11 +5,6 @@
 
 <script setup lang="ts">
     import _Column from 'primevue/column';
-    import { ref } from 'vue';
-    import { useElementSize } from '@maxvue/max-use';
-
-    const el = ref('el');
-    const { _width } = useElementSize(el as any);
 
 </script>
 
