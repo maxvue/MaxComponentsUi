@@ -30,14 +30,14 @@
             </template>
         </Select>
         <!-- SELECT NORMAL -->
-        <Select v-bind="{...props, ...attrs}" v-else " v-model="temp_value" :filter="props.filter"  :loading="loading" @before-show="(before_show as any)" :options="options" :optionLabel="attrs.optionLabel" :optionValue="props.optionValue" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false" :disabled="props.disabled">
+        <Select v-bind="{...props, ...attrs}" v-else v-model="temp_value" :filter="props.filter"  :loading="loading" @before-show="(before_show as any)" :options="options" :optionLabel="props.optionLabel" :optionValue="props.optionValue" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false" :disabled="props.disabled">
             <template #option="slotProps">
                 <slot name="option" :option="slotProps.option" :selected="slotProps.selected" :index="slotProps.index">
                     <div :class="`category ${slotProps.option.category}`" v-if="attrs.category === true">{{ slotProps.option.category === 'UTILITY' ? 'A' : '' }}{{ slotProps.option.category === 'MARKETING' ? 'B' : '' }}</div>
                     <div class="label_div">
                         <Icon :icon="slotProps.option['icon']" v-if="slotProps.option['icon']" :size="slotProps.option?.['iconSize'] ?? '1'" :style="{ width: '30px' }" />
                         <div class="labelz">
-                            <div v-html="slotProps.option[attrs.optionLabel] ?? slotProps.option.label" :style="{ color: attrs.color }"></div>
+                            <div v-html="slotProps.option[props.optionLabel] ?? slotProps.option.label" :style="{ color: attrs.color }"></div>
                         </div>
                         <div class="subLabel" v-html="slotProps.option?.sub_label ?? slotProps.option?.sub ?? slotProps.option?.subLabel"></div>
                         <img v-if="slotProps.option['img']" :src="`/media/images/${slotProps.option['img']}`" alt="Image" class="img-label" />
