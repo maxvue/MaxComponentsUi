@@ -9,6 +9,8 @@ import ptBR from './locales/pt-br';
 export { default as InputBase } from './components/InputBase.vue';
 
 export { default as MaxIcon } from './components/MaxIcon.vue';
+export { default as MaxAiIcon } from './components/MaxAiIcon.vue';
+export { default as MaxIconAi } from './components/MaxAiIcon.vue';
 export { default as MaxDoneIcon } from './components/MaxDoneIcon.vue';
 export { default as MaxWaitIcon } from './components/MaxWaitIcon.vue';
 export { default as MaxErrorIcon } from './components/MaxErrorIcon.vue';
