@@ -8,7 +8,7 @@ vi.mock('@maxvue/max-use', async (importOriginal) => {
     const actual = await importOriginal();
     return {
         ...(actual as object),
-        useElementHover: () => ref(true),
+        useElementHover: () => ref(true)
     };
 });
 
@@ -48,9 +48,8 @@ describe('MaxIcon', () => {
     it('aplica tamanho via prop size', () => {
         const wrapper = mountIcon({ size: '2rem' });
         const style = wrapper.find('.max-icon-div')?.attributes('style');
-        if (style) {
-            expect(style).toContain('2rem');
-        }
+        if (style) expect(style).toContain('2rem');
+
     });
 
     it('aplica cor escura via dark', () => {

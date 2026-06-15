@@ -159,11 +159,11 @@
         }).catch( (error) => console.error('Erro ao enviar arquivo. ', error));
     };
 
-    function onDrop(files: File[] | null) {
+    function onDrop(_files: File[] | null) {
         // if (files) emit('files-selected', files);
     }
 
-    const onClick = (event: any, button: MaxButtonsType) => {
+    const _onClick = (event: any, button: MaxButtonsType) => {
         if (button.route) {
             goToRoute(button.route, { ...(button.params ?? {}), ...(button.data ?? {}), ...(button.query ?? {}) });
             return;

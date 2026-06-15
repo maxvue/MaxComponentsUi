@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import MaxTableFields from '../../src/components/MaxTableFields.vue';
-import { ulid } from '@maxvue/max-use';
+import { _ulid } from '@maxvue/max-use';
 
 vi.mock('@maxvue/max-use', async (importOriginal) => {
     const actual = await importOriginal<typeof import('@maxvue/max-use')>();
@@ -26,7 +26,7 @@ describe('MaxTableFields.vue', () => {
             global: {
                 stubs: {
                     MaxIconButton: true,
-                    MaxInputText: true,
+                    MaxInputText: true
                 }
             }
         });
@@ -45,7 +45,7 @@ describe('MaxTableFields.vue', () => {
             },
             global: {
                 stubs: {
-                    MaxInputText: true,
+                    MaxInputText: true
                 }
             }
         });
@@ -93,20 +93,20 @@ describe('MaxTableFields.vue', () => {
         });
 
         const row = { car: { color: 'blue' }, simple: 'text', id: 5 };
-        
+
         expect((wrapper.vm as any).resolveData(row, null)).toBe(null);
         expect((wrapper.vm as any).resolveData(row, 'car.color')).toBe('blue');
 
         const objData = { color: 'car.color', size: 10, idx: 'id' };
         const resolved = (wrapper.vm as any).resolveData(row, objData);
-        // Devido a um bug na implementação atual do componente onde typeof resolved === 'string' 
+        // Devido a um bug na implementação atual do componente onde typeof resolved === 'string'
         // nunca é verdadeiro, resolved retorna um objeto vazio.
         expect(resolved).toEqual({});
 
         // Fallback for non-object, non-string, non-falsy values
         const numData = 42;
         expect((wrapper.vm as any).resolveData(row, numData)).toBe(42);
-        
+
         // This hits the `if (keys.includes('id'))` branch for coverage even though keys is empty.
         expect((wrapper.vm as any).resolveData(row, true)).toBe(true);
     });
@@ -171,7 +171,7 @@ describe('MaxTableFields.vue', () => {
             { field: 'c6', input: 'auto-complete', options: ['A'] },
             { field: 'c7', input: 'auto-complete-api', route: '/api' },
             { field: 'c8', input: 'phone-number' },
-            { field: 'c9', input: 'other-fallback' },
+            { field: 'c9', input: 'other-fallback' }
         ];
         const wrapper = mount(MaxTableFields, {
             props: { list: [{}], columns },
@@ -190,11 +190,10 @@ describe('MaxTableFields.vue', () => {
         });
         expect(wrapper.exists()).toBe(true);
         // Fire updates to test setFieldValue for each input
-        ['MaxInputNumber', 'MaxInputSelect', 'MaxInputDatePicker', 'MaxInputCheckbox', 'MaxInputTextArea', 'MaxInputAutoComplete', 'MaxInputAutoCompleteApi', 'MaxPhoneField'].forEach((comp, idx) => {
+        ['MaxInputNumber', 'MaxInputSelect', 'MaxInputDatePicker', 'MaxInputCheckbox', 'MaxInputTextArea', 'MaxInputAutoComplete', 'MaxInputAutoCompleteApi', 'MaxPhoneField'].forEach((comp, _idx) => {
             const compWrapper = wrapper.findComponent({ name: comp });
-            if(compWrapper.exists()) {
-                compWrapper.vm.$emit('update:modelValue', 'new-val');
-            }
+            if(compWrapper.exists()) compWrapper.vm.$emit('update:modelValue', 'new-val');
+
         });
     });
 

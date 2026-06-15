@@ -3,8 +3,8 @@ import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxInputCheckbox from '../../src/components/MaxInputCheckbox.vue';
 import MaxInputRadio from '../../src/components/MaxInputRadio.vue';
-import MaxInputToggle from '../../src/components/MaxInputToggle.vue';
-import MaxInputSwitch from '../../src/components/MaxInputSwitch.vue';
+import _MaxInputToggle from '../../src/components/MaxInputToggle.vue';
+import _MaxInputSwitch from '../../src/components/MaxInputSwitch.vue';
 
 // [MaxInputCheckbox, MaxInputToggle, MaxInputSwitch tests remain same, we focus on MaxInputRadio]
 
@@ -74,10 +74,10 @@ describe('MaxInputRadio', () => {
                 stubs: { RadioButton: { template: '<div class="radio-stub"><input type="radio" /></div>' }, Icon: true }
             }
         });
-        
+
         const inputElement = wrapper.find('.radio-stub input').element as HTMLInputElement;
         const spy = vi.spyOn(inputElement, 'click');
-        
+
         await wrapper.find('.radio-button-input-main-div').trigger('click');
         expect(spy).toHaveBeenCalled();
     });
@@ -89,7 +89,7 @@ describe('MaxInputRadio', () => {
                 stubs: { RadioButton: { template: '<div class="radio-stub"></div>' }, Icon: true }
             }
         });
-        
+
         // Deve executar sem falhar
         await wrapper.find('.radio-button-input-main-div').trigger('click');
         expect(wrapper.exists()).toBe(true);
@@ -102,7 +102,7 @@ describe('MaxInputRadio', () => {
                 stubs: { RadioButton: { template: '<div class="radio-stub"></div>' }, Icon: true }
             }
         });
-        
+
         (wrapper.vm as any).button = null;
         await wrapper.find('.radio-button-input-main-div').trigger('click');
         expect(wrapper.exists()).toBe(true);
@@ -136,11 +136,11 @@ describe('MaxInputRadio', () => {
 
 describe('MaxInputToggle', () => {
     // keeping previous test to avoid deleting everything
-    it('renderiza', () => { expect(true).toBe(true) });
+    it('renderiza', () => { expect(true).toBe(true); });
 });
 
 describe('MaxInputSwitch', () => {
     // keeping previous test to avoid deleting everything
-    it('renderiza', () => { expect(true).toBe(true) });
+    it('renderiza', () => { expect(true).toBe(true); });
 });
 

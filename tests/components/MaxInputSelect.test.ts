@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxInputSelect from '../../src/components/MaxInputSelect.vue';
@@ -20,8 +20,8 @@ function mountSelect(props: Record<string, any> = {}, attrs: Record<string, any>
     });
 }
 
-function delay(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+function _delay(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 describe('MaxInputSelect', () => {
@@ -43,7 +43,7 @@ describe('MaxInputSelect', () => {
         const options = [{ value: 'a', name: 'A', icon: 'mdi:test' }];
         const wrapper = mountSelect({ modelValue: 'a', options });
         await wrapper.vm.$nextTick();
-        
+
         const vm = wrapper.vm as any;
         expect(vm.option_selected.name).toBe('A');
     });
@@ -54,7 +54,7 @@ describe('MaxInputSelect', () => {
         ];
         const wrapper = mountSelect({ modelValue: 'b', groupOptions });
         await wrapper.vm.$nextTick();
-        
+
         const vm = wrapper.vm as any;
         expect(vm.option_selected.name).toBe('B');
     });
@@ -68,26 +68,26 @@ describe('MaxInputSelect', () => {
 
     it('chama loadOptions em before_show', async () => {
         let resolveLoad: any;
-        const loadPromise = new Promise(resolve => {
+        const loadPromise = new Promise((resolve) => {
             resolveLoad = resolve;
         });
         const loadOptions = vi.fn().mockReturnValue(loadPromise);
         const wrapper = mountSelect({ loadOptions });
-        
+
         wrapper.find('.p-select').trigger('click');
-        
+
         // Let event loop process click
         await wrapper.vm.$nextTick();
-        
+
         expect(loadOptions).toHaveBeenCalled();
         expect((wrapper.vm as any).loading).toBe(true);
-        
+
         // Return valid group format because option_selected will try to iterate it
         resolveLoad([{ items: [{ value: 'loaded', name: 'Loaded' }] }]);
-        
+
         await loadPromise;
         await wrapper.vm.$nextTick();
-        
+
         expect((wrapper.vm as any).optionsField).toEqual([{ items: [{ value: 'loaded', name: 'Loaded' }] }]);
         expect((wrapper.vm as any).loading).toBe(false);
     });

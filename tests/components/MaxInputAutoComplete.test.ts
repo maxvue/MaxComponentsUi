@@ -70,10 +70,10 @@ describe('MaxInputAutoComplete.vue', () => {
     it('calcula isDone e caution corretamente no blur', async () => {
         const wrapper = mountAutoComplete({ required: true, modelValue: '' });
         await wrapper.find('.auto-complete').trigger('blur');
-        
+
         expect((wrapper.vm as any).isDone).toBe(false);
         expect((wrapper.vm as any).caution).toBe(true);
-        
+
     });
 
     it('calcula isDone = true quando required e tem valor no blur', async () => {
@@ -94,7 +94,7 @@ describe('MaxInputAutoComplete.vue', () => {
             { name: 'Banana', value: 'banana' }
         ];
         const wrapper = mountAutoComplete({ modelValue: 'açã', options });
-        
+
         await wrapper.find('.auto-complete').trigger('complete');
         const filtered = (wrapper.vm as any).filtered_values;
         expect(filtered.length).toBe(1);
@@ -103,7 +103,7 @@ describe('MaxInputAutoComplete.vue', () => {
 
     it('emite update:modelValue apenas se for object', async () => {
         const wrapper = mountAutoComplete();
-        
+
         // Atribuindo string, NÃO deve emitir (Auto-complete cuida disso)
         (wrapper.vm as any).temp_value = 'some_str';
         await wrapper.vm.$nextTick();
@@ -119,10 +119,10 @@ describe('MaxInputAutoComplete.vue', () => {
     it('renderiza o slot de option corretamente', () => {
         const options = [{ label: 'Item Label', subLabel: 'Sub Label Item' }];
         const wrapper = mountAutoComplete({ options, optionLabel: 'label' });
-        
+
         const labelEl = wrapper.find('.autocomplete-item-select-label');
         const subLabelEl = wrapper.find('.autocomplete-item-select-sub-label');
-        
+
         expect(labelEl.text()).toBe('Item Label');
         expect(subLabelEl.text()).toBe('Sub Label Item');
     });

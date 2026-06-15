@@ -49,11 +49,11 @@ describe('MaxInputAutoCompleteApi.vue', () => {
     it('busca dados da API no mount quando data tiver conteudo', async () => {
         const wrapper = mountAutoCompleteApi({ data: { category: 1 } });
         await wrapper.vm.$nextTick();
-        
+
         expect(maxUse.getCachedApi).toHaveBeenCalledWith('/api/test', { category: 1, input_value: '' });
-        
+
         // resolve promise
-        await new Promise(resolve => setTimeout(resolve, 0));
+        await new Promise((resolve) => setTimeout(resolve, 0));
         expect((wrapper.vm as any).list.length).toBe(1);
     });
 
@@ -128,10 +128,10 @@ describe('MaxInputAutoCompleteApi.vue', () => {
             { label: 'Maçã', value: 'apple', sub_label: 'Fruit' },
             { name: 'Banana', value: 'banana', sub_label: 'Fruit' }
         ];
-        
+
         (wrapper.vm as any).temp_value = 'açã';
         await wrapper.vm.$nextTick(); // This triggers watch(temp_value) -> search()
-        
+
         const filtered = (wrapper.vm as any).filtered_values;
         expect(filtered.length).toBe(1);
         expect(filtered[0].value).toBe('apple');
@@ -139,7 +139,7 @@ describe('MaxInputAutoCompleteApi.vue', () => {
 
     it('emite update:modelValue apenas se for object', async () => {
         const wrapper = mountAutoCompleteApi();
-        
+
         (wrapper.vm as any).temp_value = 'some_str';
         await wrapper.vm.$nextTick();
         expect(wrapper.emitted('update:modelValue')).toBeFalsy();
@@ -152,10 +152,10 @@ describe('MaxInputAutoCompleteApi.vue', () => {
 
     it('renderiza o slot de option corretamente', () => {
         const wrapper = mountAutoCompleteApi();
-        
+
         const labelEl = wrapper.find('.autocomplete-item-select-label');
         const subLabelEl = wrapper.find('.autocomplete-item-select-sub-label');
-        
+
         expect(labelEl.text()).toBe('Model Test');
         expect(subLabelEl.text()).toBe('Sub Test');
     });

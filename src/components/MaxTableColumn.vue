@@ -1,15 +1,15 @@
 <template>
 
- 
+
 </template>
 
 <script setup lang="ts">
-    import Column from 'primevue/column';
+    import _Column from 'primevue/column';
     import { ref } from 'vue';
     import { useElementSize } from '@maxvue/max-use';
 
     const el = ref('el');
-    const { width } = useElementSize(el as any);
+    const { _width } = useElementSize(el as any);
 
 </script>
 

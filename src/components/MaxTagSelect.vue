@@ -16,7 +16,7 @@
                     </div>
                 </slot>
             </template>
-            <template #value="value">
+            <template #value>
                 <div class="value-tag-div" :style="getStyleColor(option_selected, false, true)" :color-string="getColorString(option_selected)" v-if="! isButton" >
                     <MaxIcon :icon="option_selected?.icon ?? null" :size="option_selected?.icon_size ?? 1.4" pr10 v-if="option_selected.icon" :color="getStyleColor(option_selected, false, true).color" />
                     <div class="tag-value-text" :style="{color: getStyleColor(option_selected, false, true).color}" >{{ option_selected?.[props.optionName] ?? option_selected?.name ?? option_selected?.label }}</div>

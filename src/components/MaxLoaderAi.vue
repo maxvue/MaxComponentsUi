@@ -12,6 +12,7 @@
 
 <script setup lang="ts">
     import { useAttrs } from 'vue';
+
     const attrs = useAttrs();
     import { DotLottieVue } from '@lottiefiles/dotlottie-vue';
 </script>

@@ -8,7 +8,7 @@ vi.mock('@maxvue/max-use', async (importOriginal) => {
     const actual = await importOriginal();
     return {
         ...(actual as object),
-        goToRoute: vi.fn(),
+        goToRoute: vi.fn()
     };
 });
 
@@ -77,7 +77,7 @@ describe('MaxButton', () => {
     it('chama action ao invés de click se existir', () => {
         const actionMock = vi.fn();
         const wrapper = mountButton({ label: 'Action', action: actionMock, data: { id: 2 } });
-        
+
         // Chamando onClick
         (wrapper.vm as any).onClick(new MouseEvent('click'));
         expect(actionMock).toHaveBeenCalled();

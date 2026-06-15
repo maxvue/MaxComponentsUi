@@ -62,7 +62,7 @@ describe('MaxInputText', () => {
         const wrapper = mountInputText({ targetValue: 'Correto', modelValue: 'Incorreto' }, { error_msg: 'Erro customizado' });
         const input = wrapper.find('input');
         await input.trigger('blur');
-        
+
         const inputBase = wrapper.findComponent(InputBase);
         expect(inputBase.props('error')).toBe('Erro customizado');
     });
@@ -71,7 +71,7 @@ describe('MaxInputText', () => {
         const wrapper = mountInputText({ done: false, modelValue: 'Texto' });
         const input = wrapper.find('input');
         await input.trigger('blur');
-        
+
         const inputBase = wrapper.findComponent(InputBase);
         expect(inputBase.props('error')).toBe('Valor inválido');
     });

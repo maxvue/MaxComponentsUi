@@ -18,7 +18,7 @@ describe('MaxMaps.vue', () => {
                 modelValue: { latitude: -23.5, longitude: -46.6 }
             }
         });
-        
+
         expect(wrapper.exists()).toBe(true);
         expect(wrapper.vm.coordinates.latitude).toBe(-23.5);
     });
@@ -29,7 +29,7 @@ describe('MaxMaps.vue', () => {
                 modelValue: null
             }
         });
-        
+
         expect(wrapper.find('.mapa').exists()).toBe(false);
     });
 

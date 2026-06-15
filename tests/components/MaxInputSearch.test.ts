@@ -38,12 +38,11 @@ describe('MaxInputSearch', () => {
         await input.trigger('input');
 
         // Aguarda o debounce
-        await new Promise(resolve => setTimeout(resolve, 350));
+        await new Promise((resolve) => setTimeout(resolve, 350));
 
         const emitted = wrapper.emitted('search');
-        if (emitted) {
-            expect(emitted[0][0]).toBe('teste');
-        }
+        if (emitted) expect(emitted[0][0]).toBe('teste');
+
     });
 
     it('não emite search quando valor tem 1 ou menos caracteres', async () => {
@@ -54,7 +53,7 @@ describe('MaxInputSearch', () => {
         await input.setValue('a');
         await input.trigger('input');
 
-        await new Promise(resolve => setTimeout(resolve, 350));
+        await new Promise((resolve) => setTimeout(resolve, 350));
 
         const emitted = wrapper.emitted('search');
         expect(emitted).toBeUndefined();

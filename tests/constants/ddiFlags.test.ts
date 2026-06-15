@@ -26,9 +26,8 @@ describe('ddiFlags', () => {
     });
 
     it('siglas são strings de 2 caracteres', () => {
-        for (const item of country_ddi_flags) {
-            expect(item.sigla).toHaveLength(2);
-        }
+        for (const item of country_ddi_flags) expect(item.sigla).toHaveLength(2);
+
     });
 
     it('DDI do Brasil (55) é único na lista', () => {

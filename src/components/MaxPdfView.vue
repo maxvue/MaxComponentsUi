@@ -63,17 +63,17 @@
     const percent = ref(0);
     const isLoading = ref(true);
 
-    function rendered() {
+    function _rendered() {
         isLoading.value = false;
         opacity.value = 0.9;
     }
 
-    function loaded(event: any) {
+    function _loaded(event: any) {
         total.value = event.numPages;
         opacity.value = 1;
     }
 
-    function progressPdf(event: any) {
+    function _progressPdf(event: any) {
         percent.value = Math.round((event.loaded / event.total) * 100);
         if (percent.value > 99) percent.value = 98;
     }

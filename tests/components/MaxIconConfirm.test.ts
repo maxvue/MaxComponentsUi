@@ -37,7 +37,7 @@ describe('MaxIconConfirm', () => {
         expect(store.show).toBe(false);
 
         const wrapper = mountIconConfirm({ message: 'Excluir?' });
-        
+
         const vm = wrapper.vm as any;
         vm.onClickToggle();
 

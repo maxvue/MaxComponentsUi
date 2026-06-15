@@ -20,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-    import { computed, ref, useAttrs } from 'vue';
+    import { computed, ref, _useAttrs } from 'vue';
     import Menu from 'primevue/menu';
     import MaxButton from './MaxButton.vue';
     import MaxIcon from './MaxIcon.vue';

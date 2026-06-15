@@ -34,7 +34,7 @@
     const marker_options = ref({
         position: center.value,
         gmpDraggable: true,
-        click: function (e: any) {
+        click: function (_e: any) {
         }
     });
     const pinOptions = ref({
@@ -54,7 +54,7 @@
         marker_options.value = {
             position: center.value,
             gmpDraggable: true,
-            click: function (e: any) {
+            click: function (_e: any) {
             }
         };
     },{ immediate: true });

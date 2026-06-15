@@ -44,8 +44,12 @@ export default [
             }],
             'vue/html-indent': ['error', 4],
             'vue/multi-word-component-names': 'off',
-            'vue/no-unused-vars': 'warn',
-            '@typescript-eslint/no-unused-vars': 'warn'
+            'vue/no-unused-vars': ['warn', { 'ignorePattern': '^_' }],
+            '@typescript-eslint/no-unused-vars': ['warn', { 
+                'argsIgnorePattern': '^_', 
+                'varsIgnorePattern': '^_',
+                'caughtErrorsIgnorePattern': '^_'
+            }]
         }
     },
 

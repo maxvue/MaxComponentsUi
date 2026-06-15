@@ -97,7 +97,7 @@ describe('MaxTable', () => {
         expect(wrapper.find('.action-btn').exists()).toBe(true);
 
         const vm = wrapper.vm as any;
-        
+
         mockWidth.value = 50;
         await wrapper.vm.$nextTick();
 

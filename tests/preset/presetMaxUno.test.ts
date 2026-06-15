@@ -185,13 +185,13 @@ describe('coverage evaluation', () => {
 
         // Execute shortcut functions
         preset.shortcuts.forEach((shortcut: any) => {
-            if (typeof shortcut[1] === 'function') try { shortcut[1](['match', '10', '10']); } catch(e) {}
+            if (typeof shortcut[1] === 'function') try { shortcut[1](['match', '10', '10']); } catch(_e) {}
 
         });
 
         // Execute rules functions
         preset.rules.forEach((rule: any) => {
-            if (typeof rule[1] === 'function') try { rule[1](['match', '10', '10']); } catch(e) {}
+            if (typeof rule[1] === 'function') try { rule[1](['match', '10', '10']); } catch(_e) {}
 
         });
 

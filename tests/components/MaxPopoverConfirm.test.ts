@@ -89,7 +89,7 @@ describe('MaxPopoverConfirm', () => {
     it('botões chamam accept e reject corretamente do componente', async () => {
         const wrapper = mountPopoverConfirm();
         const store = useConfirmStore();
-        
+
         store.message = 'Deletar?';
         let accepted = false;
         let rejected = false;
@@ -102,7 +102,7 @@ describe('MaxPopoverConfirm', () => {
 
         const buttons = wrapper.findAllComponents({ name: 'MaxButton' });
         expect(buttons.length).toBe(2);
-        
+
         // Simular click no botão reject (primeiro na ordem do template)
         await buttons[0].vm.$emit('click');
         expect(rejected).toBe(true);
@@ -110,7 +110,7 @@ describe('MaxPopoverConfirm', () => {
 
         store.show = true;
         await wrapper.vm.$nextTick();
-        
+
         const newButtons = wrapper.findAllComponents({ name: 'MaxButton' });
 
         // Simular click no botão accept (segundo)

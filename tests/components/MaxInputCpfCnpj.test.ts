@@ -79,7 +79,7 @@ describe('MaxInputCpfCnpj', () => {
         const wrapper = mountCpfCnpj();
         (wrapper.vm as any).temp_value = '123456789012';
         expect((wrapper.vm as any).maskValue.mask).toContain('##.###.###/####-##');
-        
+
         (wrapper.vm as any).temp_value = '12345';
         expect((wrapper.vm as any).maskValue.mask).toContain('###.###.###-##');
     });
@@ -132,7 +132,7 @@ describe('MaxInputCpfCnpj', () => {
         const wrapper = mountCpfCnpj();
         (wrapper.vm as any).temp_value = '52998224725';
         await wrapper.vm.$nextTick();
-        
+
         expect(wrapper.emitted('update:modelValue')).toBeTruthy();
         expect(wrapper.emitted('complete')).toBeTruthy();
     });
@@ -141,7 +141,7 @@ describe('MaxInputCpfCnpj', () => {
         const wrapper = mountCpfCnpj();
         (wrapper.vm as any).temp_value = '11111111111111';
         await wrapper.vm.$nextTick();
-        
+
         expect(wrapper.emitted('update:modelValue')).toBeTruthy();
         expect(wrapper.emitted('complete')).toBeFalsy();
     });

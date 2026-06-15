@@ -86,11 +86,11 @@ describe('MaxInputPhoneMail', () => {
         const wrapper = mountPhoneMail({ modelValue: '11999887766' });
         const input = wrapper.find('input');
         await input.trigger('blur'); // Define isDone !== null
-        
+
         // Modifica o input e checa se watch() atualiza o isDone
         (wrapper.vm as any).temp_value = '119998877';
         await wrapper.vm.$nextTick();
-        
+
         const ib = wrapper.findComponent(InputBase);
         expect(ib.props('done')).toBe(false);
     });

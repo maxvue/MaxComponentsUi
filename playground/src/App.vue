@@ -115,6 +115,7 @@
 <script setup lang="ts">
 
     import { ref } from 'vue';
+
     const lastClickEvent = ref<string>('');
 
     const value = ref({

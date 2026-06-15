@@ -8,9 +8,8 @@ vi.mock('@primevue/auto-import-resolver', () => ({
         resolve: (name: string) => {
             // Simula resolução de componentes PrimeVue conhecidos
             const primeComponents = ['DataTable', 'Column', 'Dialog', 'InputText', 'Button'];
-            if (primeComponents.includes(name)) {
-                return { name, from: 'primevue/' + name.toLowerCase() };
-            }
+            if (primeComponents.includes(name)) return { name, from: 'primevue/' + name.toLowerCase() };
+
             return undefined;
         }
     }]

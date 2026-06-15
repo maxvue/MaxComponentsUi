@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxToast from '../../src/components/MaxToast.vue';
@@ -120,7 +120,7 @@ describe('MaxToast', () => {
         const pinia = createPinia();
         setActivePinia(pinia);
         const store = useToastStore(pinia);
-        const id = store.add({ title: 'Hover Me', severity: 'info' });
+        const _id = store.add({ title: 'Hover Me', severity: 'info' });
 
         const wrapper = mount(MaxToast, {
             global: {
@@ -134,7 +134,7 @@ describe('MaxToast', () => {
         await flushPromises();
 
         const item = wrapper.find('.max-toast-item');
-        
+
         // Simula mouseenter
         await item.trigger('mouseenter');
         expect(store.items[0].paused).toBe(true);

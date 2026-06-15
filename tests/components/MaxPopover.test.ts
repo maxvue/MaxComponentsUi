@@ -99,7 +99,7 @@ describe('MaxPopover', () => {
         vm.toggle();
         expect(vm.isOpen).toBe(true);
         vi.advanceTimersByTime(2); // resolve o setTimeout
-        
+
         expect(vm.style.opacity).toBe(1);
 
         vi.useRealTimers();
@@ -145,11 +145,11 @@ describe('MaxPopover', () => {
 
         vm.toggle();
         await wrapper.vm.$nextTick();
-        
+
         expect(vm.isOpen).toBe(true);
         const bg = wrapper.find('.background-popover');
         expect(bg.exists()).toBe(true);
-        
+
         // Testa fechamento
         await bg.trigger('click');
         expect(vm.isOpen).toBe(false);

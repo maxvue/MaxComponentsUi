@@ -197,7 +197,7 @@
 
     @keyframes max-toast-shrink {
         from { width: 100%; }
-        to   { width: 0%; }
+        to { width: 0%; }
     }
 
     /* ─── Animações de entrada e saída ─── */

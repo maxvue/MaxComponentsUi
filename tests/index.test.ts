@@ -5,7 +5,7 @@ describe('index install', () => {
     it('deve registrar o PrimeVue e a diretiva tooltip', () => {
         const app = {
             use: vi.fn(),
-            directive: vi.fn(),
+            directive: vi.fn()
         };
 
         install(app as any);
@@ -17,13 +17,13 @@ describe('index install', () => {
     it('deve aceitar options customizadas', () => {
         const app = {
             use: vi.fn(),
-            directive: vi.fn(),
+            directive: vi.fn()
         };
 
         install(app as any, {
             locale: { custom: true },
             theme: { options: { prefix: 'test' } },
-            ripple: false,
+            ripple: false
         });
 
         expect(app.use).toHaveBeenCalled();

@@ -43,7 +43,7 @@ describe('MaxInputSwitch', () => {
             global: { stubs: { ToggleSwitch: true } }
         });
         expect(wrapper.findComponent(InputBase).props('caution')).toBe(true);
-        
+
         const wrapper2 = mount(MaxInputSwitch, {
             props: { modelValue: false, caution: 'Cuidado' },
             global: { stubs: { ToggleSwitch: true } }

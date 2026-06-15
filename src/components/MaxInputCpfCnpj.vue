@@ -70,7 +70,7 @@
     // CALCULA LARGURA DO INPUT E ESPAÇAMENTO DAS LETRAS
     const el = useTemplateRef<any>('el');
     const { width } = useElementSize(el as any);
-    const space_letters = computed(() => (width.value ? (width.value - 100) / 30 : 0));
+    const _space_letters = computed(() => (width.value ? (width.value - 100) / 30 : 0));
 
     const checkDone = () => {
         isDone.value = done.value;

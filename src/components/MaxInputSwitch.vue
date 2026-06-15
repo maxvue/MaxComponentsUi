@@ -16,6 +16,7 @@
     import { ref, computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
     import ToggleSwitch from 'primevue/toggleswitch';
+
     const attrs = useAttrs();
 
     const props = withDefaults(

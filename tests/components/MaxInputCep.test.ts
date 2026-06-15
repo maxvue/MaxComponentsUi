@@ -51,9 +51,8 @@ describe('MaxInputCep', () => {
         await input.setValue('01001000');
 
         const complete = wrapper.emitted('complete');
-        if (complete) {
-            expect(complete.length).toBeGreaterThan(0);
-        }
+        if (complete) expect(complete.length).toBeGreaterThan(0);
+
     });
 
     it('done prop overrides internal validation', () => {
@@ -89,8 +88,8 @@ describe('MaxInputCep', () => {
 
     it('displays error_msg when required and empty', () => {
         const wrapper = mountCep({ modelValue: '', required: true, done: false });
-        const ib = wrapper.findComponent(InputBase);
-        // Note: done=false and value='' might not trigger caution from computed unless we explicitly trigger blur maybe? 
+        const _ib = wrapper.findComponent(InputBase);
+        // Note: done=false and value='' might not trigger caution from computed unless we explicitly trigger blur maybe?
         // Wait, caution is done.value === false && temp_value_numbers.value.length > 0
         // Oh, if value is empty caution is false unless explicitly passed.
     });

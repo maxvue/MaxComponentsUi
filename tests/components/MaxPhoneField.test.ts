@@ -96,7 +96,7 @@ describe('MaxPhoneField', () => {
         // mock magic keys logic manually by setting ref
         (wrapper.vm as any).noMask = true;
         await wrapper.vm.$nextTick();
-        
+
         const mask = (wrapper.vm as any).maskValue.mask;
         expect(mask).toBe('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$');
     });

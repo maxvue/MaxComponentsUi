@@ -63,13 +63,13 @@ describe('MaxInputFileUpload', () => {
                 directives: { tooltip: () => {} }
             }
         });
-        
+
         // trigger file select
-        wrapper.vm.onSelectHandler({ files: [{name: 'test.pdf', size: 100}] });
+        wrapper.vm.onSelectHandler({ files: [{ name: 'test.pdf', size: 100 }] });
         expect(wrapper.vm.files.length).toBe(1);
 
         // onBeforeUpload
-        const mockRequest = { 
+        const mockRequest = {
             xhr: { setRequestHeader: vi.fn() },
             formData: { append: vi.fn() }
         };
@@ -81,9 +81,8 @@ describe('MaxInputFileUpload', () => {
 
         // triggerChoose
         const fileUploadStub = wrapper.findComponent({ name: 'FileUpload' });
-        if (fileUploadStub) {
-            wrapper.vm.triggerChoose();
-        }
+        if (fileUploadStub) wrapper.vm.triggerChoose();
+
     });
 
     it('custom events are called', async () => {
@@ -106,7 +105,7 @@ describe('MaxInputFileUpload', () => {
 
         wrapper.vm.onUploadHandler({});
         expect(onUploadMock).toHaveBeenCalled();
-        
+
     });
 
     it('covers showError true branches and timeout', async () => {
@@ -131,7 +130,7 @@ describe('MaxInputFileUpload', () => {
         // Set variables to ensure both #content and #empty evaluate the error slots
         wrapper.vm.showError = true;
         wrapper.vm.uploading = false;
-        
+
         // This will cover the fallback content of <slot name="error"> on lines 34 and 44
         await wrapper.vm.$nextTick();
 

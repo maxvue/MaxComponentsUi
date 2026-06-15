@@ -13,7 +13,7 @@
     </div>
 </template>
 <script setup lang="ts">
-    const props = withDefaults(defineProps<{
+    const _props = withDefaults(defineProps<{
         noErrors?: boolean;
         typeSelect?: string;
         obrigatorio?: boolean;

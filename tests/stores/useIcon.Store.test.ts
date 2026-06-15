@@ -1,8 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { useIconStore } from '../../src/stores/useIcon.Store';
-import { nextTick, watch } from 'vue';
-
+import { watch } from 'vue';
 
 
 vi.mock('@maxvue/max-use', async (importOriginal) => {
@@ -10,7 +9,7 @@ vi.mock('@maxvue/max-use', async (importOriginal) => {
     return {
         ...actual,
         watchDebounced: vi.fn((source, cb) => {
-            watch(source, cb, { deep: true, flush: 'sync' }); 
+            watch(source, cb, { deep: true, flush: 'sync' });
         })
     };
 });
@@ -60,24 +59,24 @@ describe('useIconStore', () => {
 
     it('deve acionar o fetch quando novos icones sao requisitados', async () => {
         const store = useIconStore();
-        
+
         let resolveJson: any;
         const mockFetch = vi.spyOn(globalThis, 'fetch').mockReturnValue(Promise.resolve({
-            json: () => new Promise(resolve => { resolveJson = resolve })
+            json: () => new Promise((resolve) => { resolveJson = resolve; })
         } as any));
 
         store.getIcon('icon-c');
-        
-        await new Promise(r => setTimeout(r, 250)); // wait for debounce
+
+        await new Promise((r) => setTimeout(r, 250)); // wait for debounce
 
         expect(mockFetch).toHaveBeenCalled();
         const url = mockFetch.mock.calls[0][0] as string;
         expect(url).toContain('icons%5B%5D=icon-c');
 
         resolveJson({ 'icon-c': 'svg-c' });
-        
+
         // Wait for fetch promises to resolve
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await new Promise((resolve) => setTimeout(resolve, 50));
 
         expect(store.icons_data['icon-c']).toBe('svg-c');
         expect(localStorage.getItem('all_icons')).toBe(JSON.stringify({ 'icon-c': 'svg-c' }));
@@ -85,30 +84,30 @@ describe('useIconStore', () => {
 
     it('deve lidar com erros no fetch', async () => {
         const store = useIconStore();
-        
+
         const mockFetch = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('Network error'));
         const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
         store.getIcon('icon-d');
 
-        await new Promise(r => setTimeout(r, 250)); // wait for debounce
+        await new Promise((r) => setTimeout(r, 250)); // wait for debounce
 
         expect(mockFetch).toHaveBeenCalled();
 
-        await new Promise(resolve => setTimeout(resolve, 50));
-        
+        await new Promise((resolve) => setTimeout(resolve, 50));
+
         expect(consoleSpy).toHaveBeenCalled();
         expect(store.icons_data['icon-d']).toBe('waiting');
-        
+
         consoleSpy.mockRestore();
     });
 
     it('deve lidar com a ausencia do icone no retorno do fetch', async () => {
         const store = useIconStore();
-        
+
         let resolveJson: any;
-        const mockFetch = vi.spyOn(globalThis, 'fetch').mockReturnValue(Promise.resolve({
-            json: () => new Promise(resolve => { resolveJson = resolve })
+        const _mockFetch = vi.spyOn(globalThis, 'fetch').mockReturnValue(Promise.resolve({
+            json: () => new Promise((resolve) => { resolveJson = resolve; })
         } as any));
 
         const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -116,12 +115,12 @@ describe('useIconStore', () => {
 
         store.getIcon('icon-e');
 
-        await new Promise(r => setTimeout(r, 250)); // wait for debounce
+        await new Promise((r) => setTimeout(r, 250)); // wait for debounce
 
         // Resolve com json vazio (icone faltante)
         if (resolveJson) resolveJson({});
-        
-        await new Promise(resolve => setTimeout(resolve, 50));
+
+        await new Promise((resolve) => setTimeout(resolve, 50));
 
         // Ainda em waiting pois erro < 4
         expect(store.icons_data['icon-e']).toBe('waiting');
@@ -132,16 +131,16 @@ describe('useIconStore', () => {
         for (let i = 0; i < 4; i++) {
             delete store.icons_data['icon-e']; // Remove to change list
             store.getIcon('icon-e'); // Re-adds and triggers computed change
-            await new Promise(r => setTimeout(r, 250)); // wait for debounce
-            
+            await new Promise((r) => setTimeout(r, 250)); // wait for debounce
+
             vi.spyOn(globalThis, 'fetch').mockReturnValue(Promise.resolve({
                 json: () => Promise.resolve({})
             } as any));
-            await new Promise(resolve => setTimeout(resolve, 50));
+            await new Promise((resolve) => setTimeout(resolve, 50));
         }
 
         expect(store.icons_data['icon-e']).toBe('');
-        
+
         consoleSpy.mockRestore();
         traceSpy.mockRestore();
     });

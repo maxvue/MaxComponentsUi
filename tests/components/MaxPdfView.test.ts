@@ -13,11 +13,11 @@ describe('MaxPdfView.vue', () => {
             global: {
                 stubs: {
                     ProgressSpinner: true,
-                    Botao: true,
+                    Botao: true
                 }
             }
         });
-        
+
         expect(wrapper.exists()).toBe(true);
     });
 
@@ -28,7 +28,7 @@ describe('MaxPdfView.vue', () => {
                 stubs: { ProgressSpinner: true, Botao: true }
             }
         });
-        
+
         await wrapper.setProps({ file: 'novo.pdf' });
         expect(wrapper.vm.is_open).toBe(true);
     });
@@ -40,11 +40,11 @@ describe('MaxPdfView.vue', () => {
                 stubs: { ProgressSpinner: true, Botao: true }
             }
         });
-        
+
         wrapper.vm.Zoom('in');
         expect(wrapper.vm.size.width).toBeGreaterThan(1024);
         wrapper.vm.Zoom('out');
-        expect(wrapper.vm.size.width).toBeLessThan(1100); 
+        expect(wrapper.vm.size.width).toBeLessThan(1100);
     });
 
     it('renderiza o template completo e chama funções', async () => {
@@ -55,10 +55,10 @@ describe('MaxPdfView.vue', () => {
                 stubs: { ProgressSpinner: true, Botao: true }
             }
         });
-        
+
         await wrapper.setProps({ file: 'novo.pdf' });
         await wrapper.vm.$nextTick(); // renders the template
-        
+
         // now template is rendered, is_open = true
         expect(wrapper.vm.is_open).toBe(true);
 
@@ -86,7 +86,7 @@ describe('MaxPdfView.vue', () => {
         expect(wrapper.vm.opacity).toBe(0);
         vi.runAllTimers(); // runs setTimeout
         expect(wrapper.vm.is_open).toBe(false);
-        
+
         vi.useRealTimers();
     });
 
@@ -95,7 +95,7 @@ describe('MaxPdfView.vue', () => {
             props: { file: 'test.pdf' },
             global: { stubs: { ProgressSpinner: true, Botao: true } }
         });
-        
+
         wrapper.vm.progressPdf({ loaded: 50, total: 100 });
         expect(wrapper.vm.percent).toBe(50);
 

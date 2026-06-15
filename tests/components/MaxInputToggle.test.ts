@@ -38,11 +38,11 @@ describe('MaxInputToggle', () => {
             props: { modelValue: false },
             global: { stubs: { ToggleSwitch: true } }
         });
-        
+
         // Simula mudança de ToggleSwitch
         const toggle = wrapper.findComponent({ name: 'ToggleSwitch' });
         await toggle.vm.$emit('update:modelValue', true);
-        
+
         expect(wrapper.emitted('update:modelValue')).toBeTruthy();
         expect(wrapper.emitted('update:modelValue')?.[0][0]).toBe(true);
 

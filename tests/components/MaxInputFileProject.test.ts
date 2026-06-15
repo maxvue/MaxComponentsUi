@@ -14,10 +14,10 @@ let openMock = vi.fn();
 vi.mock('@maxvue/max-use', () => ({
     getRoute: vi.fn(),
     useDropZone: () => ({ isOverDropZone: { value: false } }),
-    useFileDialog: () => ({ 
-        open: openMock, 
-        reset: vi.fn(), 
-        onChange: vi.fn((cb) => { onChangeCallback = cb; }) 
+    useFileDialog: () => ({
+        open: openMock,
+        reset: vi.fn(),
+        onChange: vi.fn((cb) => { onChangeCallback = cb; })
     }),
     ulid: vi.fn(() => '12345'),
     size: vi.fn((arr) => arr?.length || 0),
@@ -33,7 +33,7 @@ describe('MaxInputFileProject', () => {
         });
         expect(wrapper.exists()).toBe(true);
         expect(wrapper.find('.instruction').text()).toContain('Insira fotos dos documentos');
-        
+
         // cover click on open files button
         await wrapper.findComponent({ name: 'MaxIconButton' }).vm.$emit('click', { stopPropagation: vi.fn() });
         expect(openMock).toHaveBeenCalled();
@@ -74,15 +74,14 @@ describe('MaxInputFileProject', () => {
             props: { files: [], url: '/upload', uploadData: { a: 1, b: { c: 2 } } },
             global: { stubs: ['MaxIconButton', 'MaxIcon', 'MaxLoaderIcon', 'MaxButton'] }
         });
-        
+
         // cover onChange callback
-        if (onChangeCallback) {
-            onChangeCallback([{ name: 'file_test.png' }]);
-        }
+        if (onChangeCallback) onChangeCallback([{ name: 'file_test.png' }]);
+
 
         const file = new File(['content'], 'test.png', { type: 'image/png' });
         wrapper.vm.sendFile([file]);
-        await new Promise(r => setTimeout(r, 10));
+        await new Promise((r) => setTimeout(r, 10));
         expect(consoleSpy).toHaveBeenCalled();
         consoleSpy.mockRestore();
     });

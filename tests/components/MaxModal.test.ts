@@ -82,32 +82,32 @@ describe('MaxModal', () => {
         const store = useModalStore();
 
         expect(store.show_id).toBe(null);
-        
+
         // Chamada de toggle para ABRIR o modal
         vm.toggle();
         expect(store.show_id).toBe(vm.id);
 
         // Avança o timer do setTimeout(..., 1)
         vi.advanceTimersByTime(2);
-        
+
         // Tentar chamar de novo logo em seguida não deve fazer nada devido ao is_changing
         vm.toggle();
         expect(store.show_id).toBe(vm.id); // ainda o mesmo
-        
+
         // Avança 500ms para passar com folga do refAutoReset(400) do is_changing
         vi.advanceTimersByTime(500);
         vm.is_changing = false; // Força para false caso refAutoReset não tenha disparado no fake timer
 
         // Agora chama toggle para FECHAR o modal
         vm.toggle();
-        
+
         // Timeout 1
         vi.advanceTimersByTime(10);
         // Timeout 2 (300ms)
         vi.advanceTimersByTime(350);
-        
+
         expect(store.show_id).toBe(null); // deve ter removido da store
-        
+
         vi.useRealTimers();
     });
 
@@ -118,21 +118,21 @@ describe('MaxModal', () => {
         });
         const vm = wrapper.vm as any;
         const store = useModalStore();
-        
+
         vm.toggle();
         await wrapper.vm.$nextTick();
-        
+
         expect(store.show_id).toBe(vm.id);
         const bg = wrapper.find('.background-modal');
         expect(bg.exists()).toBe(true);
         expect(wrapper.find('.max-modal-header').exists()).toBe(true);
-        
+
         // Testa o click.stop vazio
         const maxModal = wrapper.find('.max-modal');
         await maxModal.trigger('click');
-        
+
         // Testa fechamento via botão X e background
         await bg.trigger('click');
-        expect(store.show_id).toBe(null); 
+        expect(store.show_id).toBe(null);
     });
 });

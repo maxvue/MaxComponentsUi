@@ -47,20 +47,20 @@ describe('MaxUserAvatar', () => {
 
     it('aplica v-tooltip condicionalmente dependendo do showTooltip', () => {
         const tooltipDirective = vi.fn();
-        const wrapper = mount(MaxUserAvatar, {
+        const _wrapper = mount(MaxUserAvatar, {
             props: { name: 'João', showTooltip: false },
             global: {
                 stubs: { Avatar: true },
                 directives: { tooltip: tooltipDirective }
             }
         });
-        
+
         // Quando showTooltip é false, tooltip recebe null
         expect(tooltipDirective).toHaveBeenCalled();
         const callArgs = tooltipDirective.mock.calls[0];
         expect(callArgs[1].value).toBe(null);
 
-        const wrapper2 = mount(MaxUserAvatar, {
+        const _wrapper2 = mount(MaxUserAvatar, {
             props: { name: 'João', showTooltip: true, imageUrl: 'img.jpg' },
             global: {
                 stubs: { Avatar: true },

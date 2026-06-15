@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxInputTypeAddress from '../../src/components/MaxInputTypeAddress.vue';
-import MaxInputSelect from '../../src/components/MaxInputSelect.vue';
+import _MaxInputSelect from '../../src/components/MaxInputSelect.vue';
 
 function mountTypeAddress(props: Record<string, any> = {}, attrs: Record<string, any> = {}) {
     return mount(MaxInputTypeAddress, {

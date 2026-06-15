@@ -6,6 +6,7 @@
 
 <script setup lang="ts">
     import { useAttrs } from 'vue';
+
     const attrs: any = useAttrs();
 </script>
 
