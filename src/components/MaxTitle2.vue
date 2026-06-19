@@ -1,6 +1,6 @@
 <template>
     <div class="max-title-2 select-none">
-        <MaxIcon :i="resolvedIcon ?? 'line-md:plus-circle'" v-if="resolvedIcon" size="1.5" class="mb-2" pr-8 />
+        <MaxIcon :i="resolvedIcon" v-if="resolvedIcon" size="1.5" class="mb-2" pr-8 />
         <div>
             <div v-if="resolvedTitle" class="text-h1">{{ resolvedTitle }}</div>
             <div v-if="resolvedSubtitle" class="text-h2" v-html="resolvedSubtitle"></div>
