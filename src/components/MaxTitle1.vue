@@ -1,7 +1,8 @@
 <template>
-    <div :class="`e-t1 ${center}`" v-bind="attrs">
-        <div v-if="attrs.h1" class="text-lg font-medium uppercase t1-main-text">{{ attrs.h1 }}</div>
-        <div v-if="attrs.h2" class="text-sm t2-main-text" >{{ attrs.h2 }}</div>
+    <div :class="`max-title-2 ${center}`" v-bind="attrs">
+        <MaxIcon :i="icon ?? 'line-md:plus-circle'" v-if="icon" size="1.5" class="mb-2" pr-8 />
+        <div v-if="title" class="text-lg font-medium uppercase t1-main-text">{{ title }}</div>
+        <div v-if="subtitle" class="text-sm t2-main-text" v-html="subtitle"></div>
     </div>
 </template>
 
@@ -10,10 +11,16 @@
 
     const attrs = useAttrs();
     const center = computed(() => (attrs.center !== undefined ? 'center' : ''));
+
+    const title = computed(() => attrs['h1'] ?? attrs['title']);
+    const subtitle = computed(() => attrs['h2'] ?? attrs['subtitle']);
+    const icon = computed(() => attrs.icon ?? attrs.i ?? attrs.icone );
 </script>
 
 <style lang="scss" scoped>
-    .e-t1 {
+    .max-title-2 {
+        display: grid;
+        grid-template-columns: auto 1fr;
         padding: 10px 0 0;
         width: 100%;
         color: var(--background-700);
