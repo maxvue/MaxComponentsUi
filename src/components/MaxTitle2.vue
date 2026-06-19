@@ -1,14 +1,17 @@
 <template>
     <div class="t2 select-none" v-bind="attrs">
-        <div v-if="attrs['h1']" class="text-h1">{{ attrs['h1'] }}</div>
-        <div v-if="attrs['h2']" class="text-h2" v-html="attrs['h2']"></div>
+        <div v-if="title" class="text-h1">{{ title }}</div>
+        <div v-if="subtitle" class="text-h2" v-html="subtitle"></div>
     </div>
 </template>
 
 <script setup lang="ts">
-    import { useAttrs } from 'vue';
+    import { computed, useAttrs } from 'vue';
 
     const attrs = useAttrs();
+
+    const title = computed(() => attrs['h1'] ?? attrs['title']);
+    const subtitle = computed(() => attrs['h2'] ?? attrs['subtitle']);
 </script>
 
 <style scoped lang="scss">
