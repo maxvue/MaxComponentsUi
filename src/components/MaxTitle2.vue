@@ -32,6 +32,7 @@
         grid-template-columns: auto 1fr;
         padding: 1rem 0 5px;
         width: 100%;
+        place-items: center start;
 
         .text-h1 {
             font-weight: 500;

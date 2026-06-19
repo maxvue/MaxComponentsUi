@@ -31,6 +31,7 @@
     .max-title-2 {
         display: grid;
         grid-template-columns: auto 1fr;
+        place-items: center start;
         padding: 10px 0 0;
         width: 100%;
         color: var(--background-700);
