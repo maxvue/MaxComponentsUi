@@ -1,21 +1,29 @@
 <template>
-    <div class="max-title-2 select-none" v-bind="attrs">
-        <MaxIcon :i="icon ?? 'line-md:plus-circle'" v-if="icon" size="1.5" class="mb-2" pr-8 />
+    <div class="max-title-2 select-none">
+        <MaxIcon :i="resolvedIcon ?? 'line-md:plus-circle'" v-if="resolvedIcon" size="1.5" class="mb-2" pr-8 />
         <div>
-            <div v-if="title" class="text-h1">{{ title }}</div>
-            <div v-if="subtitle" class="text-h2" v-html="subtitle"></div>
+            <div v-if="resolvedTitle" class="text-h1">{{ resolvedTitle }}</div>
+            <div v-if="resolvedSubtitle" class="text-h2" v-html="resolvedSubtitle"></div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-    import { computed, useAttrs } from 'vue';
+    import { computed } from 'vue';
 
-    const attrs = useAttrs();
+    const props = defineProps<{
+        h1?: string;
+        title?: string;
+        h2?: string;
+        subtitle?: string;
+        icon?: string;
+        i?: string;
+        icone?: string;
+    }>();
 
-    const title = computed(() => attrs['h1'] ?? attrs['title']);
-    const subtitle = computed(() => attrs['h2'] ?? attrs['subtitle']);
-    const icon = computed(() => attrs.icon ?? attrs.i ?? attrs.icone );
+    const resolvedTitle = computed(() => props.h1 ?? props.title);
+    const resolvedSubtitle = computed(() => props.h2 ?? props.subtitle);
+    const resolvedIcon = computed(() => props.icon ?? props.i ?? props.icone);
 </script>
 
 <style scoped lang="scss">
