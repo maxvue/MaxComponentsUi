@@ -2,7 +2,7 @@
     <div :class="`badge-component-main-div ${props.size ?? ''}`"  >
         <MaxIcon v-if="props.icon || props.i" :icon="props.icon ?? props.i" class="icon-badge" dark="0.3" :color="icon_color"/>
         <OverlayBadge v-if="is_overlay" />
-        <Badge :value="message" v-else :class="`${props.icon || props.iconColor ? 'with-icon' : ''} ${props.iconValue ? 'with-icon-value' : ''}`" ref="badgeElem" :style="{backgroundColor: bg_color, color: text_color}" />
+        <Badge width="300" v-bind="attrs" :value="message" v-else :class="`${props.icon || props.iconColor ? 'with-icon' : ''} ${props.iconValue ? 'with-icon-value' : ''}`" ref="badgeElem" :style="{backgroundColor: bg_color, color: text_color}" />
         <div class="circle-color-badge">
             <div :style="{ background: (props.iconColor ?? 'none') as string }" class="circle-color-badge-text">
                 {{ props.iconValue ?? '' }}

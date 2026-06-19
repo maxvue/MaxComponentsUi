@@ -121,7 +121,8 @@
                     width: 100% !important;
                     z-index: 1 !important;
                     font-family: Jost, sans-serif;
-                    display: grid;
+                    display: flex !important;
+                    background-color: red !important;
 
                     tr {
                         width: 100% !important;
