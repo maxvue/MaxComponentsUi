@@ -122,6 +122,7 @@
                     z-index: 1 !important;
                     font-family: Jost, sans-serif;
                     display: flex !important;
+                    flex-direction: column;
 
                     tr {
                         width: 100% !important;
