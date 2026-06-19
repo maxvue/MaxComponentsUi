@@ -1,8 +1,10 @@
 <template>
     <div :class="`max-title-2 ${center}`" v-bind="attrs">
         <MaxIcon :i="icon ?? 'line-md:plus-circle'" v-if="icon" size="1.5" class="mb-2" pr-8 />
-        <div v-if="title" class="text-lg font-medium uppercase t1-main-text">{{ title }}</div>
-        <div v-if="subtitle" class="text-sm t2-main-text" v-html="subtitle"></div>
+        <div>
+            <div v-if="title" class="text-lg font-medium uppercase t1-main-text">{{ title }}</div>
+            <div v-if="subtitle" class="text-sm t2-main-text" v-html="subtitle"></div>
+        </div>
     </div>
 </template>
 
