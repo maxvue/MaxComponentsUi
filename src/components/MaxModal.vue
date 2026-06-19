@@ -105,8 +105,6 @@
     const show = modal_store.show;
 
     const style: any = useDefaultReset({
-        top: 0,
-        left: 0,
         isTop: false,
         isLeft: false,
         opacity: 0
@@ -129,11 +127,7 @@
 
             modal_store.toggle(id.value);
             setTimeout(() => {
-                const { width: width_el, height: height_el } = useElementSize(el as any);
-                const { width: window_width, height: window_height } = useWindowSize();
                 const data = {
-                    top: (window_height.value - height_el.value) / 2,
-                    left: (window_width.value - width_el.value) / 2,
                     isTop: false,
                     isLeft: false,
                     opacity: 0
@@ -196,6 +190,9 @@
             border: 1px solid var(--surface-border);
             display: grid;
             grid-template-rows: auto 1fr;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
 
             /* O drop-shadow traça o contorno real do elemento + seus ::before, criando o balão perfeito */
             filter: drop-shadow(0 4px 8px rgb(0 0 0 / 20%));
