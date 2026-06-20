@@ -38,6 +38,7 @@ export { default as PhoneField } from './components/MaxPhoneField.vue';
 export { default as InputPhone } from './components/MaxPhoneField.vue';
 
 // Inputs
+export { default as MaxColorPicker } from './components/MaxColorPicker.vue';
 export { default as MaxInputAutoComplete } from './components/MaxInputAutoComplete.vue';
 export { default as MaxInputAutoCompleteApi } from './components/MaxInputAutoCompleteApi.vue';
 export { default as MaxInputCep } from './components/MaxInputCep.vue';
