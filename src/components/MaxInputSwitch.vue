@@ -1,5 +1,5 @@
 <template>
-    <InputBase v-bind="props" :modelValue="(props.modelValue as any)" class="input-switch-main" :caution="caution" :done="isDone ?? undefined" :icon-right="icon ?? 'ph:toggle-right-duotone'">
+    <InputBase v-bind="props" :modelValue="(props.modelValue as any)" class="input-switch-main" :caution="caution" :done="isDone ?? undefined" :icon-right="icon ?? ''">
         <div class="input-grid-switch">
             <ToggleSwitch v-bind="attrs" v-model="temp_value" />
             <div class="rotulo">{{ question }}</div>

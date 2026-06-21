@@ -37,7 +37,7 @@
                     <div class="label_div">
                         <Icon :icon="slotProps.option['icon']" v-if="slotProps.option['icon']" :size="slotProps.option?.['iconSize'] ?? '1'" :style="{ width: '30px' }" />
                         <div class="labelz">
-                            <div v-html="slotProps.option[props.optionLabel] ?? slotProps.option.label" :style="{ color: attrs.color }"></div>
+                            <div v-html="slotProps.option[props.optionLabel] ?? slotProps.option.label ?? slotProps.option.name" :style="{ color: attrs.color }"></div>
                         </div>
                         <div class="subLabel" v-html="slotProps.option?.sub_label ?? slotProps.option?.sub ?? slotProps.option?.subLabel"></div>
                         <img v-if="slotProps.option['img']" :src="`/media/images/${slotProps.option['img']}`" alt="Image" class="img-label" />

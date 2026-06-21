@@ -1,5 +1,6 @@
 <template>
     <div class="max-icon-div" :k="icon_name ?? 'nono'" :vh="svgContent" :ii="String(icon_name)" :i="String(props.i)" :icon="String(props.icon)" :style="style" v-if="icon_name" :cc="JSON.stringify(hover_color) + isHovered" ref="icon_ref" >
+        <div v-if="props.tooltip" v-tooltip="props.tooltip"></div>
         <div class="max-icon" v-html="svgContent" :v-bind="attrs" flex :style="style" />
         <div class="sub-icon checked" v-if="props.checked === true">
             <div class="background-icon"></div>
@@ -60,6 +61,8 @@
         colorHover?: string;
         /** Hover color */
         hoverColor?: string | undefined;
+        /** Hover color */
+        tooltip?: string | undefined;
     }>(), {
         dark: undefined,
         light: undefined,
