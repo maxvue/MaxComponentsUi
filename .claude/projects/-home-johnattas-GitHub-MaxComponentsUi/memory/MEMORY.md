@@ -1,0 +1,1 @@
+- [check-*.cjs mutate source](check-scripts-mutate-source.md) — running scripts/check-*.cjs auto-writes imports into .vue files

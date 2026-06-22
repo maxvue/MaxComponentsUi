@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const srcDir = path.join(__dirname);
+const srcDir = path.join(__dirname, '..', 'src');
 const vueApis = [
     'ref', 'computed', 'watch', 'watchEffect', 'onMounted', 'onUnmounted',
     'useAttrs', 'useSlots', 'inject', 'provide', 'nextTick', 'reactive',

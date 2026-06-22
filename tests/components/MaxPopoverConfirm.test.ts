@@ -18,7 +18,11 @@ function mountPopoverConfirm() {
     return mount(MaxPopoverConfirm, {
         global: {
             stubs: {
-                MaxButton: true,
+                MaxButton: {
+                    name: 'MaxButton',
+                    props: ['action', 'label', 'icon'],
+                    template: '<button class="max-button-stub" @click="action && action()">{{ label }}</button>'
+                },
                 MaxIcon: {
                     template: '<span class="max-icon"></span>',
                     props: ['icon', 'i', 'size']
@@ -100,21 +104,21 @@ describe('MaxPopoverConfirm', () => {
         store.show = true;
         await wrapper.vm.$nextTick(); // Garante renderização v-if
 
-        const buttons = wrapper.findAllComponents({ name: 'MaxButton' });
+        const buttons = wrapper.findAll('.max-button-stub');
         expect(buttons.length).toBe(2);
 
-        // Simular click no botão reject (primeiro na ordem do template)
-        await buttons[0].vm.$emit('click');
+        // Click no botão reject (primeiro na ordem do template)
+        await buttons[0].trigger('click');
         expect(rejected).toBe(true);
         expect(store.show).toBe(false); // hide() é chamado internamente
 
         store.show = true;
         await wrapper.vm.$nextTick();
 
-        const newButtons = wrapper.findAllComponents({ name: 'MaxButton' });
+        const newButtons = wrapper.findAll('.max-button-stub');
 
-        // Simular click no botão accept (segundo)
-        await newButtons[1].vm.$emit('click');
+        // Click no botão accept (segundo)
+        await newButtons[1].trigger('click');
         expect(accepted).toBe(true);
         expect(store.show).toBe(false);
     });

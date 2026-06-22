@@ -28,7 +28,7 @@
 
 <script setup lang="ts">
     import { useModalStore } from '../stores/useModal.Store';
-    import { useElementSize, useWindowSize, Random, useDefaultReset, refAutoReset } from '@maxvue/max-use';
+    import { Random, useDefaultReset, refAutoReset } from '@maxvue/max-use';
     import { useTemplateRef, computed, ref } from 'vue';
     import MaxIconButton from './MaxIconButton.vue';
     import MaxButton from './MaxButton.vue';
@@ -123,8 +123,6 @@
         // ADICIONA MODAL
         if (modal_store.show_id !== id.value) {
 
-            console.trace('adicionando');
-
             modal_store.toggle(id.value);
             setTimeout(() => {
                 const data = {
@@ -142,7 +140,6 @@
 
         // REMOVE MODAL
         else if (modal_store.show_id === id.value) setTimeout(() => {
-            console.trace('Removendo');
             style.value.opacity = 0;
             setTimeout(() => {
                 modal_store.toggle(id.value);

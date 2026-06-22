@@ -16,19 +16,19 @@
                 </Transition>
 
                 <div class="pdfDiv">
-                    <!-- <VuePdfEmbed :annotation-layer="false" :textLayer="false" :source="props.file" :width="size.width" :height="size.height" @rendered="rendered" @loaded="loaded" @progress="progressPdf"> -->
-                    <!-- <template #before-page="slotProps">
+                    <VuePdfEmbed :annotation-layer="false" :textLayer="false" :source="props.file" :width="size.width" :height="size.height" @rendered="rendered" @loaded="loaded" @progress="progressPdf">
+                        <template #before-page="slotProps">
                             <div class="header-page">Página {{ slotProps.page }} de {{ total }}</div>
                         </template>
-                    </VuePdfEmbed> -->
+                    </VuePdfEmbed>
                 </div>
             </div>
             <div class="space" @click="closePDF" />
         </div>
         <div class="pdf-div-bar-tools">
-            <Botao icon="iconamoon:zoom-out-light" flex text @click="Zoom('out')" />
-            <Botao icon="lucide:zoom-in" flex text @click="Zoom('in')" />
-            <Botao icon="ic:round-close" flex text @click="closePDF" />
+            <MaxButton icon="iconamoon:zoom-out-light" flex text @click="Zoom('out')" />
+            <MaxButton icon="lucide:zoom-in" flex text @click="Zoom('in')" />
+            <MaxButton icon="ic:round-close" flex text @click="closePDF" />
         </div>
     </div>
 </template>
@@ -41,7 +41,8 @@
     import { useWindowSize } from '@maxvue/max-use';
     import { ref, watch } from 'vue';
     import ProgressSpinner from 'primevue/progressspinner';
-    // import VuePdfEmbed from 'vue-pdf-embed';
+    import VuePdfEmbed from 'vue-pdf-embed';
+    import MaxButton from './MaxButton.vue';
 
     const { width: screen_width, height: screen_height } = useWindowSize();
 
@@ -63,21 +64,20 @@
     const percent = ref(0);
     const isLoading = ref(true);
 
-    function _rendered() {
+    function rendered() {
         isLoading.value = false;
         opacity.value = 0.9;
     }
 
-    function _loaded(event: any) {
+    function loaded(event: any) {
         total.value = event.numPages;
         opacity.value = 1;
     }
 
-    function _progressPdf(event: any) {
+    function progressPdf(event: any) {
         percent.value = Math.round((event.loaded / event.total) * 100);
         if (percent.value > 99) percent.value = 98;
     }
-
 
     function closePDF() {
         opacity.value = 0;
@@ -104,10 +104,7 @@
         width: 100vw;
         height: 100vh;
         background-color: rgb(0 0 0 / 90%);
-        transform: scale(0);
-        transition:
-            transform 0.2s ease,
-            opacity 0.6s ease;
+        transition: opacity 0.6s ease;
         overflow: auto;
         display: grid;
         grid-template-columns: 1fr calc(0.6 * 100vw) 1fr;
@@ -140,8 +137,6 @@
 
         .pdfDiv {
             padding: calc(100vh * 0.05);
-            opacity: 0;
-            transition: opacity 0.5s ease;
 
             .header-page {
                 width: 100%;

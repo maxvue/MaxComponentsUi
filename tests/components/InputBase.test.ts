@@ -5,6 +5,10 @@ import FloatLabel from 'primevue/floatlabel';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
 import Message from 'primevue/message';
+import MaxIcon from '../../src/components/MaxIcon.vue';
+
+const hasIcon = (wrapper: ReturnType<typeof mount>, icon: string) =>
+    wrapper.findAllComponents(MaxIcon).some((c) => c.props('icon') === icon);
 
 describe('InputBase.vue', () => {
     const globalOptions = {
@@ -27,7 +31,7 @@ describe('InputBase.vue', () => {
             global: globalOptions
         });
         // Line 12
-        expect(wrapper.html()).toContain('icon="mdi:right"');
+        expect(hasIcon(wrapper, 'mdi:right')).toBe(true);
         // Line 133
         expect(wrapper.find('.input-message').text()).toContain('Caution message');
     });
@@ -40,6 +44,6 @@ describe('InputBase.vue', () => {
         // Line 135
         expect(wrapper.find('.input-message').text()).toContain('Main message');
         // Line 19
-        expect(wrapper.html()).toContain('icon="mdi:info"');
+        expect(hasIcon(wrapper, 'mdi:info')).toBe(true);
     });
 });

@@ -10,12 +10,12 @@
  * Oferece suporte a validação de obrigatoriedade e comparação de valores.
  */
 <script setup lang="ts">
+    import InputText from 'primevue/inputtext';
     import { toSearchableString, hasContent } from '@maxvue/max-use';
     import type { Ref } from 'vue';
     import { ref, computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
     import ColorPicker from 'primevue/colorpicker';
-    import MaxInputText from './MaxInputText.vue';
 
     const modelValue = defineModel<any>({ default: '' });
     const attrs: any = useAttrs();

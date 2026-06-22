@@ -4,6 +4,17 @@ import vueParser from 'vue-eslint-parser';
 import eslintPluginVue from 'eslint-plugin-vue';
 
 export default [
+    // Ignora artefatos de build, cobertura e dependências (não devem ser lintados)
+    {
+        ignores: [
+            'dist/**',
+            'coverage/**',
+            'node_modules/**',
+            '**/*.tsbuildinfo',
+            'test-tmp.js'
+        ]
+    },
+
     // 1º Bloco: Configuração Base (Aplica-se a TS, JS e Vue)
     {
         files: ['**/*.{ts,js,mts,vue}'],
@@ -45,8 +56,8 @@ export default [
             'vue/html-indent': ['error', 4],
             'vue/multi-word-component-names': 'off',
             'vue/no-unused-vars': ['warn', { 'ignorePattern': '^_' }],
-            '@typescript-eslint/no-unused-vars': ['warn', { 
-                'argsIgnorePattern': '^_', 
+            '@typescript-eslint/no-unused-vars': ['warn', {
+                'argsIgnorePattern': '^_',
                 'varsIgnorePattern': '^_',
                 'caughtErrorsIgnorePattern': '^_'
             }]

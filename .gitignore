@@ -8,6 +8,11 @@ dist/
 .eslintcache
 *.cache
 
+# Relatórios e arquivos temporários
+coverage_*.txt
+coverage_report.txt
+test-tmp.js
+
 # Logs
 *.log
 *.log.*

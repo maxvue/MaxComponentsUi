@@ -41,7 +41,6 @@
     import MaxLoaderIcon from './MaxLoaderIcon.vue';
     import type { MaxButtonsType } from '../types/index.js';
     import axios from 'axios';
-    import { goToRoute } from '@maxvue/max-use';
     import MaxIconButton from './MaxIconButton.vue';
 
     const props = withDefaults(defineProps<{ files: DBFile[]; uploadData?: any; auto?: boolean; url?: string; route?:string; ready?: boolean; uploadRoute?: string; buttons?: MaxButtonsType[] }>(), { files: () => [], buttons: () => [], auto: true });
@@ -162,19 +161,6 @@
     function onDrop(_files: File[] | null) {
         // if (files) emit('files-selected', files);
     }
-
-    const _onClick = (event: any, button: MaxButtonsType) => {
-        if (button.route) {
-            goToRoute(button.route, { ...(button.params ?? {}), ...(button.data ?? {}), ...(button.query ?? {}) });
-            return;
-        }
-
-        if (button.action) {
-            const data = { ...(button.data ?? {}), ...(button.query ?? {}), ...(button.params ?? {}) };
-            button.action({ event: event, data: data });
-            return;
-        }
-    };
 </script>
 
 <style lang="scss">

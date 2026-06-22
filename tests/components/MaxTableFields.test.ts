@@ -99,9 +99,8 @@ describe('MaxTableFields.vue', () => {
 
         const objData = { color: 'car.color', size: 10, idx: 'id' };
         const resolved = (wrapper.vm as any).resolveData(row, objData);
-        // Devido a um bug na implementação atual do componente onde typeof resolved === 'string'
-        // nunca é verdadeiro, resolved retorna um objeto vazio.
-        expect(resolved).toEqual({});
+        // Cada valor string é resolvido como caminho no row; valores não-string são mantidos.
+        expect(resolved).toEqual({ color: 'blue', size: 10, idx: 5 });
 
         // Fallback for non-object, non-string, non-falsy values
         const numData = 42;

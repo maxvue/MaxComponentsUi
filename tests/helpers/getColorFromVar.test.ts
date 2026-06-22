@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getColorFromVar } from '../../src/helpers/getColorFromVar';
+import { getColorFromVar } from '@maxvue/max-use';
 
 describe('getColorFromVar', () => {
     it('retorna instância Color para cor RGB direta', () => {

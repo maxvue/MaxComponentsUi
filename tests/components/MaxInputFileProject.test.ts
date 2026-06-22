@@ -2,7 +2,6 @@ import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import MaxInputFileProject from '../../src/components/MaxInputFileProject.vue';
 import axios from 'axios';
-import { goToRoute } from '@maxvue/max-use';
 
 vi.mock('axios', () => ({
     default: { post: vi.fn().mockResolvedValue({}) }
@@ -21,8 +20,7 @@ vi.mock('@maxvue/max-use', () => ({
     }),
     ulid: vi.fn(() => '12345'),
     size: vi.fn((arr) => arr?.length || 0),
-    isBlank: vi.fn((val) => !val),
-    goToRoute: vi.fn()
+    isBlank: vi.fn((val) => !val)
 }));
 
 describe('MaxInputFileProject', () => {
@@ -53,16 +51,28 @@ describe('MaxInputFileProject', () => {
         expect(wrapper.vm.temp_files.length).toBe(2);
     });
 
-    it('covers onClick com route e action', () => {
-        const wrapper = mount(MaxInputFileProject, {
-            props: { files: [] },
-            global: { stubs: ['MaxIconButton', 'MaxIcon', 'MaxLoaderIcon', 'MaxButton'] }
-        });
-        wrapper.vm.onClick({}, { route: 'home', params: { a: 1 } });
-        expect(goToRoute).toHaveBeenCalledWith('home', { a: 1 });
-
+    it('renderiza um MaxButton acionável para cada botão configurado', async () => {
         const actionMock = vi.fn();
-        wrapper.vm.onClick({}, { action: actionMock, data: { b: 2 } });
+        const wrapper = mount(MaxInputFileProject, {
+            props: { files: [], buttons: [{ action: actionMock, data: { b: 2 } }] },
+            global: {
+                stubs: {
+                    MaxIconButton: true,
+                    MaxIcon: true,
+                    MaxLoaderIcon: true,
+                    MaxButton: {
+                        name: 'MaxButton',
+                        props: ['action', 'data'],
+                        template: '<button class="max-button-stub" @click="action({ event: {}, data })">btn</button>'
+                    }
+                }
+            }
+        });
+
+        const button = wrapper.find('.max-button-stub');
+        expect(button.exists()).toBe(true);
+
+        await button.trigger('click');
         expect(actionMock).toHaveBeenCalled();
     });
 

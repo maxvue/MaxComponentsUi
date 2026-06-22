@@ -8,7 +8,7 @@ vi.mock('@maxvue/max-use', async (importOriginal) => {
     const actual = await importOriginal() as any;
     return {
         ...actual,
-        getCachedApi: vi.fn(() => Promise.resolve([{ label: 'Test', value: '1' }]))
+        getCachedApiIDB: vi.fn(() => Promise.resolve([{ label: 'Test', value: '1' }]))
     };
 });
 
@@ -50,7 +50,7 @@ describe('MaxInputAutoCompleteApi.vue', () => {
         const wrapper = mountAutoCompleteApi({ data: { category: 1 } });
         await wrapper.vm.$nextTick();
 
-        expect(maxUse.getCachedApi).toHaveBeenCalledWith('/api/test', { category: 1, input_value: '' });
+        expect(maxUse.getCachedApiIDB).toHaveBeenCalledWith('/api/test', { category: 1, input_value: '' });
 
         // resolve promise
         await new Promise((resolve) => setTimeout(resolve, 0));
@@ -60,7 +60,7 @@ describe('MaxInputAutoCompleteApi.vue', () => {
     it('não busca dados da API se data for em branco e não mudar', async () => {
         const wrapper = mountAutoCompleteApi({ data: null });
         await wrapper.vm.$nextTick();
-        expect(maxUse.getCachedApi).not.toHaveBeenCalled();
+        expect(maxUse.getCachedApiIDB).not.toHaveBeenCalled();
     });
 
     it('atualiza o valor quando modificado via props (não sobrescreve list)', async () => {

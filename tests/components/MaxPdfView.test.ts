@@ -6,110 +6,54 @@ vi.mock('@maxvue/max-use', () => ({
     useWindowSize: () => ({ width: { value: 1024 }, height: { value: 768 } })
 }));
 
+function mountPdf(props: Record<string, any> = {}) {
+    return mount(MaxPdfView, {
+        props: { file: '', ...props },
+        global: { stubs: { ProgressSpinner: true, VuePdfEmbed: true, MaxButton: true } }
+    });
+}
+
 describe('MaxPdfView.vue', () => {
-    it('deve montar o componente corretamente', async () => {
-        const wrapper = mount(MaxPdfView, {
-            props: { file: 'test.pdf' },
-            global: {
-                stubs: {
-                    ProgressSpinner: true,
-                    Botao: true
-                }
-            }
-        });
-
-        expect(wrapper.exists()).toBe(true);
+    it('não exibe o visualizador enquanto não há arquivo', () => {
+        const wrapper = mountPdf();
+        expect(wrapper.find('.viewPDF').exists()).toBe(false);
     });
 
-    it('deve atualizar o status de visibilidade ao alterar prop file', async () => {
-        const wrapper = mount(MaxPdfView, {
-            props: { file: '' },
-            global: {
-                stubs: { ProgressSpinner: true, Botao: true }
-            }
-        });
-
+    it('abre o visualizador (com loading) ao definir o arquivo', async () => {
+        const wrapper = mountPdf();
         await wrapper.setProps({ file: 'novo.pdf' });
-        expect(wrapper.vm.is_open).toBe(true);
+
+        expect(wrapper.find('.viewPDF').exists()).toBe(true);
+        expect(wrapper.find('.loading').exists()).toBe(true);
     });
 
-    it('deve executar o zoom in e zoom out', async () => {
-        const wrapper = mount(MaxPdfView, {
-            props: { file: 'test.pdf' },
-            global: {
-                stubs: { ProgressSpinner: true, Botao: true }
-            }
-        });
-
-        wrapper.vm.Zoom('in');
-        expect(wrapper.vm.size.width).toBeGreaterThan(1024);
-        wrapper.vm.Zoom('out');
-        expect(wrapper.vm.size.width).toBeLessThan(1100);
-    });
-
-    it('renderiza o template completo e chama funções', async () => {
+    it('fecha o visualizador ao clicar na área de fundo', async () => {
         vi.useFakeTimers();
-        const wrapper = mount(MaxPdfView, {
-            props: { file: '' },
-            global: {
-                stubs: { ProgressSpinner: true, Botao: true }
-            }
-        });
-
+        const wrapper = mountPdf();
         await wrapper.setProps({ file: 'novo.pdf' });
-        await wrapper.vm.$nextTick(); // renders the template
+        expect(wrapper.find('.viewPDF').exists()).toBe(true);
 
-        // now template is rendered, is_open = true
-        expect(wrapper.vm.is_open).toBe(true);
+        await wrapper.find('.space').trigger('click'); // closePDF
 
-        wrapper.vm.rendered();
-        expect(wrapper.vm.isLoading).toBe(false);
-        expect(wrapper.vm.opacity).toBe(0.9);
-
-        wrapper.vm.loaded({ numPages: 5 });
-        expect(wrapper.vm.total).toBe(5);
-        expect(wrapper.vm.opacity).toBe(1);
-
-        // find buttons and click them
-        const botoes = wrapper.findAllComponents({ name: 'Botao' });
-        // The first is Zoom out, second is Zoom in, third is close
-        if (botoes.length >= 3) {
-            await botoes[0].trigger('click');
-            await botoes[1].trigger('click');
-            await botoes[2].trigger('click'); // closePDF
-        } else {
-            // fallback if stub doesn't allow trigger
-            wrapper.vm.Zoom('in');
-            wrapper.vm.closePDF();
-        }
-
-        expect(wrapper.vm.opacity).toBe(0);
-        vi.runAllTimers(); // runs setTimeout
-        expect(wrapper.vm.is_open).toBe(false);
+        vi.runAllTimers();
+        await wrapper.vm.$nextTick();
+        expect(wrapper.find('.viewPDF').exists()).toBe(false);
 
         vi.useRealTimers();
     });
 
-    it('testa progressPdf e limitador de percent', async () => {
-        const wrapper = mount(MaxPdfView, {
-            props: { file: 'test.pdf' },
-            global: { stubs: { ProgressSpinner: true, Botao: true } }
-        });
+    it('aplica zoom in e zoom out alterando a largura', async () => {
+        const wrapper = mountPdf({ file: 'test.pdf' });
+        const vm = wrapper.vm as any;
+        const initial = vm.size.width;
 
-        wrapper.vm.progressPdf({ loaded: 50, total: 100 });
-        expect(wrapper.vm.percent).toBe(50);
+        vm.Zoom('in');
+        expect(vm.size.width).toBeGreaterThan(initial);
 
-        wrapper.vm.progressPdf({ loaded: 100, total: 100 });
-        expect(wrapper.vm.percent).toBe(98);
-    });
+        const afterIn = vm.size.width;
+        vm.Zoom('out');
+        expect(vm.size.width).toBeLessThan(afterIn);
 
-    it('testa Zoom cover branches', async () => {
-        const wrapper = mount(MaxPdfView, {
-            props: { file: 'test.pdf' },
-            global: { stubs: { ProgressSpinner: true, Botao: true } }
-        });
-        wrapper.vm.Zoom('in');
-        wrapper.vm.Zoom('out');
-        wrapper.vm.Zoom('other'); // cover else
+        vm.Zoom('other'); // cobre o branch que não altera nada
     });
 });

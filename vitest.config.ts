@@ -20,7 +20,7 @@ export default defineConfig({
         setupFiles: ['./tests/setup.ts'],
         include: ['tests/**/*.test.ts'],
         pool: 'forks',
-        poolOptions: { forks: { singleFork: true } },
+        singleFork: true,
         coverage: {
             provider: 'v8',
             reporter: ['text', 'html'],
@@ -31,8 +31,7 @@ export default defineConfig({
                 'src/themes/**',
                 'src/locales/**',
                 'src/prime/**',
-                'src/scripts/**',
-                'src/check-*.cjs'
+                'src/scripts/**'
             ]
         }
     }

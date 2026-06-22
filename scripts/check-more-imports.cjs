@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const srcDir = path.join(__dirname);
+const srcDir = path.join(__dirname, '..', 'src');
 let totalModified = 0;
 
 function walk(dir) {

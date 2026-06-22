@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const componentsDir = path.join(__dirname, 'components');
+const componentsDir = path.join(__dirname, '..', 'src', 'components');
 const primeVueComponents = new Set([
   'AutoComplete', 'CascadeSelect', 'Checkbox', 'CheckboxGroup', 'ColorPicker', 'DatePicker', 'InputOtp', 'Knob', 'Listbox', 'MultiSelect', 'Password', 'Rating', 'Select', 'SelectButton', 'Slider', 'Textarea', 'ToggleButton', 'ToggleSwitch', 'TreeSelect', 'SpeedDial', 'SplitButton', 'DataTable', 'Column', 'ColumnGroup', 'Row', 'DataView', 'OrderList', 'OrganizationChart', 'Paginator', 'PickList', 'Timeline', 'Tree', 'TreeTable', 'VirtualScroller', 'Accordion', 'AccordionPanel', 'AccordionHeader', 'AccordionContent', 'Card', 'Divider', 'Fieldset', 'Panel', 'ScrollPanel', 'Splitter', 'SplitterPanel', 'Stepper', 'StepList', 'StepPanels', 'StepItem', 'Step', 'StepPanel', 'Tabs', 'TabList', 'Tab', 'TabPanels', 'TabPanel', 'Toolbar', 'ConfirmDialog', 'ConfirmPopup', 'Dialog', 'Drawer', 'DynamicDialog', 'Popover', 'Breadcrumb', 'ContextMenu', 'Dock', 'Menu', 'Menubar', 'MegaMenu', 'PanelMenu', 'TieredMenu', 'Badge', 'Message', 'Carousel', 'Galleria', 'Image', 'ImageCompare', 'Avatar', 'AvatarGroup', 'OverlayBadge', 'BlockUI', 'Chip', 'MeterGroup', 'ProgressBar', 'ProgressSpinner', 'ScrollTop', 'Skeleton', 'Tag', 'Terminal', 'Chips', 'InputText', 'InputNumber', 'Button', 'InputGroup', 'InputGroupAddon', 'Tooltip', 'FloatLabel', 'IconField', 'InputIcon', 'FileUpload'
 ]);

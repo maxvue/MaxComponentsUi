@@ -48,6 +48,23 @@ globalThis.fetch = vi.fn(() =>
     } as Response)
 );
 
+// Mock mínimo do indexedDB para componentes que usam cache via IDB (getCachedApiIDB)
+if (typeof globalThis.indexedDB === 'undefined') {
+    const request: any = {
+        result: null,
+        onsuccess: null,
+        onerror: null,
+        onupgradeneeded: null
+    };
+    Object.defineProperty(globalThis, 'indexedDB', {
+        configurable: true,
+        value: {
+            open: vi.fn(() => request),
+            deleteDatabase: vi.fn(() => request)
+        }
+    });
+}
+
 // Mock do módulo virtual:uno.css (importado no index.ts)
 vi.mock('virtual:uno.css', () => ({}));
 
