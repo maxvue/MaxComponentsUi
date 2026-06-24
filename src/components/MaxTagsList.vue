@@ -32,7 +32,7 @@
 
     const emit = defineEmits<{ change: [value: any[]] }>();
 
-    const add_tag: Ref = ref(null);
+    const add_tag = ref<any>(null);
 
     const items_array = computed(() =>{
         const values = Array.isArray(model.value) ? model.value : Object.values(model.value);
@@ -49,7 +49,7 @@
     defineExpose({ count });
 
 
-    watchTrue(add_tag, () => {
+    watchTrue(() => add_tag.value, () => {
         const data: any = options_array.value.find((opt: any) => opt.value === add_tag.value?.value || opt.value === add_tag.value) ?? null;
         if (data && !items_array.value.some((item: any) => item.value === data.value)) {
             const new_value = [...items_array.value, data];
