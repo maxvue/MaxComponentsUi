@@ -52,13 +52,13 @@
     const temp_value = ref(props.modelValue);
 
 
-    const computedLines = computed(() => temp_value.value.split(/\r\n|\r|\n/).length);
+    const computedLines = computed(() => (temp_value.value ?? '').split(/\r\n|\r|\n/).length);
 
     const lines = computed(() => props.rows ?? (computedLines.value > (props.minLines ?? props.minRows) ? computedLines.value : (props.minLines ?? props.minRows)));
 
     watch( temp_value, () => emit('update:modelValue', temp_value.value),{ immediate: true });
 
-    watch(() => props.modelValue, (val) => temp_value.value = val);
+    watch(() => props.modelValue, (val) => temp_value.value = val ?? '');
 </script>
 
 <style lang="scss">

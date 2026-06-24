@@ -24,6 +24,11 @@ export { default as MaxIconConfirm } from './components/MaxIconConfirm.vue';
 // Titles && Strings
 export { default as MaxTitle1 } from './components/MaxTitle1.vue';
 export { default as MaxTitle2 } from './components/MaxTitle2.vue';
+
+// Auth
+export { default as MaxAuthCard } from './components/MaxAuthCard.vue';
+export { default as AuthCard } from './components/MaxAuthCard.vue';
+
 export * from './stores';
 
 

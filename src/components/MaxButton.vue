@@ -4,7 +4,7 @@
             <slot></slot>
         </template>
         <template #icon>
-            <MaxIcon v-if="props.icon ?? props.i" :icon="props.icon ?? props.i" :size="props.size ?? props.sizeIcon ?? props.iconSize ?? '1'" class="content-button-icon" :dark="props.dark" :light="light" />
+            <MaxIcon v-if="props.icon ?? props.i" :icon="props.icon ?? props.i" :size="props.size ?? props.sizeIcon ?? props.iconSize ?? '1'" class="content-button-icon" :dark="props.dark" :light="light" :color="iconColor" />
         </template>
         <template #loadingicon>
             <MaxIcon  icon="loading" :size="props.size ?? props.sizeIcon ?? props.iconSize ?? '1'" class="content-button-icon" flex />
@@ -25,7 +25,9 @@
 
     const props = withDefaults(defineProps<MaxButtonsType>(), { iconSize: 1.4, dark: undefined, route: null, params: {}, data: {}, query: {}, uppercase: false });
 
-    const light = computed(() => props.dark ? undefined : 0.7);
+    const isTransparentVariant = computed(() => props.variant === 'outlined' || props.variant === 'text' || props.variant === 'link');
+    const light = computed(() => props.dark || isTransparentVariant.value ? undefined : 0.7);
+    const iconColor = computed(() => isTransparentVariant.value ? 'currentColor' : undefined);
 
     const iconPos = computed<'left' | 'right'>(() => {
         if (props.iconRight) return 'right';
@@ -59,6 +61,25 @@
         /* min-width: 15px; */
 
         /* min-height: 15px; */
+    }
+
+    .p-button-outlined,
+    .p-button-text,
+    .p-button-link,
+    [data-p~="outlined"],
+    [data-p~="text"],
+    [data-p~="link"] {
+        .content-button-icon {
+            .max-icon-div,
+            .max-icon {
+                color: inherit !important;
+            }
+
+            svg {
+                fill: currentColor !important;
+                color: inherit !important;
+            }
+        }
     }
 
 </style>
