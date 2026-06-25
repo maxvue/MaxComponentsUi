@@ -73,6 +73,7 @@ export { default as MaxSelectTag } from './components/MaxTagSelect.vue';
 export { default as MaxInputSwitch } from './components/MaxInputSwitch.vue';
 export { default as MaxInputTextArea } from './components/MaxInputTextArea.vue';
 export { default as MaxInputTextList } from './components/MaxInputTextList.vue';
+export { default as MaxInputMarkdown } from './components/MaxInputMarkdown.vue';
 export { default as MaxInputToggle } from './components/MaxInputToggle.vue';
 export { default as MaxInputTypeAddress } from './components/MaxInputTypeAddress.vue';
 export { default as MaxGridCols } from './components/MaxGridCols.vue';
