@@ -256,11 +256,9 @@
     };
 
     const applyLink = () => {
-        if (!linkUrl.value) {
-            props.editor?.chain().focus().unsetLink().run();
-        } else {
-            props.editor?.chain().focus().setLink({ href: linkUrl.value, target: '_blank' }).run();
-        }
+        if (!linkUrl.value) props.editor?.chain().focus().unsetLink().run();
+        else props.editor?.chain().focus().setLink({ href: linkUrl.value, target: '_blank' }).run();
+
         showLinkPopover.value = false;
         linkUrl.value = '';
     };
@@ -279,9 +277,8 @@
     };
 
     const applyImage = () => {
-        if (imageUrl.value) {
-            props.editor?.chain().focus().setImage({ src: imageUrl.value }).run();
-        }
+        if (imageUrl.value) props.editor?.chain().focus().setImage({ src: imageUrl.value }).run();
+
         showImagePopover.value = false;
         imageUrl.value = '';
     };
@@ -360,7 +357,7 @@
         align-items: center;
         gap: 6px;
         padding: 8px;
-        background: var(--background-0, #ffffff);
+        background: var(--background-0, #fff);
         border: 1px solid var(--background-200, rgb(0 0 0 / 10%));
         border-radius: 6px;
         box-shadow: 0 4px 12px rgb(0 0 0 / 12%);
@@ -373,7 +370,7 @@
             border-radius: 4px;
             font-size: 13px;
             outline: none;
-            background: var(--background-0, #ffffff);
+            background: var(--background-0, #fff);
             color: inherit;
 
             &:focus {
@@ -394,7 +391,7 @@
             &--primary {
                 background: var(--max-primary-500, #3b82f6);
                 border-color: var(--max-primary-500, #3b82f6);
-                color: #ffffff;
+                color: #fff;
             }
         }
     }

@@ -121,7 +121,7 @@
             providers: () => [],
             loading: false,
             error: '',
-            showRemember: true,
+            showRemember: true
         }
     );
 
@@ -142,7 +142,7 @@
         submit: 'Entrar',
         socialDivider: 'ou acesse com',
         registerPrompt: 'Não tem uma conta?',
-        register: 'Cadastre-se',
+        register: 'Cadastre-se'
     };
 
     const t = computed<Required<AuthLabels>>(() => ({ ...defaults, ...(props.labels ?? {}) }));
@@ -183,7 +183,7 @@
             color: var(--background-600);
             user-select: none;
 
-            input[type="checkbox"] {
+            input[type='checkbox'] {
                 width: 16px;
                 height: 16px;
                 accent-color: var(--background-650);

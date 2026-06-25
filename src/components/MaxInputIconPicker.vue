@@ -125,7 +125,7 @@
         // Outros
         'mdi:gift', 'mdi:charity', 'mdi:recycle', 'mdi:star', 'mdi:flag',
         'mdi:earth', 'mdi:weather-sunny', 'mdi:umbrella', 'mdi:baby-carriage',
-        'mdi:flower', 'mdi:leaf', 'mdi:tree', 'mdi:bottle-wine', 'mdi:barley',
+        'mdi:flower', 'mdi:leaf', 'mdi:tree', 'mdi:bottle-wine', 'mdi:barley'
     ];
 
     const attrs: any = useAttrs();
@@ -164,7 +164,7 @@
             required: false,
             caution: undefined,
             disabled: false,
-            error: undefined,
+            error: undefined
         }
     );
 
@@ -198,9 +198,8 @@
 
     const toRows = (icons: string[]): string[][] => {
         const result: string[][] = [];
-        for (let i = 0; i < icons.length; i += COLS) {
-            result.push(icons.slice(i, i + COLS));
-        }
+        for (let i = 0; i < icons.length; i += COLS) result.push(icons.slice(i, i + COLS));
+
         return result;
     };
 

@@ -1,5 +1,5 @@
 <template>
-    <InputBase v-bind="inputBaseProps" class="max-input-markdown">
+    <div class="max-input-mark-down">
         <div
             class="max-input-markdown__editor-wrap"
             :class="{ 'max-input-markdown__editor-wrap--disabled': props.disabled }"
@@ -12,7 +12,7 @@
                 :editor="editor"
             />
         </div>
-    </InputBase>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -131,6 +131,9 @@
 
 <style lang="scss">
     .max-input-markdown {
+        border: 1px solid red !important;
+        outline: 1px solid blue !important;
+
         .max-input-markdown__editor-wrap {
             width: 100%;
             border-radius: inherit;

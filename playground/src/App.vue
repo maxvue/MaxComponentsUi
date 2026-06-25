@@ -47,9 +47,9 @@
                             <MaxInputIconPicker v-model="iconValue" label="Obrigatório" required s33 />
                             <MaxInputIconPicker v-model="iconValue" label="Desabilitado" disabled s33 />
                             <div s66 style="display:flex;align-items:center;gap:8px;padding-top:8px;">
-                                <span style="font-size:0.85rem;color:#888">Selecionado:</span>
+                                <span style="font-size:0.85rem;color:#888;">Selecionado:</span>
                                 <MaxIcon v-if="iconValue" :i="iconValue" size="1.4" />
-                                <code style="font-size:0.8rem">{{ iconValue || '—' }}</code>
+                                <code style="font-size:0.8rem;">{{ iconValue || '—' }}</code>
                             </div>
                         </MaxGrid>
                     </div>

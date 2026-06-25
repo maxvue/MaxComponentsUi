@@ -14,7 +14,7 @@ vi.mock('@tiptap/vue-3', () => {
         destroy: vi.fn(),
         getAttributes: vi.fn(() => ({})),
         on: vi.fn(),
-        off: vi.fn(),
+        off: vi.fn()
     };
 
     return {
@@ -22,13 +22,13 @@ vi.mock('@tiptap/vue-3', () => {
         EditorContent: {
             name: 'EditorContent',
             template: '<div class="editor-content-stub"></div>',
-            props: ['editor'],
-        },
+            props: ['editor']
+        }
     };
 });
 
 vi.mock('tiptap-markdown', () => ({
-    Markdown: { configure: vi.fn(() => ({})) },
+    Markdown: { configure: vi.fn(() => ({})) }
 }));
 
 vi.mock('@tiptap/starter-kit', () => ({ default: {} }));
@@ -48,14 +48,14 @@ function mountMarkdown(props: Record<string, any> = {}) {
                 MaxInputMarkdownToolbar: {
                     name: 'MaxInputMarkdownToolbar',
                     template: '<div class="toolbar-stub"></div>',
-                    props: ['editor'],
+                    props: ['editor']
                 },
                 MaxIcon: {
                     template: '<span class="max-icon-stub"></span>',
-                    props: ['icon', 'size'],
-                },
-            },
-        },
+                    props: ['icon', 'size']
+                }
+            }
+        }
     });
 }
 

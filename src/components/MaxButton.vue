@@ -66,9 +66,9 @@
     .p-button-outlined,
     .p-button-text,
     .p-button-link,
-    [data-p~="outlined"],
-    [data-p~="text"],
-    [data-p~="link"] {
+    [data-p~='outlined'],
+    [data-p~='text'],
+    [data-p~='link'] {
         .content-button-icon {
             .max-icon-div,
             .max-icon {
@@ -76,7 +76,7 @@
             }
 
             svg {
-                fill: currentColor !important;
+                fill: currentcolor !important;
                 color: inherit !important;
             }
         }
