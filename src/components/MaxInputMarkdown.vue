@@ -1,5 +1,5 @@
 <template>
-    <InputBase v-bind="inputBaseProps" class="max-input-markdown" :inLine="!!props.label">
+    <InputBase v-bind="inputBaseProps" class="max-input-markdown">
         <div
             class="max-input-markdown__editor-wrap"
             :class="{ 'max-input-markdown__editor-wrap--disabled': props.disabled }"
@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-    import { computed, onBeforeUnmount, watch } from 'vue';
+    import { computed, onBeforeUnmount, onMounted, watch } from 'vue';
     import { useEditor, EditorContent } from '@tiptap/vue-3';
     import StarterKit from '@tiptap/starter-kit';
     import Underline from '@tiptap/extension-underline';
@@ -77,7 +77,7 @@
     }));
 
     const editor = useEditor({
-        content: props.modelValue,
+        content: '',
         editable: !props.disabled,
         extensions: [
             StarterKit,
@@ -104,6 +104,10 @@
         onUpdate: ({ editor: e }) => {
             emit('update:modelValue', (e.storage as Record<string, any>).markdown.getMarkdown());
         }
+    });
+
+    onMounted(() => {
+        if (props.modelValue) editor.value?.commands.setContent(props.modelValue);
     });
 
     const closePopovers = () => {};
