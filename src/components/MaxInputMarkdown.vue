@@ -27,7 +27,6 @@
     import TableHeader from '@tiptap/extension-table-header';
     import TableCell from '@tiptap/extension-table-cell';
     import { Markdown } from 'tiptap-markdown';
-    import InputBase from './InputBase.vue';
     import MaxInputMarkdownToolbar from './MaxInputMarkdownToolbar.vue';
 
     const props = withDefaults(
