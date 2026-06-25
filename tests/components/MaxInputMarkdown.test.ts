@@ -94,6 +94,6 @@ describe('MaxInputMarkdown', () => {
 
     it('passa label para InputBase via inLine', () => {
         const wrapper = mountMarkdown({ label: 'Descrição' });
-        expect(wrapper.exists()).toBe(true);
+        expect(wrapper.find('.in-line-label').text()).toBe('Descrição');
     });
 });
