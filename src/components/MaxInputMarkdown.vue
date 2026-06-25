@@ -22,7 +22,7 @@
     import Underline from '@tiptap/extension-underline';
     import Link from '@tiptap/extension-link';
     import Image from '@tiptap/extension-image';
-    import Table from '@tiptap/extension-table';
+    import { Table } from '@tiptap/extension-table';
     import TableRow from '@tiptap/extension-table-row';
     import TableHeader from '@tiptap/extension-table-header';
     import TableCell from '@tiptap/extension-table-cell';
@@ -53,7 +53,7 @@
             modelValue: '',
             disabled: false,
             minHeight: '200px',
-            maxHeight: '500px',
+            maxHeight: '500px'
         }
     );
 
@@ -73,7 +73,7 @@
         done: props.done,
         error: props.error,
         caution: props.caution,
-        required: props.required,
+        required: props.required
     }));
 
     const editor = useEditor({
@@ -92,18 +92,18 @@
                 html: false,
                 tightLists: true,
                 bulletListMarker: '-',
-                transformPastedText: true,
-            }),
+                transformPastedText: true
+            })
         ],
         editorProps: {
             attributes: {
                 class: 'max-input-markdown__prosemirror',
-                ...(props.placeholder ? { 'data-placeholder': props.placeholder } : {}),
-            },
+                ...(props.placeholder ? { 'data-placeholder': props.placeholder } : {})
+            }
         },
         onUpdate: ({ editor: e }) => {
-            emit('update:modelValue', e.storage.markdown.getMarkdown());
-        },
+            emit('update:modelValue', (e.storage as Record<string, any>).markdown.getMarkdown());
+        }
     });
 
     const closePopovers = () => {};
@@ -112,7 +112,7 @@
         () => props.modelValue,
         (val) => {
             if (!editor.value) return;
-            const current = editor.value.storage.markdown.getMarkdown();
+            const current = (editor.value.storage as Record<string, any>).markdown.getMarkdown();
             if (val !== current) editor.value.commands.setContent(val ?? '');
         }
     );
@@ -157,7 +157,7 @@
             }
 
             // Placeholder
-            &:before {
+            &::before {
                 content: attr(data-placeholder);
                 color: var(--background-400, #9ca3af);
                 pointer-events: none;
@@ -165,7 +165,7 @@
                 display: none;
             }
 
-            &.is-empty:before {
+            &.is-empty::before {
                 display: block;
             }
 
