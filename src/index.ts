@@ -44,6 +44,9 @@ export { default as InputPhone } from './components/MaxPhoneField.vue';
 
 // Inputs
 export { default as MaxColorPicker } from './components/MaxColorPicker.vue';
+export { default as MaxInputIconPicker } from './components/MaxInputIconPicker.vue';
+export { default as InputIconPicker } from './components/MaxInputIconPicker.vue';
+export { default as IconPicker } from './components/MaxInputIconPicker.vue';
 export { default as MaxInputAutoComplete } from './components/MaxInputAutoComplete.vue';
 export { default as MaxInputAutoCompleteApi } from './components/MaxInputAutoCompleteApi.vue';
 export { default as MaxInputCep } from './components/MaxInputCep.vue';
@@ -69,6 +72,7 @@ export { default as MaxInputSelectTag } from './components/MaxTagSelect.vue';
 export { default as MaxSelectTag } from './components/MaxTagSelect.vue';
 export { default as MaxInputSwitch } from './components/MaxInputSwitch.vue';
 export { default as MaxInputTextArea } from './components/MaxInputTextArea.vue';
+export { default as MaxInputTextList } from './components/MaxInputTextList.vue';
 export { default as MaxInputToggle } from './components/MaxInputToggle.vue';
 export { default as MaxInputTypeAddress } from './components/MaxInputTypeAddress.vue';
 export { default as MaxGridCols } from './components/MaxGridCols.vue';

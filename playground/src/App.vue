@@ -39,6 +39,19 @@
                             <MaxInputSelect v-model="selectValue" :options="optionsWithIcons" s40 label="Select com ícones" icon="humbleicons:box" />
                             <div s60></div>
                         </MaxGrid>
+
+                        <h3>Icon Picker</h3>
+                        <MaxGrid>
+                            <MaxInputIconPicker v-model="iconValue" label="Ícone da categoria" s33 />
+                            <MaxInputIconPicker v-model="iconValue" label="Com cor" color="#6366f1" s33 />
+                            <MaxInputIconPicker v-model="iconValue" label="Obrigatório" required s33 />
+                            <MaxInputIconPicker v-model="iconValue" label="Desabilitado" disabled s33 />
+                            <div s66 style="display:flex;align-items:center;gap:8px;padding-top:8px;">
+                                <span style="font-size:0.85rem;color:#888">Selecionado:</span>
+                                <MaxIcon v-if="iconValue" :i="iconValue" size="1.4" />
+                                <code style="font-size:0.8rem">{{ iconValue || '—' }}</code>
+                            </div>
+                        </MaxGrid>
                     </div>
                 </div>
             </section>
@@ -117,6 +130,8 @@
     import { ref } from 'vue';
 
     const lastClickEvent = ref<string>('');
+
+    const iconValue = ref('');
 
     const value = ref({
         a: '',

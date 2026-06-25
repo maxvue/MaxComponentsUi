@@ -1,5 +1,5 @@
 <template>
-    <Button v-bind="props as PrimeButtonProps" :iconPos="iconPos" uppercase @click="props.action?.({event: $event, data: data}) ?? onClick" v-if="props.label" >
+    <Button v-bind="props as PrimeButtonProps" :iconPos="iconPos" uppercase @click="onClick" v-if="props.label" >
         <template #default>
             <slot></slot>
         </template>
