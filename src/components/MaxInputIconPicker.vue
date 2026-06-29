@@ -33,8 +33,12 @@
             <MaxIcon i="svg-spinners:ring-resize" size="2" :dark="0.4" />
         </div>
 
-        <div v-else-if="rows.length === 0 && search.length >= 2" class="picker-state-area">
+        <div v-else-if="flatIcons.length === 0 && search.length >= 2" class="picker-state-area">
             Nenhum ícone encontrado para "{{ search }}"
+        </div>
+
+        <div v-else-if="flatIcons.length === 0 && !isLoading" class="picker-state-area">
+            <MaxIcon i="svg-spinners:ring-resize" size="2" :dark="0.4" />
         </div>
 
         <VirtualScroller
@@ -43,19 +47,25 @@
             :itemSize="40"
             :style="{ height: 'calc(90dvh - 140px)' }"
             class="icon-virtual-list"
+            @scroll="onScrollerScroll"
         >
-            <template #item="{ item }">
-                <div class="icon-row">
+            <template #item="{ item, options }">
+                <div class="icon-row" :data-row-index="options.index">
                     <div
-                        v-for="icon in (item as string[])"
-                        :key="icon"
+                        v-for="icon in (item as IconEntry[])"
+                        :key="icon.name"
                         class="icon-cell"
-                        :class="{ selected: modelValue === icon }"
-                        @click.stop="selectIcon(icon)"
-                        v-tooltip="icon"
+                        :class="{ selected: modelValue === icon.name }"
+                        @click.stop="selectIcon(icon.name)"
+                        v-tooltip="icon.name"
                         pointer
                     >
-                        <MaxIcon :i="icon" size="1.5" />
+                        <div
+                            v-if="svgCache[icon.name]"
+                            class="picker-icon-svg"
+                            v-html="svgCache[icon.name]"
+                        />
+                        <div v-else class="picker-icon-placeholder" />
                     </div>
                 </div>
             </template>
@@ -65,7 +75,7 @@
 
 <script setup lang="ts">
     import { hasContent, watchDebounced } from '@maxvue/max-use';
-    import { ref, computed, watch, useAttrs } from 'vue';
+    import { ref, computed, watch, useAttrs, nextTick } from 'vue';
     import type { Ref } from 'vue';
     import InputBase from './InputBase.vue';
     import MaxIcon from './MaxIcon.vue';
@@ -75,58 +85,11 @@
 
     const COLS = 8;
 
-    const POPULAR_ICONS: string[] = [
-        // Finanças
-        'mdi:cash', 'mdi:cash-multiple', 'mdi:credit-card', 'mdi:credit-card-outline',
-        'mdi:bank', 'mdi:bank-outline', 'mdi:wallet', 'mdi:wallet-outline',
-        'mdi:piggy-bank', 'mdi:piggy-bank-outline', 'mdi:currency-usd', 'mdi:currency-eur',
-        'mdi:currency-brl', 'mdi:chart-line', 'mdi:chart-bar', 'mdi:chart-pie',
-        'mdi:trending-up', 'mdi:trending-down', 'mdi:trending-neutral', 'mdi:receipt',
-        'mdi:receipt-text', 'mdi:calculator', 'mdi:tag', 'mdi:tag-outline',
-        'mdi:coins', 'mdi:safe', 'mdi:percent', 'mdi:ticket-percent',
-        'mdi:account-cash', 'mdi:cash-register', 'mdi:transfer', 'mdi:swap-horizontal',
-        // Casa & Moradia
-        'mdi:home', 'mdi:home-outline', 'mdi:sofa', 'mdi:bed', 'mdi:shower',
-        'mdi:fridge', 'mdi:television', 'mdi:lightbulb', 'mdi:water', 'mdi:fire',
-        'mdi:tools', 'mdi:broom', 'mdi:air-conditioner', 'mdi:washing-machine',
-        'mdi:apartment', 'mdi:office-building', 'mdi:garage', 'mdi:key',
-        // Alimentação
-        'mdi:food', 'mdi:food-fork-drink', 'mdi:food-apple', 'mdi:coffee',
-        'mdi:beer', 'mdi:pizza', 'mdi:hamburger', 'mdi:cake', 'mdi:ice-cream',
-        'mdi:silverware-fork-knife', 'mdi:cart', 'mdi:shopping', 'mdi:basket',
-        // Transporte
-        'mdi:car', 'mdi:car-outline', 'mdi:bus', 'mdi:train', 'mdi:airplane',
-        'mdi:bicycle', 'mdi:motorbike', 'mdi:taxi', 'mdi:ferry', 'mdi:subway',
-        'mdi:gas-station', 'mdi:parking', 'mdi:road-variant', 'mdi:map-marker',
-        // Saúde
-        'mdi:medical-bag', 'mdi:heart', 'mdi:heart-outline', 'mdi:pill',
-        'mdi:doctor', 'mdi:hospital', 'mdi:dumbbell', 'mdi:yoga', 'mdi:run',
-        'mdi:tooth', 'mdi:eye', 'mdi:stethoscope',
-        // Educação
-        'mdi:school', 'mdi:book', 'mdi:book-open', 'mdi:pen', 'mdi:pencil',
-        'mdi:backpack', 'mdi:graduation-cap', 'mdi:laptop', 'mdi:monitor',
-        // Lazer & Entretenimento
-        'mdi:movie', 'mdi:music', 'mdi:gamepad', 'mdi:headphones',
-        'mdi:guitar', 'mdi:soccer', 'mdi:basketball', 'mdi:tennis',
-        'mdi:swim', 'mdi:theater', 'mdi:ticket', 'mdi:music-note',
-        // Tecnologia
-        'mdi:phone', 'mdi:cellphone', 'mdi:wifi', 'mdi:cloud', 'mdi:email',
-        'mdi:printer', 'mdi:keyboard', 'mdi:mouse', 'mdi:server',
-        'mdi:shield', 'mdi:lock', 'mdi:magnify',
-        // Trabalho
-        'mdi:briefcase', 'mdi:clipboard-text', 'mdi:calendar', 'mdi:clock',
-        'mdi:account', 'mdi:account-group', 'mdi:handshake', 'mdi:presentation',
-        'mdi:chart-gantt', 'mdi:file-document',
-        // Vestuário
-        'mdi:tshirt-crew', 'mdi:shoe-heel', 'mdi:hanger', 'mdi:glasses',
-        'mdi:sunglasses', 'mdi:hat-fedora',
-        // Pets
-        'mdi:dog', 'mdi:cat', 'mdi:paw', 'mdi:bird', 'mdi:fish',
-        // Outros
-        'mdi:gift', 'mdi:charity', 'mdi:recycle', 'mdi:star', 'mdi:flag',
-        'mdi:earth', 'mdi:weather-sunny', 'mdi:umbrella', 'mdi:baby-carriage',
-        'mdi:flower', 'mdi:leaf', 'mdi:tree', 'mdi:bottle-wine', 'mdi:barley'
-    ];
+    interface IconEntry {
+        id: number;
+        name: string;
+        search: string;
+    }
 
     const attrs: any = useAttrs();
 
@@ -158,21 +121,34 @@
             required?: boolean;
             /** Texto de placeholder quando nenhum ícone está selecionado */
             placeholder?: string;
+            /** URL base para listar/buscar ícones curados */
+            listUrl?: string;
+            /** URL para buscar SVGs dos ícones curados via POST */
+            svgUrl?: string;
         }>(),
         {
             done: undefined,
             required: false,
             caution: undefined,
             disabled: false,
-            error: undefined
+            error: undefined,
+            listUrl: '/api/icons/picker',
+            svgUrl: '/api/icons/picker/svg',
         }
     );
 
     const visible = ref(false);
     const search = ref('');
-    const apiIcons = ref<string[]>([]);
+    const curatedIcons = ref<IconEntry[]>([]);
     const isLoading = ref(false);
     const isDone: Ref = ref(props.done ?? null);
+
+    /** Cache local de SVGs: name → svg string */
+    const svgCache = ref<Record<string, string>>({});
+
+    /** Fila de nomes aguardando fetch de SVG */
+    let svgFetchQueue: string[] = [];
+    let svgFetchTimer: ReturnType<typeof setTimeout> | null = null;
 
     const isRequiredDone = computed(() => (props.required ? hasContent(modelValue.value) : null));
 
@@ -196,46 +172,127 @@
         return attrs_error_message ?? 'Valor inválido';
     });
 
-    const toRows = (icons: string[]): string[][] => {
-        const result: string[][] = [];
-        for (let i = 0; i < icons.length; i += COLS) result.push(icons.slice(i, i + COLS));
+    const flatIcons = computed<IconEntry[]>(() => curatedIcons.value);
 
+    const toRows = (icons: IconEntry[]): IconEntry[][] => {
+        const result: IconEntry[][] = [];
+        for (let i = 0; i < icons.length; i += COLS) { result.push(icons.slice(i, i + COLS)); }
         return result;
     };
 
-    const rows = computed<string[][]>(() => {
-        if (search.value.length >= 2) return toRows(apiIcons.value);
-        return toRows(POPULAR_ICONS);
-    });
+    const rows = computed<IconEntry[][]>(() => toRows(flatIcons.value));
 
-    const openDrawer = () => {
-        if (props.disabled) return;
-        search.value = '';
-        apiIcons.value = [];
-        visible.value = true;
+    /**
+     * Enfileira nomes de ícones para fetch de SVG com debounce de 150ms.
+     * Respeita o limite de 200 por request.
+     */
+    const enqueueSvgFetch = (names: string[]) => {
+        const pending = names.filter(n => !svgCache.value[n] && !svgFetchQueue.includes(n));
+        if (pending.length === 0) { return; }
+        svgFetchQueue.push(...pending);
+
+        if (svgFetchTimer !== null) { clearTimeout(svgFetchTimer); }
+        svgFetchTimer = setTimeout(async () => {
+            const batch = svgFetchQueue.splice(0, 200);
+            svgFetchTimer = null;
+            if (batch.length === 0) { return; }
+
+            try {
+                const res = await fetch(props.svgUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({ names: batch }),
+                });
+                const data: Record<string, string> = await res.json();
+                svgCache.value = { ...svgCache.value, ...data };
+            } catch {
+                // Silencia erros de rede; ícones ficam sem SVG temporariamente
+            }
+
+            // Se ficaram itens na fila após o splice, reagenda
+            if (svgFetchQueue.length > 0) { enqueueSvgFetch([]); }
+        }, 150);
     };
 
-    const selectIcon = (icon: string) => {
-        modelValue.value = icon;
+    /**
+     * Ao scrollar o VirtualScroller, coleta os ícones visíveis e solicita os SVGs ausentes.
+     * O VirtualScroller renderiza apenas as linhas visíveis no DOM, então inspecionamos
+     * a lista completa estimando pelo scrollTop e height.
+     */
+    const onScrollerScroll = (event: Event) => {
+        const el = event.target as HTMLElement;
+        if (!el) { return; }
+        const scrollTop = el.scrollTop;
+        const clientHeight = el.clientHeight;
+        const itemSize = 40;
+
+        const firstRow = Math.floor(scrollTop / itemSize);
+        const visibleRows = Math.ceil(clientHeight / itemSize) + 2; // +2 buffer
+        const lastRow = firstRow + visibleRows;
+
+        const visibleIcons: string[] = [];
+        for (let r = firstRow; r <= lastRow && r < rows.value.length; r++) {
+            for (const icon of rows.value[r]) { visibleIcons.push(icon.name); }
+        }
+        enqueueSvgFetch(visibleIcons);
+    };
+
+    /**
+     * Pré-carrega SVGs das primeiras linhas visíveis ao montar a lista.
+     */
+    const preloadInitialSvgs = () => {
+        const initialRows = Math.ceil(600 / 40) + 2; // altura aprox visível / itemSize
+        const names: string[] = [];
+        for (let r = 0; r < initialRows && r < rows.value.length; r++) {
+            for (const icon of rows.value[r]) { names.push(icon.name); }
+        }
+        enqueueSvgFetch(names);
+    };
+
+    /**
+     * Busca a lista curada de ícones no backend.
+     */
+    const fetchCuratedIcons = async (query?: string) => {
+        isLoading.value = true;
+        try {
+            const url = query
+                ? `${props.listUrl}?q=${encodeURIComponent(query)}`
+                : props.listUrl;
+            const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+            const data: IconEntry[] = await res.json();
+            curatedIcons.value = Array.isArray(data) ? data : [];
+        } catch {
+            curatedIcons.value = [];
+        } finally {
+            isLoading.value = false;
+            await nextTick();
+            preloadInitialSvgs();
+        }
+    };
+
+    const openDrawer = () => {
+        if (props.disabled) { return; }
+        search.value = '';
+        curatedIcons.value = [];
+        svgCache.value = {};
+        svgFetchQueue = [];
+        if (svgFetchTimer !== null) { clearTimeout(svgFetchTimer); svgFetchTimer = null; }
+        visible.value = true;
+        fetchCuratedIcons();
+    };
+
+    const selectIcon = (iconName: string) => {
+        modelValue.value = iconName;
         isDone.value = testIsDone();
         visible.value = false;
     };
 
     watchDebounced(() => search.value, async (val: string) => {
         if (val.length < 2) {
-            apiIcons.value = [];
+            await fetchCuratedIcons();
             return;
         }
-        isLoading.value = true;
-        try {
-            const res = await fetch(`https://api.iconify.design/search?query=${encodeURIComponent(val)}&limit=120`);
-            const data = await res.json();
-            apiIcons.value = data.icons ?? [];
-        } catch {
-            apiIcons.value = [];
-        } finally {
-            isLoading.value = false;
-        }
+        await fetchCuratedIcons(val);
     }, { debounce: 400 });
 
     watch(modelValue, () => {
@@ -314,9 +371,31 @@
         &.selected {
             background-color: var(--max-primary-100);
 
-            .max-icon-div {
-                color: var(--max-primary-600) !important;
+            .picker-icon-svg {
+                color: var(--max-primary-600);
             }
+        }
+
+        .picker-icon-svg {
+            display: grid;
+            place-items: center;
+            width: 1.5rem;
+            height: 1.5rem;
+            color: rgb(0 0 0 / 50%);
+
+            svg {
+                min-width: 100% !important;
+                min-height: 100% !important;
+                max-width: 100% !important;
+                max-height: 100% !important;
+            }
+        }
+
+        .picker-icon-placeholder {
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 4px;
+            background-color: var(--background-100);
         }
     }
 }
