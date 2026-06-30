@@ -165,7 +165,7 @@
         .max-auth-card {
             width: 360px;
             max-width: 90vw;
-            background: var(--background-25);
+            background: var(--background-0);
             border: 1px solid var(--background-200);
             border-radius: 12px;
             padding: 2rem;
