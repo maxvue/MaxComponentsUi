@@ -6,7 +6,7 @@
             </slot>
 
             <MaxGrid mt-6 gap-4>
-                <MaxInputPhoneMail s100 v-if="identifier === 'email-phone'" :label="t.email" v-model="email" email @keyup.enter="onSubmit" />
+                <MaxInputPhoneMail s100 v-if="identifier === 'email-phone'" v-model="email" @keyup.enter="onSubmit" />
                 <MaxInputText s100 v-else :label="t.email" type="email" v-model="email" icon="mdi:email-outline" @keyup.enter="onSubmit" />
                 <MaxInputText s100 :label="t.password" type="password" v-model="password" icon="mdi:lock-outline" @keyup.enter="onSubmit" />
 
