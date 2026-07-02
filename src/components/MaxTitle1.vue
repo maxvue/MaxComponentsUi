@@ -1,6 +1,6 @@
 <template>
     <div class="max-title-2" :class="{ center: center }">
-        <MaxIcon :i="resolvedIcon" v-if="resolvedIcon" size="1.5" class="mb-2" pr-8 />
+        <MaxIcon :i="resolvedIcon" v-if="resolvedIcon" :size="resolvedIconSize" class="mb-2" pr-8 />
         <div>
             <div v-if="resolvedTitle" class="text-lg font-medium uppercase t1-main-text">{{ resolvedTitle }}</div>
             <div v-if="resolvedSubtitle" class="text-sm t2-main-text" v-html="resolvedSubtitle"></div>
@@ -20,11 +20,14 @@
         icon?: string;
         i?: string;
         icone?: string;
+        iconSize?: string | number;
+        sizeIcon?: string | number;
     }>();
 
     const resolvedTitle = computed(() => props.h1 ?? props.title);
     const resolvedSubtitle = computed(() => props.h2 ?? props.subtitle);
     const resolvedIcon = computed(() => props.icon ?? props.i ?? props.icone);
+    const resolvedIconSize = computed(() => props.sizeIcon ?? props.iconSize ?? 1.3);
 </script>
 
 <style lang="scss" scoped>

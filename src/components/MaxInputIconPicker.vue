@@ -133,7 +133,7 @@
             disabled: false,
             error: undefined,
             listUrl: '/api/icons/picker',
-            svgUrl: '/api/icons/picker/svg',
+            svgUrl: '/api/icons/picker/svg'
         }
     );
 
@@ -176,7 +176,7 @@
 
     const toRows = (icons: IconEntry[]): IconEntry[][] => {
         const result: IconEntry[][] = [];
-        for (let i = 0; i < icons.length; i += COLS) { result.push(icons.slice(i, i + COLS)); }
+        for (let i = 0; i < icons.length; i += COLS) result.push(icons.slice(i, i + COLS));
         return result;
     };
 
@@ -187,21 +187,21 @@
      * Respeita o limite de 200 por request.
      */
     const enqueueSvgFetch = (names: string[]) => {
-        const pending = names.filter(n => !svgCache.value[n] && !svgFetchQueue.includes(n));
-        if (pending.length === 0) { return; }
+        const pending = names.filter((n) => !svgCache.value[n] && !svgFetchQueue.includes(n));
+        if (pending.length === 0) return;
         svgFetchQueue.push(...pending);
 
-        if (svgFetchTimer !== null) { clearTimeout(svgFetchTimer); }
+        if (svgFetchTimer !== null) clearTimeout(svgFetchTimer);
         svgFetchTimer = setTimeout(async () => {
             const batch = svgFetchQueue.splice(0, 200);
             svgFetchTimer = null;
-            if (batch.length === 0) { return; }
+            if (batch.length === 0) return;
 
             try {
                 const res = await fetch(props.svgUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                    body: JSON.stringify({ names: batch }),
+                    body: JSON.stringify({ names: batch })
                 });
                 const data: Record<string, string> = await res.json();
                 svgCache.value = { ...svgCache.value, ...data };
@@ -210,7 +210,7 @@
             }
 
             // Se ficaram itens na fila após o splice, reagenda
-            if (svgFetchQueue.length > 0) { enqueueSvgFetch([]); }
+            if (svgFetchQueue.length > 0) enqueueSvgFetch([]);
         }, 150);
     };
 
@@ -221,7 +221,7 @@
      */
     const onScrollerScroll = (event: Event) => {
         const el = event.target as HTMLElement;
-        if (!el) { return; }
+        if (!el) return;
         const scrollTop = el.scrollTop;
         const clientHeight = el.clientHeight;
         const itemSize = 40;
@@ -231,9 +231,8 @@
         const lastRow = firstRow + visibleRows;
 
         const visibleIcons: string[] = [];
-        for (let r = firstRow; r <= lastRow && r < rows.value.length; r++) {
-            for (const icon of rows.value[r]) { visibleIcons.push(icon.name); }
-        }
+        for (let r = firstRow; r <= lastRow && r < rows.value.length; r++) for (const icon of rows.value[r]) visibleIcons.push(icon.name);
+
         enqueueSvgFetch(visibleIcons);
     };
 
@@ -243,9 +242,8 @@
     const preloadInitialSvgs = () => {
         const initialRows = Math.ceil(600 / 40) + 2; // altura aprox visível / itemSize
         const names: string[] = [];
-        for (let r = 0; r < initialRows && r < rows.value.length; r++) {
-            for (const icon of rows.value[r]) { names.push(icon.name); }
-        }
+        for (let r = 0; r < initialRows && r < rows.value.length; r++) for (const icon of rows.value[r]) names.push(icon.name);
+
         enqueueSvgFetch(names);
     };
 
@@ -271,7 +269,7 @@
     };
 
     const openDrawer = () => {
-        if (props.disabled) { return; }
+        if (props.disabled) return;
         search.value = '';
         curatedIcons.value = [];
         svgCache.value = {};

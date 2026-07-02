@@ -1,8 +1,15 @@
 <template>
-    <InputBase v-bind="props" :modelValue="(props.modelValue as any)" class="input-switch-main" :caution="caution" :done="isDone ?? undefined" :icon-right="icon ?? ''">
-        <div class="input-grid-switch">
-            <ToggleSwitch v-bind="attrs" v-model="temp_value" />
-            <div class="rotulo">{{ props.question }}</div>
+    <InputBase v-bind="props" class="max-switch">
+        <div class="max-switch-input">
+            <div class="max-switch-label-left" v-if="has_left_label" @click="() => changeValue(props.falseValue)">
+                {{ props.labelLeft ?? props.leftLabel ?? props.labelFalse ?? props.falseLabel ?? '' }}
+            </div>
+            <div class="max-switch-label-toggle" @click="() => changeValue()">
+                {{ temp_value }}
+            </div>
+            <div class="max-switch-label-right" v-if="has_right_label" @click="() => changeValue(props.falseValue)">
+                {{ props.labelRight ?? props.rightLabel ?? props.labelTrue ?? props.trueLabel ?? props.question ?? '' }}
+            </div>
         </div>
     </InputBase>
 </template>
@@ -15,16 +22,29 @@
 <script setup lang="ts">
     import { ref, computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
-    import ToggleSwitch from 'primevue/toggleswitch';
+    import { hasContent } from '@maxvue/max-use';
 
     const attrs = useAttrs();
 
     const props = withDefaults(
         defineProps<{
             /** Valor booleano do switch */
-            modelValue: boolean;
-            /** Pergunta ou rótulo exibido ao lado do switch */
+            modelValue: any;
+            /** Rótulo exibido ao lado esquerdo do Switch */
+            labelLeft?: string;
+            leftLabel?: string;
+            falseLabel?: string;
+            labelFalse?: string;
+            /** Rótulo exibido do lado direito do Switch */
+            labelRight?: string;
+            rightLabel?: string;
+            trueLabel?: string;
+            labelTrue?: string;
             question?: string;
+            /** Ícone opcional */
+            trueValue: any;
+            /** Ícone opcional */
+            falseValue: any;
             /** Ícone opcional */
             icon?: string | undefined;
             /** Alias para o ícone */
@@ -52,57 +72,37 @@
             /** Define se o campo é obrigatório */
             required?: boolean;
         }>(),
-        { modelValue: false, done: undefined, required: false, caution: undefined }
+        { modelValue: false, done: undefined, required: false, caution: undefined, trueValue: true, falseValue: false }
     );
 
     const emit = defineEmits(['update:modelValue']);
     const temp_value = ref(props.modelValue);
-    const isDone = ref(props.done ?? null);
 
-    const caution = computed(() => {
-        if (props.caution !== undefined) return props.caution;
-        return isDone.value === false;
-    });
+    const has_left_label = computed(() => hasContent(props.labelLeft ?? props.leftLabel ?? props.labelFalse ?? props.falseLabel));
+    const has_right_label = computed(() => hasContent(props.labelRight ?? props.rightLabel ?? props.labelTrue ?? props.trueLabel ?? props.question));
 
-    watch(
-        temp_value,
-        () => {
-            isDone.value = props.done ?? null;
+    const changeValue = (value: any = null) => {
+        if (value) {
+            temp_value.value = value;
             emit('update:modelValue', temp_value.value);
-        },
-        { immediate: true }
-    );
-
-    watch(
-        () => props.modelValue,
-        (val) => {
-            temp_value.value = val;
+            return;
         }
-    );
+
+        temp_value.value = temp_value.value === props.trueValue ? props.falseValue : props.trueValue;
+        emit('update:modelValue', temp_value.value);
+    };
+
+    watch(() => props.modelValue, () => temp_value.value = props.modelValue);
+
 </script>
 
 <style lang="scss">
-    .input-switch {
-        outline: none !important;
-    }
-
-    .input-grid-switch {
-        display: grid;
-        grid-template-columns: auto 1fr;
-        gap: 10px;
-        width: 100%;
-        height: 100%;
-        align-items: center;
-
-        .p-toggleswitch {
-            grid-column: 1;
+    .max-switch {
+        .max-switch-input {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
         }
 
-        .rotulo {
-            text-align: left;
-            width: 100%;
-            font-size: 0.8rem;
-            color: var(--background-700);
-        }
     }
 </style>

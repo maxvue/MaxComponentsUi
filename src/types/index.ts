@@ -73,6 +73,8 @@ export interface MaxButtonsType extends /* @vue-ignore */ Omit<PrimeButtonProps,
     iconSize?: number | string | undefined | null;
     /** Coloca texto em maiúsculo */
     uppercase?: boolean;
+    /** Borda tracejada com fundo transparente */
+    dashed?: boolean;
 }
 
 /**
