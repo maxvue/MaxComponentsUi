@@ -24,7 +24,7 @@
  * Exibe uma pergunta ou rótulo ao lado do switch.
  */
 <script setup lang="ts">
-    import { ref, computed, watch, useAttrs } from 'vue';
+    import { ref, computed, watch } from 'vue';
     import InputBase from './InputBase.vue';
     import { hasContent } from '@maxvue/max-use';
 
