@@ -1,13 +1,17 @@
 <template>
     <InputBase v-bind="props" class="max-switch">
-        <div class="max-switch-input">
-            <div class="max-switch-label-left" v-if="has_left_label" @click="() => changeValue(props.falseValue)">
+        <div :class="`max-switch-input ${temp_value === props.trueValue ? 'active' : ''}`">
+            <div class="max-switch-label left" v-if="has_left_label" @click="() => changeValue(props.falseValue)">
                 {{ props.labelLeft ?? props.leftLabel ?? props.labelFalse ?? props.falseLabel ?? '' }}
             </div>
-            <div class="max-switch-label-toggle" @click="() => changeValue()">
-                {{ temp_value }}
+            <div :class="`max-switch-toggle ${temp_value === props.trueValue ? 'active' : ''}`" @click="() => changeValue()">
+                <div class="max-switch-background">
+                    <div class="max-switch-button">
+
+                    </div>
+                </div>
             </div>
-            <div class="max-switch-label-right" v-if="has_right_label" @click="() => changeValue(props.falseValue)">
+            <div class="max-switch-label right" v-if="has_right_label" @click="() => changeValue(props.falseValue)">
                 {{ props.labelRight ?? props.rightLabel ?? props.labelTrue ?? props.trueLabel ?? props.question ?? '' }}
             </div>
         </div>
@@ -23,8 +27,6 @@
     import { ref, computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
     import { hasContent } from '@maxvue/max-use';
-
-    const attrs = useAttrs();
 
     const props = withDefaults(
         defineProps<{
@@ -97,12 +99,81 @@
 </script>
 
 <style lang="scss">
-    .max-switch {
-        .max-switch-input {
-            display: grid;
-            grid-template-columns: auto 1fr auto;
-            align-items: center;
+.max-switch {
+    display: grid;
+    grid-template-columns: 1fr;
+    place-items: center;
+
+    .max-switch-input {
+        padding-left: 5px;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        height: 20px;
+
+        .max-switch-label {
+            &.right {
+                padding-left: 10px;
+            }
+
+            &.left {
+                padding-right: 10px;
+            }
         }
 
+        .max-switch-toggle {
+            position: relative;
+            height: 20px;
+
+            .max-switch-background {
+                width: 38px;
+                height: 20px;
+                display: grid;
+                place-items: center;
+                border-radius: 14px;
+            }
+
+            .max-switch-button {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                position: absolute;
+                transition: left 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+            }
+        }
+
+        &.active {
+            .max-switch-label {
+                &.right {
+                    color: var(--blue-800);
+                }
+            }
+
+            .max-switch-background {
+                background-color: var(--blue-200);
+            }
+
+            .max-switch-button {
+                background-color: var(--blue-750);
+                left: 21px;
+            }
+        }
+
+        &:not(.active) {
+            .max-switch-label {
+                &.right {
+                    color: var(--background-700);
+                }
+            }
+
+            .max-switch-background {
+                background-color: var(--background-200);
+            }
+
+            .max-switch-button {
+                background-color: var(--background-600);
+                left: 5px;
+            }
+        }
     }
+}
 </style>

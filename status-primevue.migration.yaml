@@ -65,7 +65,7 @@ components:
     level: baixa
     description_migration: >-
       Substituir Textarea do PrimeVue por <textarea> nativo. Manter redimensionamento automático (auto-resize) e InputBase.
-    status: waiting
+    status: done
 
   - name: MaxInputTextList
     level: baixa

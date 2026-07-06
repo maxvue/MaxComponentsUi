@@ -8,9 +8,13 @@
 
         <!-- INPUT FIELD -->
         <div class="max-input-field-div">
-            <MaxIcon :icon="props.iconLeft ?? props.icon ?? props.i" :size="1.2" :light="light" :dark="dark" v-if="!props.noIcon && (props.iconLeft || props.iconPos === 'left')" ml-5 mr-5 />
-            <slot></slot>
-            <MaxIcon :icon="props.iconRight ?? props.icon ?? props.i" :size="1.2" :light="light" :dark="dark" v-if="!props.noIcon && (props.iconRight || props.iconPos === 'right')" ml-3 mr-5  />
+            <MaxIcon :icon="props.iconLeft ?? props.icon ?? props.i" :size="1.2" :light="light" :dark="dark" v-if="hasContent(props.iconLeft ?? props.icon ?? props.i) && !props.noIcon && (props.iconLeft || props.iconPos === 'left')" ml-5 />
+            <div v-else></div>
+            <div mr-3 ml-3 w-full class="input-slot-div">
+                <slot></slot>
+            </div>
+            <MaxIcon :icon="props.iconRight ?? props.icon ?? props.i" :size="1.2" :light="light" :dark="dark" v-if="hasContent(props.iconRight ?? props.icon ?? props.i) && !props.noIcon && (props.iconRight || props.iconPos === 'right')" mr-5  />
+            <div v-else></div>
 
             <!-- INPUT STATUS ICON -->
             <div class="input-status-icon">
@@ -151,6 +155,7 @@
     display: grid !important;
     grid-template-rows: 36px 19px;
     position: relative;
+    place-items: center;
 
     .max-input-label {
         position: absolute;
@@ -196,27 +201,29 @@
         display: grid;
         grid-template-columns: auto 1fr auto;
         align-items: center;
-        width: calc(100% - 2px);
-        transform: translateX(1px);
+        width: calc(100% - 4px);
         outline: 1px solid var(--background-300) !important;
         border-radius: 8px;
         height: 36px;
+        position: relative;
 
         &:focus-within {
             outline: 1px solid var(--blue-700) !important;
         }
 
-        input, textarea, label {
-            border: none !important;
+        input, textarea, label, .p-select, .p-select-label {
             outline: none !important;
             background-color: transparent !important;
             height: 100% !important;
             position: relative !important;
             padding: 0 7px;
+            border: none !important;
+            box-shadow: none !important;
+            width: 100% !important;
         }
 
         .input-status-icon {
-            display: absolute;
+            position: absolute;
             top: 2px;
             right: 3px;
 

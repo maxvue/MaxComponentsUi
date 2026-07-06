@@ -1,6 +1,17 @@
 <template>
     <InputBase v-bind="{...props}" class="input-text-area-main-div">
-        <Textarea v-bind="{...props, ...attrs}" :autoResize="props.autoResize" v-model="temp_value" @blur="checkDone()" :rows="lines" :minLines="props.minLines ?? props.minRows ?? 1" />
+        <textarea
+            ref="textAreaEl"
+            class="max-textarea"
+            :value="temp_value"
+            :rows="lines"
+            :disabled="props.disabled"
+            :autofocus="props.autofocus"
+            :wrap="props.wrap"
+            v-bind="attrs"
+            @input="onInput"
+            @blur="checkDone()"
+        ></textarea>
     </InputBase>
 </template>
 
@@ -9,9 +20,8 @@
  * Suporta redimensionamento automático e integração com InputBase.
  */
 <script setup lang="ts">
-    import { ref, computed, watch, useAttrs } from 'vue';
+    import { ref, computed, watch, useAttrs, onMounted, nextTick } from 'vue';
     import InputBase from './InputBase.vue';
-    import Textarea from 'primevue/textarea';
 
     const attrs = useAttrs();
 
@@ -51,6 +61,22 @@
     const emit = defineEmits(['update:modelValue']);
     const temp_value = ref(props.modelValue);
 
+    const textAreaEl = ref<HTMLTextAreaElement | null>(null);
+
+    const resize = () => {
+        if (!props.autoResize || !textAreaEl.value) return;
+
+        const el = textAreaEl.value;
+        el.style.height = 'auto';
+        el.style.height = `${el.scrollHeight}px`;
+    };
+
+    const onInput = (event: Event) => {
+        temp_value.value = (event.target as HTMLTextAreaElement).value;
+        resize();
+    };
+
+    onMounted(() => nextTick(resize));
 
     const computedLines = computed(() => (temp_value.value ?? '').split(/\r\n|\r|\n/).length);
 
@@ -63,6 +89,13 @@
 
 <style lang="scss">
     .input-text-area-main-div {
+        grid-template-rows: auto auto;
+
+        .max-input-field-div {
+            height: auto !important;
+            padding: 8px 0 5px !important;
+        }
+
         textarea {
             box-shadow: none !important;
             width: 100%;

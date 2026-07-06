@@ -139,14 +139,12 @@
 
     .inputs-div {
         display: grid;
-        grid-template-columns: auto 1fr;
+        grid-template-columns: 83px 1fr;
         width: 100%;
         position: relative;
         grid-column: 1 !important;
         place-items: center;
         height: 36px !important;
-        border-radius: var(--max-inputtext-border-radius);
-        border: 1px solid var(--max-inputtext-border-color);
 
         &:focus-within {
             border-color: var(--max-inputtext-focus-border-color);
