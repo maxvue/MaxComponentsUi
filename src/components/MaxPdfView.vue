@@ -39,10 +39,12 @@
  */
 <script setup lang="ts">
     import { useWindowSize } from '@maxvue/max-use';
-    import { ref, watch } from 'vue';
+    import { defineAsyncComponent, ref, watch } from 'vue';
     import ProgressSpinner from 'primevue/progressspinner';
-    import VuePdfEmbed from 'vue-pdf-embed';
     import MaxButton from './MaxButton.vue';
+
+    // Async: vue-pdf-embed pesa ~2,6 MB (814 KB gzip) — só carrega quando um PDF é exibido
+    const VuePdfEmbed = defineAsyncComponent(() => import('vue-pdf-embed'));
 
     const { width: screen_width, height: screen_height } = useWindowSize();
 
