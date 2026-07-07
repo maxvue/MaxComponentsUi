@@ -31,10 +31,12 @@
     </div>
 </template>
 <script setup lang="ts">
-    import { ref, watch } from 'vue';
+    import { defineAsyncComponent, ref, watch } from 'vue';
     import { useFileDialog, useDropZone } from '@maxvue/max-use';
-    import { DotLottieVue } from '@lottiefiles/dotlottie-vue';
     import MaxIcon from './MaxIcon.vue';
+
+    // Async: dotlottie (player WASM ~1,2 MB) — só carrega quando a animação de upload aparece
+    const DotLottieVue = defineAsyncComponent(() => import('@lottiefiles/dotlottie-vue').then((m) => m.DotLottieVue));
 
     const props = withDefaults(defineProps<{
         /** Tipos de arquivo aceitos (ex: '.pdf, .jpg, .png') */

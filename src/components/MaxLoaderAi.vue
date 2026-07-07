@@ -11,10 +11,12 @@
 </template>
 
 <script setup lang="ts">
-    import { useAttrs } from 'vue';
+    import { defineAsyncComponent, useAttrs } from 'vue';
 
     const attrs = useAttrs();
-    import { DotLottieVue } from '@lottiefiles/dotlottie-vue';
+
+    // Async: dotlottie (player WASM ~1,2 MB) — só carrega quando o loader de IA aparece
+    const DotLottieVue = defineAsyncComponent(() => import('@lottiefiles/dotlottie-vue').then((m) => m.DotLottieVue));
 </script>
 
 <style lang="scss">
