@@ -32,15 +32,15 @@ export const presetMaxUno = () => {
 
 
             // Tipografia
-            [/^w-?max-(.+)$/, ([, s]) => ({ 'max-width': s + 'px' })],
+            [/^w-?max-(.+)$/, ([, s]) => ({ 'max-width': s + 'px !important' })],
             [/^font-weight-(.+)$/, ([, s]) => ({ 'font-weight': s })],
-            [/^max-w-(.+)$/, ([, s]) => ({ 'max-width': s + 'px' })],
-            [/^h-?max-(.+)$/, ([, s]) => ({ 'max-height': s + 'px' })],
-            [/^max-h-(.+)$/, ([, s]) => ({ 'max-height': s + 'px' })],
-            [/^min-w-(.+)$/, ([, s]) => ({ 'min-width': s + 'px' })],
-            [/^w-?min-(.+)$/, ([, s]) => ({ 'min-width': s + 'px' })],
-            [/^h-?min-(.+)$/, ([, s]) => ({ 'min-height': s + 'px' })],
-            [/^min-h-(.+)$/, ([, s]) => ({ 'min-height': s + 'px' })],
+            [/^max-w-(.+)$/, ([, s]) => ({ 'max-width': s + 'px !important' })],
+            [/^h-?max-(.+)$/, ([, s]) => ({ 'max-height': s + 'px !important' })],
+            [/^max-h-(.+)$/, ([, s]) => ({ 'max-height': s + 'px !important' })],
+            [/^min-w-(.+)$/, ([, s]) => ({ 'min-width': s + 'px !important' })],
+            [/^w-?min-(.+)$/, ([, s]) => ({ 'min-width': s + 'px !important' })],
+            [/^h-?min-(.+)$/, ([, s]) => ({ 'min-height': s + 'px !important' })],
+            [/^min-h-(.+)$/, ([, s]) => ({ 'min-height': s + 'px !important' })],
 
             [/^hover-(.+)$/, ([, s]) => ({
                 '&:hover': {

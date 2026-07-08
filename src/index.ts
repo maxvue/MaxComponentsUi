@@ -1,5 +1,6 @@
 import 'virtual:uno.css';
 
+import { defineAsyncComponent } from 'vue';
 import PrimeVue from 'primevue/config';
 
 import { MaxStyle } from './styles/style';
@@ -73,7 +74,10 @@ export { default as MaxSelectTag } from './components/MaxTagSelect.vue';
 export { default as MaxInputSwitch } from './components/MaxInputSwitch.vue';
 export { default as MaxInputTextArea } from './components/MaxInputTextArea.vue';
 export { default as MaxInputTextList } from './components/MaxInputTextList.vue';
-export { default as MaxInputMarkdown } from './components/MaxInputMarkdown.vue';
+// Async: o MaxInputMarkdown arrasta o tiptap inteiro (starter-kit + 8 extensões, ~350 KB);
+// como export estático ele entraria no bundle eager de TODOS os apps consumidores, mesmo sem uso.
+// Mesmo padrão de MaxPdfView/MaxLoaderAi (deps pesadas sob demanda).
+export const MaxInputMarkdown = defineAsyncComponent(() => import('./components/MaxInputMarkdown.vue'));
 export { default as MaxInputMarkdownToolbar } from './components/MaxInputMarkdownToolbar.vue';
 export { default as MaxInputToggle } from './components/MaxInputToggle.vue';
 export { default as MaxInputTypeAddress } from './components/MaxInputTypeAddress.vue';
@@ -89,7 +93,8 @@ export { default as MaxBadgeComponent } from './components/MaxBadgeComponent.vue
 export { default as MaxEmptyDiv } from './components/MaxEmptyDiv.vue';
 export { default as MaxLink } from './components/MaxLink.vue';
 export { default as MaxLogo } from './components/MaxLogo.vue';
-export { default as MaxMaps } from './components/MaxMaps.vue';
+// Async: o MaxMaps arrasta o vue3-google-map — fora do bundle eager, carrega só quando usado em tela.
+export const MaxMaps = defineAsyncComponent(() => import('./components/MaxMaps.vue'));
 export { default as MaxPdfView } from './components/MaxPdfView.vue';
 export { default as MaxTable } from './components/MaxTable.vue';
 export { default as MaxTableFields } from './components/MaxTableFields.vue';
