@@ -40,7 +40,14 @@
     const method = ref();
     const name_method = ref('Email ou Whatsapp');
 
-    const temp_value = ref(props.modelValue);
+    /**
+     * Normaliza o valor recebido para string.
+     * `withDefaults` só cobre `undefined`, então um `null` vindo de coluna anulável do banco
+     * (ou um número) chegaria cru ao parsePhoneNumberFromString e lançaria em tempo de render.
+     */
+    const toText = (value: unknown): string => (value === null || value === undefined ? '' : String(value));
+
+    const temp_value = ref(toText(props.modelValue));
     const iconLeft = computed(() => (method.value === 'whatsapp' ? (attrs.icon ?? attrs.icon_left ?? attrs['icon-left'] ?? 'ic:baseline-whatsapp') : 'prime:at'));
 
     const isDone: Ref = ref(props.done ?? null);
@@ -126,7 +133,7 @@
     watch(
         () => props.modelValue,
         () => {
-            temp_value.value = props.modelValue;
+            temp_value.value = toText(props.modelValue);
         }
     );
 
