@@ -26,26 +26,31 @@ npm install vue@^3.5.33 vue-router@^5.0.6
 ### Registro Global (Plugin)
 
 ```typescript
-import { createApp } from 'vue'
-import MaxComponentsUi from '@maxvue/max-components-ui'
+import { createApp } from "vue";
+import MaxComponentsUi from "@maxvue/max-components-ui";
 
-const app = createApp(App)
+const app = createApp(App);
 
 // Registra o PrimeVue com o tema Max + locale pt-BR automaticamente
-app.use(MaxComponentsUi)
+app.use(MaxComponentsUi);
 ```
 
 ### Importação Individual
 
 ```vue
 <template>
-  <MaxButton label="Salvar" icon="mdi:content-save" severity="success" @click="salvar" />
+  <MaxButton
+    label="Salvar"
+    icon="mdi:content-save"
+    severity="success"
+    @click="salvar"
+  />
 </template>
 
 <script setup lang="ts">
-import { MaxButton } from '@maxvue/max-components-ui'
+import { MaxButton } from "@maxvue/max-components-ui";
 
-const salvar = () => console.log('Salvo!')
+const salvar = () => console.log("Salvo!");
 </script>
 ```
 
@@ -55,16 +60,16 @@ Configure o resolver para importar automaticamente os componentes sem `import` m
 
 ```typescript
 // vite.config.ts
-import Components from 'unplugin-vue-components/vite'
-import { MaxComponentsUiResolver } from '@maxvue/max-components-ui/resolver'
+import Components from "unplugin-vue-components/vite";
+import { MaxComponentsUiResolver } from "@maxvue/max-components-ui/resolver";
 
 export default defineConfig({
   plugins: [
     Components({
-      resolvers: [MaxComponentsUiResolver()]
-    })
-  ]
-})
+      resolvers: [MaxComponentsUiResolver()],
+    }),
+  ],
+});
 ```
 
 Com isso, basta usar os componentes diretamente no template:
@@ -91,20 +96,20 @@ app.use(MaxComponentsUi, {
   theme: {
     preset: MeuPresetCustomizado,
     options: {
-      darkModeSelector: '.my-dark-class',
-      prefix: 'app'
-    }
-  }
-})
+      darkModeSelector: ".my-dark-class",
+      prefix: "app",
+    },
+  },
+});
 ```
 
-| Opção | Tipo | Padrão | Descrição |
-|-------|------|--------|-----------|
-| `locale` | `object` | `ptBR` | Traduções do PrimeVue |
-| `theme.preset` | `object` | `MaxStyle` | Preset de cores/semântica (baseado no Aura) |
-| `theme.options.darkModeSelector` | `string` | `'.dark'` | Seletor CSS para ativar dark mode |
-| `theme.options.prefix` | `string` | `'max'` | Prefixo das variáveis CSS |
-| `ripple` | `boolean` | `true` | Efeito ripple nos botões |
+| Opção                            | Tipo      | Padrão     | Descrição                                   |
+| -------------------------------- | --------- | ---------- | ------------------------------------------- |
+| `locale`                         | `object`  | `ptBR`     | Traduções do PrimeVue                       |
+| `theme.preset`                   | `object`  | `MaxStyle` | Preset de cores/semântica (baseado no Aura) |
+| `theme.options.darkModeSelector` | `string`  | `'.dark'`  | Seletor CSS para ativar dark mode           |
+| `theme.options.prefix`           | `string`  | `'max'`    | Prefixo das variáveis CSS                   |
+| `ripple`                         | `boolean` | `true`     | Efeito ripple nos botões                    |
 
 ---
 
@@ -112,13 +117,13 @@ app.use(MaxComponentsUi, {
 
 A biblioteca expõe múltiplos entry points via `package.json` exports:
 
-| Import path | Descrição | Documentação |
-|-------------|-----------|--------------|
-| `@maxvue/max-components-ui` | Componentes Max + função `install` + tipos | [COMPONENTS.md](COMPONENTS.md) |
-| `@maxvue/max-components-ui/resolver` | `MaxComponentsUiResolver` para auto-import | [docs/AUTO-IMPORT.md](docs/AUTO-IMPORT.md) |
-| `@maxvue/max-components-ui/preset` | `presetMaxUno` — preset UnoCSS com classes utilitárias | [docs/THEME.md](docs/THEME.md) |
-| `@maxvue/max-components-ui/prime` | Re-exportação de componentes PrimeVue puros | [docs/PRIME.md](docs/PRIME.md) |
-| `@maxvue/max-components-ui/stores` | Stores Pinia (`useIconStore`, `usePopoverStore`) | [docs/STORES.md](docs/STORES.md) |
+| Import path                          | Descrição                                              | Documentação                               |
+| ------------------------------------ | ------------------------------------------------------ | ------------------------------------------ |
+| `@maxvue/max-components-ui`          | Componentes Max + função `install` + tipos             | [COMPONENTS.md](COMPONENTS.md)             |
+| `@maxvue/max-components-ui/resolver` | `MaxComponentsUiResolver` para auto-import             | [docs/AUTO-IMPORT.md](docs/AUTO-IMPORT.md) |
+| `@maxvue/max-components-ui/preset`   | `presetMaxUno` — preset UnoCSS com classes utilitárias | [docs/THEME.md](docs/THEME.md)             |
+| `@maxvue/max-components-ui/prime`    | Re-exportação de componentes PrimeVue puros            | [docs/PRIME.md](docs/PRIME.md)             |
+| `@maxvue/max-components-ui/stores`   | Stores Pinia (`useIconStore`, `usePopoverStore`)       | [docs/STORES.md](docs/STORES.md)           |
 
 ---
 
@@ -126,22 +131,22 @@ A biblioteca expõe múltiplos entry points via `package.json` exports:
 
 A biblioteca contém **59 componentes** organizados em categorias:
 
-| Categoria | Componentes |
-|-----------|-------------|
-| **Base** | `InputBase` |
-| **Botões** | `MaxButton`, `MaxIconButton`, `MaxIconConfirm` |
-| **Tipografia** | `MaxTitle1`, `MaxTitle2` |
-| **Inputs de Texto** | `MaxInputText`, `MaxInputTextArea`, `MaxInputNumber`, `MaxInputSearch` |
+| Categoria                 | Componentes                                                                                                                                                                                                                                                                                                      |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Base**                  | `InputBase`                                                                                                                                                                                                                                                                                                      |
+| **Botões**                | `MaxButton`, `MaxIconButton`, `MaxIconConfirm`                                                                                                                                                                                                                                                                   |
+| **Tipografia**            | `MaxTitle1`, `MaxTitle2`                                                                                                                                                                                                                                                                                         |
+| **Inputs de Texto**       | `MaxInputText`, `MaxInputTextArea`, `MaxInputNumber`, `MaxInputSearch`                                                                                                                                                                                                                                           |
 | **Inputs Especializados** | `MaxInputCep`, `MaxInputCpfCnpj`, `MaxInputDatePicker`, `MaxInputSelect`, `MaxInputAutoComplete`, `MaxInputAutoCompleteApi`, `MaxInputCheckbox`, `MaxInputRadio`, `MaxInputSwitch`, `MaxInputToggle`, `MaxInputCoordinateDecimalLat`, `MaxInputCoordinateDecimalLng`, `MaxInputPhoneMail`, `MaxInputTypeAddress` |
-| **Telefone** | `MaxPhoneField` |
-| **Arquivos** | `MaxInputFile`, `MaxInputFileUpload`, `MaxInputFileUploadBig`, `MaxInputFileUploadButton`, `MaxInputFileProject` |
-| **Tabelas** | `MaxTable`, `MaxTableFields`, `MaxTableColumn` |
-| **Layout** | `MaxGrid`, `MaxGridCols` |
-| **Overlays** | `MaxModal`, `MaxPopover`, `MaxPopoverConfirm`, `MaxTogglePopover` |
-| **Ícones e Status** | `MaxIcon`, `MaxDoneIcon`, `MaxWaitIcon`, `MaxErrorIcon` |
-| **Loaders** | `MaxLoader`, `MaxLoaderAi`, `MaxLoaderIcon` |
-| **Transições** | `MaxAnimateFade`, `MaxTransitionFadeLight`, `MaxTransitionUp`, `TransitionFade` |
-| **Display** | `MaxBadgeComponent`, `MaxEmptyDiv`, `MaxLink`, `MaxLogo`, `MaxMaps`, `MaxPdfView`, `MaxUserAvatar`, `MaxMsgLabels`, `MaxTextInputFloatLabel` |
+| **Telefone**              | `MaxPhoneField`                                                                                                                                                                                                                                                                                                  |
+| **Arquivos**              | `MaxInputFile`, `MaxInputFileUpload`, `MaxInputFileUploadBig`, `MaxInputFileUploadButton`, `MaxInputFileProject`                                                                                                                                                                                                 |
+| **Tabelas**               | `MaxTable`, `MaxTableFields`, `MaxTableColumn`                                                                                                                                                                                                                                                                   |
+| **Layout**                | `MaxGrid`, `MaxGridCols`                                                                                                                                                                                                                                                                                         |
+| **Overlays**              | `MaxModal`, `MaxPopover`, `MaxPopoverConfirm`, `MaxTogglePopover`                                                                                                                                                                                                                                                |
+| **Ícones e Status**       | `MaxIcon`, `MaxDoneIcon`, `MaxWaitIcon`, `MaxErrorIcon`                                                                                                                                                                                                                                                          |
+| **Loaders**               | `MaxLoader`, `MaxLoaderAi`, `MaxLoaderIcon`                                                                                                                                                                                                                                                                      |
+| **Transições**            | `MaxAnimateFade`, `MaxTransitionFadeLight`, `MaxTransitionUp`, `TransitionFade`                                                                                                                                                                                                                                  |
+| **Display**               | `MaxBadgeComponent`, `MaxEmptyDiv`, `MaxLink`, `MaxLogo`, `MaxMaps`, `MaxPdfView`, `MaxUserAvatar`, `MaxMsgLabels`, `MaxTextInputFloatLabel`                                                                                                                                                                     |
 
 > Para documentação detalhada de cada componente (props, aliases, slots), veja o **[Catálogo de Componentes](COMPONENTS.md)**.
 
@@ -156,11 +161,11 @@ A biblioteca fornece:
 
 ```typescript
 // uno.config.ts
-import { presetMaxUno } from '@maxvue/max-components-ui/preset'
+import { presetMaxUno } from "@maxvue/max-components-ui/preset";
 
 export default defineConfig({
-  presets: [presetMaxUno()]
-})
+  presets: [presetMaxUno()],
+});
 ```
 
 > Veja todas as classes utilitárias e paleta de cores em [docs/THEME.md](docs/THEME.md).
@@ -172,7 +177,12 @@ export default defineConfig({
 A biblioteca exporta interfaces úteis para tipagem:
 
 ```typescript
-import type { MaxTableColumn, MaxTableButtons, SelectItem, SelectOptions } from '@maxvue/max-components-ui'
+import type {
+  MaxTableColumn,
+  MaxTableButtons,
+  SelectItem,
+  SelectOptions,
+} from "@maxvue/max-components-ui";
 ```
 
 > Referência completa em [docs/TYPES.md](docs/TYPES.md).
@@ -230,15 +240,15 @@ src/
 
 ## 📚 Documentação Adicional
 
-| Documento | Descrição |
-|-----------|-----------|
-| [COMPONENTS.md](COMPONENTS.md) | Catálogo completo de componentes |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Guia de contribuição |
-| [docs/TYPES.md](docs/TYPES.md) | Referência de tipos TypeScript |
-| [docs/THEME.md](docs/THEME.md) | Tema e preset UnoCSS |
-| [docs/STORES.md](docs/STORES.md) | Stores Pinia |
-| [docs/AUTO-IMPORT.md](docs/AUTO-IMPORT.md) | Configuração do auto-import |
-| [docs/PRIME.md](docs/PRIME.md) | Componentes PrimeVue re-exportados |
+| Documento                                  | Descrição                          |
+| ------------------------------------------ | ---------------------------------- |
+| [COMPONENTS.md](COMPONENTS.md)             | Catálogo completo de componentes   |
+| [CONTRIBUTING.md](CONTRIBUTING.md)         | Guia de contribuição               |
+| [docs/TYPES.md](docs/TYPES.md)             | Referência de tipos TypeScript     |
+| [docs/THEME.md](docs/THEME.md)             | Tema e preset UnoCSS               |
+| [docs/STORES.md](docs/STORES.md)           | Stores Pinia                       |
+| [docs/AUTO-IMPORT.md](docs/AUTO-IMPORT.md) | Configuração do auto-import        |
+| [docs/PRIME.md](docs/PRIME.md)             | Componentes PrimeVue re-exportados |
 
 ---
 
