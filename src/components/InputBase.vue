@@ -1,7 +1,7 @@
 <template>
     <div class="max-input-main-div" :class="`${props.float !== undefined ? 'float' : ''} ${done ? 'done' : ''} ${!noStatus && caution ? 'caution' : ''} ${textCenter ? 'text-center' : ''} ${textRight ? 'text-right' : ''} ${props.class ? props.class : ''} ${!noStatus &&  isError ? 'error' : ''} ${!noStatus && caution ? 'caution' : ''} ${inLine ? 'in-line' : ''}`">
         <!-- INPUT LABEL -->
-        <div class="max-input-label" v-if="props.label" >
+        <div :class="inLine ? 'in-line-label' : 'max-input-label'" v-if="props.label" >
             {{ props.label }}
         </div>
 
@@ -390,6 +390,18 @@
             .value-div {
                 width: 100% !important;
                 text-align: center !important;
+            }
+        }
+
+        input, span, select, .p-select-label, .p-inputtext, .value-div, .value-text {
+            color: var(--background-650) !important;
+        }
+
+        // O select aninha .p-select > .p-select-label > .value-div > .value-text; sem isto
+        // cada nivel recebe o fundo acima e as pilulas aparecem empilhadas
+        .p-select {
+            .p-select-label, .value-div, .value-text, span {
+                background-color: transparent !important;
             }
         }
 

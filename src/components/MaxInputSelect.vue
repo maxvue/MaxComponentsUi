@@ -184,6 +184,15 @@
         height: 36px !important;
     }
 
+    // Nos modos compactos a raiz do InputBase tem 20px; sem isto os 36px cravados
+    // acima vazam da linha e encavalam no conteudo de cima
+    &.in-line, &[input-click]:not([input-click='false']) {
+        .p-select, .p-select-label {
+            height: 20px !important;
+            min-height: 20px !important;
+        }
+    }
+
     .p-select-label {
         border: none !important;
         padding: 0 10px !important;
