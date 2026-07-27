@@ -61,6 +61,14 @@ describe('MaxIcon', () => {
         }
     });
 
+    it('dark booleano escurece de forma perceptível em relação ao padrão', () => {
+        const padrao = mountIcon({}).find('.max-icon-div').attributes('style');
+        const escuro = mountIcon({ dark: true }).find('.max-icon-div').attributes('style');
+
+        expect(padrao).toContain('rgba(0, 0, 0, 0.4)');
+        expect(escuro).toContain('rgba(0, 0, 0, 0.6)');
+    });
+
     it('aplica cor clara via light', () => {
         const wrapper = mountIcon({ light: 0.8 });
         const style = wrapper.find('.max-icon-div')?.attributes('style');

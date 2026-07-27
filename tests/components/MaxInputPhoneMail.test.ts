@@ -135,4 +135,29 @@ describe('MaxInputPhoneMail', () => {
         await wrapper.setProps({ modelValue: 'new@email.com' });
         expect((wrapper.vm as any).temp_value).toBe('new@email.com');
     });
+
+    it('monta sem lançar quando modelValue é null', () => {
+        expect(() => mountPhoneMail({ modelValue: null as any })).not.toThrow();
+    });
+
+    it('monta sem lançar quando modelValue é null com attr email', () => {
+        expect(() => mountPhoneMail({ modelValue: null as any }, { email: true })).not.toThrow();
+    });
+
+    it('monta sem lançar quando modelValue é número', () => {
+        expect(() => mountPhoneMail({ modelValue: 11999887766 as any })).not.toThrow();
+    });
+
+    it('trata null como vazio: done nulo e caution falso quando não obrigatório', () => {
+        const wrapper = mountPhoneMail({ modelValue: null as any });
+        const ib = wrapper.findComponent(InputBase);
+        expect(ib.props('done')).toBeUndefined();
+        expect(ib.props('caution')).toBe(false);
+    });
+
+    it('não lança ao receber null via watch de props.modelValue', async () => {
+        const wrapper = mountPhoneMail({ modelValue: 'test@email.com' });
+        await wrapper.setProps({ modelValue: null as any });
+        expect((wrapper.vm as any).temp_value).toBe('');
+    });
 });

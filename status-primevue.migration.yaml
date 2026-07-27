@@ -1,0 +1,231 @@
+# Status de migração de independência do PrimeVue
+# Apenas componentes que DEPENDEM do PrimeVue (direta ou transitivamente) estão listados.
+# level: baixa | media | alta | muito_alta
+# status: waiting | in_progress | done | blocked
+# description_migration: orientação para o agente de migração
+
+components:
+  - name: InputBase
+    level: alta
+    description_migration: >-
+      Núcleo de todos os inputs. Depende de FloatLabel, IconField, InputIcon e Message do PrimeVue.
+      FloatLabel e IconField/InputIcon são apenas layout — reimplementar com <label> flutuante via CSS
+      e slots de ícone esquerdo/direito. Message vira uma <div> de feedback abaixo do campo. Preservar
+      a API atual: estados done/error/caution/required/noStatus, modo inline, slots icon/iconLeft/iconRight/iconPos.
+      Migrar este componente PRIMEIRO — destrava ~19 inputs que o utilizam.
+    status: done
+
+  - name: MaxInputText
+    level: baixa
+    description_migration: >-
+      Trocar InputText do PrimeVue por <input type="text"> nativo estilizado. Mantém InputBase como wrapper.
+      Preservar v-model, formatação toSearchableString/hasContent e estados isDone/error_msg/caution.
+    status: waiting
+
+  - name: MaxInputCep
+    level: baixa
+    description_migration: >-
+      Substituir InputText por <input> nativo. Manter máscara de CEP (formatCep/onlyNumbers) e validação cepIsValid.
+      Preservar ícone de loading à direita e InputBase como wrapper.
+    status: waiting
+
+  - name: MaxInputCpfCnpj
+    level: baixa
+    description_migration: >-
+      Substituir InputText por <input> nativo. Manter formatação onlyNumbers, validações isCpf/isCnpj e
+      debounce (watchDebounced). Preservar InputBase.
+    status: waiting
+
+  - name: MaxInputCoordinateDecimalLat
+    level: baixa
+    description_migration: >-
+      Substituir InputText por <input> nativo. Manter conversão toNumber/isBlank e validação de latitude. Preservar InputBase.
+    status: waiting
+
+  - name: MaxInputCoordinateDecimalLng
+    level: baixa
+    description_migration: >-
+      Substituir InputText por <input> nativo. Manter conversão toNumber/isBlank e validação de longitude. Preservar InputBase.
+    status: waiting
+
+  - name: MaxInputPhoneMail
+    level: baixa
+    description_migration: >-
+      Substituir InputText por <input> nativo. Manter lógica de detecção telefone/email (onlyNumbers/onlyLetters)
+      e ícone dinâmico. Preservar InputBase.
+    status: waiting
+
+  - name: MaxInputSearch
+    level: baixa
+    description_migration: >-
+      Substituir InputText por <input> nativo. Manter ícone de busca/loading à direita e InputBase.
+    status: waiting
+
+  - name: MaxInputTextArea
+    level: baixa
+    description_migration: >-
+      Substituir Textarea do PrimeVue por <textarea> nativo. Manter redimensionamento automático (auto-resize) e InputBase.
+    status: done
+
+  - name: MaxInputTextList
+    level: baixa
+    description_migration: >-
+      Já usa apenas InputBase (sem componente PrimeVue direto). Só depende da migração do InputBase.
+    status: waiting
+
+  - name: MaxColorPicker
+    level: media
+    description_migration: >-
+      Depende de InputText e ColorPicker do PrimeVue. Substituir InputText por <input> e reimplementar o
+      seletor de cor (usar <input type="color"> nativo ou um picker headless leve). Manter toSearchableString/hasContent e InputBase.
+    status: waiting
+
+  - name: MaxInputCheckbox
+    level: baixa
+    description_migration: >-
+      Substituir Checkbox do PrimeVue por <input type="checkbox"> estilizado via CSS. Manter geração de id (Random) e v-model.
+    status: waiting
+
+  - name: MaxInputRadio
+    level: baixa
+    description_migration: >-
+      RadioButton é usado no template via registro global do PrimeVue. Substituir por <input type="radio"> estilizado.
+      Manter inputId/name/value e v-model.
+    status: waiting
+
+  - name: MaxInputSwitch
+    level: baixa
+    description_migration: >-
+      Substituir ToggleSwitch do PrimeVue por um toggle em CSS puro (checkbox estilizado). Manter InputBase, caution/isDone e icon-right.
+    status: done
+
+  - name: MaxInputToggle
+    level: baixa
+    description_migration: >-
+      Substituir ToggleSwitch do PrimeVue por toggle em CSS puro. Não usa InputBase. Manter v-model.
+    status: waiting
+
+  - name: MaxInputNumber
+    level: media
+    description_migration: >-
+      Substituir InputNumber do PrimeVue. Reimplementar formatação numérica/locale (pt-BR), separadores de
+      milhar/decimal e, se houver, botões de incremento/decremento. Manter toSearchableString/hasContent e InputBase.
+    status: waiting
+
+  - name: MaxInputFileUpload
+    level: media
+    description_migration: >-
+      Depende de FileUpload e ProgressSpinner do PrimeVue. Reimplementar seleção de arquivos com <input type="file">
+      e área de drag & drop (useDropZone/useFileDialog do max-use). ProgressSpinner vira um spinner CSS.
+    status: waiting
+
+  - name: MaxBadgeComponent
+    level: baixa
+    description_migration: >-
+      Substituir Badge e OverlayBadge do PrimeVue por <span> estilizado (badge simples e badge sobreposto via CSS
+      absolute). Manter getColorFromVar.
+    status: waiting
+
+  - name: MaxUserAvatar
+    level: baixa
+    description_migration: >-
+      Substituir Avatar do PrimeVue por <div>/<img> estilizado (imagem, iniciais ou ícone). Manter integração com useConfirmStore.
+    status: waiting
+
+  - name: MaxButton
+    level: baixa
+    description_migration: >-
+      Substituir Button do PrimeVue por <button> nativo estilizado. Manter tipos MaxButtonsType, navegação goToRoute
+      e mapear ButtonProps próprios (severity/size/outlined/loading/icon).
+    status: waiting
+
+  - name: MaxPdfView
+    level: baixa
+    description_migration: >-
+      Único uso PrimeVue é ProgressSpinner — substituir por spinner CSS. Manter renderização de PDF e useWindowSize.
+    status: waiting
+
+  - name: MaxPopoverMenu
+    level: media
+    description_migration: >-
+      Substituir Menu do PrimeVue. Reimplementar lista de itens/submenus com navegação por teclado e posicionamento.
+      Manter goToRoute, useDefaultReset e getCssSize.
+    status: waiting
+
+  - name: MaxInputSelect
+    level: alta
+    description_migration: >-
+      Substituir Select do PrimeVue. Reimplementar dropdown com busca/filtro, navegação por teclado, opções agrupadas
+      (SelectGroupOptions) e optionLabel/optionValue. Considerar biblioteca headless. Manter InputBase, isBlank/watchDebounced.
+    status: waiting
+
+  - name: MaxTagSelect
+    level: alta
+    description_migration: >-
+      Depende de Select do PrimeVue. Mesma reimplementação de dropdown do MaxInputSelect, mas com renderização de tags
+      coloridas (getColorFromVar/contrastColor) e seleção múltipla. Manter InputBase.
+    status: waiting
+
+  - name: MaxPhoneField
+    level: alta
+    description_migration: >-
+      Depende de Select (DDI/países) e InputText. Reimplementar o Select de países (country_ddi_flags) e o <input> de telefone.
+      Manter watchDebounced/refAutoReset/useMagicKeys e InputBase.
+    status: waiting
+
+  - name: MaxInputAutoComplete
+    level: alta
+    description_migration: >-
+      Substituir AutoComplete do PrimeVue. Reimplementar campo com sugestões/dropdown, filtro e navegação por teclado.
+      Manter hasContent/toSearchableString e InputBase.
+    status: waiting
+
+  - name: MaxInputAutoCompleteApi
+    level: alta
+    description_migration: >-
+      Depende de AutoComplete do PrimeVue com busca assíncrona via API + cache IDB (getCachedApiIDB/keyExists).
+      Reimplementar autocomplete com debounce e estados de loading. Manter InputBase.
+    status: waiting
+
+  - name: MaxInputIconPicker
+    level: alta
+    description_migration: >-
+      Depende de InputText, Drawer e VirtualScroller do PrimeVue. Reimplementar o Drawer (painel lateral) e a lista
+      virtualizada de ícones (usar @tanstack/vue-virtual ou equivalente). Manter endpoints /api/icons/picker, SVG sob
+      demanda e InputBase.
+    status: waiting
+
+  - name: MaxInputDatePicker
+    level: muito_alta
+    description_migration: >-
+      Substituir DatePicker do PrimeVue — widget de calendário completo (navegação mês/ano, range, hora, locale pt-BR).
+      Fortemente recomendado usar biblioteca de calendário headless em vez de reimplementar do zero. Manter useDateFormat e InputBase.
+    status: waiting
+
+  - name: MaxTable
+    level: muito_alta
+    description_migration: >-
+      Substituir DataTable e Column do PrimeVue — o maior bloqueador. Reimplementar ordenação, paginação, seleção,
+      scroll e slots de coluna. Recomendado adotar TanStack Table (headless) e construir a camada visual por cima.
+      Manter useElementSize. Migrar em conjunto com MaxTableColumn e MaxTableFields.
+    status: waiting
+
+  - name: MaxTableColumn
+    level: muito_alta
+    description_migration: >-
+      Wrapper de Column do PrimeVue, fortemente acoplado ao DataTable. Deve ser migrado junto com MaxTable, adaptando-se
+      ao novo motor de tabela (ex.: definição de colunas do TanStack Table).
+    status: waiting
+
+  - name: MaxTableFields
+    level: media
+    description_migration: >-
+      Não usa PrimeVue diretamente, mas depende de MaxTableColumn/MaxTable. Adaptar geração dinâmica de colunas
+      (MaxTableColumn) ao novo motor de tabela após a migração do MaxTable. Manter ulid/size/refAutoReset e getCssSize.
+    status: waiting
+
+  - name: MaxInputTypeAddress
+    level: baixa
+    description_migration: >-
+      Não usa PrimeVue diretamente — apenas MaxInputSelect. Herda a migração do Select; nenhuma mudança específica além disso.
+    status: waiting

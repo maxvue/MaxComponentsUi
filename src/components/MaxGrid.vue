@@ -28,6 +28,18 @@
     padding-top: 14px;
     position: relative;
 
+    /* Quando o grid recebe a flag no-message, força o colapso da linha de
+       mensagem em todos os inputs internos (MaxInput*). */
+    &[no-message], &[no-messages] {
+        .max-input-main-div {
+            grid-template-rows: 1fr;
+
+            .message-spacer {
+                display: none !important;
+            }
+        }
+    }
+
     .label-grid {
         position: absolute;
         top: -10px;

@@ -6,7 +6,8 @@
             </slot>
 
             <MaxGrid mt-6 gap-4>
-                <MaxInputText s100 :label="t.email" type="email" v-model="email" icon="mdi:email-outline" @keyup.enter="onSubmit" />
+                <MaxInputPhoneMail s100 v-if="identifier === 'email-phone'" v-model="email" @keyup.enter="onSubmit" />
+                <MaxInputText s100 v-else :label="t.email" type="email" v-model="email" icon="mdi:email-outline" @keyup.enter="onSubmit" />
                 <MaxInputText s100 :label="t.password" type="password" v-model="password" icon="mdi:lock-outline" @keyup.enter="onSubmit" />
 
                 <div class="max-auth-options" s100 v-if="showRemember || forgotTo">
@@ -65,6 +66,7 @@
     import MaxTitle2 from './MaxTitle2.vue';
     import MaxGrid from './MaxGrid.vue';
     import MaxInputText from './MaxInputText.vue';
+    import MaxInputPhoneMail from './MaxInputPhoneMail.vue';
     import MaxButton from './MaxButton.vue';
 
     /** Provedor de login social configurável */
@@ -113,6 +115,8 @@
             forgotTo?: RouteLocationRaw;
             /** Sobrescreve textos pt-BR */
             labels?: AuthLabels;
+            /** Tipo do campo de identificação: 'email' (padrão) ou 'email-phone' (e-mail OU telefone) */
+            identifier?: 'email' | 'email-phone';
         }>(),
         {
             title: 'Acesse sua conta',
@@ -121,7 +125,8 @@
             providers: () => [],
             loading: false,
             error: '',
-            showRemember: true
+            showRemember: true,
+            identifier: 'email'
         }
     );
 
@@ -160,7 +165,7 @@
         .max-auth-card {
             width: 360px;
             max-width: 90vw;
-            background: var(--background-50);
+            background: var(--background-0);
             border: 1px solid var(--background-200);
             border-radius: 12px;
             padding: 2rem;

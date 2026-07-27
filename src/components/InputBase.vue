@@ -1,48 +1,49 @@
 <template>
-    <FloatLabel variant="on" class="max-input-main-div" :class="`${props.float !== undefined ? 'float' : ''} ${done ? 'done' : ''} ${!noStatus && caution ? 'caution' : ''} ${textCenter ? 'text-center' : ''} ${textRight ? 'text-right' : ''} ${props.class ? props.class : ''} ${!noStatus &&  isError ? 'error' : ''} ${!noStatus && caution ? 'caution' : ''} ${inLine ? 'in-line' : ''}`">
-        <div v-if="props.label && props.inLine" class="in-line-label">
+    <div class="max-input-main-div" :class="`${props.float !== undefined ? 'float' : ''} ${done ? 'done' : ''} ${!noStatus && caution ? 'caution' : ''} ${textCenter ? 'text-center' : ''} ${textRight ? 'text-right' : ''} ${props.class ? props.class : ''} ${!noStatus &&  isError ? 'error' : ''} ${!noStatus && caution ? 'caution' : ''} ${inLine ? 'in-line' : ''}`">
+        <!-- INPUT LABEL -->
+        <div :class="inLine ? 'in-line-label' : 'max-input-label'" v-if="props.label" >
             {{ props.label }}
         </div>
-        <IconField v-if="props.icon ?? props.i ?? props.iconLeft ?? props.iconRight">
-            <InputIcon v-if="!props.noIcon && (props.iconLeft || props.iconPos === 'left')">
-                <MaxIcon :icon="props.iconLeft ?? props.icon ?? props.i" :size="1.2" :light="light" :dark="dark" />
-            </InputIcon>
-            <slot></slot>
-            <InputIcon v-if="!props.noIcon && (props.iconRight || props.iconPos === 'right')">
-                <MaxIcon :icon="props.iconRight ?? props.icon ?? props.i" :size="1.2" :light="light" :dark="dark"  />
-            </InputIcon>
-        </IconField>
-        <slot v-else></slot>
-        <label for="in_label" v-if="props.label && !props.inLine" class="max-input-label active">{{ props.label }}</label>
-        <Message size="small" class="input-message" variant="simple" v-if="displayMessage">
-            <template #icon>
-                <MaxIcon :icon="iconMessage" v-if="iconMessage" :size="0.9" :light="light" :dark="dark"  />
-            </template>
-            {{ displayMessage }}
-        </Message>
-        <div v-else class="message-spacer"></div>
-        <div class="is-done" v-if="done && !noDone && !noStatus">
-            <MaxIcon icon="lets-icons:check-fill" :size="0.8" :light="light" :dark="dark" color-green-700 />
+
+
+        <!-- INPUT FIELD -->
+        <div class="max-input-field-div">
+            <MaxIcon :icon="props.iconLeft ?? props.icon ?? props.i" :size="1.2" :light="light" :dark="dark" v-if="hasContent(props.iconLeft ?? props.icon ?? props.i) && !props.noIcon && (props.iconLeft || props.iconPos === 'left')" ml-5 />
+            <div v-else></div>
+            <div mr-3 ml-3 w-full class="input-slot-div">
+                <slot></slot>
+            </div>
+            <MaxIcon :icon="props.iconRight ?? props.icon ?? props.i" :size="1.2" :light="light" :dark="dark" v-if="hasContent(props.iconRight ?? props.icon ?? props.i) && !props.noIcon && (props.iconRight || props.iconPos === 'right')" mr-5  />
+            <div v-else></div>
+
+            <!-- INPUT STATUS ICON -->
+            <div class="input-status-icon">
+                <div class="is-done" v-if="done && !noDone && !noStatus">
+                    <MaxIcon icon="lets-icons:check-fill" :size="0.8" :light="light" :dark="dark" color-green-700 />
+                </div>
+                <div class="is-caution" v-else-if="caution && !noCaution && !noStatus">
+                    <MaxIcon icon="humbleicons:exclamation" :size="0.8" :light="light" :dark="dark" color-orange-600 />
+                </div>
+                <div class="is-error" v-else-if="error && !noError && !noStatus">
+                    <MaxIcon icon="humbleicons:exclamation" :size="0.8" :light="light" :dark="dark" color-red-700 />
+                </div>
+                <div class="required" v-else-if="required && !noStatus">*</div>
+            </div>
         </div>
-        <div class="is-caution" v-else-if="caution && !noCaution && !noStatus">
-            <MaxIcon icon="humbleicons:exclamation" :size="0.8" :light="light" :dark="dark" color-orange-600 />
+
+        <!-- INPUT MESSAGE -->
+        <div class="input-message">
+            <MaxIcon :icon="iconMessage" v-if="iconMessage && displayMessage" :size="0.9" :light="light" :dark="dark" />
+            <span class="message-text">{{ displayMessage }}</span>
         </div>
-        <div class="is-error" v-else-if="error && !noError && !noStatus">
-            <MaxIcon icon="humbleicons:exclamation" :size="0.8" :light="light" :dark="dark" color-red-700 />
-        </div>
-        <div class="required" v-else-if="required && !noStatus">*</div>
-    </FloatLabel>
+    </div>
 
 </template>
 
 <script setup lang="ts">
     import { hasContent } from '@maxvue/max-use';
     import { computed } from 'vue';
-    import FloatLabel from 'primevue/floatlabel';
-    import IconField from 'primevue/iconfield';
-    import InputIcon from 'primevue/inputicon';
     import MaxIcon from './MaxIcon.vue';
-    import Message from 'primevue/message';
     import { SelectGroupOptions } from '../types';
 
     /**
@@ -153,49 +154,96 @@
 .max-input-main-div {
     display: grid !important;
     grid-template-rows: 36px 19px;
-
-    /* Override do z-index do PrimeVue (.p-inputicon) que sobrepõe o MaxPopover */
-    .p-inputicon {
-        z-index: unset;
-    }
+    position: relative;
+    place-items: center;
 
     .max-input-label {
+        position: absolute;
+        pointer-events: none;
+        line-height: 1;
+
+        // color: var(--background-600);
+        top: calc((0.75rem / 2) * -1);
+        left: 20px;
+        padding: 0 5px !important;
+        font-size: 0.75rem;
+        color: var(--background-650) !important;
+        height: 0.75rem;
+        z-index: 1;
+
+        &::before {
+            content: attr(data-content);
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            top: calc((0.75rem / 2) - 1px);
+            background-color: var(--background-0);
+            z-index: -1;
+        }
+
         &.active {
             top: 0;
             transform: translateY(-50%);
-            border-radius: var(--max-floatlabel-on-border-radius);
-            background: var(--max-floatlabel-on-active-background);
+            border-radius: var(--max-floatlabel-on-border-radius, 2px);
+            background: var(--max-floatlabel-on-active-background, var(--background-0));
             padding: 0 5px !important;
-            font-size: var(--max-floatlabel-active-font-size);
-            font-weight: var(--max-floatlabel-active-font-weight);
+            font-weight: var(--max-floatlabel-active-font-weight, 400);
             inset-inline-start: 15px !important;
         }
     }
 
-    .message-spacer {
-        height: 16px;
-        width: 100%;
+    &:has(.max-input-field-div:focus-within) .max-input-label {
+        color: var(--blue-700) !important;
     }
 
-    .required {
-        position: absolute;
-        top: 1px;
-        right: 3px;
-        color: darkred;
+    .max-input-field-div {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        width: calc(100% - 4px);
+        outline: 1px solid var(--background-300) !important;
+        border-radius: 8px;
+        height: 36px;
+        position: relative;
+
+        &:focus-within {
+            outline: 1px solid var(--blue-700) !important;
+        }
+
+        input, textarea, label, .p-select, .p-select-label {
+            outline: none !important;
+            background-color: transparent !important;
+            height: 100% !important;
+            position: relative !important;
+            padding: 0 7px;
+            border: none !important;
+            box-shadow: none !important;
+            width: 100% !important;
+        }
+
+        .input-status-icon {
+            position: absolute;
+            top: 2px;
+            right: 3px;
+
+            .is-done {
+                color: #16a34a;
+            }
+
+            .is-caution {
+                color: #da422b;
+            }
+
+            .required {
+                position: absolute;
+                top: 1px;
+                right: 3px;
+                color: darkred;
+            }
+        }
     }
 
-    .is-done {
-        position: absolute;
-        top: 2px;
-        right: 3px;
-        color: #16a34a;
-    }
-
-    .is-caution {
-        position: absolute;
-        top: 2px;
-        right: 3px;
-    }
 
     &.text-center {
         input {
@@ -214,20 +262,15 @@
             color: var(--orange-600);
         }
 
-        input {
-            border-color: var(--orange-600);
-        }
 
         .p-select {
             border-color: var(--orange-600);
         }
 
         .input-message {
-            .p-message-content {
-                color: var(--max-orange-500);
-            }
+            color: var(--max-orange-500);
 
-            .p-message-text {
+            .message-text {
                 color: var(--orange-600);
             }
         }
@@ -247,11 +290,9 @@
         }
 
         .input-message {
-            .p-message-content {
-                color: var(--max-red-600);
-            }
+            color: var(--max-red-600);
 
-            .p-message-text {
+            .message-text {
                 color: var(--max-red-600);
             }
         }
@@ -352,6 +393,18 @@
             }
         }
 
+        input, span, select, .p-select-label, .p-inputtext, .value-div, .value-text {
+            color: var(--background-650) !important;
+        }
+
+        // O select aninha .p-select > .p-select-label > .value-div > .value-text; sem isto
+        // cada nivel recebe o fundo acima e as pilulas aparecem empilhadas
+        .p-select {
+            .p-select-label, .value-div, .value-text, span {
+                background-color: transparent !important;
+            }
+        }
+
         .in-line-label {
             font-size: 12px;
             font-weight: 500;
@@ -364,14 +417,16 @@
     }
 
     .input-message {
-        .p-message-content {
-            justify-content: flex-end;
-            padding: 0 6px;
-            padding-top: 4px;
-            color: var(--max-surface-400);
-        }
+        display: none;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 0 6px;
+        padding-top: 4px;
+        color: var(--max-surface-400);
+        height: 16px;
+        width: 100%;
 
-        .p-message-text {
+        .message-text {
             font-size: 10px !important;
         }
     }
