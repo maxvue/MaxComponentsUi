@@ -69,10 +69,12 @@
             data_sent['file'] = [];
         }
 
-        getCachedApiIDB(props.route, { ...(props.data ?? {}), input_value: data_sent }).then((res: any) => {
+        const applyList = (res: any) => {
             if (isBlank(res) || size(res) === 0) return;
             list.value = res;
-        });
+        };
+
+        getCachedApiIDB(props.route, { ...(props.data ?? {}), input_value: data_sent }, null, undefined, applyList).then(applyList);
         return;
     }, { deep: true, immediate: true } );
 

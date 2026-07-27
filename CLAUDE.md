@@ -109,3 +109,8 @@ Os testes ficam em `tests/` e usam Vitest + `@vue/test-utils` + `happy-dom`. A c
 - Ordem dos blocos Template → Script → Style nos arquivos `.vue`
 - Múltiplos aliases de export para o mesmo componente são definidos em `src/index.ts` (ex.: `MaxInputText`, `InputText`, `InputField` apontam todos para o mesmo arquivo)
 - `src/prime/index.ts` re-exporta componentes crus do PrimeVue que não têm wrapper Max, para que as apps consumidoras possam importar tudo de uma única fonte
+
+## Execução de Agentes em Worktree
+
+- Toda execução de agentes/subagentes que proponha modificações de código neste repositório deve ocorrer em um **git worktree separado**, criado especificamente para as alterações propostas (`git worktree add ../MaxComponentsUi-wt-<slug> -b <slug>`) — nunca diretamente no working tree principal.
+- Valide as mudanças no worktree isolado e só então integre (merge) ao branch principal.
