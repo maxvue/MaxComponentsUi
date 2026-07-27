@@ -73,7 +73,7 @@
 
     const value_dark = computed(() => {
         if (isNumber(props.dark)) return props.dark;
-        if (props.dark) return 0.8;
+        if (props.dark) return 0.6;
         return null;
     });
 

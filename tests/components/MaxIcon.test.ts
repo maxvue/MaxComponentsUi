@@ -66,7 +66,7 @@ describe('MaxIcon', () => {
         const escuro = mountIcon({ dark: true }).find('.max-icon-div').attributes('style');
 
         expect(padrao).toContain('rgba(0, 0, 0, 0.4)');
-        expect(escuro).toContain('rgba(0, 0, 0, 0.8)');
+        expect(escuro).toContain('rgba(0, 0, 0, 0.6)');
     });
 
     it('aplica cor clara via light', () => {
