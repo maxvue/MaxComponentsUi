@@ -1,6 +1,6 @@
 <template>
-    <InputBase v-bind="props" class="input-credit-card-cvv-base" text-center :label="props.label" :done="done" :required="props.required" :error="error_msg">
-        <InputText type="text" v-bind="attrs" v-model="temp_value" v-maska:unmaskedValue.unmasked="maskValue" placeholder="000" autoClear="false" slotChar=" " @blur="checkDone()" />
+    <InputBase v-bind="props" class="input-credit-card-number-base" text-center :label="props.label" :done="done" :required="props.required" :error="error_msg">
+        <InputText type="text" v-bind="attrs" v-model="temp_value" v-maska:unmaskedValue.unmasked="maskValue" placeholder="0000 0000 0000 0000" autoClear="false" slotChar=" " @blur="checkDone()" />
     </InputBase>
 </template>
 
@@ -9,6 +9,7 @@
     import { ref, computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
     import InputText from 'primevue/inputtext';
+    import { isValidCreditCard } from '@maxvue/max-use';
 
     const attrs: any = useAttrs();
 
@@ -16,10 +17,9 @@
         defineProps<{
             modelValue: string;
             label?: string | undefined;
-            len?: number;
             required?: boolean;
         }>(),
-        { modelValue: '', label: 'CVV', len: 3, required: false }
+        { modelValue: '', label: 'Número do cartão', required: false }
     );
 
     const emit = defineEmits<{
@@ -33,14 +33,14 @@
 
     const isDone = ref<boolean | null>(null);
 
-    const done = computed(() => isDone.value ?? (unmaskedValue.value.length > 0 ? unmaskedValue.value.length === props.len : null));
+    const done = computed(() => isDone.value ?? (unmaskedValue.value.length > 0 ? isValidCreditCard(unmaskedValue.value) : null));
 
     const checkDone = () => {
-        isDone.value = unmaskedValue.value.length > 0 ? unmaskedValue.value.length === props.len : (props.required ? false : null);
+        isDone.value = unmaskedValue.value.length > 0 ? isValidCreditCard(unmaskedValue.value) : (props.required ? false : null);
     };
 
     const error_msg = computed(() => {
-        if (isDone.value === false) return unmaskedValue.value.length === 0 ? 'Campo obrigatório' : 'CVV inválido';
+        if (isDone.value === false) return unmaskedValue.value.length === 0 ? 'Campo obrigatório' : 'Número de cartão inválido';
         return null;
     });
 
@@ -51,7 +51,7 @@
 
         return {
             tokens: tokens,
-            mask: '#'.repeat(props.len)
+            mask: '#### #### #### ####'
         };
     });
 
@@ -71,7 +71,7 @@
 </script>
 
 <style lang="scss">
-.input-credit-card-cvv-base {
+.input-credit-card-number-base {
     input {
         letter-spacing: 2px;
     }
