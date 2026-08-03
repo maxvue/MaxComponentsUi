@@ -135,4 +135,84 @@ describe('MaxModal', () => {
         await bg.trigger('click');
         expect(store.show_id).toBe(null);
     });
+
+    it('expõe open() e close() via defineExpose', () => {
+        const wrapper = mountModal();
+        const vm = wrapper.vm as any;
+        expect(typeof vm.open).toBe('function');
+        expect(typeof vm.close).toBe('function');
+    });
+
+    it('open() abre e é idempotente (chamadas repetidas não alteram nada)', () => {
+        const wrapper = mountModal();
+        const vm = wrapper.vm as any;
+        const store = useModalStore();
+
+        vm.open();
+        expect(store.show_id).toBe(vm.id);
+
+        // Chamar novamente não deve fazer nada (idempotente)
+        vm.open();
+        expect(store.show_id).toBe(vm.id);
+    });
+
+    it('close() fecha preservando a animação de saída (opacity -> 0, depois remove após 300ms)', () => {
+        vi.useFakeTimers();
+        const wrapper = mountModal();
+        const vm = wrapper.vm as any;
+        const store = useModalStore();
+
+        vm.open();
+        expect(store.show_id).toBe(vm.id);
+
+        vm.close();
+
+        // Ainda não removido: aguardando a animação de saída
+        expect(store.show_id).toBe(vm.id);
+
+        // Timeout 1 (1ms) zera opacity
+        vi.advanceTimersByTime(2);
+        expect(vm.style.opacity).toBe(0);
+        expect(store.show_id).toBe(vm.id); // ainda presente durante a transição CSS
+
+        // Timeout 2 (300ms) remove de fato
+        vi.advanceTimersByTime(350);
+        expect(store.show_id).toBe(null);
+
+        // Idempotente: chamar close() de novo não faz nada
+        vm.close();
+        expect(store.show_id).toBe(null);
+
+        vi.useRealTimers();
+    });
+
+    it('open() -> close() -> open() em sequência rápida NÃO é descartado pelo guard de 400ms', () => {
+        vi.useFakeTimers();
+        const wrapper = mountModal();
+        const vm = wrapper.vm as any;
+        const store = useModalStore();
+
+        // Abre
+        vm.open();
+        expect(store.show_id).toBe(vm.id);
+        vi.advanceTimersByTime(2);
+
+        // Fecha imediatamente (bem antes dos 400ms do guard de toggle())
+        vm.close();
+        vi.advanceTimersByTime(2); // dispara o setTimeout(1) que zera opacity
+
+        // Reabre ANTES dos 300ms de saída completarem e ANTES dos 400ms do guard
+        vm.open();
+
+        // open() reafirma imediatamente o show_id (sem esperar timers)
+        expect(store.show_id).toBe(vm.id);
+
+        vi.advanceTimersByTime(500);
+
+        // Resultado final determinístico: modal aberto
+        expect(store.show_id).toBe(vm.id);
+        expect(vm.style.opacity).toBe(1);
+
+        vi.useRealTimers();
+    });
 });

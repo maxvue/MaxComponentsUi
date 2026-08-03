@@ -29,7 +29,7 @@
 <script setup lang="ts">
     import { useModalStore } from '../stores/useModal.Store';
     import { Random, useDefaultReset, refAutoReset } from '@maxvue/max-use';
-    import { useTemplateRef, computed, ref } from 'vue';
+    import { useTemplateRef, computed, ref, watch } from 'vue';
     import MaxIconButton from './MaxIconButton.vue';
     import MaxButton from './MaxButton.vue';
     import MaxTitle1 from './MaxTitle1.vue';
@@ -112,19 +112,58 @@
 
     const is_changing = refAutoReset(false, 400);
 
+    /**
+     * Timers de transição (abertura/fechamento) atualmente agendados.
+     * Guardado para que uma chamada mais recente (toggle/open/close) possa
+     * cancelar uma transição anterior ainda em voo, evitando que um
+     * `hide()`/`toggle()` tardio (do fechamento anterior) desfaça uma
+     * reabertura programática que já aconteceu.
+     */
+    let pending_timers: ReturnType<typeof setTimeout>[] = [];
+
+    const clearPendingTimers = () => {
+        pending_timers.forEach((timer) => clearTimeout(timer));
+        pending_timers = [];
+    };
+
+    /**
+     * Última intenção determinística expressa via open()/close().
+     * Necessário porque `modal_store.show_id` continua igual ao `id` deste
+     * modal durante toda a animação de saída (opacity indo a 0 até o
+     * `hide()` disparar aos 300ms) — usá-lo sozinho para checar
+     * idempotência faria `open()` concluir, erradamente, que o modal já
+     * está aberto enquanto na verdade ele está no meio do fechamento.
+     */
+    let intent: 'open' | 'closed' = 'closed';
+
+    /**
+     * Se este modal for fechado por uma via que não passa por close()
+     * (clique no fundo/botão X, que chamam `modal_store.hide` diretamente,
+     * ou outro modal assumindo o `show_id` global), sincroniza `intent` de
+     * volta para 'closed' para que um open() futuro não seja descartado
+     * por acreditar, erroneamente, que o modal já está "abrindo".
+     */
+    watch(() => modal_store.show_id, (value) => {
+        if (value !== id.value) intent = 'closed';
+    });
+
     const toggle = () => {
 
         if (is_changing.value) return;
 
         is_changing.value = true;
 
+        clearPendingTimers();
+
         if (style.value.opacity !== 0) style.reset();
 
         // ADICIONA MODAL
         if (modal_store.show_id !== id.value) {
 
+            intent = 'open';
+
             modal_store.toggle(id.value);
-            setTimeout(() => {
+            pending_timers.push(setTimeout(() => {
                 const data = {
                     isTop: false,
                     isLeft: false,
@@ -133,19 +172,72 @@
 
                 style.value = data;
                 style.value.opacity = 1;
-            }, 1);
+            }, 1));
 
             return;
         }
 
         // REMOVE MODAL
-        else if (modal_store.show_id === id.value) setTimeout(() => {
-            style.value.opacity = 0;
-            setTimeout(() => {
-                modal_store.toggle(id.value);
-            }, 300);
-        }, 1);
+        else if (modal_store.show_id === id.value) {
 
+            intent = 'closed';
+
+            pending_timers.push(setTimeout(() => {
+                style.value.opacity = 0;
+                pending_timers.push(setTimeout(() => {
+                    modal_store.toggle(id.value);
+                }, 300));
+            }, 1));
+
+        }
+
+
+    };
+
+    const open = () => {
+
+        // Idempotente: já aberto (ou abrindo), não faz nada.
+        if (intent === 'open') return;
+
+        intent = 'open';
+
+        // Cancela qualquer fechamento (via toggle/close) ainda em andamento,
+        // para que ele não desfaça esta reabertura mais tarde.
+        clearPendingTimers();
+
+        if (style.value.opacity !== 0) style.reset();
+
+        modal_store.show(id.value);
+        pending_timers.push(setTimeout(() => {
+            const data = {
+                isTop: false,
+                isLeft: false,
+                opacity: 0
+            };
+
+            style.value = data;
+            style.value.opacity = 1;
+        }, 1));
+
+    };
+
+    const close = () => {
+
+        // Idempotente: já fechado (ou fechando), não faz nada.
+        if (intent === 'closed') return;
+
+        intent = 'closed';
+
+        // Cancela qualquer abertura (via toggle/open) ainda em andamento,
+        // para que ela não sobreponha este fechamento mais tarde.
+        clearPendingTimers();
+
+        pending_timers.push(setTimeout(() => {
+            style.value.opacity = 0;
+            pending_timers.push(setTimeout(() => {
+                modal_store.hide();
+            }, 300));
+        }, 1));
 
     };
 
@@ -153,7 +245,9 @@
         toggle,
         is_show,
         show,
-        hide
+        hide,
+        open,
+        close
     });
 
 </script>
