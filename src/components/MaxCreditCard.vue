@@ -5,16 +5,53 @@
                 <div class="flip-card-front">
                     <svg viewBox="0 0 700 430">
                         <image :href="creditCardFrontUri" x="0" y="0" width="700" height="430" />
-                        <text x="105" y="270" font-size="42" fill="#336699" font-weight="700" font-family="'JetBrains Mono', monospace">{{ t1 }} {{ t2 }} {{ t3 }} {{ t4 }}</text>
-                        <text x="35" y="340" font-size="32" fill="#336699" font-family="'JetBrains Mono', monospace">{{ props.name || 'NOME IMPRESSO NO CARTÃO' }}</text>
-                        <text x="35" y="380" font-size="28" fill="#336699" font-family="'JetBrains Mono', monospace">{{ date }}</text>
+                        <text
+                            ref="numberTextEl"
+                            x="105"
+                            y="270"
+                            font-size="42"
+                            fill="#336699"
+                            font-weight="700"
+                            font-family="'JetBrains Mono', monospace"
+                            :textLength="numberTextLength"
+                            :lengthAdjust="numberTextLength ? 'spacingAndGlyphs' : undefined"
+                        >{{ t1 }} {{ t2 }} {{ t3 }} {{ t4 }}</text>
+                        <text
+                            ref="nameTextEl"
+                            x="35"
+                            y="340"
+                            font-size="32"
+                            fill="#336699"
+                            font-family="'JetBrains Mono', monospace"
+                            :textLength="nameTextLength"
+                            :lengthAdjust="nameTextLength ? 'spacingAndGlyphs' : undefined"
+                        >{{ props.name || 'NOME IMPRESSO NO CARTÃO' }}</text>
+                        <text
+                            ref="dateTextEl"
+                            x="35"
+                            y="380"
+                            font-size="28"
+                            fill="#336699"
+                            font-family="'JetBrains Mono', monospace"
+                            :textLength="dateTextLength"
+                            :lengthAdjust="dateTextLength ? 'spacingAndGlyphs' : undefined"
+                        >{{ date }}</text>
                         <image v-if="card_type_image" :href="card_type_image" x="540" y="320" width="138" height="92" />
                     </svg>
                 </div>
                 <div class="flip-card-back">
                     <svg viewBox="0 0 700 430">
                         <image :href="creditCardRearUri" x="0" y="0" width="700" height="430" />
-                        <text x="548" y="218" font-size="36" fill="#336699" font-family="'JetBrains Mono', monospace">{{ cvv }}</text>
+                        <text
+                            ref="cvvTextEl"
+                            x="548"
+                            y="218"
+                            font-size="36"
+                            fill="#336699"
+                            font-family="'JetBrains Mono', monospace"
+                            :textLength="cvvTextLength"
+                            :lengthAdjust="cvvTextLength ? 'spacingAndGlyphs' : undefined"
+                        >{{ cvv }}</text>
                         <image v-if="card_type_image" :href="card_type_image" x="540" y="320" width="138" height="92" />
                     </svg>
                 </div>
@@ -24,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-    import { computed } from 'vue';
+    import { computed, ref, nextTick, watch, onMounted } from 'vue';
     import { onlyNumbers } from '@maxvue/max-use';
     import { svgToDataUri } from '../helpers/svgToDataUri';
     import creditCardFrontSvg from '../assets/credit-card/credit-card.svg?raw';
@@ -119,6 +156,61 @@
     });
 
     const side = computed(() => (props.side === 'back' ? 'flip' : ''));
+
+    /**
+     * Largura máxima disponível (em unidades do viewBox 700x430) para cada texto do cartão,
+     * calculada a partir do `x` inicial de cada elemento até a margem/elemento vizinho seguinte.
+     */
+    const NUMBER_MAX_WIDTH = 560; // x=105 até próximo da bandeira/margem direita
+    const NAME_MAX_WIDTH = 460; // x=35 até a margem direita, antes da bandeira
+    const DATE_MAX_WIDTH = 150; // x=35, campo curto de validade
+    const CVV_MAX_WIDTH = 120; // x=548 até a margem direita
+
+    const numberTextEl = ref<SVGTextElement | null>(null);
+    const nameTextEl = ref<SVGTextElement | null>(null);
+    const dateTextEl = ref<SVGTextElement | null>(null);
+    const cvvTextEl = ref<SVGTextElement | null>(null);
+
+    const numberTextLength = ref<number | undefined>(undefined);
+    const nameTextLength = ref<number | undefined>(undefined);
+    const dateTextLength = ref<number | undefined>(undefined);
+    const cvvTextLength = ref<number | undefined>(undefined);
+
+    /**
+     * Mede a largura real renderizada de um `<text>` (com a fonte de fato disponível no
+     * navegador, seja `JetBrains Mono` ou o fallback `monospace`) e só define `textLength`
+     * quando o texto realmente transborda o espaço disponível. Isso evita esticar (ou
+     * comprimir) de forma artificial textos curtos, como nomes pequenos ou o placeholder,
+     * mantendo a proporção visual entre grupos de tamanhos diferentes (ex.: Amex 4-6-5).
+     */
+    function clampTextLength(el: SVGTextElement | null, maxWidth: number, target: { value: number | undefined }): void {
+        if (!el || typeof el.getComputedTextLength !== 'function') {
+            target.value = undefined;
+            return;
+        }
+
+        // `getComputedTextLength()` sempre retorna a largura natural dos glifos, ignorando
+        // um `textLength` já aplicado — por isso é seguro medir sem remover o atributo antes.
+        const naturalWidth = el.getComputedTextLength();
+        target.value = naturalWidth > maxWidth ? maxWidth : undefined;
+    }
+
+    function updateAllTextLengths(): void {
+        clampTextLength(numberTextEl.value, NUMBER_MAX_WIDTH, numberTextLength);
+        clampTextLength(nameTextEl.value, NAME_MAX_WIDTH, nameTextLength);
+        clampTextLength(dateTextEl.value, DATE_MAX_WIDTH, dateTextLength);
+        clampTextLength(cvvTextEl.value, CVV_MAX_WIDTH, cvvTextLength);
+    }
+
+    onMounted(async () => {
+        await nextTick();
+        updateAllTextLengths();
+    });
+
+    watch([t1, t2, t3, t4, () => props.name, date, cvv], async () => {
+        await nextTick();
+        updateAllTextLengths();
+    });
 </script>
 
 <style lang="scss">
