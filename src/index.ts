@@ -58,6 +58,7 @@ export { default as MaxCreditCard } from './components/MaxCreditCard.vue';
 export { default as MaxInputCpfCnpj } from './components/MaxInputCpfCnpj.vue';
 export { default as MaxInputCreditCard } from './components/MaxInputCreditCard.vue';
 export { default as MaxInputCreditCardCvv } from './components/MaxInputCreditCardCvv.vue';
+export { default as MaxInputCreditCardDate } from './components/MaxInputCreditCardDate.vue';
 export { default as MaxInputDatePicker } from './components/MaxInputDatePicker.vue';
 export { default as MaxInputField } from './components/MaxInputText.vue';
 export { default as MaxInputFile } from './components/MaxInputFile.vue';

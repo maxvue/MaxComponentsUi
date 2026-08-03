@@ -4,7 +4,7 @@
             <div class="flip-card-inner">
                 <div class="flip-card-front">
                     <svg viewBox="0 0 700 430">
-                        <image :href="`${props.assetsPath}/credit-card.svg`" x="0" y="0" width="700" height="430" />
+                        <image :href="creditCardFrontUri" x="0" y="0" width="700" height="430" />
                         <text x="105" y="270" font-size="42" fill="#336699" font-weight="700" font-family="'JetBrains Mono', monospace">{{ t1 }} {{ t2 }} {{ t3 }} {{ t4 }}</text>
                         <text x="35" y="340" font-size="32" fill="#336699" font-family="'JetBrains Mono', monospace">{{ props.name || 'NOME IMPRESSO NO CARTÃO' }}</text>
                         <text x="35" y="380" font-size="28" fill="#336699" font-family="'JetBrains Mono', monospace">{{ date }}</text>
@@ -13,7 +13,7 @@
                 </div>
                 <div class="flip-card-back">
                     <svg viewBox="0 0 700 430">
-                        <image :href="`${props.assetsPath}/credit-card-rear.svg`" x="0" y="0" width="700" height="430" />
+                        <image :href="creditCardRearUri" x="0" y="0" width="700" height="430" />
                         <text x="548" y="218" font-size="36" fill="#336699" font-family="'JetBrains Mono', monospace">{{ cvv }}</text>
                         <image v-if="card_type_image" :href="card_type_image" x="540" y="320" width="138" height="92" />
                     </svg>
@@ -26,6 +26,41 @@
 <script setup lang="ts">
     import { computed } from 'vue';
     import { onlyNumbers } from '@maxvue/max-use';
+    import { svgToDataUri } from '../helpers/svgToDataUri';
+    import creditCardFrontSvg from '../assets/credit-card/credit-card.svg?raw';
+    import creditCardRearSvg from '../assets/credit-card/credit-card-rear.svg?raw';
+    import cardAmexSvg from '../assets/credit-card/card-amex.svg?raw';
+    import cardAmericanExpressSvg from '../assets/credit-card/card-american-express.svg?raw';
+    import cardDinersSvg from '../assets/credit-card/card-diners.svg?raw';
+    import cardDinersClubSvg from '../assets/credit-card/card-diners-club.svg?raw';
+    import cardDiscoverySvg from '../assets/credit-card/card-discovery.svg?raw';
+    import cardEloSvg from '../assets/credit-card/card-elo.svg?raw';
+    import cardHipercardSvg from '../assets/credit-card/card-hipercard.svg?raw';
+    import cardHiperSvg from '../assets/credit-card/card-hiper.svg?raw';
+    import cardJcbSvg from '../assets/credit-card/card-jcb.svg?raw';
+    import cardMaestroSvg from '../assets/credit-card/card-maestro.svg?raw';
+    import cardMastercardSvg from '../assets/credit-card/card-mastercard.svg?raw';
+    import cardVisaSvg from '../assets/credit-card/card-visa.svg?raw';
+
+    /** SVGs das bandeiras embutidos no bundle, indexados pelos mesmos nomes usados anteriormente em `card-${cardType}.svg`. */
+    const CARD_TYPE_SVGS: Record<string, string> = {
+        amex: cardAmexSvg,
+        'american-express': cardAmericanExpressSvg,
+        diners: cardDinersSvg,
+        'diners-club': cardDinersClubSvg,
+        discover: cardDiscoverySvg,
+        discovery: cardDiscoverySvg,
+        elo: cardEloSvg,
+        hipercard: cardHipercardSvg,
+        hiper: cardHiperSvg,
+        jcb: cardJcbSvg,
+        maestro: cardMaestroSvg,
+        mastercard: cardMastercardSvg,
+        visa: cardVisaSvg
+    };
+
+    const creditCardFrontUri = svgToDataUri(creditCardFrontSvg);
+    const creditCardRearUri = svgToDataUri(creditCardRearSvg);
 
     /**
      * Representação visual de um cartão de crédito, com frente e verso.
@@ -44,10 +79,8 @@
             cardType?: string | null;
             /** Face exibida do cartão */
             side?: 'front' | 'back';
-            /** Caminho base das imagens SVG do cartão na aplicação consumidora */
-            assetsPath?: string;
         }>(),
-        { number: '', cvv: '', name: '', date: '', cardType: null, side: 'front', assetsPath: '/media/images' }
+        { number: '', cvv: '', name: '', date: '', cardType: null, side: 'front' }
     );
 
     const code = computed(() => onlyNumbers(String(props.number ?? '')).padEnd(16, '0').slice(0, 16));
@@ -73,7 +106,11 @@
     });
 
     const card_type = computed(() => props.cardType ?? detected_type.value);
-    const card_type_image = computed(() => (card_type.value ? `${props.assetsPath}/card-${card_type.value}.svg` : false));
+    const card_type_image = computed(() => {
+        if (!card_type.value) return false;
+        const svg = CARD_TYPE_SVGS[card_type.value];
+        return svg ? svgToDataUri(svg) : false;
+    });
 
     const date = computed(() => {
         const digits = onlyNumbers(String(props.date ?? ''));
