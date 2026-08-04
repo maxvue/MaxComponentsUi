@@ -189,3 +189,6 @@ export type MenuItem = {
     url?: string;
 
 };
+
+// Tipos do MaxChart (formato chart.js).
+export type * from './chart';

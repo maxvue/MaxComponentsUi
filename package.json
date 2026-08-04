@@ -63,6 +63,7 @@
         "@tiptap/vue-3": "^3.27.1",
         "@unocss/reset": "^66.7.0",
         "axios": "^1.16.1",
+        "chart.js": "^4.5.1",
         "color": "^5.0.3",
         "libphonenumber-js": "^1.13.3",
         "maska": "^3.2.0",
