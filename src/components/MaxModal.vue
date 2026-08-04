@@ -7,12 +7,16 @@
         </div>
         <teleport to="body">
             <div class="background-modal" @click.stop="modal_store.hide" v-if="modal_store.show_id === id" :style="{opacity: style?.opacity}" :data-html2canvas-ignore="props.ignoreCanvas">
-                <div class="max-modal" ref="el" :style="{top: style.top + 'px', left: style.left + 'px'}"  @click.stop="() => {}" :class="props.class">
+                <div class="max-modal" ref="el" :style="{top: style.top + 'px', left: style.left + 'px', padding: modal_padding}"  @click.stop="() => {}" :class="props.class">
                     <slot name="header" v-if="!props.noHeader">
                         <MaxGrid s100 class="max-modal-header" pt0 mt0 mb-15>
-                            <MaxTitle1 s90  :h1="props.title ?? 'Titulo'" :h2="props.subTitle ?? 'Sub Titulo'" p0 m0 />
+                            <slot name="title" v-bind="props">
+                                <MaxTitle1 s90  :h1="props.title ?? 'Titulo'" :h2="props.subTitle ?? 'Sub Titulo'" p0 m0 />
+                            </slot>
                             <div s1 w-max-23>
-                                <MaxIconButton i="iconoir:xmark" size="1.3" @click.stop="modal_store.hide" class="close-btn" />
+                                <slot name="close" :close="close" :hide="modal_store.hide">
+                                    <MaxIconButton i="iconoir:xmark" size="1.3" @click.stop="modal_store.hide" class="close-btn" />
+                                </slot>
                             </div>
                         </MaxGrid>
                     </slot>
@@ -77,6 +81,8 @@
         plus?: boolean | string | number | undefined;
         /** IgnoreCanvas */
         ignoreCanvas?: boolean;
+        /** Padding geral do interior do modal (incluindo header/títulos). Número em px ou string CSS (ex: '1rem', '10px 20px') */
+        padding?: string | number;
         /** No Button Flag */
         noButton?: boolean;
         /** No Header Flag */
@@ -93,6 +99,11 @@
     });
 
     const is_show = computed(() => modal_store.show_id === id.value);
+
+    const modal_padding = computed(() => {
+        if (props.padding === undefined) return undefined;
+        return typeof props.padding === 'number' ? `${props.padding}px` : props.padding;
+    });
 
     const modal_store = useModalStore();
 

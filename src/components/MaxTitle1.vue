@@ -1,6 +1,8 @@
 <template>
     <div class="max-title-2" :class="{ center: center }">
-        <MaxIcon :i="resolvedIcon" v-if="resolvedIcon" :size="resolvedIconSize" class="mb-2" pr-8 />
+        <!-- Sem `pr-8` aqui: o MaxIcon replica os attrs no div interno (v-bind="attrs"), e o
+             padding duplicado esmagava o svg. O espaçamento fica no column-gap do wrapper. -->
+        <MaxIcon :i="resolvedIcon" v-if="resolvedIcon" :size="resolvedIconSize" class="mb-2" />
         <div>
             <div v-if="resolvedTitle" class="text-lg font-medium uppercase t1-main-text">{{ resolvedTitle }}</div>
             <div v-if="resolvedSubtitle" class="text-sm t2-main-text" v-html="resolvedSubtitle"></div>
@@ -34,6 +36,7 @@
     .max-title-2 {
         display: grid;
         grid-template-columns: auto 1fr;
+        column-gap: 8px;
         place-items: center start;
         padding: 10px 0 0;
         width: 100%;

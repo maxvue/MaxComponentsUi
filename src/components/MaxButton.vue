@@ -7,7 +7,7 @@
             <MaxIcon v-if="props.icon ?? props.i" :icon="props.icon ?? props.i" :size="props.size ?? props.sizeIcon ?? props.iconSize ?? '1'" class="content-button-icon" :dark="props.dark" :light="light" :color="iconColor" />
         </template>
         <template #loadingicon>
-            <MaxIcon  icon="loading" :size="props.size ?? props.sizeIcon ?? props.iconSize ?? '1'" class="content-button-icon" flex />
+            <MaxIcon  icon="loading" :size="props.size ?? props.sizeIcon ?? props.iconSize ?? '1'" class="content-button-icon" />
         </template>
     </Button>
     <MaxIconButton  v-bind="props" v-else class="icon-button-b" ></MaxIconButton>
