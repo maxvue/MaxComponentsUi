@@ -302,10 +302,10 @@
         &:not([input-click='false']) {
             grid-template-rows: 1fr;
             height: 20px;
+            padding: 0 !important;
 
-            div, span, input, select, .p-select-label, .value-div {
-                width: 100%;
-                max-height: 20px;
+            span, input, select, .p-select, .p-inputnumber {
+                width: calc(100% - 4px) !important;
                 border: none !important;
                 border-color: transparent !important;
                 outline: none !important;
@@ -314,7 +314,31 @@
                 font-size: 0.9rem;
                 color: rgb(66 54 54);
                 font-weight: 450;
-                padding: 0 2px !important;
+                padding: 0 !important;
+
+            }
+
+            .value-div {
+                width: 100% !important;
+                border: none !important;
+                border-color: transparent !important;
+                outline: none !important;
+            }
+
+            .p-select-label {
+                min-height: 10px !important;
+                max-height: 10px !important;
+            }
+
+            .max-input-field-div {
+                max-height: 20px;
+                background-color: var(--background-100);
+            }
+
+            .input-slot-div {
+                height: 100% !important;
+                max-height: 20px;
+                width: calc(100% - 6px) !important;
             }
 
             .message-spacer {
@@ -344,18 +368,16 @@
         }
     }
 
-    &[slim] {
-        grid-template-rows: 24px;
-        height: 22px;
+    &[slim], &[input-click] {
+        grid-template-rows: 20px;
+        height: 20px;
 
-        div, span, input, select, .p-select-label, .value-div, .value-text {
-            height: 21px !important;
-            max-height: 21px !important;
+        div, span, input, select, .p-select, .value-div, .value-text {
+            height: 20px !important;
+            max-height: 20px !important;
             font-size: 0.8rem;
 
-            :not(.p-inputnumber) {
-                padding: 0 4px !important;
-            }
+
         }
 
         .message-spacer {
@@ -379,13 +401,15 @@
         grid-template-columns: auto 1fr !important;
         grid-template-rows: 1fr !important;
         place-items: center start;
-        gap: 4px !important;
+        gap: 7px !important;
         padding: 0 !important;
 
-        div, span, input, select, .p-select-label, .p-inputtext, .p-component, .value-div {
-            background-color: var(--background-100) !important;
-            border-radius: 4px;
-            padding: 0 0 0 4px !important;
+        .input-slot-div {
+            min-height: 100% !important;
+        }
+
+        div, span, input, select, .p-select-label, .p-inputtext, .p-inputnumber, .p-component, .value-div {
+            height: 100% !important;
 
             .value-div {
                 width: 100% !important;

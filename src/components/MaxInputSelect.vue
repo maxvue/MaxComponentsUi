@@ -46,7 +46,7 @@
             </template>
             <template #value="value">
                 <div class="value-div" :style="{ color: options.find((option: any) => option[props.optionValue] === value.value)?.color }">
-                    <Icon :icon="option_selected.icon ?? null" :size="option_selected.icon_size ?? undefined" pr10/>
+                    <Icon :icon="option_selected.icon ?? null" :size="option_selected.icon_size ?? undefined" :style="{paddingRight: option_selected.icon ? '10px' : '0'}" />
                     <span class="value-text" elipsis>{{ option_selected[props.optionName] ?? option_selected.name ?? option_selected.label }}</span>
                 </div>
             </template>

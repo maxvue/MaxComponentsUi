@@ -8,6 +8,7 @@
             :disabled="props.disabled"
             :autofocus="props.autofocus"
             :wrap="props.wrap"
+            :auto-resize="props.autoResize ? '' : undefined"
             v-bind="attrs"
             @input="onInput"
             @blur="checkDone()"
@@ -85,6 +86,8 @@
     watch( temp_value, () => emit('update:modelValue', temp_value.value),{ immediate: true });
 
     watch(() => props.modelValue, (val) => temp_value.value = val ?? '');
+
+    watch(temp_value, () => nextTick(resize));
 </script>
 
 <style lang="scss">
@@ -105,6 +108,11 @@
 
             &[no-border] {
                 border: none !important;
+            }
+
+            &[auto-resize] {
+                height: auto !important;
+                overflow-y: hidden;
             }
         }
     }
