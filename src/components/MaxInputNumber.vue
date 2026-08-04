@@ -53,11 +53,13 @@
             suffix?: string | undefined;
             /** Placeholder do campo */
             placeholder?: string | undefined;
-            /** Número de casas decimais */
+            /** Mínimo de casas decimais */
             minFractionDigits?: number | undefined;
+            /** Máximo de casas decimais */
+            maxFractionDigits?: number | undefined;
 
         }>(),
-        { modelValue: '', done: undefined, required: false, caution: undefined, prefix: undefined, suffix: undefined, placeholder: undefined, minFractionDigits: 2 }
+        { modelValue: '', done: undefined, required: false, caution: undefined, prefix: undefined, suffix: undefined, placeholder: undefined, minFractionDigits: 0, maxFractionDigits: 2 }
     );
 
     const temp_value = ref(props.modelValue);

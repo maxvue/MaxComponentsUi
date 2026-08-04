@@ -22,7 +22,7 @@
 
                 <span s100 class="max-auth-error" v-if="error">{{ error }}</span>
 
-                <MaxButton s100 :label="t.submit" icon="mdi:login" :loading="true" :action="onSubmit" />
+                <MaxButton s100 :label="t.submit" icon="mdi:login" :loading="loading" :action="onSubmit" />
 
                 <template v-if="providers.length">
                     <div class="max-auth-divider" s100>
