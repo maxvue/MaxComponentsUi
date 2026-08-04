@@ -3,6 +3,8 @@ import { mount } from '@vue/test-utils';
 import MaxTabs from '../../src/components/MaxTabs.vue';
 import MaxTabList from '../../src/components/MaxTabList.vue';
 import MaxTab from '../../src/components/MaxTab.vue';
+import MaxTabPanels from '../../src/components/MaxTabPanels.vue';
+import MaxTabPanel from '../../src/components/MaxTabPanel.vue';
 
 /** Monta a estrutura completa de headers usada nos testes de teclado. */
 const mountTabList = (props: Record<string, unknown> = {}) => mount(MaxTabs, {
@@ -118,5 +120,63 @@ describe('MaxTabList', () => {
         const wrapper = mountTabList();
         await wrapper.findAll('.max-tab')[2].trigger('keydown', { key: 'Enter' });
         expect(wrapper.emitted('update:value')?.[0]).toEqual(['2']);
+    });
+});
+
+/** Monta a estrutura completa de tabs com painéis. */
+const mountFull = (props: Record<string, unknown> = {}) => mount(MaxTabs, {
+    props: { value: '0', ...props },
+    slots: {
+        default: `
+            <MaxTabList>
+                <MaxTab value="0">Um</MaxTab>
+                <MaxTab value="1">Dois</MaxTab>
+            </MaxTabList>
+            <MaxTabPanels>
+                <MaxTabPanel value="0"><span class="p0">Painel Um</span></MaxTabPanel>
+                <MaxTabPanel value="1"><span class="p1">Painel Dois</span></MaxTabPanel>
+            </MaxTabPanels>
+        `
+    },
+    global: { components: { MaxTabList, MaxTab, MaxTabPanels, MaxTabPanel } }
+});
+
+describe('MaxTabPanel', () => {
+    it('mostra apenas o painel do tab ativo', () => {
+        const wrapper = mountFull();
+        expect(wrapper.find('.p0').isVisible()).toBe(true);
+        expect(wrapper.find('.p1').isVisible()).toBe(false);
+    });
+
+    it('troca o painel visivel quando value muda', async () => {
+        const wrapper = mountFull();
+        await wrapper.setProps({ value: '1' });
+        expect(wrapper.find('.p0').isVisible()).toBe(false);
+        expect(wrapper.find('.p1').isVisible()).toBe(true);
+    });
+
+    it('aplica role tabpanel e aria-labelledby apontando ao header', () => {
+        const wrapper = mountFull();
+        const panel = wrapper.find('.max-tab-panel');
+        expect(panel.attributes('role')).toBe('tabpanel');
+        expect(panel.attributes('aria-labelledby')).toContain('-tab-0');
+    });
+
+    it('com lazy, o painel inativo nunca foi montado', () => {
+        const wrapper = mountFull({ lazy: true });
+        expect(wrapper.find('.p1').exists()).toBe(false);
+    });
+
+    it('sem lazy, o painel inativo permanece no DOM apenas oculto', () => {
+        const wrapper = mountFull();
+        const panels = wrapper.findAll('.max-tab-panel');
+        expect(panels.length).toBe(2);
+    });
+
+    it('com lazy, painel ja visitado continua montado apos sair', async () => {
+        const wrapper = mountFull({ lazy: true });
+        await wrapper.setProps({ value: '1' });
+        await wrapper.setProps({ value: '0' });
+        expect(wrapper.findAll('.max-tab-panel').length).toBe(2);
     });
 });

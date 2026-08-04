@@ -22,9 +22,14 @@ const localStorageMock = (() => {
 
 Object.defineProperty(globalThis, 'localStorage', { value: localStorageMock });
 
-// Mock do getComputedStyle para testes de getColorFromVar
+// Mock do getComputedStyle para testes de getColorFromVar.
+// Repassa display/visibility/opacity do style inline real do elemento, para que
+// utilitários como wrapper.isVisible() do @vue/test-utils (usado com v-show) funcionem.
 Object.defineProperty(globalThis, 'getComputedStyle', {
-    value: vi.fn(() => ({
+    value: vi.fn((element?: HTMLElement) => ({
+        display: element?.style?.display || '',
+        visibility: element?.style?.visibility || '',
+        opacity: element?.style?.opacity || '',
         getPropertyValue: vi.fn((prop: string) => {
             const cssVars: Record<string, string> = {
                 '--blue-500': '#3b82f6',
