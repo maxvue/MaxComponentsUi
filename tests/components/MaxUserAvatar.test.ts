@@ -45,6 +45,37 @@ describe('MaxUserAvatar', () => {
         expect(avatar.attributes('data-label')).toBe('JO');
     });
 
+    it('exibe apenas a primeira letra com initialsLength=1', () => {
+        const wrapper = mountAvatar({ name: 'Maria Silva', initialsLength: 1 });
+        const avatar = wrapper.find('.p-avatar');
+        expect(avatar.attributes('data-label')).toBe('M');
+    });
+
+    it('ignora espaço à esquerda em vez de renderizar avatar em branco', () => {
+        const wrapper = mountAvatar({ name: '  maria', initialsLength: 1 });
+        const avatar = wrapper.find('.p-avatar');
+        expect(avatar.attributes('data-label')).toBe('M');
+    });
+
+    it('não quebra quando o nome ainda não chegou', () => {
+        const wrapper = mountAvatar({ initialsLength: 1 });
+        const avatar = wrapper.find('.p-avatar');
+        expect(avatar.attributes('data-label')).toBe('');
+    });
+
+    /**
+     * A classe é o contrato com quem consome a lib: é por ela que os tokens
+     * `--max-user-avatar-*` são redefinidos para repintar o fallback pela
+     * paleta do projeto. Perdê-la quebra a cor sem quebrar teste nenhum.
+     */
+    it('expõe a classe de gancho no fallback de iniciais', () => {
+        const wrapper = mount(MaxUserAvatar, {
+            props: { name: 'Maria' },
+            global: { stubs: { Avatar: { template: '<div :class="$attrs.class" />' } } }
+        });
+        expect(wrapper.find('.max-user-avatar-initials').exists()).toBe(true);
+    });
+
     it('aplica v-tooltip condicionalmente dependendo do showTooltip', () => {
         const tooltipDirective = vi.fn();
         const _wrapper = mount(MaxUserAvatar, {
