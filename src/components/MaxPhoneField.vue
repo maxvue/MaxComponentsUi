@@ -1,7 +1,7 @@
 <template>
     <InputBase class="input-phone" v-bind="props" :value="temp_value" :done="done" :error="error" :caution="caution" :label="props.noLabel ? undefined : props.label ?? ('Telefone' + String(props.noLabel)) " :icon-right="props.noIcon ? undefined : 'ic:baseline-whatsapp'" >
         <div class="inputs-div">
-            <Select v-model="country" :options="country_ddi_flags" filter :filterFields="['name', 'value']">
+            <MaxInputSelect v-model="country" :options="country_ddi_flags" filter :filterFields="['name', 'value']">
                 <template #option="slotProps">
                     <slot name="option" :option="slotProps.option" :selected="slotProps.selected" :index="slotProps.index">
                         <div class="input-phone-label-div">
@@ -21,8 +21,8 @@
                         <div style="color: var(--background-600);">+ {{ value.value.value }}</div>
                     </div>
                 </template>
-            </Select>
-            <InputText type="text" slot-b v-model="phone" v-maska:unmaskedValue.unmasked="maskValue" flex :autoClear="false" slotChar=" " :placeholder="country.value === 55 ? '(99) 9 9999 - 9999' : ''" p0 fluid/>
+            </MaxInputSelect>
+            <MaxBaseInput type="text" slot-b v-model="phone" v-maska:unmaskedValue.unmasked="maskValue" flex :autoClear="false" slotChar=" " :placeholder="country.value === 55 ? '(99) 9 9999 - 9999' : ''" p0 fluid/>
         </div>
     </InputBase>
 </template>
@@ -32,8 +32,8 @@
     import { useMagicKeys } from '@maxvue/max-use';
     import { ref, computed, watch } from 'vue';
     import InputBase from './InputBase.vue';
-    import Select from 'primevue/select';
-    import InputText from 'primevue/inputtext';
+    import MaxInputSelect from './MaxInputSelect.vue';
+    import MaxBaseInput from './base/MaxBaseInput.vue';
     import { vMaska } from 'maska/vue';
     import { country_ddi_flags } from '../constants/ddiFlags';
 

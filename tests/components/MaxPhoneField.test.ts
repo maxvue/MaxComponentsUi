@@ -9,7 +9,10 @@ function mountPhoneField(props: Record<string, any> = {}, attrs: Record<string, 
         attrs,
         global: {
             stubs: {
-                Select: true
+                MaxInputSelect: {
+                    template: '<div class="max-input-select-stub"><slot name="value" :value="modelValue" /></div>',
+                    props: ['modelValue', 'options']
+                }
             }
         }
     });
@@ -20,9 +23,10 @@ describe('MaxPhoneField', () => {
         setActivePinia(createPinia());
     });
 
-    it('renderiza corretamente', () => {
+    it('renderiza corretamente sem PrimeVue', () => {
         const wrapper = mountPhoneField();
         expect(wrapper.exists()).toBe(true);
+        expect(wrapper.html()).not.toContain('data-pc-name');
     });
 
     it('aplica DDI correto pelo modelValue com 2 digitos (55)', async () => {
@@ -46,7 +50,6 @@ describe('MaxPhoneField', () => {
         await wrapper.vm.$nextTick();
         const country = (wrapper.vm as any).country;
         expect(country.ddi).toBe(55);
-        // Fallback places all digits in phone
         expect((wrapper.vm as any).phone).toBe('(99) 9 1234 - 56');
     });
 
@@ -70,7 +73,7 @@ describe('MaxPhoneField', () => {
     });
 
     it('computa maskValue para default % se country !== 55', async () => {
-        const wrapper = mountPhoneField({ modelValue: '18005551234' }); // DDI 1
+        const wrapper = mountPhoneField({ modelValue: '18005551234' });
         await wrapper.vm.$nextTick();
         const mask = (wrapper.vm as any).maskValue.mask;
         expect(mask).toBe('%');
@@ -93,7 +96,6 @@ describe('MaxPhoneField', () => {
     it('testa noMask quando ctrl+v é acionado', async () => {
         const wrapper = mountPhoneField();
         (wrapper.vm as any).onFocus = true;
-        // mock magic keys logic manually by setting ref
         (wrapper.vm as any).noMask = true;
         await wrapper.vm.$nextTick();
 

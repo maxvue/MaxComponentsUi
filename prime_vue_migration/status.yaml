@@ -973,10 +973,14 @@ itens:
     plano: prime_vue_migration/plans/24-MaxPhoneField.md
     primitivas: [Select, InputText]
     depende_de: [1, 23]
-    execucao: Aguardando
-    verificacao: Aguardando
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: ''
+    notas: >
+      Reimplementado MaxPhoneField sem dependências do PrimeVue (substituído Select por MaxInputSelect e InputText por MaxBaseInput).
+      Preservada integração com libphonenumber-js, DDI de países, bandeiras e máscaras dinâmicas.
+      11 testes em tests/components/MaxPhoneField.test.ts passando 100%.
+      Gates: vitest do componente limpo (11/11), type-check limpo, lint limpo (2 warnings pré-existentes), grep primevue VAZIO em MaxPhoneField.vue, git diff InputBase.vue VAZIO, suíte completa sem regressão.
 
   - id: 25
     componente: MaxTagSelect
