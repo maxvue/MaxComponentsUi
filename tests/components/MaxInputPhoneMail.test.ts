@@ -160,4 +160,12 @@ describe('MaxInputPhoneMail', () => {
         await wrapper.setProps({ modelValue: null as any });
         expect((wrapper.vm as any).temp_value).toBe('');
     });
+
+    it('preserva InputBase como wrapper raiz e não emite marcações do PrimeVue', () => {
+        const wrapper = mountPhoneMail();
+        expect(wrapper.findComponent(InputBase).exists()).toBe(true);
+        expect(wrapper.element.classList).toContain('max-input-main-div');
+        expect(wrapper.html()).not.toContain('data-pc-name');
+        expect(wrapper.html()).not.toContain('data-pc-section');
+    });
 });

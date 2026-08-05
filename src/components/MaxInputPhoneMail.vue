@@ -1,6 +1,6 @@
 <template>
     <InputBase v-bind="props" class="input-base-phone-mail-main-div" :label="attrs.label ?? name_method" :icon="iconLeft" :done="done ?? undefined" :caution="caution" :error="error_msg">
-        <InputText type="text" v-bind="attrs" v-model="temp_value" v-maska:unmaskedValue.unmasked="maskValue" autoClear="false" slotChar=" " @blur="checkDone()" :placeholder="attrs.email !== undefined || attrs.mail !== undefined ? 'usuario@email.com' : '(99) 9 9999 - 9999'" />
+        <MaxBaseInput type="text" v-bind="attrs" v-model="temp_value" v-maska:unmaskedValue.unmasked="maskValue" :disabled="props.disabled" @blur="checkDone()" :placeholder="attrs.email !== undefined || attrs.mail !== undefined ? 'usuario@email.com' : '(99) 9 9999 - 9999'" />
     </InputBase>
 </template>
 
@@ -9,7 +9,7 @@
     import type { Ref } from 'vue';
     import { ref, computed, watch, onMounted, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
-    import InputText from 'primevue/inputtext';
+    import MaxBaseInput from './base/MaxBaseInput.vue';
     import { vMaska } from 'maska/vue';
     import { parsePhoneNumberFromString } from 'libphonenumber-js';
 

@@ -751,10 +751,13 @@ itens:
     plano: prime_vue_migration/plans/07-inputs-texto-derivados.md
     primitivas: [InputText]
     depende_de: [1, 6]
-    execucao: Aguardando
-    verificacao: Aguardando
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: ''
+    notas: >
+      Substituído InputText por MaxBaseInput preservando v-bind="attrs" explícito.
+      24 testes em tests/components/MaxInputPhoneMail.test.ts passando 100% (incluindo teste de wrapper InputBase e ausência de marcações PrimeVue).
+      Gates: vitest do componente limpo (24/24), type-check limpo, lint limpo (2 warnings pré-existentes), grep primevue VAZIO, git diff InputBase.vue VAZIO, suíte completa sem regressão.
 
   - id: 10
     componente: MaxInputSearch

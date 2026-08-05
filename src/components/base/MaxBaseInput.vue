@@ -56,5 +56,7 @@
     const onBlur = (event: FocusEvent) => emit('blur', event);
     const onFocus = (event: FocusEvent) => emit('focus', event);
 
-    defineExpose({ $el: inputRef, focus: () => inputRef.value?.focus() });
+    const unmaskedValue = ref('');
+
+    defineExpose({ $el: inputRef, focus: () => inputRef.value?.focus(), unmaskedValue });
 </script>
