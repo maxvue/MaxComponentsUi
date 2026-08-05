@@ -1,6 +1,8 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach } from 'vitest';
 import { ref, nextTick } from 'vue';
+import { mount } from '@vue/test-utils';
 import { useFocusTrap } from '../../src/helpers/useFocusTrap';
+import MaxDrawer from '../../src/components/MaxDrawer.vue';
 
 describe('useFocusTrap', () => {
     it('move o foco para o primeiro elemento focavel ao ativar', async () => {
@@ -174,5 +176,129 @@ describe('useFocusTrap', () => {
         expect(document.activeElement?.id).toBe('unico');
 
         document.body.removeChild(container);
+    });
+});
+
+/** Monta o drawer anexado ao body, necessario por causa do Teleport. */
+const mountDrawer = (props: Record<string, unknown> = {}) => mount(MaxDrawer, {
+    props: { visible: true, ...props },
+    slots: { default: '<button class="interno">Interno</button>' },
+    attachTo: document.body
+});
+
+describe('MaxDrawer', () => {
+    afterEach(() => {
+        document.body.innerHTML = '';
+    });
+
+    it('nao renderiza nada quando visible e false', () => {
+        mountDrawer({ visible: false });
+        expect(document.querySelector('.max-drawer')).toBeNull();
+    });
+
+    it('renderiza o painel e o slot quando visible e true', () => {
+        mountDrawer();
+        expect(document.querySelector('.max-drawer')).not.toBeNull();
+        expect(document.querySelector('.interno')).not.toBeNull();
+    });
+
+    it('aplica a classe da posicao, com left por padrao', () => {
+        mountDrawer();
+        expect(document.querySelector('.max-drawer-left')).not.toBeNull();
+    });
+
+    it('aceita as demais posicoes', () => {
+        mountDrawer({ position: 'right' });
+        expect(document.querySelector('.max-drawer-right')).not.toBeNull();
+    });
+
+    it('aplica role complementary e aria-modal', () => {
+        mountDrawer();
+        const drawer = document.querySelector('.max-drawer');
+        expect(drawer?.getAttribute('role')).toBe('complementary');
+        expect(drawer?.getAttribute('aria-modal')).toBe('true');
+    });
+
+    it('renderiza o header quando a prop header e informada', () => {
+        mountDrawer({ header: 'Titulo' });
+        expect(document.querySelector('.max-drawer-header')?.textContent).toContain('Titulo');
+    });
+
+    it('emite update:visible false ao clicar no botao de fechar', async () => {
+        const wrapper = mountDrawer();
+        const botao = document.querySelector<HTMLElement>('.max-drawer-close');
+        botao?.click();
+        await wrapper.vm.$nextTick();
+        expect(wrapper.emitted('update:visible')?.[0]).toEqual([false]);
+    });
+
+    it('nao renderiza o botao de fechar com showCloseIcon false', () => {
+        mountDrawer({ showCloseIcon: false });
+        expect(document.querySelector('.max-drawer-close')).toBeNull();
+    });
+
+    it('fecha ao clicar na mascara quando dismissable', async () => {
+        const wrapper = mountDrawer();
+        const mascara = document.querySelector<HTMLElement>('.max-drawer-mask');
+        mascara?.click();
+        await wrapper.vm.$nextTick();
+        expect(wrapper.emitted('update:visible')?.[0]).toEqual([false]);
+    });
+
+    it('nao fecha ao clicar na mascara quando dismissable e false', async () => {
+        const wrapper = mountDrawer({ dismissable: false });
+        const mascara = document.querySelector<HTMLElement>('.max-drawer-mask');
+        mascara?.click();
+        await wrapper.vm.$nextTick();
+        expect(wrapper.emitted('update:visible')).toBeFalsy();
+    });
+
+    it('fecha com a tecla Escape', async () => {
+        const wrapper = mountDrawer();
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+        await wrapper.vm.$nextTick();
+        expect(wrapper.emitted('update:visible')?.[0]).toEqual([false]);
+    });
+
+    it('nao muta o proprio visible (componente controlado)', async () => {
+        const wrapper = mountDrawer();
+        document.querySelector<HTMLElement>('.max-drawer-close')?.click();
+        await wrapper.vm.$nextTick();
+        expect(wrapper.props('visible')).toBe(true);
+    });
+
+    it('expoe open, close e toggle imperativos', async () => {
+        const wrapper = mountDrawer({ visible: false });
+        wrapper.vm.open();
+        expect(wrapper.emitted('update:visible')?.[0]).toEqual([true]);
+    });
+
+    it('emite show ao abrir', async () => {
+        const wrapper = mountDrawer({ visible: false });
+        await wrapper.setProps({ visible: true });
+        expect(wrapper.emitted('show')).toBeTruthy();
+    });
+
+    it('emite hide ao fechar', async () => {
+        const wrapper = mountDrawer({ visible: true });
+        await wrapper.setProps({ visible: false });
+        expect(wrapper.emitted('hide')).toBeTruthy();
+    });
+
+    it('trava o scroll do body com blockScroll', async () => {
+        const wrapper = mountDrawer({ visible: false, blockScroll: true });
+        await wrapper.setProps({ visible: true });
+        expect(document.body.style.overflow).toBe('hidden');
+        await wrapper.setProps({ visible: false });
+        expect(document.body.style.overflow).not.toBe('hidden');
+    });
+
+    it('renderiza o slot footer quando informado', () => {
+        mount(MaxDrawer, {
+            props: { visible: true },
+            slots: { default: '<div>x</div>', footer: '<span class="rodape">Rodape</span>' },
+            attachTo: document.body
+        });
+        expect(document.querySelector('.rodape')).not.toBeNull();
     });
 });
