@@ -20,7 +20,7 @@ export default defineConfig({
         AutoImport({
             imports: [
                 'vue',
-                maxUseAutoImport,
+                ...maxUseAutoImport,
                 {
                     from: 'vue',
                     imports: ['Ref', 'ComputedRef', 'ShallowRef', 'ShallowComputedRef', 'PropType', 'WatchStopHandle', 'Watch'],

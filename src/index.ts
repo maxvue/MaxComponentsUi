@@ -30,6 +30,32 @@ export { default as MaxTitle2 } from './components/MaxTitle2.vue';
 export { default as MaxAuthCard } from './components/MaxAuthCard.vue';
 export { default as AuthCard } from './components/MaxAuthCard.vue';
 
+// Tabs
+export { default as MaxTabs } from './components/MaxTabs.vue';
+export { default as Tabs } from './components/MaxTabs.vue';
+export { default as MaxTabList } from './components/MaxTabList.vue';
+export { default as TabList } from './components/MaxTabList.vue';
+export { default as MaxTab } from './components/MaxTab.vue';
+export { default as Tab } from './components/MaxTab.vue';
+export { default as MaxTabPanels } from './components/MaxTabPanels.vue';
+export { default as TabPanels } from './components/MaxTabPanels.vue';
+export { default as MaxTabPanel } from './components/MaxTabPanel.vue';
+export { default as TabPanel } from './components/MaxTabPanel.vue';
+
+// Accordion
+export { default as MaxAccordion } from './components/MaxAccordion.vue';
+export { default as Accordion } from './components/MaxAccordion.vue';
+export { default as MaxAccordionPanel } from './components/MaxAccordionPanel.vue';
+export { default as AccordionPanel } from './components/MaxAccordionPanel.vue';
+export { default as MaxAccordionHeader } from './components/MaxAccordionHeader.vue';
+export { default as AccordionHeader } from './components/MaxAccordionHeader.vue';
+export { default as MaxAccordionContent } from './components/MaxAccordionContent.vue';
+export { default as AccordionContent } from './components/MaxAccordionContent.vue';
+
+// Drawer
+export { default as MaxDrawer } from './components/MaxDrawer.vue';
+export { default as Drawer } from './components/MaxDrawer.vue';
+
 export * from './stores';
 
 

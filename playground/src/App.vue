@@ -121,6 +121,109 @@
                     <Button label="Clique em mim" @click="handleDetailedClick" />
                 </div>
             </section>
+
+            <section class="component-section">
+                <h2>Tabs, Accordion e Drawer</h2>
+                <div class="component-grid">
+                    <div class="component-item">
+                        <h3>Tabs</h3>
+                        <MaxTabs v-model:value="tab_ativa">
+                            <MaxTabList>
+                                <MaxTab value="0">Dados</MaxTab>
+                                <MaxTab value="1">Anexos</MaxTab>
+                                <MaxTab value="2" disabled>Bloqueada</MaxTab>
+                            </MaxTabList>
+                            <MaxTabPanels>
+                                <MaxTabPanel value="0">Conteúdo dos dados</MaxTabPanel>
+                                <MaxTabPanel value="1">Conteúdo dos anexos</MaxTabPanel>
+                                <MaxTabPanel value="2">Conteúdo bloqueado</MaxTabPanel>
+                            </MaxTabPanels>
+                        </MaxTabs>
+
+                        <h3>Tabs scrollable</h3>
+                        <MaxTabs v-model:value="tab_scrollable_ativa" scrollable>
+                            <MaxTabList>
+                                <MaxTab v-for="n in 10" :key="n" :value="String(n)">Aba {{ n }}</MaxTab>
+                            </MaxTabList>
+                            <MaxTabPanels>
+                                <MaxTabPanel v-for="n in 10" :key="n" :value="String(n)">Conteúdo da aba {{ n }}</MaxTabPanel>
+                            </MaxTabPanels>
+                        </MaxTabs>
+                    </div>
+
+                    <div class="component-item">
+                        <h3>Accordion</h3>
+                        <MaxAccordion v-model:value="painel_aberto">
+                            <MaxAccordionPanel value="a">
+                                <MaxAccordionHeader>Primeira seção</MaxAccordionHeader>
+                                <MaxAccordionContent>Conteúdo da primeira seção.</MaxAccordionContent>
+                            </MaxAccordionPanel>
+                            <MaxAccordionPanel value="b">
+                                <MaxAccordionHeader>Segunda seção</MaxAccordionHeader>
+                                <MaxAccordionContent>Conteúdo da segunda seção.</MaxAccordionContent>
+                            </MaxAccordionPanel>
+                            <MaxAccordionPanel value="c">
+                                <MaxAccordionHeader>Terceira seção</MaxAccordionHeader>
+                                <MaxAccordionContent>Conteúdo da terceira seção.</MaxAccordionContent>
+                            </MaxAccordionPanel>
+                        </MaxAccordion>
+
+                        <h3>Accordion múltiplo</h3>
+                        <MaxAccordion v-model:value="paineis_abertos" multiple>
+                            <MaxAccordionPanel value="a">
+                                <MaxAccordionHeader>Primeira seção</MaxAccordionHeader>
+                                <MaxAccordionContent>Conteúdo da primeira seção.</MaxAccordionContent>
+                            </MaxAccordionPanel>
+                            <MaxAccordionPanel value="b">
+                                <MaxAccordionHeader>Segunda seção</MaxAccordionHeader>
+                                <MaxAccordionContent>Conteúdo da segunda seção.</MaxAccordionContent>
+                            </MaxAccordionPanel>
+                            <MaxAccordionPanel value="c">
+                                <MaxAccordionHeader>Terceira seção</MaxAccordionHeader>
+                                <MaxAccordionContent>Conteúdo da terceira seção.</MaxAccordionContent>
+                            </MaxAccordionPanel>
+                        </MaxAccordion>
+                    </div>
+
+                    <div class="component-item">
+                        <h3>Drawer</h3>
+                        <div class="button-group">
+                            <MaxButton label="Abrir drawer (direita)" @click="drawer_visivel = true" />
+                            <MaxButton label="Abrir drawer (esquerda)" @click="drawer_visivel_esquerda = true" />
+                            <MaxButton label="Abrir drawer (topo)" @click="drawer_visivel_topo = true" />
+                            <MaxButton label="Abrir drawer (base)" @click="drawer_visivel_base = true" />
+                        </div>
+
+                        <MaxDrawer v-model:visible="drawer_visivel" header="Menu lateral" position="right">
+                            <p>Conteúdo do drawer.</p>
+                            <template #footer>
+                                <MaxButton label="Fechar" @click="drawer_visivel = false" />
+                            </template>
+                        </MaxDrawer>
+
+                        <MaxDrawer v-model:visible="drawer_visivel_esquerda" header="Menu esquerdo" position="left">
+                            <p>Conteúdo do drawer à esquerda.</p>
+                            <template #footer>
+                                <MaxButton label="Fechar" @click="drawer_visivel_esquerda = false" />
+                            </template>
+                        </MaxDrawer>
+
+                        <MaxDrawer v-model:visible="drawer_visivel_topo" header="Menu superior" position="top">
+                            <p>Conteúdo do drawer no topo.</p>
+                            <template #footer>
+                                <MaxButton label="Fechar" @click="drawer_visivel_topo = false" />
+                            </template>
+                        </MaxDrawer>
+
+                        <MaxDrawer v-model:visible="drawer_visivel_base" header="Menu inferior" position="bottom">
+                            <p>Conteúdo do drawer na base.</p>
+                            <template #footer>
+                                <MaxButton label="Fechar" @click="drawer_visivel_base = false" />
+                            </template>
+                        </MaxDrawer>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 </template>
@@ -165,6 +268,15 @@
         const timestamp = new Date().toLocaleTimeString();
         lastClickEvent.value = `Botão clicado às ${timestamp} - Coordenadas: (${event.clientX}, ${event.clientY})`;
     };
+
+    const tab_ativa = ref('0');
+    const tab_scrollable_ativa = ref('1');
+    const painel_aberto = ref<string | undefined>('a');
+    const paineis_abertos = ref<string[]>(['a']);
+    const drawer_visivel = ref(false);
+    const drawer_visivel_esquerda = ref(false);
+    const drawer_visivel_topo = ref(false);
+    const drawer_visivel_base = ref(false);
 </script>
 
 <style lang="scss">
