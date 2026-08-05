@@ -10,18 +10,29 @@ Ela depende de um pacote local irmão `@maxvue/max-use` (referenciado como `file
 
 ## Migração em andamento: independência do PrimeVue
 
-A partir do PrimeVue 5 a biblioteca deixará de ser open source. Existe um esforço ativo para tornar a `@maxvue/max-components-ui` **independente do PrimeVue**, reimplementando ou substituindo cada componente dependente do PrimeVue enquanto preserva a API pública, os estilos e o comportamento atuais. **O código ainda depende do PrimeVue hoje** — a migração está planejada, mas ainda não foi executada.
+A partir do PrimeVue 5 a biblioteca deixará de ser open source. Existe um esforço ativo para tornar a `@maxvue/max-components-ui` **independente do PrimeVue**, reimplementando ou substituindo cada componente dependente do PrimeVue enquanto preserva a API pública, os estilos e o comportamento atuais.
 
-Arquivos de controle (todos na raiz do repositório):
+**Parte do trabalho já foi feita.** Estes componentes **já são PrimeVue-free** e servem de referência do padrão da casa: `InputBase` (o wrapper central de todos os inputs), `MaxInputSwitch`, `MaxInputRadio`, `MaxInputTextList`, `MaxInputTextArea`, `MaxModal`, `MaxPopover`, `MaxToast`, `MaxTableFields`, `MaxInputFileUploadBig`, `MaxInputFileUploadButton` e `MaxInputFileProject`. Os **34 arquivos restantes** ainda dependem do PrimeVue.
+
+Arquivos de controle (em [`prime_vue_migration/`](prime_vue_migration/)):
 
 | Arquivo | Papel |
 |---------|-------|
-| [`migration_plan.md`](migration_plan.md) | Brief original do orquestrador — como os planos por componente foram gerados. |
-| [`status-primevue.migration.yaml`](status-primevue.migration.yaml) | Fonte de verdade do progresso: lista cada componente dependente do PrimeVue com `level` e `status` (`waiting`/`in_progress`/`done`/`blocked`). |
-| [`migration_plans/`](migration_plans/) | Um plano de migração autossuficiente por componente (`migration_plans/[NomeComponente].md`), 33 no total. |
-| [`migration_executor.md`](migration_executor.md) | Painel de controle + protocolo do **agente executor**: uma fila ordenada e a regra de que cada invocação migra exatamente **um** componente, depois para e atualiza o status. |
+| [`prime_vue_migration/README.md`](prime_vue_migration/README.md) | Visão geral: mapa das fases, restrições de ordem e critério de saída. |
+| [`prime_vue_migration/status.yaml`](prime_vue_migration/status.yaml) | Fonte de verdade do progresso: 38 itens com `execucao` e `verificacao` (`Aguardando`/`Realizando`/`Concluído`). |
+| [`prime_vue_migration/execution.md`](prime_vue_migration/execution.md) | Protocolo do **agente executor**: loop contínuo, portões de qualidade e verificação por subagente. |
+| [`prime_vue_migration/plans/`](prime_vue_migration/plans/) | Um plano de implementação detalhado por item (29 planos). |
 
-**Se pedirem para avançar a migração**, siga o `migration_executor.md`: pegue o próximo item `waiting` de menor número, execute o plano dele, verifique, atualize o status **tanto no YAML quanto na fila do executor** e então pare. Não migre mais de um componente por invocação, não pule etapas e não reordene. Restrições de ordem principais: `InputBase` primeiro (destrava ~19 inputs); `MaxInputSelect` antes dos dropdowns que o reutilizam; o conjunto `MaxTable` → `MaxTableColumn` → `MaxTableFields` migra junto.
+**Se pedirem para avançar a migração**, siga o `prime_vue_migration/execution.md`. Ele roda em **loop** até concluir todos os itens: pega o próximo item pendente cujas dependências estejam satisfeitas, implementa, testa, dispara um subagente verificador (Opus 5) e só avança quando aprovado. Todo o trabalho ocorre num **git worktree separado** (ver seção "Execução de Agentes em Worktree" abaixo).
+
+Restrições de ordem principais: `MaxBaseInput` primeiro (destrava 10 inputs); `MaxInputSelect` antes dos dropdowns que o reutilizam; conjuntos indivisíveis (mesma passada): {`MaxInputCoordinateDecimalLat`, `Lng`}, {os três de cartão de crédito}, {`MaxTable`, `MaxTableColumn`}; `src/index.ts` por último (é ele que desinstala as dependências).
+
+⚠️ O item **36** (`src/prime/index.ts`, ~110 re-exports publicados como entry point `./prime`) exige **decisão de produto do usuário** — o executor levanta os dados, apresenta as opções e segue para os demais itens sem bloquear.
+
+**Critério de saída** — quando este comando retornar vazio, a migração está completa:
+```bash
+grep -rn "primevue\|@primeuix\|@primevue" src/ --include='*.vue' --include='*.ts'
+```
 
 ## Comandos
 
