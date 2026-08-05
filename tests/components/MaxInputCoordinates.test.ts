@@ -62,6 +62,14 @@ describe('MaxInputCoordinateDecimalLat', () => {
         const ib = wrapper.findComponent(InputBase);
         expect(ib.props('error')).toBe('Latitude inválida.');
     });
+
+    it('preserva InputBase como wrapper raiz e não emite marcações do PrimeVue em Lat', () => {
+        const wrapper = mountCoord(MaxInputCoordinateDecimalLat);
+        expect(wrapper.findComponent(InputBase).exists()).toBe(true);
+        expect(wrapper.element.classList).toContain('max-input-main-div');
+        expect(wrapper.html()).not.toContain('data-pc-name');
+        expect(wrapper.html()).not.toContain('data-pc-section');
+    });
 });
 
 describe('MaxInputCoordinateDecimalLng', () => {
@@ -105,5 +113,13 @@ describe('MaxInputCoordinateDecimalLng', () => {
         const wrapper = mountCoord(MaxInputCoordinateDecimalLng, { modelValue: -80.0 });
         const ib = wrapper.findComponent(InputBase);
         expect(ib.props('error')).toBe('Longitude inválida.');
+    });
+
+    it('preserva InputBase como wrapper raiz e não emite marcações do PrimeVue em Lng', () => {
+        const wrapper = mountCoord(MaxInputCoordinateDecimalLng);
+        expect(wrapper.findComponent(InputBase).exists()).toBe(true);
+        expect(wrapper.element.classList).toContain('max-input-main-div');
+        expect(wrapper.html()).not.toContain('data-pc-name');
+        expect(wrapper.html()).not.toContain('data-pc-section');
     });
 });

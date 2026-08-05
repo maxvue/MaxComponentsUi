@@ -779,10 +779,13 @@ itens:
     plano: prime_vue_migration/plans/07-inputs-texto-derivados.md
     primitivas: [InputText]
     depende_de: [1, 6]
-    execucao: Aguardando
-    verificacao: Aguardando
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: 'Migrar junto com o id 12 (mesmo padrão, testes irmãos).'
+    notas: >
+      Substituído InputText por MaxBaseInput mantendo fluid e v-maska. Migrado em conjunto indivisível com id 12.
+      15 testes em tests/components/MaxInputCoordinates.test.ts passando 100%.
+      Gates: vitest dos componentes limpo (15/15), type-check limpo, lint limpo (2 warnings pré-existentes), grep primevue VAZIO, git diff InputBase.vue VAZIO, suíte completa sem regressão.
 
   - id: 12
     componente: MaxInputCoordinateDecimalLng
@@ -790,10 +793,11 @@ itens:
     plano: prime_vue_migration/plans/07-inputs-texto-derivados.md
     primitivas: [InputText]
     depende_de: [1, 6]
-    execucao: Aguardando
-    verificacao: Aguardando
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: 'Migrar junto com o id 11.'
+    notas: >
+      Substituído InputText por MaxBaseInput mantendo fluid e v-maska. Migrado em conjunto indivisível com id 11. Ver id 11.
 
   - id: 13
     componente: MaxInputCreditCard
