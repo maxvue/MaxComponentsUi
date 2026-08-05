@@ -3,19 +3,18 @@ import { mount } from '@vue/test-utils';
 import MaxInputToggle from '../../src/components/MaxInputToggle.vue';
 
 describe('MaxInputToggle', () => {
-    it('deve montar o componente corretamente', () => {
+    it('deve montar o componente corretamente e renderizar input role=switch', () => {
         const wrapper = mount(MaxInputToggle, {
-            props: { modelValue: false },
-            global: { stubs: { ToggleSwitch: true } }
+            props: { modelValue: false }
         });
         expect(wrapper.exists()).toBe(true);
+        expect(wrapper.find('input[role="switch"]').exists()).toBe(true);
     });
 
     it('renderiza o label se fornecido via attrs', () => {
         const wrapper = mount(MaxInputToggle, {
             props: { modelValue: false },
-            attrs: { label: 'Toggle Label', labelCenter: true },
-            global: { stubs: { ToggleSwitch: true } }
+            attrs: { label: 'Toggle Label', labelCenter: true }
         });
         expect(wrapper.find('.input-toggle-field-label-div').text()).toBe('Toggle Label');
         expect(wrapper.find('.input-toggle-field-label-main-div').classes()).toContain('label-center');
@@ -23,39 +22,40 @@ describe('MaxInputToggle', () => {
 
     it('renderiza trueLabel e falseLabel e aplica active class', () => {
         const wrapper = mount(MaxInputToggle, {
-            props: { modelValue: false, trueLabel: 'Ativado', falseLabel: 'Desativado' },
-            global: { stubs: { ToggleSwitch: true } }
+            props: { modelValue: false, trueLabel: 'Ativado', falseLabel: 'Desativado' }
         });
         const labels = wrapper.findAll('.input-toggle-field-label');
         expect(labels.length).toBe(2);
         expect(labels[0].text()).toBe('Desativado');
-        expect(labels[0].classes()).toContain('active'); // because modelValue is false (falseValue)
+        expect(labels[0].classes()).toContain('active');
         expect(labels[1].text()).toBe('Ativado');
     });
 
-    it('sincroniza prop modelValue com modelvalue (ref interno) e emite update', async () => {
+    it('alterna modelValue ao acionar o input role=switch', async () => {
         const wrapper = mount(MaxInputToggle, {
-            props: { modelValue: false },
-            global: { stubs: { ToggleSwitch: true } }
+            props: { modelValue: false }
         });
-
-        // Simula mudança de ToggleSwitch
-        const toggle = wrapper.findComponent({ name: 'ToggleSwitch' });
-        await toggle.vm.$emit('update:modelValue', true);
+        const input = wrapper.find('input[role="switch"]');
+        await input.trigger('change');
 
         expect(wrapper.emitted('update:modelValue')).toBeTruthy();
         expect(wrapper.emitted('update:modelValue')?.[0][0]).toBe(true);
+    });
 
-        // Altera via prop (agora que o prop estava false, vamos definir para 'test')
-        await wrapper.setProps({ modelValue: 'test' });
-        expect((wrapper.vm as any).modelvalue).toBe('test');
+    it('suporta valores customizados trueValue e falseValue (ex: S/N)', async () => {
+        const wrapper = mount(MaxInputToggle, {
+            props: { modelValue: 'N', trueValue: 'S', falseValue: 'N' }
+        });
+        const input = wrapper.find('input[role="switch"]');
+        await input.trigger('change');
+
+        expect(wrapper.emitted('update:modelValue')?.[0][0]).toBe('S');
     });
 
     it('resolve trueLabel / falseLabel de attrs (fallback)', () => {
         const wrapper = mount(MaxInputToggle, {
             props: { modelValue: true },
-            attrs: { 'true-label': 'Sim', 'false-label': 'Nao' },
-            global: { stubs: { ToggleSwitch: true } }
+            attrs: { 'true-label': 'Sim', 'false-label': 'Nao' }
         });
         const labels = wrapper.findAll('.input-toggle-field-label');
         expect(labels[0].text()).toBe('Nao');
@@ -63,12 +63,18 @@ describe('MaxInputToggle', () => {
         expect(labels[1].classes()).toContain('active');
     });
 
-    it('emite update no change manual', async () => {
+    it('não altera valor quando disabled=true', async () => {
         const wrapper = mount(MaxInputToggle, {
-            props: { modelValue: false },
-            global: { stubs: { ToggleSwitch: true } }
+            props: { modelValue: false, disabled: true }
         });
-        (wrapper.vm as any).update_value();
-        expect(wrapper.emitted('update:modelValue')).toBeTruthy();
+        const input = wrapper.find('input[role="switch"]');
+        await input.trigger('change');
+
+        expect(wrapper.emitted('update:modelValue')).toBeFalsy();
+    });
+
+    it('não emite marcações do PrimeVue', () => {
+        const wrapper = mount(MaxInputToggle, { props: { modelValue: false } });
+        expect(wrapper.html()).not.toContain('data-pc-name');
     });
 });

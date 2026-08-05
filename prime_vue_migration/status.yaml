@@ -908,12 +908,16 @@ itens:
     componente: MaxInputToggle
     arquivo: src/components/MaxInputToggle.vue
     plano: prime_vue_migration/plans/20-MaxInputToggle.md
-    primitivas: [ToggleSwitch]
-    depende_de: []
-    execucao: Aguardando
-    verificacao: Aguardando
+    primitivas: [ToggleButton]
+    depende_de: [1, 16]
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: 'MaxInputSwitch.vue já implementa um toggle sem PrimeVue — reaproveitar markup/SCSS.'
+    notas: >
+      Reimplementado MaxInputToggle sem dependência do PrimeVue (removido import de primevue/toggleswitch).
+      Emitida estrutura HTML p-toggleswitch com input role="switch" nativo, aria-checked e animação CSS.
+      8 testes em tests/components/MaxInputToggle.test.ts passando 100%.
+      Gates: vitest do componente limpo (8/8), type-check limpo, lint limpo (2 warnings pré-existentes), grep primevue VAZIO em MaxInputToggle.vue, git diff InputBase.vue VAZIO, suíte completa sem regressão.
 
   - id: 21
     componente: MaxInputNumber

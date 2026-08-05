@@ -11,7 +11,20 @@
                     {{ falseLabel ?? '' }}
                 </div>
                 <div class="input-toggle-field-input">
-                    <ToggleSwitch v-model="modelvalue" @change="update_value" />
+                    <div :class="['p-toggleswitch', 'p-component', { 'p-toggleswitch-checked': isChecked, 'p-disabled': props.disabled }]">
+                        <input
+                            type="checkbox"
+                            role="switch"
+                            class="p-toggleswitch-input"
+                            :checked="isChecked"
+                            :aria-checked="isChecked"
+                            :disabled="props.disabled"
+                            @change="onToggleChange"
+                        />
+                        <span class="p-toggleswitch-slider">
+                            <div class="p-toggleswitch-handle"></div>
+                        </span>
+                    </div>
                 </div>
                 <div :class="`input-toggle-field-label ${trueValue === modelvalue ? 'active' : ''}`" v-if="trueLabel">
                     {{ trueLabel ?? '' }}
@@ -23,7 +36,6 @@
 
 <script setup lang="ts">
     import { ref, computed, watch, useAttrs } from 'vue';
-    import ToggleSwitch from 'primevue/toggleswitch';
 
     const attrs: any = useAttrs();
 
@@ -34,11 +46,16 @@
             falseLabel?: string;
             trueValue?: any;
             falseValue?: any;
+            disabled?: boolean;
         }>(),
-        { modelValue: false, trueValue: true, falseValue: false }
+        { modelValue: false, trueValue: true, falseValue: false, disabled: false }
     );
 
-    const emit = defineEmits(['update:modelValue']);
+    const emit = defineEmits<{
+        'update:modelValue': [val: any];
+        'change': [event: Event];
+    }>();
+
     const modelvalue = ref(props.modelValue);
 
     watch(modelvalue, (val) => {
@@ -57,8 +74,17 @@
     const trueValue = computed(() => props.trueValue ?? true);
     const falseValue = computed(() => props.falseValue ?? false);
 
+    const isChecked = computed(() => modelvalue.value === trueValue.value);
+
     const update_value = () => {
         emit('update:modelValue', modelvalue.value);
+    };
+
+    const onToggleChange = (event: Event) => {
+        if (props.disabled) return;
+        modelvalue.value = isChecked.value ? falseValue.value : trueValue.value;
+        update_value();
+        emit('change', event);
     };
 </script>
 
@@ -151,19 +177,65 @@
             }
 
             .p-toggleswitch {
+                position: relative;
+                display: inline-block;
+                width: 2.5rem;
+                height: 1.25rem;
                 max-height: 18px;
-            }
 
-            .p-toggleswitch-handle {
-                top: 11px;
-                width: 12px;
-                height: 12px;
-                left: 4px;
-            }
+                .p-toggleswitch-input {
+                    cursor: pointer;
+                    appearance: none;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    padding: 0;
+                    margin: 0;
+                    opacity: 0;
+                    z-index: 1;
+                    outline: 0 none;
+                }
 
-            .p-toggleswitch-checked {
+                .p-toggleswitch-slider {
+                    position: absolute;
+                    cursor: pointer;
+                    inset: 0;
+                    background-color: var(--max-border-color, #cbd5e1);
+                    transition: 0.2s;
+                    border-radius: 1rem;
+                }
+
                 .p-toggleswitch-handle {
-                    left: calc(100% - 16px);
+                    position: absolute;
+                    content: '';
+                    height: 12px;
+                    width: 12px;
+                    left: 4px;
+                    top: 3px;
+                    background-color: white;
+                    transition: 0.2s;
+                    border-radius: 50%;
+                }
+
+                &.p-toggleswitch-checked {
+                    .p-toggleswitch-slider {
+                        background-color: var(--max-primary-500, #3b82f6);
+                    }
+
+                    .p-toggleswitch-handle {
+                        left: calc(100% - 16px);
+                    }
+                }
+
+                &.p-disabled {
+                    opacity: 0.6;
+                    cursor: default;
+
+                    .p-toggleswitch-input {
+                        cursor: default;
+                    }
                 }
             }
         }
