@@ -26,9 +26,23 @@ export const useFocusTrap = (el: Ref<HTMLElement | null>): FocusTrap => {
     /** Elemento que tinha o foco antes de o trap ser ativado. */
     let previous: HTMLElement | null = null;
 
+    /**
+     * Verifica se o elemento esta visivel. `offsetParent` e
+     * `getBoundingClientRect` nao funcionam de forma confiavel no happy-dom
+     * (ambiente de teste), entao a checagem se restringe a atributos e
+     * estilos inline que sao verificaveis tanto no browser quanto nos testes.
+     */
+    const isVisible = (element: HTMLElement): boolean => {
+        if (element.hidden) return false;
+        if (element.style.display === 'none') return false;
+        if (element.style.visibility === 'hidden') return false;
+        if (element.getAttribute('aria-hidden') === 'true') return false;
+        return true;
+    };
+
     const focusable = (): HTMLElement[] => {
         if (! el.value) return [];
-        return Array.from(el.value.querySelectorAll<HTMLElement>(FOCUSABLE));
+        return Array.from(el.value.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(isVisible);
     };
 
     const activate = () => {
@@ -40,7 +54,11 @@ export const useFocusTrap = (el: Ref<HTMLElement | null>): FocusTrap => {
     };
 
     const deactivate = () => {
-        previous?.focus();
+        // Se o elemento de origem foi removido do DOM enquanto o trap estava
+        // ativo, `focus()` seria um no-op silencioso. Nesse caso, optamos por
+        // nao devolver o foco a lugar nenhum, em vez de tentar um fallback.
+        if (previous?.isConnected) previous.focus();
+
         previous = null;
     };
 
@@ -54,6 +72,12 @@ export const useFocusTrap = (el: Ref<HTMLElement | null>): FocusTrap => {
         const first = items[0];
         const last = items[items.length - 1];
         const target = event.target as HTMLElement | null;
+
+        if (! target || ! items.includes(target)) {
+            event.preventDefault();
+            (event.shiftKey ? last : first).focus();
+            return;
+        }
 
         if (event.shiftKey && target === first) {
             event.preventDefault();
