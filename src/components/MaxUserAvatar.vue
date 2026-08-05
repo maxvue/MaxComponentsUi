@@ -1,21 +1,30 @@
 <template>
-    <Avatar :image="props.imageUrl" shape="circle" v-if="props.imageUrl" :class="{ removable: remove }" @click="onAvatarClick" v-tooltip.top="showTooltip ? (remove ? (labelRemove ?? name) : name) : null" />
-    <Avatar :label="initials" shape="circle" pointer v-else :class="['max-user-avatar-initials', { removable: remove }]" @click="onAvatarClick" v-tooltip.top="showTooltip ? (remove ? (labelRemove ?? name) : name) : null" />
+    <div
+        v-if="props.imageUrl && !imageFailed"
+        :class="['p-avatar', 'p-component', 'p-avatar-circle', 'p-avatar-image', { removable: remove }]"
+        @click="onAvatarClick"
+        v-tooltip.top="showTooltip ? (remove ? (labelRemove ?? name) : name) : null"
+    >
+        <img :src="props.imageUrl" :alt="props.name ?? 'Avatar'" @error="onImageError" />
+    </div>
+    <div
+        v-else
+        :class="['p-avatar', 'p-component', 'p-avatar-circle', 'max-user-avatar-initials', { removable: remove }]"
+        @click="onAvatarClick"
+        v-tooltip.top="showTooltip ? (remove ? (labelRemove ?? name) : name) : null"
+        role="img"
+        :aria-label="props.name ?? 'Avatar'"
+    >
+        <span class="p-avatar-text">{{ initials }}</span>
+    </div>
 </template>
 
-/**
- * Componente de avatar do usuário.
- * Exibe a imagem do usuário ou as iniciais baseadas no nome.
- * Quando `remove` está ativo, exibe um overlay "×" no hover e, ao clicar,
- * solicita confirmação (via useConfirmStore) antes de emitir o evento `remove`.
- */
 <script setup lang="ts">
-
-    import { computed } from 'vue';
-    import Avatar from 'primevue/avatar';
+    import { computed, ref } from 'vue';
     import { useConfirmStore } from '../stores/useConfirm.Store';
 
     const confirm_store = useConfirmStore();
+    const imageFailed = ref(false);
 
     const props = withDefaults(defineProps<{
         /** URL da imagem do avatar */
@@ -60,7 +69,15 @@
         return props.name?.trim().substring(0, length).toUpperCase() ?? '';
     });
 
-    const emit = defineEmits<{ remove: [] }>();
+    const emit = defineEmits<{
+        remove: [];
+        error: [event: Event];
+    }>();
+
+    const onImageError = (event: Event) => {
+        imageFailed.value = true;
+        emit('error', event);
+    };
 
     const onAvatarClick = (event: MouseEvent) => {
         if (!props.remove) return;
@@ -76,46 +93,78 @@
         confirm_store.acceptProps = { label: 'Remover', icon: 'trash', action: () => emit('remove') };
         confirm_store.show = true;
     };
-
 </script>
 
 <style lang="scss">
-    /**
-     * Cores do fallback de iniciais.
-     *
-     * Ficam em token com fallback nos valores anteriores (`#ece9fc`/`#2a1261`),
-     * que estavam escritos inline num `style=`: assim quem consome a lib repinta
-     * o avatar pela própria paleta sem precisar de prop nova, e quem não fizer
-     * nada continua vendo exatamente o que via antes.
-     */
-    .p-avatar.max-user-avatar-initials {
-        background-color: var(--max-user-avatar-background, #ece9fc);
-        color: var(--max-user-avatar-color, #2a1261);
-    }
+    .p-avatar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        height: 2rem;
+        font-size: 1rem;
+        border-radius: 6px;
 
-    .p-avatar.removable {
-        position: relative;
-        cursor: pointer;
-
-        &::after {
-            content: '×';
-            position: absolute;
-            inset: 0;
-            display: grid;
-            place-items: center;
+        &.p-avatar-circle {
             border-radius: 50%;
-            font-size: 0.9em;
-            font-weight: 700;
-            line-height: 1;
-            color: #fff;
-            background-color: rgb(220 38 38 / 45%);
-            opacity: 0;
-            transition: opacity 0.15s ease;
-            pointer-events: none;
         }
 
-        &:hover::after {
-            opacity: 1;
+        &.p-avatar-image {
+            background: transparent;
+            overflow: hidden;
+
+            img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+        }
+
+        &.p-avatar-lg {
+            width: 3rem;
+            height: 3rem;
+            font-size: 1.5rem;
+        }
+
+        &.p-avatar-xl {
+            width: 4rem;
+            height: 4rem;
+            font-size: 2rem;
+        }
+
+        &.max-user-avatar-initials {
+            background-color: var(--max-user-avatar-background, #ece9fc);
+            color: var(--max-user-avatar-color, #2a1261);
+
+            .p-avatar-text {
+                font-weight: 600;
+            }
+        }
+
+        &.removable {
+            position: relative;
+            cursor: pointer;
+
+            &::after {
+                content: '×';
+                position: absolute;
+                inset: 0;
+                display: grid;
+                place-items: center;
+                border-radius: 50%;
+                font-size: 0.9em;
+                font-weight: 700;
+                line-height: 1;
+                color: #fff;
+                background-color: rgb(220 38 38 / 45%);
+                opacity: 0;
+                transition: opacity 0.15s ease;
+                pointer-events: none;
+            }
+
+            &:hover::after {
+                opacity: 1;
+            }
         }
     }
 </style>
