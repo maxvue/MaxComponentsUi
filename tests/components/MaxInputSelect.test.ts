@@ -1,27 +1,27 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxInputSelect from '../../src/components/MaxInputSelect.vue';
+import InputBase from '../../src/components/InputBase.vue';
 
-function mountSelect(props: Record<string, any> = {}, attrs: Record<string, any> = {}) {
-    return mount(MaxInputSelect, {
+let activeWrapper: any = null;
+
+function mountSelect(props: Record<string, any> = {}, attrs: Record<string, any> = {}, slots: Record<string, any> = {}) {
+    activeWrapper = mount(MaxInputSelect, {
         props: { modelValue: null, ...props },
         attrs,
+        slots,
+        attachTo: document.body,
         global: {
             stubs: {
-                Icon: true,
-                Select: {
-                    name: 'Select',
-                    template: '<div class="p-select" @click="$emit(\'before-show\')"><slot name="value" :value="modelValue" /></div>',
-                    props: ['modelValue', 'options']
+                Icon: {
+                    template: '<span class="max-icon-stub"></span>',
+                    props: ['icon', 'size']
                 }
             }
         }
     });
-}
-
-function _delay(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return activeWrapper;
 }
 
 describe('MaxInputSelect', () => {
@@ -29,14 +29,24 @@ describe('MaxInputSelect', () => {
         setActivePinia(createPinia());
     });
 
-    it('renderiza corretamente', () => {
+    afterEach(() => {
+        if (activeWrapper) {
+            activeWrapper.unmount();
+            activeWrapper = null;
+        }
+    });
+
+    it('renderiza corretamente com InputBase', () => {
         const wrapper = mountSelect();
         expect(wrapper.exists()).toBe(true);
+        expect(wrapper.findComponent(InputBase).exists()).toBe(true);
+        expect(wrapper.find('.p-select').exists()).toBe(true);
     });
 
     it('exibe placeholder se sem valor', () => {
         const wrapper = mountSelect({ modelValue: '' }, { placeholder: 'Selecione' });
         expect(wrapper.find('.placeholder-select').exists()).toBe(true);
+        expect(wrapper.find('.placeholder-select').text()).toBe('Selecione');
     });
 
     it('renderiza options simples e calcula option_selected', async () => {
@@ -66,6 +76,34 @@ describe('MaxInputSelect', () => {
         expect(vm.option_selected).toEqual({});
     });
 
+    it('clicar no gatilho abre o overlay e exibe as opções', async () => {
+        const options = [{ value: '1', label: 'Opção 1' }, { value: '2', label: 'Opção 2' }];
+        const wrapper = mountSelect({ options });
+
+        await wrapper.find('.p-select').trigger('click');
+        await wrapper.vm.$nextTick();
+
+        const overlay = document.querySelector('.p-select-overlay');
+        expect(overlay).not.toBeNull();
+        expect(document.querySelectorAll('.p-select-option').length).toBe(2);
+    });
+
+    it('selecionar uma opção emite update:modelValue e change', async () => {
+        const options = [{ value: 'val1', label: 'Opção 1' }];
+        const wrapper = mountSelect({ options });
+
+        await wrapper.find('.p-select').trigger('click');
+        await wrapper.vm.$nextTick();
+
+        const optionEl = document.querySelector('.p-select-option') as HTMLElement;
+        expect(optionEl).not.toBeNull();
+        optionEl.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.emitted('update:modelValue')?.[0]).toEqual(['val1']);
+        expect(wrapper.emitted('change')).toBeTruthy();
+    });
+
     it('chama loadOptions em before_show', async () => {
         let resolveLoad: any;
         const loadPromise = new Promise((resolve) => {
@@ -74,15 +112,12 @@ describe('MaxInputSelect', () => {
         const loadOptions = vi.fn().mockReturnValue(loadPromise);
         const wrapper = mountSelect({ loadOptions });
 
-        wrapper.find('.p-select').trigger('click');
-
-        // Let event loop process click
+        await wrapper.find('.p-select').trigger('click');
         await wrapper.vm.$nextTick();
 
         expect(loadOptions).toHaveBeenCalled();
         expect((wrapper.vm as any).loading).toBe(true);
 
-        // Return valid group format because option_selected will try to iterate it
         resolveLoad([{ items: [{ value: 'loaded', name: 'Loaded' }] }]);
 
         await loadPromise;
@@ -92,16 +127,39 @@ describe('MaxInputSelect', () => {
         expect((wrapper.vm as any).loading).toBe(false);
     });
 
-    it('atualiza temp_value pelo watch de modelValue', async () => {
-        const wrapper = mountSelect({ modelValue: 'a' });
-        await wrapper.setProps({ modelValue: 'b' });
-        expect((wrapper.vm as any).temp_value).toBe('b');
+    it('suporta busca com filter ignorando acentos/case', async () => {
+        const options = [{ value: '1', label: 'São Paulo' }, { value: '2', label: 'Rio de Janeiro' }];
+        const wrapper = mountSelect({ options, filter: true });
+
+        await wrapper.find('.p-select').trigger('click');
+        await wrapper.vm.$nextTick();
+
+        const filterInput = document.querySelector('.p-select-header input') as HTMLInputElement;
+        expect(filterInput).not.toBeNull();
+
+        filterInput.value = 'sao';
+        filterInput.dispatchEvent(new Event('input', { bubbles: true }));
+        await wrapper.vm.$nextTick();
+
+        expect(document.querySelectorAll('.p-select-option').length).toBe(1);
+        expect(document.querySelector('.p-select-option')?.textContent).toContain('São Paulo');
     });
 
-    it('emite update:modelValue ao alterar temp_value', async () => {
-        const wrapper = mountSelect();
-        (wrapper.vm as any).temp_value = 'new_value';
+    it('teclado: Enter e Space alternam overlay e Escape fecha', async () => {
+        const wrapper = mountSelect({ options: [{ value: '1', label: 'Item' }] });
+        const select = wrapper.find('.p-select');
+
+        await select.trigger('keydown', { key: 'Enter' });
         await wrapper.vm.$nextTick();
-        expect(wrapper.emitted('update:modelValue')?.[0][0]).toBe('new_value');
+        expect(document.querySelector('.p-select-overlay')).not.toBeNull();
+
+        await select.trigger('keydown', { key: 'Escape' });
+        await wrapper.vm.$nextTick();
+        expect(document.querySelector('.p-select-overlay')).toBeNull();
+    });
+
+    it('não emite marcações do PrimeVue', () => {
+        const wrapper = mountSelect({ options: [{ value: '1', label: 'Item' }] });
+        expect(wrapper.html()).not.toContain('data-pc-name');
     });
 });

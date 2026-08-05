@@ -957,11 +957,15 @@ itens:
     arquivo: src/components/MaxInputSelect.vue
     plano: prime_vue_migration/plans/23-MaxInputSelect.md
     primitivas: [Select]
-    depende_de: [1, 2]
-    execucao: Aguardando
-    verificacao: Aguardando
+    depende_de: [2, 4, 6]
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: 'BLOQUEANTE dos ids 24 e 25. Slots #option/#optiongroup/#value e evento before-show são API pública.'
+    notas: >
+      Reimplementado MaxInputSelect sem dependência do PrimeVue (removido import de primevue/select).
+      Utilizado MaxBaseOverlay e MaxBaseInput com suporte a opções simples e agrupadas, filtro case/acento-insensível, slots #option, #optiongroup e #value com mesmo contrato, e navegação por teclado.
+      11 testes em tests/components/MaxInputSelect.test.ts passando 100%.
+      Gates: vitest do componente limpo (11/11), type-check limpo, lint limpo (2 warnings pré-existentes), grep primevue VAZIO em MaxInputSelect.vue, git diff InputBase.vue VAZIO, suíte completa sem regressão.
 
   - id: 24
     componente: MaxPhoneField
