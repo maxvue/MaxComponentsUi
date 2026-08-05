@@ -8,7 +8,7 @@
                         <div class="conjunto">
                             <div class="texto">Loading</div>
                             <div class="circle">
-                                <ProgressSpinner style="width: 50px; height: 50px;" strokeWidth="7" animationDuration=".5s" aria-label="Custom ProgressSpinner"></ProgressSpinner>
+                                <MaxBaseSpinner style="width: 50px; height: 50px;" strokeWidth="7" animationDuration=".5s" aria-label="Custom ProgressSpinner" />
                             </div>
                             <div class="percent">{{ percent }}%</div>
                         </div>
@@ -40,7 +40,7 @@
 <script setup lang="ts">
     import { useWindowSize } from '@maxvue/max-use';
     import { defineAsyncComponent, ref, watch } from 'vue';
-    import ProgressSpinner from 'primevue/progressspinner';
+    import MaxBaseSpinner from './base/MaxBaseSpinner.vue';
     import MaxButton from './MaxButton.vue';
 
     // Async: vue-pdf-embed pesa ~2,6 MB (814 KB gzip) — só carrega quando um PDF é exibido

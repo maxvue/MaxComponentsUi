@@ -940,10 +940,13 @@ itens:
     plano: prime_vue_migration/plans/22-MaxPdfView.md
     primitivas: [ProgressSpinner]
     depende_de: [3]
-    execucao: Aguardando
-    verificacao: Aguardando
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: 'Troca simples de 1 tag.'
+    notas: >
+      Reimplementado MaxPdfView substituindo ProgressSpinner por MaxBaseSpinner.
+      5 testes em tests/components/MaxPdfView.test.ts passando 100%.
+      Gates: vitest do componente limpo (5/5), type-check limpo, lint limpo (2 warnings pré-existentes), grep primevue VAZIO em MaxPdfView.vue, git diff InputBase.vue VAZIO, suíte completa sem regressão.
 
 # -----------------------------------------------------------------------------
 # FASE 3 — OVERLAYS (todos dependem de MaxBaseOverlay)

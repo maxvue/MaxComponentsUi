@@ -9,7 +9,7 @@ vi.mock('@maxvue/max-use', () => ({
 function mountPdf(props: Record<string, any> = {}) {
     return mount(MaxPdfView, {
         props: { file: '', ...props },
-        global: { stubs: { ProgressSpinner: true, VuePdfEmbed: true, MaxButton: true } }
+        global: { stubs: { VuePdfEmbed: true, MaxButton: true } }
     });
 }
 
@@ -19,12 +19,13 @@ describe('MaxPdfView.vue', () => {
         expect(wrapper.find('.viewPDF').exists()).toBe(false);
     });
 
-    it('abre o visualizador (com loading) ao definir o arquivo', async () => {
+    it('abre o visualizador (com loading contendo MaxBaseSpinner) ao definir o arquivo', async () => {
         const wrapper = mountPdf();
         await wrapper.setProps({ file: 'novo.pdf' });
 
         expect(wrapper.find('.viewPDF').exists()).toBe(true);
         expect(wrapper.find('.loading').exists()).toBe(true);
+        expect(wrapper.find('.p-progressspinner').exists()).toBe(true);
     });
 
     it('fecha o visualizador ao clicar na área de fundo', async () => {
@@ -55,5 +56,11 @@ describe('MaxPdfView.vue', () => {
         expect(vm.size.width).toBeLessThan(afterIn);
 
         vm.Zoom('other'); // cobre o branch que não altera nada
+    });
+
+    it('não emite marcações do PrimeVue', async () => {
+        const wrapper = mountPdf();
+        await wrapper.setProps({ file: 'novo.pdf' });
+        expect(wrapper.html()).not.toContain('data-pc-name');
     });
 });
