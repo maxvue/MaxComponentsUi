@@ -1,5 +1,5 @@
 <template>
-    <div class="card-container">
+    <div class="max-credit-card">
         <div :class="`flip-card ${side}`">
             <div class="flip-card-inner">
                 <div class="flip-card-front">
@@ -214,13 +214,20 @@
 </script>
 
 <style lang="scss">
-.card-container {
+.max-credit-card {
+    /** Proporção do viewBox dos SVGs de frente/verso (700x430). */
+    --max-credit-card-ratio: 700 / 430;
+    --max-credit-card-max-width: 400px;
+
     perspective: 1000px;
     position: relative;
     width: 100%;
     display: grid;
 
     svg {
+        display: block;
+        width: 100%;
+        height: 100%;
         font-family: 'JetBrains Mono', monospace;
         font-optical-sizing: auto;
     }
@@ -237,11 +244,22 @@
             display: grid;
             place-items: start center;
 
+            /**
+             * As duas faces são `position: absolute` (necessário para empilhá-las no flip),
+             * então não geram altura no fluxo. Reservamos a altura aqui a partir da
+             * proporção do cartão, para que o componente ocupe o espaço do cartão visível
+             * em vez de colapsar para 0.
+             */
+            width: 100%;
+            max-width: var(--max-credit-card-max-width);
+            aspect-ratio: var(--max-credit-card-ratio);
+            margin-inline: auto;
+
             .flip-card-front,
             .flip-card-back {
                 position: absolute;
+                inset: 0;
                 width: 100%;
-                max-width: 400px;
                 backface-visibility: hidden;
             }
 

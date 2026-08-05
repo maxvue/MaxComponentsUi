@@ -1,20 +1,5 @@
 <template>
-    <button
-        ref="el"
-        type="button"
-        role="tab"
-        class="max-tab"
-        :class="{ 'max-tab-active': is_active, 'max-tab-disabled': props.disabled }"
-        :id="`${context.id_prefix}-tab-${props.value}`"
-        :data-tab-value="props.value"
-        :aria-controls="`${context.id_prefix}-panel-${props.value}`"
-        :aria-selected="is_active"
-        :aria-disabled="props.disabled || undefined"
-        :disabled="props.disabled"
-        :tabindex="is_reachable ? context.tabindex.value : -1"
-        @click="onClick"
-        @focus="onFocus"
-    >
+    <button ref="el" type="button" role="tab" class="max-tab" :class="{ 'max-tab-active': is_active, 'max-tab-disabled': props.disabled }" :id="`${context.id_prefix}-tab-${props.value}`" :data-tab-value="props.value" :aria-controls="`${context.id_prefix}-panel-${props.value}`" :aria-selected="is_active" :aria-disabled="props.disabled || undefined" :disabled="props.disabled" :tabindex="is_reachable ? context.tabindex.value : -1" @click="onClick" @focus="onFocus" >
         <slot></slot>
     </button>
 </template>
