@@ -4,8 +4,8 @@ import { inject, type InjectionKey, type Ref } from 'vue';
 export interface AccordionContext {
     /** Values dos paineis abertos (sempre array, mesmo no modo single). */
     open_values: Readonly<Ref<string[]>>;
-    /** Alterna um painel; respeita multiple. */
-    toggle: (value: string) => void;
+    /** Alterna um painel; respeita multiple. `originalEvent` e repassado ao payload de tab-open/tab-close. */
+    toggle: (value: string, originalEvent?: MouseEvent) => void;
     /** Renderiza o conteudo do painel apenas quando ele abre. */
     lazy: Readonly<Ref<boolean>>;
     /** Abre o painel ao receber foco, sem exigir clique. */

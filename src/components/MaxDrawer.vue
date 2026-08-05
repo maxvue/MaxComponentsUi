@@ -22,16 +22,18 @@
                                 <span class="max-drawer-title">{{ props.header }}</span>
                             </slot>
                             <!--
-                                `v-bind="closeButtonProps"` fica depois de `type`/`aria-label` para que o
+                                `v-bind="close_button_attrs"` fica depois de `type`/`aria-label` para que o
                                 consumidor possa sobrescrever ambos (ex.: customizar o aria-label). A
                                 `class` e tratada a parte para que `max-drawer-close` nunca seja perdida:
-                                a classe do consumidor e mesclada, nao substitui a nossa.
+                                a classe do consumidor e mesclada, nao substitui a nossa. `close_button_attrs`
+                                ja remove as chaves severity/text/rounded do default (props de <Button> do
+                                PrimeVue, sem efeito num <button> nativo) antes do v-bind.
                             -->
                             <button
                                 v-if="props.showCloseIcon"
                                 type="button"
                                 aria-label="Fechar"
-                                v-bind="props.closeButtonProps"
+                                v-bind="close_button_attrs"
                                 :class="['max-drawer-close', props.closeButtonProps?.class]"
                                 @click="close"
                             >
@@ -66,8 +68,10 @@
         position?: 'left' | 'right' | 'top' | 'bottom' | 'full';
         /** Texto do cabecalho. */
         header?: string | null;
-        /** Permite fechar clicando fora ou com Escape. */
+        /** Permite fechar clicando na mascara (fora do painel). Independente de closeOnEscape. */
         dismissable?: boolean;
+        /** Permite fechar com a tecla Escape. Independente de dismissable. */
+        closeOnEscape?: boolean;
         /** Exibe o botao de fechar no cabecalho. */
         showCloseIcon?: boolean;
         /** Exibe a mascara escura atras do painel. */
@@ -87,11 +91,12 @@
         position: 'left',
         header: null,
         dismissable: true,
+        closeOnEscape: true,
         showCloseIcon: true,
         modal: true,
         blockScroll: false,
         closeIcon: undefined,
-        closeButtonProps: undefined,
+        closeButtonProps: () => ({ severity: 'secondary', text: true, rounded: true }),
         baseZIndex: 0,
         autoZIndex: true
     });
@@ -110,6 +115,19 @@
     const scroll_lock = useScrollLock();
 
     const is_show = computed(() => props.visible);
+
+    /**
+     * As chaves do default de closeButtonProps (severity/text/rounded) sao
+     * props do componente <Button> do PrimeVue — nosso botao de fechar e um
+     * <button> nativo, entao repassa-las via v-bind poluiria o DOM com
+     * atributos HTML invalidos e sem efeito visual. Removemos apenas essas
+     * tres chaves antes do v-bind; qualquer outra chave em closeButtonProps
+     * (ex.: title, data-testid) continua repassada normalmente.
+     */
+    const close_button_attrs = computed(() => {
+        const props_to_strip = ['severity', 'text', 'rounded'];
+        return Object.fromEntries(Object.entries(props.closeButtonProps ?? {}).filter(([key]) => ! props_to_strip.includes(key)));
+    });
 
     /** Fica acima do MaxModal (z-index 59) quando autoZIndex esta ligado. */
     const z_index = computed(() => (props.autoZIndex ? props.baseZIndex + 60 : props.baseZIndex));
@@ -130,7 +148,7 @@
     };
 
     const onEscape = (event: KeyboardEvent) => {
-        if (event.key === 'Escape' && props.dismissable) close();
+        if (event.key === 'Escape' && props.closeOnEscape) close();
     };
 
     /**

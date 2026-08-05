@@ -260,6 +260,28 @@ describe('MaxDrawer', () => {
         expect(wrapper.emitted('update:visible')?.[0]).toEqual([false]);
     });
 
+    it('Escape ainda fecha quando dismissable e false, pois closeOnEscape e independente', async () => {
+        const wrapper = mountDrawer({ dismissable: false });
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+        await wrapper.vm.$nextTick();
+        expect(wrapper.emitted('update:visible')?.[0]).toEqual([false]);
+    });
+
+    it('nao fecha com Escape quando closeOnEscape e false', async () => {
+        const wrapper = mountDrawer({ closeOnEscape: false });
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+        await wrapper.vm.$nextTick();
+        expect(wrapper.emitted('update:visible')).toBeFalsy();
+    });
+
+    it('clique na mascara continua governado apenas por dismissable, mesmo com closeOnEscape false', async () => {
+        const wrapper = mountDrawer({ closeOnEscape: false });
+        const mascara = document.querySelector<HTMLElement>('.max-drawer-mask');
+        mascara?.click();
+        await wrapper.vm.$nextTick();
+        expect(wrapper.emitted('update:visible')?.[0]).toEqual([false]);
+    });
+
     it('nao muta o proprio visible (componente controlado)', async () => {
         const wrapper = mountDrawer();
         document.querySelector<HTMLElement>('.max-drawer-close')?.click();
@@ -317,6 +339,19 @@ describe('MaxDrawer', () => {
         const botao = document.querySelector('.max-drawer-close');
         expect(botao?.getAttribute('title')).toBe('Fechar painel');
         expect(botao?.getAttribute('data-testid')).toBe('fechar-drawer');
+    });
+
+    it('usa o default do PrimeVue para closeButtonProps quando a prop nao e informada', () => {
+        const wrapper = mountDrawer();
+        expect(wrapper.props('closeButtonProps')).toEqual({ severity: 'secondary', text: true, rounded: true });
+    });
+
+    it('nao aplica severity/text/rounded do default como atributos DOM invalidos no botao nativo', () => {
+        mountDrawer();
+        const botao = document.querySelector('.max-drawer-close');
+        expect(botao?.hasAttribute('severity')).toBe(false);
+        expect(botao?.hasAttribute('text')).toBe(false);
+        expect(botao?.hasAttribute('rounded')).toBe(false);
     });
 
     it('nao emite hide no mount quando visible comeca false', () => {

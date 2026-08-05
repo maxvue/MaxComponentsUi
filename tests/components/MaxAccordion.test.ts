@@ -81,22 +81,24 @@ describe('MaxAccordion', () => {
         expect(wrapper.emitted('update:value')?.[0]).toEqual([['b']]);
     });
 
-    it('emite tab-open ao abrir', () => {
-        const wrapper = mount(MaxAccordion, {
-            props: { value: undefined },
-            slots: { default: '<div>x</div>' }
-        });
+    it('emite tab-open com value e index numerico ao abrir', () => {
+        const wrapper = mountFull({ value: undefined });
         wrapper.vm.toggle('a');
-        expect(wrapper.emitted('tab-open')?.[0]).toEqual([{ value: 'a' }]);
+        expect(wrapper.emitted('tab-open')?.[0]).toEqual([{ originalEvent: undefined, index: 0, value: 'a' }]);
     });
 
-    it('emite tab-close ao fechar', () => {
-        const wrapper = mount(MaxAccordion, {
-            props: { value: 'a' },
-            slots: { default: '<div>x</div>' }
-        });
+    it('emite tab-open com o index correto para o segundo e terceiro painel', () => {
+        const wrapper = mountFull({ value: undefined });
+        wrapper.vm.toggle('b');
+        expect(wrapper.emitted('tab-open')?.[0]).toEqual([{ originalEvent: undefined, index: 1, value: 'b' }]);
+        wrapper.vm.toggle('c');
+        expect(wrapper.emitted('tab-open')?.[1]).toEqual([{ originalEvent: undefined, index: 2, value: 'c' }]);
+    });
+
+    it('emite tab-close com value e index numerico ao fechar', () => {
+        const wrapper = mountFull({ value: 'a' });
         wrapper.vm.toggle('a');
-        expect(wrapper.emitted('tab-close')?.[0]).toEqual([{ value: 'a' }]);
+        expect(wrapper.emitted('tab-close')?.[0]).toEqual([{ originalEvent: undefined, index: 0, value: 'a' }]);
     });
 });
 

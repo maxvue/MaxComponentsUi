@@ -36,8 +36,12 @@
 
     const emit = defineEmits<{
         'update:value': [value: string | string[] | undefined];
-        'tab-open': [event: { value: string }];
-        'tab-close': [event: { value: string }];
+        /**
+         * Payload compativel com o PrimeVue (`originalEvent`/`index`), com
+         * `value` adicional para quem ja consome nosso formato anterior.
+         */
+        'tab-open': [event: { originalEvent: MouseEvent | undefined; index: number; value: string }];
+        'tab-close': [event: { originalEvent: MouseEvent | undefined; index: number; value: string }];
     }>();
 
     /** Normaliza value para array, independente do modo. */
@@ -51,7 +55,7 @@
 
     const id_prefix = `max-accordion-${Random()}`;
 
-    const toggle = (value: string) => {
+    const toggle = (value: string, originalEvent?: MouseEvent) => {
 
         const is_open = open_values.value.includes(value);
 
@@ -63,8 +67,11 @@
         }
         else emit('update:value', is_open ? undefined : value);
 
-        if (is_open) emit('tab-close', { value });
-        else emit('tab-open', { value });
+        // Posicao (0-based) do painel entre os registrados, como no index do PrimeVue.
+        const index = headers.value.findIndex((header) => header.value === value);
+
+        if (is_open) emit('tab-close', { originalEvent, index, value });
+        else emit('tab-open', { originalEvent, index, value });
     };
 
     const registerHeader: AccordionContext['registerHeader'] = (value, el, disabled) => {

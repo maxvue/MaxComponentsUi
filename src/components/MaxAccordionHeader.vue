@@ -45,9 +45,10 @@
         return context.expand_icon.value ?? 'iconoir:nav-arrow-down';
     });
 
-    const onClick = () => {
+    /** `originalEvent` e undefined quando a ativacao vem do teclado (Enter/Espaco), nao de um clique real. */
+    const onClick = (event?: MouseEvent) => {
         if (panel.disabled.value) return;
-        context.toggle(panel.value);
+        context.toggle(panel.value, event);
     };
 
     const onKeydown = (event: KeyboardEvent) => {

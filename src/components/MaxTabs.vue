@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
     import { TABS_INJECTION_KEY, type TabsContext } from '../helpers/tabsContext';
-    import { provide, toRef, ref } from 'vue';
+    import { provide, toRef, ref, computed } from 'vue';
     import { Random } from '@maxvue/max-use';
 
     const props = withDefaults(defineProps<{
@@ -39,6 +39,15 @@
     const tabs = ref<{ value: string; el: HTMLElement; disabled: () => boolean }[]>([]);
 
     const id_prefix = `max-tabs-${Random()}`;
+
+    /**
+     * Value do primeiro tab habilitado, na ordem de registro. Usado por
+     * MaxTab como fallback de tabindex apenas quando nao ha nenhum value
+     * ativo definido, garantindo que o tablist nunca fique inteiramente fora
+     * do fluxo de tabulacao (WAI-ARIA exige exatamente um tab com
+     * tabindex 0).
+     */
+    const fallback_tab_value = computed(() => tabs.value.find((tab) => ! tab.disabled())?.value);
 
     const select = (value: string) => {
         emit('update:value', value);
@@ -77,6 +86,7 @@
 
     provide(TABS_INJECTION_KEY, {
         active_value: toRef(props, 'value'),
+        fallback_tab_value,
         select,
         lazy: toRef(props, 'lazy'),
         select_on_focus: toRef(props, 'selectOnFocus'),

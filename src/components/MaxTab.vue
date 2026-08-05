@@ -11,7 +11,7 @@
         :aria-selected="is_active"
         :aria-disabled="props.disabled || undefined"
         :disabled="props.disabled"
-        :tabindex="is_active ? context.tabindex.value : -1"
+        :tabindex="is_reachable ? context.tabindex.value : -1"
         @click="onClick"
         @focus="onFocus"
     >
@@ -37,6 +37,20 @@
     const el = useTemplateRef<HTMLElement>('el');
 
     const is_active = computed(() => context.active_value.value === props.value);
+
+    /**
+     * Determina qual tab recebe tabindex 0. Quando ha um value ativo
+     * definido, o proprio is_active decide, sem depender do registro (o que
+     * mantem o caso comum correto desde a primeira renderizacao, antes de
+     * qualquer tab se registrar via onMounted). So quando nao ha value ativo
+     * (undefined) e que caimos no fallback do contexto — o primeiro tab
+     * habilitado, na ordem de registro — para o tablist nunca ficar
+     * inteiramente fora do fluxo de tabulacao.
+     */
+    const is_reachable = computed(() => {
+        if (context.active_value.value !== undefined) return is_active.value;
+        return context.fallback_tab_value.value === props.value;
+    });
 
     const onClick = () => {
         if (props.disabled) return;

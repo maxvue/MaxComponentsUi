@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
 import MaxTabs from '../../src/components/MaxTabs.vue';
 import MaxTabList from '../../src/components/MaxTabList.vue';
@@ -88,6 +89,38 @@ describe('MaxTab', () => {
         const wrapper = mountTabList();
         const tabs = wrapper.findAll('.max-tab');
         expect(tabs[0].attributes('tabindex')).toBe('0');
+        expect(tabs[2].attributes('tabindex')).toBe('-1');
+    });
+
+    it('sem value, o primeiro tab recebe tabindex 0 e os demais -1', async () => {
+        const wrapper = mountTabList({ value: undefined });
+        // O registro dos tabs no contexto acontece no onMounted de cada
+        // MaxTab, entao o fallback so fica visivel no DOM apos um tick.
+        await nextTick();
+        const tabs = wrapper.findAll('.max-tab');
+        expect(tabs[0].attributes('tabindex')).toBe('0');
+        expect(tabs[1].attributes('tabindex')).toBe('-1');
+        expect(tabs[2].attributes('tabindex')).toBe('-1');
+    });
+
+    it('sem value e com o primeiro tab desabilitado, o primeiro habilitado recebe tabindex 0', async () => {
+        const wrapper = mount(MaxTabs, {
+            props: { value: undefined },
+            slots: {
+                default: `
+                    <MaxTabList>
+                        <MaxTab value="0" disabled>Um</MaxTab>
+                        <MaxTab value="1">Dois</MaxTab>
+                        <MaxTab value="2">Tres</MaxTab>
+                    </MaxTabList>
+                `
+            },
+            global: { components: { MaxTabList, MaxTab } }
+        });
+        await nextTick();
+        const tabs = wrapper.findAll('.max-tab');
+        expect(tabs[0].attributes('tabindex')).toBe('-1');
+        expect(tabs[1].attributes('tabindex')).toBe('0');
         expect(tabs[2].attributes('tabindex')).toBe('-1');
     });
 });

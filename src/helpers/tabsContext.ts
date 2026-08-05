@@ -7,6 +7,14 @@ import { inject, type InjectionKey, type Ref } from 'vue';
 export interface TabsContext {
     /** Valor do tab atualmente ativo. */
     active_value: Readonly<Ref<string | undefined>>;
+    /**
+     * Value do primeiro tab habilitado, na ordem de registro. Usado por
+     * MaxTab como fallback de tabindex 0 apenas quando nao ha nenhum value
+     * ativo definido (active_value undefined), garantindo que o tablist
+     * nunca fique inteiramente inalcancavel por teclado (WAI-ARIA exige
+     * exatamente um tab com tabindex 0).
+     */
+    fallback_tab_value: Readonly<Ref<string | undefined>>;
     /** Seleciona um tab pelo seu value. */
     select: (value: string) => void;
     /** Renderiza o conteúdo do painel só quando ativa pela primeira vez. */
