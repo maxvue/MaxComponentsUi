@@ -33,7 +33,7 @@ meta:
   # Cobre as 3 origens: primevue, @primeuix/themes e @primevue/auto-import-resolver.
   criterio_final: "grep -rn \"primevue\\|@primeuix\\|@primevue\" src/ --include='*.vue' --include='*.ts'"
   # Preenchido pelo executor no início da sessão (execution.md §0).
-  baseline_testes: null
+  baseline_testes: '609 passed, 18 failed, 7 test files failed (70 total) — falhas pré-existentes, não relacionadas à migração: InputBase.test.ts (2), MaxCreditCard.test.ts (2), MaxInputAutoCompleteApi.test.ts (1), MaxInputCpfCnpj.test.ts (3), MaxInputMarkdown.test.ts (6), MaxInputSwitch.test.ts (3), MaxLoaderAi.test.ts (1)'
   # Arquivos que NENHUM item pode alterar. Já são PrimeVue-free e são a base do padrão
   # da casa. Alteração em qualquer um deles = reprovação automática na verificação.
   intocaveis:
@@ -51,10 +51,30 @@ itens:
     plano: prime_vue_migration/plans/01-MaxBaseInput.md
     primitivas: [InputText]
     depende_de: []
-    execucao: Aguardando
-    verificacao: Aguardando
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: 'Primitiva mais crítica: destrava 10 componentes de input de texto.'
+    notas: >
+      Implementado como <input> raiz sem wrapper (preserva v-maska). Classes
+      p-inputtext/p-component/p-filled/p-invalid/p-disabled/p-inputtext-fluid/-sm/-lg
+      replicadas. Sem CSS visual próprio: InputBase.vue já estiliza .p-inputtext/input/
+      [disabled] genericamente, então a primitiva só precisa emitir as classes certas.
+      13 testes em tests/components/base/MaxBaseInput.test.ts, incluindo integração real
+      com v-maska (maska/vue). Mutações testadas e confirmadas como detectadas: (1)
+      remover emit update:modelValue, (2) hasValue fixo em true — cada uma quebrou seu
+      teste correspondente diretamente. (3) envolver o input num <div>: na 1ª rodada só
+      quebrou por acidente via o teste de atributos herdados, porque wrapper.element do
+      VTU resolve para o componente interno independente de um wrapper externo — achado
+      do subagente verificador (opus). Corrigido: o teste do elemento raiz agora também
+      afirma wrapper.html().trim().startsWith('<input') e wrapper.find('div').exists()
+      === false, que quebram diretamente sob essa mutação. Gates: type-check limpo, lint
+      limpo (2 warnings pré-existentes não relacionados), suite completa 622 passed/18
+      failed (mesmas 18 falhas do baseline, 0 regressão). Não exportado em src/index.ts
+      nem no manifesto do resolver (primitiva interna), conforme plano.
+      VERIFICAÇÃO (subagente opus): APROVADO. Zero PrimeVue, API idêntica ao plano,
+      contrato do v-maska preservado, InputBase.vue intocado, portões limpos. 3 achados
+      MENORES (teste do elemento raiz reforçado acima; nota de mutação corrigida; CSS
+      visual só validável no playground quando integrado a um consumidor nos itens 6-15).
 
   - id: 2
     componente: MaxBaseOverlay
