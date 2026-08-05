@@ -805,10 +805,13 @@ itens:
     plano: prime_vue_migration/plans/13-cartao-credito.md
     primitivas: [InputText]
     depende_de: [1, 6]
-    execucao: Aguardando
-    verificacao: Aguardando
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: 'Migrar os 3 (13/14/15) numa única passada — compartilham teste MaxCreditCard.test.ts.'
+    notas: >
+      Substituído InputText por MaxBaseInput. Migrado em trio indivisível com ids 14 e 15.
+      16 testes em tests/components/MaxCreditCard.test.ts (incluindo testes de integridade de InputBase e ausência de marcações PrimeVue para os três componentes).
+      Gates: vitest limpo para o trio, type-check limpo, lint limpo (2 warnings pré-existentes), grep primevue VAZIO para os três arquivos, git diff InputBase.vue VAZIO, suíte completa sem regressão.
 
   - id: 14
     componente: MaxInputCreditCardCvv
@@ -816,10 +819,11 @@ itens:
     plano: prime_vue_migration/plans/13-cartao-credito.md
     primitivas: [InputText]
     depende_de: [1, 6]
-    execucao: Aguardando
-    verificacao: Aguardando
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: 'Ver id 13.'
+    notas: >
+      Substituído InputText por MaxBaseInput. Migrado em trio indivisível com ids 13 e 15. Ver id 13.
 
   - id: 15
     componente: MaxInputCreditCardDate
@@ -827,8 +831,11 @@ itens:
     plano: prime_vue_migration/plans/13-cartao-credito.md
     primitivas: [InputText]
     depende_de: [1, 6]
-    execucao: Aguardando
-    verificacao: Aguardando
+    execucao: Concluído
+    verificacao: Concluído
+    tentativas: 0
+    notas: >
+      Substituído InputText por MaxBaseInput. Migrado em trio indivisível com ids 13 e 14. Ver id 13.
     tentativas: 0
     notas: 'Ver id 13.'
 

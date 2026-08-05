@@ -2,7 +2,12 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import { nextTick } from 'vue';
+import { vMaska } from 'maska/vue';
 import MaxCreditCard from '../../src/components/MaxCreditCard.vue';
+import MaxInputCreditCard from '../../src/components/MaxInputCreditCard.vue';
+import MaxInputCreditCardCvv from '../../src/components/MaxInputCreditCardCvv.vue';
+import MaxInputCreditCardDate from '../../src/components/MaxInputCreditCardDate.vue';
+import InputBase from '../../src/components/InputBase.vue';
 
 /**
  * `happy-dom`/`jsdom` não implementam `SVGTextElement.getComputedTextLength()`. Para validar
@@ -206,6 +211,57 @@ describe('MaxCreditCard', () => {
 
             expect(group6).toBeGreaterThan(group4);
             expect(group6 / group4).toBeCloseTo(6 / 4, 5);
+        });
+    });
+
+    describe('Trio de inputs de cartão de crédito (MaxInputCreditCard*)', () => {
+        it('preserva InputBase como wrapper e remove PrimeVue do MaxInputCreditCard', () => {
+            const wrapper = mount(MaxInputCreditCard);
+            expect(wrapper.findComponent(InputBase).exists()).toBe(true);
+            expect(wrapper.element.classList).toContain('max-input-main-div');
+            expect(wrapper.html()).not.toContain('data-pc-name');
+        });
+
+        it('preserva InputBase como wrapper e remove PrimeVue do MaxInputCreditCardCvv', () => {
+            const wrapper = mount(MaxInputCreditCardCvv);
+            expect(wrapper.findComponent(InputBase).exists()).toBe(true);
+            expect(wrapper.element.classList).toContain('max-input-main-div');
+            expect(wrapper.html()).not.toContain('data-pc-name');
+        });
+
+        it('preserva InputBase como wrapper e remove PrimeVue do MaxInputCreditCardDate', () => {
+            const wrapper = mount(MaxInputCreditCardDate);
+            expect(wrapper.findComponent(InputBase).exists()).toBe(true);
+            expect(wrapper.element.classList).toContain('max-input-main-div');
+            expect(wrapper.html()).not.toContain('data-pc-name');
+        });
+
+        it('valida rejeição de mês inválido (13) em MaxInputCreditCardDate', async () => {
+            const wrapper = mount(MaxInputCreditCardDate, {
+                global: {
+                    directives: { maska: vMaska }
+                }
+            });
+            const input = wrapper.find('input');
+            await input.setValue('1330');
+            await input.trigger('blur');
+            const ib = wrapper.findComponent(InputBase);
+            expect(ib.props('done')).toBe(false);
+            expect(ib.props('error')).toBe('Validade inválida');
+        });
+
+        it('valida CVV com comprimento exigido pela prop len', async () => {
+            const wrapper = mount(MaxInputCreditCardCvv, {
+                props: { len: 3 },
+                global: {
+                    directives: { maska: vMaska }
+                }
+            });
+            const input = wrapper.find('input');
+            await input.setValue('123');
+            await input.trigger('blur');
+            const ib = wrapper.findComponent(InputBase);
+            expect(ib.props('done')).toBe(true);
         });
     });
 });

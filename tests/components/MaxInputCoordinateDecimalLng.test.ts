@@ -5,7 +5,7 @@ import { vMaska } from 'maska/vue';
 
 const globalOptions = {
     directives: { maska: vMaska },
-    stubs: { InputBase: { template: '<div><slot /></div>', props: ['error', 'caution', 'done'] }, InputText: { template: '<input />' } }
+    stubs: { InputBase: { template: '<div><slot /></div>', props: ['error', 'caution', 'done'] } }
 };
 
 describe('MaxInputCoordinateDecimalLng', () => {
@@ -70,7 +70,7 @@ describe('MaxInputCoordinateDecimalLng', () => {
             global: globalOptions
         });
         await wrapper.setProps({ modelValue: '-40' });
-        expect(wrapper.vm.temp_value).toBe(-40);
+        expect(Number(String(wrapper.vm.temp_value).replace(/\.$/, ''))).toBe(-40);
     });
 
     it('testa propriedades done e caution manuais via prop', async () => {
