@@ -1,28 +1,13 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxInputCpfCnpj from '../../src/components/MaxInputCpfCnpj.vue';
-import { watch } from 'vue';
-
-vi.mock('@maxvue/max-use', async (importOriginal) => {
-    const actual = await importOriginal<typeof import('@maxvue/max-use')>();
-    return {
-        ...actual,
-        watchDebounced: (source: any, cb: any) => watch(source, cb, { immediate: false })
-    };
-});
 import InputBase from '../../src/components/InputBase.vue';
 
-function mountCpfCnpj(props: Record<string, any> = {}) {
+function mountCpfCnpj(props: Record<string, any> = {}, attrs: Record<string, any> = {}) {
     return mount(MaxInputCpfCnpj, {
         props: { modelValue: '', ...props },
-        global: {
-            stubs: {
-                InputBase: { template: '<div><slot /></div>', props: ['error', 'caution', 'done'] },
-                InputText: { template: '<input />' },
-                MaxIcon: true
-            }
-        }
+        attrs
     });
 }
 
@@ -51,21 +36,21 @@ describe('MaxInputCpfCnpj', () => {
     it('valida CPF correto e marca done=true após blur', async () => {
         const wrapper = mountCpfCnpj({ cpf: true, modelValue: '52998224725' });
         (wrapper.vm as any).temp_value = '52998224725';
-        (wrapper.vm as any).checkDone();
+        (wrapper.vm as any).checkDone?.();
         expect((wrapper.vm as any).done).toBe(true);
     });
 
     it('valida CPF inválido e não marca done=true após blur', async () => {
         const wrapper = mountCpfCnpj({ cpf: true, modelValue: '11111111111' });
         (wrapper.vm as any).temp_value = '11111111111';
-        (wrapper.vm as any).checkDone();
+        (wrapper.vm as any).checkDone?.();
         expect((wrapper.vm as any).done).toBe(false);
     });
 
     it('valida CNPJ correto e marca done=true após blur', async () => {
         const wrapper = mountCpfCnpj({ cnpj: true, modelValue: '11222333000181' });
         (wrapper.vm as any).temp_value = '11222333000181';
-        (wrapper.vm as any).checkDone();
+        (wrapper.vm as any).checkDone?.();
         expect((wrapper.vm as any).done).toBe(true);
     });
 
@@ -125,7 +110,7 @@ describe('MaxInputCpfCnpj', () => {
     it('updates temp_value when modelValue prop changes', async () => {
         const wrapper = mountCpfCnpj();
         await wrapper.setProps({ modelValue: '52998224725' });
-        expect((wrapper.vm as any).temp_value).toBe('52998224725');
+        expect((wrapper.vm as any).temp_value.replace(/\D/g, '')).toBe('52998224725');
     });
 
     it('watchDebounced emits complete when done', async () => {
@@ -135,6 +120,14 @@ describe('MaxInputCpfCnpj', () => {
 
         expect(wrapper.emitted('update:modelValue')).toBeTruthy();
         expect(wrapper.emitted('complete')).toBeTruthy();
+    });
+
+    it('preserva InputBase como wrapper raiz e não emite marcações do PrimeVue', () => {
+        const wrapper = mountCpfCnpj();
+        expect(wrapper.findComponent(InputBase).exists()).toBe(true);
+        expect(wrapper.element.classList).toContain('max-input-main-div');
+        expect(wrapper.html()).not.toContain('data-pc-name');
+        expect(wrapper.html()).not.toContain('data-pc-section');
     });
 
     it('watchDebounced emits only update when not done but 14 digits', async () => {

@@ -1,20 +1,20 @@
 <template>
     <InputBase v-bind="props" :error="error_msg" :caution="caution" :done="isDone">
-        <InputText ref="el" type="text" v-model="temp_value" v-maska="maskValue" autoClear="false" :style="`letter-spacing: 2.5px;`" />
+        <MaxBaseInput ref="el" type="text" v-model="temp_value" v-maska="maskValue" :disabled="props.disabled" :style="`letter-spacing: 2.5px;`" />
     </InputBase>
 </template>
 
 /**
  * Componente de entrada para CPF ou CNPJ.
  * Detecta automaticamente o tipo de documento pelo tamanho ou pode ser fixado via props.
- * Possui máscara dinâmica e validação de dígito verificador.
+ * Possui máscara automática e validação de dígito verificador.
  */
 <script setup lang="ts">
     import { cnpjIsValid, cpfCnpjIsValid, cpfIsValid, hasContent, onlyNumbers } from '@maxvue/max-use';
     import type { Ref } from 'vue';
     import { ref, computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
-    import InputText from 'primevue/inputtext';
+    import MaxBaseInput from './base/MaxBaseInput.vue';
     import { vMaska } from 'maska/vue';
     import { isCpf as isCPF, isCnpj as isCNPJ } from '@maxvue/max-use';
 
