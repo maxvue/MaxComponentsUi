@@ -48,10 +48,6 @@ export { default as TreeTable } from 'primevue/treetable';
 export { default as VirtualScroller } from 'primevue/virtualscroller';
 
 // PANEL
-export { default as Accordion } from 'primevue/accordion';
-export { default as AccordionPanel } from 'primevue/accordionpanel';
-export { default as AccordionHeader } from 'primevue/accordionheader';
-export { default as AccordionContent } from 'primevue/accordioncontent';
 export { default as Card } from 'primevue/card';
 export { default as Divider } from 'primevue/divider';
 export { default as Fieldset } from 'primevue/fieldset';
@@ -65,11 +61,6 @@ export { default as StepPanels } from 'primevue/steppanels';
 export { default as StepItem } from 'primevue/stepitem';
 export { default as Step } from 'primevue/step';
 export { default as StepPanel } from 'primevue/steppanel';
-export { default as Tabs } from 'primevue/tabs';
-export { default as TabList } from 'primevue/tablist';
-export { default as Tab } from 'primevue/tab';
-export { default as TabPanels } from 'primevue/tabpanels';
-export { default as TabPanel } from 'primevue/tabpanel';
 export { default as Toolbar } from 'primevue/toolbar';
 export { default as Editor } from 'primevue/editor';
 
@@ -78,7 +69,6 @@ export { default as Editor } from 'primevue/editor';
 export { default as ConfirmDialog } from 'primevue/confirmdialog';
 export { default as ConfirmPopup } from 'primevue/confirmpopup';
 export { default as Dialog } from 'primevue/dialog';
-export { default as Drawer } from 'primevue/drawer';
 export { default as DynamicDialog } from 'primevue/dynamicdialog';
 export { default as Popover } from 'primevue/popover';
 

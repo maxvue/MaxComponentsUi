@@ -63,7 +63,8 @@
         }
         else emit('update:value', is_open ? undefined : value);
 
-        emit(is_open ? 'tab-close' : 'tab-open', { value });
+        if (is_open) emit('tab-close', { value });
+        else emit('tab-open', { value });
     };
 
     const registerHeader: AccordionContext['registerHeader'] = (value, el, disabled) => {
