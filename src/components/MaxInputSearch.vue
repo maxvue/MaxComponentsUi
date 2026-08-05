@@ -1,13 +1,13 @@
 <template>
     <InputBase v-bind="attrs" class="input-search-main-div" :iconRight="isLoading === true ? 'line-md:loading-twotone-loop' :  'material-symbols:search-rounded'">
-        <InputText type="text" v-bind="attrs" fluid v-model="temp_value" @input="onInput" />
+        <MaxBaseInput type="text" v-bind="attrs" fluid v-model="temp_value" @input="onInput" />
     </InputBase>
 </template>
 
 <script setup lang="ts">
     import { ref, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
-    import InputText from 'primevue/inputtext';
+    import MaxBaseInput from './base/MaxBaseInput.vue';
 
     const attrs = useAttrs();
 
