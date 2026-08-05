@@ -723,10 +723,13 @@ itens:
     plano: prime_vue_migration/plans/07-inputs-texto-derivados.md
     primitivas: [InputText]
     depende_de: [1, 6]
-    execucao: Aguardando
-    verificacao: Aguardando
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: 'Usa v-maska. Preservar a diretiva de máscara intacta.'
+    notas: >
+      Substituído InputText por MaxBaseInput. Diretiva v-maska mantida no elemento <input> real.
+      15 testes em tests/components/MaxInputCep.test.ts (2 testes novos adicionados: ausência de PrimeVue/wrapper InputBase e vMaska aplicado ao input real).
+      Gates: vitest do componente limpo (15/15), type-check limpo, lint limpo (2 warnings pré-existentes), grep primevue VAZIO, git diff InputBase.vue VAZIO, suíte completa sem regressão (795 passed / 18 failed baseline).
 
   - id: 8
     componente: MaxInputCpfCnpj

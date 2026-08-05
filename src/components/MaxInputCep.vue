@@ -1,6 +1,6 @@
 <template>
     <InputBase v-bind="props" class="input-base-phone-mail-main-div" :value="temp_value" :done="done ?? undefined" :caution="caution" :error="error_msg ?? undefined" :icon-right="loading ? 'loading' : undefined">
-        <InputText type="text" v-model="temp_value" v-maska="maskValue" autoClear="false" slotChar=" " placeholder="00 . 000 - 000" @blur="checkDone()" />
+        <MaxBaseInput type="text" v-model="temp_value" v-maska="maskValue" :disabled="props.disabled" placeholder="00 . 000 - 000" @blur="checkDone()" />
     </InputBase>
 </template>
 
@@ -13,7 +13,7 @@
     import type { Ref } from 'vue';
     import { ref, computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
-    import InputText from 'primevue/inputtext';
+    import MaxBaseInput from './base/MaxBaseInput.vue';
     import { vMaska } from 'maska/vue';
 
     const attrs: any = useAttrs();

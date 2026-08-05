@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
+import { vMaska } from 'maska/vue';
 import MaxInputCep from '../../src/components/MaxInputCep.vue';
 import InputBase from '../../src/components/InputBase.vue';
 
@@ -94,18 +95,38 @@ describe('MaxInputCep', () => {
         // Oh, if value is empty caution is false unless explicitly passed.
     });
 
+    it('preserva InputBase como wrapper raiz e não emite marcações do PrimeVue', () => {
+        const wrapper = mountCep();
+        expect(wrapper.findComponent(InputBase).exists()).toBe(true);
+        expect(wrapper.element.classList).toContain('max-input-main-div');
+        expect(wrapper.html()).not.toContain('data-pc-name');
+        expect(wrapper.html()).not.toContain('data-pc-section');
+    });
+
+    it('aplica a máscara com vMaska no elemento input real', async () => {
+        const wrapper = mount(MaxInputCep, {
+            props: { modelValue: '' },
+            global: {
+                directives: {
+                    maska: vMaska
+                }
+            }
+        });
+        const input = wrapper.find('input');
+        await input.setValue('01310100');
+        expect(input.element.value).toBe('01.310 - 100');
+    });
+
     it('updates internal temp_value when modelValue prop changes', async () => {
         const wrapper = mountCep({ modelValue: '01001000' });
         await wrapper.setProps({ modelValue: '12345678' });
         const input = wrapper.find('input');
-        expect(input.element.value).not.toBe('01001000'); // the masked value might be '12.345 - 678'
-        // the important part is that watch is triggered
+        expect(input.element.value).not.toBe('01001000');
     });
 
     it('checkDone is called on blur', async () => {
         const wrapper = mountCep({ modelValue: '123' });
         const input = wrapper.find('input');
         await input.trigger('blur');
-        // Doesn't return anything but we cover the function call
     });
 });
