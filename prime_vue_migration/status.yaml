@@ -377,10 +377,149 @@ itens:
     plano: prime_vue_migration/plans/04-MaxBaseVirtualScroller.md
     primitivas: [VirtualScroller]
     depende_de: []
-    execucao: Aguardando
-    verificacao: Aguardando
-    tentativas: 0
-    notas: '@tanstack/vue-virtual JÁ está nas dependencies — usar em vez de implementar do zero.'
+    execucao: Concluído
+    verificacao: Concluído
+    tentativas: 2
+    notas: >
+      @tanstack/vue-virtual JÁ está nas dependencies — usado em vez de implementar do
+      zero. Versão instalada conferida: 3.13.34; useVirtualizer devolve
+      Ref<Virtualizer>, então precisa de .value no script (no template o unwrap é
+      automático).
+      LEVANTAMENTO DO CONSUMIDOR (plano §2, obrigatório): consumidor ÚNICO é
+      MaxInputIconPicker.vue:44. É lista VERTICAL de altura fixa, não grade 2D — o
+      próprio consumidor pré-agrupa os ícones em linhas de 8 colunas (COLS=8) e passa
+      as LINHAS como items. Usa apenas :items, :itemSize=40, :style, class, @scroll e
+      o slot #item com {item, options} (só options.index é lido). Portanto NÃO foram
+      replicados: orientation horizontal/both, itemSize como array, lazy, showLoader,
+      slots #content/#loader — nenhum tem consumidor.
+      CONTRATO CRÍTICO do @scroll: MaxInputIconPicker.vue:222 lê
+      event.target.scrollTop e .clientHeight para descobrir quais ícones estão
+      visíveis e buscar os SVGs. Isso obriga o listener a ficar no elemento que de
+      fato rola (o container com overflow:auto), não num wrapper interno — há teste
+      afirmando que event.target é a raiz.
+      ARMADILHA DE TESTE resolvida: o virtual-core mede o elemento de scroll por
+      offsetWidth/offsetHeight (getRect em virtual-core/dist/esm/index.js:14), NÃO por
+      getBoundingClientRect nem clientHeight. O stub inicial mirou o alvo errado e o
+      resultado foi 0 itens renderizados — que faria várias asserções "passarem" por
+      vacuidade. Com offsetHeight stubado a virtualização roda de verdade no
+      happy-dom: 15 nós renderizados para 1000 itens (400px/40px = 10 visíveis + 5 de
+      overscan), medido explicitamente.
+      Erro de tipo achado no portão e corrigido: row.key do tanstack é `Key` (aceita
+      bigint), que o Vue não aceita como :key — trocado por row.index, sempre number.
+      ARIA: aria-setsize com o total REAL da coleção e aria-posinset absoluto (sem
+      isso um leitor de tela anunciaria "item 1 de 15" numa lista de 1000); role e
+      itemRole configuráveis pelo consumidor.
+      13 testes. 10 mutações aplicadas e todas detectadas, incluindo a que mais
+      importa: renderizar TODOS os items (matando a virtualização) quebra 3 testes.
+      Também: aria-setsize com a contagem renderizada, aria-posinset sem +1, first
+      sempre true, last off-by-one, emit scroll removido, translateY fixo, totalSize
+      fixo, estimateSize ignorando itemSize, overflow removido.
+      ESCOPO: este item apenas CRIA a primitiva; a troca da tag em
+      MaxInputIconPicker é do id 31.
+      Gates: grep primevue VAZIO; não exportado; InputBase intocado; type-check
+      limpo; lint limpo (2 warnings pré-existentes); suíte 721 passed / 18 failed —
+      mesmas 18 do baseline, 0 regressão.
+      ---
+      TENTATIVA 1 REPROVADA pelo subagente verificador (opus), com 3 BLOQUEANTES.
+      Ele CONFIRMOU de forma independente que a virtualização é real e não teatro:
+      leu getRect na lib, mediu 15 nós para 1000 itens, checou que overscan 0/5/20
+      produz 10/15/30, e verificou que nenhuma asserção passa por vacuidade-zero.
+      Também descartou dois riscos que eu havia levantado: o :style do consumidor
+      VENCE o do componente (com overflow:auto preservado) e o @scroll vem mesmo da
+      raiz rolável — o contrato de MaxInputIconPicker.vue:222 está atendido.
+      (E1) BUG REAL: scroll-index-change emitia SEMPRE a janela anterior. onScroll lia
+      virtualRows de forma síncrona dentro do listener, antes de o virtualizer
+      recomputar o range para o novo scrollTop. Medido pelo verificador: com
+      scrollTop=1200 a janela real é [25..44] mas o payload saía {first:15,last:34} —
+      um evento inteiro de atraso, sistemático. Corrigido calculando a janela a partir
+      do scrollTop do próprio evento (floor(scrollTop/itemSize) e + ceil(clientHeight/
+      itemSize)), com clamp em items.length-1.
+      (E2) scroll-index-change não tinha teste algum — a mutação que apagava o evento
+      inteiro sobrevivia 13/13. Agora há 3 testes (janela nova, dedup, clamp no último
+      índice) e o BUG ORIGINAL é detectado por eles quando reintroduzido.
+      (E3) aria-posinset só era validado na janela inicial, onde índice absoluto e
+      posição na fatia coincidem — a mutação que o tornava relativo à fatia sobrevivia.
+      É exatamente a regressão que o plano §Acessibilidade manda evitar. Agora há
+      teste que rola para longe do topo e confirma posinset absoluto e contíguo.
+      MENORES acatados: options.count sem cobertura (o teste usava 3 itens, todos
+      renderizados, então total e renderizados coincidiam — agora usa 1000 com 15
+      renderizados); numToleratedItems sem teste; o teste de virtualização usava a
+      faixa frouxa >0 && <100 e passava até sem o stub de layout — agora afirma a
+      contagem exata (15) com a matemática no comentário; scrollToIndex só verificava
+      "é função e não lança" — agora espiona o scrollTop e exige que role de fato.
+      Sobraram sem teste M8 (:key constante), M9 (position static) e M10 (width 100%),
+      classificados pelo verificador como baixa prioridade em CSS/identidade de nó.
+      19 testes. 6 mutações revalidadas, todas detectadas, incluindo o bug original.
+      Gates da tentativa 2: grep primevue VAZIO; não exportado; InputBase intocado;
+      type-check limpo; lint limpo (2 warnings pré-existentes); suíte 727 passed /
+      18 failed — mesmas 18 do baseline, 0 regressão.
+      ---
+      TENTATIVA 2 REPROVADA, com achado importante: minha correção de E1 tinha trocado
+      um erro por outro. O verificador LEU o virtualscroller do PrimeVue
+      (node_modules/primevue/virtualscroller/index.mjs:604-616, calculateFirst/
+      calculateLast) e mostrou que scroll-index-change reporta a faixa RENDERIZADA
+      (visível ± numToleratedItems), não a visível: em scrollTop=1200 o PrimeVue emite
+      {25,51} enquanto minha aritmética emitia {30,40} — e o DOM montado era [25..44],
+      ou seja o payload contradizia o próprio componente.
+      (F1) Corrigido de vez: o payload agora sai do range do PRÓPRIO virtualizer
+      (rows[0].index / rows[at(-1)].index) após `await nextTick()`. Isso resolve as
+      duas coisas de uma vez — a fonte de verdade passa a ser o que está montado
+      (tolerância incluída, como no PrimeVue) e o nextTick evita a janela anterior,
+      que era o bug E1 original. Aritmética paralela sobre scrollTop foi abandonada.
+      (F2) Intervalo INVERTIDO eliminado pela mesma correção: o verificador mediu
+      {first:25,last:4} com lista de 5 itens rolada além do fim, porque eu clampava
+      só o last. Vindo de linhas reais, first<=last é estrutural. Há teste varrendo
+      todos os eventos e exigindo last>=first, first>=0 e last<=length-1.
+      (F3) options.index sem cobertura de índice absoluto — a mutação `index: 0`
+      sobrevivia 19/19 porque os testes de options usavam listas de 3-5 itens, onde
+      índice absoluto e posição na fatia coincidem (o mesmo vício que E3 apontou para
+      aria-posinset, que eu tinha corrigido só lá). É o ÚNICO campo de options que o
+      consumidor real lê (MaxInputIconPicker usa como data-row-index). Agora há teste
+      que rola e exige índice > 50 e contíguo.
+      (F4) Os 3 testes de scroll-index-change usavam apenas scrollTop múltiplo exato
+      de itemSize (0/400/800/1200), onde floor==ceil — as mutações floor<->ceil
+      sobreviviam. Somado teste com scrollTop=1210.
+      MENOR acatado: a dedup lastFirst/lastLast nunca era invalidada ao trocar a
+      coleção (janela numericamente igual sobre itens diferentes era engolida) —
+      agora há watch sobre props.items que a reseta, com teste. Também fechada a
+      mutação `&&`->`||` da dedup, com um caso de lista menor que a viewport, em que
+      só o `first` muda entre rolagens.
+      23 testes. Mutações revalidadas e todas detectadas: options.index fixo,
+      aritmética paralela (payload ignorando tolerância), dedup removida, dedup com
+      ||, watch de items removido, nextTick removido (o bug original).
+      Gates da tentativa 3: grep primevue VAZIO; não exportado; InputBase intocado;
+      type-check limpo; lint limpo (2 warnings pré-existentes); suíte 731 passed /
+      18 failed — mesmas 18 do baseline, 0 regressão.
+      ---
+      TENTATIVA 3: APROVADO. O verificador mediu o payload contra os aria-posinset
+      REALMENTE montados em 8 posições (0, 200, 1200, 1210 não-alinhado, 4000, 17777,
+      39600 e 100000 além do fim) e obteve casamento EXATO em todas — F1 e F2
+      corrigidos, intervalo invertido agora impossível por construção, já que os
+      índices vêm de linhas existentes. Auditou o `await nextTick()` no handler async:
+      o emit('scroll') continua síncrono com event.target.scrollTop já válido (o
+      consumidor não é afetado), e 3 scrolls no mesmo tick produzem 1 evento coerente
+      com o DOM final, sem fora de ordem. Descartou a suspeita de tautologia do helper
+      janelaNoDom: corromper aria-posinset e payload juntos (+1 e +1000) é morto por
+      duas vias independentes (o teste de bounds e o de aria absoluto).
+      Registrou uma DIVERGÊNCIA CONSCIENTE de convenção: o `last` do PrimeVue é
+      EXCLUSIVO (index.mjs:838 faz items.slice(first, last)) e o overscan dele é
+      maior, então em scrollTop=1200 ele emite {25,51} e nós {25,44} inclusivo. O
+      `first` é idêntico. Sem impacto: o único consumidor (id 31) escuta apenas
+      @scroll, não scroll-index-change.
+      Fechada antes do commit a única lacuna load-bearing: a guarda de linhas vazias
+      não tinha teste porque, sendo onScroll async, a exceção virava rejeição não
+      capturada — que o happy-dom não propaga e não derruba o teste. Em vez de caçar a
+      rejeição, troquei o acesso por opcional (rows[0]?.index) com guarda de
+      undefined: o comportamento passou a ser observável pelo RESULTADO (nenhum evento
+      emitido) e a mutação agora morre.
+      Sobraram sem teste, todas classificadas como MENOR sem consumidor: a ordem
+      emit/nextTick (inócua, pois scrollTop é propriedade viva do DOM), o watch raso
+      de items (mutação in-place não invalida a dedup — o id 31 substitui o array) e
+      a convenção inclusiva do last.
+      TOTAL: 23 testes, ~30 mutações ao longo das 3 rodadas.
+      Gates finais: grep primevue VAZIO; não exportado; InputBase intocado;
+      type-check limpo; lint limpo (2 warnings pré-existentes); suíte 731 passed /
+      18 failed — mesmas 18 do baseline nos mesmos 7 arquivos, 0 regressão.
 
   - id: 5
     componente: vTooltip
