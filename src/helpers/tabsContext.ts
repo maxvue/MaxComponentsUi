@@ -9,12 +9,22 @@ export interface TabsContext {
     active_value: Readonly<Ref<string | undefined>>;
     /**
      * Value do primeiro tab habilitado, na ordem de registro. Usado por
-     * MaxTab como fallback de tabindex 0 apenas quando nao ha nenhum value
-     * ativo definido (active_value undefined), garantindo que o tablist
-     * nunca fique inteiramente inalcancavel por teclado (WAI-ARIA exige
-     * exatamente um tab com tabindex 0).
+     * MaxTab como fallback de tabindex 0 quando nao ha nenhum value ativo
+     * definido, ou quando o value ativo e orfao (nao corresponde a nenhum
+     * tab registrado — ex.: removido dinamicamente da lista), garantindo que
+     * o tablist nunca fique inteiramente inalcancavel por teclado (WAI-ARIA
+     * exige exatamente um tab com tabindex 0).
      */
     fallback_tab_value: Readonly<Ref<string | undefined>>;
+    /**
+     * True quando o active_value atual corresponde a um tab registrado.
+     * False tanto quando active_value e undefined quanto quando e um value
+     * orfao (nao corresponde a nenhum tab). Antes do registro ter ao menos
+     * um tab (janela entre a primeira renderizacao do MaxTabs e o onMounted
+     * dos MaxTab filhos), fica true de forma conservadora para nao tratar a
+     * ausencia temporaria de registro como "value orfao".
+     */
+    has_registered_active_tab: Readonly<Ref<boolean>>;
     /** Seleciona um tab pelo seu value. */
     select: (value: string) => void;
     /** Renderiza o conteúdo do painel só quando ativa pela primeira vez. */

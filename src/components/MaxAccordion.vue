@@ -67,7 +67,16 @@
         }
         else emit('update:value', is_open ? undefined : value);
 
-        // Posicao (0-based) do painel entre os registrados, como no index do PrimeVue.
+        /*
+         * Posicao (0-based) do painel entre os registrados, como no index do
+         * PrimeVue. findIndex retorna -1 quando o value chamado nao
+         * corresponde a nenhum header registrado (ex.: toggle() acionado
+         * programaticamente antes do MaxAccordionHeader montar, ou com um
+         * value que nunca existiu). Esse -1 e repassado como esta no
+         * payload: nao inventamos um index valido para um painel que nao
+         * existe. Quem consumir o evento deve tratar -1 como "sem
+         * correspondencia", nao como um indice real.
+         */
         const index = headers.value.findIndex((header) => header.value === value);
 
         if (is_open) emit('tab-close', { originalEvent, index, value });

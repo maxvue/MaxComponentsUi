@@ -123,6 +123,82 @@ describe('MaxTab', () => {
         expect(tabs[1].attributes('tabindex')).toBe('0');
         expect(tabs[2].attributes('tabindex')).toBe('-1');
     });
+
+    it('com value orfao (sem tab correspondente), o primeiro tab habilitado recebe tabindex 0', async () => {
+        const wrapper = mountTabList({ value: 'zzz' });
+        await nextTick();
+        const tabs = wrapper.findAll('.max-tab');
+        expect(tabs[0].attributes('tabindex')).toBe('0');
+        expect(tabs[1].attributes('tabindex')).toBe('-1');
+        expect(tabs[2].attributes('tabindex')).toBe('-1');
+    });
+
+    it('com value orfao e o primeiro tab desabilitado, o primeiro habilitado recebe tabindex 0', async () => {
+        const wrapper = mount(MaxTabs, {
+            props: { value: 'zzz' },
+            slots: {
+                default: `
+                    <MaxTabList>
+                        <MaxTab value="0" disabled>Um</MaxTab>
+                        <MaxTab value="1">Dois</MaxTab>
+                        <MaxTab value="2">Tres</MaxTab>
+                    </MaxTabList>
+                `
+            },
+            global: { components: { MaxTabList, MaxTab } }
+        });
+        await nextTick();
+        const tabs = wrapper.findAll('.max-tab');
+        expect(tabs[0].attributes('tabindex')).toBe('-1');
+        expect(tabs[1].attributes('tabindex')).toBe('0');
+        expect(tabs[2].attributes('tabindex')).toBe('-1');
+    });
+
+    it('com value valido, so o tab ativo tem tabindex 0, inclusive apos o registro popular (nextTick)', async () => {
+        const wrapper = mountTabList();
+        const tabs_sync = wrapper.findAll('.max-tab');
+        expect(tabs_sync[0].attributes('tabindex')).toBe('0');
+        expect(tabs_sync[2].attributes('tabindex')).toBe('-1');
+        await nextTick();
+        const tabs_after_tick = wrapper.findAll('.max-tab');
+        expect(tabs_after_tick[0].attributes('tabindex')).toBe('0');
+        expect(tabs_after_tick[1].attributes('tabindex')).toBe('-1');
+        expect(tabs_after_tick[2].attributes('tabindex')).toBe('-1');
+    });
+
+    it('tab ativo removido dinamicamente da lista: o fallback assume e o tablist continua alcancavel', async () => {
+        // Componente hospedeiro com estado reativo proprio, controlando quais
+        // tabs existem — simula uma lista dinamica onde o tab ativo e removido
+        // em runtime, deixando o value do MaxTabs orfao sem o pai muda-lo.
+        const Host = {
+            components: { MaxTabs, MaxTabList, MaxTab },
+            data: () => ({ show_middle: true }),
+            template: `
+                <MaxTabs value="1">
+                    <MaxTabList>
+                        <MaxTab value="0">Um</MaxTab>
+                        <MaxTab v-if="show_middle" value="1">Dois</MaxTab>
+                        <MaxTab value="2">Tres</MaxTab>
+                    </MaxTabList>
+                </MaxTabs>
+            `
+        };
+        const wrapper = mount(Host);
+        await nextTick();
+        // Antes da remocao, o tab '1' (ativo) e o unico alcancavel.
+        expect(wrapper.findAll('.max-tab')[1].attributes('tabindex')).toBe('0');
+
+        // Remove o tab '1' da lista dinamicamente; o MaxTabs continua com value="1", agora orfao.
+        wrapper.vm.show_middle = false;
+        await nextTick();
+        await nextTick();
+
+        const tabs = wrapper.findAll('.max-tab');
+        expect(tabs.length).toBe(2);
+        // Nenhum tab casa mais com o value '1': o primeiro habilitado assume o fallback.
+        expect(tabs[0].attributes('tabindex')).toBe('0');
+        expect(tabs[1].attributes('tabindex')).toBe('-1');
+    });
 });
 
 describe('MaxTabList', () => {

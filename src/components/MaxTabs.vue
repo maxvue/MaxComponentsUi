@@ -42,12 +42,27 @@
 
     /**
      * Value do primeiro tab habilitado, na ordem de registro. Usado por
-     * MaxTab como fallback de tabindex apenas quando nao ha nenhum value
-     * ativo definido, garantindo que o tablist nunca fique inteiramente fora
-     * do fluxo de tabulacao (WAI-ARIA exige exatamente um tab com
-     * tabindex 0).
+     * MaxTab como fallback de tabindex quando nao ha nenhum value ativo
+     * definido, ou quando o value ativo e orfao, garantindo que o tablist
+     * nunca fique inteiramente fora do fluxo de tabulacao (WAI-ARIA exige
+     * exatamente um tab com tabindex 0).
      */
     const fallback_tab_value = computed(() => tabs.value.find((tab) => ! tab.disabled())?.value);
+
+    /**
+     * True quando o value ativo corresponde a um tab registrado. Antes do
+     * registro ter ao menos um tab (janela entre a primeira renderizacao do
+     * MaxTabs e o onMounted dos MaxTab filhos), fica true de forma
+     * conservadora: nesse instante ainda nao sabemos se o value e orfao ou
+     * simplesmente nao foi registrado ainda, entao evitamos acionar o
+     * fallback e quebrar o caso comum (value valido) na primeira
+     * renderizacao sincrona.
+     */
+    const has_registered_active_tab = computed(() => {
+        if (props.value === undefined) return false;
+        if (! tabs.value.length) return true;
+        return tabs.value.some((tab) => tab.value === props.value);
+    });
 
     const select = (value: string) => {
         emit('update:value', value);
@@ -87,6 +102,7 @@
     provide(TABS_INJECTION_KEY, {
         active_value: toRef(props, 'value'),
         fallback_tab_value,
+        has_registered_active_tab,
         select,
         lazy: toRef(props, 'lazy'),
         select_on_focus: toRef(props, 'selectOnFocus'),

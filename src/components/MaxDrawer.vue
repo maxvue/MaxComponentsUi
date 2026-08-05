@@ -120,12 +120,15 @@
      * As chaves do default de closeButtonProps (severity/text/rounded) sao
      * props do componente <Button> do PrimeVue — nosso botao de fechar e um
      * <button> nativo, entao repassa-las via v-bind poluiria o DOM com
-     * atributos HTML invalidos e sem efeito visual. Removemos apenas essas
-     * tres chaves antes do v-bind; qualquer outra chave em closeButtonProps
-     * (ex.: title, data-testid) continua repassada normalmente.
+     * atributos HTML invalidos e sem efeito visual. Removemos essas tres
+     * chaves antes do v-bind; qualquer outra chave em closeButtonProps (ex.:
+     * title, data-testid) continua repassada normalmente. `class` tambem e
+     * removida daqui porque ja e tratada a parte no `:class` do template
+     * (mesclada com `max-drawer-close`) — mante-la em close_button_attrs
+     * faria o v-bind aplicar a mesma classe do consumidor duas vezes.
      */
     const close_button_attrs = computed(() => {
-        const props_to_strip = ['severity', 'text', 'rounded'];
+        const props_to_strip = ['severity', 'text', 'rounded', 'class'];
         return Object.fromEntries(Object.entries(props.closeButtonProps ?? {}).filter(([key]) => ! props_to_strip.includes(key)));
     });
 

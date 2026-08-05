@@ -354,6 +354,13 @@ describe('MaxDrawer', () => {
         expect(botao?.hasAttribute('rounded')).toBe(false);
     });
 
+    it('nao duplica a classe de closeButtonProps.class no botao de fechar', () => {
+        mountDrawer({ closeButtonProps: { class: 'minha-classe' } });
+        const botao = document.querySelector('.max-drawer-close');
+        const classes = botao?.className.split(' ').filter((c) => c === 'minha-classe');
+        expect(classes?.length).toBe(1);
+    });
+
     it('nao emite hide no mount quando visible comeca false', () => {
         const wrapper = mountDrawer({ visible: false });
         expect(wrapper.emitted('hide')).toBeFalsy();

@@ -39,16 +39,18 @@
     const is_active = computed(() => context.active_value.value === props.value);
 
     /**
-     * Determina qual tab recebe tabindex 0. Quando ha um value ativo
-     * definido, o proprio is_active decide, sem depender do registro (o que
-     * mantem o caso comum correto desde a primeira renderizacao, antes de
-     * qualquer tab se registrar via onMounted). So quando nao ha value ativo
-     * (undefined) e que caimos no fallback do contexto — o primeiro tab
-     * habilitado, na ordem de registro — para o tablist nunca ficar
-     * inteiramente fora do fluxo de tabulacao.
+     * Determina qual tab recebe tabindex 0. Quando o value ativo corresponde
+     * a um tab registrado (has_registered_active_tab), o proprio is_active
+     * decide — isso cobre tanto o caso comum quanto a janela antes de
+     * qualquer tab se registrar via onMounted, onde has_registered_active_tab
+     * fica true de forma conservadora para nao quebrar o value valido na
+     * primeira renderizacao sincrona. So quando o value ativo e undefined OU
+     * orfao (nao corresponde a nenhum tab ja registrado) e que caimos no
+     * fallback do contexto — o primeiro tab habilitado, na ordem de registro
+     * — para o tablist nunca ficar inteiramente fora do fluxo de tabulacao.
      */
     const is_reachable = computed(() => {
-        if (context.active_value.value !== undefined) return is_active.value;
+        if (context.has_registered_active_tab.value) return is_active.value;
         return context.fallback_tab_value.value === props.value;
     });
 
