@@ -1,23 +1,65 @@
 <template>
     <InputBase v-bind="props" class="if" :value="temp_value" :done="isDone" :error="props.error" :caution="caution">
-        <AutoComplete v-bind="props" :optionLabel="props.optionLabel" :suggestions="filtered_values" @complete="search" :forceSelection="true" :virtualScrollerOptions="{ itemSize: 40 }" v-model="temp_value" :placeholder="props.placeholder ?? 'SELECIONE'" @blur="isDone = testIsDone()" >
-            <template #option="slotProps">
-                <div class="autocomplete-item-select">
-                    <div class="autocomplete-item-select-label">{{ slotProps.option[props.optionLabel ?? 'label'] ?? slotProps.option.label }}</div>
-                    <div class="autocomplete-item-select-sub-label">{{ slotProps.option.subLabel ?? slotProps.option.sublabel ?? slotProps.option['sub-label'] }}</div>
-                </div>
-            </template>
-            <template #content></template>
-        </AutoComplete>
+        <div ref="triggerRef" class="p-autocomplete p-component w-full">
+            <MaxBaseInput
+                type="text"
+                v-bind="attrs"
+                v-model="displayInputText"
+                :placeholder="props.placeholder ?? 'SELECIONE'"
+                :disabled="props.disabled"
+                role="combobox"
+                :aria-expanded="overlayVisible"
+                :aria-controls="panelId"
+                autocomplete="off"
+                @input="onInput"
+                @focus="onFocus"
+                @blur="onBlur"
+                @keydown="onKeydown"
+            />
+        </div>
+
+        <MaxBaseOverlay
+            v-model:visible="overlayVisible"
+            :target="triggerRef"
+            match-target-width
+        >
+            <div class="p-autocomplete-overlay p-component" :id="panelId">
+                <ul class="p-autocomplete-list p-select-list" role="listbox">
+                    <li
+                        v-for="(opt, idx) in filtered_values"
+                        :key="idx"
+                        class="p-autocomplete-option p-select-option"
+                        role="option"
+                        @click.stop="selectOption(opt)"
+                    >
+                        <slot name="option" :option="opt" :index="idx">
+                            <div class="autocomplete-item-select">
+                                <div class="autocomplete-item-select-label">{{ opt[props.optionLabel ?? 'name'] ?? opt.label ?? opt.name }}</div>
+                                <div class="autocomplete-item-select-sub-label">{{ opt.subLabel ?? opt.sublabel ?? opt['sub-label'] }}</div>
+                            </div>
+                        </slot>
+                    </li>
+                    <li v-if="filtered_values.length === 0" class="p-autocomplete-empty-message p-select-empty-message">
+                        Nenhum resultado encontrado
+                    </li>
+                </ul>
+            </div>
+        </MaxBaseOverlay>
     </InputBase>
 </template>
 
 <script setup lang="ts">
-    import { hasContent, toSearchableString } from '@maxvue/max-use';
+    import { hasContent, toSearchableString, Random } from '@maxvue/max-use';
     import type { Ref } from 'vue';
-    import { ref, computed, watch } from 'vue';
+    import { ref, computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
-    import AutoComplete from 'primevue/autocomplete';
+    import MaxBaseInput from './base/MaxBaseInput.vue';
+    import MaxBaseOverlay from './base/MaxBaseOverlay.vue';
+
+    const attrs: any = useAttrs();
+    const panelId = `p-autocomplete-panel-${Random()}`;
+    const triggerRef = ref<HTMLElement | null>(null);
+    const overlayVisible = ref(false);
 
     const props = withDefaults(
         defineProps<{
@@ -45,12 +87,27 @@
 
     const list = computed(() => props.options ?? []);
     const temp_value: Ref = ref(props.modelValue);
-    const filtered_values: Ref = ref([]);
+    const filtered_values: Ref<any[]> = ref([]);
+    const inputText = ref('');
+
+    const displayInputText = computed({
+        get() {
+            if (typeof temp_value.value === 'string' && temp_value.value !== '') return temp_value.value;
+            if (temp_value.value && typeof temp_value.value === 'object') return temp_value.value[props.optionLabel ?? 'name'] ?? temp_value.value.label ?? temp_value.value.name ?? '';
+
+            return inputText.value;
+        },
+        set(val: string) {
+            inputText.value = val;
+            if (typeof temp_value.value === 'object') temp_value.value = val;
+
+        }
+    });
 
     const temp_value_string = computed(() => {
         if (temp_value.value && typeof temp_value.value === 'string') return temp_value.value;
         if (temp_value.value && typeof temp_value.value === 'object') return temp_value.value?.value ?? temp_value.value?.label ?? temp_value.value?.id ?? temp_value.value[props.optionValue ?? 'value'] ?? '';
-        return '';
+        return inputText.value;
     });
 
     const isDone: Ref = ref(props.done ?? null);
@@ -65,20 +122,52 @@
 
     const caution = computed(() => (props.caution !== undefined ? props.caution && isDone.value === false : isDone.value === false));
 
-    const emit = defineEmits(['update:modelValue']);
+    const emit = defineEmits(['update:modelValue', 'complete', 'blur', 'focus']);
 
     watch(temp_value, () => {
         isDone.value = testIsDone();
         if (temp_value.value && typeof temp_value.value !== 'string') emit('update:modelValue', temp_value.value);
     });
 
-    watch( () => props.modelValue, () => temp_value.value = props.modelValue );
+    watch(() => props.modelValue, () => temp_value.value = props.modelValue);
 
     const search = () => {
+        const query = toSearchableString(inputText.value || temp_value_string.value);
         filtered_values.value = list.value.filter((item: any) => {
-            const search = (item.value ?? '') + (item.label ?? '') + (item.name ?? '') + (item[props.optionValue ?? 'value'] ?? '');
-            return toSearchableString(search).toLowerCase().includes(toSearchableString(temp_value_string.value));
+            const searchStr = (item.value ?? '') + (item.label ?? '') + (item.name ?? '') + (item[props.optionValue ?? 'value'] ?? '');
+            return toSearchableString(searchStr).toLowerCase().includes(query.toLowerCase());
         });
+        emit('complete', { query });
+    };
+
+    const onInput = () => {
+        search();
+        overlayVisible.value = true;
+    };
+
+    const onFocus = (event: FocusEvent) => {
+        search();
+        overlayVisible.value = true;
+        emit('focus', event);
+    };
+
+    const onBlur = (event: FocusEvent) => {
+        setTimeout(() => {
+            overlayVisible.value = false;
+            isDone.value = testIsDone();
+            emit('blur', event);
+        }, 150);
+    };
+
+    const selectOption = (opt: any) => {
+        temp_value.value = opt;
+        emit('update:modelValue', opt);
+        overlayVisible.value = false;
+    };
+
+    const onKeydown = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') overlayVisible.value = false;
+
     };
 </script>
 
@@ -148,6 +237,10 @@
 
     .p-autocomplete-overlay {
         width: auto !important;
+        background-color: var(--background-0, #fff);
+        border: 1px solid var(--max-border-color, #e2e8f0);
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
 
         .p-virtualscroller {
             width: auto !important;

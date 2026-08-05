@@ -1002,11 +1002,15 @@ itens:
     arquivo: src/components/MaxInputAutoComplete.vue
     plano: prime_vue_migration/plans/26-MaxInputAutoComplete.md
     primitivas: [AutoComplete]
-    depende_de: [1, 2]
-    execucao: Aguardando
-    verificacao: Aguardando
+    depende_de: [2, 4, 6]
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: 'BLOQUEANTE do id 27.'
+    notas: >
+      Reimplementado MaxInputAutoComplete sem dependência do PrimeVue (removido import de primevue/autocomplete).
+      Utilizado MaxBaseInput e MaxBaseOverlay com filtro toSearchableString, slots #option e suporte a objetos/strings.
+      9 testes em tests/components/MaxInputAutoComplete.test.ts passando 100%.
+      Gates: vitest do componente limpo (9/9), type-check limpo, lint limpo (2 warnings pré-existentes), grep primevue VAZIO em MaxInputAutoComplete.vue, git diff InputBase.vue VAZIO, suíte completa sem regressão.
 
   - id: 27
     componente: MaxInputAutoCompleteApi
