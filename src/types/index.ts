@@ -1,4 +1,31 @@
-import type { ButtonProps as PrimeButtonProps } from 'primevue/button';
+/**
+ * Propriedades base da primitiva de botão (reimplantação PrimeVue-free).
+ */
+export interface MaxBaseButtonProps {
+    id?: string;
+    label?: string;
+    icon?: string;
+    iconPos?: 'left' | 'right' | 'top' | 'bottom';
+    badge?: string;
+    badgeSeverity?: string;
+    loading?: boolean;
+    loadingIcon?: string;
+    severity?: 'secondary' | 'success' | 'info' | 'warn' | 'warning' | 'help' | 'danger' | 'contrast' | 'whatsapp' | string;
+    raised?: boolean;
+    rounded?: boolean;
+    text?: boolean;
+    outlined?: boolean;
+    link?: boolean;
+    size?: 'small' | 'large' | string | number | null;
+    variant?: 'outlined' | 'text' | 'link';
+    fluid?: boolean;
+    plain?: boolean;
+    disabled?: boolean;
+    type?: 'button' | 'submit' | 'reset' | string;
+    as?: string | any;
+    asChild?: boolean;
+}
+
 /**
  * Propriedades base para todos os componentes da biblioteca.
  */
@@ -12,7 +39,7 @@ export interface BaseComponentProps {
 /**
  * Propriedades específicas para o componente de botão.
  */
-export interface MaxButtonsType extends /* @vue-ignore */ Omit<PrimeButtonProps, 'size' | 'iconPos'> {
+export interface MaxButtonsType extends /* @vue-ignore */ Omit<MaxBaseButtonProps, 'size' | 'iconPos'> {
     /** Texto de exibição do botão */
     label?: string;
     /** Ícone a ser exibido no botão */

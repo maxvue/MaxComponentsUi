@@ -849,10 +849,15 @@ itens:
     plano: prime_vue_migration/plans/16-MaxButton.md
     primitivas: [Button]
     depende_de: []
-    execucao: Aguardando
-    verificacao: Aguardando
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: 'ATENÇÃO: também remove `import type ButtonProps` de src/types/index.ts. Preservar classes .p-button-* usadas no SCSS.'
+    notas: >
+      Reimplementado MaxButton sem dependência do PrimeVue (removido import de primevue/button em MaxButton.vue e src/types/index.ts).
+      Criada interface MaxBaseButtonProps exportada em src/types/index.ts e mantida compatibilidade com MaxButtonsType.
+      Emitidas todas as classes p-button-*, p-component, data-p e aliases warning/warn.
+      13 testes em tests/components/MaxButton.test.ts passando 100%.
+      Gates: vitest do componente limpo (13/13), type-check limpo, lint limpo (2 warnings pré-existentes), grep primevue VAZIO em MaxButton.vue e src/types/index.ts, git diff InputBase.vue VAZIO, suíte completa sem regressão.
 
   - id: 17
     componente: MaxBadgeComponent

@@ -12,9 +12,10 @@ vi.mock('@maxvue/max-use', async (importOriginal) => {
     };
 });
 
-function mountButton(props: Record<string, any> = {}) {
+function mountButton(props: Record<string, any> = {}, slots: Record<string, any> = {}) {
     return mount(MaxButton, {
         props,
+        slots,
         global: {
             stubs: {
                 MaxIconButton: {
@@ -39,55 +40,93 @@ describe('MaxButton', () => {
     it('renderiza com label', () => {
         const wrapper = mountButton({ label: 'Salvar' });
         expect(wrapper.text()).toContain('Salvar');
+        expect(wrapper.element.tagName).toBe('BUTTON');
+        expect(wrapper.classes()).toContain('p-button');
+        expect(wrapper.classes()).toContain('p-component');
+    });
+
+    it('gera classes de severity e gera ambas para warning', () => {
+        const wrapper = mountButton({ label: 'Aviso', severity: 'warning' });
+        expect(wrapper.classes()).toContain('p-button-warn');
+        expect(wrapper.classes()).toContain('p-button-warning');
+        expect(wrapper.attributes('data-p')).toContain('warning');
+    });
+
+    it('variantes outlined/text/link geram classes e atributo data-p', () => {
+        const wrapper = mountButton({ label: 'Teste', outlined: true });
+        expect(wrapper.classes()).toContain('p-button-outlined');
+        expect(wrapper.attributes('data-p')).toContain('outlined');
+
+        const wrapperVariant = mountButton({ label: 'Teste', variant: 'text' });
+        expect(wrapperVariant.classes()).toContain('p-button-text');
+        expect(wrapperVariant.attributes('data-p')).toContain('text');
+    });
+
+    it('aplica estado loading com aria-busy e disabled', () => {
+        const wrapper = mountButton({ label: 'Salvando', loading: true });
+        expect(wrapper.classes()).toContain('p-button-loading');
+        expect(wrapper.attributes('aria-busy')).toBe('true');
+        expect(wrapper.attributes('disabled')).toBeDefined();
+    });
+
+    it('fica desabilitado e ignora cliques quando disabled=true', async () => {
+        const wrapper = mountButton({ label: 'Salvar', disabled: true });
+        expect(wrapper.classes()).toContain('p-disabled');
+        expect(wrapper.attributes('disabled')).toBeDefined();
+
+        await wrapper.trigger('click');
+        expect(wrapper.emitted('click')).toBeFalsy();
+    });
+
+    it('posiciona ícone à direita quando iconPos=right ou iconRight fornecido', () => {
+        const wrapperRight = mountButton({ label: 'Avançar', icon: 'mdi:arrow-right', iconPos: 'right' });
+        expect(wrapperRight.find('.p-button-icon-right').exists()).toBe(true);
+
+        const wrapperIconRight = mountButton({ label: 'Avançar', iconRight: 'mdi:arrow-right' });
+        expect(wrapperIconRight.find('.p-button-icon-right').exists()).toBe(true);
     });
 
     it('renderiza como MaxIconButton quando não tem label', () => {
         const wrapper = mountButton({ icon: 'mdi:pencil' });
-        expect(wrapper.exists()).toBe(true);
-    });
-
-    it('aplica severity passada via props', () => {
-        const wrapper = mountButton({ label: 'Excluir', severity: 'danger' });
-        expect(wrapper.exists()).toBe(true);
-    });
-
-    it('fica desabilitado quando disabled=true', () => {
-        const wrapper = mountButton({ label: 'Salvar', disabled: true });
-        expect(wrapper.exists()).toBe(true);
-    });
-
-    it('renderiza com ícone quando icon é passado', () => {
-        const wrapper = mountButton({ label: 'Salvar', icon: 'mdi:check' });
-        expect(wrapper.exists()).toBe(true);
-    });
-
-    it('renderiza ícone de loading quando loading=true', () => {
-        const wrapper = mountButton({ label: 'Salvar', loading: true });
-        // Line 10 (template #loadingicon) should be covered
-        expect(wrapper.html()).toContain('max-icon-stub');
+        expect(wrapper.find('.icon-button-b').exists()).toBe(true);
     });
 
     it('emite click quando não há route nem action', async () => {
         const wrapper = mountButton({ label: 'Click Me' });
-        (wrapper.vm as any).onClick(new MouseEvent('click'));
+        await wrapper.trigger('click');
         expect(wrapper.emitted('click')).toBeTruthy();
         expect(wrapper.emitted('click')?.[0]).toEqual([true]);
     });
 
-    it('chama action ao invés de click se existir', () => {
+    it('chama action ao invés de click se existir', async () => {
         const actionMock = vi.fn();
         const wrapper = mountButton({ label: 'Action', action: actionMock, data: { id: 2 } });
 
-        // Chamando onClick
-        (wrapper.vm as any).onClick(new MouseEvent('click'));
+        await wrapper.trigger('click');
         expect(actionMock).toHaveBeenCalled();
         expect(wrapper.emitted('click')).toBeFalsy();
     });
 
-    it('chama goToRoute quando route for passado', () => {
+    it('chama goToRoute quando route for passado', async () => {
         const wrapper = mountButton({ label: 'Go', route: 'home', params: { id: 1 } });
-        (wrapper.vm as any).onClick(new MouseEvent('click'));
+        await wrapper.trigger('click');
         expect(maxUse.goToRoute).toHaveBeenCalledWith('home', { id: 1 });
         expect(wrapper.emitted('click')).toBeFalsy();
+    });
+
+    it('aplica classe max-button-dashed quando dashed=true', () => {
+        const wrapper = mountButton({ label: 'Tracejado', dashed: true });
+        expect(wrapper.classes()).toContain('max-button-dashed');
+    });
+
+    it('slot default sobrescreve o conteúdo do botão', () => {
+        const wrapper = mountButton({ label: 'Salvar' }, { default: '<span>Conteúdo Custom</span>' });
+        expect(wrapper.html()).toContain('Conteúdo Custom');
+    });
+
+    it('não emite marcações do PrimeVue', () => {
+        const wrapper = mountButton({ label: 'Teste' });
+        expect(wrapper.html()).not.toContain('data-pc-name');
+        expect(wrapper.html()).not.toContain('data-pc-section');
     });
 });
