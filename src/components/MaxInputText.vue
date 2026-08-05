@@ -1,6 +1,6 @@
 <template>
     <InputBase v-bind="props" :done="props.done ?? isDone" :error="props.error ?? error_msg" :caution="caution">
-        <InputText v-bind="props" :type="props.type" :placeholder="props.placeholder" v-model="temp_value" fluid @blur="isDone = testIsDone()" />
+        <MaxBaseInput :type="props.type" :placeholder="props.placeholder" :disabled="props.disabled" v-model="temp_value" fluid @blur="isDone = testIsDone()" />
         <slot></slot>
     </InputBase>
 </template>
@@ -14,7 +14,7 @@
     import type { Ref } from 'vue';
     import { ref, computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
-    import InputText from 'primevue/inputtext';
+    import MaxBaseInput from './base/MaxBaseInput.vue';
 
     const attrs: any = useAttrs();
 

@@ -630,10 +630,92 @@ itens:
     plano: prime_vue_migration/plans/06-MaxInputText.md
     primitivas: [InputText]
     depende_de: [1]
-    execucao: Aguardando
-    verificacao: Aguardando
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: 'Componente-piloto da Fase 1. Valide o padrão aqui antes de replicar nos 7 seguintes.'
+    notas: >
+      Componente-piloto da Fase 1. Padrão validado aqui para replicar nos ids 7-15.
+      ⚠️⚠️ ARMADILHAS OBRIGATÓRIAS PARA OS IDS 7-15 (levantadas pelo verificador opus;
+      leia ANTES de migrar cada derivado):
+      (A1) v-maska está CEGO nos testes. tests/setup.ts:85 faz stub da diretiva
+      (`maska: {}`), então NENHUM teste exercita mascaramento — uma máscara quebrada
+      passa por type-check, lint e suíte inteira sem um único erro. A diretiva precisa
+      do <input> REAL; aplicada em <MaxBaseInput v-maska="..."> ela chega lá por
+      fallthrough (o root do MaxBaseInput É o <input>), mas isso NÃO está provado por
+      teste. Para ids 7, 8, 9, 11, 12 e 13-15: ou escrever teste com a diretiva real
+      (como fiz em tests/components/base/MaxBaseInput.test.ts, importando vMaska de
+      'maska/vue'), ou exigir validação manual no playground.
+      (A2) `ref="el"` MUDA DE SEMÂNTICA. MaxInputCpfCnpj.vue:3 usa <InputText ref="el">.
+      Com um componente Vue o ref passa a apontar para a INSTÂNCIA, não para o
+      HTMLInputElement. MaxBaseInput mitiga com defineExpose({ $el, focus }), mas
+      qualquer código que faça el.value.value ou trate el como nó DOM quebra em
+      silêncio. Auditar cada uso de ref antes de trocar a tag.
+      (A3) NÃO REMOVER `v-bind="attrs"`. MaxInputPhoneMail.vue:3 e MaxInputSearch.vue:3
+      passam `v-bind="attrs"` ao input — semântica DIFERENTE do `v-bind="props"` que
+      este piloto removeu. Ali os attrs chegam ao input por bind EXPLÍCITO, não por
+      fallthrough; removê-los seria regressão de contrato. O padrão manda tirar só o
+      `v-bind="props"`.
+      (A4) Atributos que o InputText do PrimeVue absorvia em props declaradas mas o
+      MaxBaseInput não tem (maxlength, inputmode, autoClear, slotChar, number)
+      precisam de repasse explícito, caso a caso.
+      PADRÃO A REPLICAR (diff de exatamente 2 linhas; toda a lógica de validação fica
+      INTACTA — isDone/isEqual/isRequiredDone/testIsDone/caution/error_msg e os dois
+      watch não se tocam):
+        - <InputText v-bind="props" :type="props.type" :placeholder="props.placeholder" v-model="temp_value" fluid @blur="..." />
+        + <MaxBaseInput :type="props.type" :placeholder="props.placeholder" :disabled="props.disabled" v-model="temp_value" fluid @blur="..." />
+        - import InputText from 'primevue/inputtext';
+        + import MaxBaseInput from './base/MaxBaseInput.vue';
+      O `v-bind="props"` sai do input e as props que o <input> entende passam
+      explícitas. Nos derivados, incluir também o que aquele componente usa (v-maska,
+      maxlength, inputmode etc.) — conferir caso a caso.
+      ⚠️ CORREÇÃO DO PLANO §2: a mitigação descrita ali é FALSA. O plano afirma que
+      atributos externos "continuam chegando ao <input> via attrs porque MaxBaseInput
+      tem inheritAttrs: true". Medi o componente ANTES da migração (git stash) e o
+      comportamento real é outro: InputBase NÃO declara inheritAttrs:false, então
+      atributos externos sempre caíram na <div class="max-input-main-div"> raiz e
+      NUNCA chegaram ao <input>. Comparação antes/depois com autocomplete="off":
+        ANTES  -> naRaiz: "off", noInput: undefined, label vazando p/ o <input>
+        DEPOIS -> naRaiz: "off", noInput: undefined, label NÃO vaza
+      Ou seja: o contrato de atributos externos é preservado bit a bit, e o que muda
+      é só a remoção do vazamento das props do Max (label/msg/iconMessage/targetValue)
+      como atributos DOM inválidos — melhoria, não regressão. O teste afirma o
+      comportamento REAL (attrs na raiz), não o descrito no plano.
+      Baseline do teste do item: 7 passando antes da mudança; 7 continuam passando
+      sem enfraquecimento, mais 9 asserções novas = 16.
+      7 mutações aplicadas e todas detectadas: fluid removido, disabled/type/
+      placeholder não repassados, @blur sem recalcular isDone, v-model só de leitura,
+      e a volta do v-bind="props" no input (que faz as props do Max vazarem).
+      Gates: grep primevue VAZIO; git diff InputBase.vue VAZIO; InputBase segue como
+      wrapper mais externo (teste dedicado afirmando a classe max-input-main-div na
+      raiz); type-check limpo; lint limpo (2 warnings pré-existentes); suíte completa
+      784 passed / 18 failed — mesmas 18 do baseline, 0 regressão.
+      VERIFICAÇÃO (subagente opus): APROVADO na 1a tentativa, sem BLOQUEANTES, com
+      auditoria independente forte. Ele REFEZ a medição antes/depois com 16 atributos
+      (autocomplete, data-*, aria-*, name, id, maxlength, inputmode, readonly,
+      required, tabindex, pattern, min, spellcheck, title, style, class): o diff dos
+      atributos da raiz deu VAZIO — bit a bit idênticos — e nenhum deles chegava ao
+      <input> antes nem depois. Confirmou que o plano §2 está errado e minha correção
+      certa. Verificou também os EVENTOS externos (onKeyup/onChange/onClick), também
+      idênticos, e confirmou que os únicos atributos que saíram do <input> são
+      label/msg/targetvalue/float/required (props do Max vazando como atributos DOM
+      inválidos) mais os internos data-pc-* da lib — nada legítimo perdido. Conferiu
+      as props declaradas do InputText em node_modules e confirmou que nenhuma se
+      perdeu funcionalmente. Rodou 11 mutações novas.
+      Achado metodológico importante: as 5 mutações que sobreviveram à minha suíte ele
+      provou serem lacunas de cobertura PRÉ-EXISTENTES, rodando o mesmo harness na
+      versão original com PrimeVue e obtendo comportamento IDÊNTICO — não são
+      regressões deste item. Ainda assim fechei todas, porque esses mesmos blocos de
+      lógica serão copiados nos ids 7-15: precedência de testIsDone (isEqual antes de
+      isRequiredDone), ordem dos ifs de error_msg (exige o caso vazio+required+
+      targetValue, em que ambos falham juntos), guarda `!caution`, o ramo
+      `props.caution && isDone===false` e o repasse de :caution ao InputBase.
+      Reforcei também os 2 testes fracos que ele apontou: o de attrs agora afirma os
+      DOIS lados do contrato (na raiz sim, no input não), e o de "sem PrimeVue" passou
+      a checar data-pc-name/data-pc-section — os marcadores reais que a lib injetava —
+      em vez de classes que o próprio MaxBaseInput poderia emitir.
+      TOTAL: 21 testes (7 originais + 14 novos); 12 mutações, todas detectadas.
+      Gates finais: suíte completa 789 passed / 18 failed — mesmas 18 do baseline,
+      0 regressão.
 
   - id: 7
     componente: MaxInputCep
