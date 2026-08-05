@@ -52,7 +52,7 @@ itens:
     primitivas: [InputText]
     depende_de: []
     execucao: Concluído
-    verificacao: Aguardando
+    verificacao: Realizando
     tentativas: 0
     notas: >
       Implementado como <input> raiz sem wrapper (preserva v-maska). Classes
