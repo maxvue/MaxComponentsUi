@@ -1,25 +1,30 @@
 <template>
-    <div :class="`badge-component-main-div ${props.size ?? ''}`"  >
-        <MaxIcon v-if="props.icon || props.i" :icon="props.icon ?? props.i" class="icon-badge" dark="0.3" :color="icon_color"/>
-        <OverlayBadge v-if="is_overlay" />
-        <Badge width="300" v-bind="attrs" :value="message" v-else :class="`${props.icon || props.iconColor ? 'with-icon' : ''} ${props.iconValue ? 'with-icon-value' : ''}`" ref="badgeElem" :style="{backgroundColor: bg_color, color: text_color}" />
-        <div class="circle-color-badge">
+    <div :class="`badge-component-main-div ${props.size ?? ''}`">
+        <MaxIcon v-if="props.icon || props.i" :icon="props.icon ?? props.i" class="icon-badge" dark="0.3" :color="icon_color" />
+        <span v-if="is_overlay" class="p-overlaybadge max-badge-overlay">
+            <slot />
+            <span :class="badgeClasses" v-bind="attrs" v-bind:aria-hidden="!message ? 'true' : undefined" :style="{ backgroundColor: bg_color, color: text_color }">
+                {{ message }}
+            </span>
+        </span>
+        <span v-else :class="badgeClasses" v-bind="attrs" ref="badgeElem" :style="{ backgroundColor: bg_color, color: text_color }">
+            {{ message }}
+        </span>
+        <div class="circle-color-badge" v-if="props.iconColor || props.iconValue">
             <div :style="{ background: (props.iconColor ?? 'none') as string }" class="circle-color-badge-text">
                 {{ props.iconValue ?? '' }}
             </div>
         </div>
-
     </div>
 </template>
 
 <script setup lang="ts">
-    import Badge from 'primevue/badge';
-    import OverlayBadge from 'primevue/overlaybadge';
     import MaxIcon from './MaxIcon.vue';
-    import { useAttrs, computed } from 'vue';
+    import { useAttrs, computed, ref } from 'vue';
     import { getColorFromVar } from '@maxvue/max-use';
 
     const attrs = useAttrs();
+    const badgeElem = ref<HTMLElement | null>(null);
 
     const props = withDefaults(defineProps<{
         /** Nome do ícone (ex: 'mdi:home') */
@@ -29,7 +34,7 @@
         /** Texto do badge */
         label?: string;
         /** Alias para o texto do badge */
-        value?: string;
+        value?: string | number;
         /** Alias para o texto do badge */
         msg?: string;
         /** Alias para o texto do badge */
@@ -39,7 +44,9 @@
         /** Alias para o texto do badge */
         txt?: string;
         /** Alias para o nome do ícone */
-        number?: string;
+        number?: string | number;
+        /** Severidade */
+        severity?: 'secondary' | 'success' | 'info' | 'warn' | 'danger' | 'contrast' | string;
         /** Rotação do ícone em graus */
         rotate?: number;
         /** Inversão do ícone */
@@ -66,8 +73,28 @@
         textColor?: string;
     }>(), {});
 
-    const message = computed<string>(() => String(props.label ?? props.msg ?? props.value ?? props.mensagem ?? props.text ?? props.txt ?? props.number ?? ''));
-    const is_overlay = computed(() => props.overlay === true );
+    const message = computed<string>(() => {
+        const val = props.label ?? props.msg ?? props.value ?? props.mensagem ?? props.text ?? props.txt ?? props.number;
+        return val !== undefined && val !== null ? String(val) : '';
+    });
+
+    const is_overlay = computed(() => props.overlay === true);
+
+    const badgeClasses = computed(() => {
+        const sizeAttr = props.size ?? attrs.size;
+        const sevAttr = props.severity ?? attrs.severity;
+        return [
+            'p-badge',
+            'p-component',
+            !message.value ? 'p-badge-dot' : '',
+            message.value.length === 1 ? 'p-badge-circle' : '',
+            sevAttr ? `p-badge-${sevAttr}` : '',
+            sizeAttr === 'large' || sizeAttr === 'lg' ? 'p-badge-lg' : '',
+            sizeAttr === 'xlarge' || sizeAttr === 'xl' ? 'p-badge-xl' : '',
+            props.icon || props.iconColor ? 'with-icon' : '',
+            props.iconValue ? 'with-icon-value' : ''
+        ].filter(Boolean).join(' ');
+    });
 
     const bg_color = computed<string>(() => {
         if (props.background) return props.background;
@@ -97,7 +124,9 @@
         return Color.lighten(0.6).hexa();
     });
 
-
+    defineExpose({
+        badgeElem
+    });
 </script>
 
 <style lang="scss">
@@ -148,8 +177,31 @@
             &.with-icon, &.with-icon-value {
                 padding-left: 26px;
             }
+
+            &.p-badge-dot {
+                width: 0.5rem;
+                min-width: 0.5rem;
+                height: 0.5rem;
+                border-radius: 50%;
+                padding: 0;
+            }
+
+            &.p-badge-circle {
+                padding: 0;
+                border-radius: 50%;
+            }
         }
 
+        .p-overlaybadge {
+            position: relative;
+
+            .p-badge {
+                position: absolute;
+                top: 0;
+                right: 0;
+                transform: translate(50%, -50%);
+            }
+        }
 
         .circle-color-badge {
             position: absolute;

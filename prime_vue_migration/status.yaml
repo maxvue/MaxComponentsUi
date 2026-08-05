@@ -865,10 +865,14 @@ itens:
     plano: prime_vue_migration/plans/17-MaxBadgeComponent.md
     primitivas: [Badge, OverlayBadge]
     depende_de: []
-    execucao: Aguardando
-    verificacao: Aguardando
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: ''
+    notas: >
+      Reimplementado MaxBadgeComponent sem dependência do PrimeVue (removidos imports de primevue/badge e primevue/overlaybadge).
+      Emitidas classes p-badge*, p-component, p-overlaybadge, p-badge-dot e p-badge-circle.
+      11 testes em tests/components/MaxBadgeComponent.test.ts passando 100%.
+      Gates: vitest do componente limpo (11/11), type-check limpo, lint limpo (2 warnings pré-existentes), grep primevue VAZIO em MaxBadgeComponent.vue, git diff InputBase.vue VAZIO, suíte completa sem regressão.
 
   - id: 18
     componente: MaxUserAvatar
