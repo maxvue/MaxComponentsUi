@@ -111,7 +111,6 @@
             }
 
             &[auto-resize] {
-                height: auto !important;
                 overflow-y: hidden;
             }
         }

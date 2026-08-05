@@ -1,0 +1,48 @@
+Objetivo: 
+Tornar esta biblioteca independente do PrimeVue...
+
+Pasoss (O que voce deve fazer).
+1. Mapear os componentes que faltam ser implementados (Ou atualizados) aqui.
+    - Verificar se os arquivos dos componentes atuais fazem uso do primevue. Estes também deverão fazer parte da lista.
+2. Criar uma pasta chamada prime_vue_migration
+3. Preparar um plano de implementação destes Componentes com objetido de substituilos.
+4. Para cada Componente que precisa ser implementado, criar um arquivo .md com um plano de implementação completo. Analisando o componente original do Primevue.
+5. Criar um arquivo chamado execution.md na qual vou chamar para execução em outra seção do claude code.
+6. Criar um arquivo chamado status.yaml com a lista dos Componentes e os status de execução e verificação. Os status são:
+- Aguardando -> Para quando não estiver sido iniciado a implementação
+- Realizando -> Para quando estiver em execução mas não finalizado
+- Concluído -> Para quando estiver concluído e aprovado
+
+# OBS #
+- Você (Apenas aqui nesta seção) pode sugerir melhorias no processo de execução.
+
+# Arquivo Instructions #
+O Agente que receberá o arquivo execution.md deverá abrir o arquivo de status e analisar o seguinte:
+- Caso Status de Execução seja: 
+A: Realizando: Verificar como está a realização. Caso a execução esteja parada, continuar de onde parou.
+B: Aguardando: Trocar o status de excução para "Ralizando" e iniciar a execução.
+C: Concluído: Verificar o Status de verificação
+ - Caso Status de Verificação seja: 
+A: Realizando: Verificar como está a verificação. Caso a verificação esteja parada, reinicie a verificação do zero.
+B: Aguardando: Trocar o status de verificação para "Ralizando" e iniciar a verificação.
+C: Concluído: Ir para próximo item da lista.
+
+# PROCESSO PARA EXECUÇÃO #
+1. Criar o Componente
+2. Criar teste corretamente e verificar se o Componente passa no teste.
+3. Verificar possíveis brechas no teste.
+4. Caso necessário corrigir o Componente e o teste, deixando ambos prontos para verificação.
+
+# VERIFICAÇÃO #
+1. Disparar um subagente (usando modelo OPUS 5) que fará a verificação
+2. Aguardar finalização da verificação e caso seja aprovado. Seguir para o próximo item da lista.
+
+# APÓS VERIFICAÇÃO APROVADA #
+1. Seguir para próximo item da lista.
+
+# IMPORTANTE #
+1. Todos os componentes finais devem possuir a mesma API do primevue.
+2. Caso algum item da API do primevue esteja conflitando com algo do componente pré existente, o que está no componente deve prevalecer.
+3. Os componentes finais devem possuir testes unitários.
+4. Uma única execução deve rodar em loop até que todos os arquivos estejam finalizados, prontos e com verificação e testes aprovados.
+5. Já tinhamos inicialmente, um processo de independencia do Primevue anterior, os arquivos referentes a este processo (status e execução etc) devem ser removidos.

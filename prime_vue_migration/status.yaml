@@ -1,0 +1,484 @@
+# =============================================================================
+# STATUS DA MIGRAÇÃO — INDEPENDÊNCIA DO PRIMEVUE
+# =============================================================================
+# Fonte de verdade do progresso. O agente executor (execution.md) LÊ e ESCREVE
+# neste arquivo a cada passo.
+#
+# Status possíveis (para `execucao` e `verificacao`):
+#   Aguardando  -> ainda não iniciado
+#   Realizando  -> em andamento, não finalizado
+#   Concluído   -> finalizado e aprovado
+#
+# Campos por item:
+#   id           : ordem de execução (NÃO reordenar)
+#   componente   : nome do arquivo .vue (sem extensão) ou do módulo
+#   arquivo      : caminho do arquivo a ser alterado
+#   plano        : caminho do plano de implementação detalhado
+#   primitivas   : primitivas PrimeVue que este item elimina
+#   depende_de   : ids que precisam estar Concluídos antes deste
+#   execucao     : Aguardando | Realizando | Concluído
+#   verificacao  : Aguardando | Realizando | Concluído
+#   tentativas   : nº de vezes que a verificação reprovou (o executor incrementa)
+#   notas        : anotações livres do executor (progresso parcial, bloqueios)
+# =============================================================================
+
+meta:
+  projeto: '@maxvue/max-components-ui'
+  objetivo: 'Remover 100% da dependência de primevue e @primeuix/themes'
+  primevue_versao_atual: '4.5.5'
+  gerado_em: '2026-08-05'
+  total_itens: 38
+  # Comando de saída: quando TODOS os itens estiverem Concluído/Concluído,
+  # este comando deve retornar VAZIO.
+  # Cobre as 3 origens: primevue, @primeuix/themes e @primevue/auto-import-resolver.
+  criterio_final: "grep -rn \"primevue\\|@primeuix\\|@primevue\" src/ --include='*.vue' --include='*.ts'"
+  # Preenchido pelo executor no início da sessão (execution.md §0).
+  baseline_testes: null
+  # Arquivos que NENHUM item pode alterar. Já são PrimeVue-free e são a base do padrão
+  # da casa. Alteração em qualquer um deles = reprovação automática na verificação.
+  intocaveis:
+    - src/components/InputBase.vue   # wrapper obrigatório de TODO input (label, ícones,
+                                     # estados done/error/caution/required, mensagem)
+
+# -----------------------------------------------------------------------------
+# FASE 0 — PRIMITIVAS BASE (nenhuma depende de PrimeVue; destravam todo o resto)
+# -----------------------------------------------------------------------------
+itens:
+
+  - id: 1
+    componente: MaxBaseInput
+    arquivo: src/components/base/MaxBaseInput.vue
+    plano: prime_vue_migration/plans/01-MaxBaseInput.md
+    primitivas: [InputText]
+    depende_de: []
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'Primitiva mais crítica: destrava 10 componentes de input de texto.'
+
+  - id: 2
+    componente: MaxBaseOverlay
+    arquivo: src/components/base/MaxBaseOverlay.vue
+    plano: prime_vue_migration/plans/02-MaxBaseOverlay.md
+    primitivas: []
+    depende_de: []
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'Teleport + posicionamento + click-outside + ESC. Base de Select/AutoComplete/DatePicker/Menu/Drawer.'
+
+  - id: 3
+    componente: MaxBaseSpinner
+    arquivo: src/components/base/MaxBaseSpinner.vue
+    plano: prime_vue_migration/plans/03-MaxBaseSpinner.md
+    primitivas: [ProgressSpinner]
+    depende_de: []
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'SVG animado puro. Usado por MaxPdfView e MaxInputFileUpload.'
+
+  - id: 4
+    componente: MaxBaseVirtualScroller
+    arquivo: src/components/base/MaxBaseVirtualScroller.vue
+    plano: prime_vue_migration/plans/04-MaxBaseVirtualScroller.md
+    primitivas: [VirtualScroller]
+    depende_de: []
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: '@tanstack/vue-virtual JÁ está nas dependencies — usar em vez de implementar do zero.'
+
+  - id: 5
+    componente: vTooltip
+    arquivo: src/directives/tooltip.ts
+    plano: prime_vue_migration/plans/05-vTooltip.md
+    primitivas: [Tooltip]
+    depende_de: []
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'Diretiva registrada em src/index.ts install(). Modificadores .top/.right/.bottom/.left.'
+
+# -----------------------------------------------------------------------------
+# FASE 1 — INPUTS DE TEXTO (todos dependem apenas de MaxBaseInput)
+# -----------------------------------------------------------------------------
+
+  - id: 6
+    componente: MaxInputText
+    arquivo: src/components/MaxInputText.vue
+    plano: prime_vue_migration/plans/06-MaxInputText.md
+    primitivas: [InputText]
+    depende_de: [1]
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'Componente-piloto da Fase 1. Valide o padrão aqui antes de replicar nos 7 seguintes.'
+
+  - id: 7
+    componente: MaxInputCep
+    arquivo: src/components/MaxInputCep.vue
+    plano: prime_vue_migration/plans/07-inputs-texto-derivados.md
+    primitivas: [InputText]
+    depende_de: [1, 6]
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'Usa v-maska. Preservar a diretiva de máscara intacta.'
+
+  - id: 8
+    componente: MaxInputCpfCnpj
+    arquivo: src/components/MaxInputCpfCnpj.vue
+    plano: prime_vue_migration/plans/07-inputs-texto-derivados.md
+    primitivas: [InputText]
+    depende_de: [1, 6]
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'Máscara dinâmica CPF/CNPJ.'
+
+  - id: 9
+    componente: MaxInputPhoneMail
+    arquivo: src/components/MaxInputPhoneMail.vue
+    plano: prime_vue_migration/plans/07-inputs-texto-derivados.md
+    primitivas: [InputText]
+    depende_de: [1, 6]
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: ''
+
+  - id: 10
+    componente: MaxInputSearch
+    arquivo: src/components/MaxInputSearch.vue
+    plano: prime_vue_migration/plans/07-inputs-texto-derivados.md
+    primitivas: [InputText]
+    depende_de: [1, 6]
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: ''
+
+  - id: 11
+    componente: MaxInputCoordinateDecimalLat
+    arquivo: src/components/MaxInputCoordinateDecimalLat.vue
+    plano: prime_vue_migration/plans/07-inputs-texto-derivados.md
+    primitivas: [InputText]
+    depende_de: [1, 6]
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'Migrar junto com o id 12 (mesmo padrão, testes irmãos).'
+
+  - id: 12
+    componente: MaxInputCoordinateDecimalLng
+    arquivo: src/components/MaxInputCoordinateDecimalLng.vue
+    plano: prime_vue_migration/plans/07-inputs-texto-derivados.md
+    primitivas: [InputText]
+    depende_de: [1, 6]
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'Migrar junto com o id 11.'
+
+  - id: 13
+    componente: MaxInputCreditCard
+    arquivo: src/components/MaxInputCreditCard.vue
+    plano: prime_vue_migration/plans/13-cartao-credito.md
+    primitivas: [InputText]
+    depende_de: [1, 6]
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'Migrar os 3 (13/14/15) numa única passada — compartilham teste MaxCreditCard.test.ts.'
+
+  - id: 14
+    componente: MaxInputCreditCardCvv
+    arquivo: src/components/MaxInputCreditCardCvv.vue
+    plano: prime_vue_migration/plans/13-cartao-credito.md
+    primitivas: [InputText]
+    depende_de: [1, 6]
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'Ver id 13.'
+
+  - id: 15
+    componente: MaxInputCreditCardDate
+    arquivo: src/components/MaxInputCreditCardDate.vue
+    plano: prime_vue_migration/plans/13-cartao-credito.md
+    primitivas: [InputText]
+    depende_de: [1, 6]
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'Ver id 13.'
+
+# -----------------------------------------------------------------------------
+# FASE 2 — COMPONENTES AUTÔNOMOS (sem dependência de overlay)
+# -----------------------------------------------------------------------------
+
+  - id: 16
+    componente: MaxButton
+    arquivo: src/components/MaxButton.vue
+    plano: prime_vue_migration/plans/16-MaxButton.md
+    primitivas: [Button]
+    depende_de: []
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'ATENÇÃO: também remove `import type ButtonProps` de src/types/index.ts. Preservar classes .p-button-* usadas no SCSS.'
+
+  - id: 17
+    componente: MaxBadgeComponent
+    arquivo: src/components/MaxBadgeComponent.vue
+    plano: prime_vue_migration/plans/17-MaxBadgeComponent.md
+    primitivas: [Badge, OverlayBadge]
+    depende_de: []
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: ''
+
+  - id: 18
+    componente: MaxUserAvatar
+    arquivo: src/components/MaxUserAvatar.vue
+    plano: prime_vue_migration/plans/18-MaxUserAvatar.md
+    primitivas: [Avatar]
+    depende_de: []
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: ''
+
+  - id: 19
+    componente: MaxInputCheckbox
+    arquivo: src/components/MaxInputCheckbox.vue
+    plano: prime_vue_migration/plans/19-MaxInputCheckbox.md
+    primitivas: [Checkbox]
+    depende_de: []
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'Usar MaxInputSwitch.vue (já migrado) como referência de estilo.'
+
+  - id: 20
+    componente: MaxInputToggle
+    arquivo: src/components/MaxInputToggle.vue
+    plano: prime_vue_migration/plans/20-MaxInputToggle.md
+    primitivas: [ToggleSwitch]
+    depende_de: []
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'MaxInputSwitch.vue já implementa um toggle sem PrimeVue — reaproveitar markup/SCSS.'
+
+  - id: 21
+    componente: MaxInputNumber
+    arquivo: src/components/MaxInputNumber.vue
+    plano: prime_vue_migration/plans/21-MaxInputNumber.md
+    primitivas: [InputNumber]
+    depende_de: [1]
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'Formatação via Intl.NumberFormat pt-BR. Item mais delicado da Fase 2.'
+
+  - id: 22
+    componente: MaxPdfView
+    arquivo: src/components/MaxPdfView.vue
+    plano: prime_vue_migration/plans/22-MaxPdfView.md
+    primitivas: [ProgressSpinner]
+    depende_de: [3]
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'Troca simples de 1 tag.'
+
+# -----------------------------------------------------------------------------
+# FASE 3 — OVERLAYS (todos dependem de MaxBaseOverlay)
+# -----------------------------------------------------------------------------
+
+  - id: 23
+    componente: MaxInputSelect
+    arquivo: src/components/MaxInputSelect.vue
+    plano: prime_vue_migration/plans/23-MaxInputSelect.md
+    primitivas: [Select]
+    depende_de: [1, 2]
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'BLOQUEANTE dos ids 24 e 25. Slots #option/#optiongroup/#value e evento before-show são API pública.'
+
+  - id: 24
+    componente: MaxPhoneField
+    arquivo: src/components/MaxPhoneField.vue
+    plano: prime_vue_migration/plans/24-MaxPhoneField.md
+    primitivas: [Select, InputText]
+    depende_de: [1, 23]
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: ''
+
+  - id: 25
+    componente: MaxTagSelect
+    arquivo: src/components/MaxTagSelect.vue
+    plano: prime_vue_migration/plans/25-MaxTagSelect.md
+    primitivas: [Select]
+    depende_de: [23]
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: ''
+
+  - id: 26
+    componente: MaxInputAutoComplete
+    arquivo: src/components/MaxInputAutoComplete.vue
+    plano: prime_vue_migration/plans/26-MaxInputAutoComplete.md
+    primitivas: [AutoComplete]
+    depende_de: [1, 2]
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'BLOQUEANTE do id 27.'
+
+  - id: 27
+    componente: MaxInputAutoCompleteApi
+    arquivo: src/components/MaxInputAutoCompleteApi.vue
+    plano: prime_vue_migration/plans/27-MaxInputAutoCompleteApi.md
+    primitivas: [AutoComplete]
+    depende_de: [26]
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'Importa `AutoCompleteProps` como type — remover também.'
+
+  - id: 28
+    componente: MaxInputDatePicker
+    arquivo: src/components/MaxInputDatePicker.vue
+    plano: prime_vue_migration/plans/28-MaxInputDatePicker.md
+    primitivas: [DatePicker]
+    depende_de: [1, 2]
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'Item de maior esforço. Locale pt-BR de src/locales/.'
+
+  - id: 29
+    componente: MaxColorPicker
+    arquivo: src/components/MaxColorPicker.vue
+    plano: prime_vue_migration/plans/29-MaxColorPicker.md
+    primitivas: [ColorPicker, InputText]
+    depende_de: [1, 2]
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'HSB<->HEX. Sem teste existente — criar do zero.'
+
+  - id: 30
+    componente: MaxPopoverMenu
+    arquivo: src/components/MaxPopoverMenu.vue
+    plano: prime_vue_migration/plans/30-MaxPopoverMenu.md
+    primitivas: [Menu]
+    depende_de: [2]
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'MaxPopover.vue já é PrimeVue-free — avaliar reuso antes de usar MaxBaseOverlay.'
+
+  - id: 31
+    componente: MaxInputIconPicker
+    arquivo: src/components/MaxInputIconPicker.vue
+    plano: prime_vue_migration/plans/31-MaxInputIconPicker.md
+    primitivas: [InputText, Drawer, VirtualScroller]
+    depende_de: [1, 2, 4]
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'Sem teste existente — criar do zero. 3 primitivas de uma vez.'
+
+  - id: 32
+    componente: MaxInputFileUpload
+    arquivo: src/components/MaxInputFileUpload.vue
+    plano: prime_vue_migration/plans/32-MaxInputFileUpload.md
+    primitivas: [FileUpload, ProgressSpinner]
+    depende_de: [3]
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'Os irmãos Big/Button/Project já são PrimeVue-free — usar como referência de drag&drop.'
+
+# -----------------------------------------------------------------------------
+# FASE 4 — TABELA (conjunto indivisível: migrar 33 e 34 na MESMA passada)
+# -----------------------------------------------------------------------------
+
+  - id: 33
+    componente: MaxTable
+    arquivo: src/components/MaxTable.vue
+    plano: prime_vue_migration/plans/33-MaxTable.md
+    primitivas: [DataTable, Column]
+    depende_de: [16]
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'CONJUNTO INDIVISÍVEL com id 34. Maior item da migração. MaxTableFields.vue já é PrimeVue-free.'
+
+  - id: 34
+    componente: MaxTableColumn
+    arquivo: src/components/MaxTableColumn.vue
+    plano: prime_vue_migration/plans/33-MaxTable.md
+    primitivas: [Column]
+    depende_de: [33]
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'Migrar na MESMA passada do id 33.'
+
+# -----------------------------------------------------------------------------
+# FASE 5 — INFRAESTRUTURA (só depois que TODOS os componentes estiverem prontos)
+# -----------------------------------------------------------------------------
+
+  - id: 35
+    componente: MaxStyle
+    arquivo: src/styles/style.ts
+    plano: prime_vue_migration/plans/35-MaxStyle-tema.md
+    primitivas: ['@primeuix/themes', 'Aura']
+    depende_de: [16, 23, 33]
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'Converter o preset definePreset() em CSS custom properties puras.'
+
+  - id: 36
+    componente: prime-index
+    arquivo: src/prime/index.ts
+    plano: prime_vue_migration/plans/36-prime-index.md
+    primitivas: ['~110 re-exports']
+    depende_de: [35]
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'DECISÃO DE PRODUTO NECESSÁRIA — ver o plano. Não executar sem confirmação do usuário.'
+
+  - id: 38
+    componente: MaxComponentsUiResolver
+    arquivo: src/helpers/MaxComponentsUiResolver.ts
+    plano: prime_vue_migration/plans/38-MaxComponentsUiResolver.md
+    primitivas: ['@primevue/auto-import-resolver']
+    depende_de: [36]
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'PACOTE SEPARADO (@primevue/auto-import-resolver) — npm uninstall primevue NÃO o remove. Depende da decisão do id 36.'
+
+  - id: 37
+    componente: install-plugin
+    arquivo: src/index.ts
+    plano: prime_vue_migration/plans/37-install-plugin.md
+    primitivas: ['primevue/config', 'primevue/tooltip']
+    depende_de: [5, 35, 36, 38]
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    notas: 'ÚLTIMO ITEM. Remove app.use(PrimeVue) e desinstala as deps do package.json.'

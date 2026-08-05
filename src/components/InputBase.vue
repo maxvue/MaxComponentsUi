@@ -214,12 +214,15 @@
         input, textarea, label, .p-select, .p-select-label {
             outline: none !important;
             background-color: transparent !important;
-            height: 100% !important;
             position: relative !important;
             padding: 0 7px;
             border: none !important;
             box-shadow: none !important;
             width: 100% !important;
+        }
+
+        input, textarea:not([auto-resize]), label, .p-select, .p-select-label {
+            height: 100% !important;
         }
 
         .input-status-icon {
