@@ -45,12 +45,19 @@ mantenha esses números.
 ## 2. Uso neste repositório
 
 ```
-MaxPdfView.vue           <ProgressSpinner />   (sem props)
-MaxInputFileUpload.vue   <ProgressSpinner />   (sem props)
+MaxPdfView.vue:11          style="width:50px;height:50px" strokeWidth="7"
+                           animationDuration=".5s" aria-label="Custom ProgressSpinner"
+MaxInputFileUpload.vue:27  style="width:20px;height:20px" animationDuration="2s"
 ```
 
-Nenhum dos dois passa props. A superfície real é mínima — mas implemente as três props
-mesmo assim (requisito de paridade de API do briefing).
+> **Correção:** uma versão anterior deste plano afirmava que nenhum consumidor passava
+> props. É falso — verifique sempre o código. Duas consequências:
+> - `animationDuration` precisa **de fato** controlar a animação, não apenas existir
+>   como prop. Aplique-o ao `<svg>` (rotação) **e** ao `<circle>` (traço), senão
+>   acelerar a rotação dessincroniza o desenho do traço;
+> - `style` e `aria-label` chegam como **atributos**, não props. A herança de
+>   atributos do Vue precisa alcançar o elemento raiz, e um `aria-label` em atributo
+>   deve sobrescrever o default da prop `ariaLabel`.
 
 ---
 

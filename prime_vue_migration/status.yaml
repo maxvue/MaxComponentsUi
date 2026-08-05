@@ -317,10 +317,59 @@ itens:
     plano: prime_vue_migration/plans/03-MaxBaseSpinner.md
     primitivas: [ProgressSpinner]
     depende_de: []
-    execucao: Aguardando
-    verificacao: Aguardando
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: 'SVG animado puro. Usado por MaxPdfView e MaxInputFileUpload.'
+    notas: >
+      SVG animado puro. Usado por MaxPdfView e MaxInputFileUpload.
+      DIVERGÊNCIA DO PLANO (§2): o plano afirma que nenhum consumidor passa props.
+      O código diz o contrário e prevalece — MaxPdfView.vue:11 usa
+      style="width:50px;height:50px" strokeWidth="7" animationDuration=".5s"
+      aria-label="Custom ProgressSpinner", e MaxInputFileUpload.vue:27 usa
+      style + animationDuration="2s". Consequências: animationDuration precisa de
+      fato controlar a animação (não só existir como prop), e style/aria-label
+      chegam como ATRIBUTOS, não props — o aria-label do MaxPdfView sobrescreve o
+      default via herança de atributos, comportamento coberto por teste próprio.
+      animationDuration é aplicado ao <svg> (rotação) E ao <circle> (traço), como
+      no PrimeVue. Diferenças propositais mantidas do plano: stroke em cor única
+      var(--max-primary-500) em vez dos 4 tons do Material que o PrimeVue ciclava;
+      prefers-reduced-motion desacelera para 4s em vez de remover a animação (é
+      indicador de progresso); role="progressbar" + aria-busy explícitos.
+      ESCOPO: este item apenas CRIA a primitiva. A troca das tags nos dois
+      consumidores (e a remoção do import de primevue/progressspinner) é dos ids
+      22 e 32, conforme a fila — por isso o grep global de primevue ainda acusa
+      MaxPdfView.vue e MaxInputFileUpload.vue.
+      12 testes em tests/components/base/MaxBaseSpinner.test.ts. 7 mutações
+      aplicadas e todas detectadas: viewBox alterado, strokeWidth fixo, duração não
+      chegando ao circle, role removido, fill fixo, raio do círculo alterado,
+      ariaLabel ignorado.
+      Gates: grep primevue VAZIO no arquivo novo; não exportado em src/index.ts nem
+      no manifesto; InputBase.vue intocado; type-check limpo; lint limpo (2
+      warnings pré-existentes); suíte completa 708 passed / 18 failed — mesmas 18
+      do baseline, 0 regressão.
+      VERIFICAÇÃO (subagente opus): APROVADO na 1a tentativa. Conferiu as props reais
+      do primevue/progressspinner em node_modules e confirmou paridade total (3 props,
+      mesmos defaults, mesmo markup e mesmas classes). Confirmou a divergência do
+      plano lendo os call sites, e simulou os dois com render real: style dimensiona a
+      raiz, stroke-width=7 chega ao circle, .5s chega ao svg E ao circle, aria-label
+      do atributo vence sem duplicação. Mediu o RISCO PRINCIPAL em happy-dom real (não
+      o getComputedStyle mockado do setup.ts): o shorthand `animation: ... 2s ...` da
+      folha expande para longhands no parse, e o `animation-duration` inline vence por
+      origem — ou seja, animationDuration TEM efeito, o bug suspeito não existe.
+      25 mutações: as 20 de template/script todas mortas. As 5 CSS-only sobreviventes
+      (display, stroke-linecap, stroke-dasharray, ângulo do keyframe, !important do
+      reduced-motion) são inverificáveis por construção — happy-dom não aplica blocos
+      <style> de SFC nem resolve @keyframes; só teste visual as cobriria (o plano §5
+      já prevê comparação no playground).
+      Achados MENORES acatados: o plano 03 §2 estava desatualizado e foi CORRIGIDO
+      neste commit para descrever os call sites reais. Confirmou que o !important do
+      prefers-reduced-motion anula o animationDuration customizado quando a media
+      query está ativa — e que isso é o comportamento CORRETO e intencional (uma
+      duração customizada mais rápida é exatamente o que a preferência deve
+      neutralizar). Registrou ainda que aplicar animationDuration também ao <circle>
+      é uma MELHORIA sobre o PrimeVue, que só o aplica ao <svg> e por isso
+      dessincroniza o traço quando a rotação é acelerada; e que a ausência de
+      aria-valuenow é correta (progressbar indeterminado é a semântica de um spinner).
 
   - id: 4
     componente: MaxBaseVirtualScroller
