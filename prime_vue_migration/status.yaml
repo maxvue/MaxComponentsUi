@@ -52,7 +52,7 @@ itens:
     primitivas: [InputText]
     depende_de: []
     execucao: Concluído
-    verificacao: Realizando
+    verificacao: Concluído
     tentativas: 0
     notas: >
       Implementado como <input> raiz sem wrapper (preserva v-maska). Classes
@@ -61,11 +61,20 @@ itens:
       [disabled] genericamente, então a primitiva só precisa emitir as classes certas.
       13 testes em tests/components/base/MaxBaseInput.test.ts, incluindo integração real
       com v-maska (maska/vue). Mutações testadas e confirmadas como detectadas: (1)
-      remover emit update:modelValue, (2) hasValue fixo em true, (3) envolver o input
-      num <div> — todas quebraram o teste correspondente. Gates: type-check limpo, lint
+      remover emit update:modelValue, (2) hasValue fixo em true — cada uma quebrou seu
+      teste correspondente diretamente. (3) envolver o input num <div>: na 1ª rodada só
+      quebrou por acidente via o teste de atributos herdados, porque wrapper.element do
+      VTU resolve para o componente interno independente de um wrapper externo — achado
+      do subagente verificador (opus). Corrigido: o teste do elemento raiz agora também
+      afirma wrapper.html().trim().startsWith('<input') e wrapper.find('div').exists()
+      === false, que quebram diretamente sob essa mutação. Gates: type-check limpo, lint
       limpo (2 warnings pré-existentes não relacionados), suite completa 622 passed/18
       failed (mesmas 18 falhas do baseline, 0 regressão). Não exportado em src/index.ts
       nem no manifesto do resolver (primitiva interna), conforme plano.
+      VERIFICAÇÃO (subagente opus): APROVADO. Zero PrimeVue, API idêntica ao plano,
+      contrato do v-maska preservado, InputBase.vue intocado, portões limpos. 3 achados
+      MENORES (teste do elemento raiz reforçado acima; nota de mutação corrigida; CSS
+      visual só validável no playground quando integrado a um consumidor nos itens 6-15).
 
   - id: 2
     componente: MaxBaseOverlay

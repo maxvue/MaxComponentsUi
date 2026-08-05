@@ -4,9 +4,13 @@ import { vMaska } from 'maska/vue';
 import MaxBaseInput from '../../../src/components/base/MaxBaseInput.vue';
 
 describe('MaxBaseInput', () => {
-    it('renderiza um <input> como elemento raiz', () => {
+    it('renderiza um <input> como elemento raiz, sem wrapper envolvente', () => {
         const wrapper = mount(MaxBaseInput);
         expect(wrapper.element.tagName).toBe('INPUT');
+        // wrapper.element resolve para o componente interno independente de haver um
+        // elemento externo; o html() renderizado é quem denuncia um wrapper acidental.
+        expect(wrapper.html().trim().startsWith('<input')).toBe(true);
+        expect(wrapper.find('div').exists()).toBe(false);
     });
 
     it('aplica as classes p-inputtext e p-component', () => {
