@@ -1,21 +1,33 @@
 <template>
     <InputBase v-bind="props" :value="temp_value" :done="isDone" :error="error_msg" :caution="caution">
-        <InputNumber v-bind="props" v-model="temp_value" fluid @blur="isDone = testIsDone()" />
+        <MaxBaseInput
+            ref="inputRef"
+            type="text"
+            role="spinbutton"
+            v-bind="attrs"
+            :modelValue="displayString"
+            :disabled="props.disabled"
+            :aria-valuenow="temp_value ?? undefined"
+            :aria-valuemin="minVal ?? undefined"
+            :aria-valuemax="maxVal ?? undefined"
+            @update:modelValue="onInput"
+            @focus="onFocus"
+            @blur="onBlur"
+            @keydown.up.prevent="stepUp"
+            @keydown.down.prevent="stepDown"
+        />
     </InputBase>
 </template>
 
-/**
- * Componente de entrada de texto padrão.
- * Oferece suporte a validação de obrigatoriedade e comparação de valores.
- */
 <script setup lang="ts">
     import { toSearchableString, hasContent } from '@maxvue/max-use';
     import type { Ref } from 'vue';
     import { ref, computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
-    import InputNumber from 'primevue/inputnumber';
+    import MaxBaseInput from './base/MaxBaseInput.vue';
 
     const attrs: any = useAttrs();
+    const inputRef = ref<any>(null);
 
     const props = withDefaults(
         defineProps<{
@@ -57,12 +69,110 @@
             minFractionDigits?: number | undefined;
             /** Máximo de casas decimais */
             maxFractionDigits?: number | undefined;
-
+            /** Mínimo */
+            min?: number | undefined;
+            /** Máximo */
+            max?: number | undefined;
+            /** Passo */
+            step?: number | undefined;
+            /** Permitir vazio */
+            allowEmpty?: boolean | undefined;
         }>(),
-        { modelValue: '', done: undefined, required: false, caution: undefined, prefix: undefined, suffix: undefined, placeholder: undefined, minFractionDigits: 0, maxFractionDigits: 2 }
+        {
+            modelValue: '',
+            done: undefined,
+            required: false,
+            caution: undefined,
+            prefix: undefined,
+            suffix: undefined,
+            placeholder: undefined,
+            minFractionDigits: 0,
+            maxFractionDigits: 2,
+            allowEmpty: true,
+            step: 1
+        }
     );
 
-    const temp_value = ref(props.modelValue);
+    const emit = defineEmits<{
+        'update:modelValue': [val: number | null];
+        'blur': [event: FocusEvent];
+        'focus': [event: FocusEvent];
+        'input': [val: number | null];
+    }>();
+
+    const temp_value = ref<number | null>(props.modelValue !== '' && props.modelValue !== null && props.modelValue !== undefined ? Number(props.modelValue) : null);
+    const isFocused = ref(false);
+    const rawInput = ref('');
+
+    const minVal = computed(() => props.min ?? attrs.min);
+    const maxVal = computed(() => props.max ?? attrs.max);
+    const stepVal = computed(() => props.step ?? attrs.step ?? 1);
+
+    const separators = computed(() => {
+        const loc = (props as any).locale ?? attrs.locale ?? 'pt-BR';
+        const parts = new Intl.NumberFormat(loc).formatToParts(12345.6);
+        return {
+            group: parts.find((p) => p.type === 'group')?.value ?? '.',
+            decimal: parts.find((p) => p.type === 'decimal')?.value ?? ','
+        };
+    });
+
+    const formatter = computed(() => {
+        const loc = (props as any).locale ?? attrs.locale ?? 'pt-BR';
+        const mode = (props as any).mode ?? attrs.mode ?? 'decimal';
+        const currency = (props as any).currency ?? attrs.currency;
+
+        return new Intl.NumberFormat(loc, {
+            style: mode === 'currency' ? 'currency' : 'decimal',
+            currency: mode === 'currency' ? currency : undefined,
+            useGrouping: (props as any).useGrouping ?? attrs.useGrouping ?? true,
+            minimumFractionDigits: props.minFractionDigits ?? 0,
+            maximumFractionDigits: props.maxFractionDigits ?? 2
+        });
+    });
+
+    const formatValue = (val: number | null): string => {
+        if (val === null || val === undefined || Number.isNaN(val)) return '';
+        const formatted = formatter.value.format(val);
+        const pfx = props.prefix ?? attrs.prefix ?? '';
+        const sfx = props.suffix ?? attrs.suffix ?? '';
+        return `${pfx}${formatted}${sfx}`;
+    };
+
+    const parseValue = (text: string): number | null => {
+        if (!text || text.trim() === '') return null;
+
+        let clean = text;
+        const pfx = props.prefix ?? attrs.prefix;
+        const sfx = props.suffix ?? attrs.suffix;
+        if (pfx) clean = clean.replace(pfx, '');
+        if (sfx) clean = clean.replace(sfx, '');
+
+        clean = clean
+            .split(separators.value.group).join('')
+            .split(separators.value.decimal).join('.')
+            .replace(/[^\d.-]/g, '');
+
+        if (clean === '' || clean === '-') return null;
+        const parsed = Number(clean);
+        return Number.isNaN(parsed) ? null : parsed;
+    };
+
+    const clamp = (val: number | null): number | null => {
+        if (val === null) {
+            if (props.allowEmpty === false) return minVal.value ?? 0;
+            return null;
+        }
+        if (minVal.value !== undefined && val < minVal.value) return minVal.value;
+        if (maxVal.value !== undefined && val > maxVal.value) return maxVal.value;
+        return val;
+    };
+
+    const displayString = computed(() => {
+        if (isFocused.value) return rawInput.value;
+
+        return formatValue(temp_value.value);
+    });
 
     const isDone: Ref = ref(props.done ?? null);
 
@@ -88,13 +198,55 @@
         return attrs_error_message ?? 'Valor inválido';
     });
 
-    const emit = defineEmits(['update:modelValue']);
-    watch(temp_value, () => {
+    const onInput = (val: string) => {
+        rawInput.value = val;
+        const parsed = parseValue(val);
+        temp_value.value = parsed;
+        emit('input', parsed);
+        emit('update:modelValue', parsed);
+    };
+
+    const onFocus = (event: FocusEvent) => {
+        isFocused.value = true;
+        rawInput.value = temp_value.value !== null ? String(temp_value.value).replace('.', separators.value.decimal) : '';
+        emit('focus', event);
+    };
+
+    const onBlur = (event: FocusEvent) => {
+        isFocused.value = false;
+        const parsed = rawInput.value !== '' ? parseValue(rawInput.value) : temp_value.value;
+        const clamped = clamp(parsed);
+        temp_value.value = clamped;
         isDone.value = testIsDone();
-        emit('update:modelValue', temp_value.value);
-    });
+        emit('update:modelValue', clamped);
+        emit('blur', event);
+    };
+
+    const stepUp = () => {
+        if (props.disabled) return;
+        const current = temp_value.value ?? 0;
+        const next = clamp(current + stepVal.value);
+        temp_value.value = next;
+        isDone.value = testIsDone();
+        emit('update:modelValue', next);
+    };
+
+    const stepDown = () => {
+        if (props.disabled) return;
+        const current = temp_value.value ?? 0;
+        const next = clamp(current - stepVal.value);
+        temp_value.value = next;
+        isDone.value = testIsDone();
+        emit('update:modelValue', next);
+    };
+
     watch(
         () => props.modelValue,
-        () => (temp_value.value = props.modelValue)
+        (val) => {
+            const num = val !== '' && val !== null && val !== undefined ? Number(val) : null;
+            temp_value.value = Number.isNaN(num) ? null : num;
+            if (!isFocused.value) isDone.value = testIsDone();
+
+        }
     );
 </script>

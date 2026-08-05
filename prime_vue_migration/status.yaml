@@ -924,11 +924,15 @@ itens:
     arquivo: src/components/MaxInputNumber.vue
     plano: prime_vue_migration/plans/21-MaxInputNumber.md
     primitivas: [InputNumber]
-    depende_de: [1]
-    execucao: Aguardando
-    verificacao: Aguardando
+    depende_de: [1, 6]
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: 'Formatação via Intl.NumberFormat pt-BR. Item mais delicado da Fase 2.'
+    notas: >
+      Reimplementado MaxInputNumber sem dependência do PrimeVue (removido import de primevue/inputnumber).
+      Utilizado MaxBaseInput com formatação por Intl.NumberFormat pt-BR, separadores dinâmicos, suporte a moeda/decimal, min/max, step e role="spinbutton".
+      13 testes em tests/components/MaxInputNumber.test.ts passando 100%.
+      Gates: vitest do componente limpo (13/13), type-check limpo, lint limpo (2 warnings pré-existentes), grep primevue VAZIO em MaxInputNumber.vue, git diff InputBase.vue VAZIO, suíte completa sem regressão.
 
   - id: 22
     componente: MaxPdfView
