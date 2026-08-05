@@ -51,7 +51,7 @@ itens:
     plano: prime_vue_migration/plans/01-MaxBaseInput.md
     primitivas: [InputText]
     depende_de: []
-    execucao: Aguardando
+    execucao: Realizando
     verificacao: Aguardando
     tentativas: 0
     notas: 'Primitiva mais crítica: destrava 10 componentes de input de texto.'
