@@ -132,8 +132,8 @@
             caution: undefined,
             disabled: false,
             error: undefined,
-            listUrl: '/api/icons/picker',
-            svgUrl: '/api/icons/picker/svg'
+            listUrl: 'https://engeapp.com.br/api/icons/picker',
+            svgUrl: 'https://engeapp.com.br/api/icons/picker/svg'
         }
     );
 
