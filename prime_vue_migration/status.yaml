@@ -988,10 +988,14 @@ itens:
     plano: prime_vue_migration/plans/25-MaxTagSelect.md
     primitivas: [Select]
     depende_de: [23]
-    execucao: Aguardando
-    verificacao: Aguardando
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: ''
+    notas: >
+      Reimplementado MaxTagSelect sem dependência do PrimeVue (removido import de primevue/select).
+      Utilizado MaxBaseOverlay com preservação de todas as funções getStyleColor/getColorString e estilização de cores de tags customizadas.
+      Criado teste do zero em tests/components/MaxTagSelect.test.ts com 7 testes passando 100%.
+      Gates: vitest do componente limpo (7/7), type-check limpo, lint limpo (2 warnings pré-existentes), grep primevue VAZIO em MaxTagSelect.vue, git diff InputBase.vue VAZIO, suíte completa sem regressão.
 
   - id: 26
     componente: MaxInputAutoComplete
