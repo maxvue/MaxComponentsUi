@@ -1,6 +1,6 @@
 <template>
     <Avatar :image="props.imageUrl" shape="circle" v-if="props.imageUrl" :class="{ removable: remove }" @click="onAvatarClick" v-tooltip.top="showTooltip ? (remove ? (labelRemove ?? name) : name) : null" />
-    <Avatar :label="name?.substring(0, 2).toUpperCase() ?? '' " style="background-color: #ece9fc; color: #2a1261;" shape="circle" pointer v-else :class="{ removable: remove }" @click="onAvatarClick" v-tooltip.top="showTooltip ? (remove ? (labelRemove ?? name) : name) : null" />
+    <Avatar :label="initials" shape="circle" pointer v-else :class="['max-user-avatar-initials', { removable: remove }]" @click="onAvatarClick" v-tooltip.top="showTooltip ? (remove ? (labelRemove ?? name) : name) : null" />
 </template>
 
 /**
@@ -11,6 +11,7 @@
  */
 <script setup lang="ts">
 
+    import { computed } from 'vue';
     import Avatar from 'primevue/avatar';
     import { useConfirmStore } from '../stores/useConfirm.Store';
 
@@ -31,10 +32,32 @@
         remove?: boolean;
         /** Mensagem/label exibida na confirmação de remoção */
         labelRemove?: string;
+        /**
+         * Quantas iniciais do nome exibir quando não há imagem.
+         *
+         * O padrão é `2` porque era o comportamento anterior (`substring(0, 2)`) e
+         * os projetos que já consomem a lib contam com ele. Passe `1` para a
+         * primeira letra apenas.
+         */
+        initialsLength?: number;
 
     }>(), {
         showTooltip: true,
-        route: null
+        route: null,
+        initialsLength: 2
+    });
+
+    /**
+     * Iniciais do fallback.
+     *
+     * `trim()` antes de cortar: um nome com espaço à esquerda renderizaria um
+     * avatar em branco — o espaço é um caractere como outro qualquer para o
+     * `substring`, e o resultado é indistinguível de "nome não carregou".
+     */
+    const initials = computed<string>(() => {
+        const length = Math.max(1, Math.trunc(props.initialsLength));
+
+        return props.name?.trim().substring(0, length).toUpperCase() ?? '';
     });
 
     const emit = defineEmits<{ remove: [] }>();
@@ -57,6 +80,19 @@
 </script>
 
 <style lang="scss">
+    /**
+     * Cores do fallback de iniciais.
+     *
+     * Ficam em token com fallback nos valores anteriores (`#ece9fc`/`#2a1261`),
+     * que estavam escritos inline num `style=`: assim quem consome a lib repinta
+     * o avatar pela própria paleta sem precisar de prop nova, e quem não fizer
+     * nada continua vendo exatamente o que via antes.
+     */
+    .p-avatar.max-user-avatar-initials {
+        background-color: var(--max-user-avatar-background, #ece9fc);
+        color: var(--max-user-avatar-color, #2a1261);
+    }
+
     .p-avatar.removable {
         position: relative;
         cursor: pointer;
