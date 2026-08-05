@@ -527,10 +527,98 @@ itens:
     plano: prime_vue_migration/plans/05-vTooltip.md
     primitivas: [Tooltip]
     depende_de: []
-    execucao: Aguardando
-    verificacao: Aguardando
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: 'Diretiva registrada em src/index.ts install(). Modificadores .top/.right/.bottom/.left.'
+    notas: >
+      Diretiva registrada em src/index.ts install(). Modificadores
+      .top/.right/.bottom/.left/.focus.
+      DEFAULT DE POSIÇÃO CONFIRMADO NA FONTE (não confiei só no plano): o `else` final
+      de `align` na lib chamava `alignRight` — o default É `right`. Trocar para `top`
+      reposicionaria silenciosamente os tooltips de todas as apps consumidoras. Há
+      teste dedicado protegendo isso.
+      CONTRATO QUE O PLANO NÃO MENCIONA: `v-tooltip="null"` é usado em 8 lugares deste
+      repo (MaxPopover x3, MaxModal, MaxIconConfirm, MaxTogglePopover, MaxPopoverMenu)
+      para SUPRIMIR tooltip, e MaxUserAvatar usa o padrão
+      `v-tooltip.top="cond ? texto : null"`. Portanto valor null/undefined/'' não pode
+      criar tooltip, e um valor que VIRA null em runtime precisa esconder o tooltip já
+      visível. Três testes cobrem isso.
+      ESTILO: o visual vinha do tema do PrimeVue (params.scss só definia z-index), e
+      some junto com ele. Criado src/directives/tooltip.scss — global e não escopado,
+      porque o nó vive no document.body — importado por src/index.ts. Classes
+      p-tooltip / p-tooltip-text / p-tooltip-arrow / p-tooltip-{pos} preservadas, pois
+      apps consumidoras estilizam por esses seletores.
+      BUG REAL encontrado pelos próprios testes e corrigido: o flip disparava com
+      rects zerados. Sem layout medido (elemento ainda não pintado, display:none,
+      ambiente de teste) toda comparação de borda dá "não cabe", e .top/.left viravam
+      para o lado oposto sem motivo. Agora o flip só ocorre quando há medição real
+      (host.width > 0 || host.height > 0).
+      ARMADILHA DE LINT: escrever `if (medido) { ...cadeia de else if... }` fez o
+      --fix remover as chaves e pendurar os `else if` no `if` interno, invertendo a
+      lógica silenciosamente. Reescrito como função `flip()` com returns, que o
+      formatador não distorce. Também trocado word-break:break-word (deprecado no
+      stylelint) por overflow-wrap.
+      ACESSIBILIDADE: sem o modificador .focus registra mouse E teclado (tooltip só no
+      hover é inacessível por Tab); role="tooltip" e aria-describedby ligando gatilho
+      ao nó, removido ao esconder.
+      32 testes em tests/directives/tooltip.test.ts. 12 mutações aplicadas e TODAS
+      detectadas, incluindo as 3 que o plano §4 exige: default virando `top`,
+      innerHTML incondicional (XSS) e unmounted sem limpeza. Também: disabled
+      ignorado, hasText aceitando vazio, .focus registrando mouse, aria-describedby
+      não removido, autoHide ignorado, updated não atualizando texto visível,
+      showDelay ignorado, flip sem guarda de medição, flip sempre virando.
+      src/index.ts agora importa de './directives/tooltip'; a linha
+      app.directive('tooltip', Tooltip) não mudou, como o plano §3 pede.
+      Gates: grep primevue VAZIO nos 2 arquivos novos (inclusive nos comentários, que
+      poluiriam o critério de saída); InputBase intocado; type-check limpo; lint limpo
+      (2 warnings pré-existentes); suíte completa 763 passed / 18 failed — mesmas 18
+      do baseline, 0 regressão.
+      PENDÊNCIA DO PLANO §5: validação manual no playground nas 4 posições não foi
+      feita (o visual novo do SCSS só é conferível ali). Recomendo fazer antes do
+      merge.
+      ---
+      VERIFICAÇÃO (subagente opus): APROVADO na 1a tentativa, sem BLOQUEANTES. Ele
+      conferiu na FONTE o default `right` (não aceitou minha palavra), reproduziu o
+      padrão `!!x === x ? x : default` da lib para todas as opções e confirmou
+      paridade em casos-limite (escape:0, escape:"false", disabled:1/"sim"/{},
+      autoHide:undefined/0, showDelay:null, fitContent), validou por sonda todas as
+      formas de uso do plano §1 mais o contrato local do null, e mediu ausência de
+      vazamento em 6 cenários (timer pendente + unmount, hideDelay + unmount,
+      mouseleave cancelando showTimer, re-entrada durante hideDelay, remonta por
+      key-change, unmount duplo). Aplicou 22 mutações novas.
+      3 MENORES acatados e corrigidos antes do commit:
+      (G1) DIVERGÊNCIA DE CONTRATO que eu havia perdido: a lib escondia o tooltip em
+      `click` e em `keydown` com code === 'Escape'. Conferi a fonte
+      (bindEvents/onClick/onKeydown): o `click` só é registrado no ramo NÃO-focus, e o
+      `keydown` é registrado nos DOIS ramos. Repliquei exatamente assim. O Escape é
+      ainda o padrão WAI-ARIA para dispensar tooltip. 4 testes novos.
+      (G2) Todo o bloco de coordenadas (top/left das 4 posições e a soma do scroll)
+      estava sem cobertura — 5 mutações sobreviviam ali, embora o cálculo estivesse
+      correto. Adicionado um describe com rects stubados e valores exatos.
+      (G3) O `if/else` sem chaves em `updated` (formato que o --fix já havia mordido
+      uma vez) foi eliminado: a lógica de escape virou o helper `aplicarTexto`,
+      compartilhado com `buildTooltip` — que também duplicava a mesma regra, de modo
+      que os dois caminhos agora não podem divergir.
+      Não acatados, por serem equivalentes observáveis segundo o próprio verificador:
+      states.delete e listeners=[] (WeakMap não é inspecionável de fora e o elemento
+      é descartado logo depois) e a dupla aplicação da classe extra.
+      Uma 2a verificação (subagente opus) auditou especificamente essas 3 correções e
+      APROVOU: confirmou na fonte que click é registrado só no ramo não-focus e
+      keydown nos dois, que o hideDelay é respeitado nos dois caminhos novos, que a
+      aritmética dos testes de coordenada é honesta (conferiu à mão, não é
+      tautológica) e que o helper aplicarTexto preserva o comportamento de XSS na
+      criação E na atualização. Achou mais 2 MENORES, ambos corrigidos:
+      (H1) DIVERGÊNCIA que EU introduzi ao reusar `onHide` como handler de click: na
+      lib, `autoHide` é consultado APENAS no onMouseLeave — onBlur e onClick escondem
+      incondicionalmente. Conferi a fonte e confirmei. Separei os handlers:
+      `onMouseLeave` tem a guarda de autoHide, `onHide` (usado por blur e click) não.
+      2 testes novos travam isso.
+      (H2) Nenhum teste garantia que o modo .focus NÃO registra click — mutação que
+      adicionava o listener ali sobrevivia. Coberto.
+      TOTAL FINAL: 44 testes; 24 mutações minhas + 33 dos verificadores.
+      Gates finais: grep primevue VAZIO; InputBase intocado; type-check limpo; lint
+      limpo (2 warnings pré-existentes); suíte completa 775 passed / 18 failed —
+      mesmas 18 do baseline, 0 regressão.
 
 # -----------------------------------------------------------------------------
 # FASE 1 — INPUTS DE TEXTO (todos dependem apenas de MaxBaseInput)
