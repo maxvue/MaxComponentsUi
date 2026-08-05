@@ -21,11 +21,18 @@
                             <slot name="header">
                                 <span class="max-drawer-title">{{ props.header }}</span>
                             </slot>
+                            <!--
+                                `v-bind="closeButtonProps"` fica depois de `type`/`aria-label` para que o
+                                consumidor possa sobrescrever ambos (ex.: customizar o aria-label). A
+                                `class` e tratada a parte para que `max-drawer-close` nunca seja perdida:
+                                a classe do consumidor e mesclada, nao substitui a nossa.
+                            -->
                             <button
                                 v-if="props.showCloseIcon"
                                 type="button"
-                                class="max-drawer-close"
                                 aria-label="Fechar"
+                                v-bind="props.closeButtonProps"
+                                :class="['max-drawer-close', props.closeButtonProps?.class]"
                                 @click="close"
                             >
                                 <slot name="closeicon">
@@ -48,6 +55,7 @@
 
 <script setup lang="ts">
     import { useFocusTrap } from '../helpers/useFocusTrap';
+    import { useScrollLock } from '../helpers/useScrollLock';
     import { computed, watch, onBeforeUnmount, useTemplateRef } from 'vue';
     import MaxIcon from './MaxIcon.vue';
 
@@ -68,6 +76,8 @@
         blockScroll?: boolean;
         /** Nome do icone do botao de fechar. */
         closeIcon?: string;
+        /** Atributos extras aplicados ao botao de fechar (ex.: title, data-testid). */
+        closeButtonProps?: Record<string, unknown>;
         /** z-index base somado ao incremento automatico. */
         baseZIndex?: number;
         /** Calcula o z-index automaticamente a partir do baseZIndex. */
@@ -81,6 +91,7 @@
         modal: true,
         blockScroll: false,
         closeIcon: undefined,
+        closeButtonProps: undefined,
         baseZIndex: 0,
         autoZIndex: true
     });
@@ -95,6 +106,8 @@
     const panel_el = useTemplateRef<HTMLElement>('panel_el');
 
     const trap = useFocusTrap(panel_el);
+
+    const scroll_lock = useScrollLock();
 
     const is_show = computed(() => props.visible);
 
@@ -129,6 +142,17 @@
      */
     let is_first_run = true;
 
+    /**
+     * Rastreia se ESTA instancia foi quem aplicou o lock de scroll, em vez
+     * de reconsultar `props.blockScroll` no fechamento. Isso evita destravar
+     * o scroll para sempre quando o consumidor alterna `blockScroll` para
+     * false enquanto o drawer segue aberto: sem essa flag, o guard
+     * `if (props.blockScroll)` no fechamento veria `false` e nunca chamaria
+     * `scroll_lock.unlock()`, deixando o contador compartilhado positivo
+     * indefinidamente.
+     */
+    let has_scroll_lock = false;
+
     watch(() => props.visible, (value) => {
 
         const first_run = is_first_run;
@@ -138,20 +162,29 @@
             emit('show');
             trap.activate();
             document.addEventListener('keydown', onEscape);
-            if (props.blockScroll) document.body.style.overflow = 'hidden';
+            if (props.blockScroll) {
+                scroll_lock.lock();
+                has_scroll_lock = true;
+            }
             return;
         }
 
         if (! first_run) emit('hide');
         trap.deactivate();
         document.removeEventListener('keydown', onEscape);
-        if (props.blockScroll) document.body.style.overflow = '';
+        if (has_scroll_lock) {
+            scroll_lock.unlock();
+            has_scroll_lock = false;
+        }
 
     }, { immediate: true });
 
     onBeforeUnmount(() => {
         document.removeEventListener('keydown', onEscape);
-        if (props.blockScroll) document.body.style.overflow = '';
+        if (has_scroll_lock) {
+            scroll_lock.unlock();
+            has_scroll_lock = false;
+        }
     });
 
     defineExpose({ open, close, toggle, is_show });

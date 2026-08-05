@@ -269,8 +269,17 @@ describe('MaxDrawer', () => {
 
     it('expoe open, close e toggle imperativos', async () => {
         const wrapper = mountDrawer({ visible: false });
+
         wrapper.vm.open();
         expect(wrapper.emitted('update:visible')?.[0]).toEqual([true]);
+
+        wrapper.vm.close();
+        expect(wrapper.emitted('update:visible')?.[1]).toEqual([false]);
+
+        // toggle() le o `visible` atual das props (ainda false, pois o
+        // componente e controlado e nao muta a prop sozinho), entao emite true.
+        wrapper.vm.toggle();
+        expect(wrapper.emitted('update:visible')?.[2]).toEqual([true]);
     });
 
     it('emite show ao abrir', async () => {
@@ -286,11 +295,12 @@ describe('MaxDrawer', () => {
     });
 
     it('trava o scroll do body com blockScroll', async () => {
+        document.body.style.overflow = '';
         const wrapper = mountDrawer({ visible: false, blockScroll: true });
         await wrapper.setProps({ visible: true });
         expect(document.body.style.overflow).toBe('hidden');
         await wrapper.setProps({ visible: false });
-        expect(document.body.style.overflow).not.toBe('hidden');
+        expect(document.body.style.overflow).toBe('');
     });
 
     it('renderiza o slot footer quando informado', () => {
@@ -300,5 +310,65 @@ describe('MaxDrawer', () => {
             attachTo: document.body
         });
         expect(document.querySelector('.rodape')).not.toBeNull();
+    });
+
+    it('aplica closeButtonProps ao botao de fechar', () => {
+        mountDrawer({ closeButtonProps: { title: 'Fechar painel', 'data-testid': 'fechar-drawer' } });
+        const botao = document.querySelector('.max-drawer-close');
+        expect(botao?.getAttribute('title')).toBe('Fechar painel');
+        expect(botao?.getAttribute('data-testid')).toBe('fechar-drawer');
+    });
+
+    it('nao emite hide no mount quando visible comeca false', () => {
+        const wrapper = mountDrawer({ visible: false });
+        expect(wrapper.emitted('hide')).toBeFalsy();
+    });
+
+    it('emite hide legitimo ao abrir e depois fechar', async () => {
+        const wrapper = mountDrawer({ visible: false });
+        await wrapper.setProps({ visible: true });
+        await wrapper.setProps({ visible: false });
+        expect(wrapper.emitted('hide')).toHaveLength(1);
+    });
+
+    it('mantem o scroll travado para outro drawer ainda aberto ao fechar um deles', async () => {
+        document.body.style.overflow = '';
+        const wrapperA = mountDrawer({ visible: false, blockScroll: true });
+        const wrapperB = mountDrawer({ visible: false, blockScroll: true });
+
+        await wrapperA.setProps({ visible: true });
+        await wrapperB.setProps({ visible: true });
+        expect(document.body.style.overflow).toBe('hidden');
+
+        await wrapperA.setProps({ visible: false });
+        expect(document.body.style.overflow).toBe('hidden');
+
+        await wrapperB.setProps({ visible: false });
+        expect(document.body.style.overflow).toBe('');
+    });
+
+    it('restaura o valor original de overflow, nao apenas uma string vazia', async () => {
+        document.body.style.overflow = 'scroll';
+        const wrapper = mountDrawer({ visible: false, blockScroll: true });
+
+        await wrapper.setProps({ visible: true });
+        expect(document.body.style.overflow).toBe('hidden');
+
+        await wrapper.setProps({ visible: false });
+        expect(document.body.style.overflow).toBe('scroll');
+
+        document.body.style.overflow = '';
+    });
+
+    it('alternar blockScroll para false com o drawer aberto e depois fechar nao deixa o scroll travado', async () => {
+        document.body.style.overflow = '';
+        const wrapper = mountDrawer({ visible: false, blockScroll: true });
+
+        await wrapper.setProps({ visible: true });
+        expect(document.body.style.overflow).toBe('hidden');
+
+        await wrapper.setProps({ blockScroll: false });
+        await wrapper.setProps({ visible: false });
+        expect(document.body.style.overflow).toBe('');
     });
 });
