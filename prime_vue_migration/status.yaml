@@ -894,11 +894,15 @@ itens:
     arquivo: src/components/MaxInputCheckbox.vue
     plano: prime_vue_migration/plans/19-MaxInputCheckbox.md
     primitivas: [Checkbox]
-    depende_de: []
-    execucao: Aguardando
-    verificacao: Aguardando
+    depende_de: [1]
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: 'Usar MaxInputSwitch.vue (já migrado) como referência de estilo.'
+    notas: >
+      Reimplementado MaxInputCheckbox sem dependência do PrimeVue (removido import de primevue/checkbox).
+      Preservado input type="checkbox" nativo, suporte a modo binário e modo grupo array (sem mutação), aria-checked="mixed" para indeterminado e classes CSS de compatibilidade.
+      15 testes em tests/components/SelectionInputs.test.ts passando 100%.
+      Gates: vitest do componente limpo (15/15), type-check limpo, lint limpo (2 warnings pré-existentes), grep primevue VAZIO em MaxInputCheckbox.vue, git diff InputBase.vue VAZIO, suíte completa sem regressão.
 
   - id: 20
     componente: MaxInputToggle

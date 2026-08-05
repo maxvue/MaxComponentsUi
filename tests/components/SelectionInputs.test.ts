@@ -13,29 +13,58 @@ describe('MaxInputCheckbox', () => {
         setActivePinia(createPinia());
     });
 
-    it('renderiza corretamente e atualiza v-model via props', async () => {
-        const wrapper = mount(MaxInputCheckbox, {
-            props: { modelValue: false }
-        });
-        expect(wrapper.exists()).toBe(true);
-        await wrapper.setProps({ modelValue: true });
-    });
-
-    it('renderiza com label', () => {
+    it('renderiza com label e input checkbox nativo', () => {
         const wrapper = mount(MaxInputCheckbox, {
             props: { modelValue: false, label: 'Aceito os termos' }
         });
+        expect(wrapper.exists()).toBe(true);
         expect(wrapper.text()).toContain('Aceito os termos');
+        expect(wrapper.find('input[type="checkbox"]').exists()).toBe(true);
     });
 
-    it('atualiza temp_value para emitir v-model', async () => {
+    it('alterna o modelValue binário ao acionar o input', async () => {
         const wrapper = mount(MaxInputCheckbox, {
             props: { modelValue: false }
         });
-        const vm = wrapper.vm as any;
-        vm.temp_value = true;
-        await wrapper.vm.$nextTick();
+        const input = wrapper.find('input[type="checkbox"]');
+        await input.trigger('change');
         expect(wrapper.emitted('update:modelValue')?.[0]).toEqual([true]);
+    });
+
+    it('suporta modo de grupo de array adicionando e removendo sem mutar array original', async () => {
+        const originalArray = ['A'];
+        const wrapper = mount(MaxInputCheckbox, {
+            props: { modelValue: originalArray, binary: false, value: 'B' }
+        });
+        const input = wrapper.find('input[type="checkbox"]');
+        await input.trigger('change');
+
+        const emitted = wrapper.emitted('update:modelValue')?.[0][0] as string[];
+        expect(emitted).toEqual(['A', 'B']);
+        expect(emitted).not.toBe(originalArray);
+        expect(originalArray).toEqual(['A']);
+    });
+
+    it('exibe estado indeterminado com aria-checked=mixed', () => {
+        const wrapper = mount(MaxInputCheckbox, {
+            props: { modelValue: false, indeterminate: true }
+        });
+        const input = wrapper.find('input[type="checkbox"]');
+        expect(input.attributes('aria-checked')).toBe('mixed');
+    });
+
+    it('não altera o valor quando disabled=true', async () => {
+        const wrapper = mount(MaxInputCheckbox, {
+            props: { modelValue: false, disabled: true }
+        });
+        const input = wrapper.find('input[type="checkbox"]');
+        await input.trigger('change');
+        expect(wrapper.emitted('update:modelValue')).toBeFalsy();
+    });
+
+    it('não emite marcações do PrimeVue', () => {
+        const wrapper = mount(MaxInputCheckbox, { props: { modelValue: false } });
+        expect(wrapper.html()).not.toContain('data-pc-name');
     });
 });
 
