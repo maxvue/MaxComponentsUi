@@ -2,6 +2,18 @@
 
 Este arquivo fornece orientações para o Claude Code (claude.ai/code) ao trabalhar com o código deste repositório.
 
+## Diretrizes de Idioma
+
+1. **Usar Português do Brasil (pt-BR) para:**
+   - Comunicação entre Usuário <=> Agente de IA
+   - Comentários no Código (comentários em inglês devem ser substituídos por comentários em português do Brasil)
+
+2. **Usar Inglês (en-US) para:**
+   - Nomes de funções
+   - Nomes de variáveis
+   - Nomes de tabelas do banco de dados
+   - Nomes de colunas do banco de dados
+
 ## Visão geral do projeto
 
 `@maxvue/max-components-ui` é uma biblioteca de componentes Vue 3 construída sobre o PrimeVue 4, distribuída como um módulo ES via npm. Ela encapsula e estende o PrimeVue com um tema customizado (`MaxStyle`), locale (pt-BR), preset do UnoCSS e um conjunto de componentes de formulário/layout/exibição.
