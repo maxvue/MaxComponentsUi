@@ -162,8 +162,10 @@
             backgroundColor: background,
             color: text,
             borderRadius: '6px',
-            padding: '0 6px !important',
-            gap: 0
+            padding: '2px 8px !important',
+            gap: '4px',
+            alignItems: 'center',
+            display: 'inline-flex'
         };
     };
 
@@ -273,12 +275,14 @@
 
     .p-select-label {
         border: none !important;
-        padding: 0 10px !important;
-        display: grid;
-        place-items: center start;
+        padding: 0 6px !important;
+        display: flex !important;
+        align-items: center !important;
         outline: none !important;
-        height: 32px !important;
+        height: 100% !important;
+        max-height: 36px !important;
         width: 100%;
+        box-sizing: border-box;
 
         &:focus {
             border: none !important;
@@ -293,23 +297,78 @@
         color: var(--background-650);
         font-size: 0.9rem;
         z-index: 1;
-        display: grid;
-        place-items: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         width: 100%;
         height: 100%;
         pointer-events: none; /* O clique atravessa a div */
     }
 
     &[flex], &[full] {
-        .p-select, .p-select-label, .value-tag-div, .tag-value-text {
+        .p-select, .p-select-label {
             height: 100% !important;
             max-height: 100% !important;
-            display: grid;
+            display: flex;
+            align-items: center;
         }
 
         .tag-value-text {
-            display: grid;
-            place-items: center start;
+            display: inline-flex;
+            align-items: center;
+        }
+    }
+
+    /*
+     * O InputBase, ao receber `input-click`, limita o `.p-select-label` a
+     * `min/max-height: 10px !important` — altura pensada para valores em
+     * texto puro. A tag tem padding e fundo próprios, então 10px achatam o
+     * fundo e o texto vaza. Reproduzimos aqui a mesma especificidade do
+     * InputBase para devolver a altura da linha ao label.
+     */
+    &[input-click]:not([input-click='false']) {
+        .p-select-label {
+            min-height: 100% !important;
+            max-height: 100% !important;
+        }
+
+        /*
+         * O InputBase desenha o campo com fundo (`--background-100`) e contorno
+         * (`outline: 1px solid var(--background-300)`). Em volta da tag isso
+         * aparecia como uma cápsula cinza, já que a tag é menor que o campo.
+         * A tag já tem fundo e raio próprios, então o chrome do input é
+         * removido aqui.
+         */
+        .max-input-field-div {
+            background-color: transparent !important;
+            outline: none !important;
+        }
+
+        /*
+         * Sem o fundo do campo, a tag pode ocupar a altura inteira da linha:
+         * o `--max-tag-inset` fica em 0 por padrão.
+         */
+        .value-tag-div {
+            height: calc(100% - var(--max-tag-inset, 0px)) !important;
+            min-height: auto !important;
+            max-height: calc(100% - var(--max-tag-inset, 0px)) !important;
+            line-height: 1;
+
+            .tag-value-text {
+                height: auto !important;
+                max-height: 100% !important;
+            }
+        }
+    }
+
+    .value-tag-div {
+        height: auto !important;
+        min-height: auto !important;
+        max-height: 100% !important;
+
+        .tag-value-text {
+            height: auto !important;
+            max-height: 100% !important;
         }
     }
 }
@@ -321,6 +380,7 @@
     place-items: center start;
     gap: 10px;
     height: 30px;
+    box-sizing: border-box;
 
     .sub-label-tag {
         padding-left: 1rem;
@@ -340,17 +400,25 @@
 }
 
 .value-tag-div {
-    grid-template-columns: auto 1fr auto;
-    place-items: center;
-    padding: unset;
-    display: grid;
-    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 2px 8px !important;
     position: relative;
+    max-width: 100%;
+    box-sizing: border-box;
+    line-height: normal;
 
     .tag-value-text {
         width: 100% !important;
         max-width: 100% !important;
         position: relative;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: inline-block;
+        line-height: 1.2;
     }
 }
 

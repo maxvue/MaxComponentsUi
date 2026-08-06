@@ -25,6 +25,9 @@
         "./stores": {
             "types": "./dist/stores/index.d.ts",
             "import": "./dist/stores/index.es.js"
+        },
+        "./dist/components/*.vue": {
+            "types": "./dist/components/*.vue.d.ts"
         }
     },
     "files": [

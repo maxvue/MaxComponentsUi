@@ -51,6 +51,23 @@ describe('MaxTagSelect', () => {
         expect(wrapper.find('.tab-placeholder-select').text()).toBe('Escolha uma tag');
     });
 
+    // Vindo do main: guarda de regressão dos 3 fixes visuais da tag (98e9d249,
+    // 7be165fa, efe815f0). A pílula precisa renderizar com fundo próprio e o
+    // texto do rótulo visível — foi o que quebrou quando o InputBase achatou o
+    // .p-select-label para 10px.
+    it('renderiza a pílula da tag com estilos de fundo e texto', async () => {
+        const options = [
+            { value: 'carrossel', label: 'Carrossel', name: 'Carrossel', background_color: '#C6E7F0' }
+        ];
+        const wrapper = mountTagSelect({ modelValue: 'carrossel', options });
+        await wrapper.vm.$nextTick();
+
+        const valueDiv = wrapper.find('.value-tag-div');
+        expect(valueDiv.exists()).toBe(true);
+        expect(valueDiv.attributes('color-string')).toBe('#C6E7F0');
+        expect(wrapper.find('.tag-value-text').text()).toBe('Carrossel');
+    });
+
     it('calcula option_selected com base na prop options', async () => {
         const options = [{ value: 1, label: 'Tag Alta', tag_color: '#ff0000' }];
         const wrapper = mountTagSelect({ modelValue: 1, options });
