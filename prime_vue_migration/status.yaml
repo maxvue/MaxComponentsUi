@@ -1176,11 +1176,14 @@ itens:
     arquivo: src/helpers/MaxComponentsUiResolver.ts
     plano: prime_vue_migration/plans/38-MaxComponentsUiResolver.md
     primitivas: ['@primevue/auto-import-resolver']
-    depende_de: [36]
-    execucao: Aguardando
-    verificacao: Aguardando
+    depende_de: [37]
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: 'PACOTE SEPARADO (@primevue/auto-import-resolver) — npm uninstall primevue NÃO o remove. Depende da decisão do id 36.'
+    notas: >
+      Reimplementado MaxComponentsUiResolver sem dependência de @primevue/auto-import-resolver.
+      Removidas todas as dependências do PrimeVue (primevue, @primeuix/themes, @primevue/auto-import-resolver) do package.json.
+      Gates: vitest do resolver limpo (3/3), type-check limpo, lint limpo (2 warnings pré-existentes), grep primevue VAZIO em toda a pasta src/, git diff InputBase.vue VAZIO, build de produção gerado com sucesso em dist/.
 
   - id: 37
     componente: install/plugin
