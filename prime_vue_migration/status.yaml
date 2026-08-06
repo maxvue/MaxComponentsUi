@@ -1032,11 +1032,15 @@ itens:
     arquivo: src/components/MaxInputDatePicker.vue
     plano: prime_vue_migration/plans/28-MaxInputDatePicker.md
     primitivas: [DatePicker]
-    depende_de: [1, 2]
-    execucao: Aguardando
-    verificacao: Aguardando
+    depende_de: [2]
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: 'Item de maior esforço. Locale pt-BR de src/locales/.'
+    notas: >
+      Reimplementado MaxInputDatePicker sem dependência do PrimeVue (removido import de primevue/datepicker).
+      Utilizado MaxBaseInput com máscara Maska DD/MM/AAAA e MaxBaseOverlay com calendário interativo em português, navegação de mês/ano, botão de Hoje/Limpar e suporte completo a objetos Date/Strings.
+      14 testes em tests/components/MaxInputDatePicker.test.ts passando 100%.
+      Gates: vitest do componente limpo (14/14), type-check limpo, lint limpo (2 warnings pré-existentes), grep primevue VAZIO em MaxInputDatePicker.vue, git diff InputBase.vue VAZIO, suíte completa sem regressão.
 
   - id: 29
     componente: MaxColorPicker
