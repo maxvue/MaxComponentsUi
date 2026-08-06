@@ -1,16 +1,14 @@
 <template>
     <InputBase v-bind="props" :done="isDone" :error="props.error" :caution="props.caution">
-        <AutoComplete optionLabel="label" :suggestions="filtered_values" @complete="search" :virtualScrollerOptions="{ itemSize: 40 }" v-model="temp_value" :placeholder="props.placeholder ?? 'SELECIONE'" @blur="isDone = testIsDone()" >
+        <MaxInputAutoComplete optionLabel="label" :options="filtered_values" @complete="search" v-model="temp_value" :placeholder="props.placeholder ?? 'SELECIONE'" @blur="isDone = testIsDone()">
             <template #option="slotProps">
                 <div class="autocomplete-item-select">
-                    <div class="autocomplete-item-select-label">{{ slotProps.option.model }}</div>
+                    <div class="autocomplete-item-select-label">{{ slotProps.option.model ?? slotProps.option.label }}</div>
                     <div class="autocomplete-item-select-sub-label">{{ slotProps.option.sub_label }}</div>
                 </div>
             </template>
-            <template #content></template>
-        </AutoComplete>
+        </MaxInputAutoComplete>
     </InputBase>
-
 </template>
 
 <script setup lang="ts">
@@ -22,10 +20,9 @@
     import type { Ref } from 'vue';
     import { ref, computed, watch } from 'vue';
     import InputBase from './InputBase.vue';
-    import AutoComplete from 'primevue/autocomplete';
-    import type { AutoCompleteProps } from 'primevue/autocomplete';
+    import MaxInputAutoComplete from './MaxInputAutoComplete.vue';
 
-    interface props extends AutoCompleteProps {
+    interface props {
         route: string;
         i?: string | undefined;
         data?: any;
@@ -39,9 +36,18 @@
         required?: boolean | null | undefined;
         optionValue?: string | undefined;
         optionLabel?: string | undefined;
+        modelValue?: any;
+        placeholder?: string | undefined;
+        disabled?: boolean | undefined;
+        dropdownMode?: string | undefined;
+        multiple?: boolean | undefined;
+        variant?: any;
+        minLength?: number | undefined;
+        delay?: number | undefined;
+        forceSelection?: boolean | undefined;
     }
 
-    const props = withDefaults( defineProps<props>(),{
+    const props = withDefaults(defineProps<props>(), {
         modelValue: '',
         done: undefined,
         data: {},
@@ -56,15 +62,14 @@
         forceSelection: false
     });
 
-
     const temp_value: Ref = ref(props.modelValue);
     const list: Ref<any[]> = ref([]);
 
-    watch( () => props.data, (newValue, oldValue) => {
-        if (isBlank(props.data) && isBlank(newValue) || isEqual(newValue, oldValue)) return;
+    watch(() => props.data, (newValue, oldValue) => {
+        if ((isBlank(props.data) && isBlank(newValue)) || isEqual(newValue, oldValue)) return;
 
         const data_sent = keyExists(['files', 'file'], temp_value.value) ? { ...temp_value.value } : temp_value.value;
-        if (keyExists(['files', 'file'], temp_value.value)){
+        if (keyExists(['files', 'file'], temp_value.value)) {
             data_sent['files'] = [];
             data_sent['file'] = [];
         }
@@ -75,8 +80,7 @@
         };
 
         getCachedApiIDB(props.route, { ...(props.data ?? {}), input_value: data_sent }, null, undefined, applyList).then(applyList);
-        return;
-    }, { deep: true, immediate: true } );
+    }, { deep: true, immediate: true });
 
     const filtered_values: Ref<any[]> = ref([]);
     const emit = defineEmits(['update:modelValue']);
@@ -103,7 +107,6 @@
         if (temp_value.value && typeof temp_value.value !== 'string') emit('update:modelValue', temp_value.value);
     });
 
-
     const search = () => {
         if (hasContent(list.value as any)) filtered_values.value = (list.value as any[]).filter((item: any) => {
             const searchStr = (item.value ?? '') + (item.label ?? '') + (item.sub_label ?? '') + (item.name ?? '') + (item[props.optionValue ?? 'value'] ?? '');
@@ -115,6 +118,5 @@
 <style lang="scss">
 .autocomplete-item-select-sub-label {
     font-size: 0.9em;
-
 }
 </style>

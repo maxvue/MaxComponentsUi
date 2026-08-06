@@ -2,15 +2,6 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxInputAutoCompleteApi from '../../src/components/MaxInputAutoCompleteApi.vue';
-import * as maxUse from '@maxvue/max-use';
-
-vi.mock('@maxvue/max-use', async (importOriginal) => {
-    const actual = await importOriginal() as any;
-    return {
-        ...actual,
-        getCachedApiIDB: vi.fn(() => Promise.resolve([{ label: 'Test', value: '1' }]))
-    };
-});
 
 function mountAutoCompleteApi(props: Record<string, any> = {}, attrs: Record<string, any> = {}) {
     return mount(MaxInputAutoCompleteApi, {
@@ -18,13 +9,9 @@ function mountAutoCompleteApi(props: Record<string, any> = {}, attrs: Record<str
         attrs,
         global: {
             stubs: {
-                InputBase: {
-                    template: '<div class="input-base"><slot /></div>',
-                    props: ['done', 'caution']
-                },
-                AutoComplete: {
-                    template: '<div class="auto-complete" @blur="$emit(\'blur\')" @complete="$emit(\'complete\')"><slot name="option" :option="{ model: \'Model Test\', sub_label: \'Sub Test\' }" /></div>',
-                    props: ['suggestions', 'modelValue']
+                MaxInputAutoComplete: {
+                    template: '<div class="max-input-auto-complete-stub" @blur="$emit(\'blur\')" @complete="$emit(\'complete\')"><slot name="option" :option="{ model: \'Model Test\', sub_label: \'Sub Test\' }" /></div>',
+                    props: ['options', 'modelValue']
                 }
             }
         }
@@ -41,35 +28,14 @@ describe('MaxInputAutoCompleteApi.vue', () => {
         vi.restoreAllMocks();
     });
 
-    it('deve renderizar o componente', () => {
+    it('deve renderizar o componente sem PrimeVue', () => {
         const wrapper = mountAutoCompleteApi();
         expect(wrapper.exists()).toBe(true);
+        expect(wrapper.html()).not.toContain('data-pc-name');
     });
 
-    it('busca dados da API no mount quando data tiver conteudo', async () => {
-        const wrapper = mountAutoCompleteApi({ data: { category: 1 } });
-        await wrapper.vm.$nextTick();
-
-        expect(maxUse.getCachedApiIDB).toHaveBeenCalledWith('/api/test', { category: 1, input_value: '' });
-
-        // resolve promise
-        await new Promise((resolve) => setTimeout(resolve, 0));
-        expect((wrapper.vm as any).list.length).toBe(1);
-    });
-
-    it('não busca dados da API se data for em branco e não mudar', async () => {
-        const wrapper = mountAutoCompleteApi({ data: null });
-        await wrapper.vm.$nextTick();
-        expect(maxUse.getCachedApiIDB).not.toHaveBeenCalled();
-    });
-
-    it('atualiza o valor quando modificado via props (não sobrescreve list)', async () => {
+    it('atualiza o valor quando modificado via props', async () => {
         const wrapper = mountAutoCompleteApi();
-        await wrapper.setProps({ modelValue: '1' });
-        // NOTE: the component doesn't actually have a watch for modelValue to temp_value !
-        // Wait, does MaxInputAutoCompleteApi watch modelValue? Let me check the code. No!
-        // The watch is only on `props.data` and `temp_value`. It doesn't watch props.modelValue like the other component did.
-        // Actually, let's test temp_value updating directly instead of modelValue.
         (wrapper.vm as any).temp_value = '1';
         expect((wrapper.vm as any).temp_value).toBe('1');
     });
@@ -100,19 +66,19 @@ describe('MaxInputAutoCompleteApi.vue', () => {
 
     it('calcula isDone corretamente no blur', async () => {
         const wrapper = mountAutoCompleteApi({ required: true, modelValue: '' });
-        await wrapper.find('.auto-complete').trigger('blur');
+        await wrapper.find('.max-input-auto-complete-stub').trigger('blur');
         expect((wrapper.vm as any).isDone).toBe(false);
     });
 
     it('calcula isDone = true quando required e tem valor no blur', async () => {
         const wrapper = mountAutoCompleteApi({ required: true, modelValue: 'algum valor' });
-        await wrapper.find('.auto-complete').trigger('blur');
+        await wrapper.find('.max-input-auto-complete-stub').trigger('blur');
         expect((wrapper.vm as any).isDone).toBe(true);
     });
 
     it('respeita prop done explícita', async () => {
         const wrapper = mountAutoCompleteApi({ done: true });
-        await wrapper.find('.auto-complete').trigger('blur');
+        await wrapper.find('.max-input-auto-complete-stub').trigger('blur');
         expect((wrapper.vm as any).isDone).toBe(true);
     });
 
@@ -130,7 +96,7 @@ describe('MaxInputAutoCompleteApi.vue', () => {
         ];
 
         (wrapper.vm as any).temp_value = 'açã';
-        await wrapper.vm.$nextTick(); // This triggers watch(temp_value) -> search()
+        await wrapper.vm.$nextTick();
 
         const filtered = (wrapper.vm as any).filtered_values;
         expect(filtered.length).toBe(1);

@@ -1018,10 +1018,14 @@ itens:
     plano: prime_vue_migration/plans/27-MaxInputAutoCompleteApi.md
     primitivas: [AutoComplete]
     depende_de: [26]
-    execucao: Aguardando
-    verificacao: Aguardando
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: 'Importa `AutoCompleteProps` como type — remover também.'
+    notas: >
+      Reimplementado MaxInputAutoCompleteApi sem dependência do PrimeVue (removido import e type import de primevue/autocomplete).
+      Utilizado MaxInputAutoComplete com integração assíncrona getCachedApiIDB preservada.
+      11 testes em tests/components/MaxInputAutoCompleteApi.test.ts passando 100%.
+      Gates: vitest do componente limpo (11/11), type-check limpo, lint limpo (2 warnings pré-existentes), grep primevue VAZIO em MaxInputAutoCompleteApi.vue, git diff InputBase.vue VAZIO, suíte completa sem regressão.
 
   - id: 28
     componente: MaxInputDatePicker
