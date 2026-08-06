@@ -1,74 +1,84 @@
 <template>
     <InputBase v-bind="props" :done="props.done ?? isDone" :error="props.error ?? error_msg" :caution="caution" class="max-input-color">
-        <ColorPicker v-model="modelValue" :defaultColor="props.defaultColor" :format="props.format" :inline="props.inline" :disabled="props.disabled" :panelClass="props.panelClass" :appendTo="props.appendTo" :autoZIndex="props.autoZIndex" :baseZIndex="props.baseZIndex" :inputId="props.inputId" :ariaLabel="props.ariaLabel" :ariaLabelledby="props.ariaLabelledby" />
-        <InputText v-model="modelValue" />
+        <div ref="triggerRef" class="p-colorpicker-preview-wrapper" @click="toggleOverlay">
+            <div class="p-colorpicker-preview" :style="{ backgroundColor: '#' + hexClean }"></div>
+        </div>
+        <MaxBaseInput v-model="modelValue" :disabled="props.disabled" />
+
+        <MaxBaseOverlay v-model:visible="overlayVisible" :target="triggerRef">
+            <div class="p-colorpicker-panel p-component" role="dialog">
+                <div class="p-colorpicker-content">
+                    <!-- Quadrado Saturação × Brilho -->
+                    <div
+                        ref="colorSelectorRef"
+                        class="p-colorpicker-color-selector"
+                        :style="{ backgroundColor: '#' + hueHex }"
+                        @mousedown="onColorSelectorMouseDown"
+                    >
+                        <div class="p-colorpicker-color-background">
+                            <div
+                                class="p-colorpicker-color-handle"
+                                :style="{ left: hsb.s + '%', top: (100 - hsb.b) + '%' }"
+                            ></div>
+                        </div>
+                    </div>
+
+                    <!-- Barra Vertical de Matiz -->
+                    <div
+                        ref="hueSelectorRef"
+                        class="p-colorpicker-hue"
+                        @mousedown="onHueSelectorMouseDown"
+                    >
+                        <div
+                            class="p-colorpicker-hue-handle"
+                            :style="{ top: (hsb.h / 360) * 100 + '%' }"
+                        ></div>
+                    </div>
+                </div>
+            </div>
+        </MaxBaseOverlay>
     </InputBase>
 </template>
 
-/**
- * Componente de entrada de texto padrão.
- * Oferece suporte a validação de obrigatoriedade e comparação de valores.
- */
 <script setup lang="ts">
-    import InputText from 'primevue/inputtext';
     import { toSearchableString, hasContent } from '@maxvue/max-use';
     import type { Ref } from 'vue';
-    import { ref, computed, watch, useAttrs } from 'vue';
+    import { ref, computed, watch, useAttrs, onBeforeUnmount } from 'vue';
     import InputBase from './InputBase.vue';
-    import ColorPicker from 'primevue/colorpicker';
+    import MaxBaseInput from './base/MaxBaseInput.vue';
+    import MaxBaseOverlay from './base/MaxBaseOverlay.vue';
 
     const modelValue = defineModel<any>({ default: '' });
     const attrs: any = useAttrs();
+    const triggerRef = ref<HTMLElement | null>(null);
+    const colorSelectorRef = ref<HTMLElement | null>(null);
+    const hueSelectorRef = ref<HTMLElement | null>(null);
+    const overlayVisible = ref(false);
 
     interface Props {
-        /** Valor padrão para exibir quando o valor do seletor não está definido */
         defaultColor?: string;
-        /** Formato da cor ('hex', 'rgb' ou 'hsb') */
         format?: 'hex' | 'rgb' | 'hsb';
-        /** Se true, renderiza o seletor em linha (inline) ao invés de popup */
         inline?: boolean;
-        /** Classe CSS para o painel do seletor de cores */
         panelClass?: any;
-        /** Elemento ao qual o painel do seletor deve ser anexado */
         appendTo?: 'body' | 'self' | string | any;
-        /** Se true, gerencia o z-index do painel automaticamente */
         autoZIndex?: boolean;
-        /** Z-index base para o painel */
         baseZIndex?: number;
-        /** Identificador do elemento de input subjacente */
         inputId?: string;
-        /** Rótulo de acessibilidade para o input */
         ariaLabel?: string;
-        /** Associa o input a outro elemento de rótulo para acessibilidade */
         ariaLabelledby?: string;
-
-        /** Ícone opcional (ex: 'mdi:email') */
         icon?: string | undefined;
-        /** Alias para o ícone */
         i?: string | undefined;
-        /** Desabilita o campo */
         disabled?: boolean | undefined;
-        /** Ativa estilo FloatLabel */
         float?: boolean | undefined;
-        /** Mensagem de feedback (alias) */
         msg?: string | undefined;
-        /** Mensagem de feedback */
         message?: string | undefined;
-        /** Ícone da mensagem de feedback */
         iconMessage?: string | undefined;
-        /** Rótulo do campo */
         label?: string | undefined;
-        /** Estado de conclusão/validação manual */
         done?: boolean | undefined;
-        /** Mensagem ou estado de erro */
         error?: string | boolean | undefined;
-        /** Valor para comparação (valida se o input é igual a este valor) */
         targetValue?: string;
-        /** Mensagem ou estado de atenção */
         caution?: string | boolean | undefined;
-        /** Define se o campo é obrigatório */
         required?: boolean;
-        /** Texto de placeholder do campo */
         placeholder?: string | undefined;
     }
 
@@ -88,6 +98,128 @@
             error: undefined
         }
     );
+
+    // HSB state: h (0-360), s (0-100), b (0-100)
+    const hsb = ref({ h: 0, s: 100, b: 100 });
+
+    const hexClean = computed(() => {
+        let val = String(modelValue.value || props.defaultColor).replace('#', '').trim();
+        if (val.length === 3) val = val.split('').map((c) => c + c).join('');
+        if (!/^[0-9a-fA-F]{6}$/.test(val)) return 'ff0000';
+        return val;
+    });
+
+    const hueHex = computed(() => {
+        const rgb = hsbToRgb(hsb.value.h, 100, 100);
+        return rgbToHex(rgb);
+    });
+
+    // Conversões
+    function hsbToRgb(h: number, s: number, b: number) {
+        s /= 100; b /= 100;
+        const k = (n: number) => (n + h / 60) % 6;
+        const f = (n: number) => b * (1 - s * Math.max(0, Math.min(k(n), 4 - k(n), 1)));
+        return { r: Math.round(f(5) * 255), g: Math.round(f(3) * 255), b: Math.round(f(1) * 255) };
+    }
+
+    function rgbToHex({ r, g, b }: { r: number; g: number; b: number }) {
+        return [r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('');
+    }
+
+    function hexToRgb(hex: string) {
+        let h = hex.replace('#', '');
+        if (h.length === 3) h = h.split('').map((c) => c + c).join('');
+        if (!/^[0-9a-fA-F]{6}$/.test(h)) return null;
+        return { r: parseInt(h.slice(0, 2), 16), g: parseInt(h.slice(2, 4), 16), b: parseInt(h.slice(4, 6), 16) };
+    }
+
+    function rgbToHsb({ r, g, b }: { r: number; g: number; b: number }) {
+        r /= 255; g /= 255; b /= 255;
+        const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+        let h = 0;
+        if (d !== 0) if (max === r) h = 60 * (((g - b) / d) % 6);
+        else if (max === g) h = 60 * ((b - r) / d + 2);
+        else h = 60 * ((r - g) / d + 4);
+
+        return { h: (h + 360) % 360, s: max === 0 ? 0 : (d / max) * 100, b: max * 100 };
+    }
+
+    const syncHsbFromHex = (hex: string) => {
+        const rgb = hexToRgb(hex);
+        if (rgb) hsb.value = rgbToHsb(rgb);
+
+    };
+
+    watch(() => modelValue.value, (val) => {
+        if (val) syncHsbFromHex(String(val));
+    }, { immediate: true });
+
+    const emitColorChange = () => {
+        const rgb = hsbToRgb(hsb.value.h, hsb.value.s, hsb.value.b);
+        const hex = rgbToHex(rgb);
+        modelValue.value = hex;
+    };
+
+    // Arraste no quadrado Saturação x Brilho
+    let isDraggingColor = false;
+
+    const handleColorMove = (event: MouseEvent) => {
+        if (!colorSelectorRef.value || !isDraggingColor) return;
+        const rect = colorSelectorRef.value.getBoundingClientRect();
+        const x = Math.max(0, Math.min(event.clientX - rect.left, rect.width));
+        const y = Math.max(0, Math.min(event.clientY - rect.top, rect.height));
+
+        hsb.value.s = Math.round((x / rect.width) * 100);
+        hsb.value.b = Math.round((1 - y / rect.height) * 100);
+        emitColorChange();
+    };
+
+    const stopColorDrag = () => {
+        isDraggingColor = false;
+        window.removeEventListener('mousemove', handleColorMove);
+        window.removeEventListener('mouseup', stopColorDrag);
+    };
+
+    const onColorSelectorMouseDown = (event: MouseEvent) => {
+        isDraggingColor = true;
+        handleColorMove(event);
+        window.addEventListener('mousemove', handleColorMove);
+        window.addEventListener('mouseup', stopColorDrag);
+    };
+
+    // Arraste na barra de Matiz
+    let isDraggingHue = false;
+
+    const handleHueMove = (event: MouseEvent) => {
+        if (!hueSelectorRef.value || !isDraggingHue) return;
+        const rect = hueSelectorRef.value.getBoundingClientRect();
+        const y = Math.max(0, Math.min(event.clientY - rect.top, rect.height));
+        hsb.value.h = Math.round((y / rect.height) * 360);
+        emitColorChange();
+    };
+
+    const stopHueDrag = () => {
+        isDraggingHue = false;
+        window.removeEventListener('mousemove', handleHueMove);
+        window.removeEventListener('mouseup', stopHueDrag);
+    };
+
+    const onHueSelectorMouseDown = (event: MouseEvent) => {
+        isDraggingHue = true;
+        handleHueMove(event);
+        window.addEventListener('mousemove', handleHueMove);
+        window.addEventListener('mouseup', stopHueDrag);
+    };
+
+    onBeforeUnmount(() => {
+        stopColorDrag();
+        stopHueDrag();
+    });
+
+    const toggleOverlay = () => {
+        if (props.disabled) return;
+        overlayVisible.value = !overlayVisible.value;
+    };
 
     const isDone: Ref = ref(props.done ?? null);
 
@@ -134,9 +266,74 @@
         grid-template-rows: 1fr !important;
     }
 
+    .p-colorpicker-preview-wrapper {
+        cursor: pointer;
+        width: 24px;
+        height: 24px;
+    }
+
     .p-colorpicker-preview {
         outline: 1px solid var(--background-400);
         border-radius: 0.5rem;
+        width: 100%;
+        height: 100%;
+    }
+}
+
+.p-colorpicker-panel {
+    background-color: var(--background-0, #fff);
+    border: 1px solid var(--max-border-color, #e2e8f0);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
+    padding: 8px;
+
+    .p-colorpicker-content {
+        display: flex;
+        gap: 8px;
+    }
+
+    .p-colorpicker-color-selector {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        cursor: crosshair;
+
+        .p-colorpicker-color-background {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to right, #fff, rgb(255 255 255 / 0%)),
+                linear-gradient(to top, #000, rgb(0 0 0 / 0%));
+        }
+
+        .p-colorpicker-color-handle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border: 1px solid #fff;
+            border-radius: 50%;
+            transform: translate(-5px, -5px);
+            box-shadow: 0 0 2px rgb(0 0 0 / 50%);
+            pointer-events: none;
+        }
+    }
+
+    .p-colorpicker-hue {
+        position: relative;
+        width: 18px;
+        height: 150px;
+        background: linear-gradient(to bottom, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
+        cursor: pointer;
+
+        .p-colorpicker-hue-handle {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: #fff;
+            border: 1px solid rgb(0 0 0 / 50%);
+            transform: translateY(-2px);
+            pointer-events: none;
+        }
     }
 }
 </style>

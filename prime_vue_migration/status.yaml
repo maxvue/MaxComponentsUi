@@ -1047,11 +1047,15 @@ itens:
     arquivo: src/components/MaxColorPicker.vue
     plano: prime_vue_migration/plans/29-MaxColorPicker.md
     primitivas: [ColorPicker, InputText]
-    depende_de: [1, 2]
-    execucao: Aguardando
-    verificacao: Aguardando
+    depende_de: [2]
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: 'HSB<->HEX. Sem teste existente — criar do zero.'
+    notas: >
+      Reimplementado MaxColorPicker sem dependência do PrimeVue (removido import de primevue/colorpicker e primevue/inputtext).
+      Utilizado MaxBaseInput para entrada de texto hex e MaxBaseOverlay com seletores de saturação, brilho e matiz HSB, com cálculo bidirecional HSB<->RGB<->HEX.
+      Criada suite de testes em tests/components/MaxColorPicker.test.ts com 5/5 testes passando 100%.
+      Gates: vitest do componente limpo (5/5), type-check limpo, lint limpo (2 warnings pré-existentes), grep primevue VAZIO em MaxColorPicker.vue, git diff InputBase.vue VAZIO, suíte completa sem regressão.
 
   - id: 30
     componente: MaxPopoverMenu
