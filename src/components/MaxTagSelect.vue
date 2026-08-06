@@ -252,12 +252,26 @@
             min-height: 100% !important;
             max-height: 100% !important;
         }
+
+        /*
+         * A tag fica levemente menor que o campo (`--max-tag-inset` de folga em
+         * cima e embaixo) para ser lida como uma pílula dentro do input, sem
+         * encostar na borda arredondada dele. O seletor repete a especificidade
+         * do InputBase, que aplica `height: 20px !important` a todo div interno.
+         */
+        .value-tag-div {
+            height: calc(100% - var(--max-tag-inset, 6px)) !important;
+            min-height: auto !important;
+            max-height: calc(100% - var(--max-tag-inset, 6px)) !important;
+            line-height: 1;
+
+            .tag-value-text {
+                height: auto !important;
+                max-height: 100% !important;
+            }
+        }
     }
 
-    /*
-     * A tag se dimensiona pelo conteúdo, em vez de esticar até a altura da
-     * linha do input, para o fundo acompanhar exatamente o texto.
-     */
     .value-tag-div {
         height: auto !important;
         min-height: auto !important;
