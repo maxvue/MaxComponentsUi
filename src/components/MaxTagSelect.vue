@@ -227,7 +227,7 @@
     }
 
     &[flex], &[full] {
-        .p-select, .p-select-label, .value-tag-div {
+        .p-select, .p-select-label {
             height: 100% !important;
             max-height: 100% !important;
             display: flex;
@@ -237,6 +237,35 @@
         .tag-value-text {
             display: inline-flex;
             align-items: center;
+        }
+    }
+
+    /*
+     * O InputBase, ao receber `input-click`, limita o `.p-select-label` a
+     * `min/max-height: 10px !important` — altura pensada para valores em
+     * texto puro. A tag tem padding e fundo próprios, então 10px achatam o
+     * fundo e o texto vaza. Reproduzimos aqui a mesma especificidade do
+     * InputBase para devolver a altura da linha ao label.
+     */
+    &[input-click]:not([input-click='false']) {
+        .p-select-label {
+            min-height: 100% !important;
+            max-height: 100% !important;
+        }
+    }
+
+    /*
+     * A tag se dimensiona pelo conteúdo, em vez de esticar até a altura da
+     * linha do input, para o fundo acompanhar exatamente o texto.
+     */
+    .value-tag-div {
+        height: auto !important;
+        min-height: auto !important;
+        max-height: 100% !important;
+
+        .tag-value-text {
+            height: auto !important;
+            max-height: 100% !important;
         }
     }
 }
