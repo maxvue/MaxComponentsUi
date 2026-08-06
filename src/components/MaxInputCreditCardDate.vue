@@ -1,6 +1,6 @@
 <template>
     <InputBase v-bind="props" class="input-credit-card-date-base" text-center :label="props.label" :done="done" :required="props.required" :error="error_msg">
-        <InputText type="text" v-bind="attrs" v-model="temp_value" v-maska:unmaskedValue.unmasked="maskValue" placeholder="MM/AA" autoClear="false" slotChar=" " @blur="checkDone()" />
+        <MaxBaseInput type="text" v-bind="attrs" v-model="temp_value" v-maska:unmaskedValue.unmasked="maskValue" placeholder="MM/AA" @blur="checkDone()" />
     </InputBase>
 </template>
 
@@ -8,7 +8,7 @@
     import { vMaska } from 'maska/vue';
     import { ref, computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
-    import InputText from 'primevue/inputtext';
+    import MaxBaseInput from './base/MaxBaseInput.vue';
 
     const attrs: any = useAttrs();
 

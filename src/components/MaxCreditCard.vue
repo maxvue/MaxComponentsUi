@@ -1,5 +1,5 @@
 <template>
-    <div class="card-container">
+    <div class="max-credit-card">
         <div :class="`flip-card ${side}`">
             <div class="flip-card-inner">
                 <div class="flip-card-front">
@@ -9,7 +9,7 @@
                             ref="numberTextEl"
                             x="105"
                             y="270"
-                            style="font-size: 42px"
+                            style="font-size: 42px;"
                             fill="#336699"
                             font-weight="700"
                             font-family="'JetBrains Mono', monospace"
@@ -20,7 +20,7 @@
                             ref="nameTextEl"
                             x="35"
                             y="340"
-                            style="font-size: 32px"
+                            style="font-size: 32px;"
                             fill="#336699"
                             font-family="'JetBrains Mono', monospace"
                             :textLength="nameTextLength"
@@ -30,7 +30,7 @@
                             ref="dateTextEl"
                             x="35"
                             y="380"
-                            style="font-size: 28px"
+                            style="font-size: 28px;"
                             fill="#336699"
                             font-family="'JetBrains Mono', monospace"
                             :textLength="dateTextLength"
@@ -46,7 +46,7 @@
                             ref="cvvTextEl"
                             x="548"
                             y="218"
-                            style="font-size: 36px"
+                            style="font-size: 36px;"
                             fill="#336699"
                             font-family="'JetBrains Mono', monospace"
                             :textLength="cvvTextLength"
@@ -214,13 +214,20 @@
 </script>
 
 <style lang="scss">
-.card-container {
+.max-credit-card {
+    /** Proporção do viewBox dos SVGs de frente/verso (700x430). */
+    --max-credit-card-ratio: 700 / 430;
+    --max-credit-card-max-width: 400px;
+
     perspective: 1000px;
     position: relative;
     width: 100%;
     display: grid;
 
     svg {
+        display: block;
+        width: 100%;
+        height: 100%;
         font-family: 'JetBrains Mono', monospace;
         font-optical-sizing: auto;
     }
@@ -237,11 +244,22 @@
             display: grid;
             place-items: start center;
 
+            /**
+             * As duas faces são `position: absolute` (necessário para empilhá-las no flip),
+             * então não geram altura no fluxo. Reservamos a altura aqui a partir da
+             * proporção do cartão, para que o componente ocupe o espaço do cartão visível
+             * em vez de colapsar para 0.
+             */
+            width: 100%;
+            max-width: var(--max-credit-card-max-width);
+            aspect-ratio: var(--max-credit-card-ratio);
+            margin-inline: auto;
+
             .flip-card-front,
             .flip-card-back {
                 position: absolute;
+                inset: 0;
                 width: 100%;
-                max-width: 400px;
                 backface-visibility: hidden;
             }
 
