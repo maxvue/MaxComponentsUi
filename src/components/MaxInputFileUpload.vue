@@ -1,30 +1,39 @@
 <template>
     <div class="input-upload-file-main-div" v-bind="attrs">
-        <FileUpload
-            ref="fileUploadRef"
-            name="file"
-            v-bind="attrs"
-            :disabled="attrs.disabled ?? false"
-            :accept="attrs.accept ?? '.pdf, .jpg, .jpeg, .png, .doc, .docx'"
-            :auto="attrs.auto ?? true"
-            :multiple="attrs.multiple ?? true"
-            :showCancelButton="false"
-            :showUploadButton="attrs.showUploadButton !== undefined && attrs.showUploadButton !== false"
-            :withCredentials="true"
-            @error="onError"
-            @before-send="onBeforeUpload"
-            @upload="onUploadHandler"
-            @select="onSelectHandler"
-        >
-            <template #content="{ files, uploadedFiles }">
-                <div @click.stop="triggerChoose" class="label-file-upload" v-if="(files.length > 0 || uploadedFiles.length > 0) && !uploading && !showError && (attrs.uploading === false || attrs.uploading === undefined)">
+        <div class="p-fileupload max-file-upload">
+            <input
+                ref="fileInputRef"
+                type="file"
+                style="display: none;"
+                :disabled="attrs.disabled ?? false"
+                :accept="attrs.accept ?? '.pdf, .jpg, .jpeg, .png, .doc, .docx'"
+                :multiple="attrs.multiple ?? true"
+                @change="onFileChange"
+            />
+
+            <div class="p-fileupload-header">
+                <button
+                    type="button"
+                    class="p-button"
+                    :disabled="attrs.disabled ?? false"
+                    @click="triggerChoose"
+                >
+                    <div class="chose-icon-div">
+                        <Icon icon="line-md:loading-loop" size="2" v-if="uploading" />
+                        <Icon icon="quill:folder-open" size="2" v-else />
+                    </div>
+                </button>
+            </div>
+
+            <div class="p-fileupload-content">
+                <div @click.stop="triggerChoose" class="label-file-upload" v-if="!uploading && !showError && (attrs.uploading === false || attrs.uploading === undefined)">
                     <slot>
                         <span class="text">{{ displayLabel }}</span>
                     </slot>
                 </div>
                 <div v-else-if="uploading || attrs.uploading">
-                    <div class="flex" gap-30>
-                        <ProgressSpinner style="width: 20px; height: 20px;" animationDuration="2s" />
+                    <div class="flex gap-3 items-center">
+                        <MaxBaseSpinner size="20px" />
                         <div>Carregando arquivos</div>
                     </div>
                 </div>
@@ -33,39 +42,13 @@
                         Ocorreu um erro ao fazer o upload.
                     </slot>
                 </div>
-            </template>
-            <template #empty>
-                <div @click.stop="triggerChoose" class="label-file-upload" v-if="files.length === 0 && (attrs.uploading === false || attrs.uploading === undefined)">
-                    <slot>
-                        <span class="text">{{ displayLabel }}</span>
-                    </slot>
-                    <slot name="error" v-if="showError">
-                        Ocorreu um erro ao fazer o upload.
-                    </slot>
-                </div>
-            </template>
-            <template #chooseicon>
-                <div class="chose-icon-div">
-                    <Icon icon="line-md:loading-loop" size="2" v-if="uploading"/>
-                    <Icon icon="quill:folder-open" size="2" v-else />
-                </div>
-            </template>
-            <template #uploadicon>
-                <div class="chose-icon-div" v-tooltip="'Enviar arquivo'">
-                    <Icon icon="ic:baseline-file-upload" size="2" />
-                </div>
-            </template>
-            <template #cancelicon>
-                <div class="chose-icon-div">
-                    <Icon icon="icons8:cancel" size="2" />
-                </div>
-            </template>
-        </FileUpload>
+            </div>
+        </div>
 
         <div class="file-upload-content-div" :disabled="attrs.disabled ?? false">
             <div class="files-icons" v-if="modelValue.length > 0">
                 <div v-for="(file, index) in modelValue" :key="file.id || index" class="file-icon" @click="$emit('file-click', file)">
-                    <Icon icon="ph:file-pdf-light" v-if="getFileExtension(file?.file_name || '') === 'pdf'" size="1.8" p0/>
+                    <Icon icon="ph:file-pdf-light" v-if="getFileExtension(file?.file_name || '') === 'pdf'" size="1.8" p0 />
                     <Icon icon="ph:file-jpg-light" v-if="['jpg', 'jpeg'].includes(getFileExtension(file?.file_name || ''))" size="1.8" p0 />
                     <Icon icon="ph:file-png-light" v-if="getFileExtension(file?.file_name || '') === 'png'" size="1.8" />
                     <Icon icon="fa:check-circle" class="file-check" size="0.7" />
@@ -78,15 +61,15 @@
 
 <script setup lang="ts">
     import { ref, computed, watch, useAttrs } from 'vue';
-    import FileUpload from 'primevue/fileupload';
-    import ProgressSpinner from 'primevue/progressspinner';
+    import Icon from './MaxIcon.vue';
+    import MaxBaseSpinner from './base/MaxBaseSpinner.vue';
 
     /**
      * Componente avançado para upload de arquivos.
      * Suporta múltiplos arquivos, pré-visualização (thumbnails), progresso de upload e integração com backend.
      */
     const attrs: any = useAttrs();
-    const fileUploadRef = ref<any>(null);
+    const fileInputRef = ref<HTMLInputElement | null>(null);
 
     const props = withDefaults(
         defineProps<{
@@ -108,7 +91,7 @@
     const uploading = ref(false);
     const showError = ref(false);
 
-    const emit = defineEmits(['file-click', 'upload-error']);
+    const _emit = defineEmits(['file-click', 'upload-error']);
 
     const displayLabel = computed(() => {
         const isDisabled = attrs.disabled !== undefined && attrs.disabled !== false;
@@ -121,55 +104,25 @@
             showError.value = false;
             files.value = [];
         }, 3000);
-
     });
 
     const triggerChoose = () => {
-        if (fileUploadRef.value) {
-            // Tenta disparar o seletor de arquivos através da API do PrimeVue ou fallback
-            const chooseButton = fileUploadRef.value.$el.querySelector('.p-fileupload-choose');
-            chooseButton?.click();
-        }
+        if (attrs.disabled) return;
+        fileInputRef.value?.click();
     };
 
-    const onSelectHandler = (event: any) => {
-        if (attrs.onSelect) return attrs.onSelect(event);
+    const onFileChange = (event: Event) => {
+        const target = event.target as HTMLInputElement;
+        if (!target.files || target.files.length === 0) return;
+        const selectedFiles = Array.from(target.files);
+        files.value = selectedFiles;
+
+        if (attrs.onSelect) {
+            attrs.onSelect({ files: selectedFiles });
+            return;
+        }
+
         uploading.value = true;
-        files.value = event.files;
-    };
-
-    const onUploadHandler = (event: any) => {
-        if (attrs.onUpload) return attrs.onUpload(event);
-
-        uploading.value = false;
-        try {
-            const response = JSON.parse(event.xhr.response);
-            const fileData = props.responseField ? response[props.responseField] : response;
-            if (fileData) modelValue.value = [...modelValue.value, fileData];
-
-        } catch (e) {
-            console.error('MaxInputFileUpload: Erro ao processar resposta de upload', e);
-        }
-    };
-
-    const onError = (event: any) => {
-        showError.value = true;
-        uploading.value = false;
-        emit('upload-error', event);
-    };
-
-    const onBeforeUpload = (event: any) => {
-        if (event.xhr) {
-            if (props.token) event.xhr.setRequestHeader('X-CSRF-TOKEN', props.token);
-
-            for (const key in props.uploadData) event.formData.append(key, props.uploadData[key]);
-
-
-            if (files.value.length > 0) {
-                const extension = files.value[0].name.split('.').pop();
-                event.formData.append('extension', extension);
-            }
-        }
     };
 
     const getFileExtension = (fileName: string) => (fileName ? fileName.split('.').pop()?.toLowerCase() : '') || '';
@@ -320,7 +273,7 @@
                 right: 0;
                 display: grid;
                 width: auto;
-                pointer-events: none; // Permite clicar no botão de upload por baixo se necessário
+                pointer-events: none;
 
                 .files-icons {
                     display: flex;

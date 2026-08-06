@@ -1092,11 +1092,15 @@ itens:
     arquivo: src/components/MaxInputFileUpload.vue
     plano: prime_vue_migration/plans/32-MaxInputFileUpload.md
     primitivas: [FileUpload, ProgressSpinner]
-    depende_de: [3]
-    execucao: Aguardando
-    verificacao: Aguardando
+    depende_de: [5]
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: 'Os irmãos Big/Button/Project já são PrimeVue-free — usar como referência de drag&drop.'
+    notas: >
+      Reimplementado MaxInputFileUpload sem dependência do PrimeVue (removido import de primevue/fileupload e primevue/progressspinner).
+      Utilizado input nativo type="file" e MaxBaseSpinner, mantendo suporte a múltiplos arquivos, miniaturas e handlers customizados de upload/seleção.
+      3 testes em tests/components/MaxInputFileUpload.test.ts passando 100%.
+      Gates: vitest do componente limpo (3/3), type-check limpo, lint limpo (2 warnings pré-existentes), grep primevue VAZIO em MaxInputFileUpload.vue, git diff InputBase.vue VAZIO, suíte completa sem regressão.
 
 # -----------------------------------------------------------------------------
 # FASE 4 — TABELA (conjunto indivisível: migrar 33 e 34 na MESMA passada)
