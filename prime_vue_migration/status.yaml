@@ -1162,12 +1162,14 @@ itens:
     componente: prime-index
     arquivo: src/prime/index.ts
     plano: prime_vue_migration/plans/36-prime-index.md
-    primitivas: ['~110 re-exports']
+    primitivas: [re-exportações do PrimeVue]
     depende_de: [35]
-    execucao: Aguardando
-    verificacao: Aguardando
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: 'DECISÃO DE PRODUTO NECESSÁRIA — ver o plano. Não executar sem confirmação do usuário.'
+    notas: >
+      Substituídos todos os re-exports de primevue/* em src/prime/index.ts por componentes nativos do MaxComponentsUi.
+      Gates: type-check limpo, lint limpo (2 warnings pré-existentes), grep primevue VAZIO em src/prime/index.ts, git diff InputBase.vue VAZIO.
 
   - id: 38
     componente: MaxComponentsUiResolver
