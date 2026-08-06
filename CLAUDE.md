@@ -135,5 +135,5 @@ Os testes ficam em `tests/` e usam Vitest + `@vue/test-utils` + `happy-dom`. A c
 
 ## Execução de Agentes em Worktree
 
-- Toda execução de agentes/subagentes que proponha modificações de código neste repositório deve ocorrer em um **git worktree separado**, criado especificamente para as alterações propostas (`git worktree add ../MaxComponentsUi-wt-<slug> -b <slug>`) — nunca diretamente no working tree principal.
+- Toda execução de agentes/subagentes que proponha modificações de código neste repositório deve ocorrer em um **git worktree separado**, criado especificamente para as alterações propostas dentro da pasta oculta `.worktrees/` na raiz do projeto (`git worktree add .worktrees/wt-<slug> -b <slug>`) — nunca diretamente no working tree principal. A pasta `.worktrees/` é ignorada pelo Git (`.gitignore`).
 - Valide as mudanças no worktree isolado e só então integre (merge) ao branch principal.
