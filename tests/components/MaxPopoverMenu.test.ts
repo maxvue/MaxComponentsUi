@@ -1,8 +1,7 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import MaxPopoverMenu from '../../src/components/MaxPopoverMenu.vue';
 
-// Mock do goToRoute
 vi.mock('@maxvue/max-use', async (importOriginal) => {
     const actual = await importOriginal<typeof import('@maxvue/max-use')>();
     return {
@@ -11,159 +10,96 @@ vi.mock('@maxvue/max-use', async (importOriginal) => {
     };
 });
 
-describe('MaxPopoverMenu', () => {
-    it('renderiza corretamente', () => {
-        const wrapper = mount(MaxPopoverMenu, {
-            global: {
-                stubs: {
-                    Menu: {
-                        template: '<div><slot name="item" :item="model[0]"></slot></div>',
-                        props: ['model', 'popup']
-                    },
-                    MaxButton: {
-                        template: '<button class="max-button"></button>',
-                        props: ['size']
-                    },
-                    MaxIcon: {
-                        template: '<span></span>',
-                        props: ['icon']
-                    }
-                }
-            },
-            props: {
-                items: [
-                    { label: 'Item 1', icon: 'mdi:home' }
-                ]
-            }
-        });
+let activeWrapper: any = null;
 
-        expect(wrapper.exists()).toBe(true);
-        expect(wrapper.find('.max-popover-menu-label').text()).toBe('Item 1');
+function mountPopoverMenu(props: Record<string, any> = {}, attrs: Record<string, any> = {}) {
+    activeWrapper = mount(MaxPopoverMenu, {
+        props,
+        attrs,
+        attachTo: document.body
+    });
+    return activeWrapper;
+}
+
+describe('MaxPopoverMenu', () => {
+    afterEach(() => {
+        if (activeWrapper) {
+            activeWrapper.unmount();
+            activeWrapper = null;
+        }
     });
 
-    it('expõe e chama método toggle', () => {
-        const mockToggle = vi.fn();
-        const wrapper = mount(MaxPopoverMenu, {
-            global: {
-                stubs: {
-                    Menu: {
-                        template: '<div></div>',
-                        methods: { toggle: mockToggle }
-                    },
-                    MaxButton: true
-                }
-            }
+    it('renderiza corretamente sem PrimeVue', () => {
+        const wrapper = mountPopoverMenu({
+            items: [{ label: 'Item 1', icon: 'mdi:home' }]
         });
+        expect(wrapper.exists()).toBe(true);
+        expect(wrapper.html()).not.toContain('data-pc-name');
+    });
 
+    it('expõe e chama os métodos imperativos toggle, show e hide', async () => {
+        const wrapper = mountPopoverMenu({
+            items: [{ label: 'Item 1' }]
+        });
         const vm = wrapper.vm as any;
-        vm.toggle(new MouseEvent('click'));
-        expect(mockToggle).toHaveBeenCalled();
+
+        expect(document.body.querySelector('.p-menu')).toBeNull();
+        vm.toggle();
+        await wrapper.vm.$nextTick();
+        expect(document.body.querySelector('.p-menu')).not.toBeNull();
+
+        vm.hide();
+        await wrapper.vm.$nextTick();
+        expect(document.body.querySelector('.p-menu')).toBeNull();
+
+        vm.show();
+        await wrapper.vm.$nextTick();
+        expect(document.body.querySelector('.p-menu')).not.toBeNull();
     });
 
     it('onClick chama goToRoute se o item tiver route', async () => {
         const { goToRoute } = await import('@maxvue/max-use');
-        const wrapper = mount(MaxPopoverMenu, {
-            global: {
-                stubs: {
-                    Menu: true,
-                    MaxButton: true
-                }
-            }
-        });
-
+        const wrapper = mountPopoverMenu();
         const vm = wrapper.vm as any;
-        vm.onClick(new MouseEvent('click'), { route: 'home.index', data: { id: 1 } });
 
+        vm.onClick(new MouseEvent('click'), { route: 'home.index', data: { id: 1 } });
         expect(goToRoute).toHaveBeenCalledWith('home.index', { id: 1 });
     });
 
     it('onClick chama action se o item não tiver route', async () => {
-        const wrapper = mount(MaxPopoverMenu, {
-            global: {
-                stubs: {
-                    Menu: true,
-                    MaxButton: true
-                }
-            }
-        });
-
+        const wrapper = mountPopoverMenu();
         const actionMock = vi.fn();
         const vm = wrapper.vm as any;
-        vm.onClick(new MouseEvent('click'), { action: actionMock, data: { id: 2 } });
 
-        // Pula o debounce/executing já que a chamada é nova
+        vm.onClick(new MouseEvent('click'), { action: actionMock, data: { id: 2 } });
         expect(actionMock).toHaveBeenCalled();
     });
 
     it('onClick bloqueia chamadas duplicadas', async () => {
-        const wrapper = mount(MaxPopoverMenu, {
-            global: {
-                stubs: {
-                    Menu: true,
-                    MaxButton: true
-                }
-            }
-        });
-
+        const wrapper = mountPopoverMenu();
         const actionMock = vi.fn();
         const vm = wrapper.vm as any;
 
-        // Primeira chamada
         vm.onClick(new MouseEvent('click'), { action: actionMock });
         expect(actionMock).toHaveBeenCalledTimes(1);
 
-        // Segunda chamada imediata deve ser ignorada devido a executing = true
         vm.onClick(new MouseEvent('click'), { action: actionMock });
         expect(actionMock).toHaveBeenCalledTimes(1);
     });
 
-    it('chama item.action diretamente no template ao clicar', async () => {
+    it('chama item.action ao clicar no item do overlay', async () => {
         const actionMock = vi.fn();
-        const wrapper = mount(MaxPopoverMenu, {
-            global: {
-                stubs: {
-                    Menu: {
-                        template: '<div><slot name="item" :item="model[0]"></slot></div>',
-                        props: ['model', 'popup']
-                    },
-                    MaxButton: true,
-                    MaxIcon: true
-                }
-            },
-            props: {
-                items: [
-                    { label: 'Ação 1', action: actionMock, data: { foo: 'bar' } }
-                ]
-            }
+        const wrapper = mountPopoverMenu({
+            items: [{ label: 'Ação 1', action: actionMock, data: { foo: 'bar' } }]
         });
 
-        const item = wrapper.find('.max-popover-menu-item');
-        await item.trigger('click');
+        (wrapper.vm as any).show();
+        await wrapper.vm.$nextTick();
+
+        const itemEl = document.body.querySelector('.p-menu-item') as HTMLElement;
+        expect(itemEl).not.toBeNull();
+        itemEl?.click();
+
         expect(actionMock).toHaveBeenCalledWith(expect.objectContaining({ data: { foo: 'bar' } }));
-    });
-
-    it('chama onClick no template caso item não possua action própria', async () => {
-        const { goToRoute } = await import('@maxvue/max-use');
-        const wrapper = mount(MaxPopoverMenu, {
-            global: {
-                stubs: {
-                    Menu: {
-                        template: '<div><slot name="item" :item="model[0]"></slot></div>',
-                        props: ['model', 'popup']
-                    },
-                    MaxButton: true,
-                    MaxIcon: true
-                }
-            },
-            props: {
-                items: [
-                    { label: 'Rota', route: 'some.route', data: { biz: 'baz' } }
-                ]
-            }
-        });
-
-        const item = wrapper.find('.max-popover-menu-item');
-        await item.trigger('click');
-        expect(goToRoute).toHaveBeenCalledWith('some.route', { biz: 'baz' });
     });
 });

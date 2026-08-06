@@ -1063,10 +1063,14 @@ itens:
     plano: prime_vue_migration/plans/30-MaxPopoverMenu.md
     primitivas: [Menu]
     depende_de: [2]
-    execucao: Aguardando
-    verificacao: Aguardando
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: 'MaxPopover.vue já é PrimeVue-free — avaliar reuso antes de usar MaxBaseOverlay.'
+    notas: >
+      Reimplementado MaxPopoverMenu sem dependência do PrimeVue (removido import de primevue/menu).
+      Utilizado MaxBaseOverlay com suporte a rotas, ações, slots #item e métodos imperativos toggle(), show() e hide() expostos via defineExpose.
+      6 testes em tests/components/MaxPopoverMenu.test.ts passando 100%.
+      Gates: vitest do componente limpo (6/6), type-check limpo, lint limpo (2 warnings pré-existentes), grep primevue VAZIO em MaxPopoverMenu.vue, git diff InputBase.vue VAZIO, suíte completa sem regressão.
 
   - id: 31
     componente: MaxInputIconPicker

@@ -1,29 +1,40 @@
 <template>
-    <div class="max-popover-menu" ref="btn_el" pointer v-tooltip="null" :style="{width: size_icon, height: size_icon} ">
-        <div v-tooltip="null" @click.stop="toggle" class="botao" :style="{width: size_icon, height: size_icon} ">
-            <slot name="button" >
-                <MaxButton v-bind="props" :size="props.size || props.sizeIcon ? String(props.size ?? props.sizeIcon) : ''" flex/>
+    <div ref="triggerRef" class="max-popover-menu" pointer v-tooltip="null" :style="{ width: size_icon, height: size_icon }">
+        <div v-tooltip="null" @click.stop="toggle" class="botao" :style="{ width: size_icon, height: size_icon }">
+            <slot name="button">
+                <MaxButton v-bind="props" :size="props.size || props.sizeIcon ? String(props.size ?? props.sizeIcon) : ''" flex />
             </slot>
         </div>
 
-        <Menu ref="menu" id="overlay_menu" :model="props.items ?? props.model" :popup="true">
-            <template #item="{ item }">
-                <slot name="item" :data="item">
-                    <div class="max-popover-menu-item" @click.stop="(event) => item.action ? item.action({ event, data: item.data ?? {} }) : onClick(event, item)" >
-                        <MaxIcon :icon="item.icon ?? item.i" v-if="item.icon || item.i" size="1.1" />
-                        <div class="max-popover-menu-label">{{ item.label }}</div>
-                    </div>
-                </slot>
-            </template>
-        </Menu>
+        <MaxBaseOverlay v-model:visible="overlayVisible" :target="triggerRef">
+            <div class="p-menu p-component" role="menu">
+                <ul class="p-menu-list">
+                    <li
+                        v-for="(item, idx) in menuItems"
+                        :key="idx"
+                        class="p-menu-item"
+                        role="menuitem"
+                        :class="{ 'p-disabled': item.disabled }"
+                        @click.stop="handleItemClick($event, item)"
+                    >
+                        <slot name="item" :data="item">
+                            <div class="max-popover-menu-item">
+                                <MaxIcon :icon="item.icon ?? item.i" v-if="item.icon || item.i" size="1.1" />
+                                <div class="max-popover-menu-label">{{ item.label }}</div>
+                            </div>
+                        </slot>
+                    </li>
+                </ul>
+            </div>
+        </MaxBaseOverlay>
     </div>
 </template>
 
 <script setup lang="ts">
     import { computed, ref } from 'vue';
-    import Menu from 'primevue/menu';
     import MaxButton from './MaxButton.vue';
     import MaxIcon from './MaxIcon.vue';
+    import MaxBaseOverlay from './base/MaxBaseOverlay.vue';
     import { goToRoute, useDefaultReset } from '@maxvue/max-use';
     import { getCssSize } from '../helpers/getCssSize.js';
 
@@ -63,22 +74,51 @@
     }>(), {
         dark: 0.4,
         light: undefined,
-        loading: false,
         message: 'Deseja continuar?'
     });
 
-    const size_icon = computed(() => getCssSize(Number(props.size ?? props.sizeIcon ?? props.iconSize ?? 1.1) + 'rem') );
+    const size_icon = computed(() => getCssSize(Number(props.size ?? props.sizeIcon ?? props.iconSize ?? 1.1) + 'rem'));
 
-    const menu = ref();
+    const triggerRef = ref<HTMLElement | null>(null);
+    const overlayVisible = ref(false);
 
-    const toggle = (event?: any) => {
-        menu.value.toggle(event);
+    const menuItems = computed(() => props.items ?? props.model ?? []);
+
+    const toggle = (_event?: any) => {
+        overlayVisible.value = !overlayVisible.value;
+    };
+
+    const show = (_event?: any) => {
+        overlayVisible.value = true;
+    };
+
+    const hide = () => {
+        overlayVisible.value = false;
     };
 
     const executing = useDefaultReset<boolean>(false, 200);
 
+    const handleItemClick = (event: any, item: any) => {
+        if (item.disabled) return;
+
+        if (item.command) {
+            item.command({ originalEvent: event, item });
+            hide();
+            return;
+        }
+
+        if (item.action) {
+            item.action({ event, data: item.data ?? {} });
+            hide();
+            return;
+        }
+
+        onClick(event, item);
+        hide();
+    };
+
     const onClick = (event: any, item: any) => {
-        if (! executing.value) {
+        if (!executing.value) {
             executing.value = true;
 
             const data = item.data ?? item.props ?? item.params ?? item.query ?? {};
@@ -94,10 +134,15 @@
             }
         }
     };
+
+    defineExpose({
+        toggle,
+        show,
+        hide
+    });
 </script>
 
 <style lang="scss">
-
 .max-popover-menu {
     max-height: 40px;
     max-width: 40px;
@@ -119,5 +164,30 @@
     height: 2rem;
     cursor: pointer;
     padding: 0 8px;
+}
+
+.p-menu {
+    background-color: var(--background-0, #fff);
+    border: 1px solid var(--max-border-color, #e2e8f0);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
+    padding: 4px 0;
+
+    .p-menu-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .p-menu-item {
+        &:hover {
+            background-color: var(--background-100, #f1f5f9);
+        }
+
+        &.p-disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    }
 }
 </style>
