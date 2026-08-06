@@ -496,6 +496,29 @@
     box-shadow: 0 7px 12px 5px #fff !important;
     padding: 8px !important;
     z-index: 1 !important;
+
+    // O MaxBaseInput renderiza um <input> cru (sem CSS proprio), entao o campo de
+    // busca precisa do estilo aqui para acompanhar a largura do overlay
+    .p-select-filter-input {
+        width: 100%;
+        box-sizing: border-box;
+        height: 34px;
+        padding: 0 10px;
+        border: 1px solid var(--background-400);
+        border-radius: 5px;
+        background-color: var(--background-0);
+        color: var(--background-750);
+        font-size: 0.9rem;
+        outline: none;
+
+        &:focus {
+            border-color: var(--max-primary-500);
+        }
+
+        &::placeholder {
+            color: var(--background-600);
+        }
+    }
 }
 
 .p-select-overlay {
