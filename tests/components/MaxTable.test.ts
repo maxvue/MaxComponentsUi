@@ -16,19 +16,7 @@ vi.mock('@maxvue/max-use', async (importOriginal) => {
 function mountTable(props: Record<string, any> = {}, attrs: Record<string, any> = {}) {
     return mount(MaxTable, {
         props,
-        attrs: { value: [], ...attrs },
-        global: {
-            stubs: {
-                DataTable: {
-                    template: '<div class="p-datatable"><slot v-for="name in Object.keys($slots)" :name="name" /></div>',
-                    props: ['stripedRows']
-                },
-                Column: {
-                    template: '<div class="p-column"><slot name="body" :data="{}" :index="0" /></div>',
-                    props: ['header', 'style']
-                }
-            }
-        }
+        attrs: { value: [], ...attrs }
     });
 }
 
@@ -37,14 +25,11 @@ describe('MaxTable', () => {
         setActivePinia(createPinia());
     });
 
-    it('renderiza corretamente', () => {
+    it('renderiza corretamente sem PrimeVue', () => {
         const wrapper = mountTable();
         expect(wrapper.find('.max-table-main-div').exists()).toBe(true);
-    });
-
-    it('renderiza DataTable internamente', () => {
-        const wrapper = mountTable();
         expect(wrapper.find('.p-datatable').exists()).toBe(true);
+        expect(wrapper.html()).not.toContain('data-pc-name');
     });
 
     it('expõe width via defineExpose', () => {
@@ -54,18 +39,9 @@ describe('MaxTable', () => {
 
     it('aceita slots personalizados', () => {
         const wrapper = mount(MaxTable, {
-            attrs: { value: [] },
+            attrs: { value: [{ id: 1 }] },
             slots: {
-                default: '<div class="custom-slot">Custom</div>'
-            },
-            global: {
-                stubs: {
-                    DataTable: {
-                        template: '<div class="p-datatable"><slot /></div>',
-                        props: ['stripedRows']
-                    },
-                    Column: { template: '<div></div>' }
-                }
+                default: '<td class="custom-slot">Custom</td>'
             }
         });
         expect(wrapper.find('.custom-slot').exists()).toBe(true);
@@ -73,26 +49,12 @@ describe('MaxTable', () => {
 
     it('renderiza o slot "buttons" e calcula o width', async () => {
         const wrapper = mount(MaxTable, {
-            attrs: { value: [] },
+            attrs: { value: [{ id: 1 }] },
             slots: {
                 buttons: '<button class="action-btn">Action</button>'
-            },
-            global: {
-                stubs: {
-                    DataTable: {
-                        template: `<div class="p-datatable">
-                            <slot name="buttons" :data="{}" :index="0" />
-                        </div>`
-                    },
-                    Column: {
-                        template: '<div class="p-column"><slot name="body" :data="{}" :index="0" /></div>'
-                    }
-                }
             }
         });
 
-        // O slot 'buttons' adiciona uma Column
-        expect(wrapper.find('.p-column').exists()).toBe(true);
         expect(wrapper.find('.max-table-buttons').exists()).toBe(true);
         expect(wrapper.find('.action-btn').exists()).toBe(true);
 
@@ -101,9 +63,8 @@ describe('MaxTable', () => {
         mockWidth.value = 50;
         await wrapper.vm.$nextTick();
 
-        expect(vm.width).toBe(60); // calculated_width.value + 10
+        expect(vm.width).toBe(60);
 
-        // Atualizar novamente não deve mudar se width.value > 1
         mockWidth.value = 100;
         await wrapper.vm.$nextTick();
         expect(vm.width).toBe(60);

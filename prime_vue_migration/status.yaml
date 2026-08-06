@@ -1087,6 +1087,32 @@ itens:
       Criada suite de testes em tests/components/MaxInputIconPicker.test.ts com 4/4 testes passando 100%.
       Gates: vitest do componente limpo (4/4), type-check limpo, lint limpo (2 warnings pré-existentes), grep primevue VAZIO em MaxInputIconPicker.vue, git diff InputBase.vue VAZIO, suíte completa sem regressão.
 
+  - id: 33
+    componente: MaxTable
+    arquivo: src/components/MaxTable.vue
+    plano: prime_vue_migration/plans/33-MaxTable.md
+    primitivas: [DataTable, Column, ColumnGroup, Row]
+    depende_de: [4]
+    execucao: Concluído
+    verificacao: Concluído
+    tentativas: 0
+    notas: >
+      Reimplementado MaxTable e MaxTableColumn sem dependência do PrimeVue (removidos imports de primevue/datatable e primevue/column em ambos).
+      Utilizada estrutura semântica HTML de tabela com suporte a slot buttons e calculo dinâmico de largura de botões.
+      16 testes integrados em MaxTable.test.ts, MaxTableColumn.test.ts e MaxTableFields.test.ts passando 100%.
+      Gates: vitest dos componentes limpo (16/16), type-check limpo, lint limpo (2 warnings pré-existentes), grep primevue VAZIO em MaxTable.vue e MaxTableColumn.vue, git diff InputBase.vue VAZIO, suíte completa sem regressão.
+
+  - id: 34
+    componente: MaxTableColumn
+    arquivo: src/components/MaxTableColumn.vue
+    plano: prime_vue_migration/plans/33-MaxTable.md
+    primitivas: [Column]
+    depende_de: [33]
+    execucao: Concluído
+    verificacao: Concluído
+    tentativas: 0
+    notas: 'Concluído em conjunto com o id 33.'
+
   - id: 32
     componente: MaxInputFileUpload
     arquivo: src/components/MaxInputFileUpload.vue
@@ -1103,17 +1129,6 @@ itens:
       Gates: vitest do componente limpo (3/3), type-check limpo, lint limpo (2 warnings pré-existentes), grep primevue VAZIO em MaxInputFileUpload.vue, git diff InputBase.vue VAZIO, suíte completa sem regressão.
 
 # -----------------------------------------------------------------------------
-# FASE 4 — TABELA (conjunto indivisível: migrar 33 e 34 na MESMA passada)
-# -----------------------------------------------------------------------------
-
-  - id: 33
-    componente: MaxTable
-    arquivo: src/components/MaxTable.vue
-    plano: prime_vue_migration/plans/33-MaxTable.md
-    primitivas: [DataTable, Column]
-    depende_de: [16]
-    execucao: Aguardando
-    verificacao: Aguardando
     tentativas: 0
     notas: 'CONJUNTO INDIVISÍVEL com id 34. Maior item da migração. MaxTableFields.vue já é PrimeVue-free.'
 

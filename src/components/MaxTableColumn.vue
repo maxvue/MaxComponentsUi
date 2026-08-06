@@ -1,13 +1,30 @@
 <template>
-
-
+    <slot name="body" :data="data" :index="index">
+        <component :is="tag">
+            <slot :data="data" :index="index">
+                {{ field ? resolveField(data, field) : header }}
+            </slot>
+        </component>
+    </slot>
 </template>
 
 <script setup lang="ts">
-    import _Column from 'primevue/column';
+    import { computed } from 'vue';
 
+    const props = defineProps<{
+        field?: string;
+        header?: string;
+        data?: any;
+        index?: number;
+    }>();
+
+    const tag = computed(() => (props.data !== undefined ? 'td' : 'th'));
+
+    const resolveField = (row: any, fieldStr?: string) => {
+        if (!fieldStr || !row) return '';
+        return fieldStr.split('.').reduce((acc: any, key) => acc?.[key], row) ?? '';
+    };
 </script>
-
 
 <style lang="scss">
 .max-table-main-div {
