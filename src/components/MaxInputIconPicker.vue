@@ -19,58 +19,61 @@
         </div>
     </InputBase>
 
-    <Drawer
-        v-model:visible="visible"
-        header="Escolha um ícone"
-        position="bottom"
-        class="max-icon-picker-drawer"
-    >
-        <div class="picker-search-area">
-            <PrimeInputText v-model="search" placeholder="Pesquisar ícones..." fluid />
-        </div>
-
-        <div v-if="isLoading" class="picker-state-area">
-            <MaxIcon i="svg-spinners:ring-resize" size="2" :dark="0.4" />
-        </div>
-
-        <div v-else-if="flatIcons.length === 0 && search.length >= 2" class="picker-state-area">
-            Nenhum ícone encontrado para "{{ search }}"
-        </div>
-
-        <div v-else-if="flatIcons.length === 0 && !isLoading" class="picker-state-area">
-            <MaxIcon i="svg-spinners:ring-resize" size="2" :dark="0.4" />
-        </div>
-
-        <VirtualScroller
-            v-else
-            :items="rows"
-            :itemSize="40"
-            :style="{ height: 'calc(90dvh - 140px)' }"
-            class="icon-virtual-list"
-            @scroll="onScrollerScroll"
-        >
-            <template #item="{ item, options }">
-                <div class="icon-row" :data-row-index="options.index">
-                    <div
-                        v-for="icon in (item as IconEntry[])"
-                        :key="icon.name"
-                        class="icon-cell"
-                        :class="{ selected: modelValue === icon.name }"
-                        @click.stop="selectIcon(icon.name)"
-                        v-tooltip="icon.name"
-                        pointer
-                    >
-                        <div
-                            v-if="svgCache[icon.name]"
-                            class="picker-icon-svg"
-                            v-html="svgCache[icon.name]"
-                        />
-                        <div v-else class="picker-icon-placeholder" />
-                    </div>
+    <Teleport to="body" :disabled="!visible">
+        <div v-if="visible" class="max-icon-picker-drawer-backdrop" @click="visible = false">
+            <div class="max-icon-picker-drawer p-component" role="dialog" aria-modal="true" @click.stop>
+                <div class="picker-header">
+                    <h3>Escolha um ícone</h3>
+                    <button type="button" aria-label="Fechar" class="close-btn" @click="visible = false">×</button>
                 </div>
-            </template>
-        </VirtualScroller>
-    </Drawer>
+                <div class="picker-search-area">
+                    <MaxBaseInput v-model="search" placeholder="Pesquisar ícones..." />
+                </div>
+
+                <div v-if="isLoading" class="picker-state-area">
+                    <MaxIcon i="svg-spinners:ring-resize" size="2" :dark="0.4" />
+                </div>
+
+                <div v-else-if="flatIcons.length === 0 && search.length >= 2" class="picker-state-area">
+                    Nenhum ícone encontrado para "{{ search }}"
+                </div>
+
+                <div v-else-if="flatIcons.length === 0 && !isLoading" class="picker-state-area">
+                    <MaxIcon i="svg-spinners:ring-resize" size="2" :dark="0.4" />
+                </div>
+
+                <MaxBaseVirtualScroller
+                    v-else
+                    :items="rows"
+                    :itemSize="40"
+                    :height="360"
+                    class="icon-virtual-list"
+                    @scroll="onScrollerScroll"
+                >
+                    <template #item="{ item, options }">
+                        <div class="icon-row" :data-row-index="options.index">
+                            <div
+                                v-for="icon in (item as IconEntry[])"
+                                :key="icon.name"
+                                class="icon-cell"
+                                :class="{ selected: modelValue === icon.name }"
+                                @click.stop="selectIcon(icon.name)"
+                                :aria-label="icon.name"
+                                pointer
+                            >
+                                <div
+                                    v-if="svgCache[icon.name]"
+                                    class="picker-icon-svg"
+                                    v-html="svgCache[icon.name]"
+                                />
+                                <div v-else class="picker-icon-placeholder" />
+                            </div>
+                        </div>
+                    </template>
+                </MaxBaseVirtualScroller>
+            </div>
+        </div>
+    </Teleport>
 </template>
 
 <script setup lang="ts">
@@ -79,9 +82,8 @@
     import type { Ref } from 'vue';
     import InputBase from './InputBase.vue';
     import MaxIcon from './MaxIcon.vue';
-    import PrimeInputText from 'primevue/inputtext';
-    import Drawer from 'primevue/drawer';
-    import VirtualScroller from 'primevue/virtualscroller';
+    import MaxBaseInput from './base/MaxBaseInput.vue';
+    import MaxBaseVirtualScroller from './base/MaxBaseVirtualScroller.vue';
 
     const COLS = 8;
 
@@ -97,33 +99,19 @@
 
     const props = withDefaults(
         defineProps<{
-            /** Cor aplicada ao ícone selecionado no trigger */
             color?: string;
-            /** Desabilita o campo */
             disabled?: boolean;
-            /** Ativa estilo FloatLabel */
             float?: boolean;
-            /** Mensagem de feedback (alias) */
             msg?: string;
-            /** Mensagem de feedback */
             message?: string;
-            /** Ícone da mensagem de feedback */
             iconMessage?: string;
-            /** Rótulo do campo */
             label?: string;
-            /** Estado de conclusão/validação manual */
             done?: boolean;
-            /** Mensagem ou estado de erro */
             error?: string | boolean;
-            /** Mensagem ou estado de atenção */
             caution?: string | boolean;
-            /** Define se o campo é obrigatório */
             required?: boolean;
-            /** Texto de placeholder quando nenhum ícone está selecionado */
             placeholder?: string;
-            /** URL base para listar/buscar ícones curados */
             listUrl?: string;
-            /** URL para buscar SVGs dos ícones curados via POST */
             svgUrl?: string;
         }>(),
         {
@@ -143,10 +131,8 @@
     const isLoading = ref(false);
     const isDone: Ref = ref(props.done ?? null);
 
-    /** Cache local de SVGs: name → svg string */
     const svgCache = ref<Record<string, string>>({});
 
-    /** Fila de nomes aguardando fetch de SVG */
     let svgFetchQueue: string[] = [];
     let svgFetchTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -182,10 +168,6 @@
 
     const rows = computed<IconEntry[][]>(() => toRows(flatIcons.value));
 
-    /**
-     * Enfileira nomes de ícones para fetch de SVG com debounce de 150ms.
-     * Respeita o limite de 200 por request.
-     */
     const enqueueSvgFetch = (names: string[]) => {
         const pending = names.filter((n) => !svgCache.value[n] && !svgFetchQueue.includes(n));
         if (pending.length === 0) return;
@@ -206,19 +188,13 @@
                 const data: Record<string, string> = await res.json();
                 svgCache.value = { ...svgCache.value, ...data };
             } catch {
-                // Silencia erros de rede; ícones ficam sem SVG temporariamente
+                // Silencia erros de rede
             }
 
-            // Se ficaram itens na fila após o splice, reagenda
             if (svgFetchQueue.length > 0) enqueueSvgFetch([]);
         }, 150);
     };
 
-    /**
-     * Ao scrollar o VirtualScroller, coleta os ícones visíveis e solicita os SVGs ausentes.
-     * O VirtualScroller renderiza apenas as linhas visíveis no DOM, então inspecionamos
-     * a lista completa estimando pelo scrollTop e height.
-     */
     const onScrollerScroll = (event: Event) => {
         const el = event.target as HTMLElement;
         if (!el) return;
@@ -227,7 +203,7 @@
         const itemSize = 40;
 
         const firstRow = Math.floor(scrollTop / itemSize);
-        const visibleRows = Math.ceil(clientHeight / itemSize) + 2; // +2 buffer
+        const visibleRows = Math.ceil(clientHeight / itemSize) + 2;
         const lastRow = firstRow + visibleRows;
 
         const visibleIcons: string[] = [];
@@ -236,20 +212,14 @@
         enqueueSvgFetch(visibleIcons);
     };
 
-    /**
-     * Pré-carrega SVGs das primeiras linhas visíveis ao montar a lista.
-     */
     const preloadInitialSvgs = () => {
-        const initialRows = Math.ceil(600 / 40) + 2; // altura aprox visível / itemSize
+        const initialRows = Math.ceil(600 / 40) + 2;
         const names: string[] = [];
         for (let r = 0; r < initialRows && r < rows.value.length; r++) for (const icon of rows.value[r]) names.push(icon.name);
 
         enqueueSvgFetch(names);
     };
 
-    /**
-     * Busca a lista curada de ícones no backend.
-     */
     const fetchCuratedIcons = async (query?: string) => {
         isLoading.value = true;
         try {
@@ -327,18 +297,57 @@
     }
 }
 
+.max-icon-picker-drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgb(0 0 0 / 40%);
+    z-index: 9999;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
 .max-icon-picker-drawer {
-    height: 90dvh;
+    width: 100%;
+    max-width: 600px;
+    max-height: 80vh;
+    background-color: var(--background-0, #fff);
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 -4px 16px rgb(0 0 0 / 15%);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+
+    .picker-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+
+        h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            color: var(--background-600);
+        }
+    }
 
     .picker-search-area {
-        padding: 0 4px 14px;
+        padding-bottom: 12px;
     }
 
     .picker-state-area {
         display: flex;
         align-items: center;
         justify-content: center;
-        height: calc(90dvh - 140px);
+        height: 200px;
         color: var(--background-500);
         font-size: 0.9rem;
         gap: 0.5rem;

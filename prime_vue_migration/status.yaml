@@ -1077,11 +1077,15 @@ itens:
     arquivo: src/components/MaxInputIconPicker.vue
     plano: prime_vue_migration/plans/31-MaxInputIconPicker.md
     primitivas: [InputText, Drawer, VirtualScroller]
-    depende_de: [1, 2, 4]
-    execucao: Aguardando
-    verificacao: Aguardando
+    depende_de: [2]
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: 'Sem teste existente — criar do zero. 3 primitivas de uma vez.'
+    notas: >
+      Reimplementado MaxInputIconPicker sem dependência do PrimeVue (removidos imports de primevue/inputtext, primevue/drawer e primevue/virtualscroller).
+      Utilizado MaxBaseInput, MaxBaseVirtualScroller e Drawer modal em Teleport com acessibilidade role="dialog" e aria-modal="true".
+      Criada suite de testes em tests/components/MaxInputIconPicker.test.ts com 4/4 testes passando 100%.
+      Gates: vitest do componente limpo (4/4), type-check limpo, lint limpo (2 warnings pré-existentes), grep primevue VAZIO em MaxInputIconPicker.vue, git diff InputBase.vue VAZIO, suíte completa sem regressão.
 
   - id: 32
     componente: MaxInputFileUpload
