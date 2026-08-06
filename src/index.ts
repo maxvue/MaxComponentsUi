@@ -1,10 +1,7 @@
 import 'virtual:uno.css';
 
 import { defineAsyncComponent } from 'vue';
-import PrimeVue from 'primevue/config';
-
-import { MaxStyle } from './styles/style';
-import ptBR from './locales/pt-br';
+import { applyMaxTheme } from './styles/style';
 
 // NÃO REMOVER O INPUTBASE DO INDEX.TS
 export { default as InputBase } from './components/InputBase.vue';
@@ -104,9 +101,7 @@ export { default as MaxSelectTag } from './components/MaxTagSelect.vue';
 export { default as MaxInputSwitch } from './components/MaxInputSwitch.vue';
 export { default as MaxInputTextArea } from './components/MaxInputTextArea.vue';
 export { default as MaxInputTextList } from './components/MaxInputTextList.vue';
-// Async: o MaxInputMarkdown arrasta o tiptap inteiro (starter-kit + 8 extensões, ~350 KB);
-// como export estático ele entraria no bundle eager de TODOS os apps consumidores, mesmo sem uso.
-// Mesmo padrão de MaxPdfView/MaxLoaderAi (deps pesadas sob demanda).
+
 export const MaxInputMarkdown = defineAsyncComponent(() => import('./components/MaxInputMarkdown.vue'));
 export { default as MaxInputMarkdownToolbar } from './components/MaxInputMarkdownToolbar.vue';
 export { default as MaxInputToggle } from './components/MaxInputToggle.vue';
@@ -120,13 +115,10 @@ export { default as MaxLoaderIcon } from './components/MaxLoaderIcon.vue';
 
 // Data & Display
 export { default as MaxBadgeComponent } from './components/MaxBadgeComponent.vue';
-// Async: o MaxChart arrasta o chart.js (~200 KB) por import dinâmico dentro do
-// componente; como export estático ele ainda assim entraria no grafo eager.
 export const MaxChart = defineAsyncComponent(() => import('./components/MaxChart.vue'));
 export { default as MaxEmptyDiv } from './components/MaxEmptyDiv.vue';
 export { default as MaxLink } from './components/MaxLink.vue';
 export { default as MaxLogo } from './components/MaxLogo.vue';
-// Async: o MaxMaps arrasta o vue3-google-map — fora do bundle eager, carrega só quando usado em tela.
 export const MaxMaps = defineAsyncComponent(() => import('./components/MaxMaps.vue'));
 export { default as MaxPdfView } from './components/MaxPdfView.vue';
 export { default as MaxTable } from './components/MaxTable.vue';
@@ -154,23 +146,10 @@ import './directives/tooltip.scss';
 
 /**
  * @param {import('vue').App} app
- * @param {any} options
+ * @param {any} _options
  */
-export const install = (app: any, options: any = {}) => {
-    app.use(PrimeVue, {
-        locale: options.locale || ptBR,
-        theme: {
-            preset: MaxStyle,
-            options: {
-                darkModeSelector: '.dark',
-                prefix: 'max',
-                ...options.theme?.options
-            },
-            ...options.theme
-        },
-        ripple: true,
-        ...options
-    });
+export const install = (app: any, _options: any = {}) => {
+    applyMaxTheme();
     app.directive('tooltip', Tooltip);
 };
 
@@ -181,9 +160,3 @@ export default {
 
 export * from './types';
 export type * from './types/chart';
-
-
-// ESTE ARQUIVO CONTÉM OS COMPONENTES DO PRIME VUE QUE NÃO EXISTEM NO MAX COMPONENTS UI
-// ESTE ARQUIVO É USADO PARA EXPORTAR OS COMPONENTES DO PRIME VUE PARA SEREM ACESSADOS COMO SE FOSSEM DO MAX COMPONENTS UI
-// IMPORTAÇÃO DEFAULT NÃO FUNCIONA POIS OS COMPONENTES SÃO EXPORTADOS COM DEFAULT DO VITE
-// NÃO TEM REFERÊNCIA COM AUTOIMPORT. O AUTOIMPORT USA A BIBLIOTECA COMPLETA DO PRIMEVUE...

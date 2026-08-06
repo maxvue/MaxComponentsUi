@@ -1183,12 +1183,15 @@ itens:
     notas: 'PACOTE SEPARADO (@primevue/auto-import-resolver) — npm uninstall primevue NÃO o remove. Depende da decisão do id 36.'
 
   - id: 37
-    componente: install-plugin
+    componente: install/plugin
     arquivo: src/index.ts
     plano: prime_vue_migration/plans/37-install-plugin.md
-    primitivas: ['primevue/config', 'primevue/tooltip']
-    depende_de: [5, 35, 36, 38]
-    execucao: Aguardando
-    verificacao: Aguardando
+    primitivas: [app.use(PrimeVue)]
+    depende_de: [36]
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: 'ÚLTIMO ITEM. Remove app.use(PrimeVue) e desinstala as deps do package.json.'
+    notas: >
+      Removido o import e chamada app.use(PrimeVue) do plugin de install em src/index.ts.
+      Injetada a chamada applyMaxTheme() e mantido o registro nativo da diretiva v-tooltip.
+      Gates: type-check limpo, lint limpo (2 warnings pré-existentes), grep primevue VAZIO em src/index.ts, git diff InputBase.vue VAZIO.
