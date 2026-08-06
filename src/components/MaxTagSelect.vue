@@ -1,8 +1,8 @@
 <template>
     <InputBase v-bind="{...props, ...attrs}" class="max-select-tag" input-click no-dropdown >
-        <tadiv v-if="attrs.placeholder !== undefined && (!temp_value || temp_value === '')" class="tab-placeholder-select">
+        <div v-if="attrs.placeholder !== undefined && (!temp_value || temp_value === '')" class="tab-placeholder-select">
             {{ attrs.placeholder }}
-        </tadiv>
+        </div>
         <Select v-bind="{...props, ...attrs}" v-model="temp_value" :filter="props.filter"  :loading="loading" @before-show="(before_show as any)" :options="options" :optionLabel="props.optionLabel" :optionValue="props.optionValue" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false" :disabled="props.disabled">
             <template #option="slotProps">
                 <slot name="option" :option="slotProps.option" :selected="slotProps.selected" :index="slotProps.index">
@@ -114,13 +114,14 @@
             text = hover ? 'var(--background-600)' : 'var(--background-650)';
         }
 
-
         return {
             backgroundColor: background,
             color: text,
             borderRadius: '6px',
-            padding: '0 6px !important',
-            gap: 0
+            padding: '2px 8px !important',
+            gap: '4px',
+            alignItems: 'center',
+            display: 'inline-flex'
         };
     };
 
@@ -189,15 +190,20 @@
     .p-select {
         width: 100%;
         height: 36px !important;
+        display: flex;
+        align-items: center;
     }
 
     .p-select-label {
         border: none !important;
-        padding: 0 10px !important;
-        display: grid;
-        place-items: center start;
+        padding: 0 6px !important;
+        display: flex !important;
+        align-items: center !important;
         outline: none !important;
-        height: 32px !important;
+        height: 100% !important;
+        max-height: 36px !important;
+        width: 100%;
+        box-sizing: border-box;
 
         &:focus {
             border: none !important;
@@ -212,23 +218,25 @@
         color: var(--background-650);
         font-size: 0.9rem;
         z-index: 1;
-        display: grid;
-        place-items: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         width: 100%;
         height: 100%;
         pointer-events: none; /* O clique atravessa a div */
     }
 
     &[flex], &[full] {
-        .p-select, .p-select-label, .value-tag-div, .tag-value-text {
+        .p-select, .p-select-label, .value-tag-div {
             height: 100% !important;
             max-height: 100% !important;
-            display: grid;
+            display: flex;
+            align-items: center;
         }
 
         .tag-value-text {
-            display: grid;
-            place-items: center start;
+            display: inline-flex;
+            align-items: center;
         }
     }
 }
@@ -240,6 +248,7 @@
     place-items: center start;
     gap: 10px;
     height: 30px;
+    box-sizing: border-box;
 
     .sub-label-tag {
         padding-left: 1rem;
@@ -259,17 +268,25 @@
 }
 
 .value-tag-div {
-    grid-template-columns: auto 1fr auto;
-    place-items: center;
-    padding: unset;
-    display: grid;
-    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 2px 8px !important;
     position: relative;
+    max-width: 100%;
+    box-sizing: border-box;
+    line-height: normal;
 
     .tag-value-text {
         width: 100% !important;
         max-width: 100% !important;
         position: relative;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: inline-block;
+        line-height: 1.2;
     }
 }
 
