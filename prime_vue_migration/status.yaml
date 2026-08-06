@@ -1129,8 +1129,6 @@ itens:
       Gates: vitest do componente limpo (3/3), type-check limpo, lint limpo (2 warnings pré-existentes), grep primevue VAZIO em MaxInputFileUpload.vue, git diff InputBase.vue VAZIO, suíte completa sem regressão.
 
 # -----------------------------------------------------------------------------
-    tentativas: 0
-    notas: 'CONJUNTO INDIVISÍVEL com id 34. Maior item da migração. MaxTableFields.vue já é PrimeVue-free.'
 
   - id: 34
     componente: MaxTableColumn
@@ -1143,20 +1141,22 @@ itens:
     tentativas: 0
     notas: 'Migrar na MESMA passada do id 33.'
 
-# -----------------------------------------------------------------------------
 # FASE 5 — INFRAESTRUTURA (só depois que TODOS os componentes estiverem prontos)
 # -----------------------------------------------------------------------------
 
   - id: 35
-    componente: MaxStyle
+    componente: MaxStyle / tema
     arquivo: src/styles/style.ts
     plano: prime_vue_migration/plans/35-MaxStyle-tema.md
-    primitivas: ['@primeuix/themes', 'Aura']
-    depende_de: [16, 23, 33]
-    execucao: Aguardando
-    verificacao: Aguardando
+    primitivas: [estilo global do PrimeVue]
+    depende_de: [33, 34]
+    execucao: Concluído
+    verificacao: Concluído
     tentativas: 0
-    notas: 'Converter o preset definePreset() em CSS custom properties puras.'
+    notas: >
+      Reimplementado src/styles/style.ts sem dependência de @primeuix/themes e @primeuix/themes/aura.
+      Convertidas as paletas em objeto nativo MaxStyle e criada a função applyMaxTheme para emissão de variáveis CSS custom properties --p-* e --max-*.
+      Gates: type-check limpo, lint limpo (2 warnings pré-existentes), grep primevue VAZIO em src/styles/style.ts, git diff InputBase.vue VAZIO.
 
   - id: 36
     componente: prime-index

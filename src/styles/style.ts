@@ -1,7 +1,4 @@
-import Aura from '@primeuix/themes/aura';
-import { definePreset } from '@primeuix/themes';
-
-export const MaxStyle = definePreset(Aura, {
+export const MaxStyle = {
     semantic: {
         primary: {
             50: '#67C8DB',
@@ -64,4 +61,13 @@ export const MaxStyle = definePreset(Aura, {
             900: '#7F1D1D'
         }
     }
-});
+};
+
+export const applyMaxTheme = (root: HTMLElement = document.documentElement) => {
+    Object.entries(MaxStyle.semantic).forEach(([palette, shades]) => {
+        Object.entries(shades).forEach(([shade, color]) => {
+            root.style.setProperty(`--p-${palette}-${shade}`, color as string);
+            root.style.setProperty(`--max-${palette}-${shade}`, color as string);
+        });
+    });
+};
