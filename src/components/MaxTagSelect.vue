@@ -254,15 +254,25 @@
         }
 
         /*
-         * A tag fica levemente menor que o campo (`--max-tag-inset` de folga em
-         * cima e embaixo) para ser lida como uma pílula dentro do input, sem
-         * encostar na borda arredondada dele. O seletor repete a especificidade
-         * do InputBase, que aplica `height: 20px !important` a todo div interno.
+         * O InputBase desenha o campo com fundo (`--background-100`) e contorno
+         * (`outline: 1px solid var(--background-300)`). Em volta da tag isso
+         * aparecia como uma cápsula cinza, já que a tag é menor que o campo.
+         * A tag já tem fundo e raio próprios, então o chrome do input é
+         * removido aqui.
+         */
+        .max-input-field-div {
+            background-color: transparent !important;
+            outline: none !important;
+        }
+
+        /*
+         * Sem o fundo do campo, a tag pode ocupar a altura inteira da linha:
+         * o `--max-tag-inset` fica em 0 por padrão.
          */
         .value-tag-div {
-            height: calc(100% - var(--max-tag-inset, 6px)) !important;
+            height: calc(100% - var(--max-tag-inset, 0px)) !important;
             min-height: auto !important;
-            max-height: calc(100% - var(--max-tag-inset, 6px)) !important;
+            max-height: calc(100% - var(--max-tag-inset, 0px)) !important;
             line-height: 1;
 
             .tag-value-text {
