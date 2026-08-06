@@ -337,7 +337,21 @@ npm run build
 
 # 5. Playground sobe sem erro
 npm run dev:playground
+
+# 5b. Playground RENDERIZA sem componente órfão.
+#     "Sobe sem erro" é portão fraco: um componente que o resolver não resolve mais
+#     deixa o dev server subir normalmente e só falha ao renderizar. Suba o servidor,
+#     baixe o SFC transformado e confira que não sobrou nenhuma resolução em runtime:
+setsid timeout 60 npx vite --config playground/vite.config.ts --port 5210 --host 127.0.0.1 >/tmp/pg.log 2>&1 </dev/null &
+sleep 20
+curl -s http://127.0.0.1:5210/src/App.vue | grep "= _resolveComponent"   # deve retornar VAZIO
 ```
+
+⚠️ Atenção aos **aliases**: o `Components()` do playground resolve por **nome de arquivo**
+(`MaxButton`), não pelos aliases sem prefixo (`Button`, `T1`) — esses existem apenas em
+`src/components-manifest.json`, consumido pelo `MaxComponentsUiResolver`, que o playground
+**não** usa (ele importa o fonte vivo de `../src`, e o resolver aponta para o pacote
+publicado). Use sempre a tag com o nome do arquivo nos templates do playground.
 
 Depois, reporte ao usuário:
 - itens concluídos / total;

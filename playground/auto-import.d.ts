@@ -211,6 +211,7 @@ declare global {
   const formatTimeAgo: typeof import('@maxvue/max-use').formatTimeAgo
   const formatTimeAgoIntl: typeof import('@maxvue/max-use').formatTimeAgoIntl
   const formatTimeAgoIntlParts: typeof import('@maxvue/max-use').formatTimeAgoIntlParts
+  const functionsHelpers: typeof import('@maxvue/max-use').functionsHelpers
   const get: typeof import('@maxvue/max-use').get
   const getCachedApi: typeof import('@maxvue/max-use').getCachedApi
   const getCachedApiIDB: typeof import('@maxvue/max-use').getCachedApiIDB
@@ -282,6 +283,7 @@ declare global {
   const isFuture: typeof import('@maxvue/max-use').isFuture
   const isInDateInterval: typeof import('@maxvue/max-use').isInDateInterval
   const isIterable: typeof import('@maxvue/max-use').isIterable
+  const isNil: typeof import('@maxvue/max-use').isNil
   const isNotEmpty: typeof import('@maxvue/max-use').isNotEmpty
   const isNotValid: typeof import('@maxvue/max-use').isNotValid
   const isNumber: typeof import('@maxvue/max-use').isNumber
@@ -313,6 +315,7 @@ declare global {
   const kebabCase: typeof import('@maxvue/max-use').kebabCase
   const keyBy: typeof import('@maxvue/max-use').keyBy
   const keyExists: typeof import('@maxvue/max-use').keyExists
+  const lang: typeof import('@maxvue/max-use').lang
   const last: typeof import('@maxvue/max-use').last
   const makeDestructurable: typeof import('@maxvue/max-use').makeDestructurable
   const mapGamepadToXbox360Controller: typeof import('@maxvue/max-use').mapGamepadToXbox360Controller
@@ -323,6 +326,7 @@ declare global {
   const median: typeof import('@maxvue/max-use').median
   const minutesAgo: typeof import('@maxvue/max-use').minutesAgo
   const monthsAgo: typeof import('@maxvue/max-use').monthsAgo
+  const negate: typeof import('@maxvue/max-use').negate
   const nextTick: typeof import('vue').nextTick
   const noEmpty: typeof import('@maxvue/max-use').noEmpty
   const noHtml: typeof import('@maxvue/max-use').noHtml
@@ -403,6 +407,7 @@ declare global {
   const roundUp: typeof import('@maxvue/max-use').roundUp
   const sample: typeof import('@maxvue/max-use').sample
   const secondsAgo: typeof import('@maxvue/max-use').secondsAgo
+  const seq: typeof import('@maxvue/max-use').seq
   const set: typeof import('@maxvue/max-use').set
   const setApiRequestConfig: typeof import('@maxvue/max-use').setApiRequestConfig
   const setLibraryRouter: typeof import('@maxvue/max-use').setLibraryRouter
@@ -419,10 +424,12 @@ declare global {
   const sortByMulti: typeof import('@maxvue/max-use').sortByMulti
   const src: typeof import('../src/index.ts').default
   const stripHtml: typeof import('@maxvue/max-use').stripHtml
+  const stubTrue: typeof import('@maxvue/max-use').stubTrue
   const sum: typeof import('@maxvue/max-use').sum
   const sumBy: typeof import('@maxvue/max-use').sumBy
   const syncRef: typeof import('@maxvue/max-use').syncRef
   const syncRefs: typeof import('@maxvue/max-use').syncRefs
+  const tap: typeof import('@maxvue/max-use').tap
   const throttleFilter: typeof import('@maxvue/max-use').throttleFilter
   const timeAgo: typeof import('@maxvue/max-use').timeAgo
   const timestamp: typeof import('@maxvue/max-use').timestamp
@@ -622,6 +629,7 @@ declare global {
   const useWindowFocus: typeof import('@maxvue/max-use').useWindowFocus
   const useWindowScroll: typeof import('@maxvue/max-use').useWindowScroll
   const useWindowSize: typeof import('@maxvue/max-use').useWindowSize
+  const utils: typeof import('@maxvue/max-use').utils
   const validCnpj: typeof import('@maxvue/max-use').validCnpj
   const validCnpjOrCpf: typeof import('@maxvue/max-use').validCnpjOrCpf
   const validCpf: typeof import('@maxvue/max-use').validCpf
@@ -676,7 +684,7 @@ declare global {
   export type { ToastSeverity, ToastItem, ToastPayload } from '../src/stores/useToast.Store.ts'
   import('../src/stores/useToast.Store.ts')
   // @ts-ignore
-  export type { BaseComponentProps, MaxButtonsType, ComponentEmits, SelectItem, SelectGroupOptionsElement, SelectGroupOptions, SelectOptions, MaxTableColumn, DBFile, MenuItem } from '../src/types/index.ts'
+  export type { MaxBaseButtonProps, BaseComponentProps, MaxButtonsType, ComponentEmits, SelectItem, SelectGroupOptionsElement, SelectGroupOptions, SelectOptions, MaxTableColumn, DBFile, MenuItem } from '../src/types/index.ts'
   import('../src/types/index.ts')
 }
 
@@ -890,6 +898,7 @@ declare module 'vue' {
     readonly formatTimeAgo: UnwrapRef<typeof import('@maxvue/max-use')['formatTimeAgo']>
     readonly formatTimeAgoIntl: UnwrapRef<typeof import('@maxvue/max-use')['formatTimeAgoIntl']>
     readonly formatTimeAgoIntlParts: UnwrapRef<typeof import('@maxvue/max-use')['formatTimeAgoIntlParts']>
+    readonly functionsHelpers: UnwrapRef<typeof import('@maxvue/max-use')['functionsHelpers']>
     readonly get: UnwrapRef<typeof import('@maxvue/max-use')['get']>
     readonly getCachedApi: UnwrapRef<typeof import('@maxvue/max-use')['getCachedApi']>
     readonly getCachedApiIDB: UnwrapRef<typeof import('@maxvue/max-use')['getCachedApiIDB']>
@@ -961,6 +970,7 @@ declare module 'vue' {
     readonly isFuture: UnwrapRef<typeof import('@maxvue/max-use')['isFuture']>
     readonly isInDateInterval: UnwrapRef<typeof import('@maxvue/max-use')['isInDateInterval']>
     readonly isIterable: UnwrapRef<typeof import('@maxvue/max-use')['isIterable']>
+    readonly isNil: UnwrapRef<typeof import('@maxvue/max-use')['isNil']>
     readonly isNotEmpty: UnwrapRef<typeof import('@maxvue/max-use')['isNotEmpty']>
     readonly isNotValid: UnwrapRef<typeof import('@maxvue/max-use')['isNotValid']>
     readonly isNumber: UnwrapRef<typeof import('@maxvue/max-use')['isNumber']>
@@ -992,6 +1002,7 @@ declare module 'vue' {
     readonly kebabCase: UnwrapRef<typeof import('@maxvue/max-use')['kebabCase']>
     readonly keyBy: UnwrapRef<typeof import('@maxvue/max-use')['keyBy']>
     readonly keyExists: UnwrapRef<typeof import('@maxvue/max-use')['keyExists']>
+    readonly lang: UnwrapRef<typeof import('@maxvue/max-use')['lang']>
     readonly last: UnwrapRef<typeof import('@maxvue/max-use')['last']>
     readonly makeDestructurable: UnwrapRef<typeof import('@maxvue/max-use')['makeDestructurable']>
     readonly mapGamepadToXbox360Controller: UnwrapRef<typeof import('@maxvue/max-use')['mapGamepadToXbox360Controller']>
@@ -1002,6 +1013,7 @@ declare module 'vue' {
     readonly median: UnwrapRef<typeof import('@maxvue/max-use')['median']>
     readonly minutesAgo: UnwrapRef<typeof import('@maxvue/max-use')['minutesAgo']>
     readonly monthsAgo: UnwrapRef<typeof import('@maxvue/max-use')['monthsAgo']>
+    readonly negate: UnwrapRef<typeof import('@maxvue/max-use')['negate']>
     readonly nextTick: UnwrapRef<typeof import('vue')['nextTick']>
     readonly noEmpty: UnwrapRef<typeof import('@maxvue/max-use')['noEmpty']>
     readonly noHtml: UnwrapRef<typeof import('@maxvue/max-use')['noHtml']>
@@ -1082,6 +1094,7 @@ declare module 'vue' {
     readonly roundUp: UnwrapRef<typeof import('@maxvue/max-use')['roundUp']>
     readonly sample: UnwrapRef<typeof import('@maxvue/max-use')['sample']>
     readonly secondsAgo: UnwrapRef<typeof import('@maxvue/max-use')['secondsAgo']>
+    readonly seq: UnwrapRef<typeof import('@maxvue/max-use')['seq']>
     readonly set: UnwrapRef<typeof import('@maxvue/max-use')['set']>
     readonly setApiRequestConfig: UnwrapRef<typeof import('@maxvue/max-use')['setApiRequestConfig']>
     readonly setLibraryRouter: UnwrapRef<typeof import('@maxvue/max-use')['setLibraryRouter']>
@@ -1098,10 +1111,12 @@ declare module 'vue' {
     readonly sortByMulti: UnwrapRef<typeof import('@maxvue/max-use')['sortByMulti']>
     readonly src: UnwrapRef<typeof import('../src/index.ts')['default']>
     readonly stripHtml: UnwrapRef<typeof import('@maxvue/max-use')['stripHtml']>
+    readonly stubTrue: UnwrapRef<typeof import('@maxvue/max-use')['stubTrue']>
     readonly sum: UnwrapRef<typeof import('@maxvue/max-use')['sum']>
     readonly sumBy: UnwrapRef<typeof import('@maxvue/max-use')['sumBy']>
     readonly syncRef: UnwrapRef<typeof import('@maxvue/max-use')['syncRef']>
     readonly syncRefs: UnwrapRef<typeof import('@maxvue/max-use')['syncRefs']>
+    readonly tap: UnwrapRef<typeof import('@maxvue/max-use')['tap']>
     readonly throttleFilter: UnwrapRef<typeof import('@maxvue/max-use')['throttleFilter']>
     readonly timeAgo: UnwrapRef<typeof import('@maxvue/max-use')['timeAgo']>
     readonly timestamp: UnwrapRef<typeof import('@maxvue/max-use')['timestamp']>
@@ -1301,6 +1316,7 @@ declare module 'vue' {
     readonly useWindowFocus: UnwrapRef<typeof import('@maxvue/max-use')['useWindowFocus']>
     readonly useWindowScroll: UnwrapRef<typeof import('@maxvue/max-use')['useWindowScroll']>
     readonly useWindowSize: UnwrapRef<typeof import('@maxvue/max-use')['useWindowSize']>
+    readonly utils: UnwrapRef<typeof import('@maxvue/max-use')['utils']>
     readonly validCnpj: UnwrapRef<typeof import('@maxvue/max-use')['validCnpj']>
     readonly validCnpjOrCpf: UnwrapRef<typeof import('@maxvue/max-use')['validCnpjOrCpf']>
     readonly validCpf: UnwrapRef<typeof import('@maxvue/max-use')['validCpf']>

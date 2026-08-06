@@ -4,7 +4,6 @@ import { resolve } from 'path';
 import UnoCSS from 'unocss/vite';
 import AutoImport from 'unplugin-auto-import/vite';
 import Components from 'unplugin-vue-components/vite';
-import { PrimeVueResolver } from '@primevue/auto-import-resolver';
 import { maxUseAutoImport } from '@maxvue/max-use';
 
 
@@ -50,8 +49,7 @@ export default defineConfig({
             allowOverrides: true,
             dts: './auto-import-components.d.ts',
             directives: true,
-            syncMode: 'overwrite',
-            resolvers: [PrimeVueResolver()]
+            syncMode: 'overwrite'
         })
     ],
     root: resolve(__dirname),

@@ -10,10 +10,8 @@
     },
     "dependencies": {
         "@iconify/vue": "^5.0.0",
-        "@primeuix/themes": "^2.0.3",
         "@unocss/reset": "^66.6.8",
         "primeicons": "^7.0.0",
-        "primevue": "^4.5.5",
         "sass": "^1.99.0",
         "vue": "^3.5.13",
         "vue-router": "^5.0.6"

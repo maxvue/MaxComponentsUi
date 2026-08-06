@@ -59,7 +59,7 @@
 
         <main class="playground__main">
             <section class="component-section">
-                <T1 h1="Button" h2="Botões" />
+                <MaxTitle1 h1="Button" h2="Botões" />
                 <div class="component-grid">
                     <div class="component-item">
                         <h3>Básico</h3>
@@ -118,7 +118,7 @@
                 <h2>Eventos</h2>
                 <div class="component-item">
                     <p>Último clique: {{ lastClickEvent || 'Nenhum' }}</p>
-                    <Button label="Clique em mim" @click="handleDetailedClick" />
+                    <MaxButton label="Clique em mim" @click="handleDetailedClick" />
                 </div>
             </section>
 

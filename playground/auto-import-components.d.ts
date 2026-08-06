@@ -11,7 +11,6 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    Button: typeof import('primevue/button')['default']
     InputBase: typeof import('./../src/components/InputBase.vue')['default']
     MaxAccordion: typeof import('./../src/components/MaxAccordion.vue')['default']
     MaxAccordionContent: typeof import('./../src/components/MaxAccordionContent.vue')['default']
@@ -21,6 +20,10 @@ declare module 'vue' {
     MaxAnimateFade: typeof import('./../src/components/MaxAnimateFade.vue')['default']
     MaxAuthCard: typeof import('./../src/components/MaxAuthCard.vue')['default']
     MaxBadgeComponent: typeof import('./../src/components/MaxBadgeComponent.vue')['default']
+    MaxBaseInput: typeof import('./../src/components/base/MaxBaseInput.vue')['default']
+    MaxBaseOverlay: typeof import('./../src/components/base/MaxBaseOverlay.vue')['default']
+    MaxBaseSpinner: typeof import('./../src/components/base/MaxBaseSpinner.vue')['default']
+    MaxBaseVirtualScroller: typeof import('./../src/components/base/MaxBaseVirtualScroller.vue')['default']
     MaxButton: typeof import('./../src/components/MaxButton.vue')['default']
     MaxChart: typeof import('./../src/components/MaxChart.vue')['default']
     MaxColorPicker: typeof import('./../src/components/MaxColorPicker.vue')['default']
@@ -96,12 +99,8 @@ declare module 'vue' {
     MaxTransitionUp: typeof import('./../src/components/MaxTransitionUp.vue')['default']
     MaxUserAvatar: typeof import('./../src/components/MaxUserAvatar.vue')['default']
     MaxWaitIcon: typeof import('./../src/components/MaxWaitIcon.vue')['default']
-    RadioButton: typeof import('primevue/radiobutton')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     TransitionFade: typeof import('./../src/components/TransitionFade.vue')['default']
-  }
-  export interface GlobalDirectives {
-    Tooltip: typeof import('primevue/tooltip')['default']
   }
 }

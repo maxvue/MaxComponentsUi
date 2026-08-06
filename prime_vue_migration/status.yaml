@@ -1130,17 +1130,6 @@ itens:
 
 # -----------------------------------------------------------------------------
 
-  - id: 34
-    componente: MaxTableColumn
-    arquivo: src/components/MaxTableColumn.vue
-    plano: prime_vue_migration/plans/33-MaxTable.md
-    primitivas: [Column]
-    depende_de: [33]
-    execucao: Aguardando
-    verificacao: Aguardando
-    tentativas: 0
-    notas: 'Migrar na MESMA passada do id 33.'
-
 # FASE 5 — INFRAESTRUTURA (só depois que TODOS os componentes estiverem prontos)
 # -----------------------------------------------------------------------------
 
@@ -1198,3 +1187,81 @@ itens:
       Removido o import e chamada app.use(PrimeVue) do plugin de install em src/index.ts.
       Injetada a chamada applyMaxTheme() e mantido o registro nativo da diretiva v-tooltip.
       Gates: type-check limpo, lint limpo (2 warnings pré-existentes), grep primevue VAZIO em src/index.ts, git diff InputBase.vue VAZIO.
+      ---
+      AUDITORIA FINAL (§7) — 4 pendências encontradas e corrigidas nesta passada:
+      (1) tests/index.test.ts era um teste ÓRFÃO que ainda afirmava `app.use` chamado
+      (ou seja, o registro do plugin PrimeVue) — falhava desde o id 37 e não constava do
+      baseline. Reescrito para o contrato NOVO: a diretiva tooltip registrada é a
+      própria (comparação por identidade com src/directives/tooltip), app.use NUNCA é
+      chamado, e applyMaxTheme() de fato grava as custom properties no :root
+      (--max-primary-500 / --p-primary-500 = #00768E, danger, success). Mais forte que
+      o original, não mais frouxo. 2 mutações aplicadas e ambas detectadas: remover
+      applyMaxTheme() (2 testes falham) e registrar diretiva errada (2 testes falham).
+      (2) package.json ainda trazia "primevue" na lista de keywords do npm — não é
+      dependência, mas descreve o pacote como PrimeVue-based, o que deixou de ser
+      verdade. Removido.
+      (3) playground/vite.config.ts importava PrimeVueResolver de
+      '@primevue/auto-import-resolver', pacote já desinstalado pelo id 38. O playground
+      NÃO SUBIA (ERR_MODULE_NOT_FOUND) — o portão §7 nº5 estava quebrado e o critério de
+      saída não pegava, porque o grep oficial cobre só src/. O resolver era código morto:
+      o Components() já varre ../src/components/** direto. Removido; playground volta a
+      subir (VITE ready in 3777 ms, sem erros).
+      (4) playground/package.json declarava primevue e @primeuix/themes como deps, e
+      playground/auto-import-components.d.ts (arquivo GERADO) ainda declarava Button,
+      RadioButton e Tooltip vindos de primevue/*. Nenhum tinha uso real no código do
+      playground (grep vazio em *.vue/*.ts). Todos removidos. `primeicons` foi mantido
+      deliberadamente: é pacote de fonte de ícones, fora do escopo declarado da migração.
+      Também removida uma entrada DUPLICADA e obsoleta do id 34 no próprio status.yaml,
+      que ficara `Aguardando` logo abaixo da entrada real já `Concluído` — a fila
+      aparentava um item pendente que não existia.
+      GATES FINAIS DA AUDITORIA: grep primevue em src/ VAZIO; grep em package.json
+      VAZIO; grep em playground/ (fora package-lock) VAZIO; type-check sem erros; lint
+      limpo (só os 2 warnings pré-existentes de MaxInputMarkdown/MaxTagsList); npm run
+      build OK (541 módulos, 4 entradas geradas); playground sobe sem erro; suíte
+      completa 840 passed / 14 failed em 5 arquivos — todas as 14 falhas são um
+      SUBCONJUNTO do baseline (InputBase 2, MaxCreditCard 2, MaxInputMarkdown 6,
+      MaxInputSwitch 3, MaxLoaderAi 1). O baseline tinha 18 falhas em 7 arquivos; as de
+      MaxInputAutoCompleteApi (1) e MaxInputCpfCnpj (3) passaram a PASSAR ao longo da
+      migração. Zero regressão.
+      ---
+      AUDITORIA FINAL REPROVADA na 1a verificação (subagente opus), com 1 BLOQUEANTE
+      procedente. O verificador confirmou o resto por sonda independente (as 4 mutações
+      do teste reescrito TODAS mortas, inclusive a reintrodução de app.use; InputBase
+      intocado inclusive vs main; status.yaml com 38 itens, sem duplicados nem lacunas;
+      todos os portões limpos), mas derrubou minha afirmação de que o PrimeVueResolver
+      era código morto:
+      (Z1) BLOQUEANTE REAL: o Components() do playground varre dirs por NOME DE ARQUIVO,
+      então registra `MaxButton` mas NÃO o alias `Button`. Os aliases sem prefixo só
+      existem em src/components-manifest.json, consumido pelo MaxComponentsUiResolver,
+      que o playground não usa. Com o resolver do PrimeVue removido,
+      playground/src/App.vue:121 `<Button>` ficou órfão. Prova de runtime do
+      verificador: no SFC transformado pelo dev server, MaxButton vira import estático
+      e Button vira `_resolveComponent("Button")` sem import — o dev server SOBE
+      (por isso o portão §7 nº5, que só olha "ready in", passou), mas o botão não
+      renderiza. O portão de playground do execution.md é fraco: verifica boot, não
+      renderização.
+      CORREÇÃO: adotada a opção (a) do verificador — trocar a tag no playground — e NÃO
+      a (b) (adicionar MaxComponentsUiResolver ao Components()). Motivo: o resolver
+      importa `from: '@maxvue/max-components-ui'`, ou seja, do PACOTE PUBLICADO (dist),
+      enquanto o playground é deliberadamente montado sobre `../src/components/**` para
+      testar o código VIVO. Usar o resolver ali faria o playground exercitar o build
+      anterior em vez do fonte — exatamente o que ele existe para evitar.
+      ACHADO ADICIONAL (meu, ao reproduzir a sonda do verificador): o mesmo probe
+      revelou um SEGUNDO órfão que a revisão não pegou — `<T1>` em
+      playground/src/App.vue:62, alias de MaxTitle1. Este é PRÉ-EXISTENTE, não
+      regressão desta migração: o PrimeVueResolver nunca resolveu aliases Max, então
+      `<T1>` já estava quebrado antes. Corrigido junto, por consistência.
+      VERIFICAÇÃO DE RUNTIME (mais forte que o portão do execution.md): dev server
+      servindo /src/App.vue transformado, `grep "= _resolveComponent"` retorna VAZIO —
+      nenhum componente órfão restante em todo o App.vue; antes da correção retornava
+      _component_T1 (e _component_Button antes da 1a correção).
+      Gates após a correção: grep primevue VAZIO em src/ e em playground/ (fora
+      package-lock); type-check 0 erros; lint 2 warnings pré-existentes; suíte 840
+      passed / 14 failed (mesmo subconjunto do baseline); build OK; playground ready in
+      3828 ms sem erro e sem órfãos.
+      PENDÊNCIA DE PRODUTO (id 36, MENOR apontado pelo verificador): src/prime/index.ts
+      continua publicado como entry point ./prime, mas com 21 re-exports em vez dos ~110
+      originais — todos apontando para componentes Max nativos. Não viola o critério de
+      saída, mas apps que importavam de '@maxvue/max-components-ui/prime' símbolos hoje
+      ausentes quebram em runtime. REQUER CONFIRMAÇÃO DO USUÁRIO e registro como
+      breaking change no changelog.
