@@ -228,7 +228,7 @@ route.name existe?
 | 1 | **MaxPinia como pacote irmão** | `../MaxPinia` criado, `pinia@4` compatível, `file:../MaxPinia` no `package.json`, `npm install` limpo | — |
 | 2 | ✅ **Stores base** | `useLoading.Store.ts` + `useUser.Store.ts` na lib, com rotas configuráveis via `configureMaxApp()` | 1 |
 | 3 | ✅ **`useSystem.Store.ts`** | Reescrever o rascunho `useApp.Store.ts`: imports explícitos, remover `useChatSettingsStore`, `split_panel` opcional, exportar em `stores/index.ts` | 2 |
-| 4 | **`useLogin.Store.ts`** | Corrigir imports (`apiGetRoute`/`apiPostRoute` do MaxUse), trocar `vue3-toastify` pelo `useToastStore`, rotas via config | 3 |
+| 4 | ✅ **`useLogin.Store.ts`** | Corrigir imports (`apiGetRoute`/`apiPostRoute` do MaxUse), trocar `vue3-toastify` pelo `useToastStore`, rotas via config | 3 |
 | 5 | **`MaxLoadScreen`** | `LoadScreen.vue` + `LoadScreenTarget.vue` → `MaxLoadScreen.vue` + `MaxLoadScreenTarget.vue` | 2 |
 | 6 | **`MaxContainerApp` + `MaxBottomMenu`** | Ambos são folhas, sem stores complexas | 3 |
 | 7 | **`MaxSideMenu`** | `SideMenu.vue` + `MenuVerticalItem.vue`; store `useListMenus` configurável | 3 |
@@ -250,7 +250,7 @@ route.name existe?
 | 1 | MaxPinia como pacote irmão | ✅ `done` |
 | 2 | Stores base (loading, user) | ✅ `done` |
 | 3 | useSystem.Store | ✅ `done` |
-| 4 | useLogin.Store | `waiting` |
+| 4 | useLogin.Store | ✅ `done` |
 | 5 | MaxLoadScreen | `waiting` |
 | 6 | MaxContainerApp + MaxBottomMenu | `waiting` |
 | 7 | MaxSideMenu | `waiting` |
@@ -294,6 +294,27 @@ system.registerSplitPanelKeyPart(() => chat.is_visible ? '_visible' : '_notvisib
 ```
 
 A ordem importa: `_hidded` antes de `_visible`, para reproduzir exatamente a chave original.
+
+---
+
+## 8.0.1 Pendência da etapa 4 — fallback de e-mail no login
+
+A `useLogin.Store` do engeapp devolvia `'undefined@enge.tec.br'` quando o método detectado
+**não** era e-mail:
+
+```ts
+const email = computed(() => {
+    if (method.value === 'email') return value.value;
+    return 'undefined@enge.tec.br';   // sentinela específica do engeapp
+});
+```
+
+Na versão da lib esse fallback virou **string vazia**, coerente com `phone_number` e `user_name`.
+
+**Verificar na etapa 14:** se o endpoint de login do engeapp exigir um e-mail sintaticamente
+válido mesmo em login por telefone/usuário, o backend passará a receber `''`. Duas saídas:
+ajustar a validação no servidor (preferível) ou reintroduzir a sentinela na aplicação, antes de
+chamar `submit()`. Um login por telefone/usuário no ambiente de dev evidencia o caso.
 
 ---
 
