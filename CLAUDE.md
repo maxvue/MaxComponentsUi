@@ -18,7 +18,7 @@ Arquivos de controle (todos na raiz do repositório):
 |---------|-------|
 | [`migration_plan.md`](migration_plan.md) | Brief original do orquestrador — como os planos por componente foram gerados. |
 | [`status-primevue.migration.yaml`](status-primevue.migration.yaml) | Fonte de verdade do progresso: lista cada componente dependente do PrimeVue com `level` e `status` (`waiting`/`in_progress`/`done`/`blocked`). |
-| [`migration_plans/`](migration_plans/) | Um plano de migração autossuficiente por componente (`migration_plans/[NomeComponente].md`), 33 no total. |
+| [`migration_plans/`](migration_plans/) | Um plano de migração autossuficiente por componente (`migration_plans/[NomeComponente].md`), 34 no total. |
 | [`migration_executor.md`](migration_executor.md) | Painel de controle + protocolo do **agente executor**: uma fila ordenada e a regra de que cada invocação migra exatamente **um** componente, depois para e atualiza o status. |
 
 **Se pedirem para avançar a migração**, siga o `migration_executor.md`: pegue o próximo item `waiting` de menor número, execute o plano dele, verifique, atualize o status **tanto no YAML quanto na fila do executor** e então pare. Não migre mais de um componente por invocação, não pule etapas e não reordene. Restrições de ordem principais: `InputBase` primeiro (destrava ~19 inputs); `MaxInputSelect` antes dos dropdowns que o reutilizam; o conjunto `MaxTable` → `MaxTableColumn` → `MaxTableFields` migra junto.
