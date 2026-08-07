@@ -41,6 +41,7 @@ export { default as MaxTabPanels } from './components/MaxTabPanels.vue';
 export { default as TabPanels } from './components/MaxTabPanels.vue';
 export { default as MaxTabPanel } from './components/MaxTabPanel.vue';
 export { default as TabPanel } from './components/MaxTabPanel.vue';
+export { default as MaxTabItem } from './components/MaxTabItem.vue';
 
 // Accordion
 export { default as MaxAccordion } from './components/MaxAccordion.vue';

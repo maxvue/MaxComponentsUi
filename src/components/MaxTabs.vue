@@ -1,5 +1,5 @@
 <template>
-    <div class="max-tabs" :class="{ 'max-tabs-scrollable': props.scrollable }">
+    <div class="max-tabs">
         <slot></slot>
     </div>
 </template>

@@ -9,7 +9,16 @@
     "exclude": [
         "src/**/__tests__/*",
         "node_modules",
-        "dist"
+        "dist",
+        // Arquivos órfãos trazidos da app Engeapp: não são exportados por
+        // src/index.ts nem por src/stores/index.ts, não estão no manifesto do
+        // resolver e não são referenciados por nenhum componente ou teste.
+        // Dependem de globals auto-importados da app (user, loading, version,
+        // useWindowSize, useRefCached, PageLayout, VoipDialer...) que não
+        // existem nesta biblioteca. Mantidos como referência, fora do build.
+        "src/stores/useApp.Store.ts",
+        "src/stores/useLogin.Store.ts",
+        "src/components/MaxApp.vue"
     ],
     "compilerOptions": {
         "composite": true,
