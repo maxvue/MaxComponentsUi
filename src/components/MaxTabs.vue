@@ -11,16 +11,36 @@
 
 <script setup lang="ts">
     import { isValid, Random, useRefCached } from '@maxvue/max-use';
-    import { provide, computed, watch, ref } from 'vue';
+    import { TABS_INJECTION_KEY } from '../helpers/tabsContext';
+    import { provide, computed, watch, ref, toRef } from 'vue';
 
     type Props = {
         title?: string;
         icon?: string;
         id?: string | number;
         cached?: boolean;
+        /** Monta o conteudo do painel apenas quando ativado pela primeira vez. */
+        lazy?: boolean;
+        /** Ativa o tab ao receber foco, sem exigir clique. */
+        selectOnFocus?: boolean;
+        /** tabindex aplicado aos headers. */
+        tabindex?: number;
+        /** Habilita rolagem horizontal dos headers quando houver overflow. */
+        scrollable?: boolean;
+        /** Exibe os botoes de navegacao no modo scrollable. */
+        showNavigators?: boolean;
     };
 
-    const props = withDefaults( defineProps<Props>(), { title: '', icon: 'x', cached: true });
+    const props = withDefaults( defineProps<Props>(), {
+        title: '',
+        icon: 'x',
+        cached: true,
+        lazy: false,
+        selectOnFocus: false,
+        tabindex: 0,
+        scrollable: false,
+        showNavigators: true
+    });
 
     /**
      * Sentinela devolvida pelo useRefCached quando ainda não há aba salva no
@@ -32,7 +52,7 @@
 
     const active_tab_cached = useRefCached<string | number>('max-tab-opened-' + (props.id ?? ''), NO_CACHED);
 
-    const active_tab = defineModel<string | number>('value', { default: 0 });
+    const active_tab = defineModel<string | number>('value');
 
     watch(active_tab_cached, () => {
         if (active_tab.value === active_tab_cached.value) return;
@@ -42,7 +62,7 @@
 
     watch(active_tab, () => {
         if (active_tab.value === active_tab_cached.value) return;
-        if (isValid(props.id) && props.cached) active_tab_cached.value = active_tab.value;
+        if (isValid(props.id) && props.cached && isValid(active_tab.value)) active_tab_cached.value = active_tab.value;
     });
 
     const tabs_id = computed(() => props.id ?? Random());
@@ -89,6 +109,78 @@
         selectTab
     });
 
+    /** Value ativo do novo sistema de tabs, sempre normalizado como string. */
+    const active_value = computed(() => (active_tab.value === undefined ? undefined : String(active_tab.value)));
+
+    /** Headers registrados pelos MaxTab, na ordem de montagem. */
+    const tab_headers = ref<{ value: string; el: HTMLElement; disabled: () => boolean }[]>([]);
+
+    const registerTabHeader = (value: string, el: HTMLElement, disabled: () => boolean) => {
+        tab_headers.value.push({ value, el, disabled });
+        return () => {
+            tab_headers.value = tab_headers.value.filter((header) => header.value !== value);
+        };
+    };
+
+    /** Value do primeiro tab habilitado, na ordem de registro. */
+    const fallback_tab_value = computed(() => tab_headers.value.find((header) => ! header.disabled())?.value);
+
+    /**
+     * Antes de qualquer tab se registrar, fica true de forma conservadora
+     * (janela entre a primeira renderizacao e o onMounted dos MaxTab
+     * filhos) — assim a ausencia temporaria de registro nao e tratada como
+     * "value orfao".
+     */
+    const has_registered_active_tab = computed(() => {
+        if (! tab_headers.value.length) return true;
+        if (active_value.value === undefined) return false;
+        return tab_headers.value.some((header) => header.value === active_value.value);
+    });
+
+    const select = (value: string) => {
+        active_tab.value = value;
+    };
+
+    /**
+     * Move a selecao a partir de uma tecla de navegacao, pulando tabs
+     * desabilitados e dando a volta nas extremidades.
+     */
+    const navigate = (from: string, key: 'next' | 'prev' | 'first' | 'last') => {
+
+        const enabled = tab_headers.value.filter((header) => ! header.disabled());
+        if (! enabled.length) return;
+
+        const current = enabled.findIndex((header) => header.value === from);
+
+        let target = 0;
+        if (key === 'first') target = 0;
+        else if (key === 'last') target = enabled.length - 1;
+        else if (key === 'next') target = current < 0 ? 0 : (current + 1) % enabled.length;
+        else target = current <= 0 ? enabled.length - 1 : current - 1;
+
+        const header = enabled[target];
+        if (! header) return;
+
+        header.el.focus();
+        if (props.selectOnFocus) select(header.value);
+    };
+
+    provide(TABS_INJECTION_KEY, {
+        active_value,
+        fallback_tab_value,
+        has_registered_active_tab,
+        select,
+        lazy: toRef(props, 'lazy'),
+        select_on_focus: toRef(props, 'selectOnFocus'),
+        tabindex: toRef(props, 'tabindex'),
+        id_prefix: `max-tabs-${Random()}`,
+        registerTab: registerTabHeader,
+        navigate,
+        scrollable: toRef(props, 'scrollable'),
+        show_navigators: toRef(props, 'showNavigators')
+    });
+
+    defineExpose({ select, navigate });
 </script>
 
 <style lang="scss">
