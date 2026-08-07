@@ -262,6 +262,13 @@
             color: var(--orange-600);
         }
 
+        .max-input-field-div {
+            outline: 1px solid var(--orange-b-500) !important;
+
+            &:focus-within {
+                outline: 1px solid var(--blue-700) !important;
+            }
+        }
 
         .p-select {
             border-color: var(--orange-600);
@@ -279,6 +286,14 @@
     &.error {
         label, .max-input-label {
             color: var(--max-red-600);
+        }
+
+        .max-input-field-div {
+            outline: 1px solid var(--red-b-650) !important;
+
+            &:focus-within {
+                outline: 1px solid var(--blue-700) !important;
+            }
         }
 
         input {
