@@ -59,7 +59,7 @@ describe('MaxUserSection', () => {
 
     it('usa labels padrão em pt-BR no menu', () => {
         const wrapper = mountSection({ name: 'João', userId: 1 });
-        const labels = wrapper.findAll('.main-item-menu-div').map(d => d.text());
+        const labels = wrapper.findAll('.main-item-menu-div').map((d) => d.text());
         expect(labels).toContain('Meu perfil');
         expect(labels).toContain('Configurações');
         expect(labels).toContain('Suporte');
@@ -68,17 +68,17 @@ describe('MaxUserSection', () => {
 
     it('permite sobrescrever as labels', () => {
         const wrapper = mountSection({ name: 'João', userId: 1, labelProfile: 'My profile' });
-        const labels = wrapper.findAll('.main-item-menu-div').map(d => d.text());
+        const labels = wrapper.findAll('.main-item-menu-div').map((d) => d.text());
         expect(labels).toContain('My profile');
     });
 
     it('alterna o label de dark mode conforme a prop darkMode', () => {
         const off = mountSection({ name: 'João', userId: 1, darkMode: false })
-            .findAll('.main-item-menu-div').map(d => d.text());
+            .findAll('.main-item-menu-div').map((d) => d.text());
         expect(off).toContain('Ativar Modo escuro');
 
         const on = mountSection({ name: 'João', userId: 1, darkMode: true })
-            .findAll('.main-item-menu-div').map(d => d.text());
+            .findAll('.main-item-menu-div').map((d) => d.text());
         expect(on).toContain('Desativar Modo escuro');
     });
 
@@ -90,7 +90,7 @@ describe('MaxUserSection', () => {
     it('emite os eventos correspondentes ao clicar nos itens do menu', async () => {
         const wrapper = mountSection({ name: 'João', userId: 1, darkMode: false });
         const itemBy = (label: string) =>
-            wrapper.findAll('.main-item-menu-div').find(d => d.text() === label)!;
+            wrapper.findAll('.main-item-menu-div').find((d) => d.text() === label)!;
 
         await itemBy('Meu perfil').trigger('click');
         await itemBy('Configurações').trigger('click');
@@ -121,7 +121,7 @@ describe('MaxUserSection', () => {
     it('respeita o override do menu via prop items', () => {
         const items = [{ label: 'Custom', icon: 'mdi:star', exec: () => {} }];
         const wrapper = mountSection({ name: 'João', userId: 1, items });
-        const labels = wrapper.findAll('.main-item-menu-div').map(d => d.text());
+        const labels = wrapper.findAll('.main-item-menu-div').map((d) => d.text());
         expect(labels).toEqual(['Custom']);
     });
 });
