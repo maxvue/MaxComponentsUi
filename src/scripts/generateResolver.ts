@@ -9,9 +9,22 @@ const __dirname = path.dirname(__filename);
 
 const componentsDir = path.resolve(__dirname, '../components');
 const outputFile = path.resolve(__dirname, '../components-manifest.json');
+const tsconfigFile = path.resolve(__dirname, '../../tsconfig.json');
+
+// tsconfig.json permite comentários (JSONC), então não é JSON puro. Em vez de
+// fazer parsing completo do arquivo, extraímos apenas as entradas do array
+// `exclude` que apontam para arquivos .vue dentro de src/components/ — é
+// tudo que este script precisa para não listar componentes excluídos do
+// build (ex.: arquivos órfãos deixados fora do tsconfig).
+const tsconfigContent = fs.readFileSync(tsconfigFile, 'utf-8');
+const excludedComponentFiles = new Set(
+    [...tsconfigContent.matchAll(/["']src\/components\/([^"']+\.vue)["']/g)].map((match) => match[1])
+);
 
 const files = fs.readdirSync(componentsDir);
-const componentNames = files.filter((file) => file.endsWith('.vue')).map((file) => file.replace('.vue', ''));
+const componentNames = files
+    .filter((file) => file.endsWith('.vue') && !excludedComponentFiles.has(file))
+    .map((file) => file.replace('.vue', ''));
 
 const aliases: Record<string, string> = {
     'Botao': 'MaxButton',
