@@ -136,7 +136,7 @@
         if (/^(5[1-5]|2[2-7])/.test(digits)) return 'mastercard';
         if (/^3[47]/.test(digits)) return 'amex';
         if (/^(4011|4312|4389|5041|5066|5090|6277|6362|6363|650|651|655)/.test(digits)) return 'elo';
-        if (/^(38|60)/.test(digits)) return 'hipercard';
+        if (/^(6062|384100|384140|384160)/.test(digits)) return 'hipercard';
         if (/^(30[0-5]|36|38)/.test(digits)) return 'diners';
         if (/^(6011|65|64[4-9])/.test(digits)) return 'discover';
         return null;

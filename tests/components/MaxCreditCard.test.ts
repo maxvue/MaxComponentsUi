@@ -216,6 +216,23 @@ describe('MaxCreditCard', () => {
         });
     });
 
+    describe('detecção de bandeira (detected_type)', () => {
+        it('classifica número real da Diners como diners', () => {
+            const wrapper = mountCard({ number: '30569309025904' });
+            expect((wrapper.vm as any).detected_type).toBe('diners');
+        });
+
+        it('classifica número real da Discover como discover', () => {
+            const wrapper = mountCard({ number: '6011111111111117' });
+            expect((wrapper.vm as any).detected_type).toBe('discover');
+        });
+
+        it('classifica número real da Hipercard como hipercard', () => {
+            const wrapper = mountCard({ number: '6062825624254001' });
+            expect((wrapper.vm as any).detected_type).toBe('hipercard');
+        });
+    });
+
     describe('Trio de inputs de cartão de crédito (MaxInputCreditCard*)', () => {
         it('preserva InputBase como wrapper e remove PrimeVue do MaxInputCreditCard', () => {
             const wrapper = mount(MaxInputCreditCard);
