@@ -142,6 +142,8 @@ export { default as MaxTransitionUp } from './components/MaxTransitionUp.vue';
 export { default as TransitionFade } from './components/TransitionFade.vue';
 export { default as MaxAnimateFade } from './components/MaxAnimateFade.vue';
 export { default as MaxUserAvatar } from './components/MaxUserAvatar.vue';
+export { default as MaxUserSection } from './components/MaxUserSection.vue';
+export { default as UserSection } from './components/MaxUserSection.vue';
 export { default as MaxPopoverConfirm } from './components/MaxPopoverConfirm.vue';
 export { default as MaxPopover } from './components/MaxPopover.vue';
 export { default as MaxModal } from './components/MaxModal.vue';

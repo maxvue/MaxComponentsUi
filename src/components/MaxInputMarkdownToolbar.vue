@@ -1,5 +1,7 @@
 <template>
     <div class="md-toolbar" :class="{ 'md-toolbar--disabled': !editor }">
+        <span v-if="props.label" class="md-toolbar__label">{{ props.label }}</span>
+        <div v-if="props.label" class="md-toolbar__divider" />
         <!-- Formatação inline -->
         <div class="md-toolbar__group">
             <button
@@ -237,6 +239,7 @@
 
     const props = defineProps<{
         editor: Editor | null;
+        label?: string;
     }>();
 
     const showLinkPopover = ref(false);
@@ -295,6 +298,14 @@
         border-bottom: 1px solid var(--background-200, rgb(0 0 0 / 8%));
         border-top-left-radius: inherit;
         border-top-right-radius: inherit;
+
+        &__label {
+            font-size: 0.8em;
+            font-weight: 600;
+            color: var(--background-500, #6b7280);
+            white-space: nowrap;
+            padding: 0 4px;
+        }
 
         &__group {
             display: flex;
