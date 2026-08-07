@@ -52,6 +52,7 @@
     "dependencies": {
         "@iconify/vue": "^5.0.1",
         "@lottiefiles/dotlottie-vue": "^0.11.24",
+        "@maxvue/max-pinia": "file:../MaxPinia",
         "@maxvue/max-use": "file:../MaxUse",
         "@primeuix/themes": "^2.0.3",
         "@tanstack/vue-virtual": "^3.13.35",
