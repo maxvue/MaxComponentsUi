@@ -35,7 +35,13 @@ vi.mock('@tiptap/starter-kit', () => ({ default: {} }));
 vi.mock('@tiptap/extension-underline', () => ({ default: {} }));
 vi.mock('@tiptap/extension-link', () => ({ default: { configure: vi.fn(() => ({})) } }));
 vi.mock('@tiptap/extension-image', () => ({ default: {} }));
-vi.mock('@tiptap/extension-table', () => ({ default: { configure: vi.fn(() => ({})) } }));
+// `@tiptap/extension-table` exporta `Table` de forma nomeada (diferente das
+// extensoes irmas, que usam default). O mock expoe os dois formatos para nao
+// quebrar caso o estilo de import mude.
+vi.mock('@tiptap/extension-table', () => {
+    const Table = { configure: vi.fn(() => ({})) };
+    return { Table, default: Table };
+});
 vi.mock('@tiptap/extension-table-row', () => ({ default: {} }));
 vi.mock('@tiptap/extension-table-header', () => ({ default: {} }));
 vi.mock('@tiptap/extension-table-cell', () => ({ default: {} }));

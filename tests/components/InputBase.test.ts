@@ -71,12 +71,15 @@ describe('InputBase.vue', () => {
         expect(wrapper.find('.required').text()).toBe('*');
     });
 
-    it('renders the message spacer when there is no message', () => {
+    // A linha de mensagem e sempre renderizada (reservando o espaco), ficando
+    // vazia quando nao ha mensagem. O antigo `.message-spacer` deixou de existir
+    // na migracao que removeu FloatLabel/IconField do PrimeVue.
+    it('keeps an empty message line when there is no message', () => {
         const wrapper = mount(InputBase, {
             props: { label: 'Only label' }
         });
-        expect(wrapper.find('.message-spacer').exists()).toBe(true);
-        expect(wrapper.find('.input-message').exists()).toBe(false);
+        expect(wrapper.find('.input-message').exists()).toBe(true);
+        expect(wrapper.find('.input-message .message-text').text()).toBe('');
     });
 
     it('renders both left and right icons with the slot between them', () => {
@@ -86,9 +89,8 @@ describe('InputBase.vue', () => {
         });
         expect(hasIcon(wrapper, 'mdi:left')).toBe(true);
         expect(hasIcon(wrapper, 'mdi:right')).toBe(true);
-        const icons = wrapper.findAll('.max-inputicon');
-        expect(icons.length).toBe(2);
-        expect(wrapper.find('.max-iconfield .slotted-input').exists()).toBe(true);
+        expect(wrapper.findAllComponents(MaxIcon).length).toBe(2);
+        expect(wrapper.find('.max-input-field-div .input-slot-div .slotted-input').exists()).toBe(true);
     });
 
     it('renders no input icon when noIcon is set even with icon defined', () => {

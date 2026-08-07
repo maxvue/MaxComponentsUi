@@ -17,7 +17,7 @@
 
 
 <script setup lang="ts">
-    import { ref, computed, useAttrs, Ref } from 'vue';
+    import { ref, computed, useAttrs } from 'vue';
     import { getColorFromVar, contrastColor, watchTrue } from '@maxvue/max-use';
     import MaxTagSelect from './MaxTagSelect.vue';
     import MaxIconButton from './MaxIconButton.vue';

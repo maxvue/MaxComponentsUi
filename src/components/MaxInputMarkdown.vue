@@ -1,18 +1,10 @@
 <template>
-    <div class="max-input-mark-down">
-        <div
-            class="max-input-markdown__editor-wrap"
-            :class="{ 'max-input-markdown__editor-wrap--disabled': props.disabled }"
-            @click.stop="closePopovers"
-        >
+    <InputBase v-bind="inputBaseProps" in-line class="max-input-mark-down">
+        <div class="max-input-markdown__editor-wrap" :class="{ 'max-input-markdown__editor-wrap--disabled': props.disabled }" @click.stop="closePopovers">
             <MaxInputMarkdownToolbar :editor="editor ?? null" />
-            <EditorContent
-                class="max-input-markdown__content"
-                :style="{ minHeight: props.minHeight, maxHeight: props.maxHeight }"
-                :editor="editor"
-            />
+            <EditorContent class="max-input-markdown__content" :style="{ minHeight: props.minHeight, maxHeight: props.maxHeight }" :editor="editor" />
         </div>
-    </div>
+    </InputBase>
 </template>
 
 <script setup lang="ts">
@@ -28,6 +20,7 @@
     import TableCell from '@tiptap/extension-table-cell';
     import { Markdown } from 'tiptap-markdown';
     import MaxInputMarkdownToolbar from './MaxInputMarkdownToolbar.vue';
+    import InputBase from './InputBase.vue';
 
     const props = withDefaults(
         defineProps<{

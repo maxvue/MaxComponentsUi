@@ -41,7 +41,6 @@ export const useIconStore = defineStore('icons', () => {
                 headers: { 'Accept': 'application/json' }
             }).then((res) => res.json()).then((data) => {
 
-                console.trace('Ícones requisitados com sucesso', icons_to_fetch);
                 const updated_data = { ...icons_data.value };
 
                 for (const icon_name of icons_to_fetch) {

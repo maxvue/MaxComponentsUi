@@ -1,4 +1,4 @@
-import { mount } from '@vue/test-utils';
+import { mount, flushPromises } from '@vue/test-utils';
 import { describe, it, expect, vi } from 'vitest';
 import MaxLoaderAi from '../../src/components/MaxLoaderAi.vue';
 
@@ -10,12 +10,16 @@ vi.mock('@lottiefiles/dotlottie-vue', () => ({
 }));
 
 describe('MaxLoaderAi', () => {
-    it('renderiza o loader por padrão (show=undefined)', () => {
+    it('renderiza o loader por padrão (show=undefined)', async () => {
         const wrapper = mount(MaxLoaderAi);
 
         expect(wrapper.find('.loader-main-div-ai').exists()).toBe(true);
-        expect(wrapper.find('.mock-dot-lottie').exists()).toBe(true);
         expect(wrapper.find('.background-ai').exists()).toBe(true);
+
+        // DotLottieVue e carregado via defineAsyncComponent: so aparece no DOM
+        // depois que o import dinamico resolve.
+        await flushPromises();
+        expect(wrapper.find('.mock-dot-lottie').exists()).toBe(true);
     });
 
     it('exibe label quando fornecido via attrs', () => {

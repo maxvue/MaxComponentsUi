@@ -50,7 +50,12 @@ describe('MaxInputAutoCompleteApi.vue', () => {
         const wrapper = mountAutoCompleteApi({ data: { category: 1 } });
         await wrapper.vm.$nextTick();
 
-        expect(maxUse.getCachedApiIDB).toHaveBeenCalledWith('/api/test', { category: 1, input_value: '' });
+        // Argumentos adicionais (cache/callback) sao detalhe de implementacao;
+        // o contrato verificado aqui e a url e o payload da consulta.
+        expect(maxUse.getCachedApiIDB).toHaveBeenCalled();
+        const [url, payload] = (maxUse.getCachedApiIDB as any).mock.calls[0];
+        expect(url).toBe('/api/test');
+        expect(payload).toEqual({ category: 1, input_value: '' });
 
         // resolve promise
         await new Promise((resolve) => setTimeout(resolve, 0));

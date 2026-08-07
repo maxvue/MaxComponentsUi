@@ -48,24 +48,26 @@ describe('MaxInputCpfCnpj', () => {
         expect(maskValue.mask).toContain('##.###.###/####-##');
     });
 
-    it('valida CPF correto e marca done=true após blur', async () => {
+    // `done` e um computed derivado de temp_value — nao existe metodo
+    // imperativo de validacao. Basta atribuir o valor e aguardar o ciclo.
+    it('valida CPF correto e marca done=true', async () => {
         const wrapper = mountCpfCnpj({ cpf: true, modelValue: '52998224725' });
         (wrapper.vm as any).temp_value = '52998224725';
-        (wrapper.vm as any).checkDone();
+        await wrapper.vm.$nextTick();
         expect((wrapper.vm as any).done).toBe(true);
     });
 
-    it('valida CPF inválido e não marca done=true após blur', async () => {
+    it('valida CPF inválido e não marca done=true', async () => {
         const wrapper = mountCpfCnpj({ cpf: true, modelValue: '11111111111' });
         (wrapper.vm as any).temp_value = '11111111111';
-        (wrapper.vm as any).checkDone();
+        await wrapper.vm.$nextTick();
         expect((wrapper.vm as any).done).toBe(false);
     });
 
-    it('valida CNPJ correto e marca done=true após blur', async () => {
+    it('valida CNPJ correto e marca done=true', async () => {
         const wrapper = mountCpfCnpj({ cnpj: true, modelValue: '11222333000181' });
         (wrapper.vm as any).temp_value = '11222333000181';
-        (wrapper.vm as any).checkDone();
+        await wrapper.vm.$nextTick();
         expect((wrapper.vm as any).done).toBe(true);
     });
 

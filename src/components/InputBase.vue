@@ -1,5 +1,5 @@
 <template>
-    <div class="max-input-main-div" :class="`${props.float !== undefined ? 'float' : ''} ${done ? 'done' : ''} ${!noStatus && caution ? 'caution' : ''} ${textCenter ? 'text-center' : ''} ${textRight ? 'text-right' : ''} ${props.class ? props.class : ''} ${!noStatus &&  isError ? 'error' : ''} ${!noStatus && caution ? 'caution' : ''} ${inLine ? 'in-line' : ''}`">
+    <div class="max-input-main-div" :class="`${props.float !== undefined ? 'float' : ''} ${done ? 'done' : ''} ${!noStatus && caution ? 'caution' : ''} ${textCenter ? 'text-center' : ''} ${textRight ? 'text-right' : ''} ${props.class ? props.class : ''} ${!noStatus &&  isError ? 'error' : ''} ${inLine ? 'in-line' : ''}`">
         <!-- INPUT LABEL -->
         <div :class="inLine ? 'in-line-label' : 'max-input-label'" v-if="props.label" >
             {{ props.label }}
@@ -146,7 +146,9 @@
         if (typeof props.caution === 'string' && hasContent(props.caution)) return props.caution;
         const mainMsg = props.message ?? props.msg;
         if (hasContent(mainMsg)) return mainMsg;
-        return false;
+        // String vazia (e nao `false`) para manter a linha de mensagem reservando
+        // o espaco sem interpolar o literal "false" no template.
+        return '';
     });
 </script>
 

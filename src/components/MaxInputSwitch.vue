@@ -1,17 +1,17 @@
 <template>
     <InputBase v-bind="props" class="max-switch">
         <div :class="`max-switch-input ${temp_value === props.trueValue ? 'active' : ''}`">
-            <div class="max-switch-label left" v-if="has_left_label" @click="() => changeValue(props.falseValue)">
+            <div class="max-switch-label left" v-if="has_left_label" @click="() => setValue(props.falseValue)">
                 {{ props.labelLeft ?? props.leftLabel ?? props.labelFalse ?? props.falseLabel ?? '' }}
             </div>
-            <div :class="`max-switch-toggle ${temp_value === props.trueValue ? 'active' : ''}`" @click="() => changeValue()">
+            <div :class="`max-switch-toggle ${temp_value === props.trueValue ? 'active' : ''}`" @click="toggleValue">
                 <div class="max-switch-background">
                     <div class="max-switch-button">
 
                     </div>
                 </div>
             </div>
-            <div class="max-switch-label right" v-if="has_right_label" @click="() => changeValue(props.falseValue)">
+            <div class="max-switch-label right" v-if="has_right_label" @click="() => setValue(props.trueValue)">
                 {{ props.labelRight ?? props.rightLabel ?? props.labelTrue ?? props.trueLabel ?? props.question ?? '' }}
             </div>
         </div>
@@ -83,15 +83,21 @@
     const has_left_label = computed(() => hasContent(props.labelLeft ?? props.leftLabel ?? props.labelFalse ?? props.falseLabel));
     const has_right_label = computed(() => hasContent(props.labelRight ?? props.rightLabel ?? props.labelTrue ?? props.trueLabel ?? props.question));
 
-    const changeValue = (value: any = null) => {
-        if (value) {
-            temp_value.value = value;
-            emit('update:modelValue', temp_value.value);
-            return;
-        }
-
-        temp_value.value = temp_value.value === props.trueValue ? props.falseValue : props.trueValue;
+    /**
+     * Define o valor do switch explicitamente. Usado pelos rotulos laterais,
+     * onde cada lado representa um valor fixo (esquerda = falseValue,
+     * direita = trueValue), e nao uma alternancia.
+     */
+    const setValue = (value: any) => {
+        if (props.disabled) return;
+        temp_value.value = value;
         emit('update:modelValue', temp_value.value);
+    };
+
+    /** Alterna entre trueValue e falseValue. Usado pelo toggle central. */
+    const toggleValue = () => {
+        if (props.disabled) return;
+        setValue(temp_value.value === props.trueValue ? props.falseValue : props.trueValue);
     };
 
     watch(() => props.modelValue, () => temp_value.value = props.modelValue);

@@ -18,25 +18,31 @@ import InputBase from '../../src/components/InputBase.vue';
  *
  * Largura por glifo ~0.62em é uma aproximação razoável para monospace genérico do sistema.
  */
-function mockMonospaceFallbackMetrics(): void {
-    const GLYPH_WIDTH_EM = 0.75;
+/**
+ * O `font-size` dos `<text>` do cartao e declarado via `style` inline, nao como
+ * atributo — ler apenas `getAttribute('font-size')` cairia sempre no fallback
+ * de 16px e nada transbordaria, tornando o teste inofensivo.
+ */
+function readFontSize(el: SVGTextElement): number {
+    const fromStyle = (el as unknown as HTMLElement).style?.fontSize;
+    if (fromStyle) return parseFloat(fromStyle);
+    return parseFloat(el.getAttribute('font-size') ?? '16');
+}
 
+function mockTextMetrics(glyphWidthEm: number): void {
     vi.spyOn(SVGTextElement.prototype, 'getComputedTextLength').mockImplementation(function (this: SVGTextElement) {
-        const fontSize = parseFloat(this.getAttribute('font-size') ?? '16');
         const text = this.textContent ?? '';
-        return text.length * fontSize * GLYPH_WIDTH_EM;
+        return text.length * readFontSize(this) * glyphWidthEm;
     });
+}
+
+function mockMonospaceFallbackMetrics(): void {
+    mockTextMetrics(0.75);
 }
 
 /** Simula uma fonte compacta (ex.: JetBrains Mono real), na qual nada deveria transbordar. */
 function mockNarrowFontMetrics(): void {
-    const GLYPH_WIDTH_EM = 0.45;
-
-    vi.spyOn(SVGTextElement.prototype, 'getComputedTextLength').mockImplementation(function (this: SVGTextElement) {
-        const fontSize = parseFloat(this.getAttribute('font-size') ?? '16');
-        const text = this.textContent ?? '';
-        return text.length * fontSize * GLYPH_WIDTH_EM;
-    });
+    mockTextMetrics(0.45);
 }
 
 const NUMBER_MAX_WIDTH = 560;
@@ -166,12 +172,8 @@ describe('MaxCreditCard', () => {
         });
 
         it('CVV de 4 dígitos com fonte muito larga é clampado à caixa reservada', async () => {
-            vi.spyOn(SVGTextElement.prototype, 'getComputedTextLength').mockImplementation(function (this: SVGTextElement) {
-                const fontSize = parseFloat(this.getAttribute('font-size') ?? '16');
-                const text = this.textContent ?? '';
-                // Glifo bem mais largo que o necessário, para garantir overflow determinístico no CVV.
-                return text.length * fontSize * 1.2;
-            });
+            // Glifo bem mais largo que o necessário, para garantir overflow determinístico no CVV.
+            mockTextMetrics(1.2);
 
             const wrapper = mountCard({ cvv: '1234', side: 'back' });
             await nextTick();

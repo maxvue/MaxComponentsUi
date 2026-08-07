@@ -1,12 +1,5 @@
 <template>
-    <div
-        v-if="should_render"
-        v-show="is_active"
-        class="max-tab-panel"
-        role="tabpanel"
-        :id="`${context.id_prefix}-panel-${props.value}`"
-        :aria-labelledby="`${context.id_prefix}-tab-${props.value}`"
-    >
+    <div class="max-tab-panel" >
         <slot></slot>
     </div>
 </template>
