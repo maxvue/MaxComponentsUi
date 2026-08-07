@@ -1,0 +1,118 @@
+# =============================================================================
+# STATUS DA MIGRAÇÃO — TRILHA "NO USE" (componentes NÃO usados nos projetos)
+# =============================================================================
+# Fonte de verdade da trilha executada por `execute_no_use.md`.
+# Execução EM UMA ÚNICA TACADA, sem pausas: o executor só para no final,
+# quando todos os itens estiverem finalizados.
+#
+# REGRA CENTRAL DESTA TRILHA (execute_no_use.md §2):
+# antes de migrar, o executor RE-VERIFICA se o item realmente não é usado.
+#   A) Se estiver em uso em algum projeto -> TRANSFERE para status_in_use.yaml
+#      e NÃO executa aqui (o item passa a exigir validação manual).
+#   B) Se realmente não estiver em uso   -> executa direto, sem pausa.
+#
+# Status possíveis (para `execucao` e `verificacao`):
+#   Aguardando  -> ainda não iniciado
+#   Realizando  -> em andamento, não finalizado
+#   Concluído   -> finalizado e aprovado
+#   Transferido -> movido para a trilha in_use (re-verificação achou uso real)
+# =============================================================================
+
+meta:
+  projeto: '@maxvue/max-components-ui'
+  trilha: 'no_use'
+  objetivo: 'Migrar em lote os componentes sem nenhum consumidor conhecido'
+  primevue_versao_atual: '4.5.5'
+  gerado_em: '2026-08-07'
+  total_itens: 1
+  modo_execucao: 'LOTE CONTÍNUO — sem pausas; parar apenas no encerramento'
+
+  # ---------------------------------------------------------------------------
+  # POR QUE ESTA TRILHA TEM APENAS 1 ITEM
+  # ---------------------------------------------------------------------------
+  # O censo de uso (2026-08-07) mostrou que 28 dos 29 componentes sob migração
+  # SÃO usados em pelo menos um projeto de ~/GitHub. Só MaxInputIconPicker não é.
+  #
+  # O que tornou o censo confiável — e que uma busca ingênua erraria:
+  #
+  # 1. ALIASES. A maioria dos projetos NÃO usa o prefixo `Max`. Buscar por
+  #    "MaxInputToggle" retorna ZERO, mas <InputToggle> aparece em 9 arquivos.
+  #    O mesmo vale para MaxPhoneField (<InputPhone>, 14 arquivos) e
+  #    MaxPdfView (<PdfView>, 2 arquivos). Uma busca sem aliases classificaria
+  #    6 componentes usados como "não usados".
+  #
+  # 2. FALSOS POSITIVOS. Buscar a palavra solta também engana: MaxInputIconPicker
+  #    "aparecia" em 2 arquivos, mas as ocorrências eram a classe CSS
+  #    `icon-picker-drawer` — não o componente. Por isso o censo conta apenas
+  #    tag de abertura, tag de fechamento ou import ES.
+  #
+  # Consequência prática: esta trilha é curta e a in_use é longa. Isso é o
+  # resultado correto, não um erro de particionamento — a biblioteca é
+  # amplamente consumida.
+  # ---------------------------------------------------------------------------
+  censo:
+    data: '2026-08-07'
+    projetos_analisados:
+      - AgenteDeBolso
+      - engeapp
+      - MaxAdmin
+      - mbo
+      - MinhaBibliaOnline
+      - SocialMedia
+    escopo: 'resources/**/*.{vue,ts,js,tsx,jsx} — worktrees (-wt-) e node_modules excluídos'
+    metodo: 'Tag de abertura, tag de fechamento ou import ES. Menção solta da palavra NÃO conta.'
+    resultado: '28 de 29 componentes em uso; 1 sem nenhum consumidor'
+
+  # ---------------------------------------------------------------------------
+  # REGRAS DESTA MIGRAÇÃO QUE DIFEREM DO BRIEFING ORIGINAL
+  # ---------------------------------------------------------------------------
+  # 1. REUSO PRIMEIRO: antes de implementar, o executor verifica se já existe no
+  #    projeto uma solução concisa, PrimeVue-free e funcional para o mesmo fim.
+  # 2. SEM CLASSES .p-*: as classes do PrimeVue não devem nem precisam ser
+  #    emitidas. Use nomes próprios e remova as regras .p-* órfãs do repo.
+  #    Preencher `classes_p_removidas` — sem teste manual nesta trilha, essa
+  #    lista é o único registro que sobra para o ajuste de CSS das apps.
+  # 3. PARIDADE SÓ DE PROPS: apenas as PROPS precisam ser iguais às do PrimeVue.
+  #    Markup interno, classes e estrutura são livres.
+  # ---------------------------------------------------------------------------
+
+  # PRÉ-REQUISITO: a trilha PRIMITIVE precisa estar concluída E INTEGRADA antes
+  # desta começar. As primitivas base (ids 1, 2, 4) vivem em status_primitive.yaml.
+  depende_da_trilha: 'status_primitive.yaml (ids 1, 2, 4) — concluída e integrada'
+
+  baseline_testes: 'PREENCHER no início da sessão (execute_no_use.md §0)'
+
+  intocaveis:
+    - src/components/InputBase.vue
+
+itens:
+
+  - id: 31
+    componente: MaxInputIconPicker
+    arquivo: src/components/MaxInputIconPicker.vue
+    plano: prime_vue_migration/plans/31-MaxInputIconPicker.md
+    primitivas: [InputText, Drawer, VirtualScroller]
+    depende_de: [1, 2, 4]
+    uso: '0 arquivos — nenhum consumidor em nenhum projeto'
+    execucao: Aguardando
+    verificacao: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    evidencia_nao_uso: >-
+      Aliases verificados: MaxInputIconPicker, InputIconPicker, IconPicker,
+      max-input-icon-picker, input-icon-picker, max_input_icon_picker, input_icon_picker.
+      Nenhum deles aparece como tag ou import em nenhum dos 6 projetos.
+      ATENÇÃO ao re-verificar: uma busca pela palavra solta `icon-picker` retorna 2
+      resultados FALSOS — a classe CSS `icon-picker-drawer` em
+      AgenteDeBolso/resources/Vue/Components/SelectIcon.vue e no arquivo homônimo do
+      MinhaBibliaOnline. Ambos os projetos implementam o próprio seletor de ícone com
+      <Drawer> local, sem usar o componente da biblioteca.
+    notas: >-
+      Sem teste existente — criar do zero. 3 primitivas de uma vez.
+      DEPENDE de ids 1, 2 e 4, que estão na trilha PRIMITIVE: esta trilha não pode
+      começar antes de MaxBaseInput, MaxBaseOverlay e MaxBaseVirtualScroller
+      estarem Concluídos em status_primitive.yaml E a branch primevue-primitive
+      estar integrada na base.
+      REUSO: os dois projetos que têm seletor de ícone próprio (SelectIcon.vue do
+      AgenteDeBolso e do MinhaBibliaOnline) usam <Drawer> local — vale olhar como
+      referência de UX antes de implementar.

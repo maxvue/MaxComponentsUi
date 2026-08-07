@@ -1,0 +1,638 @@
+# =============================================================================
+# STATUS DA MIGRAÇÃO — TRILHA "IN USE" (componentes USADOS nos projetos)
+# =============================================================================
+# Fonte de verdade da trilha executada por `execute_in_use.md`.
+# Execução ITEM A ITEM, com PAUSA para teste manual do usuário entre cada item.
+#
+# Status possíveis (para `execucao` e `verificacao`):
+#   Aguardando  -> ainda não iniciado
+#   Realizando  -> em andamento, não finalizado
+#   Concluído   -> finalizado e aprovado
+#
+# Campo extra desta trilha:
+#   teste_usuario : Aguardando | Aprovado | Reprovado
+#                   O executor PARA e espera o usuário validar manualmente.
+#
+# Campos por item:
+#   id            : ordem de execução (NÃO reordenar) — mantém o id original
+#   componente    : nome do arquivo .vue (sem extensão) ou do módulo
+#   arquivo       : caminho do arquivo a ser alterado
+#   plano         : caminho do plano de implementação detalhado
+#   primitivas    : primitivas PrimeVue que este item elimina
+#   depende_de    : ids que precisam estar Concluídos antes deste
+#   uso           : censo de uso real nos projetos ~/GitHub (tags + imports)
+#   execucao      : Aguardando | Realizando | Concluído
+#   verificacao   : Aguardando | Realizando | Concluído
+#   tentativas    : nº de vezes que a verificação reprovou
+#   notas         : anotações livres do executor
+# =============================================================================
+
+meta:
+  projeto: '@maxvue/max-components-ui'
+  trilha: 'in_use'
+  objetivo: 'Migrar, com validação manual entre itens, os componentes efetivamente usados nos projetos'
+  primevue_versao_atual: '4.5.5'
+  gerado_em: '2026-08-07'
+  total_itens: 32
+  modo_execucao: 'SEQUENCIAL COM PAUSA — um item por vez; parar e aguardar teste do usuário'
+
+  # ---------------------------------------------------------------------------
+  # PRÉ-REQUISITO: a trilha PRIMITIVE precisa estar concluída e integrada
+  # ---------------------------------------------------------------------------
+  # As primitivas base (ids 1-5) NÃO estão mais aqui — foram para
+  # status_primitive.yaml / execute_primitive.md, que roda ANTES desta trilha.
+  # Vários itens daqui têm `depende_de: [1]`, `[2]` etc.: esses ids referem-se aos
+  # itens da trilha primitive. Confirme que estão Concluídos lá antes de começar.
+  # ---------------------------------------------------------------------------
+  depende_da_trilha: 'status_primitive.yaml (ids 1, 2, 3, 4, 5) — concluída e integrada'
+
+  # Nota de ordem: o id 37 (install-plugin) aparece por ÚLTIMO, depois do 38, porque
+  # depende dele (depende_de: [5, 35, 36, 38]). Essa inversão vem do status.yaml
+  # original e é intencional — não "corrija" reordenando por id.
+
+  # ---------------------------------------------------------------------------
+  # REGRAS DESTA MIGRAÇÃO QUE DIFEREM DO BRIEFING ORIGINAL
+  # ---------------------------------------------------------------------------
+  # 1. REUSO PRIMEIRO: antes de implementar, o executor verifica se já existe no
+  #    projeto uma solução concisa, PrimeVue-free e funcional para o mesmo fim.
+  # 2. SEM CLASSES .p-*: as classes do PrimeVue não devem nem precisam ser
+  #    emitidas. Use nomes próprios e remova as regras .p-* órfãs do repo.
+  # 3. PARIDADE SÓ DE PROPS: apenas as PROPS precisam ser iguais às do PrimeVue.
+  #    Markup interno, classes e estrutura são livres.
+  # ---------------------------------------------------------------------------
+
+  # ---------------------------------------------------------------------------
+  # ⚠️ EFEITO COLATERAL CONHECIDO DA REGRA 2 (reportar, não silenciar)
+  # ---------------------------------------------------------------------------
+  # Apps consumidoras estilizam classes .p-* por fora. Referências .p-* no
+  # CSS/SCSS/Vue de cada projeto (censo de 2026-08-07):
+  #   MinhaBibliaOnline : 254   <- tem uma pasta resources/Theme/PrimeVue/ inteira
+  #   engeapp           : 167
+  #   AgenteDeBolso     :  63
+  #   SocialMedia       :   2
+  #   MaxAdmin / mbo    :   0
+  # Quando um seletor .p-* deixar de ser emitido, o CSS correspondente nessas
+  # apps PARA DE APLICAR — a tela funciona, mas muda de aparência.
+  # Isso é ACEITO nesta migração (decisão do usuário). A obrigação do executor é
+  # LISTAR cada classe .p-* removida (campo `classes_p_removidas` do item), para
+  # o ajuste posterior do CSS das apps.
+  #
+  # Componentes desta trilha com MAIS regras .p-* no <style> do próprio repo:
+  #   MaxTagSelect (id 25), MaxPhoneField (id 24), MaxTableColumn (id 34),
+  #   MaxInputCheckbox (id 19)
+  # ---------------------------------------------------------------------------
+
+  # ---------------------------------------------------------------------------
+  # CENSO DE USO (base da divisão in_use / no_use)
+  # ---------------------------------------------------------------------------
+  censo:
+    data: '2026-08-07'
+    projetos_analisados:
+      - AgenteDeBolso
+      - engeapp
+      - MaxAdmin
+      - mbo
+      - MinhaBibliaOnline
+      - SocialMedia
+    escopo: 'resources/**/*.{vue,ts,js,tsx,jsx} — worktrees (-wt-) e node_modules excluídos'
+    metodo: >-
+      Contagem de USO REAL: tag de abertura (<Componente ...>), tag de fechamento
+      (</Componente>) ou import ES. Simples menção da palavra NÃO conta — isso
+      evitou 13 falsos positivos causados por classes CSS e comentários
+      (ex.: a classe `icon-picker-drawer` fazia MaxInputIconPicker parecer usado).
+    aliases: >-
+      Todos os aliases de src/components-manifest.json (PascalCase, snake_case,
+      kebab-case e formas sem o prefixo Max) + os re-exports de src/index.ts.
+      Isso é essencial: a maioria dos projetos NÃO usa o prefixo `Max`.
+      Ex.: MaxPhoneField aparece como <InputPhone>, MaxPdfView como <PdfView>.
+
+  baseline_testes: 'PREENCHER no início da sessão (execute_in_use.md §0)'
+
+  intocaveis:
+    - src/components/InputBase.vue
+
+# -----------------------------------------------------------------------------
+# FASE 1 — INPUTS DE TEXTO
+# -----------------------------------------------------------------------------
+itens:
+
+  - id: 6
+    componente: MaxInputText
+    arquivo: src/components/MaxInputText.vue
+    plano: prime_vue_migration/plans/06-MaxInputText.md
+    primitivas: [InputText]
+    depende_de: [1]
+    uso: '136 arquivos — AgenteDeBolso:30 MaxAdmin:4 MinhaBibliaOnline:30 SocialMedia:11 engeapp:61'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: >-
+      2º componente mais usado da biblioteca. Componente-piloto da Fase 1:
+      valide o padrão aqui antes de replicar nos seguintes.
+      Usado majoritariamente pelos aliases InputText / InputField.
+
+  - id: 7
+    componente: MaxInputCep
+    arquivo: src/components/MaxInputCep.vue
+    plano: prime_vue_migration/plans/07-inputs-texto-derivados.md
+    primitivas: [InputText]
+    depende_de: [1, 6]
+    uso: '3 arquivos — MinhaBibliaOnline:1 engeapp:2'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: 'Usa v-maska. Preservar a diretiva de máscara intacta.'
+
+  - id: 8
+    componente: MaxInputCpfCnpj
+    arquivo: src/components/MaxInputCpfCnpj.vue
+    plano: prime_vue_migration/plans/07-inputs-texto-derivados.md
+    primitivas: [InputText]
+    depende_de: [1, 6]
+    uso: '11 arquivos — MinhaBibliaOnline:1 engeapp:10'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: 'Máscara dinâmica CPF/CNPJ. Testar a troca de máscara ao passar de 11 para 14 dígitos.'
+
+  - id: 9
+    componente: MaxInputPhoneMail
+    arquivo: src/components/MaxInputPhoneMail.vue
+    plano: prime_vue_migration/plans/07-inputs-texto-derivados.md
+    primitivas: [InputText]
+    depende_de: [1, 6]
+    uso: '6 arquivos — AgenteDeBolso:2 MinhaBibliaOnline:2 engeapp:2'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: 'Usado em telas de login/cadastro — regressão aqui bloqueia autenticação.'
+
+  - id: 10
+    componente: MaxInputSearch
+    arquivo: src/components/MaxInputSearch.vue
+    plano: prime_vue_migration/plans/07-inputs-texto-derivados.md
+    primitivas: [InputText]
+    depende_de: [1, 6]
+    uso: '3 arquivos — MaxAdmin:1 engeapp:2'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: ''
+
+  - id: 11
+    componente: MaxInputCoordinateDecimalLat
+    arquivo: src/components/MaxInputCoordinateDecimalLat.vue
+    plano: prime_vue_migration/plans/07-inputs-texto-derivados.md
+    primitivas: [InputText]
+    depende_de: [1, 6]
+    uso: '1 arquivo — engeapp:1 (InstalationCoordinates.vue, alias InputCoordinateDecimalLat)'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: 'CONJUNTO INDIVISÍVEL com id 12 — mesma passada, mesmo teste.'
+
+  - id: 12
+    componente: MaxInputCoordinateDecimalLng
+    arquivo: src/components/MaxInputCoordinateDecimalLng.vue
+    plano: prime_vue_migration/plans/07-inputs-texto-derivados.md
+    primitivas: [InputText]
+    depende_de: [1, 6]
+    uso: '1 arquivo — engeapp:1 (mesmo arquivo do id 11)'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: 'CONJUNTO INDIVISÍVEL com id 11.'
+
+  - id: 13
+    componente: MaxInputCreditCard
+    arquivo: src/components/MaxInputCreditCard.vue
+    plano: prime_vue_migration/plans/13-cartao-credito.md
+    primitivas: [InputText]
+    depende_de: [1, 6]
+    uso: '2 arquivos — MinhaBibliaOnline:1 engeapp:1 (Checkout)'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: >-
+      CONJUNTO INDIVISÍVEL com 14 e 15 — compartilham o teste MaxCreditCard.test.ts.
+      Fluxo de checkout: testar o cartão completo (número + validade + CVV) de uma vez.
+
+  - id: 14
+    componente: MaxInputCreditCardCvv
+    arquivo: src/components/MaxInputCreditCardCvv.vue
+    plano: prime_vue_migration/plans/13-cartao-credito.md
+    primitivas: [InputText]
+    depende_de: [1, 6]
+    uso: '1 arquivo — engeapp:1 (CheckoutCard.vue)'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: 'Ver id 13.'
+
+  - id: 15
+    componente: MaxInputCreditCardDate
+    arquivo: src/components/MaxInputCreditCardDate.vue
+    plano: prime_vue_migration/plans/13-cartao-credito.md
+    primitivas: [InputText]
+    depende_de: [1, 6]
+    uso: '3 arquivos — AgenteDeBolso:1 MinhaBibliaOnline:1 engeapp:1'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: 'Ver id 13.'
+
+# -----------------------------------------------------------------------------
+# FASE 2 — COMPONENTES AUTÔNOMOS
+# -----------------------------------------------------------------------------
+
+  - id: 16
+    componente: MaxButton
+    arquivo: src/components/MaxButton.vue
+    plano: prime_vue_migration/plans/16-MaxButton.md
+    primitivas: [Button]
+    depende_de: []
+    uso: '215 arquivos — AgenteDeBolso:97 engeapp:69 MinhaBibliaOnline:30 SocialMedia:15 MaxAdmin:2 mbo:2'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: >-
+      COMPONENTE MAIS USADO DA BIBLIOTECA (215 arquivos, 6 projetos).
+      Maior risco de regressão de toda a migração — teste manual mais rigoroso.
+      Também remove `import type ButtonProps` de src/types/index.ts.
+      Preservar as classes .p-button-* usadas no SCSS das apps consumidoras.
+
+  - id: 17
+    componente: MaxBadgeComponent
+    arquivo: src/components/MaxBadgeComponent.vue
+    plano: prime_vue_migration/plans/17-MaxBadgeComponent.md
+    primitivas: [Badge, OverlayBadge]
+    depende_de: []
+    uso: '5 arquivos — MaxAdmin:1 engeapp:4'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: 'Testar tanto Badge simples quanto OverlayBadge (badge sobre ícone).'
+
+  - id: 18
+    componente: MaxUserAvatar
+    arquivo: src/components/MaxUserAvatar.vue
+    plano: prime_vue_migration/plans/18-MaxUserAvatar.md
+    primitivas: [Avatar]
+    depende_de: []
+    uso: '10 arquivos — AgenteDeBolso:3 SocialMedia:1 engeapp:6'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: 'Aparece no topo de todas as telas autenticadas.'
+
+  - id: 19
+    componente: MaxInputCheckbox
+    arquivo: src/components/MaxInputCheckbox.vue
+    plano: prime_vue_migration/plans/19-MaxInputCheckbox.md
+    primitivas: [Checkbox]
+    depende_de: []
+    uso: '23 arquivos — AgenteDeBolso:14 MaxAdmin:1 MinhaBibliaOnline:2 engeapp:6'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: 'Usar MaxInputSwitch.vue (já PrimeVue-free) como referência de estilo.'
+
+  - id: 20
+    componente: MaxInputToggle
+    arquivo: src/components/MaxInputToggle.vue
+    plano: prime_vue_migration/plans/20-MaxInputToggle.md
+    primitivas: [ToggleSwitch]
+    depende_de: []
+    uso: '9 arquivos — AgenteDeBolso:3 MinhaBibliaOnline:2 engeapp:4 (alias InputToggle)'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: >-
+      ATENÇÃO: só é encontrado pelo alias `InputToggle` / `input-toggle` —
+      nenhum projeto usa o nome `MaxInputToggle`. Confirmar que o alias segue funcionando.
+      MaxInputSwitch.vue já implementa um toggle sem PrimeVue — reaproveitar markup/SCSS.
+
+  - id: 21
+    componente: MaxInputNumber
+    arquivo: src/components/MaxInputNumber.vue
+    plano: prime_vue_migration/plans/21-MaxInputNumber.md
+    primitivas: [InputNumber]
+    depende_de: [1]
+    uso: '33 arquivos — AgenteDeBolso:18 MinhaBibliaOnline:6 engeapp:9'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: >-
+      Item mais delicado da Fase 2. Formatação via Intl.NumberFormat pt-BR.
+      Testar moeda, separador decimal, min/max e casas de precisão.
+
+  - id: 22
+    componente: MaxPdfView
+    arquivo: src/components/MaxPdfView.vue
+    plano: prime_vue_migration/plans/22-MaxPdfView.md
+    primitivas: [ProgressSpinner]
+    depende_de: [3]
+    uso: '2 arquivos — AgenteDeBolso:1 MinhaBibliaOnline:1 (alias PdfView, no AuthenticatedLayout)'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: >-
+      Troca simples de 1 tag. Só encontrado pelo alias `PdfView`.
+      Está no layout autenticado — visível em toda a aplicação.
+
+# -----------------------------------------------------------------------------
+# FASE 3 — OVERLAYS
+# -----------------------------------------------------------------------------
+
+  - id: 23
+    componente: MaxInputSelect
+    arquivo: src/components/MaxInputSelect.vue
+    plano: prime_vue_migration/plans/23-MaxInputSelect.md
+    primitivas: [Select]
+    depende_de: [1, 2]
+    uso: '68 arquivos — AgenteDeBolso:13 MinhaBibliaOnline:8 SocialMedia:4 engeapp:43'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: >-
+      3º mais usado + BLOQUEANTE dos ids 24 e 25.
+      Slots #option/#optiongroup/#value e o evento before-show são API pública.
+      Testar teclado (setas/Enter/Esc), filtro e agrupamento.
+
+  - id: 24
+    componente: MaxPhoneField
+    arquivo: src/components/MaxPhoneField.vue
+    plano: prime_vue_migration/plans/24-MaxPhoneField.md
+    primitivas: [Select, InputText]
+    depende_de: [1, 23]
+    uso: '14 arquivos — AgenteDeBolso:2 MinhaBibliaOnline:3 engeapp:9 (alias InputPhone)'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: >-
+      Só é encontrado pelo alias `InputPhone` — nenhum projeto usa `MaxPhoneField`.
+      Usado na tela de Login — regressão bloqueia autenticação.
+
+  - id: 25
+    componente: MaxTagSelect
+    arquivo: src/components/MaxTagSelect.vue
+    plano: prime_vue_migration/plans/25-MaxTagSelect.md
+    primitivas: [Select]
+    depende_de: [23]
+    uso: '3 arquivos — SocialMedia:1 engeapp:2'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: >-
+      Houve correção visual recente (commit 32d4568b — largura da tag).
+      Confirmar que o fix continua valendo após a migração.
+
+  - id: 26
+    componente: MaxInputAutoComplete
+    arquivo: src/components/MaxInputAutoComplete.vue
+    plano: prime_vue_migration/plans/26-MaxInputAutoComplete.md
+    primitivas: [AutoComplete]
+    depende_de: [1, 2]
+    uso: '1 arquivo — engeapp:1 (ChatInputTemplatesPopover.vue)'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: 'BLOQUEANTE do id 27.'
+
+  - id: 27
+    componente: MaxInputAutoCompleteApi
+    arquivo: src/components/MaxInputAutoCompleteApi.vue
+    plano: prime_vue_migration/plans/27-MaxInputAutoCompleteApi.md
+    primitivas: [AutoComplete]
+    depende_de: [26]
+    uso: '4 arquivos — MinhaBibliaOnline:1 engeapp:3'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: 'Importa `AutoCompleteProps` como type — remover também. Testar o debounce da busca remota.'
+
+  - id: 28
+    componente: MaxInputDatePicker
+    arquivo: src/components/MaxInputDatePicker.vue
+    plano: prime_vue_migration/plans/28-MaxInputDatePicker.md
+    primitivas: [DatePicker]
+    depende_de: [1, 2]
+    uso: '20 arquivos — AgenteDeBolso:4 MinhaBibliaOnline:2 SocialMedia:1 engeapp:13'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: >-
+      Item de MAIOR ESFORÇO da migração. Locale pt-BR de src/locales/.
+      Testar: seleção simples, range, navegação por mês/ano, teclado e formato de saída.
+
+  - id: 29
+    componente: MaxColorPicker
+    arquivo: src/components/MaxColorPicker.vue
+    plano: prime_vue_migration/plans/29-MaxColorPicker.md
+    primitivas: [ColorPicker, InputText]
+    depende_de: [1, 2]
+    uso: '2 arquivos — MinhaBibliaOnline:1 SocialMedia:1'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: 'HSB<->HEX. Sem teste existente — criar do zero.'
+
+  - id: 30
+    componente: MaxPopoverMenu
+    arquivo: src/components/MaxPopoverMenu.vue
+    plano: prime_vue_migration/plans/30-MaxPopoverMenu.md
+    primitivas: [Menu]
+    depende_de: [2]
+    uso: '6 arquivos — AgenteDeBolso:3 engeapp:3'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: 'MaxPopover.vue já é PrimeVue-free — avaliar reuso antes de usar MaxBaseOverlay.'
+
+  - id: 32
+    componente: MaxInputFileUpload
+    arquivo: src/components/MaxInputFileUpload.vue
+    plano: prime_vue_migration/plans/32-MaxInputFileUpload.md
+    primitivas: [FileUpload, ProgressSpinner]
+    depende_de: [3]
+    uso: '3 arquivos — MinhaBibliaOnline:3'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: >-
+      Os irmãos Big/Button/Project já são PrimeVue-free — usar como referência de drag&drop.
+      Testar upload real: seleção, drag&drop, progresso e erro.
+
+# -----------------------------------------------------------------------------
+# FASE 4 — TABELA (conjunto indivisível: 33 e 34 na MESMA passada)
+# -----------------------------------------------------------------------------
+
+  - id: 33
+    componente: MaxTable
+    arquivo: src/components/MaxTable.vue
+    plano: prime_vue_migration/plans/33-MaxTable.md
+    primitivas: [DataTable, Column]
+    depende_de: [16]
+    uso: '15 arquivos — AgenteDeBolso:5 SocialMedia:2 engeapp:8'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: >-
+      CONJUNTO INDIVISÍVEL com id 34. Maior item da migração.
+      MaxTableFields.vue já é PrimeVue-free.
+      Testar: ordenação, paginação, seleção, slots de coluna e responsividade.
+
+  - id: 34
+    componente: MaxTableColumn
+    arquivo: src/components/MaxTableColumn.vue
+    plano: prime_vue_migration/plans/33-MaxTable.md
+    primitivas: [Column]
+    depende_de: [33]
+    uso: '2 arquivos — engeapp:2'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: 'Migrar na MESMA passada do id 33.'
+
+# -----------------------------------------------------------------------------
+# FASE 5 — INFRAESTRUTURA
+# Impacto global: afeta TODOS os projetos ao mesmo tempo. Fica na trilha in_use
+# por definição — não há como isolar. Cada item exige validação manual.
+# -----------------------------------------------------------------------------
+
+  - id: 35
+    componente: MaxStyle
+    arquivo: src/styles/style.ts
+    plano: prime_vue_migration/plans/35-MaxStyle-tema.md
+    primitivas: ['@primeuix/themes', 'Aura']
+    depende_de: [16, 23, 33]
+    uso: 'GLOBAL — o tema aplica-se a todos os componentes de todos os projetos'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: >-
+      Converter o preset definePreset() em CSS custom properties puras.
+      Teste manual OBRIGATÓRIO em dark mode e light mode.
+
+  - id: 36
+    componente: prime-index
+    arquivo: src/prime/index.ts
+    plano: prime_vue_migration/plans/36-prime-index.md
+    primitivas: ['~110 re-exports']
+    depende_de: [35]
+    uso: >-
+      2 ocorrências de `@maxvue/max-components-ui/prime` nos projetos —
+      AgenteDeBolso/resources/Vue/Pages/ReportsPage.vue:148 importa { ConfirmDialog };
+      a outra é apenas um comentário (ScheduleGroup.vue:39).
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    decisao_confirmdialog: >-
+      RESOLVIDO (decisão do usuário, 2026-08-07): o ConfirmDialog NÃO será reimplementado.
+      Já existe alternativa funcional e PrimeVue-free no projeto: MaxIconConfirm.vue,
+      apoiado em src/stores/useConfirm.Store.ts.
+    notas: >-
+      ConfirmDialog: DESCARTADO — usar MaxIconConfirm (já existe, já é PrimeVue-free).
+      ATENÇÃO ao migrar o consumidor: AgenteDeBolso/resources/Vue/Pages/ReportsPage.vue
+      importa DUAS coisas do PrimeVue, não uma:
+        linha 148: import { ConfirmDialog } from '@maxvue/max-components-ui/prime';
+        linha ~151: import { useConfirm } from 'primevue/useconfirm';
+      O MaxIconConfirm usa o useConfirmStore próprio da lib, com API diferente do
+      useConfirm do PrimeVue — a troca exige ajustar a PÁGINA consumidora, não só a lib.
+      O mesmo padrão (useConfirm do PrimeVue) aparece em CategoriesPage.vue e
+      BudgetPage.vue do AgenteDeBolso — verificar os três antes de remover o barrel.
+      Esse ajuste é no repositório do AgenteDeBolso, FORA do escopo desta migração:
+      reportar ao usuário, não editar por conta própria.
+
+  - id: 38
+    componente: MaxComponentsUiResolver
+    arquivo: src/helpers/MaxComponentsUiResolver.ts
+    plano: prime_vue_migration/plans/38-MaxComponentsUiResolver.md
+    primitivas: ['@primevue/auto-import-resolver']
+    depende_de: [36]
+    uso: 'GLOBAL — usado no vite.config.ts de 6 projetos (todos dependem do auto-import)'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: >-
+      PACOTE SEPARADO (@primevue/auto-import-resolver) — `npm uninstall primevue` NÃO o remove.
+      Depende da decisão do id 36. Quebra aqui derruba o build de TODOS os projetos.
+
+  - id: 37
+    componente: install-plugin
+    arquivo: src/index.ts
+    plano: prime_vue_migration/plans/37-install-plugin.md
+    primitivas: ['primevue/config', 'primevue/tooltip']
+    depende_de: [5, 35, 36, 38]
+    uso: 'GLOBAL — o install() é chamado por todos os projetos'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []   # classes .p-* que deixaram de ser emitidas
+    notas: >-
+      ÚLTIMO ITEM DE TODA A MIGRAÇÃO. Remove app.use(PrimeVue) e desinstala as deps
+      do package.json. Só executar quando as DUAS trilhas (in_use e no_use) estiverem
+      100% concluídas — ver execute_in_use.md §8.

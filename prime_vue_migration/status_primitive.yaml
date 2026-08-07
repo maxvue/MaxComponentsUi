@@ -1,0 +1,173 @@
+# =============================================================================
+# STATUS DA MIGRAÇÃO — TRILHA "PRIMITIVE" (primitivas base)
+# =============================================================================
+# Fonte de verdade da trilha executada por `execute_primitive.md`.
+# É a PRIMEIRA das três trilhas — roda sozinha, antes de todas as outras.
+#
+#   1. status_primitive.yaml  <-- ESTE ARQUIVO (roda primeiro, sozinho)
+#          |
+#          +--> 2. status_in_use.yaml   (item a item, com teste manual)
+#          +--> 3. status_no_use.yaml   (lote contínuo, sem pausas)
+#                  As duas podem rodar EM PARALELO depois desta.
+#
+# Execução ITEM A ITEM, com PAUSA para teste manual do usuário entre cada item.
+#
+# Status possíveis (para `execucao` e `verificacao`):
+#   Aguardando  -> ainda não iniciado
+#   Realizando  -> em andamento, não finalizado
+#   Concluído   -> finalizado e aprovado
+#
+# Campo extra:
+#   teste_usuario : Aguardando | Aprovado | Reprovado
+# =============================================================================
+
+meta:
+  projeto: '@maxvue/max-components-ui'
+  trilha: 'primitive'
+  objetivo: 'Migrar as primitivas base — dependência comum das trilhas in_use e no_use'
+  primevue_versao_atual: '4.5.5'
+  gerado_em: '2026-08-07'
+  total_itens: 5
+  modo_execucao: >-
+    SEQUENCIAL COM PAUSA OBRIGATÓRIA — um item por vez; migrar, verificar, PARAR e
+    aguardar a aprovação manual do usuário antes de pegar o próximo. 5 itens = 5 paradas.
+    Esta trilha NÃO tem modo contínuo: cada primitiva é dependência de toda a biblioteca,
+    e aprovar em bloco impede identificar qual delas introduziu um defeito.
+
+  # ---------------------------------------------------------------------------
+  # POR QUE ESTA TRILHA EXISTE
+  # ---------------------------------------------------------------------------
+  # As primitivas base são dependência de componentes das DUAS outras trilhas.
+  # Enquanto viviam dentro da status_in_use.yaml, a trilha no_use não podia
+  # começar sem esperar por elas (o MaxInputIconPicker depende dos ids 1, 2 e 4).
+  # Isoladas aqui, elas rodam uma vez, são integradas, e então in_use e no_use
+  # ficam livres para rodar em paralelo, cada uma no seu worktree.
+  # ---------------------------------------------------------------------------
+
+  # ---------------------------------------------------------------------------
+  # REGRAS DESTA MIGRAÇÃO QUE DIFEREM DO BRIEFING ORIGINAL
+  # ---------------------------------------------------------------------------
+  # 1. REUSO PRIMEIRO: antes de implementar, o executor verifica se já existe no
+  #    projeto uma solução concisa, PrimeVue-free e funcional para o mesmo fim.
+  # 2. SEM CLASSES .p-*: as classes do PrimeVue não devem nem precisam ser
+  #    emitidas. Use nomes próprios e remova as regras .p-* órfãs do repo.
+  # 3. PARIDADE SÓ DE PROPS: apenas as PROPS precisam ser iguais às do PrimeVue.
+  #    Markup interno, classes e estrutura são livres.
+  # ---------------------------------------------------------------------------
+
+  # ---------------------------------------------------------------------------
+  # ⚠️ EFEITO COLATERAL CONHECIDO DA REGRA 2 (reportar, não silenciar)
+  # ---------------------------------------------------------------------------
+  # Apps consumidoras estilizam classes .p-* por fora. Contagem de referências
+  # .p-* no CSS/SCSS/Vue de cada projeto (censo de 2026-08-07):
+  #   MinhaBibliaOnline : 254   <- tem uma pasta resources/Theme/PrimeVue/ inteira
+  #   engeapp           : 167
+  #   AgenteDeBolso     :  63
+  #   SocialMedia       :   2
+  #   MaxAdmin / mbo    :   0
+  # Quando um seletor .p-* deixar de ser emitido, o CSS correspondente nessas
+  # apps PARA DE APLICAR — a tela funciona, mas muda de aparência.
+  # Isso é ACEITO nesta migração (decisão do usuário). A obrigação do executor é
+  # LISTAR cada classe .p-* removida, para o ajuste posterior do CSS das apps.
+  # ---------------------------------------------------------------------------
+
+  baseline_testes: '614 passando / 18 falhando (7 arquivos) em 2026-08-07 — falhas pré-existentes em MaxInputSwitch.test.ts e MaxLoaderAi.test.ts, não relacionadas a esta migração'
+
+  intocaveis:
+    - src/components/InputBase.vue
+
+  # Peças do repositório que JÁ são PrimeVue-free — candidatas a reuso (§2 do executor)
+  reuso_candidatos:
+    - src/components/MaxPopover.vue          # overlay posicionado — base do MaxBaseOverlay
+    - src/components/MaxInputSwitch.vue      # toggle completo, sem PrimeVue
+    - src/components/InputBase.vue           # wrapper de input (intocável, mas referência)
+    - src/components/MaxTableFields.vue
+    - src/components/MaxInputFileUploadBig.vue
+    - '@tanstack/vue-virtual'                # já em dependencies — base do VirtualScroller
+
+itens:
+
+  - id: 1
+    componente: MaxBaseInput
+    arquivo: src/components/base/MaxBaseInput.vue
+    plano: prime_vue_migration/plans/01-MaxBaseInput.md
+    primitivas: [InputText]
+    depende_de: []
+    uso: 'INTERNA — destrava 10 inputs de texto usados em 5 projetos'
+    execucao: Realizando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []
+    notas: >-
+      Primitiva mais crítica da migração. Antes de implementar, conferir o markup do
+      InputBase.vue (intocável, mas é a referência do padrão da casa).
+
+  - id: 2
+    componente: MaxBaseOverlay
+    arquivo: src/components/base/MaxBaseOverlay.vue
+    plano: prime_vue_migration/plans/02-MaxBaseOverlay.md
+    primitivas: []
+    depende_de: []
+    uso: 'INTERNA — base de Select/AutoComplete/DatePicker/Menu/Drawer'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []
+    notas: >-
+      Teleport + posicionamento + click-outside + ESC.
+      REUSO: MaxPopover.vue já é PrimeVue-free e resolve overlay posicionado —
+      avaliar estender/reaproveitar antes de escrever do zero.
+
+  - id: 3
+    componente: MaxBaseSpinner
+    arquivo: src/components/base/MaxBaseSpinner.vue
+    plano: prime_vue_migration/plans/03-MaxBaseSpinner.md
+    primitivas: [ProgressSpinner]
+    depende_de: []
+    uso: 'INTERNA — usada por MaxPdfView e MaxInputFileUpload (ambos usados)'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []
+    notas: >-
+      SVG animado puro. REUSO: conferir MaxLoader.vue / MaxLoaderIcon.vue, que já
+      existem e podem cobrir o caso sem uma primitiva nova.
+
+  - id: 4
+    componente: MaxBaseVirtualScroller
+    arquivo: src/components/base/MaxBaseVirtualScroller.vue
+    plano: prime_vue_migration/plans/04-MaxBaseVirtualScroller.md
+    primitivas: [VirtualScroller]
+    depende_de: []
+    uso: 'INTERNA — dependência do MaxInputIconPicker (trilha no_use) e do MaxTagSelect'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []
+    notas: >-
+      @tanstack/vue-virtual JÁ está nas dependencies — usar em vez de implementar do zero.
+      É este item que destrava a trilha no_use.
+      ATENÇÃO: MaxTagSelect.vue tem regra .p-virtualscroller no <style> (linha ~330);
+      ela deve ser substituída pelo seletor novo quando o MaxTagSelect for migrado.
+
+  - id: 5
+    componente: vTooltip
+    arquivo: src/directives/tooltip.ts
+    plano: prime_vue_migration/plans/05-vTooltip.md
+    primitivas: [Tooltip]
+    depende_de: []
+    uso: 'ALTÍSSIMO — `v-tooltip` aparece em 83 arquivos dos projetos'
+    execucao: Aguardando
+    verificacao: Aguardando
+    teste_usuario: Aguardando
+    tentativas: 0
+    classes_p_removidas: []
+    notas: >-
+      Diretiva registrada em src/index.ts install(). Modificadores .top/.right/.bottom/.left.
+      IMPACTO DE CSS ALTO: MinhaBibliaOnline tem resources/Theme/PrimeVue/Tooltip.scss
+      estilizando .p-tooltip / .p-tooltip-top / .p-tooltip-arrow. Ao trocar as classes,
+      esse arquivo para de aplicar — listar as classes removidas no relatório do item.
