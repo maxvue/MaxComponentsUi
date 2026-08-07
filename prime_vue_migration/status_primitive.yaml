@@ -71,7 +71,15 @@ meta:
   # LISTAR cada classe .p-* removida, para o ajuste posterior do CSS das apps.
   # ---------------------------------------------------------------------------
 
-  baseline_testes: 'PREENCHER no início da sessão (execute_primitive.md §0)'
+  baseline_testes: >-
+    2026-08-07, worktree primevue-primitive (branch a partir de dev 0c192bc5):
+    614 passando / 18 falhando, 63 arquivos ok / 7 com falha (70 no total).
+    Falhas PRÉ-EXISTENTES, anteriores a qualquer alteração desta migração —
+    não são regressão e não bloqueiam itens: InputBase.test.ts,
+    MaxInputSwitch.test.ts, MaxInputMarkdown.test.ts, MaxInputCpfCnpj.test.ts,
+    MaxCreditCard.test.ts, MaxLoaderAi.test.ts, MaxInputAutoCompleteApi.test.ts.
+    Critério para os itens: a suíte deve continuar com 614 passando e as MESMAS
+    7 falhas. Qualquer falha nova, ou um desses números piorando, é regressão.
 
   intocaveis:
     - src/components/InputBase.vue
@@ -94,14 +102,36 @@ itens:
     primitivas: [InputText]
     depende_de: []
     uso: 'INTERNA — destrava 10 inputs de texto usados em 5 projetos'
-    execucao: Aguardando
-    verificacao: Aguardando
+    execucao: Concluído
+    verificacao: Concluído
     teste_usuario: Aguardando
     tentativas: 0
-    classes_p_removidas: []
+    classes_p_removidas: ['p-inputtext', 'p-component', 'p-filled', 'p-inputtext-sm', 'p-inputtext-lg', 'p-inputtext-fluid', 'p-variant-filled', 'p-invalid', 'p-disabled']
     notas: >-
-      Primitiva mais crítica da migração. Antes de implementar, conferir o markup do
-      InputBase.vue (intocável, mas é a referência do padrão da casa).
+      Concluído em 2026-08-07. Raiz continua sendo o <input> puro (requisito do v-maska).
+      Classes .p-* substituídas por max-input / max-input-has-value / max-input-sm /
+      max-input-lg / max-input-fluid / max-input-filled / max-input-invalid /
+      max-input-disabled, com <style> próprio usando as variáveis do tema Max.
+      Props, eventos e defineExpose preservados.
+      Teste criado: tests/components/base/MaxBaseInput.test.ts (13 asserções).
+      MUTAÇÕES TESTADAS (todas fazem o teste falhar): (1) remover emit update:modelValue;
+      (2) hasValue fixo em true; (3) envolver o <input> num <div> — pega pelo teste de
+      v-maska; (4) reintroduzir a classe p-inputtext.
+      ACHADO: a primeira versão do teste usava setValue(), que emite update:modelValue
+      por conta própria e deixava a mutação (1) sobreviver. Trocado por disparo do evento
+      input nativo.
+      Portões: vitest 13/13; type-check limpo; lint 0 erros (2 warnings pré-existentes em
+      MaxInputMarkdown/MaxTagsList); suíte 627 passando / 18 falhando (mesmas 7 do
+      baseline, sem regressão).
+      VERIFICAÇÃO (subagente opus): APROVADO, com 2 achados MENORES já corrigidos:
+      (a) os dois testes que deveriam guardar o contrato do v-maska eram inúteis —
+      wrapper.element do @vue/test-utils resolve até o filho significativo e reportava
+      'INPUT' mesmo com um <div> em volta; quem matava a mutação (3) era, por acidente, o
+      teste de atributos herdados. Asserção trocada para olhar o HTML bruto
+      (html().startsWith('<input') + find('div') inexistente); revalidado: com o <div>
+      wrapper agora falham 2 testes, incluindo o guardião correto.
+      (b) MaxChart.vue tinha alterações de vírgula do --fix do ESLint, sem relação com o
+      item; revertido para manter o diff limpo.
 
   - id: 2
     componente: MaxBaseOverlay
