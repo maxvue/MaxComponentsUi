@@ -227,7 +227,7 @@ route.name existe?
 |---|---|---|---|
 | 1 | **MaxPinia como pacote irmão** | `../MaxPinia` criado, `pinia@4` compatível, `file:../MaxPinia` no `package.json`, `npm install` limpo | — |
 | 2 | ✅ **Stores base** | `useLoading.Store.ts` + `useUser.Store.ts` na lib, com rotas configuráveis via `configureMaxApp()` | 1 |
-| 3 | **`useSystem.Store.ts`** | Reescrever o rascunho `useApp.Store.ts`: imports explícitos, remover `useChatSettingsStore`, `split_panel` opcional, exportar em `stores/index.ts` | 2 |
+| 3 | ✅ **`useSystem.Store.ts`** | Reescrever o rascunho `useApp.Store.ts`: imports explícitos, remover `useChatSettingsStore`, `split_panel` opcional, exportar em `stores/index.ts` | 2 |
 | 4 | **`useLogin.Store.ts`** | Corrigir imports (`apiGetRoute`/`apiPostRoute` do MaxUse), trocar `vue3-toastify` pelo `useToastStore`, rotas via config | 3 |
 | 5 | **`MaxLoadScreen`** | `LoadScreen.vue` + `LoadScreenTarget.vue` → `MaxLoadScreen.vue` + `MaxLoadScreenTarget.vue` | 2 |
 | 6 | **`MaxContainerApp` + `MaxBottomMenu`** | Ambos são folhas, sem stores complexas | 3 |
@@ -249,7 +249,7 @@ route.name existe?
 |---|---|---|
 | 1 | MaxPinia como pacote irmão | ✅ `done` |
 | 2 | Stores base (loading, user) | ✅ `done` |
-| 3 | useSystem.Store | `waiting` |
+| 3 | useSystem.Store | ✅ `done` |
 | 4 | useLogin.Store | `waiting` |
 | 5 | MaxLoadScreen | `waiting` |
 | 6 | MaxContainerApp + MaxBottomMenu | `waiting` |
@@ -275,6 +275,25 @@ route.name existe?
 | `ChatPanel` (37 arquivos) | Triplica o escopo | Manter no engeapp via slot (etapa 9) |
 | Migração em paralelo com a do PrimeVue | Conflito nos mesmos arquivos | Worktree separado (`feat/max-app`) |
 | Tamanho do bundle | `index.es.js` cresce muito | Avaliar entrada `./app` separada |
+
+---
+
+## 8.0 Pendência da etapa 3 para a integração (etapa 14)
+
+A `useSystem.Store` do engeapp compunha a chave do `split_panel` lendo a store de chat
+diretamente. Esse acoplamento foi removido; a chave agora é extensível. **Na etapa 14, o engeapp
+precisa registrar as partes que antes eram implícitas**, senão o `localStorage` do painel
+dividido passa a usar uma chave diferente e os usuários perdem o tamanho salvo:
+
+```ts
+const system = useSystemStore();
+const chat = useChatSettingsStore();
+
+system.registerSplitPanelKeyPart(() => chat.is_hide ? '_hidded' : '_not_hidded');
+system.registerSplitPanelKeyPart(() => chat.is_visible ? '_visible' : '_notvisible');
+```
+
+A ordem importa: `_hidded` antes de `_visible`, para reproduzir exatamente a chave original.
 
 ---
 
