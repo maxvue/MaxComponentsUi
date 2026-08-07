@@ -226,7 +226,7 @@ route.name existe?
 | # | Etapa | Entrega | Depende de |
 |---|---|---|---|
 | 1 | **MaxPinia como pacote irmão** | `../MaxPinia` criado, `pinia@4` compatível, `file:../MaxPinia` no `package.json`, `npm install` limpo | — |
-| 2 | **Stores base** | `useLoading.Store.ts` + `useUser.Store.ts` na lib, com rotas configuráveis via `configureMaxApp()` | 1 |
+| 2 | ✅ **Stores base** | `useLoading.Store.ts` + `useUser.Store.ts` na lib, com rotas configuráveis via `configureMaxApp()` | 1 |
 | 3 | **`useSystem.Store.ts`** | Reescrever o rascunho `useApp.Store.ts`: imports explícitos, remover `useChatSettingsStore`, `split_panel` opcional, exportar em `stores/index.ts` | 2 |
 | 4 | **`useLogin.Store.ts`** | Corrigir imports (`apiGetRoute`/`apiPostRoute` do MaxUse), trocar `vue3-toastify` pelo `useToastStore`, rotas via config | 3 |
 | 5 | **`MaxLoadScreen`** | `LoadScreen.vue` + `LoadScreenTarget.vue` → `MaxLoadScreen.vue` + `MaxLoadScreenTarget.vue` | 2 |
@@ -248,7 +248,7 @@ route.name existe?
 | # | Etapa | Status |
 |---|---|---|
 | 1 | MaxPinia como pacote irmão | ✅ `done` |
-| 2 | Stores base (loading, user) | `waiting` |
+| 2 | Stores base (loading, user) | ✅ `done` |
 | 3 | useSystem.Store | `waiting` |
 | 4 | useLogin.Store | `waiting` |
 | 5 | MaxLoadScreen | `waiting` |
@@ -275,6 +275,29 @@ route.name existe?
 | `ChatPanel` (37 arquivos) | Triplica o escopo | Manter no engeapp via slot (etapa 9) |
 | Migração em paralelo com a do PrimeVue | Conflito nos mesmos arquivos | Worktree separado (`feat/max-app`) |
 | Tamanho do bundle | `index.es.js` cresce muito | Avaliar entrada `./app` separada |
+
+---
+
+## 8.1 Achado da etapa 2 — instância dupla de Vue/VueUse nos testes
+
+> ✅ **Corrigido no commit `eb8f95c7`.** Registrado aqui porque afeta todas as etapas seguintes.
+
+O `vitest.config.ts` aliasa `@maxvue/max-use` para o **fonte** do MaxUse
+(`../MaxUse/src/index.ts`). O `import '@vueuse/core'` de lá resolvia para a cópia aninhada em
+`../MaxUse/node_modules`, carregando uma **segunda instância do Vue**. Consequência: todo watcher
+reexportado do VueUse (`watchDebounced`, `refAutoReset`, `useWindowSize`, …) **nunca disparava**
+sobre refs criados nos testes — e falhava **em silêncio**, sem erro.
+
+Comprovado por teste-sonda: com o mesmo padrão de mutação, o `@vueuse/core` direto disparava
+**1** vez e o re-export do MaxUse, **0**. Após a correção, ambos disparam 1.
+
+Correção: `@vueuse/core` como devDependency + alias fixo de `vue` e `@vueuse/core` +
+`dedupe: ['vue', '@vueuse/core', 'pinia']`.
+
+**Impacto nas próximas etapas:** mais de 10 arquivos já existentes em `src/` usam esses
+re-exports (`MaxModal`, `MaxPopover`, `MaxInputSelect`, `useIcon.Store`, …). A etapa 5
+(`MaxLoadScreen`) depende diretamente do `watchDebounced` e teria falhado silenciosamente sem
+esta correção. Se algum watcher parecer inerte em teste, **suspeite primeiro de instância dupla**.
 
 ---
 
