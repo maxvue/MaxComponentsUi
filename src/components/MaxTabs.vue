@@ -1,8 +1,10 @@
 <template>
     <div class="max-tabs">
-        <div class="max-tabs-title" :id="'max-tab-' + tabs_id"></div>
         <div class="max-tabs-content">
-            <slot></slot>
+            <div class="max-tabs-title" :id="'max-tab-' + tabs_id"></div>
+            <div class="max-tab-content">
+                <slot></slot>
+            </div>
         </div>
     </div>
 </template>
@@ -90,7 +92,15 @@
 </script>
 
 <style lang="scss">
-    .max-tabs {
+.max-tabs {
+    display: grid;
+    max-height: 100%;
+    max-width: 100%;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+
+    .max-tabs-content {
         display: flex;
         flex-direction: column;
         width: 100%;
@@ -102,13 +112,16 @@
         .max-tabs-title {
             display: flex;
             border-bottom: 1px solid var(--background-300);
+            background-color: var(--background-50);
         }
 
-        .max-tabs-content {
+        .max-tab-content {
             overflow: hidden;
             width: 100%;
             height: 100%;
             display: grid;
         }
     }
+}
+
 </style>

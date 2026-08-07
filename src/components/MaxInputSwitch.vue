@@ -43,10 +43,10 @@
             trueLabel?: string;
             labelTrue?: string;
             question?: string;
-            /** Ícone opcional */
-            trueValue: any;
-            /** Ícone opcional */
-            falseValue: any;
+            /** Valor retornado quando ativo (opcional) */
+            trueValue?: any;
+            /** Valor retornado quando inativo (opcional) */
+            falseValue?: any;
             /** Ícone opcional */
             icon?: string | undefined;
             /** Alias para o ícone */

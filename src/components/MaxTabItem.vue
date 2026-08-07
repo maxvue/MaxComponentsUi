@@ -39,14 +39,9 @@
             // Usa o `value` informado como identificador da aba; sem ele, mantém a
             // numeração automática por ordem de montagem (compatibilidade).
             if (! tab_id.value) tab_id.value = props.value ?? tabs_info.add_count_tabs();
-            tabs_info?.registerTab?.(tab_id.value);
         }, 0);
         setTimeout(() => {
-            // A aba só é escolhida automaticamente quando NENHUMA das registradas
-            // casa com o valor corrente. Testar se o valor "parece vazio" não serve:
-            // uma aba com value="0" satisfaria a comparação e cada item seguinte
-            // sobrescreveria o anterior, abrindo sempre a aba errada.
-            tabs_info?.selectFirstTabIfNoneActive?.();
+            if (toValue(tabs_info?.active_tab) == 0 || toValue(tabs_info?.active_tab) === '' || toValue(tabs_info?.active_tab) === undefined) tabs_info?.selectTab(tab_id.value);
         }, 10);
 
     });
@@ -68,17 +63,34 @@
     padding: 10px 20px;
     position: relative;
 
+    &::before {
+        content: '';
+        left: 0;
+        width: 100%;
+        height: 100%;
+        bottom: 0;
+        position: absolute;
+        color: var(--background-800);
+        background-color: rgb(0 0 0 / 10%);
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
     &:hover {
-        background-color: var(--background-50);
+        background-color: var(--background-100);
         color: var(--background-800);
 
         .max-icon {
             color: var(--background-800) !important;
         }
+
+        &::before {
+            opacity: 1;
+        }
     }
 
     &[active='true'] {
-        background-color: var(--background-150);
+        background-color: var(--background-175);
 
         &::after {
             content: '';
@@ -97,5 +109,10 @@
         }
     }
 }
+
+.max-tab-item-content {
+    display: grid;
+    padding: 1rem;
+    overflow: hidden;
+}
 </style>
-\

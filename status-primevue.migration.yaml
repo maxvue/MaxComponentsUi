@@ -20,7 +20,7 @@ components:
     description_migration: >-
       Trocar InputText do PrimeVue por <input type="text"> nativo estilizado. Mantém InputBase como wrapper.
       Preservar v-model, formatação toSearchableString/hasContent e estados isDone/error_msg/caution.
-    status: waiting
+    status: done
 
   - name: MaxInputCep
     level: baixa

@@ -21,6 +21,8 @@ export { default as MaxGrid } from './components/MaxGrid.vue';
 export { default as MaxButton } from './components/MaxButton.vue';
 export { default as MaxIconButton } from './components/MaxIconButton.vue';
 export { default as MaxIconConfirm } from './components/MaxIconConfirm.vue';
+export { default as MaxButtonIconConfirm } from './components/MaxIconConfirm.vue';
+export { default as MaxButtonConfirm } from './components/MaxButtonConfirm.vue';
 
 // Titles && Strings
 export { default as MaxTitle1 } from './components/MaxTitle1.vue';
