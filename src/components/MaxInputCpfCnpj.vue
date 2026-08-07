@@ -1,5 +1,5 @@
 <template>
-    <InputBase v-bind="props" :error="error_msg" :caution="caution" :done="isDone">
+    <InputBase v-bind="props" :error="error_msg" :caution="caution" :done="done">
         <InputText ref="el" type="text" v-model="temp_value" v-maska="maskValue" autoClear="false" :style="`letter-spacing: 2.5px;`" />
     </InputBase>
 </template>
@@ -10,13 +10,12 @@
  * Possui máscara dinâmica e validação de dígito verificador.
  */
 <script setup lang="ts">
-    import { cnpjIsValid, cpfCnpjIsValid, cpfIsValid, hasContent, onlyNumbers } from '@maxvue/max-use';
+    import { cnpjIsValid, cpfCnpjIsValid, cpfIsValid, onlyNumbers } from '@maxvue/max-use';
     import type { Ref } from 'vue';
     import { ref, computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
     import InputText from 'primevue/inputtext';
     import { vMaska } from 'maska/vue';
-    import { isCpf as isCPF, isCnpj as isCNPJ } from '@maxvue/max-use';
 
     const attrs: any = useAttrs();
 
@@ -62,15 +61,6 @@
 
     const temp_value = ref(props.modelValue ?? '');
 
-    const isDone: Ref = computed(() => {
-        if (!hasContent(temp_value.value)) return props.required ? false : null;
-
-        if (props.cpf) return cpfIsValid(temp_value.value);
-        if (props.cnpj) return cnpjIsValid(temp_value.value);
-
-        return cpfCnpjIsValid(temp_value.value);
-    });
-
     const type_mask: Ref = ref(null);
 
     // CALCULA A MÁSCARA DO INPUT
@@ -102,9 +92,9 @@
 
     const done = computed(() => {
         if (props.done !== undefined) return props.done;
-        if (props.cpf) return isCPF(temp_value.value);
-        if (props.cnpj) return isCNPJ(temp_value.value);
-        return isCPF(temp_value.value) || isCNPJ(temp_value.value);
+        if (props.cpf) return cpfIsValid(temp_value.value);
+        if (props.cnpj) return cnpjIsValid(temp_value.value);
+        return cpfCnpjIsValid(temp_value.value);
     });
 
     const caution = computed(() => {
@@ -126,11 +116,9 @@
     // ATUALIZA O VALOR DO INPUT COM O VALOR DO MODEL E VICE-VERSA
     watch( temp_value, () => {
         const only_numbers: string = onlyNumbers(temp_value.value);
-        if (only_numbers.length === 11 || only_numbers.length === 14) {
-            emit('update:modelValue', onlyNumbers(temp_value.value));
-            if (done.value) emit('complete', onlyNumbers(temp_value.value));
+        emit('update:modelValue', only_numbers);
+        if (only_numbers.length === 11 || only_numbers.length === 14) if (done.value) emit('complete', only_numbers);
 
-        }
     }, { immediate: true });
 
     watch(() => props.modelValue,() => {
