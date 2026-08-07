@@ -27,7 +27,25 @@ export const useIconStore = defineStore('icons', () => {
         if (!data) return;
 
         try {
-            icons_data.value = JSON.parse(data);
+            const parsed = JSON.parse(data);
+
+            if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+                localStorage.removeItem(CACHE_KEY);
+                return;
+            }
+
+            // O cache é gravável por qualquer script do mesmo origin, então ele é
+            // tratado como fonte não confiável: cada SVG é re-sanitizado na leitura.
+            // O sentinela 'waiting' e valores vazios não são markup e passam direto
+            // (sanitizá-los devolveria '' e apagaria o estado de "buscando").
+            const sanitized: Record<string, string> = {};
+
+            for (const [icon_name, value] of Object.entries(parsed)) {
+                if (typeof value !== 'string') continue;
+                sanitized[icon_name] = (value === 'waiting' || value === '') ? value : sanitizeSvg(value);
+            }
+
+            icons_data.value = sanitized;
         } catch {
             // Storage corrompido: descarta e segue com cache vazio, sem propagar o erro
             localStorage.removeItem(CACHE_KEY);

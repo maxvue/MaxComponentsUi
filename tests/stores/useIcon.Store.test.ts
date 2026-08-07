@@ -34,11 +34,14 @@ describe('useIconStore', () => {
     });
 
     it('deve carregar do cache ao buscar o primeiro icone', () => {
-        localStorage.setItem('all_icons_v2', JSON.stringify({ 'icon-a': '<svg>a</svg>' }));
+        localStorage.setItem('all_icons_v2', JSON.stringify({ 'icon-a': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M0 0h24"/></svg>' }));
         const store = useIconStore();
         const res = store.getIcon('icon-a');
-        expect(res).toBe('<svg>a</svg>');
-        expect(store.icons_data['icon-a']).toBe('<svg>a</svg>');
+
+        // O cache agora é re-sanitizado na leitura, então o valor não volta
+        // byte-a-byte; o que importa é que o conteúdo do ícone sobreviva.
+        expect(res).toContain('<path');
+        expect(store.icons_data['icon-a']).toContain('<path');
     });
 
     it('getIcon nao deve colocar em waiting se o icone ja existir', () => {
