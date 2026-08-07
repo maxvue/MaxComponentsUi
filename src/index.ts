@@ -147,6 +147,9 @@ export { default as MaxPopoverMenu } from './components/MaxPopoverMenu.vue';
 export { default as MaxToast } from './components/MaxToast.vue';
 export { Toast } from './helpers/Toast';
 
+// Configuração do app shell (MaxApp) — deve ser chamada no boot da aplicação.
+export { configureMaxApp, getMaxAppConfig, resetMaxAppConfig } from './helpers/maxAppConfig';
+
 
 import Tooltip from 'primevue/tooltip';
 

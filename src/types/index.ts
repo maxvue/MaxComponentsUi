@@ -192,3 +192,6 @@ export type MenuItem = {
 
 // Tipos do MaxChart (formato chart.js).
 export type * from './chart';
+
+// Tipos do app shell (MaxApp): loading, usuário e configuração.
+export type * from './app';
