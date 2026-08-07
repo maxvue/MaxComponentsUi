@@ -117,7 +117,7 @@
     watch( temp_value, () => {
         const only_numbers: string = onlyNumbers(temp_value.value);
         emit('update:modelValue', only_numbers);
-        if (only_numbers.length === 11 || only_numbers.length === 14) if (done.value) emit('complete', only_numbers);
+        if ((only_numbers.length === 11 || only_numbers.length === 14) && done.value) emit('complete', only_numbers);
 
     }, { immediate: true });
 
