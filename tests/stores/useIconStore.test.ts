@@ -43,7 +43,7 @@ describe('useIconStore', () => {
 
     it('carrega cache do localStorage quando icons_data está vazio', () => {
         const dados = { 'mdi:cached': '<svg>cached</svg>' };
-        localStorage.setItem('all_icons', JSON.stringify(dados));
+        localStorage.setItem('all_icons_v2', JSON.stringify(dados));
 
         const store = useIconStore();
         const result = store.getIcon('mdi:cached');

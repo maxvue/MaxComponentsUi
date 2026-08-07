@@ -2,6 +2,11 @@ import { watchDebounced, size } from '@maxvue/max-use';
 import { defineStore } from 'pinia';
 import type { Ref } from 'vue';
 import { ref, computed } from 'vue';
+import { sanitizeSvg } from '../helpers/sanitizeSvg';
+
+// Chave versionada: caches gravados antes da sanitização (achado 06) não devem
+// ser lidos como válidos, então trocamos a chave para forçar seu descarte.
+const CACHE_KEY = 'all_icons_v2';
 
 export const useIconStore = defineStore('icons', () => {
     const icons_data: Ref = ref({});
@@ -18,8 +23,15 @@ export const useIconStore = defineStore('icons', () => {
 
     // Carrega os ícones do cache local sem tentar mutar o computed
     const getInCache = () => {
-        const data = localStorage.getItem('all_icons');
-        if (data) icons_data.value = JSON.parse(data);
+        const data = localStorage.getItem(CACHE_KEY);
+        if (!data) return;
+
+        try {
+            icons_data.value = JSON.parse(data);
+        } catch {
+            // Storage corrompido: descarta e segue com cache vazio, sem propagar o erro
+            localStorage.removeItem(CACHE_KEY);
+        }
     };
 
     const errors = ref<Record<string, number>>({
@@ -27,6 +39,19 @@ export const useIconStore = defineStore('icons', () => {
     });
 
     const MAX_FETCH_RETRIES = 4;
+    const FETCH_RETRY_RESET_DELAY = 30000;
+
+    let fetchResetTimer: ReturnType<typeof setTimeout> | null = null;
+
+    // Agenda o reset do contador de falhas de fetch após um intervalo, evitando
+    // que uma queda momentânea de rede trave novos ícones pelo resto da sessão.
+    const scheduleFetchErrorReset = () => {
+        if (fetchResetTimer !== null) return;
+        fetchResetTimer = setTimeout(() => {
+            fetchResetTimer = null;
+            errors.value['fetch'] = 0;
+        }, FETCH_RETRY_RESET_DELAY);
+    };
 
     watchDebounced(() => [list_icons_waiting_request.value, errors.value], () => {
         // Captura snapshot da lista no momento da requisição para evitar condição de corrida
@@ -46,7 +71,7 @@ export const useIconStore = defineStore('icons', () => {
                 for (const icon_name of icons_to_fetch) {
 
                     if (data && data[icon_name]) {
-                        updated_data[icon_name] = data[icon_name];
+                        updated_data[icon_name] = sanitizeSvg(data[icon_name]);
                         continue;
                     }
 
@@ -64,12 +89,14 @@ export const useIconStore = defineStore('icons', () => {
             }).catch((error) => {
                 console.error('Erro na Requisição dos ícones', { 'url': `https://engeapp.com.br/api/icons?${params.toString()}`, 'error': error });
                 errors.value['fetch'] += 1;
+
+                if (errors.value['fetch'] >= MAX_FETCH_RETRIES) scheduleFetchErrorReset();
             });
         }
 
     }, { debounce: 50, maxWait: 150, deep: true });
 
-    const saveCache = () => localStorage.setItem('all_icons', JSON.stringify(icons_data.value));
+    const saveCache = () => localStorage.setItem(CACHE_KEY, JSON.stringify(icons_data.value));
 
     return { getIcon, list_icons_waiting_request, icons_data };
 });

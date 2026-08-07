@@ -60,6 +60,7 @@
         "axios": "^1.19.0",
         "chart.js": "^4.5.1",
         "color": "^5.0.3",
+        "dompurify": "^3.4.13",
         "libphonenumber-js": "^1.13.10",
         "maska": "^3.2.0",
         "pinia": "^4.0.2",
