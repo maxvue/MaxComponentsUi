@@ -71,7 +71,7 @@ meta:
   # LISTAR cada classe .p-* removida, para o ajuste posterior do CSS das apps.
   # ---------------------------------------------------------------------------
 
-  baseline_testes: '614 passando / 18 falhando (7 arquivos) em 2026-08-07 — falhas pré-existentes em MaxInputSwitch.test.ts e MaxLoaderAi.test.ts, não relacionadas a esta migração'
+  baseline_testes: 'PREENCHER no início da sessão (execute_primitive.md §0)'
 
   intocaveis:
     - src/components/InputBase.vue
@@ -94,7 +94,7 @@ itens:
     primitivas: [InputText]
     depende_de: []
     uso: 'INTERNA — destrava 10 inputs de texto usados em 5 projetos'
-    execucao: Realizando
+    execucao: Aguardando
     verificacao: Aguardando
     teste_usuario: Aguardando
     tentativas: 0
