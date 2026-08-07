@@ -126,7 +126,25 @@ governa **todo** o branching do `App.vue` — é o plugin `createMaxPinia`, conf
 totalmente desacoplado** — toda a configuração entra por injeção (`resolveRoute`,
 `getSessionToken`, `isAppStarted`, `onActivity`, `loading`). Não precisa ser reescrito.
 
-**Ação:** clonar/mover o `MaxPinia` para ser **pacote irmão**, ao lado de `MaxUse`:
+> ✅ **ETAPA 1 CONCLUÍDA.** Registro do que foi encontrado e feito:
+>
+> O `MaxPinia` **já era** um repositório git próprio em `~/GitHub/MaxPinia` — o caminho
+> `engeapp/storage/libs/MaxPinia` é apenas um **symlink** para ele. Nada precisou ser
+> clonado ou movido; bastou referenciá-lo.
+>
+> Mudanças aplicadas:
+> 1. `MaxPinia/package.json`: peer range → `"pinia": "^3.0.0 || ^4.0.0"` (commit `8b2694a`).
+> 2. `MaxPinia/package.json`: **`@vue/devtools-api` adicionado como devDependency**. O pinia 3
+>    o trazia como `dependency` direta; o pinia 4 o moveu para peer opcional, mas o runtime
+>    ainda o importa — sem ele, `test/config.test.ts` falha ao carregar.
+> 3. `MaxComponentsUi/package.json`: `"@maxvue/max-pinia": "file:../MaxPinia"` (commit `560284c8`).
+>
+> Evidências: MaxPinia com pinia 4.0.2 → type-check limpo, **23/23 testes**, build ok
+> (`dist/index.es.js`, 21.65 kB). MaxComponentsUi → `createMaxPinia` e `useAsyncStatus`
+> resolvem; type-check limpo (com os rascunhos §2 fora); suíte **sem regressões**
+> (18 falhas pré-existentes de componentes de input vs. 33 no baseline da `main`).
+
+**Ação (histórico):** ter o `MaxPinia` como **pacote irmão**, ao lado de `MaxUse`:
 
 ```
 ~/GitHub/
@@ -229,7 +247,7 @@ route.name existe?
 
 | # | Etapa | Status |
 |---|---|---|
-| 1 | MaxPinia como pacote irmão | `waiting` |
+| 1 | MaxPinia como pacote irmão | ✅ `done` |
 | 2 | Stores base (loading, user) | `waiting` |
 | 3 | useSystem.Store | `waiting` |
 | 4 | useLogin.Store | `waiting` |
