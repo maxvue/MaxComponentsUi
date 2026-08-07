@@ -147,7 +147,7 @@ Migre **de cima para baixo**, sempre o próximo `waiting`. Atualize a coluna **S
 | 33 | MaxTableFields | media | [MaxTableFields.md](migration_plans/MaxTableFields.md) | MaxTable, MaxTableColumn | waiting |
 | 34 | MaxUserSection | media | [MaxUserSection.md](migration_plans/MaxUserSection.md) | — | waiting |
 | 35 | MaxButtonConfirm | baixa | *(plano ainda não escrito — dependência transitiva)* | MaxButton, v-tooltip | waiting |
-| 36 | MaxIconConfirm | baixa | *(plano ainda não escrito — dependência transitiva)* | MaxButton, v-tooltip | waiting |
+| 36 | MaxIconConfirm | baixa | *(plano ainda não escrito — dependência transitiva)* | v-tooltip | waiting |
 
 **Legenda de status:** `waiting` (aguardando) · `in_progress` (em execução) · `done` (concluído) ·
 `blocked` (bloqueado — ver motivo no registro).

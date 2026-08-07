@@ -251,8 +251,8 @@ components:
   - name: MaxIconConfirm
     level: baixa
     description_migration: >-
-      Dependência transitiva: usa MaxButton (que importa primevue/button) e a diretiva v-tooltip (registrada via
-      PrimeVue). Resolvido automaticamente quando MaxButton estiver done E v-tooltip tiver um substituto próprio
-      (floating-vue ou equivalente) — nenhuma alteração direta é necessária neste componente além de revalidar após
-      essas duas migrações.
+      Não usa MaxButton — envolve MaxIconButton (que não importa nada do PrimeVue). A única dependência do PrimeVue é
+      a diretiva v-tooltip, usada diretamente em MaxIconConfirm.vue. Resolvido automaticamente quando v-tooltip tiver
+      um substituto próprio (floating-vue ou equivalente) — nenhuma alteração direta é necessária neste componente
+      além de revalidar após essa migração.
     status: waiting
