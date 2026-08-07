@@ -259,17 +259,21 @@
 }
 
 .value-tag-div {
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: auto auto auto;
     place-items: center;
     padding: unset;
     display: grid;
     overflow: hidden;
     position: relative;
+    width: fit-content;
+    max-width: 100%;
 
     .tag-value-text {
-        width: 100% !important;
         max-width: 100% !important;
         position: relative;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 }
 
