@@ -1,8 +1,13 @@
 <template>
     <teleport :to="'#max-tab-' + toValue(tabs_info?.tabs_id)" v-if="toValue(tabs_info?.tabs_id) && is_mounted">
-        <div class="max-tab-item-title" :active="is_active" @click="tabs_info?.selectTab(tab_id)">
+        <div
+            class="max-tab-item-title"
+            :active="is_active"
+            :disabled="props.disabled || undefined"
+            @click="onTitleClick"
+        >
             <max-icon :icon="props.icon ?? props.i" v-if="props.icon || props.i" size="1.2" />
-            {{ props.title }}
+            <slot name="title">{{ props.title }}</slot>
         </div>
     </teleport>
     <div class="max-tab-item-content" v-if="is_active">
@@ -20,6 +25,7 @@
         icon?: string;
         i?: string;
         value?: string | number;
+        disabled?: boolean;
     };
 
     const props = withDefaults( defineProps<Props>(), { });
@@ -29,6 +35,12 @@
     const tabs_info: any = inject('tabs_info');
 
     const is_mounted = ref(false);
+
+    // Aba desabilitada não seleciona — o atributo [disabled] cuida do visual.
+    function onTitleClick() {
+        if (props.disabled) return;
+        tabs_info?.selectTab(tab_id.value);
+    }
 
     const is_active = computed(() => String(toValue(tabs_info?.active_tab)) === String(toValue(tab_id)));
 
@@ -106,6 +118,16 @@
 
         .max-icon {
             color: var(--background-800) !important;
+        }
+    }
+
+    &[disabled] {
+        opacity: 0.4;
+        cursor: not-allowed;
+
+        &:hover {
+            background-color: transparent;
+            color: var(--background-750);
         }
     }
 }
