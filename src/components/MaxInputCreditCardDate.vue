@@ -9,6 +9,7 @@
     import { ref, computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
     import MaxBaseInput from './base/MaxBaseInput.vue';
+    import { onlyNumbers } from '@maxvue/max-use';
 
     const attrs: any = useAttrs();
 
@@ -69,7 +70,8 @@
     watch(
         () => props.modelValue,
         () => {
-            temp_value.value = toText(props.modelValue);
+            const numbers = onlyNumbers(toText(props.modelValue));
+            if (numbers !== onlyNumbers(temp_value.value)) temp_value.value = toText(props.modelValue);
         }
     );
 
