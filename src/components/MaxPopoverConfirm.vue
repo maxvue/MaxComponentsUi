@@ -1,6 +1,6 @@
 <template>
     <TransitionFade>
-        <div class="background-popover" @click.stop="confirm_store.hide" v-if="confirm_store.show">
+        <div class="background-popover-confirm" @click.stop="confirm_store.hide" v-if="confirm_store.show">
             <div class="max-icon-confirm-dialog" ref="el" :style="{top: position.top + 'px', left: position.left + 'px'}"  :class="[position.isTop ? 'is-top' : 'is-bottom', position.isLeft ? 'is-left' : 'is-right']">
                 <div pw4 pt-4 full text-center color-background-750 class="popover-confirm-content" >
                     <MaxIcon :i="confirm_store.messageIcon ?? 'mingcute:question-fill'" size="1.2" color-red-600 />
@@ -64,7 +64,7 @@
 </script>
 
 <style lang="scss">
-.background-popover {
+.background-popover-confirm {
     background-color: rgb(0 0 0 / 10%);
     height: 100vh;
     width: 100vw;

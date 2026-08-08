@@ -52,7 +52,7 @@ describe('MaxPopoverConfirm', () => {
         store.show = false;
 
         const wrapper = mountPopoverConfirm();
-        expect(wrapper.find('.background-popover').exists()).toBe(false);
+        expect(wrapper.find('.background-popover-confirm').exists()).toBe(false);
     });
 
     it('integra com o confirm store para exibição condicional', () => {
@@ -137,7 +137,7 @@ describe('MaxPopoverConfirm', () => {
         expect(dialog.classes()).toContain('is-top');
         expect(dialog.classes()).toContain('is-left');
 
-        const bg = wrapper.find('.background-popover');
+        const bg = wrapper.find('.background-popover-confirm');
         await bg.trigger('click');
         expect(store.show).toBe(false);
     });
