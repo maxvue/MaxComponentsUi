@@ -104,4 +104,25 @@ describe('MaxInputSelect', () => {
         await wrapper.vm.$nextTick();
         expect(wrapper.emitted('update:modelValue')?.[0][0]).toBe('new_value');
     });
+
+    it('não lança quando loadOptions retorna lista plana com groupOptions setado', async () => {
+        const groupOptions = [{ label: 'Group 1', items: [{ value: 'b', name: 'B' }] }];
+        let resolveLoad: any;
+        const loadPromise = new Promise((resolve) => {
+            resolveLoad = resolve;
+        });
+        const loadOptions = vi.fn().mockReturnValue(loadPromise);
+        const wrapper = mountSelect({ modelValue: 'flat', groupOptions, loadOptions });
+
+        wrapper.find('.p-select').trigger('click');
+        await wrapper.vm.$nextTick();
+
+        resolveLoad([{ value: 'flat', name: 'Flat Option' }]);
+        await loadPromise;
+        await wrapper.vm.$nextTick();
+
+        const vm = wrapper.vm as any;
+        expect(() => vm.option_selected).not.toThrow();
+        expect(vm.option_selected.name).toBe('Flat Option');
+    });
 });
