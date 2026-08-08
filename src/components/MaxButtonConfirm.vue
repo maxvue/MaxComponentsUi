@@ -1,8 +1,8 @@
 <template>
-    <MaxButton v-bind="props" v-tooltip="null" pointer :action="onClickToggle" ref="btn_el" />
+    <MaxButton :label="props.label" :icon="props.icon" :i="props.i" :blank="props.blank" :route="props.route" :data="props.data" :params="props.params" :rotate="props.rotate" :flip="props.flip" :size="props.size" :scale="props.scale" :severity="props.severity" :variant="props.variant" :loading="props.loading" :width="props.width" :height="props.height" :dark="props.dark" :light="props.light" v-tooltip="null" pointer :action="onClickToggle" ref="btn_el" />
 </template>
 
-<script setup lang="ts">;
+<script setup lang="ts">
     import MaxButton from './MaxButton.vue';
     import { useTemplateRef } from 'vue';
     import { useElementBounding } from '@maxvue/max-use';
@@ -41,10 +41,6 @@
         message?: string;
         /** Icone de mensagem de confirmação */
         messageIcon?: string | null;
-        /** Label do botão de sim */
-        acceptLabel?: string;
-        /** Icone do botão de sim */
-        acceptIcon?: string;
         /** Label do botão de não */
         rejectProps?: {
             label: string;
@@ -56,8 +52,6 @@
             icon?: string;
             action?: ((event?: any) => void) | undefined;
         };
-        /** Icone do botão de não */
-        cancelIcon?: string;
         loading?: boolean;
         /** Largura específica */
         width?: string | number;
@@ -80,17 +74,19 @@
 
     const btn_el = useTemplateRef('btn_el');
 
+    const { x, y, height, width } = useElementBounding(btn_el as any);
+
     const onClickToggle = () => {
-        const { x, y, height, width } = useElementBounding(btn_el as any);
-        confirm_store.x = x.value;
-        confirm_store.y = y.value;
-        confirm_store.height = height.value;
-        confirm_store.width = width.value;
-        confirm_store.show = !confirm_store.show;
-        confirm_store.message = props.message;
-        confirm_store.messageIcon = props.messageIcon;
-        confirm_store.rejectProps = props.rejectProps;
-        confirm_store.acceptProps = props.acceptProps;
+        confirm_store.confirm({
+            message: props.message,
+            messageIcon: props.messageIcon,
+            rejectProps: props.rejectProps,
+            acceptProps: props.acceptProps,
+            x: x.value,
+            y: y.value,
+            width: width.value,
+            height: height.value
+        });
     };
 
 </script>
