@@ -48,6 +48,7 @@
     const toText = (value: unknown): string => (value === null || value === undefined ? '' : String(value));
 
     const temp_value = ref(toText(props.modelValue));
+    const unmaskedValue = ref('');
     const iconLeft = computed(() => (method.value === 'whatsapp' ? (attrs.icon ?? attrs.icon_left ?? attrs['icon-left'] ?? 'ic:baseline-whatsapp') : 'prime:at'));
 
     const isDone: Ref = ref(props.done ?? null);
@@ -87,11 +88,16 @@
         return attrs_error_message ?? 'Valor inválido';
     });
 
+    /**
+     * Computed puro: apenas lê `temp_value`/`method` e devolve os tokens/máscara
+     * correspondentes. Não muta nenhum estado (ver watch de `temp_value` abaixo,
+     * responsável por decidir o modo e normalizar o valor de e-mail).
+     */
     const maskValue = computed(() => {
         const tokens = {
             '#': { pattern: /[a-zA-Z0-9@]/ },
-            '@': { pattern: /[a-zA-Z0-9@(.+_-]/ },
-            '%': { pattern: /[a-zA-Z0-9@().+_-\s]/, optional: true, repeated: true }
+            '@': { pattern: /[a-zA-Z0-9@.+_-]/ },
+            '%': { pattern: /[a-zA-Z0-9@.+_-]/, optional: true, repeated: true }
         };
 
         const only_numbers = temp_value.value ? onlyNumbers(temp_value.value) : '';
@@ -99,12 +105,12 @@
 
         if (only_letters.length > 1) return {
             tokens: tokens,
-            mask: maskMail()
+            mask: '%'
         };
 
         if (only_numbers.length > 1) return {
             tokens: tokens,
-            mask: maskPhone(only_numbers)
+            mask: phoneMask(only_numbers)
         };
 
         return {
@@ -113,21 +119,53 @@
         };
     });
 
-    const maskPhone = (value: string) => {
-        name_method.value = 'Whatsapp';
-        return value[2] === '9' || value[2] === '8' || value[2] === '7' || value[2] === '6' ? '+55 (##) 9 #### - ####' : '+55 (##) #### - ####$';
-    };
+    const phoneMask = (value: string) => (value[2] === '9' || value[2] === '8' || value[2] === '7' || value[2] === '6' ? '+55 (##) 9 #### - ####' : '+55 (##) #### - ####');
 
-    const maskMail = () => {
-        name_method.value = 'Email';
-        method.value = 'email';
-        temp_value.value = temp_value.value ? temp_value.value.replace(/[()\-\s]/g, '') : '';
-        return '%';
-    };
+    /**
+     * Decide o modo (telefone/e-mail) e normaliza o valor digitado.
+     * Mover essa lógica para cá (fora do computed `maskValue`) evita a
+     * auto-mutação de dependência: aqui é seguro escrever em `temp_value`,
+     * `method` e `name_method` como efeito da mudança — o computed em si
+     * fica puro (só leitura).
+     *
+     * A normalização (remover `()`, `-` e espaço de um valor que parece
+     * e-mail) só reatribui `temp_value` quando o valor realmente muda,
+     * evitando loop infinito watch → muta temp_value → dispara o watch de novo.
+     */
+    watch(temp_value, (newValue) => {
+        const only_numbers = newValue ? onlyNumbers(newValue) : '';
+        const only_letters = newValue ? onlyLetters(newValue) : '';
 
-    watch(temp_value, () => {
-        emit('update:modelValue', temp_value.value);
-        if(isDone.value !== null) isDone.value = done.value;
+        if (only_letters.length > 1) {
+            name_method.value = 'Email';
+            method.value = 'email';
+            const normalized = newValue ? newValue.replace(/[()\-\s]/g, '') : '';
+            if (normalized !== newValue) {
+                temp_value.value = normalized;
+                return;
+            }
+        } else if (only_numbers.length > 1) {
+            name_method.value = 'Whatsapp';
+            method.value = 'whatsapp';
+        }
+
+        if (isDone.value !== null) isDone.value = done.value;
+    });
+
+    /**
+     * Emite o valor desmascarado (`unmaskedValue`, exposto pelo `v-maska:unmaskedValue.unmasked`
+     * no template) em vez do valor mascarado (`temp_value`), por consistência com os demais
+     * inputs da lib (CPF/CNPJ, CEP), que emitem apenas o valor limpo.
+     *
+     * Testado manualmente (ver relatório da Etapa 7b): para telefone, o `unmaskedValue` do Maska
+     * já remove `+55`, parênteses, traços e espaços, retornando só os dígitos — funciona bem
+     * "de graça". Para e-mail, a máscara é o token livre `%` (sem caracteres literais a remover),
+     * então o `unmaskedValue` é idêntico ao valor mascarado — também correto, já que o e-mail não
+     * tem estrutura de máscara para "desfazer".
+     */
+    watch(unmaskedValue, () => {
+        emit('update:modelValue', unmaskedValue.value);
+        if (isDone.value !== null) isDone.value = done.value;
     });
 
     watch(
@@ -147,6 +185,8 @@
             name_method.value = 'Email';
         }
     });
+
+    defineExpose({ unmaskedValue });
 </script>
 
 <style lang="scss" scoped>
