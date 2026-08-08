@@ -10,6 +10,16 @@ const __dirname = path.dirname(__filename);
 const componentsDir = path.resolve(__dirname, '../components');
 const outputFile = path.resolve(__dirname, '../components-manifest.json');
 const tsconfigFile = path.resolve(__dirname, '../../tsconfig.json');
+const primeIndexFile = path.resolve(__dirname, '../prime/index.ts');
+
+// src/prime/index.ts só re-exporta um subconjunto do PrimeVue. Extraímos os
+// nomes reais via regex (mesmo espírito tolerante do parsing do tsconfig.json
+// acima) em vez de parsear TypeScript de verdade — é tudo que precisamos para
+// saber quais nomes realmente existem em '@maxvue/max-components-ui/prime'.
+const primeIndexContent = fs.readFileSync(primeIndexFile, 'utf-8');
+const primeExportNames = new Set(
+    [...primeIndexContent.matchAll(/export\s*\{\s*default as (\w+)\s*\}/g)].map((match) => match[1])
+);
 
 // tsconfig.json permite comentários (JSONC), então não é JSON puro. Em vez de
 // fazer parsing completo do arquivo, extraímos apenas as entradas do array
@@ -52,7 +62,10 @@ componentNames.forEach((name: string) => {
     aliases[kebabCase(name)] = name;
 
     const noMax = name.replace(/^Max/, '');
-    if (noMax !== name) {
+    // Não cria o alias sem prefixo Max se ele colidir com um nome real
+    // exportado por src/prime/index.ts (ex.: ColorPicker, Popover) — evita
+    // que o alias esconda silenciosamente o componente PrimeVue cru.
+    if (noMax !== name && !primeExportNames.has(noMax)) {
         aliases[noMax] = name;
         aliases[snakeCase(noMax)] = name;
         aliases[kebabCase(noMax)] = name;
@@ -61,7 +74,8 @@ componentNames.forEach((name: string) => {
 
 const manifest = {
     components: componentNames,
-    aliases: aliases
+    aliases: aliases,
+    primeExports: [...primeExportNames]
 };
 
 fs.writeFileSync(outputFile, JSON.stringify(manifest, null, 2));
