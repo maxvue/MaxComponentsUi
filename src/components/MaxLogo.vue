@@ -1,7 +1,7 @@
 <template>
-    <div class="logo" pointer >
+    <div class="logo" pointer :rounded="props.rounded ? true : undefined">
         <RouterLink to="/">
-            <img :src="`${props.src}`" alt="Image" />
+            <img v-if="props.src" :src="`${props.src}`" alt="Image" />
         </RouterLink>
     </div>
 
@@ -16,15 +16,13 @@
             src?: string;
             rounded?: boolean;
         }>(),
-        { src: 'get_file?file=logo.svg', rounded: false }
+        { src: undefined, rounded: false }
     );
 </script>
 
 <style scoped lang="scss">
     @mixin rounded($value) {
-        &[rounded='#{$value}'] {
-            border-radius: #{$value}rem;
-        }
+        border-radius: #{$value}rem;
     }
 
     .logo {
@@ -45,6 +43,10 @@
 
         &[rounded-3] {
             border-radius: 3rem;
+        }
+
+        &[rounded] {
+            @include rounded(3);
         }
 
         &[pp] {
