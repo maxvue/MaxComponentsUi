@@ -1,11 +1,11 @@
 <template>
-    <InputBase v-bind="attrs" class="input-search-main-div" :iconRight="isLoading === true ? 'line-md:loading-twotone-loop' :  'material-symbols:search-rounded'">
+    <InputBase class="input-search-main-div" :iconRight="isLoading === true ? 'line-md:loading-twotone-loop' :  'material-symbols:search-rounded'">
         <InputText type="text" v-bind="attrs" fluid v-model="temp_value" @input="onInput" />
     </InputBase>
 </template>
 
 <script setup lang="ts">
-    import { ref, watch, useAttrs } from 'vue';
+    import { ref, watch, useAttrs, onUnmounted } from 'vue';
     import InputBase from './InputBase.vue';
     import InputText from 'primevue/inputtext';
 
@@ -29,11 +29,20 @@
 
     const onInput = () => {
         clearTimeout(debounceTimer);
+
+        // Campo limpo: notifica o consumidor imediatamente (sem debounce) para que ele possa
+        // resetar a lista de resultados exibida, sem esperar os 300ms do debounce de busca.
+        if (temp_value.value === '') {
+            emit('search', '');
+            return;
+        }
+
         debounceTimer = setTimeout(() => {
             if (temp_value.value && temp_value.value.length > 1) emit('search', temp_value.value);
-
         }, 300);
     };
+
+    onUnmounted(() => clearTimeout(debounceTimer));
 </script>
 
 <style lang="scss">

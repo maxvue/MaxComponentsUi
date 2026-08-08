@@ -79,4 +79,33 @@ describe('MaxInputSearch', () => {
         const ib = wrapper.findComponent(InputBase);
         expect(ib.props('iconRight')).toContain('search');
     });
+
+    it('limpar o campo emite search com string vazia', async () => {
+        vi.useRealTimers();
+        const wrapper = mountSearch({ modelValue: 'teste' });
+        const input = wrapper.find('input');
+
+        await input.setValue('');
+        await input.trigger('input');
+
+        const emitted = wrapper.emitted('search');
+        expect(emitted).toBeTruthy();
+        expect(emitted?.[emitted.length - 1][0]).toBe('');
+    });
+
+    it('não emite search após unmount (clearTimeout no debounce pendente)', async () => {
+        vi.useRealTimers();
+        const wrapper = mountSearch();
+        const input = wrapper.find('input');
+
+        await input.setValue('teste');
+        await input.trigger('input');
+
+        wrapper.unmount();
+
+        await new Promise((resolve) => setTimeout(resolve, 350));
+
+        const emitted = wrapper.emitted('search');
+        expect(emitted).toBeUndefined();
+    });
 });
