@@ -1,16 +1,15 @@
 <template>
-    <InputBase v-bind="props" class="input-base-phone-mail-main-div" :value="temp_value" :done="done ?? undefined" :caution="caution" :error="error_msg ?? undefined" :icon-right="loading ? 'loading' : undefined">
-        <InputText type="text" v-model="temp_value" v-maska="maskValue" autoClear="false" slotChar=" " placeholder="00 . 000 - 000" @blur="checkDone()" />
+    <InputBase v-bind="props" class="input-base-cep-main-div" :value="temp_value" :done="done ?? undefined" :caution="caution" :error="error_msg ?? undefined" :icon-right="loading ? 'loading' : undefined">
+        <InputText type="text" v-model="temp_value" v-maska="maskValue" autoClear="false" slotChar=" " placeholder="00000-000" />
     </InputBase>
 </template>
 
 /**
  * Componente de entrada para CEP (Código de Endereçamento Postal).
- * Possui máscara automática (00.000-000) e validação integrada.
+ * Possui máscara automática (00000-000) e validação integrada.
  */
 <script setup lang="ts">
     import { formatCep, onlyNumbers, cepIsValid } from '@maxvue/max-use';
-    import type { Ref } from 'vue';
     import { ref, computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
     import InputText from 'primevue/inputtext';
@@ -58,14 +57,9 @@
 
     const temp_value = ref(formatCep(props.modelValue));
     const temp_value_numbers = computed(() => onlyNumbers(temp_value.value ?? ''));
-    const maskValue = computed(() => ({ tokens: { '#': { pattern: /[0-9]/ } }, mask: '##.### - ###' }));
+    const maskValue = computed(() => ({ tokens: { '#': { pattern: /[0-9]/ } }, mask: '#####-###' }));
 
     const isValidCep = computed(() => cepIsValid(temp_value_numbers.value));
-    const isDone: Ref = ref(props.done ?? null);
-
-    const checkDone = () => {
-        isDone.value = done.value;
-    };
 
     const done = computed(() => {
         if (props.done !== undefined) return props.done ?? null;
