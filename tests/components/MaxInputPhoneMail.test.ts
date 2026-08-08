@@ -31,6 +31,22 @@ describe('MaxInputPhoneMail', () => {
         expect(wrapper.findComponent(InputBase).exists()).toBe(true);
     });
 
+    it('reflete o modo email imediatamente no mount, sem interação do usuário (regressão)', () => {
+        const wrapper = mountPhoneMail({ modelValue: 'usuario@email.com' });
+
+        expect((wrapper.vm as any).method).toBe('email');
+        expect((wrapper.vm as any).name_method).toBe('Email');
+        expect(wrapper.findComponent(InputBase).props('label')).toBe('Email');
+    });
+
+    it('reflete o modo whatsapp imediatamente no mount, sem interação do usuário (regressão)', () => {
+        const wrapper = mountPhoneMail({ modelValue: '11999887766' });
+
+        expect((wrapper.vm as any).method).toBe('whatsapp');
+        expect((wrapper.vm as any).name_method).toBe('Whatsapp');
+        expect(wrapper.findComponent(InputBase).props('label')).toBe('Whatsapp');
+    });
+
     it('valida email válido e marca done=true após blur', async () => {
         const wrapper = mountPhoneMail({ modelValue: 'usuario@email.com' });
         const input = wrapper.find('input');

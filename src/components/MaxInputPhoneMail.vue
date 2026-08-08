@@ -131,26 +131,39 @@
      * A normalização (remover `()`, `-` e espaço de um valor que parece
      * e-mail) só reatribui `temp_value` quando o valor realmente muda,
      * evitando loop infinito watch → muta temp_value → dispara o watch de novo.
+     *
+     * `immediate: true` é necessário para reproduzir o timing do antigo
+     * `computed` avaliado eagerly: sem isso, montar o componente com um
+     * `modelValue` inicial não-vazio (ex.: um e-mail já preenchido) deixava
+     * `method`/`name_method` presos nos valores padrão até o usuário digitar
+     * algo, porque um `watch` sem `immediate` só dispara em mudanças
+     * subsequentes. Na primeira execução (immediate, no mount) não há
+     * "valor anterior" — mas a lógica abaixo não depende dele, apenas do
+     * `newValue` atual, então é segura para rodar assim.
      */
-    watch(temp_value, (newValue) => {
-        const only_numbers = newValue ? onlyNumbers(newValue) : '';
-        const only_letters = newValue ? onlyLetters(newValue) : '';
+    watch(
+        temp_value,
+        (newValue) => {
+            const only_numbers = newValue ? onlyNumbers(newValue) : '';
+            const only_letters = newValue ? onlyLetters(newValue) : '';
 
-        if (only_letters.length > 1) {
-            name_method.value = 'Email';
-            method.value = 'email';
-            const normalized = newValue ? newValue.replace(/[()\-\s]/g, '') : '';
-            if (normalized !== newValue) {
-                temp_value.value = normalized;
-                return;
+            if (only_letters.length > 1) {
+                name_method.value = 'Email';
+                method.value = 'email';
+                const normalized = newValue ? newValue.replace(/[()\-\s]/g, '') : '';
+                if (normalized !== newValue) {
+                    temp_value.value = normalized;
+                    return;
+                }
+            } else if (only_numbers.length > 1) {
+                name_method.value = 'Whatsapp';
+                method.value = 'whatsapp';
             }
-        } else if (only_numbers.length > 1) {
-            name_method.value = 'Whatsapp';
-            method.value = 'whatsapp';
-        }
 
-        if (isDone.value !== null) isDone.value = done.value;
-    });
+            if (isDone.value !== null) isDone.value = done.value;
+        },
+        { immediate: true }
+    );
 
     /**
      * Emite o valor desmascarado (`unmaskedValue`, exposto pelo `v-maska:unmaskedValue.unmasked`
