@@ -32,8 +32,8 @@
 
 <script setup lang="ts">
     import { useModalStore } from '../stores/useModal.Store';
-    import { Random, useDefaultReset, refAutoReset } from '@maxvue/max-use';
-    import { useTemplateRef, computed, ref, watch } from 'vue';
+    import { useDefaultReset, refAutoReset } from '@maxvue/max-use';
+    import { useTemplateRef, computed, ref, watch, useId } from 'vue';
     import MaxIconButton from './MaxIconButton.vue';
     import MaxButton from './MaxButton.vue';
     import MaxTitle1 from './MaxTitle1.vue';
@@ -107,13 +107,9 @@
 
     const modal_store = useModalStore();
 
-    const id = ref(Random());
+    const id = ref(useId());
 
     const el = useTemplateRef('el');
-
-    const hide = modal_store.hide;
-
-    const show = modal_store.show;
 
     const style: any = useDefaultReset({
         isTop: false,
@@ -255,8 +251,8 @@
     defineExpose({
         toggle,
         is_show,
-        show,
-        hide,
+        show: open,
+        hide: close,
         open,
         close
     });
