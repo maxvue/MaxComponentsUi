@@ -24,7 +24,11 @@ export const presetMaxUno = () => {
             [/^[pm][tblrwhyx]?-?(\d+)$/, (params) => paddingMargin(params)],
             [/^w[-_]?[fF](?:ull|lex)$/, () => ({ width: '100% !important' })],
             [/^fs-(.+)$/, ([, s]) => ({ 'font-size': `${s}rem !important` })],
-            [/^color-(.+)$/, ([, s]) => ({ color: `var(--${String(s).length > 3 ? s : 'gray-300'}) !important` })],
+            // O captura precisa excluir parênteses: com `(.+)`, a função CSS
+            // `color-mix(in srgb, ...)` — escrita dentro de blocos <style> — era
+            // lida como utilitário e gerava `var(--mix(in)`, um bracket sem
+            // fechamento que quebra o PostCSS na build da app consumidora.
+            [/^color-([\w-]+)$/, ([, s]) => ({ color: `var(--${String(s).length > 3 ? s : 'gray-300'}) !important` })],
             // Cores dinâmicas
             [/^text-(center|left|right)$/, ([, s]) => ({ 'text-align': s + ' !important' })],
             [/^bg-(.+)$/, ([, s]) => ({ 'background-color': s.startsWith('var(') || s.startsWith('#') || s.startsWith('rgb') || s.startsWith('hsl') ? s : `var(--${s})` })],

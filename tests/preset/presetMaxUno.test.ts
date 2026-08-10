@@ -71,6 +71,17 @@ describe('presetMaxUno', () => {
             expect(result).toEqual({ color: 'var(--blue-500) !important' });
         });
 
+        it('color-X não captura a função CSS color-mix()', () => {
+            // Regressão: com `(.+)`, a regra casava `color-mix(in` — escrito em
+            // blocos <style> das apps consumidoras — e gerava `var(--mix(in)`,
+            // um bracket sem fechamento que quebrava o PostCSS na build delas.
+            const regex = /^color-([\w-]+)$/;
+
+            expect(regex.test('color-blue-500')).toBe(true);
+            expect(regex.test('color-mix(in')).toBe(false);
+            expect(regex.test('color-mix(in srgb, var(--x) 50%, transparent)')).toBe(false);
+        });
+
         it('text-center/left/right match', () => {
             expect(/^text-(center|left|right)$/.test('text-center')).toBe(true);
             expect(/^text-(center|left|right)$/.test('text-left')).toBe(true);
