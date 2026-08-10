@@ -114,3 +114,79 @@ describe('MaxListBox - renderizacao e selecao', () => {
         expect(wrapper.findAll('[role="option"]')).toHaveLength(3);
     });
 });
+
+describe('MaxListBox - filtro local', () => {
+    beforeEach(() => {
+        setActivePinia(createPinia());
+    });
+
+    it('nao renderiza o campo de busca por padrao', () => {
+        const wrapper = mountListBox();
+        expect(wrapper.find('input').exists()).toBe(false);
+    });
+
+    it('renderiza o campo de busca quando filter e true', () => {
+        const wrapper = mountListBox({ filter: true });
+        expect(wrapper.find('input').exists()).toBe(true);
+    });
+
+    it('filtra os itens pelo label', async () => {
+        const wrapper = mountListBox({ filter: true });
+        await wrapper.find('input').setValue('alf');
+        await wrapper.vm.$nextTick();
+
+        const items = wrapper.findAll('.max-listbox-item');
+        expect(items).toHaveLength(1);
+        expect(items[0].text()).toContain('Alfa');
+    });
+
+    it('filtra ignorando acentos e caixa', async () => {
+        const wrapper = mountListBox({
+            filter: true,
+            options: [{ value: 1, label: 'Órgão Público' }, { value: 2, label: 'Outro' }]
+        });
+        await wrapper.find('input').setValue('ORGAO');
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.findAll('.max-listbox-item')).toHaveLength(1);
+    });
+
+    it('filtra tambem pelo sublabel', async () => {
+        const wrapper = mountListBox({ filter: true });
+        await wrapper.find('input').setValue('segundo');
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.findAll('.max-listbox-item')[0].text()).toContain('Beta');
+    });
+
+    it('respeita filterFields customizado', async () => {
+        const wrapper = mountListBox({
+            filter: true,
+            filterFields: ['codigo'],
+            options: [{ value: 1, label: 'Alfa', codigo: 'X9' }, { value: 2, label: 'Beta', codigo: 'Y7' }]
+        });
+        await wrapper.find('input').setValue('y7');
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.findAll('.max-listbox-item')).toHaveLength(1);
+        expect(wrapper.findAll('.max-listbox-item')[0].text()).toContain('Beta');
+    });
+
+    it('exibe emptyMessage quando o filtro nao casa com nada', async () => {
+        const wrapper = mountListBox({ filter: true, emptyMessage: 'Nada aqui' });
+        await wrapper.find('input').setValue('zzzz');
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.findAll('.max-listbox-item')).toHaveLength(0);
+        expect(wrapper.text()).toContain('Nada aqui');
+    });
+
+    it('emite filter apos o debounce de 300ms', async () => {
+        const wrapper = mountListBox({ filter: true });
+        await wrapper.find('input').setValue('alf');
+
+        await new Promise((resolve) => setTimeout(resolve, 350));
+
+        expect(wrapper.emitted('filter')?.[0]).toEqual(['alf']);
+    });
+});

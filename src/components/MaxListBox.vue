@@ -6,6 +6,17 @@
             </slot>
         </div>
 
+        <div v-if="props.filter" class="max-listbox-filter">
+            <input
+                v-model="searchInput"
+                type="text"
+                class="max-listbox-filter-input"
+                :placeholder="props.filterPlaceholder"
+                :disabled="props.disabled"
+                @input="onFilterInput"
+            >
+        </div>
+
         <ul ref="listElem" class="max-listbox-list" role="listbox" :aria-disabled="props.disabled">
             <li
                 v-for="(option, index) in visibleOptions"
@@ -44,7 +55,7 @@
  * automática e carregamento paginado por scroll infinito.
  */
 <script setup lang="ts">
-    import { ref, computed } from 'vue';
+    import { ref, computed, onBeforeUnmount } from 'vue';
     import MaxIcon from './MaxIcon.vue';
     import MaxBadgeComponent from './MaxBadgeComponent.vue';
 
@@ -74,6 +85,12 @@
             title?: string;
             /** Altura do painel (ex.: '400px'); padrão 100% do container */
             height?: string;
+            /** Exibe o campo de busca */
+            filter?: boolean;
+            /** Placeholder do campo de busca */
+            filterPlaceholder?: string;
+            /** Campos usados no filtro local; padrão: optionLabel + optionSubLabel */
+            filterFields?: string[];
         }>(),
         {
             modelValue: null,
@@ -87,23 +104,58 @@
             emptyMessage: 'Nenhum registro encontrado',
             disabled: false,
             title: undefined,
-            height: undefined
+            height: undefined,
+            filter: false,
+            filterPlaceholder: 'Buscar...',
+            filterFields: undefined
         }
     );
 
     const emit = defineEmits<{
         (e: 'update:modelValue', value: any): void;
         (e: 'change', payload: { value: any; option: any }): void;
+        (e: 'filter', term: string): void;
     }>();
 
     const listElem = ref<HTMLElement | null>(null);
 
     const rootStyle = computed(() => (props.height ? { height: props.height } : undefined));
 
+    const searchInput = ref('');
+    const searchTerm = ref('');
+    let filterTimer: ReturnType<typeof setTimeout> | undefined;
+
+    /** Remove acentos e normaliza a caixa para comparação de texto. */
+    function normalize(value: any): string {
+        return String(value ?? '')
+            .normalize('NFD')
+            .replace(/[̀-ͯ]/g, '')
+            .toLowerCase();
+    }
+
+    function onFilterInput() {
+        clearTimeout(filterTimer);
+        filterTimer = setTimeout(() => {
+            searchTerm.value = searchInput.value;
+            emit('filter', searchInput.value);
+        }, 300);
+    }
+
+    const filterFieldList = computed(() => props.filterFields ?? [props.optionLabel, props.optionSubLabel]);
+
+    const filteredOptions = computed<any[]>(() => {
+        const list = props.options ?? [];
+        const term = normalize(searchInput.value);
+
+        if (!props.filter || term === '') return list;
+
+        return list.filter((option) => filterFieldList.value.some((field) => normalize(option?.[field]).includes(term)));
+    });
+
     /** Lista efetivamente renderizada. Inclui o selectedOption externo no topo
      * quando o valor selecionado ainda não está presente na lista local. */
     const visibleOptions = computed<any[]>(() => {
-        const list = props.options ?? [];
+        const list = filteredOptions.value;
 
         if (props.selectedOption === undefined || props.selectedOption === null) return list;
 
@@ -143,6 +195,8 @@
         emit('update:modelValue', value);
         emit('change', { value, option });
     }
+
+    onBeforeUnmount(() => clearTimeout(filterTimer));
 
     defineExpose({ listElem });
 </script>
