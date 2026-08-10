@@ -137,6 +137,14 @@
         return tab_headers.value.some((header) => header.value === active_value.value);
     });
 
+    /**
+     * Value efetivamente selecionado para exibicao: usa active_value quando
+     * ele corresponde a um tab registrado; caso contrario (sem v-model, ou
+     * value orfao) cai para fallback_tab_value, garantindo que sempre haja
+     * um tab selecionado e um painel visivel — mesmo no modo nao controlado.
+     */
+    const effective_active_value = computed(() => (has_registered_active_tab.value ? active_value.value : fallback_tab_value.value));
+
     const select = (value: string) => {
         active_tab.value = value;
     };
@@ -169,6 +177,7 @@
         active_value,
         fallback_tab_value,
         has_registered_active_tab,
+        effective_active_value,
         select,
         lazy: toRef(props, 'lazy'),
         select_on_focus: toRef(props, 'selectOnFocus'),

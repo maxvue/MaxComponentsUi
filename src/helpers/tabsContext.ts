@@ -17,6 +17,15 @@ export interface TabsContext {
      */
     fallback_tab_value: Readonly<Ref<string | undefined>>;
     /**
+     * Value efetivamente selecionado para fins de exibicao (aria-selected do
+     * MaxTab e visibilidade do MaxTabPanel): igual a active_value quando ha
+     * um value ativo valido; cai para fallback_tab_value quando nao ha
+     * v-model definido (modo nao controlado) ou o value ativo e orfao,
+     * replicando o comportamento do sistema legado MaxTabItem de sempre
+     * deixar algum tab selecionado.
+     */
+    effective_active_value: Readonly<Ref<string | undefined>>;
+    /**
      * True quando o active_value atual corresponde a um tab registrado.
      * False tanto quando active_value e undefined quanto quando e um value
      * orfao (nao corresponde a nenhum tab). Antes do registro ter ao menos

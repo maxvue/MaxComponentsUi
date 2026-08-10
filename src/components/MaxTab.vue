@@ -4,6 +4,7 @@
         class="max-tab"
         :class="{ 'max-tab-active': is_active, 'max-tab-disabled': disabled }"
         role="tab"
+        :id="`${context.id_prefix}-tab-${value}`"
         :data-tab-value="value"
         :aria-selected="is_active ? 'true' : 'false'"
         :aria-disabled="disabled ? 'true' : 'false'"
@@ -32,7 +33,7 @@
 
     const el = useTemplateRef<HTMLElement>('el');
 
-    const is_active = computed(() => context.has_registered_active_tab.value && context.active_value.value === props.value);
+    const is_active = computed(() => context.effective_active_value.value === props.value);
 
     const is_tabbable = computed(() => {
         if (is_active.value) return true;
