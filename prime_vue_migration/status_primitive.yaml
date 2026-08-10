@@ -342,7 +342,7 @@ itens:
     uso: 'ALTÍSSIMO — `v-tooltip` aparece em 83 arquivos dos projetos'
     execucao: Concluído
     verificacao: Concluído
-    teste_usuario: Aguardando
+    teste_usuario: Aprovado
     tentativas: 0
     classes_p_removidas: ['p-tooltip', 'p-component', 'p-tooltip-top', 'p-tooltip-right', 'p-tooltip-bottom', 'p-tooltip-left', 'p-tooltip-arrow', 'p-tooltip-text']
     notas: >-
