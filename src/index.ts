@@ -125,6 +125,10 @@ export { default as MaxContainerApp } from './components/MaxContainerApp.vue';
 export { default as MaxBottomMenu } from './components/MaxBottomMenu.vue';
 export { default as MaxSideMenu } from './components/MaxSideMenu.vue';
 export { default as MaxMenuVerticalItem } from './components/MaxMenuVerticalItem.vue';
+export { default as MaxTopMenu } from './components/MaxTopMenu.vue';
+export { default as MaxTopMenuSearchBar } from './components/MaxTopMenuSearchBar.vue';
+export { default as MaxTopToolbar } from './components/MaxTopToolbar.vue';
+export { default as MaxUserSection } from './components/MaxUserSection.vue';
 
 // Data & Display
 export { default as MaxBadgeComponent } from './components/MaxBadgeComponent.vue';
