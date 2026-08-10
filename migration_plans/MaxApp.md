@@ -657,6 +657,15 @@ Resolvido removendo as 7 locais e apontando o auto-import para
 | `vue-tsc` | 275 erros — **280 no baseline**; nenhum nos arquivos alterados |
 | Navegador | ❌ **não testado** |
 
+### Já mesclado na `dev` do engeapp
+
+Commit de merge `74a6cbf6f`. **Para o ambiente servir o código novo, reinicie o Vite** — o
+processo em execução foi iniciado antes do merge e serve o `App.vue` antigo:
+
+```bash
+cd ~/GitHub/engeapp && npm run dev     # após encerrar o processo anterior
+```
+
 ### O que falta — só validação manual
 
 1. **Login** por e-mail e telefone (com `allow-user-name` desligado, usuário não deve detectar).
