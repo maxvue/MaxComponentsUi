@@ -233,13 +233,13 @@ route.name existe?
 | 6 | ✅ **`MaxContainerApp` + `MaxBottomMenu`** | Ambos são folhas, sem stores complexas | 3 |
 | 7 | ✅ **`MaxSideMenu`** | `SideMenu.vue` + `MenuVerticalItem.vue`; store `useListMenus` configurável | 3 |
 | 8 | ✅ **`MaxTopMenu`** | **Escopo reduzido ao esqueleto + slots** (ver §8.5). Reverb/LiveKit ficam no engeapp | 3, 7 |
-| 9 | **`MaxSplitPanesContent`** | `splitpanes` + **slot** para o painel lateral (evita arrastar o `ChatPanel`) | 3 |
+| 9 | ✅ **`MaxSplitPanesContent`** | `splitpanes` + **slot** para o painel lateral (evita arrastar o `ChatPanel`) | 3 |
 | 10 | **`MaxPageLayout`** | Compõe 6→9 | 6, 7, 8, 9 |
-| 11 | **VoIP** | `useVoip.Store` (LiveKit dinâmico) + 5 componentes | 3 |
+| 11 | ❌ ~~**VoIP**~~ | **Cancelada por decisão do usuário** — os 5 componentes e o `useVoip.Store` (512 linhas, LiveKit/WebRTC) ficam no engeapp e entram pelo slot `voip` do `MaxTopMenu`. A lib não ganha LiveKit | — |
 | 12 | **`MaxApp.vue`** | Reescrever o rascunho com props §5, branching §5 e slots | 10, 11 |
 | 13 | **Resolver + exports** | `npx tsx src/scripts/generateResolver.ts`, exports em `index.ts` | 12 |
 | 14 | **Integração no engeapp** | Trocar `App.vue` pelo `<MaxApp/>`, validar em dev | 13 |
-| 15 | *(opcional)* **supportChat** | 37 arquivos — só se decidido migrar o chat | 9 |
+| 15 | ❌ ~~**supportChat**~~ | **Cancelada por decisão do usuário** — as 37 telas ficam no engeapp e entram pelo slot `side` do `MaxSplitPanesContent` | — |
 
 ---
 
@@ -255,13 +255,13 @@ route.name existe?
 | 6 | MaxContainerApp + MaxBottomMenu | ✅ `done` |
 | 7 | MaxSideMenu | ✅ `done` |
 | 8 | MaxTopMenu (esqueleto + slots) | ✅ `done` |
-| 9 | MaxSplitPanesContent | `waiting` |
+| 9 | MaxSplitPanesContent | ✅ `done` |
 | 10 | MaxPageLayout | `waiting` |
-| 11 | VoIP | `waiting` |
+| 11 | ~~VoIP~~ | ❌ `cancelled` — fica no engeapp |
 | 12 | MaxApp.vue | `waiting` |
 | 13 | Resolver + exports | `waiting` |
 | 14 | Integração no engeapp | `waiting` |
-| 15 | supportChat (opcional) | `waiting` |
+| 15 | ~~supportChat~~ | ❌ `cancelled` — fica no engeapp |
 
 ---
 
@@ -506,6 +506,38 @@ A suíte às vezes reporta `EnvironmentTeardownError: Closing rpc while "onUserC
 pending`. É uma corrida no encerramento do worker do Vitest, ligada a saída de console — **não é
 falha de teste**. Execuções repetidas dão 763 passando / 18 falhando de forma estável, ora com
 2 erros, ora com nenhum. Ignorar, ou eliminar `console.log` de testes.
+
+---
+
+## 8.7 Escopo final — o que a lib leva e o que fica no engeapp
+
+Decisões acumuladas do usuário nas etapas 8 e 9: **VoIP e ChatPanel ficam fora**. O plano
+original previa 65 arquivos; o escopo real ficou em torno de **16 componentes**.
+
+### Na biblioteca
+
+`MaxApp`, `MaxPageLayout`, `MaxContainerApp`, `MaxTopMenu`, `MaxTopMenuSearchBar`,
+`MaxTopToolbar`, `MaxUserSection`, `MaxSideMenu`, `MaxMenuVerticalItem`, `MaxBottomMenu`,
+`MaxSplitPanesContent`, `MaxLoadScreen`, `MaxLoadScreenTarget` + as stores `system`, `user`,
+`loading`, `login`, `searchBar`, `listMenus`, `topToolbar`.
+
+### No engeapp, entrando por slot
+
+| Componente | Slot |
+|---|---|
+| Painel de notificações | `MaxTopMenu#notifications` |
+| `ReportBugs` (647 linhas) | `MaxTopMenu#bugs` |
+| `LiveSection` + `LiveStatusIndicator` + `LiveUsersList` | `MaxTopMenu#live` |
+| `VoipDialpad` + `VoipCallHistory` | `MaxTopMenu#voip` |
+| `ReverbComponent` + `PlannerReverbListener` + toggle do chat | `MaxTopMenu#chat` |
+| `ImportProjectPopover` | `MaxTopToolbar#plus` |
+| `ChatPanel` (37 telas) | `MaxSplitPanesContent#side` |
+| `VoipDialer`, `VoipReverbListener`, `IncomingCallModal` | `MaxApp#extras` (etapa 12) |
+
+### Consequência para as dependências
+
+A lib **não** ganha `livekit-client`, `@laravel/echo-vue`, `pdfjs-dist`, `vue3-emoji-picker`
+nem `ziggy-js`. A única dependência nova de toda a migração foi o **`splitpanes`**.
 
 ---
 
