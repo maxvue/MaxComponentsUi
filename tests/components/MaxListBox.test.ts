@@ -513,3 +513,83 @@ describe('MaxListBox - scroll infinito', () => {
         expect(loadOptions).toHaveBeenCalledTimes(2);
     });
 });
+
+describe('MaxListBox - preenchimento automatico do painel', () => {
+    beforeEach(() => {
+        setActivePinia(createPinia());
+    });
+
+    async function flush() {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+    }
+
+    function page(n: number, size = 3) {
+        return Array.from({ length: size }, (_, i) => ({ value: n * 100 + i, label: `P${n}I${i}` }));
+    }
+
+    /** Marca o painel como "curto": conteúdo não preenche a altura visível. */
+    function markAsShort(wrapper: any) {
+        const list = wrapper.find('.max-listbox-list');
+        Object.defineProperty(list.element, 'clientHeight', { value: 400, configurable: true });
+        Object.defineProperty(list.element, 'scrollHeight', { value: 120, configurable: true });
+    }
+
+    /** Marca o painel como "cheio": conteúdo já preenche (e excede) a altura visível. */
+    function markAsFilled(wrapper: any) {
+        const list = wrapper.find('.max-listbox-list');
+        Object.defineProperty(list.element, 'clientHeight', { value: 400, configurable: true });
+        Object.defineProperty(list.element, 'scrollHeight', { value: 1000, configurable: true });
+    }
+
+    it('busca a proxima pagina quando a primeira nao preenche o painel, sem nenhum evento de scroll', async () => {
+        const loadOptions = vi.fn()
+            .mockResolvedValueOnce({ items: page(1), hasMore: true })
+            .mockResolvedValueOnce({ items: page(2), hasMore: false });
+
+        const wrapper = mountListBox({ options: undefined, loadOptions });
+        markAsShort(wrapper);
+        await flush();
+        await wrapper.vm.$nextTick();
+        await flush();
+        await wrapper.vm.$nextTick();
+
+        expect(loadOptions).toHaveBeenCalledTimes(2);
+        expect(loadOptions).toHaveBeenLastCalledWith({ page: 2, search: '', pageSize: 50 });
+    });
+
+    it('para a cadeia de auto-preenchimento quando hasMore fica false', async () => {
+        const loadOptions = vi.fn()
+            .mockResolvedValueOnce({ items: page(1), hasMore: true })
+            .mockResolvedValueOnce({ items: page(2), hasMore: true })
+            .mockResolvedValueOnce({ items: page(3), hasMore: false });
+
+        const wrapper = mountListBox({ options: undefined, loadOptions });
+        markAsShort(wrapper);
+        await flush();
+        await wrapper.vm.$nextTick();
+        await flush();
+        await wrapper.vm.$nextTick();
+        await flush();
+        await wrapper.vm.$nextTick();
+
+        expect(loadOptions).toHaveBeenCalledTimes(3);
+
+        // Mais um ciclo de flush/tick nao deve gerar chamadas extras.
+        await flush();
+        await wrapper.vm.$nextTick();
+        expect(loadOptions).toHaveBeenCalledTimes(3);
+    });
+
+    it('nao busca pagina extra quando a primeira pagina ja preenche o painel', async () => {
+        const loadOptions = vi.fn().mockResolvedValueOnce({ items: page(1), hasMore: true });
+
+        const wrapper = mountListBox({ options: undefined, loadOptions });
+        markAsFilled(wrapper);
+        await flush();
+        await wrapper.vm.$nextTick();
+        await flush();
+        await wrapper.vm.$nextTick();
+
+        expect(loadOptions).toHaveBeenCalledTimes(1);
+    });
+});

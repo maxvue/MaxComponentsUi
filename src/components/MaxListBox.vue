@@ -74,7 +74,7 @@
  * automática e carregamento paginado por scroll infinito.
  */
 <script setup lang="ts">
-    import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
+    import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
     import MaxIcon from './MaxIcon.vue';
     import MaxBadgeComponent from './MaxBadgeComponent.vue';
     import { useVirtualList } from '../composables/useVirtualList';
@@ -200,6 +200,13 @@
     const failedPage = ref(1);
     /** Sequência de requisição: respostas de buscas antigas são descartadas. */
     let requestId = 0;
+    /** Conta os auto-preenchimentos consecutivos (páginas buscadas sem um scroll
+     * real do usuário) desde o último reset. Protege contra loop infinito quando
+     * o servidor mente sobre `hasMore` ou quando o painel não é mensurável. */
+    let autoFillCount = 0;
+    /** Limite de páginas que o auto-preenchimento busca sozinho antes de desistir
+     * e esperar por um scroll real do usuário. */
+    const MAX_AUTO_FILL_PAGES = 20;
 
     const isLoading = computed(() => props.loading || isLoadingPage.value);
     const isInitialLoading = computed(() => isLoadingPage.value && apiItems.value.length === 0);
@@ -229,6 +236,10 @@
             if (result?.hasMore !== undefined) hasMore.value = result.hasMore;
             else if (result?.total !== undefined) hasMore.value = apiItems.value.length < result.total;
             else hasMore.value = items.length > 0;
+
+            // A página carregada pode não preencher o painel (lista curta): sem scroll
+            // possível o evento de scroll nunca dispara, então verificamos aqui mesmo.
+            fillViewportIfNeeded();
         } catch (error) {
             if (thisRequest !== requestId) return;
 
@@ -247,6 +258,7 @@
         hasMore.value = true;
         loadError.value = null;
         isLoadingPage.value = false;
+        autoFillCount = 0;
         fetchPage(1);
     }
 
@@ -329,7 +341,44 @@
         const target = event.target as HTMLElement;
         setViewport(target.scrollTop, target.clientHeight || DEFAULT_VIEWPORT_HEIGHT);
 
+        // Um scroll real do usuário devolve a capacidade total de auto-preenchimento.
+        autoFillCount = 0;
+
         if (shouldLoadMore(target)) fetchPage(currentPage.value + 1);
+    }
+
+    /** Após uma página carregar, busca a próxima automaticamente se o conteúdo
+     * ainda não preenche o painel — sem barra de rolagem o evento `scroll` nunca
+     * dispara, então o carregamento infinito ficaria travado sem esta checagem.
+     * Espera o DOM atualizar (nextTick) para medir alturas reais.
+     *
+     * Termina porque: (1) cada chamada depende de `hasMore`/`isLoadingPage`/
+     * `loadError`, atualizados de forma síncrona por `fetchPage` antes de
+     * qualquer nova chamada; e (2) `autoFillCount` limita a MAX_AUTO_FILL_PAGES
+     * o número de páginas buscadas sem um scroll real — protegendo contra um
+     * servidor que nunca preenche o painel (ou mente sobre `hasMore`). */
+    async function fillViewportIfNeeded() {
+        if (autoFillCount >= MAX_AUTO_FILL_PAGES) return;
+
+        await nextTick();
+
+        const target = listElem.value;
+        if (!target) return;
+
+        // Sem uma altura real de layout (ex.: painel ainda não medido, ou
+        // ambiente sem layout como o dos testes) não há como saber se o
+        // conteúdo preenche o painel — não arriscamos auto-buscar às cegas.
+        if (target.clientHeight <= 0) return;
+
+        if (!shouldLoadMore(target)) return;
+
+        // Só preenchemos automaticamente quando não há barra de rolagem possível
+        // (scrollHeight <= clientHeight); com conteúdo rolável, o próprio scroll
+        // do usuário já dispara as próximas páginas via onListScroll.
+        if (target.scrollHeight > target.clientHeight) return;
+
+        autoFillCount += 1;
+        await fetchPage(currentPage.value + 1);
     }
 
     function valueOf(option: any): any {
