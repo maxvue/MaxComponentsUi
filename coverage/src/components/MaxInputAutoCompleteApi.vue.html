@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">94% </span>
+                <span class="strong">90.9% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>47/50</span>
+                <span class='fraction'>50/55</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">88.13% </span>
+                <span class="strong">85.93% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>52/59</span>
+                <span class='fraction'>55/64</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">97.36% </span>
+                <span class="strong">93.02% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>37/38</span>
+                <span class='fraction'>40/43</span>
             </div>
         
             
@@ -174,7 +174,16 @@
 <a name='L109'></a><a href='#L109'>109</a>
 <a name='L110'></a><a href='#L110'>110</a>
 <a name='L111'></a><a href='#L111'>111</a>
-<a name='L112'></a><a href='#L112'>112</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L112'></a><a href='#L112'>112</a>
+<a name='L113'></a><a href='#L113'>113</a>
+<a name='L114'></a><a href='#L114'>114</a>
+<a name='L115'></a><a href='#L115'>115</a>
+<a name='L116'></a><a href='#L116'>116</a>
+<a name='L117'></a><a href='#L117'>117</a>
+<a name='L118'></a><a href='#L118'>118</a>
+<a name='L119'></a><a href='#L119'>119</a>
+<a name='L120'></a><a href='#L120'>120</a>
+<a name='L121'></a><a href='#L121'>121</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">16x</span>
 <span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-yes">18x</span>
@@ -216,6 +225,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">13x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -239,9 +249,17 @@
 <span class="cline-any cline-yes">13x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">13x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">13x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -297,6 +315,7 @@
             &lt;template #content<span class="fstat-no" title="function not covered" >&gt;&lt;/template&gt;<span class="cstat-no" title="statement not covered" ></span></span>
         &lt;/AutoComplete&gt;
     &lt;/InputBase&gt;
+&nbsp;
 &lt;/template&gt;
 &nbsp;
 &lt;script setup lang="ts"&gt;
@@ -304,7 +323,7 @@
      * Componente Autocomplete que busca sugestões de uma API.
      * Integra-se com as rotas do backend Max para busca dinâmica.
      */
-    import { hasContent, toSearchableString, getCachedApi, toArray, isBlank, size, isEqual } from '@maxvue/max-use';
+    import { hasContent, toSearchableString, getCachedApiIDB, keyExists, isBlank, size, isEqual } from '@maxvue/max-use';
     import type { Ref } from 'vue';
     import { ref, computed, watch } from 'vue';
     import InputBase from './InputBase.vue';
@@ -347,12 +366,20 @@
     const list: Ref&lt;any[]&gt; = ref([]);
 &nbsp;
     watch( () =&gt; props.data, (newValue, oldValue) =&gt; {
-        if (isBlank(newValue) || isEqual(newValue, oldValue)) return;
+        if (isBlank(props.data) &amp;&amp; isBlank(newValue) || isEqual(newValue, oldValue)) return;
 &nbsp;
-        getCachedApi(props.route, { ...(props.data ?? <span class="branch-1 cbranch-no" title="branch not covered" >{}), i</span>nput_value: temp_value.value }).then((res: any) =&gt; {
+        const data_sent = keyExists(['files', 'file'], temp_value.value) ? <span class="branch-0 cbranch-no" title="branch not covered" >{ ...temp_value.value } : t</span>emp_value.value;
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (keyExists(['files', 'file'], temp_value.value)){
+<span class="cstat-no" title="statement not covered" >            data_sent['files'] = [];</span>
+<span class="cstat-no" title="statement not covered" >            data_sent['file'] = [];</span>
+        }
+&nbsp;
+        const applyList = (res: any) =&gt; {
             <span class="missing-if-branch" title="if path not taken" >I</span>if (isBlank(res) || size(res) === 0) <span class="cstat-no" title="statement not covered" >return;</span>
             list.value = res;
-        });
+        };
+&nbsp;
+        getCachedApiIDB(props.route, { ...(props.data ?? <span class="branch-1 cbranch-no" title="branch not covered" >{}), i</span>nput_value: data_sent }, null, undefined, applyList).then(applyList);
         return;
     }, { deep: true, immediate: true } );
 &nbsp;
@@ -403,7 +430,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-05-29T12:13:03.532Z
+                at 2026-08-10T14:46:30.972Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
