@@ -19,8 +19,9 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, computed, watch, useAttrs, nextTick } from 'vue';
+    import { ref, computed, useAttrs, nextTick } from 'vue';
     import InputBase from './InputBase.vue';
+    import { useMirroredModel } from '../helpers/useMirroredModel';
 
     const attrs = useAttrs();
 
@@ -44,8 +45,18 @@
         { modelValue: '' }
     );
 
-    const emit = defineEmits(['update:modelValue']);
-    const temp_value = ref(String(props.modelValue ?? ''));
+    const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
+
+    // temp_value espelha props.modelValue sempre convertido para string.
+    // A conversao ocorre tanto na leitura (getter, usado na inicializacao e no
+    // watch reativo de props.modelValue -> temp_value) quanto na emissao
+    // (transform), preservando o comportamento original de `String(val ?? '')`
+    // em ambos os sentidos.
+    const temp_value = useMirroredModel(
+        { get modelValue() { return String(props.modelValue ?? ''); } },
+        emit,
+        { transform: (value: string) => String(value ?? '') }
+    );
 
     const textareaRef = ref<HTMLTextAreaElement | null>(null);
     const lineNumbersRef = ref<HTMLDivElement | null>(null);
@@ -102,9 +113,6 @@
             el.selectionStart = el.selectionEnd = start + 1 + indentation.length;
         }
     };
-
-    watch(temp_value, () => emit('update:modelValue', temp_value.value));
-    watch(() => props.modelValue, (val) => temp_value.value = String(val ?? ''));
 </script>
 
 <style lang="scss">

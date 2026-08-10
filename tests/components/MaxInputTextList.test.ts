@@ -72,4 +72,40 @@ describe('MaxInputTextList', () => {
         const emitted = wrapper.emitted('update:modelValue')!;
         expect(emitted[emitted.length - 1][0]).toBe('    abc\n    ');
     });
+
+    it('indenta cada linha de um bloco selecionado ao pressionar Tab', async () => {
+        const wrapper = mountTextList({ modelValue: 'linha1\nlinha2' });
+        const textarea = wrapper.find('textarea');
+        const el = textarea.element as HTMLTextAreaElement;
+        // Seleciona da linha 1 até o fim da linha 2 (bloco completo)
+        el.selectionStart = 0;
+        el.selectionEnd = el.value.length;
+
+        await textarea.trigger('keydown', { key: 'Tab' });
+
+        const emitted = wrapper.emitted('update:modelValue')!;
+        expect(emitted[emitted.length - 1][0]).toBe('    linha1\n    linha2');
+    });
+
+    it('sincroniza o scroll do textarea com a coluna de números de linha', async () => {
+        const wrapper = mountTextList({ modelValue: 'l1\nl2\nl3\nl4\nl5\nl6\nl7\nl8\nl9\nl10' });
+        const textarea = wrapper.find('textarea');
+        const el = textarea.element as HTMLTextAreaElement;
+        const lineNumbers = wrapper.find('.line-numbers').element as HTMLDivElement;
+
+        Object.defineProperty(el, 'scrollTop', { value: 42, writable: true });
+        await textarea.trigger('scroll');
+
+        expect(lineNumbers.scrollTop).toBe(42);
+    });
+
+    it('repassa label, error e required ao InputBase', () => {
+        const wrapper = mountTextList({ label: 'Meu Label', error: 'Erro aqui', required: true });
+
+        const inputBase = wrapper.findComponent({ name: 'InputBase' });
+        expect(inputBase.exists()).toBe(true);
+        expect(inputBase.props('label')).toBe('Meu Label');
+        expect(inputBase.props('error')).toBe('Erro aqui');
+        expect(inputBase.props('required')).toBe(true);
+    });
 });

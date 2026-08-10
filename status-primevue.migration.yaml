@@ -71,7 +71,7 @@ components:
     level: baixa
     description_migration: >-
       Já usa apenas InputBase (sem componente PrimeVue direto). Só depende da migração do InputBase.
-    status: waiting
+    status: done
 
   - name: MaxColorPicker
     level: media
