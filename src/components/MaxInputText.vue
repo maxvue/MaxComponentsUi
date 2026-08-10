@@ -1,4 +1,12 @@
 <template>
+    <!--
+        Decisão deliberada: `v-bind="props"` fica no InputBase (elemento raiz),
+        não no <input> interno. Attrs extras não declarados em `props` (ex.:
+        `maxlength`, `autocomplete`) caem no root do InputBase, não no <input>.
+        Não é fallthrough "quebrado" — é o mesmo padrão usado por
+        MaxInputTextArea. Não "corrigir" isso sem entender que foi escolhido
+        conscientemente (ver achado 38 / CLAUDE.md).
+    -->
     <InputBase v-bind="props" :done="props.done ?? isDone" :error="props.error ?? error_msg" :caution="caution">
         <input
             class="p-inputtext p-component"

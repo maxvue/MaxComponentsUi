@@ -31,6 +31,12 @@ const excludedComponentFiles = new Set(
     [...tsconfigContent.matchAll(/["']src\/components\/([^"']+\.vue)["']/g)].map((match) => match[1])
 );
 
+// readdirSync não é recursivo — só lê o nível raiz de src/components/, então
+// qualquer coisa dentro de subpastas (ex.: src/components/base/) fica fora do
+// manifesto. Isso é intencional para src/components/base/: são componentes
+// internos/auxiliares (ex.: MaxBaseInput.vue) usados por outros componentes
+// Max, não fazem parte da API pública de auto-import e não devem ser
+// resolvíveis diretamente pelas apps consumidoras.
 const files = fs.readdirSync(componentsDir);
 const componentNames = files
     .filter((file) => file.endsWith('.vue') && !excludedComponentFiles.has(file))
