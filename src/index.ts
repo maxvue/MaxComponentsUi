@@ -117,6 +117,8 @@ export { default as MaxGridCols } from './components/MaxGridCols.vue';
 export { default as MaxLoader } from './components/MaxLoader.vue';
 export { default as MaxLoaderAi } from './components/MaxLoaderAi.vue';
 export { default as MaxLoaderIcon } from './components/MaxLoaderIcon.vue';
+export { default as MaxLoadScreen } from './components/MaxLoadScreen.vue';
+export { default as MaxLoadScreenTarget } from './components/MaxLoadScreenTarget.vue';
 
 // Data & Display
 export { default as MaxBadgeComponent } from './components/MaxBadgeComponent.vue';
