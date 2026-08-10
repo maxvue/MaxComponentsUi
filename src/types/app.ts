@@ -63,6 +63,32 @@ export interface MaxAppUser {
     [key: string]: any;
 }
 
+/** Detalhes de um item de menu, como devolvidos pelo backend. */
+export interface SideMenuDetails {
+    /** Ícone exibido no botão. */
+    icon?: string | null;
+    /** Nome do componente de página, usado para marcar o item ativo. */
+    page_component?: string | null;
+    /** Rota de destino. */
+    route?: string | null;
+    /** Agrupa o item na seção inferior (configurações). */
+    settings?: boolean | null;
+    /** Oculta o item do menu. */
+    hide?: boolean | null;
+    /** Texto do tooltip. */
+    tooltip?: string | null;
+    /** Título do item. */
+    title?: string | null;
+    [key: string]: any;
+}
+
+/** Item do menu lateral. */
+export interface SideMenuItem {
+    id?: string;
+    details: SideMenuDetails;
+    [key: string]: any;
+}
+
 /**
  * Configuração global do app shell, injetada no boot via `configureMaxApp()`.
  *
@@ -82,6 +108,8 @@ export interface MaxAppConfig {
     routeSocialRedirect?: string;
     /** Rota que informa se o usuário está sendo impersonado. Padrão: `'user.impersonate.status'`. */
     routeImpersonateStatus?: string;
+    /** Rota que devolve os menus da aplicação. Padrão: `'menus'`. */
+    routeMenus?: string;
     /** URL base usada quando o usuário ainda não foi carregado. */
     baseUrl?: string;
     /** Versão da aplicação, exibida na interface. */

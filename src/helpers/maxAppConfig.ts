@@ -9,13 +9,14 @@ import type { MaxAppConfig } from '../types/app';
  */
 const DEFAULT_CONFIG: Required<Pick<MaxAppConfig,
     'routeUser' | 'routeUserSave' | 'routeLogin' | 'routeProviders' |
-    'routeSocialRedirect' | 'routeImpersonateStatus'>> = {
+    'routeSocialRedirect' | 'routeImpersonateStatus' | 'routeMenus'>> = {
     routeUser: 'user.data',
     routeUserSave: 'user.save',
     routeLogin: 'login',
     routeProviders: 'social.providers',
     routeSocialRedirect: 'social.redirect',
-    routeImpersonateStatus: 'user.impersonate.status'
+    routeImpersonateStatus: 'user.impersonate.status',
+    routeMenus: 'menus'
 };
 
 let config: MaxAppConfig = { ...DEFAULT_CONFIG };

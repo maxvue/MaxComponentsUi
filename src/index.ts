@@ -123,6 +123,8 @@ export { default as MaxLoadScreenTarget } from './components/MaxLoadScreenTarget
 // App shell — layout
 export { default as MaxContainerApp } from './components/MaxContainerApp.vue';
 export { default as MaxBottomMenu } from './components/MaxBottomMenu.vue';
+export { default as MaxSideMenu } from './components/MaxSideMenu.vue';
+export { default as MaxMenuVerticalItem } from './components/MaxMenuVerticalItem.vue';
 
 // Data & Display
 export { default as MaxBadgeComponent } from './components/MaxBadgeComponent.vue';
