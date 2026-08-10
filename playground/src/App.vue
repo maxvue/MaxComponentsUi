@@ -224,6 +224,56 @@
                     </div>
                 </div>
             </section>
+
+            <section class="component-section">
+                <h2>MaxListBox</h2>
+                <div class="component-grid">
+                    <div class="component-item">
+                        <h3>Local com filtro</h3>
+                        <MaxListBox
+                            v-model="listBoxValue"
+                            :options="listBoxOptions"
+                            filter
+                            title="Registros"
+                            height="320px"
+                        />
+                        <p>Selecionado: {{ listBoxValue ?? 'nenhum' }}</p>
+                    </div>
+
+                    <div class="component-item">
+                        <h3>Duas linhas + badge</h3>
+                        <MaxListBox
+                            v-model="listBoxValue"
+                            :options="listBoxOptions"
+                            two-lines
+                            :item-height="56"
+                            height="320px"
+                        />
+                    </div>
+
+                    <div class="component-item">
+                        <h3>Virtual scroll (2000 itens)</h3>
+                        <MaxListBox
+                            v-model="bigListValue"
+                            :options="bigListOptions"
+                            filter
+                            height="320px"
+                        />
+                    </div>
+
+                    <div class="component-item">
+                        <h3>API paginada (scroll infinito)</h3>
+                        <MaxListBox
+                            v-model="apiListValue"
+                            :load-options="fakeLoadOptions"
+                            filter
+                            :page-size="20"
+                            height="320px"
+                            @load-error="lastClickEvent = 'erro ao carregar'"
+                        />
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 </template>
@@ -245,6 +295,57 @@
     });
 
     const selectValue = ref();
+
+    const listBoxValue = ref(null);
+    const bigListValue = ref(null);
+    const apiListValue = ref(null);
+
+    const listBoxOptions = ref([
+        { value: 1, label: 'Construtora Alfa', sub_label: 'CNPJ 11.111.111/0001-11', icon: 'mdi:office-building', badge: '12' },
+        { value: 2, label: 'Beta Engenharia', sub_label: 'CNPJ 22.222.222/0001-22', icon: 'mdi:office-building', badge: '3' },
+        { value: 3, label: 'Gama Incorporadora', sub_label: 'CNPJ 33.333.333/0001-33', icon: 'mdi:office-building' },
+        { value: 4, label: 'Delta Obras (inativa)', sub_label: 'CNPJ 44.444.444/0001-44', icon: 'mdi:office-building', disabled: true }
+    ]);
+
+    const bigListOptions = ref(
+        Array.from({ length: 2000 }, (_, i) => ({
+            value: i,
+            label: `Registro ${i}`,
+            sub_label: `código ${1000 + i}`
+        }))
+    );
+
+    /**
+     * Simula uma API paginada com latência, para testar o scroll infinito.
+     *
+     * Diferente do stub ingênuo, o filtro de busca é aplicado de fato sobre a
+     * base completa antes de paginar: o `total` retornado reflete o tamanho do
+     * conjunto já filtrado. Isso é essencial porque o componente auto-preenche
+     * o painel buscando páginas seguintes sempre que a página atual não cobre a
+     * altura visível (ver MaxListBox.vue -> fillViewportIfNeeded) — se `total`
+     * não refletisse a busca, uma busca sem resultados nunca fecharia
+     * `hasMore` e o auto-preenchimento buscaria página atrás de página
+     * indefinidamente (até o limite de segurança MAX_AUTO_FILL_PAGES).
+     */
+    async function fakeLoadOptions({ page, search, pageSize }: { page: number; search: string; pageSize: number }) {
+        await new Promise((resolve) => setTimeout(resolve, 400));
+
+        const allItems = Array.from({ length: 137 }, (_, i) => ({
+            value: i,
+            label: `Item remoto ${i}`,
+            sub_label: `código ${2000 + i}`
+        }));
+
+        const filtered = search
+            ? allItems.filter((item) => item.label.toLowerCase().includes(search.toLowerCase()))
+            : allItems;
+
+        const total = filtered.length;
+        const start = (page - 1) * pageSize;
+        const items = filtered.slice(start, start + pageSize);
+
+        return { items, total };
+    }
 
     const options = ref([
         { name: 'Opção1', label: 'Opção1 Label', value: 1 },

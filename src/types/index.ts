@@ -195,3 +195,6 @@ export type * from './chart';
 
 // Tipos do app shell (MaxApp): loading, usuário e configuração.
 export type * from './app';
+
+// Tipos do MaxListBox.
+export type * from './listbox';

@@ -144,6 +144,9 @@ export { default as MaxBadgeComponent } from './components/MaxBadgeComponent.vue
 export const MaxChart = defineAsyncComponent(() => import('./components/MaxChart.vue'));
 export { default as MaxEmptyDiv } from './components/MaxEmptyDiv.vue';
 export { default as MaxLink } from './components/MaxLink.vue';
+export { default as MaxListBox } from './components/MaxListBox.vue';
+export { default as ListBox } from './components/MaxListBox.vue';
+export { default as Listbox } from './components/MaxListBox.vue';
 export { default as MaxLogo } from './components/MaxLogo.vue';
 // Async: o MaxMaps arrasta o vue3-google-map — fora do bundle eager, carrega só quando usado em tela.
 export const MaxMaps = defineAsyncComponent(() => import('./components/MaxMaps.vue'));
