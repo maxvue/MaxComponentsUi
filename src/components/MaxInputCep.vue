@@ -10,10 +10,11 @@
  */
 <script setup lang="ts">
     import { formatCep, onlyNumbers, cepIsValid } from '@maxvue/max-use';
-    import { ref, computed, watch, useAttrs } from 'vue';
+    import { computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
     import InputText from 'primevue/inputtext';
     import { vMaska } from 'maska/vue';
+    import { useMirroredModel } from '../helpers/useMirroredModel';
 
     const attrs: any = useAttrs();
 
@@ -55,7 +56,21 @@
 
     const emit = defineEmits(['update:modelValue', 'complete']);
 
-    const temp_value = ref(formatCep(props.modelValue));
+    // temp_value guarda o valor FORMATADO (ex.: '01001-000'), enquanto
+    // props.modelValue e o emitido/recebido em formato cru (so digitos).
+    // Por isso: `transform` desfaz a formatacao antes de emitir, e `compare`
+    // normaliza ambos os lados para digitos antes de decidir se reatribui o
+    // ref local — evita que a formatacao local seja descartada quando o
+    // valor externo "equivalente" (mesmos digitos) volta via prop, o mesmo
+    // guard que a Etapa 7c precisou preservar aqui manualmente.
+    const temp_value = useMirroredModel(
+        { get modelValue() { return formatCep(props.modelValue); } },
+        emit as (event: 'update:modelValue', value: string) => void,
+        {
+            transform: (value: string) => onlyNumbers(value ?? ''),
+            compare: (a: string, b: string) => onlyNumbers(a ?? '') === onlyNumbers(b ?? '')
+        }
+    );
     const temp_value_numbers = computed(() => onlyNumbers(temp_value.value ?? ''));
     const maskValue = computed(() => ({ tokens: { '#': { pattern: /[0-9]/ } }, mask: '#####-###' }));
 
@@ -79,15 +94,10 @@
         return attrs_error_message ?? 'CEP inválido';
     });
 
+    // Emite 'complete' quando o CEP se torna valido. A emissao de
+    // 'update:modelValue' em si fica a cargo do useMirroredModel acima.
     watch(temp_value, () => {
-        const numbers = onlyNumbers(temp_value.value);
-        emit('update:modelValue', numbers);
-        if (isValidCep.value) emit('complete', numbers);
-    });
-
-    watch(() => props.modelValue,() => {
-        const numbers = onlyNumbers(props.modelValue);
-        if (numbers !== onlyNumbers(temp_value.value)) temp_value.value = numbers;
+        if (isValidCep.value) emit('complete', temp_value_numbers.value);
     });
 </script>
 
