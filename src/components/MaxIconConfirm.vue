@@ -1,5 +1,5 @@
 <template>
-    <MaxIconButton v-bind="props" v-tooltip="null" pointer :action="onClickToggle" ref="btn_el" />
+    <MaxIconButton :icon="props.icon" :i="props.i" :blank="props.blank" :route="props.route" :data="props.data" :params="props.params" :rotate="props.rotate" :flip="props.flip" :size="props.size" :scale="props.scale" :loading="props.loading" :width="props.width" :height="props.height" :dark="props.dark" :light="props.light" :checked="props.checked" :plus="props.plus" v-tooltip="null" pointer :action="onClickToggle" ref="btn_el" />
 </template>
 
 <script setup lang="ts">

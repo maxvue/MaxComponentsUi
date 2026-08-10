@@ -7,10 +7,11 @@
     import { useTemplateRef } from 'vue';
     import { useElementBounding } from '@maxvue/max-use';
     import { useConfirmStore } from '../stores/useConfirm.Store';
+    import type { ConfirmProps } from '../types';
 
     const confirm_store = useConfirmStore();
 
-    const props = withDefaults(defineProps<{
+    const props = withDefaults(defineProps<ConfirmProps & {
         /** Texto de exibição do botão */
         label?: string;
         /** Nome do ícone (ex: 'mdi:home') */
@@ -37,21 +38,6 @@
         severity?: 'secondary' | 'success' | 'info' | 'whatsapp' | 'warning' | 'help' | 'danger' | 'contrast';
         /** Variante visual do botão */
         variant?: 'outlined' | 'text' | 'link';
-        /** Mensagem de confirmação */
-        message?: string;
-        /** Icone de mensagem de confirmação */
-        messageIcon?: string | null;
-        /** Label do botão de não */
-        rejectProps?: {
-            label: string;
-            icon?: string;
-            action?: ((event?: any) => void) | undefined;
-        };
-        acceptProps?: {
-            label: string;
-            icon?: string;
-            action?: ((event?: any) => void) | undefined;
-        };
         loading?: boolean;
         /** Largura específica */
         width?: string | number;
