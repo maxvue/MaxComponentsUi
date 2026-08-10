@@ -119,7 +119,26 @@
         };
     });
 
-    const phoneMask = (value: string) => (value[2] === '9' || value[2] === '8' || value[2] === '7' || value[2] === '6' ? '+55 (##) 9 #### - ####' : '+55 (##) #### - ####');
+    /**
+     * Remove o DDI `55` do início dos dígitos para que a posição do nono dígito seja estável.
+     * `phoneMask` é reavaliado sobre o `temp_value` já mascarado, e o `+55` da máscara é literal:
+     * `onlyNumbers` o devolve junto, então o mesmo telefone chega aqui ora como `62998817171`,
+     * ora como `5562998817171`. Sem normalizar, o índice do dígito discriminante escorregava e
+     * um celular era remascarado como fixo (perdendo o último dígito) dependendo do DDD.
+     */
+    const withoutCountryCode = (digits: string) => (digits.length > 11 && digits.startsWith('55') ? digits.slice(2) : digits);
+
+    /**
+     * O nono dígito do celular é um token `#`, nunca um `9` literal: um literal faria o Maska
+     * consumir o dígito digitado para casar com ele, sobrando slots de menos para o restante
+     * do número e descartando o último dígito do `unmaskedValue` (que é o valor emitido).
+     * O texto exibido é idêntico nos dois casos, então a perda só aparecia como "valor inválido".
+     */
+    const phoneMask = (value: string) => {
+        const local = withoutCountryCode(value);
+        const isMobile = ['9', '8', '7', '6'].includes(local[2]);
+        return isMobile ? '+55 (##) # #### - ####' : '+55 (##) #### - ####';
+    };
 
     /**
      * Decide o modo (telefone/e-mail) e normaliza o valor digitado.
