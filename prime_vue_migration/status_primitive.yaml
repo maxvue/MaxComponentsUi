@@ -223,14 +223,37 @@ itens:
     primitivas: [ProgressSpinner]
     depende_de: []
     uso: 'INTERNA — usada por MaxPdfView e MaxInputFileUpload (ambos usados)'
-    execucao: Aguardando
+    execucao: Concluído
     verificacao: Realizando
     teste_usuario: Aguardando
     tentativas: 0
     classes_p_removidas: []
     notas: >-
-      SVG animado puro. REUSO: conferir MaxLoader.vue / MaxLoaderIcon.vue, que já
-      existem e podem cobrir o caso sem uma primitiva nova.
+      Concluído em 2026-08-10. REUSO investigado: MaxLoader.vue é uma tela de loading
+      completa (fundo full-screen, label, layout próprio), não uma primitiva de
+      spinner isolada — não serve como substituto direto do ProgressSpinner, que é
+      renderizado inline sem chrome. MaxLoaderIcon.vue é um ícone de spinner fixo
+      (55x55px, sem props de stroke/fill/duração), incompatível com a API exigida
+      pelo plano (strokeWidth/fill/animationDuration, usada por MaxPdfView e
+      MaxInputFileUpload). Nenhum dos dois reaproveitável diretamente; implementado
+      do zero seguindo a estrutura SVG do plano (viewBox="25 25 50 50", r="20",
+      stroke-dasharray animado), mas com classes próprias max-base-spinner /
+      max-base-spinner-spin / max-base-spinner-circle em vez de .p-progressspinner*
+      (o plano antecede a regra "sem .p-*" desta migração; a regra prevalece).
+      Diferença proposital do PrimeVue (documentada no próprio plano): stroke fixo em
+      var(--max-primary-500) em vez do ciclo de 4 cores do Material (nunca combinou
+      com o tema Max); prefers-reduced-motion respeitado (desacelera a animação sem
+      removê-la, já que é indicador de progresso).
+      Teste criado: tests/components/base/MaxBaseSpinner.test.ts (9 casos: viewBox,
+      role/aria-busy, classes, strokeWidth/fill/animationDuration/ariaLabel
+      customizados, defaults, ausência de PrimeVue).
+      MUTAÇÕES TESTADAS (todas fazem o teste falhar): (1) remover aria-busy; (2)
+      trocar o viewBox; (3) travar stroke-width em '2' ignorando a prop; (4) travar
+      fill em 'none' ignorando a prop; (5) travar animationDuration em '2s' ignorando
+      a prop; (6) travar aria-label em 'Carregando' ignorando a prop.
+      Portões: vitest 9/9; type-check limpo; lint 0 erros (mesmos 2 warnings
+      pré-existentes); suíte 656 passando / 18 falhando (mesmas 7 arquivos do
+      baseline, sem regressão nova).
 
   - id: 4
     componente: MaxBaseVirtualScroller
