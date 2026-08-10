@@ -120,6 +120,10 @@ export { default as MaxLoaderIcon } from './components/MaxLoaderIcon.vue';
 export { default as MaxLoadScreen } from './components/MaxLoadScreen.vue';
 export { default as MaxLoadScreenTarget } from './components/MaxLoadScreenTarget.vue';
 
+// App shell — layout
+export { default as MaxContainerApp } from './components/MaxContainerApp.vue';
+export { default as MaxBottomMenu } from './components/MaxBottomMenu.vue';
+
 // Data & Display
 export { default as MaxBadgeComponent } from './components/MaxBadgeComponent.vue';
 // Async: o MaxChart arrasta o chart.js (~200 KB) por import dinâmico dentro do
