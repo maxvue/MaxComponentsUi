@@ -63,7 +63,7 @@
                  uma <li> ali dentro pintaria logo após o último item da janela atual — no meio
                  do viewport, não no fim real da lista. Como siblings da window (e do spacer),
                  eles ficam em fluxo normal no fim de .max-listbox-list em ambos os modos. -->
-            <div v-if="isLoading || (isApiMode && hasMore && visibleOptions.length > 0)" class="max-listbox-loader">
+            <div v-if="isLoading || (isApiMode && hasMore && visibleOptions.length > 0)" class="max-listbox-loader" role="presentation">
                 <slot name="loader">Carregando...</slot>
             </div>
 
@@ -72,7 +72,7 @@
                 <button type="button" class="max-listbox-retry" @click="retry">Tentar novamente</button>
             </div>
 
-            <div v-if="visibleOptions.length === 0 && !isInitialLoading && !loadError" class="max-listbox-empty">
+            <div v-if="visibleOptions.length === 0 && !isInitialLoading && !loadError" class="max-listbox-empty" role="presentation">
                 <slot name="empty">{{ props.emptyMessage }}</slot>
             </div>
         </div>
