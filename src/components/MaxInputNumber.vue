@@ -1,6 +1,6 @@
 <template>
     <InputBase v-bind="props" :value="temp_value" :done="isDone" :error="error_msg" :caution="caution">
-        <InputNumber v-bind="props" v-model="temp_value" fluid @blur="isDone = testIsDone()" />
+        <InputNumber :disabled="props.disabled" :placeholder="props.placeholder" :prefix="props.prefix" :suffix="props.suffix" :min-fraction-digits="props.minFractionDigits" :max-fraction-digits="props.maxFractionDigits" v-model="temp_value" fluid @blur="isDone = testIsDone()" />
     </InputBase>
 </template>
 
