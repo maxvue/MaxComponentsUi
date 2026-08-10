@@ -242,6 +242,14 @@ describe('MaxBaseOverlay', () => {
 
         const after = getPanel().style.top;
         expect(after).not.toBe(before);
+        expect(after).toBe('524px');
+    });
+
+    it('aplica o role informado via prop no painel', async () => {
+        wrapper = mount(MaxBaseOverlay, { props: { visible: true, target, role: 'listbox' } });
+        await settle();
+
+        expect(getPanel().getAttribute('role')).toBe('listbox');
     });
 
     it('remove todos os listeners ao desmontar, em document E em window (simetria por tipo+handler+capture)', async () => {

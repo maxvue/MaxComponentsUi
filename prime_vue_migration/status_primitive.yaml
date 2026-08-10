@@ -141,7 +141,7 @@ itens:
     depende_de: []
     uso: 'INTERNA — base de Select/AutoComplete/DatePicker/Menu/Drawer'
     execucao: Concluído
-    verificacao: Realizando
+    verificacao: Concluído
     teste_usuario: Aguardando
     tentativas: 1
     classes_p_removidas: []
@@ -202,6 +202,19 @@ itens:
       Portões (2ª rodada): vitest 19/19; type-check limpo; lint 0 erros (mesmos 2
       warnings pré-existentes de MaxInputMarkdown/MaxTagsList); suíte 646 passando /
       18 falhando (mesmas 7 arquivos do baseline, sem regressão nova).
+      2ª VERIFICAÇÃO (subagente opus, sessão nova): APROVADO. Confirmou os 3
+      pontos da 1ª rodada corrigidos de forma genuína (não mascarada): conferiu à
+      mão as contas de flip vertical/align/clamp, confirmou que o foco NÃO é
+      mockado em tests/setup.ts (happy-dom real) e que a mutação removendo
+      tabindex="-1" quebra o teste, e validou a simetria de listeners em window
+      especificamente para resize. Aplicou 11 mutações próprias, todas mortas.
+      2 achados MENORES (não bloqueantes, corrigidos mesmo assim): (a) prop `role`
+      sem cobertura — adicionado teste que monta com role:'listbox' e confere o
+      atributo; (b) teste de reposição em resize usava apenas "mudou", agora
+      assevera o valor exato ('524px'). Teste final: 20 casos.
+      Portões finais (com os 2 reforços): vitest 20/20; type-check limpo; lint 0
+      erros (mesmos 2 warnings pré-existentes); suíte 647 passando / 18 falhando
+      (mesmas 7 arquivos do baseline, sem regressão nova).
 
   - id: 3
     componente: MaxBaseSpinner
