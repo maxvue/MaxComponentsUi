@@ -94,4 +94,17 @@ describe('useVirtualList', () => {
         expect(virtualizedCount).toBeLessThan(1000);
         expect(vl.visibleItems.value).toHaveLength(1000);
     });
+
+    it('limita a janela quando o scrollTop excede a altura do conteudo', () => {
+        const items = ref(makeItems(20));
+        const vl = useVirtualList(items, { itemHeight: ref(50), enabled: ref(true) });
+
+        vl.setViewport(5000, 500); // scrollTop muito alem do fim da lista
+
+        expect(vl.offsetY.value).toBeLessThanOrEqual(vl.totalHeight.value);
+        expect(vl.visibleItems.value.length).toBeGreaterThan(0);
+
+        const last = vl.visibleItems.value[vl.visibleItems.value.length - 1];
+        expect(last.index).toBe(19);
+    });
 });

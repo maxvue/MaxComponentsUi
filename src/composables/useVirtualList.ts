@@ -37,7 +37,8 @@ export function useVirtualList<T>(items: MaybeRef<T[]>, options: UseVirtualListO
         if (!options.enabled.value) return 0;
 
         const first = Math.floor(scrollTop.value / options.itemHeight.value);
-        return Math.max(0, first - overscan);
+        const maxIndex = Math.max(0, items.value.length - 1);
+        return Math.min(maxIndex, Math.max(0, first - overscan));
     });
 
     const endIndex = computed(() => {
