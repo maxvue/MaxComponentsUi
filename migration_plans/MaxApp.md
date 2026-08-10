@@ -236,8 +236,8 @@ route.name existe?
 | 9 | ✅ **`MaxSplitPanesContent`** | `splitpanes` + **slot** para o painel lateral (evita arrastar o `ChatPanel`) | 3 |
 | 10 | ✅ **`MaxPageLayout`** | Compõe 6→9 e **repassa os slots** dos filhos | 6, 7, 8, 9 |
 | 11 | ❌ ~~**VoIP**~~ | **Cancelada por decisão do usuário** — os 5 componentes e o `useVoip.Store` (512 linhas, LiveKit/WebRTC) ficam no engeapp e entram pelo slot `voip` do `MaxTopMenu`. A lib não ganha LiveKit | — |
-| 12 | **`MaxApp.vue`** | Reescrever o rascunho com props §5, branching §5 e slots | 10, 11 |
-| 13 | **Resolver + exports** | `npx tsx src/scripts/generateResolver.ts`, exports em `index.ts` | 12 |
+| 12 | ✅ **`MaxApp.vue`** | Reescrever o rascunho com props §5, branching §5 e slots | 10 |
+| 13 | ✅ **Resolver + exports** | Mantidos a cada etapa, não ao final | 12 |
 | 14 | **Integração no engeapp** | Trocar `App.vue` pelo `<MaxApp/>`, validar em dev | 13 |
 | 15 | ❌ ~~**supportChat**~~ | **Cancelada por decisão do usuário** — as 37 telas ficam no engeapp e entram pelo slot `side` do `MaxSplitPanesContent` | — |
 
@@ -258,8 +258,8 @@ route.name existe?
 | 9 | MaxSplitPanesContent | ✅ `done` |
 | 10 | MaxPageLayout | ✅ `done` |
 | 11 | ~~VoIP~~ | ❌ `cancelled` — fica no engeapp |
-| 12 | MaxApp.vue | `waiting` |
-| 13 | Resolver + exports | `waiting` |
+| 12 | MaxApp.vue | ✅ `done` |
+| 13 | Resolver + exports | ✅ `done` — mantidos a cada etapa |
 | 14 | Integração no engeapp | `waiting` |
 | 15 | ~~supportChat~~ | ❌ `cancelled` — fica no engeapp |
 
@@ -560,6 +560,72 @@ VoIP que o `App.vue` monta fora do layout.
 ⚠️ **Ao testar o slot `side`, defina `split_panel` abaixo de 100.** O painel lateral exige
 `sideVisible` **e** espaço disponível; como o valor padrão é 100, o `<pane>` é corretamente
 suprimido e o teste falha por motivo legítimo — não é bug de repasse.
+
+---
+
+## 8.9 Guia da etapa 14 — integração no engeapp
+
+Tudo que a lib precisava entregar está pronto. Falta só religar o engeapp.
+
+### 1. `package.json` e boot
+
+O `@maxvue/max-pinia` continua sendo instalado e configurado como hoje, em `resources/app.ts`.
+Nada muda ali — a lib não instala o plugin, apenas depende dele.
+
+### 2. Substituir o `resources/App.vue`
+
+```vue
+<template>
+    <MaxApp
+        route-login="login"
+        route-providers="social.providers"
+        :allow-user-name="false"
+        :blank-pages="['Page', 'contatos', 'Contract', 'Wire', 'SolarCompanySubdomain']"
+        :add-items="[
+            { label: 'Novo Projeto', icon: 'clarity:block-line', size: '1.9', route: 'new_project' },
+            { label: 'Equipamento', icon: 'mingcute:solar-panel-line', size: '1.9', route: 'new_equipment' }
+        ]"
+        :side-visible="chatSettings.is_visible"
+    >
+        <template #search>
+            <MaxTopMenuSearchBar :placeholder="`Pesquisar em ${board.count_cards} Projetos`">
+                <MaxInputCheckbox v-model="board.show_finished_cards" label="Incluir antigos" class="checkbox-search-top" />
+            </MaxTopMenuSearchBar>
+        </template>
+
+        <template #chat><!-- toggle + ReverbComponent + PlannerReverbListener --></template>
+        <template v-if="isInternal" #bugs><ReportBugs /></template>
+        <template #notifications><!-- painel de notificações --></template>
+        <template v-if="isInternal" #voip><VoipDialpad /><VoipCallHistory /></template>
+        <template v-if="isInternal" #live><LiveSection /></template>
+
+        <template #user>
+            <MaxUserSection @logout="logoutCompleto" @profile="irParaPerfil" @toggle-dark-mode="alternarTema" @end-impersonate="encerrarImpersonacao" />
+        </template>
+
+        <template #side><ChatPanel /></template>
+
+        <template #extras><VoipDialer /><VoipReverbListener /><IncomingCallModal /></template>
+    </MaxApp>
+</template>
+```
+
+### 3. Pendências obrigatórias (nenhuma pode ser esquecida)
+
+| # | O quê | Onde | Por quê |
+|---|---|---|---|
+| 1 | Registrar as partes da chave do `split_panel` | boot | §8.0 — senão o usuário perde o tamanho salvo do painel |
+| 2 | Reimplementar a limpeza do logout | handler `@logout` | §8.5 — LiveRooms, `localStorage`, `clearAll()`, cache `integrador-api` do PWA |
+| 3 | Recriar o `isInternal` | `App.vue` | §8.5 — `user.data.is_internal` não existe no tipo `User` |
+| 4 | Conferir o fallback de e-mail no login | backend | §8.0.1 — antes ia `'undefined@enge.tec.br'`, agora vai `''` |
+
+### 4. Validação sugerida
+
+- Login por e-mail, telefone e usuário (com `allow-user-name` desligado, o terceiro não detecta).
+- Logout: confirmar que a sessão realmente encerra e o cache não sobrevive.
+- Rota de site, rota blank e rota autenticada.
+- Redimensionar o painel dividido, recarregar e conferir que o tamanho persiste.
+- Mobile: menu inferior aparece, menu lateral some.
 
 ---
 
