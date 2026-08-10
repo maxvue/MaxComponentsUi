@@ -1,8 +1,8 @@
 <template>
     <InputBase v-bind="{...props, ...attrs}" class="max-select-tag" input-click no-dropdown >
-        <tadiv v-if="attrs.placeholder !== undefined && (!temp_value || temp_value === '')" class="tab-placeholder-select">
+        <div v-if="attrs.placeholder !== undefined && (!temp_value || temp_value === '')" class="tab-placeholder-select">
             {{ attrs.placeholder }}
-        </tadiv>
+        </div>
         <Select v-bind="{...props, ...attrs}" v-model="temp_value" :filter="props.filter"  :loading="loading" @before-show="(before_show as any)" :options="options" :optionLabel="props.optionLabel" :optionValue="props.optionValue" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false" :disabled="props.disabled">
             <template #option="slotProps">
                 <slot name="option" :option="slotProps.option" :selected="slotProps.selected" :index="slotProps.index">
@@ -147,6 +147,13 @@
 
         const groups = Object.values(options.value) as any[];
         for (const group of groups) {
+            // `group` pode ser uma opção plana (sem `.items`) quando `loadOptions` retorna uma
+            // lista não agrupada — nesse caso buscamos a opção diretamente no próprio item em
+            // vez de assumir que é sempre um grupo com `.items` (evita TypeError em runtime).
+            if (!group || !Array.isArray(group.items)) {
+                if (group?.[valueKey] === temp_value.value) return group;
+                continue;
+            }
             const found = group.items.find((opt: any) => opt[valueKey] === temp_value.value);
             if (found) return found;
         }
