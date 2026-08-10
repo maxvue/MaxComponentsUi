@@ -229,7 +229,7 @@ route.name existe?
 | 2 | ✅ **Stores base** | `useLoading.Store.ts` + `useUser.Store.ts` na lib, com rotas configuráveis via `configureMaxApp()` | 1 |
 | 3 | ✅ **`useSystem.Store.ts`** | Reescrever o rascunho `useApp.Store.ts`: imports explícitos, remover `useChatSettingsStore`, `split_panel` opcional, exportar em `stores/index.ts` | 2 |
 | 4 | ✅ **`useLogin.Store.ts`** | Corrigir imports (`apiGetRoute`/`apiPostRoute` do MaxUse), trocar `vue3-toastify` pelo `useToastStore`, rotas via config | 3 |
-| 5 | **`MaxLoadScreen`** | `LoadScreen.vue` + `LoadScreenTarget.vue` → `MaxLoadScreen.vue` + `MaxLoadScreenTarget.vue` | 2 |
+| 5 | ✅ **`MaxLoadScreen`** | `LoadScreen.vue` + `LoadScreenTarget.vue` → `MaxLoadScreen.vue` + `MaxLoadScreenTarget.vue` | 2 |
 | 6 | **`MaxContainerApp` + `MaxBottomMenu`** | Ambos são folhas, sem stores complexas | 3 |
 | 7 | **`MaxSideMenu`** | `SideMenu.vue` + `MenuVerticalItem.vue`; store `useListMenus` configurável | 3 |
 | 8 | **`MaxTopMenu`** | 13 arquivos; a etapa mais pesada. Reverb via guard, Ziggy via `setRouteResolver` | 3, 7 |
@@ -251,7 +251,7 @@ route.name existe?
 | 2 | Stores base (loading, user) | ✅ `done` |
 | 3 | useSystem.Store | ✅ `done` |
 | 4 | useLogin.Store | ✅ `done` |
-| 5 | MaxLoadScreen | `waiting` |
+| 5 | MaxLoadScreen | ✅ `done` |
 | 6 | MaxContainerApp + MaxBottomMenu | `waiting` |
 | 7 | MaxSideMenu | `waiting` |
 | 8 | MaxTopMenu | `waiting` |
@@ -338,6 +338,35 @@ Correção: `@vueuse/core` como devDependency + alias fixo de `vue` e `@vueuse/c
 re-exports (`MaxModal`, `MaxPopover`, `MaxInputSelect`, `useIcon.Store`, …). A etapa 5
 (`MaxLoadScreen`) depende diretamente do `watchDebounced` e teria falhado silenciosamente sem
 esta correção. Se algum watcher parecer inerte em teste, **suspeite primeiro de instância dupla**.
+
+---
+
+## 8.2 Achado da etapa 5 — Pinia global nos testes de componente
+
+O `tests/setup.ts` instala um **Pinia global** em `config.global.plugins` (linha 78). Todo
+componente montado usa **essa** instância — que **não** é a criada por `setActivePinia()` no
+teste. O sintoma engana: a store manipulada pelo teste tem os dados, mas o componente renderiza
+vazio, como se o `v-if` estivesse errado.
+
+Ao montar componentes que leem stores, passe a instância local explicitamente:
+
+```ts
+let pinia: Pinia;
+
+const mountWithPinia = (component: any, options: Record<string, any> = {}) => mount(component, {
+    ...options,
+    global: { ...(options.global ?? {}), plugins: [pinia] }
+});
+
+beforeEach(() => {
+    pinia = createPinia();
+    setActivePinia(pinia);
+});
+```
+
+**Teleport:** componentes que usam `<Teleport>` (como o `MaxLoadScreenTarget`) deixam nós fora do
+wrapper. Sem `unmount()` + limpeza do `document.body` no `afterEach`, o conteúdo sobrevive ao caso
+seguinte e infla as contagens. Vale para as etapas 6–12, que montam componentes com store.
 
 ---
 
