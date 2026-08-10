@@ -140,7 +140,7 @@ itens:
     primitivas: []
     depende_de: []
     uso: 'INTERNA — base de Select/AutoComplete/DatePicker/Menu/Drawer'
-    execucao: Aguardando
+    execucao: Realizando
     verificacao: Aguardando
     teste_usuario: Aguardando
     tentativas: 0
