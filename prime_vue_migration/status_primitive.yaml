@@ -104,7 +104,7 @@ itens:
     uso: 'INTERNA — destrava 10 inputs de texto usados em 5 projetos'
     execucao: Concluído
     verificacao: Concluído
-    teste_usuario: Aguardando
+    teste_usuario: Aprovado
     tentativas: 0
     classes_p_removidas: ['p-inputtext', 'p-component', 'p-filled', 'p-inputtext-sm', 'p-inputtext-lg', 'p-inputtext-fluid', 'p-variant-filled', 'p-invalid', 'p-disabled']
     notas: >-

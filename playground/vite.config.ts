@@ -57,6 +57,13 @@ export default defineConfig({
     root: resolve(__dirname),
     server: {
         host: 'maxcomponents.test',
+        // Porta fixa fora da faixa 5173-5176, disputada pelos outros projetos de
+        // ~/GitHub (SocialMedia 5173, engeapp 5174, AgenteDeBolso 5175, MaxAdmin 5176,
+        // e mbo/MinhaBibliaOnline/MaxUse/MaxPinia, que sobem sem porta fixa a partir da
+        // 5173). strictPort faz falhar em vez de escorregar para a porta de outro
+        // projeto, o que mascarava o conflito.
+        port: 5180,
+        strictPort: true,
         open: false,
         cors: true,
         origin: 'https://maxcomponents.test'
