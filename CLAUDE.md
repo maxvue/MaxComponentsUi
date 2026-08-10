@@ -81,10 +81,12 @@ Qualquer novo componente de input deve usar `<InputBase>` como seu elemento mais
 
 ### Stores (Pinia)
 
-Três stores exportadas em `src/stores/`:
+Cinco stores exportadas pelo barrel `src/stores/index.ts`:
 - `useIconStore` — faz cache dos fetches de ícones SVG do Iconify
 - `usePopoverStore` — controla o estado de abrir/fechar do `MaxPopover`
 - `useToastStore` — controla a fila do `MaxToast`
+- `useConfirmStore` — controla o estado do popover de confirmação usado por `MaxButtonConfirm`/`MaxIconConfirm`/`MaxTogglePopover`
+- `useModalStore` — controla qual `MaxModal` está aberto (por `id`)
 
 ### Auto-import de componentes
 
@@ -111,6 +113,7 @@ Os testes ficam em `tests/` e usam Vitest + `@vue/test-utils` + `happy-dom`. A c
 - Ordem dos blocos Template → Script → Style nos arquivos `.vue`
 - Múltiplos aliases de export para o mesmo componente são definidos em `src/index.ts` (ex.: `MaxInputText`, `InputText`, `InputField` apontam todos para o mesmo arquivo)
 - `src/prime/index.ts` re-exporta componentes crus do PrimeVue que não têm wrapper Max, para que as apps consumidoras possam importar tudo de uma única fonte
+- `MaxInputText` (e, pelo mesmo padrão, `MaxInputTextArea`) usa `v-bind="props"` no `InputBase`, não repassa attrs extras (`maxlength`, `autocomplete`, etc.) para o `<input>`/`<textarea>` interno — attrs adicionais caem no elemento raiz do `InputBase`. É uma decisão deliberada, não um bug: ver comentário no próprio `MaxInputText.vue`.
 
 ## Execução de Agentes em Worktree
 
