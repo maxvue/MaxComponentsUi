@@ -130,6 +130,7 @@ export { default as MaxTopMenuSearchBar } from './components/MaxTopMenuSearchBar
 export { default as MaxTopToolbar } from './components/MaxTopToolbar.vue';
 export { default as MaxUserSection } from './components/MaxUserSection.vue';
 export { default as MaxSplitPanesContent } from './components/MaxSplitPanesContent.vue';
+export { default as MaxPageLayout } from './components/MaxPageLayout.vue';
 
 // Data & Display
 export { default as MaxBadgeComponent } from './components/MaxBadgeComponent.vue';
