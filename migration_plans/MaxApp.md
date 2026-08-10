@@ -232,7 +232,7 @@ route.name existe?
 | 5 | ✅ **`MaxLoadScreen`** | `LoadScreen.vue` + `LoadScreenTarget.vue` → `MaxLoadScreen.vue` + `MaxLoadScreenTarget.vue` | 2 |
 | 6 | ✅ **`MaxContainerApp` + `MaxBottomMenu`** | Ambos são folhas, sem stores complexas | 3 |
 | 7 | ✅ **`MaxSideMenu`** | `SideMenu.vue` + `MenuVerticalItem.vue`; store `useListMenus` configurável | 3 |
-| 8 | **`MaxTopMenu`** | 13 arquivos; a etapa mais pesada. Reverb via guard, Ziggy via `setRouteResolver` | 3, 7 |
+| 8 | ✅ **`MaxTopMenu`** | **Escopo reduzido ao esqueleto + slots** (ver §8.5). Reverb/LiveKit ficam no engeapp | 3, 7 |
 | 9 | **`MaxSplitPanesContent`** | `splitpanes` + **slot** para o painel lateral (evita arrastar o `ChatPanel`) | 3 |
 | 10 | **`MaxPageLayout`** | Compõe 6→9 | 6, 7, 8, 9 |
 | 11 | **VoIP** | `useVoip.Store` (LiveKit dinâmico) + 5 componentes | 3 |
@@ -254,7 +254,7 @@ route.name existe?
 | 5 | MaxLoadScreen | ✅ `done` |
 | 6 | MaxContainerApp + MaxBottomMenu | ✅ `done` |
 | 7 | MaxSideMenu | ✅ `done` |
-| 8 | MaxTopMenu | `waiting` |
+| 8 | MaxTopMenu (esqueleto + slots) | ✅ `done` |
 | 9 | MaxSplitPanesContent | `waiting` |
 | 10 | MaxPageLayout | `waiting` |
 | 11 | VoIP | `waiting` |
@@ -430,6 +430,82 @@ vi.mock('@maxvue/max-use', async (importOriginal) => ({
     useRefCachedApi: () => menusRef
 }));
 ```
+
+---
+
+## 8.5 Decisão da etapa 8 — TopMenu como esqueleto com slots
+
+A medição da árvore desmentiu a estimativa inicial:
+
+| | Plano original | Medido |
+|---|---|---|
+| Componentes | 13 | 13 (o `PlannerReverbListener` faltava na lista) |
+| Linhas de componente | — | ~2.900 |
+| Stores | 17 | 17, somando ~2.700 linhas |
+| **Total** | — | **~5.600 linhas** |
+
+As sete etapas anteriores **somadas** deram ~1.500 linhas. As maiores stores são domínio puro:
+`useChat` (836), `useVoip` (512, LiveKit/WebRTC), `useProject` (249), `useStationElements` (224).
+
+**Decisão do usuário: migrar só o esqueleto; o resto fica no engeapp via slot.** A lib não ganha
+LiveKit, Reverb nem o modelo de projetos solares.
+
+### Entrou na lib
+
+| Componente | Adaptação |
+|---|---|
+| `MaxTopMenu` | Estrutura + botão de recarregar + slots |
+| `MaxUserSection` | Itens viram prop; ações viram eventos |
+| `MaxTopMenuSearchBar` | Placeholder vira prop; checkbox vira slot |
+| `MaxTopToolbar` | Preserva `action`/`command`/`route` |
+| `useTopToolbar.Store` | `useRouter()` + `getRoute` no lugar do singleton e do Ziggy |
+
+### Slots do `MaxTopMenu`
+
+`status`, `search`, `add`, `chat`, `bugs`, `notifications`, `voip`, `live`, `user`.
+
+### Ficou no engeapp (9 componentes)
+
+Notificações (o painel inteiro), `ReportBugs` (647 linhas, abre pasta local), `TopToolbar`
+`ImportProjectPopover`, `LiveSection` + `LiveStatusIndicator` + `LiveUsersList` (LiveKit),
+`VoipDialpad`, `VoipCallHistory`, `ReverbComponent`, `PlannerReverbListener`.
+
+### O que a etapa 14 precisa fazer
+
+```vue
+<MaxTopMenu :add-items="[{ label: 'Novo Projeto', icon: 'clarity:block-line', route: 'new_project' },
+                         { label: 'Equipamento', icon: 'mingcute:solar-panel-line', route: 'new_equipment' }]">
+    <template #search><MaxTopMenuSearchBar :placeholder="`Pesquisar em ${board.count_cards} Projetos`">
+        <MaxInputCheckbox label="Incluir antigos" v-model="board.show_finished_cards" class="checkbox-search-top" />
+    </MaxTopMenuSearchBar></template>
+    <template #chat><!-- toggle + ReverbComponent + PlannerReverbListener --></template>
+    <template #bugs><ReportBugs v-if="isInternal" /></template>
+    <template #notifications><!-- painel de notificações --></template>
+    <template #voip><!-- VoipDialpad + VoipCallHistory --></template>
+    <template #live><LiveSection v-if="isInternal" /></template>
+    <template #user>
+        <MaxUserSection @logout="logoutCompleto" @profile="irParaPerfil" @toggle-dark-mode="alternarTema" />
+    </template>
+</MaxTopMenu>
+```
+
+⚠️ **O `isInternal` some da lib.** Era `user.data.is_internal`, campo injetado no payload pelo
+`UserDataControler` que nem existe no tipo `User`. Cada slot condicional passa a ser
+responsabilidade do engeapp.
+
+⚠️ **A limpeza do logout precisa ser reimplementada no handler do evento `@logout`** — hoje ela
+desconecta o LiveRooms, limpa `localStorage`, chama `user.clearAll()` e apaga o cache
+`integrador-api` do PWA. Cada passo tem um comentário no original explicando o bug que ele evita;
+**não simplificar**.
+
+---
+
+## 8.6 Nota — erro intermitente de teardown do Vitest
+
+A suíte às vezes reporta `EnvironmentTeardownError: Closing rpc while "onUserConsoleLog" was
+pending`. É uma corrida no encerramento do worker do Vitest, ligada a saída de console — **não é
+falha de teste**. Execuções repetidas dão 763 passando / 18 falhando de forma estável, ora com
+2 erros, ora com nenhum. Ignorar, ou eliminar `console.log` de testes.
 
 ---
 
