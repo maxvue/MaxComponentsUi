@@ -340,13 +340,59 @@ itens:
     primitivas: [Tooltip]
     depende_de: []
     uso: 'ALTÍSSIMO — `v-tooltip` aparece em 83 arquivos dos projetos'
-    execucao: Aguardando
+    execucao: Concluído
     verificacao: Realizando
     teste_usuario: Aguardando
     tentativas: 0
-    classes_p_removidas: []
+    classes_p_removidas: ['p-tooltip', 'p-component', 'p-tooltip-top', 'p-tooltip-right', 'p-tooltip-bottom', 'p-tooltip-left', 'p-tooltip-arrow', 'p-tooltip-text']
     notas: >-
-      Diretiva registrada em src/index.ts install(). Modificadores .top/.right/.bottom/.left.
-      IMPACTO DE CSS ALTO: MinhaBibliaOnline tem resources/Theme/PrimeVue/Tooltip.scss
-      estilizando .p-tooltip / .p-tooltip-top / .p-tooltip-arrow. Ao trocar as classes,
-      esse arquivo para de aplicar — listar as classes removidas no relatório do item.
+      Concluído em 2026-08-10. Diretiva implementada do zero em
+      src/directives/tooltip.ts, registrada em src/index.ts install() exatamente como
+      antes (app.directive('tooltip', Tooltip)), só trocando a origem do import de
+      'primevue/tooltip' para './directives/tooltip'.
+      DESVIO DO PLANO (obrigatório pela regra desta migração, não por erro do plano):
+      o plano 05 pede explicitamente para MANTER os nomes de classe p-tooltip/
+      p-tooltip-text/p-tooltip-arrow/p-tooltip-{top,right,bottom,left}, alegando que
+      apps consumidoras podem estilizá-los. Isso contradiz a regra global desta
+      migração (seção 4.2 regra 4 do executor: NUNCA usar classes .p-*, mesmo que o
+      plano individual sugira o contrário — a regra da migração prevalece sobre o
+      plano). Implementado com classes próprias: max-tooltip, max-tooltip-text,
+      max-tooltip-arrow, max-tooltip-{top,right,bottom,left}.
+      IMPACTO DE CSS CONFIRMADO E ACEITO (usuário já ciente, decisão da migração):
+      MinhaBibliaOnline tem resources/Theme/PrimeVue/Tooltip.scss estilizando
+      .p-tooltip/.p-tooltip-top/.p-tooltip-arrow — esse arquivo deixa de aplicar.
+      Como mitigação, o novo bloco de estilo (não escopado, em src/themes/params.scss,
+      substituindo a regra .p-tooltip { z-index } que já existia ali) já entrega um
+      visual completo por padrão (fundo escuro, texto claro, seta, border-radius),
+      então apps que não tinham CSS próprio continuam com tooltip funcional e visível
+      — só MinhaBibliaOnline precisa portar o Tooltip.scss para as novas classes.
+      API implementada: todas as formas de uso da seção 1 do plano — string simples,
+      objeto com opções (value/disabled/escape/showDelay/hideDelay/autoHide/
+      fitContent/class), modificadores .top/.right/.bottom/.left, modificador .focus.
+      Default de posição: right (idêntico ao PrimeVue — não top, que quebraria layouts
+      existentes silenciosamente). escape:true por padrão usa textContent; só usa
+      innerHTML quando escape===false (proteção de XSS preservada). Timers
+      (showTimer/hideTimer) e listeners guardados em WeakMap por elemento, limpos em
+      unmounted. Sem modificador .focus, registra mouseenter/mouseleave E focus/blur
+      simultaneamente (tooltip só-mouse é inacessível por teclado, conforme o plano
+      exige). role="tooltip" no nó + aria-describedby no gatilho apontando pro id
+      gerado. Hook updated: atualiza options/position e, se o tooltip já estiver
+      visível, re-renderiza o texto (tooltip com valor reativo não congela).
+      Posicionamento: lógica de flip própria (não importada de MaxBaseOverlay, que não
+      expõe utilitário de posicionamento reaproveitável — é acoplada ao seu próprio
+      estado interno); mesma técnica de getBoundingClientRect + clamp usada em
+      MaxBaseOverlay, mas com 4 direções (top/right/bottom/left) em vez de 2.
+      Teste criado: tests/directives/tooltip.test.ts (20 casos, com fake timers do
+      Vitest e mock de getBoundingClientRect no gatilho, já que happy-dom não faz
+      layout — sem o mock, a lógica de flip por viewport zerada faria os testes de
+      modificador de posição falharem por acidente).
+      MUTAÇÕES TESTADAS (todas fazem o teste falhar, incluindo as 3 que o plano exige
+      explicitamente): (1) default de posição trocado para 'top' (mata o teste do
+      default); (2) innerHTML incondicional ignorando escape (mata o teste de XSS);
+      (3) remover a limpeza em unmounted (mata os 2 testes de vazamento); (4)
+      remover a checagem de disabled; (5) showDelay ignorado; (6) modificador focus
+      ignorado (sempre registra os 2 pares de listener); (7) hook updated não
+      re-renderiza o texto; (8) aria-describedby não aplicado.
+      Portões: vitest 20/20; type-check limpo; lint 0 erros (mesmos 2 warnings
+      pré-existentes); suíte 687 passando / 18 falhando (mesmas 7 arquivos do
+      baseline, sem regressão nova).

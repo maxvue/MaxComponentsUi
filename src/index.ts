@@ -148,7 +148,7 @@ export { default as MaxToast } from './components/MaxToast.vue';
 export { Toast } from './helpers/Toast';
 
 
-import Tooltip from 'primevue/tooltip';
+import Tooltip from './directives/tooltip';
 
 
 /**
