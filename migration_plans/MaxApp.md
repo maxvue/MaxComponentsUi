@@ -1,0 +1,638 @@
+# Plano de Migração — MaxApp (App Shell independente do engeapp)
+
+> Documento autossuficiente. Uma IA futura deve conseguir executar esta migração lendo apenas
+> este arquivo + o código-fonte referenciado nos dois repositórios. **Não modificar código-fonte
+> fora do escopo da etapa em execução.** Convenções obrigatórias: `<script setup lang="ts">`,
+> indentação de 4 espaços, aspas simples, ponto e vírgula, sem trailing commas, ordem de blocos
+> **Template → Script → Style**.
+
+---
+
+## 1. Objetivo
+
+Permitir que o `engeapp` substitua todo o seu `resources/App.vue` por um único componente
+importado desta biblioteca:
+
+```vue
+<template>
+    <MaxApp route-login="login" route-providers="social.providers" :allow-user-name="false" />
+</template>
+```
+
+Hoje o `App.vue` do engeapp ([`resources/App.vue`](../../engeapp/resources/App.vue)) faz o
+branching de layout, monta o `PageLayout`, o `LoadScreen`, os singletons de UI
+(`MaxPopoverConfirm`, `MaxToast`) e o bloco VoIP. Todo esse shell deve passar a morar aqui.
+
+**Decisão de escopo tomada pelo usuário:** migrar **tudo**, incluindo o `@maxvue/max-pinia`.
+
+---
+
+## 2. Estado atual (ponto de partida)
+
+Existem dois rascunhos **incompletos e não funcionais** no repositório, copiados do engeapp:
+
+### `src/components/MaxApp.vue`
+- `<script setup>` **vazio** — nenhuma prop, nenhum `system`/`user`/`route` definido.
+- Template com três `<slot>` irmãos, dois deles com o **mesmo nome** (`authenticated`), **sem
+  `v-if`** — todos os `RouterView` renderizariam simultaneamente.
+- Referencia `PageLayout`, `LoadScreen`, `VoipDialer`, `VoipReverbListener`, `IncomingCallModal`,
+  que **não existem** nesta lib.
+- O `<style>` estiliza `.app-container`, mas o template usa `.max-app` — seletor morto.
+
+### `src/stores/useApp.Store.ts`
+- Exporta `useSystemStore` (nome do arquivo não bate com o da store).
+- Referencia símbolos **inexistentes/não importados**: `user`, `loading`, `version`,
+  `useChatSettingsStore`, `useUserStore`, `useLoadingStore`, `useWindowSize`, `useBreakpoints`,
+  `useRefCached`, `UseWindowSizeReturn`.
+- Não está exportado em [`src/stores/index.ts`](../src/stores/index.ts).
+
+### `src/stores/useLogin.Store.ts`
+- Referencia `apiPostRoute`, `apiGetRoute`, `toast`, `route` sem importar (dependem de
+  auto-import, que **não existe** no build desta lib).
+- Rotas `'login'` e `'social.providers'` **hardcoded** — devem virar props/config.
+
+> **Conclusão:** os três arquivos são rascunhos. Nenhum deles compila. A migração parte deles,
+> mas praticamente reescreve todos.
+
+---
+
+## 3. Mapa de dependências real (medido)
+
+A árvore transitiva a partir de `App.vue` do engeapp contém **65 arquivos `.vue` locais** e
+**22 stores Pinia**.
+
+### 3.1 O fator dominante: `ChatPanel`
+
+`SplitPanesContent.vue` faz `defineAsyncComponent(() => import('@/Vue/Sections/supportChat/ChatPanel.vue'))`.
+Essa **única aresta** arrasta as **37 telas de `Sections/supportChat/**`**.
+
+| Escopo | Arquivos `.vue` |
+|---|---|
+| Árvore **sem** a aresta `ChatPanel` | **23** |
+| Árvore **com** a aresta `ChatPanel` | **65** |
+
+O subtree de chat é domínio de negócio puro do engeapp (chat estilo WhatsApp, protocolos,
+sugestões de IA, upload de mídia, gravação de áudio). **Recomendação técnica registrada:** manter
+`ChatPanel` no engeapp e injetá-lo por slot no `MaxSplitPanesContent`. Isso reduz a migração de
+65 para 23 arquivos sem perder a API de uma linha.
+
+### 3.2 Componentes por grupo
+
+| Grupo | Qtd | Arquivos |
+|---|---|---|
+| Layout | 11 | `PageLayout`, `ContainerApp`, `SplitPanesContent`, `SideMenu`, `TopMenu`, `TopMenu/UserSection`, `TopMenu/TopMenuSearchBar`, `TopMenu/ReportBugs`, `BottomMenu`, `LoadScreen`, `LoadScreenTarget` |
+| Componentes de apoio | 11 | `TopToolbar`, `MenuVerticalItem`, `ImportProjectPopover`, `LiveSection`, `LiveStatusIndicator`, `LiveUsersList`, `ArchiveChatPopover`, `BlockContactPopover`, `TransferSupportPopover`, `Popovers/PopoverAddContact`, `Popovers/PopoverSearchChat` |
+| VoIP | 5 | `VoipDialer`, `VoipReverbListener`, `IncomingCallModal`, `VoipDialpad`, `VoipCallHistory` |
+| supportChat | 37 | `ChatPanel` + todo `Sections/supportChat/**` |
+
+### 3.3 Stores (22)
+
+`useBugsReportStore`, `useChatActiveSupportStore`, `useChatAiSuggestionsStore`,
+`useChatSettingsStore`, `useChatStore`, `useClientStore`, `useListChatRoomsStore`,
+`useListMenusStore`, `useListsToSelectStore`, `useLiveRoomsStore`, `useLoadingStore`,
+`useLocationStore`, `useNotificationsStore`, `usePlannerListsStore`, `useProjectStore`,
+`useSearchBarStore`, `useStationElementsStore`, `useSystemStore`, `useTopToolbarStore`,
+`useUserStore`, `useViewFileStore`, `useVoipStore`.
+
+### 3.4 Dependências externas a resolver
+
+| Dependência | Onde | Tratamento |
+|---|---|---|
+| `@maxvue/max-pinia` | plugin de cache/sync; provê `status.server.get.is_success` | **Virar pacote irmão** (§4) |
+| `ziggy-js` / `route()` | TopMenu, ReportBugs, `useVoip.Store` | Injetar via `setRouteResolver` do MaxUse — **nunca importar Ziggy aqui** |
+| `@laravel/echo-vue` | `VoipReverbListener`, `ReverbComponent`, TopMenu | `peerDependency` opcional + guard `echoIsConfigured()` |
+| `livekit-client` | `useVoip.Store` (WebRTC real) | `peerDependency` opcional, import dinâmico |
+| `splitpanes` | `SplitPanesContent` | `dependency` |
+| `pdfjs-dist`, `vue3-emoji-picker`, `color` | subtree supportChat | Só se o chat for migrado |
+| `vue3-toastify` | vários | Substituir pelo `MaxToast`/`useToastStore` já existente na lib |
+| `axios` | chat + voip | já é `dependency` desta lib |
+| Browser APIs | `new Audio()`, `AudioContext` | Guardar com `typeof window !== 'undefined'` |
+
+---
+
+## 4. Pré-requisito bloqueante: `@maxvue/max-pinia`
+
+O `useUserStore` **não busca dados sozinho**. Ele apenas declara:
+
+```ts
+const options = computed(() => ({ get: { route: 'user.data' }, save: 'user.save', key: 'user' }));
+```
+
+Quem faz o GET, o cache em LocalForage e popula `status.server.get.is_success` — a condição que
+governa **todo** o branching do `App.vue` — é o plugin `createMaxPinia`, configurado em
+[`engeapp/resources/app.ts:42-54`](../../engeapp/resources/app.ts#L42-L54).
+
+**Boa notícia:** o `@maxvue/max-pinia` (v0.2.0, em `engeapp/storage/libs/MaxPinia`) **já é
+totalmente desacoplado** — toda a configuração entra por injeção (`resolveRoute`,
+`getSessionToken`, `isAppStarted`, `onActivity`, `loading`). Não precisa ser reescrito.
+
+> ✅ **ETAPA 1 CONCLUÍDA.** Registro do que foi encontrado e feito:
+>
+> O `MaxPinia` **já era** um repositório git próprio em `~/GitHub/MaxPinia` — o caminho
+> `engeapp/storage/libs/MaxPinia` é apenas um **symlink** para ele. Nada precisou ser
+> clonado ou movido; bastou referenciá-lo.
+>
+> Mudanças aplicadas:
+> 1. `MaxPinia/package.json`: peer range → `"pinia": "^3.0.0 || ^4.0.0"` (commit `8b2694a`).
+> 2. `MaxPinia/package.json`: **`@vue/devtools-api` adicionado como devDependency**. O pinia 3
+>    o trazia como `dependency` direta; o pinia 4 o moveu para peer opcional, mas o runtime
+>    ainda o importa — sem ele, `test/config.test.ts` falha ao carregar.
+> 3. `MaxComponentsUi/package.json`: `"@maxvue/max-pinia": "file:../MaxPinia"` (commit `560284c8`).
+>
+> Evidências: MaxPinia com pinia 4.0.2 → type-check limpo, **23/23 testes**, build ok
+> (`dist/index.es.js`, 21.65 kB). MaxComponentsUi → `createMaxPinia` e `useAsyncStatus`
+> resolvem; type-check limpo (com os rascunhos §2 fora); suíte **sem regressões**
+> (18 falhas pré-existentes de componentes de input vs. 33 no baseline da `main`).
+
+**Ação (histórico):** ter o `MaxPinia` como **pacote irmão**, ao lado de `MaxUse`:
+
+```
+~/GitHub/
+├── MaxComponentsUi/
+├── MaxUse/
+└── MaxPinia/          ← novo
+```
+
+E declarar em `package.json` desta lib:
+
+```json
+"dependencies": {
+    "@maxvue/max-pinia": "file:../MaxPinia"
+}
+```
+
+> ✅ **Compatibilidade com pinia 4 — já verificada.** O `MaxPinia` declara
+> `peerDependency "pinia": "^3.0.0"`, enquanto esta lib está em **`pinia 4.0.2`** (commit
+> `52d64d9c`). A verificação mostrou que o `MaxPinia` consome o pinia **apenas por dois imports
+> de tipo** em `src/plugin.ts:2` — `PiniaPlugin` e `PiniaPluginContext` — sem nenhuma API de
+> runtime. Ambos continuam exportados em `pinia@4.0.2`
+> (`node_modules/pinia/dist/pinia.d.ts:552`, `:580`, `:955`).
+>
+> **Portanto a etapa 1 é apenas ampliar o range para `"pinia": "^3.0.0 || ^4.0.0"`** — não há
+> quebra de API a resolver.
+
+---
+
+## 5. API pública do `MaxApp`
+
+```ts
+interface MaxAppProps {
+    /** Nome da rota de login (ex.: 'login'). */
+    routeLogin?: string;
+    /** Nome da rota que lista os provedores sociais (ex.: 'social.providers'). */
+    routeProviders?: string;
+    /** Nome da rota que devolve os dados do usuário. Padrão: 'user.data'. */
+    routeUser?: string;
+    /** Habilita login por nome de usuário. Padrão: true. */
+    allowUserName?: boolean;
+    /** Habilita login por e-mail. Padrão: true. */
+    allowEmail?: boolean;
+    /** Habilita login por telefone. Padrão: true. */
+    allowPhone?: boolean;
+    /** Nomes de rota que devem renderizar sem layout (blank). */
+    blankPages?: string[];
+}
+```
+
+### Slots (escape hatches)
+
+| Slot | Props | Uso |
+|---|---|---|
+| `layout` | `{ screen }` | Substituir o `MaxPageLayout` padrão |
+| `login` | — | Substituir a tela de login |
+| `extras` | — | Injetar VoIP ou qualquer singleton do app |
+
+### Branching (preservar exatamente o do `App.vue` atual)
+
+```
+route.name existe?
+├── meta.layout === 'site'                          → <RouterView/> puro
+├── meta.layout === 'blank' || page ∈ blankPages    → <RouterView/> puro
+├── user carregado && !user.data.id                 → <RouterView/> (login)
+└── user carregado && user.data.id                  → <MaxPageLayout :screen> <RouterView/>
+```
+
+> O `blankPages` substitui o hardcode atual
+> (`'Page'`, `'contatos'`, `'Contract'`, `'Wire'`, `'SolarCompanySubdomain'`), que é domínio do
+> engeapp e **não pode** ficar na lib.
+
+---
+
+## 6. Etapas de execução (uma por invocação)
+
+> Cada etapa é uma invocação do agente. **Não executar mais de uma por vez.** Ao final de cada
+> etapa: `npm run type-check`, `npm run lint`, `npm run test` e atualizar o status na tabela §7.
+
+| # | Etapa | Entrega | Depende de |
+|---|---|---|---|
+| 1 | **MaxPinia como pacote irmão** | `../MaxPinia` criado, `pinia@4` compatível, `file:../MaxPinia` no `package.json`, `npm install` limpo | — |
+| 2 | ✅ **Stores base** | `useLoading.Store.ts` + `useUser.Store.ts` na lib, com rotas configuráveis via `configureMaxApp()` | 1 |
+| 3 | ✅ **`useSystem.Store.ts`** | Reescrever o rascunho `useApp.Store.ts`: imports explícitos, remover `useChatSettingsStore`, `split_panel` opcional, exportar em `stores/index.ts` | 2 |
+| 4 | ✅ **`useLogin.Store.ts`** | Corrigir imports (`apiGetRoute`/`apiPostRoute` do MaxUse), trocar `vue3-toastify` pelo `useToastStore`, rotas via config | 3 |
+| 5 | ✅ **`MaxLoadScreen`** | `LoadScreen.vue` + `LoadScreenTarget.vue` → `MaxLoadScreen.vue` + `MaxLoadScreenTarget.vue` | 2 |
+| 6 | ✅ **`MaxContainerApp` + `MaxBottomMenu`** | Ambos são folhas, sem stores complexas | 3 |
+| 7 | ✅ **`MaxSideMenu`** | `SideMenu.vue` + `MenuVerticalItem.vue`; store `useListMenus` configurável | 3 |
+| 8 | ✅ **`MaxTopMenu`** | **Escopo reduzido ao esqueleto + slots** (ver §8.5). Reverb/LiveKit ficam no engeapp | 3, 7 |
+| 9 | ✅ **`MaxSplitPanesContent`** | `splitpanes` + **slot** para o painel lateral (evita arrastar o `ChatPanel`) | 3 |
+| 10 | ✅ **`MaxPageLayout`** | Compõe 6→9 e **repassa os slots** dos filhos | 6, 7, 8, 9 |
+| 11 | ❌ ~~**VoIP**~~ | **Cancelada por decisão do usuário** — os 5 componentes e o `useVoip.Store` (512 linhas, LiveKit/WebRTC) ficam no engeapp e entram pelo slot `voip` do `MaxTopMenu`. A lib não ganha LiveKit | — |
+| 12 | ✅ **`MaxApp.vue`** | Reescrever o rascunho com props §5, branching §5 e slots | 10 |
+| 13 | ✅ **Resolver + exports** | Mantidos a cada etapa, não ao final | 12 |
+| 14 | **Integração no engeapp** | Trocar `App.vue` pelo `<MaxApp/>`, validar em dev | 13 |
+| 15 | ❌ ~~**supportChat**~~ | **Cancelada por decisão do usuário** — as 37 telas ficam no engeapp e entram pelo slot `side` do `MaxSplitPanesContent` | — |
+
+---
+
+## 7. Painel de status
+
+| # | Etapa | Status |
+|---|---|---|
+| 1 | MaxPinia como pacote irmão | ✅ `done` |
+| 2 | Stores base (loading, user) | ✅ `done` |
+| 3 | useSystem.Store | ✅ `done` |
+| 4 | useLogin.Store | ✅ `done` |
+| 5 | MaxLoadScreen | ✅ `done` |
+| 6 | MaxContainerApp + MaxBottomMenu | ✅ `done` |
+| 7 | MaxSideMenu | ✅ `done` |
+| 8 | MaxTopMenu (esqueleto + slots) | ✅ `done` |
+| 9 | MaxSplitPanesContent | ✅ `done` |
+| 10 | MaxPageLayout | ✅ `done` |
+| 11 | ~~VoIP~~ | ❌ `cancelled` — fica no engeapp |
+| 12 | MaxApp.vue | ✅ `done` |
+| 13 | Resolver + exports | ✅ `done` — mantidos a cada etapa |
+| 14 | Integração no engeapp | `waiting` |
+| 15 | ~~supportChat~~ | ❌ `cancelled` — fica no engeapp |
+
+---
+
+## 8. Riscos
+
+| Risco | Impacto | Mitigação |
+|---|---|---|
+| ~~`pinia@4` vs peer `^3.0.0` do MaxPinia~~ | ~~Bloqueia a etapa 1~~ | **Resolvido:** só imports de tipo, presentes no pinia 4. Ampliar o range |
+| Ziggy dentro da lib | Acopla a lib ao Laravel | Usar só `setRouteResolver` do MaxUse |
+| Reverb/LiveKit obrigatórios | Quebra consumidores sem VoIP | `peerDependencies` opcionais + guards |
+| `ChatPanel` (37 arquivos) | Triplica o escopo | Manter no engeapp via slot (etapa 9) |
+| Migração em paralelo com a do PrimeVue | Conflito nos mesmos arquivos | Worktree separado (`feat/max-app`) |
+| Tamanho do bundle | `index.es.js` cresce muito | Avaliar entrada `./app` separada |
+
+---
+
+## 8.0 Pendência da etapa 3 para a integração (etapa 14)
+
+A `useSystem.Store` do engeapp compunha a chave do `split_panel` lendo a store de chat
+diretamente. Esse acoplamento foi removido; a chave agora é extensível. **Na etapa 14, o engeapp
+precisa registrar as partes que antes eram implícitas**, senão o `localStorage` do painel
+dividido passa a usar uma chave diferente e os usuários perdem o tamanho salvo:
+
+```ts
+const system = useSystemStore();
+const chat = useChatSettingsStore();
+
+system.registerSplitPanelKeyPart(() => chat.is_hide ? '_hidded' : '_not_hidded');
+system.registerSplitPanelKeyPart(() => chat.is_visible ? '_visible' : '_notvisible');
+```
+
+A ordem importa: `_hidded` antes de `_visible`, para reproduzir exatamente a chave original.
+
+---
+
+## 8.0.1 Pendência da etapa 4 — fallback de e-mail no login
+
+A `useLogin.Store` do engeapp devolvia `'undefined@enge.tec.br'` quando o método detectado
+**não** era e-mail:
+
+```ts
+const email = computed(() => {
+    if (method.value === 'email') return value.value;
+    return 'undefined@enge.tec.br';   // sentinela específica do engeapp
+});
+```
+
+Na versão da lib esse fallback virou **string vazia**, coerente com `phone_number` e `user_name`.
+
+**Verificar na etapa 14:** se o endpoint de login do engeapp exigir um e-mail sintaticamente
+válido mesmo em login por telefone/usuário, o backend passará a receber `''`. Duas saídas:
+ajustar a validação no servidor (preferível) ou reintroduzir a sentinela na aplicação, antes de
+chamar `submit()`. Um login por telefone/usuário no ambiente de dev evidencia o caso.
+
+---
+
+## 8.1 Achado da etapa 2 — instância dupla de Vue/VueUse nos testes
+
+> ✅ **Corrigido no commit `eb8f95c7`.** Registrado aqui porque afeta todas as etapas seguintes.
+
+O `vitest.config.ts` aliasa `@maxvue/max-use` para o **fonte** do MaxUse
+(`../MaxUse/src/index.ts`). O `import '@vueuse/core'` de lá resolvia para a cópia aninhada em
+`../MaxUse/node_modules`, carregando uma **segunda instância do Vue**. Consequência: todo watcher
+reexportado do VueUse (`watchDebounced`, `refAutoReset`, `useWindowSize`, …) **nunca disparava**
+sobre refs criados nos testes — e falhava **em silêncio**, sem erro.
+
+Comprovado por teste-sonda: com o mesmo padrão de mutação, o `@vueuse/core` direto disparava
+**1** vez e o re-export do MaxUse, **0**. Após a correção, ambos disparam 1.
+
+Correção: `@vueuse/core` como devDependency + alias fixo de `vue` e `@vueuse/core` +
+`dedupe: ['vue', '@vueuse/core', 'pinia']`.
+
+**Impacto nas próximas etapas:** mais de 10 arquivos já existentes em `src/` usam esses
+re-exports (`MaxModal`, `MaxPopover`, `MaxInputSelect`, `useIcon.Store`, …). A etapa 5
+(`MaxLoadScreen`) depende diretamente do `watchDebounced` e teria falhado silenciosamente sem
+esta correção. Se algum watcher parecer inerte em teste, **suspeite primeiro de instância dupla**.
+
+---
+
+## 8.2 Achado da etapa 5 — Pinia global nos testes de componente
+
+O `tests/setup.ts` instala um **Pinia global** em `config.global.plugins` (linha 78). Todo
+componente montado usa **essa** instância — que **não** é a criada por `setActivePinia()` no
+teste. O sintoma engana: a store manipulada pelo teste tem os dados, mas o componente renderiza
+vazio, como se o `v-if` estivesse errado.
+
+Ao montar componentes que leem stores, passe a instância local explicitamente:
+
+```ts
+let pinia: Pinia;
+
+const mountWithPinia = (component: any, options: Record<string, any> = {}) => mount(component, {
+    ...options,
+    global: { ...(options.global ?? {}), plugins: [pinia] }
+});
+
+beforeEach(() => {
+    pinia = createPinia();
+    setActivePinia(pinia);
+});
+```
+
+**Teleport:** componentes que usam `<Teleport>` (como o `MaxLoadScreenTarget`) deixam nós fora do
+wrapper. Sem `unmount()` + limpeza do `document.body` no `afterEach`, o conteúdo sobrevive ao caso
+seguinte e infla as contagens. Vale para as etapas 6–12, que montam componentes com store.
+
+---
+
+## 8.3 Padrão da etapa 6 — rotas do engeapp como props com default
+
+O `BottomMenu` trazia as quatro abas fixas no código (`integrador_dashboard`,
+`integrador_clients`, `board`, `settings`), além de um `if` para tratar `integrador_client_show`
+como parte de "Clientes". Rotas de uma aplicação específica não podem ficar embutidas numa lib
+genérica — mas remover o default quebraria o engeapp.
+
+**Solução adotada, a reaproveitar nas etapas 7 e 8:** virar prop com as rotas atuais como
+`default`. O engeapp continua funcionando sem passar nada, e outras aplicações sobrescrevem.
+
+```ts
+const props = withDefaults(defineProps<{ tabs?: BottomTab[] }>(), {
+    tabs: () => [ /* as rotas atuais do engeapp */ ]
+});
+```
+
+O caso especial do `if` virou o campo `matches?: string[]` da aba — genérico para qualquer tela
+de detalhe que deva ativar a seção-pai. O `grid-template-columns` passou a ser calculado a partir
+de `tabs.length`, já que o número de abas deixou de ser fixo.
+
+O `MaxSideMenu` (etapa 7) lê `useListMenusStore` e o `MaxTopMenu` (etapa 8) tem vários pontos
+semelhantes; aplicar a mesma abordagem.
+
+---
+
+## 8.4 Achados da etapa 7 — mocks em testes de componente
+
+Dois tropeços que voltam a aparecer na etapa 8, que monta muito mais componentes.
+
+**1. Mock de `vue-router` não pode substituir o módulo inteiro.** Vários componentes da lib
+(`MaxLogo`, `MaxButton`, `MaxIconButton`) renderizam `RouterLink`. Um mock que devolve só
+`useRoute`/`useRouter` apaga o `RouterLink` e o erro aponta para o SFC errado. Use
+`importOriginal`:
+
+```ts
+vi.mock('vue-router', async (importOriginal) => ({
+    ...(await importOriginal<Record<string, any>>()),
+    useRoute: () => route,
+    useRouter: () => ({ push: vi.fn() })
+}));
+```
+
+Mesmo assim o `RouterLink` real exige um router injetado (`Cannot read properties of undefined
+(reading 'resolve')`). Quando o componente com link não é o alvo do teste, **stub**:
+
+```ts
+stubs: { MaxLogo: { template: '<div class="max-logo-stub" />' } }
+```
+
+**2. `useRefCachedApi` dispara requisição de verdade.** Nas stores que o usam
+(`useListMenus`, e várias da etapa 8), sobrescreva só ele, preservando o resto do MaxUse:
+
+```ts
+const menusRef = ref<any>(null);
+
+vi.mock('@maxvue/max-use', async (importOriginal) => ({
+    ...(await importOriginal<Record<string, any>>()),
+    useRefCachedApi: () => menusRef
+}));
+```
+
+---
+
+## 8.5 Decisão da etapa 8 — TopMenu como esqueleto com slots
+
+A medição da árvore desmentiu a estimativa inicial:
+
+| | Plano original | Medido |
+|---|---|---|
+| Componentes | 13 | 13 (o `PlannerReverbListener` faltava na lista) |
+| Linhas de componente | — | ~2.900 |
+| Stores | 17 | 17, somando ~2.700 linhas |
+| **Total** | — | **~5.600 linhas** |
+
+As sete etapas anteriores **somadas** deram ~1.500 linhas. As maiores stores são domínio puro:
+`useChat` (836), `useVoip` (512, LiveKit/WebRTC), `useProject` (249), `useStationElements` (224).
+
+**Decisão do usuário: migrar só o esqueleto; o resto fica no engeapp via slot.** A lib não ganha
+LiveKit, Reverb nem o modelo de projetos solares.
+
+### Entrou na lib
+
+| Componente | Adaptação |
+|---|---|
+| `MaxTopMenu` | Estrutura + botão de recarregar + slots |
+| `MaxUserSection` | Itens viram prop; ações viram eventos |
+| `MaxTopMenuSearchBar` | Placeholder vira prop; checkbox vira slot |
+| `MaxTopToolbar` | Preserva `action`/`command`/`route` |
+| `useTopToolbar.Store` | `useRouter()` + `getRoute` no lugar do singleton e do Ziggy |
+
+### Slots do `MaxTopMenu`
+
+`status`, `search`, `add`, `chat`, `bugs`, `notifications`, `voip`, `live`, `user`.
+
+### Ficou no engeapp (9 componentes)
+
+Notificações (o painel inteiro), `ReportBugs` (647 linhas, abre pasta local), `TopToolbar`
+`ImportProjectPopover`, `LiveSection` + `LiveStatusIndicator` + `LiveUsersList` (LiveKit),
+`VoipDialpad`, `VoipCallHistory`, `ReverbComponent`, `PlannerReverbListener`.
+
+### O que a etapa 14 precisa fazer
+
+```vue
+<MaxTopMenu :add-items="[{ label: 'Novo Projeto', icon: 'clarity:block-line', route: 'new_project' },
+                         { label: 'Equipamento', icon: 'mingcute:solar-panel-line', route: 'new_equipment' }]">
+    <template #search><MaxTopMenuSearchBar :placeholder="`Pesquisar em ${board.count_cards} Projetos`">
+        <MaxInputCheckbox label="Incluir antigos" v-model="board.show_finished_cards" class="checkbox-search-top" />
+    </MaxTopMenuSearchBar></template>
+    <template #chat><!-- toggle + ReverbComponent + PlannerReverbListener --></template>
+    <template #bugs><ReportBugs v-if="isInternal" /></template>
+    <template #notifications><!-- painel de notificações --></template>
+    <template #voip><!-- VoipDialpad + VoipCallHistory --></template>
+    <template #live><LiveSection v-if="isInternal" /></template>
+    <template #user>
+        <MaxUserSection @logout="logoutCompleto" @profile="irParaPerfil" @toggle-dark-mode="alternarTema" />
+    </template>
+</MaxTopMenu>
+```
+
+⚠️ **O `isInternal` some da lib.** Era `user.data.is_internal`, campo injetado no payload pelo
+`UserDataControler` que nem existe no tipo `User`. Cada slot condicional passa a ser
+responsabilidade do engeapp.
+
+⚠️ **A limpeza do logout precisa ser reimplementada no handler do evento `@logout`** — hoje ela
+desconecta o LiveRooms, limpa `localStorage`, chama `user.clearAll()` e apaga o cache
+`integrador-api` do PWA. Cada passo tem um comentário no original explicando o bug que ele evita;
+**não simplificar**.
+
+---
+
+## 8.6 Nota — erro intermitente de teardown do Vitest
+
+A suíte às vezes reporta `EnvironmentTeardownError: Closing rpc while "onUserConsoleLog" was
+pending`. É uma corrida no encerramento do worker do Vitest, ligada a saída de console — **não é
+falha de teste**. Execuções repetidas dão 763 passando / 18 falhando de forma estável, ora com
+2 erros, ora com nenhum. Ignorar, ou eliminar `console.log` de testes.
+
+---
+
+## 8.7 Escopo final — o que a lib leva e o que fica no engeapp
+
+Decisões acumuladas do usuário nas etapas 8 e 9: **VoIP e ChatPanel ficam fora**. O plano
+original previa 65 arquivos; o escopo real ficou em torno de **16 componentes**.
+
+### Na biblioteca
+
+`MaxApp`, `MaxPageLayout`, `MaxContainerApp`, `MaxTopMenu`, `MaxTopMenuSearchBar`,
+`MaxTopToolbar`, `MaxUserSection`, `MaxSideMenu`, `MaxMenuVerticalItem`, `MaxBottomMenu`,
+`MaxSplitPanesContent`, `MaxLoadScreen`, `MaxLoadScreenTarget` + as stores `system`, `user`,
+`loading`, `login`, `searchBar`, `listMenus`, `topToolbar`.
+
+### No engeapp, entrando por slot
+
+| Componente | Slot |
+|---|---|
+| Painel de notificações | `MaxTopMenu#notifications` |
+| `ReportBugs` (647 linhas) | `MaxTopMenu#bugs` |
+| `LiveSection` + `LiveStatusIndicator` + `LiveUsersList` | `MaxTopMenu#live` |
+| `VoipDialpad` + `VoipCallHistory` | `MaxTopMenu#voip` |
+| `ReverbComponent` + `PlannerReverbListener` + toggle do chat | `MaxTopMenu#chat` |
+| `ImportProjectPopover` | `MaxTopToolbar#plus` |
+| `ChatPanel` (37 telas) | `MaxSplitPanesContent#side` |
+| `VoipDialer`, `VoipReverbListener`, `IncomingCallModal` | `MaxApp#extras` (etapa 12) |
+
+### Consequência para as dependências
+
+A lib **não** ganha `livekit-client`, `@laravel/echo-vue`, `pdfjs-dist`, `vue3-emoji-picker`
+nem `ziggy-js`. A única dependência nova de toda a migração foi o **`splitpanes`**.
+
+---
+
+## 8.8 Nota da etapa 10 — repasse de slots em cadeia
+
+Como os filhos passaram a expor slots (decisões das etapas 8 e 9), cada nível da composição
+precisa repassá-los, senão o engeapp não alcança o `MaxTopMenu` a partir do layout:
+
+```vue
+<template v-for="(_, name) in topMenuSlots" #[name]="slotProps" :key="name">
+    <slot :name="name" v-bind="slotProps ?? {}"></slot>
+</template>
+```
+
+**A etapa 12 precisa fazer o mesmo**, um nível acima: o `MaxApp` renderiza o `MaxPageLayout` e
+tem de repassar os mesmos nove slots do topo (`status`, `search`, `add`, `chat`, `bugs`,
+`notifications`, `voip`, `live`, `user`) mais o `side` — além do `extras`, para os componentes
+VoIP que o `App.vue` monta fora do layout.
+
+⚠️ **Ao testar o slot `side`, defina `split_panel` abaixo de 100.** O painel lateral exige
+`sideVisible` **e** espaço disponível; como o valor padrão é 100, o `<pane>` é corretamente
+suprimido e o teste falha por motivo legítimo — não é bug de repasse.
+
+---
+
+## 8.9 Guia da etapa 14 — integração no engeapp
+
+Tudo que a lib precisava entregar está pronto. Falta só religar o engeapp.
+
+### 1. `package.json` e boot
+
+O `@maxvue/max-pinia` continua sendo instalado e configurado como hoje, em `resources/app.ts`.
+Nada muda ali — a lib não instala o plugin, apenas depende dele.
+
+### 2. Substituir o `resources/App.vue`
+
+```vue
+<template>
+    <MaxApp
+        route-login="login"
+        route-providers="social.providers"
+        :allow-user-name="false"
+        :blank-pages="['Page', 'contatos', 'Contract', 'Wire', 'SolarCompanySubdomain']"
+        :add-items="[
+            { label: 'Novo Projeto', icon: 'clarity:block-line', size: '1.9', route: 'new_project' },
+            { label: 'Equipamento', icon: 'mingcute:solar-panel-line', size: '1.9', route: 'new_equipment' }
+        ]"
+        :side-visible="chatSettings.is_visible"
+    >
+        <template #search>
+            <MaxTopMenuSearchBar :placeholder="`Pesquisar em ${board.count_cards} Projetos`">
+                <MaxInputCheckbox v-model="board.show_finished_cards" label="Incluir antigos" class="checkbox-search-top" />
+            </MaxTopMenuSearchBar>
+        </template>
+
+        <template #chat><!-- toggle + ReverbComponent + PlannerReverbListener --></template>
+        <template v-if="isInternal" #bugs><ReportBugs /></template>
+        <template #notifications><!-- painel de notificações --></template>
+        <template v-if="isInternal" #voip><VoipDialpad /><VoipCallHistory /></template>
+        <template v-if="isInternal" #live><LiveSection /></template>
+
+        <template #user>
+            <MaxUserSection @logout="logoutCompleto" @profile="irParaPerfil" @toggle-dark-mode="alternarTema" @end-impersonate="encerrarImpersonacao" />
+        </template>
+
+        <template #side><ChatPanel /></template>
+
+        <template #extras><VoipDialer /><VoipReverbListener /><IncomingCallModal /></template>
+    </MaxApp>
+</template>
+```
+
+### 3. Pendências obrigatórias (nenhuma pode ser esquecida)
+
+| # | O quê | Onde | Por quê |
+|---|---|---|---|
+| 1 | Registrar as partes da chave do `split_panel` | boot | §8.0 — senão o usuário perde o tamanho salvo do painel |
+| 2 | Reimplementar a limpeza do logout | handler `@logout` | §8.5 — LiveRooms, `localStorage`, `clearAll()`, cache `integrador-api` do PWA |
+| 3 | Recriar o `isInternal` | `App.vue` | §8.5 — `user.data.is_internal` não existe no tipo `User` |
+| 4 | Conferir o fallback de e-mail no login | backend | §8.0.1 — antes ia `'undefined@enge.tec.br'`, agora vai `''` |
+
+### 4. Validação sugerida
+
+- Login por e-mail, telefone e usuário (com `allow-user-name` desligado, o terceiro não detecta).
+- Logout: confirmar que a sessão realmente encerra e o cache não sobrevive.
+- Rota de site, rota blank e rota autenticada.
+- Redimensionar o painel dividido, recarregar e conferir que o tamanho persiste.
+- Mobile: menu inferior aparece, menu lateral some.
+
+---
+
+## 9. Convenções
+
+- Todo componente migrado ganha o prefixo `Max` e vai para `src/components/`.
+- Nada de auto-import: **todo símbolo importado explicitamente**.
+- Nenhuma rota hardcoded — sempre via prop ou `configureMaxApp()`.
+- Após novos `.vue`: `npx tsx src/scripts/generateResolver.ts`.
+- Testes em `tests/components/`, seguindo `tests/setup.ts`.

@@ -1,0 +1,109 @@
+<template>
+    <div class="side-menu" v-bind="attrs">
+        <div class="grid-logo-and-menu">
+            <div v-if="system.type_device === 'desktop'" v-tooltip="system.version" class="space-logo" @click="clearSearch">
+                <MaxLogo fill flex no-padding />
+            </div>
+            <div class="menu">
+                <div v-if="items" class="grupo items">
+                    <MaxMenuVerticalItem :items="items" />
+                </div>
+                <div v-if="settings" class="grupo settings">
+                    <MaxMenuVerticalItem :items="settings" />
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script setup lang="ts">
+    import { computed, useAttrs } from 'vue';
+    import MaxLogo from './MaxLogo.vue';
+    import MaxMenuVerticalItem from './MaxMenuVerticalItem.vue';
+    import { useSystemStore } from '../stores/useSystem.Store';
+    import { useSearchBarStore } from '../stores/useSearchBar.Store';
+    import { useListMenusStore } from '../stores/useListMenus.Store';
+    import type { SideMenuItem } from '../types/app';
+
+    const attrs = useAttrs();
+    const menus = useListMenusStore();
+    const system = useSystemStore();
+
+    /**
+     * Separa os itens em dois grupos.
+     *
+     * `hide` tem cast booleano no modelo, então precisa de checagem falsy e não
+     * `=== null`: com a comparação estrita, salvar `hide = false` pela tela de
+     * administração escondia o menu.
+     */
+    const visible = computed<SideMenuItem[]>(() => (menus.list?.side ?? []).filter((item: SideMenuItem) => !item.details?.hide));
+
+    /** Itens da seção inferior (configurações). */
+    const settings = computed<SideMenuItem[] | null>(() => {
+        const list = visible.value.filter((item) => item.details?.settings);
+
+        return list.length ? list : null;
+    });
+
+    /** Itens da seção principal. */
+    const items = computed<SideMenuItem[] | null>(() => {
+        const list = visible.value.filter((item) => !item.details?.settings);
+
+        return list.length ? list : null;
+    });
+
+    const clearSearch = (): void => {
+        useSearchBarStore().input_value = '';
+    };
+</script>
+
+<style scoped lang="scss">
+    .side-menu {
+        position: relative;
+        overflow: hidden;
+        width: 55px;
+        height: 100vh;
+        z-index: 3;
+
+        &[screen='mobile'] {
+            position: absolute;
+            left: -100%;
+        }
+
+        .grid-logo-and-menu {
+            display: grid;
+            width: 100%;
+            height: 100%;
+            padding-bottom: 5px;
+            grid-template-rows: auto 1fr;
+
+            .space-logo {
+                position: relative;
+                top: 5px;
+                left: 5px;
+                width: 55px;
+                height: 55px;
+                margin-bottom: 40px;
+                padding: 7px;
+            }
+
+            .menu {
+                display: grid;
+                width: 100%;
+                height: 100%;
+                padding-bottom: 2rem;
+                grid-template-rows: 1fr auto;
+
+                .grupo {
+                    display: grid;
+                    gap: 4px;
+                    width: 100%;
+                    height: 100%;
+                    grid-template-columns: 1fr;
+                    grid-template-rows: repeat(auto-fill, minmax(2.7rem, 1fr));
+                    place-items: center;
+                }
+            }
+        }
+    }
+</style>

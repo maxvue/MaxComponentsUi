@@ -121,6 +121,21 @@ export { default as MaxGridCols } from './components/MaxGridCols.vue';
 export { default as MaxLoader } from './components/MaxLoader.vue';
 export { default as MaxLoaderAi } from './components/MaxLoaderAi.vue';
 export { default as MaxLoaderIcon } from './components/MaxLoaderIcon.vue';
+export { default as MaxLoadScreen } from './components/MaxLoadScreen.vue';
+export { default as MaxLoadScreenTarget } from './components/MaxLoadScreenTarget.vue';
+
+// App shell — layout
+export { default as MaxContainerApp } from './components/MaxContainerApp.vue';
+export { default as MaxBottomMenu } from './components/MaxBottomMenu.vue';
+export { default as MaxSideMenu } from './components/MaxSideMenu.vue';
+export { default as MaxMenuVerticalItem } from './components/MaxMenuVerticalItem.vue';
+export { default as MaxTopMenu } from './components/MaxTopMenu.vue';
+export { default as MaxTopMenuSearchBar } from './components/MaxTopMenuSearchBar.vue';
+export { default as MaxTopToolbar } from './components/MaxTopToolbar.vue';
+// O MaxUserSection é exportado mais abaixo, junto do seu alias UserSection.
+export { default as MaxSplitPanesContent } from './components/MaxSplitPanesContent.vue';
+export { default as MaxPageLayout } from './components/MaxPageLayout.vue';
+export { default as MaxApp } from './components/MaxApp.vue';
 
 // Data & Display
 export { default as MaxBadgeComponent } from './components/MaxBadgeComponent.vue';
@@ -152,6 +167,9 @@ export { default as MaxModal } from './components/MaxModal.vue';
 export { default as MaxPopoverMenu } from './components/MaxPopoverMenu.vue';
 export { default as MaxToast } from './components/MaxToast.vue';
 export { Toast } from './helpers/Toast';
+
+// Configuração do app shell (MaxApp) — deve ser chamada no boot da aplicação.
+export { configureMaxApp, getMaxAppConfig, resetMaxAppConfig } from './helpers/maxAppConfig';
 
 
 import Tooltip from 'primevue/tooltip';

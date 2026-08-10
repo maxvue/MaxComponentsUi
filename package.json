@@ -52,6 +52,7 @@
     "dependencies": {
         "@iconify/vue": "^5.0.1",
         "@lottiefiles/dotlottie-vue": "^0.11.24",
+        "@maxvue/max-pinia": "file:../MaxPinia",
         "@maxvue/max-use": "file:../MaxUse",
         "@primeuix/themes": "^2.0.3",
         "@tanstack/vue-virtual": "^3.13.35",
@@ -74,6 +75,7 @@
         "primevue": "^4.5.5",
         "quill": "^2.0.3",
         "sass": "^1.102.0",
+        "splitpanes": "^4.1.2",
         "tiptap-markdown": "^0.9.0",
         "vite-plugin-css-injected-by-js": "^5.0.2",
         "vue-pdf-embed": "^2.1.5",
@@ -93,6 +95,7 @@
         "@vue/eslint-config-typescript": "^14.9.0",
         "@vue/test-utils": "^2.4.11",
         "@vue/tsconfig": "^0.9.1",
+        "@vueuse/core": "^14.4.0",
         "ajv": "^8.20.0",
         "eslint": "^10.8.0",
         "eslint-plugin-vue": "^10.10.0",
