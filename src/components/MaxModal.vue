@@ -48,7 +48,7 @@
         i?: string;
         /** link para abrir em nova aba */
         blank?: string;
-        /** Rotação do ícone em graus */
+        /** Rota para navegação ao clicar */
         route?: string;
         /** Label para botão */
         label?: string;
@@ -91,7 +91,6 @@
         dark: 0.4,
         light: undefined,
         loading: false,
-        message: 'Deseja continuar?',
         ignoreCanvas: false,
         noButton: false,
         noHeader: false
