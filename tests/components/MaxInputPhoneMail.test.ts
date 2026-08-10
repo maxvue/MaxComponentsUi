@@ -187,7 +187,7 @@ describe('MaxInputPhoneMail', () => {
         const lastValue = emitted![emitted!.length - 1][0];
         expect(lastValue).not.toContain('+55');
         expect(lastValue).not.toMatch(/[()\-\s]/);
-        expect(lastValue).toBe('1199998888');
+        expect(lastValue).toBe('11999998888');
     });
 
     it('emite o valor de e-mail sem parênteses/traço/espaço residual da normalização', async () => {
@@ -239,5 +239,58 @@ describe('MaxInputPhoneMail', () => {
         await input.setValue('11999998888');
         expect((wrapper.vm as any).method).toBe('whatsapp');
         expect(wrapper.findComponent(InputBase).props('label')).toBe('Whatsapp');
+    });
+
+    /**
+     * Regressão: a máscara de celular usava `9` literal (`+55 (##) 9 #### - ####`).
+     * O Maska consumia o 9 digitado pelo usuário para casar com esse literal, sobrando
+     * apenas 8 slots `#` para os 9 dígitos restantes — o último dígito era descartado
+     * silenciosamente do `unmaskedValue`, que é justamente o valor emitido no v-model.
+     * O texto exibido ficava correto, então o bug só aparecia como "valor inválido".
+     */
+    describe('máscara de celular não descarta dígitos (regressão)', () => {
+        const casosCelular = [
+            ['62998817171', 'Goiânia'],
+            ['11987654321', 'São Paulo'],
+            ['21970001122', 'Rio de Janeiro']
+        ];
+
+        it.each(casosCelular)('preserva os 11 dígitos de %s (%s) no valor emitido', async (digitos) => {
+            const wrapper = mountPhoneMail();
+            await wrapper.find('input').setValue(digitos);
+
+            expect((wrapper.vm as any).unmaskedValue).toBe(digitos);
+        });
+
+        it('preserva os 10 dígitos de um telefone fixo', async () => {
+            const wrapper = mountPhoneMail();
+            await wrapper.find('input').setValue('6232811717');
+
+            expect((wrapper.vm as any).unmaskedValue).toBe('6232811717');
+        });
+
+        it('não descarta dígitos enquanto o celular ainda está incompleto', async () => {
+            const wrapper = mountPhoneMail();
+            await wrapper.find('input').setValue('629988');
+
+            expect((wrapper.vm as any).unmaskedValue).toBe('629988');
+        });
+
+        it('mantém a formatação visual do celular', async () => {
+            const wrapper = mountPhoneMail();
+            const input = wrapper.find('input');
+            await input.setValue('62998817171');
+
+            expect((input.element as HTMLInputElement).value).toBe('+55 (62) 9 9881 - 7171');
+        });
+
+        it('emite um celular que o libphonenumber considera válido', async () => {
+            const wrapper = mountPhoneMail();
+            const input = wrapper.find('input');
+            await input.setValue('62998817171');
+            await input.trigger('blur');
+
+            expect(wrapper.findComponent(InputBase).props('done')).toBe(true);
+        });
     });
 });
