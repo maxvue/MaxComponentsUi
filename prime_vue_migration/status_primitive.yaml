@@ -273,16 +273,53 @@ itens:
     primitivas: [VirtualScroller]
     depende_de: []
     uso: 'INTERNA — dependência do MaxInputIconPicker (trilha no_use) e do MaxTagSelect'
-    execucao: Aguardando
+    execucao: Concluído
     verificacao: Realizando
     teste_usuario: Aguardando
     tentativas: 0
     classes_p_removidas: []
     notas: >-
-      @tanstack/vue-virtual JÁ está nas dependencies — usar em vez de implementar do zero.
-      É este item que destrava a trilha no_use.
-      ATENÇÃO: MaxTagSelect.vue tem regra .p-virtualscroller no <style> (linha ~330);
-      ela deve ser substituída pelo seletor novo quando o MaxTagSelect for migrado.
+      Concluído em 2026-08-10. @tanstack/vue-virtual (v3.13.34 instalada, conferida no
+      .d.ts) usado em vez de implementar virtualização do zero, conforme o plano.
+      USO REAL em MaxInputIconPicker.vue investigado ANTES da implementação (leitura
+      completa do arquivo): consome apenas `items` (linha 46, na verdade `rows` — uma
+      grade 2D de ícones já pré-quebrada em linhas de 8 colunas antes de chegar ao
+      VirtualScroller, ou seja, a virtualização em si é só vertical/1D sobre linhas),
+      `itemSize` fixo em 40, `:style` para altura do container (não a prop
+      `scrollHeight` do PrimeVue), o slot `item` com `{item, options}` e o evento
+      `scroll` (usado para lazy-load de SVGs conforme a posição visível). Não usa
+      `orientation`, `lazy`, `showLoader`, `numToleratedItems` explícito nem os slots
+      `content`/`loader`. Por "paridade de API = cobrir o que o consumidor usa" (regra
+      do próprio plano), implementado apenas: items/itemSize/style/numToleratedItems
+      (com default, não usado explicitamente hoje mas mantido por ser trivial) como
+      props; slot item; eventos scroll e scroll-index-change (bônus de paridade com o
+      PrimeVue, calculado a partir de virtualizer.value.range); scrollToIndex exposto.
+      Sem classes .p-* — é infraestrutura nova.
+      ACESSIBILIDADE (exigida pelo plano): role="listbox" no container, role="option"
+      em cada item virtualizado, aria-setsize/aria-posinset com o total e a posição
+      REAIS (não a posição relativa aos itens renderizados), evitando o problema que
+      o plano descreve de leitor de tela anunciar "item 3 de 12" numa lista de 5000.
+      DESVIO DE TIPO: virtualRow.key é do tipo Key do @tanstack/virtual-core, que
+      inclui bigint — incompatível com o tipo esperado por :key do Vue
+      (PropertyKey | undefined). Corrigido com String(virtualRow.key).
+      Teste criado: tests/components/base/MaxBaseVirtualScroller.test.ts (10 casos).
+      DESAFIO DE AMBIENTE (antecipado pelo próprio plano): happy-dom não faz layout,
+      então @tanstack/vue-virtual não consegue medir a viewport sem mock. Resolvido
+      com um helper stubViewport() que sobrescreve clientHeight/offsetHeight/
+      getBoundingClientRect do elemento raiz montado — com isso o teste 2 (1000 itens
+      renderizando <100 nós) passa de verdade, não por acidente.
+      MUTAÇÕES TESTADAS (todas fazem o teste falhar): (1) overscan fixo em 10000
+      (deixaria de virtualizar de fato); (2) remover aria-setsize; (3) remover
+      role="listbox"; (4) quebrar scrollToIndex (lança exceção); (5) options.first
+      sempre false.
+      É este item que destrava a trilha no_use (MaxInputIconPicker depende dele).
+      ATENÇÃO PARA TRILHAS FUTURAS: MaxTagSelect.vue tem regra .p-virtualscroller no
+      <style> (linha ~330); ela deve ser substituída pelo seletor novo quando o
+      MaxTagSelect for migrado (fora do escopo deste item — MaxTagSelect não usa
+      MaxBaseVirtualScroller ainda, só tem CSS órfão apontando para o PrimeVue).
+      Portões: vitest 10/10; type-check limpo (após a correção de String(key));
+      lint 0 erros (mesmos 2 warnings pré-existentes); suíte 667 passando / 18
+      falhando (mesmas 7 arquivos do baseline, sem regressão nova).
 
   - id: 5
     componente: vTooltip
