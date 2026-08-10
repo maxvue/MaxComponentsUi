@@ -17,31 +17,41 @@
             >
         </div>
 
-        <ul ref="listElem" class="max-listbox-list" role="listbox" :aria-disabled="props.disabled">
-            <li
-                v-for="(option, index) in visibleOptions"
-                :key="optionKey(option, index)"
-                class="max-listbox-item"
-                :class="{ 'is-selected': isSelected(option), 'is-disabled': isDisabled(option) }"
-                role="option"
-                :aria-selected="isSelected(option)"
-                :aria-disabled="isDisabled(option)"
-                @click="selectOption(option)"
-            >
-                <slot name="option" :option="option" :selected="isSelected(option)" :index="index">
-                    <MaxIcon v-if="option.icon" :icon="option.icon" class="max-listbox-item-icon" />
-                    <div class="max-listbox-item-labels">
-                        <span class="max-listbox-item-label">{{ labelOf(option) }}</span>
-                        <span v-if="subLabelOf(option)" class="max-listbox-item-sublabel">{{ subLabelOf(option) }}</span>
-                    </div>
-                    <MaxBadgeComponent v-if="option.badge !== undefined && option.badge !== null" :label="String(option.badge)" :color="option.badgeColor" class="max-listbox-item-badge" />
-                </slot>
-            </li>
+        <div ref="listElem" class="max-listbox-list" @scroll="onListScroll">
+            <div v-if="isVirtual" class="max-listbox-spacer" :style="{ height: `${totalHeight}px` }" aria-hidden="true" />
 
-            <li v-if="visibleOptions.length === 0" class="max-listbox-empty">
-                <slot name="empty">{{ props.emptyMessage }}</slot>
-            </li>
-        </ul>
+            <ul
+                class="max-listbox-window"
+                role="listbox"
+                :aria-disabled="props.disabled"
+                :style="isVirtual ? { transform: `translateY(${offsetY}px)` } : undefined"
+            >
+                <li
+                    v-for="entry in (isVirtual ? visibleItems : plainItems)"
+                    :key="optionKey(entry.item, entry.index)"
+                    class="max-listbox-item"
+                    :class="{ 'is-selected': isSelected(entry.item), 'is-disabled': isDisabled(entry.item) }"
+                    role="option"
+                    :aria-selected="isSelected(entry.item)"
+                    :aria-disabled="isDisabled(entry.item)"
+                    :style="isVirtual ? { height: `${props.itemHeight}px` } : undefined"
+                    @click="selectOption(entry.item)"
+                >
+                    <slot name="option" :option="entry.item" :selected="isSelected(entry.item)" :index="entry.index">
+                        <MaxIcon v-if="entry.item.icon" :icon="entry.item.icon" class="max-listbox-item-icon" />
+                        <div class="max-listbox-item-labels">
+                            <span class="max-listbox-item-label">{{ labelOf(entry.item) }}</span>
+                            <span v-if="subLabelOf(entry.item)" class="max-listbox-item-sublabel">{{ subLabelOf(entry.item) }}</span>
+                        </div>
+                        <MaxBadgeComponent v-if="entry.item.badge !== undefined && entry.item.badge !== null" :label="String(entry.item.badge)" :color="entry.item.badgeColor" class="max-listbox-item-badge" />
+                    </slot>
+                </li>
+
+                <li v-if="visibleOptions.length === 0" class="max-listbox-empty">
+                    <slot name="empty">{{ props.emptyMessage }}</slot>
+                </li>
+            </ul>
+        </div>
 
         <div v-if="$slots.footer" class="max-listbox-footer">
             <slot name="footer" />
@@ -58,6 +68,7 @@
     import { ref, computed, onBeforeUnmount } from 'vue';
     import MaxIcon from './MaxIcon.vue';
     import MaxBadgeComponent from './MaxBadgeComponent.vue';
+    import { useVirtualList } from '../composables/useVirtualList';
 
     const props = withDefaults(
         defineProps<{
@@ -91,6 +102,12 @@
             filterPlaceholder?: string;
             /** Campos usados no filtro local; padrão: optionLabel + optionSubLabel */
             filterFields?: string[];
+            /** Força a virtualização; undefined = automático acima do threshold */
+            virtualScroll?: boolean;
+            /** Quantidade de itens a partir da qual a virtualização liga sozinha */
+            virtualScrollThreshold?: number;
+            /** Altura fixa de cada linha, em pixels (exigida pela virtualização) */
+            itemHeight?: number;
         }>(),
         {
             modelValue: null,
@@ -107,7 +124,10 @@
             height: undefined,
             filter: false,
             filterPlaceholder: 'Buscar...',
-            filterFields: undefined
+            filterFields: undefined,
+            virtualScroll: undefined,
+            virtualScrollThreshold: 500,
+            itemHeight: 44
         }
     );
 
@@ -175,6 +195,29 @@
 
         return [props.selectedOption, ...list];
     });
+
+    /** Altura assumida do viewport antes do primeiro scroll (e em ambiente sem layout). */
+    const DEFAULT_VIEWPORT_HEIGHT = 400;
+
+    const isVirtual = computed(() => {
+        if (props.virtualScroll !== undefined) return props.virtualScroll;
+        return visibleOptions.value.length > props.virtualScrollThreshold;
+    });
+
+    const { visibleItems, offsetY, totalHeight, setViewport } = useVirtualList(visibleOptions, {
+        itemHeight: computed(() => props.itemHeight),
+        enabled: isVirtual
+    });
+
+    /** Janela não virtualizada: todas as opções, no mesmo formato { item, index } da janela virtual. */
+    const plainItems = computed(() => visibleOptions.value.map((item, index) => ({ item, index })));
+
+    setViewport(0, DEFAULT_VIEWPORT_HEIGHT);
+
+    function onListScroll(event: Event) {
+        const target = event.target as HTMLElement;
+        setViewport(target.scrollTop, target.clientHeight || DEFAULT_VIEWPORT_HEIGHT);
+    }
 
     function valueOf(option: any): any {
         return option?.[props.optionValue];

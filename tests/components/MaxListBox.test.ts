@@ -225,3 +225,58 @@ describe('MaxListBox - filtro local', () => {
         expect(wrapper.text()).toContain('Externo');
     });
 });
+
+describe('MaxListBox - virtual scroll', () => {
+    beforeEach(() => {
+        setActivePinia(createPinia());
+    });
+
+    function manyOptions(n: number) {
+        return Array.from({ length: n }, (_, i) => ({ value: i, label: `Item ${i}` }));
+    }
+
+    it('renderiza todos os itens abaixo do threshold', () => {
+        const wrapper = mountListBox({ options: manyOptions(50) });
+        expect(wrapper.findAll('.max-listbox-item')).toHaveLength(50);
+    });
+
+    it('nao virtualiza automaticamente em 500 itens', () => {
+        const wrapper = mountListBox({ options: manyOptions(500) });
+        expect(wrapper.findAll('.max-listbox-item')).toHaveLength(500);
+    });
+
+    it('virtualiza automaticamente acima de 500 itens', () => {
+        const wrapper = mountListBox({ options: manyOptions(501) });
+        expect(wrapper.findAll('.max-listbox-item').length).toBeLessThan(501);
+    });
+
+    it('respeita virtualScrollThreshold customizado', () => {
+        const wrapper = mountListBox({ options: manyOptions(30), virtualScrollThreshold: 10 });
+        expect(wrapper.findAll('.max-listbox-item').length).toBeLessThan(30);
+    });
+
+    it('virtualiza quando virtualScroll e true, mesmo em lista pequena', () => {
+        const wrapper = mountListBox({ options: manyOptions(100), virtualScroll: true, itemHeight: 44 });
+        expect(wrapper.findAll('.max-listbox-item').length).toBeLessThan(100);
+    });
+
+    it('nao virtualiza quando virtualScroll e false, mesmo em lista grande', () => {
+        const wrapper = mountListBox({ options: manyOptions(600), virtualScroll: false });
+        expect(wrapper.findAll('.max-listbox-item')).toHaveLength(600);
+    });
+
+    it('renderiza o spacer com a altura total quando virtualizado', () => {
+        const wrapper = mountListBox({ options: manyOptions(1000), itemHeight: 44 });
+        const spacer = wrapper.find('.max-listbox-spacer');
+
+        expect(spacer.exists()).toBe(true);
+        expect(spacer.attributes('style')).toContain('44000px');
+    });
+
+    it('mantem a selecao funcionando com virtualizacao ativa', async () => {
+        const wrapper = mountListBox({ options: manyOptions(1000) });
+        await wrapper.findAll('.max-listbox-item')[0].trigger('click');
+
+        expect(wrapper.emitted('update:modelValue')?.[0]).toEqual([0]);
+    });
+});
