@@ -234,6 +234,14 @@ describe('MaxApp', () => {
             expect(login.allow_phone).toBe(false);
         });
 
+        it('repassa a logo até o menu lateral', () => {
+            loadUser();
+
+            const wrapper = mountApp({ props: { logo: '/get_file?file=logo.svg' } });
+
+            expect(wrapper.findComponent(MaxPageLayout).props('logo')).toBe('/get_file?file=logo.svg');
+        });
+
         it('repassa addItems ao layout', () => {
             loadUser();
             const addItems = [{ label: 'Novo Projeto', icon: 'mdi:plus', route: 'new_project' }];

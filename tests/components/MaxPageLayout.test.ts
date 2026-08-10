@@ -92,6 +92,12 @@ describe('MaxPageLayout', () => {
         expect(wrapper.findComponent(MaxBottomMenu).props('tabs')).toEqual(bottomTabs);
     });
 
+    it('repassa a logo ao menu lateral', () => {
+        const wrapper = mountLayout({ props: { logo: '/get_file?file=logo.svg' } });
+
+        expect(wrapper.findComponent(MaxSideMenu).props('logo')).toBe('/get_file?file=logo.svg');
+    });
+
     it('repassa sideVisible ao conteúdo', () => {
         const wrapper = mountLayout({ props: { sideVisible: true } });
 

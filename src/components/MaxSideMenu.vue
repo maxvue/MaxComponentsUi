@@ -2,7 +2,7 @@
     <div class="side-menu" v-bind="attrs">
         <div class="grid-logo-and-menu">
             <div v-if="system.type_device === 'desktop'" v-tooltip="system.version" class="space-logo" @click="clearSearch">
-                <MaxLogo fill flex no-padding />
+                <MaxLogo v-if="logoSrc" :src="logoSrc" fill flex no-padding />
             </div>
             <div class="menu">
                 <div v-if="items" class="grupo items">
@@ -18,6 +18,7 @@
 
 <script setup lang="ts">
     import { computed, useAttrs } from 'vue';
+    import { getRoute } from '@maxvue/max-use';
     import MaxLogo from './MaxLogo.vue';
     import MaxMenuVerticalItem from './MaxMenuVerticalItem.vue';
     import { useSystemStore } from '../stores/useSystem.Store';
@@ -25,9 +26,33 @@
     import { useListMenusStore } from '../stores/useListMenus.Store';
     import type { SideMenuItem } from '../types/app';
 
+    const props = defineProps<{
+        /**
+         * Logo exibida no topo do menu.
+         *
+         * Aceita uma URL (`/get_file?file=logo.svg`, `https://…`, `data:…`) ou o
+         * nome de uma rota, resolvido pelo `getRoute` do MaxUse. Quando omitida
+         * — ou quando a rota não resolve — nenhuma logo é renderizada.
+         */
+        logo?: string;
+    }>();
+
     const attrs = useAttrs();
     const menus = useListMenusStore();
     const system = useSystemStore();
+
+    /** Indica que o valor já é um caminho utilizável, e não um nome de rota. */
+    const isUrl = (value: string): boolean => /^(https?:\/\/|\/|data:|blob:)/.test(value);
+
+    /** Resolve a prop `logo` para a URL final da imagem. */
+    const logoSrc = computed<string | undefined>(() => {
+        const logo = props.logo?.trim();
+
+        if (!logo) return undefined;
+        if (isUrl(logo)) return logo;
+
+        return getRoute(logo) ?? undefined;
+    });
 
     /**
      * Separa os itens em dois grupos.

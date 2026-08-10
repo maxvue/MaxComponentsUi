@@ -16,10 +16,12 @@ vi.mock('vue-router', async (importOriginal) => ({
 
 // O useRefCachedApi dispara requisição real; aqui só interessa a ref devolvida.
 const menusRef = ref<any>(null);
+const getRoute = vi.fn<(name: string) => string | null>(() => null);
 
 vi.mock('@maxvue/max-use', async (importOriginal) => ({
     ...(await importOriginal<Record<string, any>>()),
-    useRefCachedApi: () => menusRef
+    useRefCachedApi: () => menusRef,
+    getRoute: (...args: [string]) => getRoute(...args)
 }));
 
 import MaxSideMenu from '../../src/components/MaxSideMenu.vue';
@@ -38,7 +40,12 @@ const mountWithPinia = (component: any, options: Record<string, any> = {}) => mo
     global: {
         ...(options.global ?? {}),
         plugins: [pinia],
-        stubs: { MaxLogo: { template: '<div class="max-logo-stub" />' }, ...(options.global?.stubs ?? {}) }
+        // O stub declara `src` para que os testes da prop `logo` possam
+        // inspecionar o valor que chega ao MaxLogo.
+        stubs: {
+            MaxLogo: { name: 'MaxLogo', props: ['src'], template: '<div class="max-logo-stub" />' },
+            ...(options.global?.stubs ?? {})
+        }
     }
 });
 
@@ -107,6 +114,56 @@ describe('MaxSideMenu', () => {
         const wrapper = mountWithPinia(MaxSideMenu);
 
         expect(wrapper.find('.space-logo').exists()).toBe(true);
+    });
+
+    describe('prop logo', () => {
+        beforeEach(() => {
+            menusRef.value = { side: [] };
+            getRoute.mockReset();
+            getRoute.mockReturnValue(null);
+        });
+
+        it('não renderiza logo quando a prop é omitida', () => {
+            const wrapper = mountWithPinia(MaxSideMenu);
+
+            expect(wrapper.find('.space-logo').exists()).toBe(true);
+            expect(wrapper.findComponent({ name: 'MaxLogo' }).exists()).toBe(false);
+        });
+
+        it.each([
+            ['/get_file?file=logo.svg'],
+            ['https://cdn.exemplo.com/logo.png'],
+            ['data:image/svg+xml;base64,abc']
+        ])('usa %s diretamente como src', (url) => {
+            const wrapper = mountWithPinia(MaxSideMenu, { props: { logo: url } });
+
+            expect(wrapper.findComponent({ name: 'MaxLogo' }).props('src')).toBe(url);
+            expect(getRoute).not.toHaveBeenCalled();
+        });
+
+        it('resolve um nome de rota pelo getRoute', () => {
+            getRoute.mockReturnValue('https://app.exemplo.com/logo');
+
+            const wrapper = mountWithPinia(MaxSideMenu, { props: { logo: 'assets.logo' } });
+
+            expect(getRoute).toHaveBeenCalledWith('assets.logo');
+            expect(wrapper.findComponent({ name: 'MaxLogo' }).props('src')).toBe('https://app.exemplo.com/logo');
+        });
+
+        it('não renderiza logo quando a rota não resolve', () => {
+            getRoute.mockReturnValue(null);
+
+            const wrapper = mountWithPinia(MaxSideMenu, { props: { logo: 'rota.inexistente' } });
+
+            expect(wrapper.findComponent({ name: 'MaxLogo' }).exists()).toBe(false);
+        });
+
+        it('ignora valor em branco', () => {
+            const wrapper = mountWithPinia(MaxSideMenu, { props: { logo: '   ' } });
+
+            expect(wrapper.findComponent({ name: 'MaxLogo' }).exists()).toBe(false);
+            expect(getRoute).not.toHaveBeenCalled();
+        });
     });
 
     it('limpa a busca ao clicar na logo', async () => {

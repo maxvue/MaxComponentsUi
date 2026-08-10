@@ -22,6 +22,7 @@
                     :add-items="props.addItems"
                     :bottom-tabs="props.bottomTabs"
                     :side-visible="props.sideVisible"
+                    :logo="props.logo"
                 >
                     <RouterView />
 
@@ -82,6 +83,12 @@
         bottomTabs?: BottomTab[];
         /** Exibe o painel lateral do conteúdo. */
         sideVisible?: boolean;
+        /**
+         * Logo do menu lateral. Aceita uma URL (`/get_file?file=logo.svg`,
+         * `https://…`) ou o nome de uma rota, resolvido pelo `getRoute`.
+         * Sem ela, o espaço fica vazio.
+         */
+        logo?: string;
     }>(), {
         allowUserName: true,
         allowEmail: true,

@@ -8,7 +8,7 @@
             </template>
         </MaxTopMenu>
 
-        <MaxSideMenu v-bind="attrs" />
+        <MaxSideMenu v-bind="attrs" :logo="props.logo" />
 
         <MaxSplitPanesContent v-bind="attrs" :side-visible="props.sideVisible">
             <slot></slot>
@@ -40,6 +40,8 @@
         bottomTabs?: BottomTab[];
         /** Exibe o painel lateral do conteúdo. */
         sideVisible?: boolean;
+        /** Logo do menu lateral: URL ou nome de rota. Sem ela, nada é exibido. */
+        logo?: string;
     }>();
 
     const attrs = useAttrs();
