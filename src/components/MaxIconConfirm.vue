@@ -7,17 +7,18 @@
     import { useTemplateRef } from 'vue';
     import { useElementBounding } from '@maxvue/max-use';
     import { useConfirmStore } from '../stores/useConfirm.Store';
+    import type { ConfirmProps } from '../types';
 
     const confirm_store = useConfirmStore();
 
-    const props = withDefaults(defineProps<{
+    const props = withDefaults(defineProps<ConfirmProps & {
         /** Nome do ícone (ex: 'mdi:home') */
         icon?: string;
         /** Alias para o nome do ícone */
         i?: string;
         /** link para abrir em nova aba */
         blank?: string;
-        /** Rotação do ícone em graus */
+        /** Rota para navegação ao clicar */
         route?: string;
         /** Query data */
         data?: any;
@@ -31,25 +32,10 @@
         size?: string | number;
         /** Alias para o tamanho */
         scale?: string | number;
-        /** Mensagem de confirmação */
-        message?: string;
-        /** Icone de mensagem de confirmação */
-        messageIcon?: string | null;
         /** Label do botão de sim */
         acceptLabel?: string;
         /** Icone do botão de sim */
         acceptIcon?: string;
-        /** Label do botão de não */
-        rejectProps?: {
-            label: string;
-            icon?: string;
-            action?: ((event?: any) => void) | undefined;
-        };
-        acceptProps?: {
-            label: string;
-            icon?: string;
-            action?: ((event?: any) => void) | undefined;
-        };
         /** Icone do botão de não */
         cancelIcon?: string;
         loading?: boolean;

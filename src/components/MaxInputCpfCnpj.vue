@@ -17,43 +17,18 @@
     import InputText from 'primevue/inputtext';
     import { vMaska } from 'maska/vue';
     import { useMirroredModel } from '../helpers/useMirroredModel';
+    import type { InputBaseProps } from '../types';
 
     const attrs: any = useAttrs();
 
     const props = withDefaults(
-        defineProps<{
+        defineProps<InputBaseProps & {
             /** Valor do documento (apenas números) */
             modelValue: string | null;
             /** Força a máscara e validação de CPF */
             cpf?: boolean;
             /** Força a máscara e validação de CNPJ */
             cnpj?: boolean;
-            /** Ícone opcional */
-            icon?: string | undefined;
-            /** Alias para o ícone */
-            i?: string | undefined;
-            /** Desabilita o campo */
-            disabled?: boolean | undefined;
-            /** Estilo FloatLabel */
-            float?: boolean | undefined;
-            /** Mensagem de feedback (alias) */
-            msg?: string | undefined;
-            /** Mensagem de feedback */
-            message?: string | undefined;
-            /** Ícone da mensagem de feedback */
-            iconMessage?: string | undefined;
-            /** Rótulo do campo */
-            label?: string | undefined;
-            /** Estado de conclusão/validação manual */
-            done?: boolean | undefined;
-            /** Mensagem ou estado de erro */
-            error?: string | boolean | undefined;
-            /** Valor para comparação (opcional) */
-            targetValue?: string;
-            /** Mensagem ou estado de atenção */
-            caution?: string | boolean | undefined;
-            /** Define se o campo é obrigatório */
-            required?: boolean;
         }>(),
         { modelValue: '', done: undefined, required: false, caution: undefined }
     );

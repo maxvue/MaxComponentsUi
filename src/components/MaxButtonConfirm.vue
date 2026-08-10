@@ -19,7 +19,7 @@
         i?: string;
         /** link para abrir em nova aba */
         blank?: string;
-        /** Rotação do ícone em graus */
+        /** Rota para navegação ao clicar */
         route?: string;
         /** Query data */
         data?: any;
