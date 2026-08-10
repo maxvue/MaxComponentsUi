@@ -13,7 +13,8 @@ export const MaxStyle = definePreset(Aura, {
             600: '#005F77',
             700: '#004860',
             800: '#003048',
-            900: '#001931'
+            900: '#001931',
+            950: '#00152A'
         },
         success: {
             50: '#E8FDF3',
@@ -25,7 +26,8 @@ export const MaxStyle = definePreset(Aura, {
             600: '#059669',
             700: '#047857',
             800: '#065F46',
-            900: '#064E3B'
+            900: '#064E3B',
+            950: '#054232'
         },
         info: {
             50: '#F0F9FF',
@@ -37,7 +39,8 @@ export const MaxStyle = definePreset(Aura, {
             600: '#0284C7',
             700: '#0369A1',
             800: '#075985',
-            900: '#0C4A6E'
+            900: '#0C4A6E',
+            950: '#0A3F5E'
         },
         warning: {
             50: '#FFFBEB',
@@ -49,7 +52,8 @@ export const MaxStyle = definePreset(Aura, {
             600: '#D97706',
             700: '#B45309',
             800: '#92400E',
-            900: '#78350F'
+            900: '#78350F',
+            950: '#662D0D'
         },
         danger: {
             50: '#FEF2F2',
@@ -61,7 +65,8 @@ export const MaxStyle = definePreset(Aura, {
             600: '#DC2626',
             700: '#B91C1C',
             800: '#991B1B',
-            900: '#7F1D1D'
+            900: '#7F1D1D',
+            950: '#6C1919'
         }
     }
 });
