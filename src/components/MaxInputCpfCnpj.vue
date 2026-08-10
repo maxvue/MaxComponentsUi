@@ -16,6 +16,7 @@
     import InputBase from './InputBase.vue';
     import InputText from 'primevue/inputtext';
     import { vMaska } from 'maska/vue';
+    import { useMirroredModel } from '../helpers/useMirroredModel';
 
     const attrs: any = useAttrs();
 
@@ -59,7 +60,21 @@
 
     const emit = defineEmits(['update:modelValue', 'complete']);
 
-    const temp_value = ref(props.modelValue ?? '');
+    // O modelValue e sempre normalizado para "so digitos" antes de emitir e
+    // ao receber um valor externo, entao a igualdade estrita (default) ja
+    // e o guard correto aqui — nao ha formatacao local a preservar. Usa
+    // `immediate: true` para preservar o comportamento corrigido na Etapa 6
+    // (achado 10): o watch de emissao sempre rodou desde o mount, garantindo
+    // que um `modelValue` inicial ja normalizado seja reemitido/consistente
+    // e que a logica de `complete` (abaixo) tambem avalie o valor inicial.
+    const temp_value = useMirroredModel(
+        // Getter preserva a reatividade a props.modelValue (que useMirroredModel
+        // le via `props.modelValue` internamente) e normaliza `null` para ''
+        // como o codigo anterior fazia com `props.modelValue ?? ''`.
+        { get modelValue() { return props.modelValue ?? ''; } },
+        emit as (event: 'update:modelValue', value: string) => void,
+        { transform: (value: string) => onlyNumbers(value), immediate: true }
+    );
 
     const type_mask: Ref = ref(null);
 
@@ -113,15 +128,11 @@
         return attrs_error_message ?? 'Documento inválido';
     });
 
-    // ATUALIZA O VALOR DO INPUT COM O VALOR DO MODEL E VICE-VERSA
-    watch( temp_value, () => {
+    // Emite 'complete' quando o documento atinge 11 (CPF) ou 14 (CNPJ)
+    // digitos e passa na validacao. A emissao de 'update:modelValue' em si
+    // fica a cargo do useMirroredModel acima.
+    watch(temp_value, () => {
         const only_numbers: string = onlyNumbers(temp_value.value);
-        emit('update:modelValue', only_numbers);
         if ((only_numbers.length === 11 || only_numbers.length === 14) && done.value) emit('complete', only_numbers);
-
     }, { immediate: true });
-
-    watch(() => props.modelValue,() => {
-        if (props.modelValue !== temp_value.value) temp_value.value = onlyNumbers(props.modelValue ?? '');
-    });
 </script>
