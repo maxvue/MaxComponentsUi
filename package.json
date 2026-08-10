@@ -48,6 +48,7 @@
         "@maxvue/max-pinia": "file:../MaxPinia",
         "@maxvue/max-use": "file:../MaxUse",
         "@primeuix/themes": "^2.0.3",
+        "@tanstack/vue-virtual": "^3.13.34",
         "@tiptap/extension-image": "^3.29.2",
         "@tiptap/extension-link": "^3.29.2",
         "@tiptap/extension-table": "^3.29.2",

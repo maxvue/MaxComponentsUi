@@ -159,6 +159,48 @@
     --max-inputtext-disabled-background: red !important;
 }
 
-.p-tooltip {
+.max-tooltip {
+    position: absolute;
     z-index: 99999 !important;
+    max-width: 260px;
+    padding: 0.35rem 0.65rem;
+    border-radius: 6px;
+    background: var(--background-900, #2b2b2b);
+    color: var(--background-0, #fff);
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    pointer-events: none;
+
+    .max-tooltip-text {
+        white-space: normal;
+        overflow-wrap: break-word;
+    }
+
+    .max-tooltip-arrow {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        background: inherit;
+        transform: rotate(45deg);
+    }
+
+    &.max-tooltip-top .max-tooltip-arrow {
+        bottom: -4px;
+        left: calc(50% - 4px);
+    }
+
+    &.max-tooltip-bottom .max-tooltip-arrow {
+        top: -4px;
+        left: calc(50% - 4px);
+    }
+
+    &.max-tooltip-left .max-tooltip-arrow {
+        right: -4px;
+        top: calc(50% - 4px);
+    }
+
+    &.max-tooltip-right .max-tooltip-arrow {
+        left: -4px;
+        top: calc(50% - 4px);
+    }
 }

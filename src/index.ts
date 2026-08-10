@@ -177,7 +177,7 @@ export { Toast } from './helpers/Toast';
 export { configureMaxApp, getMaxAppConfig, resetMaxAppConfig } from './helpers/maxAppConfig';
 
 
-import Tooltip from 'primevue/tooltip';
+import Tooltip from './directives/tooltip';
 
 
 /**

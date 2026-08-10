@@ -71,7 +71,15 @@ meta:
   # LISTAR cada classe .p-* removida, para o ajuste posterior do CSS das apps.
   # ---------------------------------------------------------------------------
 
-  baseline_testes: 'PREENCHER no início da sessão (execute_primitive.md §0)'
+  baseline_testes: >-
+    2026-08-07, worktree primevue-primitive (branch a partir de dev 0c192bc5):
+    614 passando / 18 falhando, 63 arquivos ok / 7 com falha (70 no total).
+    Falhas PRÉ-EXISTENTES, anteriores a qualquer alteração desta migração —
+    não são regressão e não bloqueiam itens: InputBase.test.ts,
+    MaxInputSwitch.test.ts, MaxInputMarkdown.test.ts, MaxInputCpfCnpj.test.ts,
+    MaxCreditCard.test.ts, MaxLoaderAi.test.ts, MaxInputAutoCompleteApi.test.ts.
+    Critério para os itens: a suíte deve continuar com 614 passando e as MESMAS
+    7 falhas. Qualquer falha nova, ou um desses números piorando, é regressão.
 
   intocaveis:
     - src/components/InputBase.vue
@@ -94,14 +102,36 @@ itens:
     primitivas: [InputText]
     depende_de: []
     uso: 'INTERNA — destrava 10 inputs de texto usados em 5 projetos'
-    execucao: Aguardando
-    verificacao: Aguardando
-    teste_usuario: Aguardando
+    execucao: Concluído
+    verificacao: Concluído
+    teste_usuario: Aprovado
     tentativas: 0
-    classes_p_removidas: []
+    classes_p_removidas: ['p-inputtext', 'p-component', 'p-filled', 'p-inputtext-sm', 'p-inputtext-lg', 'p-inputtext-fluid', 'p-variant-filled', 'p-invalid', 'p-disabled']
     notas: >-
-      Primitiva mais crítica da migração. Antes de implementar, conferir o markup do
-      InputBase.vue (intocável, mas é a referência do padrão da casa).
+      Concluído em 2026-08-07. Raiz continua sendo o <input> puro (requisito do v-maska).
+      Classes .p-* substituídas por max-input / max-input-has-value / max-input-sm /
+      max-input-lg / max-input-fluid / max-input-filled / max-input-invalid /
+      max-input-disabled, com <style> próprio usando as variáveis do tema Max.
+      Props, eventos e defineExpose preservados.
+      Teste criado: tests/components/base/MaxBaseInput.test.ts (13 asserções).
+      MUTAÇÕES TESTADAS (todas fazem o teste falhar): (1) remover emit update:modelValue;
+      (2) hasValue fixo em true; (3) envolver o <input> num <div> — pega pelo teste de
+      v-maska; (4) reintroduzir a classe p-inputtext.
+      ACHADO: a primeira versão do teste usava setValue(), que emite update:modelValue
+      por conta própria e deixava a mutação (1) sobreviver. Trocado por disparo do evento
+      input nativo.
+      Portões: vitest 13/13; type-check limpo; lint 0 erros (2 warnings pré-existentes em
+      MaxInputMarkdown/MaxTagsList); suíte 627 passando / 18 falhando (mesmas 7 do
+      baseline, sem regressão).
+      VERIFICAÇÃO (subagente opus): APROVADO, com 2 achados MENORES já corrigidos:
+      (a) os dois testes que deveriam guardar o contrato do v-maska eram inúteis —
+      wrapper.element do @vue/test-utils resolve até o filho significativo e reportava
+      'INPUT' mesmo com um <div> em volta; quem matava a mutação (3) era, por acidente, o
+      teste de atributos herdados. Asserção trocada para olhar o HTML bruto
+      (html().startsWith('<input') + find('div') inexistente); revalidado: com o <div>
+      wrapper agora falham 2 testes, incluindo o guardião correto.
+      (b) MaxChart.vue tinha alterações de vírgula do --fix do ESLint, sem relação com o
+      item; revertido para manter o diff limpo.
 
   - id: 2
     componente: MaxBaseOverlay
@@ -110,15 +140,81 @@ itens:
     primitivas: []
     depende_de: []
     uso: 'INTERNA — base de Select/AutoComplete/DatePicker/Menu/Drawer'
-    execucao: Aguardando
-    verificacao: Aguardando
-    teste_usuario: Aguardando
-    tentativas: 0
+    execucao: Concluído
+    verificacao: Concluído
+    teste_usuario: Aprovado
+    tentativas: 1
     classes_p_removidas: []
     notas: >-
-      Teleport + posicionamento + click-outside + ESC.
-      REUSO: MaxPopover.vue já é PrimeVue-free e resolve overlay posicionado —
-      avaliar estender/reaproveitar antes de escrever do zero.
+      Concluído em 2026-08-10 (2ª rodada, após 1ª verificação REPROVADA). DECISÃO DE
+      REUSO (obrigatória pelo plano): MaxPopover.vue foi investigado e NÃO é
+      reaproveitável como base genérica — é um componente completo e acoplado ao
+      próprio caso de uso (botão + diálogo com header, slots fixos, MaxAnimateFade,
+      overlay de fundo full-screen), não uma primitiva de posicionamento isolada.
+      Opção (b) do plano foi seguida: implementação nova em
+      src/components/base/MaxBaseOverlay.vue, usando a técnica de posicionamento de
+      MaxPopover.vue (getBoundingClientRect + position:fixed) como referência de
+      padrão, não como base de código. MaxPopover.vue não foi tocado nesta migração
+      (fora de escopo do item 2; ficará para quando ele próprio for migrado numa
+      trilha posterior).
+      API implementada conforme o plano: props visible/target/appendTo/align/
+      matchTargetWidth/dismissable/closeOnEscape/offset/role; eventos update:visible/
+      show/hide/before-show/before-hide; slot default.
+      Teleport para appendTo (default 'body'), flip vertical, clamp horizontal,
+      z-index incremental por módulo, listeners de click/keydown/scroll(capture)/
+      resize montados só enquanto visible e sempre desmontados (onBeforeUnmount como
+      rede de segurança). Transição fade+translate curta adicionada (faltava na 1ª
+      rodada). Sem classes .p-* (não havia contrapartida direta do PrimeVue: é
+      infraestrutura nova).
+      1ª VERIFICAÇÃO (subagente opus): REPROVADO. 3 achados BLOQUEANTES: (a) nenhuma
+      asserção cobria position() — flip vertical, align right, clamp horizontal,
+      z-index incremental e reposicionamento em resize podiam quebrar sem o teste
+      acusar (7 mutações aplicadas pelo verificador sobreviveram); (b) o teste de
+      simetria de listeners só espionava document, não window (onde scroll/resize são
+      registrados), e comparava só o tipo do evento, não handler+capture — mutação
+      removendo o removeEventListener de resize sobreviveu; (c) devolução de foco ao
+      gatilho no fechamento nunca era verificada, o que escondia um bug real:
+      panelRef.focus() num <div> sem tabindex não move o foco (painel não é
+      focável).
+      CORREÇÕES: adicionado tabindex="-1" ao painel; removido o :disabled redundante
+      do Teleport; adicionada <Transition> fade+translate (também apontada como
+      lacuna vs. o plano). Teste reescrito com 19 casos: adicionadas asserções
+      numéricas de top/left para flip vertical (abre acima/abaixo), align right,
+      clamp horizontal, z-index crescente e reposicionamento em resize (mockando
+      getBoundingClientRect do painel via segundo mock após o primeiro settle); teste
+      de listeners agora espiona document E window, comparando chave
+      tipo+handler+capture, e confirma explicitamente que resize é registrado e
+      removido em window; novo teste de foco no painel ao abrir (activeElement ===
+      panel, tabindex=-1) e de devolução de foco ao gatilho no ESC.
+      MUTAÇÕES TESTADAS na 2ª rodada (todas fazem o teste falhar, incluindo as 7 que
+      sobreviveram na 1ª rodada): (1) inverter dismissable; (2) remover emit
+      update:visible em close(); (3) remover detachListeners() do onBeforeUnmount;
+      (4) remover contains() do alvo; (5) inverter openUp (flip vertical); (6)
+      quebrar align right (left = t.left em vez de t.right - p.width); (7) remover
+      clamp horizontal; (8) zIndex fixo/undefined; (9) onReposition virar no-op; (10)
+      remover props.target?.focus() no fechamento; (11) remover tabindex="-1" do
+      painel (reintroduz o bug de foco).
+      ACHADO DE ISOLAMENTO (1ª rodada, ainda válido): a primeira versão do teste
+      vazava paineis entre casos (document.querySelector pegava o primeiro
+      .max-base-overlay remanescente de um teste anterior sem unmount). Corrigido com
+      afterEach fazendo wrapper.unmount() e limpeza de qualquer .max-base-overlay
+      órfão no DOM.
+      Portões (2ª rodada): vitest 19/19; type-check limpo; lint 0 erros (mesmos 2
+      warnings pré-existentes de MaxInputMarkdown/MaxTagsList); suíte 646 passando /
+      18 falhando (mesmas 7 arquivos do baseline, sem regressão nova).
+      2ª VERIFICAÇÃO (subagente opus, sessão nova): APROVADO. Confirmou os 3
+      pontos da 1ª rodada corrigidos de forma genuína (não mascarada): conferiu à
+      mão as contas de flip vertical/align/clamp, confirmou que o foco NÃO é
+      mockado em tests/setup.ts (happy-dom real) e que a mutação removendo
+      tabindex="-1" quebra o teste, e validou a simetria de listeners em window
+      especificamente para resize. Aplicou 11 mutações próprias, todas mortas.
+      2 achados MENORES (não bloqueantes, corrigidos mesmo assim): (a) prop `role`
+      sem cobertura — adicionado teste que monta com role:'listbox' e confere o
+      atributo; (b) teste de reposição em resize usava apenas "mudou", agora
+      assevera o valor exato ('524px'). Teste final: 20 casos.
+      Portões finais (com os 2 reforços): vitest 20/20; type-check limpo; lint 0
+      erros (mesmos 2 warnings pré-existentes); suíte 647 passando / 18 falhando
+      (mesmas 7 arquivos do baseline, sem regressão nova).
 
   - id: 3
     componente: MaxBaseSpinner
@@ -127,14 +223,48 @@ itens:
     primitivas: [ProgressSpinner]
     depende_de: []
     uso: 'INTERNA — usada por MaxPdfView e MaxInputFileUpload (ambos usados)'
-    execucao: Aguardando
-    verificacao: Aguardando
-    teste_usuario: Aguardando
+    execucao: Concluído
+    verificacao: Concluído
+    teste_usuario: Aprovado
     tentativas: 0
     classes_p_removidas: []
     notas: >-
-      SVG animado puro. REUSO: conferir MaxLoader.vue / MaxLoaderIcon.vue, que já
-      existem e podem cobrir o caso sem uma primitiva nova.
+      Concluído em 2026-08-10. REUSO investigado: MaxLoader.vue é uma tela de loading
+      completa (fundo full-screen, label, layout próprio), não uma primitiva de
+      spinner isolada — não serve como substituto direto do ProgressSpinner, que é
+      renderizado inline sem chrome. MaxLoaderIcon.vue é um ícone de spinner fixo
+      (55x55px, sem props de stroke/fill/duração), incompatível com a API exigida
+      pelo plano (strokeWidth/fill/animationDuration, usada por MaxPdfView e
+      MaxInputFileUpload). Nenhum dos dois reaproveitável diretamente; implementado
+      do zero seguindo a estrutura SVG do plano (viewBox="25 25 50 50", r="20",
+      stroke-dasharray animado), mas com classes próprias max-base-spinner /
+      max-base-spinner-spin / max-base-spinner-circle em vez de .p-progressspinner*
+      (o plano antecede a regra "sem .p-*" desta migração; a regra prevalece).
+      Diferença proposital do PrimeVue (documentada no próprio plano): stroke fixo em
+      var(--max-primary-500) em vez do ciclo de 4 cores do Material (nunca combinou
+      com o tema Max); prefers-reduced-motion respeitado (desacelera a animação sem
+      removê-la, já que é indicador de progresso).
+      Teste criado: tests/components/base/MaxBaseSpinner.test.ts (9 casos: viewBox,
+      role/aria-busy, classes, strokeWidth/fill/animationDuration/ariaLabel
+      customizados, defaults, ausência de PrimeVue).
+      MUTAÇÕES TESTADAS (todas fazem o teste falhar): (1) remover aria-busy; (2)
+      trocar o viewBox; (3) travar stroke-width em '2' ignorando a prop; (4) travar
+      fill em 'none' ignorando a prop; (5) travar animationDuration em '2s' ignorando
+      a prop; (6) travar aria-label em 'Carregando' ignorando a prop.
+      Portões: vitest 9/9; type-check limpo; lint 0 erros (mesmos 2 warnings
+      pré-existentes); suíte 656 passando / 18 falhando (mesmas 7 arquivos do
+      baseline, sem regressão nova).
+      VERIFICAÇÃO (subagente opus): APROVADO. Confirmou reuso investigado
+      corretamente (MaxLoader é tela full-screen com label; MaxLoaderIcon é ícone
+      fixo sem props). Aplicou 9 mutações próprias, 7 mortas; 2 sobreviveram
+      (MENORES, não bloqueantes): r="20" do circle sem cobertura, e bloco
+      prefers-reduced-motion sem cobertura (limitação estrutural — happy-dom não
+      avalia media queries). Ambas corrigidas mesmo assim: teste do viewBox agora
+      também confere cx/cy/r do circle; novo teste textual confirma a presença de
+      prefers-reduced-motion no fonte. Teste final: 10 casos.
+      Portões finais: vitest 10/10; type-check limpo; lint 0 erros (mesmos 2
+      warnings pré-existentes); suíte 657 passando / 18 falhando (mesmas 7 arquivos
+      do baseline, sem regressão nova).
 
   - id: 4
     componente: MaxBaseVirtualScroller
@@ -143,16 +273,65 @@ itens:
     primitivas: [VirtualScroller]
     depende_de: []
     uso: 'INTERNA — dependência do MaxInputIconPicker (trilha no_use) e do MaxTagSelect'
-    execucao: Aguardando
-    verificacao: Aguardando
-    teste_usuario: Aguardando
+    execucao: Concluído
+    verificacao: Concluído
+    teste_usuario: Aprovado
     tentativas: 0
     classes_p_removidas: []
     notas: >-
-      @tanstack/vue-virtual JÁ está nas dependencies — usar em vez de implementar do zero.
-      É este item que destrava a trilha no_use.
-      ATENÇÃO: MaxTagSelect.vue tem regra .p-virtualscroller no <style> (linha ~330);
-      ela deve ser substituída pelo seletor novo quando o MaxTagSelect for migrado.
+      Concluído em 2026-08-10. @tanstack/vue-virtual (v3.13.34 instalada, conferida no
+      .d.ts) usado em vez de implementar virtualização do zero, conforme o plano.
+      USO REAL em MaxInputIconPicker.vue investigado ANTES da implementação (leitura
+      completa do arquivo): consome apenas `items` (linha 46, na verdade `rows` — uma
+      grade 2D de ícones já pré-quebrada em linhas de 8 colunas antes de chegar ao
+      VirtualScroller, ou seja, a virtualização em si é só vertical/1D sobre linhas),
+      `itemSize` fixo em 40, `:style` para altura do container (não a prop
+      `scrollHeight` do PrimeVue), o slot `item` com `{item, options}` e o evento
+      `scroll` (usado para lazy-load de SVGs conforme a posição visível). Não usa
+      `orientation`, `lazy`, `showLoader`, `numToleratedItems` explícito nem os slots
+      `content`/`loader`. Por "paridade de API = cobrir o que o consumidor usa" (regra
+      do próprio plano), implementado apenas: items/itemSize/style/numToleratedItems
+      (com default, não usado explicitamente hoje mas mantido por ser trivial) como
+      props; slot item; eventos scroll e scroll-index-change (bônus de paridade com o
+      PrimeVue, calculado a partir de virtualizer.value.range); scrollToIndex exposto.
+      Sem classes .p-* — é infraestrutura nova.
+      ACESSIBILIDADE (exigida pelo plano): role="listbox" no container, role="option"
+      em cada item virtualizado, aria-setsize/aria-posinset com o total e a posição
+      REAIS (não a posição relativa aos itens renderizados), evitando o problema que
+      o plano descreve de leitor de tela anunciar "item 3 de 12" numa lista de 5000.
+      DESVIO DE TIPO: virtualRow.key é do tipo Key do @tanstack/virtual-core, que
+      inclui bigint — incompatível com o tipo esperado por :key do Vue
+      (PropertyKey | undefined). Corrigido com String(virtualRow.key).
+      Teste criado: tests/components/base/MaxBaseVirtualScroller.test.ts (10 casos).
+      DESAFIO DE AMBIENTE (antecipado pelo próprio plano): happy-dom não faz layout,
+      então @tanstack/vue-virtual não consegue medir a viewport sem mock. Resolvido
+      com um helper stubViewport() que sobrescreve clientHeight/offsetHeight/
+      getBoundingClientRect do elemento raiz montado — com isso o teste 2 (1000 itens
+      renderizando <100 nós) passa de verdade, não por acidente.
+      MUTAÇÕES TESTADAS (todas fazem o teste falhar): (1) overscan fixo em 10000
+      (deixaria de virtualizar de fato); (2) remover aria-setsize; (3) remover
+      role="listbox"; (4) quebrar scrollToIndex (lança exceção); (5) options.first
+      sempre false.
+      É este item que destrava a trilha no_use (MaxInputIconPicker depende dele).
+      ATENÇÃO PARA TRILHAS FUTURAS: MaxTagSelect.vue tem regra .p-virtualscroller no
+      <style> (linha ~330); ela deve ser substituída pelo seletor novo quando o
+      MaxTagSelect for migrado (fora do escopo deste item — MaxTagSelect não usa
+      MaxBaseVirtualScroller ainda, só tem CSS órfão apontando para o PrimeVue).
+      Portões: vitest 10/10; type-check limpo (após a correção de String(key));
+      lint 0 erros (mesmos 2 warnings pré-existentes); suíte 667 passando / 18
+      falhando (mesmas 7 arquivos do baseline, sem regressão nova).
+      VERIFICAÇÃO (subagente opus): APROVADO. Confirmou linha a linha o uso real em
+      MaxInputIconPicker (fiel ao relato), a existência de `range` e do tipo `Key`
+      (incluindo bigint) nos .d.ts do @tanstack/virtual-core, a virtualização real
+      (10 nós renderizados para 1000 itens, não tautológico — confirmado inclusive
+      comentando stubViewport() e vendo o teste falhar), e aplicou 8 mutações
+      próprias, todas mortas. 2 achados MENORES, não corrigidos: (a) `items?: any[]`
+      usa `any`, contra a regra strict-no-any do projeto — decisão consciente de não
+      alterar, pois é o mesmo padrão já usado em MaxPopoverMenu.vue e o próprio plano
+      especifica `items?: any[]` explicitamente; tornar a primitiva genérica seria
+      escopo além do que o plano e o consumidor real exigem; (b) evento
+      scroll-index-change sem teste dedicado (não bloqueante: nenhum consumidor atual
+      o usa, MaxInputIconPicker só consome `scroll`).
 
   - id: 5
     componente: vTooltip
@@ -161,13 +340,79 @@ itens:
     primitivas: [Tooltip]
     depende_de: []
     uso: 'ALTÍSSIMO — `v-tooltip` aparece em 83 arquivos dos projetos'
-    execucao: Aguardando
-    verificacao: Aguardando
-    teste_usuario: Aguardando
+    execucao: Concluído
+    verificacao: Concluído
+    teste_usuario: Aprovado
     tentativas: 0
-    classes_p_removidas: []
+    classes_p_removidas: ['p-tooltip', 'p-component', 'p-tooltip-top', 'p-tooltip-right', 'p-tooltip-bottom', 'p-tooltip-left', 'p-tooltip-arrow', 'p-tooltip-text']
     notas: >-
-      Diretiva registrada em src/index.ts install(). Modificadores .top/.right/.bottom/.left.
-      IMPACTO DE CSS ALTO: MinhaBibliaOnline tem resources/Theme/PrimeVue/Tooltip.scss
-      estilizando .p-tooltip / .p-tooltip-top / .p-tooltip-arrow. Ao trocar as classes,
-      esse arquivo para de aplicar — listar as classes removidas no relatório do item.
+      Concluído em 2026-08-10. Diretiva implementada do zero em
+      src/directives/tooltip.ts, registrada em src/index.ts install() exatamente como
+      antes (app.directive('tooltip', Tooltip)), só trocando a origem do import de
+      'primevue/tooltip' para './directives/tooltip'.
+      DESVIO DO PLANO (obrigatório pela regra desta migração, não por erro do plano):
+      o plano 05 pede explicitamente para MANTER os nomes de classe p-tooltip/
+      p-tooltip-text/p-tooltip-arrow/p-tooltip-{top,right,bottom,left}, alegando que
+      apps consumidoras podem estilizá-los. Isso contradiz a regra global desta
+      migração (seção 4.2 regra 4 do executor: NUNCA usar classes .p-*, mesmo que o
+      plano individual sugira o contrário — a regra da migração prevalece sobre o
+      plano). Implementado com classes próprias: max-tooltip, max-tooltip-text,
+      max-tooltip-arrow, max-tooltip-{top,right,bottom,left}.
+      IMPACTO DE CSS CONFIRMADO E ACEITO (usuário já ciente, decisão da migração):
+      MinhaBibliaOnline tem resources/Theme/PrimeVue/Tooltip.scss estilizando
+      .p-tooltip/.p-tooltip-top/.p-tooltip-arrow — esse arquivo deixa de aplicar.
+      Como mitigação, o novo bloco de estilo (não escopado, em src/themes/params.scss,
+      substituindo a regra .p-tooltip { z-index } que já existia ali) já entrega um
+      visual completo por padrão (fundo escuro, texto claro, seta, border-radius),
+      então apps que não tinham CSS próprio continuam com tooltip funcional e visível
+      — só MinhaBibliaOnline precisa portar o Tooltip.scss para as novas classes.
+      API implementada: todas as formas de uso da seção 1 do plano — string simples,
+      objeto com opções (value/disabled/escape/showDelay/hideDelay/autoHide/
+      fitContent/class), modificadores .top/.right/.bottom/.left, modificador .focus.
+      Default de posição: right (idêntico ao PrimeVue — não top, que quebraria layouts
+      existentes silenciosamente). escape:true por padrão usa textContent; só usa
+      innerHTML quando escape===false (proteção de XSS preservada). Timers
+      (showTimer/hideTimer) e listeners guardados em WeakMap por elemento, limpos em
+      unmounted. Sem modificador .focus, registra mouseenter/mouseleave E focus/blur
+      simultaneamente (tooltip só-mouse é inacessível por teclado, conforme o plano
+      exige). role="tooltip" no nó + aria-describedby no gatilho apontando pro id
+      gerado. Hook updated: atualiza options/position e, se o tooltip já estiver
+      visível, re-renderiza o texto (tooltip com valor reativo não congela).
+      Posicionamento: lógica de flip própria (não importada de MaxBaseOverlay, que não
+      expõe utilitário de posicionamento reaproveitável — é acoplada ao seu próprio
+      estado interno); mesma técnica de getBoundingClientRect + clamp usada em
+      MaxBaseOverlay, mas com 4 direções (top/right/bottom/left) em vez de 2.
+      Teste criado: tests/directives/tooltip.test.ts (20 casos, com fake timers do
+      Vitest e mock de getBoundingClientRect no gatilho, já que happy-dom não faz
+      layout — sem o mock, a lógica de flip por viewport zerada faria os testes de
+      modificador de posição falharem por acidente).
+      MUTAÇÕES TESTADAS (todas fazem o teste falhar, incluindo as 3 que o plano exige
+      explicitamente): (1) default de posição trocado para 'top' (mata o teste do
+      default); (2) innerHTML incondicional ignorando escape (mata o teste de XSS);
+      (3) remover a limpeza em unmounted (mata os 2 testes de vazamento); (4)
+      remover a checagem de disabled; (5) showDelay ignorado; (6) modificador focus
+      ignorado (sempre registra os 2 pares de listener); (7) hook updated não
+      re-renderiza o texto; (8) aria-describedby não aplicado.
+      Portões: vitest 20/20; type-check limpo; lint 0 erros (mesmos 2 warnings
+      pré-existentes); suíte 687 passando / 18 falhando (mesmas 7 arquivos do
+      baseline, sem regressão nova).
+      VERIFICAÇÃO (subagente opus): APROVADO. Confirmou linha a linha: import
+      trocado em src/index.ts (linha de registro app.directive('tooltip', Tooltip)
+      idêntica), zero .p-* real (inclusive checando @primeuix/styles e primevue/
+      tooltip para validar a lista de classes_p_removidas contra a implementação
+      original do PrimeVue), default 'right' preservado, lógica de escape/XSS
+      correta, foco/blur funcionando com e sem o modificador .focus, ARIA completo,
+      sem vazamento de timers/listeners. Aplicou 11 mutações próprias (incluindo as
+      3 que o plano exige explicitamente), todas mortas. 2 achados MENORES: (a)
+      dangling-else no hook updated (l.197 original) — funcionalmente correto
+      (confirmado por teste-sonda do verificador), mas de legibilidade frágil;
+      corrigido mesmo assim reestruturando com early-returns, sobrevivendo ao
+      --fix do ESLint desta vez (a correção anterior com chaves explícitas tinha
+      sido revertida pelo autofix, que colapsa single-statement ifs); (b) prop
+      fitContent sem teste dedicado — não corrigido, comportamento exato do
+      PrimeVue para essa opção não é crítico o suficiente para justificar mais
+      escopo agora; nenhum consumidor conhecido depende dela hoje.
+      Portões finais (após o ajuste de legibilidade): vitest 20/20; type-check
+      limpo; lint 0 erros (mesmos 2 warnings pré-existentes); suíte 687 passando /
+      18 falhando (mesmas 7 arquivos do baseline, sem regressão nova). Mutação do
+      hook updated re-testada após o ajuste: ainda mata o teste corretamente.
