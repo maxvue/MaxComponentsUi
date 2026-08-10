@@ -79,6 +79,14 @@ describe('MaxListBox - renderizacao e selecao', () => {
         expect(wrapper.text()).toContain('Nada aqui');
     });
 
+    it('nao exibe emptyMessage enquanto loading externo esta ativo em modo local', () => {
+        const wrapper = mountListBox({ options: [], loading: true, emptyMessage: 'Nada aqui' });
+
+        expect(wrapper.find('.max-listbox-loader').exists()).toBe(true);
+        expect(wrapper.find('.max-listbox-empty').exists()).toBe(false);
+        expect(wrapper.text()).not.toContain('Nada aqui');
+    });
+
     it('nao emite quando o painel esta disabled', async () => {
         const wrapper = mountListBox({ disabled: true });
         await wrapper.findAll('.max-listbox-item')[0].trigger('click');
@@ -224,6 +232,19 @@ describe('MaxListBox - filtro local', () => {
 
         expect(wrapper.text()).toContain('Externo');
     });
+
+    it('filtra a lista renderizada imediatamente, antes do debounce de 300ms', async () => {
+        const wrapper = mountListBox({ filter: true });
+        await wrapper.find('input').setValue('alf');
+
+        // Sem esperar o debounce: a lista local ja deve ter reagido a cada tecla.
+        const items = wrapper.findAll('.max-listbox-item');
+        expect(items).toHaveLength(1);
+        expect(items[0].text()).toContain('Alfa');
+
+        // O evento filter, por outro lado, ainda nao foi emitido nesse momento.
+        expect(wrapper.emitted('filter')).toBeFalsy();
+    });
 });
 
 describe('MaxListBox - virtual scroll', () => {
@@ -278,6 +299,29 @@ describe('MaxListBox - virtual scroll', () => {
         await wrapper.findAll('.max-listbox-item')[0].trigger('click');
 
         expect(wrapper.emitted('update:modelValue')?.[0]).toEqual([0]);
+    });
+
+    it('loader/erro/vazio nao ficam dentro de .max-listbox-window em modo virtual', async () => {
+        const loadOptions = vi.fn().mockImplementation(() => new Promise(() => {}));
+        const wrapper = mountListBox({ options: undefined, loadOptions, virtualScroll: true });
+        await wrapper.vm.$nextTick();
+
+        const windowEl = wrapper.find('.max-listbox-window');
+        expect(windowEl.find('.max-listbox-loader').exists()).toBe(false);
+
+        // Deve existir como irmao da window, dentro de .max-listbox-list.
+        const loader = wrapper.find('.max-listbox-list > .max-listbox-loader');
+        expect(loader.exists()).toBe(true);
+    });
+
+    it('respeita itemHeight customizado em modo virtual (altura da linha e do spacer)', () => {
+        const wrapper = mountListBox({ options: manyOptions(1000), itemHeight: 32 });
+
+        const spacer = wrapper.find('.max-listbox-spacer');
+        expect(spacer.attributes('style')).toContain('32000px');
+
+        const firstItem = wrapper.findAll('.max-listbox-item')[0];
+        expect(firstItem.attributes('style')).toContain('height: 32px');
     });
 });
 
@@ -400,6 +444,39 @@ describe('MaxListBox - modo API', () => {
         await wrapper.vm.$nextTick();
 
         expect(wrapper.find('.max-listbox-loader').exists()).toBe(true);
+    });
+
+    it('passa a buscar via loadOptions quando a prop e definida apos o mount', async () => {
+        const loadOptions = vi.fn().mockResolvedValue({ items: page(1), hasMore: false });
+        const wrapper = mountListBox({ options: OPTIONS, loadOptions: undefined });
+        await flush();
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.text()).toContain('Alfa');
+        expect(loadOptions).not.toHaveBeenCalled();
+
+        await wrapper.setProps({ loadOptions });
+        await flush();
+        await wrapper.vm.$nextTick();
+
+        expect(loadOptions).toHaveBeenCalledWith({ page: 1, search: '', pageSize: 50 });
+        expect(wrapper.text()).toContain('P1I0');
+        expect(wrapper.text()).not.toContain('Alfa');
+    });
+
+    it('volta a exibir as options locais quando loadOptions e removida apos o mount', async () => {
+        const loadOptions = vi.fn().mockResolvedValue({ items: page(1), hasMore: false });
+        const wrapper = mountListBox({ options: OPTIONS, loadOptions });
+        await flush();
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.text()).toContain('P1I0');
+
+        await wrapper.setProps({ loadOptions: undefined });
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.text()).toContain('Alfa');
+        expect(wrapper.text()).not.toContain('P1I0');
     });
 });
 
@@ -591,6 +668,29 @@ describe('MaxListBox - preenchimento automatico do painel', () => {
         await wrapper.vm.$nextTick();
 
         expect(loadOptions).toHaveBeenCalledTimes(1);
+    });
+
+    it('interrompe o auto-preenchimento em MAX_AUTO_FILL_PAGES quando o servidor sempre retorna paginas vazias com hasMore true', async () => {
+        // Painel "curto" (nunca preenche) + servidor que nunca esvazia hasMore:
+        // sem o teto de MAX_AUTO_FILL_PAGES isso seria um loop infinito de fetchPage.
+        const loadOptions = vi.fn().mockResolvedValue({ items: [], hasMore: true });
+
+        const wrapper = mountListBox({ options: undefined, loadOptions });
+        markAsShort(wrapper);
+
+        // Esvazia a cadeia de fetch -> fillViewportIfNeeded -> fetch ate estabilizar.
+        for (let i = 0; i < 25; i++) {
+            await flush();
+            await wrapper.vm.$nextTick();
+        }
+
+        // 1 busca inicial (mount) + 20 auto-preenchimentos (MAX_AUTO_FILL_PAGES) = 21.
+        expect(loadOptions).toHaveBeenCalledTimes(21);
+
+        // Mais ciclos nao devem gerar chamadas extras: o teto realmente contem o loop.
+        await flush();
+        await wrapper.vm.$nextTick();
+        expect(loadOptions).toHaveBeenCalledTimes(21);
     });
 });
 

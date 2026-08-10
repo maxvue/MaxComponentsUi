@@ -14,7 +14,10 @@ export type ListBoxOption = {
     icon?: string;
     /** Texto do badge exibido à direita */
     badge?: string | number;
-    /** Cor do badge (variável do tema ou nome de cor aceito pelo MaxBadgeComponent) */
+    /** Cor do badge. O valor é repassado verbatim como `background` do
+     * MaxBadgeComponent (que aplica direto como cor CSS) — portanto precisa ser
+     * um valor CSS válido, ex.: 'var(--blue-600)'. Um token de tema puro como
+     * 'blue-600' NÃO funciona. */
     badgeColor?: string;
     /** Item não selecionável (campo definido por optionDisabled) */
     disabled?: boolean;

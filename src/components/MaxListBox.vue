@@ -36,7 +36,7 @@
                 :style="isVirtual ? { transform: `translateY(${offsetY}px)` } : undefined"
             >
                 <li
-                    v-for="entry in (isVirtual ? visibleItems : plainItems)"
+                    v-for="entry in visibleItems"
                     :id="itemId(entry.index)"
                     :key="optionKey(entry.item, entry.index)"
                     class="max-listbox-item"
@@ -56,20 +56,25 @@
                         <MaxBadgeComponent v-if="entry.item.badge !== undefined && entry.item.badge !== null" :label="String(entry.item.badge)" :background="entry.item.badgeColor" class="max-listbox-item-badge" />
                     </slot>
                 </li>
-
-                <li v-if="isLoading || (isApiMode && hasMore && visibleOptions.length > 0)" class="max-listbox-loader" role="presentation">
-                    <slot name="loader">Carregando...</slot>
-                </li>
-
-                <li v-if="loadError" class="max-listbox-error" role="presentation">
-                    <span>Erro ao carregar</span>
-                    <button type="button" class="max-listbox-retry" @click="retry">Tentar novamente</button>
-                </li>
-
-                <li v-if="visibleOptions.length === 0 && !isInitialLoading && !loadError" class="max-listbox-empty" role="presentation">
-                    <slot name="empty">{{ props.emptyMessage }}</slot>
-                </li>
             </ul>
+
+            <!-- Loader/erro/vazio ficam fora de .max-listbox-window de propósito: em modo
+                 virtual a window flutua (position: absolute) sobre a janela renderizada, então
+                 uma <li> ali dentro pintaria logo após o último item da janela atual — no meio
+                 do viewport, não no fim real da lista. Como siblings da window (e do spacer),
+                 eles ficam em fluxo normal no fim de .max-listbox-list em ambos os modos. -->
+            <div v-if="isLoading || (isApiMode && hasMore && visibleOptions.length > 0)" class="max-listbox-loader">
+                <slot name="loader">Carregando...</slot>
+            </div>
+
+            <div v-if="loadError" class="max-listbox-error">
+                <span>Erro ao carregar</span>
+                <button type="button" class="max-listbox-retry" @click="retry">Tentar novamente</button>
+            </div>
+
+            <div v-if="visibleOptions.length === 0 && !isInitialLoading && !loadError" class="max-listbox-empty">
+                <slot name="empty">{{ props.emptyMessage }}</slot>
+            </div>
         </div>
 
         <div v-if="$slots.footer" class="max-listbox-footer">
@@ -94,7 +99,12 @@
         defineProps<{
             /** Valor selecionado; null quando nada está selecionado */
             modelValue?: any;
-            /** Objeto já resolvido pela app, exibido enquanto o item real não foi carregado */
+            /** Objeto já resolvido pela app, exibido enquanto o item real não foi
+             * carregado. Quando há um termo de busca ativo, o filtro tem precedência:
+             * um selectedOption que não casa com o termo não é fixado no topo da lista.
+             * Em modo API a checagem é feita client-side contra optionLabel/
+             * optionSubLabel — um item que o servidor encontrou por outro campo (ex.:
+             * um número de documento) não será fixado enquanto o filtro estiver ativo. */
             selectedOption?: any;
             /** Lista de opções local */
             options?: any[];
@@ -116,7 +126,10 @@
             title?: string;
             /** Altura do painel (ex.: '400px'); padrão 100% do container */
             height?: string;
-            /** Exibe o campo de busca */
+            /** Exibe o campo de busca. Nota: a filtragem local atualiza a lista
+             * renderizada a cada tecla digitada, sem debounce — é a melhor UX para
+             * uma lista já em memória. O evento `filter` e a busca em modo API
+             * (loadOptions) continuam com debounce de 300ms. */
             filter?: boolean;
             /** Placeholder do campo de busca */
             filterPlaceholder?: string;
@@ -219,7 +232,11 @@
     const MAX_AUTO_FILL_PAGES = 20;
 
     const isLoading = computed(() => props.loading || isLoadingPage.value);
-    const isInitialLoading = computed(() => isLoadingPage.value && apiItems.value.length === 0);
+    // Considera tanto o loading interno (busca de página em modo API) quanto o
+    // `loading` externo controlado pela app (ex.: modo local com fetch no pai):
+    // em ambos os casos, se ainda não há nada em visibleOptions para mostrar,
+    // é carregamento inicial — e a linha de "vazio" não deve aparecer junto.
+    const isInitialLoading = computed(() => isLoading.value && visibleOptions.value.length === 0);
 
     async function fetchPage(pageToLoad: number) {
         if (!props.loadOptions || isLoadingPage.value) return;
@@ -286,6 +303,26 @@
         if (isApiMode.value) resetAndFetch();
     });
 
+    // A prop loadOptions pode ser fornecida (ou removida) depois do mount — ex.:
+    // um painel que troca de um array local em cache para busca no servidor.
+    // Sem este watch, apiItems ficaria vazio para sempre e filteredOptions (que
+    // passa a olhar para apiItems assim que isApiMode vira true) mostraria a
+    // lista permanentemente vazia. Ao voltar para modo local (isApiMode false)
+    // não é preciso fazer nada: filteredOptions volta a ler props.options
+    // automaticamente, e limpamos o estado da API para não deixar lixo (erro,
+    // hasMore etc.) vazando caso o modo API seja religado depois.
+    watch(isApiMode, (apiMode) => {
+        if (apiMode) resetAndFetch();
+        else {
+            apiItems.value = [];
+            currentPage.value = 0;
+            hasMore.value = true;
+            loadError.value = null;
+            isLoadingPage.value = false;
+            autoFillCount = 0;
+        }
+    });
+
     const filteredOptions = computed<any[]>(() => {
         // No modo API o filtro é server-side: a lista já vem filtrada.
         if (isApiMode.value) return apiItems.value;
@@ -329,9 +366,6 @@
         enabled: isVirtual
     });
 
-    /** Janela não virtualizada: todas as opções, no mesmo formato { item, index } da janela virtual. */
-    const plainItems = computed(() => visibleOptions.value.map((item, index) => ({ item, index })));
-
     setViewport(0, DEFAULT_VIEWPORT_HEIGHT);
 
     /** Distância do fim, em múltiplos da altura do viewport, que dispara a próxima página. */
@@ -366,7 +400,15 @@
      * `loadError`, atualizados de forma síncrona por `fetchPage` antes de
      * qualquer nova chamada; e (2) `autoFillCount` limita a MAX_AUTO_FILL_PAGES
      * o número de páginas buscadas sem um scroll real — protegendo contra um
-     * servidor que nunca preenche o painel (ou mente sobre `hasMore`). */
+     * servidor que nunca preenche o painel (ou mente sobre `hasMore`).
+     *
+     * Limitação conhecida: esta função depende de medir `clientHeight` real do
+     * painel (guarda em `target.clientHeight <= 0`). Um painel montado dentro de
+     * um container escondido com `display: none` não tem layout algum e mede 0
+     * — o auto-preenchimento fica pulado até que um scroll real aconteça (o que
+     * nunca ocorre enquanto escondido). Prefira `v-if` a `v-show` para painéis
+     * que usam este componente, ou aceite que a paginação só avance após o
+     * painel se tornar visível e o usuário rolar manualmente. */
     async function fillViewportIfNeeded() {
         if (autoFillCount >= MAX_AUTO_FILL_PAGES) return;
 
@@ -615,7 +657,14 @@
     align-items: center;
     gap: 10px;
     padding: 0 12px;
-    min-height: 44px;
+
+    // Sem virtualização a altura mínima "natural" da linha é 44px (mantém o
+    // layout de hoje, já que itemHeight tem esse mesmo valor por padrão). Em
+    // modo virtual o <li> já recebe um `height` inline vindo de itemHeight (ver
+    // template); min-height precisa seguir o mesmo valor, senão ele vence sobre
+    // `height` e desalinha as linhas com o que useVirtualList calculou para
+    // totalHeight/offsetY/startIndex.
+    min-height: v-bind('`${props.itemHeight}px`');
     cursor: pointer;
     color: var(--background-750);
 
@@ -639,6 +688,13 @@
 
         &:hover {
             background-color: var(--blue-700);
+        }
+
+        // .is-focused sozinho usa outline azul (--blue-600), que é a mesma cor
+        // do fundo aqui: sem isso, uma linha focada E selecionada não mostra
+        // nenhuma indicação de foco para quem navega por teclado.
+        &.is-focused {
+            outline-color: var(--background-0);
         }
     }
 
