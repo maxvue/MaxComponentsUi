@@ -402,3 +402,114 @@ describe('MaxListBox - modo API', () => {
         expect(wrapper.find('.max-listbox-loader').exists()).toBe(true);
     });
 });
+
+describe('MaxListBox - scroll infinito', () => {
+    beforeEach(() => {
+        setActivePinia(createPinia());
+    });
+
+    async function flush() {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+    }
+
+    function page(n: number, size = 3) {
+        return Array.from({ length: size }, (_, i) => ({ value: n * 100 + i, label: `P${n}I${i}` }));
+    }
+
+    /** Simula o usuário rolando até o fim da lista. */
+    async function scrollToBottom(wrapper: any) {
+        const list = wrapper.find('.max-listbox-list');
+        Object.defineProperty(list.element, 'scrollHeight', { value: 1000, configurable: true });
+        Object.defineProperty(list.element, 'clientHeight', { value: 400, configurable: true });
+        Object.defineProperty(list.element, 'scrollTop', { value: 600, configurable: true, writable: true });
+        await list.trigger('scroll');
+    }
+
+    it('carrega a proxima pagina ao rolar ate o fim', async () => {
+        const loadOptions = vi.fn()
+            .mockResolvedValueOnce({ items: page(1), hasMore: true })
+            .mockResolvedValueOnce({ items: page(2), hasMore: false });
+
+        const wrapper = mountListBox({ options: undefined, loadOptions });
+        await flush();
+        await wrapper.vm.$nextTick();
+
+        await scrollToBottom(wrapper);
+        await flush();
+
+        expect(loadOptions).toHaveBeenLastCalledWith({ page: 2, search: '', pageSize: 50 });
+    });
+
+    it('acumula os itens das paginas carregadas', async () => {
+        const loadOptions = vi.fn()
+            .mockResolvedValueOnce({ items: page(1), hasMore: true })
+            .mockResolvedValueOnce({ items: page(2), hasMore: false });
+
+        const wrapper = mountListBox({ options: undefined, loadOptions });
+        await flush();
+        await wrapper.vm.$nextTick();
+
+        await scrollToBottom(wrapper);
+        await flush();
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.findAll('.max-listbox-item')).toHaveLength(6);
+    });
+
+    it('para de carregar quando hasMore e false', async () => {
+        const loadOptions = vi.fn().mockResolvedValue({ items: page(1), hasMore: false });
+
+        const wrapper = mountListBox({ options: undefined, loadOptions });
+        await flush();
+        await wrapper.vm.$nextTick();
+
+        await scrollToBottom(wrapper);
+        await flush();
+
+        expect(loadOptions).toHaveBeenCalledTimes(1);
+    });
+
+    it('nao dispara requisicao duplicada com uma ja em voo', async () => {
+        const loadOptions = vi.fn()
+            .mockResolvedValueOnce({ items: page(1), hasMore: true })
+            .mockImplementationOnce(() => new Promise(() => {}));
+
+        const wrapper = mountListBox({ options: undefined, loadOptions });
+        await flush();
+        await wrapper.vm.$nextTick();
+
+        await scrollToBottom(wrapper);
+        await scrollToBottom(wrapper);
+        await scrollToBottom(wrapper);
+        await flush();
+
+        expect(loadOptions).toHaveBeenCalledTimes(2);
+    });
+
+    it('nao dispara scroll infinito no modo local', async () => {
+        const wrapper = mountListBox({ options: OPTIONS });
+        await scrollToBottom(wrapper);
+        await flush();
+
+        expect(wrapper.findAll('.max-listbox-item')).toHaveLength(3);
+    });
+
+    it('para de carregar apos um erro', async () => {
+        const loadOptions = vi.fn()
+            .mockResolvedValueOnce({ items: page(1), hasMore: true })
+            .mockRejectedValueOnce(new Error('falhou'));
+
+        const wrapper = mountListBox({ options: undefined, loadOptions });
+        await flush();
+        await wrapper.vm.$nextTick();
+
+        await scrollToBottom(wrapper);
+        await flush();
+        await wrapper.vm.$nextTick();
+
+        await scrollToBottom(wrapper);
+        await flush();
+
+        expect(loadOptions).toHaveBeenCalledTimes(2);
+    });
+});

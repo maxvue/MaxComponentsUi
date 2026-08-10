@@ -312,9 +312,24 @@
 
     setViewport(0, DEFAULT_VIEWPORT_HEIGHT);
 
+    /** Distância do fim, em múltiplos da altura do viewport, que dispara a próxima página. */
+    const LOAD_MORE_THRESHOLD_VIEWPORTS = 2;
+
+    function shouldLoadMore(target: HTMLElement): boolean {
+        if (!isApiMode.value) return false;
+        if (!hasMore.value || isLoadingPage.value || loadError.value) return false;
+
+        const viewport = target.clientHeight || DEFAULT_VIEWPORT_HEIGHT;
+        const distanceToBottom = target.scrollHeight - target.scrollTop - viewport;
+
+        return distanceToBottom <= viewport * LOAD_MORE_THRESHOLD_VIEWPORTS;
+    }
+
     function onListScroll(event: Event) {
         const target = event.target as HTMLElement;
         setViewport(target.scrollTop, target.clientHeight || DEFAULT_VIEWPORT_HEIGHT);
+
+        if (shouldLoadMore(target)) fetchPage(currentPage.value + 1);
     }
 
     function valueOf(option: any): any {
