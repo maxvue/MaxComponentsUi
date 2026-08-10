@@ -234,7 +234,7 @@ route.name existe?
 | 7 | ✅ **`MaxSideMenu`** | `SideMenu.vue` + `MenuVerticalItem.vue`; store `useListMenus` configurável | 3 |
 | 8 | ✅ **`MaxTopMenu`** | **Escopo reduzido ao esqueleto + slots** (ver §8.5). Reverb/LiveKit ficam no engeapp | 3, 7 |
 | 9 | ✅ **`MaxSplitPanesContent`** | `splitpanes` + **slot** para o painel lateral (evita arrastar o `ChatPanel`) | 3 |
-| 10 | **`MaxPageLayout`** | Compõe 6→9 | 6, 7, 8, 9 |
+| 10 | ✅ **`MaxPageLayout`** | Compõe 6→9 e **repassa os slots** dos filhos | 6, 7, 8, 9 |
 | 11 | ❌ ~~**VoIP**~~ | **Cancelada por decisão do usuário** — os 5 componentes e o `useVoip.Store` (512 linhas, LiveKit/WebRTC) ficam no engeapp e entram pelo slot `voip` do `MaxTopMenu`. A lib não ganha LiveKit | — |
 | 12 | **`MaxApp.vue`** | Reescrever o rascunho com props §5, branching §5 e slots | 10, 11 |
 | 13 | **Resolver + exports** | `npx tsx src/scripts/generateResolver.ts`, exports em `index.ts` | 12 |
@@ -256,7 +256,7 @@ route.name existe?
 | 7 | MaxSideMenu | ✅ `done` |
 | 8 | MaxTopMenu (esqueleto + slots) | ✅ `done` |
 | 9 | MaxSplitPanesContent | ✅ `done` |
-| 10 | MaxPageLayout | `waiting` |
+| 10 | MaxPageLayout | ✅ `done` |
 | 11 | ~~VoIP~~ | ❌ `cancelled` — fica no engeapp |
 | 12 | MaxApp.vue | `waiting` |
 | 13 | Resolver + exports | `waiting` |
@@ -538,6 +538,28 @@ original previa 65 arquivos; o escopo real ficou em torno de **16 componentes**.
 
 A lib **não** ganha `livekit-client`, `@laravel/echo-vue`, `pdfjs-dist`, `vue3-emoji-picker`
 nem `ziggy-js`. A única dependência nova de toda a migração foi o **`splitpanes`**.
+
+---
+
+## 8.8 Nota da etapa 10 — repasse de slots em cadeia
+
+Como os filhos passaram a expor slots (decisões das etapas 8 e 9), cada nível da composição
+precisa repassá-los, senão o engeapp não alcança o `MaxTopMenu` a partir do layout:
+
+```vue
+<template v-for="(_, name) in topMenuSlots" #[name]="slotProps" :key="name">
+    <slot :name="name" v-bind="slotProps ?? {}"></slot>
+</template>
+```
+
+**A etapa 12 precisa fazer o mesmo**, um nível acima: o `MaxApp` renderiza o `MaxPageLayout` e
+tem de repassar os mesmos nove slots do topo (`status`, `search`, `add`, `chat`, `bugs`,
+`notifications`, `voip`, `live`, `user`) mais o `side` — além do `extras`, para os componentes
+VoIP que o `App.vue` monta fora do layout.
+
+⚠️ **Ao testar o slot `side`, defina `split_panel` abaixo de 100.** O painel lateral exige
+`sideVisible` **e** espaço disponível; como o valor padrão é 100, o `<pane>` é corretamente
+suprimido e o teste falha por motivo legítimo — não é bug de repasse.
 
 ---
 
