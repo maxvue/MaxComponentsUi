@@ -185,8 +185,43 @@ describe('MaxListBox - filtro local', () => {
         const wrapper = mountListBox({ filter: true });
         await wrapper.find('input').setValue('alf');
 
-        await new Promise((resolve) => setTimeout(resolve, 350));
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        expect(wrapper.emitted('filter')).toBeFalsy();
 
+        await new Promise((resolve) => setTimeout(resolve, 250));
+
+        expect(wrapper.emitted('filter')).toHaveLength(1);
         expect(wrapper.emitted('filter')?.[0]).toEqual(['alf']);
+    });
+
+    it('nao fixa selectedOption que nao casa com o termo de busca ativo', async () => {
+        const wrapper = mountListBox({
+            filter: true,
+            selectedOption: { value: 99, label: 'Externo' }
+        });
+        await wrapper.find('input').setValue('alf');
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.text()).not.toContain('Externo');
+    });
+
+    it('fixa selectedOption quando ele casa com o termo de busca ativo', async () => {
+        const wrapper = mountListBox({
+            filter: true,
+            selectedOption: { value: 99, label: 'Externo' }
+        });
+        await wrapper.find('input').setValue('exter');
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.text()).toContain('Externo');
+    });
+
+    it('mantem selectedOption fixado quando o termo de busca esta vazio', () => {
+        const wrapper = mountListBox({
+            filter: true,
+            selectedOption: { value: 99, label: 'Externo' }
+        });
+
+        expect(wrapper.text()).toContain('Externo');
     });
 });

@@ -143,24 +143,37 @@
 
     const filterFieldList = computed(() => props.filterFields ?? [props.optionLabel, props.optionSubLabel]);
 
+    /** Verifica se uma opção casa com o termo de busca já normalizado. */
+    function matchesTerm(option: any, term: string): boolean {
+        if (term === '') return true;
+        return filterFieldList.value.some((field) => normalize(option?.[field]).includes(term));
+    }
+
     const filteredOptions = computed<any[]>(() => {
         const list = props.options ?? [];
+
+        if (!props.filter) return list;
+
         const term = normalize(searchInput.value);
-
-        if (!props.filter || term === '') return list;
-
-        return list.filter((option) => filterFieldList.value.some((field) => normalize(option?.[field]).includes(term)));
+        return list.filter((option) => matchesTerm(option, term));
     });
 
     /** Lista efetivamente renderizada. Inclui o selectedOption externo no topo
-     * quando o valor selecionado ainda não está presente na lista local. */
+     * quando o valor selecionado ainda não está presente na lista local — mas
+     * apenas se ele também casar com o termo de busca ativo (o filtro tem
+     * precedência sobre a fixação do selectedOption). */
     const visibleOptions = computed<any[]>(() => {
         const list = filteredOptions.value;
 
         if (props.selectedOption === undefined || props.selectedOption === null) return list;
 
         const alreadyInList = list.some((opt) => valueOf(opt) === valueOf(props.selectedOption));
-        return alreadyInList ? list : [props.selectedOption, ...list];
+        if (alreadyInList) return list;
+
+        const term = props.filter ? normalize(searchInput.value) : '';
+        if (!matchesTerm(props.selectedOption, term)) return list;
+
+        return [props.selectedOption, ...list];
     });
 
     function valueOf(option: any): any {
