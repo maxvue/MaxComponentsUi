@@ -147,9 +147,10 @@
 
         const groups = Object.values(options.value) as any[];
         for (const group of groups) {
-            // `group` pode ser uma opção plana (sem `.items`) quando `loadOptions` retorna uma
-            // lista não agrupada — nesse caso buscamos a opção diretamente no próprio item em
-            // vez de assumir que é sempre um grupo com `.items` (evita TypeError em runtime).
+            // MaxTagSelect não tem modo agrupado real (sem prop `groupOptions`); `options.value`
+            // é sempre uma lista plana. Este guard só existe para o caso de `loadOptions`
+            // retornar itens sem `.items`, buscando a opção diretamente no item em vez de
+            // assumir a forma de grupo (evita TypeError em runtime).
             if (!group || !Array.isArray(group.items)) {
                 if (group?.[valueKey] === temp_value.value) return group;
                 continue;
