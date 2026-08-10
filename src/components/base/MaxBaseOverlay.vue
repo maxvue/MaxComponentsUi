@@ -1,14 +1,17 @@
 <template>
-    <Teleport :to="appendTo" :disabled="!visible">
-        <div
-            v-if="visible"
-            ref="panelRef"
-            class="max-base-overlay"
-            :role="role"
-            :style="panelStyle"
-        >
-            <slot></slot>
-        </div>
+    <Teleport :to="appendTo">
+        <Transition name="max-base-overlay">
+            <div
+                v-if="visible"
+                ref="panelRef"
+                class="max-base-overlay"
+                :role="role"
+                tabindex="-1"
+                :style="panelStyle"
+            >
+                <slot></slot>
+            </div>
+        </Transition>
     </Teleport>
 </template>
 
@@ -158,5 +161,16 @@
         border: 1px solid var(--surface-border);
         border-radius: 0.75rem;
         box-shadow: 0 4px 8px rgb(0 0 0 / 20%);
+    }
+
+    .max-base-overlay-enter-active,
+    .max-base-overlay-leave-active {
+        transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+
+    .max-base-overlay-enter-from,
+    .max-base-overlay-leave-to {
+        opacity: 0;
+        transform: translateY(-4px);
     }
 </style>

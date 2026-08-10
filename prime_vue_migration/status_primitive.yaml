@@ -141,47 +141,67 @@ itens:
     depende_de: []
     uso: 'INTERNA — base de Select/AutoComplete/DatePicker/Menu/Drawer'
     execucao: Concluído
-    verificacao: Realizando
+    verificacao: Aguardando
     teste_usuario: Aguardando
-    tentativas: 0
+    tentativas: 1
     classes_p_removidas: []
     notas: >-
-      Concluído em 2026-08-10. DECISÃO DE REUSO (obrigatória pelo plano): MaxPopover.vue
-      foi investigado e NÃO é reaproveitável como base genérica — é um componente
-      completo e acoplado ao próprio caso de uso (botão + diálogo com header, slots
-      fixos, MaxAnimateFade, overlay de fundo full-screen), não uma primitiva de
-      posicionamento isolada. Opção (b) do plano foi seguida: implementação nova em
+      Concluído em 2026-08-10 (2ª rodada, após 1ª verificação REPROVADA). DECISÃO DE
+      REUSO (obrigatória pelo plano): MaxPopover.vue foi investigado e NÃO é
+      reaproveitável como base genérica — é um componente completo e acoplado ao
+      próprio caso de uso (botão + diálogo com header, slots fixos, MaxAnimateFade,
+      overlay de fundo full-screen), não uma primitiva de posicionamento isolada.
+      Opção (b) do plano foi seguida: implementação nova em
       src/components/base/MaxBaseOverlay.vue, usando a técnica de posicionamento de
-      MaxPopover.vue (getBoundingClientRect + position:fixed) como referência de padrão,
-      não como base de código. MaxPopover.vue não foi tocado nesta migração (fora de
-      escopo do item 2; ficará para quando ele próprio for migrado numa trilha
-      posterior).
+      MaxPopover.vue (getBoundingClientRect + position:fixed) como referência de
+      padrão, não como base de código. MaxPopover.vue não foi tocado nesta migração
+      (fora de escopo do item 2; ficará para quando ele próprio for migrado numa
+      trilha posterior).
       API implementada conforme o plano: props visible/target/appendTo/align/
       matchTargetWidth/dismissable/closeOnEscape/offset/role; eventos update:visible/
       show/hide/before-show/before-hide; slot default.
       Teleport para appendTo (default 'body'), flip vertical, clamp horizontal,
-      z-index incremental por módulo, listeners de click/keydown/scroll(capture)/resize
-      montados só enquanto visible e sempre desmontados (onBeforeUnmount como rede de
-      segurança). Foco: movido ao painel na abertura, devolvido ao gatilho no
-      fechamento. Sem classes .p-* (não havia contrapartida direta do PrimeVue: é
+      z-index incremental por módulo, listeners de click/keydown/scroll(capture)/
+      resize montados só enquanto visible e sempre desmontados (onBeforeUnmount como
+      rede de segurança). Transição fade+translate curta adicionada (faltava na 1ª
+      rodada). Sem classes .p-* (não havia contrapartida direta do PrimeVue: é
       infraestrutura nova).
-      Teste criado: tests/components/base/MaxBaseOverlay.test.ts (12 casos, cobrindo
-      todos os itens do checklist do plano, com getBoundingClientRect mockado no
-      gatilho já que happy-dom não faz layout).
-      MUTAÇÕES TESTADAS (todas fazem o teste falhar): (1) inverter a checagem de
-      dismissable; (2) remover o emit update:visible em close(); (3) remover
-      detachListeners() do onBeforeUnmount; (4) remover a checagem de contains() do
-      alvo (gatilho fecharia via click-outside). Uma 5ª mutação (checagem de tecla
-      Escape) não quebrou o teste isoladamente porque o guard de closeOnEscape acima
-      dela já cobre esse caminho — não é um teste frouxo, é sobreposição esperada de
-      guards.
-      ACHADO DE ISOLAMENTO: a primeira versão do teste vazava paineis entre casos
-      (document.querySelector pegava o primeiro .max-base-overlay remanescente de um
-      teste anterior sem unmount). Corrigido com afterEach fazendo wrapper.unmount() e
-      limpeza de qualquer .max-base-overlay órfão no DOM.
-      Portões: vitest 12/12; type-check limpo; lint 0 erros (mesmos 2 warnings
-      pré-existentes de MaxInputMarkdown/MaxTagsList); suíte 639 passando / 18
-      falhando (mesmas 7 arquivos do baseline, sem regressão nova).
+      1ª VERIFICAÇÃO (subagente opus): REPROVADO. 3 achados BLOQUEANTES: (a) nenhuma
+      asserção cobria position() — flip vertical, align right, clamp horizontal,
+      z-index incremental e reposicionamento em resize podiam quebrar sem o teste
+      acusar (7 mutações aplicadas pelo verificador sobreviveram); (b) o teste de
+      simetria de listeners só espionava document, não window (onde scroll/resize são
+      registrados), e comparava só o tipo do evento, não handler+capture — mutação
+      removendo o removeEventListener de resize sobreviveu; (c) devolução de foco ao
+      gatilho no fechamento nunca era verificada, o que escondia um bug real:
+      panelRef.focus() num <div> sem tabindex não move o foco (painel não é
+      focável).
+      CORREÇÕES: adicionado tabindex="-1" ao painel; removido o :disabled redundante
+      do Teleport; adicionada <Transition> fade+translate (também apontada como
+      lacuna vs. o plano). Teste reescrito com 19 casos: adicionadas asserções
+      numéricas de top/left para flip vertical (abre acima/abaixo), align right,
+      clamp horizontal, z-index crescente e reposicionamento em resize (mockando
+      getBoundingClientRect do painel via segundo mock após o primeiro settle); teste
+      de listeners agora espiona document E window, comparando chave
+      tipo+handler+capture, e confirma explicitamente que resize é registrado e
+      removido em window; novo teste de foco no painel ao abrir (activeElement ===
+      panel, tabindex=-1) e de devolução de foco ao gatilho no ESC.
+      MUTAÇÕES TESTADAS na 2ª rodada (todas fazem o teste falhar, incluindo as 7 que
+      sobreviveram na 1ª rodada): (1) inverter dismissable; (2) remover emit
+      update:visible em close(); (3) remover detachListeners() do onBeforeUnmount;
+      (4) remover contains() do alvo; (5) inverter openUp (flip vertical); (6)
+      quebrar align right (left = t.left em vez de t.right - p.width); (7) remover
+      clamp horizontal; (8) zIndex fixo/undefined; (9) onReposition virar no-op; (10)
+      remover props.target?.focus() no fechamento; (11) remover tabindex="-1" do
+      painel (reintroduz o bug de foco).
+      ACHADO DE ISOLAMENTO (1ª rodada, ainda válido): a primeira versão do teste
+      vazava paineis entre casos (document.querySelector pegava o primeiro
+      .max-base-overlay remanescente de um teste anterior sem unmount). Corrigido com
+      afterEach fazendo wrapper.unmount() e limpeza de qualquer .max-base-overlay
+      órfão no DOM.
+      Portões (2ª rodada): vitest 19/19; type-check limpo; lint 0 erros (mesmos 2
+      warnings pré-existentes de MaxInputMarkdown/MaxTagsList); suíte 646 passando /
+      18 falhando (mesmas 7 arquivos do baseline, sem regressão nova).
 
   - id: 3
     componente: MaxBaseSpinner
