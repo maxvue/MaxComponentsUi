@@ -24,7 +24,7 @@
         data: null,
         options: null,
         plugins: null,
-        ariaLabel: '',
+        ariaLabel: ''
     });
 
     const emit = defineEmits<{
@@ -43,7 +43,7 @@
     /** Opções padrão do projeto — o gráfico preenche o container em vez de impor proporção. */
     const baseOptions = (): MaxChartOptions => ({
         maintainAspectRatio: false,
-        responsive: true,
+        responsive: true
     });
 
     const destroyChart = () => {
@@ -79,7 +79,7 @@
             type: props.type,
             data: props.data,
             options: { ...baseOptions(), ...(props.options ?? {}) },
-            plugins: props.plugins ?? [],
+            plugins: props.plugins ?? []
         } as unknown as ConstructorParameters<typeof Chart>[1];
 
         chart.value = new Chart(canvas_ref.value, config) as unknown as MaxChartInstance;
@@ -114,7 +114,7 @@
         /** Recria a instância do zero. */
         reinit: () => void initChart(),
         /** PNG em base64 do estado atual. */
-        toBase64Image: (): string | undefined => chart.value?.toBase64Image(),
+        toBase64Image: (): string | undefined => chart.value?.toBase64Image()
     });
 </script>
 
