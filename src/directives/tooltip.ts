@@ -194,12 +194,15 @@ export const Tooltip: Directive<HTMLElement, string | TooltipOptions> = {
         if (!state) return;
         state.options = parseOptions(binding);
         state.position = parsePosition(binding);
-        if (state.tooltipEl) if (state.options.disabled || !state.options.value) destroyTooltip(el, state);
-        else {
-            renderText(state.tooltipEl, state.options);
-            position(el, state.tooltipEl, state.position);
+        if (!state.tooltipEl) return;
+
+        if (state.options.disabled || !state.options.value) {
+            destroyTooltip(el, state);
+            return;
         }
 
+        renderText(state.tooltipEl, state.options);
+        position(el, state.tooltipEl, state.position);
     },
     unmounted(el) {
         const state = states.get(el);

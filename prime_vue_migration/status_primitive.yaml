@@ -341,7 +341,7 @@ itens:
     depende_de: []
     uso: 'ALTÍSSIMO — `v-tooltip` aparece em 83 arquivos dos projetos'
     execucao: Concluído
-    verificacao: Realizando
+    verificacao: Concluído
     teste_usuario: Aguardando
     tentativas: 0
     classes_p_removidas: ['p-tooltip', 'p-component', 'p-tooltip-top', 'p-tooltip-right', 'p-tooltip-bottom', 'p-tooltip-left', 'p-tooltip-arrow', 'p-tooltip-text']
@@ -396,3 +396,23 @@ itens:
       Portões: vitest 20/20; type-check limpo; lint 0 erros (mesmos 2 warnings
       pré-existentes); suíte 687 passando / 18 falhando (mesmas 7 arquivos do
       baseline, sem regressão nova).
+      VERIFICAÇÃO (subagente opus): APROVADO. Confirmou linha a linha: import
+      trocado em src/index.ts (linha de registro app.directive('tooltip', Tooltip)
+      idêntica), zero .p-* real (inclusive checando @primeuix/styles e primevue/
+      tooltip para validar a lista de classes_p_removidas contra a implementação
+      original do PrimeVue), default 'right' preservado, lógica de escape/XSS
+      correta, foco/blur funcionando com e sem o modificador .focus, ARIA completo,
+      sem vazamento de timers/listeners. Aplicou 11 mutações próprias (incluindo as
+      3 que o plano exige explicitamente), todas mortas. 2 achados MENORES: (a)
+      dangling-else no hook updated (l.197 original) — funcionalmente correto
+      (confirmado por teste-sonda do verificador), mas de legibilidade frágil;
+      corrigido mesmo assim reestruturando com early-returns, sobrevivendo ao
+      --fix do ESLint desta vez (a correção anterior com chaves explícitas tinha
+      sido revertida pelo autofix, que colapsa single-statement ifs); (b) prop
+      fitContent sem teste dedicado — não corrigido, comportamento exato do
+      PrimeVue para essa opção não é crítico o suficiente para justificar mais
+      escopo agora; nenhum consumidor conhecido depende dela hoje.
+      Portões finais (após o ajuste de legibilidade): vitest 20/20; type-check
+      limpo; lint 0 erros (mesmos 2 warnings pré-existentes); suíte 687 passando /
+      18 falhando (mesmas 7 arquivos do baseline, sem regressão nova). Mutação do
+      hook updated re-testada após o ajuste: ainda mata o teste corretamente.
