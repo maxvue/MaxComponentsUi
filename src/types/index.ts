@@ -192,3 +192,6 @@ export type MenuItem = {
 
 // Tipos do MaxChart (formato chart.js).
 export type * from './chart';
+
+// Tipos do MaxListBox.
+export type * from './listbox';
