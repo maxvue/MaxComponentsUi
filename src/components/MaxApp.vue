@@ -1,35 +1,146 @@
 <template>
-    <div class="max-app">
-        <slot name="login">
-            <RouterView />
-        </slot>
-        <slot name="authenticated">
-            <RouterView />
-        </slot>
-        <slot name="authenticated">
-            <PageLayout :screen="system.type_device">
+    <div v-if="route.name" class="max-app">
+        <!-- Páginas de site e telas sem layout: apenas o conteúdo da rota. -->
+        <div v-if="isSite || isBlank">
+            <slot name="blank">
                 <RouterView />
-            </PageLayout>
-        </slot>
-        <LoadScreen />
+            </slot>
+        </div>
+
+        <!-- Usuário carregado, mas sem sessão: tela de login. -->
+        <div v-else-if="isLoaded && !isLogged">
+            <slot name="login">
+                <RouterView />
+            </slot>
+        </div>
+
+        <!-- Usuário autenticado: aplicação completa. -->
+        <div v-else-if="isLoaded && isLogged">
+            <slot name="authenticated">
+                <MaxPageLayout
+                    :screen="system.type_device"
+                    :add-items="props.addItems"
+                    :bottom-tabs="props.bottomTabs"
+                    :side-visible="props.sideVisible"
+                >
+                    <RouterView />
+
+                    <template v-for="(_, name) in forwardedSlots" #[name]="slotProps" :key="name">
+                        <slot :name="name" v-bind="slotProps ?? {}"></slot>
+                    </template>
+                </MaxPageLayout>
+            </slot>
+        </div>
+
+        <MaxLoadScreen />
     </div>
 
     <MaxPopoverConfirm />
     <MaxToast />
-    <template v-if="user.status?.server?.get?.is_success && system?.user?.data?.id">
-        <VoipDialer />
-        <VoipReverbListener />
-        <IncomingCallModal />
-    </template>
+
+    <!-- Componentes que vivem fora do layout (VoIP, ouvintes de eventos). -->
+    <slot v-if="isLoaded && isLogged" name="extras"></slot>
 </template>
 
 <script setup lang="ts">
+    import { computed, watch, useSlots } from 'vue';
+    import { RouterView, useRoute } from 'vue-router';
+    import MaxPageLayout from './MaxPageLayout.vue';
+    import MaxLoadScreen from './MaxLoadScreen.vue';
+    import MaxPopoverConfirm from './MaxPopoverConfirm.vue';
+    import MaxToast from './MaxToast.vue';
+    import { useSystemStore } from '../stores/useSystem.Store';
+    import { useUserStore } from '../stores/useUser.Store';
+    import { useLoginStore } from '../stores/useLogin.Store';
+    import { configureMaxApp } from '../helpers/maxAppConfig';
+    import type { BottomTab } from './MaxBottomMenu.vue';
 
+    /** Slots repassados ao `MaxPageLayout`. */
+    const LAYOUT_SLOTS = ['status', 'search', 'add', 'chat', 'bugs', 'notifications', 'voip', 'live', 'user', 'side'] as const;
 
+    const props = withDefaults(defineProps<{
+        /** Rota de submissão do login. */
+        routeLogin?: string;
+        /** Rota que lista os provedores sociais. */
+        routeProviders?: string;
+        /** Rota que devolve os dados do usuário. */
+        routeUser?: string;
+        /** Habilita o login por nome de usuário. */
+        allowUserName?: boolean;
+        /** Habilita o login por e-mail. */
+        allowEmail?: boolean;
+        /** Habilita o login por telefone. */
+        allowPhone?: boolean;
+        /**
+         * Rotas que devem renderizar sem layout. No engeapp eram nomes fixos no
+         * `App.vue` ('Page', 'contatos', 'Contract', 'Wire', ...).
+         */
+        blankPages?: string[];
+        /** Itens do menu "Adicionar Novo" do topo. */
+        addItems?: Array<Record<string, any>>;
+        /** Abas do menu inferior (mobile). */
+        bottomTabs?: BottomTab[];
+        /** Exibe o painel lateral do conteúdo. */
+        sideVisible?: boolean;
+    }>(), {
+        allowUserName: true,
+        allowEmail: true,
+        allowPhone: true,
+        blankPages: () => []
+    });
+
+    // A configuração precisa ser aplicada antes das stores resolverem suas rotas.
+    configureMaxApp({
+        ...(props.routeLogin ? { routeLogin: props.routeLogin } : {}),
+        ...(props.routeProviders ? { routeProviders: props.routeProviders } : {}),
+        ...(props.routeUser ? { routeUser: props.routeUser } : {})
+    });
+
+    const route = useRoute();
+    const system = useSystemStore();
+    const user = useUserStore();
+    const login = useLoginStore();
+
+    const slots = useSlots();
+
+    /** Apenas os slots de layout efetivamente informados. */
+    const forwardedSlots = computed(() => {
+        const provided: Record<string, true> = {};
+
+        LAYOUT_SLOTS.forEach((name) => {
+            if (slots[name]) provided[name] = true;
+        });
+
+        return provided;
+    });
+
+    /**
+     * Indica que a store de usuário terminou de carregar do servidor.
+     *
+     * `status` é injetado pelo `@maxvue/max-pinia`; sem o plugin, nada é
+     * renderizado além dos singletons — o mesmo comportamento do engeapp.
+     */
+    const isLoaded = computed<boolean>(() => Boolean((user as any).status?.server?.get?.is_success));
+
+    /** Indica sessão ativa. */
+    const isLogged = computed<boolean>(() => Boolean(user.data?.id));
+
+    /** Rota marcada como site (`meta.layout === 'site'`). */
+    const isSite = computed<boolean>(() => route?.meta?.layout === 'site');
+
+    /** Rota sem layout, por `meta.layout` ou por estar em `blankPages`. */
+    const isBlank = computed<boolean>(() => route?.meta?.layout === 'blank' || props.blankPages.includes(system.page));
+
+    // Propaga as permissões de login para a store do formulário.
+    watch(() => [props.allowEmail, props.allowPhone, props.allowUserName], ([email, phone, userName]) => {
+        login.allow_email = email as boolean;
+        login.allow_phone = phone as boolean;
+        login.allow_user_name = userName as boolean;
+    }, { immediate: true });
 </script>
 
 <style lang="scss">
-    .app-container {
+    .max-app {
         min-height: 100vh;
 
         .fade-enter-active,

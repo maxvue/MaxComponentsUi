@@ -131,6 +131,7 @@ export { default as MaxTopToolbar } from './components/MaxTopToolbar.vue';
 export { default as MaxUserSection } from './components/MaxUserSection.vue';
 export { default as MaxSplitPanesContent } from './components/MaxSplitPanesContent.vue';
 export { default as MaxPageLayout } from './components/MaxPageLayout.vue';
+export { default as MaxApp } from './components/MaxApp.vue';
 
 // Data & Display
 export { default as MaxBadgeComponent } from './components/MaxBadgeComponent.vue';
