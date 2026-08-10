@@ -141,7 +141,7 @@ itens:
     depende_de: []
     uso: 'INTERNA — base de Select/AutoComplete/DatePicker/Menu/Drawer'
     execucao: Concluído
-    verificacao: Aguardando
+    verificacao: Realizando
     teste_usuario: Aguardando
     tentativas: 1
     classes_p_removidas: []
@@ -211,7 +211,7 @@ itens:
     depende_de: []
     uso: 'INTERNA — usada por MaxPdfView e MaxInputFileUpload (ambos usados)'
     execucao: Aguardando
-    verificacao: Aguardando
+    verificacao: Realizando
     teste_usuario: Aguardando
     tentativas: 0
     classes_p_removidas: []
@@ -227,7 +227,7 @@ itens:
     depende_de: []
     uso: 'INTERNA — dependência do MaxInputIconPicker (trilha no_use) e do MaxTagSelect'
     execucao: Aguardando
-    verificacao: Aguardando
+    verificacao: Realizando
     teste_usuario: Aguardando
     tentativas: 0
     classes_p_removidas: []
@@ -245,7 +245,7 @@ itens:
     depende_de: []
     uso: 'ALTÍSSIMO — `v-tooltip` aparece em 83 arquivos dos projetos'
     execucao: Aguardando
-    verificacao: Aguardando
+    verificacao: Realizando
     teste_usuario: Aguardando
     tentativas: 0
     classes_p_removidas: []
