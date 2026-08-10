@@ -417,6 +417,9 @@
     }
 
     function selectOption(option: any) {
+        // Rede de segurança independente do reconcile de focusedIndex: nunca agir
+        // sobre uma opção inexistente (índice ficou fora da lista já encolhida).
+        if (option === null || option === undefined) return;
         if (props.disabled || isDisabled(option)) return;
 
         const value = valueOf(option);
@@ -427,6 +430,21 @@
     /** Identificador único desta instância, usado no aria-activedescendant. */
     const instanceId = `max-listbox-${Math.random().toString(36).slice(2, 9)}`;
     const focusedIndex = ref(-1);
+
+    /** Reconcilia o foco quando a lista visível muda (ex.: filtro reduz os
+     * resultados). Sem isso um índice obsoleto aponta para uma opção que não
+     * existe mais — aria-activedescendant referenciaria um id inexistente e
+     * Enter selecionaria `undefined`, apagando silenciosamente a seleção do
+     * usuário. Em vez de sempre resetar para -1 (o que perderia o contexto de
+     * navegação a cada filtro), o foco é preso (clamp) ao último item ainda
+     * existente — mantém a navegação por teclado utilizável — e só cai para -1
+     * quando a lista fica vazia. */
+    watch(visibleOptions, (list) => {
+        if (focusedIndex.value < 0) return;
+
+        if (list.length === 0) focusedIndex.value = -1;
+        else if (focusedIndex.value > list.length - 1) focusedIndex.value = list.length - 1;
+    });
 
     const focusedItemId = computed(() => (focusedIndex.value >= 0 ? `${instanceId}-opt-${focusedIndex.value}` : undefined));
 
@@ -456,6 +474,14 @@
 
         if (top < list.scrollTop) list.scrollTop = top;
         else if (bottom > list.scrollTop + viewport) list.scrollTop = bottom - viewport;
+
+        // Atualiza a janela virtual de forma síncrona: setar scrollTop não dispara
+        // o evento 'scroll' de imediato (fica pendente até o próximo tick do
+        // navegador), então sem isso o item recém-focado poderia não estar
+        // renderizado ainda no momento em que aria-activedescendant já aponta
+        // para ele — exatamente o cenário que a virtualização precisa evitar.
+        // O scroll do mouse continua indo só pelo listener @scroll (onListScroll).
+        setViewport(list.scrollTop, viewport);
     }
 
     function onKeydown(event: KeyboardEvent) {
@@ -607,7 +633,7 @@
         color: var(--background-0);
 
         .max-listbox-item-sublabel,
-        .icon-div {
+        .max-listbox-item-icon {
             color: var(--background-200);
         }
 

@@ -685,4 +685,68 @@ describe('MaxListBox - teclado', () => {
         expect(active).toBeTruthy();
         expect(wrapper.findAll('.max-listbox-item')[0].attributes('id')).toBe(active);
     });
+
+    it('reconcilia o foco quando o filtro encolhe a lista, sem emitir undefined', async () => {
+        const wrapper = mountListBox({ filter: true });
+        const list = wrapper.find('.max-listbox-list');
+
+        // Foca o terceiro item (indice 2) — o unico desabilitado, entao usamos End.
+        await list.trigger('keydown', { key: 'End' });
+        expect(wrapper.findAll('.max-listbox-item')[2].classes()).toContain('is-focused');
+
+        // Filtra para um unico item (Alfa) — a lista visivel encolhe para 1.
+        await wrapper.find('.max-listbox-filter-input').setValue('Alfa');
+        await new Promise((resolve) => setTimeout(resolve, 350));
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.findAll('.max-listbox-item')).toHaveLength(1);
+
+        // aria-activedescendant nao pode apontar para um id que nao existe mais.
+        const active = list.attributes('aria-activedescendant');
+        if (active !== undefined) expect(wrapper.findAll('.max-listbox-item').some((item) => item.attributes('id') === active)).toBe(true);
+
+
+        await list.trigger('keydown', { key: 'Enter' });
+
+        const emitted = wrapper.emitted('update:modelValue');
+        if (emitted) expect(emitted[0]).not.toEqual([undefined]);
+    });
+
+    it('nao emite update:modelValue com undefined quando Enter e pressionado apos a lista esvaziar por completo', async () => {
+        // Cobertura adicional da rede de seguranca em selectOption: com a lista
+        // totalmente vazia (filtro sem resultados) o foco cai para -1 (reconcile),
+        // mas mesmo que chegasse a agir sobre um indice invalido, nada deve emitir.
+        const wrapper = mountListBox({ filter: true });
+        const list = wrapper.find('.max-listbox-list');
+
+        await list.trigger('keydown', { key: 'ArrowDown' });
+        expect(wrapper.findAll('.max-listbox-item')[0].classes()).toContain('is-focused');
+
+        await wrapper.find('.max-listbox-filter-input').setValue('zzz-inexistente');
+        await new Promise((resolve) => setTimeout(resolve, 350));
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.findAll('.max-listbox-item')).toHaveLength(0);
+
+        await list.trigger('keydown', { key: 'Enter' });
+
+        expect(wrapper.emitted('update:modelValue')).toBeFalsy();
+    });
+
+    it('foco e activedescendant ficam sincronos em lista virtualizada ao pressionar End', async () => {
+        const manyOptions = Array.from({ length: 2000 }, (_, index) => ({ value: index, label: `Item ${index}` }));
+        const wrapper = mountListBox({ options: manyOptions, virtualScroll: true });
+        const list = wrapper.find('.max-listbox-list');
+
+        Object.defineProperty(list.element, 'clientHeight', { value: 400, configurable: true });
+
+        await list.trigger('keydown', { key: 'End' });
+
+        const active = list.attributes('aria-activedescendant');
+        expect(active).toBeTruthy();
+
+        const focusedEl = wrapper.find(`#${active}`);
+        expect(focusedEl.exists()).toBe(true);
+        expect(focusedEl.classes()).toContain('is-focused');
+    });
 });
