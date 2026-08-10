@@ -238,7 +238,7 @@ route.name existe?
 | 11 | ❌ ~~**VoIP**~~ | **Cancelada por decisão do usuário** — os 5 componentes e o `useVoip.Store` (512 linhas, LiveKit/WebRTC) ficam no engeapp e entram pelo slot `voip` do `MaxTopMenu`. A lib não ganha LiveKit | — |
 | 12 | ✅ **`MaxApp.vue`** | Reescrever o rascunho com props §5, branching §5 e slots | 10 |
 | 13 | ✅ **Resolver + exports** | Mantidos a cada etapa, não ao final | 12 |
-| 14 | **Integração no engeapp** | Trocar `App.vue` pelo `<MaxApp/>`, validar em dev | 13 |
+| 14 | ✅ **Integração no engeapp** | Feita no branch `feat/max-app-integration`. **Falta validar em navegador** (ver §8.10) | 13 |
 | 15 | ❌ ~~**supportChat**~~ | **Cancelada por decisão do usuário** — as 37 telas ficam no engeapp e entram pelo slot `side` do `MaxSplitPanesContent` | — |
 
 ---
@@ -260,7 +260,7 @@ route.name existe?
 | 11 | ~~VoIP~~ | ❌ `cancelled` — fica no engeapp |
 | 12 | MaxApp.vue | ✅ `done` |
 | 13 | Resolver + exports | ✅ `done` — mantidos a cada etapa |
-| 14 | Integração no engeapp | `waiting` |
+| 14 | Integração no engeapp | ✅ `done` — falta validação em navegador |
 | 15 | ~~supportChat~~ | ❌ `cancelled` — fica no engeapp |
 
 ---
@@ -626,6 +626,54 @@ Nada muda ali — a lib não instala o plugin, apenas depende dele.
 - Rota de site, rota blank e rota autenticada.
 - Redimensionar o painel dividido, recarregar e conferir que o tamanho persiste.
 - Mobile: menu inferior aparece, menu lateral some.
+
+---
+
+## 8.10 Etapa 14 — feita, mas não validada em navegador
+
+Branch: `feat/max-app-integration` no engeapp (worktree `../engeapp-wt-maxapp`), commit
+`83130e7d9`.
+
+### O achado que não estava previsto: stores duplicadas
+
+O engeapp tinha **as 7 stores duplicadas**, com os **mesmos ids do Pinia**. O auto-import
+resolvia para as locais, então o `MaxApp` (que usa as da lib) e as 93 referências do app
+enxergariam **instâncias diferentes do mesmo estado global** — `is_logged` divergente entre o
+shell e as telas.
+
+Resolvido removendo as 7 locais e apontando o auto-import para
+`@maxvue/max-components-ui`. Conferido antes que a API da lib é **igual ou superset** em todas.
+
+### Também foi preciso
+
+- Extrair `NotificationsPanel.vue` e `ChatToggle.vue` do antigo `TopMenu`.
+- Copiar `auto-import.d.ts` para o worktree: é gerado pelo Vite, não versionado.
+
+### Estado da verificação
+
+| | Resultado |
+|---|---|
+| `vite build` | ✅ 4.127 módulos, sem erro |
+| `vue-tsc` | 275 erros — **280 no baseline**; nenhum nos arquivos alterados |
+| Navegador | ❌ **não testado** |
+
+### O que falta — só validação manual
+
+1. **Login** por e-mail e telefone (com `allow-user-name` desligado, usuário não deve detectar).
+2. **Logout** — o passo mais arriscado: confirmar que a sessão encerra de fato e que o cache não
+   sobrevive. A limpeza foi preservada, mas nunca executada.
+3. **Painel dividido** — redimensionar, recarregar, conferir que o tamanho persiste (valida o
+   `registerSplitPanelKeyPart`).
+4. **Rotas** site, blank e autenticada.
+5. **Mobile** — menu inferior aparece, lateral some.
+6. **`isInternal`** — chat, bugs, VoIP e Live aparecem para interno e somem para integrador.
+
+### Limpeza pendente
+
+O `PageLayout.vue` local ficou **órfão (0 referências)**; `TopMenu`, `UserSection`,
+`TopMenuSearchBar`, `SplitPanesContent`, `ContainerApp`, `SideMenu` e `BottomMenu` só são
+referenciados por ele. Remover depois que a validação em navegador passar — não antes.
+O `LoadScreen` local tem **5 usos reais** e permanece.
 
 ---
 
