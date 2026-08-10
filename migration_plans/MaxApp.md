@@ -231,7 +231,7 @@ route.name existe?
 | 4 | ✅ **`useLogin.Store.ts`** | Corrigir imports (`apiGetRoute`/`apiPostRoute` do MaxUse), trocar `vue3-toastify` pelo `useToastStore`, rotas via config | 3 |
 | 5 | ✅ **`MaxLoadScreen`** | `LoadScreen.vue` + `LoadScreenTarget.vue` → `MaxLoadScreen.vue` + `MaxLoadScreenTarget.vue` | 2 |
 | 6 | ✅ **`MaxContainerApp` + `MaxBottomMenu`** | Ambos são folhas, sem stores complexas | 3 |
-| 7 | **`MaxSideMenu`** | `SideMenu.vue` + `MenuVerticalItem.vue`; store `useListMenus` configurável | 3 |
+| 7 | ✅ **`MaxSideMenu`** | `SideMenu.vue` + `MenuVerticalItem.vue`; store `useListMenus` configurável | 3 |
 | 8 | **`MaxTopMenu`** | 13 arquivos; a etapa mais pesada. Reverb via guard, Ziggy via `setRouteResolver` | 3, 7 |
 | 9 | **`MaxSplitPanesContent`** | `splitpanes` + **slot** para o painel lateral (evita arrastar o `ChatPanel`) | 3 |
 | 10 | **`MaxPageLayout`** | Compõe 6→9 | 6, 7, 8, 9 |
@@ -253,7 +253,7 @@ route.name existe?
 | 4 | useLogin.Store | ✅ `done` |
 | 5 | MaxLoadScreen | ✅ `done` |
 | 6 | MaxContainerApp + MaxBottomMenu | ✅ `done` |
-| 7 | MaxSideMenu | `waiting` |
+| 7 | MaxSideMenu | ✅ `done` |
 | 8 | MaxTopMenu | `waiting` |
 | 9 | MaxSplitPanesContent | `waiting` |
 | 10 | MaxPageLayout | `waiting` |
@@ -392,6 +392,44 @@ de `tabs.length`, já que o número de abas deixou de ser fixo.
 
 O `MaxSideMenu` (etapa 7) lê `useListMenusStore` e o `MaxTopMenu` (etapa 8) tem vários pontos
 semelhantes; aplicar a mesma abordagem.
+
+---
+
+## 8.4 Achados da etapa 7 — mocks em testes de componente
+
+Dois tropeços que voltam a aparecer na etapa 8, que monta muito mais componentes.
+
+**1. Mock de `vue-router` não pode substituir o módulo inteiro.** Vários componentes da lib
+(`MaxLogo`, `MaxButton`, `MaxIconButton`) renderizam `RouterLink`. Um mock que devolve só
+`useRoute`/`useRouter` apaga o `RouterLink` e o erro aponta para o SFC errado. Use
+`importOriginal`:
+
+```ts
+vi.mock('vue-router', async (importOriginal) => ({
+    ...(await importOriginal<Record<string, any>>()),
+    useRoute: () => route,
+    useRouter: () => ({ push: vi.fn() })
+}));
+```
+
+Mesmo assim o `RouterLink` real exige um router injetado (`Cannot read properties of undefined
+(reading 'resolve')`). Quando o componente com link não é o alvo do teste, **stub**:
+
+```ts
+stubs: { MaxLogo: { template: '<div class="max-logo-stub" />' } }
+```
+
+**2. `useRefCachedApi` dispara requisição de verdade.** Nas stores que o usam
+(`useListMenus`, e várias da etapa 8), sobrescreva só ele, preservando o resto do MaxUse:
+
+```ts
+const menusRef = ref<any>(null);
+
+vi.mock('@maxvue/max-use', async (importOriginal) => ({
+    ...(await importOriginal<Record<string, any>>()),
+    useRefCachedApi: () => menusRef
+}));
+```
 
 ---
 
