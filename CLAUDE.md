@@ -71,6 +71,8 @@ Todos os componentes de input de formulário devem ser encapsulados pelo `InputB
 
 Qualquer novo componente de input deve usar `<InputBase>` como seu elemento mais externo.
 
+**Exceção documentada:** `MaxInputCheckbox`, `MaxInputRadio` e `MaxInputToggle` não usam `InputBase` — têm `<div>` como raiz e layout próprio, por serem controles binários/múltipla escolha com necessidades visuais distintas dos inputs de texto/seleção (o próprio PrimeVue renderiza `Checkbox`/`RadioButton` de forma bem diferente de um input de texto). Essa distinção não é arbitrária: `MaxInputSwitch` (comparável a esses três) usa `InputBase` porque seu caso de uso e visual são mais próximos de um input tradicional.
+
 ### Estilização
 
 - **UnoCSS** (`virtual:uno.css`) — preset customizado exportado de `src/presetMaxUno.ts`. Classes utilitárias como `pt-4`, `gap-2`, `color-blue-500`, `bg-background-300`, `hover-primary-600` são todas regras customizadas definidas ali.
