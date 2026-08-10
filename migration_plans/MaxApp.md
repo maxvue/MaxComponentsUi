@@ -230,7 +230,7 @@ route.name existe?
 | 3 | ✅ **`useSystem.Store.ts`** | Reescrever o rascunho `useApp.Store.ts`: imports explícitos, remover `useChatSettingsStore`, `split_panel` opcional, exportar em `stores/index.ts` | 2 |
 | 4 | ✅ **`useLogin.Store.ts`** | Corrigir imports (`apiGetRoute`/`apiPostRoute` do MaxUse), trocar `vue3-toastify` pelo `useToastStore`, rotas via config | 3 |
 | 5 | ✅ **`MaxLoadScreen`** | `LoadScreen.vue` + `LoadScreenTarget.vue` → `MaxLoadScreen.vue` + `MaxLoadScreenTarget.vue` | 2 |
-| 6 | **`MaxContainerApp` + `MaxBottomMenu`** | Ambos são folhas, sem stores complexas | 3 |
+| 6 | ✅ **`MaxContainerApp` + `MaxBottomMenu`** | Ambos são folhas, sem stores complexas | 3 |
 | 7 | **`MaxSideMenu`** | `SideMenu.vue` + `MenuVerticalItem.vue`; store `useListMenus` configurável | 3 |
 | 8 | **`MaxTopMenu`** | 13 arquivos; a etapa mais pesada. Reverb via guard, Ziggy via `setRouteResolver` | 3, 7 |
 | 9 | **`MaxSplitPanesContent`** | `splitpanes` + **slot** para o painel lateral (evita arrastar o `ChatPanel`) | 3 |
@@ -252,7 +252,7 @@ route.name existe?
 | 3 | useSystem.Store | ✅ `done` |
 | 4 | useLogin.Store | ✅ `done` |
 | 5 | MaxLoadScreen | ✅ `done` |
-| 6 | MaxContainerApp + MaxBottomMenu | `waiting` |
+| 6 | MaxContainerApp + MaxBottomMenu | ✅ `done` |
 | 7 | MaxSideMenu | `waiting` |
 | 8 | MaxTopMenu | `waiting` |
 | 9 | MaxSplitPanesContent | `waiting` |
@@ -367,6 +367,31 @@ beforeEach(() => {
 **Teleport:** componentes que usam `<Teleport>` (como o `MaxLoadScreenTarget`) deixam nós fora do
 wrapper. Sem `unmount()` + limpeza do `document.body` no `afterEach`, o conteúdo sobrevive ao caso
 seguinte e infla as contagens. Vale para as etapas 6–12, que montam componentes com store.
+
+---
+
+## 8.3 Padrão da etapa 6 — rotas do engeapp como props com default
+
+O `BottomMenu` trazia as quatro abas fixas no código (`integrador_dashboard`,
+`integrador_clients`, `board`, `settings`), além de um `if` para tratar `integrador_client_show`
+como parte de "Clientes". Rotas de uma aplicação específica não podem ficar embutidas numa lib
+genérica — mas remover o default quebraria o engeapp.
+
+**Solução adotada, a reaproveitar nas etapas 7 e 8:** virar prop com as rotas atuais como
+`default`. O engeapp continua funcionando sem passar nada, e outras aplicações sobrescrevem.
+
+```ts
+const props = withDefaults(defineProps<{ tabs?: BottomTab[] }>(), {
+    tabs: () => [ /* as rotas atuais do engeapp */ ]
+});
+```
+
+O caso especial do `if` virou o campo `matches?: string[]` da aba — genérico para qualquer tela
+de detalhe que deva ativar a seção-pai. O `grid-template-columns` passou a ser calculado a partir
+de `tabs.length`, já que o número de abas deixou de ser fixo.
+
+O `MaxSideMenu` (etapa 7) lê `useListMenusStore` e o `MaxTopMenu` (etapa 8) tem vários pontos
+semelhantes; aplicar a mesma abordagem.
 
 ---
 
