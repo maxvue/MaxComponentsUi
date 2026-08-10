@@ -8,4 +8,10 @@ describe('MaxTextInputFloatLabel.vue', () => {
         expect(wrapper.exists()).toBe(true);
         expect(wrapper.html()).toContain('<!-- Componente Descontinuado -->');
     });
+
+    it('não renderiza nenhum elemento filho além do comentário (no-op confirmado)', () => {
+        const wrapper = mount(MaxTextInputFloatLabel);
+        expect(wrapper.element.children.length).toBe(0);
+        expect(wrapper.text()).toBe('');
+    });
 });
