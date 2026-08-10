@@ -23,6 +23,12 @@
                     :bottom-tabs="props.bottomTabs"
                     :side-visible="props.sideVisible"
                     :logo="props.logo"
+                    @profile="emit('profile')"
+                    @settings="emit('settings')"
+                    @support="emit('support')"
+                    @toggle-dark-mode="emit('toggleDarkMode')"
+                    @logout="emit('logout')"
+                    @end-impersonate="emit('endImpersonate')"
                 >
                     <RouterView />
 
@@ -95,6 +101,20 @@
         allowPhone: true,
         blankPages: () => []
     });
+
+    /**
+     * Eventos do menu do usuário, vindos do `MaxUserSection` e repassados pelo
+     * `MaxPageLayout`. A aplicação decide o que fazer: a limpeza do logout e a
+     * navegação de perfil dependem do domínio dela.
+     */
+    const emit = defineEmits<{
+        profile: [];
+        settings: [];
+        support: [];
+        toggleDarkMode: [];
+        logout: [];
+        endImpersonate: [];
+    }>();
 
     // A configuração precisa ser aplicada antes das stores resolverem suas rotas.
     configureMaxApp({

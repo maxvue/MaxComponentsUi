@@ -234,6 +234,36 @@ describe('MaxApp', () => {
             expect(login.allow_phone).toBe(false);
         });
 
+        // Regressão: os eventos morriam no MaxPageLayout, que não os
+        // reemitia — o @logout da aplicação nunca disparava e o usuário
+        // clicava em "Sair" sem efeito nenhum.
+        it.each(['logout', 'profile', 'settings', 'support', 'endImpersonate'])(
+            'propaga o evento %s do menu do usuário até quem usa o MaxApp',
+            async (evento) => {
+                loadUser();
+
+                const wrapper = mountApp();
+                const section = wrapper.findComponent({ name: 'MaxUserSection' });
+
+                expect(section.exists()).toBe(true);
+
+                section.vm.$emit(evento);
+                await wrapper.vm.$nextTick();
+
+                expect(wrapper.emitted(evento)).toBeTruthy();
+            }
+        );
+
+        it('propaga toggleDarkMode até quem usa o MaxApp', async () => {
+            loadUser();
+
+            const wrapper = mountApp();
+            wrapper.findComponent({ name: 'MaxUserSection' }).vm.$emit('toggleDarkMode');
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.emitted('toggleDarkMode')).toBeTruthy();
+        });
+
         it('repassa a logo até o menu lateral', () => {
             loadUser();
 

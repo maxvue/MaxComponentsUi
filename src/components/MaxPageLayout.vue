@@ -1,6 +1,15 @@
 <template>
     <MaxContainerApp v-bind="attrs">
-        <MaxTopMenu v-bind="attrs" :add-items="props.addItems">
+        <MaxTopMenu
+            v-bind="attrs"
+            :add-items="props.addItems"
+            @profile="emit('profile')"
+            @settings="emit('settings')"
+            @support="emit('support')"
+            @toggle-dark-mode="emit('toggleDarkMode')"
+            @logout="emit('logout')"
+            @end-impersonate="emit('endImpersonate')"
+        >
             <!-- Repassa os slots do topo para quem usa o layout: notificações,
                  chat, VoIP e Live continuam vindo da aplicação. -->
             <template v-for="(_, name) in topMenuSlots" #[name]="slotProps" :key="name">
@@ -42,6 +51,20 @@
         sideVisible?: boolean;
         /** Logo do menu lateral: URL ou nome de rota. Sem ela, nada é exibido. */
         logo?: string;
+    }>();
+
+    /**
+     * Eventos do `MaxUserSection`, repassados do `MaxTopMenu` para quem usa o
+     * layout. Sem este repasse eles morriam aqui, e o `@logout` da aplicação
+     * nunca era disparado.
+     */
+    const emit = defineEmits<{
+        profile: [];
+        settings: [];
+        support: [];
+        toggleDarkMode: [];
+        logout: [];
+        endImpersonate: [];
     }>();
 
     const attrs = useAttrs();
