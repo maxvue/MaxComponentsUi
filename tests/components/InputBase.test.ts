@@ -1,5 +1,6 @@
 import { mount } from '@vue/test-utils';
 import { describe, it, expect } from 'vitest';
+import { defineComponent, h } from 'vue';
 import InputBase from '../../src/components/InputBase.vue';
 import MaxIcon from '../../src/components/MaxIcon.vue';
 
@@ -98,5 +99,78 @@ describe('InputBase.vue', () => {
             props: { icon: 'mdi:user', noIcon: true }
         });
         expect(wrapper.find('.max-inputicon').exists()).toBe(false);
+    });
+
+    it('renders a label with a non-empty for attribute when props.label is defined', () => {
+        const wrapper = mount(InputBase, {
+            props: { label: 'My Label' }
+        });
+        const label = wrapper.find('label');
+        expect(label.exists()).toBe(true);
+        expect(label.attributes('for')).toBeTruthy();
+    });
+
+    it('generates a different id for each instance within the same app', () => {
+        // `useId()` gera ids unicos por app Vue raiz; para provar que duas instancias
+        // de InputBase recebem ids diferentes entre si, ambas precisam viver na
+        // mesma arvore/app (dois `mount()` separados criam apps distintas e
+        // reiniciam o contador, o que nao provaria nada).
+        const Wrapper = defineComponent({
+            components: { InputBase },
+            render: () => [
+                h(InputBase, { label: 'Label A', ref: 'a' }),
+                h(InputBase, { label: 'Label B', ref: 'b' })
+            ]
+        });
+        const wrapper = mount(Wrapper);
+        const labels = wrapper.findAll('label');
+        const idA = labels[0].attributes('for');
+        const idB = labels[1].attributes('for');
+        expect(idA).toBeTruthy();
+        expect(idB).toBeTruthy();
+        expect(idA).not.toBe(idB);
+    });
+
+    it('exposes inputId and messageId as slot props', () => {
+        let capturedInputId: string | undefined;
+        let capturedMessageId: string | undefined;
+        mount(InputBase, {
+            props: { label: 'My Label' },
+            slots: {
+                default: (slotProps: { inputId?: string; messageId?: string }) => {
+                    capturedInputId = slotProps.inputId;
+                    capturedMessageId = slotProps.messageId;
+                    return [];
+                }
+            }
+        });
+        expect(capturedInputId).not.toBeUndefined();
+        expect(capturedMessageId).not.toBeUndefined();
+    });
+
+    it('sets aria-live="polite" on .input-message', () => {
+        const wrapper = mount(InputBase, {
+            props: { message: 'Hello' }
+        });
+        expect(wrapper.find('.input-message').attributes('aria-live')).toBe('polite');
+    });
+
+    it('sets role="alert" on .input-message when error is truthy, and not otherwise', () => {
+        const errorWrapper = mount(InputBase, {
+            props: { error: true }
+        });
+        expect(errorWrapper.find('.input-message').attributes('role')).toBe('alert');
+
+        const noErrorWrapper = mount(InputBase, {
+            props: { message: 'Hello' }
+        });
+        expect(noErrorWrapper.find('.input-message').attributes('role')).not.toBe('alert');
+    });
+
+    it('sets aria-hidden="true" on the required asterisk when rendered', () => {
+        const wrapper = mount(InputBase, {
+            props: { required: true }
+        });
+        expect(wrapper.find('.required').attributes('aria-hidden')).toBe('true');
     });
 });

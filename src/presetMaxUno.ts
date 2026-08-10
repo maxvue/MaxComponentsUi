@@ -18,10 +18,13 @@ export const presetMaxUno = () => {
         shortcuts: [
             [/^h[-_]?[fF](?:ull|lex)$/, () => ({ height: '100% !important' })],
             [/^font-size-(.+)$/, ([, s]) => ({ 'font-size': `${s}rem !important` })],
+            // Padding/margin: os eixos `w`/`h` são aliases de `x`/`y` (largura = esquerda+direita,
+            // altura = topo+baixo) nesta regra específica — NÃO se referem a width/height do elemento.
+            // Ex.: `pw-10` = padding horizontal, `mh-10` = margin vertical. Ver src/helpers/paddingMargin.ts.
             [/^[pm][tblrwhyx]?-?(\d+)$/, (params) => paddingMargin(params)],
             [/^w[-_]?[fF](?:ull|lex)$/, () => ({ width: '100% !important' })],
             [/^fs-(.+)$/, ([, s]) => ({ 'font-size': `${s}rem !important` })],
-            [/^ color-(.+)$/, ([, s]) => ({ color: `var(--${String(s).length > 3 ? s : 'gray-300'}) !important` })],
+            [/^color-(.+)$/, ([, s]) => ({ color: `var(--${String(s).length > 3 ? s : 'gray-300'}) !important` })],
             // Cores dinâmicas
             [/^text-(center|left|right)$/, ([, s]) => ({ 'text-align': s + ' !important' })],
             [/^bg-(.+)$/, ([, s]) => ({ 'background-color': s.startsWith('var(') || s.startsWith('#') || s.startsWith('rgb') || s.startsWith('hsl') ? s : `var(--${s})` })],
@@ -32,15 +35,15 @@ export const presetMaxUno = () => {
 
 
             // Tipografia
-            [/^w-?max-(.+)$/, ([, s]) => ({ 'max-width': s + 'px !important' })],
+            [/^w-?max-(.+)$/, ([, s]) => ({ 'max-width': `${getCssSize(s)} !important` })],
             [/^font-weight-(.+)$/, ([, s]) => ({ 'font-weight': s })],
-            [/^max-w-(.+)$/, ([, s]) => ({ 'max-width': s + 'px !important' })],
-            [/^h-?max-(.+)$/, ([, s]) => ({ 'max-height': s + 'px !important' })],
-            [/^max-h-(.+)$/, ([, s]) => ({ 'max-height': s + 'px !important' })],
-            [/^min-w-(.+)$/, ([, s]) => ({ 'min-width': s + 'px !important' })],
-            [/^w-?min-(.+)$/, ([, s]) => ({ 'min-width': s + 'px !important' })],
-            [/^h-?min-(.+)$/, ([, s]) => ({ 'min-height': s + 'px !important' })],
-            [/^min-h-(.+)$/, ([, s]) => ({ 'min-height': s + 'px !important' })],
+            [/^max-w-(.+)$/, ([, s]) => ({ 'max-width': `${getCssSize(s)} !important` })],
+            [/^h-?max-(.+)$/, ([, s]) => ({ 'max-height': `${getCssSize(s)} !important` })],
+            [/^max-h-(.+)$/, ([, s]) => ({ 'max-height': `${getCssSize(s)} !important` })],
+            [/^min-w-(.+)$/, ([, s]) => ({ 'min-width': `${getCssSize(s)} !important` })],
+            [/^w-?min-(.+)$/, ([, s]) => ({ 'min-width': `${getCssSize(s)} !important` })],
+            [/^h-?min-(.+)$/, ([, s]) => ({ 'min-height': `${getCssSize(s)} !important` })],
+            [/^min-h-(.+)$/, ([, s]) => ({ 'min-height': `${getCssSize(s)} !important` })],
 
             [/^hover-(.+)$/, ([, s]) => ({
                 '&:hover': {
@@ -75,7 +78,9 @@ export const presetMaxUno = () => {
 
             // Utilitários
             [/^elipsis$/, () => ({ 'white-space': 'nowrap', 'text-overflow': 'ellipsis', 'max-width': '100%', overflow: 'hidden' })],
-            [/^[sw]-?(\d+)$/, ([, d]) => ({ flex: `1 0 calc(${d}% - 8px)` })],
+            // Restrita ao prefixo `s-` (ex.: `s-50`, `s100`) para não colidir com `w-*`,
+            // que deve ser resolvido pelo presetWind3 com a semântica padrão de `width`.
+            [/^s-?(\d+)$/, ([, d]) => ({ flex: `1 0 calc(${d}% - 8px)` })],
             [/^opacity-?([\d.]+)$/, ([, d]) => {
                 const val = Number(d);
                 return { opacity: val > 1 ? `${val / 100}` : `${val}` };

@@ -16,7 +16,6 @@ describe('useConfirmStore', () => {
         expect(store.y).toBe(0);
         expect(store.width).toBe(0);
         expect(store.height).toBe(0);
-        expect(store.count_loadeds).toBe(0);
     });
 
     it('inicia com acceptProps padrão', () => {
@@ -70,5 +69,50 @@ describe('useConfirmStore', () => {
         expect(chamada).toBe(true);
         expect(store.acceptProps.label).toBe('Confirmar');
         expect(store.acceptProps.icon).toBe('mdi:check');
+    });
+
+    describe('confirm()', () => {
+        it('abre sempre com show = true, mesmo chamado repetidamente (nunca faz toggle)', () => {
+            const store = useConfirmStore();
+            store.confirm({
+                message: 'A?',
+                rejectProps: { label: 'Não', action: () => {} },
+                acceptProps: { label: 'Sim', action: () => {} },
+                x: 1, y: 2, width: 3, height: 4
+            });
+            expect(store.show).toBe(true);
+
+            // Chamar de novo (ex.: outro alvo clicado com o confirm já aberto)
+            // deve MANTER show=true (reabrir no novo alvo), nunca fechar.
+            store.confirm({
+                message: 'B?',
+                rejectProps: { label: 'Não', action: () => {} },
+                acceptProps: { label: 'Sim', action: () => {} },
+                x: 10, y: 20, width: 30, height: 40
+            });
+            expect(store.show).toBe(true);
+            expect(store.message).toBe('B?');
+            expect(store.x).toBe(10);
+        });
+
+        it('reseta messageIcon para null quando o payload não o informa (evita vazamento entre instâncias)', () => {
+            const store = useConfirmStore();
+            store.confirm({
+                message: 'Com ícone',
+                messageIcon: 'mdi:alert',
+                rejectProps: { label: 'Não', action: () => {} },
+                acceptProps: { label: 'Sim', action: () => {} },
+                x: 0, y: 0, width: 0, height: 0
+            });
+            expect(store.messageIcon).toBe('mdi:alert');
+
+            store.confirm({
+                message: 'Sem ícone',
+                rejectProps: { label: 'Não', action: () => {} },
+                acceptProps: { label: 'Sim', action: () => {} },
+                x: 0, y: 0, width: 0, height: 0
+            });
+            expect(store.messageIcon).toBeNull();
+        });
     });
 });

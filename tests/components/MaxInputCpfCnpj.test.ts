@@ -147,4 +147,19 @@ describe('MaxInputCpfCnpj', () => {
         expect(wrapper.emitted('update:modelValue')).toBeTruthy();
         expect(wrapper.emitted('complete')).toBeFalsy();
     });
+
+    it('emite update:modelValue com valor reduzido ao apagar o documento (não fica congelado)', async () => {
+        const wrapper = mountCpfCnpj({ cpf: true, modelValue: '52998224725' });
+        (wrapper.vm as any).temp_value = '52998224725';
+        await wrapper.vm.$nextTick();
+        expect(wrapper.emitted('update:modelValue')?.pop()).toEqual(['52998224725']);
+
+        (wrapper.vm as any).temp_value = '5299';
+        await wrapper.vm.$nextTick();
+        expect(wrapper.emitted('update:modelValue')?.pop()).toEqual(['5299']);
+
+        (wrapper.vm as any).temp_value = '';
+        await wrapper.vm.$nextTick();
+        expect(wrapper.emitted('update:modelValue')?.pop()).toEqual(['']);
+    });
 });

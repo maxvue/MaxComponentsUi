@@ -153,6 +153,7 @@ export const MaxMaps = defineAsyncComponent(() => import('./components/MaxMaps.v
 export { default as MaxPdfView } from './components/MaxPdfView.vue';
 export { default as MaxTable } from './components/MaxTable.vue';
 export { default as MaxTableFields } from './components/MaxTableFields.vue';
+export { default as MaxTableColumn } from './components/MaxTableColumn.vue';
 
 // Utils / Others
 export { default as MaxMsgLabels } from './components/MaxMsgLabels.vue';
@@ -166,6 +167,7 @@ export { default as MaxUserSection } from './components/MaxUserSection.vue';
 export { default as UserSection } from './components/MaxUserSection.vue';
 export { default as MaxPopoverConfirm } from './components/MaxPopoverConfirm.vue';
 export { default as MaxPopover } from './components/MaxPopover.vue';
+export { default as MaxTogglePopover } from './components/MaxTogglePopover.vue';
 export { default as MaxModal } from './components/MaxModal.vue';
 export { default as MaxPopoverMenu } from './components/MaxPopoverMenu.vue';
 export { default as MaxToast } from './components/MaxToast.vue';

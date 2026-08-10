@@ -136,6 +136,39 @@ describe('MaxModal', () => {
         expect(store.show_id).toBe(null);
     });
 
+    it('show() (sem argumento) abre o modal chamando open() internamente', () => {
+        vi.useFakeTimers();
+        const wrapper = mountModal();
+        const vm = wrapper.vm as any;
+        const store = useModalStore();
+
+        expect(store.show_id).toBe(null);
+
+        // Chamada sem argumento, como um consumidor externo faria via template ref
+        vm.show();
+
+        expect(store.show_id).toBe(vm.id);
+
+        vi.useRealTimers();
+    });
+
+    it('hide() (sem argumento) fecha o modal chamando close() internamente', () => {
+        vi.useFakeTimers();
+        const wrapper = mountModal();
+        const vm = wrapper.vm as any;
+        const store = useModalStore();
+
+        vm.open();
+        expect(store.show_id).toBe(vm.id);
+
+        vm.hide();
+        vi.advanceTimersByTime(400);
+
+        expect(store.show_id).toBe(null);
+
+        vi.useRealTimers();
+    });
+
     it('expõe open() e close() via defineExpose', () => {
         const wrapper = mountModal();
         const vm = wrapper.vm as any;

@@ -1,71 +1,55 @@
 <template>
-    <InputBase v-bind="props" class="input-base-phone-mail-main-div" :value="temp_value" :done="done ?? undefined" :caution="caution" :error="error_msg ?? undefined" :icon-right="loading ? 'loading' : undefined">
-        <InputText type="text" v-model="temp_value" v-maska="maskValue" autoClear="false" slotChar=" " placeholder="00 . 000 - 000" @blur="checkDone()" />
+    <InputBase v-bind="props" class="input-base-cep-main-div" :value="temp_value" :done="done ?? undefined" :caution="caution" :error="error_msg ?? undefined" :icon-right="loading ? 'loading' : undefined">
+        <InputText type="text" v-model="temp_value" v-maska="maskValue" autoClear="false" slotChar=" " placeholder="00000-000" />
     </InputBase>
 </template>
 
 /**
  * Componente de entrada para CEP (Código de Endereçamento Postal).
- * Possui máscara automática (00.000-000) e validação integrada.
+ * Possui máscara automática (00000-000) e validação integrada.
  */
 <script setup lang="ts">
     import { formatCep, onlyNumbers, cepIsValid } from '@maxvue/max-use';
-    import type { Ref } from 'vue';
-    import { ref, computed, watch, useAttrs } from 'vue';
+    import { computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
     import InputText from 'primevue/inputtext';
     import { vMaska } from 'maska/vue';
+    import { useMirroredModel } from '../helpers/useMirroredModel';
+    import type { InputBaseProps } from '../types';
 
     const attrs: any = useAttrs();
 
     const props = withDefaults(
-        defineProps<{
+        defineProps<InputBaseProps & {
             /** Valor do CEP (apenas números) */
             modelValue: any;
             /** Estado de carregamento */
             loading?: boolean;
-            /** Ícone opcional */
-            icon?: string | undefined;
-            /** Alias para o ícone */
-            i?: string | undefined;
-            /** Desabilita o campo */
-            disabled?: boolean | undefined;
-            /** Estilo FloatLabel */
-            float?: boolean | undefined;
-            /** Mensagem de feedback (alias) */
-            msg?: string | undefined;
-            /** Mensagem de feedback */
-            message?: string | undefined;
-            /** Ícone da mensagem de feedback */
-            iconMessage?: string | undefined;
-            /** Rótulo do campo */
-            label?: string | undefined;
-            /** Define se a validação foi bem-sucedida */
-            done?: boolean | undefined;
-            /** Mensagem ou estado de erro */
-            error?: string | boolean | undefined;
-            /** Valor alvo para comparação (opcional) */
-            targetValue?: string;
-            /** Mensagem ou estado de atenção */
-            caution?: string | boolean | undefined;
-            /** Define se o campo é obrigatório */
-            required?: boolean;
         }>(),
         { modelValue: '', loading: false, done: undefined, required: false, caution: undefined }
     );
 
     const emit = defineEmits(['update:modelValue', 'complete']);
 
-    const temp_value = ref(formatCep(props.modelValue));
+    // temp_value guarda o valor FORMATADO (ex.: '01001-000'), enquanto
+    // props.modelValue e o emitido/recebido em formato cru (so digitos).
+    // Por isso: `transform` desfaz a formatacao antes de emitir, e `compare`
+    // normaliza ambos os lados para digitos antes de decidir se reatribui o
+    // ref local — evita que a formatacao local seja descartada quando o
+    // valor externo "equivalente" (mesmos digitos) volta via prop, o mesmo
+    // guard que a Etapa 7c precisou preservar aqui manualmente.
+    const temp_value = useMirroredModel(
+        { get modelValue() { return formatCep(props.modelValue); } },
+        emit as (event: 'update:modelValue', value: string) => void,
+        {
+            transform: (value: string) => onlyNumbers(value ?? ''),
+            compare: (a: string, b: string) => onlyNumbers(a ?? '') === onlyNumbers(b ?? '')
+        }
+    );
     const temp_value_numbers = computed(() => onlyNumbers(temp_value.value ?? ''));
-    const maskValue = computed(() => ({ tokens: { '#': { pattern: /[0-9]/ } }, mask: '##.### - ###' }));
+    const maskValue = computed(() => ({ tokens: { '#': { pattern: /[0-9]/ } }, mask: '#####-###' }));
 
     const isValidCep = computed(() => cepIsValid(temp_value_numbers.value));
-    const isDone: Ref = ref(props.done ?? null);
-
-    const checkDone = () => {
-        isDone.value = done.value;
-    };
 
     const done = computed(() => {
         if (props.done !== undefined) return props.done ?? null;
@@ -85,15 +69,10 @@
         return attrs_error_message ?? 'CEP inválido';
     });
 
+    // Emite 'complete' quando o CEP se torna valido. A emissao de
+    // 'update:modelValue' em si fica a cargo do useMirroredModel acima.
     watch(temp_value, () => {
-        const numbers = onlyNumbers(temp_value.value);
-        emit('update:modelValue', numbers);
-        if (isValidCep.value) emit('complete', numbers);
-    });
-
-    watch(() => props.modelValue,() => {
-        const numbers = onlyNumbers(props.modelValue);
-        if (numbers !== onlyNumbers(temp_value.value)) temp_value.value = numbers;
+        if (isValidCep.value) emit('complete', temp_value_numbers.value);
     });
 </script>
 

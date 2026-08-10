@@ -8,8 +8,8 @@
         <Teleport to="body" :disabled="! isOpen">
             <div style="position: fixed;" v-tooltip="null" class="popover-item" >
                 <MaxAnimateFade :show="isOpen" :duration="0.3">
-                    <div class="background-popover" @click.stop="hide" v-if="isOpen" :style="{opacity: style.opacity}">
-                        <div class="max-popover-dialog" ref="el" :style="{top: style.top + 'px', left: style.left + 'px'}"  :class="[style.isTop ? 'is-top' : 'is-bottom', style.isLeft ? 'is-left' : 'is-right', props.noPicker ? 'no-picker' : '', props.class]" @click.stop="() => {}" >
+                    <div class="background-popover" @click.stop="hide" v-if="isOpen" :style="{opacity: position.opacity}">
+                        <div class="max-popover-dialog" ref="el" :style="{top: position.top + 'px', left: position.left + 'px'}"  :class="[position.isTop ? 'is-top' : 'is-bottom', position.isLeft ? 'is-left' : 'is-right', props.noPicker ? 'no-picker' : '', props.class]" @click.stop="() => {}" >
                             <slot name="header">
                                 <MaxGrid s100 class="max-popover-header" pt0 mt0 mb-15>
                                     <MaxTitle1 s90  :h1="props.title ?? 'Titulo'" :h2="props.subTitle ?? 'Sub Titulo'" p0 m0 />
@@ -30,7 +30,8 @@
 
 <script setup lang="ts">
     import { useElementSize, useWindowSize, useElementBounding, useDefaultReset } from '@maxvue/max-use';
-    import { useTemplateRef, ref, computed } from 'vue';
+    import { useTemplateRef, ref, computed, useId } from 'vue';
+    import { usePopoverStore } from '../stores/usePopover.Store';
     import MaxIconButton from './MaxIconButton.vue';
     import MaxButton from './MaxButton.vue';
     import MaxTitle1 from './MaxTitle1.vue';
@@ -47,7 +48,7 @@
         i?: string;
         /** link para abrir em nova aba */
         blank?: string;
-        /** Rotação do ícone em graus */
+        /** Rota para navegação ao clicar */
         route?: string;
         /** Label para botão */
         label?: string;
@@ -85,61 +86,63 @@
         dark: 0.4,
         light: undefined,
         loading: false,
-        message: 'Deseja continuar?',
         noPicker: false
     });
 
     const size_icon = computed(() => getCssSize(String(props.size ?? props.sizeIcon ?? props.iconSize ?? 1.1)) );
 
-    const isOpen = ref(false);
+    const id = ref(useId());
+
+    const popover_store = usePopoverStore();
+
+    const isOpen = computed(() => popover_store.show_id === id.value);
 
     const el = useTemplateRef('el');
     const btn_el = useTemplateRef('btn_el');
 
+    const { x, y, width: width_btn, height: height_btn } = useElementBounding(btn_el as any);
+    const { width: width_el, height: height_el } = useElementSize(el as any);
+    const { width: window_width, height: window_height } = useWindowSize();
+
     const style: any = useDefaultReset({
-        top: 0,
-        left: 0,
-        isTop: false,
-        isLeft: false,
         opacity: 0
     });
 
+    const position = computed(() => {
+        const data = {
+            top: y.value + height_btn.value + 15,
+            left: x.value + (width_btn.value / 2) - (width_el.value / 2),
+            isTop: false,
+            isLeft: false,
+            opacity: style.value.opacity
+        };
+
+        if (data.top + height_el.value + 15 > window_height.value) {
+            data.top = y.value - height_btn.value - height_el.value;
+            data.isTop = true;
+        }
+
+        if (data.left + width_el.value + 15 > window_width.value) {
+            data.left = x.value + (width_btn.value) - (width_el.value) + 10;
+            data.isLeft = true;
+        }
+
+        return data;
+    });
 
     const toggle = () => {
-        isOpen.value = !isOpen.value;
+        if (style.value.opacity !== 0) style.reset();
+
+        popover_store.toggle(id.value);
 
         setTimeout(() => {
-            const { x, y, width: width_btn, height: height_btn } = useElementBounding(btn_el as any);
-            const { width: width_el, height: height_el } = useElementSize(el as any);
-            const { width: window_width, height: window_height } = useWindowSize();
-            const data = {
-                top: y.value + height_btn.value + 15,
-                left: x.value + (width_btn.value / 2) - (width_el.value / 2),
-                isTop: false,
-                isLeft: false,
-                opacity: 0
-            };
-
-
-            if (data.top + height_el.value + 15 > window_height.value) {
-                data.top = y.value - height_btn.value - height_el.value;
-                data.isTop = true;
-            }
-
-            if (data.left + width_el.value + 15 > window_width.value) {
-                data.left = x.value + (width_btn.value) - (width_el.value) + 10;
-                data.isLeft = true;
-            }
-
-            style.value = data;
-
-
             style.value.opacity = 1;
         }, 1);
     };
 
     const hide = () => {
-        isOpen.value = false;
+        style.reset();
+        popover_store.hide();
     };
 
     const show = toggle;

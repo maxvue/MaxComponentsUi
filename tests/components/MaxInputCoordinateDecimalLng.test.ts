@@ -89,4 +89,12 @@ describe('MaxInputCoordinateDecimalLng', () => {
         });
         expect(wrapper.vm.error).toBe(false);
     });
+
+    it('campo obrigatório e vazio não deve retornar done=true', async () => {
+        const wrapper = mount(MaxInputCoordinateDecimalLng, {
+            props: { modelValue: '', required: true },
+            global: globalOptions
+        });
+        expect(wrapper.vm.done).not.toBe(true);
+    });
 });

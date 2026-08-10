@@ -31,6 +31,22 @@ describe('MaxInputPhoneMail', () => {
         expect(wrapper.findComponent(InputBase).exists()).toBe(true);
     });
 
+    it('reflete o modo email imediatamente no mount, sem interação do usuário (regressão)', () => {
+        const wrapper = mountPhoneMail({ modelValue: 'usuario@email.com' });
+
+        expect((wrapper.vm as any).method).toBe('email');
+        expect((wrapper.vm as any).name_method).toBe('Email');
+        expect(wrapper.findComponent(InputBase).props('label')).toBe('Email');
+    });
+
+    it('reflete o modo whatsapp imediatamente no mount, sem interação do usuário (regressão)', () => {
+        const wrapper = mountPhoneMail({ modelValue: '11999887766' });
+
+        expect((wrapper.vm as any).method).toBe('whatsapp');
+        expect((wrapper.vm as any).name_method).toBe('Whatsapp');
+        expect(wrapper.findComponent(InputBase).props('label')).toBe('Whatsapp');
+    });
+
     it('valida email válido e marca done=true após blur', async () => {
         const wrapper = mountPhoneMail({ modelValue: 'usuario@email.com' });
         const input = wrapper.find('input');
@@ -159,5 +175,69 @@ describe('MaxInputPhoneMail', () => {
         const wrapper = mountPhoneMail({ modelValue: 'test@email.com' });
         await wrapper.setProps({ modelValue: null as any });
         expect((wrapper.vm as any).temp_value).toBe('');
+    });
+
+    it('emite valor desmascarado (sem +55, parênteses, traços ou espaços) para telefone', async () => {
+        const wrapper = mountPhoneMail();
+        const input = wrapper.find('input');
+        await input.setValue('11999998888');
+
+        const emitted = wrapper.emitted('update:modelValue');
+        expect(emitted).toBeTruthy();
+        const lastValue = emitted![emitted!.length - 1][0];
+        expect(lastValue).not.toContain('+55');
+        expect(lastValue).not.toMatch(/[()\-\s]/);
+        expect(lastValue).toBe('1199998888');
+    });
+
+    it('emite o valor de e-mail sem parênteses/traço/espaço residual da normalização', async () => {
+        const wrapper = mountPhoneMail();
+        const input = wrapper.find('input');
+        await input.setValue('usuario@email.com');
+
+        const emitted = wrapper.emitted('update:modelValue');
+        expect(emitted).toBeTruthy();
+        const lastValue = emitted![emitted!.length - 1][0];
+        expect(lastValue).not.toMatch(/[()\-\s]/);
+        expect(lastValue).toBe('usuario@email.com');
+    });
+
+    it('não produz mais um "$" literal no telefone fixo (8, 7 ou 6 dígitos após o DDD)', async () => {
+        const wrapper = mountPhoneMail();
+        const input = wrapper.find('input');
+        await input.setValue('1188888888');
+
+        expect((wrapper.vm as any).temp_value).not.toContain('$');
+
+        const emitted = wrapper.emitted('update:modelValue');
+        if (emitted) {
+            const lastValue = emitted[emitted.length - 1][0];
+            expect(lastValue).not.toContain('$');
+        }
+    });
+
+    it('não aceita espaços dentro de um e-mail digitado', async () => {
+        const wrapper = mountPhoneMail();
+        const input = wrapper.find('input');
+        await input.setValue('user name@mail.com');
+
+        expect((wrapper.vm as any).temp_value).not.toMatch(/\s/);
+    });
+
+    it('muda de modo telefone para email (e vice-versa) atualizando method/name_method/máscara via watch', async () => {
+        const wrapper = mountPhoneMail();
+        const input = wrapper.find('input');
+
+        await input.setValue('11999998888');
+        expect((wrapper.vm as any).method).toBe('whatsapp');
+        expect(wrapper.findComponent(InputBase).props('label')).toBe('Whatsapp');
+
+        await input.setValue('usuario@email.com');
+        expect((wrapper.vm as any).method).toBe('email');
+        expect(wrapper.findComponent(InputBase).props('label')).toBe('Email');
+
+        await input.setValue('11999998888');
+        expect((wrapper.vm as any).method).toBe('whatsapp');
+        expect(wrapper.findComponent(InputBase).props('label')).toBe('Whatsapp');
     });
 });

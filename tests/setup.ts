@@ -39,12 +39,17 @@ Object.defineProperty(globalThis, 'getComputedStyle', {
                 '--background-0': '#ffffff',
                 '--gray-300': '#d1d5db'
             };
+            if (!(prop in cssVars)) console.warn(`[tests/setup] getComputedStyle: variável CSS desconhecida "${prop}" retornando string vazia — considere adicioná-la ao mock`);
+
             return cssVars[prop] ?? '';
         })
     }))
 });
 
-// Mock global do fetch para testes de useIconStore
+// Mock global do fetch para testes de useIconStore.
+// Sempre resolve com sucesso por padrão — testes que precisam exercitar caminhos de
+// erro (ex.: tests/stores/useIcon.Store.test.ts) devem sobrescrever localmente com
+// vi.spyOn(globalThis, 'fetch').mockRejectedValue(...) ou .mockResolvedValue({ ok: false, ... }).
 globalThis.fetch = vi.fn(() =>
     Promise.resolve({
         json: () => Promise.resolve({}),
@@ -53,7 +58,14 @@ globalThis.fetch = vi.fn(() =>
     } as Response)
 );
 
-// Mock mínimo do indexedDB para componentes que usam cache via IDB (getCachedApiIDB)
+// Mock mínimo do indexedDB para componentes que usam cache via IDB (getCachedApiIDB).
+// LIMITAÇÃO CONHECIDA: este mock nunca dispara onsuccess/onerror/onupgradeneeded — qualquer
+// código que aguarde um desses callbacks para resolver fica pendurado indefinidamente, e
+// nenhum teste vai perceber isso automaticamente (a promise/callback nunca é chamada, então
+// o teste que depende dela para completar simplesmente não avança). Testes que precisam
+// validar de verdade o caminho de sucesso/erro do IndexedDB devem criar um mock local mais
+// completo naquele arquivo de teste (ex.: disparando request.onsuccess manualmente via
+// setTimeout/queueMicrotask, ou usando fake timers) — não depender deste mock global para isso.
 if (typeof globalThis.indexedDB === 'undefined') {
     const request: any = {
         result: null,
@@ -79,7 +91,13 @@ config.global.plugins = [
     [PrimeVue, { ripple: false }]
 ];
 
-// Stubs globais para componentes que dependem de diretivas externas
+// Stubs globais para componentes que dependem de diretivas externas.
+// Intencionalmente stubadas como objetos vazios (no-op) para simplicidade da maioria dos
+// testes — nenhuma formatação de máscara real nem tooltip real acontece com esses stubs.
+// Testes que precisam validar o comportamento REAL da máscara (Maska) devem importar
+// `vMaska` de 'maska/vue' e registrá-la localmente no mount(), sem alterar este stub global:
+//   import { vMaska } from 'maska/vue';
+//   mount(Componente, { global: { directives: { maska: vMaska } } });
 config.global.directives = {
     tooltip: {},
     maska: {}

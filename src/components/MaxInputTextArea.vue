@@ -81,13 +81,22 @@
 
     const computedLines = computed(() => (temp_value.value ?? '').split(/\r\n|\r|\n/).length);
 
-    const lines = computed(() => props.rows ?? (computedLines.value > (props.minLines ?? props.minRows) ? computedLines.value : (props.minLines ?? props.minRows)));
+    const minLinesNormalized = computed(() => {
+        const value = Number(props.minLines ?? props.minRows);
+        return Number.isNaN(value) ? 1 : value;
+    });
 
-    watch( temp_value, () => emit('update:modelValue', temp_value.value),{ immediate: true });
+    const lines = computed(() => props.rows ?? (computedLines.value > minLinesNormalized.value ? computedLines.value : minLinesNormalized.value));
+
+    // Consolidado em um único watch: emite o v-model e reajusta a altura sempre que
+    // temp_value mudar. immediate: true preservado do watch original de emissão —
+    // sem ele o primeiro resize/emit no mount seria perdido (regressão já vista na Etapa 7b).
+    watch(temp_value, () => {
+        emit('update:modelValue', temp_value.value);
+        nextTick(resize);
+    }, { immediate: true });
 
     watch(() => props.modelValue, (val) => temp_value.value = val ?? '');
-
-    watch(temp_value, () => nextTick(resize));
 </script>
 
 <style lang="scss">

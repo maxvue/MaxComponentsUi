@@ -23,7 +23,16 @@
                 <MaxIcon i="mdi:close" size="1.1" color="inherit" />
             </button>
 
-            <!-- Barra de progresso -->
+            <!--
+                Barra de progresso.
+                LIMITAÇÃO CONHECIDA: `animationDuration` usa sempre `toast.duration` (a duração
+                original do toast), não o `remaining` atual. Após um pause()/resume() (hover),
+                `remaining` é recalculado e clampado em no mínimo 500ms (ver useToast.Store.ts,
+                função `pause`), mas a animação CSS reinicia com a duração total original — a
+                barra visual passa a dessincronizar do tempo real restante até a remoção do toast.
+                Corrigir plenamente exigiria derivar `animationDuration` de `toast.remaining` e
+                reiniciar a animação a cada resume(); fora do escopo desta correção pontual.
+            -->
             <div class="max-toast-progress">
                 <div
                     :class="['max-toast-progress-bar', { paused: toast.paused }]"

@@ -56,7 +56,7 @@
     });
 
     const error = computed(() => {
-        if (isBlank(temp_value.value) && props.required) return 'Campo obrigatório';
+        if (isBlank(temp_value.value)) return props.required ? 'Campo obrigatório' : false;
         if (!done.value) return 'Latitude inválida.';
         return false;
     });
@@ -67,7 +67,7 @@
         const tokens = {
             '#': { pattern: /[0-9]/ },
             '9': { pattern: /[0-9]/, optional: true },
-            '3': { pattern: /[0-3-]/, optional: true }
+            '3': { pattern: /[0-5-]/, optional: true }
         };
 
         return {
@@ -81,8 +81,10 @@
         temp_value,
         () => {
             if (temp_value?.value < 0) negative.value = true;
-            emit('update:modelValue', temp_value.value);
-            if (done.value) emit('complete', temp_value.value);
+            else negative.value = false;
+            const val = toNumber(temp_value.value, 6);
+            emit('update:modelValue', val);
+            if (done.value) emit('complete', val);
 
         },
         { immediate: true }

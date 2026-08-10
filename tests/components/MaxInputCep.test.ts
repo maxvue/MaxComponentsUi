@@ -102,10 +102,11 @@ describe('MaxInputCep', () => {
         // the important part is that watch is triggered
     });
 
-    it('checkDone is called on blur', async () => {
-        const wrapper = mountCep({ modelValue: '123' });
+    it('aplica a máscara 00000-000 (sem ponto/espaços)', async () => {
+        const wrapper = mountCep({ modelValue: '' });
         const input = wrapper.find('input');
-        await input.trigger('blur');
-        // Doesn't return anything but we cover the function call
+        await input.setValue('01001000');
+        await input.trigger('input');
+        expect(input.element.value).toBe('01001-000');
     });
 });

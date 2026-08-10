@@ -46,7 +46,6 @@
 
     const done = computed(() => {
         if (props.done !== undefined) return props.done;
-        if (isBlank(temp_value.value) && props.required) return true;
         return !(only_numbers.value <= -74 || only_numbers.value > -32.4 || only_numbers.value === 0 || isNaN(only_numbers.value));
     });
 

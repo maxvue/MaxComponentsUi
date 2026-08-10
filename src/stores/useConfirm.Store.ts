@@ -2,21 +2,33 @@ import { defineStore } from 'pinia';
 import type { Ref } from 'vue';
 import { ref } from 'vue';
 
+type ConfirmActionProps = { label: string; icon?: string; action?: (event?: any) => void };
+
+type ConfirmPayload = {
+    message: string;
+    messageIcon?: string | null;
+    rejectProps: ConfirmActionProps;
+    acceptProps: ConfirmActionProps;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+};
+
 export const useConfirmStore = defineStore('confirm.popover', () => {
 
     const message: Ref<string> = ref('Deseja continuar?');
     const messageIcon: Ref<string | null> = ref(null);
-    const rejectProps: Ref<{ label: string; icon?: string; action?: (event?: any) => void }> = ref({
+    const rejectProps: Ref<ConfirmActionProps> = ref({
         label: 'Não',
         icon: undefined,
         action: () => {}
     });
-    const acceptProps: Ref<{ label: string; icon?: string; action?: (event?: any) => void }> = ref({
+    const acceptProps: Ref<ConfirmActionProps> = ref({
         label: 'Sim',
         icon: undefined,
         action: () => {}
     });
-    const count_loadeds = ref(0);
 
     const show: Ref<boolean> = ref(false);
 
@@ -29,5 +41,23 @@ export const useConfirmStore = defineStore('confirm.popover', () => {
         show.value = false;
     };
 
-    return { message, messageIcon, rejectProps, acceptProps, show, x, y, width, height, count_loadeds, hide };
+    /**
+     * Abre o confirm no alvo informado, resetando todos os campos para os
+     * valores do payload (nunca faz toggle — sempre abre no alvo clicado,
+     * mesmo que outro confirm já esteja aberto, evitando vazamento de
+     * estado entre instâncias como `messageIcon`).
+     */
+    const confirm = (payload: ConfirmPayload) => {
+        message.value = payload.message;
+        messageIcon.value = payload.messageIcon ?? null;
+        rejectProps.value = payload.rejectProps;
+        acceptProps.value = payload.acceptProps;
+        x.value = payload.x;
+        y.value = payload.y;
+        width.value = payload.width;
+        height.value = payload.height;
+        show.value = true;
+    };
+
+    return { message, messageIcon, rejectProps, acceptProps, show, x, y, width, height, hide, confirm };
 });

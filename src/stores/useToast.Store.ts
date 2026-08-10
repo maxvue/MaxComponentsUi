@@ -92,7 +92,14 @@ export const useToastStore = defineStore('max-toast', () => {
         return id;
     };
 
-    /** Pausa o timer de um toast (ao hover) */
+    /**
+     * Pausa o timer de um toast (ao hover).
+     *
+     * NOTA: `remaining` é clampado em no mínimo 500ms para o timer de remoção não parecer
+     * instantâneo. A barra de progresso visual em `MaxToast.vue`, porém, usa `animationDuration`
+     * baseado em `toast.duration` (duração original), não em `remaining` — após pause()/resume()
+     * ela fica dessincronizada do tempo real restante. Ver comentário em `MaxToast.vue`.
+     */
     const pause = (id: string): void => {
         const toast = items.value.find((t) => t.id === id);
         if (!toast || toast.paused) return;

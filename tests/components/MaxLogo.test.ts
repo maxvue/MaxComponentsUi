@@ -22,16 +22,16 @@ describe('MaxLogo', () => {
         expect(wrapper.find('.logo').exists()).toBe(true);
     });
 
-    it('renderiza imagem com src padrão', () => {
+    it('não renderiza <img> quando src não é informado (evita 404 por padrão)', () => {
         const wrapper = mountLogo();
         const img = wrapper.find('img');
-        expect(img.exists()).toBe(true);
-        expect(img.attributes('src')).toBe('get_file?file=logo.svg');
+        expect(img.exists()).toBe(false);
     });
 
     it('aceita src customizado', () => {
         const wrapper = mountLogo({ src: '/assets/logo-custom.png' });
         const img = wrapper.find('img');
+        expect(img.exists()).toBe(true);
         expect(img.attributes('src')).toBe('/assets/logo-custom.png');
     });
 
@@ -39,5 +39,15 @@ describe('MaxLogo', () => {
         const wrapper = mountLogo();
         const link = wrapper.find('.router-link');
         expect(link.exists()).toBe(true);
+    });
+
+    it('aplica atributo rounded quando prop rounded=true', () => {
+        const wrapper = mountLogo({ rounded: true });
+        expect(wrapper.find('.logo').attributes('rounded')).toBeDefined();
+    });
+
+    it('não aplica atributo rounded por padrão', () => {
+        const wrapper = mountLogo();
+        expect(wrapper.find('.logo').attributes('rounded')).toBeUndefined();
     });
 });

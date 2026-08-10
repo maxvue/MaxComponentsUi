@@ -271,6 +271,13 @@ describe('MaxTabPanel', () => {
         expect(panel.attributes('aria-labelledby')).toContain('-tab-0');
     });
 
+    it('aria-labelledby do painel corresponde ao id real do tab', () => {
+        const wrapper = mountFull();
+        const panel = wrapper.find('.max-tab-panel');
+        const tab = wrapper.findAll('.max-tab')[0];
+        expect(panel.attributes('aria-labelledby')).toBe(tab.attributes('id'));
+    });
+
     it('com lazy, o painel inativo nunca foi montado', () => {
         const wrapper = mountFull({ lazy: true });
         expect(wrapper.find('.p1').exists()).toBe(false);
@@ -287,5 +294,29 @@ describe('MaxTabPanel', () => {
         await wrapper.setProps({ value: '1' });
         await wrapper.setProps({ value: '0' });
         expect(wrapper.findAll('.max-tab-panel').length).toBe(2);
+    });
+
+    it('sem v-model:value (modo nao controlado), o primeiro tab fica selecionado e seu painel visivel', async () => {
+        const wrapper = mount(MaxTabs, {
+            slots: {
+                default: `
+                    <MaxTabList>
+                        <MaxTab value="0">Um</MaxTab>
+                        <MaxTab value="1">Dois</MaxTab>
+                    </MaxTabList>
+                    <MaxTabPanels>
+                        <MaxTabPanel value="0"><span class="p0">Painel Um</span></MaxTabPanel>
+                        <MaxTabPanel value="1"><span class="p1">Painel Dois</span></MaxTabPanel>
+                    </MaxTabPanels>
+                `
+            },
+            global: { components: { MaxTabList, MaxTab, MaxTabPanels, MaxTabPanel } }
+        });
+        await nextTick();
+        const tabs = wrapper.findAll('.max-tab');
+        expect(tabs[0].attributes('aria-selected')).toBe('true');
+        expect(tabs[1].attributes('aria-selected')).toBe('false');
+        expect(wrapper.find('.p0').isVisible()).toBe(true);
+        expect(wrapper.find('.p1').isVisible()).toBe(false);
     });
 });

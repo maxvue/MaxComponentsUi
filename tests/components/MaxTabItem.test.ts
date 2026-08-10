@@ -70,7 +70,7 @@ describe('MaxTabItem — slot #title', () => {
     });
 
     it('sem o slot, o title via prop continua renderizando (compatibilidade)', async () => {
-        const wrapper = mountTabs(`<MaxTabItem value="a" title="Padrao" />`);
+        const wrapper = mountTabs('<MaxTabItem value="a" title="Padrao" />');
         await settle();
         expect(wrapper.find('.max-tab-item-title').text()).toContain('Padrao');
         wrapper.unmount();

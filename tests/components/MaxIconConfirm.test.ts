@@ -13,6 +13,7 @@ function mountIconConfirm(props: Record<string, any> = {}) {
             plugins: [pinia],
             stubs: {
                 MaxIconButton: {
+                    name: 'MaxIconButton',
                     template: '<button class="icon-button"></button>',
                     props: ['icon', 'i', 'dark', 'light']
                 }
@@ -67,5 +68,27 @@ describe('MaxIconConfirm', () => {
 
         vm.acceptProps.action();
         expect(chamado).toBe(true);
+    });
+
+    it('não vaza message/messageIcon/rejectProps/acceptProps como atributos crus para o MaxIconButton', () => {
+        const wrapper = mountIconConfirm({
+            message: 'Mensagem customizada',
+            messageIcon: 'mdi:info',
+            rejectProps: { label: 'Não quero' },
+            acceptProps: { label: 'Quero' }
+        });
+
+        const maxIconButton = wrapper.findComponent({ name: 'MaxIconButton' });
+        expect(maxIconButton.exists()).toBe(true);
+
+        // Nenhuma dessas props de confirmação deve chegar ao MaxIconButton (nem como prop, nem como attr)
+        expect(maxIconButton.props('message')).toBeUndefined();
+        expect(maxIconButton.props('messageIcon')).toBeUndefined();
+        expect(maxIconButton.props('rejectProps')).toBeUndefined();
+        expect(maxIconButton.props('acceptProps')).toBeUndefined();
+        expect(maxIconButton.attributes('message')).toBeUndefined();
+        expect(maxIconButton.attributes('messageicon')).toBeUndefined();
+        expect(maxIconButton.attributes('rejectprops')).toBeUndefined();
+        expect(maxIconButton.attributes('acceptprops')).toBeUndefined();
     });
 });

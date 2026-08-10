@@ -216,6 +216,23 @@ describe('MaxCreditCard', () => {
         });
     });
 
+    describe('detecção de bandeira (detected_type)', () => {
+        it('classifica número real da Diners como diners', () => {
+            const wrapper = mountCard({ number: '30569309025904' });
+            expect((wrapper.vm as any).detected_type).toBe('diners');
+        });
+
+        it('classifica número real da Discover como discover', () => {
+            const wrapper = mountCard({ number: '6011111111111117' });
+            expect((wrapper.vm as any).detected_type).toBe('discover');
+        });
+
+        it('classifica número real da Hipercard como hipercard', () => {
+            const wrapper = mountCard({ number: '6062825624254001' });
+            expect((wrapper.vm as any).detected_type).toBe('hipercard');
+        });
+    });
+
     describe('Trio de inputs de cartão de crédito (MaxInputCreditCard*)', () => {
         it('preserva InputBase como wrapper e remove PrimeVue do MaxInputCreditCard', () => {
             const wrapper = mount(MaxInputCreditCard);
@@ -264,6 +281,43 @@ describe('MaxCreditCard', () => {
             await input.trigger('blur');
             const ib = wrapper.findComponent(InputBase);
             expect(ib.props('done')).toBe(true);
+        });
+
+        it('eco do v-model não reatribui temp_value quando modelValue muda para o mesmo valor normalizado (MaxInputCreditCard)', async () => {
+            const wrapper = mount(MaxInputCreditCard, {
+                props: { modelValue: '4111111111111111' }
+            });
+            // Digita o valor mascarado manualmente (simula o que v-maska faria) para que
+            // temp_value fique com formatação diferente do modelValue (dígitos puros) —
+            // cenário exato em que a comparação ingênua reescreveria o input a cada digitação.
+            const vm = wrapper.vm as any;
+            vm.temp_value = '4111 1111 1111 1111';
+            await wrapper.vm.$nextTick();
+
+            // mesmo número (apenas normalizado é comparado): não deve reatribuir temp_value
+            await wrapper.setProps({ modelValue: '4111111111111111' });
+            expect(vm.temp_value).toBe('4111 1111 1111 1111');
+        });
+
+        it('eco do v-model não reatribui temp_value quando modelValue muda para o mesmo valor normalizado (MaxInputCreditCardCvv)', async () => {
+            const wrapper = mount(MaxInputCreditCardCvv, {
+                props: { modelValue: '123' }
+            });
+            const vm = wrapper.vm as any;
+            await wrapper.setProps({ modelValue: '123' });
+            expect(vm.temp_value).toBe('123');
+        });
+
+        it('eco do v-model não reatribui temp_value quando modelValue muda para o mesmo valor normalizado (MaxInputCreditCardDate)', async () => {
+            const wrapper = mount(MaxInputCreditCardDate, {
+                props: { modelValue: '1230' }
+            });
+            const vm = wrapper.vm as any;
+            vm.temp_value = '12/30';
+            await wrapper.vm.$nextTick();
+
+            await wrapper.setProps({ modelValue: '1230' });
+            expect(vm.temp_value).toBe('12/30');
         });
     });
 });

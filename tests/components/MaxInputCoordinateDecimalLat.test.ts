@@ -22,7 +22,7 @@ describe('MaxInputCoordinateDecimalLat', () => {
         wrapper.vm.temp_value = '-23.550520';
         await wrapper.vm.$nextTick();
         expect(wrapper.emitted('update:modelValue')).toBeTruthy();
-        expect(wrapper.emitted('update:modelValue')?.pop()).toEqual(['-23.550520']);
+        expect(wrapper.emitted('update:modelValue')?.pop()).toEqual([-23.55052]);
         // check negative ref
         expect(wrapper.vm.negative).toBe(true);
     });
@@ -90,5 +90,62 @@ describe('MaxInputCoordinateDecimalLat', () => {
             global: globalOptions
         });
         expect(wrapper.vm.error).toBe(false);
+    });
+
+    it('aceita latitude 4.x pela máscara (dígito "4" no primeiro token) e marca done=true', async () => {
+        const wrapper = mount(MaxInputCoordinateDecimalLat, {
+            props: { modelValue: '' },
+            global: globalOptions
+        });
+        wrapper.vm.temp_value = '4.5';
+        await wrapper.vm.$nextTick();
+        expect(wrapper.vm.maskValue.tokens['3'].pattern.test('4')).toBe(true);
+        expect(wrapper.vm.done).toBe(true);
+    });
+
+    it('reseta negative ao esvaziar temp_value após um valor negativo', async () => {
+        const wrapper = mount(MaxInputCoordinateDecimalLat, {
+            props: { modelValue: '' },
+            global: globalOptions
+        });
+        wrapper.vm.temp_value = '-23.5';
+        await wrapper.vm.$nextTick();
+        expect(wrapper.vm.negative).toBe(true);
+
+        wrapper.vm.temp_value = '';
+        await wrapper.vm.$nextTick();
+        expect(wrapper.vm.negative).toBe(false);
+    });
+
+    it('campo vazio e não obrigatório não deve mostrar erro', async () => {
+        const wrapper = mount(MaxInputCoordinateDecimalLat, {
+            props: { modelValue: '', required: false },
+            global: globalOptions
+        });
+        expect(wrapper.vm.error).toBe(false);
+    });
+
+    it('emite update:modelValue como number, não string', async () => {
+        const wrapper = mount(MaxInputCoordinateDecimalLat, {
+            props: { modelValue: '' },
+            global: globalOptions
+        });
+        wrapper.vm.temp_value = '-23.550520';
+        await wrapper.vm.$nextTick();
+        const emittedValue = wrapper.emitted('update:modelValue')?.pop()?.[0];
+        expect(typeof emittedValue).toBe('number');
+    });
+
+    it('não emite update:modelValue com valor congelado ao apagar (achado 10-like: reduz sem travar)', async () => {
+        const wrapper = mount(MaxInputCoordinateDecimalLat, {
+            props: { modelValue: '' },
+            global: globalOptions
+        });
+        wrapper.vm.temp_value = '-23.550520';
+        await wrapper.vm.$nextTick();
+
+        wrapper.vm.temp_value = '';
+        await wrapper.vm.$nextTick();
+        expect(wrapper.emitted('update:modelValue')?.pop()).toEqual([0]);
     });
 });

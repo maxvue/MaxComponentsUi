@@ -71,7 +71,7 @@ components:
     level: baixa
     description_migration: >-
       Já usa apenas InputBase (sem componente PrimeVue direto). Só depende da migração do InputBase.
-    status: waiting
+    status: done
 
   - name: MaxColorPicker
     level: media
@@ -228,4 +228,31 @@ components:
     level: baixa
     description_migration: >-
       Não usa PrimeVue diretamente — apenas MaxInputSelect. Herda a migração do Select; nenhuma mudança específica além disso.
+    status: waiting
+
+  - name: MaxUserSection
+    level: media
+    description_migration: >-
+      Depende diretamente de TieredMenu do PrimeVue (src/components/MaxUserSection.vue:46), usado em modo popup
+      para o menu dropdown do usuário. Reimplementar com overlay próprio (recomendado: Floating UI para
+      posicionamento) preservando o método toggle(event), a navegação por teclado, o fechamento ao clicar fora/Escape
+      e o slot #item com os mesmos campos de item (label/icon/exec). Manter MaxUserAvatar e MaxIcon intactos.
+    status: waiting
+
+  - name: MaxButtonConfirm
+    level: baixa
+    description_migration: >-
+      Dependência transitiva: usa MaxButton (que importa primevue/button) e a diretiva v-tooltip (registrada via
+      PrimeVue). Resolvido automaticamente quando MaxButton estiver done E v-tooltip tiver um substituto próprio
+      (floating-vue ou equivalente) — nenhuma alteração direta é necessária neste componente além de revalidar após
+      essas duas migrações.
+    status: waiting
+
+  - name: MaxIconConfirm
+    level: baixa
+    description_migration: >-
+      Não usa MaxButton — envolve MaxIconButton (que não importa nada do PrimeVue). A única dependência do PrimeVue é
+      a diretiva v-tooltip, usada diretamente em MaxIconConfirm.vue. Resolvido automaticamente quando v-tooltip tiver
+      um substituto próprio (floating-vue ou equivalente) — nenhuma alteração direta é necessária neste componente
+      além de revalidar após essa migração.
     status: waiting

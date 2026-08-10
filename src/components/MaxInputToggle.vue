@@ -30,8 +30,26 @@
     const props = withDefaults(
         defineProps<{
             modelValue: any;
+            /**
+             * Nome canônico: `trueLabel`. Também aceita, via atributos não
+             * declarados (`useAttrs()`), os aliases legados `labelTrue`/
+             * `true-label` e agora também a prop declarada `labelRight`
+             * (espelhando o nome usado por `MaxInputSwitch`) — mantidos por
+             * compatibilidade, não remover.
+             */
             trueLabel?: string;
+            /**
+             * Nome canônico: `falseLabel`. Também aceita, via atributos não
+             * declarados (`useAttrs()`), os aliases legados `labelFalse`/
+             * `false-label` e agora também a prop declarada `labelLeft`
+             * (espelhando o nome usado por `MaxInputSwitch`) — mantidos por
+             * compatibilidade, não remover.
+             */
             falseLabel?: string;
+            /** Alias de `trueLabel`, espelhando `MaxInputSwitch.labelRight` */
+            labelRight?: string;
+            /** Alias de `falseLabel`, espelhando `MaxInputSwitch.labelLeft` */
+            labelLeft?: string;
             trueValue?: any;
             falseValue?: any;
         }>(),
@@ -52,8 +70,8 @@
         }
     );
 
-    const trueLabel = computed(() => props.trueLabel ?? attrs.labelTrue ?? attrs['true-label'] ?? null);
-    const falseLabel = computed(() => props.falseLabel ?? attrs.labelFalse ?? attrs['false-label'] ?? null);
+    const trueLabel = computed(() => props.trueLabel ?? props.labelRight ?? attrs.labelTrue ?? attrs['true-label'] ?? null);
+    const falseLabel = computed(() => props.falseLabel ?? props.labelLeft ?? attrs.labelFalse ?? attrs['false-label'] ?? null);
     const trueValue = computed(() => props.trueValue ?? true);
     const falseValue = computed(() => props.falseValue ?? false);
 

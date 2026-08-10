@@ -18,7 +18,6 @@
 <script setup lang="ts">
     import { inject, ref, onMounted, toValue, computed } from 'vue';
     // import MaxIcon from './MaxIcon.vue';
-    import { Random, watchOnce } from '@maxvue/max-use';
 
     type Props = {
         title?: string;

@@ -42,12 +42,15 @@ describe('useIconStore', () => {
     });
 
     it('carrega cache do localStorage quando icons_data está vazio', () => {
-        const dados = { 'mdi:cached': '<svg>cached</svg>' };
-        localStorage.setItem('all_icons', JSON.stringify(dados));
+        const dados = { 'mdi:cached': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M0 0h24"/></svg>' };
+        localStorage.setItem('all_icons_v2', JSON.stringify(dados));
 
         const store = useIconStore();
         const result = store.getIcon('mdi:cached');
-        expect(result).toBe('<svg>cached</svg>');
+
+        // O cache agora é re-sanitizado na leitura, então o valor não volta
+        // byte-a-byte; o que importa é que o <svg> raiz e o conteúdo sobrevivam.
+        expect(result).toContain('<path');
     });
 
     it('list_icons_waiting_request filtra ícones em espera', () => {

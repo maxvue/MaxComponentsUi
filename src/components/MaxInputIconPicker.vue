@@ -82,6 +82,7 @@
     import PrimeInputText from 'primevue/inputtext';
     import Drawer from 'primevue/drawer';
     import VirtualScroller from 'primevue/virtualscroller';
+    import { sanitizeSvg } from '../helpers/sanitizeSvg';
 
     const COLS = 8;
 
@@ -204,7 +205,9 @@
                     body: JSON.stringify({ names: batch })
                 });
                 const data: Record<string, string> = await res.json();
-                svgCache.value = { ...svgCache.value, ...data };
+                const sanitized_data: Record<string, string> = {};
+                for (const name in data) sanitized_data[name] = sanitizeSvg(data[name]);
+                svgCache.value = { ...svgCache.value, ...sanitized_data };
             } catch {
                 // Silencia erros de rede; ícones ficam sem SVG temporariamente
             }

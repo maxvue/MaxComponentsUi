@@ -67,4 +67,18 @@ describe('MaxInputTextArea', () => {
         // checkDone define isDone = props.done
         expect((wrapper.vm as any).isDone).toBe(true);
     });
+
+    it('emite update:modelValue imediatamente no mount (immediate: true preservado)', () => {
+        const wrapper = mountTextArea({ modelValue: 'valor inicial' });
+        const emitted = wrapper.emitted('update:modelValue');
+        expect(emitted).toBeTruthy();
+        expect(emitted?.[0][0]).toBe('valor inicial');
+    });
+
+    it('não quebra com minRows não numérico (normaliza para fallback 1)', () => {
+        const wrapper = mountTextArea({ modelValue: '', minRows: 'abc' as any });
+        const vm = wrapper.vm as any;
+        expect(Number.isNaN(vm.lines)).toBe(false);
+        expect(vm.lines).toBeGreaterThanOrEqual(1);
+    });
 });

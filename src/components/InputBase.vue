@@ -1,17 +1,30 @@
 <template>
     <div class="max-input-main-div" :class="`${props.float !== undefined ? 'float' : ''} ${done ? 'done' : ''} ${!noStatus && caution ? 'caution' : ''} ${textCenter ? 'text-center' : ''} ${textRight ? 'text-right' : ''} ${props.class ? props.class : ''} ${!noStatus &&  isError ? 'error' : ''} ${inLine ? 'in-line' : ''}`">
         <!-- INPUT LABEL -->
-        <div :class="inLine ? 'in-line-label' : 'max-input-label'" v-if="props.label" >
+        <!--
+            `for` aponta para `input_id`, o id exposto via slot prop `inputId`.
+            O elemento real de input vive dentro do `<slot>` (controlado pelo
+            componente filho), entao a associacao so tem efeito quando um filho
+            futuro aplicar `:id="inputId"` no seu input. Ate la isso e inerte,
+            nao um erro funcional.
+        -->
+        <label :for="input_id" :class="inLine ? 'in-line-label' : 'max-input-label'" v-if="props.label" >
             {{ props.label }}
-        </div>
+        </label>
 
 
         <!-- INPUT FIELD -->
-        <div class="max-input-field-div">
+        <!--
+            `aria-invalid` aplicado aqui (no wrapper) e nao no `<input>` real,
+            pois este ultimo esta fora do controle direto do InputBase (vive no
+            slot). Nao e o padrao ARIA ideal, mas serve como sinal semantico
+            adicional ate que os consumidores adotem o slot prop `inputId`.
+        -->
+        <div class="max-input-field-div" :aria-invalid="isError ? 'true' : undefined">
             <MaxIcon :icon="props.iconLeft ?? props.icon ?? props.i" :size="1.2" :light="light" :dark="dark" v-if="hasContent(props.iconLeft ?? props.icon ?? props.i) && !props.noIcon && (props.iconLeft || props.iconPos === 'left')" ml-5 />
             <div v-else></div>
             <div mr-3 ml-3 w-full class="input-slot-div">
-                <slot></slot>
+                <slot :input-id="input_id" :message-id="message_id"></slot>
             </div>
             <MaxIcon :icon="props.iconRight ?? props.icon ?? props.i" :size="1.2" :light="light" :dark="dark" v-if="hasContent(props.iconRight ?? props.icon ?? props.i) && !props.noIcon && (props.iconRight || props.iconPos === 'right')" mr-5  />
             <div v-else></div>
@@ -27,12 +40,17 @@
                 <div class="is-error" v-else-if="error && !noError && !noStatus">
                     <MaxIcon icon="humbleicons:exclamation" :size="0.8" :light="light" :dark="dark" color-red-700 />
                 </div>
-                <div class="required" v-else-if="required && !noStatus">*</div>
+                <!--
+                    `aria-hidden` porque este asterisco e apenas um indicador visual
+                    redundante. O `aria-required` "de verdade" precisaria estar no
+                    `<input>` real dentro do slot, fora de alcance direto do InputBase.
+                -->
+                <div class="required" v-else-if="required && !noStatus" aria-hidden="true">*</div>
             </div>
         </div>
 
         <!-- INPUT MESSAGE -->
-        <div class="input-message">
+        <div class="input-message" :id="message_id" aria-live="polite" :role="isError ? 'alert' : undefined">
             <MaxIcon :icon="iconMessage" v-if="iconMessage && displayMessage" :size="0.9" :light="light" :dark="dark" />
             <span class="message-text">{{ displayMessage }}</span>
         </div>
@@ -42,7 +60,7 @@
 
 <script setup lang="ts">
     import { hasContent } from '@maxvue/max-use';
-    import { computed } from 'vue';
+    import { computed, useId } from 'vue';
     import MaxIcon from './MaxIcon.vue';
     import { SelectGroupOptions } from '../types';
 
@@ -138,6 +156,16 @@
         iconPos: 'left',
         inLine: false
     });
+
+    /**
+     * Id unico por instancia, gerado com `useId()` (Vue 3.5+). Usado para associar
+     * o `<label>` (via `for`) e a mensagem de feedback (via `aria-describedby`) ao
+     * elemento real de input, que vive dentro do `<slot>` (fora do controle direto
+     * do InputBase). Exposto via slot prop `inputId` para adocao futura pelos
+     * componentes filhos.
+     */
+    const input_id = useId();
+    const message_id = computed(() => `${input_id}-message`);
 
     const isError = computed(() => (!props.noStatus && typeof props.error === 'string' && hasContent(props.error)) || props.error === true || props.done === false);
 

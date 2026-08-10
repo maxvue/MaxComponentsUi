@@ -38,7 +38,7 @@ export interface MaxButtonsType extends /* @vue-ignore */ Omit<PrimeButtonProps,
     i?: string;
     /** link para abrir em nova aba */
     blank?: string;
-    /** Rotação do ícone em graus */
+    /** Rota para navegação ao clicar */
     route?: string | null;
     /** Query data */
     data?: any;
@@ -75,6 +75,69 @@ export interface MaxButtonsType extends /* @vue-ignore */ Omit<PrimeButtonProps,
     uppercase?: boolean;
     /** Borda tracejada com fundo transparente */
     dashed?: boolean;
+}
+
+/**
+ * Propriedades compartilhadas pelos componentes de confirmação
+ * (`MaxButtonConfirm`, `MaxIconConfirm`, `MaxTogglePopover`).
+ * As props de identidade visual (label, ícone, etc.) variam entre os 3
+ * componentes conforme o elemento que cada um dispara (botão de texto,
+ * botão de ícone, popover) — aqui ficam apenas as props de conteúdo/
+ * comportamento da confirmação em si.
+ */
+export interface ConfirmProps {
+    /** Mensagem de confirmação */
+    message?: string;
+    /** Icone de mensagem de confirmação */
+    messageIcon?: string | null;
+    /** Label do botão de não */
+    rejectProps?: {
+        label: string;
+        icon?: string;
+        action?: ((event?: any) => void) | undefined;
+    };
+    /** Label do botão de sim */
+    acceptProps?: {
+        label: string;
+        icon?: string;
+        action?: ((event?: any) => void) | undefined;
+    };
+}
+
+/**
+ * Subconjunto de props que a maioria dos componentes de input duplica ao
+ * redeclarar, na própria interface, as mesmas props que o `InputBase`
+ * (`src/components/InputBase.vue`) já define e repassa via `v-bind="props"`.
+ * Ex.: `MaxInputCpfCnpj`, `MaxInputCep`, `MaxInputCoordinateDecimalLat/Lng`,
+ * `MaxInputPhoneMail`.
+ */
+export interface InputBaseProps {
+    /** Ícone opcional (ex: 'mdi:email') */
+    icon?: string | undefined;
+    /** Alias para o ícone */
+    i?: string | undefined;
+    /** Desabilita o campo */
+    disabled?: boolean | undefined;
+    /** Ativa estilo FloatLabel */
+    float?: boolean | undefined;
+    /** Mensagem de feedback (alias) */
+    msg?: string | undefined;
+    /** Mensagem de feedback */
+    message?: string | undefined;
+    /** Ícone da mensagem de feedback */
+    iconMessage?: string | undefined;
+    /** Rótulo do campo */
+    label?: string | undefined;
+    /** Estado de conclusão/validação manual */
+    done?: boolean | undefined;
+    /** Mensagem ou estado de erro */
+    error?: string | boolean | undefined;
+    /** Valor para comparação (opcional) */
+    targetValue?: string;
+    /** Mensagem ou estado de atenção */
+    caution?: string | boolean | undefined;
+    /** Define se o campo é obrigatório */
+    required?: boolean;
 }
 
 /**

@@ -1,5 +1,12 @@
 <template>
-    <div class="max-tab-panel" >
+    <div
+        v-if="should_render"
+        v-show="is_active"
+        class="max-tab-panel"
+        role="tabpanel"
+        :id="`${context.id_prefix}-panel-${value}`"
+        :aria-labelledby="`${context.id_prefix}-tab-${value}`"
+    >
         <slot></slot>
     </div>
 </template>
@@ -15,7 +22,7 @@
 
     const context = injectTabsContext('MaxTabPanel');
 
-    const is_active = computed(() => context.active_value.value === props.value);
+    const is_active = computed(() => context.effective_active_value.value === props.value);
 
     /**
      * No modo lazy o painel so entra no DOM na primeira ativacao; depois disso

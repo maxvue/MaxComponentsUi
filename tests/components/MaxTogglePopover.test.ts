@@ -2,7 +2,18 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxTogglePopover from '../../src/components/MaxTogglePopover.vue';
+import MaxButtonConfirm from '../../src/components/MaxButtonConfirm.vue';
 import { useConfirmStore } from '../../src/stores/useConfirm.Store';
+
+const popoverStub = {
+    MaxPopover: {
+        template: '<div class="max-popover"><slot /></div>'
+    },
+    MaxIconButton: {
+        name: 'MaxIconButton',
+        template: '<button class="max-icon-button" @click="$emit(\'click\', $event)"></button>'
+    }
+};
 
 describe('MaxTogglePopover.vue', () => {
     beforeEach(() => {
@@ -83,5 +94,59 @@ describe('MaxTogglePopover.vue', () => {
 
         expect(store.show).toBe(true);
         expect(store.message).toBe('Deseja continuar?'); // default prop
+    });
+
+    it('abrir o confirm do botão A com o confirm do botão B já aberto reabre em A (não fecha)', async () => {
+        const wrapperA = mount(MaxTogglePopover, {
+            global: { directives: { tooltip: vi.fn() }, stubs: popoverStub },
+            props: { message: 'Confirma A?' }
+        });
+        const wrapperB = mount(MaxTogglePopover, {
+            global: { directives: { tooltip: vi.fn() }, stubs: popoverStub },
+            props: { message: 'Confirma B?' }
+        });
+
+        const store = useConfirmStore();
+
+        // Abre o confirm do botão B primeiro
+        await wrapperB.findComponent({ name: 'MaxIconButton' }).vm.$emit('click', { stopPropagation: vi.fn() });
+        expect(store.show).toBe(true);
+        expect(store.message).toBe('Confirma B?');
+
+        // Clicar no botão A deve MANTER show=true e trocar os dados para A
+        // (nao fazer toggle, que fecharia por já estar show=true)
+        await wrapperA.findComponent({ name: 'MaxIconButton' }).vm.$emit('click', { stopPropagation: vi.fn() });
+        expect(store.show).toBe(true);
+        expect(store.message).toBe('Confirma A?');
+    });
+
+    it('abrir via MaxTogglePopover depois de um confirm com messageIcon nao vaza o icone anterior', async () => {
+        const wrapperConfirmComIcone = mount(MaxButtonConfirm, {
+            global: {
+                directives: { tooltip: vi.fn() },
+                stubs: {
+                    MaxButton: {
+                        name: 'MaxButton',
+                        template: '<button class="max-button"></button>',
+                        props: ['action']
+                    }
+                }
+            },
+            props: { label: 'Excluir', messageIcon: 'mdi:alert' }
+        });
+
+        const store = useConfirmStore();
+
+        (wrapperConfirmComIcone.vm as any).onClickToggle();
+        expect(store.messageIcon).toBe('mdi:alert');
+
+        const wrapperToggle = mount(MaxTogglePopover, {
+            global: { directives: { tooltip: vi.fn() }, stubs: popoverStub },
+            props: { message: 'Sem icone' }
+        });
+
+        await wrapperToggle.findComponent({ name: 'MaxIconButton' }).vm.$emit('click', { stopPropagation: vi.fn() });
+
+        expect(store.messageIcon).toBeNull();
     });
 });

@@ -1,17 +1,17 @@
 <template>
     <InputBase v-bind="{...props, ...attrs}" class="max-select-tag" input-click no-dropdown >
-        <tadiv v-if="attrs.placeholder !== undefined && (!temp_value || temp_value === '')" class="tab-placeholder-select">
+        <div v-if="attrs.placeholder !== undefined && (!temp_value || temp_value === '')" class="tab-placeholder-select">
             {{ attrs.placeholder }}
-        </tadiv>
+        </div>
         <Select v-bind="{...props, ...attrs}" v-model="temp_value" :filter="props.filter"  :loading="loading" @before-show="(before_show as any)" :options="options" :optionLabel="props.optionLabel" :optionValue="props.optionValue" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false" :disabled="props.disabled">
             <template #option="slotProps">
                 <slot name="option" :option="slotProps.option" :selected="slotProps.selected" :index="slotProps.index">
                     <div class="label-tag-div" :style="getStyleColor(slotProps.option, slotProps.option['hover'] ?? false, false)" @mouseenter="options.find(o => o['value'] === slotProps.option['value'])['hover'] = true" @mouseleave="options.find(o => o['value'] === slotProps.option['value'])['hover'] = false">
                         <MaxIcon :icon="slotProps.option['icon']" v-if="slotProps.option['icon']" :size="slotProps.option?.['iconSize'] ?? '1'" :style="{ width: '30px'}" :color="getStyleColor(slotProps.option, false, false).color"/>
                         <div class="label-tag">
-                            <div v-html="slotProps.option[props.optionLabel] ?? slotProps.option.label" :style="{ color: attrs.color }"></div>
+                            <div v-text="slotProps.option[props.optionLabel] ?? slotProps.option.label" :style="{ color: attrs.color }"></div>
                         </div>
-                        <div class="sub-label-tag" v-html="slotProps.option?.sub_label ?? slotProps.option?.sub ?? slotProps.option?.subLabel"></div>
+                        <div class="sub-label-tag" v-text="slotProps.option?.sub_label ?? slotProps.option?.sub ?? slotProps.option?.subLabel"></div>
                         <img v-if="slotProps.option['img']" :src="`/media/images/${slotProps.option['img']}`" alt="Image" class="img-label" />
                     </div>
                 </slot>
@@ -147,6 +147,14 @@
 
         const groups = Object.values(options.value) as any[];
         for (const group of groups) {
+            // MaxTagSelect não tem modo agrupado real (sem prop `groupOptions`); `options.value`
+            // é sempre uma lista plana. Este guard só existe para o caso de `loadOptions`
+            // retornar itens sem `.items`, buscando a opção diretamente no item em vez de
+            // assumir a forma de grupo (evita TypeError em runtime).
+            if (!group || !Array.isArray(group.items)) {
+                if (group?.[valueKey] === temp_value.value) return group;
+                continue;
+            }
             const found = group.items.find((opt: any) => opt[valueKey] === temp_value.value);
             if (found) return found;
         }

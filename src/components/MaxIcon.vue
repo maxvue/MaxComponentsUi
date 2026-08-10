@@ -21,7 +21,7 @@
  */
 <script setup lang="ts">
     import { useIconStore } from '../stores/useIcon.Store';
-    import { ref, computed, useAttrs } from 'vue';
+    import { ref, computed, useAttrs, watchEffect } from 'vue';
     import { useElementHover, isNumber, getColorFromVar } from '@maxvue/max-use';
 
     const icon_store = useIconStore();
@@ -130,9 +130,17 @@
 
     const style = computed(() => ({ ...sizeStyles.value, ...colorStyle.value }));
 
+    // watchEffect roda fora da árvore de avaliação de computeds: aqui é seguro
+    // disparar a mutação de estado (marcar 'waiting' / requisitar fetch) via getIcon().
+    watchEffect(() => {
+        if (icon_name.value) icon_store.getIcon(icon_name.value);
+    });
+
+    // Getter puro: apenas lê o estado já presente na store, sem mutá-lo.
     const svgContent = computed(() => {
-        if (icon_name.value && icon_store.icons_data[icon_name.value] && icon_store.icons_data[icon_name.value] !== 'waiting') return icon_store.icons_data[icon_name.value];
-        return icon_name.value ? icon_store.getIcon(icon_name.value) : 'C';
+        if (!icon_name.value) return 'C';
+        const cached = icon_store.icons_data[icon_name.value];
+        return cached && cached !== 'waiting' ? cached : null;
     });
 
 </script>

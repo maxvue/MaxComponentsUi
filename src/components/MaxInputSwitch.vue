@@ -32,12 +32,20 @@
         defineProps<{
             /** Valor booleano do switch */
             modelValue: any;
-            /** Rótulo exibido ao lado esquerdo do Switch */
+            /**
+             * Rótulo exibido ao lado esquerdo do Switch.
+             * Nome canônico: `falseLabel`. `labelLeft`/`leftLabel`/`labelFalse`
+             * são aliases legados mantidos por compatibilidade — não remover.
+             */
             labelLeft?: string;
             leftLabel?: string;
             falseLabel?: string;
             labelFalse?: string;
-            /** Rótulo exibido do lado direito do Switch */
+            /**
+             * Rótulo exibido do lado direito do Switch.
+             * Nome canônico: `trueLabel`. `labelRight`/`rightLabel`/`labelTrue`/
+             * `question` são aliases legados mantidos por compatibilidade — não remover.
+             */
             labelRight?: string;
             rightLabel?: string;
             trueLabel?: string;

@@ -7,4 +7,10 @@ describe('MaxInputFile', () => {
         const wrapper = mount(MaxInputFile);
         expect(wrapper.exists()).toBe(true);
     });
+
+    it('não renderiza nenhum conteúdo (template vazio, componente sem lógica)', () => {
+        const wrapper = mount(MaxInputFile);
+        expect(wrapper.html()).toBe('');
+        expect(wrapper.findAll('*').length).toBe(0);
+    });
 });

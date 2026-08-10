@@ -34,11 +34,14 @@ describe('useIconStore', () => {
     });
 
     it('deve carregar do cache ao buscar o primeiro icone', () => {
-        localStorage.setItem('all_icons', JSON.stringify({ 'icon-a': 'svg-a' }));
+        localStorage.setItem('all_icons_v2', JSON.stringify({ 'icon-a': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M0 0h24"/></svg>' }));
         const store = useIconStore();
         const res = store.getIcon('icon-a');
-        expect(res).toBe('svg-a');
-        expect(store.icons_data['icon-a']).toBe('svg-a');
+
+        // O cache agora é re-sanitizado na leitura, então o valor não volta
+        // byte-a-byte; o que importa é que o conteúdo do ícone sobreviva.
+        expect(res).toContain('<path');
+        expect(store.icons_data['icon-a']).toContain('<path');
     });
 
     it('getIcon nao deve colocar em waiting se o icone ja existir', () => {
@@ -73,13 +76,13 @@ describe('useIconStore', () => {
         const url = mockFetch.mock.calls[0][0] as string;
         expect(url).toContain('icons%5B%5D=icon-c');
 
-        resolveJson({ 'icon-c': 'svg-c' });
+        resolveJson({ 'icon-c': '<svg><path d="M0 0"/></svg>' });
 
         // Wait for fetch promises to resolve
         await new Promise((resolve) => setTimeout(resolve, 50));
 
-        expect(store.icons_data['icon-c']).toBe('svg-c');
-        expect(localStorage.getItem('all_icons')).toBe(JSON.stringify({ 'icon-c': 'svg-c' }));
+        expect(store.icons_data['icon-c']).toContain('<path');
+        expect(localStorage.getItem('all_icons_v2')).toContain('<path');
     });
 
     it('deve lidar com erros no fetch', async () => {
@@ -143,5 +146,88 @@ describe('useIconStore', () => {
 
         consoleSpy.mockRestore();
         traceSpy.mockRestore();
+    });
+
+    it('nao deve lancar excecao e deve tratar como cache vazio quando o localStorage esta corrompido', () => {
+        localStorage.setItem('all_icons_v2', 'isto não é json válido{{{');
+
+        const store = useIconStore();
+
+        expect(() => store.getIcon('icon-corrupted')).not.toThrow();
+
+        const res = store.getIcon('icon-corrupted');
+        expect(res).toBeNull();
+        expect(store.icons_data['icon-corrupted']).toBe('waiting');
+        // Storage corrompido deve ser descartado
+        expect(localStorage.getItem('all_icons_v2')).toBeNull();
+    });
+
+    it('sanitiza SVG malicioso vindo do fetch antes de gravar em icons_data e no cache persistido', async () => {
+        const store = useIconStore();
+
+        let resolveJson: any;
+        vi.spyOn(globalThis, 'fetch').mockReturnValue(Promise.resolve({
+            json: () => new Promise((resolve) => { resolveJson = resolve; })
+        } as any));
+
+        store.getIcon('icon-malicious');
+
+        await new Promise((r) => setTimeout(r, 250)); // wait for debounce
+
+        resolveJson({ 'icon-malicious': '<svg onload="alert(1)"><script>alert(2)</script><path d="M0 0"/></svg>' });
+
+        await new Promise((resolve) => setTimeout(resolve, 50));
+
+        const stored = store.icons_data['icon-malicious'];
+        expect(stored).not.toContain('<script');
+        expect(stored).not.toMatch(/\son\w+\s*=/i);
+
+        const persisted = localStorage.getItem('all_icons_v2') ?? '';
+        expect(persisted).not.toContain('<script');
+        expect(persisted).not.toMatch(/\son\w+\s*=/i);
+    });
+
+    it('reseta o contador de falhas de fetch apos o intervalo de backoff, permitindo novas requisicoes', async () => {
+        vi.useFakeTimers();
+
+        const store = useIconStore();
+
+        vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('Network error'));
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        // Esgota as tentativas ate atingir MAX_FETCH_RETRIES (4)
+        for (let i = 0; i < 4; i++) {
+            store.getIcon(`icon-retry-${i}`);
+            await vi.advanceTimersByTimeAsync(250); // debounce
+            await vi.advanceTimersByTimeAsync(50); // flush da promise rejeitada
+        }
+
+        expect(store.icons_data['fetch' as any]).toBeUndefined(); // errors nao fica em icons_data
+        // Depois de 4 falhas, novas requisicoes nao devem disparar fetch (contador travado)
+        const fetchCallsBeforeReset = (globalThis.fetch as any).mock.calls.length;
+        store.getIcon('icon-blocked');
+        await vi.advanceTimersByTimeAsync(250);
+        expect((globalThis.fetch as any).mock.calls.length).toBe(fetchCallsBeforeReset);
+
+        // A partir daqui, o fetch passa a ter sucesso para qualquer icone pendente
+        // (inclui 'icon-blocked', que continua na fila de waiting_request)
+        vi.spyOn(globalThis, 'fetch').mockReturnValue(Promise.resolve({
+            json: () => Promise.resolve({ 'icon-blocked': '<svg><path d="M0 0"/></svg>', 'icon-after-reset': '<svg><path d="M0 0"/></svg>' })
+        } as any));
+
+        // Avanca o backoff (30s) para que o contador de erros seja resetado
+        await vi.advanceTimersByTimeAsync(30000);
+        await vi.advanceTimersByTimeAsync(250); // deixa o watcher assentar apos o reset do errors.fetch
+        await vi.advanceTimersByTimeAsync(50);
+
+        // Novo icone pedido depois do reset deve conseguir disparar fetch novamente
+        store.getIcon('icon-after-reset');
+        await vi.advanceTimersByTimeAsync(250);
+        await vi.advanceTimersByTimeAsync(50);
+
+        expect(store.icons_data['icon-after-reset']).toContain('<path');
+
+        consoleSpy.mockRestore();
+        vi.useRealTimers();
     });
 });

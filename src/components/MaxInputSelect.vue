@@ -1,17 +1,17 @@
 <template>
-    <InputBase v-bind="{...props, ...attrs}" class="select_input_div" >
+    <InputBase v-bind="{...props, ...attrsWithoutModelProps}" class="select_input_div" >
         <div v-if="attrs.placeholder !== undefined && (!temp_value || temp_value === '')" class="placeholder-select">
             {{ attrs.placeholder }}
         </div>
-        <Select v-bind="{...props, ...attrs}" v-if="props.groupOptions !== undefined" :filter="props.filter"  v-model="temp_value" :loading="loading" @before-show="(before_show as any)" :options="options" optionGroupLabel="label" optionGroupChildren="items" :optionValue="'value'" :optionLabel="'label'" ref="elem" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false" :disabled="props.disabled">
+        <Select v-bind="attrsWithoutModelProps" v-if="props.groupOptions !== undefined" :filter="props.filter"  v-model="temp_value" :loading="loading" @before-show="(before_show as any)" :options="options" optionGroupLabel="label" optionGroupChildren="items" :optionValue="'value'" :optionLabel="'label'" ref="elem" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false" :disabled="props.disabled">
             <template #option="slotProps">
                 <slot name="option" :option="slotProps.option" :selected="slotProps.selected" :index="slotProps.index">
                     <div class="label_div">
                         <Icon :icon="slotProps.option['icon']" v-if="slotProps.option['icon']" :size="slotProps.option['iconSize'] ?? '1'" :style="{ width: '30px' }" />
                         <div class="labelz">
-                            <div v-html="slotProps.option.label" :style="{ color: attrs.color }"></div>
+                            <div v-text="slotProps.option.label" :style="{ color: attrs.color }"></div>
                         </div>
-                        <div class="subLabel" v-html="slotProps.option?.sub_label ?? slotProps.option?.sub ?? slotProps.option?.subLabel"></div>
+                        <div class="subLabel" v-text="slotProps.option?.sub_label ?? slotProps.option?.sub ?? slotProps.option?.subLabel"></div>
                     </div>
                 </slot>
             </template>
@@ -30,16 +30,16 @@
             </template>
         </Select>
         <!-- SELECT NORMAL -->
-        <Select v-bind="{...props, ...attrs}" v-else v-model="temp_value" :filter="props.filter"  :loading="loading" @before-show="(before_show as any)" :options="options" :optionLabel="props.optionLabel" :optionValue="props.optionValue" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false" :disabled="props.disabled">
+        <Select v-bind="attrsWithoutModelProps" v-else v-model="temp_value" :filter="props.filter"  :loading="loading" @before-show="(before_show as any)" :options="options" :optionLabel="props.optionLabel" :optionValue="props.optionValue" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false" :disabled="props.disabled">
             <template #option="slotProps">
                 <slot name="option" :option="slotProps.option" :selected="slotProps.selected" :index="slotProps.index">
                     <div :class="`category ${slotProps.option.category}`" v-if="attrs.category === true">{{ slotProps.option.category === 'UTILITY' ? 'A' : '' }}{{ slotProps.option.category === 'MARKETING' ? 'B' : '' }}</div>
                     <div class="label_div">
                         <Icon :icon="slotProps.option['icon']" v-if="slotProps.option['icon']" :size="slotProps.option?.['iconSize'] ?? '1'" :style="{ width: '30px' }" />
                         <div class="labelz">
-                            <div v-html="slotProps.option[props.optionLabel] ?? slotProps.option.label ?? slotProps.option.name" :style="{ color: attrs.color }"></div>
+                            <div v-text="slotProps.option[props.optionLabel] ?? slotProps.option.label ?? slotProps.option.name" :style="{ color: attrs.color }"></div>
                         </div>
-                        <div class="subLabel" v-html="slotProps.option?.sub_label ?? slotProps.option?.sub ?? slotProps.option?.subLabel"></div>
+                        <div class="subLabel" v-text="slotProps.option?.sub_label ?? slotProps.option?.sub ?? slotProps.option?.subLabel"></div>
                         <img v-if="slotProps.option['img']" :src="`/media/images/${slotProps.option['img']}`" alt="Image" class="img-label" />
                     </div>
                 </slot>
@@ -63,7 +63,7 @@
     import InputBase from './InputBase.vue';
     import Select from 'primevue/select';
     import { SelectGroupOptions } from '../types';
-    import { isBlank, watchDebounced } from '@maxvue/max-use';
+    import { isBlank } from '@maxvue/max-use';
 
     const attrs: any = useAttrs();
 
@@ -117,6 +117,19 @@
     const emit = defineEmits(['update:modelValue', 'before-show']);
     const temp_value = ref<any>(props.modelValue);
 
+    // `attrs` pode conter chaves que já existem como props nomeadas (ex.: modelValue,
+    // options, optionLabel) — repassá-las cruas via v-bind duplicaria o binding com o
+    // valor explícito já passado ao <Select> (v-model, :options, etc.), dependendo
+    // silenciosamente da ordem de declaração dos atributos para decidir quem vence.
+    // Aqui filtramos essas chaves para que só o que é de fato exclusivo de `attrs` seja repassado.
+    const modelPropKeys = ['modelValue', 'options', 'optionLabel', 'optionValue', 'optionName', 'groupOptions', 'loadOptions', 'default', 'filter', 'disabled'];
+    const attrsWithoutModelProps = computed(() => {
+        const result: Record<string, any> = {};
+        for (const key in attrs) if (!modelPropKeys.includes(key)) result[key] = attrs[key];
+
+        return result;
+    });
+
     watch(temp_value, (val) => emit('update:modelValue', val));
     watch(() => props.modelValue, (val) => temp_value.value = val);
 
@@ -137,6 +150,13 @@
 
         const groups = Object.values(options.value) as any[];
         for (const group of groups) {
+            // `group` pode ser uma opção plana (sem `.items`) quando `loadOptions` retorna uma
+            // lista não agrupada mesmo com `groupOptions` definido — nesse caso buscamos a opção
+            // diretamente no próprio item em vez de assumir que é sempre um grupo com `.items`.
+            if (!group || !Array.isArray(group.items)) {
+                if (group?.[valueKey] === temp_value.value) return group;
+                continue;
+            }
             const found = group.items.find((opt: any) => opt[valueKey] === temp_value.value);
             if (found) return found;
         }
@@ -156,11 +176,9 @@
         }
     }
 
-    watchDebounced(() => props.modelValue, () => {
+    watch(() => props.modelValue, () => {
         if (isBlank(props.modelValue) && props.default !== undefined) temp_value.value = props.default;
-
-
-    }, { deep: true, debounce: 500 });
+    }, { deep: true });
 </script>
 
 <style lang="scss">

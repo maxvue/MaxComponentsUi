@@ -18,7 +18,7 @@ Arquivos de controle (todos na raiz do repositório):
 |---------|-------|
 | [`migration_plan.md`](migration_plan.md) | Brief original do orquestrador — como os planos por componente foram gerados. |
 | [`status-primevue.migration.yaml`](status-primevue.migration.yaml) | Fonte de verdade do progresso: lista cada componente dependente do PrimeVue com `level` e `status` (`waiting`/`in_progress`/`done`/`blocked`). |
-| [`migration_plans/`](migration_plans/) | Um plano de migração autossuficiente por componente (`migration_plans/[NomeComponente].md`), 33 no total. |
+| [`migration_plans/`](migration_plans/) | Um plano de migração autossuficiente por componente (`migration_plans/[NomeComponente].md`), 34 no total. |
 | [`migration_executor.md`](migration_executor.md) | Painel de controle + protocolo do **agente executor**: uma fila ordenada e a regra de que cada invocação migra exatamente **um** componente, depois para e atualiza o status. |
 
 **Se pedirem para avançar a migração**, siga o `migration_executor.md`: pegue o próximo item `waiting` de menor número, execute o plano dele, verifique, atualize o status **tanto no YAML quanto na fila do executor** e então pare. Não migre mais de um componente por invocação, não pule etapas e não reordene. Restrições de ordem principais: `InputBase` primeiro (destrava ~19 inputs); `MaxInputSelect` antes dos dropdowns que o reutilizam; o conjunto `MaxTable` → `MaxTableColumn` → `MaxTableFields` migra junto.
@@ -71,6 +71,8 @@ Todos os componentes de input de formulário devem ser encapsulados pelo `InputB
 
 Qualquer novo componente de input deve usar `<InputBase>` como seu elemento mais externo.
 
+**Exceção documentada:** `MaxInputCheckbox`, `MaxInputRadio` e `MaxInputToggle` não usam `InputBase` — têm `<div>` como raiz e layout próprio, por serem controles binários/múltipla escolha com necessidades visuais distintas dos inputs de texto/seleção (o próprio PrimeVue renderiza `Checkbox`/`RadioButton` de forma bem diferente de um input de texto). Essa distinção não é arbitrária: `MaxInputSwitch` (comparável a esses três) usa `InputBase` porque seu caso de uso e visual são mais próximos de um input tradicional.
+
 ### Estilização
 
 - **UnoCSS** (`virtual:uno.css`) — preset customizado exportado de `src/presetMaxUno.ts`. Classes utilitárias como `pt-4`, `gap-2`, `color-blue-500`, `bg-background-300`, `hover-primary-600` são todas regras customizadas definidas ali.
@@ -79,10 +81,12 @@ Qualquer novo componente de input deve usar `<InputBase>` como seu elemento mais
 
 ### Stores (Pinia)
 
-Três stores exportadas em `src/stores/`:
+Cinco stores exportadas pelo barrel `src/stores/index.ts`:
 - `useIconStore` — faz cache dos fetches de ícones SVG do Iconify
 - `usePopoverStore` — controla o estado de abrir/fechar do `MaxPopover`
 - `useToastStore` — controla a fila do `MaxToast`
+- `useConfirmStore` — controla o estado do popover de confirmação usado por `MaxButtonConfirm`/`MaxIconConfirm`/`MaxTogglePopover`
+- `useModalStore` — controla qual `MaxModal` está aberto (por `id`)
 
 ### Auto-import de componentes
 
@@ -109,6 +113,7 @@ Os testes ficam em `tests/` e usam Vitest + `@vue/test-utils` + `happy-dom`. A c
 - Ordem dos blocos Template → Script → Style nos arquivos `.vue`
 - Múltiplos aliases de export para o mesmo componente são definidos em `src/index.ts` (ex.: `MaxInputText`, `InputText`, `InputField` apontam todos para o mesmo arquivo)
 - `src/prime/index.ts` re-exporta componentes crus do PrimeVue que não têm wrapper Max, para que as apps consumidoras possam importar tudo de uma única fonte
+- `MaxInputText` (e, pelo mesmo padrão, `MaxInputTextArea`) usa `v-bind="props"` no `InputBase`, não repassa attrs extras (`maxlength`, `autocomplete`, etc.) para o `<input>`/`<textarea>` interno — attrs adicionais caem no elemento raiz do `InputBase`. É uma decisão deliberada, não um bug: ver comentário no próprio `MaxInputText.vue`.
 
 ## Execução de Agentes em Worktree
 

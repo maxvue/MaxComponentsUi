@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxPopover from '../../src/components/MaxPopover.vue';
-import { ref } from 'vue';
+import { ref, defineComponent, h } from 'vue';
 
 vi.mock('@maxvue/max-use', async (importOriginal) => {
     const actual = await importOriginal<typeof import('@maxvue/max-use')>();
@@ -107,14 +107,14 @@ describe('MaxPopover', () => {
 
     it('ajusta a posição se o popover exceder os limites da tela', async () => {
         vi.useFakeTimers();
-        const wrapper = mountPopover();
-        const vm = wrapper.vm as any;
 
         // Mock window size
         Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: 800 });
         Object.defineProperty(window, 'innerHeight', { writable: true, configurable: true, value: 600 });
 
-        // Mock element dimensions
+        // Mock element dimensions. Precisa ser configurado ANTES do mount,
+        // já que useElementBounding agora é instanciado no nível de setup
+        // (nao mais recriado dentro do handler a cada clique).
         const originalGetBoundingClientRect = Element.prototype.getBoundingClientRect;
         Element.prototype.getBoundingClientRect = vi.fn(() => ({
             width: 500,
@@ -128,11 +128,14 @@ describe('MaxPopover', () => {
             toJSON: () => {}
         })) as any;
 
+        const wrapper = mountPopover();
+        const vm = wrapper.vm as any;
+
         vm.show();
         vi.advanceTimersByTime(10); // resolve setTimeout
 
-        expect(vm.style.isTop).toBe(true);
-        expect(vm.style.isLeft).toBe(true);
+        expect(vm.position.isTop).toBe(true);
+        expect(vm.position.isLeft).toBe(true);
 
         // Restore mocks
         Element.prototype.getBoundingClientRect = originalGetBoundingClientRect;
@@ -153,5 +156,61 @@ describe('MaxPopover', () => {
         // Testa fechamento
         await bg.trigger('click');
         expect(vm.isOpen).toBe(false);
+    });
+
+    it('abrir um segundo MaxPopover fecha o primeiro automaticamente (integração com usePopoverStore)', () => {
+        vi.useFakeTimers();
+
+        // Ambos os popovers precisam compartilhar a mesma app Vue (como
+        // aconteceria numa página real) para que o `useId()` de cada um
+        // gere ids distintos entre si.
+        const stubs = {
+            MaxButton: {
+                template: '<button class="max-button"><slot /></button>',
+                props: ['icon', 'i', 'label', 'size', 'action']
+            },
+            MaxIconButton: {
+                template: '<button class="icon-button"><slot /></button>',
+                props: ['icon', 'i', 'size']
+            },
+            MaxTitle1: {
+                template: '<div class="title"><slot /></div>',
+                props: ['h1', 'h2']
+            },
+            MaxGrid: {
+                template: '<div class="grid"><slot /></div>',
+                props: ['label']
+            },
+            MaxAnimateFade: {
+                template: '<div><slot /></div>',
+                props: ['show', 'duration']
+            },
+            Teleport: true
+        };
+
+        const Parent = defineComponent({
+            components: { MaxPopover },
+            setup() {
+                return () => h('div', [
+                    h(MaxPopover, { icon: 'mdi:dots-vertical' }),
+                    h(MaxPopover, { icon: 'mdi:dots-horizontal' })
+                ]);
+            }
+        });
+
+        const wrapper = mount(Parent, { global: { stubs } });
+        const popovers = wrapper.findAllComponents(MaxPopover);
+        const vm1 = popovers[0].vm as any;
+        const vm2 = popovers[1].vm as any;
+
+        vm1.toggle();
+        expect(vm1.isOpen).toBe(true);
+        expect(vm2.isOpen).toBe(false);
+
+        vm2.toggle();
+        expect(vm2.isOpen).toBe(true);
+        expect(vm1.isOpen).toBe(false);
+
+        vi.useRealTimers();
     });
 });
