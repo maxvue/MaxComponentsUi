@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxListBox from '../../src/components/MaxListBox.vue';
@@ -278,5 +278,127 @@ describe('MaxListBox - virtual scroll', () => {
         await wrapper.findAll('.max-listbox-item')[0].trigger('click');
 
         expect(wrapper.emitted('update:modelValue')?.[0]).toEqual([0]);
+    });
+});
+
+describe('MaxListBox - modo API', () => {
+    beforeEach(() => {
+        setActivePinia(createPinia());
+    });
+
+    function page(n: number, size = 3) {
+        return Array.from({ length: size }, (_, i) => ({ value: n * 100 + i, label: `P${n}I${i}` }));
+    }
+
+    async function flush() {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+    }
+
+    it('chama loadOptions na montagem com page 1', async () => {
+        const loadOptions = vi.fn().mockResolvedValue({ items: page(1), hasMore: false });
+        mountListBox({ options: undefined, loadOptions, pageSize: 25 });
+        await flush();
+
+        expect(loadOptions).toHaveBeenCalledWith({ page: 1, search: '', pageSize: 25 });
+    });
+
+    it('renderiza os itens retornados pela API', async () => {
+        const loadOptions = vi.fn().mockResolvedValue({ items: page(1), hasMore: false });
+        const wrapper = mountListBox({ options: undefined, loadOptions });
+        await flush();
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.findAll('.max-listbox-item')).toHaveLength(3);
+        expect(wrapper.text()).toContain('P1I0');
+    });
+
+    it('ignora options quando loadOptions esta definido', async () => {
+        const loadOptions = vi.fn().mockResolvedValue({ items: page(1), hasMore: false });
+        const wrapper = mountListBox({ options: OPTIONS, loadOptions });
+        await flush();
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.text()).not.toContain('Alfa');
+        expect(wrapper.text()).toContain('P1I0');
+    });
+
+    it('refaz a busca do zero ao filtrar, enviando o termo', async () => {
+        const loadOptions = vi.fn().mockResolvedValue({ items: page(1), hasMore: true });
+        const wrapper = mountListBox({ options: undefined, loadOptions, filter: true });
+        await flush();
+
+        await wrapper.find('input').setValue('teste');
+        await new Promise((resolve) => setTimeout(resolve, 350));
+
+        expect(loadOptions).toHaveBeenLastCalledWith({ page: 1, search: 'teste', pageSize: 50 });
+    });
+
+    it('descarta resposta fora de ordem', async () => {
+        let resolveFirst: (v: any) => void = () => {};
+        const loadOptions = vi.fn()
+            .mockImplementationOnce(() => new Promise((resolve) => { resolveFirst = resolve; }))
+            .mockResolvedValueOnce({ items: [{ value: 9, label: 'Recente' }], hasMore: false });
+
+        const wrapper = mountListBox({ options: undefined, loadOptions, filter: true });
+
+        await wrapper.find('input').setValue('novo');
+        await new Promise((resolve) => setTimeout(resolve, 350));
+        await flush();
+
+        // a primeira requisicao (obsoleta) responde depois da segunda
+        resolveFirst({ items: [{ value: 1, label: 'Obsoleto' }], hasMore: false });
+        await flush();
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.text()).toContain('Recente');
+        expect(wrapper.text()).not.toContain('Obsoleto');
+    });
+
+    it('emite load-error quando loadOptions rejeita', async () => {
+        const loadOptions = vi.fn().mockRejectedValue(new Error('falhou'));
+        const wrapper = mountListBox({ options: undefined, loadOptions });
+        await flush();
+
+        expect(wrapper.emitted('load-error')).toBeTruthy();
+    });
+
+    it('exibe o botao de retry apos erro', async () => {
+        const loadOptions = vi.fn().mockRejectedValue(new Error('falhou'));
+        const wrapper = mountListBox({ options: undefined, loadOptions });
+        await flush();
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find('.max-listbox-retry').exists()).toBe(true);
+    });
+
+    it('retry refaz a mesma pagina', async () => {
+        const loadOptions = vi.fn().mockRejectedValue(new Error('falhou'));
+        const wrapper = mountListBox({ options: undefined, loadOptions });
+        await flush();
+        await wrapper.vm.$nextTick();
+
+        loadOptions.mockResolvedValueOnce({ items: page(1), hasMore: false });
+        await wrapper.find('.max-listbox-retry').trigger('click');
+        await flush();
+
+        expect(loadOptions).toHaveBeenLastCalledWith({ page: 1, search: '', pageSize: 50 });
+    });
+
+    it('deriva hasMore a partir de total', async () => {
+        const loadOptions = vi.fn().mockResolvedValue({ items: page(1), total: 10 });
+        const wrapper = mountListBox({ options: undefined, loadOptions });
+        await flush();
+        await wrapper.vm.$nextTick();
+
+        // 3 carregados de 10 -> ainda ha mais
+        expect(wrapper.find('.max-listbox-loader').exists()).toBe(true);
+    });
+
+    it('exibe o loader durante o carregamento inicial', async () => {
+        const loadOptions = vi.fn().mockImplementation(() => new Promise(() => {}));
+        const wrapper = mountListBox({ options: undefined, loadOptions });
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find('.max-listbox-loader').exists()).toBe(true);
     });
 });

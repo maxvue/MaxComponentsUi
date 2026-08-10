@@ -47,7 +47,16 @@
                     </slot>
                 </li>
 
-                <li v-if="visibleOptions.length === 0" class="max-listbox-empty">
+                <li v-if="isLoading || (isApiMode && hasMore && visibleOptions.length > 0)" class="max-listbox-loader">
+                    <slot name="loader">Carregando...</slot>
+                </li>
+
+                <li v-if="loadError" class="max-listbox-error">
+                    <span>Erro ao carregar</span>
+                    <button type="button" class="max-listbox-retry" @click="retry">Tentar novamente</button>
+                </li>
+
+                <li v-if="visibleOptions.length === 0 && !isInitialLoading && !loadError" class="max-listbox-empty">
                     <slot name="empty">{{ props.emptyMessage }}</slot>
                 </li>
             </ul>
@@ -65,10 +74,11 @@
  * automática e carregamento paginado por scroll infinito.
  */
 <script setup lang="ts">
-    import { ref, computed, onBeforeUnmount } from 'vue';
+    import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
     import MaxIcon from './MaxIcon.vue';
     import MaxBadgeComponent from './MaxBadgeComponent.vue';
     import { useVirtualList } from '../composables/useVirtualList';
+    import { LoadOptionsContext, LoadOptionsResult } from '../types';
 
     const props = withDefaults(
         defineProps<{
@@ -108,6 +118,12 @@
             virtualScrollThreshold?: number;
             /** Altura fixa de cada linha, em pixels (exigida pela virtualização) */
             itemHeight?: number;
+            /** Carrega páginas do servidor; quando definido, `options` é ignorado */
+            loadOptions?: (ctx: LoadOptionsContext) => Promise<LoadOptionsResult>;
+            /** Itens por página enviados ao loadOptions */
+            pageSize?: number;
+            /** Loading controlado externamente pela app */
+            loading?: boolean;
         }>(),
         {
             modelValue: null,
@@ -127,7 +143,10 @@
             filterFields: undefined,
             virtualScroll: undefined,
             virtualScrollThreshold: 500,
-            itemHeight: 44
+            itemHeight: 44,
+            loadOptions: undefined,
+            pageSize: 50,
+            loading: false
         }
     );
 
@@ -135,6 +154,7 @@
         (e: 'update:modelValue', value: any): void;
         (e: 'change', payload: { value: any; option: any }): void;
         (e: 'filter', term: string): void;
+        (e: 'load-error', error: unknown): void;
     }>();
 
     const listElem = ref<HTMLElement | null>(null);
@@ -169,7 +189,85 @@
         return filterFieldList.value.some((field) => normalize(option?.[field]).includes(term));
     }
 
+    const isApiMode = computed(() => props.loadOptions !== undefined);
+
+    const apiItems = ref<any[]>([]);
+    const currentPage = ref(0);
+    const hasMore = ref(true);
+    const isLoadingPage = ref(false);
+    const loadError = ref<unknown>(null);
+    /** Página que estava sendo buscada quando o erro ocorreu. */
+    const failedPage = ref(1);
+    /** Sequência de requisição: respostas de buscas antigas são descartadas. */
+    let requestId = 0;
+
+    const isLoading = computed(() => props.loading || isLoadingPage.value);
+    const isInitialLoading = computed(() => isLoadingPage.value && apiItems.value.length === 0);
+
+    async function fetchPage(pageToLoad: number) {
+        if (!props.loadOptions || isLoadingPage.value) return;
+
+        const thisRequest = ++requestId;
+        isLoadingPage.value = true;
+        loadError.value = null;
+        failedPage.value = pageToLoad;
+
+        try {
+            const result = await props.loadOptions({
+                page: pageToLoad,
+                search: searchTerm.value,
+                pageSize: props.pageSize
+            });
+
+            // Uma busca mais recente já foi disparada: descarta esta resposta.
+            if (thisRequest !== requestId) return;
+
+            const items = result?.items ?? [];
+            apiItems.value = pageToLoad === 1 ? items : [...apiItems.value, ...items];
+            currentPage.value = pageToLoad;
+
+            if (result?.hasMore !== undefined) hasMore.value = result.hasMore;
+            else if (result?.total !== undefined) hasMore.value = apiItems.value.length < result.total;
+            else hasMore.value = items.length > 0;
+        } catch (error) {
+            if (thisRequest !== requestId) return;
+
+            loadError.value = error;
+            hasMore.value = false;
+            emit('load-error', error);
+        } finally {
+            if (thisRequest === requestId) isLoadingPage.value = false;
+        }
+    }
+
+    /** Recomeça a busca do zero — usado na montagem e a cada mudança de filtro. */
+    function resetAndFetch() {
+        apiItems.value = [];
+        currentPage.value = 0;
+        hasMore.value = true;
+        loadError.value = null;
+        isLoadingPage.value = false;
+        fetchPage(1);
+    }
+
+    function retry() {
+        loadError.value = null;
+        hasMore.value = true;
+        fetchPage(failedPage.value);
+    }
+
+    onMounted(() => {
+        if (isApiMode.value) resetAndFetch();
+    });
+
+    watch(searchTerm, () => {
+        if (isApiMode.value) resetAndFetch();
+    });
+
     const filteredOptions = computed<any[]>(() => {
+        // No modo API o filtro é server-side: a lista já vem filtrada.
+        if (isApiMode.value) return apiItems.value;
+
         const list = props.options ?? [];
 
         if (!props.filter) return list;
