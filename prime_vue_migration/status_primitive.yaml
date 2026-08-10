@@ -274,7 +274,7 @@ itens:
     depende_de: []
     uso: 'INTERNA — dependência do MaxInputIconPicker (trilha no_use) e do MaxTagSelect'
     execucao: Concluído
-    verificacao: Realizando
+    verificacao: Concluído
     teste_usuario: Aguardando
     tentativas: 0
     classes_p_removidas: []
@@ -320,6 +320,18 @@ itens:
       Portões: vitest 10/10; type-check limpo (após a correção de String(key));
       lint 0 erros (mesmos 2 warnings pré-existentes); suíte 667 passando / 18
       falhando (mesmas 7 arquivos do baseline, sem regressão nova).
+      VERIFICAÇÃO (subagente opus): APROVADO. Confirmou linha a linha o uso real em
+      MaxInputIconPicker (fiel ao relato), a existência de `range` e do tipo `Key`
+      (incluindo bigint) nos .d.ts do @tanstack/virtual-core, a virtualização real
+      (10 nós renderizados para 1000 itens, não tautológico — confirmado inclusive
+      comentando stubViewport() e vendo o teste falhar), e aplicou 8 mutações
+      próprias, todas mortas. 2 achados MENORES, não corrigidos: (a) `items?: any[]`
+      usa `any`, contra a regra strict-no-any do projeto — decisão consciente de não
+      alterar, pois é o mesmo padrão já usado em MaxPopoverMenu.vue e o próprio plano
+      especifica `items?: any[]` explicitamente; tornar a primitiva genérica seria
+      escopo além do que o plano e o consumidor real exigem; (b) evento
+      scroll-index-change sem teste dedicado (não bloqueante: nenhum consumidor atual
+      o usa, MaxInputIconPicker só consome `scroll`).
 
   - id: 5
     componente: vTooltip
