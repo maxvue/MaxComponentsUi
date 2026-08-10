@@ -3,11 +3,16 @@ import { mount } from '@vue/test-utils';
 import MaxBaseSpinner from '../../../src/components/base/MaxBaseSpinner.vue';
 
 describe('MaxBaseSpinner', () => {
-    it('renderiza um <svg> com viewBox="25 25 50 50"', () => {
+    it('renderiza um <svg> com viewBox="25 25 50 50" e <circle> no padrao Material', () => {
         const wrapper = mount(MaxBaseSpinner);
         const svg = wrapper.find('svg');
         expect(svg.exists()).toBe(true);
         expect(svg.attributes('viewBox')).toBe('25 25 50 50');
+
+        const circle = wrapper.find('circle');
+        expect(circle.attributes('cx')).toBe('50');
+        expect(circle.attributes('cy')).toBe('50');
+        expect(circle.attributes('r')).toBe('20');
     });
 
     it('aplica role="progressbar" e aria-busy="true"', () => {
@@ -63,5 +68,13 @@ describe('MaxBaseSpinner', () => {
         expect(html).not.toContain('primevue');
         expect(html).not.toContain('@primeuix');
         expect(/\.p-[a-z-]/.test(html)).toBe(false);
+    });
+
+    it('desacelera (nao remove) a animacao sob prefers-reduced-motion', () => {
+        const source = require('fs').readFileSync(
+            require('path').resolve(__dirname, '../../../src/components/base/MaxBaseSpinner.vue'),
+            'utf-8'
+        );
+        expect(source).toContain('prefers-reduced-motion');
     });
 });

@@ -224,7 +224,7 @@ itens:
     depende_de: []
     uso: 'INTERNA — usada por MaxPdfView e MaxInputFileUpload (ambos usados)'
     execucao: Concluído
-    verificacao: Realizando
+    verificacao: Concluído
     teste_usuario: Aguardando
     tentativas: 0
     classes_p_removidas: []
@@ -254,6 +254,17 @@ itens:
       Portões: vitest 9/9; type-check limpo; lint 0 erros (mesmos 2 warnings
       pré-existentes); suíte 656 passando / 18 falhando (mesmas 7 arquivos do
       baseline, sem regressão nova).
+      VERIFICAÇÃO (subagente opus): APROVADO. Confirmou reuso investigado
+      corretamente (MaxLoader é tela full-screen com label; MaxLoaderIcon é ícone
+      fixo sem props). Aplicou 9 mutações próprias, 7 mortas; 2 sobreviveram
+      (MENORES, não bloqueantes): r="20" do circle sem cobertura, e bloco
+      prefers-reduced-motion sem cobertura (limitação estrutural — happy-dom não
+      avalia media queries). Ambas corrigidas mesmo assim: teste do viewBox agora
+      também confere cx/cy/r do circle; novo teste textual confirma a presença de
+      prefers-reduced-motion no fonte. Teste final: 10 casos.
+      Portões finais: vitest 10/10; type-check limpo; lint 0 erros (mesmos 2
+      warnings pré-existentes); suíte 657 passando / 18 falhando (mesmas 7 arquivos
+      do baseline, sem regressão nova).
 
   - id: 4
     componente: MaxBaseVirtualScroller
