@@ -17,20 +17,30 @@
             >
         </div>
 
-        <div ref="listElem" class="max-listbox-list" @scroll="onListScroll">
+        <div
+            ref="listElem"
+            class="max-listbox-list"
+            role="listbox"
+            :tabindex="props.disabled ? -1 : 0"
+            :aria-disabled="props.disabled"
+            :aria-activedescendant="focusedItemId"
+            @scroll="onListScroll"
+            @keydown="onKeydown"
+        >
             <div v-if="isVirtual" class="max-listbox-spacer" :style="{ height: `${totalHeight}px` }" aria-hidden="true" />
 
             <ul
                 class="max-listbox-window"
-                role="listbox"
-                :aria-disabled="props.disabled"
+                :class="{ 'is-virtual': isVirtual }"
+                role="presentation"
                 :style="isVirtual ? { transform: `translateY(${offsetY}px)` } : undefined"
             >
                 <li
                     v-for="entry in (isVirtual ? visibleItems : plainItems)"
+                    :id="itemId(entry.index)"
                     :key="optionKey(entry.item, entry.index)"
                     class="max-listbox-item"
-                    :class="{ 'is-selected': isSelected(entry.item), 'is-disabled': isDisabled(entry.item) }"
+                    :class="{ 'is-selected': isSelected(entry.item), 'is-disabled': isDisabled(entry.item), 'is-focused': focusedIndex === entry.index }"
                     role="option"
                     :aria-selected="isSelected(entry.item)"
                     :aria-disabled="isDisabled(entry.item)"
@@ -43,20 +53,20 @@
                             <span class="max-listbox-item-label">{{ labelOf(entry.item) }}</span>
                             <span v-if="subLabelOf(entry.item)" class="max-listbox-item-sublabel">{{ subLabelOf(entry.item) }}</span>
                         </div>
-                        <MaxBadgeComponent v-if="entry.item.badge !== undefined && entry.item.badge !== null" :label="String(entry.item.badge)" :color="entry.item.badgeColor" class="max-listbox-item-badge" />
+                        <MaxBadgeComponent v-if="entry.item.badge !== undefined && entry.item.badge !== null" :label="String(entry.item.badge)" :background="entry.item.badgeColor" class="max-listbox-item-badge" />
                     </slot>
                 </li>
 
-                <li v-if="isLoading || (isApiMode && hasMore && visibleOptions.length > 0)" class="max-listbox-loader">
+                <li v-if="isLoading || (isApiMode && hasMore && visibleOptions.length > 0)" class="max-listbox-loader" role="presentation">
                     <slot name="loader">Carregando...</slot>
                 </li>
 
-                <li v-if="loadError" class="max-listbox-error">
+                <li v-if="loadError" class="max-listbox-error" role="presentation">
                     <span>Erro ao carregar</span>
                     <button type="button" class="max-listbox-retry" @click="retry">Tentar novamente</button>
                 </li>
 
-                <li v-if="visibleOptions.length === 0 && !isInitialLoading && !loadError" class="max-listbox-empty">
+                <li v-if="visibleOptions.length === 0 && !isInitialLoading && !loadError" class="max-listbox-empty" role="presentation">
                     <slot name="empty">{{ props.emptyMessage }}</slot>
                 </li>
             </ul>
@@ -414,6 +424,72 @@
         emit('change', { value, option });
     }
 
+    /** Identificador único desta instância, usado no aria-activedescendant. */
+    const instanceId = `max-listbox-${Math.random().toString(36).slice(2, 9)}`;
+    const focusedIndex = ref(-1);
+
+    const focusedItemId = computed(() => (focusedIndex.value >= 0 ? `${instanceId}-opt-${focusedIndex.value}` : undefined));
+
+    function itemId(index: number): string {
+        return `${instanceId}-opt-${index}`;
+    }
+
+    function moveFocus(delta: number) {
+        const total = visibleOptions.value.length;
+        if (total === 0) return;
+
+        const next = focusedIndex.value < 0 ? 0 : focusedIndex.value + delta;
+        focusedIndex.value = Math.min(total - 1, Math.max(0, next));
+        scrollFocusedIntoView();
+    }
+
+    /** Mantém o item em foco visível ao navegar pelo teclado. Como as linhas têm
+     * altura fixa (itemHeight), a posição é calculada aritmeticamente em vez de
+     * lida do DOM — funciona tanto na lista virtualizada quanto na completa. */
+    function scrollFocusedIntoView() {
+        const list = listElem.value;
+        if (!list || focusedIndex.value < 0) return;
+
+        const top = focusedIndex.value * props.itemHeight;
+        const bottom = top + props.itemHeight;
+        const viewport = list.clientHeight || DEFAULT_VIEWPORT_HEIGHT;
+
+        if (top < list.scrollTop) list.scrollTop = top;
+        else if (bottom > list.scrollTop + viewport) list.scrollTop = bottom - viewport;
+    }
+
+    function onKeydown(event: KeyboardEvent) {
+        if (props.disabled) return;
+
+        switch (event.key) {
+            case 'ArrowDown':
+                event.preventDefault();
+                moveFocus(1);
+                break;
+            case 'ArrowUp':
+                event.preventDefault();
+                moveFocus(-1);
+                break;
+            case 'Home':
+                event.preventDefault();
+                focusedIndex.value = 0;
+                scrollFocusedIntoView();
+                break;
+            case 'End':
+                event.preventDefault();
+                focusedIndex.value = visibleOptions.value.length - 1;
+                scrollFocusedIntoView();
+                break;
+            case 'Enter':
+            case ' ':
+                event.preventDefault();
+                if (focusedIndex.value >= 0) selectOption(visibleOptions.value[focusedIndex.value]);
+                break;
+            default:
+                break;
+        }
+    }
+
     onBeforeUnmount(() => clearTimeout(filterTimer));
 
     defineExpose({ listElem });
@@ -424,20 +500,186 @@
     display: flex;
     flex-direction: column;
     min-height: 0;
+    height: 100%;
+    background-color: var(--background-0);
+    border: 1px solid var(--background-300);
+    border-radius: 6px;
+    overflow: hidden;
+
+    &.is-disabled {
+        opacity: 0.6;
+        pointer-events: none;
+    }
 }
 
+.max-listbox-header {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--background-300);
+}
+
+.max-listbox-title {
+    font-weight: 600;
+    color: var(--background-750);
+}
+
+.max-listbox-filter {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--background-300);
+}
+
+.max-listbox-filter-input {
+    width: 100%;
+    height: 32px;
+    padding: 0 10px;
+    border: 1px solid var(--background-300);
+    border-radius: 4px;
+    background-color: var(--background-0);
+    color: var(--background-750);
+    font-size: 0.9rem;
+    outline: none;
+
+    &::placeholder {
+        color: var(--background-600);
+    }
+
+    &:focus {
+        border-color: var(--blue-600);
+    }
+}
+
+// Elemento focável e rolável: role="listbox" vive aqui porque é ele quem
+// recebe foco/teclado; o <ul> interno é apenas um agrupamento de apresentação.
 .max-listbox-list {
+    position: relative;
     flex: 1;
+    overflow-y: auto;
+    outline: none;
+    scrollbar-width: thin;
+
+    &::-webkit-scrollbar {
+        width: 3px;
+        height: 3px;
+    }
+}
+
+.max-listbox-spacer {
+    width: 100%;
+}
+
+// Sem virtualização a janela fica em fluxo normal (position: static, o padrão),
+// então sua altura real soma a de todos os itens e o scroll do contêiner pai
+// funciona naturalmente. Só quando virtualizado ela flutua (is-virtual) sobre
+// o spacer que sustenta a altura total, deslocada por translateY.
+.max-listbox-window {
     margin: 0;
     padding: 0;
     list-style: none;
-    overflow-y: auto;
+
+    &.is-virtual {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+    }
 }
 
 .max-listbox-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 0 12px;
+    min-height: 44px;
+    cursor: pointer;
+    color: var(--background-750);
+
+    &:hover {
+        background-color: var(--background-300);
+    }
+
+    &.is-focused {
+        outline: 2px solid var(--blue-600);
+        outline-offset: -2px;
+    }
+
+    &.is-selected {
+        background-color: var(--blue-600);
+        color: var(--background-0);
+
+        .max-listbox-item-sublabel,
+        .icon-div {
+            color: var(--background-200);
+        }
+
+        &:hover {
+            background-color: var(--blue-700);
+        }
+    }
+
+    &.is-disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+
+        &:hover {
+            background-color: transparent;
+        }
+    }
+}
+
+.max-listbox-item-labels {
     display: flex;
     align-items: center;
     gap: 10px;
+    min-width: 0;
+}
+
+.max-listbox-item-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.max-listbox-item-sublabel {
+    color: var(--background-600);
+    font-size: 0.85rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// Layout de duas linhas: sublabel abaixo do label em vez de ao lado.
+.max-listbox.two-lines {
+    .max-listbox-item-labels {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+    }
+}
+
+.max-listbox-empty,
+.max-listbox-loader,
+.max-listbox-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 12px;
+    color: var(--background-600);
+    font-size: 0.9rem;
+}
+
+.max-listbox-retry {
+    border: none;
+    background: none;
+    padding: 0;
+    color: var(--blue-600);
     cursor: pointer;
+    text-decoration: underline;
+    font-size: 0.9rem;
+}
+
+.max-listbox-footer {
+    padding: 10px 12px;
+    border-top: 1px solid var(--background-300);
 }
 </style>

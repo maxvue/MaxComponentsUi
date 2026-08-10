@@ -593,3 +593,96 @@ describe('MaxListBox - preenchimento automatico do painel', () => {
         expect(loadOptions).toHaveBeenCalledTimes(1);
     });
 });
+
+describe('MaxListBox - teclado', () => {
+    beforeEach(() => {
+        setActivePinia(createPinia());
+    });
+
+    it('a lista e focavel', () => {
+        const wrapper = mountListBox();
+        expect(wrapper.find('.max-listbox-list').attributes('tabindex')).toBe('0');
+    });
+
+    it('seta para baixo move o foco para o primeiro item', async () => {
+        const wrapper = mountListBox();
+        await wrapper.find('.max-listbox-list').trigger('keydown', { key: 'ArrowDown' });
+
+        expect(wrapper.findAll('.max-listbox-item')[0].classes()).toContain('is-focused');
+    });
+
+    it('seta para baixo duas vezes move para o segundo item', async () => {
+        const wrapper = mountListBox();
+        const list = wrapper.find('.max-listbox-list');
+        await list.trigger('keydown', { key: 'ArrowDown' });
+        await list.trigger('keydown', { key: 'ArrowDown' });
+
+        expect(wrapper.findAll('.max-listbox-item')[1].classes()).toContain('is-focused');
+    });
+
+    it('seta para cima nao passa do primeiro item', async () => {
+        const wrapper = mountListBox();
+        const list = wrapper.find('.max-listbox-list');
+        await list.trigger('keydown', { key: 'ArrowDown' });
+        await list.trigger('keydown', { key: 'ArrowUp' });
+        await list.trigger('keydown', { key: 'ArrowUp' });
+
+        expect(wrapper.findAll('.max-listbox-item')[0].classes()).toContain('is-focused');
+    });
+
+    it('Enter seleciona o item em foco', async () => {
+        const wrapper = mountListBox();
+        const list = wrapper.find('.max-listbox-list');
+        await list.trigger('keydown', { key: 'ArrowDown' });
+        await list.trigger('keydown', { key: 'Enter' });
+
+        expect(wrapper.emitted('update:modelValue')?.[0]).toEqual([1]);
+    });
+
+    it('Espaco seleciona o item em foco', async () => {
+        const wrapper = mountListBox();
+        const list = wrapper.find('.max-listbox-list');
+        await list.trigger('keydown', { key: 'ArrowDown' });
+        await list.trigger('keydown', { key: ' ' });
+
+        expect(wrapper.emitted('update:modelValue')?.[0]).toEqual([1]);
+    });
+
+    it('Enter nao seleciona item desabilitado', async () => {
+        const wrapper = mountListBox();
+        const list = wrapper.find('.max-listbox-list');
+        // terceiro item (indice 2) esta disabled
+        await list.trigger('keydown', { key: 'End' });
+        await list.trigger('keydown', { key: 'Enter' });
+
+        expect(wrapper.emitted('update:modelValue')).toBeFalsy();
+    });
+
+    it('Home vai para o primeiro item e End para o ultimo', async () => {
+        const wrapper = mountListBox();
+        const list = wrapper.find('.max-listbox-list');
+
+        await list.trigger('keydown', { key: 'End' });
+        expect(wrapper.findAll('.max-listbox-item')[2].classes()).toContain('is-focused');
+
+        await list.trigger('keydown', { key: 'Home' });
+        expect(wrapper.findAll('.max-listbox-item')[0].classes()).toContain('is-focused');
+    });
+
+    it('nao reage ao teclado quando disabled', async () => {
+        const wrapper = mountListBox({ disabled: true });
+        await wrapper.find('.max-listbox-list').trigger('keydown', { key: 'ArrowDown' });
+
+        expect(wrapper.find('.is-focused').exists()).toBe(false);
+    });
+
+    it('aplica aria-activedescendant no item em foco', async () => {
+        const wrapper = mountListBox();
+        const list = wrapper.find('.max-listbox-list');
+        await list.trigger('keydown', { key: 'ArrowDown' });
+
+        const active = list.attributes('aria-activedescendant');
+        expect(active).toBeTruthy();
+        expect(wrapper.findAll('.max-listbox-item')[0].attributes('id')).toBe(active);
+    });
+});
