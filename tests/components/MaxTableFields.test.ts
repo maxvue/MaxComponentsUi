@@ -9,8 +9,6 @@ vi.mock('@maxvue/max-use', async (importOriginal) => {
         ...actual,
         ulid: () => 'mock-id',
         size: (arr: any[]) => arr?.length || 0,
-        refAutoReset: (val: any) => ({ value: val }),
-        useDefaultReset: (val: any) => ({ value: val }),
         getCssSize: (val: any) => (typeof val === 'number' ? `${val}px` : val)
     };
 });
@@ -206,5 +204,80 @@ describe('MaxTableFields.vue', () => {
             global: { stubs: { MaxIconButton: true } }
         });
         expect(wrapper.find('.max-table-fields-buttons').exists()).toBe(true);
+    });
+
+    it('emite update:field e executa col.action para cada alteração em edições consecutivas (< 100ms)', async () => {
+        const colActionSpy = vi.fn();
+        const columns = [{ field: 'name', header: 'Nome', input: 'text', action: colActionSpy }];
+        const list = [{ name: 'Valor1' }];
+        const wrapper = mount(MaxTableFields, {
+            props: { list, columns }
+        });
+
+        (wrapper.vm as any).setFieldValue(list[0], 'name', 'Valor2', columns[0]);
+        (wrapper.vm as any).setFieldValue(list[0], 'name', 'Valor3', columns[0]);
+
+        expect(wrapper.emitted('update:field')?.length).toBe(2);
+        expect(colActionSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it('deriva rowKey corretamente usando dataKey, id, uuid, ulid ou fallback', () => {
+        const columns = [{ field: 'name', header: 'Nome' }];
+        const wrapper = mount(MaxTableFields, {
+            props: { list: [], columns, dataKey: 'code' }
+        });
+
+        expect((wrapper.vm as any).rowKey({ code: 'C10' }, 0)).toBe('C10');
+        expect((wrapper.vm as any).rowKey({ id: 'ID1' }, 0)).toBe('ID1');
+        expect((wrapper.vm as any).rowKey({ uuid: 'U1' }, 0)).toBe('U1');
+        expect((wrapper.vm as any).rowKey({ ulid: 'UL1' }, 0)).toBe('UL1');
+        expect((wrapper.vm as any).rowKey({ _recordKey: 'K1' }, 0)).toBe('K1');
+        expect((wrapper.vm as any).rowKey({}, 3)).toBe(3);
+    });
+
+    it('calcula totalColspan corretamente quando list é vazio usando props.buttons ou slot buttons', () => {
+        const columns = [{ field: 'name', header: 'Nome' }];
+
+        // Com prop buttons
+        const wrapperProps = mount(MaxTableFields, {
+            props: { list: [], columns, buttons: [{ id: 'b1' }] }
+        });
+        expect(wrapperProps.find('.max-table-fields-empty-cell').attributes('colspan')).toBe('2');
+
+        // Com slot buttons
+        const wrapperSlot = mount(MaxTableFields, {
+            props: { list: [], columns },
+            slots: { buttons: '<div>Ações</div>' }
+        });
+        expect(wrapperSlot.find('.max-table-fields-empty-cell').attributes('colspan')).toBe('2');
+
+        // Sem botões
+        const wrapperNone = mount(MaxTableFields, {
+            props: { list: [], columns }
+        });
+        expect(wrapperNone.find('.max-table-fields-empty-cell').attributes('colspan')).toBe('1');
+    });
+
+    it('renderiza fallback limpo de slot de coluna sem vazar nome de slot e campo', () => {
+        const columns = [{ field: 'name', header: 'Nome', slot: 'inexistente' }];
+        const list = [{ name: 'Maria' }];
+        const wrapper = mount(MaxTableFields, {
+            props: { list, columns }
+        });
+
+        const cellText = wrapper.find('.default-slot').text();
+        expect(cellText).toBe('Maria');
+        expect(cellText).not.toContain('inexistente');
+        expect(cellText).not.toContain('name');
+    });
+
+    it('exibe o valor como texto em colunas sem slot e sem input', () => {
+        const columns = [{ field: 'role', header: 'Cargo' }];
+        const list = [{ role: 'Desenvolvedor' }];
+        const wrapper = mount(MaxTableFields, {
+            props: { list, columns }
+        });
+
+        expect(wrapper.find('.max-table-fields-td').text()).toBe('Desenvolvedor');
     });
 });
