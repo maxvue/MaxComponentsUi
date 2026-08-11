@@ -63,4 +63,29 @@ describe('presetMaxUno — CSS gerado', () => {
 
         expectParsavel(await generate(code));
     });
+
+    it('hover-primary-600 e hover-red-500 geram CSS de hover correto', async () => {
+        const css = await generate('<div class="hover-primary-600 hover-red-500"></div>');
+
+        expectParsavel(css);
+        expect(css).toContain('var(--primary-600)');
+        expect(css).toContain('var(--red-500)');
+    });
+
+    it('color-red gera var(--red) e não var(--gray-300)', async () => {
+        const css = await generate('<div class="color-red"></div>');
+
+        expectParsavel(css);
+        expect(css).toContain('var(--red)');
+        expect(css).not.toContain('var(--gray-300)');
+    });
+
+    it('opacity-150 é clamped em 1 e não gera 1.5 nem NaN', async () => {
+        const css = await generate('<div class="opacity-150 opacity-1.2.3"></div>');
+
+        expectParsavel(css);
+        expect(css).toContain('opacity:1');
+        expect(css).not.toContain('opacity:1.5');
+        expect(css).not.toContain('opacity:NaN');
+    });
 });
