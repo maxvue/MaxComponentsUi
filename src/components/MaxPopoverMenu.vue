@@ -25,7 +25,7 @@
     import MaxButton from './MaxButton.vue';
     import MaxIcon from './MaxIcon.vue';
     import { goToRoute, useDefaultReset } from '@maxvue/max-use';
-    import { getCssSize } from '../helpers/getCssSize.js';
+    import { getCssSize } from '../helpers/getCssSize';
 
     const props = withDefaults(defineProps<{
         /** Texto do botão */
