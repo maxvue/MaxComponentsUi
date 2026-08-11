@@ -7,12 +7,11 @@
 </template>
 
 <script setup lang="ts">
-    import { computed, ref, useAttrs } from 'vue';
+    import { computed, ref } from 'vue';
     import MaxIcon from './MaxIcon.vue';
-    import { goToRoute, useDefaultReset } from '@maxvue/max-use';
+    import { goToRoute } from '@maxvue/max-use';
     import type { MaxButtonsType } from '../types';
 
-    const attrs = useAttrs();
 
     const hover = ref(false);
 
