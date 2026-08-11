@@ -141,4 +141,75 @@ describe('MaxPopoverConfirm', () => {
         await bg.trigger('click');
         expect(store.show).toBe(false);
     });
+
+    describe('Acessibilidade (Etapa 5.1)', () => {
+        afterEach(() => {
+            document.body.innerHTML = '';
+        });
+
+        it('painel possui role="alertdialog", aria-modal="true" e aria-labelledby', async () => {
+            const wrapper = mountPopoverConfirm();
+            const store = useConfirmStore();
+            store.message = 'Deseja confirmar a exclusão?';
+            store.show = true;
+            await wrapper.vm.$nextTick();
+
+            const dialog = wrapper.find('.max-icon-confirm-dialog');
+            expect(dialog.exists()).toBe(true);
+            expect(dialog.attributes('role')).toBe('alertdialog');
+            expect(dialog.attributes('aria-modal')).toBe('true');
+            const labelledby = dialog.attributes('aria-labelledby');
+            expect(labelledby).toBeTruthy();
+            expect(wrapper.find(`#${labelledby}`).text()).toContain('Deseja confirmar a exclusão?');
+        });
+
+        it('fecha ao pressionar a tecla Escape', async () => {
+            const wrapper = mountPopoverConfirm();
+            const store = useConfirmStore();
+            store.show = true;
+            await wrapper.vm.$nextTick();
+
+            expect(store.show).toBe(true);
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+            await wrapper.vm.$nextTick();
+
+            expect(store.show).toBe(false);
+        });
+
+        it('ativa focus trap e foca o botão de confirmação/cancelamento ao abrir', async () => {
+            const botaoOrigem = document.createElement('button');
+            botaoOrigem.id = 'gatilho-confirm';
+            document.body.appendChild(botaoOrigem);
+            botaoOrigem.focus();
+
+            const wrapper = mount(MaxPopoverConfirm, {
+                attachTo: document.body,
+                global: {
+                    stubs: {
+                        MaxButton: {
+                            template: '<button class="max-button-stub">{{ label }}</button>',
+                            props: ['action', 'label', 'icon']
+                        },
+                        MaxIcon: { template: '<span></span>' },
+                        MaxGrid: { template: '<div><slot /></div>' },
+                        TransitionFade: { template: '<div><slot /></div>' }
+                    }
+                }
+            });
+
+            const store = useConfirmStore();
+            store.show = true;
+            await wrapper.vm.$nextTick();
+            await wrapper.vm.$nextTick();
+
+            const dialog = document.querySelector('.max-icon-confirm-dialog');
+            expect(dialog?.contains(document.activeElement)).toBe(true);
+
+            store.hide();
+            await wrapper.vm.$nextTick();
+
+            expect(document.activeElement).toBe(botaoOrigem);
+            document.body.removeChild(botaoOrigem);
+        });
+    });
 });

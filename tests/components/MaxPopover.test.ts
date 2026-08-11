@@ -13,26 +13,28 @@ vi.mock('@maxvue/max-use', async (importOriginal) => {
     };
 });
 
-function mountPopover(props: Record<string, any> = {}, slots: Record<string, any> = {}) {
-    return mount(MaxPopover, {
+const mountedWrappers: any[] = [];
+
+function mountPopover(props: Record<string, any> = {}, slots: Record<string, any> = {}, options: Record<string, any> = {}) {
+    const wrapper = mount(MaxPopover, {
         props: { icon: 'mdi:dots-vertical', title: 'Menu', subTitle: 'Opções', ...props },
         slots,
         global: {
             stubs: {
                 MaxButton: {
-                    template: '<button class="max-button"><slot /></button>',
+                    template: '<button class="max-button" v-bind="$attrs"><slot /></button>',
                     props: ['icon', 'i', 'label', 'size', 'action']
                 },
                 MaxIconButton: {
-                    template: '<button class="icon-button"><slot /></button>',
+                    template: '<button class="icon-button" v-bind="$attrs"><slot /></button>',
                     props: ['icon', 'i', 'size']
                 },
                 MaxTitle1: {
-                    template: '<div class="title"><slot /></div>',
+                    template: '<div class="title" v-bind="$attrs"><slot /></div>',
                     props: ['h1', 'h2']
                 },
                 MaxGrid: {
-                    template: '<div class="grid"><slot /></div>',
+                    template: '<div class="grid" v-bind="$attrs"><slot /></div>',
                     props: ['label']
                 },
                 MaxAnimateFade: {
@@ -41,8 +43,11 @@ function mountPopover(props: Record<string, any> = {}, slots: Record<string, any
                 },
                 Teleport: true
             }
-        }
+        },
+        ...options
     });
+    mountedWrappers.push(wrapper);
+    return wrapper;
 }
 
 describe('MaxPopover', () => {
@@ -232,5 +237,110 @@ describe('MaxPopover', () => {
 
         wrapper.unmount();
         expect(popover_store.show_id).toBe(null);
+    });
+
+    describe('Acessibilidade (Etapa 5.1)', () => {
+        afterEach(() => {
+            while (mountedWrappers.length > 0) {
+                const w = mountedWrappers.pop();
+                try { w.unmount(); } catch {}
+            }
+            document.body.innerHTML = '';
+        });
+
+        it('fecha o popover com a tecla Escape', async () => {
+            const wrapper = mountPopover();
+            const vm = wrapper.vm as any;
+
+            vm.show();
+            await wrapper.vm.$nextTick();
+            expect(vm.isOpen).toBe(true);
+
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+            await wrapper.vm.$nextTick();
+
+            expect(vm.isOpen).toBe(false);
+        });
+
+        it('gatilho possui role="button", tabindex="0", aria-expanded e aria-controls', async () => {
+            const wrapper = mountPopover();
+            const vm = wrapper.vm as any;
+
+            const iconBtn = wrapper.find('.max-popover-icon');
+            expect(iconBtn.exists()).toBe(true);
+            expect(iconBtn.attributes('role')).toBe('button');
+            expect(iconBtn.attributes('tabindex')).toBe('0');
+            expect(iconBtn.attributes('aria-expanded')).toBe('false');
+            expect(iconBtn.attributes('aria-controls')).toBeTruthy();
+
+            vm.show();
+            await wrapper.vm.$nextTick();
+            expect(iconBtn.attributes('aria-expanded')).toBe('true');
+        });
+
+        it('gatilho abre o popover com Enter ou Espaço', async () => {
+            const wrapper = mountPopover();
+            const vm = wrapper.vm as any;
+            const iconBtn = wrapper.find('.max-popover-icon');
+
+            await iconBtn.trigger('keydown', { key: 'Enter' });
+            expect(vm.isOpen).toBe(true);
+
+            vm.hide();
+            await wrapper.vm.$nextTick();
+
+            await iconBtn.trigger('keydown', { key: ' ' });
+            expect(vm.isOpen).toBe(true);
+        });
+
+        it('painel possui role="dialog", id e aria-labelledby', async () => {
+            const wrapper = mountPopover({ title: 'Menu' });
+            const vm = wrapper.vm as any;
+
+            vm.show();
+            await wrapper.vm.$nextTick();
+
+            const dialog = wrapper.find('.max-popover-dialog');
+            expect(dialog.exists()).toBe(true);
+            expect(dialog.attributes('role')).toBe('dialog');
+            expect(dialog.attributes('id')).toBeTruthy();
+            expect(dialog.attributes('aria-labelledby')).toBeTruthy();
+        });
+
+        it('botão de fechar possui aria-label="Fechar"', async () => {
+            const wrapper = mountPopover();
+            const vm = wrapper.vm as any;
+
+            vm.show();
+            await wrapper.vm.$nextTick();
+
+            const closeBtn = wrapper.find('.max-popover-header .icon-button');
+            expect(closeBtn.exists()).toBe(true);
+            expect(closeBtn.attributes('aria-label')).toBe('Fechar');
+        });
+
+        it('ativa focus trap e restaura o foco ao gatilho ao fechar', async () => {
+            const wrapper = mountPopover({}, {
+                content: '<button id="opt1">Opção 1</button>'
+            }, { attachTo: document.body });
+            const vm = wrapper.vm as any;
+            const iconBtn = wrapper.find<HTMLElement>('.max-popover-icon').element;
+
+            iconBtn.focus();
+            expect(document.activeElement).toBe(iconBtn);
+
+            vm.show();
+            await wrapper.vm.$nextTick();
+            await wrapper.vm.$nextTick();
+
+            // O foco deve estar retido no diálogo flutuante
+            const dialog = wrapper.find('.max-popover-dialog').element;
+            expect(dialog.contains(document.activeElement)).toBe(true);
+
+            vm.hide();
+            await wrapper.vm.$nextTick();
+
+            expect(document.activeElement).toBe(iconBtn);
+        });
     });
 });

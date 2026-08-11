@@ -1,19 +1,41 @@
 <template>
     <div ref="btn_el" pointer v-tooltip="null" class="max-popover-main">
-        <div v-tooltip="null" @click.stop="toggle" flex :style="{width: size_icon, height: size_icon} " class="max-popover-icon">
+        <div
+            v-tooltip="null"
+            @click.stop="toggle"
+            @keydown="onKeydownTrigger"
+            role="button"
+            tabindex="0"
+            :aria-expanded="isOpen"
+            :aria-controls="dialog_id"
+            flex
+            :style="{width: size_icon, height: size_icon}"
+            class="max-popover-icon"
+        >
             <slot name="button" v-bind="props">
                 <MaxButton v-bind="props" :size="String(props.size ?? props.sizeIcon ?? props.iconSize ?? 1.1)" :action="undefined" />
             </slot>
         </div>
         <Teleport to="body" v-if="isOpen">
-            <div style="position: fixed;" v-tooltip="null" class="popover-item" >
+            <div style="position: fixed;" v-tooltip="null" class="popover-item">
                 <MaxAnimateFade :show="isOpen" :duration="0.3">
                     <div class="background-popover" @click.stop="hide" v-if="isOpen" :style="{opacity: position.opacity}">
-                        <div class="max-popover-dialog" ref="el" :style="{top: position.top + 'px', left: position.left + 'px'}"  :class="[position.isTop ? 'is-top' : 'is-bottom', position.isLeft ? 'is-left' : 'is-right', props.noPicker ? 'no-picker' : '', props.class]" @click.stop="() => {}" >
+                        <div
+                            class="max-popover-dialog"
+                            ref="el"
+                            role="dialog"
+                            :id="dialog_id"
+                            :aria-labelledby="title_id"
+                            :aria-label="!title_id ? (props.title ?? undefined) : undefined"
+                            :style="{top: position.top + 'px', left: position.left + 'px'}"
+                            :class="[position.isTop ? 'is-top' : 'is-bottom', position.isLeft ? 'is-left' : 'is-right', props.noPicker ? 'no-picker' : '', props.class]"
+                            @click.stop="() => {}"
+                            @keydown="trap.onKeydown"
+                        >
                             <slot name="header">
-                                <MaxGrid s100 class="max-popover-header" pt0 mt0 mb-15>
-                                    <MaxTitle1 s90  :h1="props.title ?? 'Titulo'" :h2="props.subTitle ?? 'Sub Titulo'" p0 m0 />
-                                    <MaxIconButton s10 i="iconoir:xmark" size="1.3" @click.stop="hide" />
+                                <MaxGrid s100 class="max-popover-header" pt0 mt0 mb-15 :id="title_id">
+                                    <MaxTitle1 s90 :h1="props.title ?? 'Titulo'" :h2="props.subTitle ?? 'Sub Titulo'" p0 m0 />
+                                    <MaxIconButton s10 i="iconoir:xmark" size="1.3" aria-label="Fechar" @click.stop="hide" />
                                 </MaxGrid>
                             </slot>
                             <div class="max-popover-content">
@@ -30,8 +52,9 @@
 
 <script setup lang="ts">
     import { useElementSize, useWindowSize, useElementBounding, useDefaultReset } from '@maxvue/max-use';
-    import { useTemplateRef, ref, computed, useId, onBeforeUnmount } from 'vue';
+    import { useTemplateRef, ref, computed, useId, watch, onBeforeUnmount } from 'vue';
     import { usePopoverStore } from '../stores/usePopover.Store';
+    import { useFocusTrap } from '../helpers/useFocusTrap';
     import MaxIconButton from './MaxIconButton.vue';
     import MaxButton from './MaxButton.vue';
     import MaxTitle1 from './MaxTitle1.vue';
@@ -97,8 +120,13 @@
 
     const isOpen = computed(() => popover_store.show_id === id.value);
 
-    const el = useTemplateRef('el');
+    const dialog_id = computed(() => 'max-popover-dialog-' + id.value);
+    const title_id = computed(() => (props.title || props.subTitle ? 'max-popover-title-' + id.value : undefined));
+
+    const el = useTemplateRef<HTMLElement>('el');
     const btn_el = useTemplateRef('btn_el');
+
+    const trap = useFocusTrap(el);
 
     const { x, y, width: width_btn, height: height_btn } = useElementBounding(btn_el as any);
     const { width: width_el, height: height_el } = useElementSize(el as any);
@@ -133,14 +161,36 @@
     let is_unmounted = false;
     let pending_timer: ReturnType<typeof setTimeout> | null = null;
 
+    const onEscape = (event: KeyboardEvent) => {
+        if (event.key === 'Escape' && isOpen.value) hide();
+    };
+
+    const onKeydownTrigger = (event: KeyboardEvent) => {
+        if (event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar') {
+            event.preventDefault();
+            toggle();
+        }
+    };
+
+    watch(isOpen, (value) => {
+        if (value) {
+            trap.activate();
+            document.addEventListener('keydown', onEscape);
+        } else {
+            trap.deactivate();
+            document.removeEventListener('keydown', onEscape);
+        }
+    });
+
     onBeforeUnmount(() => {
         is_unmounted = true;
         if (pending_timer !== null) {
             clearTimeout(pending_timer);
             pending_timer = null;
         }
+        trap.deactivate();
+        document.removeEventListener('keydown', onEscape);
         if (popover_store.show_id === id.value) popover_store.hide();
-
     });
 
     const toggle = () => {

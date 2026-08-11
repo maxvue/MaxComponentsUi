@@ -1,11 +1,22 @@
 <template>
-    <TransitionGroup name="max-toast" tag="div" class="max-toast-container">
+    <TransitionGroup
+        name="max-toast"
+        tag="div"
+        class="max-toast-container"
+        role="region"
+        aria-live="polite"
+        aria-atomic="false"
+        aria-label="Notificações"
+    >
         <div
             v-for="toast in toastStore.items"
             :key="toast.id"
             :class="['max-toast-item', `severity-${toast.severity}`]"
+            :role="toast.severity === 'error' ? 'alert' : 'status'"
             @mouseenter="toastStore.pause(toast.id)"
             @mouseleave="toastStore.resume(toast.id)"
+            @focusin="toastStore.pause(toast.id)"
+            @focusout="toastStore.resume(toast.id)"
         >
             <!-- Ícone da severidade -->
             <div class="max-toast-icon">
@@ -19,7 +30,7 @@
             </div>
 
             <!-- Botão fechar -->
-            <button class="max-toast-close" @click="toastStore.remove(toast.id)" aria-label="Fechar">
+            <button class="max-toast-close" @click="toastStore.remove(toast.id)" :aria-label="'Fechar notificação: ' + toast.title">
                 <MaxIcon i="mdi:close" size="1.1" color="inherit" />
             </button>
 

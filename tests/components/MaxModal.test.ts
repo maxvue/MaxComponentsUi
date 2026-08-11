@@ -4,8 +4,10 @@ import { setActivePinia, createPinia } from 'pinia';
 import MaxModal from '../../src/components/MaxModal.vue';
 import { useModalStore } from '../../src/stores/useModal.Store';
 
-function mountModal(props: Record<string, any> = {}, slots: Record<string, any> = {}) {
-    return mount(MaxModal, {
+const mountedWrappers: any[] = [];
+
+function mountModal(props: Record<string, any> = {}, slots: Record<string, any> = {}, options: Record<string, any> = {}) {
+    const wrapper = mount(MaxModal, {
         props: { icon: 'mdi:cog', ...props },
         slots,
         global: {
@@ -28,13 +30,28 @@ function mountModal(props: Record<string, any> = {}, slots: Record<string, any> 
                 },
                 Teleport: true
             }
-        }
+        },
+        ...options
     });
+    mountedWrappers.push(wrapper);
+    return wrapper;
 }
 
 describe('MaxModal', () => {
     beforeEach(() => {
         setActivePinia(createPinia());
+        useModalStore().hide();
+        document.body.style.overflow = '';
+    });
+
+    afterEach(() => {
+        while (mountedWrappers.length > 0) {
+            const w = mountedWrappers.pop();
+            try { w.unmount(); } catch {}
+        }
+        useModalStore().hide();
+        document.body.innerHTML = '';
+        document.body.style.overflow = '';
     });
 
     it('renderiza corretamente', () => {
@@ -281,5 +298,150 @@ describe('MaxModal', () => {
 
         spyHide.mockRestore();
         vi.useRealTimers();
+    });
+
+    describe('Acessibilidade (Etapa 5.1)', () => {
+        afterEach(() => {
+            const store = useModalStore();
+            store.hide();
+            document.body.innerHTML = '';
+            document.body.style.overflow = '';
+            setActivePinia(createPinia());
+        });
+
+        it('aplica role="dialog" e aria-modal="true" no painel do modal', async () => {
+            const wrapper = mountModal({ title: 'Título Teste' });
+            const vm = wrapper.vm as any;
+            vm.open();
+            await wrapper.vm.$nextTick();
+
+            const modalEl = wrapper.find('.max-modal');
+            expect(modalEl.exists()).toBe(true);
+            expect(modalEl.attributes('role')).toBe('dialog');
+            expect(modalEl.attributes('aria-modal')).toBe('true');
+        });
+
+        it('vincula aria-labelledby ao título do modal ou aplica aria-label', async () => {
+            const wrapper = mountModal({ title: 'Título Teste' });
+            const vm = wrapper.vm as any;
+            vm.open();
+            await wrapper.vm.$nextTick();
+
+            const modalEl = wrapper.find('.max-modal');
+            const labelledBy = modalEl.attributes('aria-labelledby');
+            expect(labelledBy).toBeTruthy();
+            expect(wrapper.find(`#${labelledBy}`).exists()).toBe(true);
+        });
+
+        it('aplica aria-label="Fechar" no botão de fechar', async () => {
+            const wrapper = mount(MaxModal, {
+                props: { icon: 'mdi:cog' },
+                global: {
+                    stubs: { Teleport: true }
+                }
+            });
+            const vm = wrapper.vm as any;
+            vm.open();
+            await wrapper.vm.$nextTick();
+
+            const closeBtn = wrapper.find('.close-btn');
+            expect(closeBtn.exists()).toBe(true);
+            expect(closeBtn.attributes('aria-label')).toBe('Fechar');
+        });
+
+        it('fecha o modal com a tecla Escape por padrão', async () => {
+            vi.useFakeTimers();
+            const wrapper = mountModal({}, {}, { attachTo: document.body });
+            const vm = wrapper.vm as any;
+            const store = useModalStore();
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+            expect(store.show_id).toBe(vm.id);
+
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+            vi.advanceTimersByTime(350);
+
+            expect(store.show_id).toBe(null);
+            vi.useRealTimers();
+        });
+
+        it('respeita closeOnEscape false', async () => {
+            vi.useFakeTimers();
+            const wrapper = mountModal({ closeOnEscape: false });
+            const vm = wrapper.vm as any;
+            const store = useModalStore();
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+            expect(store.show_id).toBe(vm.id);
+
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+            vi.advanceTimersByTime(350);
+
+            expect(store.show_id).toBe(vm.id);
+            vi.useRealTimers();
+        });
+
+        it('trava o scroll do body com blockScroll', async () => {
+            vi.useFakeTimers();
+            document.body.style.overflow = '';
+            const wrapper = mountModal({ blockScroll: true });
+            const vm = wrapper.vm as any;
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+            expect(document.body.style.overflow).toBe('hidden');
+
+            vm.close();
+            vi.advanceTimersByTime(10);
+            vi.advanceTimersByTime(350);
+            await wrapper.vm.$nextTick();
+            expect(document.body.style.overflow).toBe('');
+            wrapper.unmount();
+            vi.useRealTimers();
+        });
+
+        it('restaura o scroll do body ao desmontar aberto', async () => {
+            document.body.style.overflow = '';
+            const wrapper = mountModal({ blockScroll: true });
+            const vm = wrapper.vm as any;
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+            expect(document.body.style.overflow).toBe('hidden');
+
+            wrapper.unmount();
+            expect(document.body.style.overflow).toBe('');
+        });
+
+        it('ativa focus trap e restaura foco ao fechar', async () => {
+            const botaoOrigem = document.createElement('button');
+            botaoOrigem.id = 'origem';
+            document.body.appendChild(botaoOrigem);
+            botaoOrigem.focus();
+
+            const wrapper = mount(MaxModal, {
+                props: { icon: 'mdi:cog' },
+                slots: {
+                    content: '<button id="interno">Interno</button>'
+                },
+                attachTo: document.body
+            });
+            const vm = wrapper.vm as any;
+            const store = useModalStore();
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+            await wrapper.vm.$nextTick();
+
+            expect(document.activeElement?.id).toBe('interno');
+
+            store.hide();
+            await wrapper.vm.$nextTick();
+
+            expect(document.activeElement).toBe(botaoOrigem);
+            document.body.removeChild(botaoOrigem);
+        });
     });
 });

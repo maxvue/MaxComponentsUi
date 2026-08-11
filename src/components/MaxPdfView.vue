@@ -1,7 +1,15 @@
 <template>
     <div v-if="is_open">
-        <div class="viewPDF" :style="{opacity: opacity}">
-            <div class="space" @click="closePDF" />
+        <div
+            class="viewPDF"
+            ref="el"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Visualizador de PDF"
+            :style="{opacity: opacity}"
+            @keydown="trap.onKeydown"
+        >
+            <div class="space" aria-hidden="true" @click="closePDF" />
             <div class="meio">
                 <Transition>
                     <div class="loading" v-if="isLoading" @click="closePDF">
@@ -23,7 +31,7 @@
                     </VuePdfEmbed>
                 </div>
             </div>
-            <div class="space" @click="closePDF" />
+            <div class="space" aria-hidden="true" @click="closePDF" />
         </div>
         <div class="pdf-div-bar-tools">
             <MaxButton icon="iconamoon:zoom-out-light" flex text @click="Zoom('out')" />
@@ -39,7 +47,9 @@
  */
 <script setup lang="ts">
     import { useWindowSize } from '@maxvue/max-use';
-    import { defineAsyncComponent, ref, watch } from 'vue';
+    import { defineAsyncComponent, ref, watch, useTemplateRef, onBeforeUnmount } from 'vue';
+    import { useFocusTrap } from '../helpers/useFocusTrap';
+    import { useScrollLock } from '../helpers/useScrollLock';
     import ProgressSpinner from 'primevue/progressspinner';
     import MaxButton from './MaxButton.vue';
 
@@ -52,6 +62,10 @@
         /** URL ou fonte do arquivo PDF */
         file: { default: '' }
     });
+
+    const el = useTemplateRef<HTMLElement>('el');
+    const trap = useFocusTrap(el);
+    const scroll_lock = useScrollLock();
 
     const size = ref({ width: screen_width.value, height: screen_height.value });
     const Zoom = (value: string) => {
@@ -66,35 +80,80 @@
     const percent = ref(0);
     const isLoading = ref(true);
 
+    let close_timer: ReturnType<typeof setTimeout> | null = null;
+    let has_scroll_lock = false;
+
+    const onEscape = (event: KeyboardEvent) => {
+        if (event.key === 'Escape' && is_open.value) closePDF();
+    };
+
+    watch(is_open, (value) => {
+        if (value) {
+            trap.activate();
+            document.addEventListener('keydown', onEscape);
+            if (!has_scroll_lock) {
+                scroll_lock.lock();
+                has_scroll_lock = true;
+            }
+        } else {
+            trap.deactivate();
+            document.removeEventListener('keydown', onEscape);
+            if (has_scroll_lock) {
+                scroll_lock.unlock();
+                has_scroll_lock = false;
+            }
+        }
+    }, { immediate: true });
+
+    onBeforeUnmount(() => {
+        if (close_timer !== null) {
+            clearTimeout(close_timer);
+            close_timer = null;
+        }
+        trap.deactivate();
+        document.removeEventListener('keydown', onEscape);
+        if (has_scroll_lock) {
+            scroll_lock.unlock();
+            has_scroll_lock = false;
+        }
+    });
+
     function rendered() {
         isLoading.value = false;
         opacity.value = 0.9;
     }
 
-    function loaded(event: any) {
+    function loaded(event: { numPages: number }) {
         total.value = event.numPages;
         opacity.value = 1;
     }
 
-    function progressPdf(event: any) {
+    function progressPdf(event: { loaded: number; total: number }) {
         percent.value = Math.round((event.loaded / event.total) * 100);
         if (percent.value > 99) percent.value = 98;
     }
 
     function closePDF() {
         opacity.value = 0;
-        setTimeout(() => {
+        if (close_timer !== null) clearTimeout(close_timer);
+        close_timer = setTimeout(() => {
             is_open.value = false;
+            close_timer = null;
         }, 500);
     }
 
-    watch(() => props.file, () => {
+    watch(() => props.file, (newFile) => {
+        if (!newFile) return;
+        if (close_timer !== null) {
+            clearTimeout(close_timer);
+            close_timer = null;
+        }
         opacity.value = 0;
         isLoading.value = true;
         percent.value = 0;
         total.value = 0;
         is_open.value = true;
-    });
+    }, { immediate: true });
 </script>
 
 <style scoped lang="scss">

@@ -1,37 +1,52 @@
 <template>
-    <TransitionFade>
-        <div class="background-popover-confirm" @click.stop="confirm_store.hide" v-if="confirm_store.show">
-            <div class="max-icon-confirm-dialog" ref="el" :style="{top: position.top + 'px', left: position.left + 'px'}"  :class="[position.isTop ? 'is-top' : 'is-bottom', position.isLeft ? 'is-left' : 'is-right']">
-                <div pw4 pt-4 full text-center color-background-750 class="popover-confirm-content" >
-                    <MaxIcon :i="confirm_store.messageIcon ?? 'mingcute:question-fill'" size="1.2" color-red-600 />
-                    <div>
-                        {{confirm_store.message}}
+    <Teleport to="body">
+        <TransitionFade>
+            <div class="background-popover-confirm" @click.stop="confirm_store.hide" v-if="confirm_store.show">
+                <div
+                    class="max-icon-confirm-dialog"
+                    ref="el"
+                    role="alertdialog"
+                    aria-modal="true"
+                    :aria-labelledby="msg_id"
+                    :style="{top: position.top + 'px', left: position.left + 'px'}"
+                    :class="[position.isTop ? 'is-top' : 'is-bottom', position.isLeft ? 'is-left' : 'is-right']"
+                    @click.stop="() => {}"
+                    @keydown="trap.onKeydown"
+                >
+                    <div pw4 pt-4 full text-center color-background-750 class="popover-confirm-content">
+                        <MaxIcon :i="confirm_store.messageIcon ?? 'mingcute:question-fill'" size="1.2" color-red-600 />
+                        <div :id="msg_id">
+                            {{confirm_store.message}}
+                        </div>
                     </div>
+                    <MaxGrid>
+                        <MaxButton s50 :action="reject" :label="confirm_store.rejectProps.label" :icon="confirm_store.rejectProps.icon" />
+                        <MaxButton s50 :action="accept" :label="confirm_store.acceptProps.label" :icon="confirm_store.acceptProps.icon" />
+                    </MaxGrid>
                 </div>
-                <MaxGrid>
-                    <MaxButton s50 :action="reject" :label="confirm_store.rejectProps.label" :icon="confirm_store.rejectProps.icon" />
-                    <MaxButton s50 :action="accept" :label="confirm_store.acceptProps.label" :icon="confirm_store.acceptProps.icon"  />
-                </MaxGrid>
             </div>
-        </div>
-    </TransitionFade>
+        </TransitionFade>
+    </Teleport>
 </template>
 
 <script setup lang="ts">
     import { useConfirmStore } from '../stores/useConfirm.Store';
+    import { useFocusTrap } from '../helpers/useFocusTrap';
     import MaxGrid from './MaxGrid.vue';
     import MaxButton from './MaxButton.vue';
     import MaxIcon from './MaxIcon.vue';
     import { useElementSize, useWindowSize } from '@maxvue/max-use';
-    import { useTemplateRef, computed } from 'vue';
+    import { useTemplateRef, computed, watch, onBeforeUnmount, useId } from 'vue';
     import TransitionFade from './TransitionFade.vue';
 
     const confirm_store = useConfirmStore();
     const { width: window_width, height: window_height } = useWindowSize();
 
+    const id = useId();
+    const msg_id = computed(() => 'max-popover-confirm-msg-' + id);
 
-    const el = useTemplateRef('el');
-    const { width, height } = useElementSize(el as any);
+    const el = useTemplateRef<HTMLElement>('el');
+    const trap = useFocusTrap(el);
 
     const accept = () => {
         confirm_store.acceptProps.action?.();
@@ -42,6 +57,24 @@
         confirm_store.hide();
     };
 
+    const onEscape = (event: KeyboardEvent) => {
+        if (event.key === 'Escape' && confirm_store.show) confirm_store.hide();
+    };
+
+    watch(() => confirm_store.show, (value) => {
+        if (value) {
+            trap.activate();
+            document.addEventListener('keydown', onEscape);
+        } else {
+            trap.deactivate();
+            document.removeEventListener('keydown', onEscape);
+        }
+    }, { immediate: true });
+
+    onBeforeUnmount(() => {
+        trap.deactivate();
+        document.removeEventListener('keydown', onEscape);
+    });
 
     const position = computed(() => {
         const data ={
@@ -61,6 +94,7 @@
         return data;
     });
 
+    const { width, height } = useElementSize(el as any);
 </script>
 
 <style lang="scss">
@@ -69,7 +103,7 @@
     height: 100vh;
     width: 100vw;
     position: fixed;
-    z-index: 3;
+    z-index: 99;
     top: 0;
     left: 0;
 }

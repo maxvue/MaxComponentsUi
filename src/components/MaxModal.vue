@@ -7,15 +7,26 @@
         </div>
         <teleport to="body">
             <div class="background-modal" @click.stop="modal_store.hide" v-if="modal_store.show_id === id" :style="{opacity: style?.opacity}" :data-html2canvas-ignore="props.ignoreCanvas">
-                <div class="max-modal" ref="el" :style="{top: style.top + 'px', left: style.left + 'px', padding: modal_padding}"  @click.stop="() => {}" :class="props.class">
+                <div
+                    class="max-modal"
+                    ref="el"
+                    role="dialog"
+                    aria-modal="true"
+                    :aria-labelledby="title_id"
+                    :aria-label="!title_id ? (props.title ?? undefined) : undefined"
+                    :style="{top: style.top + 'px', left: style.left + 'px', padding: modal_padding}"
+                    @click.stop="() => {}"
+                    @keydown="trap.onKeydown"
+                    :class="props.class"
+                >
                     <slot name="header" v-if="!props.noHeader">
-                        <MaxGrid s100 class="max-modal-header" pt0 mt0 mb-15>
+                        <MaxGrid s100 class="max-modal-header" pt0 mt0 mb-15 :id="title_id">
                             <slot name="title" v-bind="props">
-                                <MaxTitle1 s90  :h1="props.title ?? 'Titulo'" :h2="props.subTitle ?? 'Sub Titulo'" p0 m0 />
+                                <MaxTitle1 s90 :h1="props.title ?? 'Titulo'" :h2="props.subTitle ?? 'Sub Titulo'" p0 m0 />
                             </slot>
                             <div s1 w-max-23>
                                 <slot name="close" :close="close" :hide="modal_store.hide">
-                                    <MaxIconButton i="iconoir:xmark" size="1.3" @click.stop="modal_store.hide" class="close-btn" />
+                                    <MaxIconButton i="iconoir:xmark" size="1.3" aria-label="Fechar" @click.stop="modal_store.hide" class="close-btn" />
                                 </slot>
                             </div>
                         </MaxGrid>
@@ -34,6 +45,8 @@
     import { useModalStore } from '../stores/useModal.Store';
     import { useDefaultReset, refAutoReset } from '@maxvue/max-use';
     import { useTemplateRef, computed, ref, watch, useId, onBeforeUnmount } from 'vue';
+    import { useFocusTrap } from '../helpers/useFocusTrap';
+    import { useScrollLock } from '../helpers/useScrollLock';
     import MaxIconButton from './MaxIconButton.vue';
     import MaxButton from './MaxButton.vue';
     import MaxTitle1 from './MaxTitle1.vue';
@@ -87,14 +100,19 @@
         noButton?: boolean;
         /** No Header Flag */
         noHeader?: boolean;
+        /** Trava o scroll do body enquanto aberto. Default true. */
+        blockScroll?: boolean;
+        /** Permite fechar com a tecla Escape. Default true. */
+        closeOnEscape?: boolean;
     }>(), {
         dark: 0.4,
         light: undefined,
         loading: false,
         ignoreCanvas: false,
         noButton: false,
-        noHeader: false
-
+        noHeader: false,
+        blockScroll: false,
+        closeOnEscape: true
     });
 
     const is_show = computed(() => modal_store.show_id === id.value);
@@ -108,7 +126,11 @@
 
     const id = ref(useId());
 
-    const el = useTemplateRef('el');
+    const el = useTemplateRef<HTMLElement>('el');
+    const trap = useFocusTrap(el);
+    const scroll_lock = useScrollLock();
+
+    const title_id = computed(() => (! props.noHeader ? 'max-modal-title-' + id.value : undefined));
 
     const style: any = useDefaultReset({
         isTop: false,
@@ -119,6 +141,7 @@
     const is_changing = refAutoReset(false, 400);
 
     let is_unmounted = false;
+    let has_scroll_lock = false;
 
     /**
      * Timers de transição (abertura/fechamento) atualmente agendados.
@@ -134,11 +157,38 @@
         pending_timers = [];
     };
 
+    const onEscape = (event: KeyboardEvent) => {
+        if (event.key === 'Escape' && props.closeOnEscape) close();
+    };
+
+    watch(is_show, (value) => {
+        if (value) {
+            trap.activate();
+            document.addEventListener('keydown', onEscape);
+            if (props.blockScroll) {
+                scroll_lock.lock();
+                has_scroll_lock = true;
+            }
+        } else {
+            trap.deactivate();
+            document.removeEventListener('keydown', onEscape);
+            if (has_scroll_lock) {
+                scroll_lock.unlock();
+                has_scroll_lock = false;
+            }
+        }
+    }, { immediate: true });
+
     onBeforeUnmount(() => {
         is_unmounted = true;
         clearPendingTimers();
+        trap.deactivate();
+        document.removeEventListener('keydown', onEscape);
+        if (has_scroll_lock) {
+            scroll_lock.unlock();
+            has_scroll_lock = false;
+        }
         if (modal_store.show_id === id.value) modal_store.hide();
-
     });
 
     /**
@@ -278,7 +328,7 @@
     .max-modal-item {
         &.no-button {
             position: fixed !important;
-            width: 0  !important;
+            width: 0 !important;
             height: 0 !important;
             top: 0 !important;
             left: 0 !important;

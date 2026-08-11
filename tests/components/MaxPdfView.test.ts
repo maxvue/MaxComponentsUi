@@ -56,4 +56,85 @@ describe('MaxPdfView.vue', () => {
 
         vm.Zoom('other'); // cobre o branch que não altera nada
     });
+
+    describe('Acessibilidade e Ciclo de Vida (Etapa 5.1)', () => {
+        afterEach(() => {
+            document.body.innerHTML = '';
+            document.body.style.overflow = '';
+        });
+
+        it('container .viewPDF possui role="dialog", aria-modal="true" e aria-label="Visualizador de PDF"', async () => {
+            const wrapper = mountPdf({ file: 'teste.pdf' });
+            await wrapper.vm.$nextTick();
+
+            const dialog = wrapper.find('.viewPDF');
+            expect(dialog.exists()).toBe(true);
+            expect(dialog.attributes('role')).toBe('dialog');
+            expect(dialog.attributes('aria-modal')).toBe('true');
+            expect(dialog.attributes('aria-label')).toBe('Visualizador de PDF');
+        });
+
+        it('fecha o visualizador ao pressionar a tecla Escape', async () => {
+            vi.useFakeTimers();
+            const wrapper = mountPdf({ file: 'teste.pdf' });
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.find('.viewPDF').exists()).toBe(true);
+
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+            vi.advanceTimersByTime(600);
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.find('.viewPDF').exists()).toBe(false);
+            vi.useRealTimers();
+        });
+
+        it('trava o scroll do body com useScrollLock enquanto o PDF está aberto', async () => {
+            vi.useFakeTimers();
+            document.body.style.overflow = '';
+            const wrapper = mountPdf();
+            await wrapper.setProps({ file: 'teste.pdf' });
+
+            expect(document.body.style.overflow).toBe('hidden');
+
+            const vm = wrapper.vm as any;
+            vm.closePDF();
+            vi.advanceTimersByTime(600);
+            await wrapper.vm.$nextTick();
+            await wrapper.vm.$nextTick();
+
+            expect(document.body.style.overflow).toBe('');
+            vi.useRealTimers();
+        });
+
+        it('limpa o close_timer ao desmontar prevenindo timers órfãos', async () => {
+            vi.useFakeTimers();
+            const wrapper = mountPdf({ file: 'teste.pdf' });
+            await wrapper.vm.$nextTick();
+
+            const vm = wrapper.vm as any;
+            vm.closePDF();
+
+            wrapper.unmount();
+            expect(() => vi.advanceTimersByTime(600)).not.toThrow();
+            vi.useRealTimers();
+        });
+
+        it('reabrir PDF cancela timer de fechamento pendente', async () => {
+            vi.useFakeTimers();
+            const wrapper = mountPdf({ file: 'doc1.pdf' });
+            await wrapper.vm.$nextTick();
+
+            const vm = wrapper.vm as any;
+            vm.closePDF();
+
+            // Reabre antes dos 500ms
+            await wrapper.setProps({ file: 'doc2.pdf' });
+            vi.advanceTimersByTime(600);
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.find('.viewPDF').exists()).toBe(true);
+            vi.useRealTimers();
+        });
+    });
 });
