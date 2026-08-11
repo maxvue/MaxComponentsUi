@@ -1,5 +1,5 @@
 <template>
-    <div class="map-main-div" s24 v-if="coordinates.latitude && coordinates.longitude">
+    <div class="map-main-div" s24 v-if="coordinates.latitude !== 0 && coordinates.longitude !== 0">
         <div class="mapa" ref="mapDiv" v-if="effectiveApiKey">
             <GoogleMap :api-key="effectiveApiKey" style="width: 100%; height: 100%;" :center="center" :zoom="zoom" ref="mapRef" :mapTypeId="props.mapTypeId" :mapId="effectiveMapId" v-if="isMounted">
                 <AdvancedMarker :options="marker_options" :pin-options="pinOptions" ref="markerRef" @dragend="onDrag" />
@@ -44,12 +44,18 @@
 
     watch(() => [coordinates.value.latitude, coordinates.value.longitude], () => emit('update:modelValue', coordinates.value));
 
-    watch(() => props.modelValue,() => {
-        const is_valid = props.modelValue?.latitude && props.modelValue?.longitude;
-        const is_different = coordinates.value.latitude !== Number(props.modelValue?.latitude) || coordinates.value.longitude !== Number(props.modelValue?.longitude);
+    watch(
+        () => [props.modelValue?.latitude, props.modelValue?.longitude],
+        () => {
+            const lat = Number(props.modelValue?.latitude ?? 0);
+            const lng = Number(props.modelValue?.longitude ?? 0);
+            const is_valid = !isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0;
+            const is_different = coordinates.value.latitude !== lat || coordinates.value.longitude !== lng;
 
-        if (is_valid && is_different) coordinates.value = { latitude: Number(props.modelValue?.latitude), longitude: Number(props.modelValue?.longitude) };
-    });
+            if (is_valid && is_different) coordinates.value = { latitude: lat, longitude: lng };
+        },
+        { immediate: true, deep: true }
+    );
 
     const center: Ref = ref({ lat: coordinates.value.latitude, lng: coordinates.value.longitude });
     const zoom: Ref = ref(20);
