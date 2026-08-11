@@ -36,6 +36,18 @@ describe('MaxLoaderIcon', () => {
         expect(wrapper.find('.max-loader-icon-div').exists()).toBe(true);
         expect(wrapper.find('svg').exists()).toBe(true);
     });
+
+    it('repassa atributos e estilos passados via attrs ao elemento raiz', () => {
+        const wrapper = mount(MaxLoaderIcon, {
+            attrs: {
+                'data-test': 'my-loader',
+                style: 'width: 30px;'
+            }
+        });
+        const div = wrapper.find('.max-loader-icon-div');
+        expect(div.attributes('data-test')).toBe('my-loader');
+        expect(div.attributes('style')).toContain('width: 30px');
+    });
 });
 
 describe('MaxLoader', () => {

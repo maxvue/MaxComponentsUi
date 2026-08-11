@@ -1,6 +1,6 @@
 <template>
     <div class="input-upload-file-button-main-div" >
-        <MaxInputFileUpload v-bind="attrs" :modelValue="(attrs.modelValue as any)" class="no-style" customUpload  :onUpload="onUpload" >
+        <MaxInputFileUpload v-bind="attrs" :modelValue="(attrs.modelValue as any)" class="no-style" @upload="onUpload" >
             <slot>
                 <div class="slot-main-div" >
                     <Icon :i="attrs.ico ?? attrs.icon ?? attrs.i ?? 'material-symbols:upload-rounded'" size="1.4"  />
