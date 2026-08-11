@@ -1,6 +1,6 @@
 <template>
     <InputBase v-bind="inputBaseProps" in-line class="max-input-markdown">
-        <div class="max-input-markdown__editor-wrap" :class="{ 'max-input-markdown__editor-wrap--disabled': props.disabled }" @click.stop="closePopovers">
+        <div class="max-input-markdown__editor-wrap" :class="{ 'max-input-markdown__editor-wrap--disabled': props.disabled }">
             <MaxInputMarkdownToolbar :editor="editor ?? null" />
             <EditorContent class="max-input-markdown__content" :style="{ minHeight: props.minHeight, maxHeight: props.maxHeight }" :editor="editor" />
         </div>
@@ -106,8 +106,6 @@
     onMounted(() => {
         if (props.modelValue) editor.value?.commands.setContent(props.modelValue);
     });
-
-    const closePopovers = () => {};
 
     watch(
         () => props.modelValue,

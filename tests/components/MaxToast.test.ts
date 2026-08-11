@@ -143,4 +143,29 @@ describe('MaxToast', () => {
         await item.trigger('mouseleave');
         expect(store.items[0].paused).toBe(false);
     });
+
+    it('desmontar MaxToast executa toastStore.clear() limpando items e timers da store', async () => {
+        const pinia = createPinia();
+        setActivePinia(pinia);
+        const store = useToastStore(pinia);
+        store.add({ title: 'Toast 1', severity: 'info' });
+        store.add({ title: 'Toast 2', severity: 'success' });
+
+        const wrapper = mount(MaxToast, {
+            global: {
+                plugins: [pinia],
+                stubs: {
+                    MaxIcon: true,
+                    TransitionGroup: { template: '<div class="max-toast-container"><slot /></div>' }
+                }
+            }
+        });
+        await flushPromises();
+
+        expect(store.items.length).toBe(2);
+
+        wrapper.unmount();
+
+        expect(store.items.length).toBe(0);
+    });
 });

@@ -36,7 +36,7 @@
             <div class="max-toast-progress">
                 <div
                     :class="['max-toast-progress-bar', { paused: toast.paused }]"
-                    :style="{ animationDuration: `${toast.duration}ms` }"
+                    :style="{ animationDuration: `${toast.remaining ?? toast.duration}ms` }"
                 />
             </div>
         </div>
@@ -44,11 +44,16 @@
 </template>
 
 <script setup lang="ts">
+    import { onBeforeUnmount } from 'vue';
     import { useToastStore } from '../stores/useToast.Store';
     import type { ToastItem } from '../stores/useToast.Store';
     import MaxIcon from './MaxIcon.vue';
 
     const toastStore = useToastStore();
+
+    onBeforeUnmount(() => {
+        toastStore.clear();
+    });
 
     /** Mapa de ícones padrão por severidade */
     const severityIconMap: Record<string, string> = {

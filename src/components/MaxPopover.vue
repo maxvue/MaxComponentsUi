@@ -5,7 +5,7 @@
                 <MaxButton v-bind="props" :size="String(props.size ?? props.sizeIcon ?? props.iconSize ?? 1.1)" :action="undefined" />
             </slot>
         </div>
-        <Teleport to="body" :disabled="! isOpen">
+        <Teleport to="body" v-if="isOpen">
             <div style="position: fixed;" v-tooltip="null" class="popover-item" >
                 <MaxAnimateFade :show="isOpen" :duration="0.3">
                     <div class="background-popover" @click.stop="hide" v-if="isOpen" :style="{opacity: position.opacity}">
@@ -30,7 +30,7 @@
 
 <script setup lang="ts">
     import { useElementSize, useWindowSize, useElementBounding, useDefaultReset } from '@maxvue/max-use';
-    import { useTemplateRef, ref, computed, useId } from 'vue';
+    import { useTemplateRef, ref, computed, useId, onBeforeUnmount } from 'vue';
     import { usePopoverStore } from '../stores/usePopover.Store';
     import MaxIconButton from './MaxIconButton.vue';
     import MaxButton from './MaxButton.vue';
@@ -130,12 +130,27 @@
         return data;
     });
 
+    let is_unmounted = false;
+    let pending_timer: ReturnType<typeof setTimeout> | null = null;
+
+    onBeforeUnmount(() => {
+        is_unmounted = true;
+        if (pending_timer !== null) {
+            clearTimeout(pending_timer);
+            pending_timer = null;
+        }
+        if (popover_store.show_id === id.value) popover_store.hide();
+
+    });
+
     const toggle = () => {
         if (style.value.opacity !== 0) style.reset();
 
         popover_store.toggle(id.value);
 
-        setTimeout(() => {
+        if (pending_timer !== null) clearTimeout(pending_timer);
+        pending_timer = setTimeout(() => {
+            if (is_unmounted) return;
             style.value.opacity = 1;
         }, 1);
     };
@@ -232,6 +247,6 @@
 }
 
 .popover-item {
-    z-index: 9999 !important;
+    z-index: 99;
 }
 </style>

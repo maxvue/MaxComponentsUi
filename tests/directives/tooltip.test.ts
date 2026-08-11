@@ -23,7 +23,7 @@ function mountWithTooltip(bindingExpr: string, modifiers: string[] = [], extra: 
             mockCenteredRect(this.$el as HTMLElement);
         }
     });
-    return mount(Comp);
+    return mount(Comp, { attachTo: document.body });
 }
 
 function getTooltipNode() {
@@ -177,7 +177,7 @@ describe('v-tooltip directive', () => {
                 mockCenteredRect(this.$el as HTMLElement);
             }
         });
-        wrapper = mount(Comp);
+        wrapper = mount(Comp, { attachTo: document.body });
         await wrapper.find('button').trigger('mouseenter');
         vi.runAllTimers();
 
@@ -242,7 +242,7 @@ describe('v-tooltip directive', () => {
                 return { text: 'Primeiro' };
             }
         });
-        wrapper = mount(Comp);
+        wrapper = mount(Comp, { attachTo: document.body });
 
         await wrapper.find('button').trigger('mouseenter');
         vi.runAllTimers();
@@ -273,5 +273,79 @@ describe('v-tooltip directive', () => {
         expect(tooltipEl?.getAttribute('role')).toBe('tooltip');
         const button = wrapper.find('button').element;
         expect(button.getAttribute('aria-describedby')).toBe(tooltipEl?.id);
+    });
+
+    it('tooltip reposiciona ao disparar evento scroll no window', async () => {
+        wrapper = mountWithTooltip('\'Texto\'');
+        await wrapper.find('button').trigger('mouseenter');
+        vi.runAllTimers();
+
+        const tooltipEl = getTooltipNode();
+        expect(tooltipEl).not.toBeNull();
+
+        const initialTop = tooltipEl?.style.top;
+        // alterar getBoundingClientRect do elemento simulando scroll/movimento
+        const button = wrapper.find('button').element as HTMLElement;
+        button.getBoundingClientRect = () => ({
+            top: 100, left: 300, right: 340, bottom: 120, width: 40, height: 20, x: 300, y: 100,
+            toJSON: () => ({})
+        } as DOMRect);
+
+        window.dispatchEvent(new Event('scroll'));
+
+        expect(tooltipEl?.style.top).not.toBe(initialTop);
+    });
+
+    it('showDelay pendente com elemento desconectado nao cria no no document.body', async () => {
+        wrapper = mountWithTooltip('{ value: \'Texto\', showDelay: 500 }');
+        const button = wrapper.find('button').element as HTMLElement;
+        await wrapper.find('button').trigger('mouseenter');
+
+        // simula remoção direta do DOM fora do ciclo de unmount do Vue
+        button.remove();
+        expect(button.isConnected).toBe(false);
+
+        vi.advanceTimersByTime(500);
+        expect(getTooltipNode()).toBeNull();
+    });
+
+    it('destroyTooltip desanexa ouvintes de scroll e resize do window', async () => {
+        const addSpy = vi.spyOn(window, 'addEventListener');
+        const removeSpy = vi.spyOn(window, 'removeEventListener');
+
+        wrapper = mountWithTooltip('\'Texto\'');
+        await wrapper.find('button').trigger('mouseenter');
+        vi.runAllTimers();
+
+        const scrollAddCalls = addSpy.mock.calls.filter((c) => c[0] === 'scroll').length;
+        expect(scrollAddCalls).toBeGreaterThan(0);
+
+        await wrapper.find('button').trigger('mouseleave');
+        vi.runAllTimers();
+
+        const scrollRemoveCalls = removeSpy.mock.calls.filter((c) => c[0] === 'scroll').length;
+        expect(scrollRemoveCalls).toBe(scrollAddCalls);
+
+        addSpy.mockRestore();
+        removeSpy.mockRestore();
+    });
+
+    it('alterar binding para disabled: true durante um showDelay cancela o timer', async () => {
+        const Comp = defineComponent({
+            directives: { tooltip: Tooltip },
+            template: '<button v-tooltip="opts">trigger</button>',
+            data() {
+                return { opts: { value: 'Texto', showDelay: 500, disabled: false } };
+            }
+        });
+        wrapper = mount(Comp, { attachTo: document.body });
+        await wrapper.find('button').trigger('mouseenter');
+
+        // altera para disabled antes do timer disparar
+        await wrapper.setData({ opts: { value: 'Texto', showDelay: 500, disabled: true } });
+        await wrapper.vm.$nextTick();
+
+        vi.advanceTimersByTime(500);
+        expect(getTooltipNode()).toBeNull();
     });
 });

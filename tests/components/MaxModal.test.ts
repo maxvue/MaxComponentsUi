@@ -248,4 +248,38 @@ describe('MaxModal', () => {
 
         vi.useRealTimers();
     });
+
+    it('desmontar MaxModal enquanto aberto limpa show_id da store global', () => {
+        const wrapper = mountModal();
+        const vm = wrapper.vm as any;
+        const store = useModalStore();
+
+        vm.open();
+        expect(store.show_id).toBe(vm.id);
+
+        wrapper.unmount();
+        expect(store.show_id).toBe(null);
+    });
+
+    it('fechar e desmontar MaxModal imediatamente nao deixa timers mutarem a store', () => {
+        vi.useFakeTimers();
+        const wrapper = mountModal();
+        const vm = wrapper.vm as any;
+        const store = useModalStore();
+
+        vm.open();
+        vm.close();
+
+        wrapper.unmount();
+
+        const spyHide = vi.spyOn(store, 'hide');
+
+        vi.advanceTimersByTime(500);
+
+        expect(store.show_id).toBe(null);
+        expect(spyHide).not.toHaveBeenCalled();
+
+        spyHide.mockRestore();
+        vi.useRealTimers();
+    });
 });

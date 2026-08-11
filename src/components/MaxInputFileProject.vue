@@ -30,14 +30,11 @@
     </div>
 </template>
 <script setup lang="ts">
-    import { type Ref, watch, computed } from 'vue';
-    import { getRoute, useDropZone } from '@maxvue/max-use';
-    import { useFileDialog } from '@maxvue/max-use';
-    import { ref } from 'vue';
+    import { type Ref, watch, computed, onBeforeUnmount, ref } from 'vue';
+    import { getRoute, useDropZone, useFileDialog, isBlank, ulid, size } from '@maxvue/max-use';
     import MaxIcon from './MaxIcon.vue';
     import MaxButton from './MaxButton.vue';
     import { DBFile } from '../types/index.js';
-    import { isBlank, ulid, size } from '@maxvue/max-use';
     import MaxLoaderIcon from './MaxLoaderIcon.vue';
     import type { MaxButtonsType } from '../types/index.js';
     import axios from 'axios';
@@ -46,8 +43,19 @@
     const props = withDefaults(defineProps<{ files: DBFile[]; uploadData?: any; auto?: boolean; url?: string; route?:string; ready?: boolean; uploadRoute?: string; buttons?: MaxButtonsType[] }>(), { files: () => [], buttons: () => [], auto: true });
 
     const temp_files = ref<DBFile[]>(props.files);
+    const created_urls = new Set<string>();
+
+    const cleanupRemovedUrls = (currentFiles: DBFile[]) => {
+        const activeUrls = new Set(currentFiles.map((f) => f.objectURL).filter(Boolean));
+        for (const url of Array.from(created_urls)) if (!activeUrls.has(url)) {
+            URL.revokeObjectURL(url);
+            created_urls.delete(url);
+        }
+
+    };
 
     watch(() => props.files, (files) => {
+        cleanupRemovedUrls(files);
         temp_files.value = files;
     }, { deep: true, immediate: true });
 
@@ -62,10 +70,20 @@
         item.id ??= ulid();
         item.name ??= item.file_name ?? item.label_file_name;
         item.extension ??= item.name?.split('.')?.pop() ?? null;
-        item.blob ??= new Blob([ item as any ], { type: item.type });
-        item.objectURL ??= URL.createObjectURL(item.blob);
-        item.src ??= item.objectURL;
-        item.file_bloob ??= item.objectURL;
+
+        if (!item.src && !item.thumbnail) {
+            if (!item.blob) if (item instanceof Blob) item.blob = item;
+            else item.blob = new Blob([item as any], { type: item.type });
+
+
+            if (!item.objectURL) {
+                item.objectURL = URL.createObjectURL(item.blob);
+                created_urls.add(item.objectURL);
+            }
+            item.src ??= item.objectURL;
+            item.file_bloob ??= item.objectURL;
+        }
+
         item.message_type ??= checkFileType(item.extension) ?? 'document';
         item.in_server ??= false;
         item.to_request_ai ??= ! item.in_server;
@@ -137,13 +155,18 @@
 
 
         files = { files: files['files'] ?? files };
+        const send_urls: string[] = [];
 
         // Adicionando os arquivos ao FormData
         files['files'].forEach((fileItem: any, index: number) => {
             const file = fileItem;
             file['target'] = null;
-            file['blob'] ??= new Blob([file], { type: file.type });
-            file['objectURL'] ??= URL.createObjectURL(file.blob);
+            if (!file['blob']) file['blob'] = file instanceof Blob ? file : new Blob([file], { type: file.type });
+
+            if (!file['objectURL']) {
+                file['objectURL'] = URL.createObjectURL(file.blob);
+                send_urls.push(file['objectURL']);
+            }
             formData.append(`files[${index}]`, file.blob, file.name);
         });
 
@@ -155,8 +178,17 @@
                 'X-Requested-With': 'XMLHttpRequest'
             },
             withCredentials: true
-        }).catch( (error) => console.error('Erro ao enviar arquivo. ', error));
+        }).catch( (error) => console.error('Erro ao enviar arquivo. ', error))
+            .finally(() => {
+                send_urls.forEach((url) => URL.revokeObjectURL(url));
+            });
     };
+
+    onBeforeUnmount(() => {
+        for (const url of Array.from(created_urls)) URL.revokeObjectURL(url);
+
+        created_urls.clear();
+    });
 
     function onDrop(_files: File[] | null) {
         // if (files) emit('files-selected', files);

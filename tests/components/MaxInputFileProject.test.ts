@@ -95,4 +95,46 @@ describe('MaxInputFileProject', () => {
         expect(consoleSpy).toHaveBeenCalled();
         consoleSpy.mockRestore();
     });
+
+    it('desmontar MaxInputFileProject revoga todas as Object URLs criadas', async () => {
+        const createSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:http://localhost/test-1');
+        const revokeSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+
+        const file = new File(['conteudo'], 'teste.pdf', { type: 'application/pdf' });
+        const wrapper = mount(MaxInputFileProject, {
+            props: { files: [file as any] },
+            global: { stubs: ['MaxIconButton', 'MaxIcon', 'MaxLoaderIcon', 'MaxButton'] }
+        });
+
+        expect(createSpy).toHaveBeenCalled();
+
+        wrapper.unmount();
+
+        expect(revokeSpy).toHaveBeenCalledWith('blob:http://localhost/test-1');
+
+        createSpy.mockRestore();
+        revokeSpy.mockRestore();
+    });
+
+    it('remover um arquivo da lista revoga sua Object URL', async () => {
+        let counter = 0;
+        const createSpy = vi.spyOn(URL, 'createObjectURL').mockImplementation(() => `blob:http://localhost/url-${++counter}`);
+        const revokeSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+
+        const file1 = new File(['1'], 'doc1.pdf', { type: 'application/pdf' });
+        const file2 = new File(['2'], 'doc2.pdf', { type: 'application/pdf' });
+
+        const wrapper = mount(MaxInputFileProject, {
+            props: { files: [file1 as any, file2 as any] },
+            global: { stubs: ['MaxIconButton', 'MaxIcon', 'MaxLoaderIcon', 'MaxButton'] }
+        });
+
+        // Atualiza a lista removendo o segundo arquivo
+        await wrapper.setProps({ files: [file1 as any] });
+
+        expect(revokeSpy).toHaveBeenCalledWith('blob:http://localhost/url-2');
+
+        createSpy.mockRestore();
+        revokeSpy.mockRestore();
+    });
 });

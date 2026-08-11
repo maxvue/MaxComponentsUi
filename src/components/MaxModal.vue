@@ -33,7 +33,7 @@
 <script setup lang="ts">
     import { useModalStore } from '../stores/useModal.Store';
     import { useDefaultReset, refAutoReset } from '@maxvue/max-use';
-    import { useTemplateRef, computed, ref, watch, useId } from 'vue';
+    import { useTemplateRef, computed, ref, watch, useId, onBeforeUnmount } from 'vue';
     import MaxIconButton from './MaxIconButton.vue';
     import MaxButton from './MaxButton.vue';
     import MaxTitle1 from './MaxTitle1.vue';
@@ -118,6 +118,8 @@
 
     const is_changing = refAutoReset(false, 400);
 
+    let is_unmounted = false;
+
     /**
      * Timers de transição (abertura/fechamento) atualmente agendados.
      * Guardado para que uma chamada mais recente (toggle/open/close) possa
@@ -131,6 +133,13 @@
         pending_timers.forEach((timer) => clearTimeout(timer));
         pending_timers = [];
     };
+
+    onBeforeUnmount(() => {
+        is_unmounted = true;
+        clearPendingTimers();
+        if (modal_store.show_id === id.value) modal_store.hide();
+
+    });
 
     /**
      * Última intenção determinística expressa via open()/close().
@@ -170,6 +179,7 @@
 
             modal_store.toggle(id.value);
             pending_timers.push(setTimeout(() => {
+                if (is_unmounted) return;
                 const data = {
                     isTop: false,
                     isLeft: false,
@@ -189,8 +199,10 @@
             intent = 'closed';
 
             pending_timers.push(setTimeout(() => {
+                if (is_unmounted) return;
                 style.value.opacity = 0;
                 pending_timers.push(setTimeout(() => {
+                    if (is_unmounted) return;
                     modal_store.toggle(id.value);
                 }, 300));
             }, 1));
@@ -215,6 +227,7 @@
 
         modal_store.show(id.value);
         pending_timers.push(setTimeout(() => {
+            if (is_unmounted) return;
             const data = {
                 isTop: false,
                 isLeft: false,
@@ -239,8 +252,10 @@
         clearPendingTimers();
 
         pending_timers.push(setTimeout(() => {
+            if (is_unmounted) return;
             style.value.opacity = 0;
             pending_timers.push(setTimeout(() => {
+                if (is_unmounted) return;
                 modal_store.hide();
             }, 300));
         }, 1));

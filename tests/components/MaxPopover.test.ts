@@ -213,4 +213,24 @@ describe('MaxPopover', () => {
 
         vi.useRealTimers();
     });
+
+    it('MaxPopover fechado não renderiza .popover-item no DOM', () => {
+        const wrapper = mountPopover();
+        const vm = wrapper.vm as any;
+
+        expect(vm.isOpen).toBe(false);
+        expect(wrapper.find('.popover-item').exists()).toBe(false);
+    });
+
+    it('desmontar MaxPopover enquanto aberto restaura popover_store.show_id para null', () => {
+        const wrapper = mountPopover();
+        const vm = wrapper.vm as any;
+        const popover_store = vm.popover_store;
+
+        vm.show();
+        expect(popover_store.show_id).toBe(vm.id);
+
+        wrapper.unmount();
+        expect(popover_store.show_id).toBe(null);
+    });
 });

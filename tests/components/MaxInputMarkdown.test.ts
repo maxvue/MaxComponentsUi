@@ -3,22 +3,26 @@ import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxInputMarkdown from '../../src/components/MaxInputMarkdown.vue';
 
-vi.mock('@tiptap/vue-3', () => {
-    const mockEditor = {
-        chain: () => ({ focus: () => ({ toggleBold: () => ({ run: vi.fn() }) }) }),
-        isActive: vi.fn(() => false),
-        can: () => ({ undo: () => false, redo: () => false }),
-        storage: { markdown: { getMarkdown: vi.fn(() => '**hello**') } },
-        commands: { setContent: vi.fn() },
-        setEditable: vi.fn(),
-        destroy: vi.fn(),
-        getAttributes: vi.fn(() => ({})),
-        on: vi.fn(),
-        off: vi.fn()
-    };
+let latestEditorOptions: any = null;
+const mockEditor = {
+    chain: () => ({ focus: () => ({ toggleBold: () => ({ run: vi.fn() }) }) }),
+    isActive: vi.fn(() => false),
+    can: () => ({ undo: () => false, redo: () => false }),
+    storage: { markdown: { getMarkdown: vi.fn(() => '') } },
+    commands: { setContent: vi.fn() },
+    setEditable: vi.fn(),
+    destroy: vi.fn(),
+    getAttributes: vi.fn(() => ({})),
+    on: vi.fn(),
+    off: vi.fn()
+};
 
+vi.mock('@tiptap/vue-3', () => {
     return {
-        useEditor: vi.fn(() => ({ value: mockEditor })),
+        useEditor: vi.fn((options) => {
+            latestEditorOptions = options;
+            return { value: mockEditor };
+        }),
         EditorContent: {
             name: 'EditorContent',
             template: '<div class="editor-content-stub"></div>',
@@ -68,6 +72,7 @@ function mountMarkdown(props: Record<string, any> = {}) {
 describe('MaxInputMarkdown', () => {
     beforeEach(() => {
         setActivePinia(createPinia());
+        latestEditorOptions = null;
         vi.clearAllMocks();
     });
 
@@ -106,5 +111,59 @@ describe('MaxInputMarkdown', () => {
     it('passa label para InputBase via inLine', () => {
         const wrapper = mountMarkdown({ label: 'Descrição' });
         expect(wrapper.find('.in-line-label').text()).toBe('Descrição');
+    });
+
+    it('emite update:modelValue quando o callback onUpdate do editor é acionado', () => {
+        const wrapper = mountMarkdown();
+        mockEditor.storage.markdown.getMarkdown.mockReturnValue('# Titulo');
+
+        latestEditorOptions.onUpdate({ editor: mockEditor });
+
+        expect(wrapper.emitted('update:modelValue')?.[0]).toEqual(['# Titulo']);
+    });
+
+    it('sincroniza modelValue do pai para o editor quando diverge', async () => {
+        const wrapper = mountMarkdown({ modelValue: '# Inicial' });
+        mockEditor.storage.markdown.getMarkdown.mockReturnValue('# Inicial');
+
+        await wrapper.setProps({ modelValue: '# Novo' });
+
+        expect(mockEditor.commands.setContent).toHaveBeenCalledWith('# Novo');
+    });
+
+    it('evita loop de atualização se o modelValue for idêntico ao conteúdo atual do editor', async () => {
+        const wrapper = mountMarkdown({ modelValue: '# Mesma coisa' });
+        mockEditor.storage.markdown.getMarkdown.mockReturnValue('# Mesma coisa');
+        mockEditor.commands.setContent.mockClear();
+
+        await wrapper.setProps({ modelValue: '# Mesma coisa' });
+
+        expect(mockEditor.commands.setContent).not.toHaveBeenCalled();
+    });
+
+    it('carrega o conteúdo inicial no onMounted quando modelValue é fornecido', () => {
+        mockEditor.commands.setContent.mockClear();
+        mountMarkdown({ modelValue: '# Inicial' });
+
+        expect(mockEditor.commands.setContent).toHaveBeenCalledWith('# Inicial');
+    });
+
+    it('destrói o editor TipTap no unmount para evitar vazamento de memória', () => {
+        const wrapper = mountMarkdown();
+        expect(mockEditor.destroy).not.toHaveBeenCalled();
+
+        wrapper.unmount();
+
+        expect(mockEditor.destroy).toHaveBeenCalledOnce();
+    });
+
+    it('reage a alteração da prop disabled invocando setEditable', async () => {
+        const wrapper = mountMarkdown({ disabled: false });
+
+        await wrapper.setProps({ disabled: true });
+        expect(mockEditor.setEditable).toHaveBeenCalledWith(false);
+
+        await wrapper.setProps({ disabled: false });
+        expect(mockEditor.setEditable).toHaveBeenCalledWith(true);
     });
 });

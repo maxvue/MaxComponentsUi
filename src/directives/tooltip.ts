@@ -21,6 +21,7 @@ interface TooltipState {
     options: TooltipOptions;
     position: Position;
     listeners: Array<[string, EventListener]>;
+    scrollListeners: Array<[string, EventListener]>;
     tooltipId: string;
 }
 
@@ -98,6 +99,7 @@ const renderText = (tooltipEl: HTMLElement, options: TooltipOptions) => {
 };
 
 const createTooltip = (el: HTMLElement, state: TooltipState) => {
+    if (!el.isConnected) return;
     if (state.tooltipEl) return;
     if (state.options.disabled) return;
     if (!state.options.value) return;
@@ -123,9 +125,25 @@ const createTooltip = (el: HTMLElement, state: TooltipState) => {
 
     renderText(tooltipEl, state.options);
     position(el, tooltipEl, state.position);
+
+    const onScrollResize = () => {
+        if (state.tooltipEl && el.isConnected) position(el, state.tooltipEl, state.position);
+
+    };
+    window.addEventListener('scroll', onScrollResize, true);
+    window.addEventListener('resize', onScrollResize);
+    state.scrollListeners = [
+        ['scroll', onScrollResize],
+        ['resize', onScrollResize]
+    ];
 };
 
 const destroyTooltip = (el: HTMLElement, state: TooltipState) => {
+    if (state.scrollListeners && state.scrollListeners.length > 0) {
+        for (const [type, listener] of state.scrollListeners) window.removeEventListener(type, listener, type === 'scroll');
+
+        state.scrollListeners = [];
+    }
     if (!state.tooltipEl) return;
     state.tooltipEl.remove();
     state.tooltipEl = null;
@@ -142,6 +160,7 @@ const show = (el: HTMLElement, state: TooltipState) => {
     const delay = state.options.showDelay ?? 0;
     state.showTimer = setTimeout(() => {
         state.showTimer = null;
+        if (!el.isConnected) return;
         createTooltip(el, state);
     }, delay);
 };
@@ -185,6 +204,7 @@ export const Tooltip: Directive<HTMLElement, string | TooltipOptions> = {
             options: parseOptions(binding),
             position: parsePosition(binding),
             listeners: [],
+            scrollListeners: [],
             tooltipId: nextId()
         };
         states.set(el, state);
@@ -195,12 +215,14 @@ export const Tooltip: Directive<HTMLElement, string | TooltipOptions> = {
         if (!state) return;
         state.options = parseOptions(binding);
         state.position = parsePosition(binding);
-        if (!state.tooltipEl) return;
 
         if (state.options.disabled || !state.options.value) {
+            clearTimers(state);
             destroyTooltip(el, state);
             return;
         }
+
+        if (!state.tooltipEl) return;
 
         renderText(state.tooltipEl, state.options);
         position(el, state.tooltipEl, state.position);
