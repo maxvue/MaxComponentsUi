@@ -71,4 +71,18 @@ describe('MaxInputToggle', () => {
         (wrapper.vm as any).update_value();
         expect(wrapper.emitted('update:modelValue')).toBeTruthy();
     });
+
+    it('respeita trueValue/falseValue customizados e passa para ToggleSwitch e destaca label active', async () => {
+        const wrapper = mount(MaxInputToggle, {
+            props: { modelValue: 'S', trueValue: 'S', falseValue: 'N', trueLabel: 'Sim', falseLabel: 'Não' },
+            global: { stubs: { ToggleSwitch: { name: 'ToggleSwitch', template: '<div><slot /></div>', props: ['trueValue', 'falseValue', 'modelValue'] } } }
+        });
+
+        const toggle = wrapper.findComponent({ name: 'ToggleSwitch' });
+        expect(toggle.props('trueValue')).toBe('S');
+        expect(toggle.props('falseValue')).toBe('N');
+
+        const labels = wrapper.findAll('.input-toggle-field-label');
+        expect(labels[1].classes()).toContain('active'); // Sim ativado para modelValue === 'S'
+    });
 });

@@ -1,16 +1,16 @@
 <template>
     <div class="max-table-main-div" >
         <DataTable v-bind="attrs" stripedRows >
-            <template v-for="name in slotNames" #[name]="slotProps" :key="name">
-                <slot :name="name" v-bind="slotProps || {}" v-if="name !== 'buttons'"></slot>
-                <Column header="" v-if="slotNames.includes('buttons')" :style="`width: ${width}px; max-width: ${width}px;`">
-                    <template #body="{ data, index }">
-                        <div class="max-table-buttons" ref="el">
-                            <slot name="buttons" v-bind="{ data, index }" ></slot>
-                        </div>
-                    </template>
-                </Column>
+            <template v-for="name in slotNames.filter(n => n !== 'buttons')" #[name]="slotProps" :key="name">
+                <slot :name="name" v-bind="slotProps || {}"></slot>
             </template>
+            <Column v-if="slotNames.includes('buttons')" header="" :style="`width: ${width}px; max-width: ${width}px;`">
+                <template #body="{ data, index }">
+                    <div class="max-table-buttons" ref="el">
+                        <slot name="buttons" v-bind="{ data, index }" ></slot>
+                    </div>
+                </template>
+            </Column>
         </DataTable>
     </div>
 </template>

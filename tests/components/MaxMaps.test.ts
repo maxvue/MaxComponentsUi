@@ -7,9 +7,10 @@ vi.mock('@maxvue/max-use', () => ({
 }));
 
 vi.mock('vue3-google-map', () => ({
-    GoogleMap: { template: '<div><slot /></div>' },
-    AdvancedMarker: { template: '<div></div>' }
+    GoogleMap: { name: 'GoogleMap', props: ['apiKey', 'mapId', 'mapTypeId'], template: '<div><slot /></div>' },
+    AdvancedMarker: { name: 'AdvancedMarker', template: '<div></div>' }
 }));
+
 
 describe('MaxMaps.vue', () => {
     it('deve montar se coordenadas forem passadas', async () => {
@@ -93,4 +94,45 @@ describe('MaxMaps.vue', () => {
         // cover is_valid && is_different
         await wrapper.setProps({ modelValue: { latitude: 10, longitude: 20 } });
     });
+
+    it('não contem a chave hardcoded AIzaSyCIrTVDHOyXkRnkxVOK8xSdcVyp1NkrZeY no código', () => {
+        const source = require('fs').readFileSync(
+            require('path').resolve(__dirname, '../../src/components/MaxMaps.vue'),
+            'utf-8'
+        );
+        expect(source).not.toContain('AIzaSyCIrTVDHOyXkRnkxVOK8xSdcVyp1NkrZeY');
+        expect(source).not.toContain('ENGEAPP_MAP');
+    });
+
+    it('exibe o container .no-map quando a apiKey do Google Maps não estiver configurada', async () => {
+        const wrapper = mount(MaxMaps, {
+            props: {
+                modelValue: { latitude: -23.5, longitude: -46.6 }
+            }
+        });
+
+        expect(wrapper.find('.no-map').exists()).toBe(true);
+        expect(wrapper.findComponent({ name: 'GoogleMap' }).exists()).toBe(false);
+    });
+
+    it('renderiza o GoogleMap quando a apiKey for passada via prop ou maxAppConfig', async () => {
+        vi.useFakeTimers();
+        const wrapper = mount(MaxMaps, {
+            props: {
+                modelValue: { latitude: -23.5, longitude: -46.6 },
+                apiKey: 'MINHA_CHAVE_PROPS',
+                mapId: 'MEU_MAP_ID'
+            }
+        });
+        vi.runAllTimers();
+        await wrapper.vm.$nextTick();
+
+        const googleMap = wrapper.findComponent({ name: 'GoogleMap' });
+        expect(googleMap.exists()).toBe(true);
+        expect(googleMap.props('apiKey')).toBe('MINHA_CHAVE_PROPS');
+        expect(googleMap.props('mapId')).toBe('MEU_MAP_ID');
+        vi.useRealTimers();
+    });
+
 });
+

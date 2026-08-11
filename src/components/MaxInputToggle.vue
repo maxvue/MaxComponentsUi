@@ -11,7 +11,7 @@
                     {{ falseLabel ?? '' }}
                 </div>
                 <div class="input-toggle-field-input">
-                    <ToggleSwitch v-model="modelvalue" @change="update_value" />
+                    <ToggleSwitch v-model="modelvalue" :trueValue="trueValue" :falseValue="falseValue" @change="update_value" />
                 </div>
                 <div :class="`input-toggle-field-label ${trueValue === modelvalue ? 'active' : ''}`" v-if="trueLabel">
                     {{ trueLabel ?? '' }}

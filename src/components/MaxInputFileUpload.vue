@@ -108,7 +108,7 @@
     const uploading = ref(false);
     const showError = ref(false);
 
-    const emit = defineEmits(['file-click', 'upload-error']);
+    const emit = defineEmits(['file-click', 'upload-error', 'upload', 'select']);
 
     const displayLabel = computed(() => {
         const isDisabled = attrs.disabled !== undefined && attrs.disabled !== false;
@@ -133,20 +133,23 @@
     };
 
     const onSelectHandler = (event: any) => {
-        if (attrs.onSelect) return attrs.onSelect(event);
         uploading.value = true;
         files.value = event.files;
+        emit('select', event);
+        if (attrs.onSelect) attrs.onSelect(event);
     };
 
     const onUploadHandler = (event: any) => {
-        if (attrs.onUpload) return attrs.onUpload(event);
-
         uploading.value = false;
-        try {
-            const response = JSON.parse(event.xhr.response);
-            const fileData = props.responseField ? response[props.responseField] : response;
-            if (fileData) modelValue.value = [...modelValue.value, fileData];
+        emit('upload', event);
+        if (attrs.onUpload) attrs.onUpload(event);
 
+        try {
+            if (event?.xhr?.response) {
+                const response = JSON.parse(event.xhr.response);
+                const fileData = props.responseField ? response[props.responseField] : response;
+                if (fileData) modelValue.value = [...modelValue.value, fileData];
+            }
         } catch (e) {
             console.error('MaxInputFileUpload: Erro ao processar resposta de upload', e);
         }

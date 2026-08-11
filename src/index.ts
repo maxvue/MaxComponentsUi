@@ -185,19 +185,21 @@ import Tooltip from './directives/tooltip';
  * @param {any} options
  */
 export const install = (app: any, options: any = {}) => {
+    const { theme: userTheme, locale: userLocale, ripple: userRipple, ...rest } = options;
+
     app.use(PrimeVue, {
-        locale: options.locale || ptBR,
+        ...rest,
+        locale: userLocale || ptBR,
+        ripple: userRipple ?? true,
         theme: {
-            preset: MaxStyle,
+            ...userTheme,
+            preset: userTheme?.preset ?? MaxStyle,
             options: {
                 darkModeSelector: '.dark',
                 prefix: 'max',
-                ...options.theme?.options
-            },
-            ...options.theme
-        },
-        ripple: true,
-        ...options
+                ...userTheme?.options
+            }
+        }
     });
     app.directive('tooltip', Tooltip);
 };

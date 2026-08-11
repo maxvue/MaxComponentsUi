@@ -23,7 +23,7 @@
 <script setup lang="ts">
     import { useAttrs } from 'vue';
 
-    const attrs = useAttrs;
+    const attrs = useAttrs();
 </script>
 
 <style lang="scss">
@@ -41,8 +41,6 @@
         position: relative;
         width: 55px;
         height: 55px;
-        max-width: 55px;
-        max-height: 55px;
         animation: rotacao 1s linear infinite;
     }
 </style>

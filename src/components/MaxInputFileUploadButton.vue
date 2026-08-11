@@ -1,10 +1,10 @@
 <template>
     <div class="input-upload-file-button-main-div" >
-        <MaxInputFileUpload v-bind="attrs" :modelValue="(attrs.modelValue as any)" class="no-style" customUpload  :onUpload="onUpload" >
+        <MaxInputFileUpload v-bind="attrs" :modelValue="(attrs.modelValue as any)" class="no-style" @upload="onUpload" >
             <slot>
-                <div class="slot-main-div" >
-                    <Icon :i="attrs.ico ?? attrs.icon ?? attrs.i ?? 'material-symbols:upload-rounded'" size="1.4"  />
-                    <div v-html="attrs.label" v-if="attrs.label" pl-10 class="input-file-button-label"></div>
+                <div class="slot-main-div">
+                    <Icon :i="attrs.ico ?? attrs.icon ?? attrs.i ?? 'material-symbols:upload-rounded'" size="1.4" />
+                    <div v-if="props.label" pl-10 class="input-file-button-label">{{ props.label }}</div>
                 </div>
             </slot>
         </MaxInputFileUpload>
@@ -14,6 +14,11 @@
     import { useAttrs } from 'vue';
     import MaxInputFileUpload from './MaxInputFileUpload.vue';
 
+    const props = defineProps<{
+        /** Rótulo textual do botão */
+        label?: string;
+    }>();
+
     const attrs = useAttrs();
 
     const emit = defineEmits(['upload']);
@@ -21,7 +26,6 @@
     const onUpload = (files: any) => {
         emit('upload', files);
     };
-
 </script>
 
 <style lang="scss">

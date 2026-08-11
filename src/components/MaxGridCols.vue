@@ -1,5 +1,5 @@
 <template>
-    <div class="grid-cols" v-bind="attrs">
+    <div class="max-grid-cols" v-bind="attrs">
         <slot></slot>
     </div>
 </template>
@@ -11,7 +11,7 @@
 </script>
 
 <style lang="scss" scoped>
-    .grid-cols {
+    .max-grid-cols {
         display: grid;
         place-items: center;
         height: auto;

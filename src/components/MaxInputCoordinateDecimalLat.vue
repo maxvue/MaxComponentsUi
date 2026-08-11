@@ -61,21 +61,21 @@
         return false;
     });
 
-    const negative: Ref = ref(false);
-
     const maskValue = computed(() => {
         const tokens = {
             '#': { pattern: /[0-9]/ },
             '9': { pattern: /[0-9]/, optional: true },
-            '3': { pattern: /[0-5-]/, optional: true }
+            'S': { pattern: /-/, optional: true }
         };
 
         return {
             tokens: tokens,
-            mask: negative.value ? '-39.######' : '33.######',
+            mask: 'S99.######',
             eager: true
         };
     });
+
+    const negative: Ref = ref(false);
 
     watch(
         temp_value,

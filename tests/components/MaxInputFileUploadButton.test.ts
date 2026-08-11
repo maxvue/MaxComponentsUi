@@ -22,19 +22,21 @@ describe('MaxInputFileUploadButton', () => {
         expect(wrapper.find('.input-file-button-label').html()).toContain('Enviar');
     });
 
-    it('deve emitir o evento upload com os arquivos recebidos', async () => {
+    it('deve repassar o evento upload disparado pelo MaxInputFileUpload', async () => {
         const wrapper = mount(MaxInputFileUploadButton, {
             global: {
                 stubs: {
-                    MaxInputFileUpload: { template: '<div><slot /></div>' },
+                    MaxInputFileUpload: {
+                        name: 'MaxInputFileUpload',
+                        template: '<button @click="$emit(\'upload\', [{ name: \'doc.pdf\' }])"><slot /></button>'
+                    },
                     Icon: true
                 }
             }
         });
 
-        const mockFiles = [{ name: 'arquivo1.pdf' }, { name: 'arquivo2.jpg' }];
-        wrapper.vm.onUpload(mockFiles);
+        await wrapper.findComponent({ name: 'MaxInputFileUpload' }).trigger('click');
         expect(wrapper.emitted('upload')).toBeTruthy();
-        expect(wrapper.emitted('upload')?.[0]).toEqual([mockFiles]);
+        expect(wrapper.emitted('upload')?.[0][0]).toEqual([{ name: 'doc.pdf' }]);
     });
 });

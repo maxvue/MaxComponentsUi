@@ -71,6 +71,20 @@ describe('MaxInputCpfCnpj', () => {
         expect((wrapper.vm as any).done).toBe(true);
     });
 
+    it('rejeita CPF com comprimento correto mas dígito verificador errado', async () => {
+        const wrapper = mountCpfCnpj({ cpf: true, modelValue: '52998224724' });
+        (wrapper.vm as any).temp_value = '52998224724';
+        await wrapper.vm.$nextTick();
+        expect((wrapper.vm as any).done).toBe(false);
+    });
+
+    it('rejeita CNPJ com comprimento correto mas dígito verificador errado', async () => {
+        const wrapper = mountCpfCnpj({ cnpj: true, modelValue: '11222333000182' });
+        (wrapper.vm as any).temp_value = '11222333000182';
+        await wrapper.vm.$nextTick();
+        expect((wrapper.vm as any).done).toBe(false);
+    });
+
     it('exibe caution para CPF inválido com conteúdo', () => {
         const wrapper = mountCpfCnpj({ cpf: true, modelValue: '12345678900' });
         (wrapper.vm as any).temp_value = '12345678900';
@@ -97,13 +111,13 @@ describe('MaxInputCpfCnpj', () => {
     });
 
     it('error returns custom attrs if any', () => {
-        const wrapper = mountCpfCnpj({ errMsg: 'Custom error', caution: true });
+        const wrapper = mountCpfCnpj({ errMsg: 'Custom error', modelValue: '123' });
         const inputBase = wrapper.findComponent(InputBase);
         expect(inputBase.props('error')).toBe('Custom error');
     });
 
-    it('error when required and empty', () => {
-        const wrapper = mountCpfCnpj({ required: true, caution: true });
+    it('exibe erro de Campo obrigatório quando required=true e o campo está vazio (sem caution manual)', () => {
+        const wrapper = mountCpfCnpj({ required: true });
         const inputBase = wrapper.findComponent(InputBase);
         expect(inputBase.props('error')).toBe('Campo obrigatório');
     });

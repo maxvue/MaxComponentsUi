@@ -76,6 +76,11 @@ describe('MaxInputMarkdown', () => {
         expect(wrapper.exists()).toBe(true);
     });
 
+    it('renderiza com a classe BEM correta .max-input-markdown no wrapper externo', () => {
+        const wrapper = mountMarkdown();
+        expect(wrapper.find('.max-input-markdown').exists()).toBe(true);
+    });
+
     it('renderiza a toolbar', () => {
         const wrapper = mountMarkdown();
         expect(wrapper.find('.toolbar-stub').exists()).toBe(true);

@@ -10,7 +10,7 @@
                         </slot>
                     </th>
                     <!-- Coluna extra para botões de ação -->
-                    <th v-if="size(props.buttons) > 0" class="max-table-fields-th max-table-fields-th-buttons" :style="`width: ${size(props.buttons) * 32}px`" >
+                    <th v-if="hasActionsColumn" class="max-table-fields-th max-table-fields-th-buttons" :style="`width: ${size(props.buttons) * 32}px`" >
                         <slot name="buttons-header">
                             {{props.headerButton}}
                         </slot>
@@ -21,14 +21,14 @@
             <!-- Corpo -->
             <tbody class="max-table-fields-body">
                 <template v-if="normalizedList.length > 0">
-                    <tr v-for="(row, index) in normalizedList" :key="index" class="max-table-fields-row" :class="{ 'max-table-fields-row-even': index % 2 === 0, 'max-table-fields-row-odd': index % 2 !== 0 }" >
+                    <tr v-for="(row, index) in normalizedList" :key="rowKey(row, index)" class="max-table-fields-row" :class="{ 'max-table-fields-row-even': index % 2 === 0, 'max-table-fields-row-odd': index % 2 !== 0 }" >
 
 
                         <td v-for="col in columns" :key="col.field" class="max-table-fields-td" :style="getColumnStyle(col)" >
                             <!-- Slot customizado tem prioridade -->
                             <slot v-if="col.slot && !col.input" :name="col.slot ?? col.field" :data="row" :value="getFieldValue(row, col.field)" :index="index" :field="col.field" >
                                 <div class="default-slot">
-                                    {{ getFieldValue(row, col.field) }} {{ col.slot }} {{ col.field }}
+                                    {{ getFieldValue(row, col.field) }}
                                 </div>
                             </slot>
 
@@ -67,12 +67,12 @@
 
                             <!-- Sem input: exibe o valor como texto -->
                             <template v-else>
-                                <!-- {{ getFieldValue(row, col.field) }} {{ col.field }} -->
+                                {{ getFieldValue(row, col.field) }}
                             </template>
                         </td>
 
                         <!-- Coluna de botões -->
-                        <td v-if="size(props.buttons) > 0" class="max-table-fields-td max-table-fields-buttons" :style="`width: ${size(props.buttons) * 32}px`" >
+                        <td v-if="hasActionsColumn" class="max-table-fields-td max-table-fields-buttons" :style="`width: ${size(props.buttons) * 32}px`" >
                             <slot name="buttons" :data="row" :index="index">
                                 <MaxIconButton v-for="btn in props.buttons" v-bind="btn" :key="btn.id" :data="btn.data ? resolveData(row, btn.data) : row" :size="btn.size ?? 1.2" class="table-icon-button"/>
                             </slot>
@@ -96,7 +96,7 @@
 <script setup lang="ts">
     import type { MaxTableColumn, MaxButtonsType } from '../types';
     import { computed, useSlots, type Slots, type ComputedRef } from 'vue';
-    import { ulid, size, refAutoReset } from '@maxvue/max-use';
+    import { ulid, size } from '@maxvue/max-use';
     // Componentes de input
     import MaxInputText from './MaxInputText.vue';
     import MaxInputNumber from './MaxInputNumber.vue';
@@ -120,6 +120,8 @@
             headerButton?: string;
             /** Identificador único da tabela */
             id?: string;
+            /** Prop de chave única da linha */
+            dataKey?: string;
             /** Mensagem exibida quando a lista está vazia */
             emptyMessage?: string;
             /** Largura da coluna de botões (ex: '120px') */
@@ -137,32 +139,42 @@
     const slots: Slots = useSlots();
     const tableId = computed(() => props.id ?? ulid());
 
-    /** Verifica se o slot de botões foi fornecido */
-    const hasButtons: ComputedRef<boolean> = computed((): boolean => !!slots['buttons']);
+    /** Verifica se a coluna de ações deve ser exibida (via prop buttons ou slot buttons) */
+    const hasActionsColumn: ComputedRef<boolean> = computed((): boolean => size(props.buttons) > 0 || !!slots['buttons']);
 
     /** Total de colunas para o colspan do estado vazio */
-    const totalColspan: ComputedRef<number> = computed((): number => props.columns.length + (hasButtons.value ? 1 : 0));
+    const totalColspan: ComputedRef<number> = computed((): number => props.columns.length + (hasActionsColumn.value ? 1 : 0));
 
     const emit = defineEmits<{
         /** Emitido quando o valor de um campo é alterado */
         'update:field': [payload: { row: any; field: string; value: any; index?: number }];
     }>();
 
-    /** Normaliza a lista: se for Record converte para array */
+    /** Normaliza a lista: se for Record converte para array preservando a chave */
     const normalizedList = computed<any[]>(() => {
         if (Array.isArray(props.list)) return props.list;
-        return Object.values(props.list);
+        if (typeof props.list === 'object' && props.list !== null) return Object.entries(props.list).map(([key, val]) => {
+            if (typeof val === 'object' && val !== null && !val.id && !val.uuid && !val.ulid) return { ...val, _recordKey: key };
+
+            return val;
+        });
+
+        return [];
     });
+
+    /** Deriva a chave única de uma linha */
+    function rowKey(row: any, index: number): string | number {
+        if (props.dataKey && row?.[props.dataKey] !== undefined) return row[props.dataKey];
+
+        return row?.id ?? row?.uuid ?? row?.ulid ?? row?._recordKey ?? index;
+    }
 
     /** Acessa o valor de um campo, suportando notação com ponto (ex: 'user.name') */
     function getFieldValue(row: any, field: string | null | undefined): any {
         if (!field) return '';
 
         return field.split('.').reduce((obj, key) => obj?.[key], row);
-
     }
-
-    const action_click = refAutoReset(false, 100);
 
     /** Define o valor de um campo no objeto da linha, suportando notação com ponto */
     function setFieldValue(row: any, field: string, value: any, col?: MaxTableColumn): void {
@@ -172,9 +184,6 @@
 
         if (target) {
             target[keys[keys.length - 1]] = value;
-
-            if (action_click.value) return;
-            action_click.value = true;
 
             col?.action?.({ row, field, value });
             emit('update:field', { row, field, value });

@@ -99,7 +99,7 @@ describe('MaxInputCoordinateDecimalLat', () => {
         });
         wrapper.vm.temp_value = '4.5';
         await wrapper.vm.$nextTick();
-        expect(wrapper.vm.maskValue.tokens['3'].pattern.test('4')).toBe(true);
+        expect(wrapper.vm.maskValue.tokens['9'].pattern.test('4')).toBe(true);
         expect(wrapper.vm.done).toBe(true);
     });
 
@@ -147,5 +147,14 @@ describe('MaxInputCoordinateDecimalLat', () => {
         wrapper.vm.temp_value = '';
         await wrapper.vm.$nextTick();
         expect(wrapper.emitted('update:modelValue')?.pop()).toEqual([0]);
+    });
+
+    it('corretamente formata e emite quando o valor -23.550520 é colado no campo input de uma vez', async () => {
+        const wrapper = mount(MaxInputCoordinateDecimalLat, {
+            props: { modelValue: '' }
+        });
+        const input = wrapper.find('input');
+        await input.setValue('-23.550520');
+        expect(wrapper.emitted('update:modelValue')?.pop()).toEqual([-23.55052]);
     });
 });

@@ -81,6 +81,7 @@ describe('MaxTable', () => {
                 stubs: {
                     DataTable: {
                         template: `<div class="p-datatable">
+                            <slot />
                             <slot name="buttons" :data="{}" :index="0" />
                         </div>`
                     },
@@ -107,5 +108,33 @@ describe('MaxTable', () => {
         mockWidth.value = 100;
         await wrapper.vm.$nextTick();
         expect(vm.width).toBe(60);
+    });
+
+    it('renderiza a coluna de botões apenas uma única vez mesmo com múltiplos slots declarados (header, footer, buttons)', () => {
+        const wrapper = mount(MaxTable, {
+            attrs: { value: [] },
+            slots: {
+                header: '<div class="header-slot">Header</div>',
+                footer: '<div class="footer-slot">Footer</div>',
+                buttons: '<button class="action-btn">Action</button>'
+            },
+            global: {
+                stubs: {
+                    DataTable: {
+                        template: `<div class="p-datatable">
+                            <slot name="header" />
+                            <slot name="footer" />
+                            <slot name="default" />
+                        </div>`
+                    },
+                    Column: {
+                        template: '<div class="p-column"><slot name="body" :data="{}" :index="0" /></div>'
+                    }
+                }
+            }
+        });
+
+        const columns = wrapper.findAll('.p-column');
+        expect(columns.length).toBe(1);
     });
 });

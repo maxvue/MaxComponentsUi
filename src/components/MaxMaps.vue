@@ -1,9 +1,16 @@
 <template>
     <div class="map-main-div" s24 v-if="coordinates.latitude && coordinates.longitude">
-        <div class="mapa" ref="mapDiv">
-            <GoogleMap api-key="AIzaSyCIrTVDHOyXkRnkxVOK8xSdcVyp1NkrZeY" style="width: 100%; height: 100%;" :center="center" :zoom="zoom" ref="mapRef" mapTypeId="satellite" mapId="ENGEAPP_MAP" v-if="isMounted">
+        <div class="mapa" ref="mapDiv" v-if="effectiveApiKey">
+            <GoogleMap :api-key="effectiveApiKey" style="width: 100%; height: 100%;" :center="center" :zoom="zoom" ref="mapRef" :mapTypeId="props.mapTypeId" :mapId="effectiveMapId" v-if="isMounted">
                 <AdvancedMarker :options="marker_options" :pin-options="pinOptions" ref="markerRef" @dragend="onDrag" />
             </GoogleMap>
+        </div>
+        <div class="no-map" v-else>
+            <div class="content">
+                <i class="pi pi-map-marker"></i>
+                <div class="t1">Mapa Indisponível</div>
+                <div class="t2">A chave da API do Google Maps não foi configurada.</div>
+            </div>
         </div>
     </div>
 </template>
@@ -11,14 +18,29 @@
 <script setup lang="ts">
     import { toNumber } from '@maxvue/max-use';
     import type { Ref } from 'vue';
-    import { ref, watch, onMounted } from 'vue';
+    import { ref, computed, watch, onMounted } from 'vue';
     import { GoogleMap, AdvancedMarker } from 'vue3-google-map';
+    import { getMaxAppConfig } from '../helpers/maxAppConfig';
 
-    const props = withDefaults(defineProps<{ modelValue: { latitude: number; longitude: number } | null }>(),{ modelValue: null });
+    const props = withDefaults(defineProps<{
+        modelValue: { latitude: number; longitude: number } | null;
+        apiKey?: string;
+        mapId?: string;
+        mapTypeId?: string;
+    }>(), {
+        modelValue: null,
+        apiKey: undefined,
+        mapId: undefined,
+        mapTypeId: 'satellite'
+    });
 
-    const coordinates = ref({ latitude: Number(props.modelValue?.latitude ?? 0),longitude: Number(props.modelValue?.longitude ?? 0) });
+    const effectiveApiKey = computed(() => props.apiKey || getMaxAppConfig().googleMapsApiKey || '');
+    const effectiveMapId = computed(() => props.mapId || getMaxAppConfig().googleMapsMapId || undefined);
+
+    const coordinates = ref({ latitude: Number(props.modelValue?.latitude ?? 0), longitude: Number(props.modelValue?.longitude ?? 0) });
 
     const emit = defineEmits(['update:modelValue']);
+
 
     watch(() => [coordinates.value.latitude, coordinates.value.longitude], () => emit('update:modelValue', coordinates.value));
 

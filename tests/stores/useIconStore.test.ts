@@ -66,4 +66,13 @@ describe('useIconStore', () => {
         expect(store.list_icons_waiting_request).toContain('mdi:wait2');
         expect(store.list_icons_waiting_request).toHaveLength(2);
     });
+
+    it('rejeita nomes de icone em formato invalido ou malicioso', () => {
+        const store = useIconStore();
+        expect(store.getIcon('javascript:alert(1)')).toBeNull();
+        expect(store.getIcon('../../path/traversal')).toBeNull();
+        expect(store.getIcon('http://malicioso.com')).toBeNull();
+        expect(store.getIcon('<script>alert(1)</script>')).toBeNull();
+        expect(store.list_icons_waiting_request).toHaveLength(0);
+    });
 });

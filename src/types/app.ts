@@ -110,8 +110,15 @@ export interface MaxAppConfig {
     routeImpersonateStatus?: string;
     /** Rota que devolve os menus da aplicação. Padrão: `'menus'`. */
     routeMenus?: string;
+    /** Rota de busca de ícones SVG. Padrão: `'https://engeapp.com.br/api/icons'`. */
+    routeIcons?: string;
     /** URL base usada quando o usuário ainda não foi carregado. */
     baseUrl?: string;
     /** Versão da aplicação, exibida na interface. */
     version?: string;
+    /** Chave da API do Google Maps usada pelo componente MaxMaps. */
+    googleMapsApiKey?: string;
+    /** ID do mapa do Google Maps usado pelo componente MaxMaps. */
+    googleMapsMapId?: string;
 }
+
