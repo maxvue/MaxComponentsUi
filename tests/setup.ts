@@ -20,6 +20,9 @@ const localStorageMock = (() => {
     };
 })();
 
+if (typeof globalThis.HTMLInputElement === 'undefined') globalThis.HTMLInputElement = (globalThis.window?.HTMLInputElement ?? class HTMLInputElement {}) as any;
+
+
 Object.defineProperty(globalThis, 'localStorage', { value: localStorageMock });
 
 // Mock do getComputedStyle para testes de getColorFromVar.

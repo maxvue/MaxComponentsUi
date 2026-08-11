@@ -95,12 +95,17 @@
     });
 
     const error_msg = computed(() => {
-        if (!caution.value) return null;
         const attrs_error_message = attrs.errMsg ?? attrs.error_message ?? attrs.error_msg ?? null;
-        if (onlyNumbers(temp_value.value).length === 0 && props.required) return attrs_error_message ?? 'Campo obrigatório';
-        if (type_mask.value === 'cpf') return attrs_error_message ?? 'CPF inválido';
-        if (type_mask.value === 'cnpj') return attrs_error_message ?? 'CNPJ inválido';
-        return attrs_error_message ?? 'Documento inválido';
+        const len = onlyNumbers(temp_value.value).length;
+
+        if (len === 0) return props.required ? (attrs_error_message ?? 'Campo obrigatório') : false;
+
+        if (!done.value) {
+            if (type_mask.value === 'cpf') return attrs_error_message ?? 'CPF inválido';
+            if (type_mask.value === 'cnpj') return attrs_error_message ?? 'CNPJ inválido';
+            return attrs_error_message ?? 'Documento inválido';
+        }
+        return false;
     });
 
     // Emite 'complete' quando o documento atinge 11 (CPF) ou 14 (CNPJ)
