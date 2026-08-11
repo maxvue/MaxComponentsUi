@@ -32,7 +32,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>13/13</span>
+                <span class='fraction'>15/15</span>
             </div>
         
             
@@ -191,8 +191,8 @@
 <a name='L126'></a><a href='#L126'>126</a>
 <a name='L127'></a><a href='#L127'>127</a>
 <a name='L128'></a><a href='#L128'>128</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">33x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -205,7 +205,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">31x</span>
+<span class="cline-any cline-yes">59x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -218,24 +218,24 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">33x</span>
+<span class="cline-any cline-yes">33x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">33x</span>
+<span class="cline-any cline-yes">33x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">33x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">33x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">33x</span>
 <span class="cline-any cline-yes">13x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -319,17 +319,17 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">&lt;template&gt;
     &lt;TransitionFade&gt;
-        &lt;div class="background-popover" @click.stop="confirm_store.hide" v-if="confirm_store.show"&gt;
+        &lt;div class="background-popover-confirm" @click.stop="confirm_store.hide" v-if="confirm_store.show"&gt;
             &lt;div class="max-icon-confirm-dialog" ref="el" :style="{top: position.top + 'px', left: position.left + 'px'}"  :class="[position.isTop ? 'is-top' : 'is-bottom', position.isLeft ? 'is-left' : 'is-right']"&gt;
                 &lt;div pw4 pt-4 full text-center color-background-750 class="popover-confirm-content" &gt;
-                    &lt;MaxIcon i="mingcute:question-fill" size="1.2" color-red-600 /&gt;
+                    &lt;MaxIcon :i="confirm_store.messageIcon ?? 'mingcute:question-fill'" size="1.2" color-red-600 /&gt;
                     &lt;div&gt;
                         {{confirm_store.message}}
                     &lt;/div&gt;
                 &lt;/div&gt;
                 &lt;MaxGrid&gt;
-                    &lt;MaxButton s50 @click="reject" :label="confirm_store.rejectProps.label" :icon="confirm_store.rejectProps.icon" /&gt;
-                    &lt;MaxButton s50 @click="accept" :label="confirm_store.acceptProps.label" :icon="confirm_store.acceptProps.icon"  /&gt;
+                    &lt;MaxButton s50 :action="reject" :label="confirm_store.rejectProps.label" :icon="confirm_store.rejectProps.icon" /&gt;
+                    &lt;MaxButton s50 :action="accept" :label="confirm_store.acceptProps.label" :icon="confirm_store.acceptProps.icon"  /&gt;
                 &lt;/MaxGrid&gt;
             &lt;/div&gt;
         &lt;/div&gt;
@@ -353,11 +353,11 @@
     const { width, height } = useElementSize(el as any);
 &nbsp;
     const accept = () =&gt; {
-        confirm_store.acceptProps.action();
+        confirm_store.acceptProps.action?.();
         confirm_store.hide();
     };
     const reject = () =&gt; {
-        confirm_store.rejectProps.action();
+        confirm_store.rejectProps.action?.();
         confirm_store.hide();
     };
 &nbsp;
@@ -383,7 +383,7 @@
 &lt;/script&gt;
 &nbsp;
 &lt;style lang="scss"&gt;
-.background-popover {
+.background-popover-confirm {
     background-color: rgb(0 0 0 / 10%);
     height: 100vh;
     width: 100vw;
@@ -451,7 +451,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-05-29T12:13:03.532Z
+                at 2026-08-10T14:46:30.972Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
