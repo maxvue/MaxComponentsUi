@@ -97,13 +97,13 @@ describe('MaxInputCpfCnpj', () => {
     });
 
     it('error returns custom attrs if any', () => {
-        const wrapper = mountCpfCnpj({ errMsg: 'Custom error', caution: true });
+        const wrapper = mountCpfCnpj({ errMsg: 'Custom error', modelValue: '123' });
         const inputBase = wrapper.findComponent(InputBase);
         expect(inputBase.props('error')).toBe('Custom error');
     });
 
-    it('error when required and empty', () => {
-        const wrapper = mountCpfCnpj({ required: true, caution: true });
+    it('exibe erro de Campo obrigatório quando required=true e o campo está vazio (sem caution manual)', () => {
+        const wrapper = mountCpfCnpj({ required: true });
         const inputBase = wrapper.findComponent(InputBase);
         expect(inputBase.props('error')).toBe('Campo obrigatório');
     });

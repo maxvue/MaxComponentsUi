@@ -26,23 +26,25 @@
         action: [value: boolean];
     }>();
 
-    const executing = useDefaultReset<boolean>(false, 200);
+    const executing = ref(false);
 
-    const onClick = (event: any) => {
-        if (! executing.value) {
-            executing.value = true;
-
+    const onClick = async (event: MouseEvent) => {
+        if (executing.value) return;
+        executing.value = true;
+        try {
             if (props.route) {
                 goToRoute(props.route, data.value);
                 return;
             }
 
             if (props.action) {
-                props.action({ event: event, data: data.value });
+                await props.action({ event: event, data: data.value });
                 return;
             }
 
             emit('action', true);
+        } finally {
+            executing.value = false;
         }
     };
 </script>

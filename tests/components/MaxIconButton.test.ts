@@ -57,13 +57,17 @@ describe('MaxIconButton', () => {
         expect(wrapper.emitted('action')![0]).toEqual([true]);
     });
 
-    it('proteção contra clique duplo (200ms)', async () => {
-        const wrapper = mountIconButton();
-        await wrapper.trigger('click');
-        await wrapper.trigger('click'); // Segundo clique imediato
+    it('proteção contra clique duplo concorrente durante ação pendente', async () => {
+        let resolvePromise: any;
+        const pendingAction = vi.fn(() => new Promise((res) => { resolvePromise = res; }));
+        const wrapper = mountIconButton({ action: pendingAction });
 
-        // Apenas um evento deve ter sido emitido (proteção useDefaultReset)
-        expect(wrapper.emitted('action')?.length).toBe(1);
+        const p1 = wrapper.trigger('click');
+        const p2 = wrapper.trigger('click'); // Segundo clique enquanto a primeira ação está pendente
+
+        expect(pendingAction).toHaveBeenCalledTimes(1);
+        resolvePromise();
+        await Promise.all([p1, p2]);
     });
 
     it('aplica hover scale ao mouseenter', async () => {
@@ -94,5 +98,30 @@ describe('MaxIconButton', () => {
 
         expect(maxUse.goToRoute).toHaveBeenCalledWith('dashboard', { filter: 'active', id: 1, q: 'search' });
         expect(wrapper.emitted('action')).toBeFalsy();
+    });
+
+    it('libera o guard de execução após a conclusão de uma ação assíncrona', async () => {
+        let contador = 0;
+        const asyncAction = vi.fn(async () => {
+            contador++;
+        });
+
+        const wrapper = mountIconButton({ action: asyncAction });
+        await wrapper.trigger('click');
+        expect(asyncAction).toHaveBeenCalledTimes(1);
+
+        await wrapper.trigger('click');
+        expect(asyncAction).toHaveBeenCalledTimes(2);
+        expect(contador).toBe(2);
+    });
+
+    it('libera o guard de execução no bloco finally mesmo quando a ação lança uma exceção', async () => {
+        const failingAction = vi.fn(() => {
+            throw new Error('Falha na ação');
+        });
+
+        const wrapper = mountIconButton({ action: failingAction });
+        await expect((wrapper.vm as any).onClick(new MouseEvent('click'))).rejects.toThrow('Falha na ação');
+        expect((wrapper.vm as any).executing).toBe(false);
     });
 });
