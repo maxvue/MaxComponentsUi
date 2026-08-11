@@ -28,7 +28,10 @@ export const presetMaxUno = () => {
             // `color-mix(in srgb, ...)` — escrita dentro de blocos <style> — era
             // lida como utilitário e gerava `var(--mix(in)`, um bracket sem
             // fechamento que quebra o PostCSS na build da app consumidora.
-            [/^color-([\w-]+)$/, ([, s]) => ({ color: `var(--${String(s).length > 3 ? s : 'gray-300'}) !important` })],
+            [/^color-([\w-]+)$/, ([, s]) => {
+                if (!s) return undefined;
+                return { color: `var(--${s}) !important` };
+            }],
             // Cores dinâmicas
             [/^text-(center|left|right)$/, ([, s]) => ({ 'text-align': s + ' !important' })],
             [/^bg-(.+)$/, ([, s]) => ({ 'background-color': s.startsWith('var(') || s.startsWith('#') || s.startsWith('rgb') || s.startsWith('hsl') ? s : `var(--${s})` })],
@@ -49,32 +52,14 @@ export const presetMaxUno = () => {
             [/^h-?min-(.+)$/, ([, s]) => ({ 'min-height': `${getCssSize(s)} !important` })],
             [/^min-h-(.+)$/, ([, s]) => ({ 'min-height': `${getCssSize(s)} !important` })],
 
-            [/^hover-(.+)$/, ([, s]) => ({
-                '&:hover': {
-                    'color': `var(--${s}) !important`,
-                    '.max-icon-div': {
-                        'color': `var(--${s}) !important`,
-                        '.max-icon': {
-                            'color': `var(--${s}) !important`,
-                            'svg': {
-                                'color': `var(--${s}) !important`
-                            }
-                        },
-                        'svg': {
-                            'color': `var(--${s}) !important`
-                        }
-                    },
-                    '.max-icon': {
-                        'color': `var(--${s}) !important`,
-                        'svg': {
-                            'color': `var(--${s}) !important`
-                        }
-                    },
-                    'svg': {
-                        'color': `var(--${s}) !important`
-                    }
+            [/^hover-(.+)$/, ([, s]) => [
+                {
+                    'color': `var(--${s}) !important`
+                },
+                {
+                    selector: (sel: string) => `${sel}:hover, ${sel}:hover .max-icon-div, ${sel}:hover .max-icon, ${sel}:hover svg`
                 }
-            })],
+            ]],
 
             // Grid system
             [/^grid-?(cols|rows)-?(.+)$/i, ([, tp, vl]) => ({ ['grid-template-' + (tp.toLowerCase() === 'cols' ? 'columns' : 'rows')]: vl.replace(/-/g, ' ') })],
@@ -85,9 +70,12 @@ export const presetMaxUno = () => {
             // Restrita ao prefixo `s-` (ex.: `s-50`, `s100`) para não colidir com `w-*`,
             // que deve ser resolvido pelo presetWind3 com a semântica padrão de `width`.
             [/^s-?(\d+)$/, ([, d]) => ({ flex: `1 0 calc(${d}% - 8px)` })],
-            [/^opacity-?([\d.]+)$/, ([, d]) => {
-                const val = Number(d);
-                return { opacity: val > 1 ? `${val / 100}` : `${val}` };
+            [/^opacity-?(\d+(?:\.\d+)?)$/, ([, d]) => {
+                const raw = Number(d);
+                if (!Number.isFinite(raw)) return undefined;
+                const val = raw > 1 ? raw / 100 : raw;
+                const clamped = Math.min(Math.max(val, 0), 1);
+                return { opacity: `${clamped}` };
             }],
             [/^no[-_]?[Cc]lick$/, () => ({ 'pointer-events': 'none' })],
 

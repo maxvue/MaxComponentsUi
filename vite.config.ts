@@ -6,8 +6,6 @@ import dts from 'vite-plugin-dts';
 import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
 import fs from 'node:fs';
 
-const pkg = JSON.parse(fs.readFileSync(new URL('./package.json', import.meta.url), 'utf-8'));
-
 export default defineConfig({
     plugins: [
         vue(),
@@ -17,16 +15,25 @@ export default defineConfig({
             jsAssetsFilterFunction: (outputChunk) => {
                 return outputChunk.fileName === 'index.es.js';
             }
-        })
+        }),
+        {
+            name: 'copy-themes',
+            closeBundle() {
+                const srcThemes = path.resolve(import.meta.dirname, 'src/themes');
+                const distThemes = path.resolve(import.meta.dirname, 'dist/themes');
+                fs.cpSync(srcThemes, distThemes, { recursive: true });
+                if (!fs.existsSync(path.resolve(distThemes, 'all.scss'))) throw new Error('Falha ao copiar dist/themes/all.scss durante o build');
 
+            }
+        }
     ],
     build: {
         lib: {
             entry: {
-                index: path.resolve(__dirname, './src/index.ts'),
-                preset: path.resolve(__dirname, './src/presetMaxUno.ts'),
-                resolver: path.resolve(__dirname, './src/helpers/MaxComponentsUiResolver.ts'),
-                prime: path.resolve(__dirname, './src/prime/index.ts')
+                index: path.resolve(import.meta.dirname, './src/index.ts'),
+                preset: path.resolve(import.meta.dirname, './src/presetMaxUno.ts'),
+                resolver: path.resolve(import.meta.dirname, './src/helpers/MaxComponentsUiResolver.ts'),
+                prime: path.resolve(import.meta.dirname, './src/prime/index.ts')
             },
             name: 'MaxComponentsUi',
             fileName: (format, entryName) => `${entryName}.${format === 'es' ? 'es.js' : 'js'}`,
@@ -34,18 +41,12 @@ export default defineConfig({
             cssFileName: 'style'
         },
         rollupOptions: {
-            external: [
-                'vue-router',
-                'vue',
-                '@iconify/vue',
-                'sass',
-                'node:path',
-                'node:url',
-                'node:fs',
-                '@oxc-parser/binding-wasm32-wasi',
-                ...Object.keys(pkg.dependencies || {}),
-                ...Object.keys(pkg.peerDependencies || {})
-            ],
+            external: (id: string) => (
+                !id.startsWith('.') &&
+                !path.isAbsolute(id) &&
+                !id.startsWith('virtual:') &&
+                !id.startsWith('\0')
+            ),
             output: {
                 exports: 'named',
                 globals: {
@@ -61,6 +62,6 @@ export default defineConfig({
         minify: 'terser'
     },
     resolve: {
-        alias: { '@': path.resolve(__dirname, './src'),'@helpers': path.resolve(__dirname, './src/helpers'),'@maxvue/max-use': path.resolve(__dirname, '../MaxUse/src/index.ts') }
+        alias: { '@': path.resolve(import.meta.dirname, './src'),'@helpers': path.resolve(import.meta.dirname, './src/helpers'),'@maxvue/max-use': path.resolve(import.meta.dirname, '../MaxUse/src/index.ts') }
     }
 });
