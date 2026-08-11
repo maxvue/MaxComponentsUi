@@ -22,6 +22,25 @@ describe('MaxInputFileUploadButton', () => {
         expect(wrapper.find('.input-file-button-label').html()).toContain('Enviar');
     });
 
+    it('escapa o label impedindo injecao de HTML (XSS)', () => {
+        const wrapper = mount(MaxInputFileUploadButton, {
+            props: {
+                label: '<img src="x" onerror="alert(1)"><b>Enviar</b>'
+            },
+            global: {
+                stubs: {
+                    MaxInputFileUpload: { template: '<div><slot /></div>' },
+                    Icon: true
+                }
+            }
+        });
+
+        const labelEl = wrapper.find('.input-file-button-label');
+        expect(labelEl.find('img').exists()).toBe(false);
+        expect(labelEl.find('b').exists()).toBe(false);
+        expect(labelEl.text()).toContain('<b>Enviar</b>');
+    });
+
     it('deve emitir o evento upload com os arquivos recebidos', async () => {
         const wrapper = mount(MaxInputFileUploadButton, {
             global: {

@@ -55,6 +55,22 @@ describe('MaxInputFileUploadBig', () => {
         expect(wrapper.find('.upload-area').exists()).toBe(true);
     });
 
+    it('escapa o label impedindo injecao de HTML (XSS)', () => {
+        const wrapper = mount(MaxInputFileUploadBig, {
+            props: {
+                label: '<img src="x" onerror="alert(1)"><b>Upload</b>'
+            },
+            global: {
+                stubs: { Icon: true, DotLottieVue: true }
+            }
+        });
+
+        const area = wrapper.find('.upload-area');
+        expect(area.find('img').exists()).toBe(false);
+        expect(area.find('b').exists()).toBe(false);
+        expect(area.text()).toContain('<b>Upload</b>');
+    });
+
     it('renderiza o conteúdo do slot default quando fornecido', () => {
         const wrapper = mount(MaxInputFileUploadBig, {
             slots: {

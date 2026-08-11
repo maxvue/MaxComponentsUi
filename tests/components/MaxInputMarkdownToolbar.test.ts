@@ -130,6 +130,34 @@ describe('MaxInputMarkdownToolbar', () => {
         expect(editor._commands.setLink).toHaveBeenCalledWith({ href: 'https://example.com', target: '_blank' });
     });
 
+    it('nao aplica o link quando a URL e um esquema malicioso (javascript:alert(1))', async () => {
+        const editor = createFakeEditor();
+        const wrapper = mountToolbar({ editor });
+
+        const linkButton = wrapper.find('button[title="Link"]');
+        await linkButton.trigger('click');
+
+        const linkInput = wrapper.find('.md-popover__input');
+        await linkInput.setValue('javascript:alert(1)');
+        await wrapper.find('.md-popover__btn--primary').trigger('click');
+
+        expect(editor._commands.setLink).not.toHaveBeenCalled();
+    });
+
+    it('nao aplica a imagem quando a URL e um esquema malicioso (javascript:alert(1))', async () => {
+        const editor = createFakeEditor();
+        const wrapper = mountToolbar({ editor });
+
+        const imgButton = wrapper.find('button[title="Imagem"]');
+        await imgButton.trigger('click');
+
+        const imgInput = wrapper.find('.md-popover__input');
+        await imgInput.setValue('javascript:alert(1)');
+        await wrapper.find('.md-popover__btn--primary').trigger('click');
+
+        expect(editor._commands.setImage).not.toHaveBeenCalled();
+    });
+
     it('insere uma tabela 3x3 com header ao clicar no botão de tabela', async () => {
         const editor = createFakeEditor();
         const wrapper = mountToolbar({ editor });

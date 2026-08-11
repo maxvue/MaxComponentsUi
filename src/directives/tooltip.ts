@@ -1,4 +1,5 @@
 import type { Directive, DirectiveBinding } from 'vue';
+import { sanitizeHtml } from '../helpers/sanitizeHtml';
 
 interface TooltipOptions {
     value?: string;
@@ -92,7 +93,7 @@ const renderText = (tooltipEl: HTMLElement, options: TooltipOptions) => {
     const textEl = tooltipEl.querySelector('.max-tooltip-text') as HTMLElement | null;
     if (!textEl) return;
     const value = options.value ?? '';
-    if (options.escape === false) textEl.innerHTML = value;
+    if (options.escape === false) textEl.innerHTML = sanitizeHtml(value);
     else textEl.textContent = value;
 };
 
