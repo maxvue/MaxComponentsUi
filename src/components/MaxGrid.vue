@@ -1,5 +1,5 @@
 <template>
-    <div class="max-grid-cols" >
+    <div class="max-grid" >
         <div class="label-grid" v-if="props.label" :class="props.labelCenter ? 'label-center' : ''">
             {{ props.label }}
         </div>
@@ -21,7 +21,7 @@
 </script>
 
 <style lang="scss">
-.max-grid-cols {
+.max-grid {
     display: flex;
     flex-wrap: wrap;
     gap: 13px 8px;

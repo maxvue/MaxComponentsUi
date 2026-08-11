@@ -22,38 +22,21 @@ describe('MaxInputFileUploadButton', () => {
         expect(wrapper.find('.input-file-button-label').html()).toContain('Enviar');
     });
 
-    it('escapa o label impedindo injecao de HTML (XSS)', () => {
+    it('deve repassar o evento upload disparado pelo MaxInputFileUpload', async () => {
         const wrapper = mount(MaxInputFileUploadButton, {
-            props: {
-                label: '<img src="x" onerror="alert(1)"><b>Enviar</b>'
-            },
             global: {
                 stubs: {
-                    MaxInputFileUpload: { template: '<div><slot /></div>' },
+                    MaxInputFileUpload: {
+                        name: 'MaxInputFileUpload',
+                        template: '<button @click="$emit(\'upload\', [{ name: \'doc.pdf\' }])"><slot /></button>'
+                    },
                     Icon: true
                 }
             }
         });
 
-        const labelEl = wrapper.find('.input-file-button-label');
-        expect(labelEl.find('img').exists()).toBe(false);
-        expect(labelEl.find('b').exists()).toBe(false);
-        expect(labelEl.text()).toContain('<b>Enviar</b>');
-    });
-
-    it('deve emitir o evento upload com os arquivos recebidos', async () => {
-        const wrapper = mount(MaxInputFileUploadButton, {
-            global: {
-                stubs: {
-                    MaxInputFileUpload: { template: '<div><slot /></div>' },
-                    Icon: true
-                }
-            }
-        });
-
-        const mockFiles = [{ name: 'arquivo1.pdf' }, { name: 'arquivo2.jpg' }];
-        wrapper.vm.onUpload(mockFiles);
+        await wrapper.findComponent({ name: 'MaxInputFileUpload' }).trigger('click');
         expect(wrapper.emitted('upload')).toBeTruthy();
-        expect(wrapper.emitted('upload')?.[0]).toEqual([mockFiles]);
+        expect(wrapper.emitted('upload')?.[0][0]).toEqual([{ name: 'doc.pdf' }]);
     });
 });

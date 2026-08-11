@@ -9,7 +9,7 @@ describe('MaxGrid', () => {
         const wrapper = mount(MaxGrid, {
             slots: { default: '<div class="child">Item</div>' }
         });
-        expect(wrapper.find('.max-grid-cols').exists()).toBe(true);
+        expect(wrapper.find('.max-grid').exists()).toBe(true);
         expect(wrapper.find('.child').exists()).toBe(true);
     });
 
@@ -43,7 +43,7 @@ describe('MaxGridCols', () => {
         const wrapper = mount(MaxGridCols, {
             slots: { default: '<div class="col">Coluna</div>' }
         });
-        expect(wrapper.find('.grid-cols').exists()).toBe(true);
+        expect(wrapper.find('.max-grid-cols').exists()).toBe(true);
         expect(wrapper.find('.col').exists()).toBe(true);
     });
 
@@ -51,7 +51,7 @@ describe('MaxGridCols', () => {
         const wrapper = mount(MaxGridCols, {
             slots: { default: '<div>Col</div>' }
         });
-        expect(wrapper.find('.grid-cols').exists()).toBe(true);
+        expect(wrapper.find('.max-grid-cols').exists()).toBe(true);
     });
 });
 

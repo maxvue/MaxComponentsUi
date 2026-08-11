@@ -107,9 +107,10 @@
         right: 1px;
         width: 40% !important;
         height: 40% !important;
-        svg: {
-            width: 40% !important;
-            height: 40% !important;
+
+        svg {
+            width: 100% !important;
+            height: 100% !important;
         }
     }
 
@@ -121,9 +122,10 @@
         right: 1px;
         width: 40% !important;
         height: 40% !important;
-        svg: {
-            width: 40% !important;
-            height: 40% !important;
+
+        svg {
+            width: 100% !important;
+            height: 100% !important;
         }
     }
 
@@ -132,9 +134,10 @@
         height: 90% !important;
         aspect-ratio: 1 / 1;
         transform: translateX(-3px);
-        svg: {
-            width: 90% !important;
-            height: 90% !important;
+
+        svg {
+            width: 100% !important;
+            height: 100% !important;
         }
     }
 
@@ -147,9 +150,10 @@
         right: 4px;
         width: 35% !important;
         height: 35% !important;
-        svg: {
-            width: 35% !important;
-            height: 35% !important;
+
+        svg {
+            width: 100% !important;
+            height: 100% !important;
         }
     }
 
