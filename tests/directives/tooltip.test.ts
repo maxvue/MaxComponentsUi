@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { defineComponent } from 'vue';
 import { mount, VueWrapper } from '@vue/test-utils';
@@ -163,6 +164,27 @@ describe('v-tooltip directive', () => {
         const textEl = document.querySelector('.max-tooltip-text');
         expect(textEl?.querySelector('b')).not.toBeNull();
         expect(textEl?.querySelector('b')?.textContent).toBe('bold');
+    });
+
+    it('escape false: sanitiza tags perigosas e handlers como script e onerror', async () => {
+        const Comp = defineComponent({
+            directives: { tooltip: Tooltip },
+            template: '<button v-tooltip="{ value: payload, escape: false }">trigger</button>',
+            data() {
+                return { payload: '<img src="x" onerror="alert(1)"><script>alert(2)</script><b>seguro</b>' };
+            },
+            mounted() {
+                mockCenteredRect(this.$el as HTMLElement);
+            }
+        });
+        wrapper = mount(Comp);
+        await wrapper.find('button').trigger('mouseenter');
+        vi.runAllTimers();
+
+        const textEl = document.querySelector('.max-tooltip-text');
+        expect(textEl?.querySelector('script')).toBeNull();
+        expect(textEl?.querySelector('img')?.hasAttribute('onerror')).toBe(false);
+        expect(textEl?.querySelector('b')?.textContent).toBe('seguro');
     });
 
     it('focus e blur tambem disparam o tooltip (acessibilidade por teclado)', async () => {

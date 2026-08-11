@@ -236,6 +236,7 @@
     import { ref, nextTick } from 'vue';
     import type { Editor } from '@tiptap/core';
     import MaxIcon from './MaxIcon.vue';
+    import { isSafeUrl } from '../helpers/isSafeUrl';
 
     const props = defineProps<{
         editor: Editor | null;
@@ -260,7 +261,8 @@
 
     const applyLink = () => {
         if (!linkUrl.value) props.editor?.chain().focus().unsetLink().run();
-        else props.editor?.chain().focus().setLink({ href: linkUrl.value, target: '_blank' }).run();
+        else if (isSafeUrl(linkUrl.value)) props.editor?.chain().focus().setLink({ href: linkUrl.value, target: '_blank' }).run();
+
 
         showLinkPopover.value = false;
         linkUrl.value = '';
@@ -280,7 +282,8 @@
     };
 
     const applyImage = () => {
-        if (imageUrl.value) props.editor?.chain().focus().setImage({ src: imageUrl.value }).run();
+        if (imageUrl.value && isSafeUrl(imageUrl.value)) props.editor?.chain().focus().setImage({ src: imageUrl.value }).run();
+
 
         showImagePopover.value = false;
         imageUrl.value = '';

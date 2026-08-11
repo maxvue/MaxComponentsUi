@@ -114,4 +114,9 @@ export interface MaxAppConfig {
     baseUrl?: string;
     /** Versão da aplicação, exibida na interface. */
     version?: string;
+    /** Chave da API do Google Maps usada pelo componente MaxMaps. */
+    googleMapsApiKey?: string;
+    /** ID do mapa do Google Maps usado pelo componente MaxMaps. */
+    googleMapsMapId?: string;
 }
+

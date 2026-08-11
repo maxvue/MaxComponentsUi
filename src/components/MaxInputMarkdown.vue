@@ -1,5 +1,5 @@
 <template>
-    <InputBase v-bind="inputBaseProps" in-line class="max-input-mark-down">
+    <InputBase v-bind="inputBaseProps" in-line class="max-input-markdown">
         <div class="max-input-markdown__editor-wrap" :class="{ 'max-input-markdown__editor-wrap--disabled': props.disabled }" @click.stop="closePopovers">
             <MaxInputMarkdownToolbar :editor="editor ?? null" />
             <EditorContent class="max-input-markdown__content" :style="{ minHeight: props.minHeight, maxHeight: props.maxHeight }" :editor="editor" />
@@ -21,6 +21,7 @@
     import { Markdown } from 'tiptap-markdown';
     import MaxInputMarkdownToolbar from './MaxInputMarkdownToolbar.vue';
     import InputBase from './InputBase.vue';
+    import { isSafeUrl } from '../helpers/isSafeUrl';
 
     const props = withDefaults(
         defineProps<{
@@ -74,7 +75,11 @@
         extensions: [
             StarterKit,
             Underline,
-            Link.configure({ openOnClick: false }),
+            Link.configure({
+                openOnClick: false,
+                protocols: ['http', 'https', 'mailto', 'tel'],
+                isAllowedUri: (url) => isSafeUrl(url)
+            }),
             Image,
             Table.configure({ resizable: false }),
             TableRow,
@@ -123,9 +128,6 @@
 
 <style lang="scss">
     .max-input-markdown {
-        border: 1px solid red !important;
-        outline: 1px solid blue !important;
-
         .max-input-markdown__editor-wrap {
             width: 100%;
             border-radius: inherit;

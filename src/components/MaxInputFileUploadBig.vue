@@ -4,7 +4,7 @@
         <div class="upload-area" v-if="!uploading && !showError">
             <slot>
                 <MaxIcon i="lets-icons:upload-light" size="3" />
-                <div v-if="label" v-html="label"></div>
+                <div v-if="label">{{ label }}</div>
             </slot>
         </div>
 

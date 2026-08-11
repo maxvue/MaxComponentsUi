@@ -13,8 +13,17 @@ export const useIconStore = defineStore('icons', () => {
 
     const list_icons_waiting_request: Ref = computed(() => Object.keys(icons_data.value ?? {}).filter((icon_name: string) => icons_data.value[icon_name] === 'waiting'));
 
+    const isSafeIconName = (name: string): boolean => {
+        if (!name || typeof name !== 'string') return false;
+        if (name.includes('..') || name.includes('<') || name.includes('>')) return false;
+        if (/^(?:https?|javascript|data|file|vbscript):/i.test(name)) return false;
+        return /^(?:[a-z0-9_-]+:)?[a-z0-9_/-]+$/i.test(name);
+    };
+
     const getIcon = (icon_name: string) => {
+        if (!icon_name || typeof icon_name !== 'string') return null;
         icon_name = icon_name.trim();
+        if (!isSafeIconName(icon_name)) return null;
         if (size(icons_data.value) === 0) getInCache();
         if (icons_data.value[icon_name]) return icons_data.value[icon_name] !== 'waiting' ? icons_data.value[icon_name] : null;
         icons_data.value[icon_name] = 'waiting';

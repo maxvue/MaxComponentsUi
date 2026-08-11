@@ -63,4 +63,11 @@ describe('sanitizeSvg', () => {
         expect(out).not.toContain('<script');
         expect(out).not.toContain('alert');
     });
+
+    it('nao descarta SVGs legitimos com texto contendo " onload=1" dentro de tags de texto (falso positivo)', () => {
+        const out = sanitizeSvg('<svg><text>exemplo com  onload=1 em texto</text></svg>');
+        expect(out).toContain('<svg');
+        expect(out).toContain('<text');
+        expect(out).toContain('onload=1');
+    });
 });
