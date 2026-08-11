@@ -95,7 +95,7 @@ describe('useToastStore', () => {
         expect(store.items).toHaveLength(1);
     });
 
-    it('pause() garante remaining mínimo de 500ms', () => {
+    it('pause() armazena remaining real e garante respiro no resume()', () => {
         const store = useToastStore();
         const id = store.add({ title: 'Quase expirado', duration: 2000 });
 
@@ -104,7 +104,16 @@ describe('useToastStore', () => {
         store.pause(id);
 
         const toast = store.items[0];
-        expect(toast.remaining).toBeGreaterThanOrEqual(500);
+        expect(toast.remaining).toBe(200);
+
+        store.resume(id);
+        // Avança 400ms (ainda não fechou pois o respiro mínimo é 500ms)
+        vi.advanceTimersByTime(400);
+        expect(store.items).toHaveLength(1);
+
+        // Avança +100ms (total 500ms) e fecha
+        vi.advanceTimersByTime(100);
+        expect(store.items).toHaveLength(0);
     });
 
     it('pause() não lança erro para ID inexistente', () => {
@@ -150,6 +159,26 @@ describe('useToastStore', () => {
         store.clear();
         // Após clear + avanço, nada deve estourar (sem erros)
         vi.advanceTimersByTime(15000);
+        expect(store.items).toHaveLength(0);
+    });
+
+    it('pausas e retomadas sucessivas próximo do vencimento não estendem a vida útil infinitamente', () => {
+        const store = useToastStore();
+        const id = store.add({ title: 'Respiro', duration: 4000 });
+
+        // Avança 3900ms (faltam 100ms)
+        vi.advanceTimersByTime(3900);
+
+        // Faz 5 ciclos de pause -> resume -> avança 400ms enquanto rodando
+        for (let i = 0; i < 5; i++) {
+            store.pause(id);
+            store.resume(id);
+            vi.advanceTimersByTime(400);
+        }
+
+        // Respiro final de 500ms encerra o timer e remove o toast
+        vi.advanceTimersByTime(500);
+
         expect(store.items).toHaveLength(0);
     });
 });

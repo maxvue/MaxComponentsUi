@@ -92,28 +92,38 @@ export const useLoginStore = defineStore('login', () => {
         loading.value = true;
         error.value = '';
 
-        const result_api = await apiPostRoute(getMaxAppConfig().routeLogin as string, {
-            method: method.value,
-            email: email.value,
-            password: password.value,
-            remember: remember.value,
-            phone_number: phone_number.value,
-            user_name: user_name.value
-        });
+        try {
+            const result_api = await apiPostRoute(getMaxAppConfig().routeLogin as string, {
+                method: method.value,
+                email: email.value,
+                password: password.value,
+                remember: remember.value,
+                phone_number: phone_number.value,
+                user_name: user_name.value
+            });
 
-        if (result_api) {
-            if (typeof location !== 'undefined') location.reload();
-        } else {
+            if (result_api) {
+                if (typeof location !== 'undefined') location.reload();
+            } else {
+                useToastStore().add({
+                    title: 'Não foi possível realizar o login.',
+                    message: 'Verifique os dados e tente novamente.',
+                    severity: 'error'
+                });
+
+                error.value = 'Usuário ou senha inválidos.';
+            }
+        } catch (_e) {
             useToastStore().add({
                 title: 'Não foi possível realizar o login.',
-                message: 'Verifique os dados e tente novamente.',
+                message: 'Não foi possível conectar ao servidor. Tente novamente.',
                 severity: 'error'
             });
 
-            error.value = 'Usuário ou senha inválidos.';
+            error.value = 'Não foi possível conectar ao servidor. Tente novamente.';
+        } finally {
+            loading.value = false;
         }
-
-        loading.value = false;
     };
 
     /**
@@ -146,11 +156,16 @@ export const useLoginStore = defineStore('login', () => {
      * Carrega do backend os provedores sociais habilitados.
      */
     const loadProviders = async (): Promise<void> => {
-        const ids = await apiGetRoute(getMaxAppConfig().routeProviders as string);
+        try {
+            const ids = await apiGetRoute(getMaxAppConfig().routeProviders as string);
 
-        providers.value = (ids ?? [])
-            .filter((id: string) => PROVIDER_MAP[id])
-            .map((id: string) => ({ id, ...PROVIDER_MAP[id] }));
+            const rawIds = Array.isArray(ids) ? ids : [];
+            providers.value = rawIds
+                .filter((id: string) => PROVIDER_MAP[id])
+                .map((id: string) => ({ id, ...PROVIDER_MAP[id] }));
+        } catch (_e) {
+            providers.value = [];
+        }
     };
 
     /**

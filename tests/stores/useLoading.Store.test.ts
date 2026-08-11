@@ -146,4 +146,20 @@ describe('useLoadingStore', () => {
         expect(Object.keys(store.targets['body'].items)).toHaveLength(2);
         vi.useRealTimers();
     });
+
+    it('não acumula chaves em keys_target ao finalizar loadings com end()', async () => {
+        vi.useFakeTimers();
+        const store = useLoadingStore();
+
+        for (let i = 0; i < 10; i++) {
+            const key = `temp_key_${i}`;
+            store.start({ key });
+            store.end(key);
+        }
+
+        await vi.advanceTimersByTimeAsync(600);
+
+        expect(Object.keys(store.keys_target)).toHaveLength(0);
+        vi.useRealTimers();
+    });
 });
