@@ -70,23 +70,44 @@ export const useUserStore = defineStore('user', () => {
     );
 
     /**
-     * Resolve quando o usuário terminar de carregar.
+     * Resolve quando o usuário terminar de carregar ou falhar/expirar o timeout.
      *
-     * Resolve imediatamente se o carregamento já ocorreu.
+     * Resolve imediatamente se o carregamento já ocorreu ou falhou.
      */
-    function waitRequest(this: any): Promise<void> {
+    function waitRequest(this: any, timeout = 15000): Promise<void> {
         return new Promise((resolve) => {
-            if (this?.status?.server?.get?.is_success) return resolve();
+            if (this?.status?.server?.get?.is_success || this?.status?.server?.get?.is_error) return resolve();
 
-            const unwatch = watch(
-                () => this?.status?.server?.get?.is_success,
-                (is_success) => {
-                    if (is_success) {
-                        unwatch();
+
+            let timer: ReturnType<typeof setTimeout> | null = null;
+            let unwatch: (() => void) | null = null;
+
+            const cleanup = () => {
+                if (unwatch) {
+                    unwatch();
+                    unwatch = null;
+                }
+                if (timer) {
+                    clearTimeout(timer);
+                    timer = null;
+                }
+            };
+
+            unwatch = watch(
+                () => [this?.status?.server?.get?.is_success, this?.status?.server?.get?.is_error],
+                ([is_success, is_error]) => {
+                    if (is_success || is_error) {
+                        cleanup();
                         resolve();
                     }
                 }
             );
+
+            if (timeout > 0) timer = setTimeout(() => {
+                cleanup();
+                resolve();
+            }, timeout);
+
         });
     }
 

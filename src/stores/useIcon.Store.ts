@@ -1,8 +1,9 @@
 import { watchDebounced, size } from '@maxvue/max-use';
 import { defineStore } from 'pinia';
 import type { Ref } from 'vue';
-import { ref, computed } from 'vue';
+import { ref, computed, onScopeDispose } from 'vue';
 import { sanitizeSvg } from '../helpers/sanitizeSvg';
+import { getMaxAppConfig } from '../helpers/maxAppConfig';
 
 // Chave versionada: caches gravados antes da sanitização (achado 06) não devem
 // ser lidos como válidos, então trocamos a chave para forçar seu descarte.
@@ -57,6 +58,7 @@ export const useIconStore = defineStore('icons', () => {
     });
 
     const MAX_FETCH_RETRIES = 4;
+    const MAX_ICON_RETRIES = 4;
     const FETCH_RETRY_RESET_DELAY = 30000;
 
     let fetchResetTimer: ReturnType<typeof setTimeout> | null = null;
@@ -71,6 +73,13 @@ export const useIconStore = defineStore('icons', () => {
         }, FETCH_RETRY_RESET_DELAY);
     };
 
+    onScopeDispose(() => {
+        if (fetchResetTimer !== null) {
+            clearTimeout(fetchResetTimer);
+            fetchResetTimer = null;
+        }
+    });
+
     watchDebounced(() => [list_icons_waiting_request.value, errors.value], () => {
         // Captura snapshot da lista no momento da requisição para evitar condição de corrida
         const icons_to_fetch = [...list_icons_waiting_request.value];
@@ -79,10 +88,17 @@ export const useIconStore = defineStore('icons', () => {
             const params = new URLSearchParams();
             icons_to_fetch.forEach((icon) => params.append('icons[]', icon));
 
-            fetch(`https://engeapp.com.br/api/icons?${params.toString()}`, {
+            const baseUrl = getMaxAppConfig().routeIcons ?? 'https://engeapp.com.br/api/icons';
+            const requestUrl = `${baseUrl}?${params.toString()}`;
+
+            fetch(requestUrl, {
                 method: 'GET',
                 headers: { 'Accept': 'application/json' }
-            }).then((res) => res.json()).then((data) => {
+            }).then((res) => {
+                if (res.ok === false) throw new Error(`HTTP ${res.status}`);
+
+                return res.json();
+            }).then((data) => {
 
                 const updated_data = { ...icons_data.value };
 
@@ -96,7 +112,7 @@ export const useIconStore = defineStore('icons', () => {
                     errors.value[icon_name] = (errors.value[icon_name] ?? 0) + 1;
                     console.error('Erro na obtenção do ícone', icon_name);
 
-                    if (errors.value[icon_name] >= 4) updated_data[icon_name] = '';
+                    if (errors.value[icon_name] >= MAX_ICON_RETRIES) updated_data[icon_name] = '';
 
                 }
 
@@ -105,7 +121,7 @@ export const useIconStore = defineStore('icons', () => {
                 icons_data.value = updated_data;
                 saveCache();
             }).catch((error) => {
-                console.error('Erro na Requisição dos ícones', { 'url': `https://engeapp.com.br/api/icons?${params.toString()}`, 'error': error });
+                console.error('Erro na Requisição dos ícones', { 'url': requestUrl, 'error': error });
                 errors.value['fetch'] += 1;
 
                 if (errors.value['fetch'] >= MAX_FETCH_RETRIES) scheduleFetchErrorReset();
@@ -114,7 +130,13 @@ export const useIconStore = defineStore('icons', () => {
 
     }, { debounce: 50, maxWait: 150, deep: true });
 
-    const saveCache = () => localStorage.setItem(CACHE_KEY, JSON.stringify(icons_data.value));
+    const saveCache = () => {
+        const cache_data: Record<string, string> = {};
+        for (const [key, value] of Object.entries(icons_data.value)) if (value && value !== 'waiting') cache_data[key] = value as string;
 
-    return { getIcon, list_icons_waiting_request, icons_data };
+
+        localStorage.setItem(CACHE_KEY, JSON.stringify(cache_data));
+    };
+
+    return { getIcon, list_icons_waiting_request, icons_data, saveCache };
 });

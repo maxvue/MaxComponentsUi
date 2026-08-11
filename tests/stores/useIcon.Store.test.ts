@@ -230,4 +230,66 @@ describe('useIconStore', () => {
         consoleSpy.mockRestore();
         vi.useRealTimers();
     });
+
+    it('deve usar a rota de ícones configurada em configureMaxApp', async () => {
+        const { configureMaxApp, resetMaxAppConfig } = await import('../../src/helpers/maxAppConfig');
+        configureMaxApp({ routeIcons: 'https://api.custom.com/v1/icons' });
+
+        try {
+            const store = useIconStore();
+            const mockFetch = vi.spyOn(globalThis, 'fetch').mockReturnValue(Promise.resolve({
+                ok: true,
+                json: () => Promise.resolve({ 'icon-custom': '<svg/>' })
+            } as any));
+
+            store.getIcon('icon-custom');
+            await new Promise((r) => setTimeout(r, 250));
+
+            expect(mockFetch).toHaveBeenCalled();
+            const url = mockFetch.mock.calls[0][0] as string;
+            expect(url).toContain('https://api.custom.com/v1/icons');
+        } finally {
+            resetMaxAppConfig();
+        }
+    });
+
+    it('deve tratar res.ok === false como erro de fetch e não tentar chamar res.json() em respostas inválidas', async () => {
+        const store = useIconStore();
+        const jsonSpy = vi.fn().mockResolvedValue({});
+        const mockFetch = vi.spyOn(globalThis, 'fetch').mockReturnValue(Promise.resolve({
+            ok: false,
+            status: 500,
+            json: jsonSpy
+        } as any));
+
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        store.getIcon('icon-500');
+        await new Promise((r) => setTimeout(r, 250));
+        await new Promise((r) => setTimeout(r, 50));
+
+        expect(mockFetch).toHaveBeenCalled();
+        expect(jsonSpy).not.toHaveBeenCalled();
+
+        consoleSpy.mockRestore();
+    });
+
+    it('não deve persistir sentinelas de erro de ícone ("") no localStorage', async () => {
+        const store = useIconStore();
+        store.icons_data['icon-valid'] = '<svg><path d="M0 0"/></svg>';
+        store.icons_data['icon-invalid'] = '';
+        store.icons_data['icon-waiting'] = 'waiting';
+
+        // Dispara saveCache() indiretamente ou simula saveCache
+        const saveCache = (store as any).saveCache;
+        if (saveCache) saveCache();
+
+        const storedRaw = localStorage.getItem('all_icons_v2');
+        expect(storedRaw).not.toBeNull();
+        const parsed = JSON.parse(storedRaw!);
+
+        expect(parsed['icon-valid']).toBeDefined();
+        expect(parsed['icon-invalid']).toBeUndefined();
+        expect(parsed['icon-waiting']).toBeUndefined();
+    });
 });

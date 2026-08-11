@@ -151,13 +151,16 @@ describe('useLoginStore', () => {
             await store.submit();
         });
 
-        it('desliga o loading ao final', async () => {
-            apiPostRoute.mockResolvedValue(false);
+        it('desliga o loading e exibe erro quando apiPostRoute rejeita (ex: erro de rede)', async () => {
+            apiPostRoute.mockRejectedValue(new Error('Erro de rede'));
 
             const store = useLoginStore();
             await store.submit();
 
             expect(store.loading).toBe(false);
+            expect(store.error).toBe('Não foi possível conectar ao servidor. Tente novamente.');
+            expect(useToastStore().items).toHaveLength(1);
+            expect(useToastStore().items[0].severity).toBe('error');
         });
     });
 
@@ -192,6 +195,22 @@ describe('useLoginStore', () => {
             const store = useLoginStore();
             await store.loadProviders();
 
+            expect(store.providers).toEqual([]);
+        });
+
+        it('lida com rejeição da API em loadProviders', async () => {
+            apiGetRoute.mockRejectedValue(new Error('Falha de rede'));
+
+            const store = useLoginStore();
+            await expect(store.loadProviders()).resolves.not.toThrow();
+            expect(store.providers).toEqual([]);
+        });
+
+        it('lida com resposta não-array da API em loadProviders', async () => {
+            apiGetRoute.mockResolvedValue({ error: 'unauthorized' });
+
+            const store = useLoginStore();
+            await store.loadProviders();
             expect(store.providers).toEqual([]);
         });
 

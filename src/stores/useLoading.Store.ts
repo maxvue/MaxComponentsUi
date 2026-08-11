@@ -102,8 +102,10 @@ export const useLoadingStore = defineStore('loading', () => {
      */
     const end = (loading_key: string): void => {
         const item = resolveItem(loading_key);
+        const internal_key = getKeys(loading_key, false);
 
         delete keys.value[loading_key];
+        if (internal_key) delete keys_target.value[internal_key];
 
         if (item) Object.assign(item, { status: 'done' });
     };
@@ -133,8 +135,19 @@ export const useLoadingStore = defineStore('loading', () => {
                 (key) => data.items[key]?.status === 'loading' || data.items[key]?.status === 'waiting'
             ).length;
 
-            if (data.target && count_loading === 0) targets.value[data.target].items = {};
+            if (data.target && count_loading === 0) {
+                Object.keys(data.items).forEach((internal_key) => {
+                    delete keys_target.value[internal_key];
+                });
+                targets.value[data.target].items = {};
+            }
         });
+
+        const totalItems = Object.values(targets.value ?? {}).reduce(
+            (acc, t) => acc + size(t.items), 0
+        );
+        if (totalItems === 0) count.value = 0;
+
     }, { debounce: 500, deep: true });
 
     return {

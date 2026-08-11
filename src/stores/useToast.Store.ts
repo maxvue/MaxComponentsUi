@@ -17,7 +17,7 @@ export interface ToastItem {
     severity: ToastSeverity;
     /** Ícone customizado (usa default do severity se omitido) */
     icon?: string;
-    /** Duração em ms antes de fechar automaticamente (default: 5000) */
+    /** Duração em ms antes de fechar automaticamente (default: 4000) */
     duration: number;
     /** Timestamp de criação para controle interno */
     createdAt: number;
@@ -63,7 +63,8 @@ export const useToastStore = defineStore('max-toast', () => {
 
     /** Inicia o timer de auto-remoção de um toast */
     const startTimer = (toast: ToastItem, delay?: number): void => {
-        const ms = delay ?? toast.remaining;
+        const targetDelay = delay ?? toast.remaining;
+        const ms = Math.max(targetDelay, 500);
         toast.timerId = setTimeout(() => remove(toast.id), ms);
         toast.paused = false;
     };
@@ -94,11 +95,6 @@ export const useToastStore = defineStore('max-toast', () => {
 
     /**
      * Pausa o timer de um toast (ao hover).
-     *
-     * NOTA: `remaining` é clampado em no mínimo 500ms para o timer de remoção não parecer
-     * instantâneo. A barra de progresso visual em `MaxToast.vue`, porém, usa `animationDuration`
-     * baseado em `toast.duration` (duração original), não em `remaining` — após pause()/resume()
-     * ela fica dessincronizada do tempo real restante. Ver comentário em `MaxToast.vue`.
      */
     const pause = (id: string): void => {
         const toast = items.value.find((t) => t.id === id);
@@ -107,7 +103,7 @@ export const useToastStore = defineStore('max-toast', () => {
         if (toast.timerId) clearTimeout(toast.timerId);
 
         const elapsed = Date.now() - toast.createdAt;
-        toast.remaining = Math.max(toast.duration - elapsed, 500);
+        toast.remaining = toast.duration - elapsed;
         toast.paused = true;
         toast.timerId = null;
     };

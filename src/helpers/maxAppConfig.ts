@@ -9,14 +9,15 @@ import type { MaxAppConfig } from '../types/app';
  */
 const DEFAULT_CONFIG: Required<Pick<MaxAppConfig,
     'routeUser' | 'routeUserSave' | 'routeLogin' | 'routeProviders' |
-    'routeSocialRedirect' | 'routeImpersonateStatus' | 'routeMenus'>> = {
+    'routeSocialRedirect' | 'routeImpersonateStatus' | 'routeMenus' | 'routeIcons'>> = {
     routeUser: 'user.data',
     routeUserSave: 'user.save',
     routeLogin: 'login',
     routeProviders: 'social.providers',
     routeSocialRedirect: 'social.redirect',
     routeImpersonateStatus: 'user.impersonate.status',
-    routeMenus: 'menus'
+    routeMenus: 'menus',
+    routeIcons: 'https://engeapp.com.br/api/icons'
 };
 
 let config: MaxAppConfig = { ...DEFAULT_CONFIG };

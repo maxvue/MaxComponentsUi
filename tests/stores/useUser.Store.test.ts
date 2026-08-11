@@ -85,4 +85,40 @@ describe('useUserStore', () => {
 
         expect(resolvido).toBe(true);
     });
+
+    it('waitRequest encerra a espera se status.server.get.is_error for true', async () => {
+        const store = useUserStore();
+        (store as any).status = { server: { get: { is_success: false, is_error: false } } };
+
+        let resolvido = false;
+        const promessa = store.waitRequest().then(() => resolvido = true);
+
+        await Promise.resolve();
+        expect(resolvido).toBe(false);
+
+        (store as any).status.server.get.is_error = true;
+        await promessa;
+
+        expect(resolvido).toBe(true);
+    });
+
+    it('waitRequest encerra por timeout se o servidor não responder', async () => {
+        vi.useFakeTimers();
+        try {
+            const store = useUserStore();
+            (store as any).status = { server: { get: { is_success: false, is_error: false } } };
+
+            let resolvido = false;
+            const promessa = store.waitRequest(1000).then(() => resolvido = true);
+
+            await vi.advanceTimersByTimeAsync(999);
+            expect(resolvido).toBe(false);
+
+            await vi.advanceTimersByTimeAsync(2);
+            await promessa;
+            expect(resolvido).toBe(true);
+        } finally {
+            vi.useRealTimers();
+        }
+    });
 });
