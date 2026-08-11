@@ -71,6 +71,20 @@ describe('MaxInputCpfCnpj', () => {
         expect((wrapper.vm as any).done).toBe(true);
     });
 
+    it('rejeita CPF com comprimento correto mas dígito verificador errado', async () => {
+        const wrapper = mountCpfCnpj({ cpf: true, modelValue: '52998224724' });
+        (wrapper.vm as any).temp_value = '52998224724';
+        await wrapper.vm.$nextTick();
+        expect((wrapper.vm as any).done).toBe(false);
+    });
+
+    it('rejeita CNPJ com comprimento correto mas dígito verificador errado', async () => {
+        const wrapper = mountCpfCnpj({ cnpj: true, modelValue: '11222333000182' });
+        (wrapper.vm as any).temp_value = '11222333000182';
+        await wrapper.vm.$nextTick();
+        expect((wrapper.vm as any).done).toBe(false);
+    });
+
     it('exibe caution para CPF inválido com conteúdo', () => {
         const wrapper = mountCpfCnpj({ cpf: true, modelValue: '12345678900' });
         (wrapper.vm as any).temp_value = '12345678900';
