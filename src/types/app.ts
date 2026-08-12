@@ -112,6 +112,14 @@ export interface MaxAppConfig {
     routeMenus?: string;
     /** Rota de busca de ícones SVG. Padrão: `'https://engeapp.com.br/api/icons'`. */
     routeIcons?: string;
+    /**
+     * E-mail enviado no login quando o método não é e-mail.
+     *
+     * O backend do engeapp valida `email` como `required|email` mesmo no login
+     * por telefone e descarta este valor específico ao montar as credenciais.
+     * Padrão: `'undefined@enge.tec.br'`.
+     */
+    undefinedEmail?: string;
     /** URL base usada quando o usuário ainda não foi carregado. */
     baseUrl?: string;
     /** Versão da aplicação, exibida na interface. */

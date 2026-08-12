@@ -52,7 +52,7 @@ describe('useLoginStore', () => {
 
             expect(store.method).toBe('phone');
             expect(store.phone_number).toBe('+55 (11) 99999-8888');
-            expect(store.email).toBe('');
+            expect(store.email).toBe('undefined@enge.tec.br');
         });
 
         it('detecta nome de usuário', async () => {
@@ -123,6 +123,40 @@ describe('useLoginStore', () => {
                 phone_number: '',
                 user_name: ''
             });
+        });
+
+        // Regressão: enviar `email` vazio no login por telefone derrubava a
+        // requisição com 422 antes de o backend conferir a senha — a regra
+        // `required|email` do LoginRequest vale para qualquer método. O
+        // servidor descarta este sentinela ao montar as credenciais.
+        it('envia o sentinela de e-mail no login por telefone', async () => {
+            const store = useLoginStore();
+            store.value = '+55 (62) 9 9988-1717';
+            store.password = 'segredo';
+            await nextTick();
+
+            await store.submit();
+
+            expect(apiPostRoute).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
+                method: 'phone',
+                email: 'undefined@enge.tec.br',
+                phone_number: '+55 (62) 9 9988-1717'
+            }));
+        });
+
+        it('envia o sentinela de e-mail no login por nome de usuário', async () => {
+            const store = useLoginStore();
+            store.value = 'joao.silva';
+            store.password = 'segredo';
+            await nextTick();
+
+            await store.submit();
+
+            expect(apiPostRoute).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
+                method: 'user_name',
+                email: 'undefined@enge.tec.br',
+                user_name: 'joao.silva'
+            }));
         });
 
         it('exibe toast e mensagem de erro quando falha', async () => {

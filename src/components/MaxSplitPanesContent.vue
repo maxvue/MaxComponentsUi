@@ -1,7 +1,7 @@
 <template>
     <div ref="main_board_ref" class="board_page_content_main_div">
         <Splitpanes :style="{ height: '100%', width: '100%', overflow: 'hidden' }" @resize="onResize">
-            <Pane id="panel1" :size="system.split_panel" :style="{ backgroundColor: 'transparent' }" relative>
+            <Pane id="panel1" class="panel1" :size="system.split_panel" :style="{ backgroundColor: 'transparent' }" relative>
                 <div class="pane1">
                     <slot></slot>
                 </div>

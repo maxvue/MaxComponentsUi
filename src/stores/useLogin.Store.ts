@@ -73,8 +73,17 @@ export const useLoginStore = defineStore('login', () => {
     /** Provedores sociais habilitados no backend. */
     const providers: Ref<LoginProvider[]> = ref([]);
 
-    /** E-mail informado, ou vazio quando o método é outro. */
-    const email = computed(() => method.value === 'email' ? value.value : '');
+    /**
+     * E-mail informado.
+     *
+     * Quando o método é outro, envia o sentinela em vez de vazio: o backend
+     * valida `email` como `required|email` mesmo no login por telefone, e um
+     * vazio derruba a requisição com 422 antes de conferir a senha. O servidor
+     * reconhece o sentinela e o trata como ausente.
+     */
+    const email = computed(() => method.value === 'email'
+        ? value.value
+        : getMaxAppConfig().undefinedEmail as string);
 
     /** Telefone informado, ou vazio quando o método é outro. */
     const phone_number = computed(() => method.value === 'phone' ? value.value : '');

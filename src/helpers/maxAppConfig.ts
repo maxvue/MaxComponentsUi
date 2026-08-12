@@ -9,7 +9,8 @@ import type { MaxAppConfig } from '../types/app';
  */
 const DEFAULT_CONFIG: Required<Pick<MaxAppConfig,
     'routeUser' | 'routeUserSave' | 'routeLogin' | 'routeProviders' |
-    'routeSocialRedirect' | 'routeImpersonateStatus' | 'routeMenus' | 'routeIcons'>> = {
+    'routeSocialRedirect' | 'routeImpersonateStatus' | 'routeMenus' | 'routeIcons' |
+    'undefinedEmail'>> = {
     routeUser: 'user.data',
     routeUserSave: 'user.save',
     routeLogin: 'login',
@@ -17,7 +18,8 @@ const DEFAULT_CONFIG: Required<Pick<MaxAppConfig,
     routeSocialRedirect: 'social.redirect',
     routeImpersonateStatus: 'user.impersonate.status',
     routeMenus: 'menus',
-    routeIcons: 'https://engeapp.com.br/api/icons'
+    routeIcons: 'https://engeapp.com.br/api/icons',
+    undefinedEmail: 'undefined@enge.tec.br'
 };
 
 let config: MaxAppConfig = { ...DEFAULT_CONFIG };
