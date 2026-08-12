@@ -35,15 +35,28 @@ describe('maxAppConfig', () => {
         expect(getMaxAppConfig().routeUser).toBe('user.data');
     });
 
-    it('não acumula configurações entre chamadas', () => {
+    it('acumula configurações entre chamadas', () => {
         configureMaxApp({ routeUser: 'primeiro' });
         configureMaxApp({ routeLogin: 'segundo' });
 
         const config = getMaxAppConfig();
 
         expect(config.routeLogin).toBe('segundo');
-        // routeUser voltou ao padrão, pois a segunda chamada substitui a anterior
-        expect(config.routeUser).toBe('user.data');
+        // routeUser sobrevive: chamadas posteriores fazem merge, não reset
+        expect(config.routeUser).toBe('primeiro');
+    });
+
+    it('preserva a configuração do boot quando o MaxApp reconfigura só as rotas', () => {
+        // Cenário real: o app configura as credenciais do Google Maps no boot...
+        configureMaxApp({ googleMapsApiKey: 'chave-do-boot', googleMapsMapId: 'MAPA' });
+        // ...e o setup do MaxApp chama configureMaxApp de novo, só com props de rota.
+        configureMaxApp({ routeLogin: 'auth.login' });
+
+        const config = getMaxAppConfig();
+
+        expect(config.googleMapsApiKey).toBe('chave-do-boot');
+        expect(config.googleMapsMapId).toBe('MAPA');
+        expect(config.routeLogin).toBe('auth.login');
     });
 
     it('aceita campos extras de configuração', () => {

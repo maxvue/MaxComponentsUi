@@ -30,11 +30,16 @@ let config: MaxAppConfig = { ...DEFAULT_CONFIG };
  * Deve ser chamada no boot da aplicação, **antes** de qualquer store do shell
  * ser instanciada — as stores leem a configuração ao resolver suas rotas.
  *
+ * Chamadas subsequentes fazem merge sobre a configuração vigente — o `MaxApp`
+ * reconfigura suas props de rota no setup e não pode apagar o que o boot da
+ * aplicação já definiu (ex.: `googleMapsApiKey`). Para voltar aos padrões,
+ * use `resetMaxAppConfig()`.
+ *
  * @example
  * configureMaxApp({ routeUser: 'me', routeLogin: 'auth.login' });
  */
 export function configureMaxApp(options: MaxAppConfig = {}): void {
-    config = { ...DEFAULT_CONFIG, ...options };
+    config = { ...config, ...options };
 }
 
 /**
