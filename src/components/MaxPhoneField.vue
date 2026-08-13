@@ -1,41 +1,83 @@
 <template>
     <InputBase class="input-phone" v-bind="props" :value="temp_value" :done="done" :error="error" :caution="caution" :label="props.noLabel ? undefined : props.label ?? ('Telefone' + String(props.noLabel)) " :icon-right="props.noIcon ? undefined : 'ic:baseline-whatsapp'" >
         <div class="inputs-div">
-            <Select v-model="country" :options="country_ddi_flags" filter :filterFields="['name', 'value']">
-                <template #option="slotProps">
-                    <slot name="option" :option="slotProps.option" :selected="slotProps.selected" :index="slotProps.index">
-                        <div class="input-phone-label-div">
-                            <img :src="'https://flagcdn.com/w40/' + slotProps.option.sigla.toLowerCase() + '.png'" alt="flag" />
-                            <div class="labelz">
-                                <div pt2 elipsis >{{ slotProps.option.label }}</div>
-                            </div>
-                            <div class="subLabel">( +{{ slotProps.option?.value }} )</div>
-                        </div>
-                    </slot>
-                </template>
-                <template #value="value: any">
+            <div
+                ref="select_el"
+                class="max-phone-select"
+                role="combobox"
+                tabindex="0"
+                :aria-expanded="isOpen"
+                :aria-controls="listbox_id"
+                aria-haspopup="listbox"
+                :aria-label="'Código do país: +' + country.value"
+                @click.stop="toggle"
+                @keydown="onTriggerKeydown"
+            >
+                <div class="max-phone-select-label">
                     <div class="item-selected">
                         <div class="item-flag">
-                            <img :src="'https://flagcdn.com/w40/' + value.value.sigla.toLowerCase() + '.png'" alt="bandeira" flex />
+                            <img :src="'https://flagcdn.com/w40/' + country.sigla.toLowerCase() + '.png'" alt="bandeira" flex />
                         </div>
-                        <div style="color: var(--background-600);">+ {{ value.value.value }}</div>
+                        <div style="color: var(--background-600);">+ {{ country.value }}</div>
                     </div>
-                </template>
-            </Select>
-            <InputText type="text" slot-b v-model="phone" v-maska:unmaskedValue.unmasked="maskValue" flex :autoClear="false" slotChar=" " :placeholder="country.value === 55 ? '(99) 9 9999 - 9999' : ''" p0 fluid/>
+                </div>
+            </div>
+            <input type="text" slot-b v-model="phone" v-maska:unmaskedValue.unmasked="maskValue" flex :placeholder="country.value === 55 ? '(99) 9 9999 - 9999' : ''" p0 class="p-inputtext" @focus="onFocus = true" @blur="onFocus = false" />
         </div>
+
+        <Teleport to="body" v-if="isOpen">
+            <div class="max-phone-overlay-mask" @click.stop="close"></div>
+            <div
+                ref="overlay_el"
+                class="max-phone-select-overlay"
+                :style="{ top: position.top + 'px', left: position.left + 'px', width: position.width + 'px' }"
+                @click.stop="() => {}"
+            >
+                <div class="max-phone-select-filter">
+                    <input
+                        ref="filter_el"
+                        type="text"
+                        v-model="filter_text"
+                        class="p-inputtext"
+                        :placeholder="'Buscar país ou código'"
+                        aria-label="Buscar país ou código"
+                        @keydown="onFilterKeydown"
+                    />
+                </div>
+                <div class="max-phone-select-list" role="listbox" :id="listbox_id" ref="list_el">
+                    <div
+                        v-for="(option, index) in filtered_options"
+                        :key="option.sigla"
+                        class="max-phone-select-option"
+                        role="option"
+                        :aria-selected="option.sigla === country.sigla"
+                        :class="{ 'is-focused': index === focused_index, 'is-selected': option.sigla === country.sigla }"
+                        @click.stop="selectOption(option)"
+                        @mousemove="focused_index = index"
+                    >
+                        <slot name="option" :option="option" :selected="option.sigla === country.sigla" :index="index">
+                            <div class="input-phone-label-div">
+                                <img :src="'https://flagcdn.com/w40/' + option.sigla.toLowerCase() + '.png'" alt="flag" />
+                                <div class="labelz">
+                                    <div pt2 elipsis >{{ option.label }}</div>
+                                </div>
+                                <div class="subLabel">( +{{ option?.value }} )</div>
+                            </div>
+                        </slot>
+                    </div>
+                </div>
+            </div>
+        </Teleport>
     </InputBase>
 </template>
 
 <script setup lang="ts">
     import { watchDebounced, refAutoReset } from '@maxvue/max-use';
     import { useMagicKeys } from '@maxvue/max-use';
-    import { ref, computed, watch } from 'vue';
+    import { ref, computed, watch, nextTick, useId, onBeforeUnmount } from 'vue';
     import InputBase from './InputBase.vue';
-    import Select from 'primevue/select';
-    import InputText from 'primevue/inputtext';
     import { vMaska } from 'maska/vue';
-    import { country_ddi_flags } from '../constants/ddiFlags';
+    import { country_ddi_flags, type DDIFlag } from '../constants/ddiFlags';
 
     const props = withDefaults(
         defineProps<{
@@ -129,6 +171,125 @@
                 : '(##) #### - ####$$'
         };
     });
+
+    /*
+        Dropdown headless de países — substitui o <Select> do PrimeVue.
+        Segue o padrão de overlay já adotado no projeto (MaxPopover):
+        Teleport para o body + position fixed calculado por getBoundingClientRect,
+        sem introduzir uma biblioteca de posicionamento nova.
+    */
+    const listbox_id = useId();
+    const select_el = ref<HTMLElement | null>(null);
+    const overlay_el = ref<HTMLElement | null>(null);
+    const filter_el = ref<HTMLInputElement | null>(null);
+    const list_el = ref<HTMLElement | null>(null);
+    const isOpen = ref(false);
+    const filter_text = ref('');
+    const focused_index = ref(0);
+    const position = ref({ top: 0, left: 0, width: 0 });
+
+    // Filtro equivalente ao `:filterFields="['name', 'value']"` do PrimeVue.
+    // `value` é numérico, por isso o String() antes de comparar.
+    const filtered_options = computed(() => {
+        const term = filter_text.value.trim().toLowerCase();
+        if (!term) return country_ddi_flags;
+
+        return country_ddi_flags.filter((option) =>
+            option.name.toLowerCase().includes(term) || String(option.value).includes(term)
+        );
+    });
+
+    function updatePosition() {
+        const el = select_el.value;
+        if (!el) return;
+
+        const rect = el.getBoundingClientRect();
+        const overlay_height = overlay_el.value?.offsetHeight ?? 300;
+        const openUp = rect.bottom + overlay_height > window.innerHeight && rect.top > overlay_height;
+
+        position.value = {
+            top: openUp ? rect.top - overlay_height : rect.bottom,
+            left: rect.left,
+            width: Math.max(rect.width, 260)
+        };
+    }
+
+    function scrollFocusedIntoView() {
+        const container = list_el.value;
+        if (!container) return;
+
+        const option = container.children[focused_index.value] as HTMLElement | undefined;
+        option?.scrollIntoView({ block: 'nearest' });
+    }
+
+    async function open() {
+        if (props.disabled) return;
+
+        isOpen.value = true;
+        filter_text.value = '';
+        focused_index.value = Math.max(0, filtered_options.value.findIndex((o) => o.sigla === country.value.sigla));
+
+        await nextTick();
+        updatePosition();
+        filter_el.value?.focus();
+        scrollFocusedIntoView();
+
+        window.addEventListener('scroll', updatePosition, true);
+        window.addEventListener('resize', updatePosition);
+    }
+
+    function close() {
+        if (!isOpen.value) return;
+
+        isOpen.value = false;
+        window.removeEventListener('scroll', updatePosition, true);
+        window.removeEventListener('resize', updatePosition);
+    }
+
+    function toggle() {
+        if (isOpen.value) close();
+        else open();
+    }
+
+    function selectOption(option: DDIFlag) {
+        country.value = option;
+        close();
+        select_el.value?.focus();
+    }
+
+    function moveFocus(delta: number) {
+        const total = filtered_options.value.length;
+        if (!total) return;
+
+        focused_index.value = (focused_index.value + delta + total) % total;
+        nextTick(scrollFocusedIntoView);
+    }
+
+    function onTriggerKeydown(event: KeyboardEvent) {
+        if (['Enter', ' ', 'ArrowDown', 'ArrowUp'].includes(event.key)) {
+            event.preventDefault();
+            open();
+        }
+    }
+
+    function onFilterKeydown(event: KeyboardEvent) {
+        if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            moveFocus(1);
+        } else if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            moveFocus(-1);
+        } else if (event.key === 'Enter') {
+            event.preventDefault();
+            const option = filtered_options.value[focused_index.value];
+            if (option) selectOption(option);
+        } else if (event.key === 'Escape' || event.key === 'Tab') close();
+    }
+
+    // Se o filtro encurta a lista, o índice focado pode ficar fora do intervalo.
+    watch(filtered_options, () => { focused_index.value = 0; });
+
+    onBeforeUnmount(close);
 </script>
 
 <style lang="scss">
@@ -150,15 +311,24 @@
             border-color: var(--max-inputtext-focus-border-color);
         }
 
-        .p-select {
+        .max-phone-select {
             height: 36px;
             background-color: transparent !important;
             border: none !important;
             width: 80px;
+            cursor: pointer;
+            outline: none;
 
-            .p-select-label {
+            &:focus-visible {
+                border-radius: 4px;
+                outline: 2px solid var(--max-inputtext-focus-border-color);
+            }
+
+            .max-phone-select-label {
                 height: 36px;
                 background-color: transparent !important;
+                padding: 0 !important;
+                position: relative;
 
                 .item-selected {
                     display: grid;
@@ -205,24 +375,65 @@
         grid-column: 2 !important;
     }
 
-    .p-select-dropdown {
-        display: none;
-    }
-
-    .p-select-label {
-        padding: 0 !important;
-        position: relative;
-    }
-
     .p-inputtext {
         padding: 0 2px !important;
     }
 }
 
-.p-select-overlay {
+.max-phone-overlay-mask {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+}
+
+.max-phone-select-overlay {
+    position: fixed;
+    z-index: 1101;
     display: grid;
     grid-template-rows: auto 1fr;
     overflow: hidden;
+    max-height: 300px;
+    border: 1px solid var(--background-300);
+    border-radius: 6px;
+    background-color: var(--background-0);
+    box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+
+    .max-phone-select-filter {
+        padding: 6px;
+        border-bottom: 1px solid var(--background-300);
+
+        input {
+            width: 100%;
+            padding: 4px 6px !important;
+            border: 1px solid var(--background-300);
+            border-radius: 4px;
+            background-color: transparent;
+
+            &:focus {
+                border-color: var(--max-inputtext-focus-border-color);
+                outline: none;
+            }
+        }
+    }
+
+    .max-phone-select-list {
+        overflow-y: auto;
+    }
+
+    .max-phone-select-option {
+        display: grid !important;
+        gap: 0 !important;
+        padding: 4px 8px;
+        cursor: pointer;
+
+        &.is-focused {
+            background-color: var(--background-100);
+        }
+
+        &.is-selected {
+            background-color: var(--background-200);
+        }
+    }
 }
 
 .input-phone-label-div {
@@ -262,10 +473,5 @@
         border-radius: 5px;
         border: 1px solid rgb(0 0 0 / 20%);
     }
-}
-
-.p-select-option {
-    gap: 0 !important;
-    display: grid !important;
 }
 </style>

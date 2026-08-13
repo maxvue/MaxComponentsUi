@@ -171,7 +171,7 @@ components:
     description_migration: >-
       Depende de Select (DDI/países) e InputText. Reimplementar o Select de países (country_ddi_flags) e o <input> de telefone.
       Manter watchDebounced/refAutoReset/useMagicKeys e InputBase.
-    status: waiting
+    status: done
 
   - name: MaxInputAutoComplete
     level: alta
