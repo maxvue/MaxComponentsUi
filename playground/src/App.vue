@@ -154,34 +154,35 @@
                     <div class="component-item">
                         <h3>Accordion</h3>
                         <MaxAccordion v-model:value="painel_aberto">
-                            <MaxAccordionPanel value="a">
-                                <MaxAccordionHeader>Primeira seção</MaxAccordionHeader>
-                                <MaxAccordionContent>Conteúdo da primeira seção.</MaxAccordionContent>
-                            </MaxAccordionPanel>
-                            <MaxAccordionPanel value="b">
-                                <MaxAccordionHeader>Segunda seção</MaxAccordionHeader>
-                                <MaxAccordionContent>Conteúdo da segunda seção.</MaxAccordionContent>
-                            </MaxAccordionPanel>
-                            <MaxAccordionPanel value="c">
-                                <MaxAccordionHeader>Terceira seção</MaxAccordionHeader>
-                                <MaxAccordionContent>Conteúdo da terceira seção.</MaxAccordionContent>
-                            </MaxAccordionPanel>
+                            <MaxAccordionItem value="a">
+                                <template #header>Primeira seção</template>
+                                <template #content>Conteúdo da primeira seção.</template>
+                            </MaxAccordionItem>
+                            <MaxAccordionItem value="b">
+                                <template #header>Segunda seção</template>
+                                <template #content>Conteúdo da segunda seção.</template>
+                            </MaxAccordionItem>
+                            <MaxAccordionItem value="c">
+                                <template #header>Terceira seção</template>
+                                <template #content>Conteúdo da terceira seção.</template>
+                            </MaxAccordionItem>
                         </MaxAccordion>
 
                         <h3>Accordion múltiplo</h3>
+                        <!-- Sem `value`: os itens recebem item-1, item-2, item-3 por ordem de montagem. -->
                         <MaxAccordion v-model:value="paineis_abertos" multiple>
-                            <MaxAccordionPanel value="a">
-                                <MaxAccordionHeader>Primeira seção</MaxAccordionHeader>
-                                <MaxAccordionContent>Conteúdo da primeira seção.</MaxAccordionContent>
-                            </MaxAccordionPanel>
-                            <MaxAccordionPanel value="b">
-                                <MaxAccordionHeader>Segunda seção</MaxAccordionHeader>
-                                <MaxAccordionContent>Conteúdo da segunda seção.</MaxAccordionContent>
-                            </MaxAccordionPanel>
-                            <MaxAccordionPanel value="c">
-                                <MaxAccordionHeader>Terceira seção</MaxAccordionHeader>
-                                <MaxAccordionContent>Conteúdo da terceira seção.</MaxAccordionContent>
-                            </MaxAccordionPanel>
+                            <MaxAccordionItem>
+                                <template #header>Primeira seção</template>
+                                <template #content>Conteúdo da primeira seção.</template>
+                            </MaxAccordionItem>
+                            <MaxAccordionItem>
+                                <template #header>Segunda seção</template>
+                                <template #content>Conteúdo da segunda seção.</template>
+                            </MaxAccordionItem>
+                            <MaxAccordionItem>
+                                <template #header>Terceira seção</template>
+                                <template #content>Conteúdo da terceira seção.</template>
+                            </MaxAccordionItem>
                         </MaxAccordion>
                     </div>
 

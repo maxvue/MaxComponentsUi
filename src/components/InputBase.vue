@@ -359,7 +359,7 @@
                 font-size: 0.9rem;
                 color: rgb(66 54 54);
                 font-weight: 450;
-                padding: 0 !important;
+                padding: 0 5px;
 
             }
 

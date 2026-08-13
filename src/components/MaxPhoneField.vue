@@ -18,7 +18,7 @@
                         <div class="item-flag">
                             <img :src="'https://flagcdn.com/w40/' + country.sigla.toLowerCase() + '.png'" alt="bandeira" flex />
                         </div>
-                        <div style="color: var(--background-600);">+ {{ country.value }}</div>
+                        <div class="label-flag" style="color: var(--background-600);">+ {{ country.value }}</div>
                     </div>
                 </div>
             </div>
@@ -300,12 +300,13 @@
 
     .inputs-div {
         display: grid;
-        grid-template-columns: 83px 1fr;
+        grid-template-columns: auto 1fr;
         width: 100%;
         position: relative;
         grid-column: 1 !important;
         place-items: center;
         height: 36px !important;
+
 
         &:focus-within {
             border-color: var(--max-inputtext-focus-border-color);
@@ -315,7 +316,6 @@
             height: 36px;
             background-color: transparent !important;
             border: none !important;
-            width: 80px;
             cursor: pointer;
             outline: none;
 
@@ -334,12 +334,13 @@
                     display: grid;
                     grid-template-columns: 25px 1fr;
                     place-items: center;
-                    height: 100%;
-                    padding-left: 5px;
+                    height: 100% !important;
+                    padding: 2px 2px 2px 5px;
+                    gap: 5px;
 
                     .item-flag {
                         width: 20px;
-                        height: 14px;
+                        height: 15px !important;
                         display: grid;
                         place-items: center;
                         border-radius: 5px;
@@ -351,6 +352,10 @@
                             width: 21px;
                             aspect-ratio: 3/2;
                         }
+                    }
+
+                    .label-flag {
+                        height: 16px !important;
                     }
                 }
             }

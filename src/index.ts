@@ -51,12 +51,8 @@ export { default as TabItem } from './components/MaxTabItem.vue';
 // Accordion
 export { default as MaxAccordion } from './components/MaxAccordion.vue';
 export { default as Accordion } from './components/MaxAccordion.vue';
-export { default as MaxAccordionPanel } from './components/MaxAccordionPanel.vue';
-export { default as AccordionPanel } from './components/MaxAccordionPanel.vue';
-export { default as MaxAccordionHeader } from './components/MaxAccordionHeader.vue';
-export { default as AccordionHeader } from './components/MaxAccordionHeader.vue';
-export { default as MaxAccordionContent } from './components/MaxAccordionContent.vue';
-export { default as AccordionContent } from './components/MaxAccordionContent.vue';
+export { default as MaxAccordionItem } from './components/MaxAccordionItem.vue';
+export { default as AccordionItem } from './components/MaxAccordionItem.vue';
 
 // Drawer
 export { default as MaxDrawer } from './components/MaxDrawer.vue';

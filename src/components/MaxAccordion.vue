@@ -5,130 +5,69 @@
 </template>
 
 <script setup lang="ts">
-    import { ACCORDION_INJECTION_KEY, type AccordionContext } from '../helpers/accordionContext';
-    import { provide, toRef, ref, computed } from 'vue';
+    import { ACCORDION_INJECTION_KEY } from '../helpers/accordionContext';
+    import { provide, toRef, computed } from 'vue';
     import { Random } from '@maxvue/max-use';
 
     const props = withDefaults(defineProps<{
-        /** Painel aberto (string) ou paineis abertos (array, com multiple). */
-        value?: string | string[];
-        /** Permite manter varios paineis abertos ao mesmo tempo. */
+        /** Permite manter varios itens abertos ao mesmo tempo. */
         multiple?: boolean;
-        /** Monta o conteudo do painel apenas quando ele abre. */
+        /** Monta o conteudo do item apenas quando ele abre. */
         lazy?: boolean;
-        /** tabindex aplicado aos headers. */
-        tabindex?: number;
-        /** Abre o painel ao receber foco. */
-        selectOnFocus?: boolean;
-        /** Icone exibido quando o painel esta fechado. */
+        /** Icone exibido quando o item esta fechado. */
         expandIcon?: string;
-        /** Icone exibido quando o painel esta aberto. */
+        /** Icone exibido quando o item esta aberto. */
         collapseIcon?: string;
     }>(), {
-        value: undefined,
         multiple: false,
         lazy: false,
-        tabindex: 0,
-        selectOnFocus: false,
         expandIcon: undefined,
         collapseIcon: undefined
     });
 
-    const emit = defineEmits<{
-        'update:value': [value: string | string[] | undefined];
-        /**
-         * Payload compativel com o PrimeVue (`originalEvent`/`index`), com
-         * `value` adicional para quem ja consome nosso formato anterior.
-         */
-        'tab-open': [event: { originalEvent: MouseEvent | undefined; index: number; value: string }];
-        'tab-close': [event: { originalEvent: MouseEvent | undefined; index: number; value: string }];
-    }>();
+    /** Item aberto (string) ou itens abertos (array, com multiple). */
+    const value = defineModel<string | string[] | undefined>('value');
 
     /** Normaliza value para array, independente do modo. */
     const open_values = computed<string[]>(() => {
-        if (props.value === undefined) return [];
-        return Array.isArray(props.value) ? props.value : [props.value];
+        if (value.value === undefined) return [];
+        return Array.isArray(value.value) ? value.value : [value.value];
     });
-
-    /** Headers registrados, na ordem de montagem, para navegacao por setas. */
-    const headers = ref<{ value: string; el: HTMLElement; disabled: () => boolean }[]>([]);
 
     const id_prefix = `max-accordion-${Random()}`;
 
-    const toggle = (value: string, originalEvent?: MouseEvent) => {
+    const toggle = (item_value: string) => {
 
-        const is_open = open_values.value.includes(value);
+        const is_open = open_values.value.includes(item_value);
 
-        if (props.multiple) {
-            const next = is_open
-                ? open_values.value.filter((item) => item !== value)
-                : [...open_values.value, value];
-            emit('update:value', next);
-        }
-        else emit('update:value', is_open ? undefined : value);
-
-        /*
-         * Posicao (0-based) do painel entre os registrados, como no index do
-         * PrimeVue. findIndex retorna -1 quando o value chamado nao
-         * corresponde a nenhum header registrado (ex.: toggle() acionado
-         * programaticamente antes do MaxAccordionHeader montar, ou com um
-         * value que nunca existiu). Esse -1 e repassado como esta no
-         * payload: nao inventamos um index valido para um painel que nao
-         * existe. Quem consumir o evento deve tratar -1 como "sem
-         * correspondencia", nao como um indice real.
-         */
-        const index = headers.value.findIndex((header) => header.value === value);
-
-        if (is_open) emit('tab-close', { originalEvent, index, value });
-        else emit('tab-open', { originalEvent, index, value });
-    };
-
-    const registerHeader: AccordionContext['registerHeader'] = (value, el, disabled) => {
-        headers.value.push({ value, el, disabled });
-        return () => {
-            headers.value = headers.value.filter((header) => header.value !== value);
-        };
+        if (props.multiple) value.value = is_open
+            ? open_values.value.filter((item) => item !== item_value)
+            : [...open_values.value, item_value];
+        else value.value = is_open ? undefined : item_value;
     };
 
     /**
-     * Move o foco para outro header, pulando os desabilitados e dando a volta
-     * nas extremidades. Com selectOnFocus, abre o painel focado se ainda nao
-     * estiver aberto.
+     * Contador de itens sem `value` explicito. Cada MaxAccordionItem pede o
+     * seu na montagem, na mesma ordem em que aparece no template.
      */
-    const navigate: AccordionContext['navigate'] = (from, key) => {
+    let auto_count = 0;
 
-        const enabled = headers.value.filter((header) => ! header.disabled());
-        if (! enabled.length) return;
-
-        const current = enabled.findIndex((header) => header.value === from);
-
-        let target = 0;
-        if (key === 'first') target = 0;
-        else if (key === 'last') target = enabled.length - 1;
-        else if (key === 'next') target = current < 0 ? 0 : (current + 1) % enabled.length;
-        else target = current <= 0 ? enabled.length - 1 : current - 1;
-
-        const header = enabled[target];
-        if (! header) return;
-
-        header.el.focus();
-        if (props.selectOnFocus && ! open_values.value.includes(header.value)) toggle(header.value);
+    const nextAutoValue = () => {
+        auto_count++;
+        return `item-${auto_count}`;
     };
 
     provide(ACCORDION_INJECTION_KEY, {
         open_values,
         toggle,
         lazy: toRef(props, 'lazy'),
-        select_on_focus: toRef(props, 'selectOnFocus'),
-        tabindex: toRef(props, 'tabindex'),
         expand_icon: toRef(props, 'expandIcon'),
         collapse_icon: toRef(props, 'collapseIcon'),
         id_prefix,
-        registerHeader,
-        navigate
+        nextAutoValue
     });
 
-    defineExpose({ toggle, navigate });
+    defineExpose({ toggle });
 </script>
 
 <style lang="scss">
