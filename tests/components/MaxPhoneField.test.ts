@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxPhoneField from '../../src/components/MaxPhoneField.vue';
@@ -7,17 +7,19 @@ function mountPhoneField(props: Record<string, any> = {}, attrs: Record<string, 
     return mount(MaxPhoneField, {
         props: { modelValue: '', ...props },
         attrs,
-        global: {
-            stubs: {
-                Select: true
-            }
-        }
+        attachTo: document.body
     });
 }
 
 describe('MaxPhoneField', () => {
     beforeEach(() => {
         setActivePinia(createPinia());
+    });
+
+    // O dropdown usa Teleport para o body; sem esta limpeza o overlay de um
+    // teste vazaria para os document.querySelector do teste seguinte.
+    afterEach(() => {
+        document.body.innerHTML = '';
     });
 
     it('renderiza corretamente', () => {
@@ -99,5 +101,146 @@ describe('MaxPhoneField', () => {
 
         const mask = (wrapper.vm as any).maskValue.mask;
         expect(mask).toBe('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$');
+    });
+
+    it('não depende mais do PrimeVue (nenhum componente Select montado)', () => {
+        const wrapper = mountPhoneField();
+        expect(wrapper.findComponent({ name: 'Select' }).exists()).toBe(false);
+        expect(wrapper.find('.max-phone-select').exists()).toBe(true);
+    });
+
+    it('abre o dropdown ao clicar no seletor de país', async () => {
+        const wrapper = mountPhoneField();
+        expect(document.querySelector('.max-phone-select-overlay')).toBeNull();
+
+        await wrapper.find('.max-phone-select').trigger('click');
+        await wrapper.vm.$nextTick();
+
+        expect((wrapper.vm as any).isOpen).toBe(true);
+        expect(document.querySelector('.max-phone-select-overlay')).not.toBeNull();
+    });
+
+    it('filtra países por nome e por código DDI numérico', async () => {
+        const wrapper = mountPhoneField();
+        await wrapper.find('.max-phone-select').trigger('click');
+
+        (wrapper.vm as any).filter_text = 'Argentina';
+        await wrapper.vm.$nextTick();
+        let filtered = (wrapper.vm as any).filtered_options;
+        expect(filtered.length).toBe(1);
+        expect(filtered[0].ddi).toBe(54);
+
+        // `value` é numérico: o filtro precisa converter para string ao comparar
+        (wrapper.vm as any).filter_text = '351';
+        await wrapper.vm.$nextTick();
+        filtered = (wrapper.vm as any).filtered_options;
+        expect(filtered.length).toBeGreaterThan(0);
+        expect(filtered.every((o: any) => String(o.value).includes('351'))).toBe(true);
+    });
+
+    it('seleciona um país pelo dropdown, fecha o overlay e troca a máscara', async () => {
+        const wrapper = mountPhoneField({ modelValue: '5511999999999' });
+        await wrapper.find('.max-phone-select').trigger('click');
+
+        const argentina = (wrapper.vm as any).filtered_options.find((o: any) => o.ddi === 54);
+        (wrapper.vm as any).selectOption(argentina);
+        await wrapper.vm.$nextTick();
+
+        expect((wrapper.vm as any).country.ddi).toBe(54);
+        expect((wrapper.vm as any).isOpen).toBe(false);
+        // país !== 55 → máscara livre
+        expect((wrapper.vm as any).maskValue.mask).toBe('%');
+    });
+
+    it('navega por teclado no filtro (setas + Enter) e fecha com Escape', async () => {
+        const wrapper = mountPhoneField();
+        await wrapper.find('.max-phone-select').trigger('click');
+        await wrapper.vm.$nextTick();
+
+        (wrapper.vm as any).filter_text = 'Argentina';
+        await wrapper.vm.$nextTick();
+
+        // O overlay é teleportado para o body, fora da árvore do wrapper
+        const filterInput = document.querySelector('.max-phone-select-filter input') as HTMLInputElement;
+        expect(filterInput).not.toBeNull();
+
+        filterInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+        await wrapper.vm.$nextTick();
+        expect((wrapper.vm as any).country.ddi).toBe(54);
+        expect((wrapper.vm as any).isOpen).toBe(false);
+
+        await wrapper.find('.max-phone-select').trigger('click');
+        await wrapper.vm.$nextTick();
+
+        const reopened = document.querySelector('.max-phone-select-filter input') as HTMLInputElement;
+        reopened.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        await wrapper.vm.$nextTick();
+        expect((wrapper.vm as any).isOpen).toBe(false);
+    });
+
+    it('abre o dropdown pelo teclado no trigger (ArrowDown)', async () => {
+        const wrapper = mountPhoneField();
+        await wrapper.find('.max-phone-select').trigger('keydown', { key: 'ArrowDown' });
+        await wrapper.vm.$nextTick();
+        expect((wrapper.vm as any).isOpen).toBe(true);
+    });
+
+    it('não abre o dropdown quando disabled', async () => {
+        const wrapper = mountPhoneField({ disabled: true });
+        await wrapper.find('.max-phone-select').trigger('click');
+        await wrapper.vm.$nextTick();
+        expect((wrapper.vm as any).isOpen).toBe(false);
+    });
+
+    it('slot #option sobrescreve o markup padrão do item', async () => {
+        const wrapper = mount(MaxPhoneField, {
+            props: { modelValue: '' },
+            attachTo: document.body,
+            slots: {
+                option: '<template #option="{ option }"><span class="custom-opt">{{ option.sigla }}</span></template>'
+            }
+        });
+
+        await wrapper.find('.max-phone-select').trigger('click');
+        await wrapper.vm.$nextTick();
+
+        expect(document.querySelector('.custom-opt')).not.toBeNull();
+        expect(document.querySelector('.input-phone-label-div')).toBeNull();
+    });
+
+    it('emite update:modelValue com DDI + dígitos após o debounce de 500ms', async () => {
+        vi.useFakeTimers();
+        try {
+            const wrapper = mount(MaxPhoneField, { props: { modelValue: '' } });
+            (wrapper.vm as any).phone = '11988887777';
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.emitted('update:modelValue')).toBeFalsy();
+
+            vi.advanceTimersByTime(600);
+            await wrapper.vm.$nextTick();
+
+            const emitted = wrapper.emitted('update:modelValue');
+            expect(emitted).toBeTruthy();
+            expect(String(emitted![emitted!.length - 1][0]).replace(/\D/g, '')).toBe('5511988887777');
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('repassa label, error, caution, done e required ao InputBase', () => {
+        const wrapper = mountPhoneField({ label: 'Celular', error: 'Inválido', required: true });
+        const base = wrapper.findComponent({ name: 'InputBase' });
+        expect(base.exists()).toBe(true);
+        expect(base.props('label')).toBe('Celular');
+        expect(base.props('error')).toBe('Inválido');
+        expect(base.props('required')).toBe(true);
+    });
+
+    it('respeita noLabel e noIcon no InputBase', () => {
+        const wrapper = mountPhoneField({ noLabel: true, noIcon: true });
+        const base = wrapper.findComponent({ name: 'InputBase' });
+        expect(base.props('label')).toBeUndefined();
+        expect(base.props('iconRight')).toBeUndefined();
     });
 });
