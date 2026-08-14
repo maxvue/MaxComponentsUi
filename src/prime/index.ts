@@ -10,7 +10,9 @@ if (import.meta.env?.DEV) console.warn(
     '[max-components-ui] O entry point \'@maxvue/max-components-ui/prime\' está ' +
         'depreciado e será removido na próxima major. Os componentes expostos aqui são ' +
         'reexportações diretas do PrimeVue: passe a importá-los de \'primevue/*\' ou ' +
-        'substitua-os por componentes Max equivalentes.'
+        'substitua-os por componentes Max equivalentes. Atenção ao auto-import: se você usa ' +
+        'esses componentes no template sem import explícito, eles vão sumir silenciosamente ' +
+        '(sem erro de import) quando este entry for removido.'
 );
 
 
