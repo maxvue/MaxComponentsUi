@@ -23,8 +23,16 @@
 
     // Esquema claro — surface deriva da rampa slate
     --max-inputtext-border-color: #cbd5e1;
+
+    // NOTA: sobrescrito por src/themes/params.scss:158-159 com !important (valor `red`),
+    // já que all.scss faz @use de params antes de tokens. O valor abaixo é letra morta
+    // hoje (claro e escuro) — decidir numa fase futura se o override some ou se este
+    // token passa a refletir o valor real usado em produção.
     --max-inputtext-disabled-background: #e2e8f0;
     --max-inputtext-focus-border-color: #00768E;
+
+    // NOTA: sobrescrito por src/themes/params.scss:158-159 com !important (valor `red`),
+    // pelo mesmo motivo do --max-inputtext-disabled-background acima.
     --max-form-field-disabled-background: #e2e8f0;
     --max-floatlabel-on-active-background: #ffffff;
     --max-surface-400: #94a3b8;
@@ -41,8 +49,14 @@
 // Esquema escuro — surface deriva da rampa zinc (o Aura troca de rampa no dark)
 .dark {
     --max-inputtext-border-color: #52525b;
+
+    // NOTA: também sobrescrito por src/themes/params.scss:158-159 (!important, valor
+    // `red`, declarado em :root sem escopo de .dark) — esta variante nunca chega a
+    // aplicar. Ver nota equivalente na declaração de :root acima.
     --max-inputtext-disabled-background: #3f3f46;
     --max-inputtext-focus-border-color: #178DA5;
+
+    // NOTA: mesmo caso do --max-inputtext-disabled-background acima.
     --max-form-field-disabled-background: #3f3f46;
     --max-floatlabel-on-active-background: #09090b;
     --max-surface-400: #a1a1aa;
