@@ -121,14 +121,18 @@
         cursor: pointer;
         font-weight: 500;
         font-family: inherit;
-        background: var(--primary-500);
+
+        // Cor da marca (declarada em src/styles/style.ts, congelada em
+        // themes/tokens.scss). NÃO usar a rampa --primary-* de colors.scss:
+        // aquela é uma escala de cinza e deixa todos os botões acinzentados.
+        background: var(--max-primary-500);
         color: #fff;
-        border-color: var(--primary-500);
+        border-color: var(--max-primary-500);
         transition: background 0.2s, color 0.2s, border-color 0.2s;
 
         &:hover {
-            background: var(--primary-600);
-            border-color: var(--primary-600);
+            background: var(--max-primary-600);
+            border-color: var(--max-primary-600);
         }
 
         &:disabled {
@@ -200,21 +204,21 @@
         &.max-button-outlined, &.p-button-outlined {
             background: transparent;
             border-color: currentcolor;
-            color: var(--primary-500);
+            color: var(--max-primary-500);
             &:hover { background: color-mix(in srgb, currentcolor 10%, transparent); }
         }
 
         &.max-button-text, &.p-button-text {
             background: transparent;
             border-color: transparent;
-            color: var(--primary-500);
+            color: var(--max-primary-500);
             &:hover { background: color-mix(in srgb, currentcolor 10%, transparent); }
         }
 
         &.max-button-link, &.p-button-link {
             background: transparent;
             border-color: transparent;
-            color: var(--primary-500);
+            color: var(--max-primary-500);
             text-decoration: underline;
             padding: 0;
         }
@@ -230,7 +234,7 @@
         background: transparent !important;
         border-style: dashed !important;
         border-width: 1px;
-        color: var(--primary-500) !important;
+        color: var(--max-primary-500) !important;
 
         &:hover,
         &:active,
