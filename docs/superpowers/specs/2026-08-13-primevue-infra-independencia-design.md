@@ -275,12 +275,21 @@ A Fase 1 é inteiramente compatível e pode sair em versões minor.
 
 ## 8. Trabalho relacionado, fora deste escopo
 
-Levantado durante o brainstorming e registrado para tratamento separado:
+Levantado durante o brainstorming e **resolvido em 2026-08-14**, fora do escopo desta spec:
 
 - **`MaxTopToolbar` importa `primevue/menubar`** ([linha 34](../../../src/components/MaxTopToolbar.vue))
-  e **não consta na fila de migração** nem no YAML de status. É um item faltante da fila.
-- **Os itens #35 e #36** (`MaxButtonConfirm`, `MaxIconConfirm`) estão bloqueados no YAML por
-  dependerem de "um substituto para `v-tooltip`". Essa premissa está desatualizada:
-  [`src/directives/tooltip.ts`](../../../src/directives/tooltip.ts) já é implementação própria,
-  registrada em [`src/index.ts:202`](../../../src/index.ts). Ambos provavelmente podem ser fechados
-  por revalidação; o #35 depende apenas do `MaxButton`.
+  e não constava na fila de migração nem no YAML de status. ✅ Acrescentado como item **#37**
+  (nível `media`) em ambos. Sem essa correção, a fila declararia a migração concluída com uma
+  dependência viva — disparando cedo o gatilho da Fase 2, que remove o PrimeVue. Ainda não tem plano
+  em `migration_plans/`, e isso está anotado na fila.
+- **Os itens #35 e #36** (`MaxButtonConfirm`, `MaxIconConfirm`) constavam como bloqueados por
+  dependerem de "um substituto para `v-tooltip`". Premissa desatualizada:
+  [`src/directives/tooltip.ts`](../../../src/directives/tooltip.ts) já é implementação própria, com
+  zero imports do PrimeVue, registrada em [`src/index.ts:202`](../../../src/index.ts).
+  ✅ **#36 `MaxIconConfirm` fechado como `done` por revalidação**, sem alteração de código —
+  verificada a árvore inteira (`MaxIconConfirm` → `MaxIconButton` → `MaxIcon`, nenhum importa
+  PrimeVue). ✅ **#35 `MaxButtonConfirm` segue `waiting`**, com a justificativa corrigida: depende
+  exclusivamente do #19 `MaxButton`, que ainda importa `primevue/button`.
+
+Saldo: a fila passou de 36 para 37 itens, com 7 `done` e 30 `waiting`. As duas fontes de verdade
+(YAML e fila do executor) foram conferidas item a item e estão idênticas.
