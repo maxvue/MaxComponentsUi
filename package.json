@@ -70,7 +70,6 @@
         "maska": "^3.2.0",
         "quill": "^2.0.3",
         "sass": "^1.102.0",
-        "splitpanes": "^4.1.2",
         "tiptap-markdown": "^0.9.0",
         "vue-pdf-embed": "^2.1.5",
         "vue3-google-map": "^0.27.2"

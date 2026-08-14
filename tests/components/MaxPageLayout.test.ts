@@ -23,9 +23,8 @@ import MaxPageLayout from '../../src/components/MaxPageLayout.vue';
 import MaxContainerApp from '../../src/components/MaxContainerApp.vue';
 import MaxTopMenu from '../../src/components/MaxTopMenu.vue';
 import MaxSideMenu from '../../src/components/MaxSideMenu.vue';
-import MaxSplitPanesContent from '../../src/components/MaxSplitPanesContent.vue';
+import MaxPageContent from '../../src/components/MaxPageContent.vue';
 import MaxBottomMenu from '../../src/components/MaxBottomMenu.vue';
-import { useSystemStore } from '../../src/stores/useSystem.Store';
 
 let pinia: Pinia;
 
@@ -53,7 +52,7 @@ describe('MaxPageLayout', () => {
         expect(wrapper.findComponent(MaxContainerApp).exists()).toBe(true);
         expect(wrapper.findComponent(MaxTopMenu).exists()).toBe(true);
         expect(wrapper.findComponent(MaxSideMenu).exists()).toBe(true);
-        expect(wrapper.findComponent(MaxSplitPanesContent).exists()).toBe(true);
+        expect(wrapper.findComponent(MaxPageContent).exists()).toBe(true);
     });
 
     it('renderiza o conteúdo da página no slot padrão', () => {
@@ -98,30 +97,10 @@ describe('MaxPageLayout', () => {
         expect(wrapper.findComponent(MaxSideMenu).props('logo')).toBe('/get_file?file=logo.svg');
     });
 
-    it('repassa sideVisible ao conteúdo', () => {
-        const wrapper = mountLayout({ props: { sideVisible: true } });
-
-        expect(wrapper.findComponent(MaxSplitPanesContent).props('sideVisible')).toBe(true);
-    });
-
     it.each(['status', 'chat', 'bugs', 'notifications', 'voip', 'live'])('repassa o slot %s ao menu superior', (slot) => {
         const wrapper = mountLayout({ slots: { [slot]: `<div class="slot-${slot}">x</div>` } });
 
         expect(wrapper.find(`.slot-${slot}`).exists()).toBe(true);
-    });
-
-    it('repassa o slot side ao conteúdo', async () => {
-        // O painel lateral exige sideVisible E espaço disponível; o split_panel
-        // começa em 100, o que legitimamente o esconde.
-        useSystemStore().split_panel = 70;
-
-        const wrapper = mountLayout({
-            props: { sideVisible: true },
-            slots: { side: '<div class="slot-side">x</div>' }
-        });
-        await wrapper.vm.$nextTick();
-
-        expect(wrapper.find('.slot-side').exists()).toBe(true);
     });
 
     it('permite substituir a seção de usuário', () => {

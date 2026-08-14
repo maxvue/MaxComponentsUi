@@ -18,9 +18,6 @@ import { clearMaxCache } from '../helpers/maxCacheKeys';
  * Diferenças em relação à versão original do engeapp:
  * - Todos os símbolos são importados explicitamente (a original dependia de
  *   auto-import, que não existe nesta biblioteca).
- * - O acoplamento com `useChatSettingsStore` foi removido: a composição da
- *   chave do `split_panel` agora é extensível via {@link registerSplitPanelKeyPart},
- *   sem que a biblioteca conheça o domínio de chat do engeapp.
  * - As rotas vêm de `configureMaxApp()`.
  */
 export const useSystemStore = defineStore('system', () => {
@@ -98,46 +95,6 @@ export const useSystemStore = defineStore('system', () => {
     /** Indica que a aplicação terminou de inicializar (gate de loading do MaxPinia). */
     const started: Ref<boolean> = ref(true);
 
-    // LAYOUT
-    /**
-     * Partes extras da chave do `split_panel`, registradas pela aplicação.
-     *
-     * Substitui o acoplamento direto com a store de chat do engeapp: cada
-     * aplicação registra sua própria função, e a chave continua variando
-     * conforme o estado do painel.
-     */
-    const split_panel_key_parts = ref<Array<() => string>>([]);
-
-    /**
-     * Registra uma função que contribui com um sufixo para a chave do
-     * `split_panel`. Devolve uma função para desfazer o registro.
-     *
-     * @example
-     * registerSplitPanelKeyPart(() => chat.is_hide ? '_hidded' : '_not_hidded');
-     */
-    function registerSplitPanelKeyPart(part: () => string): () => void {
-        split_panel_key_parts.value.push(part);
-
-        return () => {
-            const index = split_panel_key_parts.value.indexOf(part);
-            if (index >= 0) split_panel_key_parts.value.splice(index, 1);
-        };
-    }
-
-    /** Chave sob a qual o tamanho do painel dividido é persistido. */
-    const split_panel_key = computed<string>(() => {
-        let key = 'split_panel';
-
-        if (page.value?.toLowerCase() === 'chat') key += '_chatpage';
-
-        split_panel_key_parts.value.forEach((part) => key += part());
-
-        return key;
-    });
-
-    /** Tamanho persistido do painel dividido (0–100). */
-    const split_panel = useRefCached<number>(split_panel_key, 100);
-
     /**
      * Limpa o cache local da biblioteca e recarrega a aplicação.
      *
@@ -192,9 +149,6 @@ export const useSystemStore = defineStore('system', () => {
         type_device,
         content_page_size,
         started,
-        split_panel,
-        split_panel_key,
-        registerSplitPanelKeyPart,
         reloadAll
     };
 });
