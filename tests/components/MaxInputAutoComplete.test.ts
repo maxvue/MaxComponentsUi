@@ -145,3 +145,102 @@ describe('MaxInputAutoComplete.vue', () => {
         expect((wrapper.vm as any).caution).toBe(true);
     });
 });
+
+// Cenários do forceSelection (issue #6): montam o AutoComplete REAL do PrimeVue,
+// pois o comportamento destrutivo vem do onChange interno dele.
+describe('MaxInputAutoComplete.vue — forceSelection (issue #6)', () => {
+    const option = { name: 'Sao Paulo', value: 'SP' };
+
+    function mountReal(props: Record<string, any> = {}) {
+        return mount(MaxInputAutoComplete, {
+            props: { modelValue: option, options: [option], ...props },
+            attachTo: document.body,
+            global: {
+                stubs: {
+                    InputBase: {
+                        template: '<div class="input-base"><slot /></div>',
+                        props: ['done', 'caution']
+                    }
+                }
+            }
+        });
+    }
+
+    beforeEach(() => {
+        setActivePinia(createPinia());
+    });
+
+    const typeAndChange = async (wrapper: any, texto: string) => {
+        const input = wrapper.find('input');
+        (input.element as HTMLInputElement).value = texto;
+        await input.trigger('input');
+        await input.trigger('change');
+        await wrapper.vm.$nextTick();
+        await wrapper.vm.$nextTick();
+        return input;
+    };
+
+    it('regressão: texto sem correspondência não deixa o campo vazio com o pai preso no valor antigo', async () => {
+        const wrapper = mountReal();
+        await wrapper.vm.$nextTick();
+
+        const input = await typeAndChange(wrapper, 'texto que nao existe');
+
+        // O valor anterior é restaurado: nem campo vazio, nem dessincronia.
+        expect((wrapper.vm as any).temp_value).toEqual(option);
+        expect((input.element as HTMLInputElement).value).toBe(option.name);
+
+        wrapper.unmount();
+    });
+
+    it('limpeza intencional emite update:modelValue null e não restaura', async () => {
+        const wrapper = mountReal();
+        await wrapper.vm.$nextTick();
+
+        await typeAndChange(wrapper, '');
+
+        expect((wrapper.vm as any).temp_value).toBeFalsy();
+        const emitidos = wrapper.emitted('update:modelValue');
+        expect(emitidos?.[emitidos.length - 1][0]).toBeNull();
+
+        wrapper.unmount();
+    });
+
+    it('escape hatch: com force-selection false o texto digitado permanece', async () => {
+        const wrapper = mountReal({ forceSelection: false });
+        await wrapper.vm.$nextTick();
+
+        const input = await typeAndChange(wrapper, 'texto livre');
+
+        expect((input.element as HTMLInputElement).value).toBe('texto livre');
+        expect((wrapper.vm as any).temp_value).toBe('texto livre');
+
+        wrapper.unmount();
+    });
+
+    it('restore-on-invalid false: emite null em vez de restaurar', async () => {
+        const wrapper = mountReal({ restoreOnInvalid: false });
+        await wrapper.vm.$nextTick();
+
+        await typeAndChange(wrapper, 'texto que nao existe');
+
+        expect((wrapper.vm as any).temp_value).toBeFalsy();
+        const emitidos = wrapper.emitted('update:modelValue');
+        expect(emitidos?.[emitidos.length - 1][0]).toBeNull();
+
+        wrapper.unmount();
+    });
+
+    it('compatibilidade: selecionar uma opção continua emitindo o objeto', async () => {
+        const wrapper = mountReal({ modelValue: '' });
+        await wrapper.vm.$nextTick();
+
+        (wrapper.vm as any).temp_value = option;
+        await wrapper.vm.$nextTick();
+
+        const emitidos = wrapper.emitted('update:modelValue');
+        expect(emitidos?.[emitidos.length - 1][0]).toEqual(option);
+
+        wrapper.unmount();
+    });
+});

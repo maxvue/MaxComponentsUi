@@ -1,6 +1,6 @@
 <template>
     <InputBase v-bind="props" class="if" :value="temp_value" :done="isDone" :error="props.error" :caution="caution">
-        <AutoComplete v-bind="props" :optionLabel="props.optionLabel" :suggestions="filtered_values" @complete="search" :forceSelection="true" :virtualScrollerOptions="{ itemSize: 40 }" v-model="temp_value" :placeholder="props.placeholder ?? 'SELECIONE'" @blur="isDone = testIsDone()" >
+        <AutoComplete ref="ac" v-bind="props" :optionLabel="props.optionLabel" :suggestions="filtered_values" @complete="search" :forceSelection="props.forceSelection" :virtualScrollerOptions="{ itemSize: 40 }" v-model="temp_value" :placeholder="props.placeholder ?? 'SELECIONE'" @blur="isDone = testIsDone()" >
             <template #option="slotProps">
                 <div class="autocomplete-item-select">
                     <div class="autocomplete-item-select-label">{{ slotProps.option[props.optionLabel ?? 'label'] ?? slotProps.option.label }}</div>
@@ -15,7 +15,7 @@
 <script setup lang="ts">
     import { hasContent, toSearchableString } from '@maxvue/max-use';
     import type { Ref } from 'vue';
-    import { ref, computed, watch } from 'vue';
+    import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue';
     import InputBase from './InputBase.vue';
     import AutoComplete from 'primevue/autocomplete';
 
@@ -39,13 +39,34 @@
             targetValue?: string;
             caution?: string | boolean | undefined;
             required?: boolean;
+            forceSelection?: boolean;
+            restoreOnInvalid?: boolean;
         }>(),
-        { modelValue: '', options: () => [], done: undefined, error: undefined, required: false, caution: undefined, optionLabel: 'name' }
+        { modelValue: '', options: () => [], done: undefined, error: undefined, required: false, caution: undefined, optionLabel: 'name', forceSelection: true, restoreOnInvalid: true }
     );
 
     const list = computed(() => props.options ?? []);
     const temp_value: Ref = ref(props.modelValue);
     const filtered_values: Ref = ref([]);
+
+    // Referência ao AutoComplete e ao <input> nativo interno: usados apenas para
+    // saber se o usuário havia digitado algo quando o forceSelection limpou o campo.
+    const ac: Ref = ref(null);
+    const input_text: Ref<string> = ref('');
+    const last_valid: Ref = ref(props.modelValue && typeof props.modelValue !== 'string' ? props.modelValue : null);
+
+    let input_el: HTMLInputElement | null = null;
+    const onNativeInput = (event: Event) => (input_text.value = (event.target as HTMLInputElement)?.value ?? '');
+
+    onMounted(() => {
+        input_el = ac.value?.$el?.querySelector?.('input') ?? null;
+        input_el?.addEventListener('input', onNativeInput);
+    });
+
+    onBeforeUnmount(() => {
+        input_el?.removeEventListener('input', onNativeInput);
+        input_el = null;
+    });
 
     const temp_value_string = computed(() => {
         if (temp_value.value && typeof temp_value.value === 'string') return temp_value.value;
@@ -67,12 +88,49 @@
 
     const emit = defineEmits(['update:modelValue']);
 
-    watch(temp_value, () => {
+    watch(temp_value, (novo: any, antigo: any) => {
         isDone.value = testIsDone();
-        if (temp_value.value && typeof temp_value.value !== 'string') emit('update:modelValue', temp_value.value);
+
+        // Seleção de uma opção (ou valor não-string vindo de fora): estado válido.
+        if (novo && typeof novo !== 'string') {
+            last_valid.value = novo;
+            input_text.value = '';
+            emit('update:modelValue', novo);
+            return;
+        }
+
+        // Digitação livre em andamento: o AutoComplete mantém a string no v-model.
+        if (novo) return;
+
+        // Daqui para baixo o valor foi zerado. Só interessa quando havia algo antes.
+        if (!antigo) return;
+
+        // O usuário havia digitado texto que não casou com nenhuma opção e o
+        // forceSelection do PrimeVue apagou o campo. Sem tratamento, a UI fica
+        // vazia e o pai preso ao valor antigo — dessincronia silenciosa.
+        if (input_text.value) {
+            if (props.restoreOnInvalid && last_valid.value) {
+                nextTick(() => {
+                    temp_value.value = last_valid.value;
+                    input_text.value = '';
+                });
+                return;
+            }
+            input_text.value = '';
+            last_valid.value = null;
+            emit('update:modelValue', null);
+            return;
+        }
+
+        // Limpeza intencional (campo esvaziado pelo usuário): nunca restaurar.
+        last_valid.value = null;
+        emit('update:modelValue', null);
     });
 
-    watch( () => props.modelValue, () => temp_value.value = props.modelValue );
+    watch(() => props.modelValue, () => {
+        temp_value.value = props.modelValue;
+        if (props.modelValue && typeof props.modelValue !== 'string') last_valid.value = props.modelValue;
+    });
 
     const search = () => {
         filtered_values.value = list.value.filter((item: any) => {
