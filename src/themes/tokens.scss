@@ -1,0 +1,58 @@
+// Tokens que até a Fase 1 eram gerados em runtime pelo serviço de tema do PrimeVue.
+// Valores resolvidos a partir do preset Aura (@primeuix/themes ^2.0.3) e congelados aqui.
+// Os NOMES ainda seguem o formato PrimeVue de propósito: a renomeação para nomenclatura
+// própria acontece no sweep único da Fase 2, junto com as classes .p-*.
+// Ver docs/superpowers/specs/2026-08-13-primevue-infra-independencia-design.md
+
+/* stylelint-disable color-hex-length */
+:root {
+    // Rampa primária — declarada em src/styles/style.ts (MaxStyle)
+    --max-primary-100: #56C2D7;
+    --max-primary-200: #46BCD4;
+    --max-primary-400: #178DA5;
+    --max-primary-500: #00768E;
+    --max-primary-600: #005F77;
+
+    // Primitivas independentes de esquema
+    --max-orange-500: #f97316;
+    --max-red-600: #dc2626;
+
+    // FloatLabel — literais do Aura
+    --max-floatlabel-active-font-weight: 400;
+    --max-floatlabel-on-border-radius: 2px;
+
+    // Esquema claro — surface deriva da rampa slate
+    --max-inputtext-border-color: #cbd5e1;
+    --max-inputtext-disabled-background: #e2e8f0;
+    --max-inputtext-focus-border-color: #00768E;
+    --max-form-field-disabled-background: #e2e8f0;
+    --max-floatlabel-on-active-background: #ffffff;
+    --max-surface-400: #94a3b8;
+    --max-button-primary-border-color: #00768E;
+    --max-button-secondary-border-color: #f1f5f9;
+    --max-button-info-border-color: #0ea5e9;
+    --max-button-success-border-color: #22c55e;
+    --max-button-warn-border-color: #f97316;
+    --max-button-help-border-color: #a855f7;
+    --max-button-danger-border-color: #ef4444;
+    --max-button-contrast-border-color: #020617;
+}
+
+// Esquema escuro — surface deriva da rampa zinc (o Aura troca de rampa no dark)
+.dark {
+    --max-inputtext-border-color: #52525b;
+    --max-inputtext-disabled-background: #3f3f46;
+    --max-inputtext-focus-border-color: #178DA5;
+    --max-form-field-disabled-background: #3f3f46;
+    --max-floatlabel-on-active-background: #09090b;
+    --max-surface-400: #a1a1aa;
+    --max-button-primary-border-color: #178DA5;
+    --max-button-secondary-border-color: #27272a;
+    --max-button-info-border-color: #38bdf8;
+    --max-button-success-border-color: #4ade80;
+    --max-button-warn-border-color: #fb923c;
+    --max-button-help-border-color: #c084fc;
+    --max-button-danger-border-color: #f87171;
+    --max-button-contrast-border-color: #ffffff;
+}
+/* stylelint-enable color-hex-length */
