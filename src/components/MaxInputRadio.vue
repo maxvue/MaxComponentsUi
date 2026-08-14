@@ -69,7 +69,6 @@
 
         .max-radio-native {
             appearance: none;
-            appearance: none;
             margin: 0;
             width: 20px;
             height: 20px;
