@@ -45,7 +45,7 @@
                     ref="overlayEl"
                     class="p-select-overlay"
                     role="listbox"
-                    :style="{ top: position.top + 'px', left: position.left + 'px', minWidth: position.minWidth }"
+                    :style="{ top: position.top + 'px', left: position.left + 'px', width: position.width }"
                     @click.stop
                 >
                     <div v-if="props.filter" class="p-select-header">
@@ -241,8 +241,14 @@
     const overlayEl = ref<HTMLElement | null>(null);
 
     const { x, y, width: width_btn, height: height_btn } = useElementBounding(triggerEl as any);
-    const { width: width_el, height: height_el } = useElementSize(overlayEl as any);
+    const { height: height_el } = useElementSize(overlayEl as any);
     const { width: window_width, height: window_height } = useWindowSize();
+
+    /** Teto de largura do overlay. Sem isto ele herda a largura do campo, que é
+     *  100% do InputBase — em campos largos o dropdown atravessava a tela. */
+    const MAX_OVERLAY_WIDTH = 420;
+    /** Margem mínima entre o overlay e a borda da viewport. */
+    const VIEWPORT_GUTTER = 10;
 
     const position = computed(() => {
         const targetX = x.value;
@@ -250,20 +256,25 @@
         const targetW = width_btn.value;
         const targetH = height_btn.value;
 
+        // O overlay acompanha a largura do campo (comportamento do PrimeVue),
+        // mas limitado ao teto e ao espaço disponível na viewport.
+        const available = Math.max(160, window_width.value - VIEWPORT_GUTTER * 2);
+        const width = Math.min(Math.max(targetW, 160), MAX_OVERLAY_WIDTH, available);
+
         let top = targetY + targetH + 2;
         let left = targetX;
-        const minW = Math.max(targetW, 160);
 
         if (top + (height_el.value || 200) > window_height.value && targetY - (height_el.value || 200) > 0) top = targetY - (height_el.value || 200) - 2;
 
-
-        if (left + (width_el.value || minW) > window_width.value) left = Math.max(10, window_width.value - (width_el.value || minW) - 10);
+        // Usa a largura calculada, não width_el: no primeiro frame o overlay
+        // ainda não foi medido (width_el === 0) e o clamp não corrigia nada.
+        if (left + width > window_width.value) left = Math.max(VIEWPORT_GUTTER, window_width.value - width - VIEWPORT_GUTTER);
 
 
         return {
             top,
             left,
-            minWidth: minW + 'px'
+            width: width + 'px'
         };
     });
 

@@ -10,7 +10,7 @@
         <MaxIcon
             v-if="showIcon && iconPos === 'left'"
             :icon="loading ? 'loading' : (props.icon ?? props.i)"
-            :size="props.size ?? props.sizeIcon ?? props.iconSize ?? '1'"
+            :size="resolvedIconSize"
             class="content-button-icon"
             :dark="props.dark"
             :light="light"
@@ -21,7 +21,7 @@
         <MaxIcon
             v-if="showIcon && iconPos === 'right'"
             :icon="loading ? 'loading' : (props.icon ?? props.i)"
-            :size="props.size ?? props.sizeIcon ?? props.iconSize ?? '1'"
+            :size="resolvedIconSize"
             class="content-button-icon"
             :dark="props.dark"
             :light="light"
@@ -62,6 +62,19 @@
     });
 
     const showIcon = computed(() => Boolean(props.loading || props.icon || props.i));
+
+    // `size` é o tamanho do BOTÃO ('small'/'large'), não do ícone. Enquanto o
+    // Button do PrimeVue existia ele consumia essa prop e ela nunca chegava ao
+    // MaxIcon; com o <button> nativo ela passou a vazar para :size e a mandar a
+    // string 'small' como tamanho do ícone. Só aceitamos `size` aqui quando for
+    // numérico (uso legado como tamanho de ícone); caso contrário cai no
+    // sizeIcon/iconSize, cujo default é 1.4.
+    const isNumericSize = (v: unknown) => v !== null && v !== undefined && v !== '' && !isNaN(Number(v));
+
+    const resolvedIconSize = computed<string | number>(() => {
+        if (isNumericSize(props.size)) return props.size as string | number;
+        return props.sizeIcon ?? props.iconSize ?? '1';
+    });
 
     const buttonClasses = computed(() => ({
         [`p-button-${props.severity}`]: Boolean(props.severity),
@@ -135,31 +148,31 @@
         }
 
         &.max-button-success, &.p-button-success {
-            background: var(--success-500, #22c55e);
-            border-color: var(--success-500, #22c55e);
+            background: var(--success-500);
+            border-color: var(--success-500);
             color: #fff;
-            &:hover { background: var(--success-600, #16a34a); border-color: var(--success-600, #16a34a); }
+            &:hover { background: var(--success-600); border-color: var(--success-600); }
         }
 
         &.max-button-info, &.p-button-info {
-            background: var(--info-500, #0ea5e9);
-            border-color: var(--info-500, #0ea5e9);
+            background: var(--info-500);
+            border-color: var(--info-500);
             color: #fff;
-            &:hover { background: var(--info-600, #0284c7); border-color: var(--info-600, #0284c7); }
+            &:hover { background: var(--info-600); border-color: var(--info-600); }
         }
 
         &.max-button-warning, &.p-button-warning, &.p-button-warn {
-            background: var(--warning-500, #f59e0b);
-            border-color: var(--warning-500, #f59e0b);
+            background: var(--warn-500);
+            border-color: var(--warn-500);
             color: #fff;
-            &:hover { background: var(--warning-600, #d97706); border-color: var(--warning-600, #d97706); }
+            &:hover { background: var(--warn-600); border-color: var(--warn-600); }
         }
 
         &.max-button-danger, &.p-button-danger {
-            background: var(--danger-500, #ef4444);
-            border-color: var(--danger-500, #ef4444);
+            background: var(--danger-500);
+            border-color: var(--danger-500);
             color: #fff;
-            &:hover { background: var(--danger-600, #dc2626); border-color: var(--danger-600, #dc2626); }
+            &:hover { background: var(--danger-600); border-color: var(--danger-600); }
         }
 
         &.max-button-whatsapp {
@@ -169,11 +182,19 @@
             &:hover { background: #1da851; border-color: #1da851; }
         }
 
-        &.max-button-contrast, &.p-button-contrast {
-            background: var(--background-900, #111827);
-            border-color: var(--background-900, #111827);
+        &.max-button-help, &.p-button-help {
+            background: var(--violet-500);
+            border-color: var(--violet-500);
             color: #fff;
-            &:hover { background: var(--background-950, #030712); border-color: var(--background-950, #030712); }
+            &:hover { background: var(--violet-600); border-color: var(--violet-600); }
+        }
+
+        // O tema não define --background-950; a rampa termina em 900.
+        &.max-button-contrast, &.p-button-contrast {
+            background: var(--background-900);
+            border-color: var(--background-900);
+            color: #fff;
+            &:hover { background: var(--background-800); border-color: var(--background-800); }
         }
 
         &.max-button-outlined, &.p-button-outlined {
@@ -222,29 +243,29 @@
         }
 
         &.p-button-success, &.max-button-success {
-            color: var(--success-500, #22c55e) !important;
+            color: var(--success-500) !important;
         }
 
         &.p-button-info, &.max-button-info {
-            color: var(--info-500, #0ea5e9) !important;
+            color: var(--info-500) !important;
         }
 
         &.p-button-warn,
         &.p-button-warning,
         &.max-button-warning {
-            color: var(--warning-500, #f59e0b) !important;
+            color: var(--warn-500) !important;
         }
 
         &.p-button-help, &.max-button-help {
-            color: var(--help-color, #a855f7) !important;
+            color: var(--violet-500) !important;
         }
 
         &.p-button-danger, &.max-button-danger {
-            color: var(--danger-500, #ef4444) !important;
+            color: var(--danger-500) !important;
         }
 
         &.p-button-contrast, &.max-button-contrast {
-            color: var(--background-900, #111827) !important;
+            color: var(--background-900) !important;
         }
 
         .content-button-icon {

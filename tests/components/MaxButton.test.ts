@@ -22,8 +22,8 @@ function mountButton(props: Record<string, any> = {}) {
                     props: ['icon', 'i']
                 },
                 MaxIcon: {
-                    template: '<div class="max-icon-stub"></div>',
-                    props: ['icon']
+                    template: '<div class="max-icon-stub" :data-size="String(size)"></div>',
+                    props: ['icon', 'size']
                 }
             }
         }
@@ -89,5 +89,28 @@ describe('MaxButton', () => {
         (wrapper.vm as any).onClick(new MouseEvent('click'));
         expect(maxUse.goToRoute).toHaveBeenCalledWith('home', { id: 1 });
         expect(wrapper.emitted('click')).toBeFalsy();
+    });
+
+    describe('tamanho do ícone', () => {
+        it('size textual dimensiona o botão, não o ícone', () => {
+            const wrapper = mountButton({ label: 'Salvar', icon: 'mdi:check', size: 'small' });
+
+            // 'small' é tamanho de BOTÃO: não pode vazar como tamanho do ícone.
+            expect(wrapper.find('.max-icon-stub').attributes('data-size')).toBe('1.4');
+            expect(wrapper.find('button').classes()).toContain('p-button-sm');
+        });
+
+        it('size numérico ainda dimensiona o ícone (uso legado)', () => {
+            const wrapper = mountButton({ label: 'Salvar', icon: 'mdi:check', size: 2 });
+            expect(wrapper.find('.max-icon-stub').attributes('data-size')).toBe('2');
+        });
+
+        it('sizeIcon e iconSize têm precedência sobre o default', () => {
+            const comSizeIcon = mountButton({ label: 'A', icon: 'mdi:check', sizeIcon: 3, size: 'large' });
+            expect(comSizeIcon.find('.max-icon-stub').attributes('data-size')).toBe('3');
+
+            const comIconSize = mountButton({ label: 'B', icon: 'mdi:check', iconSize: 2.5 });
+            expect(comIconSize.find('.max-icon-stub').attributes('data-size')).toBe('2.5');
+        });
     });
 });
