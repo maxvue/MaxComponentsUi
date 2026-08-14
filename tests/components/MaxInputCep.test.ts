@@ -102,11 +102,25 @@ describe('MaxInputCep', () => {
         // the important part is that watch is triggered
     });
 
+    // Este caso cobre o ponto de risco da migração do InputText do PrimeVue para <input> nativo:
+    // a máscara continua sendo aplicada pela vMaska sobre o elemento nativo. Note que a diretiva
+    // exercitada aqui é a REAL, não o stub `maska: {}` do tests/setup.ts — o `v-maska` usado no
+    // <script setup> do componente resolve para o `vMaska` importado localmente, que tem
+    // precedência sobre a diretiva global.
     it('aplica a máscara 00000-000 (sem ponto/espaços)', async () => {
         const wrapper = mountCep({ modelValue: '' });
         const input = wrapper.find('input');
         await input.setValue('01001000');
         await input.trigger('input');
         expect(input.element.value).toBe('01001-000');
+    });
+
+    // A classe visual é o principal risco de regressão da migração: sem ela o campo perde
+    // altura (36px), largura 100% e estilos de estado, todos definidos no InputBase.
+    it('preserva as classes visuais p-inputtext/p-component no <input> nativo', () => {
+        const wrapper = mountCep({ modelValue: '01001000' });
+        const input = wrapper.find('input');
+        expect(input.classes()).toContain('p-inputtext');
+        expect(input.classes()).toContain('p-component');
     });
 });

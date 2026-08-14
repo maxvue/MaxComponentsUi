@@ -27,7 +27,7 @@ components:
     description_migration: >-
       Substituir InputText por <input> nativo. Manter máscara de CEP (formatCep/onlyNumbers) e validação cepIsValid.
       Preservar ícone de loading à direita e InputBase como wrapper.
-    status: waiting
+    status: done
 
   - name: MaxInputCpfCnpj
     level: baixa

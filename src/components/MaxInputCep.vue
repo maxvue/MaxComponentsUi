@@ -1,6 +1,6 @@
 <template>
     <InputBase v-bind="props" class="input-base-cep-main-div" :value="temp_value" :done="done ?? undefined" :caution="caution" :error="error_msg ?? undefined" :icon-right="loading ? 'loading' : undefined">
-        <InputText type="text" v-model="temp_value" v-maska="maskValue" autoClear="false" slotChar=" " placeholder="00000-000" />
+        <input type="text" class="p-inputtext p-component" v-model="temp_value" v-maska="maskValue" placeholder="00000-000" />
     </InputBase>
 </template>
 
@@ -12,7 +12,6 @@
     import { formatCep, onlyNumbers, cepIsValid } from '@maxvue/max-use';
     import { computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
-    import InputText from 'primevue/inputtext';
     import { vMaska } from 'maska/vue';
     import { useMirroredModel } from '../helpers/useMirroredModel';
     import type { InputBaseProps } from '../types';
