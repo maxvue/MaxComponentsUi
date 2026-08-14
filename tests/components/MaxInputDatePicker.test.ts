@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxInputDatePicker from '../../src/components/MaxInputDatePicker.vue';
@@ -15,6 +15,10 @@ describe('MaxInputDatePicker', () => {
         setActivePinia(createPinia());
     });
 
+    afterEach(() => {
+        document.body.innerHTML = '';
+    });
+
     it('renderiza corretamente', () => {
         const wrapper = mountDatePicker();
         expect(wrapper.exists()).toBe(true);
@@ -23,7 +27,6 @@ describe('MaxInputDatePicker', () => {
     it('converte string YYYY-MM-DD para Date internamente', async () => {
         const wrapper = mountDatePicker({ modelValue: '2024-06-15' });
         const ib = wrapper.findComponent(InputBase);
-        // Com data válida, done deve ser true
         expect(ib.props('done')).toBe(true);
     });
 
@@ -36,7 +39,6 @@ describe('MaxInputDatePicker', () => {
     it('done=false quando data é nula e done não é definido', () => {
         const wrapper = mountDatePicker({ modelValue: '' });
         const ib = wrapper.findComponent(InputBase);
-        // Sem data, done deve ser false (internalDate é null)
         expect(ib.props('done')).toBe(false);
     });
 
@@ -46,14 +48,12 @@ describe('MaxInputDatePicker', () => {
 
         if (emitted && emitted.length > 0) {
             const value = emitted[emitted.length - 1][0] as string;
-            // Deve ter formato YYYY-MM-DD HH:mm:ss
             expect(value).toMatch(/^\d{4}-\d{2}-\d{2}/);
         }
     });
 
     it('aceita prop done para controle manual', () => {
         const wrapper = mountDatePicker({ modelValue: '' });
-        // O done é passado via attrs, que funciona como prop
         expect(wrapper.exists()).toBe(true);
     });
 
@@ -66,23 +66,25 @@ describe('MaxInputDatePicker', () => {
     it('sincroniza internalDate para modelValue e vice-versa', async () => {
         const wrapper = mountDatePicker({ modelValue: '2024-01-01' });
         await wrapper.setProps({ modelValue: '2024-02-02' });
-        // Simular o evento emitido pelo DatePicker
-        const dp = wrapper.findComponent({ name: 'DatePicker' });
-        await dp.vm.$emit('update:modelValue', new Date('2024-03-03T10:00:00'));
+
+        (wrapper.vm as any).internalDate = new Date('2024-03-03T10:00:00');
+        await wrapper.vm.$nextTick();
+
         expect(wrapper.emitted('update:modelValue')).toBeTruthy();
-        expect(wrapper.emitted('update:modelValue')![1]).toEqual(['2024-03-03 10:00:00']);
+        expect(wrapper.emitted('update:modelValue')?.pop()).toEqual(['2024-03-03 10:00:00']);
 
         // limpa o modelValue
-        await dp.vm.$emit('update:modelValue', null);
-        expect(wrapper.emitted('update:modelValue')![2]).toEqual(['']);
+        (wrapper.vm as any).internalDate = null;
+        await wrapper.vm.$nextTick();
+        expect(wrapper.emitted('update:modelValue')?.pop()).toEqual(['']);
     });
 
     it('chama validate on blur', async () => {
         const wrapper = mountDatePicker({ required: true, modelValue: '' });
-        const dp = wrapper.findComponent({ name: 'DatePicker' });
-        await dp.vm.$emit('blur');
-        // trigger blur deve marcar hasBeenTouched = true
-        // com required = true e modelValue vazio e touched = true, caution = true
+        const input = wrapper.find('input');
+        await input.trigger('blur');
+        await wrapper.vm.$nextTick();
+
         const ib = wrapper.findComponent(InputBase);
         expect(ib.props('caution')).toBe(true);
     });
@@ -96,8 +98,8 @@ describe('MaxInputDatePicker', () => {
 
     it('retorna mensagem padrao de erro quando isCaution é true', async () => {
         const wrapper = mountDatePicker({ required: true, modelValue: '' });
-        const dp = wrapper.findComponent({ name: 'DatePicker' });
-        await dp.vm.$emit('blur');
+        const input = wrapper.find('input');
+        await input.trigger('blur');
         await wrapper.vm.$nextTick();
         const ib = wrapper.findComponent(InputBase);
         expect(ib.props('error')).toBe('Data é obrigatória');
@@ -123,7 +125,6 @@ describe('MaxInputDatePicker', () => {
 
     it('cover formatted === modelValue.value', async () => {
         const wrapper = mountDatePicker({ modelValue: '2024-01-01 00:00:00' });
-        // force trigger watch internalDate without changing modelValue visually
         wrapper.vm.internalDate = new Date('2024-01-01T00:00:00');
         await wrapper.vm.$nextTick();
         expect(wrapper.props('modelValue')).toBe('2024-01-01 00:00:00');

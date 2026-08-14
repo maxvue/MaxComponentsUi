@@ -16,7 +16,7 @@
                         <div class="conjunto">
                             <div class="texto">Loading</div>
                             <div class="circle">
-                                <ProgressSpinner style="width: 50px; height: 50px;" strokeWidth="7" animationDuration=".5s" aria-label="Custom ProgressSpinner"></ProgressSpinner>
+                                <div class="max-spinner" role="status" aria-label="Custom ProgressSpinner"></div>
                             </div>
                             <div class="percent">{{ percent }}%</div>
                         </div>
@@ -50,7 +50,6 @@
     import { defineAsyncComponent, ref, watch, useTemplateRef, onBeforeUnmount } from 'vue';
     import { useFocusTrap } from '../helpers/useFocusTrap';
     import { useScrollLock } from '../helpers/useScrollLock';
-    import ProgressSpinner from 'primevue/progressspinner';
     import MaxButton from './MaxButton.vue';
 
     // Async: vue-pdf-embed pesa ~2,6 MB (814 KB gzip) — só carrega quando um PDF é exibido
@@ -187,6 +186,20 @@
                 color: rgb(255 255 255 / 50%);
             }
 
+            .circle {
+                display: grid;
+                place-items: center;
+
+                .max-spinner {
+                    width: 50px;
+                    height: 50px;
+                    border: 7px solid rgb(255 255 255 / 20%);
+                    border-top-color: rgb(255 255 255 / 90%);
+                    border-radius: 50%;
+                    animation: max-spinner-rotate 0.5s linear infinite;
+                }
+            }
+
             .percent {
                 width: 100%;
                 text-align: center;
@@ -231,5 +244,15 @@
     .v-enter-from,
     .v-leave-to {
         opacity: 0;
+    }
+
+    @keyframes max-spinner-rotate {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
     }
 </style>

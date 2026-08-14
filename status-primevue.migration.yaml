@@ -40,20 +40,20 @@ components:
     level: baixa
     description_migration: >-
       Substituir InputText por <input> nativo. Manter conversão toNumber/isBlank e validação de latitude. Preservar InputBase.
-    status: waiting
+    status: done
 
   - name: MaxInputCoordinateDecimalLng
     level: baixa
     description_migration: >-
       Substituir InputText por <input> nativo. Manter conversão toNumber/isBlank e validação de longitude. Preservar InputBase.
-    status: waiting
+    status: done
 
   - name: MaxInputPhoneMail
     level: baixa
     description_migration: >-
       Substituir InputText por <input> nativo. Manter lógica de detecção telefone/email (onlyNumbers/onlyLetters)
       e ícone dinâmico. Preservar InputBase.
-    status: waiting
+    status: done
 
   - name: MaxInputSearch
     level: baixa
@@ -78,20 +78,20 @@ components:
     description_migration: >-
       Depende de InputText e ColorPicker do PrimeVue. Substituir InputText por <input> e reimplementar o
       seletor de cor (usar <input type="color"> nativo ou um picker headless leve). Manter toSearchableString/hasContent e InputBase.
-    status: waiting
+    status: done
 
   - name: MaxInputCheckbox
     level: baixa
     description_migration: >-
       Substituir Checkbox do PrimeVue por <input type="checkbox"> estilizado via CSS. Manter geração de id (Random) e v-model.
-    status: waiting
+    status: done
 
   - name: MaxInputRadio
     level: baixa
     description_migration: >-
       RadioButton é usado no template via registro global do PrimeVue. Substituir por <input type="radio"> estilizado.
       Manter inputId/name/value e v-model.
-    status: waiting
+    status: done
 
   - name: MaxInputSwitch
     level: baixa
@@ -103,68 +103,68 @@ components:
     level: baixa
     description_migration: >-
       Substituir ToggleSwitch do PrimeVue por toggle em CSS puro. Não usa InputBase. Manter v-model.
-    status: waiting
+    status: done
 
   - name: MaxInputNumber
     level: media
     description_migration: >-
       Substituir InputNumber do PrimeVue. Reimplementar formatação numérica/locale (pt-BR), separadores de
       milhar/decimal e, se houver, botões de incremento/decremento. Manter toSearchableString/hasContent e InputBase.
-    status: waiting
+    status: done
 
   - name: MaxInputFileUpload
     level: media
     description_migration: >-
       Depende de FileUpload e ProgressSpinner do PrimeVue. Reimplementar seleção de arquivos com <input type="file">
       e área de drag & drop (useDropZone/useFileDialog do max-use). ProgressSpinner vira um spinner CSS.
-    status: waiting
+    status: done
 
   - name: MaxBadgeComponent
     level: baixa
     description_migration: >-
       Substituir Badge e OverlayBadge do PrimeVue por <span> estilizado (badge simples e badge sobreposto via CSS
       absolute). Manter getColorFromVar.
-    status: waiting
+    status: done
 
   - name: MaxUserAvatar
     level: baixa
     description_migration: >-
       Substituir Avatar do PrimeVue por <div>/<img> estilizado (imagem, iniciais ou ícone). Manter integração com useConfirmStore.
-    status: waiting
+    status: done
 
   - name: MaxButton
     level: baixa
     description_migration: >-
       Substituir Button do PrimeVue por <button> nativo estilizado. Manter tipos MaxButtonsType, navegação goToRoute
       e mapear ButtonProps próprios (severity/size/outlined/loading/icon).
-    status: waiting
+    status: done
 
   - name: MaxPdfView
     level: baixa
     description_migration: >-
       Único uso PrimeVue é ProgressSpinner — substituir por spinner CSS. Manter renderização de PDF e useWindowSize.
-    status: waiting
+    status: done
 
   - name: MaxPopoverMenu
     level: media
     description_migration: >-
       Substituir Menu do PrimeVue. Reimplementar lista de itens/submenus com navegação por teclado e posicionamento.
       Manter goToRoute, useDefaultReset e getCssSize.
-    status: waiting
+    status: done
 
   - name: MaxInputSelect
     level: alta
     description_migration: >-
       Substituir Select do PrimeVue. Reimplementar dropdown com busca/filtro, navegação por teclado, opções agrupadas
       (SelectGroupOptions) e optionLabel/optionValue. Considerar biblioteca headless. Manter InputBase, isBlank/watchDebounced.
-    status: waiting
+    status: done
 
   - name: MaxTagSelect
     level: alta
     description_migration: >-
       Depende de Select do PrimeVue. Mesma reimplementação de dropdown do MaxInputSelect, mas com renderização de tags
       coloridas (getColorFromVar/contrastColor) e seleção múltipla. Manter InputBase.
-    status: waiting
+    status: done
 
   - name: MaxPhoneField
     level: alta
@@ -178,14 +178,14 @@ components:
     description_migration: >-
       Substituir AutoComplete do PrimeVue. Reimplementar campo com sugestões/dropdown, filtro e navegação por teclado.
       Manter hasContent/toSearchableString e InputBase.
-    status: waiting
+    status: done
 
   - name: MaxInputAutoCompleteApi
     level: alta
     description_migration: >-
       Depende de AutoComplete do PrimeVue com busca assíncrona via API + cache IDB (getCachedApiIDB/keyExists).
       Reimplementar autocomplete com debounce e estados de loading. Manter InputBase.
-    status: waiting
+    status: done
 
   - name: MaxInputIconPicker
     level: alta
@@ -193,14 +193,14 @@ components:
       Depende de InputText, Drawer e VirtualScroller do PrimeVue. Reimplementar o Drawer (painel lateral) e a lista
       virtualizada de ícones (usar @tanstack/vue-virtual ou equivalente). Manter endpoints /api/icons/picker, SVG sob
       demanda e InputBase.
-    status: waiting
+    status: done
 
   - name: MaxInputDatePicker
     level: muito_alta
     description_migration: >-
       Substituir DatePicker do PrimeVue — widget de calendário completo (navegação mês/ano, range, hora, locale pt-BR).
       Fortemente recomendado usar biblioteca de calendário headless em vez de reimplementar do zero. Manter useDateFormat e InputBase.
-    status: waiting
+    status: done
 
   - name: MaxTable
     level: muito_alta
@@ -208,27 +208,27 @@ components:
       Substituir DataTable e Column do PrimeVue — o maior bloqueador. Reimplementar ordenação, paginação, seleção,
       scroll e slots de coluna. Recomendado adotar TanStack Table (headless) e construir a camada visual por cima.
       Manter useElementSize. Migrar em conjunto com MaxTableColumn e MaxTableFields.
-    status: waiting
+    status: done
 
   - name: MaxTableColumn
     level: muito_alta
     description_migration: >-
       Wrapper de Column do PrimeVue, fortemente acoplado ao DataTable. Deve ser migrado junto com MaxTable, adaptando-se
       ao novo motor de tabela (ex.: definição de colunas do TanStack Table).
-    status: waiting
+    status: done
 
   - name: MaxTableFields
     level: media
     description_migration: >-
       Não usa PrimeVue diretamente, mas depende de MaxTableColumn/MaxTable. Adaptar geração dinâmica de colunas
       (MaxTableColumn) ao novo motor de tabela após a migração do MaxTable. Manter ulid/size/refAutoReset e getCssSize.
-    status: waiting
+    status: done
 
   - name: MaxInputTypeAddress
     level: baixa
     description_migration: >-
       Não usa PrimeVue diretamente — apenas MaxInputSelect. Herda a migração do Select; nenhuma mudança específica além disso.
-    status: waiting
+    status: done
 
   - name: MaxUserSection
     level: media
@@ -237,7 +237,7 @@ components:
       para o menu dropdown do usuário. Reimplementar com overlay próprio (recomendado: Floating UI para
       posicionamento) preservando o método toggle(event), a navegação por teclado, o fechamento ao clicar fora/Escape
       e o slot #item com os mesmos campos de item (label/icon/exec). Manter MaxUserAvatar e MaxIcon intactos.
-    status: waiting
+    status: done
 
   - name: MaxButtonConfirm
     level: baixa
@@ -246,7 +246,7 @@ components:
       dependência — src/directives/tooltip.ts é implementação própria (zero imports do PrimeVue), registrada em
       src/index.ts. Portanto este componente é resolvido automaticamente quando MaxButton estiver done; basta
       revalidar depois disso, sem alteração direta aqui.
-    status: waiting
+    status: done
 
   - name: MaxIconConfirm
     level: baixa
@@ -267,4 +267,4 @@ components:
       árvore DOM do Menubar via classes .p-menubar-item, .p-menubar-item-content, .p-menubar-item-active e
       .p-menubar-submenu — essas regras precisam ser reescritas junto com o markup. Usa também v-tooltip, que já é
       diretiva própria e não é bloqueio.
-    status: waiting
+    status: done

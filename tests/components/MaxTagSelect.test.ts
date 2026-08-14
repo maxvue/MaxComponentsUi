@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import { watch } from 'vue';
@@ -20,12 +20,7 @@ function mountTagSelect(props: Record<string, any> = {}, attrs: Record<string, a
         global: {
             stubs: {
                 MaxIcon: true,
-                MaxIconButton: { template: '<button class="max-icon-button-stub"></button>', props: ['icon', 'i', 'size'] },
-                Select: {
-                    name: 'Select',
-                    template: '<div class="p-select" @click="$emit(\'update:modelValue\', options[0]?.[optionValue])"><slot name="value" /><slot name="option" :option="options[0] ?? {}" :selected="false" :index="0" /></div>',
-                    props: ['modelValue', 'options', 'optionLabel', 'optionValue', 'filter', 'loading', 'emptyMessage', 'editable', 'disabled']
-                }
+                MaxIconButton: { template: '<button class="max-icon-button-stub"></button>', props: ['icon', 'i', 'size'] }
             }
         }
     });
@@ -34,6 +29,10 @@ function mountTagSelect(props: Record<string, any> = {}, attrs: Record<string, a
 describe('MaxTagSelect', () => {
     beforeEach(() => {
         setActivePinia(createPinia());
+    });
+
+    afterEach(() => {
+        document.body.innerHTML = '';
     });
 
     it('renderiza corretamente', () => {
@@ -46,6 +45,12 @@ describe('MaxTagSelect', () => {
         const wrapper = mountTagSelect({ options });
 
         await wrapper.find('.p-select').trigger('click');
+        await wrapper.vm.$nextTick();
+
+        const optionEl = document.body.querySelector('.p-select-option') as HTMLElement;
+        expect(optionEl).toBeTruthy();
+        optionEl.click();
+        await wrapper.vm.$nextTick();
 
         expect(wrapper.emitted('update:modelValue')).toBeTruthy();
         expect(wrapper.emitted('update:modelValue')?.pop()).toEqual(['a']);

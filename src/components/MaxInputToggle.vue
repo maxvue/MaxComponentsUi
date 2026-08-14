@@ -11,7 +11,15 @@
                     {{ falseLabel ?? '' }}
                 </div>
                 <div class="input-toggle-field-input">
-                    <ToggleSwitch v-model="modelvalue" :trueValue="trueValue" :falseValue="falseValue" @change="update_value" />
+                    <label class="max-toggleswitch">
+                        <input
+                            type="checkbox"
+                            class="max-toggleswitch-input"
+                            :checked="modelvalue === trueValue"
+                            @change="on_toggle(($event.target as HTMLInputElement).checked)"
+                        />
+                        <span class="max-toggleswitch-slider"></span>
+                    </label>
                 </div>
                 <div :class="`input-toggle-field-label ${trueValue === modelvalue ? 'active' : ''}`" v-if="trueLabel">
                     {{ trueLabel ?? '' }}
@@ -23,7 +31,6 @@
 
 <script setup lang="ts">
     import { ref, computed, watch, useAttrs } from 'vue';
-    import ToggleSwitch from 'primevue/toggleswitch';
 
     const attrs: any = useAttrs();
 
@@ -77,6 +84,11 @@
 
     const update_value = () => {
         emit('update:modelValue', modelvalue.value);
+    };
+
+    const on_toggle = (checked: boolean) => {
+        modelvalue.value = checked ? trueValue.value : falseValue.value;
+        update_value();
     };
 </script>
 
@@ -156,6 +168,8 @@
                 .input-toggle-field-input {
                     padding: 0 10px;
                     height: 17px;
+                    display: grid;
+                    place-items: center;
                 }
 
                 .input-toggle-field-label {
@@ -168,20 +182,54 @@
                 }
             }
 
-            .p-toggleswitch {
-                max-height: 18px;
-            }
+            .max-toggleswitch {
+                position: relative;
+                display: inline-block;
+                width: 34px;
+                height: 18px;
+                cursor: pointer;
 
-            .p-toggleswitch-handle {
-                top: 11px;
-                width: 12px;
-                height: 12px;
-                left: 4px;
-            }
+                .max-toggleswitch-input {
+                    position: absolute;
+                    opacity: 0;
+                    width: 100%;
+                    height: 100%;
+                    margin: 0;
+                    cursor: pointer;
+                    z-index: 1;
+                }
 
-            .p-toggleswitch-checked {
-                .p-toggleswitch-handle {
-                    left: calc(100% - 16px);
+                .max-toggleswitch-slider {
+                    position: absolute;
+                    inset: 0;
+                    border-radius: 999px;
+                    background-color: var(--background-300);
+                    transition: background-color 0.2s ease;
+
+                    &::before {
+                        content: '';
+                        position: absolute;
+                        width: 12px;
+                        height: 12px;
+                        top: 3px;
+                        left: 4px;
+                        border-radius: 50%;
+                        background-color: var(--background-0);
+                        transition: left 0.2s ease;
+                    }
+                }
+
+                .max-toggleswitch-input:checked + .max-toggleswitch-slider {
+                    background-color: var(--blue-600);
+
+                    &::before {
+                        left: calc(100% - 16px);
+                    }
+                }
+
+                .max-toggleswitch-input:focus-visible + .max-toggleswitch-slider {
+                    outline: 2px solid var(--blue-600);
+                    outline-offset: 1px;
                 }
             }
         }

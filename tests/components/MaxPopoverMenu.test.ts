@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import MaxPopoverMenu from '../../src/components/MaxPopoverMenu.vue';
 
@@ -12,14 +12,18 @@ vi.mock('@maxvue/max-use', async (importOriginal) => {
 });
 
 describe('MaxPopoverMenu', () => {
-    it('renderiza corretamente', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    afterEach(() => {
+        document.body.innerHTML = '';
+    });
+
+    it('renderiza corretamente', async () => {
         const wrapper = mount(MaxPopoverMenu, {
             global: {
                 stubs: {
-                    Menu: {
-                        template: '<div><slot name="item" :item="model[0]"></slot></div>',
-                        props: ['model', 'popup']
-                    },
                     MaxButton: {
                         template: '<button class="max-button"></button>',
                         props: ['size']
@@ -38,26 +42,25 @@ describe('MaxPopoverMenu', () => {
         });
 
         expect(wrapper.exists()).toBe(true);
-        expect(wrapper.find('.max-popover-menu-label').text()).toBe('Item 1');
+        const vm = wrapper.vm as any;
+        vm.toggle();
+        await wrapper.vm.$nextTick();
+
+        expect(document.body.querySelector('.max-popover-menu-label')?.textContent).toBe('Item 1');
     });
 
     it('expõe e chama método toggle', () => {
-        const mockToggle = vi.fn();
         const wrapper = mount(MaxPopoverMenu, {
             global: {
                 stubs: {
-                    Menu: {
-                        template: '<div></div>',
-                        methods: { toggle: mockToggle }
-                    },
                     MaxButton: true
                 }
             }
         });
 
         const vm = wrapper.vm as any;
+        expect(typeof vm.toggle).toBe('function');
         vm.toggle(new MouseEvent('click'));
-        expect(mockToggle).toHaveBeenCalled();
     });
 
     it('onClick chama goToRoute se o item tiver route', async () => {
@@ -65,7 +68,6 @@ describe('MaxPopoverMenu', () => {
         const wrapper = mount(MaxPopoverMenu, {
             global: {
                 stubs: {
-                    Menu: true,
                     MaxButton: true
                 }
             }
@@ -81,7 +83,6 @@ describe('MaxPopoverMenu', () => {
         const wrapper = mount(MaxPopoverMenu, {
             global: {
                 stubs: {
-                    Menu: true,
                     MaxButton: true
                 }
             }
@@ -91,7 +92,6 @@ describe('MaxPopoverMenu', () => {
         const vm = wrapper.vm as any;
         vm.onClick(new MouseEvent('click'), { action: actionMock, data: { id: 2 } });
 
-        // Pula o debounce/executing já que a chamada é nova
         expect(actionMock).toHaveBeenCalled();
     });
 
@@ -99,7 +99,6 @@ describe('MaxPopoverMenu', () => {
         const wrapper = mount(MaxPopoverMenu, {
             global: {
                 stubs: {
-                    Menu: true,
                     MaxButton: true
                 }
             }
@@ -122,10 +121,6 @@ describe('MaxPopoverMenu', () => {
         const wrapper = mount(MaxPopoverMenu, {
             global: {
                 stubs: {
-                    Menu: {
-                        template: '<div><slot name="item" :item="model[0]"></slot></div>',
-                        props: ['model', 'popup']
-                    },
                     MaxButton: true,
                     MaxIcon: true
                 }
@@ -137,8 +132,13 @@ describe('MaxPopoverMenu', () => {
             }
         });
 
-        const item = wrapper.find('.max-popover-menu-item');
-        await item.trigger('click');
+        const vm = wrapper.vm as any;
+        vm.toggle();
+        await wrapper.vm.$nextTick();
+
+        const item = document.body.querySelector('.max-popover-menu-item') as HTMLElement;
+        expect(item).toBeTruthy();
+        item.click();
         expect(actionMock).toHaveBeenCalledWith(expect.objectContaining({ data: { foo: 'bar' } }));
     });
 
@@ -147,10 +147,6 @@ describe('MaxPopoverMenu', () => {
         const wrapper = mount(MaxPopoverMenu, {
             global: {
                 stubs: {
-                    Menu: {
-                        template: '<div><slot name="item" :item="model[0]"></slot></div>',
-                        props: ['model', 'popup']
-                    },
                     MaxButton: true,
                     MaxIcon: true
                 }
@@ -162,8 +158,13 @@ describe('MaxPopoverMenu', () => {
             }
         });
 
-        const item = wrapper.find('.max-popover-menu-item');
-        await item.trigger('click');
+        const vm = wrapper.vm as any;
+        vm.toggle();
+        await wrapper.vm.$nextTick();
+
+        const item = document.body.querySelector('.max-popover-menu-item') as HTMLElement;
+        expect(item).toBeTruthy();
+        item.click();
         expect(goToRoute).toHaveBeenCalledWith('some.route', { biz: 'baz' });
     });
 });

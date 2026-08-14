@@ -7,7 +7,7 @@ describe('MaxInputFileUpload', () => {
         const wrapper = mount(MaxInputFileUpload, {
             props: { label: 'Fazer Upload', modelValue: [] },
             global: {
-                stubs: { FileUpload: true, Icon: true, ProgressSpinner: true },
+                stubs: { Icon: true },
                 directives: { tooltip: () => {} }
             }
         });
@@ -18,7 +18,7 @@ describe('MaxInputFileUpload', () => {
         const wrapper = mount(MaxInputFileUpload, {
             props: { modelValue: [] },
             global: {
-                stubs: { FileUpload: true, Icon: true, ProgressSpinner: true },
+                stubs: { Icon: true },
                 directives: { tooltip: () => {} }
             }
         });
@@ -31,7 +31,7 @@ describe('MaxInputFileUpload', () => {
         const wrapper = mount(MaxInputFileUpload, {
             props: { modelValue: [], responseField: 'file' },
             global: {
-                stubs: { FileUpload: true, Icon: true, ProgressSpinner: true },
+                stubs: { Icon: true },
                 directives: { tooltip: () => {} }
             }
         });
@@ -47,19 +47,7 @@ describe('MaxInputFileUpload', () => {
         const wrapper = mount(MaxInputFileUpload, {
             props: { modelValue: [] },
             global: {
-                stubs: {
-                    FileUpload: {
-                        template: `<div>
-                            <slot name="content" :files="[{name: 'file1', size: 100}]" />
-                            <slot name="empty" />
-                            <slot name="chooseicon" />
-                            <slot name="uploadicon" />
-                            <slot name="cancelicon" />
-                        </div>`
-                    },
-                    Icon: true,
-                    ProgressSpinner: true
-                },
+                stubs: { Icon: true },
                 directives: { tooltip: () => {} }
             }
         });
@@ -80,9 +68,7 @@ describe('MaxInputFileUpload', () => {
         expect(mockRequest.formData.append).toHaveBeenCalledWith('extension', 'pdf');
 
         // triggerChoose
-        const fileUploadStub = wrapper.findComponent({ name: 'FileUpload' });
-        if (fileUploadStub) wrapper.vm.triggerChoose();
-
+        wrapper.vm.triggerChoose();
     });
 
     it('custom events are called', async () => {
@@ -97,7 +83,7 @@ describe('MaxInputFileUpload', () => {
                 onUpload: onUploadMock,
                 onError: onErrorMock
             },
-            global: { stubs: { FileUpload: true, Icon: true, ProgressSpinner: true }, directives: { tooltip: () => {} } }
+            global: { stubs: { Icon: true }, directives: { tooltip: () => {} } }
         });
 
         wrapper.vm.onSelectHandler({});
@@ -106,6 +92,8 @@ describe('MaxInputFileUpload', () => {
         wrapper.vm.onUploadHandler({});
         expect(onUploadMock).toHaveBeenCalled();
 
+        wrapper.vm.onError({});
+        expect(onErrorMock).toHaveBeenCalled();
     });
 
     it('covers showError true branches and timeout', async () => {
@@ -113,25 +101,14 @@ describe('MaxInputFileUpload', () => {
         const wrapper = mount(MaxInputFileUpload, {
             props: { modelValue: [] },
             global: {
-                stubs: {
-                    FileUpload: {
-                        template: `<div>
-                            <slot name="content" :files="[{name: 'file1', size: 100}]" />
-                            <slot name="empty" />
-                        </div>`
-                    },
-                    Icon: true,
-                    ProgressSpinner: true
-                },
+                stubs: { Icon: true },
                 directives: { tooltip: () => {} }
             }
         });
 
-        // Set variables to ensure both #content and #empty evaluate the error slots
         wrapper.vm.showError = true;
         wrapper.vm.uploading = false;
 
-        // This will cover the fallback content of <slot name="error"> on lines 34 and 44
         await wrapper.vm.$nextTick();
 
         // Run the timer to cover the setTimeout inside watch(showError)

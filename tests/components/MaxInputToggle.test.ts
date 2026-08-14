@@ -5,8 +5,7 @@ import MaxInputToggle from '../../src/components/MaxInputToggle.vue';
 describe('MaxInputToggle', () => {
     it('deve montar o componente corretamente', () => {
         const wrapper = mount(MaxInputToggle, {
-            props: { modelValue: false },
-            global: { stubs: { ToggleSwitch: true } }
+            props: { modelValue: false }
         });
         expect(wrapper.exists()).toBe(true);
     });
@@ -14,8 +13,7 @@ describe('MaxInputToggle', () => {
     it('renderiza o label se fornecido via attrs', () => {
         const wrapper = mount(MaxInputToggle, {
             props: { modelValue: false },
-            attrs: { label: 'Toggle Label', labelCenter: true },
-            global: { stubs: { ToggleSwitch: true } }
+            attrs: { label: 'Toggle Label', labelCenter: true }
         });
         expect(wrapper.find('.input-toggle-field-label-div').text()).toBe('Toggle Label');
         expect(wrapper.find('.input-toggle-field-label-main-div').classes()).toContain('label-center');
@@ -23,8 +21,7 @@ describe('MaxInputToggle', () => {
 
     it('renderiza trueLabel e falseLabel e aplica active class', () => {
         const wrapper = mount(MaxInputToggle, {
-            props: { modelValue: false, trueLabel: 'Ativado', falseLabel: 'Desativado' },
-            global: { stubs: { ToggleSwitch: true } }
+            props: { modelValue: false, trueLabel: 'Ativado', falseLabel: 'Desativado' }
         });
         const labels = wrapper.findAll('.input-toggle-field-label');
         expect(labels.length).toBe(2);
@@ -35,18 +32,17 @@ describe('MaxInputToggle', () => {
 
     it('sincroniza prop modelValue com modelvalue (ref interno) e emite update', async () => {
         const wrapper = mount(MaxInputToggle, {
-            props: { modelValue: false },
-            global: { stubs: { ToggleSwitch: true } }
+            props: { modelValue: false }
         });
 
-        // Simula mudança de ToggleSwitch
-        const toggle = wrapper.findComponent({ name: 'ToggleSwitch' });
-        await toggle.vm.$emit('update:modelValue', true);
+        // Simula mudança no checkbox
+        const input = wrapper.find<HTMLInputElement>('input[type="checkbox"]');
+        await input.setValue(true);
 
         expect(wrapper.emitted('update:modelValue')).toBeTruthy();
         expect(wrapper.emitted('update:modelValue')?.[0][0]).toBe(true);
 
-        // Altera via prop (agora que o prop estava false, vamos definir para 'test')
+        // Altera via prop
         await wrapper.setProps({ modelValue: 'test' });
         expect((wrapper.vm as any).modelvalue).toBe('test');
     });
@@ -54,8 +50,7 @@ describe('MaxInputToggle', () => {
     it('resolve trueLabel / falseLabel de attrs (fallback)', () => {
         const wrapper = mount(MaxInputToggle, {
             props: { modelValue: true },
-            attrs: { 'true-label': 'Sim', 'false-label': 'Nao' },
-            global: { stubs: { ToggleSwitch: true } }
+            attrs: { 'true-label': 'Sim', 'false-label': 'Nao' }
         });
         const labels = wrapper.findAll('.input-toggle-field-label');
         expect(labels[0].text()).toBe('Nao');
@@ -65,24 +60,24 @@ describe('MaxInputToggle', () => {
 
     it('emite update no change manual', async () => {
         const wrapper = mount(MaxInputToggle, {
-            props: { modelValue: false },
-            global: { stubs: { ToggleSwitch: true } }
+            props: { modelValue: false }
         });
         (wrapper.vm as any).update_value();
         expect(wrapper.emitted('update:modelValue')).toBeTruthy();
     });
 
-    it('respeita trueValue/falseValue customizados e passa para ToggleSwitch e destaca label active', async () => {
+    it('respeita trueValue/falseValue customizados e destaca label active', async () => {
         const wrapper = mount(MaxInputToggle, {
-            props: { modelValue: 'S', trueValue: 'S', falseValue: 'N', trueLabel: 'Sim', falseLabel: 'Não' },
-            global: { stubs: { ToggleSwitch: { name: 'ToggleSwitch', template: '<div><slot /></div>', props: ['trueValue', 'falseValue', 'modelValue'] } } }
+            props: { modelValue: 'S', trueValue: 'S', falseValue: 'N', trueLabel: 'Sim', falseLabel: 'Não' }
         });
 
-        const toggle = wrapper.findComponent({ name: 'ToggleSwitch' });
-        expect(toggle.props('trueValue')).toBe('S');
-        expect(toggle.props('falseValue')).toBe('N');
+        const input = wrapper.find<HTMLInputElement>('input[type="checkbox"]');
+        expect(input.element.checked).toBe(true);
 
         const labels = wrapper.findAll('.input-toggle-field-label');
         expect(labels[1].classes()).toContain('active'); // Sim ativado para modelValue === 'S'
+
+        await input.setValue(false);
+        expect(wrapper.emitted('update:modelValue')?.[0][0]).toBe('N');
     });
 });

@@ -60,51 +60,19 @@ describe('MaxInputRadio', () => {
             props: { modelValue: null, value: 'opcao1' },
             attrs: { icon: 'mdi:check' },
             global: {
-                stubs: { RadioButton: { template: '<input type="radio" />' }, Icon: { template: '<div class="icon"></div>' } }
+                stubs: { MaxIcon: { template: '<div class="icon"></div>' } }
             }
         });
         expect(wrapper.find('.icon').exists()).toBe(true);
     });
 
-    it('onClick dispara o click() do input dentro de RadioButton', async () => {
+    it('onClick seleciona o radio e atualiza modelValue', async () => {
         const wrapper = mount(MaxInputRadio, {
-            props: { modelValue: null, value: 'opcao1' },
-            global: {
-                stubs: { RadioButton: { template: '<div class="radio-stub"><input type="radio" /></div>' }, Icon: true }
-            }
+            props: { modelValue: null, value: 'opcao1' }
         });
 
-        const inputElement = wrapper.find('.radio-stub input').element as HTMLInputElement;
-        const spy = vi.spyOn(inputElement, 'click');
-
         await wrapper.find('.radio-button-input-main-div').trigger('click');
-        expect(spy).toHaveBeenCalled();
-    });
-
-    it('onClick não dá erro se RadioButton não tiver input', async () => {
-        const wrapper = mount(MaxInputRadio, {
-            props: { modelValue: null, value: 'opcao1' },
-            global: {
-                stubs: { RadioButton: { template: '<div class="radio-stub"></div>' }, Icon: true }
-            }
-        });
-
-        // Deve executar sem falhar
-        await wrapper.find('.radio-button-input-main-div').trigger('click');
-        expect(wrapper.exists()).toBe(true);
-    });
-
-    it('onClick não dá erro se button.value não existir', async () => {
-        const wrapper = mount(MaxInputRadio, {
-            props: { modelValue: null, value: 'opcao1' },
-            global: {
-                stubs: { RadioButton: { template: '<div class="radio-stub"></div>' }, Icon: true }
-            }
-        });
-
-        (wrapper.vm as any).button = null;
-        await wrapper.find('.radio-button-input-main-div').trigger('click');
-        expect(wrapper.exists()).toBe(true);
+        expect(wrapper.emitted('update:modelValue')?.[0]).toEqual(['opcao1']);
     });
 
     it('atualiza modelo e emite evento', async () => {

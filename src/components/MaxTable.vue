@@ -1,27 +1,42 @@
 <template>
-    <div class="max-table-main-div" >
-        <DataTable v-bind="attrs" stripedRows >
-            <template v-for="name in slotNames.filter(n => n !== 'buttons')" #[name]="slotProps" :key="name">
-                <slot :name="name" v-bind="slotProps || {}"></slot>
-            </template>
-            <Column v-if="slotNames.includes('buttons')" header="" :style="`width: ${width}px; max-width: ${width}px;`">
-                <template #body="{ data, index }">
-                    <div class="max-table-buttons" ref="el">
-                        <slot name="buttons" v-bind="{ data, index }" ></slot>
-                    </div>
-                </template>
-            </Column>
-        </DataTable>
+    <div class="max-table-main-div">
+        <div class="p-datatable">
+            <div class="p-datatable-table-container">
+                <table>
+                    <thead v-if="slots.header">
+                        <tr>
+                            <slot name="header" />
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template v-for="name in slotNames.filter(n => n !== 'buttons' && n !== 'header' && n !== 'footer')" :key="name">
+                            <slot :name="name" v-bind="{}" />
+                        </template>
+                        <slot />
+                        <tr v-if="slotNames.includes('buttons')" class="p-column max-table-column-buttons" :style="`width: ${width}px; max-width: ${width}px;`">
+                            <td class="p-datatable-cell">
+                                <div class="max-table-buttons" ref="el">
+                                    <slot name="buttons" v-bind="{ data: {}, index: 0 }" />
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot v-if="slots.footer">
+                        <tr>
+                            <slot name="footer" />
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
     </div>
 </template>
 
 <script setup lang="ts">
-    import DataTable from 'primevue/datatable';
-    import Column from 'primevue/column';
     import { useAttrs, useSlots, computed, ref, useTemplateRef, watch } from 'vue';
     import { useElementSize } from '@maxvue/max-use';
 
-    const attrs = useAttrs();
+    const _attrs = useAttrs();
     const slots: Record<string, any> = useSlots() as Record<string, any>;
 
     const slotNames = computed<string[]>(() => Object.keys(slots || {}));
@@ -39,9 +54,7 @@
     defineExpose({
         width
     });
-
 </script>
-
 
 <style lang="scss">
 .max-table-main-div {

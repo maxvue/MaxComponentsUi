@@ -24,8 +24,6 @@ describe('MaxColorPicker', () => {
 
     it('emite update:modelValue ao alterar o valor do input de texto', async () => {
         const wrapper = mountColorPicker();
-        // O primeiro <input> é o preview readonly do ColorPicker do PrimeVue;
-        // o InputText real (editável) é o segundo.
         const input = wrapper.find('input.p-inputtext');
         await input.setValue('#00ff00');
 
@@ -62,9 +60,10 @@ describe('MaxColorPicker', () => {
 
     it('usa format e defaultColor padrão quando não informados', () => {
         const wrapper = mountColorPicker();
-        const colorPicker = wrapper.findComponent({ name: 'ColorPicker' });
+        expect(wrapper.props('format')).toBe('hex');
+        expect(wrapper.props('defaultColor')).toBe('ff0000');
 
-        expect(colorPicker.props('format')).toBe('hex');
-        expect(colorPicker.props('defaultColor')).toBe('ff0000');
+        const colorInput = wrapper.find('input[type="color"]');
+        expect(colorInput.exists()).toBe(true);
     });
 });

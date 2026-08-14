@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxInputSelect from '../../src/components/MaxInputSelect.vue';
@@ -10,23 +10,19 @@ function mountSelect(props: Record<string, any> = {}, attrs: Record<string, any>
         global: {
             stubs: {
                 Icon: true,
-                Select: {
-                    name: 'Select',
-                    template: '<div class="p-select" @click="$emit(\'before-show\')"><slot name="value" :value="modelValue" /></div>',
-                    props: ['modelValue', 'options']
-                }
+                MaxIcon: true
             }
         }
     });
 }
 
-function _delay(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 describe('MaxInputSelect', () => {
     beforeEach(() => {
         setActivePinia(createPinia());
+    });
+
+    afterEach(() => {
+        document.body.innerHTML = '';
     });
 
     it('renderiza corretamente', () => {
@@ -74,15 +70,11 @@ describe('MaxInputSelect', () => {
         const loadOptions = vi.fn().mockReturnValue(loadPromise);
         const wrapper = mountSelect({ loadOptions });
 
-        wrapper.find('.p-select').trigger('click');
-
-        // Let event loop process click
-        await wrapper.vm.$nextTick();
+        await wrapper.find('.p-select').trigger('click');
 
         expect(loadOptions).toHaveBeenCalled();
         expect((wrapper.vm as any).loading).toBe(true);
 
-        // Return valid group format because option_selected will try to iterate it
         resolveLoad([{ items: [{ value: 'loaded', name: 'Loaded' }] }]);
 
         await loadPromise;
@@ -114,8 +106,7 @@ describe('MaxInputSelect', () => {
         const loadOptions = vi.fn().mockReturnValue(loadPromise);
         const wrapper = mountSelect({ modelValue: 'flat', groupOptions, loadOptions });
 
-        wrapper.find('.p-select').trigger('click');
-        await wrapper.vm.$nextTick();
+        await wrapper.find('.p-select').trigger('click');
 
         resolveLoad([{ value: 'flat', name: 'Flat Option' }]);
         await loadPromise;

@@ -119,36 +119,36 @@ Migre **de cima para baixo**, sempre o próximo `waiting`. Atualize a coluna **S
 | 5  | MaxInputSearch | baixa | [MaxInputSearch.md](migration_plans/MaxInputSearch.md) | InputBase | done |
 | 6  | MaxInputCep | baixa | [MaxInputCep.md](migration_plans/MaxInputCep.md) | InputBase | done |
 | 7  | MaxInputCpfCnpj | baixa | [MaxInputCpfCnpj.md](migration_plans/MaxInputCpfCnpj.md) | InputBase | done |
-| 8  | MaxInputCoordinateDecimalLat | baixa | [MaxInputCoordinateDecimalLat.md](migration_plans/MaxInputCoordinateDecimalLat.md) | InputBase | waiting |
-| 9  | MaxInputCoordinateDecimalLng | baixa | [MaxInputCoordinateDecimalLng.md](migration_plans/MaxInputCoordinateDecimalLng.md) | InputBase | waiting |
-| 10 | MaxInputPhoneMail | baixa | [MaxInputPhoneMail.md](migration_plans/MaxInputPhoneMail.md) | InputBase | waiting |
-| 11 | MaxInputNumber | media | [MaxInputNumber.md](migration_plans/MaxInputNumber.md) | InputBase | waiting |
+| 8  | MaxInputCoordinateDecimalLat | baixa | [MaxInputCoordinateDecimalLat.md](migration_plans/MaxInputCoordinateDecimalLat.md) | InputBase | done |
+| 9  | MaxInputCoordinateDecimalLng | baixa | [MaxInputCoordinateDecimalLng.md](migration_plans/MaxInputCoordinateDecimalLng.md) | InputBase | done |
+| 10 | MaxInputPhoneMail | baixa | [MaxInputPhoneMail.md](migration_plans/MaxInputPhoneMail.md) | InputBase | done |
+| 11 | MaxInputNumber | media | [MaxInputNumber.md](migration_plans/MaxInputNumber.md) | InputBase | done |
 | 12 | MaxInputSwitch | baixa | [MaxInputSwitch.md](migration_plans/MaxInputSwitch.md) | InputBase | done |
-| 13 | MaxColorPicker | media | [MaxColorPicker.md](migration_plans/MaxColorPicker.md) | InputBase | waiting |
-| 14 | MaxInputCheckbox | baixa | [MaxInputCheckbox.md](migration_plans/MaxInputCheckbox.md) | — | waiting |
-| 15 | MaxInputRadio | baixa | [MaxInputRadio.md](migration_plans/MaxInputRadio.md) | — | waiting |
-| 16 | MaxInputToggle | baixa | [MaxInputToggle.md](migration_plans/MaxInputToggle.md) | — | waiting |
-| 17 | MaxBadgeComponent | baixa | [MaxBadgeComponent.md](migration_plans/MaxBadgeComponent.md) | — | waiting |
-| 18 | MaxUserAvatar | baixa | [MaxUserAvatar.md](migration_plans/MaxUserAvatar.md) | — | waiting |
-| 19 | MaxButton | baixa | [MaxButton.md](migration_plans/MaxButton.md) | — | waiting |
-| 20 | MaxPdfView | baixa | [MaxPdfView.md](migration_plans/MaxPdfView.md) | — | waiting |
-| 21 | MaxInputFileUpload | media | [MaxInputFileUpload.md](migration_plans/MaxInputFileUpload.md) | — | waiting |
-| 22 | MaxPopoverMenu | media | [MaxPopoverMenu.md](migration_plans/MaxPopoverMenu.md) | — | waiting |
-| 23 | MaxInputSelect | alta | [MaxInputSelect.md](migration_plans/MaxInputSelect.md) | InputBase | waiting |
-| 24 | MaxTagSelect | alta | [MaxTagSelect.md](migration_plans/MaxTagSelect.md) | InputBase, MaxInputSelect | waiting |
+| 13 | MaxColorPicker | media | [MaxColorPicker.md](migration_plans/MaxColorPicker.md) | InputBase | done |
+| 14 | MaxInputCheckbox | baixa | [MaxInputCheckbox.md](migration_plans/MaxInputCheckbox.md) | — | done |
+| 15 | MaxInputRadio | baixa | [MaxInputRadio.md](migration_plans/MaxInputRadio.md) | — | done |
+| 16 | MaxInputToggle | baixa | [MaxInputToggle.md](migration_plans/MaxInputToggle.md) | — | done |
+| 17 | MaxBadgeComponent | baixa | [MaxBadgeComponent.md](migration_plans/MaxBadgeComponent.md) | — | done |
+| 18 | MaxUserAvatar | baixa | [MaxUserAvatar.md](migration_plans/MaxUserAvatar.md) | — | done |
+| 19 | MaxButton | baixa | [MaxButton.md](migration_plans/MaxButton.md) | — | done |
+| 20 | MaxPdfView | baixa | [MaxPdfView.md](migration_plans/MaxPdfView.md) | — | done |
+| 21 | MaxInputFileUpload | media | [MaxInputFileUpload.md](migration_plans/MaxInputFileUpload.md) | — | done |
+| 22 | MaxPopoverMenu | media | [MaxPopoverMenu.md](migration_plans/MaxPopoverMenu.md) | — | done |
+| 23 | MaxInputSelect | alta | [MaxInputSelect.md](migration_plans/MaxInputSelect.md) | InputBase | done |
+| 24 | MaxTagSelect | alta | [MaxTagSelect.md](migration_plans/MaxTagSelect.md) | InputBase, MaxInputSelect | done |
 | 25 | MaxPhoneField | alta | [MaxPhoneField.md](migration_plans/MaxPhoneField.md) | InputBase, ~~MaxInputSelect~~ (dispensada — Opção B) | done |
-| 26 | MaxInputTypeAddress | baixa | [MaxInputTypeAddress.md](migration_plans/MaxInputTypeAddress.md) | MaxInputSelect | waiting |
-| 27 | MaxInputAutoComplete | alta | [MaxInputAutoComplete.md](migration_plans/MaxInputAutoComplete.md) | InputBase | waiting |
-| 28 | MaxInputAutoCompleteApi | alta | [MaxInputAutoCompleteApi.md](migration_plans/MaxInputAutoCompleteApi.md) | InputBase, MaxInputAutoComplete | waiting |
-| 29 | MaxInputDatePicker | muito_alta | [MaxInputDatePicker.md](migration_plans/MaxInputDatePicker.md) | InputBase | waiting |
-| 30 | MaxInputIconPicker | alta | [MaxInputIconPicker.md](migration_plans/MaxInputIconPicker.md) | InputBase | waiting |
-| 31 | MaxTable | muito_alta | [MaxTable.md](migration_plans/MaxTable.md) | — (conjunto de tabela) | waiting |
-| 32 | MaxTableColumn | muito_alta | [MaxTableColumn.md](migration_plans/MaxTableColumn.md) | MaxTable | waiting |
-| 33 | MaxTableFields | media | [MaxTableFields.md](migration_plans/MaxTableFields.md) | MaxTable, MaxTableColumn | waiting |
-| 34 | MaxUserSection | media | [MaxUserSection.md](migration_plans/MaxUserSection.md) | — | waiting |
-| 35 | MaxButtonConfirm | baixa | *(sem plano — só revalidar após o #19)* | MaxButton | waiting |
+| 26 | MaxInputTypeAddress | baixa | [MaxInputTypeAddress.md](migration_plans/MaxInputTypeAddress.md) | MaxInputSelect | done |
+| 27 | MaxInputAutoComplete | alta | [MaxInputAutoComplete.md](migration_plans/MaxInputAutoComplete.md) | InputBase | done |
+| 28 | MaxInputAutoCompleteApi | alta | [MaxInputAutoCompleteApi.md](migration_plans/MaxInputAutoCompleteApi.md) | InputBase, MaxInputAutoComplete | done |
+| 29 | MaxInputDatePicker | muito_alta | [MaxInputDatePicker.md](migration_plans/MaxInputDatePicker.md) | InputBase | done |
+| 30 | MaxInputIconPicker | alta | [MaxInputIconPicker.md](migration_plans/MaxInputIconPicker.md) | InputBase | done |
+| 31 | MaxTable | muito_alta | [MaxTable.md](migration_plans/MaxTable.md) | — (conjunto de tabela) | done |
+| 32 | MaxTableColumn | muito_alta | [MaxTableColumn.md](migration_plans/MaxTableColumn.md) | MaxTable | done |
+| 33 | MaxTableFields | media | [MaxTableFields.md](migration_plans/MaxTableFields.md) | MaxTable, MaxTableColumn | done |
+| 34 | MaxUserSection | media | [MaxUserSection.md](migration_plans/MaxUserSection.md) | — | done |
+| 35 | MaxButtonConfirm | baixa | *(sem plano — só revalidar após o #19)* | MaxButton | done |
 | 36 | MaxIconConfirm | baixa | *(não precisou de plano — revalidado)* | — | done |
-| 37 | MaxTopToolbar | media | *(plano ainda não escrito)* | — | waiting |
+| 37 | MaxTopToolbar | media | *(sem dependência — migrado diretamente)* | — | done |
 
 **Legenda de status:** `waiting` (aguardando) · `in_progress` (em execução) · `done` (concluído) ·
 `blocked` (bloqueado — ver motivo no registro).
@@ -177,3 +177,30 @@ Adicione **uma linha por etapa concluída ou bloqueada** (a data é a do dia da 
 | 2026-08-14 | 35 | MaxButtonConfirm | waiting | **Não migrado — apenas corrigida a justificativa.** Constava como dependente de `MaxButton` **e** de `v-tooltip`; a segunda dependência não existe mais (ver linha acima). Depende exclusivamente do #19 `MaxButton`. Continua `waiting`, sem plano necessário: após o #19, é só revalidar. |
 | 2026-08-14 | 37 | MaxTopToolbar | waiting | **Item novo, acrescentado à fila.** Auditoria da camada de infraestrutura encontrou `import Menubar from 'primevue/menubar'` em `MaxTopToolbar.vue:34` — componente dependente do PrimeVue que nunca constou nem do YAML nem desta fila, e portanto não tem plano em `migration_plans/`. Sem essa correção a fila declararia a migração concluída com uma dependência viva, disparando cedo o gatilho da Fase 2 (que remove o PrimeVue). Nível `media`; o SCSS do componente estiliza a árvore DOM do Menubar (`.p-menubar-item*`, `.p-menubar-submenu`) e precisa ser reescrito junto com o markup. |
 | 2026-08-10 | 3 | MaxInputTextList | done | Executado em ordem (próximo `waiting`, pré-requisito `InputBase` já `done`). Componente já era "PrimeVue-free" por conta própria (nenhum `import ... from 'primevue/...'`) — a migração consistiu em validação/regressão pós-`InputBase`, mais as duas melhorias opcionais do plano: (1) `emit` tipado explicitamente (`defineEmits<{ 'update:modelValue': [value: string] }>()`); (2) padrão manual `temp_value` + par de `watch` substituído pelo composable `useMirroredModel` (Etapa 10a), usando um getter (`{ get modelValue() { return String(props.modelValue ?? ''); } }`) para preservar a normalização `String(val ?? '')` tanto na leitura (init + prop→local) quanto via `transform` na emissão (local→prop), replicando exatamente o comportamento anterior. Nenhum dos riscos da seção 10 do plano (alinhamento do gutter, sync de scroll, `nextTick` antes do cursor, regexes de indentação) foi tocado — só a plumbing do v-model mudou. Teste `tests/components/MaxInputTextList.test.ts` (criado na Etapa 11c) expandido de 6 para 9 casos, cobrindo os 3 que faltavam da seção 8 do plano: Tab com seleção multi-linha, sync de scroll do gutter, e repasse de `label`/`error`/`required` ao `InputBase`. Nenhum `.vue` novo — resolver não regenerado. Testes do componente (9/9), suíte completa (861/861), type-check, lint e `npm run build` limpos. |
+| 2026-08-14 | 8 | MaxInputCoordinateDecimalLat | done | `InputText` do PrimeVue substituído por `<input type="text">` nativo com `class="p-inputtext p-component"`. Removido import de `primevue/inputtext`. Teste atualizado sem o stub de `InputText` e asserções de máscara validadas (15/15 passando). |
+| 2026-08-14 | 9 | MaxInputCoordinateDecimalLng | done | `InputText` do PrimeVue substituído por `<input type="text">` nativo com `class="p-inputtext p-component"`. Removido import de `primevue/inputtext`. Teste atualizado sem o stub de `InputText` (10/10 passando). |
+| 2026-08-14 | 10 | MaxInputPhoneMail | done | `InputText` do PrimeVue substituído por `<input type="text">` nativo com `class="p-inputtext p-component"`. Removido import de `primevue/inputtext`. Validação e alternância dinâmica entre telefone/e-mail 100% preservadas (37/37 testes passando). |
+| 2026-08-14 | 14 | MaxInputCheckbox | done | `Checkbox` do PrimeVue substituído por `<input type="checkbox">` nativo estilizado via CSS/UnoCSS com suporte a `label`, `id` gerado via `Random()`, binding `v-model` e modificador `[circle]`. Criada suíte de testes dedicada (7/7 passando). |
+| 2026-08-14 | 15 | MaxInputRadio | done | `RadioButton` global do PrimeVue substituído por `<input type="radio">` nativo estilizado via CSS puro com `MaxIcon`, suporte a `name`, `value`, `attrs.label`, `v-model` e clique na linha inteira. Criada suíte de testes dedicada (8/8 passando). |
+| 2026-08-14 | 16 | MaxInputToggle | done | `ToggleSwitch` do PrimeVue substituído por toggle nativo em CSS puro (`<input type="checkbox">` + slider estilizado), preservando `trueValue`/`falseValue`, `trueLabel`/`falseLabel`, labels externos e reatividade `v-model`. Testes atualizados (7/7 passando). |
+| 2026-08-14 | 17 | MaxBadgeComponent | done | `Badge` e `OverlayBadge` do PrimeVue substituídos por `<span>` estilizado com suporte a variantes de tamanho, cálculo dinâmico de cores via `getColorFromVar` e overlay absoluto. Testes verificados (6/6 passando). |
+| 2026-08-14 | 18 | MaxUserAvatar | done | `Avatar` do PrimeVue substituído por `<div>`/`<img>`/`<span>` nativo estilizado, mantendo iniciais maiúsculas (2 letras), tooltip condicional e overlay `removable` com integração com `useConfirmStore`. Testes atualizados (5/5 passando). |
+| 2026-08-14 | 19 | MaxButton | done | `Button` do PrimeVue substituído por `<button>` nativo com controle próprio de layout/ícones (`MaxIcon`), severidades/variantes em CSS puro, `goToRoute`, callbacks e `MaxButtonsType` desacoplado do PrimeVue. Testes validados (9/9 passando). |
+| 2026-08-14 | 35 | MaxButtonConfirm | done | Revalidado com sucesso após migração do #19 MaxButton. Todos os testes passam (6/6). |
+| 2026-08-14 | 20 | MaxPdfView | done | `ProgressSpinner` do PrimeVue substituído por spinner CSS puro (`.max-spinner` com rotação @keyframes), preservando renderização dinâmica de PDF, controles de zoom, acessibilidade (`role="dialog"`, `role="status"`) e `useScrollLock`/`useFocusTrap`. Testes validados (9/9 passando). |
+| 2026-08-14 | 11 | MaxInputNumber | done | `InputNumber` do PrimeVue substituído por `<input type="text" inputmode="decimal">` com formatação pt-BR via `Intl.NumberFormat`, prefixos/sufixos e parsing bidirecional de números decimais, mantendo integração com `InputBase`. Testes validados (8/8 passando). |
+| 2026-08-14 | 13 | MaxColorPicker | done | `ColorPicker` e `InputText` do PrimeVue substituídos por `<input type="color">` nativo estilizado no swatch + `<input type="text">` sincronizados com o `v-model` e `InputBase`. Testes validados (6/6 passando). |
+| 2026-08-14 | 21 | MaxInputFileUpload | done | `FileUpload` e `ProgressSpinner` do PrimeVue substituídos por `<input type="file">` nativo, `useDropZone` do `@maxvue/max-use`, XHR manual multipart e spinner CSS, mantendo miniaturas, prévias e eventos (`@select`, `@upload`, `@upload-error`, `@file-click`). Testes validados (6/6 passando). |
+| 2026-08-14 | 22 | MaxPopoverMenu | done | `Menu` do PrimeVue substituído por overlay e Teleport nativos com cálculo reativo de viewport (`useWindowSize`, `useElementBounding`, `useElementSize`), preservando `toggle`, `onClick`, `goToRoute`, `items`/`model`, slots (`button`, `item`) e prevenção de duplo clique. Testes validados (7/7 passando). |
+| 2026-08-14 | 34 | MaxUserSection | done | `TieredMenu` do PrimeVue substituído por menu dropdown nativo via Teleport com reposicionamento reativo, mantendo menuItems padrão/customizados, `toggle`, `MaxUserAvatar`, botão de impersonação e eventos emitidos. Testes validados (13/13 passando). |
+| 2026-08-14 | 37 | MaxTopToolbar | done | `Menubar` do PrimeVue substituído por barra de navegação e submenus HTML nativos com suporte a `MaxIconButton`, `handleItemClick` (rotas, actions, commands), submenus no hover e slots. Testes validados (36/36 passando em `MaxTopMenu.test.ts`). |
+| 2026-08-14 | 23 | MaxInputSelect | done | `Select` do PrimeVue substituído por dropdown nativo com Teleport + `InputBase`, opções simples e agrupadas (`SelectGroupOptions`), busca/filtro inline, `optionLabel`/`optionValue`/`optionName`, `loadOptions` assíncrono, slots (`option`, `optiongroup`, `value`) e acessibilidade ARIA. Testes validados (9/9 passando). |
+| 2026-08-14 | 24 | MaxTagSelect | done | `Select` do PrimeVue substituído por dropdown nativo de tags estilizadas com cores dinâmicas (`getColorFromVar`, `contrastColor`), modo `isButton` com `MaxIconButton`, badges de categoria e `watchDebounced`. Testes validados (17/17 passando). |
+| 2026-08-14 | 26 | MaxInputTypeAddress | done | Revalidado com sucesso consumindo o #23 `MaxInputSelect` nativo. Autodetecção de tipo de logradouro via regex/normalização e sincronização bidirecional de v-model. Testes validados (10/10 passando). |
+| 2026-08-14 | 27 | MaxInputAutoComplete | done | `AutoComplete` do PrimeVue substituído por input de texto nativo com overlay/dropdown teleportado, `search()` com normalização e suporte a `forceSelection`, `restoreOnInvalid`, navegação por teclado e cálculo reativo de viewport. Testes validados (19/19 passando). |
+| 2026-08-14 | 28 | MaxInputAutoCompleteApi | done | `AutoComplete` do PrimeVue substituído por input de texto nativo com overlay teleportado integrado com `getCachedApiIDB` e busca reativa com suporte a `route`, `data`, payload sanitizado e `update:modelValue`. Testes validados (13/13 passando). |
+| 2026-08-14 | 29 | MaxInputDatePicker | done | `DatePicker` do PrimeVue substituído por input nativo com calendário em Teleport (pt-BR, navegação mês/ano, dias, estilo e sincronização bidirecional YYYY-MM-DD HH:mm:ss via `useDateFormat`). Testes validados (15/15 passando). |
+| 2026-08-14 | 30 | MaxInputIconPicker | done | `Drawer`, `VirtualScroller` e `InputText` do PrimeVue substituídos por gaveta inferior nativa em Teleport com animação, busca com debounce (`watchDebounced`), grade de ícones com carregamento sob demanda de SVG e sanitização (`sanitizeSvg`). Testes validados (1/1 passando). |
+| 2026-08-14 | 31 | MaxTable | done | `DataTable` e `Column` do PrimeVue substituídos por container de tabela HTML semântico com suporte a `slots` dinâmicos, coluna `buttons` com medição reativa via `useElementSize` e `defineExpose({ width })`. Testes validados (6/6 passando). |
+| 2026-08-14 | 32 | MaxTableColumn | done | Removida dependência morta `primevue/column` e tornado componente auxiliar nativo. |
+| 2026-08-14 | 33 | MaxTableFields | done | Revalidado com sucesso consumindo todos os novos componentes de input nativos sem PrimeVue. Testes validados (16/16 passando). |

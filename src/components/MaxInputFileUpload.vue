@@ -1,30 +1,55 @@
 <template>
-    <div class="input-upload-file-main-div" v-bind="attrs">
-        <FileUpload
-            ref="fileUploadRef"
-            name="file"
-            v-bind="attrs"
+    <div ref="rootRef" class="input-upload-file-main-div" :class="{ 'is-dragover': isOverDropZone }" v-bind="attrs">
+        <input
+            ref="nativeInputRef"
+            type="file"
+            class="max-file-native-input"
+            style="display: none;"
+            :name="(attrs.name as string) ?? 'file'"
+            :accept="(attrs.accept as string) ?? '.pdf, .jpg, .jpeg, .png, .doc, .docx'"
+            :multiple="(attrs.multiple as boolean) ?? true"
             :disabled="attrs.disabled ?? false"
-            :accept="attrs.accept ?? '.pdf, .jpg, .jpeg, .png, .doc, .docx'"
-            :auto="attrs.auto ?? true"
-            :multiple="attrs.multiple ?? true"
-            :showCancelButton="false"
-            :showUploadButton="attrs.showUploadButton !== undefined && attrs.showUploadButton !== false"
-            :withCredentials="true"
-            @error="onError"
-            @before-send="onBeforeUpload"
-            @upload="onUploadHandler"
-            @select="onSelectHandler"
-        >
-            <template #content="{ files, uploadedFiles }">
-                <div @click.stop="triggerChoose" class="label-file-upload" v-if="(files.length > 0 || uploadedFiles.length > 0) && !uploading && !showError && (attrs.uploading === false || attrs.uploading === undefined)">
+            @change="onNativeInputChange"
+        />
+
+        <div class="p-fileupload" :disabled="attrs.disabled ?? false">
+            <button
+                type="button"
+                class="p-button p-fileupload-choose"
+                :disabled="attrs.disabled ?? false"
+                @click.stop="triggerChoose"
+            >
+                <div class="chose-icon-div">
+                    <Icon icon="line-md:loading-loop" size="2" v-if="uploading" />
+                    <Icon icon="quill:folder-open" size="2" v-else />
+                </div>
+            </button>
+
+            <button
+                type="button"
+                class="p-button"
+                v-if="showUploadButton"
+                v-tooltip="'Enviar arquivo'"
+                @click.stop="startUpload(files)"
+            >
+                <div class="chose-icon-div">
+                    <Icon icon="ic:baseline-file-upload" size="2" />
+                </div>
+            </button>
+
+            <div class="p-fileupload-content">
+                <div
+                    @click.stop="triggerChoose"
+                    class="label-file-upload"
+                    v-if="(files.length > 0 || modelValue.length > 0) && !uploading && !showError && (attrs.uploading === false || attrs.uploading === undefined)"
+                >
                     <slot>
                         <span class="text">{{ displayLabel }}</span>
                     </slot>
                 </div>
                 <div v-else-if="uploading || attrs.uploading">
                     <div class="flex" gap-30>
-                        <ProgressSpinner style="width: 20px; height: 20px;" animationDuration="2s" />
+                        <div class="max-spinner" role="status" aria-label="Loading"></div>
                         <div>Carregando arquivos</div>
                     </div>
                 </div>
@@ -33,9 +58,11 @@
                         Ocorreu um erro ao fazer o upload.
                     </slot>
                 </div>
-            </template>
-            <template #empty>
-                <div @click.stop="triggerChoose" class="label-file-upload" v-if="files.length === 0 && (attrs.uploading === false || attrs.uploading === undefined)">
+                <div
+                    @click.stop="triggerChoose"
+                    class="label-file-upload"
+                    v-else-if="files.length === 0 && (attrs.uploading === false || attrs.uploading === undefined)"
+                >
                     <slot>
                         <span class="text">{{ displayLabel }}</span>
                     </slot>
@@ -43,29 +70,13 @@
                         Ocorreu um erro ao fazer o upload.
                     </slot>
                 </div>
-            </template>
-            <template #chooseicon>
-                <div class="chose-icon-div">
-                    <Icon icon="line-md:loading-loop" size="2" v-if="uploading"/>
-                    <Icon icon="quill:folder-open" size="2" v-else />
-                </div>
-            </template>
-            <template #uploadicon>
-                <div class="chose-icon-div" v-tooltip="'Enviar arquivo'">
-                    <Icon icon="ic:baseline-file-upload" size="2" />
-                </div>
-            </template>
-            <template #cancelicon>
-                <div class="chose-icon-div">
-                    <Icon icon="icons8:cancel" size="2" />
-                </div>
-            </template>
-        </FileUpload>
+            </div>
+        </div>
 
         <div class="file-upload-content-div" :disabled="attrs.disabled ?? false">
             <div class="files-icons" v-if="modelValue.length > 0">
                 <div v-for="(file, index) in modelValue" :key="file.id || index" class="file-icon" @click="$emit('file-click', file)">
-                    <Icon icon="ph:file-pdf-light" v-if="getFileExtension(file?.file_name || '') === 'pdf'" size="1.8" p0/>
+                    <Icon icon="ph:file-pdf-light" v-if="getFileExtension(file?.file_name || '') === 'pdf'" size="1.8" p0 />
                     <Icon icon="ph:file-jpg-light" v-if="['jpg', 'jpeg'].includes(getFileExtension(file?.file_name || ''))" size="1.8" p0 />
                     <Icon icon="ph:file-png-light" v-if="getFileExtension(file?.file_name || '') === 'png'" size="1.8" />
                     <Icon icon="fa:check-circle" class="file-check" size="0.7" />
@@ -77,16 +88,16 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, computed, watch, useAttrs } from 'vue';
-    import FileUpload from 'primevue/fileupload';
-    import ProgressSpinner from 'primevue/progressspinner';
+    import { ref, computed, watch, useAttrs, onBeforeUnmount } from 'vue';
+    import { useDropZone } from '@maxvue/max-use';
 
     /**
      * Componente avançado para upload de arquivos.
      * Suporta múltiplos arquivos, pré-visualização (thumbnails), progresso de upload e integração com backend.
      */
     const attrs: any = useAttrs();
-    const fileUploadRef = ref<any>(null);
+    const rootRef = ref<HTMLElement | null>(null);
+    const nativeInputRef = ref<HTMLInputElement | null>(null);
 
     const props = withDefaults(
         defineProps<{
@@ -110,6 +121,8 @@
 
     const emit = defineEmits(['file-click', 'upload-error', 'upload', 'select']);
 
+    const showUploadButton = computed(() => attrs.showUploadButton !== undefined && attrs.showUploadButton !== false);
+
     const displayLabel = computed(() => {
         const isDisabled = attrs.disabled !== undefined && attrs.disabled !== false;
         if (isDisabled) return attrs['label-disabled'] ?? attrs.labelDisabled ?? attrs.label_disabled ?? props.label;
@@ -121,23 +134,79 @@
             showError.value = false;
             files.value = [];
         }, 3000);
-
     });
 
     const triggerChoose = () => {
-        if (fileUploadRef.value) {
-            // Tenta disparar o seletor de arquivos através da API do PrimeVue ou fallback
-            const chooseButton = fileUploadRef.value.$el.querySelector('.p-fileupload-choose');
-            chooseButton?.click();
+        if (attrs.disabled) return;
+        if (nativeInputRef.value) nativeInputRef.value.click();
+
+    };
+
+    const onNativeInputChange = (event: Event) => {
+        const target = event.target as HTMLInputElement;
+        if (target.files && target.files.length > 0) handleSelectedFiles(Array.from(target.files));
+
+    };
+
+    const { isOverDropZone } = useDropZone(rootRef, {
+        onDrop: (dropped) => {
+            if (attrs.disabled) return;
+            if (dropped && dropped.length) handleSelectedFiles(dropped);
         }
+    });
+
+    const handleSelectedFiles = (selected: any[]) => {
+        onSelectHandler({ files: selected });
+        if (attrs.auto ?? true) startUpload(selected);
+
     };
 
     const onSelectHandler = (event: any) => {
         uploading.value = true;
-        files.value = event.files;
+        files.value = event?.files ?? [];
         emit('select', event);
         if (attrs.onSelect) attrs.onSelect(event);
     };
+
+    let currentXhr: XMLHttpRequest | null = null;
+
+    const startUpload = (toSend: any[]) => {
+        if (!toSend || !toSend.length) return;
+        const url = (attrs.url as string) ?? '';
+        if (!url) return;
+
+        const xhr = new XMLHttpRequest();
+        currentXhr = xhr;
+
+        const formData = new FormData();
+        const fieldName = (attrs.name as string) ?? 'file';
+        if (attrs.multiple ?? true) toSend.forEach((f) => formData.append(fieldName, f, f.name));
+        else formData.append(fieldName, toSend[0], toSend[0].name);
+
+
+        xhr.withCredentials = true;
+        xhr.open('POST', url, true);
+
+        onBeforeUpload({ xhr, formData });
+
+        xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) onUploadHandler({ xhr });
+            else onError({ xhr });
+
+            currentXhr = null;
+        };
+
+        xhr.onerror = () => {
+            onError({ xhr });
+            currentXhr = null;
+        };
+
+        xhr.send(formData);
+    };
+
+    onBeforeUnmount(() => {
+        currentXhr?.abort();
+    });
 
     const onUploadHandler = (event: any) => {
         uploading.value = false;
@@ -159,6 +228,7 @@
         showError.value = true;
         uploading.value = false;
         emit('upload-error', event);
+        if (attrs.onError) attrs.onError(event);
     };
 
     const onBeforeUpload = (event: any) => {
@@ -167,8 +237,7 @@
 
             for (const key in props.uploadData) event.formData.append(key, props.uploadData[key]);
 
-
-            if (files.value.length > 0) {
+            if (files.value.length > 0 && files.value[0]?.name) {
                 const extension = files.value[0].name.split('.').pop();
                 event.formData.append('extension', extension);
             }
@@ -187,6 +256,16 @@
             padding-left: 0;
             position: relative;
 
+            .max-spinner {
+                width: 20px;
+                height: 20px;
+                border: 2px solid var(--background-300, #e2e8f0);
+                border-top-color: var(--primary-500, #3b82f6);
+                border-radius: 50%;
+                display: inline-block;
+                animation: max-spinner-rotate 1s linear infinite;
+            }
+
             .p-fileupload {
                 display: grid;
                 grid-template-columns: auto 1fr;
@@ -198,32 +277,16 @@
                 padding: 0 10px;
                 position: relative;
 
-                .p-fileupload-header {
-                    padding: 0 !important;
-                    display: grid;
-                    grid-template-columns: auto auto 1fr;
-                    height: 100%;
-                    gap: 0;
-
-                    span {
-                        display: none;
-                    }
-                }
-
-                .p-fileupload-file {
-                    display: none;
-                }
-
                 .p-button {
                     display: grid;
                     place-items: center;
                     padding: 0;
                     height: 30px;
                     width: 30px;
-                    background-color: var(--primary-c) !important;
+                    background-color: var(--primary-c, #3b82f6) !important;
                     border: none;
                     opacity: 1;
-                    color: var(--text-b);
+                    color: var(--text-b, #fff);
                     cursor: pointer;
                     z-index: 1;
 
@@ -232,9 +295,9 @@
                     }
 
                     &:hover {
-                        background-color: var(--primary-mouse) !important;
+                        background-color: var(--primary-mouse, #2563eb) !important;
                         border: none;
-                        color: var(--icon-mouse);
+                        color: var(--icon-mouse, #fff);
                     }
 
                     svg {
@@ -282,10 +345,6 @@
                 border-radius: calc(1rem - 5px);
             }
 
-            .p-fileupload-cancel-button {
-                display: none;
-            }
-
             .p-button {
                 width: auto !important;
                 height: auto !important;
@@ -323,7 +382,7 @@
                 right: 0;
                 display: grid;
                 width: auto;
-                pointer-events: none; // Permite clicar no botão de upload por baixo se necessário
+                pointer-events: none;
 
                 .files-icons {
                     display: flex;
@@ -351,10 +410,6 @@
                         &:hover {
                             .icon-div {
                                 color: var(--blue-600) !important;
-
-                                &.file-check {
-                                    color: var(--green-b-800) !important;
-                                }
                             }
                         }
 
@@ -371,12 +426,18 @@
             }
         }
 
-        .p-fileupload-highlight {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            border-radius: calc(1rem - 5px);
+        &.is-dragover {
+            outline: 2px dashed var(--primary-500);
+        }
+    }
+
+    @keyframes max-spinner-rotate {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
         }
     }
 </style>

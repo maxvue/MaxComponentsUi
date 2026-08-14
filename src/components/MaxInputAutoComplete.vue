@@ -1,23 +1,69 @@
 <template>
     <InputBase v-bind="props" class="if" :value="temp_value" :done="isDone" :error="props.error" :caution="caution">
-        <AutoComplete ref="ac" v-bind="props" :optionLabel="props.optionLabel" :suggestions="filtered_values" @complete="search" :forceSelection="props.forceSelection" :virtualScrollerOptions="{ itemSize: 40 }" v-model="temp_value" :placeholder="props.placeholder ?? 'SELECIONE'" @blur="isDone = testIsDone()" >
-            <template #option="slotProps">
-                <div class="autocomplete-item-select">
-                    <div class="autocomplete-item-select-label">{{ slotProps.option[props.optionLabel ?? 'label'] ?? slotProps.option.label }}</div>
-                    <div class="autocomplete-item-select-sub-label">{{ slotProps.option.subLabel ?? slotProps.option.sublabel ?? slotProps.option['sub-label'] }}</div>
+        <div ref="ac" class="p-autocomplete" :class="{ 'p-disabled': props.disabled }">
+            <input
+                ref="inputEl"
+                type="text"
+                class="p-inputtext p-autocomplete-input"
+                :value="displayedText"
+                :placeholder="props.placeholder ?? 'SELECIONE'"
+                :disabled="props.disabled"
+                autocomplete="off"
+                @input="onInput"
+                @change="onChange"
+                @focus="onFocus"
+                @blur="onBlur"
+                @keydown.down.prevent="onArrowDown"
+                @keydown.up.prevent="onArrowUp"
+                @keydown.enter.prevent="onEnter"
+                @keydown.esc.prevent="hide"
+            />
+        </div>
+
+        <Teleport to="body">
+            <div v-if="isOpen && filtered_values.length > 0" class="max-autocomplete-backdrop" @click="hide">
+                <div
+                    ref="overlayEl"
+                    class="p-autocomplete-overlay"
+                    role="listbox"
+                    :style="{ top: position.top + 'px', left: position.left + 'px', minWidth: position.minWidth }"
+                    @click.stop
+                >
+                    <div class="p-autocomplete-list-container">
+                        <ul class="p-autocomplete-list">
+                            <li
+                                v-for="(option, index) in filtered_values"
+                                :key="index"
+                                class="p-autocomplete-item"
+                                :class="{ 'p-autocomplete-item-active': activeIndex === index }"
+                                role="option"
+                                @click.stop="selectOption(option)"
+                                @mouseenter="activeIndex = index"
+                            >
+                                <slot name="option" :option="option" :index="index">
+                                    <div class="autocomplete-item-select">
+                                        <div class="autocomplete-item-select-label">
+                                            {{ option[props.optionLabel ?? 'label'] ?? option.label ?? option.name }}
+                                        </div>
+                                        <div class="autocomplete-item-select-sub-label">
+                                            {{ option.subLabel ?? option.sublabel ?? option['sub-label'] }}
+                                        </div>
+                                    </div>
+                                </slot>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-            </template>
-            <template #content></template>
-        </AutoComplete>
+            </div>
+        </Teleport>
     </InputBase>
 </template>
 
 <script setup lang="ts">
-    import { hasContent, toSearchableString } from '@maxvue/max-use';
+    import { hasContent, toSearchableString, useElementBounding, useElementSize, useWindowSize } from '@maxvue/max-use';
     import type { Ref } from 'vue';
-    import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue';
+    import { ref, computed, watch, nextTick, onBeforeUnmount } from 'vue';
     import InputBase from './InputBase.vue';
-    import AutoComplete from 'primevue/autocomplete';
 
     const props = withDefaults(
         defineProps<{
@@ -42,30 +88,64 @@
             forceSelection?: boolean;
             restoreOnInvalid?: boolean;
         }>(),
-        { modelValue: '', options: () => [], done: undefined, error: undefined, required: false, caution: undefined, optionLabel: 'name', forceSelection: true, restoreOnInvalid: true }
+        {
+            modelValue: '',
+            options: () => [],
+            done: undefined,
+            error: undefined,
+            required: false,
+            caution: undefined,
+            optionLabel: 'name',
+            forceSelection: true,
+            restoreOnInvalid: true
+        }
     );
 
     const list = computed(() => props.options ?? []);
-    const temp_value: Ref = ref(props.modelValue);
-    const filtered_values: Ref = ref([]);
+    const temp_value = ref<any>(props.modelValue);
+    const filtered_values = ref<any[]>([]);
+    const input_text = ref<string>('');
+    const last_valid = ref<any>(props.modelValue && typeof props.modelValue !== 'string' ? props.modelValue : null);
 
-    // Referência ao AutoComplete e ao <input> nativo interno: usados apenas para
-    // saber se o usuário havia digitado algo quando o forceSelection limpou o campo.
-    const ac: Ref = ref(null);
-    const input_text: Ref<string> = ref('');
-    const last_valid: Ref = ref(props.modelValue && typeof props.modelValue !== 'string' ? props.modelValue : null);
+    const ac = ref<HTMLElement | null>(null);
+    const inputEl = ref<HTMLInputElement | null>(null);
+    const overlayEl = ref<HTMLElement | null>(null);
+    const isOpen = ref(false);
+    const activeIndex = ref<number>(-1);
 
-    let input_el: HTMLInputElement | null = null;
-    const onNativeInput = (event: Event) => (input_text.value = (event.target as HTMLInputElement)?.value ?? '');
+    const { x, y, width: width_btn, height: height_btn } = useElementBounding(ac as any);
+    const { width: width_el, height: height_el } = useElementSize(overlayEl as any);
+    const { width: window_width, height: window_height } = useWindowSize();
 
-    onMounted(() => {
-        input_el = ac.value?.$el?.querySelector?.('input') ?? null;
-        input_el?.addEventListener('input', onNativeInput);
+    const position = computed(() => {
+        const targetX = x.value;
+        const targetY = y.value;
+        const targetW = width_btn.value;
+        const targetH = height_btn.value;
+
+        let top = targetY + targetH + 2;
+        let left = targetX;
+        const minW = Math.max(targetW, 160);
+
+        if (top + (height_el.value || 200) > window_height.value && targetY - (height_el.value || 200) > 0) top = targetY - (height_el.value || 200) - 2;
+
+
+        if (left + (width_el.value || minW) > window_width.value) left = Math.max(10, window_width.value - (width_el.value || minW) - 10);
+
+
+        return {
+            top,
+            left,
+            minWidth: minW + 'px'
+        };
     });
 
-    onBeforeUnmount(() => {
-        input_el?.removeEventListener('input', onNativeInput);
-        input_el = null;
+    const displayedText = computed(() => {
+        if (!temp_value.value) return '';
+        if (typeof temp_value.value === 'string') return temp_value.value;
+        const opt = temp_value.value;
+        const labelKey = props.optionLabel ?? 'name';
+        return opt[labelKey] ?? opt.label ?? opt.name ?? opt.value ?? '';
     });
 
     const temp_value_string = computed(() => {
@@ -86,7 +166,90 @@
 
     const caution = computed(() => (props.caution !== undefined ? props.caution && isDone.value === false : isDone.value === false));
 
-    const emit = defineEmits(['update:modelValue']);
+    const emit = defineEmits(['update:modelValue', 'complete', 'blur']);
+
+    const search = () => {
+        const query = toSearchableString(typeof temp_value.value === 'string' ? temp_value.value : temp_value_string.value);
+        filtered_values.value = list.value.filter((item: any) => {
+            const s = (item.value ?? '') + (item.label ?? '') + (item.name ?? '') + (item[props.optionValue ?? 'value'] ?? '');
+            return toSearchableString(s).toLowerCase().includes(query.toLowerCase());
+        });
+        emit('complete');
+    };
+
+    const hide = () => {
+        isOpen.value = false;
+        activeIndex.value = -1;
+    };
+
+    const onInput = (event: Event) => {
+        const val = (event.target as HTMLInputElement).value;
+        input_text.value = val;
+        temp_value.value = val;
+        search();
+        isOpen.value = filtered_values.value.length > 0;
+    };
+
+    const onFocus = () => {
+        if (typeof temp_value.value === 'string' && temp_value.value) {
+            search();
+            isOpen.value = filtered_values.value.length > 0;
+        }
+    };
+
+    const onBlur = () => {
+        isDone.value = testIsDone();
+        emit('blur');
+        setTimeout(() => {
+            if (isOpen.value) hide();
+        }, 150);
+    };
+
+    const onChange = () => {
+        if (props.forceSelection) if (typeof temp_value.value === 'string') if (input_text.value) if (props.restoreOnInvalid && last_valid.value) {
+            temp_value.value = last_valid.value;
+            input_text.value = '';
+        } else {
+            input_text.value = '';
+            last_valid.value = null;
+            temp_value.value = null;
+            emit('update:modelValue', null);
+        }
+        else {
+            last_valid.value = null;
+            temp_value.value = null;
+            emit('update:modelValue', null);
+        }
+
+
+    };
+
+    const selectOption = (item: any) => {
+        temp_value.value = item;
+        last_valid.value = item;
+        input_text.value = '';
+        hide();
+    };
+
+    const onArrowDown = () => {
+        if (!isOpen.value) {
+            search();
+            isOpen.value = filtered_values.value.length > 0;
+            return;
+        }
+        if (activeIndex.value < filtered_values.value.length - 1) activeIndex.value++;
+
+    };
+
+    const onArrowUp = () => {
+        if (activeIndex.value > 0) activeIndex.value--;
+
+    };
+
+    const onEnter = () => {
+        if (isOpen.value && activeIndex.value >= 0 && activeIndex.value < filtered_values.value.length) selectOption(filtered_values.value[activeIndex.value]);
+
+    };
 
     watch(temp_value, (novo: any, antigo: any) => {
         isDone.value = testIsDone();
@@ -99,15 +262,12 @@
             return;
         }
 
-        // Digitação livre em andamento: o AutoComplete mantém a string no v-model.
+        // Digitação livre em andamento: mantém a string no v-model.
         if (novo) return;
 
         // Daqui para baixo o valor foi zerado. Só interessa quando havia algo antes.
         if (!antigo) return;
 
-        // O usuário havia digitado texto que não casou com nenhuma opção e o
-        // forceSelection do PrimeVue apagou o campo. Sem tratamento, a UI fica
-        // vazia e o pai preso ao valor antigo — dessincronia silenciosa.
         if (input_text.value) {
             if (props.restoreOnInvalid && last_valid.value) {
                 nextTick(() => {
@@ -122,7 +282,7 @@
             return;
         }
 
-        // Limpeza intencional (campo esvaziado pelo usuário): nunca restaurar.
+        // Limpeza intencional: nunca restaurar.
         last_valid.value = null;
         emit('update:modelValue', null);
     });
@@ -132,12 +292,18 @@
         if (props.modelValue && typeof props.modelValue !== 'string') last_valid.value = props.modelValue;
     });
 
-    const search = () => {
-        filtered_values.value = list.value.filter((item: any) => {
-            const search = (item.value ?? '') + (item.label ?? '') + (item.name ?? '') + (item[props.optionValue ?? 'value'] ?? '');
-            return toSearchableString(search).toLowerCase().includes(toSearchableString(temp_value_string.value));
-        });
+    const onGlobalKeydown = (event: KeyboardEvent) => {
+        if (event.key === 'Escape' && isOpen.value) hide();
+
     };
+
+    if (typeof window !== 'undefined') window.addEventListener('keydown', onGlobalKeydown);
+
+
+    onBeforeUnmount(() => {
+        if (typeof window !== 'undefined') window.removeEventListener('keydown', onGlobalKeydown);
+
+    });
 </script>
 
 <style lang="scss">
@@ -170,10 +336,23 @@
             z-index: 9;
             pointer-events: none;
         }
+    }
 
-        .p-autocomplete-option-group {
-            position: sticky !important;
-            top: 40px !important;
+    .p-autocomplete {
+        width: 100%;
+        position: relative;
+        display: flex;
+        align-items: center;
+
+        .p-autocomplete-input {
+            width: 100%;
+            height: 36px;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 0.9rem;
+            color: var(--text-c, #334155);
+            padding: 0 10px;
         }
     }
 
@@ -204,16 +383,35 @@
         }
     }
 
+    .max-autocomplete-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 1100;
+        background: transparent;
+    }
+
     .p-autocomplete-overlay {
-        width: auto !important;
+        position: fixed;
+        z-index: 1101;
+        background: var(--background-0, #fff);
+        border: 1px solid var(--surface-border, #e2e8f0);
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+        max-height: 240px;
+        overflow-y: auto;
+        scrollbar-width: thin;
 
-        .p-virtualscroller {
-            width: auto !important;
-            overflow-x: hidden;
-            contain: content !important;
+        .p-autocomplete-list {
+            list-style: none;
+            margin: 0;
+            padding: 4px 0;
 
-            .p-virtualscroller-content {
-                position: relative !important;
+            .p-autocomplete-item {
+                cursor: pointer;
+
+                &:hover, &.p-autocomplete-item-active {
+                    background-color: var(--background-100, #f1f5f9);
+                }
             }
         }
     }
@@ -222,14 +420,5 @@
         input {
             padding-left: 32px !important;
         }
-    }
-
-    .ref-div {
-        position: absolute;
-        width: 0;
-        height: 0;
-        top: 0;
-        left: 0;
-        z-index: -10;
     }
 </style>

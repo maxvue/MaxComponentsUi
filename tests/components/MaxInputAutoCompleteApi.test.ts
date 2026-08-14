@@ -8,7 +8,7 @@ vi.mock('@maxvue/max-use', async (importOriginal) => {
     const actual = await importOriginal() as any;
     return {
         ...actual,
-        getCachedApiIDB: vi.fn(() => Promise.resolve([{ label: 'Test', value: '1' }]))
+        getCachedApiIDB: vi.fn(() => Promise.resolve([{ label: 'Test', value: '1', model: 'Model Test', sub_label: 'Sub Test' }]))
     };
 });
 
@@ -21,10 +21,6 @@ function mountAutoCompleteApi(props: Record<string, any> = {}, attrs: Record<str
                 InputBase: {
                     template: '<div class="input-base"><slot /></div>',
                     props: ['done', 'caution']
-                },
-                AutoComplete: {
-                    template: '<div class="auto-complete" @blur="$emit(\'blur\')" @complete="$emit(\'complete\')"><slot name="option" :option="{ model: \'Model Test\', sub_label: \'Sub Test\' }" /></div>',
-                    props: ['suggestions', 'modelValue']
                 }
             }
         }
@@ -39,6 +35,7 @@ describe('MaxInputAutoCompleteApi.vue', () => {
 
     afterEach(() => {
         vi.restoreAllMocks();
+        document.body.innerHTML = '';
     });
 
     it('deve renderizar o componente', () => {
@@ -50,8 +47,6 @@ describe('MaxInputAutoCompleteApi.vue', () => {
         const wrapper = mountAutoCompleteApi({ data: { category: 1 } });
         await wrapper.vm.$nextTick();
 
-        // Argumentos adicionais (cache/callback) sao detalhe de implementacao;
-        // o contrato verificado aqui e a url e o payload da consulta.
         expect(maxUse.getCachedApiIDB).toHaveBeenCalled();
         const [url, payload] = (maxUse.getCachedApiIDB as any).mock.calls[0];
         expect(url).toBe('/api/test');
@@ -70,11 +65,6 @@ describe('MaxInputAutoCompleteApi.vue', () => {
 
     it('atualiza o valor quando modificado via props (não sobrescreve list)', async () => {
         const wrapper = mountAutoCompleteApi();
-        await wrapper.setProps({ modelValue: '1' });
-        // NOTE: the component doesn't actually have a watch for modelValue to temp_value !
-        // Wait, does MaxInputAutoCompleteApi watch modelValue? Let me check the code. No!
-        // The watch is only on `props.data` and `temp_value`. It doesn't watch props.modelValue like the other component did.
-        // Actually, let's test temp_value updating directly instead of modelValue.
         (wrapper.vm as any).temp_value = '1';
         expect((wrapper.vm as any).temp_value).toBe('1');
     });
@@ -105,19 +95,19 @@ describe('MaxInputAutoCompleteApi.vue', () => {
 
     it('calcula isDone corretamente no blur', async () => {
         const wrapper = mountAutoCompleteApi({ required: true, modelValue: '' });
-        await wrapper.find('.auto-complete').trigger('blur');
+        await wrapper.find('input').trigger('blur');
         expect((wrapper.vm as any).isDone).toBe(false);
     });
 
     it('calcula isDone = true quando required e tem valor no blur', async () => {
         const wrapper = mountAutoCompleteApi({ required: true, modelValue: 'algum valor' });
-        await wrapper.find('.auto-complete').trigger('blur');
+        await wrapper.find('input').trigger('blur');
         expect((wrapper.vm as any).isDone).toBe(true);
     });
 
     it('respeita prop done explícita', async () => {
         const wrapper = mountAutoCompleteApi({ done: true });
-        await wrapper.find('.auto-complete').trigger('blur');
+        await wrapper.find('input').trigger('blur');
         expect((wrapper.vm as any).isDone).toBe(true);
     });
 
@@ -135,7 +125,7 @@ describe('MaxInputAutoCompleteApi.vue', () => {
         ];
 
         (wrapper.vm as any).temp_value = 'açã';
-        await wrapper.vm.$nextTick(); // This triggers watch(temp_value) -> search()
+        await wrapper.vm.$nextTick();
 
         const filtered = (wrapper.vm as any).filtered_values;
         expect(filtered.length).toBe(1);
@@ -155,13 +145,19 @@ describe('MaxInputAutoCompleteApi.vue', () => {
         expect(wrapper.emitted('update:modelValue')?.[0][0]).toEqual(obj);
     });
 
-    it('renderiza o slot de option corretamente', () => {
-        const wrapper = mountAutoCompleteApi();
+    it('renderiza o slot de option corretamente', async () => {
+        const wrapper = mountAutoCompleteApi({ data: { fetch: 1 } });
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        await wrapper.vm.$nextTick();
 
-        const labelEl = wrapper.find('.autocomplete-item-select-label');
-        const subLabelEl = wrapper.find('.autocomplete-item-select-sub-label');
+        const input = wrapper.find('input');
+        await input.setValue('Test');
+        await wrapper.vm.$nextTick();
 
-        expect(labelEl.text()).toBe('Model Test');
-        expect(subLabelEl.text()).toBe('Sub Test');
+        const labelEl = document.body.querySelector('.autocomplete-item-select-label');
+        const subLabelEl = document.body.querySelector('.autocomplete-item-select-sub-label');
+
+        expect(labelEl?.textContent?.trim()).toBe('Model Test');
+        expect(subLabelEl?.textContent?.trim()).toBe('Sub Test');
     });
 });

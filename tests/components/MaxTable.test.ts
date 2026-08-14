@@ -16,25 +16,14 @@ vi.mock('@maxvue/max-use', async (importOriginal) => {
 function mountTable(props: Record<string, any> = {}, attrs: Record<string, any> = {}) {
     return mount(MaxTable, {
         props,
-        attrs: { value: [], ...attrs },
-        global: {
-            stubs: {
-                DataTable: {
-                    template: '<div class="p-datatable"><slot v-for="name in Object.keys($slots)" :name="name" /></div>',
-                    props: ['stripedRows']
-                },
-                Column: {
-                    template: '<div class="p-column"><slot name="body" :data="{}" :index="0" /></div>',
-                    props: ['header', 'style']
-                }
-            }
-        }
+        attrs: { value: [], ...attrs }
     });
 }
 
 describe('MaxTable', () => {
     beforeEach(() => {
         setActivePinia(createPinia());
+        mockWidth.value = 0;
     });
 
     it('renderiza corretamente', () => {
@@ -42,7 +31,7 @@ describe('MaxTable', () => {
         expect(wrapper.find('.max-table-main-div').exists()).toBe(true);
     });
 
-    it('renderiza DataTable internamente', () => {
+    it('renderiza container de tabela internamente', () => {
         const wrapper = mountTable();
         expect(wrapper.find('.p-datatable').exists()).toBe(true);
     });
@@ -57,15 +46,6 @@ describe('MaxTable', () => {
             attrs: { value: [] },
             slots: {
                 default: '<div class="custom-slot">Custom</div>'
-            },
-            global: {
-                stubs: {
-                    DataTable: {
-                        template: '<div class="p-datatable"><slot /></div>',
-                        props: ['stripedRows']
-                    },
-                    Column: { template: '<div></div>' }
-                }
             }
         });
         expect(wrapper.find('.custom-slot').exists()).toBe(true);
@@ -76,23 +56,9 @@ describe('MaxTable', () => {
             attrs: { value: [] },
             slots: {
                 buttons: '<button class="action-btn">Action</button>'
-            },
-            global: {
-                stubs: {
-                    DataTable: {
-                        template: `<div class="p-datatable">
-                            <slot />
-                            <slot name="buttons" :data="{}" :index="0" />
-                        </div>`
-                    },
-                    Column: {
-                        template: '<div class="p-column"><slot name="body" :data="{}" :index="0" /></div>'
-                    }
-                }
             }
         });
 
-        // O slot 'buttons' adiciona uma Column
         expect(wrapper.find('.p-column').exists()).toBe(true);
         expect(wrapper.find('.max-table-buttons').exists()).toBe(true);
         expect(wrapper.find('.action-btn').exists()).toBe(true);
@@ -117,20 +83,6 @@ describe('MaxTable', () => {
                 header: '<div class="header-slot">Header</div>',
                 footer: '<div class="footer-slot">Footer</div>',
                 buttons: '<button class="action-btn">Action</button>'
-            },
-            global: {
-                stubs: {
-                    DataTable: {
-                        template: `<div class="p-datatable">
-                            <slot name="header" />
-                            <slot name="footer" />
-                            <slot name="default" />
-                        </div>`
-                    },
-                    Column: {
-                        template: '<div class="p-column"><slot name="body" :data="{}" :index="0" /></div>'
-                    }
-                }
             }
         });
 

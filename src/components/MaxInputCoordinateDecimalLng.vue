@@ -1,6 +1,14 @@
 <template>
     <InputBase v-bind="props" :error="error" :caution="caution" :done="isDone">
-        <InputText number type="text" v-model="temp_value" v-maska="maskValue" autoClear="false" slotChar=" " fluid @blur="checkDone()" :placeholder="`00,000000`" />
+        <input
+            type="text"
+            class="p-inputtext p-component"
+            v-model="temp_value"
+            v-maska="maskValue"
+            @blur="checkDone()"
+            placeholder="00,000000"
+            :disabled="props.disabled"
+        />
     </InputBase>
 </template>
 
@@ -9,7 +17,6 @@
     import type { Ref } from 'vue';
     import { ref, computed, watch } from 'vue';
     import InputBase from './InputBase.vue';
-    import InputText from 'primevue/inputtext';
     import { vMaska } from 'maska/vue';
 
     const props = withDefaults(

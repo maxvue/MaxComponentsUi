@@ -1,21 +1,36 @@
 <template>
     <InputBase v-bind="props" :done="props.done ?? isDone" :error="props.error ?? error_msg" :caution="caution" class="max-input-color">
-        <ColorPicker v-model="modelValue" :defaultColor="props.defaultColor" :format="props.format" :inline="props.inline" :disabled="props.disabled" :panelClass="props.panelClass" :appendTo="props.appendTo" :autoZIndex="props.autoZIndex" :baseZIndex="props.baseZIndex" :inputId="props.inputId" :ariaLabel="props.ariaLabel" :ariaLabelledby="props.ariaLabelledby" />
-        <InputText v-model="modelValue" />
+        <label class="p-colorpicker-preview max-colorpicker-swatch" :style="{ backgroundColor: nativeColor }">
+            <input
+                type="color"
+                class="max-colorpicker-native"
+                :value="nativeColor"
+                :disabled="props.disabled"
+                :id="props.inputId"
+                :aria-label="props.ariaLabel"
+                :aria-labelledby="props.ariaLabelledby"
+                @input="onColorInput"
+            />
+        </label>
+        <input
+            type="text"
+            class="p-inputtext p-component"
+            v-model="modelValue"
+            :disabled="props.disabled"
+            :placeholder="props.placeholder"
+        />
     </InputBase>
 </template>
 
 /**
- * Componente de entrada de texto padrão.
- * Oferece suporte a validação de obrigatoriedade e comparação de valores.
+ * Componente de seleção e entrada de cores.
+ * Oferece preview com seletor de cores nativo e campo de texto sincronizado.
  */
 <script setup lang="ts">
-    import InputText from 'primevue/inputtext';
     import { toSearchableString, hasContent } from '@maxvue/max-use';
     import type { Ref } from 'vue';
     import { ref, computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
-    import ColorPicker from 'primevue/colorpicker';
 
     const modelValue = defineModel<any>({ default: '' });
     const attrs: any = useAttrs();
@@ -89,6 +104,26 @@
         }
     );
 
+    function toNativeHex(value: any): string {
+        if (!value || typeof value !== 'string') {
+            const def = props.defaultColor ? (props.defaultColor.startsWith('#') ? props.defaultColor : `#${props.defaultColor}`) : '#ff0000';
+            return def.length === 7 ? def : '#ff0000';
+        }
+        let s = value.trim();
+        if (!s.startsWith('#')) s = `#${s}`;
+        if (/^#[0-9a-fA-F]{6}$/.test(s)) return s;
+        if (/^#[0-9a-fA-F]{3}$/.test(s)) return `#${s[1]}${s[1]}${s[2]}${s[2]}${s[3]}${s[3]}`;
+
+        return '#ff0000';
+    }
+
+    const nativeColor = computed(() => toNativeHex(modelValue.value));
+
+    const onColorInput = (event: Event) => {
+        const val = (event.target as HTMLInputElement).value;
+        modelValue.value = val;
+    };
+
     const isDone: Ref = ref(props.done ?? null);
 
     const isEqual = computed(() => typeof props.targetValue === 'string' && hasContent(props.targetValue) ? toSearchableString(props.targetValue) === toSearchableString(modelValue.value) : null);
@@ -137,6 +172,25 @@
     .p-colorpicker-preview {
         outline: 1px solid var(--background-400);
         border-radius: 0.5rem;
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+        display: block;
+        position: relative;
+        overflow: hidden;
+
+        .max-colorpicker-native {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            border: none;
+            padding: 0;
+            margin: 0;
+        }
     }
 }
 </style>

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxInputAutoComplete from '../../src/components/MaxInputAutoComplete.vue';
@@ -12,10 +12,6 @@ function mountAutoComplete(props: Record<string, any> = {}, attrs: Record<string
                 InputBase: {
                     template: '<div class="input-base"><slot /></div>',
                     props: ['done', 'caution']
-                },
-                AutoComplete: {
-                    template: '<div class="auto-complete" @blur="$emit(\'blur\')" @complete="$emit(\'complete\')"><slot name="option" :option="options?.[0] || {}" /></div>',
-                    props: ['suggestions', 'modelValue', 'options']
                 }
             }
         }
@@ -25,6 +21,10 @@ function mountAutoComplete(props: Record<string, any> = {}, attrs: Record<string
 describe('MaxInputAutoComplete.vue', () => {
     beforeEach(() => {
         setActivePinia(createPinia());
+    });
+
+    afterEach(() => {
+        document.body.innerHTML = '';
     });
 
     it('deve renderizar o componente', () => {
@@ -69,22 +69,21 @@ describe('MaxInputAutoComplete.vue', () => {
 
     it('calcula isDone e caution corretamente no blur', async () => {
         const wrapper = mountAutoComplete({ required: true, modelValue: '' });
-        await wrapper.find('.auto-complete').trigger('blur');
+        await wrapper.find('input').trigger('blur');
 
         expect((wrapper.vm as any).isDone).toBe(false);
         expect((wrapper.vm as any).caution).toBe(true);
-
     });
 
     it('calcula isDone = true quando required e tem valor no blur', async () => {
         const wrapper = mountAutoComplete({ required: true, modelValue: 'algum valor' });
-        await wrapper.find('.auto-complete').trigger('blur');
+        await wrapper.find('input').trigger('blur');
         expect((wrapper.vm as any).isDone).toBe(true);
     });
 
     it('respeita prop done explícita', async () => {
         const wrapper = mountAutoComplete({ done: true });
-        await wrapper.find('.auto-complete').trigger('blur');
+        await wrapper.find('input').trigger('blur');
         expect((wrapper.vm as any).isDone).toBe(true);
     });
 
@@ -95,7 +94,9 @@ describe('MaxInputAutoComplete.vue', () => {
         ];
         const wrapper = mountAutoComplete({ modelValue: 'açã', options });
 
-        await wrapper.find('.auto-complete').trigger('complete');
+        const input = wrapper.find('input');
+        await input.setValue('açã');
+
         const filtered = (wrapper.vm as any).filtered_values;
         expect(filtered.length).toBe(1);
         expect(filtered[0].value).toBe('apple');
@@ -116,15 +117,19 @@ describe('MaxInputAutoComplete.vue', () => {
         expect(wrapper.emitted('update:modelValue')?.[0][0]).toEqual(obj);
     });
 
-    it('renderiza o slot de option corretamente', () => {
+    it('renderiza o slot de option corretamente', async () => {
         const options = [{ label: 'Item Label', subLabel: 'Sub Label Item' }];
         const wrapper = mountAutoComplete({ options, optionLabel: 'label' });
 
-        const labelEl = wrapper.find('.autocomplete-item-select-label');
-        const subLabelEl = wrapper.find('.autocomplete-item-select-sub-label');
+        const input = wrapper.find('input');
+        await input.setValue('Item');
+        await wrapper.vm.$nextTick();
 
-        expect(labelEl.text()).toBe('Item Label');
-        expect(subLabelEl.text()).toBe('Sub Label Item');
+        const labelEl = document.body.querySelector('.autocomplete-item-select-label');
+        const subLabelEl = document.body.querySelector('.autocomplete-item-select-sub-label');
+
+        expect(labelEl?.textContent?.trim()).toBe('Item Label');
+        expect(subLabelEl?.textContent?.trim()).toBe('Sub Label Item');
     });
 
     it('testIsDone fallback para null se nada casar', () => {
@@ -141,14 +146,11 @@ describe('MaxInputAutoComplete.vue', () => {
 
     it('caution computed quando isDone é falso mas caution é passado via prop', () => {
         const wrapper = mountAutoComplete({ caution: true, done: false });
-        // done prop overrides testIsDone, so isDone ref initialized to false
         expect((wrapper.vm as any).caution).toBe(true);
     });
 });
 
-// Cenários do forceSelection (issue #6): montam o AutoComplete REAL do PrimeVue,
-// pois o comportamento destrutivo vem do onChange interno dele.
-describe('MaxInputAutoComplete.vue — forceSelection (issue #6)', () => {
+describe('MaxInputAutoComplete.vue — forceSelection', () => {
     const option = { name: 'Sao Paulo', value: 'SP' };
 
     function mountReal(props: Record<string, any> = {}) {
@@ -168,6 +170,10 @@ describe('MaxInputAutoComplete.vue — forceSelection (issue #6)', () => {
 
     beforeEach(() => {
         setActivePinia(createPinia());
+    });
+
+    afterEach(() => {
+        document.body.innerHTML = '';
     });
 
     const typeAndChange = async (wrapper: any, texto: string) => {

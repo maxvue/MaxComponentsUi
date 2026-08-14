@@ -1,33 +1,120 @@
 <template>
-    <InputBase v-bind="{...props, ...attrs}" class="max-select-tag" input-click no-dropdown >
+    <InputBase v-bind="{ ...props, ...attrs }" class="max-select-tag" input-click no-dropdown>
         <div v-if="attrs.placeholder !== undefined && (!temp_value || temp_value === '')" class="tab-placeholder-select">
             {{ attrs.placeholder }}
         </div>
-        <Select v-bind="{...props, ...attrs}" v-model="temp_value" :filter="props.filter"  :loading="loading" @before-show="(before_show as any)" :options="options" :optionLabel="props.optionLabel" :optionValue="props.optionValue" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false" :disabled="props.disabled">
-            <template #option="slotProps">
-                <slot name="option" :option="slotProps.option" :selected="slotProps.selected" :index="slotProps.index">
-                    <div class="label-tag-div" :style="getStyleColor(slotProps.option, slotProps.option['hover'] ?? false, false)" @mouseenter="options.find(o => o['value'] === slotProps.option['value'])['hover'] = true" @mouseleave="options.find(o => o['value'] === slotProps.option['value'])['hover'] = false">
-                        <MaxIcon :icon="slotProps.option['icon']" v-if="slotProps.option['icon']" :size="slotProps.option?.['iconSize'] ?? '1'" :style="{ width: '30px'}" :color="getStyleColor(slotProps.option, false, false).color"/>
-                        <div class="label-tag">
-                            <div v-text="slotProps.option[props.optionLabel] ?? slotProps.option.label" :style="{ color: attrs.color }"></div>
+
+        <div
+            ref="triggerEl"
+            class="p-select"
+            :class="{ 'p-disabled': props.disabled, 'p-focus': isOpen }"
+            tabindex="0"
+            role="combobox"
+            :aria-expanded="isOpen"
+            @click.stop="toggle"
+            @keydown.enter.prevent="toggle"
+            @keydown.space.prevent="toggle"
+            @keydown.down.prevent="toggle"
+            @keydown.up.prevent="toggle"
+        >
+            <div class="p-select-label">
+                <slot name="value">
+                    <div
+                        class="value-tag-div"
+                        :style="getStyleColor(option_selected, false, true)"
+                        :color-string="getColorString(option_selected)"
+                        v-if="!isButton"
+                    >
+                        <MaxIcon
+                            :icon="option_selected?.icon ?? null"
+                            :size="option_selected?.icon_size ?? 1.4"
+                            pr10
+                            v-if="option_selected.icon"
+                            :color="getStyleColor(option_selected, false, true).color"
+                        />
+                        <div
+                            class="tag-value-text"
+                            :style="{ color: getStyleColor(option_selected, false, true).color }"
+                        >
+                            {{ option_selected?.[props.optionName] ?? option_selected?.name ?? option_selected?.label }}
                         </div>
-                        <div class="sub-label-tag" v-text="slotProps.option?.sub_label ?? slotProps.option?.sub ?? slotProps.option?.subLabel"></div>
-                        <img v-if="slotProps.option['img']" :src="`/media/images/${slotProps.option['img']}`" alt="Image" class="img-label" />
+                        <slot name="btn-right"></slot>
+                    </div>
+                    <div v-else>
+                        <MaxIconButton :icon="props.i ?? props.icon ?? props.iconLeft" :size="option_selected?.icon_size ?? 1.8" />
                     </div>
                 </slot>
-            </template>
-            <template #value>
-                <div class="value-tag-div" :style="getStyleColor(option_selected, false, true)" :color-string="getColorString(option_selected)" v-if="! isButton" >
-                    <MaxIcon :icon="option_selected?.icon ?? null" :size="option_selected?.icon_size ?? 1.4" pr10 v-if="option_selected.icon" :color="getStyleColor(option_selected, false, true).color" />
-                    <div class="tag-value-text" :style="{color: getStyleColor(option_selected, false, true).color}" >{{ option_selected?.[props.optionName] ?? option_selected?.name ?? option_selected?.label }}</div>
-                    <slot name="btn-right">
-                    </slot>
+            </div>
+        </div>
+
+        <Teleport to="body">
+            <div v-if="isOpen" class="max-select-backdrop" @click="hide">
+                <div
+                    ref="overlayEl"
+                    class="p-select-overlay"
+                    role="listbox"
+                    :style="{ top: position.top + 'px', left: position.left + 'px', minWidth: position.minWidth }"
+                    @click.stop
+                >
+                    <div v-if="props.filter" class="p-select-header">
+                        <div class="p-select-filter-container">
+                            <input
+                                type="text"
+                                class="p-select-filter"
+                                v-model="searchQuery"
+                                placeholder="Pesquisar..."
+                                autofocus
+                                @click.stop
+                            />
+                        </div>
+                    </div>
+
+                    <div class="p-select-list-container">
+                        <div v-if="loading" class="p-select-empty-message">
+                            Carregando...
+                        </div>
+                        <template v-else-if="filteredOptions.length > 0">
+                            <div class="p-select-list">
+                                <div
+                                    v-for="(option, index) in (filteredOptions as any[])"
+                                    :key="index"
+                                    class="p-select-option"
+                                    :class="{ 'p-select-option-selected': option[props.optionValue] === temp_value }"
+                                    role="option"
+                                    :aria-selected="option[props.optionValue] === temp_value"
+                                    @click.stop="selectOption(option)"
+                                >
+                                    <slot name="option" :option="option" :selected="option[props.optionValue] === temp_value" :index="index">
+                                        <div
+                                            class="label-tag-div"
+                                            :style="getStyleColor(option, option['hover'] ?? false, false)"
+                                            @mouseenter="option['hover'] = true"
+                                            @mouseleave="option['hover'] = false"
+                                        >
+                                            <MaxIcon
+                                                :icon="option['icon']"
+                                                v-if="option['icon']"
+                                                :size="option?.['iconSize'] ?? '1'"
+                                                :style="{ width: '30px' }"
+                                                :color="getStyleColor(option, false, false).color"
+                                            />
+                                            <div class="label-tag">
+                                                <div v-text="option[props.optionLabel] ?? option.label" :style="{ color: attrs.color }"></div>
+                                            </div>
+                                            <div class="sub-label-tag" v-text="option?.sub_label ?? option?.sub ?? option?.subLabel"></div>
+                                            <img v-if="option['img']" :src="`/media/images/${option['img']}`" alt="Image" class="img-label" />
+                                        </div>
+                                    </slot>
+                                </div>
+                            </div>
+                        </template>
+                        <div v-else class="p-select-empty-message">
+                            {{ attrs.emptyMessage ?? 'Nenhum registro encontrado' }}
+                        </div>
+                    </div>
                 </div>
-                <div v-else>
-                    <MaxIconButton :icon="props.i ?? props.icon ?? props.iconLeft" :size="option_selected?.icon_size ?? 1.8" />
-                </div>
-            </template>
-        </Select>
+            </div>
+        </Teleport>
     </InputBase>
 </template>
 
@@ -36,12 +123,12 @@
  * Suporta opções simples, agrupadas e carregamento dinâmico via callback.
  */
 <script setup lang="ts">
-    import { ref, computed, watch, useAttrs, Ref } from 'vue';
+    import { ref, computed, watch, useAttrs, onBeforeUnmount, Ref } from 'vue';
     import InputBase from './InputBase.vue';
-    import Select from 'primevue/select';
     import { SelectGroupOptions } from '../types';
-    import { getColorFromVar, contrastColor, isBlank, watchDebounced } from '@maxvue/max-use';
+    import { getColorFromVar, contrastColor, isBlank, watchDebounced, useElementBounding, useElementSize, useWindowSize } from '@maxvue/max-use';
     import MaxIcon from './MaxIcon.vue';
+    import MaxIconButton from './MaxIconButton.vue';
 
     const attrs: any = useAttrs();
 
@@ -90,9 +177,22 @@
             hasRemove?: boolean | undefined;
             isButton?: boolean | undefined;
             backgroundColor?: string;
-
         }>(),
-        { modelValue: null, done: undefined, optionValue: 'value', optionName: 'name', filter: false, optionLabel: 'label', error: undefined, caution: undefined, required: false, default: undefined, disabled: false, isButton: false, backgroundColor: 'var(--background-500)' }
+        {
+            modelValue: null,
+            done: undefined,
+            optionValue: 'value',
+            optionName: 'name',
+            filter: false,
+            optionLabel: 'label',
+            error: undefined,
+            caution: undefined,
+            required: false,
+            default: undefined,
+            disabled: false,
+            isButton: false,
+            backgroundColor: 'var(--background-500)'
+        }
     );
 
     const getColorString = (item: any) => {
@@ -109,11 +209,10 @@
 
         let background = hover ? color.darken(0.2).hexa() : color.hexa();
         let text = contrastColor(background);
-        if (color_string === 'unset' && ! is_value) {
+        if (color_string === 'unset' && !is_value) {
             background = hover ? 'rgba(0,0,0, 0.1)' : 'transparent';
             text = hover ? 'var(--background-600)' : 'var(--background-650)';
         }
-
 
         return {
             backgroundColor: background,
@@ -128,16 +227,47 @@
     const temp_value = ref<any>(props.modelValue);
 
     watch(temp_value, (val) => emit('update:modelValue', val));
-    watch(() => props.modelValue, (val) => temp_value.value = val);
+    watch(() => props.modelValue, (val) => (temp_value.value = val));
 
+    const isOpen = ref(false);
     const loading = ref(false);
     const optionsField: Ref<any[]> = ref([]);
+    const searchQuery = ref('');
+
+    const triggerEl = ref<HTMLElement | null>(null);
+    const overlayEl = ref<HTMLElement | null>(null);
+
+    const { x, y, width: width_btn, height: height_btn } = useElementBounding(triggerEl as any);
+    const { width: width_el, height: height_el } = useElementSize(overlayEl as any);
+    const { width: window_width, height: window_height } = useWindowSize();
+
+    const position = computed(() => {
+        const targetX = x.value;
+        const targetY = y.value;
+        const targetW = width_btn.value;
+        const targetH = height_btn.value;
+
+        let top = targetY + targetH + 2;
+        let left = targetX;
+        const minW = Math.max(targetW, 140);
+
+        if (top + (height_el.value || 200) > window_height.value && targetY - (height_el.value || 200) > 0) top = targetY - (height_el.value || 200) - 2;
+
+
+        if (left + (width_el.value || minW) > window_width.value) left = Math.max(10, window_width.value - (width_el.value || minW) - 10);
+
+
+        return {
+            top,
+            left,
+            minWidth: minW + 'px'
+        };
+    });
 
     const options = computed(() => {
-        const options = (optionsField.value && optionsField.value.length > 0) ? optionsField.value : (props.options ?? props.groupOptions ?? []);
-        options?.map((option: any) => option.hover ??= false);
-
-        return options;
+        const list = (optionsField.value && optionsField.value.length > 0) ? optionsField.value : (props.options ?? props.groupOptions ?? []);
+        list?.map((option: any) => (option.hover ??= false));
+        return list;
     });
 
     const option_selected = computed(() => {
@@ -147,10 +277,6 @@
 
         const groups = Object.values(options.value) as any[];
         for (const group of groups) {
-            // MaxTagSelect não tem modo agrupado real (sem prop `groupOptions`); `options.value`
-            // é sempre uma lista plana. Este guard só existe para o caso de `loadOptions`
-            // retornar itens sem `.items`, buscando a opção diretamente no item em vez de
-            // assumir a forma de grupo (evita TypeError em runtime).
             if (!group || !Array.isArray(group.items)) {
                 if (group?.[valueKey] === temp_value.value) return group;
                 continue;
@@ -159,6 +285,20 @@
             if (found) return found;
         }
         return {};
+    });
+
+    const filteredOptions = computed(() => {
+        const raw = options.value;
+        if (!props.filter || !searchQuery.value.trim()) return raw;
+
+        const q = searchQuery.value.toLowerCase().trim();
+        const labelKey = props.optionLabel;
+
+        return (raw as any[]).filter((opt: any) => {
+            const txt = String(opt[labelKey] ?? opt.label ?? opt.name ?? '').toLowerCase();
+            const sub = String(opt.sub_label ?? opt.sub ?? opt.subLabel ?? '').toLowerCase();
+            return txt.includes(q) || sub.includes(q);
+        });
     });
 
     async function before_show(event: any) {
@@ -173,11 +313,46 @@
         }
     }
 
-    watchDebounced(() => props.modelValue, () => {
-        if (isBlank(props.modelValue) && props.default !== undefined) temp_value.value = props.default;
+    const toggle = async (event?: any) => {
+        if (props.disabled) return;
+        if (!isOpen.value) {
+            await before_show(event);
+            searchQuery.value = '';
+            isOpen.value = true;
+        } else hide();
+
+    };
+
+    const hide = () => {
+        isOpen.value = false;
+    };
+
+    const selectOption = (opt: any) => {
+        const val = opt?.[props.optionValue] ?? opt;
+        temp_value.value = val;
+        hide();
+    };
+
+    const onKeydown = (event: KeyboardEvent) => {
+        if (event.key === 'Escape' && isOpen.value) hide();
+
+    };
+
+    if (typeof window !== 'undefined') window.addEventListener('keydown', onKeydown);
 
 
-    }, { deep: true, debounce: 500 });
+    onBeforeUnmount(() => {
+        if (typeof window !== 'undefined') window.removeEventListener('keydown', onKeydown);
+
+    });
+
+    watchDebounced(
+        () => props.modelValue,
+        () => {
+            if (isBlank(props.modelValue) && props.default !== undefined) temp_value.value = props.default;
+        },
+        { deep: true, debounce: 500 }
+    );
 </script>
 
 <style lang="scss">
@@ -197,6 +372,10 @@
     .p-select {
         width: 100%;
         height: 36px !important;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        outline: none;
     }
 
     .p-select-label {
@@ -206,6 +385,7 @@
         place-items: center start;
         outline: none !important;
         height: 32px !important;
+        flex: 1;
 
         &:focus {
             border: none !important;
@@ -224,7 +404,7 @@
         place-items: center;
         width: 100%;
         height: 100%;
-        pointer-events: none; /* O clique atravessa a div */
+        pointer-events: none;
     }
 
     &[flex], &[full] {
@@ -286,6 +466,9 @@
 }
 
 .p-select-option {
+    cursor: pointer;
+    padding: 2px 4px;
+
     .category {
         width: 20px;
         margin-right: 10px;
@@ -295,15 +478,35 @@
     }
 }
 
-
 .p-select-header {
     box-shadow: 0 7px 12px 5px #fff !important;
-    padding-bottom: 0 !important;
+    padding: 6px !important;
     z-index: 1 !important;
+
+    .p-select-filter-container {
+        width: 100%;
+
+        .p-select-filter {
+            width: 100%;
+            padding: 4px 8px;
+            border: 1px solid var(--surface-border, #e2e8f0);
+            border-radius: 4px;
+            outline: none;
+            font-size: 0.85rem;
+        }
+    }
 }
 
-
 .p-select-overlay {
+    position: fixed;
+    z-index: 1101;
+    background: var(--background-0, #fff);
+    border: 1px solid var(--surface-border, #e2e8f0);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     transform: translateY(-10px);
 
     &:has(.label-tag-div) {
@@ -313,6 +516,8 @@
 
         .p-select-list {
             gap: 5px !important;
+            display: flex;
+            flex-direction: column;
         }
 
         .p-select-list-container {
@@ -329,10 +534,11 @@
 
 .p-select-list-container {
     scrollbar-width: thin;
+    overflow-y: auto;
 
     ::-webkit-scrollbar {
-        width: 3px;  /* Define a largura como 0 */
-        height: 3px; /* Altura da barra horizontal */
+        width: 3px;
+        height: 3px;
     }
 
     .p-virtualscroller {

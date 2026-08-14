@@ -1,34 +1,30 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxUserSection from '../../src/components/MaxUserSection.vue';
 
-// Stub do TieredMenu que renderiza o slot #item para cada entrada do model,
-// permitindo inspecionar labels e disparar os execs.
-const TieredMenuStub = {
-    template: '<div class="tiered-menu"><template v-for="(item, i) in model" :key="i"><slot name="item" :item="item" /></template></div>',
-    props: ['model'],
-    methods: {
-        toggle() {}
-    }
-};
-
-function mountSection(props: Record<string, any> = {}) {
-    return mount(MaxUserSection, {
+function mountSection(props: Record<string, any> = {}, openMenu = true) {
+    const wrapper = mount(MaxUserSection, {
         props,
         global: {
             stubs: {
-                TieredMenu: TieredMenuStub,
                 MaxUserAvatar: { template: '<div class="max-user-avatar" />' },
                 MaxIcon: { template: '<i class="max-icon" />' }
             }
         }
     });
+    if (openMenu) (wrapper.vm as any).show();
+
+    return wrapper;
 }
 
 describe('MaxUserSection', () => {
     beforeEach(() => {
         setActivePinia(createPinia());
+    });
+
+    afterEach(() => {
+        document.body.innerHTML = '';
     });
 
     it('renderiza corretamente', () => {
@@ -57,46 +53,61 @@ describe('MaxUserSection', () => {
         expect(mountSection({ name: 'João', userId: 1 }).find('.max-user-avatar').exists()).toBe(true);
     });
 
-    it('usa labels padrão em pt-BR no menu', () => {
-        const wrapper = mountSection({ name: 'João', userId: 1 });
-        const labels = wrapper.findAll('.main-item-menu-div').map((d) => d.text());
+    it('usa labels padrão em pt-BR no menu', async () => {
+        const _wrapper = mountSection({ name: 'João', userId: 1 });
+        await _wrapper.vm.$nextTick();
+        const labels = Array.from(document.body.querySelectorAll('.main-item-menu-div')).map((d) => d.textContent?.trim());
         expect(labels).toContain('Meu perfil');
         expect(labels).toContain('Configurações');
         expect(labels).toContain('Suporte');
         expect(labels).toContain('Sair');
     });
 
-    it('permite sobrescrever as labels', () => {
-        const wrapper = mountSection({ name: 'João', userId: 1, labelProfile: 'My profile' });
-        const labels = wrapper.findAll('.main-item-menu-div').map((d) => d.text());
+    it('permite sobrescrever as labels', async () => {
+        const _wrapper = mountSection({ name: 'João', userId: 1, labelProfile: 'My profile' });
+        await _wrapper.vm.$nextTick();
+        const labels = Array.from(document.body.querySelectorAll('.main-item-menu-div')).map((d) => d.textContent?.trim());
         expect(labels).toContain('My profile');
     });
 
-    it('alterna o label de dark mode conforme a prop darkMode', () => {
-        const off = mountSection({ name: 'João', userId: 1, darkMode: false })
-            .findAll('.main-item-menu-div').map((d) => d.text());
-        expect(off).toContain('Ativar Modo escuro');
+    it('alterna o label de dark mode conforme a prop darkMode', async () => {
+        const off = mountSection({ name: 'João', userId: 1, darkMode: false });
+        await off.vm.$nextTick();
+        let labels = Array.from(document.body.querySelectorAll('.main-item-menu-div')).map((d) => d.textContent?.trim());
+        expect(labels).toContain('Ativar Modo escuro');
 
-        const on = mountSection({ name: 'João', userId: 1, darkMode: true })
-            .findAll('.main-item-menu-div').map((d) => d.text());
-        expect(on).toContain('Desativar Modo escuro');
+        document.body.innerHTML = '';
+        const on = mountSection({ name: 'João', userId: 1, darkMode: true });
+        await on.vm.$nextTick();
+        labels = Array.from(document.body.querySelectorAll('.main-item-menu-div')).map((d) => d.textContent?.trim());
+        expect(labels).toContain('Desativar Modo escuro');
     });
 
-    it('exibe a versão como última linha do menu quando fornecida', () => {
-        const wrapper = mountSection({ name: 'João', userId: 1, version: '1.2.3' });
-        expect(wrapper.text()).toContain('Versão: 1.2.3');
+    it('exibe a versão como última linha do menu quando fornecida', async () => {
+        const _wrapper = mountSection({ name: 'João', userId: 1, version: '1.2.3' });
+        await _wrapper.vm.$nextTick();
+        expect(document.body.textContent).toContain('Versão: 1.2.3');
     });
 
     it('emite os eventos correspondentes ao clicar nos itens do menu', async () => {
         const wrapper = mountSection({ name: 'João', userId: 1, darkMode: false });
+        await wrapper.vm.$nextTick();
         const itemBy = (label: string) =>
-            wrapper.findAll('.main-item-menu-div').find((d) => d.text() === label)!;
+            Array.from(document.body.querySelectorAll('.main-item-menu-div')).find((d) => d.textContent?.trim() === label) as HTMLElement;
 
-        await itemBy('Meu perfil').trigger('click');
-        await itemBy('Configurações').trigger('click');
-        await itemBy('Ativar Modo escuro').trigger('click');
-        await itemBy('Suporte').trigger('click');
-        await itemBy('Sair').trigger('click');
+        itemBy('Meu perfil').click();
+        (wrapper.vm as any).show();
+        await wrapper.vm.$nextTick();
+        itemBy('Configurações').click();
+        (wrapper.vm as any).show();
+        await wrapper.vm.$nextTick();
+        itemBy('Ativar Modo escuro').click();
+        (wrapper.vm as any).show();
+        await wrapper.vm.$nextTick();
+        itemBy('Suporte').click();
+        (wrapper.vm as any).show();
+        await wrapper.vm.$nextTick();
+        itemBy('Sair').click();
 
         expect(wrapper.emitted('profile')).toHaveLength(1);
         expect(wrapper.emitted('settings')).toHaveLength(1);
@@ -118,10 +129,11 @@ describe('MaxUserSection', () => {
         expect(wrapper.find('.impersonated-btn').exists()).toBe(false);
     });
 
-    it('respeita o override do menu via prop items', () => {
+    it('respeita o override do menu via prop items', async () => {
         const items = [{ label: 'Custom', icon: 'mdi:star', exec: () => {} }];
-        const wrapper = mountSection({ name: 'João', userId: 1, items });
-        const labels = wrapper.findAll('.main-item-menu-div').map((d) => d.text());
+        const _wrapper = mountSection({ name: 'João', userId: 1, items });
+        await _wrapper.vm.$nextTick();
+        const labels = Array.from(document.body.querySelectorAll('.main-item-menu-div')).map((d) => d.textContent?.trim());
         expect(labels).toEqual(['Custom']);
     });
 });

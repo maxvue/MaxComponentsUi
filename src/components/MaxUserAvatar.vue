@@ -1,6 +1,13 @@
 <template>
-    <Avatar :image="props.imageUrl" shape="circle" v-if="props.imageUrl" :class="{ removable: remove }" @click="onAvatarClick" v-tooltip.top="showTooltip ? (remove ? (labelRemove ?? name) : name) : null" />
-    <Avatar :label="name?.substring(0, 2).toUpperCase() ?? '' " style="background-color: #ece9fc; color: #2a1261;" shape="circle" pointer v-else :class="{ removable: remove }" @click="onAvatarClick" v-tooltip.top="showTooltip ? (remove ? (labelRemove ?? name) : name) : null" />
+    <div
+        class="p-avatar max-user-avatar"
+        :class="{ removable: remove }"
+        @click="onAvatarClick"
+        v-tooltip.top="showTooltip ? (remove ? (labelRemove ?? name) : name) : null"
+    >
+        <img v-if="props.imageUrl" class="max-user-avatar__image" :src="props.imageUrl" :alt="name ?? ''" />
+        <span v-else class="max-user-avatar__initials">{{ name?.substring(0, 2).toUpperCase() ?? '' }}</span>
+    </div>
 </template>
 
 /**
@@ -10,8 +17,6 @@
  * solicita confirmação (via useConfirmStore) antes de emitir o evento `remove`.
  */
 <script setup lang="ts">
-
-    import Avatar from 'primevue/avatar';
     import { useConfirmStore } from '../stores/useConfirm.Store';
 
     const confirm_store = useConfirmStore();
@@ -31,7 +36,6 @@
         remove?: boolean;
         /** Mensagem/label exibida na confirmação de remoção */
         labelRemove?: string;
-
     }>(), {
         showTooltip: true,
         route: null
@@ -53,10 +57,40 @@
         confirm_store.acceptProps = { label: 'Remover', icon: 'trash', action: () => emit('remove') };
         confirm_store.show = true;
     };
-
 </script>
 
 <style lang="scss">
+    .p-avatar.max-user-avatar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        overflow: hidden;
+        font-size: 0.875rem;
+        line-height: 1;
+        user-select: none;
+        position: relative;
+    }
+
+    .max-user-avatar__image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .max-user-avatar__initials {
+        width: 100%;
+        height: 100%;
+        display: grid;
+        place-items: center;
+        background-color: #ece9fc;
+        color: #2a1261;
+        font-weight: 600;
+    }
+
     .p-avatar.removable {
         position: relative;
         cursor: pointer;

@@ -1,29 +1,78 @@
 <template>
     <div v-if="showed && hasContent(toolbar.items)" ref="element_ref" :class="`tool-bar-top-main-div ${attrs.plus === true ? 'onlyOne' : ''}`">
-        <Menubar ref="menu_ref" :model="toolbar.items" class="menu_bar_project_top">
-            <template #item="{ item, root, label }">
-                <div v-if="item.divider" class="divider-space"></div>
-                <div v-else-if="hasContent(label)" pointer w-flex class="menu-item-content" :class="{ root: root }" @click="handleItemClick(item)">
-                    <MaxIconButton v-if="item.icon" :icon="item.icon" :size="item.icon_size" transparent />
-                    <div class="menu-item-labels">
-                        <span class="menu-item-label">{{ label }}</span>
-                        <span v-if="item.subLabel" class="menu-item-sublabel">{{ item.subLabel }}</span>
+        <nav ref="menu_ref" class="menu_bar_project_top" role="menubar">
+            <ul class="p-menubar-root-list">
+                <li
+                    v-for="(item, index) in toolbar.items"
+                    :key="index"
+                    class="p-menubar-item"
+                    role="none"
+                    @mouseenter="activeSubmenu = index"
+                    @mouseleave="activeSubmenu = null"
+                >
+                    <div class="p-menubar-item-content">
+                        <div v-if="item.divider" class="divider-space"></div>
+                        <div
+                            v-else-if="hasContent(item.label)"
+                            pointer
+                            w-flex
+                            class="menu-item-content root"
+                            @click="handleItemClick(item)"
+                        >
+                            <MaxIconButton v-if="item.icon" :icon="item.icon" :size="item.icon_size" transparent />
+                            <div class="menu-item-labels">
+                                <span class="menu-item-label">{{ item.label }}</span>
+                                <span v-if="item.subLabel" class="menu-item-sublabel">{{ item.subLabel }}</span>
+                            </div>
+                        </div>
+                        <MaxIconButton
+                            v-else
+                            v-tooltip.bottom="item.tooltip ?? false"
+                            :icon="item.icon"
+                            light
+                            transparent
+                            :route="item.route ?? null"
+                            :action="item.action"
+                            :data="item.data ?? item.props ?? item.query"
+                            class="root"
+                            size="1.5"
+                        />
                     </div>
-                </div>
-                <MaxIconButton
-                    v-else
-                    v-tooltip.bottom="item.tooltip ?? false"
-                    :icon="item.icon"
-                    light
-                    transparent
-                    :route="item.route ?? null"
-                    :action="item.action"
-                    :data="item.data ?? item.props ?? item.query"
-                    :class="`${root ? 'root' : ''}`"
-                    size="1.5"
-                />
-            </template>
-        </Menubar>
+
+                    <!-- Submenu se houver item.items -->
+                    <ul v-if="item.items && item.items.length && activeSubmenu === index" class="p-menubar-submenu" role="menu">
+                        <li v-for="(subItem, subIndex) in item.items" :key="subIndex" class="p-menubar-item" role="none">
+                            <div class="p-menubar-item-content">
+                                <div
+                                    v-if="hasContent(subItem.label)"
+                                    pointer
+                                    w-flex
+                                    class="menu-item-content"
+                                    @click="handleItemClick(subItem)"
+                                >
+                                    <MaxIconButton v-if="subItem.icon" :icon="subItem.icon" :size="subItem.icon_size" transparent />
+                                    <div class="menu-item-labels">
+                                        <span class="menu-item-label">{{ subItem.label }}</span>
+                                        <span v-if="subItem.subLabel" class="menu-item-sublabel">{{ subItem.subLabel }}</span>
+                                    </div>
+                                </div>
+                                <MaxIconButton
+                                    v-else
+                                    v-tooltip.bottom="subItem.tooltip ?? false"
+                                    :icon="subItem.icon"
+                                    light
+                                    transparent
+                                    :route="subItem.route ?? null"
+                                    :action="subItem.action"
+                                    :data="subItem.data ?? subItem.props ?? subItem.query"
+                                    size="1.5"
+                                />
+                            </div>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
     </div>
     <slot name="plus"></slot>
 </template>
@@ -31,7 +80,6 @@
 <script setup lang="ts">
     import { ref, computed, useAttrs } from 'vue';
     import { hasContent } from '@maxvue/max-use';
-    import Menubar from 'primevue/menubar';
     import MaxIconButton from './MaxIconButton.vue';
     import { useTopToolbarStore } from '../stores/useTopToolbar.Store';
 
@@ -40,6 +88,7 @@
 
     const element_ref = ref();
     const menu_ref = ref();
+    const activeSubmenu = ref<number | null>(null);
 
     const showed = computed(() => (attrs.plus === true ? true : toolbar.show));
 
@@ -64,10 +113,6 @@
         .menu_bar_project_top {
             top: 5px;
             padding: 0 !important;
-
-            // O preset padrão do PrimeVue desenha borda clara e cantos
-            // arredondados no menubar, pensados para fundo claro. Aqui a barra
-            // fica sobre o topo escuro, então a moldura é removida.
             border: none !important;
             border-radius: 0 !important;
             background-color: var(--blue-850) !important;
@@ -75,9 +120,14 @@
 
             .p-menubar-root-list {
                 display: flex;
+                list-style: none;
+                margin: 0;
+                padding: 0;
 
                 // TODOS ITEMS
                 .p-menubar-item {
+                    position: relative;
+
                     &:has(.divider-space) {
                         opacity: 0;
 
@@ -89,7 +139,6 @@
                             width: 5px !important;
                         }
                     }
-
 
                     .p-menubar-item-content {
                         height: 40px !important;
@@ -138,8 +187,10 @@
                         }
                     }
 
-
                     .p-menubar-submenu {
+                        list-style: none;
+                        margin: 0;
+                        padding: 0;
                         left: unset;
                         right: 100% !important;
                         transform: translateX(100%) translateY(10px) !important;
@@ -147,30 +198,9 @@
                         width: max-content !important;
                         position: absolute;
                         z-index: 99999 !important;
-
-                        .p-menubar-submenu {
-                            left: unset !important;
-                            right: 0 !important;
-                            width: max-content !important;
-                            transform: translateX(calc(100% + 10px)) translateY(6px) !important;
-                            position: absolute;
-                            overflow: visible;
-                            z-index: 99999 !important;
-
-                            &::after {
-                                content: '';
-                                position: absolute;
-                                top: 7px;
-                                left: -8px;
-                                width: 8px;
-                                height: 12px;
-                                border-bottom: 1px solid var(--primary-200);
-                                border-top: 1px solid var(--primary-200);
-                                border-left: 3px solid var(--background-0);
-                                border-right: 3px solid var(--background-0);
-                                background: var(--primary-0) !important;
-                            }
-                        }
+                        background: var(--background-0, #fff);
+                        box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+                        border-radius: 4px;
 
                         .p-menubar-item {
                             .p-menubar-item-content {
@@ -189,11 +219,9 @@
                             }
                         }
                     }
-
-
                 }
 
-                // DEFINIÇÕES PARA BARRA DE MENUS (PRIMEIRA CAMADA DE ITENS);
+                // DEFINIÇÕES PARA BARRA DE MENUS (PRIMEIRA CAMADA DE ITENS)
                 > .p-menubar-item {
                     position: relative;
 

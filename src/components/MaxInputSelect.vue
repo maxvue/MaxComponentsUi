@@ -1,56 +1,139 @@
 <template>
-    <InputBase v-bind="{...props, ...attrsWithoutModelProps}" class="select_input_div" >
+    <InputBase v-bind="{ ...props, ...attrsWithoutModelProps }" class="select_input_div">
         <div v-if="attrs.placeholder !== undefined && (!temp_value || temp_value === '')" class="placeholder-select">
             {{ attrs.placeholder }}
         </div>
-        <Select v-bind="attrsWithoutModelProps" v-if="props.groupOptions !== undefined" :filter="props.filter"  v-model="temp_value" :loading="loading" @before-show="(before_show as any)" :options="options" optionGroupLabel="label" optionGroupChildren="items" :optionValue="'value'" :optionLabel="'label'" ref="elem" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false" :disabled="props.disabled">
-            <template #option="slotProps">
-                <slot name="option" :option="slotProps.option" :selected="slotProps.selected" :index="slotProps.index">
-                    <div class="label_div">
-                        <Icon :icon="slotProps.option['icon']" v-if="slotProps.option['icon']" :size="slotProps.option['iconSize'] ?? '1'" :style="{ width: '30px' }" />
-                        <div class="labelz">
-                            <div v-text="slotProps.option.label" :style="{ color: attrs.color }"></div>
-                        </div>
-                        <div class="subLabel" v-text="slotProps.option?.sub_label ?? slotProps.option?.sub ?? slotProps.option?.subLabel"></div>
+
+        <div
+            ref="triggerEl"
+            class="p-select"
+            :class="{ 'p-disabled': props.disabled, 'p-focus': isOpen }"
+            tabindex="0"
+            role="combobox"
+            :aria-expanded="isOpen"
+            @click.stop="toggle"
+            @keydown.enter.prevent="toggle"
+            @keydown.space.prevent="toggle"
+            @keydown.down.prevent="toggle"
+            @keydown.up.prevent="toggle"
+        >
+            <div class="p-select-label">
+                <slot name="value" :value="temp_value">
+                    <div
+                        class="value-div"
+                        v-if="option_selected && Object.keys(option_selected).length > 0"
+                        :style="{ color: option_selected.color }"
+                    >
+                        <MaxIcon
+                            :icon="option_selected.icon ?? null"
+                            :size="option_selected.icon_size ?? undefined"
+                            :style="{ paddingRight: option_selected.icon ? '10px' : '0' }"
+                        />
+                        <span class="value-text" elipsis>{{ option_selected[props.optionName] ?? option_selected.name ?? option_selected.label }}</span>
                     </div>
                 </slot>
-            </template>
-            <template #optiongroup="slotProps">
-                <div class="label_div">
-                    <div class="labelz">
-                        <div>{{ slotProps.option.label }}</div>
-                    </div>
-                </div>
-            </template>
-            <template #value="value">
-                <div class="value-div" :style="{ color: options.find((option: any) => option[props.optionValue ] === value.value)?.color }">
-                    <Icon :icon="option_selected.icon ?? null" :size="option_selected.icon_size ?? undefined" />
-                    <span class="value-text">{{ option_selected[props.optionName] ?? option_selected.name ?? option_selected.label }}</span>
-                </div>
-            </template>
-        </Select>
-        <!-- SELECT NORMAL -->
-        <Select v-bind="attrsWithoutModelProps" v-else v-model="temp_value" :filter="props.filter"  :loading="loading" @before-show="(before_show as any)" :options="options" :optionLabel="props.optionLabel" :optionValue="props.optionValue" :emptyMessage="attrs.emptyMessage ?? 'Nenhum registro encontrado'" :editable="attrs.editable ?? false" :disabled="props.disabled">
-            <template #option="slotProps">
-                <slot name="option" :option="slotProps.option" :selected="slotProps.selected" :index="slotProps.index">
-                    <div :class="`category ${slotProps.option.category}`" v-if="attrs.category === true">{{ slotProps.option.category === 'UTILITY' ? 'A' : '' }}{{ slotProps.option.category === 'MARKETING' ? 'B' : '' }}</div>
-                    <div class="label_div">
-                        <Icon :icon="slotProps.option['icon']" v-if="slotProps.option['icon']" :size="slotProps.option?.['iconSize'] ?? '1'" :style="{ width: '30px' }" />
-                        <div class="labelz">
-                            <div v-text="slotProps.option[props.optionLabel] ?? slotProps.option.label ?? slotProps.option.name" :style="{ color: attrs.color }"></div>
+            </div>
+
+            <div class="p-select-dropdown" aria-hidden="true">
+                <MaxIcon icon="lucide:chevron-down" size="1" />
+            </div>
+        </div>
+
+        <Teleport to="body">
+            <div v-if="isOpen" class="max-select-backdrop" @click="hide">
+                <div
+                    ref="overlayEl"
+                    class="p-select-overlay"
+                    role="listbox"
+                    :style="{ top: position.top + 'px', left: position.left + 'px', minWidth: position.minWidth }"
+                    @click.stop
+                >
+                    <div v-if="props.filter" class="p-select-header">
+                        <div class="p-select-filter-container">
+                            <input
+                                type="text"
+                                class="p-select-filter"
+                                v-model="searchQuery"
+                                placeholder="Pesquisar..."
+                                autofocus
+                                @click.stop
+                            />
                         </div>
-                        <div class="subLabel" v-text="slotProps.option?.sub_label ?? slotProps.option?.sub ?? slotProps.option?.subLabel"></div>
-                        <img v-if="slotProps.option['img']" :src="`/media/images/${slotProps.option['img']}`" alt="Image" class="img-label" />
                     </div>
-                </slot>
-            </template>
-            <template #value="value">
-                <div class="value-div" :style="{ color: options.find((option: any) => option[props.optionValue] === value.value)?.color }">
-                    <Icon :icon="option_selected.icon ?? null" :size="option_selected.icon_size ?? undefined" :style="{paddingRight: option_selected.icon ? '10px' : '0'}" />
-                    <span class="value-text" elipsis>{{ option_selected[props.optionName] ?? option_selected.name ?? option_selected.label }}</span>
+
+                    <div class="p-select-list-container">
+                        <div v-if="loading" class="p-select-empty-message">
+                            Carregando...
+                        </div>
+                        <template v-else-if="props.groupOptions !== undefined">
+                            <template v-if="hasOptions">
+                                <div v-for="(group, gIdx) in (filteredOptions as any[])" :key="gIdx" class="p-select-option-group-wrapper">
+                                    <slot name="optiongroup" :option="group">
+                                        <div class="label_div p-select-option-group">
+                                            <div class="labelz">
+                                                <div>{{ group.label }}</div>
+                                            </div>
+                                        </div>
+                                    </slot>
+                                    <div
+                                        v-for="(option, oIdx) in group.items"
+                                        :key="oIdx"
+                                        class="p-select-option"
+                                        :class="{ 'p-select-option-selected': option[props.optionValue] === temp_value }"
+                                        role="option"
+                                        :aria-selected="option[props.optionValue] === temp_value"
+                                        @click.stop="selectOption(option)"
+                                    >
+                                        <slot name="option" :option="option" :selected="option[props.optionValue] === temp_value" :index="oIdx">
+                                            <div class="label_div">
+                                                <MaxIcon :icon="option['icon']" v-if="option['icon']" :size="option['iconSize'] ?? '1'" :style="{ width: '30px' }" />
+                                                <div class="labelz">
+                                                    <div v-text="option[props.optionLabel] ?? option.label ?? option.name" :style="{ color: attrs.color }"></div>
+                                                </div>
+                                                <div class="subLabel" v-text="option?.sub_label ?? option?.sub ?? option?.subLabel"></div>
+                                            </div>
+                                        </slot>
+                                    </div>
+                                </div>
+                            </template>
+                            <div v-else class="p-select-empty-message">
+                                {{ attrs.emptyMessage ?? 'Nenhum registro encontrado' }}
+                            </div>
+                        </template>
+                        <template v-else>
+                            <template v-if="hasOptions">
+                                <div
+                                    v-for="(option, index) in (filteredOptions as any[])"
+                                    :key="index"
+                                    class="p-select-option"
+                                    :class="{ 'p-select-option-selected': option[props.optionValue] === temp_value }"
+                                    role="option"
+                                    :aria-selected="option[props.optionValue] === temp_value"
+                                    @click.stop="selectOption(option)"
+                                >
+                                    <slot name="option" :option="option" :selected="option[props.optionValue] === temp_value" :index="index">
+                                        <div :class="`category ${option.category}`" v-if="attrs.category === true">
+                                            {{ option.category === 'UTILITY' ? 'A' : '' }}{{ option.category === 'MARKETING' ? 'B' : '' }}
+                                        </div>
+                                        <div class="label_div">
+                                            <MaxIcon :icon="option['icon']" v-if="option['icon']" :size="option?.['iconSize'] ?? '1'" :style="{ width: '30px' }" />
+                                            <div class="labelz">
+                                                <div v-text="option[props.optionLabel] ?? option.label ?? option.name" :style="{ color: attrs.color }"></div>
+                                            </div>
+                                            <div class="subLabel" v-text="option?.sub_label ?? option?.sub ?? option?.subLabel"></div>
+                                            <img v-if="option['img']" :src="`/media/images/${option['img']}`" alt="Image" class="img-label" />
+                                        </div>
+                                    </slot>
+                                </div>
+                            </template>
+                            <div v-else class="p-select-empty-message">
+                                {{ attrs.emptyMessage ?? 'Nenhum registro encontrado' }}
+                            </div>
+                        </template>
+                    </div>
                 </div>
-            </template>
-        </Select>
+            </div>
+        </Teleport>
     </InputBase>
 </template>
 
@@ -59,11 +142,11 @@
  * Suporta opções simples, agrupadas e carregamento dinâmico via callback.
  */
 <script setup lang="ts">
-    import { ref, computed, watch, useAttrs, Ref } from 'vue';
+    import { ref, computed, watch, useAttrs, onBeforeUnmount, Ref } from 'vue';
     import InputBase from './InputBase.vue';
-    import Select from 'primevue/select';
+    import MaxIcon from './MaxIcon.vue';
     import { SelectGroupOptions } from '../types';
-    import { isBlank } from '@maxvue/max-use';
+    import { isBlank, useElementBounding, useElementSize, useWindowSize } from '@maxvue/max-use';
 
     const attrs: any = useAttrs();
 
@@ -109,32 +192,80 @@
             groupOptions?: SelectGroupOptions;
             disabled?: boolean | undefined;
             filter?: boolean | undefined;
-
         }>(),
-        { modelValue: null, done: undefined, optionValue: 'value', optionName: 'name', filter: false, optionLabel: 'label', error: undefined, caution: undefined, required: false, default: undefined, disabled: false }
+        {
+            modelValue: null,
+            done: undefined,
+            optionValue: 'value',
+            optionName: 'name',
+            filter: false,
+            optionLabel: 'label',
+            error: undefined,
+            caution: undefined,
+            required: false,
+            default: undefined,
+            disabled: false
+        }
     );
 
     const emit = defineEmits(['update:modelValue', 'before-show']);
     const temp_value = ref<any>(props.modelValue);
 
-    // `attrs` pode conter chaves que já existem como props nomeadas (ex.: modelValue,
-    // options, optionLabel) — repassá-las cruas via v-bind duplicaria o binding com o
-    // valor explícito já passado ao <Select> (v-model, :options, etc.), dependendo
-    // silenciosamente da ordem de declaração dos atributos para decidir quem vence.
-    // Aqui filtramos essas chaves para que só o que é de fato exclusivo de `attrs` seja repassado.
-    const modelPropKeys = ['modelValue', 'options', 'optionLabel', 'optionValue', 'optionName', 'groupOptions', 'loadOptions', 'default', 'filter', 'disabled'];
+    const modelPropKeys = [
+        'modelValue',
+        'options',
+        'optionLabel',
+        'optionValue',
+        'optionName',
+        'groupOptions',
+        'loadOptions',
+        'default',
+        'filter',
+        'disabled'
+    ];
     const attrsWithoutModelProps = computed(() => {
         const result: Record<string, any> = {};
         for (const key in attrs) if (!modelPropKeys.includes(key)) result[key] = attrs[key];
-
         return result;
     });
 
     watch(temp_value, (val) => emit('update:modelValue', val));
-    watch(() => props.modelValue, (val) => temp_value.value = val);
+    watch(() => props.modelValue, (val) => (temp_value.value = val));
 
+    const isOpen = ref(false);
     const loading = ref(false);
     const optionsField: Ref<any[]> = ref([]);
+    const searchQuery = ref('');
+
+    const triggerEl = ref<HTMLElement | null>(null);
+    const overlayEl = ref<HTMLElement | null>(null);
+
+    const { x, y, width: width_btn, height: height_btn } = useElementBounding(triggerEl as any);
+    const { width: width_el, height: height_el } = useElementSize(overlayEl as any);
+    const { width: window_width, height: window_height } = useWindowSize();
+
+    const position = computed(() => {
+        const targetX = x.value;
+        const targetY = y.value;
+        const targetW = width_btn.value;
+        const targetH = height_btn.value;
+
+        let top = targetY + targetH + 2;
+        let left = targetX;
+        const minW = Math.max(targetW, 160);
+
+        if (top + (height_el.value || 200) > window_height.value && targetY - (height_el.value || 200) > 0) top = targetY - (height_el.value || 200) - 2;
+
+
+        if (left + (width_el.value || minW) > window_width.value) left = Math.max(10, window_width.value - (width_el.value || minW) - 10);
+
+
+        return {
+            top,
+            left,
+            minWidth: minW + 'px'
+        };
+    });
 
     const options = computed(() => {
         if (optionsField.value && optionsField.value.length > 0) return optionsField.value;
@@ -150,9 +281,6 @@
 
         const groups = Object.values(options.value) as any[];
         for (const group of groups) {
-            // `group` pode ser uma opção plana (sem `.items`) quando `loadOptions` retorna uma
-            // lista não agrupada mesmo com `groupOptions` definido — nesse caso buscamos a opção
-            // diretamente no próprio item em vez de assumir que é sempre um grupo com `.items`.
             if (!group || !Array.isArray(group.items)) {
                 if (group?.[valueKey] === temp_value.value) return group;
                 continue;
@@ -162,6 +290,39 @@
         }
 
         return {};
+    });
+
+    const filteredOptions = computed(() => {
+        const raw = options.value;
+        if (!props.filter || !searchQuery.value.trim()) return raw;
+
+        const q = searchQuery.value.toLowerCase().trim();
+        const labelKey = props.optionLabel;
+
+        if (props.groupOptions !== undefined) return (raw as any[])
+            .map((group) => {
+                if (!group || !Array.isArray(group.items)) return group;
+                const items = group.items.filter((item: any) => {
+                    const txt = String(item[labelKey] ?? item.label ?? item.name ?? '').toLowerCase();
+                    const sub = String(item.sub_label ?? item.sub ?? item.subLabel ?? '').toLowerCase();
+                    return txt.includes(q) || sub.includes(q);
+                });
+                return items.length > 0 ? { ...group, items } : null;
+            })
+            .filter(Boolean);
+
+
+        return (raw as any[]).filter((opt: any) => {
+            const txt = String(opt[labelKey] ?? opt.label ?? opt.name ?? '').toLowerCase();
+            const sub = String(opt.sub_label ?? opt.sub ?? opt.subLabel ?? '').toLowerCase();
+            return txt.includes(q) || sub.includes(q);
+        });
+    });
+
+    const hasOptions = computed(() => {
+        if (props.groupOptions !== undefined) return filteredOptions.value.some((g: any) => g?.items?.length > 0);
+
+        return filteredOptions.value.length > 0;
     });
 
     async function before_show(event: any) {
@@ -176,9 +337,46 @@
         }
     }
 
-    watch(() => props.modelValue, () => {
-        if (isBlank(props.modelValue) && props.default !== undefined) temp_value.value = props.default;
-    }, { deep: true });
+    const toggle = async (event?: any) => {
+        if (props.disabled) return;
+        if (!isOpen.value) {
+            await before_show(event);
+            searchQuery.value = '';
+            isOpen.value = true;
+        } else hide();
+
+    };
+
+    const hide = () => {
+        isOpen.value = false;
+    };
+
+    const selectOption = (opt: any) => {
+        const val = opt?.[props.optionValue] ?? opt;
+        temp_value.value = val;
+        hide();
+    };
+
+    const onKeydown = (event: KeyboardEvent) => {
+        if (event.key === 'Escape' && isOpen.value) hide();
+
+    };
+
+    if (typeof window !== 'undefined') window.addEventListener('keydown', onKeydown);
+
+
+    onBeforeUnmount(() => {
+        if (typeof window !== 'undefined') window.removeEventListener('keydown', onKeydown);
+
+    });
+
+    watch(
+        () => props.modelValue,
+        () => {
+            if (isBlank(props.modelValue) && props.default !== undefined) temp_value.value = props.default;
+        },
+        { deep: true }
+    );
 </script>
 
 <style lang="scss">
@@ -191,8 +389,6 @@
 
             span {
                 font-size: 0.85rem !important;
-
-                // color: var(--background-600) !important;
             }
         }
     }
@@ -200,10 +396,20 @@
     .p-select {
         width: 100%;
         height: 36px !important;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        outline: none;
+
+        .p-select-dropdown {
+            padding-right: 8px;
+            display: flex;
+            align-items: center;
+            color: var(--background-600, #94a3b8);
+        }
     }
 
-    // Nos modos compactos a raiz do InputBase tem 20px; sem isto os 36px cravados
-    // acima vazam da linha e encavalam no conteudo de cima
     &.in-line, &[input-click]:not([input-click='false']) {
         .p-select, .p-select-label {
             height: 20px !important;
@@ -218,6 +424,7 @@
         place-items: center start;
         outline: none !important;
         height: 36px !important;
+        flex: 1;
 
         &:focus {
             border: none !important;
@@ -231,6 +438,143 @@
         position: absolute;
         color: var(--background-600);
         font-size: 0.9rem;
+    }
+}
+
+.max-select-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    background: transparent;
+}
+
+.p-select-overlay {
+    position: fixed;
+    z-index: 1101;
+    background: var(--background-0, #fff);
+    border: 1px solid var(--surface-border, #e2e8f0);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+    max-height: 280px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.p-select-header {
+    padding: 6px;
+    border-bottom: 1px solid var(--surface-border, #e2e8f0);
+    background: var(--background-0, #fff);
+
+    .p-select-filter-container {
+        width: 100%;
+
+        .p-select-filter {
+            width: 100%;
+            padding: 4px 8px;
+            border: 1px solid var(--surface-border, #e2e8f0);
+            border-radius: 4px;
+            outline: none;
+            font-size: 0.85rem;
+            background: var(--background-50, #f8fafc);
+
+            &:focus {
+                border-color: var(--primary-500, #3b82f6);
+            }
+        }
+    }
+}
+
+.p-select-list-container {
+    overflow-y: auto;
+    max-height: 240px;
+    scrollbar-width: thin;
+
+    ::-webkit-scrollbar {
+        width: 3px;
+        height: 3px;
+    }
+}
+
+.p-select-empty-message {
+    padding: 8px 12px;
+    color: var(--background-500, #64748b);
+    font-size: 0.85rem;
+}
+
+.p-select-option-group {
+    font-weight: 600;
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    color: var(--background-500, #64748b);
+    background: var(--background-50, #f8fafc);
+}
+
+.p-select-option {
+    display: flex;
+    align-items: center;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--text-c);
+
+    &:hover {
+        background-color: var(--background-100, #f1f5f9) !important;
+
+        &.p-select-option-selected {
+            background-color: var(--blue-700, #1d4ed8) !important;
+            color: var(--background-0, #fff) !important;
+
+            .icon-div {
+                color: var(--background-200) !important;
+            }
+
+            .labelz,
+            .subLabel {
+                color: var(--background-0, #fff);
+            }
+        }
+    }
+
+    &.p-select-option-selected {
+        background-color: var(--blue-600, #2563eb) !important;
+        color: var(--background-0, #fff) !important;
+
+        &:hover {
+            background-color: var(--blue-700, #1d4ed8) !important;
+        }
+
+        .icon-div {
+            color: var(--background-200) !important;
+        }
+
+        .labelz,
+        .subLabel {
+            color: var(--background-0, #fff);
+        }
+    }
+
+    .labelz,
+    .subLabel {
+        color: var(--background-650);
+    }
+
+    .category {
+        width: 20px;
+        margin-right: 10px;
+        display: grid;
+        place-items: center;
+        border-radius: 5px;
+
+        &.UTILITY {
+            background-color: var(--blue-200);
+            color: var(--blue-600);
+        }
+
+        &.MARKETING {
+            background-color: var(--orange-200);
+            color: var(--red-b-500);
+        }
     }
 }
 
@@ -277,99 +621,6 @@
 
     .value-text {
         color: var(--background-750);
-    }
-}
-
-.p-select-list-container {
-    .p-virtualscroller {
-        max-height: 250px !important;
-        overflow: hidden !important;
-        overflow-y: auto !important;
-    }
-}
-
-.p-select-option {
-    &:hover {
-        background-color: var(--background-300) !important;
-
-        &.p-select-option-selected {
-            background-color: var(--blue-700) !important;
-            color: var(--background-0) !important;
-
-            .icon-div {
-                color: var(--background-200) !important;
-            }
-
-            .labelz,
-            .subLabel {
-                color: var(--background-0);
-            }
-        }
-    }
-
-    // SEM MOUSE EM CIMA
-    &.p-select-option-selected {
-        background-color: var(--blue-600) !important;
-
-        &:hover {
-            background-color: var(--blue-700) !important;
-        }
-
-        .icon-div {
-            color: var(--background-200) !important;
-        }
-
-        .labelz,
-        .subLabel {
-            color: var(--background-0);
-        }
-    }
-
-    .labelz,
-    .subLabel {
-        color: var(--background-650);
-    }
-
-    .category {
-        width: 20px;
-        margin-right: 10px;
-        display: grid;
-        place-items: center;
-        border-radius: 5px;
-
-        &.UTILITY {
-            background-color: var(--blue-200);
-            color: var(--blue-600);
-        }
-
-        &.MARKETING {
-            background-color: var(--orange-200);
-            color: var(--red-b-500);
-        }
-    }
-}
-
-
-.p-select-header {
-    box-shadow: 0 7px 12px 5px #fff !important;
-    padding-bottom: 0 !important;
-    z-index: 1 !important;
-}
-
-.p-select-overlay {
-    &:has(.p-select-header) {
-        .p-select-list-container {
-            padding-top: 14px !important;
-        }
-    }
-}
-
-.p-select-list-container {
-    scrollbar-width: thin;
-
-    ::-webkit-scrollbar {
-        width: 3px;  /* Define a largura como 0 */
-        height: 3px; /* Altura da barra horizontal */
     }
 }
 

@@ -1,5 +1,5 @@
 <template>
-    <div class="user-section" @click.stop="toggle" pointer>
+    <div class="user-section" ref="root_el" @click.stop="toggle" pointer>
         <div class="user-text-div">
             <div v-if="props.companyName" class="solar-company-text">
                 {{ props.companyName }}
@@ -9,18 +9,7 @@
             </div>
         </div>
         <div class="button-avatar">
-
             <MaxUserAvatar :image-url="props.avatarUrl" :name="props.name" :show-tooltip="false" v-if="props.userId" />
-            <TieredMenu ref="menu" id="overlay_tmenu" :model="menuItems" popup>
-                <template #item="{ item }">
-                    <div v-if="item.label" class="main-item-menu-div" @click="item.exec && item.exec()">
-                        <MaxIcon v-if="item.icon" :icon="item.icon" />
-                        <div>
-                            {{ item.label }}
-                        </div>
-                    </div>
-                </template>
-            </TieredMenu>
         </div>
         <div v-if="props.isImpersonated" class="impersonated-btn" @click.stop="onEndImpersonate">
             <div class="impersonated-btn-grid">
@@ -32,6 +21,34 @@
                 </div>
             </div>
         </div>
+
+        <Teleport to="body">
+            <div v-if="isOpen" class="max-user-section-backdrop" @click="hide">
+                <div
+                    ref="menuEl"
+                    id="overlay_tmenu"
+                    class="max-user-section-overlay"
+                    role="menu"
+                    :style="{ top: position.top + 'px', left: position.left + 'px' }"
+                    @click.stop
+                >
+                    <template v-for="(item, index) in menuItems" :key="index">
+                        <hr v-if="item.separator" class="max-user-section-separator" />
+                        <div
+                            v-else-if="item.label"
+                            class="main-item-menu-div"
+                            role="menuitem"
+                            @click="handleItemClick(item)"
+                        >
+                            <MaxIcon v-if="item.icon" :icon="item.icon" />
+                            <div>
+                                {{ item.label }}
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </Teleport>
     </div>
 </template>
 
@@ -42,10 +59,10 @@
  * navegação, chamadas de API e estado (ex: dark mode).
  */
 <script setup lang="ts">
-    import { computed, ref } from 'vue';
-    import TieredMenu from 'primevue/tieredmenu';
+    import { computed, ref, onBeforeUnmount } from 'vue';
     import MaxIcon from './MaxIcon.vue';
     import MaxUserAvatar from './MaxUserAvatar.vue';
+    import { useElementBounding, useElementSize, useWindowSize } from '@maxvue/max-use';
 
     const props = withDefaults(defineProps<{
         /** Nome do usuário */
@@ -93,7 +110,32 @@
         endImpersonate: [];
     }>();
 
-    const menu = ref();
+    const root_el = ref<HTMLElement | null>(null);
+    const menuEl = ref<HTMLElement | null>(null);
+    const anchorEl = ref<HTMLElement | null>(null);
+    const isOpen = ref(false);
+
+    const { x, y, width: width_btn, height: height_btn } = useElementBounding(anchorEl as any);
+    const { width: width_el, height: height_el } = useElementSize(menuEl as any);
+    const { width: window_width, height: window_height } = useWindowSize();
+
+    const position = computed(() => {
+        const targetX = x.value;
+        const targetY = y.value;
+        const targetW = width_btn.value;
+        const targetH = height_btn.value;
+
+        let top = targetY + targetH + 4;
+        let left = targetX + targetW - (width_el.value || 180);
+
+        if (top + (height_el.value || 200) > window_height.value && targetY - (height_el.value || 200) > 0) top = targetY - (height_el.value || 200) - 4;
+
+
+        if (left < 10) left = 10;
+
+
+        return { top, left };
+    });
 
     const defaultItems = computed(() => {
         const list: any[] = [
@@ -134,16 +176,54 @@
 
     const menuItems = computed(() => props.items ?? defaultItems.value);
 
-    const toggle = (event: any) => {
-        menu.value.toggle(event);
+    const toggle = (event?: any) => {
+        if (event?.currentTarget) anchorEl.value = event.currentTarget as HTMLElement;
+        else if (root_el.value) anchorEl.value = root_el.value;
+
+        isOpen.value = !isOpen.value;
+    };
+
+    const hide = () => {
+        isOpen.value = false;
+    };
+
+    const show = (event?: any) => {
+        if (event?.currentTarget) anchorEl.value = event.currentTarget as HTMLElement;
+        else if (root_el.value) anchorEl.value = root_el.value;
+
+        isOpen.value = true;
+    };
+
+    const handleItemClick = (item: any) => {
+        if (item.exec) item.exec();
+        hide();
     };
 
     const onEndImpersonate = () => {
         emit('endImpersonate');
     };
+
+    const onKeydown = (event: KeyboardEvent) => {
+        if (event.key === 'Escape' && isOpen.value) hide();
+
+    };
+
+    if (typeof window !== 'undefined') window.addEventListener('keydown', onKeydown);
+
+
+    onBeforeUnmount(() => {
+        if (typeof window !== 'undefined') window.removeEventListener('keydown', onKeydown);
+
+    });
+
+    defineExpose({
+        toggle,
+        show,
+        hide
+    });
 </script>
 
-<style>
+<style lang="scss">
     .user-section {
         display: grid;
         place-items: center end;
@@ -186,6 +266,33 @@
         }
     }
 
+    .max-user-section-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 1100;
+        background: transparent;
+    }
+
+    .max-user-section-overlay {
+        position: fixed;
+        z-index: 1101;
+        background: var(--background-0, #fff);
+        border: 1px solid var(--surface-border, #e2e8f0);
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+        min-width: 180px;
+        padding: 4px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .max-user-section-separator {
+        border: none;
+        border-top: 1px solid var(--surface-border, #e2e8f0);
+        margin: 4px 0;
+    }
+
     .main-item-menu-div {
         display: grid;
         place-items: center start;
@@ -200,7 +307,7 @@
         grid-template-columns: auto 1fr;
 
         &:hover {
-            background-color: var(--background-1);
+            background-color: var(--background-100, #f1f5f9);
             color: var(--text-c);
             cursor: pointer;
         }

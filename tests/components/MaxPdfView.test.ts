@@ -9,7 +9,7 @@ vi.mock('@maxvue/max-use', () => ({
 function mountPdf(props: Record<string, any> = {}) {
     return mount(MaxPdfView, {
         props: { file: '', ...props },
-        global: { stubs: { ProgressSpinner: true, VuePdfEmbed: true, MaxButton: true } }
+        global: { stubs: { VuePdfEmbed: true, MaxButton: true } }
     });
 }
 

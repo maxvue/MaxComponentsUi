@@ -1,19 +1,29 @@
 <template>
     <InputBase v-bind="props" :value="temp_value" :done="isDone" :error="error_msg" :caution="caution">
-        <InputNumber :disabled="props.disabled" :placeholder="props.placeholder" :prefix="props.prefix" :suffix="props.suffix" :min-fraction-digits="props.minFractionDigits" :max-fraction-digits="props.maxFractionDigits" v-model="temp_value" fluid @blur="isDone = testIsDone()" />
+        <input
+            ref="inputRef"
+            type="text"
+            inputmode="decimal"
+            class="max-inputnumber p-inputtext p-component"
+            :value="displayValue"
+            :placeholder="props.placeholder"
+            :disabled="props.disabled"
+            @input="onInput"
+            @focus="onFocus"
+            @blur="onBlur"
+        />
     </InputBase>
 </template>
 
 /**
- * Componente de entrada de texto padrão.
- * Oferece suporte a validação de obrigatoriedade e comparação de valores.
+ * Componente de entrada de texto padrão para números.
+ * Oferece suporte a formatação numérica pt-BR, prefixos, sufixos, validação e comparação de valores.
  */
 <script setup lang="ts">
     import { toSearchableString, hasContent } from '@maxvue/max-use';
     import type { Ref } from 'vue';
     import { ref, computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
-    import InputNumber from 'primevue/inputnumber';
 
     const attrs: any = useAttrs();
 
@@ -57,12 +67,40 @@
             minFractionDigits?: number | undefined;
             /** Máximo de casas decimais */
             maxFractionDigits?: number | undefined;
-
         }>(),
         { modelValue: '', done: undefined, required: false, caution: undefined, prefix: undefined, suffix: undefined, placeholder: undefined, minFractionDigits: 0, maxFractionDigits: 2 }
     );
 
+    const inputRef = ref<HTMLInputElement | null>(null);
+    const isFocused = ref(false);
+
+    const formatter = computed(() => new Intl.NumberFormat('pt-BR', {
+        minimumFractionDigits: props.minFractionDigits ?? 0,
+        maximumFractionDigits: props.maxFractionDigits ?? 2
+    }));
+
+    function formatDisplay(val: any): string {
+        if (val === null || val === undefined || val === '') return '';
+        const num = typeof val === 'number' ? val : Number(val);
+        if (Number.isNaN(num)) return String(val);
+        const formatted = formatter.value.format(num);
+        return `${props.prefix ?? ''}${formatted}${props.suffix ?? ''}`;
+    }
+
+    function parseLocaleNumber(raw: string): number | null {
+        if (!hasContent(raw)) return null;
+        let s = raw;
+        if (props.prefix) s = s.split(props.prefix).join('');
+        if (props.suffix) s = s.split(props.suffix).join('');
+        s = s.replace(/[^\d,.-]/g, '');
+        s = s.replace(/\./g, '');
+        s = s.replace(',', '.');
+        const n = Number(s);
+        return Number.isNaN(n) ? null : n;
+    }
+
     const temp_value = ref(props.modelValue);
+    const displayValue = ref(formatDisplay(props.modelValue));
 
     const isDone: Ref = ref(props.done ?? null);
 
@@ -89,12 +127,41 @@
     });
 
     const emit = defineEmits(['update:modelValue']);
+
+    const onInput = (event: Event) => {
+        const raw = (event.target as HTMLInputElement).value;
+        displayValue.value = raw;
+        const parsed = parseLocaleNumber(raw);
+        temp_value.value = parsed;
+    };
+
+    const onFocus = () => {
+        isFocused.value = true;
+    };
+
+    const onBlur = () => {
+        isFocused.value = false;
+        displayValue.value = formatDisplay(temp_value.value);
+        isDone.value = testIsDone();
+    };
+
     watch(temp_value, () => {
         isDone.value = testIsDone();
         emit('update:modelValue', temp_value.value);
     });
+
     watch(
         () => props.modelValue,
-        () => (temp_value.value = props.modelValue)
+        (val) => {
+            temp_value.value = val;
+            if (!isFocused.value) displayValue.value = formatDisplay(val);
+
+        }
     );
 </script>
+
+<style lang="scss">
+    .max-inputnumber {
+        width: 100%;
+    }
+</style>

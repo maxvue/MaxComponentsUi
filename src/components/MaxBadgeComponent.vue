@@ -1,20 +1,23 @@
 <template>
-    <div :class="`badge-component-main-div ${props.size ?? ''}`"  >
-        <MaxIcon v-if="props.icon || props.i" :icon="props.icon ?? props.i" class="icon-badge" dark="0.3" :color="icon_color"/>
-        <OverlayBadge v-if="is_overlay" />
-        <Badge width="300" v-bind="attrs" :value="message" v-else :class="`${props.icon || props.iconColor ? 'with-icon' : ''} ${props.iconValue ? 'with-icon-value' : ''}`" ref="badgeElem" :style="{backgroundColor: bg_color, color: text_color}" />
+    <div :class="`badge-component-main-div ${props.size ?? ''}`">
+        <MaxIcon v-if="props.icon || props.i" :icon="props.icon ?? props.i" class="icon-badge" dark="0.3" :color="icon_color" />
+        <span v-if="is_overlay" class="p-badge p-overlay-badge" :style="{ backgroundColor: bg_color }"></span>
+        <span
+            v-else
+            ref="badgeElem"
+            v-bind="passthrough_attrs"
+            :class="`p-badge p-component ${badge_size_class} ${props.icon || props.iconColor ? 'with-icon' : ''} ${props.iconValue ? 'with-icon-value' : ''}`"
+            :style="{ backgroundColor: bg_color, color: text_color }"
+        >{{ message }}</span>
         <div class="circle-color-badge">
             <div :style="{ background: (props.iconColor ?? 'none') as string }" class="circle-color-badge-text">
                 {{ props.iconValue ?? '' }}
             </div>
         </div>
-
     </div>
 </template>
 
 <script setup lang="ts">
-    import Badge from 'primevue/badge';
-    import OverlayBadge from 'primevue/overlaybadge';
     import MaxIcon from './MaxIcon.vue';
     import { useAttrs, computed } from 'vue';
     import { getColorFromVar } from '@maxvue/max-use';
@@ -67,7 +70,24 @@
     }>(), {});
 
     const message = computed<string>(() => String(props.label ?? props.msg ?? props.value ?? props.mensagem ?? props.text ?? props.txt ?? props.number ?? ''));
-    const is_overlay = computed(() => props.overlay === true );
+    const is_overlay = computed(() => props.overlay === true);
+
+    const badge_size_class = computed<string>(() => {
+        const size = (attrs.size ?? attrs['size']) as string | undefined;
+        if (size === 'large') return 'p-badge-lg';
+        if (size === 'xlarge') return 'p-badge-xl';
+        return '';
+    });
+
+    const passthrough_attrs = computed(() => {
+        const out: Record<string, unknown> = {};
+        for (const key in attrs) {
+            if (key.startsWith('color-')) continue;
+            if (key === 'size') continue;
+            out[key] = attrs[key];
+        }
+        return out;
+    });
 
     const bg_color = computed<string>(() => {
         if (props.background) return props.background;
@@ -96,8 +116,6 @@
 
         return Color.lighten(0.6).hexa();
     });
-
-
 </script>
 
 <style lang="scss">
@@ -114,6 +132,8 @@
             text-transform: uppercase;
             display: grid;
             place-items: center;
+            border-radius: 6px;
+            padding: 0 6px;
 
             &.p-badge-lg {
                 font-size: 0.65rem;
@@ -148,8 +168,18 @@
             &.with-icon, &.with-icon-value {
                 padding-left: 26px;
             }
-        }
 
+            &.p-overlay-badge {
+                position: absolute;
+                top: 0;
+                right: 0;
+                transform: translate(50%, -50%);
+                min-width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                padding: 0;
+            }
+        }
 
         .circle-color-badge {
             position: absolute;

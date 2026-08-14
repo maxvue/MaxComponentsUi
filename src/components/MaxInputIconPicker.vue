@@ -19,58 +19,72 @@
         </div>
     </InputBase>
 
-    <Drawer
-        v-model:visible="visible"
-        header="Escolha um ícone"
-        position="bottom"
-        class="max-icon-picker-drawer"
-    >
-        <div class="picker-search-area">
-            <PrimeInputText v-model="search" placeholder="Pesquisar ícones..." fluid />
-        </div>
+    <Teleport to="body">
+        <div v-if="visible" class="max-icon-picker-drawer-backdrop" @click="visible = false">
+            <div class="max-icon-picker-drawer p-drawer-bottom" @click.stop>
+                <div class="p-drawer-header">
+                    <span class="p-drawer-title">Escolha um ícone</span>
+                    <button type="button" class="p-drawer-close-button" @click="visible = false">
+                        <MaxIcon i="mdi:close" size="1.2" />
+                    </button>
+                </div>
 
-        <div v-if="isLoading" class="picker-state-area">
-            <MaxIcon i="svg-spinners:ring-resize" size="2" :dark="0.4" />
-        </div>
+                <div class="p-drawer-content">
+                    <div class="picker-search-area">
+                        <input
+                            type="text"
+                            class="p-inputtext picker-search-input"
+                            v-model="search"
+                            placeholder="Pesquisar ícones..."
+                        />
+                    </div>
 
-        <div v-else-if="flatIcons.length === 0 && search.length >= 2" class="picker-state-area">
-            Nenhum ícone encontrado para "{{ search }}"
-        </div>
+                    <div v-if="isLoading" class="picker-state-area">
+                        <MaxIcon i="svg-spinners:ring-resize" size="2" :dark="0.4" />
+                    </div>
 
-        <div v-else-if="flatIcons.length === 0 && !isLoading" class="picker-state-area">
-            <MaxIcon i="svg-spinners:ring-resize" size="2" :dark="0.4" />
-        </div>
+                    <div v-else-if="flatIcons.length === 0 && search.length >= 2" class="picker-state-area">
+                        Nenhum ícone encontrado para "{{ search }}"
+                    </div>
 
-        <VirtualScroller
-            v-else
-            :items="rows"
-            :itemSize="40"
-            :style="{ height: 'calc(90dvh - 140px)' }"
-            class="icon-virtual-list"
-            @scroll="onScrollerScroll"
-        >
-            <template #item="{ item, options }">
-                <div class="icon-row" :data-row-index="options.index">
+                    <div v-else-if="flatIcons.length === 0 && !isLoading" class="picker-state-area">
+                        <MaxIcon i="svg-spinners:ring-resize" size="2" :dark="0.4" />
+                    </div>
+
                     <div
-                        v-for="icon in (item as IconEntry[])"
-                        :key="icon.name"
-                        class="icon-cell"
-                        :class="{ selected: modelValue === icon.name }"
-                        @click.stop="selectIcon(icon.name)"
-                        v-tooltip="icon.name"
-                        pointer
+                        v-else
+                        class="icon-virtual-list"
+                        :style="{ height: 'calc(90dvh - 140px)', overflowY: 'auto' }"
+                        @scroll="onScrollerScroll"
                     >
                         <div
-                            v-if="svgCache[icon.name]"
-                            class="picker-icon-svg"
-                            v-html="svgCache[icon.name]"
-                        />
-                        <div v-else class="picker-icon-placeholder" />
+                            v-for="(row, rIndex) in rows"
+                            :key="rIndex"
+                            class="icon-row"
+                            :data-row-index="rIndex"
+                        >
+                            <div
+                                v-for="icon in row"
+                                :key="icon.name"
+                                class="icon-cell"
+                                :class="{ selected: modelValue === icon.name }"
+                                @click.stop="selectIcon(icon.name)"
+                                :title="icon.name"
+                                pointer
+                            >
+                                <div
+                                    v-if="svgCache[icon.name]"
+                                    class="picker-icon-svg"
+                                    v-html="svgCache[icon.name]"
+                                />
+                                <div v-else class="picker-icon-placeholder" />
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </template>
-        </VirtualScroller>
-    </Drawer>
+            </div>
+        </div>
+    </Teleport>
 </template>
 
 <script setup lang="ts">
@@ -79,9 +93,6 @@
     import type { Ref } from 'vue';
     import InputBase from './InputBase.vue';
     import MaxIcon from './MaxIcon.vue';
-    import PrimeInputText from 'primevue/inputtext';
-    import Drawer from 'primevue/drawer';
-    import VirtualScroller from 'primevue/virtualscroller';
     import { sanitizeSvg } from '../helpers/sanitizeSvg';
 
     const COLS = 8;
@@ -218,9 +229,7 @@
     };
 
     /**
-     * Ao scrollar o VirtualScroller, coleta os ícones visíveis e solicita os SVGs ausentes.
-     * O VirtualScroller renderiza apenas as linhas visíveis no DOM, então inspecionamos
-     * a lista completa estimando pelo scrollTop e height.
+     * Ao scrollar a lista, coleta os ícones visíveis e solicita os SVGs ausentes.
      */
     const onScrollerScroll = (event: Event) => {
         const el = event.target as HTMLElement;
@@ -230,11 +239,12 @@
         const itemSize = 40;
 
         const firstRow = Math.floor(scrollTop / itemSize);
-        const visibleRows = Math.ceil(clientHeight / itemSize) + 2; // +2 buffer
+        const visibleRows = Math.ceil(clientHeight / itemSize) + 2;
         const lastRow = firstRow + visibleRows;
 
         const visibleIcons: string[] = [];
         for (let r = firstRow; r <= lastRow && r < rows.value.length; r++) for (const icon of rows.value[r]) visibleIcons.push(icon.name);
+
 
         enqueueSvgFetch(visibleIcons);
     };
@@ -243,9 +253,10 @@
      * Pré-carrega SVGs das primeiras linhas visíveis ao montar a lista.
      */
     const preloadInitialSvgs = () => {
-        const initialRows = Math.ceil(600 / 40) + 2; // altura aprox visível / itemSize
+        const initialRows = Math.ceil(600 / 40) + 2;
         const names: string[] = [];
         for (let r = 0; r < initialRows && r < rows.value.length; r++) for (const icon of rows.value[r]) names.push(icon.name);
+
 
         enqueueSvgFetch(names);
     };
@@ -277,7 +288,10 @@
         curatedIcons.value = [];
         svgCache.value = {};
         svgFetchQueue = [];
-        if (svgFetchTimer !== null) { clearTimeout(svgFetchTimer); svgFetchTimer = null; }
+        if (svgFetchTimer !== null) {
+            clearTimeout(svgFetchTimer);
+            svgFetchTimer = null;
+        }
         visible.value = true;
         fetchCuratedIcons();
     };
@@ -288,13 +302,17 @@
         visible.value = false;
     };
 
-    watchDebounced(() => search.value, async (val: string) => {
-        if (val.length < 2) {
-            await fetchCuratedIcons();
-            return;
-        }
-        await fetchCuratedIcons(val);
-    }, { debounce: 400 });
+    watchDebounced(
+        () => search.value,
+        async (val: string) => {
+            if (val.length < 2) {
+                await fetchCuratedIcons();
+                return;
+            }
+            await fetchCuratedIcons(val);
+        },
+        { debounce: 400 }
+    );
 
     watch(modelValue, () => {
         isDone.value = testIsDone();
@@ -330,11 +348,78 @@
     }
 }
 
+.max-icon-picker-drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    background: rgb(0 0 0 / 40%);
+    display: flex;
+    align-items: flex-end;
+}
+
 .max-icon-picker-drawer {
     height: 90dvh;
+    width: 100%;
+    background: var(--background-0, #fff);
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    box-shadow: 0 -4px 24px rgb(0 0 0 / 20%);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: drawer-slide-up 0.25s ease-out;
+
+    .p-drawer-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--surface-border, #e2e8f0);
+
+        .p-drawer-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-c, #334155);
+        }
+
+        .p-drawer-close-button {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--background-500, #94a3b8);
+
+            &:hover {
+                background: var(--background-100, #f1f5f9);
+                color: var(--text-c, #334155);
+            }
+        }
+    }
+
+    .p-drawer-content {
+        flex: 1;
+        padding: 16px 20px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
 
     .picker-search-area {
-        padding: 0 4px 14px;
+        padding: 0 0 14px;
+
+        .picker-search-input {
+            width: 100%;
+            height: 38px;
+            padding: 0 12px;
+            border: 1px solid var(--surface-border, #e2e8f0);
+            border-radius: 8px;
+            outline: none;
+            font-size: 0.9rem;
+        }
     }
 
     .picker-state-area {
@@ -349,6 +434,7 @@
 
     .icon-virtual-list {
         width: 100%;
+        scrollbar-width: thin;
     }
 
     .icon-row {
@@ -370,10 +456,10 @@
         }
 
         &.selected {
-            background-color: var(--max-primary-100);
+            background-color: var(--max-primary-100, #dbeafe);
 
             .picker-icon-svg {
-                color: var(--max-primary-600);
+                color: var(--max-primary-600, #2563eb);
             }
         }
 
@@ -398,6 +484,16 @@
             border-radius: 4px;
             background-color: var(--background-100);
         }
+    }
+}
+
+@keyframes drawer-slide-up {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
     }
 }
 </style>
