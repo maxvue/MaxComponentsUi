@@ -1,6 +1,6 @@
 <template>
     <InputBase v-bind="props" :error="error_msg" :caution="caution" :done="done">
-        <InputText ref="el" type="text" v-model="temp_value" v-maska="maskValue" autoClear="false" :style="`letter-spacing: 2.5px;`" />
+        <input ref="el" type="text" class="p-inputtext p-component" :value="masked_value" v-maska="maskValue" @input="onUserInput" :style="`letter-spacing: 2.5px;`" />
     </InputBase>
 </template>
 
@@ -14,7 +14,6 @@
     import type { Ref } from 'vue';
     import { ref, computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
-    import InputText from 'primevue/inputtext';
     import { vMaska } from 'maska/vue';
     import { useMirroredModel } from '../helpers/useMirroredModel';
     import type { InputBaseProps } from '../types';
@@ -50,6 +49,34 @@
         emit as (event: 'update:modelValue', value: string) => void,
         { transform: (value: string) => onlyNumbers(value), immediate: true }
     );
+
+    // Com o <input> nativo que substituiu o InputText do PrimeVue, o v-model do Vue sempre
+    // recebe o valor MASCARADO: o handler nativo lê event.target.value depois que a maska já
+    // reescreveu o DOM. O contrato deste componente, porém, é que `temp_value` guarde apenas
+    // dígitos (ver comentário do useMirroredModel acima). Por isso a exibição passa por
+    // `masked_value` e `temp_value` é derivado dele — a alternativa, escrever direto pelo
+    // argumento da diretiva (`v-maska:temp_value.unmasked`, como em MaxInputCreditCard.vue),
+    // exigiria `defineExpose` para a maska alcançar o ref, e um defineExpose restritivo
+    // quebraria os testes que leem temp_value/maskValue/done/caution via wrapper.vm.
+    const masked_value = ref('');
+
+    // Digitação: a maska já reescreveu o DOM quando este handler roda, então `el.value` é o
+    // texto mascarado. `temp_value` recebe só os dígitos, preservando o contrato. A escrita é
+    // feita AQUI, e não num watch sobre `masked_value`, de propósito: um par de watches
+    // mutuamente referentes briga com os guards do useMirroredModel e faz a emissão de
+    // update:modelValue ser engolida ao reduzir o documento (regressão coberta pelo teste
+    // "não fica congelado").
+    const onUserInput = (event: Event) => {
+        const el = event.target as HTMLInputElement;
+        masked_value.value = el.value;
+        temp_value.value = onlyNumbers(el.value);
+    };
+
+    // Valor vindo de fora (prop) em vez da digitação: alimenta a exibição. O guard por dígitos
+    // preserva a formatação da maska quando o valor externo é equivalente ao já exibido.
+    watch(temp_value, (value) => {
+        if (onlyNumbers(masked_value.value) !== onlyNumbers(value ?? '')) masked_value.value = value ?? '';
+    }, { immediate: true });
 
     const type_mask: Ref = ref(null);
 

@@ -34,7 +34,7 @@ components:
     description_migration: >-
       Substituir InputText por <input> nativo. Manter formatação onlyNumbers, validações isCpf/isCnpj e
       debounce (watchDebounced). Preservar InputBase.
-    status: waiting
+    status: done
 
   - name: MaxInputCoordinateDecimalLat
     level: baixa

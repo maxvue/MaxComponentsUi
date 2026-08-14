@@ -176,4 +176,32 @@ describe('MaxInputCpfCnpj', () => {
         await wrapper.vm.$nextTick();
         expect(wrapper.emitted('update:modelValue')?.pop()).toEqual(['']);
     });
+
+    // Cobre a separação exibição/valor introduzida na migração do InputText do PrimeVue para
+    // <input> nativo: o v-model nativo recebe o valor mascarado, então a máscara alimenta
+    // `masked_value` (exibição) enquanto a diretiva escreve só os dígitos em `temp_value`.
+    // Sem estes casos, uma troca no template quebraria a exibição sem nenhum teste acusar.
+    it('exibe o valor mascarado no <input> e mantém temp_value só com dígitos', async () => {
+        const wrapper = mountCpfCnpj();
+        const input = wrapper.find('input');
+
+        await input.setValue('52998224725');
+
+        expect(input.element.value).toBe('529.982.247-25');
+        expect((wrapper.vm as any).temp_value).toBe('52998224725');
+    });
+
+    it('reflete no <input> um valor que chega pela prop', async () => {
+        const wrapper = mountCpfCnpj();
+        await wrapper.setProps({ modelValue: '52998224725' });
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find('input').element.value).toBe('529.982.247-25');
+    });
+
+    it('preserva as classes visuais p-inputtext/p-component no <input> nativo', () => {
+        const input = mountCpfCnpj().find('input');
+        expect(input.classes()).toContain('p-inputtext');
+        expect(input.classes()).toContain('p-component');
+    });
 });
