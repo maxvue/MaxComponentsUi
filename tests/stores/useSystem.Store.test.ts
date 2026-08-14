@@ -189,13 +189,23 @@ describe('useSystemStore', () => {
     });
 
     describe('reloadAll', () => {
-        it('registra os loadings e limpa o localStorage', () => {
+        it('registra os loadings e limpa apenas o cache da biblioteca', () => {
             const store = useSystemStore();
-            localStorage.setItem('qualquer', 'valor');
+
+            localStorage.setItem('token_da_app', 'nao-me-apague');
+            localStorage.setItem('all_icons_v2', '{}');
+            localStorage.setItem('max-tab-opened-x', '"a"');
+            localStorage.setItem('split_panel', '50');
 
             store.reloadAll();
 
-            expect(localStorage.getItem('qualquer')).toBeNull();
+            // Chave de terceiro: o localStorage pertence à app hospedeira.
+            expect(localStorage.getItem('token_da_app')).toBe('nao-me-apague');
+
+            expect(localStorage.getItem('all_icons_v2')).toBeNull();
+            expect(localStorage.getItem('max-tab-opened-x')).toBeNull();
+            expect(localStorage.getItem('split_panel')).toBeNull();
+
             expect(store.loading.keys['system.clear.memory']).toBeDefined();
             expect(store.loading.keys['system.reload.all']).toBeDefined();
         });

@@ -7,6 +7,7 @@ import { useWindowSize, useBreakpoints, useRefCached } from '@maxvue/max-use';
 import { useUserStore } from './useUser.Store';
 import { useLoadingStore } from './useLoading.Store';
 import { getMaxAppConfig } from '../helpers/maxAppConfig';
+import { clearMaxCache } from '../helpers/maxCacheKeys';
 
 /**
  * Store central do app shell.
@@ -138,7 +139,13 @@ export const useSystemStore = defineStore('system', () => {
     const split_panel = useRefCached<number>(split_panel_key, 100);
 
     /**
-     * Limpa o cache local e recarrega a aplicação.
+     * Limpa o cache local da biblioteca e recarrega a aplicação.
+     *
+     * A limpeza é **escopada às chaves da própria biblioteca** (ver
+     * `clearMaxCache`): o `localStorage` pertence à aplicação hospedeira, então
+     * tokens, preferências e rascunhos que a lib não gravou são preservados.
+     * Para incluir chaves da aplicação nessa limpeza, declare-as com
+     * `registerMaxCacheKey()`.
      *
      * `user.clearAll()` é injetado pelo `@maxvue/max-pinia`; quando o plugin não
      * está instalado, o método é ignorado e o reload acontece do mesmo jeito.
@@ -147,7 +154,7 @@ export const useSystemStore = defineStore('system', () => {
         loading.start({ target: 'body', message: 'Limpando memória', key: 'system.clear.memory' });
         loading.start({ target: 'body', message: 'Atualizando a página', status: 'waiting', key: 'system.reload.all' });
 
-        if (typeof localStorage !== 'undefined') localStorage.clear();
+        clearMaxCache();
 
         const finish = () => {
             loading.update({ target: 'body', key: 'system.clear.memory', status: 'done' });

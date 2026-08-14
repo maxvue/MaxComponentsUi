@@ -4,10 +4,13 @@ import type { Ref } from 'vue';
 import { ref, computed, onScopeDispose } from 'vue';
 import { sanitizeSvg } from '../helpers/sanitizeSvg';
 import { getMaxAppConfig } from '../helpers/maxAppConfig';
+import { ICON_CACHE_KEY } from '../helpers/maxCacheKeys';
 
 // Chave versionada: caches gravados antes da sanitização (achado 06) não devem
 // ser lidos como válidos, então trocamos a chave para forçar seu descarte.
-const CACHE_KEY = 'all_icons_v2';
+// Definida em `maxCacheKeys` para que o registro de chaves da biblioteca e a
+// store compartilhem a mesma constante.
+const CACHE_KEY = ICON_CACHE_KEY;
 
 export const useIconStore = defineStore('icons', () => {
     const icons_data: Ref = ref({});

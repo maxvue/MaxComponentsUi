@@ -173,6 +173,7 @@ export { Toast } from './helpers/Toast';
 
 // Configuração do app shell (MaxApp) — deve ser chamada no boot da aplicação.
 export { configureMaxApp, getMaxAppConfig, resetMaxAppConfig } from './helpers/maxAppConfig';
+export { clearMaxCache, registerMaxCacheKey, isMaxCacheKey, ICON_CACHE_KEY } from './helpers/maxCacheKeys';
 
 
 import Tooltip from './directives/tooltip';
