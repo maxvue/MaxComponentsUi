@@ -59,7 +59,7 @@ components:
     level: baixa
     description_migration: >-
       Substituir InputText por <input> nativo. Manter ícone de busca/loading à direita e InputBase.
-    status: waiting
+    status: done
 
   - name: MaxInputTextArea
     level: baixa

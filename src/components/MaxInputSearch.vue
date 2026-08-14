@@ -1,13 +1,12 @@
 <template>
     <InputBase class="input-search-main-div" :iconRight="isLoading === true ? 'line-md:loading-twotone-loop' :  'material-symbols:search-rounded'">
-        <InputText type="text" v-bind="attrs" fluid v-model="temp_value" @input="onInput" />
+        <input type="text" class="p-inputtext" v-bind="attrs" :value="temp_value" @input="onInput" />
     </InputBase>
 </template>
 
 <script setup lang="ts">
     import { ref, watch, useAttrs, onUnmounted } from 'vue';
     import InputBase from './InputBase.vue';
-    import InputText from 'primevue/inputtext';
 
     const attrs = useAttrs();
 
@@ -27,7 +26,12 @@
 
     let debounceTimer: ReturnType<typeof setTimeout>;
 
-    const onInput = () => {
+    const onInput = (event: Event) => {
+        // O v-model implícito do InputText deixou de existir na migração para <input> nativo:
+        // o handler passa a ser o responsável por atualizar temp_value a partir do evento.
+        // O watch(temp_value, ...) continua emitindo update:modelValue — não emitir aqui.
+        temp_value.value = (event.target as HTMLInputElement).value;
+
         clearTimeout(debounceTimer);
 
         // Campo limpo: notifica o consumidor imediatamente (sem debounce) para que ele possa
