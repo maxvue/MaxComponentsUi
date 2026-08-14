@@ -121,6 +121,8 @@ withDefaults(defineProps<{
     targetValue?: string;
     caution?: string | boolean | undefined;
     required?: boolean;
+    forceSelection?: boolean;
+    restoreOnInvalid?: boolean;
 }>(), {
     modelValue: '',
     options: () => [],
@@ -128,16 +130,23 @@ withDefaults(defineProps<{
     error: undefined,
     required: false,
     caution: undefined,
-    optionLabel: 'name'
+    optionLabel: 'name',
+    forceSelection: true,
+    restoreOnInvalid: true
 });
 ```
 **Preservar nomes, tipos e defaults idênticos.** (`optionLabel` default `'name'`.)
+
+- `forceSelection` (default `true`) — repassado ao `AutoComplete`; quando ligado, só um objeto-opção é aceito como valor. Com `false`, texto livre digitado permanece no campo.
+- `restoreOnInvalid` (default `true`) — quando o `forceSelection` zera o campo por texto sem correspondência, restaura o último valor válido em vez de deixar UI e pai dessincronizados. Com `false`, emite `update:modelValue` com `null`.
 
 ### Eventos
 ```ts
 const emit = defineEmits(['update:modelValue']);
 ```
-- `update:modelValue` — emitido quando `temp_value` muda e **não é string** (ou seja, quando um objeto-opção foi selecionado). Ver watch, linhas 70–73.
+- `update:modelValue` — emitido em dois casos:
+  - com o **objeto-opção**, quando `temp_value` passa a um valor não-string (opção selecionada);
+  - com **`null`**, quando o valor é zerado: limpeza intencional (campo esvaziado pelo usuário) ou texto inválido com `restoreOnInvalid: false`. Nunca é emitido durante a digitação livre (valor string).
 
 ### `v-model`
 - `modelValue` entra; `update:modelValue` sai. Sincronização bidirecional via os dois `watch` (linhas 70–75).
