@@ -120,14 +120,38 @@ O arquivo entra no barril [`src/themes/all.scss`](../../../src/themes/all.scss),
 editar os mesmos arquivos duas vezes, já que o sweep da Fase 2 passa exatamente por eles. A
 renomeação acontece na Fase 2 (§5.1), atendendo à restrição 3 num único momento de risco.
 
-### 4.2 `src/styles/style.ts`
+### 4.2 `src/styles/style.ts` — ❌ MOVIDO PARA A FASE 2
 
-Deixa de importar `Aura` e `definePreset` de `@primeuix/themes`. Passa a exportar `MaxStyle` como
-objeto próprio, contendo as mesmas 5 rampas semânticas que já declara hoje — elas são literais no
-arquivo, nada se perde.
-
-`app.use(PrimeVue)` permanece intacto nesta fase e continua recebendo esse preset, para que os
-componentes **ainda não migrados** sigam sendo estilizados.
+> **Esta seção estava errada e foi corrigida durante a execução (2026-08-13).** A tentativa de
+> executá-la revelou um defeito de raciocínio da própria spec. O texto original propunha que
+> `style.ts` deixasse de importar `Aura`/`definePreset` e exportasse `MaxStyle` como objeto próprio,
+> mantendo `app.use(PrimeVue)` intacto "para que os componentes ainda não migrados sigam sendo
+> estilizados". **As duas coisas são incompatíveis.**
+>
+> O erro está na leitura da §1.1. É verdade que o `MaxStyle` declara apenas 5 rampas semânticas como
+> literais — mas é justamente a herança `definePreset(Aura, …)` que alimenta o gerador de tokens do
+> PrimeVue em runtime. O PrimeVue substitui o preset inteiro: sem `primitive` e sem `components`, ele
+> para de gerar quase tudo.
+>
+> Medição feita na execução, comparando as duas formas de preset:
+>
+> | | `definePreset(Aura, MaxStyle)` | objeto próprio |
+> |---|---|---|
+> | folha de estilo comum | 18816 chars | 1676 chars |
+> | tokens `--max-*` distintos | 436 | 55 |
+> | temas por componente | populados | vazios |
+>
+> Com 26 arquivos em `src/components/` ainda importando `primevue` e 82 componentes reexportados por
+> `./prime`, todos passariam a renderizar sem fundo, borda ou cor — violação frontal da restrição de
+> zero mudança visual e da premissa não-quebrante desta fase.
+>
+> **Conclusão:** enquanto o PrimeVue estiver instalado e renderizando, alguma fonte precisa suprir a
+> ordem de 1189 tokens. As opções são o Aura (atual), um fork completo do preset (rejeitado no
+> brainstorming) ou nada (quebra tudo). Logo **a saída do Aura só pode ocorrer junto com a saída do
+> PrimeVue** — ou seja, na Fase 2 (§5.2). Não é preferência de ordem, é a única ordem coerente.
+>
+> Mover o `definePreset` para dentro de `src/index.ts` **não** resolve: apenas troca o arquivo que
+> importa o Aura, mantendo a dependência e dando aparência de conclusão.
 
 ### 4.3 `src/types/index.ts`
 
@@ -165,6 +189,20 @@ após a Fase 2 o objeto sobrevive, consumido apenas pelo `MaxInputDatePicker`.
 [`status-primevue.migration.yaml`](../../../status-primevue.migration.yaml).
 
 A ordem abaixo é obrigatória; cada passo depende do anterior.
+
+### 5.0 Saída do preset Aura (movido da §4.2)
+
+`src/styles/style.ts` deixa de usar `definePreset(Aura, …)` e passa a exportar `MaxStyle` como objeto
+próprio. **Só pode acontecer aqui**, junto com a remoção do `app.use(PrimeVue)` da §5.2 — enquanto o
+PrimeVue renderizar qualquer componente, ele precisa de um preset completo. Ver a caixa da §4.2 para
+a medição que estabelece isso.
+
+Consequência a planejar nesta fase: com o gerador de tokens do PrimeVue fora, os ~436 tokens `--max-*`
+que ele produzia deixam de existir. Os 23 congelados em `tokens.scss` cobrem os que o código próprio
+consome hoje (verificado: os `var(--max-*)` em `src/` são exatamente esses 23, contando os dois
+`--max-credit-card-*` autodefinidos). Os demais só importam para componentes PrimeVue, que já não
+existirão. **Confirmar essa contagem antes de executar**, pois cada componente migrado pode
+introduzir novos consumos.
 
 ### 5.1 Sweep de nomenclatura
 

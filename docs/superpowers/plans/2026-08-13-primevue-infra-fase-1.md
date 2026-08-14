@@ -300,7 +300,22 @@ git commit -m "feat(themes): congela tokens --max-* gerados pelo PrimeVue em tok
 
 ---
 
-## Task 2: `MaxStyle` sem Aura
+## Task 2: `MaxStyle` sem Aura — ❌ REVERTIDA, MOVIDA PARA A FASE 2
+
+> **Executada, revertida e adiada em 2026-08-13.** A review final da branch mediu que remover
+> `definePreset(Aura, …)` mantendo `app.use(PrimeVue)` colapsa a geração de tokens do PrimeVue de 436
+> para 55 (folha comum de 18816 → 1676 chars, temas de componente vazios), deixando sem estilo os 26
+> componentes que ainda importam `primevue` e os 82 reexportados por `./prime`. O commit foi revertido
+> (`a22871b8` reverte `ef6825f3`) e o trabalho passou para a §5.0 da spec.
+>
+> **A causa foi um defeito desta task, não do implementador:** o plano tratou a herança do Aura como
+> decorativa, quando é ela que alimenta o gerador de tokens em runtime. O teste que esta task
+> especificava (`tests/styles/style.test.ts`) só fazia grep textual no fonte e conferia as 5 rampas —
+> nada montava um componente PrimeVue, então o portão não tinha como pegar o problema.
+>
+> Os Steps abaixo ficam registrados como histórico. **Não os execute.**
+
+### (histórico) Task 2: `MaxStyle` sem Aura
 
 **Files:**
 - Modify: `src/styles/style.ts`
