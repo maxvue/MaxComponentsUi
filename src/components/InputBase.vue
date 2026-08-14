@@ -392,6 +392,32 @@
         }
     }
 
+    // Remove forcadamente qualquer borda/outline do campo, inclusive nos estados
+    // de foco, erro e caution (que aplicam outline com !important mais acima).
+    // Encadeado com `&.error`/`&.caution` para vencer a especificidade daquelas
+    // regras, ja que `!important` sozinho nao desempata entre seletores iguais.
+    &[no-border]:not([no-border='false']) {
+        &, &.error, &.caution {
+            .max-input-field-div {
+                outline: none !important;
+                border: none !important;
+                box-shadow: none !important;
+
+                &:focus-within {
+                    outline: none !important;
+                    border: none !important;
+                    box-shadow: none !important;
+                }
+            }
+        }
+
+        input, textarea, select, .p-select, .p-select-label, .p-inputtext, .p-inputnumber, .value-div {
+            outline: none !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+    }
+
     &[no-message], &[no-messages] {
         grid-template-rows: 1fr;
 

@@ -167,6 +167,28 @@ describe('InputBase.vue', () => {
         expect(noErrorWrapper.find('.input-message').attributes('role')).not.toBe('alert');
     });
 
+    // O `no-border` nao e uma prop: e um attr que cai no elemento raiz por
+    // fallthrough, e o SCSS o consome via `&[no-border]`. O teste garante que o
+    // attr chega mesmo no `.max-input-main-div` (onde o seletor o espera), e nao
+    // em algum no interno.
+    it('forwards the no-border attribute to the root div', () => {
+        const wrapper = mount(InputBase, {
+            attrs: { 'no-border': '' }
+        });
+        const root = wrapper.find('.max-input-main-div');
+        expect(root.attributes('no-border')).toBe('');
+    });
+
+    it('keeps no-border on the root div alongside the error state', () => {
+        const wrapper = mount(InputBase, {
+            props: { error: true },
+            attrs: { 'no-border': '' }
+        });
+        const root = wrapper.find('.max-input-main-div');
+        expect(root.attributes('no-border')).toBe('');
+        expect(root.classes()).toContain('error');
+    });
+
     it('sets aria-hidden="true" on the required asterisk when rendered', () => {
         const wrapper = mount(InputBase, {
             props: { required: true }

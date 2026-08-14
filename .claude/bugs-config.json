@@ -1,0 +1,22 @@
+{
+    "repo": "maxvue/MaxComponentsUi",
+    "mainBranch": "dev",
+    "worktreeDir": ".worktrees",
+    "features": {
+        "bugReport": false,
+        "productionLogs": false,
+        "pulse": false,
+        "security": true
+    },
+    "commands": {
+        "test": "npm run test",
+        "formatFrontend": "npm run lint",
+        "typecheckFrontend": "npm run type-check"
+    },
+    "worktreeSetup": {
+        "notes": [
+            "O projeto depende do pacote local irmao @maxvue/max-use (file:../MaxUse). Ao criar um worktree fora de /home/johnattas/GitHub, o caminho relativo ../MaxUse quebra — crie o worktree em um diretorio irmao de MaxUse ou faca symlink de node_modules/@maxvue/max-use.",
+            "node_modules nao e versionado; rode npm install dentro do worktree ou faca symlink de node_modules antes de rodar a suite."
+        ]
+    }
+}

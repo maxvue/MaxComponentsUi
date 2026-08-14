@@ -1,22 +1,27 @@
 <template>
     <div class="max-accordion-item" :class="{ 'max-accordion-item-disabled': props.disabled }">
         <div class="max-accordion-item-header-wrapper" role="heading" :aria-level="props.headerAriaLevel">
-            <button
-                type="button"
+            <div
                 class="max-accordion-item-header"
-                :class="{ 'max-accordion-item-header-active': is_open }"
+                :class="{
+                    'max-accordion-item-header-active': is_open,
+                    'max-accordion-item-header-disabled': props.disabled
+                }"
                 :id="`${context.id_prefix}-header-${item_value}`"
+                role="button"
+                :tabindex="props.disabled ? -1 : 0"
                 :aria-controls="`${context.id_prefix}-content-${item_value}`"
                 :aria-expanded="is_open"
                 :aria-disabled="props.disabled || undefined"
-                :disabled="props.disabled"
                 @click="onClick"
+                @keydown.enter.prevent="onClick"
+                @keydown.space.prevent="onClick"
             >
                 <span class="max-accordion-item-header-text">
                     <slot name="header">{{ props.title }}</slot>
                 </span>
                 <MaxIcon :i="icon" class="max-accordion-item-header-icon" />
-            </button>
+            </div>
         </div>
         <div
             v-if="should_render"
@@ -121,7 +126,7 @@
                 color: inherit;
                 transition: background-color 0.2s ease;
 
-                &:hover:not(:disabled) {
+                &:hover:not(.max-accordion-item-header-disabled) {
                     background-color: var(--background-300);
                 }
 
@@ -129,7 +134,7 @@
                     color: var(--max-primary-500);
                 }
 
-                &:disabled {
+                &.max-accordion-item-header-disabled {
                     cursor: not-allowed;
                 }
 
