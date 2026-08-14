@@ -106,11 +106,13 @@ describe('MaxButton', () => {
         // seletor casa pela PRESENÇA do atributo. Com :flex="loading" o Vue
         // renderiza flex="false" quando loading é falso — o atributo existe, a
         // regra vence o estilo inline e o ícone estica até o contêiner.
-        it('não emite o atributo flex quando não está carregando', () => {
-            const wrapper = mountButton({ label: 'Salvar', icon: 'mdi:check' });
-            const icon = wrapper.find('.max-icon-stub');
+        it.each([
+            ['sem carregar', { label: 'Salvar', icon: 'mdi:check' }],
+            ['carregando', { label: 'Salvar', icon: 'mdi:check', loading: true }]
+        ])('não emite o atributo flex (%s)', (_caso, props) => {
+            const wrapper = mountButton(props);
 
-            expect(icon.attributes('flex')).toBeUndefined();
+            expect(wrapper.find('.max-icon-stub').attributes('flex')).toBeUndefined();
         });
 
         it('size numérico ainda dimensiona o ícone (uso legado)', () => {
