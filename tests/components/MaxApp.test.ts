@@ -169,19 +169,6 @@ describe('MaxApp', () => {
             expect(wrapper.find(`.slot-${slot}`).exists()).toBe(true);
         });
 
-        it('repassa o slot side quando há espaço no painel', async () => {
-            loadUser();
-            useSystemStore().split_panel = 70;
-
-            const wrapper = mountApp({
-                props: { sideVisible: true },
-                slots: { side: '<div class="slot-side">x</div>' }
-            });
-            await wrapper.vm.$nextTick();
-
-            expect(wrapper.find('.slot-side').exists()).toBe(true);
-        });
-
         it('repassa o slot user', () => {
             loadUser();
 

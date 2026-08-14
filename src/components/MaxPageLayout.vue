@@ -19,12 +19,9 @@
 
         <MaxSideMenu v-bind="attrs" :logo="props.logo" />
 
-        <MaxSplitPanesContent v-bind="attrs" :side-visible="props.sideVisible">
+        <MaxPageContent v-bind="attrs">
             <slot></slot>
-            <template v-if="$slots.side" #side>
-                <slot name="side"></slot>
-            </template>
-        </MaxSplitPanesContent>
+        </MaxPageContent>
 
         <MaxBottomMenu v-if="attrs.screen === 'mobile'" v-bind="attrs" :tabs="props.bottomTabs" />
     </MaxContainerApp>
@@ -35,7 +32,7 @@
     import MaxContainerApp from './MaxContainerApp.vue';
     import MaxTopMenu from './MaxTopMenu.vue';
     import MaxSideMenu from './MaxSideMenu.vue';
-    import MaxSplitPanesContent from './MaxSplitPanesContent.vue';
+    import MaxPageContent from './MaxPageContent.vue';
     import MaxBottomMenu from './MaxBottomMenu.vue';
     import type { BottomTab } from './MaxBottomMenu.vue';
 
@@ -47,8 +44,6 @@
         addItems?: Array<Record<string, any>>;
         /** Abas do menu inferior (mobile). Omitido, usa o padrão do `MaxBottomMenu`. */
         bottomTabs?: BottomTab[];
-        /** Exibe o painel lateral do conteúdo. */
-        sideVisible?: boolean;
         /** Logo do menu lateral: URL ou nome de rota. Sem ela, nada é exibido. */
         logo?: string;
     }>();

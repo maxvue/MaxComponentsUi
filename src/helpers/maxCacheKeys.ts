@@ -25,8 +25,9 @@ const EXACT_KEYS: readonly string[] = [ICON_CACHE_KEY];
 /**
  * Prefixos de chaves dinâmicas gravadas pela biblioteca.
  *
- * - `split_panel` — `useSystem.Store` (`split_panel_key`, com os sufixos
- *   registrados por `registerSplitPanelKeyPart`);
+ * - `split_panel` — legado do painel dividido, aposentado. O prefixo continua
+ *   aqui para que o `clearMaxCache` recolha as chaves já persistidas nos
+ *   navegadores de quem usou as versões anteriores;
  * - `max-tab-opened-` — `MaxTabs`.
  */
 const KEY_PREFIXES: readonly string[] = ['split_panel', 'max-tab-opened-'];

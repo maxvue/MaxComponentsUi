@@ -131,7 +131,7 @@ export { default as MaxTopMenu } from './components/MaxTopMenu.vue';
 export { default as MaxTopMenuSearchBar } from './components/MaxTopMenuSearchBar.vue';
 export { default as MaxTopToolbar } from './components/MaxTopToolbar.vue';
 // O MaxUserSection é exportado mais abaixo, junto do seu alias UserSection.
-export { default as MaxSplitPanesContent } from './components/MaxSplitPanesContent.vue';
+export { default as MaxPageContent } from './components/MaxPageContent.vue';
 export { default as MaxPageLayout } from './components/MaxPageLayout.vue';
 export { default as MaxApp } from './components/MaxApp.vue';
 

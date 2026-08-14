@@ -21,7 +21,6 @@
                     :screen="system.type_device"
                     :add-items="props.addItems"
                     :bottom-tabs="props.bottomTabs"
-                    :side-visible="props.sideVisible"
                     :logo="props.logo"
                     @profile="emit('profile')"
                     @settings="emit('settings')"
@@ -63,7 +62,7 @@
     import type { BottomTab } from './MaxBottomMenu.vue';
 
     /** Slots repassados ao `MaxPageLayout`. */
-    const LAYOUT_SLOTS = ['status', 'search', 'add', 'chat', 'bugs', 'notifications', 'voip', 'live', 'user', 'side'] as const;
+    const LAYOUT_SLOTS = ['status', 'search', 'add', 'chat', 'bugs', 'notifications', 'voip', 'live', 'user'] as const;
 
     const props = withDefaults(defineProps<{
         /** Rota de submissão do login. */
@@ -87,8 +86,6 @@
         addItems?: Array<Record<string, any>>;
         /** Abas do menu inferior (mobile). */
         bottomTabs?: BottomTab[];
-        /** Exibe o painel lateral do conteúdo. */
-        sideVisible?: boolean;
         /**
          * Logo do menu lateral. Aceita uma URL (`/get_file?file=logo.svg`,
          * `https://…`) ou o nome de uma rota, resolvido pelo `getRoute`.

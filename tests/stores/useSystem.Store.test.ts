@@ -135,40 +135,6 @@ describe('useSystemStore', () => {
         });
     });
 
-    describe('split_panel', () => {
-        it('usa a chave base fora da página de chat', () => {
-            expect(useSystemStore().split_panel_key).toBe('split_panel');
-        });
-
-        it('acrescenta o sufixo na página de chat', () => {
-            route.name = 'Chat';
-            expect(useSystemStore().split_panel_key).toBe('split_panel_chatpage');
-        });
-
-        it('compõe a chave com as partes registradas', () => {
-            const store = useSystemStore();
-            store.registerSplitPanelKeyPart(() => '_hidded');
-            store.registerSplitPanelKeyPart(() => '_visible');
-
-            expect(store.split_panel_key).toBe('split_panel_hidded_visible');
-        });
-
-        it('a função devolvida desfaz o registro', () => {
-            const store = useSystemStore();
-            const remover = store.registerSplitPanelKeyPart(() => '_extra');
-
-            expect(store.split_panel_key).toBe('split_panel_extra');
-
-            remover();
-
-            expect(store.split_panel_key).toBe('split_panel');
-        });
-
-        it('tem 100 como valor padrão', () => {
-            expect(useSystemStore().split_panel).toBe(100);
-        });
-    });
-
     describe('versão e estado inicial', () => {
         it('version vem da configuração', () => {
             configureMaxApp({ version: '3.2.1' });
