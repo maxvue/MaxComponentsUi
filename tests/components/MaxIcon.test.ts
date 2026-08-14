@@ -52,6 +52,16 @@ describe('MaxIcon', () => {
 
     });
 
+    // Defesa de última linha: o svg interno é width:100%, então um tamanho
+    // inválido faz o ícone esticar até o contêiner pai em vez de encolher.
+    it.each(['NaNpx', 'small', 'NaN', 'undefined'])('ignora tamanho invalido %s', (size) => {
+        const wrapper = mountIcon({ size });
+        const style = wrapper.find('.max-icon-div')?.attributes('style') ?? '';
+
+        expect(style).not.toContain('NaN');
+        expect(style).toContain('1rem');
+    });
+
     it('aplica cor escura via dark', () => {
         const wrapper = mountIcon({ dark: 0.6 });
         const style = wrapper.find('.max-icon-div')?.attributes('style');

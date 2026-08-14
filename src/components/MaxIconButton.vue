@@ -19,7 +19,14 @@
 
     const data = computed(() => ({ ...(props.data ?? {}), ...(props.query ?? {}), ...(props.params ?? {}) }));
 
-    const size = computed(() => 16 * Number(props.size ?? 1) + 'px');
+    // `size` também carrega os tamanhos textuais de botão ('small'/'lg'/…), que
+    // não são fatores de escala: Number('small') é NaN e gerava 'NaNpx', um valor
+    // CSS descartado pelo navegador — como o svg é width:100%, o ícone esticava
+    // até o contêiner. Só escalamos com valor numérico.
+    const size = computed(() => {
+        const factor = Number(props.size);
+        return 16 * (isNaN(factor) ? 1 : factor) + 'px';
+    });
 
     const emit = defineEmits<{
         action: [value: boolean];

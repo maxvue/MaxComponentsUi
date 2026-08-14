@@ -18,7 +18,7 @@ function mountIconButton(props: Record<string, any> = {}) {
         global: {
             stubs: {
                 MaxIcon: {
-                    template: '<span class="max-icon"></span>',
+                    template: '<span class="max-icon" :data-size="String(size)"></span>',
                     props: ['icon', 'i', 'size', 'dark', 'light', 'pointer']
                 }
             }
@@ -123,5 +123,28 @@ describe('MaxIconButton', () => {
         const wrapper = mountIconButton({ action: failingAction });
         await expect((wrapper.vm as any).onClick(new MouseEvent('click'))).rejects.toThrow('Falha na ação');
         expect((wrapper.vm as any).executing).toBe(false);
+    });
+
+    describe('tamanho do ícone', () => {
+        // `size` textual é tamanho de BOTÃO. Antes, 16 * Number('small') gerava
+        // 'NaNpx' — CSS inválido descartado pelo navegador; como o svg interno é
+        // width:100%, o ícone esticava até o contêiner pai.
+        it.each(['small', 'sm', 'large', 'lg'])('size="%s" não produz NaN', (size) => {
+            const wrapper = mountIconButton({ size });
+            const value = wrapper.find('.max-icon').attributes('data-size');
+
+            expect(value).not.toContain('NaN');
+            expect(value).toBe('16px');
+        });
+
+        it('size numérico continua dimensionando o ícone', () => {
+            const wrapper = mountIconButton({ size: 2 });
+            expect(wrapper.find('.max-icon').attributes('data-size')).toBe('32px');
+        });
+
+        it('sem size usa o padrão', () => {
+            const wrapper = mountIconButton();
+            expect(wrapper.find('.max-icon').attributes('data-size')).toBe('16px');
+        });
     });
 });

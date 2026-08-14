@@ -147,6 +147,7 @@
     import MaxIcon from './MaxIcon.vue';
     import { SelectGroupOptions } from '../types';
     import { isBlank, useElementBounding, useElementSize, useWindowSize } from '@maxvue/max-use';
+    import { getOverlayWidth, getOverlayLeft } from '../helpers/useOverlayWidth';
 
     const attrs: any = useAttrs();
 
@@ -244,36 +245,21 @@
     const { height: height_el } = useElementSize(overlayEl as any);
     const { width: window_width, height: window_height } = useWindowSize();
 
-    /** Teto de largura do overlay. Sem isto ele herda a largura do campo, que é
-     *  100% do InputBase — em campos largos o dropdown atravessava a tela. */
-    const MAX_OVERLAY_WIDTH = 420;
-    /** Margem mínima entre o overlay e a borda da viewport. */
-    const VIEWPORT_GUTTER = 10;
-
     const position = computed(() => {
         const targetX = x.value;
         const targetY = y.value;
-        const targetW = width_btn.value;
         const targetH = height_btn.value;
 
-        // O overlay acompanha a largura do campo (comportamento do PrimeVue),
-        // mas limitado ao teto e ao espaço disponível na viewport.
-        const available = Math.max(160, window_width.value - VIEWPORT_GUTTER * 2);
-        const width = Math.min(Math.max(targetW, 160), MAX_OVERLAY_WIDTH, available);
+        const width = getOverlayWidth({ triggerWidth: width_btn.value, windowWidth: window_width.value });
 
         let top = targetY + targetH + 2;
-        let left = targetX;
 
         if (top + (height_el.value || 200) > window_height.value && targetY - (height_el.value || 200) > 0) top = targetY - (height_el.value || 200) - 2;
-
-        // Usa a largura calculada, não width_el: no primeiro frame o overlay
-        // ainda não foi medido (width_el === 0) e o clamp não corrigia nada.
-        if (left + width > window_width.value) left = Math.max(VIEWPORT_GUTTER, window_width.value - width - VIEWPORT_GUTTER);
 
 
         return {
             top,
-            left,
+            left: getOverlayLeft(targetX, width, window_width.value),
             width: width + 'px'
         };
     });

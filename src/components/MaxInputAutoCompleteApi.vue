@@ -25,7 +25,7 @@
                     ref="overlayEl"
                     class="p-autocomplete-overlay"
                     role="listbox"
-                    :style="{ top: position.top + 'px', left: position.left + 'px', minWidth: position.minWidth }"
+                    :style="{ top: position.top + 'px', left: position.left + 'px', width: position.width }"
                     @click.stop
                 >
                     <div class="p-autocomplete-list-container">
@@ -60,6 +60,7 @@
      * Integra-se com as rotas do backend Max para busca dinâmica.
      */
     import { hasContent, toSearchableString, getCachedApiIDB, keyExists, isBlank, size, isEqual, useElementBounding, useElementSize, useWindowSize } from '@maxvue/max-use';
+    import { getOverlayWidth, getOverlayLeft } from '../helpers/useOverlayWidth';
     import type { Ref } from 'vue';
     import { ref, computed, watch, onBeforeUnmount } from 'vue';
     import InputBase from './InputBase.vue';
@@ -116,29 +117,25 @@
     const overlayEl = ref<HTMLElement | null>(null);
 
     const { x, y, width: width_btn, height: height_btn } = useElementBounding(ac as any);
-    const { width: width_el, height: height_el } = useElementSize(overlayEl as any);
+    const { height: height_el } = useElementSize(overlayEl as any);
     const { width: window_width, height: window_height } = useWindowSize();
 
     const position = computed(() => {
         const targetX = x.value;
         const targetY = y.value;
-        const targetW = width_btn.value;
         const targetH = height_btn.value;
 
+        const width = getOverlayWidth({ triggerWidth: width_btn.value, windowWidth: window_width.value });
+
         let top = targetY + targetH + 2;
-        let left = targetX;
-        const minW = Math.max(targetW, 160);
 
         if (top + (height_el.value || 200) > window_height.value && targetY - (height_el.value || 200) > 0) top = targetY - (height_el.value || 200) - 2;
 
 
-        if (left + (width_el.value || minW) > window_width.value) left = Math.max(10, window_width.value - (width_el.value || minW) - 10);
-
-
         return {
             top,
-            left,
-            minWidth: minW + 'px'
+            left: getOverlayLeft(targetX, width, window_width.value),
+            width: width + 'px'
         };
     });
 

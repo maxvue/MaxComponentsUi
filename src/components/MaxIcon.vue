@@ -122,8 +122,20 @@
         return { color: isHovered.value ? hover_color.value : color.value };
     });
 
+    const DEFAULT_SIZE = '1rem';
+
+    /** O svg interno é width:100%, então um tamanho inválido não encolhe o ícone:
+     *  o navegador descarta a declaração e ele estica até o contêiner pai. Por
+     *  isso valores não dimensionáveis caem no padrão em vez de passar adiante. */
+    const isValidCssSize = (value: string) => {
+        if (!value || value.includes('NaN') || value === 'undefined' || value === 'null') return false;
+        // Com unidade (2rem, 50%, 16px) ou número puro, ao qual acrescentamos rem.
+        return /^[\d.]+([a-z]+|%)$/i.test(value) || /^[\d.]+$/.test(value);
+    };
+
     const sizeStyles = computed(() => {
-        const value = String(props.size ?? '1rem');
+        const raw = String(props.size ?? DEFAULT_SIZE).trim();
+        const value = isValidCssSize(raw) ? raw : DEFAULT_SIZE;
         const formattedValue = /[a-z|%]$/i.test(value) ? value : `${value}rem`;
         return { width: formattedValue, height: formattedValue };
     });
