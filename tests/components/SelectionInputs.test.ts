@@ -3,10 +3,9 @@ import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxInputCheckbox from '../../src/components/MaxInputCheckbox.vue';
 import MaxInputRadio from '../../src/components/MaxInputRadio.vue';
-import _MaxInputToggle from '../../src/components/MaxInputToggle.vue';
-import _MaxInputSwitch from '../../src/components/MaxInputSwitch.vue';
 
-// [MaxInputCheckbox, MaxInputToggle, MaxInputSwitch tests remain same, we focus on MaxInputRadio]
+// A cobertura de MaxInputToggle e MaxInputSwitch vive em seus arquivos dedicados:
+// tests/components/MaxInputToggle.test.ts e tests/components/MaxInputSwitch.test.ts
 
 describe('MaxInputCheckbox', () => {
     beforeEach(() => {
@@ -132,15 +131,5 @@ describe('MaxInputRadio', () => {
         await wrapper.setProps({ modelValue: 'opcao2' });
         expect((wrapper.vm as any).temp_value).toBe('opcao2');
     });
-});
-
-describe('MaxInputToggle', () => {
-    // keeping previous test to avoid deleting everything
-    it('renderiza', () => { expect(true).toBe(true); });
-});
-
-describe('MaxInputSwitch', () => {
-    // keeping previous test to avoid deleting everything
-    it('renderiza', () => { expect(true).toBe(true); });
 });
 
