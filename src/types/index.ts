@@ -1,3 +1,5 @@
+import type { ButtonHTMLAttributes } from 'vue';
+
 /**
  * Propriedades base para todos os componentes da biblioteca.
  */
@@ -11,14 +13,14 @@ export interface BaseComponentProps {
 /**
  * Props visuais e de comportamento que o `MaxButtonsType` herdava do `ButtonProps`
  * do PrimeVue. Reproduzidas aqui para manter a superfície pública do tipo após a
- * remoção da dependência.
+ * remoção da dependência. A base de atributos HTML de botão (`id`, `title`,
+ * `tabindex`, `form`, `name`, `aria-*`, handlers etc.) vem de `ButtonHTMLAttributes`
+ * do próprio Vue, já que `ButtonProps` do PrimeVue estendia esse mesmo tipo.
  *
  * Deliberadamente NÃO reproduzidas: `dt`, `pt`, `ptOptions` e `unstyled` — APIs de
  * passthrough/theming do PrimeVue, sem significado após a migração.
  */
-export interface MaxButtonBaseProps {
-    /** Identificador único do elemento */
-    id?: string;
+export interface MaxButtonBaseProps extends ButtonHTMLAttributes {
     /** Desabilita o botão */
     disabled?: boolean;
     /** Estilo apenas com borda */
