@@ -125,6 +125,17 @@ A biblioteca expõe múltiplos entry points via `package.json` exports:
 | `@maxvue/max-components-ui/prime`    | Re-exportação de componentes PrimeVue puros            | [docs/PRIME.md](docs/PRIME.md)             |
 | `@maxvue/max-components-ui/stores`   | Stores Pinia (`useIconStore`, `usePopoverStore`)       | [docs/STORES.md](docs/STORES.md)           |
 
+### Depreciado: `@maxvue/max-components-ui/prime`
+
+O entry point `./prime` reexporta componentes crus do PrimeVue que não têm
+equivalente Max. Ele está **depreciado** e será removido na próxima major,
+junto com a saída definitiva do PrimeVue.
+
+Se a sua aplicação usa qualquer um desses componentes — inclusive via
+auto-import, sem `import` explícito no arquivo — passe a importá-los
+diretamente de `primevue/*`, declarando o `primevue` como dependência da
+própria aplicação, ou substitua-os por componentes Max equivalentes.
+
 ---
 
 ## 🧩 Componentes

@@ -3,6 +3,16 @@
 // IMPORTAÇÃO DEFAULT NÃO FUNCIONA POIS OS COMPONENTES SÃO EXPORTADOS COM DEFAULT DO VITE
 // NÃO TEM REFERÊNCIA COM AUTOIMPORT. O AUTOIMPORT USA A BIBLIOTECA COMPLETA DO PRIMEVUE...
 
+// DEPRECIADO — este entry point será removido na próxima major, junto com a
+// saída definitiva do PrimeVue (Fase 2 da migração de independência).
+// Ver docs/superpowers/specs/2026-08-13-primevue-infra-independencia-design.md
+if (import.meta.env?.DEV) console.warn(
+    '[max-components-ui] O entry point \'@maxvue/max-components-ui/prime\' está ' +
+        'depreciado e será removido na próxima major. Os componentes expostos aqui são ' +
+        'reexportações diretas do PrimeVue: passe a importá-los de \'primevue/*\' ou ' +
+        'substitua-os por componentes Max equivalentes.'
+);
+
 
 // FORM
 export { default as AutoComplete } from 'primevue/autocomplete';
