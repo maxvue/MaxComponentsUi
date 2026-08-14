@@ -1,4 +1,3 @@
-import type { ButtonProps as PrimeButtonProps } from 'primevue/button';
 /**
  * Propriedades base para todos os componentes da biblioteca.
  */
@@ -10,9 +9,56 @@ export interface BaseComponentProps {
 }
 
 /**
+ * Props visuais e de comportamento que o `MaxButtonsType` herdava do `ButtonProps`
+ * do PrimeVue. Reproduzidas aqui para manter a superfície pública do tipo após a
+ * remoção da dependência.
+ *
+ * Deliberadamente NÃO reproduzidas: `dt`, `pt`, `ptOptions` e `unstyled` — APIs de
+ * passthrough/theming do PrimeVue, sem significado após a migração.
+ */
+export interface MaxButtonBaseProps {
+    /** Identificador único do elemento */
+    id?: string;
+    /** Desabilita o botão */
+    disabled?: boolean;
+    /** Estilo apenas com borda */
+    outlined?: boolean;
+    /** Estilo sem fundo nem borda */
+    text?: boolean;
+    /** Cantos arredondados */
+    rounded?: boolean;
+    /** Sombra elevada */
+    raised?: boolean;
+    /** Aparência de link */
+    link?: boolean;
+    /** Remove a cor de severidade, mantendo apenas o texto */
+    plain?: boolean;
+    /** Ocupa toda a largura disponível */
+    fluid?: boolean;
+    /** Conteúdo do badge */
+    badge?: string;
+    /** Classe CSS do badge */
+    badgeClass?: string;
+    /** Severidade visual do badge */
+    badgeSeverity?: string;
+    /** Ícone exibido durante o carregamento */
+    loadingIcon?: string;
+    /** Classe CSS aplicada ao ícone */
+    iconClass?: string;
+    /** Elemento ou componente renderizado como raiz */
+    as?: string | Record<string, any>;
+    /** Delega a renderização da raiz ao slot padrão */
+    asChild?: boolean;
+    /** Estilo CSS em linha ou objeto */
+    style?: string | Record<string, any>;
+    /** Classe CSS personalizada */
+    class?: string;
+}
+
+/**
  * Propriedades específicas para o componente de botão.
  */
-export interface MaxButtonsType extends /* @vue-ignore */ Omit<PrimeButtonProps, 'size' | 'iconPos'> {
+export interface MaxButtonsType extends /* @vue-ignore */ MaxButtonBaseProps {
     /** Texto de exibição do botão */
     label?: string;
     /** Ícone a ser exibido no botão */
