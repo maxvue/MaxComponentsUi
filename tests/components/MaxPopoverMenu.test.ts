@@ -167,4 +167,39 @@ describe('MaxPopoverMenu', () => {
         item.click();
         expect(goToRoute).toHaveBeenCalledWith('some.route', { biz: 'baz' });
     });
+
+    describe('tamanho do gatilho', () => {
+        function mountWithSize(props: Record<string, any>) {
+            return mount(MaxPopoverMenu, {
+                props,
+                global: {
+                    stubs: {
+                        MaxButton: { template: '<button class="max-button"></button>', props: ['size'] },
+                        MaxIcon: true
+                    },
+                    directives: { tooltip: {} }
+                }
+            });
+        }
+
+        // size_icon vai para width E height do gatilho: um valor inválido é
+        // descartado pelo navegador e a área clicável colapsa.
+        it.each(['small', 'sm', 'large', 'lg'])('size="%s" não produz NaN nas dimensões', (size) => {
+            const wrapper = mountWithSize({ size });
+            const style = wrapper.find('.max-popover-menu').attributes('style') ?? '';
+
+            expect(style).not.toContain('NaN');
+            expect(style).toContain('1.1rem');
+        });
+
+        it('size numérico continua dimensionando o gatilho', () => {
+            const wrapper = mountWithSize({ size: 2 });
+            expect(wrapper.find('.max-popover-menu').attributes('style')).toContain('2rem');
+        });
+
+        it('sem size usa o padrão', () => {
+            const wrapper = mountWithSize({});
+            expect(wrapper.find('.max-popover-menu').attributes('style')).toContain('1.1rem');
+        });
+    });
 });

@@ -22,6 +22,8 @@ function mountButton(props: Record<string, any> = {}) {
                     props: ['icon', 'i']
                 },
                 MaxIcon: {
+                    // `flex` fica fora de props de propósito: assim cai em attrs
+                    // e é renderizado no DOM, como no MaxIcon real.
                     template: '<div class="max-icon-stub" :data-size="String(size)"></div>',
                     props: ['icon', 'size']
                 }
@@ -98,6 +100,17 @@ describe('MaxButton', () => {
             // 'small' é tamanho de BOTÃO: não pode vazar como tamanho do ícone.
             expect(wrapper.find('.max-icon-stub').attributes('data-size')).toBe('1.4');
             expect(wrapper.find('button').classes()).toContain('p-button-sm');
+        });
+
+        // params.scss:109 tem `[full],[flex] { width:100% !important }`, e o
+        // seletor casa pela PRESENÇA do atributo. Com :flex="loading" o Vue
+        // renderiza flex="false" quando loading é falso — o atributo existe, a
+        // regra vence o estilo inline e o ícone estica até o contêiner.
+        it('não emite o atributo flex quando não está carregando', () => {
+            const wrapper = mountButton({ label: 'Salvar', icon: 'mdi:check' });
+            const icon = wrapper.find('.max-icon-stub');
+
+            expect(icon.attributes('flex')).toBeUndefined();
         });
 
         it('size numérico ainda dimensiona o ícone (uso legado)', () => {

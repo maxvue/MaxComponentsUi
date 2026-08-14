@@ -1063,6 +1063,21 @@
     --error-850: #5A0000;
     --error-875: #4F0000;
     --error-900: #430000;
+
+    // Aliases semânticos usados pelos componentes. Antes eram referenciados sem
+    // nunca terem sido definidos, com um literal de fallback no próprio SCSS —
+    // o que travava a cor no tema claro e ignorava a paleta da marca.
+    --surface-border: var(--background-200);
+    --text-b: var(--background-800);
+    --text-c: var(--background-750);
+    --text-d: var(--background-700);
+    --text-color: var(--background-800);
+    --primary-a: var(--primary-600);
+    --primary-c: var(--primary-500);
+    --primary-mouse: var(--primary-600);
+    --icon-mouse: var(--primary-600);
+    --alerta-b: var(--warn-600);
+    --alerta-c: var(--warn-500);
 }
 
 :root {

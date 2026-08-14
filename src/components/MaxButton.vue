@@ -15,7 +15,7 @@
             :dark="props.dark"
             :light="light"
             :color="iconColor"
-            :flex="loading"
+            :flex="loading || undefined"
         />
         <span class="max-button-label"><slot></slot>{{ props.label && !$slots.default ? props.label : '' }}</span>
         <MaxIcon
@@ -26,7 +26,7 @@
             :dark="props.dark"
             :light="light"
             :color="iconColor"
-            :flex="loading"
+            :flex="loading || undefined"
         />
     </button>
     <MaxIconButton v-bind="props" v-else class="icon-button-b" />

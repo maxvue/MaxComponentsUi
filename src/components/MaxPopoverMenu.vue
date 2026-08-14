@@ -2,7 +2,7 @@
     <div class="max-popover-menu" ref="btn_el" pointer v-tooltip="null" :style="{ width: size_icon, height: size_icon }">
         <div v-tooltip="null" @click.stop="toggle" class="botao" :style="{ width: size_icon, height: size_icon }">
             <slot name="button">
-                <MaxButton v-bind="props" :size="props.size || props.sizeIcon ? String(props.size ?? props.sizeIcon) : ''" flex />
+                <MaxButton v-bind="props" :size="props.size ?? props.sizeIcon" flex />
             </slot>
         </div>
 
@@ -85,7 +85,15 @@
         message: 'Deseja continuar?'
     });
 
-    const size_icon = computed(() => getCssSize(Number(props.size ?? props.sizeIcon ?? props.iconSize ?? 1.1) + 'rem'));
+    // `size` também carrega os tamanhos textuais de botão ('small'/'lg'/…), que
+    // não são multiplicadores: Number('small') é NaN e gerava 'NaNrem'. Como o
+    // valor alimenta width e height do gatilho, a declaração inválida era
+    // descartada e a área clicável colapsava para o tamanho do conteúdo.
+    const size_icon = computed(() => {
+        const raw = props.size ?? props.sizeIcon ?? props.iconSize;
+        const factor = Number(raw);
+        return getCssSize((isNaN(factor) ? 1.1 : factor) + 'rem');
+    });
 
     const btn_el = ref<HTMLElement | null>(null);
     const menuEl = ref<HTMLElement | null>(null);
