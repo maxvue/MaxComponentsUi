@@ -1,7 +1,11 @@
-import Aura from '@primeuix/themes/aura';
-import { definePreset } from '@primeuix/themes';
-
-export const MaxStyle = definePreset(Aura, {
+/**
+ * Preset de tema da biblioteca.
+ *
+ * Até a Fase 1 este preset derivava do preset Aura do @primeuix/themes.
+ * Agora é um objeto próprio: as 5 rampas semânticas abaixo já eram literais no arquivo,
+ * e os tokens que vinham por herança estão congelados em src/themes/tokens.scss.
+ */
+export const MaxStyle = {
     semantic: {
         primary: {
             50: '#67C8DB',
@@ -69,4 +73,4 @@ export const MaxStyle = definePreset(Aura, {
             950: '#6C1919'
         }
     }
-});
+};
