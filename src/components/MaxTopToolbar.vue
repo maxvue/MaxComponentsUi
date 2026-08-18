@@ -7,8 +7,8 @@
                     :key="index"
                     class="p-menubar-item"
                     role="none"
-                    @mouseenter="activeSubmenu = index"
-                    @mouseleave="activeSubmenu = null"
+                    @mouseenter="openSubmenu(index)"
+                    @mouseleave="scheduleCloseSubmenu"
                 >
                     <div class="p-menubar-item-content">
                         <div v-if="item.divider" class="divider-space"></div>
@@ -78,10 +78,12 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, computed, useAttrs } from 'vue';
+    import { ref, computed, useAttrs, onBeforeUnmount } from 'vue';
     import { hasContent } from '@maxvue/max-use';
     import MaxIconButton from './MaxIconButton.vue';
     import { useTopToolbarStore } from '../stores/useTopToolbar.Store';
+
+    const SUBMENU_CLOSE_DELAY_MS = 1000;
 
     const attrs: any = useAttrs();
     const toolbar = useTopToolbarStore();
@@ -89,8 +91,30 @@
     const element_ref = ref();
     const menu_ref = ref();
     const activeSubmenu = ref<number | null>(null);
+    let closeTimer: ReturnType<typeof setTimeout> | null = null;
 
     const showed = computed(() => (attrs.plus === true ? true : toolbar.show));
+
+    const clearCloseTimer = (): void => {
+        if (closeTimer === null) return;
+        clearTimeout(closeTimer);
+        closeTimer = null;
+    };
+
+    const openSubmenu = (index: number): void => {
+        clearCloseTimer();
+        activeSubmenu.value = index;
+    };
+
+    const scheduleCloseSubmenu = (): void => {
+        clearCloseTimer();
+        closeTimer = setTimeout(() => {
+            activeSubmenu.value = null;
+            closeTimer = null;
+        }, SUBMENU_CLOSE_DELAY_MS);
+    };
+
+    onBeforeUnmount(clearCloseTimer);
 
     /**
      * Executa a ação do item: função própria (`action`), callback do PrimeVue

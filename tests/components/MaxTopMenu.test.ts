@@ -185,6 +185,10 @@ describe('MaxTopToolbar', () => {
         hasRoute.mockReturnValue(false);
     });
 
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
     it('não renderiza sem itens', () => {
         const toolbar = useTopToolbarStore();
         toolbar.show = true;
@@ -213,6 +217,52 @@ describe('MaxTopToolbar', () => {
         });
 
         expect(wrapper.find('.plus-custom').exists()).toBe(true);
+    });
+
+    it('mantém o submenu aberto por 1s após o mouse sair do item', async () => {
+        vi.useFakeTimers();
+        const toolbar = useTopToolbarStore();
+        toolbar.show = true;
+        toolbar.items = [{ label: 'Arquivo', items: [{ label: 'Novo' }] }];
+
+        const wrapper = mountWithPinia(MaxTopToolbar);
+        const item = wrapper.find('.p-menubar-root-list > .p-menubar-item');
+
+        await item.trigger('mouseenter');
+        expect(wrapper.find('.p-menubar-submenu').exists()).toBe(true);
+
+        await item.trigger('mouseleave');
+        expect(wrapper.find('.p-menubar-submenu').exists()).toBe(true);
+
+        await vi.advanceTimersByTimeAsync(999);
+        expect(wrapper.find('.p-menubar-submenu').exists()).toBe(true);
+
+        await vi.advanceTimersByTimeAsync(1);
+        expect(wrapper.find('.p-menubar-submenu').exists()).toBe(false);
+
+        wrapper.unmount();
+        vi.useRealTimers();
+    });
+
+    it('cancela o fechamento se o mouse voltar ao item antes de 1s', async () => {
+        vi.useFakeTimers();
+        const toolbar = useTopToolbarStore();
+        toolbar.show = true;
+        toolbar.items = [{ label: 'Arquivo', items: [{ label: 'Novo' }] }];
+
+        const wrapper = mountWithPinia(MaxTopToolbar);
+        const item = wrapper.find('.p-menubar-root-list > .p-menubar-item');
+
+        await item.trigger('mouseenter');
+        await item.trigger('mouseleave');
+        await vi.advanceTimersByTimeAsync(500);
+        await item.trigger('mouseenter');
+        await vi.advanceTimersByTimeAsync(1000);
+
+        expect(wrapper.find('.p-menubar-submenu').exists()).toBe(true);
+
+        wrapper.unmount();
+        vi.useRealTimers();
     });
 });
 
