@@ -1,5 +1,5 @@
 <template>
-    <InputBase v-bind="{ ...props, ...attrs }" class="max-select-tag" input-click no-dropdown>
+    <InputBase v-bind="{ ...props, ...attrs }" class="max-select-tag" input-click-auto no-dropdown>
         <div v-if="attrs.placeholder !== undefined && (!temp_value || temp_value === '')" class="tab-placeholder-select">
             {{ attrs.placeholder }}
         </div>
@@ -48,7 +48,7 @@
         </div>
 
         <Teleport to="body">
-            <div v-if="isOpen" class="max-select-backdrop" @click="hide">
+            <div v-if="isOpen" class="max-select-tag-backdrop" @click="hide">
                 <div
                     ref="overlayEl"
                     class="p-select-overlay"
@@ -353,9 +353,62 @@
 </script>
 
 <style lang="scss">
+.max-select-tag-backdrop {
+    background-color: red !important;
+
+    .p-select-list-container {
+        padding: 10px;
+    }
+
+    .p-select-option.p-select-option-selected {
+        background-color: unset !important;
+    }
+
+    .label-tag-div {
+        background-color: none !important;
+    }
+}
+
 .max-select-tag {
     &.max-input-main-div .max-input-field-div:focus-within {
         outline: none !important;
+    }
+
+    .p-select {
+        width: 100% !important;
+    }
+
+    .max-icon-div {
+        width: auto !important;
+        padding: 0 !important;
+
+        .max-icon {
+            padding: 0 !important;
+        }
+    }
+
+    .max-input-field-div {
+        width: 100%;
+
+        .input-slot-div {
+            margin: 0 !important;
+            width: 100% !important;
+            padding: 0 !important;
+
+            .value-tag-div {
+                grid-template-columns: auto 1fr auto;
+                width: 100% !important;
+                padding: 0 !important;
+            }
+        }
+    }
+
+    .input-slot-div {
+        padding: 0 !important;
+    }
+
+    .p-select-label {
+        padding: 0 !important;
     }
 
     &[small] {

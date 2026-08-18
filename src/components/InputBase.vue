@@ -345,9 +345,10 @@
 
     &[input-click] {
         &:not([input-click='false']) {
-            grid-template-rows: 1fr;
-            height: 20px;
-            padding: 0 !important;
+            .p-select-label {
+                min-height: 10px !important;
+                max-height: 10px !important;
+            }
 
             span, input, select, .p-select, .p-inputnumber {
                 width: calc(100% - 4px) !important;
@@ -362,17 +363,47 @@
                 padding: 0 5px;
 
             }
+        }
+    }
+
+    &[input-click-auto] {
+        &:not([input-click='false']) {
+            .p-select {
+                padding: 0 !important;
+            }
+
+            .p-select-label {
+                padding: 0 !important;
+            }
+
+            span, input, select, .p-select, .p-inputnumber {
+                width: 100% !important;
+                border: none !important;
+                border-color: transparent !important;
+                outline: none !important;
+                outline-color: transparent !important;
+                box-shadow: none !important;
+                font-size: 0.9rem;
+                color: rgb(66 54 54);
+                font-weight: 450;
+                padding: 0 5px;
+
+            }
+        }
+    }
+
+    &[input-click], &[input-click-auto] {
+        &:not([input-click='false']) {
+            grid-template-rows: 1fr;
+            height: 20px;
+            padding: 0 !important;
+
 
             .value-div {
                 width: 100% !important;
                 border: none !important;
                 border-color: transparent !important;
                 outline: none !important;
-            }
-
-            .p-select-label {
-                min-height: 10px !important;
-                max-height: 10px !important;
             }
 
             .max-input-field-div {
@@ -383,7 +414,7 @@
             .input-slot-div {
                 height: 100% !important;
                 max-height: 20px;
-                width: calc(100% - 6px) !important;
+                width: calc(100% - 6px);
             }
 
             .message-spacer {
