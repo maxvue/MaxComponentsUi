@@ -53,7 +53,7 @@
                     ref="overlayEl"
                     class="p-select-overlay"
                     role="listbox"
-                    :style="{ top: position.top + 'px', left: position.left + 'px', width: position.width }"
+                    :style="{ top: position.top + 'px', left: position.left + 'px' }"
                     @click.stop
                 >
                     <div v-if="props.filter" class="p-select-header">
@@ -99,7 +99,7 @@
                                                 :color="getStyleColor(option, false, false).color"
                                             />
                                             <div class="label-tag">
-                                                <div v-text="option[props.optionLabel] ?? option.label" :style="{ color: attrs.color }"></div>
+                                                <div style="display: grid; white-space: nowrap;" v-text="option[props.optionLabel] ?? option.label" :style="{ color: attrs.color }"></div>
                                             </div>
                                             <div class="sub-label-tag" v-text="option?.sub_label ?? option?.sub ?? option?.subLabel"></div>
                                             <img v-if="option['img']" :src="`/media/images/${option['img']}`" alt="Image" class="img-label" />
@@ -354,7 +354,12 @@
 
 <style lang="scss">
 .max-select-tag-backdrop {
-    background-color: red !important;
+    top: 0;
+    left: 0;
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999 !important;
 
     .p-select-list-container {
         padding: 10px;
@@ -491,8 +496,9 @@
     }
 
     .label-tag {
-        display: grid;
         place-items: center;
+        display: flex;
+        flex-flow: row nowrap;
     }
 
     img {

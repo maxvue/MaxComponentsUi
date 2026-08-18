@@ -10,6 +10,12 @@
             <slot name="title">{{ props.title }}</slot>
         </div>
     </teleport>
+    <teleport :to="'#max-tab-buttons-' + toValue(tabs_info?.tabs_id)" v-if="toValue(tabs_info?.tabs_id) && is_mounted && props.actionButtonLabel && props.actionButton">
+        <div @click="props.actionButton" class="button-tab-item" h-full>
+            <max-icon-button h-full :label="props.actionButtonLabel" :icon="props.actionButtonIcon" v-if="props.actionButtonIcon" />
+            <max-button h-full :label="props.actionButtonLabel" v-else />
+        </div>
+    </teleport>
     <div class="max-tab-item-content" v-if="is_active">
         <slot></slot>
     </div>
@@ -17,6 +23,8 @@
 
 <script setup lang="ts">
     import { inject, ref, onMounted, toValue, computed } from 'vue';
+    import MaxButton from './MaxButton.vue';
+    import MaxIconButton from './MaxIconButton.vue';
     // import MaxIcon from './MaxIcon.vue';
 
     type Props = {
@@ -24,6 +32,9 @@
         icon?: string;
         i?: string;
         value?: string | number;
+        actionButtonLabel?: string;
+        actionButtonIcon?: string;
+        actionButton?: () => {};
         disabled?: boolean;
     };
 
@@ -129,6 +140,11 @@
             color: var(--background-750);
         }
     }
+}
+
+.button-tab-item {
+    padding: 0 8px;
+    max-height: 25px;
 }
 
 .max-tab-item-content {

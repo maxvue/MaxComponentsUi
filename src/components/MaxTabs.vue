@@ -1,7 +1,12 @@
 <template>
     <div class="max-tabs">
         <div class="max-tabs-content">
-            <div class="max-tabs-title" :id="'max-tab-' + tabs_id"></div>
+            <div class="max-tabs-title">
+                <div class="max-tabs-title-items" :id="'max-tab-' + tabs_id"></div>
+                <div class="max-tabs-title-buttons" :id="'max-tab-buttons-' + tabs_id"></div>
+
+            </div>
+
             <div class="max-tab-content">
                 <slot></slot>
             </div>
@@ -211,9 +216,21 @@
         overflow: hidden;
 
         .max-tabs-title {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr auto;
             border-bottom: 1px solid var(--background-300);
-            background-color: var(--background-50);
+            width: 100%;
+            place-items: center start;
+
+            .max-tabs-title-items {
+                display: flex;
+                background-color: var(--background-50);
+            }
+
+            .max-tabs-title-buttons {
+                display: grid;
+            }
+
         }
 
         .max-tab-content {
