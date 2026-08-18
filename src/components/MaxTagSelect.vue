@@ -354,6 +354,10 @@
 
 <style lang="scss">
 .max-select-tag {
+    &.max-input-main-div .max-input-field-div:focus-within {
+        outline: none !important;
+    }
+
     &[small] {
         padding: 0 !important;
 
