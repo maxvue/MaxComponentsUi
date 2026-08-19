@@ -8,11 +8,62 @@
                 :editor="editor"
             />
         </div>
+
+        <!-- Visualizador Modal de Imagem (Lightbox) -->
+        <Teleport to="body">
+            <Transition name="max-fade">
+                <div
+                    v-if="isImageModalOpen"
+                    class="max-image-preview-modal"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Visualizador de Imagem"
+                    tabindex="-1"
+                    @click.self="closeImage"
+                >
+                    <div class="max-image-preview-modal__toolbar">
+                        <button type="button" class="max-image-preview-modal__btn" title="Diminuir Zoom" @click="zoomOutImage">
+                            <MaxIcon icon="iconamoon:zoom-out-light" :size="1.2" color="currentColor" />
+                        </button>
+                        <button type="button" class="max-image-preview-modal__btn" title="Resetar Zoom" @click="resetImageZoom">
+                            <span>{{ Math.round(imageZoom * 100) }}%</span>
+                        </button>
+                        <button type="button" class="max-image-preview-modal__btn" title="Aumentar Zoom" @click="zoomInImage">
+                            <MaxIcon icon="lucide:zoom-in" :size="1.2" color="currentColor" />
+                        </button>
+                        <a
+                            v-if="activeImageSrc && isSafeUrl(activeImageSrc)"
+                            :href="activeImageSrc"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="max-image-preview-modal__btn"
+                            title="Abrir original em nova aba"
+                        >
+                            <MaxIcon icon="mdi:open-in-new" :size="1.2" color="currentColor" />
+                        </a>
+                        <button type="button" class="max-image-preview-modal__btn max-image-preview-modal__btn--close" title="Fechar (Esc)" @click="closeImage">
+                            <MaxIcon icon="ic:round-close" :size="1.3" color="currentColor" />
+                        </button>
+                    </div>
+                    <div class="max-image-preview-modal__content" @click.self="closeImage">
+                        <img
+                            :src="activeImageSrc"
+                            :alt="activeImageAlt"
+                            class="max-image-preview-modal__img"
+                            :style="{ transform: `scale(${imageZoom})` }"
+                        />
+                    </div>
+                </div>
+            </Transition>
+        </Teleport>
+
+        <!-- Visualizador Modal de PDF -->
+        <MaxPdfView :file="activePdfUrl" />
     </InputBase>
 </template>
 
 <script setup lang="ts">
-    import { computed, onBeforeUnmount, onMounted, watch } from 'vue';
+    import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
     import { useEditor, EditorContent } from '@tiptap/vue-3';
     import StarterKit from '@tiptap/starter-kit';
     import Underline from '@tiptap/extension-underline';
@@ -24,8 +75,11 @@
     import TableCell from '@tiptap/extension-table-cell';
     import { Markdown } from 'tiptap-markdown';
     import MaxInputMarkdownToolbar from './MaxInputMarkdownToolbar.vue';
+    import MaxPdfView from './MaxPdfView.vue';
+    import MaxIcon from './MaxIcon.vue';
     import InputBase from './InputBase.vue';
     import { isSafeUrl } from '../helpers/isSafeUrl';
+    import { useScrollLock } from '../helpers/useScrollLock';
 
     const props = withDefaults(
         defineProps<{
@@ -47,6 +101,7 @@
             minHeight?: string;
             maxHeight?: string;
             onImageUpload?: (file: File) => Promise<string>;
+            onFileUpload?: (file: File) => Promise<string>;
         }>(),
         {
             modelValue: '',
@@ -54,13 +109,15 @@
             inLine: false,
             minHeight: '200px',
             maxHeight: '500px',
-            onImageUpload: undefined
+            onImageUpload: undefined,
+            onFileUpload: undefined
         }
     );
 
     const emit = defineEmits<{
         'update:modelValue': [value: string];
         'paste-image': [file: File];
+        'paste-file': [file: File];
     }>();
 
     const inputBaseProps = computed(() => ({
@@ -78,6 +135,65 @@
         caution: props.caution,
         required: props.required
     }));
+
+    const isImageModalOpen = ref(false);
+    const activeImageSrc = ref('');
+    const activeImageAlt = ref('');
+    const imageZoom = ref(1);
+
+    const activePdfUrl = ref('');
+
+    const scrollLock = useScrollLock();
+
+    const onImageModalEscape = (event: KeyboardEvent) => {
+        if (event.key === 'Escape' && isImageModalOpen.value) closeImage();
+    };
+
+    const openImage = (src: string, alt = '') => {
+        activeImageSrc.value = src;
+        activeImageAlt.value = alt;
+        imageZoom.value = 1;
+        isImageModalOpen.value = true;
+        scrollLock.lock();
+        document.addEventListener('keydown', onImageModalEscape);
+    };
+
+    const closeImage = () => {
+        isImageModalOpen.value = false;
+        activeImageSrc.value = '';
+        activeImageAlt.value = '';
+        scrollLock.unlock();
+        document.removeEventListener('keydown', onImageModalEscape);
+    };
+
+    const zoomInImage = () => {
+        imageZoom.value = Math.min(Number((imageZoom.value + 0.25).toFixed(2)), 3);
+    };
+
+    const zoomOutImage = () => {
+        imageZoom.value = Math.max(Number((imageZoom.value - 0.25).toFixed(2)), 0.5);
+    };
+
+    const resetImageZoom = () => {
+        imageZoom.value = 1;
+    };
+
+    const isPdfUrl = (url: string): boolean => {
+        if (!url) return false;
+        try {
+            const cleanUrl = url.split('?')[0].split('#')[0].toLowerCase();
+            return cleanUrl.endsWith('.pdf') || url.toLowerCase().includes('.pdf');
+        } catch {
+            return false;
+        }
+    };
+
+    const openPdf = (url: string) => {
+        activePdfUrl.value = '';
+        nextTick(() => {
+            activePdfUrl.value = url;
+        });
+    };
 
     const insertImageFile = (file: File) => {
         if (!file.type.startsWith('image/')) return;
@@ -103,6 +219,21 @@
         reader.readAsDataURL(file);
     };
 
+    const insertPdfFile = (file: File) => {
+        emit('paste-file', file);
+
+        const uploadFn = props.onFileUpload || props.onImageUpload;
+        if (uploadFn) uploadFn(file).then((url) => {
+            if (url && isSafeUrl(url)) {
+                const label = file.name || 'Documento PDF';
+                editor.value?.chain().focus().insertContent(`[${label}](${url}) `).run();
+            }
+        }).catch((err) => {
+            console.error('Erro ao processar upload do PDF:', err);
+        });
+
+    };
+
     const handlePaste = (_view: any, event: ClipboardEvent) => {
         if (props.disabled) return false;
         const clipboardData = event.clipboardData;
@@ -119,6 +250,12 @@
                     insertImageFile(file);
                     handled = true;
                 }
+            } else if (item.type === 'application/pdf') {
+                const file = item.getAsFile();
+                if (file) {
+                    insertPdfFile(file);
+                    handled = true;
+                }
             }
         }
 
@@ -127,6 +264,9 @@
             const file = clipboardData.files[i];
             if (file.type.startsWith('image/')) {
                 insertImageFile(file);
+                handled = true;
+            } else if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+                insertPdfFile(file);
                 handled = true;
             }
         }
@@ -150,6 +290,9 @@
             const file = files[i];
             if (file.type.startsWith('image/')) {
                 insertImageFile(file);
+                handled = true;
+            } else if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+                insertPdfFile(file);
                 handled = true;
             }
         }
@@ -190,6 +333,35 @@
                 class: 'max-input-markdown__prosemirror',
                 ...(props.placeholder ? { 'data-placeholder': props.placeholder } : {})
             },
+            handleClick: (_view, _pos, event) => {
+                const target = event.target as HTMLElement | null;
+                if (!target) return false;
+
+                // 1. Clique em imagem: abre modal lightbox
+                if (target.tagName === 'IMG') {
+                    const src = target.getAttribute('src');
+                    const alt = target.getAttribute('alt') || '';
+                    if (src) {
+                        openImage(src, alt);
+                        event.preventDefault();
+                        return true;
+                    }
+                }
+
+                // 2. Clique em link PDF: abre MaxPdfView
+                const linkEl = target.closest('a');
+                if (linkEl) {
+                    const href = linkEl.getAttribute('href');
+                    if (href && isPdfUrl(href)) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        openPdf(href);
+                        return true;
+                    }
+                }
+
+                return false;
+            },
             handlePaste: (view, event) => handlePaste(view, event),
             handleDrop: (view, event, slice, moved) => handleDrop(view, event, slice, moved)
         },
@@ -216,7 +388,21 @@
         (val) => editor.value?.setEditable(!val)
     );
 
-    onBeforeUnmount(() => editor.value?.destroy());
+    onBeforeUnmount(() => {
+        document.removeEventListener('keydown', onImageModalEscape);
+        if (isImageModalOpen.value) scrollLock.unlock();
+        editor.value?.destroy();
+    });
+
+    defineExpose({
+        editor,
+        openImage,
+        closeImage,
+        openPdf,
+        isImageModalOpen,
+        activeImageSrc,
+        activePdfUrl
+    });
 </script>
 
 <style lang="scss">
@@ -408,7 +594,7 @@
                 }
             }
 
-            // Links
+            // Links (Padrão e PDF)
             a {
                 color: var(--max-primary-600, #2563eb);
                 text-decoration: underline;
@@ -417,6 +603,47 @@
 
                 &:hover {
                     color: var(--max-primary-700, #1d4ed8);
+                }
+
+                // Estilização diferenciada para links de PDF (card/chip com ícone de documento)
+                &[href*=".pdf"],
+                &[href$=".pdf"] {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    padding: 3px 10px;
+                    background: var(--background-100, #f3f4f6);
+                    border: 1px solid var(--background-300, #d1d5db);
+                    border-radius: 6px;
+                    color: var(--red-700, #dc2626) !important;
+                    text-decoration: none !important;
+                    font-weight: 500;
+                    font-size: 0.9em;
+                    line-height: 1.4;
+                    cursor: pointer;
+                    transition: all 0.15s ease;
+                    vertical-align: middle;
+                    margin: 2px 4px 2px 0;
+
+                    &::before {
+                        content: '';
+                        display: inline-block;
+                        width: 16px;
+                        height: 16px;
+                        flex-shrink: 0;
+                        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23dc2626' d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2m-9.5 8.5c0 .83-.67 1.5-1.5 1.5H7v2H5.5V9H8c.83 0 1.5.67 1.5 1.5zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V9H13c.83 0 1.5.67 1.5 1.5zm4-3.5H17v1.5h1.5V13H17v2h-1.5V9h3zM7 10.5h1v1H7zm5.5 0h1v3h-1z'/%3E%3C/svg%3E");
+                        background-size: contain;
+                        background-repeat: no-repeat;
+                        background-position: center;
+                    }
+
+                    &:hover {
+                        background: var(--background-200, #e5e7eb);
+                        border-color: var(--red-500, #ef4444);
+                        color: var(--red-800, #991b1b) !important;
+                        box-shadow: 0 2px 6px rgb(220 38 38 / 15%);
+                        transform: translateY(-1px);
+                    }
                 }
             }
 
@@ -444,13 +671,27 @@
                 margin: 1.25rem 0;
             }
 
-            // Images
+            // Imagens renderizadas como Miniaturas (Thumbnails)
             img {
-                max-width: 100%;
+                max-width: 240px;
+                max-height: 160px;
+                width: auto;
                 height: auto;
-                border-radius: 6px;
-                margin: 0.5rem 0;
+                object-fit: cover;
+                border-radius: 8px;
+                border: 1px solid var(--background-300, #d1d5db);
+                box-shadow: 0 2px 6px rgb(0 0 0 / 6%);
+                cursor: zoom-in;
+                transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
                 display: inline-block;
+                margin: 0.5rem 0;
+                vertical-align: middle;
+
+                &:hover {
+                    transform: scale(1.02);
+                    box-shadow: 0 4px 12px rgb(0 0 0 / 12%);
+                    border-color: var(--max-primary-500, #3b82f6);
+                }
             }
 
             // Tables
@@ -492,5 +733,101 @@
                 }
             }
         }
+    }
+
+    // Estilos do Modal Lightbox de Imagem
+    .max-image-preview-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background-color: rgb(0 0 0 / 85%);
+        backdrop-filter: blur(8px);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        box-sizing: border-box;
+        outline: none;
+
+        &__toolbar {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgb(30 41 59 / 85%);
+            backdrop-filter: blur(6px);
+            padding: 6px 12px;
+            border-radius: 10px;
+            border: 1px solid rgb(255 255 255 / 15%);
+            box-shadow: 0 4px 16px rgb(0 0 0 / 30%);
+            z-index: 10;
+        }
+
+        &__btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 32px;
+            min-width: 32px;
+            padding: 0 8px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: rgb(255 255 255 / 85%);
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.15s ease;
+            text-decoration: none;
+            box-sizing: border-box;
+
+            &:hover {
+                background: rgb(255 255 255 / 20%);
+                color: #fff;
+            }
+
+            &--close {
+                margin-left: 4px;
+                border-left: 1px solid rgb(255 255 255 / 20%);
+                padding-left: 10px;
+
+                &:hover {
+                    background: rgb(239 68 68 / 80%);
+                    color: #fff;
+                }
+            }
+        }
+
+        &__content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
+        }
+
+        &__img {
+            max-width: 90vw;
+            max-height: 85vh;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 12px 40px rgb(0 0 0 / 50%);
+            transition: transform 0.2s ease-out;
+            user-select: none;
+        }
+    }
+
+    .max-fade-enter-active,
+    .max-fade-leave-active {
+        transition: opacity 0.25s ease;
+    }
+
+    .max-fade-enter-from,
+    .max-fade-leave-to {
+        opacity: 0;
     }
 </style>

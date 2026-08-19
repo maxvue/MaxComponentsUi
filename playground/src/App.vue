@@ -323,8 +323,7 @@
     const textAreaValue1 = ref('Linha 1\nLinha 2\nLinha 3');
     const textAreaValue2 = ref('Texto longo com maxRows=4...\nLinha 1\nLinha 2\nLinha 3\nLinha 4\nLinha 5\nLinha 6\nLinha 7');
     const textAreaValue3 = ref('Texto com scroll interno fixo em 3 linhas\nLinha 1\nLinha 2\nLinha 3\nLinha 4\nLinha 5');
-
-    const markdownValue = ref('# Título Principal\n\nEste é um exemplo de texto **negrito**, *itálico* e `código inline`.\n\n- Item 1\n- Item 2\n\n> Citação importante do sistema.');
+    const markdownValue = ref('# Título Principal\n\nEste é um exemplo de texto **negrito**, *itálico* e `código inline`.\n\n- Item 1\n- Item 2\n\n> Citação importante do sistema.\n\n### Anexos e Mídias\n\n![Exemplo de Imagem](https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=400)\n\nConsulte o documento: [Manual do Usuário.pdf](https://raw.githubusercontent.com/mozilla/pdf.js/master/test/pdfs/helloworld.pdf)');
     const markdownDisabledValue = ref('**Conteúdo somente leitura**');
     const markdownRequiredValue = ref('');
 

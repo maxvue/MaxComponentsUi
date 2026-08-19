@@ -60,6 +60,7 @@ function mountMarkdown(props: Record<string, any> = {}) {
         props: { modelValue: '', ...props },
         global: {
             stubs: {
+                teleport: true,
                 MaxInputMarkdownToolbar: {
                     name: 'MaxInputMarkdownToolbar',
                     template: '<div class="toolbar-stub"></div>',
@@ -68,6 +69,11 @@ function mountMarkdown(props: Record<string, any> = {}) {
                 MaxIcon: {
                     template: '<span class="max-icon-stub"></span>',
                     props: ['icon', 'size']
+                },
+                MaxPdfView: {
+                    name: 'MaxPdfView',
+                    template: '<div class="max-pdf-view-stub" :data-file="file"></div>',
+                    props: ['file']
                 }
             }
         }
@@ -237,5 +243,153 @@ describe('MaxInputMarkdown', () => {
 
         await wrapper.setProps({ disabled: false });
         expect(mockEditor.setEditable).toHaveBeenCalledWith(true);
+    });
+
+    describe('Visualizador Modal de Imagens (Lightbox)', () => {
+        it('abre o modal lightbox ao clicar em uma imagem no editor', async () => {
+            const wrapper = mountMarkdown();
+            const mockImg = document.createElement('img');
+            mockImg.setAttribute('src', 'https://example.com/foto.jpg');
+            mockImg.setAttribute('alt', 'Foto de Exemplo');
+
+            const mockClickEvent = {
+                target: mockImg,
+                preventDefault: vi.fn(),
+                stopPropagation: vi.fn()
+            };
+
+            const handled = latestEditorOptions.editorProps.handleClick({}, 0, mockClickEvent);
+
+            expect(handled).toBe(true);
+            expect(mockClickEvent.preventDefault).toHaveBeenCalled();
+
+            await wrapper.vm.$nextTick();
+
+            const modal = wrapper.find('.max-image-preview-modal');
+            expect(modal.exists()).toBe(true);
+            const img = modal.find('img.max-image-preview-modal__img');
+            expect(img.attributes('src')).toBe('https://example.com/foto.jpg');
+            expect(img.attributes('alt')).toBe('Foto de Exemplo');
+        });
+
+        it('aumenta, diminui e reseta o zoom da imagem no modal', async () => {
+            const wrapper = mountMarkdown();
+            const vm = wrapper.vm as any;
+
+            vm.openImage('https://example.com/foto.jpg');
+            await wrapper.vm.$nextTick();
+
+            expect(vm.imageZoom).toBe(1);
+
+            vm.zoomInImage();
+            expect(vm.imageZoom).toBe(1.25);
+
+            vm.zoomOutImage();
+            expect(vm.imageZoom).toBe(1);
+
+            vm.zoomInImage();
+            vm.zoomInImage();
+            expect(vm.imageZoom).toBe(1.5);
+
+            vm.resetImageZoom();
+            expect(vm.imageZoom).toBe(1);
+        });
+
+        it('fecha o modal de imagem ao clicar no botão de fechar ou no backdrop', async () => {
+            const wrapper = mountMarkdown();
+            const vm = wrapper.vm as any;
+
+            vm.openImage('https://example.com/foto.jpg');
+            await wrapper.vm.$nextTick();
+            expect(wrapper.find('.max-image-preview-modal').exists()).toBe(true);
+
+            await wrapper.find('.max-image-preview-modal__btn--close').trigger('click');
+            await wrapper.vm.$nextTick();
+            expect(wrapper.find('.max-image-preview-modal').exists()).toBe(false);
+
+            vm.openImage('https://example.com/foto.jpg');
+            await wrapper.vm.$nextTick();
+            expect(wrapper.find('.max-image-preview-modal').exists()).toBe(true);
+
+            await wrapper.find('.max-image-preview-modal').trigger('click');
+            await wrapper.vm.$nextTick();
+            expect(wrapper.find('.max-image-preview-modal').exists()).toBe(false);
+        });
+
+        it('fecha o modal de imagem ao pressionar Escape', async () => {
+            const wrapper = mountMarkdown();
+            const vm = wrapper.vm as any;
+
+            vm.openImage('https://example.com/foto.jpg');
+            await wrapper.vm.$nextTick();
+            expect(wrapper.find('.max-image-preview-modal').exists()).toBe(true);
+
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+            await wrapper.vm.$nextTick();
+            expect(wrapper.find('.max-image-preview-modal').exists()).toBe(false);
+        });
+    });
+
+    describe('Visualizador Modal de PDF', () => {
+        it('abre o visualizador de PDF ao clicar em link com terminação .pdf', async () => {
+            const wrapper = mountMarkdown();
+            const mockLink = document.createElement('a');
+            mockLink.setAttribute('href', 'https://example.com/relatorio.pdf');
+            mockLink.textContent = 'Relatório Técnico';
+
+            const mockClickEvent = {
+                target: mockLink,
+                preventDefault: vi.fn(),
+                stopPropagation: vi.fn()
+            };
+
+            const handled = latestEditorOptions.editorProps.handleClick({}, 0, mockClickEvent);
+
+            expect(handled).toBe(true);
+            expect(mockClickEvent.preventDefault).toHaveBeenCalled();
+            expect(mockClickEvent.stopPropagation).toHaveBeenCalled();
+
+            await wrapper.vm.$nextTick();
+            await wrapper.vm.$nextTick();
+
+            const pdfStub = wrapper.findComponent({ name: 'MaxPdfView' });
+            expect(pdfStub.exists()).toBe(true);
+            expect(pdfStub.props('file')).toBe('https://example.com/relatorio.pdf');
+        });
+
+        it('ignora clique em links normais que não são PDF', () => {
+            const _wrapper = mountMarkdown();
+            const mockLink = document.createElement('a');
+            mockLink.setAttribute('href', 'https://example.com/pagina-web');
+            mockLink.textContent = 'Site Principal';
+
+            const mockClickEvent = {
+                target: mockLink,
+                preventDefault: vi.fn(),
+                stopPropagation: vi.fn()
+            };
+
+            const handled = latestEditorOptions.editorProps.handleClick({}, 0, mockClickEvent);
+
+            expect(handled).toBe(false);
+            expect(mockClickEvent.preventDefault).not.toHaveBeenCalled();
+        });
+
+        it('processa drag and drop de arquivo PDF e emite paste-file', () => {
+            const wrapper = mountMarkdown();
+            const file = new File(['dummy pdf content'], 'contrato.pdf', { type: 'application/pdf' });
+            const mockDropEvent = {
+                dataTransfer: {
+                    files: [file]
+                },
+                preventDefault: vi.fn()
+            };
+
+            const result = latestEditorOptions.editorProps.handleDrop({}, mockDropEvent, null, false);
+
+            expect(result).toBe(true);
+            expect(mockDropEvent.preventDefault).toHaveBeenCalled();
+            expect(wrapper.emitted('paste-file')?.[0]).toEqual([file]);
+        });
     });
 });
