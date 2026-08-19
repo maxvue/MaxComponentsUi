@@ -59,6 +59,32 @@
                             <MaxInputTextArea label="Auto-resize com maxRows 4 (com scroll)" v-model="textAreaValue2" :maxRows="4" s50 />
                             <MaxInputTextArea label="Sem auto-resize (rows 3 fixo com scroll)" v-model="textAreaValue3" :autoResize="false" :rows="3" s50 />
                         </MaxGrid>
+
+                        <h3>Markdown Editor (MaxInputMarkdown)</h3>
+                        <MaxGrid>
+                            <MaxInputMarkdown
+                                label="Conteúdo Rico em Markdown"
+                                v-model="markdownValue"
+                                placeholder="Digite seu texto formatado ou cole imagens com Ctrl+V..."
+                                minHeight="200px"
+                                maxHeight="400px"
+                                s100
+                            />
+                            <MaxInputMarkdown
+                                label="Markdown Desabilitado"
+                                v-model="markdownDisabledValue"
+                                disabled
+                                minHeight="120px"
+                                s50
+                            />
+                            <MaxInputMarkdown
+                                label="Markdown Obrigatório"
+                                v-model="markdownRequiredValue"
+                                required
+                                minHeight="120px"
+                                s50
+                            />
+                        </MaxGrid>
                     </div>
                 </div>
             </section>
@@ -297,6 +323,10 @@
     const textAreaValue1 = ref('Linha 1\nLinha 2\nLinha 3');
     const textAreaValue2 = ref('Texto longo com maxRows=4...\nLinha 1\nLinha 2\nLinha 3\nLinha 4\nLinha 5\nLinha 6\nLinha 7');
     const textAreaValue3 = ref('Texto com scroll interno fixo em 3 linhas\nLinha 1\nLinha 2\nLinha 3\nLinha 4\nLinha 5');
+
+    const markdownValue = ref('# Título Principal\n\nEste é um exemplo de texto **negrito**, *itálico* e `código inline`.\n\n- Item 1\n- Item 2\n\n> Citação importante do sistema.');
+    const markdownDisabledValue = ref('**Conteúdo somente leitura**');
+    const markdownRequiredValue = ref('');
 
     const value = ref({
         a: '',

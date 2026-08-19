@@ -1,6 +1,9 @@
 import path from 'node:path';
+import { createRequire } from 'node:module';
 import { defineConfig } from 'vitest/config';
 import vue from '@vitejs/plugin-vue';
+
+const require = createRequire(import.meta.url);
 
 export default defineConfig({
     plugins: [
@@ -17,8 +20,8 @@ export default defineConfig({
             // segunda instância do Vue, e os watchers do VueUse (watchDebounced, etc.)
             // nunca disparariam sobre refs criados pelos testes. Fixar ambos aqui mantém
             // uma única instância de reatividade.
-            '@vueuse/core': path.resolve(import.meta.dirname, './node_modules/@vueuse/core'),
-            vue: path.resolve(import.meta.dirname, './node_modules/vue')
+            '@vueuse/core': path.dirname(require.resolve('@vueuse/core/package.json')),
+            vue: path.dirname(require.resolve('vue/package.json'))
         },
         // Garante instância única mesmo para dependências resolvidas transitivamente.
         dedupe: ['vue', '@vueuse/core', 'pinia']

@@ -5,7 +5,12 @@ import MaxInputMarkdown from '../../src/components/MaxInputMarkdown.vue';
 
 let latestEditorOptions: any = null;
 const mockEditor = {
-    chain: () => ({ focus: () => ({ toggleBold: () => ({ run: vi.fn() }) }) }),
+    chain: () => ({
+        focus: () => ({
+            toggleBold: () => ({ run: vi.fn() }),
+            setImage: vi.fn(() => ({ run: vi.fn() }))
+        })
+    }),
     isActive: vi.fn(() => false),
     can: () => ({ undo: () => false, redo: () => false }),
     storage: { markdown: { getMarkdown: vi.fn(() => '') } },
@@ -108,9 +113,76 @@ describe('MaxInputMarkdown', () => {
         expect(wrapper.find('.max-input-markdown__editor-wrap--disabled').exists()).toBe(true);
     });
 
-    it('passa label para InputBase via inLine', () => {
-        const wrapper = mountMarkdown({ label: 'Descrição' });
+    it('passa label para InputBase via inLine quando inLine=true', () => {
+        const wrapper = mountMarkdown({ label: 'Descrição', inLine: true });
         expect(wrapper.find('.in-line-label').text()).toBe('Descrição');
+    });
+
+    it('passa label para InputBase como floating label padrão quando inLine=false', () => {
+        const wrapper = mountMarkdown({ label: 'Descrição' });
+        expect(wrapper.find('.max-input-label').text()).toBe('Descrição');
+    });
+
+    it('processa colagem (Ctrl+V) de imagem e emite evento paste-image', () => {
+        const wrapper = mountMarkdown();
+        const file = new File(['dummy content'], 'screenshot.png', { type: 'image/png' });
+        const mockClipboardEvent = {
+            clipboardData: {
+                items: [
+                    {
+                        type: 'image/png',
+                        getAsFile: () => file
+                    }
+                ],
+                files: []
+            },
+            preventDefault: vi.fn()
+        };
+
+        const result = latestEditorOptions.editorProps.handlePaste({}, mockClipboardEvent);
+
+        expect(result).toBe(true);
+        expect(mockClipboardEvent.preventDefault).toHaveBeenCalled();
+        expect(wrapper.emitted('paste-image')?.[0]).toEqual([file]);
+    });
+
+    it('processa drag and drop de imagem', () => {
+        const wrapper = mountMarkdown();
+        const file = new File(['dummy content'], 'photo.jpg', { type: 'image/jpeg' });
+        const mockDropEvent = {
+            dataTransfer: {
+                files: [file]
+            },
+            preventDefault: vi.fn()
+        };
+
+        const result = latestEditorOptions.editorProps.handleDrop({}, mockDropEvent, null, false);
+
+        expect(result).toBe(true);
+        expect(mockDropEvent.preventDefault).toHaveBeenCalled();
+        expect(wrapper.emitted('paste-image')?.[0]).toEqual([file]);
+    });
+
+    it('utiliza onImageUpload customizado quando fornecido', async () => {
+        const onImageUpload = vi.fn().mockResolvedValue('https://example.com/uploaded.png');
+        const wrapper = mountMarkdown({ onImageUpload });
+        expect(wrapper.exists()).toBe(true);
+        const file = new File(['dummy content'], 'uploaded.png', { type: 'image/png' });
+        const mockClipboardEvent = {
+            clipboardData: {
+                items: [
+                    {
+                        type: 'image/png',
+                        getAsFile: () => file
+                    }
+                ]
+            },
+            preventDefault: vi.fn()
+        };
+
+        latestEditorOptions.editorProps.handlePaste({}, mockClipboardEvent);
+
+        expect(onImageUpload).toHaveBeenCalledWith(file);
     });
 
     it('emite update:modelValue quando o callback onUpdate do editor é acionado', () => {
