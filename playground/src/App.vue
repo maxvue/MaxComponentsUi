@@ -52,6 +52,13 @@
                                 <code style="font-size:0.8rem;">{{ iconValue || '—' }}</code>
                             </div>
                         </MaxGrid>
+
+                        <h3>Textarea</h3>
+                        <MaxGrid>
+                            <MaxInputTextArea label="Auto-resize padrão (maxRows 10)" v-model="textAreaValue1" s50 />
+                            <MaxInputTextArea label="Auto-resize com maxRows 4 (com scroll)" v-model="textAreaValue2" :maxRows="4" s50 />
+                            <MaxInputTextArea label="Sem auto-resize (rows 3 fixo com scroll)" v-model="textAreaValue3" :autoResize="false" :rows="3" s50 />
+                        </MaxGrid>
                     </div>
                 </div>
             </section>
@@ -286,6 +293,10 @@
     const lastClickEvent = ref<string>('');
 
     const iconValue = ref('');
+
+    const textAreaValue1 = ref('Linha 1\nLinha 2\nLinha 3');
+    const textAreaValue2 = ref('Texto longo com maxRows=4...\nLinha 1\nLinha 2\nLinha 3\nLinha 4\nLinha 5\nLinha 6\nLinha 7');
+    const textAreaValue3 = ref('Texto com scroll interno fixo em 3 linhas\nLinha 1\nLinha 2\nLinha 3\nLinha 4\nLinha 5');
 
     const value = ref({
         a: '',

@@ -47,7 +47,7 @@
             minRows?: number | string;
             minLines?: string | number;
             autofocus?: boolean;
-            maxRows?: number;
+            maxRows?: number | string;
             wrap?: string;
         }>(),
         { modelValue: '', autoResize: true, maxRows: 10, minRows: 1, done: undefined }
@@ -64,12 +64,60 @@
 
     const textAreaEl = ref<HTMLTextAreaElement | null>(null);
 
+    const minLinesNormalized = computed(() => {
+        const value = Number(props.minLines ?? props.minRows);
+        return Number.isNaN(value) || value < 1 ? 1 : value;
+    });
+
+    const maxRowsNormalized = computed(() => {
+        const value = Number(props.maxRows);
+        return Number.isNaN(value) || value <= 0 ? undefined : value;
+    });
+
     const resize = () => {
-        if (!props.autoResize || !textAreaEl.value) return;
+        if (!textAreaEl.value) return;
 
         const el = textAreaEl.value;
-        el.style.height = 'auto';
-        el.style.height = `${el.scrollHeight}px`;
+
+        if (!props.autoResize) {
+            el.style.removeProperty('height');
+            el.style.overflowY = 'auto';
+            return;
+        }
+
+        // Reseta altura para auto antes de medir scrollHeight
+        el.style.setProperty('height', 'auto', 'important');
+
+        // Em ambientes de teste sem renderização de layout (ex: happy-dom), scrollHeight é 0
+        if (el.scrollHeight === 0) return;
+
+        const computedStyle = window.getComputedStyle(el);
+        const lh = parseFloat(computedStyle.lineHeight);
+        const fs = parseFloat(computedStyle.fontSize);
+        const lineHeight = !Number.isNaN(lh) && lh > 0 ? lh : (!Number.isNaN(fs) && fs > 0 ? fs * 1.5 : 20);
+
+        const paddingTop = parseFloat(computedStyle.paddingTop) || 0;
+        const paddingBottom = parseFloat(computedStyle.paddingBottom) || 0;
+        const borderTop = parseFloat(computedStyle.borderTopWidth) || 0;
+        const borderBottom = parseFloat(computedStyle.borderBottomWidth) || 0;
+        const verticalPadding = paddingTop + paddingBottom + borderTop + borderBottom;
+
+        const minRows = minLinesNormalized.value;
+        const maxRows = maxRowsNormalized.value;
+
+        const minHeight = minRows * lineHeight + verticalPadding;
+        const maxHeight = maxRows !== undefined ? maxRows * lineHeight + verticalPadding : Infinity;
+
+        const scrollHeight = el.scrollHeight;
+
+        if (scrollHeight > maxHeight) {
+            el.style.setProperty('height', `${maxHeight}px`, 'important');
+            el.style.overflowY = 'auto';
+        } else {
+            const targetHeight = Math.max(minHeight, scrollHeight);
+            el.style.setProperty('height', `${targetHeight}px`, 'important');
+            el.style.overflowY = 'hidden';
+        }
     };
 
     const onInput = (event: Event) => {
@@ -80,11 +128,6 @@
     onMounted(() => nextTick(resize));
 
     const computedLines = computed(() => (temp_value.value ?? '').split(/\r\n|\r|\n/).length);
-
-    const minLinesNormalized = computed(() => {
-        const value = Number(props.minLines ?? props.minRows);
-        return Number.isNaN(value) ? 1 : value;
-    });
 
     const lines = computed(() => props.rows ?? (computedLines.value > minLinesNormalized.value ? computedLines.value : minLinesNormalized.value));
 
@@ -106,6 +149,11 @@
         .max-input-field-div {
             height: auto !important;
             padding: 8px 0 5px !important;
+
+            textarea {
+                height: auto;
+                min-height: 20px;
+            }
         }
 
         textarea {
@@ -114,14 +162,10 @@
             background: transparent;
             outline: none;
             resize: none;
+            overflow-y: auto;
 
             &[no-border] {
                 border: none !important;
-            }
-
-            &[auto-resize] {
-                height: auto !important;
-                overflow-y: hidden;
             }
         }
     }

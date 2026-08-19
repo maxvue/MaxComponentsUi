@@ -81,4 +81,56 @@ describe('MaxInputTextArea', () => {
         expect(Number.isNaN(vm.lines)).toBe(false);
         expect(vm.lines).toBeGreaterThanOrEqual(1);
     });
+
+    it('respeita maxRows e normaliza valores não numéricos', () => {
+        const wrapper = mountTextArea({ modelValue: '', maxRows: 5 });
+        expect(wrapper.exists()).toBe(true);
+
+        const wrapperInvalid = mountTextArea({ modelValue: '', maxRows: 'invalid' as any });
+        expect(wrapperInvalid.exists()).toBe(true);
+    });
+
+    it('define overflowY="auto" e limpa height quando autoResize é false', async () => {
+        const wrapper = mountTextArea({ modelValue: 'Texto', autoResize: false, rows: 4 });
+        await wrapper.vm.$nextTick();
+        const textarea = wrapper.find('textarea');
+        const el = textarea.element as HTMLTextAreaElement;
+
+        // Com autoResize=false, overflowY deve ser auto para permitir scroll
+        expect(el.style.overflowY).toBe('auto');
+    });
+
+    it('limita altura e ativa overflowY="auto" quando conteúdo excede maxRows', async () => {
+        const wrapper = mountTextArea({ modelValue: 'Linha 1\nLinha 2\nLinha 3\nLinha 4\nLinha 5', maxRows: 2 });
+        const textarea = wrapper.find('textarea');
+        const el = textarea.element as HTMLTextAreaElement;
+
+        // Simula layout com scrollHeight maior que maxHeight
+        Object.defineProperty(el, 'scrollHeight', { value: 300, configurable: true });
+        Object.defineProperty(el, 'clientHeight', { value: 60, configurable: true });
+
+        // Dispara resize
+        const vm = wrapper.vm as any;
+        vm.resize();
+        await wrapper.vm.$nextTick();
+
+        expect(el.style.overflowY).toBe('auto');
+        expect(el.style.height).toBeTruthy();
+    });
+
+    it('ajusta overflowY="hidden" quando conteúdo não excede maxRows', async () => {
+        const wrapper = mountTextArea({ modelValue: 'Linha 1', maxRows: 10 });
+        const textarea = wrapper.find('textarea');
+        const el = textarea.element as HTMLTextAreaElement;
+
+        // Simula scrollHeight pequeno
+        Object.defineProperty(el, 'scrollHeight', { value: 40, configurable: true });
+
+        const vm = wrapper.vm as any;
+        vm.resize();
+        await wrapper.vm.$nextTick();
+
+        expect(el.style.overflowY).toBe('hidden');
+    });
 });
+
