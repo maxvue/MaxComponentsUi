@@ -187,6 +187,10 @@
     position: relative;
     place-items: center;
 
+    input {
+        color: var(--background-700);
+    }
+
     .max-input-label {
         position: absolute;
         pointer-events: none;
@@ -220,6 +224,10 @@
             padding: 0 5px !important;
             font-weight: var(--max-floatlabel-active-font-weight, 400);
             inset-inline-start: 15px !important;
+        }
+
+        input {
+            color: green !important;
         }
     }
 
@@ -357,8 +365,8 @@
                 outline: none !important;
                 outline-color: transparent !important;
                 box-shadow: none !important;
-                font-size: 0.9rem;
-                color: rgb(66 54 54);
+                font-size: 0.85rem !important;
+                color: var(--background-700);
                 font-weight: 450;
                 padding: 0 5px;
 
@@ -384,7 +392,7 @@
                 outline-color: transparent !important;
                 box-shadow: none !important;
                 font-size: 0.9rem;
-                color: rgb(66 54 54);
+                color: var(--background-700);
                 font-weight: 450;
                 padding: 0 5px;
 

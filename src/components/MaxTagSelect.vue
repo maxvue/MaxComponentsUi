@@ -24,11 +24,11 @@
                         :style="getStyleColor(option_selected, false, true)"
                         :color-string="getColorString(option_selected)"
                         v-if="!isButton"
+
                     >
                         <MaxIcon
                             :icon="option_selected?.icon ?? null"
                             :size="option_selected?.icon_size ?? 1.4"
-                            pr10
                             v-if="option_selected.icon"
                             :color="getStyleColor(option_selected, false, true).color"
                         />
@@ -219,7 +219,7 @@
             backgroundColor: background,
             color: text,
             borderRadius: '6px',
-            padding: '0 6px !important',
+            padding: '0 10px 0 6px !important',
             gap: 0
         };
     };
@@ -385,7 +385,7 @@
 
     .max-icon-div {
         width: auto !important;
-        padding: 0 !important;
+        padding: 3px 10px 3px 3px !important;
 
         .max-icon {
             padding: 0 !important;
