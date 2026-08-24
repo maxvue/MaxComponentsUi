@@ -264,6 +264,92 @@ describe('MaxTopToolbar', () => {
         wrapper.unmount();
         vi.useRealTimers();
     });
+
+    it('renderiza submenu aninhado (flyout) ao passar o mouse sobre subitem com filhos', async () => {
+        const toolbar = useTopToolbarStore();
+        toolbar.show = true;
+        toolbar.items = [
+            {
+                label: 'Atendimento',
+                items: [
+                    {
+                        label: 'Atendimento ao cliente',
+                        items: [
+                            { label: 'Central 24h', subLabel: '0800 062 0196' },
+                            { label: 'WhatsApp Clara', subLabel: '556232432020' }
+                        ]
+                    },
+                    {
+                        label: 'Lista de protocolos'
+                    }
+                ]
+            }
+        ];
+
+        const wrapper = mountWithPinia(MaxTopToolbar);
+        const rootItem = wrapper.find('.p-menubar-root-list > .p-menubar-item');
+
+        await rootItem.trigger('mouseenter');
+        expect(wrapper.find('.p-menubar-submenu').exists()).toBe(true);
+
+        const subItems = wrapper.findAll('.p-menubar-submenu > .p-menubar-item');
+        expect(subItems.length).toBe(2);
+
+        // O primeiro subitem possui filhos e renderiza chevron
+        expect(subItems[0].classes()).toContain('has-nested');
+        expect(subItems[0].findComponent({ name: 'MaxIcon' }).exists()).toBe(true);
+
+        // O segundo subitem não possui filhos
+        expect(subItems[1].classes()).not.toContain('has-nested');
+
+        // Submenu aninhado ainda não está aberto
+        expect(wrapper.find('.p-menubar-submenu-nested').exists()).toBe(false);
+
+        // Passa o mouse no primeiro subitem
+        await subItems[0].trigger('mouseenter');
+        expect(wrapper.find('.p-menubar-submenu-nested').exists()).toBe(true);
+
+        // Canais filhos renderizados com seus labels e subLabels
+        const nestedItems = wrapper.findAll('.p-menubar-submenu-nested > .p-menubar-item');
+        expect(nestedItems.length).toBe(2);
+        expect(nestedItems[0].text()).toContain('Central 24h');
+        expect(nestedItems[0].text()).toContain('0800 062 0196');
+        expect(nestedItems[1].text()).toContain('WhatsApp Clara');
+        expect(nestedItems[1].text()).toContain('556232432020');
+
+        wrapper.unmount();
+    });
+
+    it('executa a ação do canal filho ao clicar no item aninhado', async () => {
+        const actionSpy = vi.fn();
+        const toolbar = useTopToolbarStore();
+        toolbar.show = true;
+        toolbar.items = [
+            {
+                label: 'Atendimento',
+                items: [
+                    {
+                        label: 'Ouvidoria',
+                        items: [
+                            { label: 'Telefone Ouvidoria', action: actionSpy }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        const wrapper = mountWithPinia(MaxTopToolbar);
+        await wrapper.find('.p-menubar-root-list > .p-menubar-item').trigger('mouseenter');
+        await wrapper.find('.p-menubar-submenu > .p-menubar-item').trigger('mouseenter');
+
+        const nestedItem = wrapper.find('.p-menubar-submenu-nested .menu-item-content');
+        expect(nestedItem.exists()).toBe(true);
+
+        await nestedItem.trigger('click');
+        expect(actionSpy).toHaveBeenCalledTimes(1);
+
+        wrapper.unmount();
+    });
 });
 
 describe('useTopToolbarStore', () => {
