@@ -23,7 +23,8 @@ pnpm-debug.log*
 vite_error.log
 
 # IDE e Editores
-.vscode/
+.vscode/*
+!.vscode/tasks.json
 .idea/
 *.swp
 *.swo
