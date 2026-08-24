@@ -1,0 +1,43 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "NPM RUN BUILD",
+            "type": "shell",
+            "command": "npm run build && git add . && git commit -m 'feat: atualizando componentes' && git push && notify-send 'VS Code' '✅ MAX COMPONENTS UI - Build, Commit e Push realizados!' -i software-update-available && paplay /usr/share/sounds/freedesktop/stereo/service-login.oga",
+            "isBackground": false,
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "focus": false,
+                "clear": true,
+                "close": true
+            },
+            "options": {
+                "statusbar": {
+                    "label": "✅ BUILD, COMMIT & PUSH",
+                    "hide": false
+                }
+            }
+        },
+        {
+            "label": "NPM RUN RELEASE",
+            "type": "shell",
+            "command": "npm run build && git add . && git commit -m 'feat: atualizando componentes' && npm run release && notify-send 'VS Code' '🚀 MAX COMPONENTS UI - Release enviado com sucesso!' -i software-update-available && paplay /usr/share/sounds/freedesktop/stereo/service-login.oga",
+            "isBackground": false,
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "focus": false,
+                "clear": true,
+                "close": true
+            },
+            "options": {
+                "statusbar": {
+                    "label": "⬆️  RELEASE NPM",
+                    "hide": false
+                }
+            }
+        }
+    ]
+}

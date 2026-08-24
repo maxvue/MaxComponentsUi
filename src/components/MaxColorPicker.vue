@@ -1,5 +1,5 @@
 <template>
-    <InputBase v-bind="props" :done="props.done ?? isDone" :error="props.error ?? error_msg" :caution="caution" class="max-input-color">
+    <!-- <InputBase v-bind="props" :done="props.done ?? isDone" :error="props.error ?? error_msg" :caution="caution" class="max-input-color">
         <label class="p-colorpicker-preview max-colorpicker-swatch" :style="{ backgroundColor: nativeColor }">
             <input
                 type="color"
@@ -19,7 +19,8 @@
             :disabled="props.disabled"
             :placeholder="props.placeholder"
         />
-    </InputBase>
+    </InputBase> -->
+    a
 </template>
 
 /**
