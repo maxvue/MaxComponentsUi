@@ -40,36 +40,13 @@
                     </div>
 
                     <!-- Submenu se houver item.items -->
-                    <ul v-if="item.items && item.items.length && activeSubmenu === index" class="p-menubar-submenu" role="menu">
-                        <li v-for="(subItem, subIndex) in item.items" :key="subIndex" class="p-menubar-item" role="none">
-                            <div class="p-menubar-item-content">
-                                <div
-                                    v-if="hasContent(subItem.label)"
-                                    pointer
-                                    w-flex
-                                    class="menu-item-content"
-                                    @click="handleItemClick(subItem)"
-                                >
-                                    <MaxIconButton v-if="subItem.icon" :icon="subItem.icon" :size="subItem.icon_size" transparent />
-                                    <div class="menu-item-labels">
-                                        <span class="menu-item-label">{{ subItem.label }}</span>
-                                        <span v-if="subItem.subLabel" class="menu-item-sublabel">{{ subItem.subLabel }}</span>
-                                    </div>
-                                </div>
-                                <MaxIconButton
-                                    v-else
-                                    v-tooltip.bottom="subItem.tooltip ?? false"
-                                    :icon="subItem.icon"
-                                    light
-                                    transparent
-                                    :route="subItem.route ?? null"
-                                    :action="subItem.action"
-                                    :data="subItem.data ?? subItem.props ?? subItem.query"
-                                    size="1.5"
-                                />
-                            </div>
-                        </li>
-                    </ul>
+                    <MaxTopToolbarSubmenu
+                        v-if="item.items && item.items.length && activeSubmenu === index"
+                        :items="item.items"
+                        @keep-open="clearCloseTimer"
+                        @schedule-close="scheduleCloseSubmenu"
+                        @item-click="handleItemClick"
+                    />
                 </li>
             </ul>
         </nav>
@@ -81,6 +58,7 @@
     import { ref, computed, useAttrs, onBeforeUnmount } from 'vue';
     import { hasContent } from '@maxvue/max-use';
     import MaxIconButton from './MaxIconButton.vue';
+    import MaxTopToolbarSubmenu from './MaxTopToolbarSubmenu.vue';
     import { useTopToolbarStore } from '../stores/useTopToolbar.Store';
 
     const SUBMENU_CLOSE_DELAY_MS = 1000;
@@ -177,10 +155,10 @@
                             width: 100% !important;
                             height: 100% !important;
                             max-height: 40px !important;
-                            display: grid;
-                            place-items: center start;
-                            grid-template-columns: 22px auto auto !important;
-                            gap: 5px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: flex-start;
+                            gap: 6px;
                             transition: transform 0.3s ease-in-out;
                             color: var(--background-700) !important;
 
@@ -190,6 +168,7 @@
                                 justify-content: center;
                                 line-height: 1.1;
                                 overflow: hidden;
+                                flex: 1;
 
                                 .menu-item-label {
                                     font-size: 0.9rem;
@@ -201,6 +180,13 @@
                                     opacity: 0.55;
                                     white-space: nowrap;
                                 }
+                            }
+
+                            .menu-item-chevron {
+                                margin-left: auto;
+                                opacity: 0.6;
+                                font-size: 0.9rem;
+                                padding-left: 8px;
                             }
                         }
 
@@ -227,6 +213,14 @@
                         border-radius: 4px;
 
                         .p-menubar-item {
+                            position: relative;
+
+                            &:hover,
+                            &.is-active {
+                                background-color: var(--primary-50, rgb(0 0 0 / 4%));
+                                border-radius: 4px;
+                            }
+
                             .p-menubar-item-content {
                                 width: auto !important;
                                 white-space: nowrap;
@@ -240,6 +234,16 @@
                                 .right-icon {
                                     padding-left: 15px;
                                 }
+                            }
+
+                            // Submenu aninhado (nível 2+)
+                            .p-menubar-submenu-nested {
+                                left: 100% !important;
+                                right: unset !important;
+                                top: 0 !important;
+                                transform: translateX(2px) !important;
+                                position: absolute;
+                                z-index: 100000 !important;
                             }
                         }
                     }
