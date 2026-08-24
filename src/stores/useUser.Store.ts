@@ -46,23 +46,18 @@ export const useUserStore = defineStore('user', () => {
     const departments_id = computed(() => data.value?.departments?.map((item: any) => item.id) ?? []);
 
     /**
-     * Status das operações do servidor, injetado pelo `@maxvue/max-pinia`.
-     */
-    function getStatus(this: any) {
-        return this?.status?.server ?? null;
-    }
-
-    /**
      * Indica se a sessão atual é uma impersonação.
      *
-     * Só consulta o servidor depois que o usuário foi carregado com sucesso.
+     * Lê diretamente do payload do usuário quando disponível ou consulta o endpoint de status.
      */
     const isImpersonated = computedAsync(
-        async function (this: any) {
-            const status_server = getStatus.call(this);
+        async () => {
+            if (data.value?.isImpersonated !== undefined) return Boolean(data.value.isImpersonated);
 
-            if (data.value?.id && status_server?.get?.is_success) return await apiGetRoute(getMaxAppConfig().routeImpersonateStatus as string);
-
+            if (data.value?.id) {
+                const routeStatus = getMaxAppConfig().routeImpersonateStatus;
+                if (routeStatus) return await apiGetRoute(routeStatus as string);
+            }
 
             return false;
         },
