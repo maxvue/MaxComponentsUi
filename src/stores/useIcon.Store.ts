@@ -5,15 +5,14 @@ import { ref, computed, onScopeDispose } from 'vue';
 import { sanitizeSvg } from '../helpers/sanitizeSvg';
 import { getMaxAppConfig } from '../helpers/maxAppConfig';
 import { ICON_CACHE_KEY } from '../helpers/maxCacheKeys';
+import { loadAllIconsFromIDB, saveIconsToIDB } from '../helpers/iconIdb';
 
-// Chave versionada: caches gravados antes da sanitização (achado 06) não devem
-// ser lidos como válidos, então trocamos a chave para forçar seu descarte.
-// Definida em `maxCacheKeys` para que o registro de chaves da biblioteca e a
-// store compartilhem a mesma constante.
+// Chave do cache legado no localStorage para migração automática para IndexedDB
 const CACHE_KEY = ICON_CACHE_KEY;
 
 export const useIconStore = defineStore('icons', () => {
     const icons_data: Ref = ref({});
+    let isCacheInitialized = false;
 
     const list_icons_waiting_request: Ref = computed(() => Object.keys(icons_data.value ?? {}).filter((icon_name: string) => icons_data.value[icon_name] === 'waiting'));
 
@@ -24,45 +23,56 @@ export const useIconStore = defineStore('icons', () => {
         return /^(?:[a-z0-9_-]+:)?[a-z0-9_/-]+$/i.test(name);
     };
 
+    // Inicializa o cache persistente: migra localStorage legado e carrega do IndexedDB
+    const initCache = () => {
+        if (isCacheInitialized) return;
+        isCacheInitialized = true;
+
+        // 1. Migração síncrona do localStorage legado (se existir), liberando espaço
+        if (typeof localStorage !== 'undefined') try {
+            const data = localStorage.getItem(CACHE_KEY);
+            if (data) {
+                const parsed = JSON.parse(data);
+                if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+                    const sanitized: Record<string, string> = {};
+                    for (const [icon_name, value] of Object.entries(parsed)) {
+                        if (typeof value !== 'string') continue;
+                        sanitized[icon_name] = (value === 'waiting' || value === '') ? value : sanitizeSvg(value);
+                    }
+
+                    if (size(sanitized) > 0) {
+                        icons_data.value = { ...icons_data.value, ...sanitized };
+                        saveIconsToIDB(sanitized);
+                    }
+                }
+                localStorage.removeItem(CACHE_KEY);
+            }
+        } catch {
+            try {
+                localStorage.removeItem(CACHE_KEY);
+            } catch {}
+        }
+
+        // 2. Carregamento assíncrono do IndexedDB
+        loadAllIconsFromIDB().then((idbIcons) => {
+            if (idbIcons && size(idbIcons) > 0) {
+                const sanitized: Record<string, string> = {};
+                for (const [icon_name, value] of Object.entries(idbIcons)) if (value && value !== 'waiting') sanitized[icon_name] = sanitizeSvg(value);
+
+
+                icons_data.value = { ...sanitized, ...icons_data.value };
+            }
+        }).catch(() => {});
+    };
+
     const getIcon = (icon_name: string) => {
         if (!icon_name || typeof icon_name !== 'string') return null;
         icon_name = icon_name.trim();
         if (!isSafeIconName(icon_name)) return null;
-        if (size(icons_data.value) === 0) getInCache();
+        if (!isCacheInitialized) initCache();
         if (icons_data.value[icon_name]) return icons_data.value[icon_name] !== 'waiting' ? icons_data.value[icon_name] : null;
         icons_data.value[icon_name] = 'waiting';
         return null;
-    };
-
-    // Carrega os ícones do cache local sem tentar mutar o computed
-    const getInCache = () => {
-        const data = localStorage.getItem(CACHE_KEY);
-        if (!data) return;
-
-        try {
-            const parsed = JSON.parse(data);
-
-            if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-                localStorage.removeItem(CACHE_KEY);
-                return;
-            }
-
-            // O cache é gravável por qualquer script do mesmo origin, então ele é
-            // tratado como fonte não confiável: cada SVG é re-sanitizado na leitura.
-            // O sentinela 'waiting' e valores vazios não são markup e passam direto
-            // (sanitizá-los devolveria '' e apagaria o estado de "buscando").
-            const sanitized: Record<string, string> = {};
-
-            for (const [icon_name, value] of Object.entries(parsed)) {
-                if (typeof value !== 'string') continue;
-                sanitized[icon_name] = (value === 'waiting' || value === '') ? value : sanitizeSvg(value);
-            }
-
-            icons_data.value = sanitized;
-        } catch {
-            // Storage corrompido: descarta e segue com cache vazio, sem propagar o erro
-            localStorage.removeItem(CACHE_KEY);
-        }
     };
 
     const errors = ref<Record<string, number>>({
@@ -197,11 +207,15 @@ export const useIconStore = defineStore('icons', () => {
     }, { debounce: 50, maxWait: 150, deep: true });
 
     const saveCache = () => {
-        const cache_data: Record<string, string> = {};
-        for (const [key, value] of Object.entries(icons_data.value)) if (value && value !== 'waiting') cache_data[key] = value as string;
+        try {
+            const cache_data: Record<string, string> = {};
+            for (const [key, value] of Object.entries(icons_data.value)) if (value && value !== 'waiting') cache_data[key] = value as string;
 
 
-        localStorage.setItem(CACHE_KEY, JSON.stringify(cache_data));
+            if (size(cache_data) > 0) saveIconsToIDB(cache_data);
+        } catch {
+            // Ignora silenciosamente qualquer erro de storage
+        }
     };
 
     return { getIcon, list_icons_waiting_request, icons_data, saveCache };

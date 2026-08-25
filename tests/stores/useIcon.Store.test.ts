@@ -82,7 +82,6 @@ describe('useIconStore', () => {
         await new Promise((resolve) => setTimeout(resolve, 50));
 
         expect(store.icons_data['icon-c']).toContain('<path');
-        expect(localStorage.getItem('all_icons_v2')).toContain('<path');
     });
 
     it('deve lidar com erros no fetch', async () => {
@@ -181,10 +180,6 @@ describe('useIconStore', () => {
         const stored = store.icons_data['icon-malicious'];
         expect(stored).not.toContain('<script');
         expect(stored).not.toMatch(/\son\w+\s*=/i);
-
-        const persisted = localStorage.getItem('all_icons_v2') ?? '';
-        expect(persisted).not.toContain('<script');
-        expect(persisted).not.toMatch(/\son\w+\s*=/i);
     });
 
     it('reseta o contador de falhas de fetch apos o intervalo de backoff, permitindo novas requisicoes', async () => {
@@ -274,23 +269,17 @@ describe('useIconStore', () => {
         consoleSpy.mockRestore();
     });
 
-    it('não deve persistir sentinelas de erro de ícone ("") no localStorage', async () => {
+    it('migra dados legados do localStorage para a memória e libera o localStorage', () => {
+        localStorage.setItem('all_icons_v2', JSON.stringify({
+            'icon-legacy': '<svg><path d="M1 1"/></svg>'
+        }));
+
         const store = useIconStore();
-        store.icons_data['icon-valid'] = '<svg><path d="M0 0"/></svg>';
-        store.icons_data['icon-invalid'] = '';
-        store.icons_data['icon-waiting'] = 'waiting';
+        store.getIcon('icon-other');
 
-        // Dispara saveCache() indiretamente ou simula saveCache
-        const saveCache = (store as any).saveCache;
-        if (saveCache) saveCache();
-
-        const storedRaw = localStorage.getItem('all_icons_v2');
-        expect(storedRaw).not.toBeNull();
-        const parsed = JSON.parse(storedRaw!);
-
-        expect(parsed['icon-valid']).toBeDefined();
-        expect(parsed['icon-invalid']).toBeUndefined();
-        expect(parsed['icon-waiting']).toBeUndefined();
+        expect(store.icons_data['icon-legacy']).toContain('<path');
+        // Deve ter apagado o localStorage para liberar os 5MB da aplicação
+        expect(localStorage.getItem('all_icons_v2')).toBeNull();
     });
 
     it('deve buscar no fallback do Iconify e salvar em cache e backend quando a rota principal retornar null', async () => {
@@ -325,12 +314,6 @@ describe('useIconStore', () => {
         await new Promise((r) => setTimeout(r, 100)); // wait for fallback and async sync
 
         expect(store.icons_data['at-icons:bot']).toContain('<path d="M8 0"');
-
-        // Verifica que o SVG foi salvo no cache local
-        const cachedRaw = localStorage.getItem('all_icons_v2');
-        expect(cachedRaw).not.toBeNull();
-        const parsedCache = JSON.parse(cachedRaw!);
-        expect(parsedCache['at-icons:bot']).toContain('<path d="M8 0"');
 
         // Verifica que o POST de sincronização com o backend foi disparado
         const postCall = mockFetch.mock.calls.find((call) => call[1]?.method === 'POST');
