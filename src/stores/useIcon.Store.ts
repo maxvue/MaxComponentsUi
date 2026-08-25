@@ -92,6 +92,39 @@ export const useIconStore = defineStore('icons', () => {
         }
     });
 
+    const fetchIconFallback = async (iconName: string): Promise<string | null> => {
+        try {
+            const fallbackBase = getMaxAppConfig().routeIconsFallback ?? 'https://api.iconify.design';
+            const cleanBase = fallbackBase.replace(/\/$/, '');
+            const url = `${cleanBase}/${encodeURIComponent(iconName)}.svg`;
+            const res = await fetch(url, {
+                method: 'GET',
+                headers: { 'Accept': 'image/svg+xml, application/json' }
+            });
+            if (!res.ok) return null;
+            const svg = await res.text();
+            return sanitizeSvg(svg);
+        } catch {
+            return null;
+        }
+    };
+
+    const syncIconToBackend = async (icon: string, svg: string): Promise<void> => {
+        try {
+            const syncUrl = getMaxAppConfig().routeIconsSync ?? getMaxAppConfig().routeIcons ?? 'https://engeapp.com.br/api/icons';
+            await fetch(syncUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ icon, svg })
+            });
+        } catch {
+            // Falha na sincronização não interrompe o funcionamento no frontend
+        }
+    };
+
     watchDebounced(() => [list_icons_waiting_request.value, errors.value], () => {
         // Captura snapshot da lista no momento da requisição para evitar condição de corrida
         const icons_to_fetch = [...list_icons_waiting_request.value];
@@ -106,37 +139,58 @@ export const useIconStore = defineStore('icons', () => {
             fetch(requestUrl, {
                 method: 'GET',
                 headers: { 'Accept': 'application/json' }
-            }).then((res) => {
+            }).then(async (res) => {
                 if (res.ok === false) throw new Error(`HTTP ${res.status}`);
 
                 return res.json();
-            }).then((data) => {
-
+            }).then(async (data) => {
                 const updated_data = { ...icons_data.value };
+                const missing_icons: string[] = [];
 
                 for (const icon_name of icons_to_fetch) {
-
                     if (data && data[icon_name]) {
                         updated_data[icon_name] = sanitizeSvg(data[icon_name]);
+                        delete errors.value[icon_name];
                         continue;
+                    }
+                    missing_icons.push(icon_name);
+                }
+
+                errors.value['fetch'] = 0;
+                icons_data.value = updated_data;
+                saveCache();
+
+                if (missing_icons.length > 0) await Promise.all(missing_icons.map(async (icon_name) => {
+                    const fallbackSvg = await fetchIconFallback(icon_name);
+                    if (fallbackSvg) {
+                        icons_data.value[icon_name] = fallbackSvg;
+                        delete errors.value[icon_name];
+                        saveCache();
+                        syncIconToBackend(icon_name, fallbackSvg);
+                        return;
                     }
 
                     errors.value[icon_name] = (errors.value[icon_name] ?? 0) + 1;
                     console.error('Erro na obtenção do ícone', icon_name);
 
-                    if (errors.value[icon_name] >= MAX_ICON_RETRIES) updated_data[icon_name] = '';
+                    if (errors.value[icon_name] >= MAX_ICON_RETRIES) icons_data.value[icon_name] = '';
+                }));
 
-                }
-
-                errors.value['fetch'] = 0;
-
-                icons_data.value = updated_data;
-                saveCache();
             }).catch((error) => {
                 console.error('Erro na Requisição dos ícones', { 'url': requestUrl, 'error': error });
                 errors.value['fetch'] += 1;
 
                 if (errors.value['fetch'] >= MAX_FETCH_RETRIES) scheduleFetchErrorReset();
+
+                Promise.all(icons_to_fetch.map(async (icon_name) => {
+                    const fallbackSvg = await fetchIconFallback(icon_name);
+                    if (fallbackSvg) {
+                        icons_data.value[icon_name] = fallbackSvg;
+                        delete errors.value[icon_name];
+                        saveCache();
+                        syncIconToBackend(icon_name, fallbackSvg);
+                    }
+                }));
             });
         }
 
