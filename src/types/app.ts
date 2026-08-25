@@ -112,6 +112,10 @@ export interface MaxAppConfig {
     routeMenus?: string;
     /** Rota de busca de ícones SVG. Padrão: `'https://engeapp.com.br/api/icons'`. */
     routeIcons?: string;
+    /** Rota de fallback para ícones SVG (Iconify). Padrão: `'https://api.iconify.design'`. */
+    routeIconsFallback?: string;
+    /** Rota de sincronização de novos ícones com o backend. Padrão: `'https://engeapp.com.br/api/icons'`. */
+    routeIconsSync?: string;
     /**
      * E-mail enviado no login quando o método não é e-mail.
      *

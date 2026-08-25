@@ -292,4 +292,144 @@ describe('useIconStore', () => {
         expect(parsed['icon-invalid']).toBeUndefined();
         expect(parsed['icon-waiting']).toBeUndefined();
     });
+
+    it('deve buscar no fallback do Iconify e salvar em cache e backend quando a rota principal retornar null', async () => {
+        const store = useIconStore();
+
+        const mockFetch = vi.spyOn(globalThis, 'fetch').mockImplementation((url, init) => {
+            const urlStr = String(url);
+            if (urlStr.includes('api/icons') && init?.method === 'POST') return Promise.resolve({
+                ok: true,
+                json: () => Promise.resolve({ success: true })
+            } as any);
+
+            if (urlStr.includes('api.iconify.design/at-icons%3Abot.svg') || urlStr.includes('api.iconify.design/at-icons:bot.svg')) return Promise.resolve({
+                ok: true,
+                text: () => Promise.resolve('<svg xmlns="http://www.w3.org/2000/svg"><path d="M8 0"/></svg>')
+            } as any);
+
+            if (urlStr.includes('icons%5B%5D=at-icons%3Abot')) return Promise.resolve({
+                ok: true,
+                json: () => Promise.resolve({ 'at-icons:bot': null })
+            } as any);
+
+            return Promise.resolve({
+                ok: true,
+                json: () => Promise.resolve({})
+            } as any);
+        });
+
+        store.getIcon('at-icons:bot');
+
+        await new Promise((r) => setTimeout(r, 250)); // wait for debounce
+        await new Promise((r) => setTimeout(r, 100)); // wait for fallback and async sync
+
+        expect(store.icons_data['at-icons:bot']).toContain('<path d="M8 0"');
+
+        // Verifica que o SVG foi salvo no cache local
+        const cachedRaw = localStorage.getItem('all_icons_v2');
+        expect(cachedRaw).not.toBeNull();
+        const parsedCache = JSON.parse(cachedRaw!);
+        expect(parsedCache['at-icons:bot']).toContain('<path d="M8 0"');
+
+        // Verifica que o POST de sincronização com o backend foi disparado
+        const postCall = mockFetch.mock.calls.find((call) => call[1]?.method === 'POST');
+        expect(postCall).toBeDefined();
+        const postBody = JSON.parse(postCall![1]!.body as string);
+        expect(postBody.icon).toBe('at-icons:bot');
+        expect(postBody.svg).toContain('<path d="M8 0"');
+    });
+
+    it('não deve quebrar o frontend se o POST de sincronização com o backend falhar', async () => {
+        const store = useIconStore();
+
+        vi.spyOn(globalThis, 'fetch').mockImplementation((url, init) => {
+            const urlStr = String(url);
+            if (init?.method === 'POST') return Promise.reject(new Error('Backend offline'));
+
+            if (urlStr.includes('api.iconify.design')) return Promise.resolve({
+                ok: true,
+                text: () => Promise.resolve('<svg xmlns="http://www.w3.org/2000/svg"><path d="M1 1"/></svg>')
+            } as any);
+
+            return Promise.resolve({
+                ok: true,
+                json: () => Promise.resolve({ 'lucide:bot': null })
+            } as any);
+        });
+
+        store.getIcon('lucide:bot');
+
+        await new Promise((r) => setTimeout(r, 250));
+        await new Promise((r) => setTimeout(r, 100));
+
+        expect(store.icons_data['lucide:bot']).toContain('<path d="M1 1"');
+    });
+
+    it('deve sanitizar SVG malicioso vindo do fallback do Iconify', async () => {
+        const store = useIconStore();
+
+        vi.spyOn(globalThis, 'fetch').mockImplementation((url) => {
+            const urlStr = String(url);
+            if (urlStr.includes('api.iconify.design')) return Promise.resolve({
+                ok: true,
+                text: () => Promise.resolve('<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"><path d="M0 0"/></svg>')
+            } as any);
+
+            return Promise.resolve({
+                ok: true,
+                json: () => Promise.resolve({ 'malicious:icon': null })
+            } as any);
+        });
+
+        store.getIcon('malicious:icon');
+
+        await new Promise((r) => setTimeout(r, 250));
+        await new Promise((r) => setTimeout(r, 100));
+
+        const stored = store.icons_data['malicious:icon'];
+        expect(stored).toBeDefined();
+        expect(stored).not.toMatch(/\son\w+\s*=/i);
+        expect(stored).toContain('<path');
+    });
+
+    it('deve respeitar configurações customizadas de routeIconsFallback e routeIconsSync', async () => {
+        const { configureMaxApp, resetMaxAppConfig } = await import('../../src/helpers/maxAppConfig');
+        configureMaxApp({
+            routeIconsFallback: 'https://custom-fallback.com/svg',
+            routeIconsSync: 'https://custom-sync.com/api/icons'
+        });
+
+        try {
+            const store = useIconStore();
+            const mockFetch = vi.spyOn(globalThis, 'fetch').mockImplementation((url, init) => {
+                const urlStr = String(url);
+                if (urlStr.includes('custom-sync.com') && init?.method === 'POST') return Promise.resolve({ ok: true, json: () => Promise.resolve({}) } as any);
+
+                if (urlStr.includes('custom-fallback.com')) return Promise.resolve({
+                    ok: true,
+                    text: () => Promise.resolve('<svg><circle r="5"/></svg>')
+                } as any);
+
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({ 'custom:icon': null })
+                } as any);
+            });
+
+            store.getIcon('custom:icon');
+            await new Promise((r) => setTimeout(r, 250));
+            await new Promise((r) => setTimeout(r, 100));
+
+            expect(store.icons_data['custom:icon']).toContain('<circle');
+
+            const fallbackCall = mockFetch.mock.calls.find((call) => String(call[0]).includes('custom-fallback.com'));
+            expect(fallbackCall).toBeDefined();
+
+            const syncCall = mockFetch.mock.calls.find((call) => String(call[0]).includes('custom-sync.com'));
+            expect(syncCall).toBeDefined();
+        } finally {
+            resetMaxAppConfig();
+        }
+    });
 });

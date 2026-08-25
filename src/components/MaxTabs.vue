@@ -1,7 +1,7 @@
 <template>
     <div class="max-tabs">
         <div class="max-tabs-content">
-            <div class="max-tabs-title">
+            <div :class="`max-tabs-title ${spread ? 'spread' : ''}`">
                 <div class="max-tabs-title-items" :id="'max-tab-' + tabs_id"></div>
                 <div class="max-tabs-title-buttons" :id="'max-tab-buttons-' + tabs_id"></div>
 
@@ -34,6 +34,7 @@
         scrollable?: boolean;
         /** Exibe os botoes de navegacao no modo scrollable. */
         showNavigators?: boolean;
+        spread?:boolean;
     };
 
     const props = withDefaults( defineProps<Props>(), {
@@ -221,6 +222,16 @@
             border-bottom: 1px solid var(--background-300);
             width: 100%;
             place-items: center start;
+
+            &.spread{
+                .max-tabs-title-items {
+
+                    width: 100%;
+                    .max-tab-item-title{
+                        flex-grow: 1 !important;
+                    }
+                }
+            }
 
             .max-tabs-title-items {
                 display: flex;

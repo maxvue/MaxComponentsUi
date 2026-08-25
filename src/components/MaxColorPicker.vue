@@ -1,6 +1,6 @@
 <template>
-    <!-- <InputBase v-bind="props" :done="props.done ?? isDone" :error="props.error ?? error_msg" :caution="caution" class="max-input-color">
-        <label class="p-colorpicker-preview max-colorpicker-swatch" :style="{ backgroundColor: nativeColor }">
+    <InputBase v-bind="props" :done="props.done ?? isDone" :error="props.error ?? error_msg" :caution="caution" class="max-input-color">
+        <div class="item-color" :style="{ backgroundColor: nativeColor }">
             <input
                 type="color"
                 class="max-colorpicker-native"
@@ -11,16 +11,8 @@
                 :aria-labelledby="props.ariaLabelledby"
                 @input="onColorInput"
             />
-        </label>
-        <input
-            type="text"
-            class="p-inputtext p-component"
-            v-model="modelValue"
-            :disabled="props.disabled"
-            :placeholder="props.placeholder"
-        />
-    </InputBase> -->
-    a
+        </div>
+    </InputBase>
 </template>
 
 /**
@@ -156,18 +148,44 @@
 
 <style lang="scss">
 .max-input-color {
-    display: grid;
-    grid-template-columns: 30px 1fr;
-    place-items: center;
-    grid-template-rows: 1fr !important;
-    gap: 0.5rem;
+    position: relative;
+    width: 30px;
+    height: 30px;
+    cursor: pointer !important;
 
-    .message-spacer {
-        display: none;
+    .max-input-field-div{
+        display: flex !important;
+        position: relative;
+        overflow: hidden;
+        border-radius: 50%;
+        outline: 2px solid rgba(0,0,0,0.2) !important;
+        aspect-ratio: 1 / 1 !important;
+        width: 100% !important;
+        height: 100% !important;
+        cursor: pointer !important;
     }
 
-    .p-floatlabel {
-        grid-template-rows: 1fr !important;
+    .input-slot-div{
+        overflow: hidden;
+        border: none;
+        height: calc(100% + 30px) !important;
+        position: absolute;
+        width: calc(100% + 30px) !important;
+        left: -15px;
+        top: -15px;
+        cursor: pointer !important;
+    }
+
+    .item-color{
+        position: absolute;
+        width: calc(100% + 30px);
+        left: -10px;
+        top: 0;
+        height: calc(100% + 30px);
+        cursor: pointer !important;
+        input {
+            cursor: pointer !important;
+        }
     }
 
     .p-colorpicker-preview {
