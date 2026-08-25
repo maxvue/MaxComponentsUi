@@ -148,7 +148,7 @@
 
     };
 
-    const { isOverDropZone } = useDropZone(rootRef, {
+    const { isOverDropZone } = useDropZone(rootRef as any, {
         onDrop: (dropped) => {
             if (attrs.disabled) return;
             if (dropped && dropped.length) handleSelectedFiles(dropped);

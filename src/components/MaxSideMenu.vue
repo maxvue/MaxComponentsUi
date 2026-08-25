@@ -61,7 +61,7 @@
      * `=== null`: com a comparação estrita, salvar `hide = false` pela tela de
      * administração escondia o menu.
      */
-    const visible = computed<SideMenuItem[]>(() => (menus.list?.side ?? []).filter((item: SideMenuItem) => !item.details?.hide));
+    const visible = computed<SideMenuItem[]>(() => ((menus.list as any)?.side ?? []).filter((item: SideMenuItem) => !item.details?.hide));
 
     /** Itens da seção inferior (configurações). */
     const settings = computed<SideMenuItem[] | null>(() => {
