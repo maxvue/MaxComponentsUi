@@ -34,7 +34,11 @@ export const presetMaxUno = () => {
             }],
             // Cores dinâmicas
             [/^text-(center|left|right)$/, ([, s]) => ({ 'text-align': s + ' !important' })],
-            [/^bg-(.+)$/, ([, s]) => ({ 'background-color': s.startsWith('var(') || s.startsWith('#') || s.startsWith('rgb') || s.startsWith('hsl') ? s : `var(--${s})` })],
+            [/^bg-(.+)$/, ([, s]) => {
+                if (!s || s.startsWith('[') || s.includes('[') || s.includes('/')) return undefined;
+                if (/^(cover|contain|center|top|bottom|left|right|repeat|no-repeat|repeat-[xy]|none|transparent|current|inherit|fixed|local|scroll|auto|clip-.+|origin-.+)$/.test(s)) return undefined;
+                return { 'background-color': s.startsWith('var(') || s.startsWith('#') || s.startsWith('rgb') || s.startsWith('hsl') ? s : `var(--${s})` };
+            }],
             [/^(?:(row|col|column))?-gap-(.+)$/i, (params) => (hasContent(params[1]) ? gap(params) : { gap: getCssSize(params[2]) + ' !important' })]
         ],
         // RULES: CSS customizado que não existe no UnoCSS padrão
