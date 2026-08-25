@@ -4,10 +4,10 @@
         {
             "label": "NPM RUN BUILD",
             "type": "shell",
-            "command": "npm run build && git add . && git commit -m 'feat: atualizando componentes' && git push && notify-send 'VS Code' '✅ MAX COMPONENTS UI - Build, Commit e Push realizados!' -i software-update-available && paplay /usr/share/sounds/freedesktop/stereo/service-login.oga",
+            "command": "npm run build && notify-send 'VS Code' '✅ MAX COMPONENTS UI - Build, Commit e Push realizados!' -i software-update-available && paplay /usr/share/sounds/freedesktop/stereo/service-login.oga",
             "isBackground": false,
             "presentation": {
-                "reveal": "always",
+                "reveal": "silent",
                 "panel": "new",
                 "focus": false,
                 "clear": true,
