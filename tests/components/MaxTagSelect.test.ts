@@ -183,4 +183,49 @@ describe('MaxTagSelect', () => {
         expect((wrapper.vm as any).optionsField).toEqual([{ value: 'z', name: 'Loaded', hover: false }]);
         expect((wrapper.vm as any).loading).toBe(false);
     });
+
+    it('não renderiza placeholder quando modelValue é 0 e exibe a tag correspondente', async () => {
+        const options = [
+            { value: 0, name: 'Opção Zero' },
+            { value: 1, name: 'Opção Um' }
+        ];
+        const wrapper = mountTagSelect({ modelValue: 0, options }, { placeholder: 'Selecione uma opção' });
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find('.tab-placeholder-select').exists()).toBe(false);
+        expect(wrapper.find('.value-tag-div').exists()).toBe(true);
+        expect(wrapper.find('.tag-value-text').text()).toBe('Opção Zero');
+    });
+
+    it('não renderiza placeholder quando modelValue é false e exibe a tag correspondente', async () => {
+        const options = [
+            { value: false, name: 'Desativado' },
+            { value: true, name: 'Ativado' }
+        ];
+        const wrapper = mountTagSelect({ modelValue: false, options }, { placeholder: 'Selecione o estado' });
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find('.tab-placeholder-select').exists()).toBe(false);
+        expect(wrapper.find('.value-tag-div').exists()).toBe(true);
+        expect(wrapper.find('.tag-value-text').text()).toBe('Desativado');
+    });
+
+    it('renderiza placeholder e NÃO renderiza .value-tag-div quando modelValue é vazio ("")', async () => {
+        const options = [{ value: 'a', name: 'Tag A' }];
+        const wrapper = mountTagSelect({ modelValue: '', options }, { placeholder: 'Selecione' });
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find('.tab-placeholder-select').exists()).toBe(true);
+        expect(wrapper.find('.tab-placeholder-select').text()).toBe('Selecione');
+        expect(wrapper.find('.value-tag-div').exists()).toBe(false);
+    });
+
+    it('não renderiza .value-tag-div quando modelValue é null e nenhum placeholder foi informado', async () => {
+        const options = [{ value: 'a', name: 'Tag A' }];
+        const wrapper = mountTagSelect({ modelValue: null, options });
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find('.tab-placeholder-select').exists()).toBe(false);
+        expect(wrapper.find('.value-tag-div').exists()).toBe(false);
+    });
 });
