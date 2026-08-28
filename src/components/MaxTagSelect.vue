@@ -219,8 +219,8 @@
             backgroundColor: background,
             color: text,
             borderRadius: '6px',
-            padding: '0 10px 0 6px !important',
-            gap: 0
+            padding: is_value ? '0 8px 0 6px !important' : '0 10px 0 6px !important',
+            gap: is_value ? '4px' : 0
         };
     };
 
@@ -383,7 +383,7 @@
         width: 100% !important;
     }
 
-    .max-icon-div {
+    .value-tag-div > .max-icon-div {
         width: auto !important;
         padding: 3px 10px 3px 3px !important;
 
@@ -507,7 +507,7 @@
 }
 
 .value-tag-div {
-    grid-template-columns: auto auto auto;
+    grid-template-columns: auto 1fr auto;
     place-items: center;
     padding: unset;
     display: grid;
@@ -515,6 +515,7 @@
     position: relative;
     width: fit-content;
     max-width: 100%;
+    gap: 4px;
 
     .tag-value-text {
         max-width: 100% !important;
