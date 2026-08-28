@@ -88,8 +88,9 @@
 
     const on_toggle = (checked: boolean) => {
         modelvalue.value = checked ? trueValue.value : falseValue.value;
-        update_value();
     };
+
+    defineExpose({ update_value, modelvalue });
 </script>
 
 <style lang="scss">

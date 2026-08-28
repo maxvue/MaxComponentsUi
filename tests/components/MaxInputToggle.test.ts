@@ -40,11 +40,39 @@ describe('MaxInputToggle', () => {
         await input.setValue(true);
 
         expect(wrapper.emitted('update:modelValue')).toBeTruthy();
+        expect(wrapper.emitted('update:modelValue')).toHaveLength(1);
         expect(wrapper.emitted('update:modelValue')?.[0][0]).toBe(true);
 
         // Altera via prop
         await wrapper.setProps({ modelValue: 'test' });
         expect((wrapper.vm as any).modelvalue).toBe('test');
+    });
+
+    it('emite update:modelValue exatamente uma vez por clique/toggle', async () => {
+        const wrapper = mount(MaxInputToggle, {
+            props: { modelValue: false }
+        });
+        const input = wrapper.find<HTMLInputElement>('input[type="checkbox"]');
+
+        await input.setValue(true);
+        expect(wrapper.emitted('update:modelValue')).toHaveLength(1);
+        expect(wrapper.emitted('update:modelValue')?.[0]).toEqual([true]);
+
+        await input.setValue(false);
+        expect(wrapper.emitted('update:modelValue')).toHaveLength(2);
+        expect(wrapper.emitted('update:modelValue')?.[1]).toEqual([false]);
+    });
+
+    it('não emite eventos duplicados ao alternar o valor via checkbox', async () => {
+        const wrapper = mount(MaxInputToggle, {
+            props: { modelValue: false }
+        });
+
+        const input = wrapper.find<HTMLInputElement>('input[type="checkbox"]');
+        await input.setValue(true);
+
+        expect(wrapper.emitted('update:modelValue')).toHaveLength(1);
+        expect(wrapper.emitted('update:modelValue')?.[0]).toEqual([true]);
     });
 
     it('resolve trueLabel / falseLabel de attrs (fallback)', () => {
