@@ -1,6 +1,15 @@
 <template>
-    <InputBase v-bind="props" :error="error_msg" :caution="caution" :done="done">
-        <input ref="el" type="text" class="p-inputtext p-component" :value="masked_value" v-maska="maskValue" @input="onUserInput" :style="`letter-spacing: 2.5px;`" />
+    <InputBase v-bind="props" :error="error_msg ?? undefined" :caution="caution" :done="done ?? undefined">
+        <input
+            ref="el"
+            type="text"
+            class="p-inputtext p-component"
+            :value="masked_value"
+            v-maska="maskValue"
+            :disabled="props.disabled"
+            @input="onUserInput"
+            :style="`letter-spacing: 2.5px;`"
+        />
     </InputBase>
 </template>
 
@@ -11,7 +20,6 @@
  */
 <script setup lang="ts">
     import { cnpjIsValid, cpfCnpjIsValid, cpfIsValid, onlyNumbers } from '@maxvue/max-use';
-    import type { Ref } from 'vue';
     import { ref, computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
     import { vMaska } from 'maska/vue';
@@ -78,61 +86,71 @@
         if (onlyNumbers(masked_value.value) !== onlyNumbers(value ?? '')) masked_value.value = value ?? '';
     }, { immediate: true });
 
-    const type_mask: Ref = ref(null);
+    const type_mask = computed<'cpf' | 'cnpj'>(() => {
+        if (props.cpf) return 'cpf';
+        if (props.cnpj) return 'cnpj';
+        const only_numbers = onlyNumbers(temp_value.value ?? '');
+        return only_numbers.length > 11 ? 'cnpj' : 'cpf';
+    });
 
     // CALCULA A MÁSCARA DO INPUT
     const maskValue = computed(() => {
-        let mask_string: string = '@';
+        if (props.cpf) return {
+            tokens: { '#': { pattern: /[0-9]/ } },
+            mask: '###.###.###-##'
+        };
 
-        if (props.cpf) {
-            mask_string = '###.###.###-##@';
-            type_mask.value = 'cpf';
-        } else if (props.cnpj) {
-            mask_string = '##.###.###/####-##';
-            type_mask.value = 'cnpj';
-        } else {
-            const only_numbers: string = onlyNumbers(temp_value.value);
-            if (only_numbers.length > 11) {
-                mask_string = '##.###.###/####-##';
-                type_mask.value = 'cnpj';
-            } else {
-                mask_string = '###.###.###-##@';
-                type_mask.value = 'cpf';
-            }
-        }
+
+        if (props.cnpj) return {
+            tokens: { '#': { pattern: /[0-9]/ } },
+            mask: '##.###.###/####-##'
+        };
+
 
         return {
-            tokens: { '#': { pattern: /[0-9]/ }, '@': { pattern: /[0-9]/, optional: true, recursive: true } },
-            mask: mask_string
+            tokens: { '#': { pattern: /[0-9]/ } },
+            mask: ['###.###.###-##', '##.###.###/####-##']
         };
     });
 
-    const done = computed(() => {
-        if (props.done !== undefined) return props.done;
-        if (props.cpf) return cpfIsValid(temp_value.value);
-        if (props.cnpj) return cnpjIsValid(temp_value.value);
-        return cpfCnpjIsValid(temp_value.value);
+    const done = computed<boolean | null>(() => {
+        if (props.done !== undefined) return props.done ?? null;
+        const only_numbers = onlyNumbers(temp_value.value ?? '');
+        if (only_numbers.length === 0) return null;
+        if (props.cpf) return cpfIsValid(only_numbers);
+        if (props.cnpj) return cnpjIsValid(only_numbers);
+        return cpfCnpjIsValid(only_numbers);
     });
 
     const caution = computed(() => {
         if (props.caution !== undefined) return props.caution;
-        const only_numbers: string = onlyNumbers(temp_value.value);
+        const only_numbers = onlyNumbers(temp_value.value ?? '');
         if (only_numbers.length === 0) return false;
-        return !done.value;
+        return done.value === false;
     });
 
-    const error_msg = computed(() => {
-        const attrs_error_message = attrs.errMsg ?? attrs.error_message ?? attrs.error_msg ?? null;
-        const len = onlyNumbers(temp_value.value).length;
+    const error_msg = computed<string | null>(() => {
+        const attrs_error_message = (typeof props.error === 'string' ? props.error : null)
+            ?? (props as any).errMsg
+            ?? attrs.errMsg
+            ?? (props as any).error_message
+            ?? attrs.error_message
+            ?? (props as any).error_msg
+            ?? attrs.error_msg
+            ?? null;
+        const only_numbers = onlyNumbers(temp_value.value ?? '');
 
-        if (len === 0) return props.required ? (attrs_error_message ?? 'Campo obrigatório') : false;
+        if (only_numbers.length === 0) return props.required ? (attrs_error_message ?? 'Campo obrigatório') : null;
 
-        if (!done.value) {
-            if (type_mask.value === 'cpf') return attrs_error_message ?? 'CPF inválido';
-            if (type_mask.value === 'cnpj') return attrs_error_message ?? 'CNPJ inválido';
-            return attrs_error_message ?? 'Documento inválido';
+
+        if (caution.value) {
+            if (typeof attrs_error_message === 'string') return attrs_error_message;
+            if (type_mask.value === 'cpf') return 'CPF inválido';
+            if (type_mask.value === 'cnpj') return 'CNPJ inválido';
+            return 'Documento inválido';
         }
-        return false;
+
+        return attrs_error_message;
     });
 
     // Emite 'complete' quando o documento atinge 11 (CPF) ou 14 (CNPJ)
