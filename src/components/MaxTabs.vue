@@ -214,7 +214,7 @@
         border: 1px solid var(--background-300);
         height: 100%;
         border-radius: 1rem;
-        overflow: hidden;
+        overflow: auto;
 
         .max-tabs-title {
             display: grid;
