@@ -116,4 +116,55 @@ describe('MaxInputSelect', () => {
         expect(() => vm.option_selected).not.toThrow();
         expect(vm.option_selected.name).toBe('Flat Option');
     });
+
+    it('não exibe placeholder e exibe option quando modelValue é 0', async () => {
+        const options = [{ value: 0, name: 'Opção Zero' }];
+        const wrapper = mountSelect({ modelValue: 0, options, placeholder: 'Selecione' });
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find('.placeholder-select').exists()).toBe(false);
+        expect(wrapper.find('.value-div').exists()).toBe(true);
+        expect(wrapper.find('.value-div').text()).toContain('Opção Zero');
+    });
+
+    it('não exibe placeholder e exibe option quando modelValue é false', async () => {
+        const options = [{ value: false, name: 'Opção Falsa' }];
+        const wrapper = mountSelect({ modelValue: false, options, placeholder: 'Selecione' });
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find('.placeholder-select').exists()).toBe(false);
+        expect(wrapper.find('.value-div').exists()).toBe(true);
+        expect(wrapper.find('.value-div').text()).toContain('Opção Falsa');
+    });
+
+    it('não exibe placeholder e exibe option quando modelValue é null e há opção com valor null', async () => {
+        const options = [{ value: null, name: 'Opção Nula' }];
+        const wrapper = mountSelect({ modelValue: null, options, placeholder: 'Selecione' });
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find('.placeholder-select').exists()).toBe(false);
+        expect(wrapper.find('.value-div').exists()).toBe(true);
+        expect(wrapper.find('.value-div').text()).toContain('Opção Nula');
+    });
+
+    it('exibe placeholder e não exibe value-div quando modelValue é órfão', async () => {
+        const options = [{ value: 'a', name: 'Opção A' }];
+        const wrapper = mountSelect({ modelValue: 'orfao', options, placeholder: 'Selecione' });
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find('.placeholder-select').exists()).toBe(true);
+        expect(wrapper.find('.placeholder-select').text()).toBe('Selecione');
+        expect(wrapper.find('.value-div').exists()).toBe(false);
+    });
+
+    it('exibe placeholder e não exibe value-div quando modelValue é null sem opção correspondente', async () => {
+        const options = [{ value: 'a', name: 'Opção A' }];
+        const wrapper = mountSelect({ modelValue: null, options, placeholder: 'Selecione' });
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find('.placeholder-select').exists()).toBe(true);
+        expect(wrapper.find('.placeholder-select').text()).toBe('Selecione');
+        expect(wrapper.find('.value-div').exists()).toBe(false);
+    });
 });
+
