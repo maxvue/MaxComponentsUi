@@ -29,7 +29,7 @@ export default defineConfig({
     test: {
         globals: true,
         environment: 'happy-dom',
-        setupFiles: ['./tests/setup.ts'],
+        setupFiles: [path.resolve(import.meta.dirname, './tests/setup.ts')],
         include: ['tests/**/*.test.ts'],
         pool: 'forks',
         singleFork: true,

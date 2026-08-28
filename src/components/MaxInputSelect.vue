@@ -1,7 +1,7 @@
 <template>
     <InputBase v-bind="{ ...props, ...attrsWithoutModelProps }" class="select_input_div">
-        <div v-if="attrs.placeholder !== undefined && (!temp_value || temp_value === '')" class="placeholder-select">
-            {{ attrs.placeholder }}
+        <div v-if="showPlaceholder" class="placeholder-select">
+            {{ placeholderText }}
         </div>
 
         <div
@@ -21,7 +21,7 @@
                 <slot name="value" :value="temp_value">
                     <div
                         class="value-div"
-                        v-if="option_selected && Object.keys(option_selected).length > 0"
+                        v-if="hasSelectedOption"
                         :style="{ color: option_selected.color }"
                     >
                         <MaxIcon
@@ -193,6 +193,7 @@
             groupOptions?: SelectGroupOptions;
             disabled?: boolean | undefined;
             filter?: boolean | undefined;
+            placeholder?: string | undefined;
         }>(),
         {
             modelValue: null,
@@ -205,7 +206,8 @@
             caution: undefined,
             required: false,
             default: undefined,
-            disabled: false
+            disabled: false,
+            placeholder: undefined
         }
     );
 
@@ -288,6 +290,12 @@
 
         return {};
     });
+
+    const hasSelectedOption = computed(() => Boolean(option_selected.value && Object.keys(option_selected.value).length > 0));
+
+    const placeholderText = computed(() => (props.placeholder !== undefined ? props.placeholder : attrs.placeholder));
+
+    const showPlaceholder = computed(() => placeholderText.value !== undefined && !hasSelectedOption.value);
 
     const filteredOptions = computed(() => {
         const raw = options.value;
