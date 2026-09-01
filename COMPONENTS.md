@@ -1,6 +1,6 @@
 # Catálogo de Componentes — MaxComponentsUi
 
-Referência completa dos **59 componentes** disponíveis na biblioteca.
+Referência completa dos **60 componentes** disponíveis na biblioteca.
 Todos os componentes utilizam `<script setup lang="ts">` e suportam v-model quando aplicável.
 
 ---
@@ -326,6 +326,34 @@ Possui validação de **dígito verificador** integrada.
 **Máscara dinâmica:** `###.###.###-##` (CPF) ↔ `##.###.###/####-##` (CNPJ)
 **Eventos:** `update:modelValue` (debounce 500ms), `complete`
 **Erros automáticos:** "CPF inválido", "CNPJ inválido", "Documento inválido"
+
+---
+
+### MaxInputOTP
+
+Input OTP com **caixas de entrada separadas** estilo login do WhatsApp (padrão de 6 dígitos com agrupamento 3 - 3 e separador central).
+100% nativo em Vue 3 + TypeScript, com navegação de teclado, avanço de foco automático, suporte a colar código completo (paste) e autofill de SMS (`autocomplete="one-time-code"`).
+
+**Arquivo:** [`src/components/MaxInputOTP.vue`](src/components/MaxInputOTP.vue)
+**Aliases:** `MaxInputOtp`, `InputOTP`, `InputOtp`
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `modelValue` | `string \| number` | `''` | Valor numérico do código OTP |
+| `length` / `len` | `number` | `6` | Quantidade total de dígitos |
+| `groupLength` | `number` | `3` | Quantidade de dígitos em cada grupo separado |
+| `separator` | `boolean \| string` | `true` | Habilita ou customiza o separador central |
+| `separatorChar` | `string` | `'-'` | Caractere usado como separador visual |
+| `integerOnly` | `boolean` | `true` | Aceita somente números (0-9) |
+| `mask` | `boolean` | `false` | Oculta os caracteres digitados (modo senha/PIN) |
+| `autofocus` | `boolean` | `false` | Foca automaticamente no 1º dígito ao montar |
+| `disabled` | `boolean` | `false` | Desabilita todos os campos |
+| `required` | `boolean` | `false` | Campo obrigatório |
+| + todas as props do `InputBase` | | |
+
+**Eventos:** `update:modelValue`, `complete` (disparado quando todos os dígitos forem preenchidos), `change`, `focus`, `blur`
+**Métodos expostos:** `focus(index?)`, `clear()`, `values`, `inputs`, `unmaskedValue`
+**Erros automáticos:** "Código incompleto", "Campo obrigatório"
 
 ---
 

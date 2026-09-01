@@ -95,6 +95,10 @@ export { default as MaxInputFileUpload } from './components/MaxInputFileUpload.v
 export { default as MaxInputFileUploadBig } from './components/MaxInputFileUploadBig.vue';
 export { default as MaxInputFileUploadButton } from './components/MaxInputFileUploadButton.vue';
 export { default as MaxInputNumber } from './components/MaxInputNumber.vue';
+export { default as MaxInputOTP } from './components/MaxInputOTP.vue';
+export { default as MaxInputOtp } from './components/MaxInputOTP.vue';
+export { default as InputOTP } from './components/MaxInputOTP.vue';
+export { default as InputOtp } from './components/MaxInputOTP.vue';
 export { default as MaxInputPhoneMail } from './components/MaxInputPhoneMail.vue';
 export { default as MaxInputRadio } from './components/MaxInputRadio.vue';
 export { default as MaxInputSearch } from './components/MaxInputSearch.vue';
