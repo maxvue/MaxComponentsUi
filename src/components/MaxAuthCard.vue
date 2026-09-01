@@ -1,9 +1,9 @@
 <template>
     <div class="max-auth-page" s100 flex items-center justify-center>
         <div class="max-auth-card">
-            <slot name="header" :step="step" :mode="mode" :phone="phone">
+            <slot name="header" :step="codeSent ? 'code' : 'phone'" :mode="mode" :phone="phone">
                 <MaxTitle2
-                    :icon="mode === 'phone-otp' && step === 'code' ? 'mdi:shield-check-outline' : icon"
+                    :icon="mode === 'phone-otp' && codeSent ? 'mdi:shield-check-outline' : icon"
                     :title="computedTitle"
                     :subtitle="computedSubtitle"
                     center
@@ -33,81 +33,38 @@
                     <MaxButton s100 :label="t.submit" icon="mdi:login" :loading="loading" :action="onSubmit" />
                 </template>
 
-                <!-- Modo Phone OTP: Etapa 1 (Telefone) -->
-                <template v-else-if="mode === 'phone-otp' && step === 'phone'">
+                <!-- Modo Phone OTP (Telefone + MaxInputOTP + Botão Dinâmico) -->
+                <template v-else-if="mode === 'phone-otp'">
                     <slot name="phone-input">
-                        <MaxPhoneField s100 v-model="phone" :label="t.phone" @keyup.enter="onSendCode" />
+                        <MaxPhoneField s100 v-model="phone" :label="t.phone" @keyup.enter="handleDynamicSubmit" />
                     </slot>
+
+                    <!-- Campo de Código de 6 Dígitos (exibido apenas após o envio) -->
+                    <template v-if="codeSent">
+                        <slot name="code-input">
+                            <MaxInputOTP
+                                s100
+                                v-model="code"
+                                :length="codeLength"
+                                :integer-only="true"
+                                :autofocus="true"
+                                @complete="handleDynamicSubmit"
+                            />
+                        </slot>
+                    </template>
 
                     <slot name="extra"></slot>
 
                     <span s100 class="max-auth-error" v-if="error">{{ error }}</span>
 
+                    <!-- Botão Dinâmico de Ação Única (sem disabled) -->
                     <MaxButton
                         s100
-                        :label="firstEndpoint.label || t.sendCode"
-                        :icon="firstEndpoint.icon || 'mdi:arrow-right'"
+                        :label="dynamicButtonLabel"
+                        :icon="dynamicButtonIcon"
                         :loading="loading"
-                        :action="onSendCode"
+                        :action="handleDynamicSubmit"
                     />
-                </template>
-
-                <!-- Modo Phone OTP: Etapa 2 (Código OTP) -->
-                <template v-else-if="mode === 'phone-otp' && step === 'code'">
-                    <div class="max-auth-phone-summary" s100>
-                        <div class="max-auth-phone-info">
-                            <span class="max-auth-phone-number">{{ phone }}</span>
-                            <button type="button" class="max-auth-change-phone-btn" @click="onChangePhone">
-                                {{ t.changePhone }}
-                            </button>
-                        </div>
-                    </div>
-
-                    <slot name="code-input">
-                        <MaxInputText
-                            s100
-                            :label="t.code"
-                            :placeholder="t.codePlaceholder"
-                            type="text"
-                            v-model="code"
-                            icon="mdi:numeric"
-                            class="max-auth-code-input"
-                            autofocus
-                            @keyup.enter="onVerifyCode"
-                        />
-                    </slot>
-
-                    <slot name="extra"></slot>
-
-                    <span s100 class="max-auth-error" v-if="error">{{ error }}</span>
-
-                    <MaxButton
-                        s100
-                        :label="t.verifyCode"
-                        icon="mdi:check-circle-outline"
-                        :loading="loading"
-                        :action="onVerifyCode"
-                    />
-
-                    <!-- Seção de Reenvio com Prioridade de Endpoints e Cooldown -->
-                    <slot name="resend">
-                        <div class="max-auth-resend-section" s100>
-                            <span class="max-auth-resend-label">{{ t.didNotReceive }}</span>
-                            <button
-                                type="button"
-                                class="max-auth-resend-btn"
-                                :disabled="remainingCooldown > 0 || loading"
-                                @click="onResendCode"
-                            >
-                                <template v-if="remainingCooldown > 0">
-                                    {{ t.resendIn }} {{ remainingCooldown }}s
-                                </template>
-                                <template v-else>
-                                    {{ nextEndpoint.label || t.resendCode }}
-                                </template>
-                            </button>
-                        </div>
-                    </slot>
                 </template>
 
                 <!-- Provedores Sociais -->
@@ -149,13 +106,14 @@
  * Emite os eventos `submit`, `send-code`, `resend-code` e `social` para o projeto consumidor tratar a lógica.
  */
 <script setup lang="ts">
-    import { ref, computed, onBeforeUnmount } from 'vue';
+    import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
     import type { RouteLocationRaw } from 'vue-router';
     import MaxTitle2 from './MaxTitle2.vue';
     import MaxGrid from './MaxGrid.vue';
     import MaxInputText from './MaxInputText.vue';
     import MaxInputPhoneMail from './MaxInputPhoneMail.vue';
     import MaxPhoneField from './MaxPhoneField.vue';
+    import MaxInputOTP from './MaxInputOTP.vue';
     import MaxButton from './MaxButton.vue';
 
     /** Provedor de login social configurável */
@@ -248,8 +206,8 @@
             cooldown?: number;
             /** Quantidade de dígitos esperados no código OTP */
             codeLength?: number;
-            /** Avança automaticamente para a etapa de código ao disparar o envio inicial */
-            autoAdvance?: boolean;
+            /** Prefixo da chave de cache no localStorage */
+            cacheKeyPrefix?: string;
         }>(),
         {
             title: 'Acesse sua conta',
@@ -267,7 +225,7 @@
             ],
             cooldown: 60,
             codeLength: 6,
-            autoAdvance: true
+            cacheKeyPrefix: 'max_auth_otp_'
         }
     );
 
@@ -283,7 +241,6 @@
         }];
         'send-code': [payload: { phone: string; endpoint: AuthOtpEndpoint; channel: string; index: number }];
         'resend-code': [payload: { phone: string; endpoint: AuthOtpEndpoint; channel: string; index: number }];
-        'change-step': [step: AuthStep];
         social: [providerId: string];
     }>();
 
@@ -292,8 +249,8 @@
     const remember = defineModel<boolean>('remember', { default: true });
     const phone = defineModel<string>('phone', { default: '' });
     const code = defineModel<string>('code', { default: '' });
-    const step = defineModel<AuthStep>('step', { default: 'phone' });
 
+    const codeSent = ref(false);
     const currentEndpointIndex = ref(0);
     const remainingCooldown = ref(0);
     let cooldownTimer: ReturnType<typeof setInterval> | null = null;
@@ -312,10 +269,10 @@
         code: 'Código de verificação',
         codePlaceholder: '000000',
         codeTitle: 'Código de confirmação',
-        sendCode: 'Receber código',
-        verifyCode: 'Confirmar código',
-        resendCode: 'Reenviar código',
-        resendIn: 'Reenviar em',
+        sendCode: 'Enviar código',
+        verifyCode: 'Entrar',
+        resendCode: 'Solicitar código novamente',
+        resendIn: 'Solicitar novamente',
         changePhone: 'Alterar número',
         codeSentTo: 'Código enviado para',
         didNotReceive: 'Não recebeu o código?'
@@ -332,14 +289,19 @@
     });
 
     const computedTitle = computed(() => {
-        if (props.mode === 'phone-otp' && step.value === 'code') return props.title !== 'Acesse sua conta' ? props.title : t.value.codeTitle;
+        if (props.mode === 'phone-otp' && codeSent.value) return props.title !== 'Acesse sua conta' ? props.title : t.value.codeTitle;
         return props.title;
     });
 
     const computedSubtitle = computed(() => {
-        if (props.mode === 'phone-otp' && step.value === 'code') return `${t.value.codeSentTo} ${phone.value}`;
+        if (props.mode === 'phone-otp' && codeSent.value) return `${t.value.codeSentTo} ${phone.value}`;
         return props.subtitle;
     });
+
+    const getStorageKey = (rawPhone: string) => {
+        const clean = (rawPhone || '').replace(/\D/g, '');
+        return clean ? `${props.cacheKeyPrefix}${clean}` : `${props.cacheKeyPrefix}last`;
+    };
 
     const stopCooldown = () => {
         if (cooldownTimer) {
@@ -348,9 +310,8 @@
         }
     };
 
-    const startCooldown = () => {
+    const startCooldownInterval = () => {
         stopCooldown();
-        remainingCooldown.value = props.cooldown;
         if (remainingCooldown.value <= 0) return;
 
         cooldownTimer = setInterval(() => {
@@ -362,10 +323,70 @@
         }, 1000);
     };
 
+    const startCooldown = () => {
+        remainingCooldown.value = props.cooldown;
+        startCooldownInterval();
+    };
+
+    const persistTimestamp = (phoneVal: string) => {
+        if (typeof window === 'undefined' || !window.localStorage) return;
+        const key = getStorageKey(phoneVal);
+        localStorage.setItem(key, String(Date.now()));
+    };
+
+    const checkAndRestoreCooldown = (phoneVal: string) => {
+        if (typeof window === 'undefined' || !window.localStorage) return;
+        const key = getStorageKey(phoneVal);
+        const cached = localStorage.getItem(key);
+        if (!cached) return;
+
+        const timestamp = parseInt(cached, 10);
+        if (Number.isNaN(timestamp)) return;
+
+        const elapsed = Math.floor((Date.now() - timestamp) / 1000);
+        if (elapsed < props.cooldown) {
+            codeSent.value = true;
+            remainingCooldown.value = props.cooldown - elapsed;
+            startCooldownInterval();
+        } else {
+            codeSent.value = true;
+            remainingCooldown.value = 0;
+            stopCooldown();
+        }
+    };
+
+    const dynamicButtonLabel = computed<string>(() => {
+        if (props.mode === 'password') return t.value.submit;
+
+        if (!codeSent.value) return firstEndpoint.value.label || t.value.sendCode;
+
+        const isComplete = code.value && String(code.value).length >= props.codeLength;
+        if (isComplete) return t.value.submit;
+
+        if (remainingCooldown.value <= 0) return t.value.resendCode;
+
+        return `${t.value.resendIn} (${remainingCooldown.value}s)`;
+    });
+
+    const dynamicButtonIcon = computed<string>(() => {
+        if (props.mode === 'password') return 'mdi:login';
+
+        if (!codeSent.value) return firstEndpoint.value.icon || 'mdi:arrow-right';
+
+        const isComplete = code.value && String(code.value).length >= props.codeLength;
+        if (isComplete) return 'mdi:login';
+
+        if (remainingCooldown.value <= 0) return nextEndpoint.value.icon || 'mdi:refresh';
+
+        return 'mdi:clock-outline';
+    });
+
     const onSendCode = (): void => {
         if (props.loading || !phone.value) return;
         currentEndpointIndex.value = 0;
         const endpoint = firstEndpoint.value;
+        codeSent.value = true;
+        persistTimestamp(phone.value);
         emit('send-code', {
             phone: phone.value,
             endpoint,
@@ -373,18 +394,15 @@
             index: 0
         });
 
-        if (props.autoAdvance) {
-            step.value = 'code';
-            emit('change-step', 'code');
-            startCooldown();
-        }
+        startCooldown();
     };
 
     const onResendCode = (): void => {
-        if (props.loading || remainingCooldown.value > 0) return;
+        if (props.loading || !phone.value) return;
         const list = activeEndpoints.value;
         currentEndpointIndex.value = (currentEndpointIndex.value + 1) % list.length;
         const endpoint = list[currentEndpointIndex.value];
+        persistTimestamp(phone.value);
 
         emit('resend-code', {
             phone: phone.value,
@@ -394,11 +412,6 @@
         });
 
         startCooldown();
-    };
-
-    const onChangePhone = (): void => {
-        step.value = 'phone';
-        emit('change-step', 'phone');
     };
 
     const onVerifyCode = (): void => {
@@ -412,16 +425,54 @@
         });
     };
 
+    const handleDynamicSubmit = (): void => {
+        if (props.loading) return;
+
+        if (props.mode === 'password') {
+            emit('submit', { email: email.value, password: password.value, remember: remember.value });
+            return;
+        }
+
+        if (!codeSent.value) {
+            onSendCode();
+            return;
+        }
+
+        const isComplete = code.value && String(code.value).length >= props.codeLength;
+        if (isComplete) {
+            onVerifyCode();
+            return;
+        }
+
+        if (remainingCooldown.value <= 0) {
+            onResendCode();
+            return;
+        }
+
+        // Durante cooldown ativo com código incompleto: não faz nada
+    };
+
     const onSubmit = (): void => {
         if (props.loading) return;
         if (props.mode === 'phone-otp') {
-            if (step.value === 'phone') onSendCode();
-            else onVerifyCode();
+            handleDynamicSubmit();
             return;
         }
 
         emit('submit', { email: email.value, password: password.value, remember: remember.value });
     };
+
+    watch(
+        phone,
+        (newPhone) => {
+            if (newPhone) checkAndRestoreCooldown(newPhone);
+        },
+        { immediate: true }
+    );
+
+    onMounted(() => {
+        if (phone.value) checkAndRestoreCooldown(phone.value);
+    });
 
     onBeforeUnmount(() => {
         stopCooldown();
@@ -491,81 +542,6 @@
             &--muted {
                 font-size: 0.82rem;
                 font-weight: 400;
-            }
-        }
-
-        .max-auth-phone-summary {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--background-100);
-            border: 1px solid var(--background-200);
-            border-radius: 8px;
-            padding: 0.5rem 0.75rem;
-            font-size: 0.85rem;
-
-            .max-auth-phone-info {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                width: 100%;
-            }
-
-            .max-auth-phone-number {
-                font-weight: 600;
-                color: var(--background-800);
-            }
-
-            .max-auth-change-phone-btn {
-                background: transparent;
-                border: none;
-                color: var(--background-650);
-                cursor: pointer;
-                font-size: 0.8rem;
-                font-weight: 500;
-                padding: 0;
-
-                &:hover {
-                    text-decoration: underline;
-                    color: var(--background-750);
-                }
-            }
-        }
-
-        .max-auth-resend-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 0.25rem;
-            text-align: center;
-            margin-top: 0.5rem;
-
-            .max-auth-resend-label {
-                font-size: 0.8rem;
-                color: var(--background-500);
-            }
-
-            .max-auth-resend-btn {
-                background: transparent;
-                border: none;
-                color: var(--background-650);
-                cursor: pointer;
-                font-size: 0.82rem;
-                font-weight: 600;
-                padding: 0.25rem 0.5rem;
-                border-radius: 4px;
-                transition: all 0.2s ease;
-
-                &:hover:not(:disabled) {
-                    text-decoration: underline;
-                    color: var(--background-750);
-                }
-
-                &:disabled {
-                    color: var(--background-400);
-                    cursor: not-allowed;
-                }
             }
         }
 

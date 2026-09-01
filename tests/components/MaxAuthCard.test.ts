@@ -18,10 +18,12 @@ describe('MaxAuthCard', () => {
     beforeEach(() => {
         setActivePinia(createPinia());
         vi.useFakeTimers();
+        if (typeof window !== 'undefined' && window.localStorage) window.localStorage.clear();
     });
 
     afterEach(() => {
         vi.restoreAllMocks();
+        if (typeof window !== 'undefined' && window.localStorage) window.localStorage.clear();
     });
 
     describe('Modo Tradicional (mode=password)', () => {
@@ -110,15 +112,16 @@ describe('MaxAuthCard', () => {
     });
 
     describe('Modo Telefone / OTP (mode=phone-otp)', () => {
-        it('renderiza o campo de telefone na Etapa 1 por padrão', () => {
+        it('renderiza MaxPhoneField com bandeiras e não exibe MaxInputOTP antes do envio', () => {
             const wrapper = mountAuthCard({ mode: 'phone-otp' });
 
             expect(wrapper.findComponent({ name: 'MaxPhoneField' }).exists()).toBe(true);
+            expect(wrapper.findComponent({ name: 'MaxInputOTP' }).exists()).toBe(false);
             expect(wrapper.text()).toContain('Receber via WhatsApp');
             expect(wrapper.find('input[type="password"]').exists()).toBe(false);
         });
 
-        it('dispara send-code com o 1º endpoint prioritário ao submeter telefone', async () => {
+        it('dispara send-code com 1º endpoint prioritário ao submeter telefone e passa a exibir MaxInputOTP', async () => {
             const wrapper = mountAuthCard({
                 mode: 'phone-otp',
                 phone: '62999999999'
@@ -133,51 +136,90 @@ describe('MaxAuthCard', () => {
             expect(sendPayload.endpoint.channel).toBe('whatsapp');
             expect(sendPayload.index).toBe(0);
 
-            // Verifica avanço automático para etapa 'code'
-            expect(wrapper.emitted('change-step')).toBeTruthy();
-            expect(wrapper.emitted('change-step')![0]).toEqual(['code']);
-            expect(wrapper.emitted('update:step')![0]).toEqual(['code']);
+            await wrapper.vm.$nextTick();
+            expect(wrapper.findComponent({ name: 'MaxInputOTP' }).exists()).toBe(true);
         });
 
-        it('não avança nem emite send-code se phone estiver vazio', async () => {
-            const wrapper = mountAuthCard({ mode: 'phone-otp', phone: '' });
-
-            const button = wrapper.findComponent({ name: 'MaxButton' });
-            await (button.props('action') as any)?.();
-
-            expect(wrapper.emitted('send-code')).toBeFalsy();
-        });
-
-        it('não avança automaticamente quando autoAdvance=false', async () => {
+        it('salva o timestamp no localStorage ao enviar código para persistir cooldown', async () => {
             const wrapper = mountAuthCard({
                 mode: 'phone-otp',
-                phone: '62999999999',
-                autoAdvance: false
+                phone: '62999999999'
             });
 
             const button = wrapper.findComponent({ name: 'MaxButton' });
             await (button.props('action') as any)?.();
 
-            expect(wrapper.emitted('send-code')).toBeTruthy();
-            expect(wrapper.emitted('change-step')).toBeFalsy();
+            const saved = window.localStorage.getItem('max_auth_otp_62999999999');
+            expect(saved).toBeTruthy();
+            expect(Number(saved)).toBeGreaterThan(0);
         });
 
-        it('renderiza a Etapa 2 (código OTP) com telefone e botão de confirmação', async () => {
+        it('restaura cooldown e exibe MaxInputOTP ao montar com timestamp recente no cache', () => {
+            const now = Date.now();
+            // Simula envio realizado há 20 segundos
+            window.localStorage.setItem('max_auth_otp_62999999999', String(now - 20000));
+
             const wrapper = mountAuthCard({
                 mode: 'phone-otp',
-                step: 'code',
                 phone: '62999999999',
-                code: '123456'
+                cooldown: 60
             });
 
-            expect(wrapper.text()).toContain('62999999999');
-            expect(wrapper.text()).toContain('Alterar número');
-            expect(wrapper.find('.max-auth-code-input').exists() || wrapper.findComponent({ name: 'MaxInputText' }).exists()).toBe(true);
+            expect(wrapper.findComponent({ name: 'MaxInputOTP' }).exists()).toBe(true);
+            const button = wrapper.findComponent({ name: 'MaxButton' });
+            expect(button.props('label')).toBe('Solicitar novamente (40s)');
+        });
 
-            const verifyButton = wrapper.findAllComponents({ name: 'MaxButton' })[0];
-            expect(verifyButton.props('label')).toBe('Confirmar código');
+        it('comportamento dinâmico do botão durante o cooldown com código incompleto (no-op e sem disabled)', async () => {
+            const wrapper = mountAuthCard({
+                mode: 'phone-otp',
+                phone: '62999999999',
+                cooldown: 60
+            });
 
-            await (verifyButton.props('action') as any)?.();
+            const button = wrapper.findComponent({ name: 'MaxButton' });
+            await (button.props('action') as any)?.();
+            await wrapper.vm.$nextTick();
+
+            // Botão deve mostrar "Solicitar novamente (60s)"
+            expect(button.props('label')).toBe('Solicitar novamente (60s)');
+            // Não deve ter atributo disabled
+            expect(button.attributes('disabled')).toBeUndefined();
+
+            // Clica no botão durante o cooldown com código incompleto
+            await (button.props('action') as any)?.();
+            // Não dispara novo send-code nem submit
+            expect(wrapper.emitted('send-code')?.length).toBe(1);
+            expect(wrapper.emitted('resend-code')).toBeFalsy();
+            expect(wrapper.emitted('submit')).toBeFalsy();
+
+            // Avança 30 segundos
+            vi.advanceTimersByTime(30000);
+            await wrapper.vm.$nextTick();
+            expect(button.props('label')).toBe('Solicitar novamente (30s)');
+            expect(button.attributes('disabled')).toBeUndefined();
+        });
+
+        it('botão dinâmico muda para "Entrar" quando todos os 6 dígitos forem preenchidos', async () => {
+            const wrapper = mountAuthCard({
+                mode: 'phone-otp',
+                phone: '62999999999',
+                cooldown: 60
+            });
+
+            const button = wrapper.findComponent({ name: 'MaxButton' });
+            await (button.props('action') as any)?.();
+            await wrapper.vm.$nextTick();
+
+            // Preenche o código com 6 dígitos
+            await wrapper.setProps({ code: '123456' });
+            await wrapper.vm.$nextTick();
+
+            expect(button.props('label')).toBe('Entrar');
+            expect(button.attributes('disabled')).toBeUndefined();
+
+            // Ao clicar, efetua login emitindo submit
+            await (button.props('action') as any)?.();
 
             expect(wrapper.emitted('submit')).toBeTruthy();
             const submitPayload = wrapper.emitted('submit')![0][0] as any;
@@ -186,56 +228,26 @@ describe('MaxAuthCard', () => {
             expect(submitPayload.endpoint.channel).toBe('whatsapp');
         });
 
-        it('permite retornar para a etapa de telefone ao clicar em Alterar número', async () => {
-            const wrapper = mountAuthCard({
-                mode: 'phone-otp',
-                step: 'code',
-                phone: '62999999999'
-            });
-
-            const changeBtn = wrapper.find('.max-auth-change-phone-btn');
-            expect(changeBtn.exists()).toBe(true);
-
-            await changeBtn.trigger('click');
-
-            expect(wrapper.emitted('change-step')).toBeTruthy();
-            expect(wrapper.emitted('change-step')![0]).toEqual(['phone']);
-            expect(wrapper.emitted('update:step')![0]).toEqual(['phone']);
-        });
-
-        it('gerencia o temporizador de cooldown e o reenvio pelo próximo endpoint prioritário', async () => {
+        it('botão dinâmico muda para "Solicitar código novamente" após 60s com código incompleto', async () => {
             const wrapper = mountAuthCard({
                 mode: 'phone-otp',
                 phone: '62999999999',
-                cooldown: 30
+                cooldown: 60
             });
 
-            // Dispara envio inicial
-            const sendButton = wrapper.findComponent({ name: 'MaxButton' });
-            await (sendButton.props('action') as any)?.();
-
+            const button = wrapper.findComponent({ name: 'MaxButton' });
+            await (button.props('action') as any)?.();
             await wrapper.vm.$nextTick();
 
-            // Na etapa 'code', o cooldown está ativo (30s)
-            const resendBtn = wrapper.find('.max-auth-resend-btn');
-            expect(resendBtn.attributes('disabled')).toBeDefined();
-            expect(resendBtn.text()).toContain('Reenviar em 30s');
-
-            // Avança 15s no timer
-            vi.advanceTimersByTime(15000);
-            await wrapper.vm.$nextTick();
-            expect(resendBtn.text()).toContain('Reenviar em 15s');
-
-            // Avança os 15s restantes
-            vi.advanceTimersByTime(15000);
+            // Avança 60 segundos
+            vi.advanceTimersByTime(60000);
             await wrapper.vm.$nextTick();
 
-            // Cooldown zerou: botão habilitado mostrando o próximo endpoint (SMS)
-            expect(resendBtn.attributes('disabled')).toBeUndefined();
-            expect(resendBtn.text()).toContain('Receber via SMS');
+            expect(button.props('label')).toBe('Solicitar código novamente');
+            expect(button.attributes('disabled')).toBeUndefined();
 
-            // Clica em reenviar por SMS
-            await resendBtn.trigger('click');
+            // Ao clicar, reenvia código para o próximo endpoint (SMS)
+            await (button.props('action') as any)?.();
 
             expect(wrapper.emitted('resend-code')).toBeTruthy();
             const resendPayload = wrapper.emitted('resend-code')![0][0] as any;
@@ -243,57 +255,11 @@ describe('MaxAuthCard', () => {
             expect(resendPayload.endpoint.channel).toBe('sms');
             expect(resendPayload.index).toBe(1);
 
-            // Cooldown reinicia
+            // Cooldown reinicia em 60s
             await wrapper.vm.$nextTick();
-            expect(resendBtn.attributes('disabled')).toBeDefined();
-            expect(resendBtn.text()).toContain('Reenviar em 30s');
-        });
-
-        it('aceita lista customizada de endpoints', async () => {
-            const customEndpoints = [
-                { url: '/api/otp/zap', label: 'Zap Prioritário', channel: 'whatsapp' },
-                { url: '/api/otp/sms', label: 'SMS Secundário', channel: 'sms' },
-                { url: '/api/otp/call', label: 'Ligação de Voz', channel: 'call' }
-            ];
-
-            const wrapper = mountAuthCard({
-                mode: 'phone-otp',
-                phone: '62988887777',
-                endpoints: customEndpoints,
-                cooldown: 0
-            });
-
-            // 1º botão exibe o label do 1º endpoint
-            const sendButton = wrapper.findComponent({ name: 'MaxButton' });
-            expect(sendButton.props('label')).toBe('Zap Prioritário');
-
-            await (sendButton.props('action') as any)?.();
-            await wrapper.vm.$nextTick();
-
-            // Na etapa de código, o reenvio oferece o 2º endpoint
-            const resendBtn = wrapper.find('.max-auth-resend-btn');
-            expect(resendBtn.text()).toBe('SMS Secundário');
-
-            await resendBtn.trigger('click');
-            expect(wrapper.emitted('resend-code')![0][0]).toMatchObject({
-                endpoint: customEndpoints[1],
-                index: 1
-            });
-
-            // Próximo reenvio oferece o 3º endpoint
-            await resendBtn.trigger('click');
-            expect(wrapper.emitted('resend-code')![1][0]).toMatchObject({
-                endpoint: customEndpoints[2],
-                index: 2
-            });
-
-            // Próximo reenvio cicla de volta para o 1º endpoint
-            await resendBtn.trigger('click');
-            expect(wrapper.emitted('resend-code')![2][0]).toMatchObject({
-                endpoint: customEndpoints[0],
-                index: 0
-            });
+            expect(button.props('label')).toBe('Solicitar novamente (60s)');
         });
     });
 });
+
 
