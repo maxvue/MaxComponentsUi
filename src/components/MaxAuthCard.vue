@@ -40,18 +40,19 @@
                     </slot>
 
                     <!-- Campo de Código de 6 Dígitos (exibido apenas após o envio) -->
-                    <template v-if="codeSent">
-                        <slot name="code-input">
-                            <MaxInputOTP
-                                s100
-                                v-model="code"
-                                :length="codeLength"
-                                :integer-only="true"
-                                :autofocus="true"
-                                @complete="onEnter"
-                            />
-                        </slot>
-                    </template>
+
+                    <slot name="code-input" v-if="codeSent">
+                        <MaxInputOTP
+                            s100
+                            v-model="code"
+                            :length="codeLength"
+                            :integer-only="true"
+                            :autofocus="true"
+                            @complete="onEnter"
+                            w-full
+                        />
+                    </slot>
+
 
                     <slot name="extra"></slot>
 

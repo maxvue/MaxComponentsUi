@@ -421,7 +421,7 @@
 }
 
 .max-input-otp-cell {
-    width: 42px;
+    width: 100%;
     height: 48px;
     border-radius: 8px;
     border: 1px solid var(--background-300);
