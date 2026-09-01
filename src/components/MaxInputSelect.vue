@@ -398,6 +398,10 @@
         }
     }
 
+    .placeholder-select{
+        padding-left: 7px !important;
+    }
+
     .p-select {
         width: 100%;
         height: 36px !important;
