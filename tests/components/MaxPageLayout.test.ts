@@ -25,6 +25,7 @@ import MaxTopMenu from '../../src/components/MaxTopMenu.vue';
 import MaxSideMenu from '../../src/components/MaxSideMenu.vue';
 import MaxPageContent from '../../src/components/MaxPageContent.vue';
 import MaxBottomMenu from '../../src/components/MaxBottomMenu.vue';
+import MaxPageMobileLayout from '../../src/components/MaxPageMobileLayout.vue';
 
 let pinia: Pinia;
 
@@ -33,7 +34,11 @@ const mountLayout = (options: Record<string, any> = {}) => mount(MaxPageLayout, 
     global: {
         ...(options.global ?? {}),
         plugins: [pinia],
-        stubs: { MaxLogo: { template: '<div class="max-logo-stub" />' }, ...(options.global?.stubs ?? {}) }
+        stubs: {
+            teleport: true,
+            MaxLogo: { template: '<div class="max-logo-stub" />' },
+            ...(options.global?.stubs ?? {})
+        }
     }
 });
 
@@ -46,79 +51,103 @@ describe('MaxPageLayout', () => {
         localStorage.clear();
     });
 
-    it('compõe container, topo, lateral e conteúdo', () => {
-        const wrapper = mountLayout();
+    describe('desktop layout', () => {
+        it('compõe container, topo, lateral e conteúdo em desktop', () => {
+            const wrapper = mountLayout();
 
-        expect(wrapper.findComponent(MaxContainerApp).exists()).toBe(true);
-        expect(wrapper.findComponent(MaxTopMenu).exists()).toBe(true);
-        expect(wrapper.findComponent(MaxSideMenu).exists()).toBe(true);
-        expect(wrapper.findComponent(MaxPageContent).exists()).toBe(true);
+            expect(wrapper.findComponent(MaxContainerApp).exists()).toBe(true);
+            expect(wrapper.findComponent(MaxTopMenu).exists()).toBe(true);
+            expect(wrapper.findComponent(MaxSideMenu).exists()).toBe(true);
+            expect(wrapper.findComponent(MaxPageContent).exists()).toBe(true);
+            expect(wrapper.findComponent(MaxPageMobileLayout).exists()).toBe(false);
+        });
+
+        it('renderiza o conteúdo da página no slot padrão', () => {
+            const wrapper = mountLayout({ slots: { default: '<div class="pagina">x</div>' } });
+
+            expect(wrapper.find('.pagina').exists()).toBe(true);
+        });
+
+        it('não exibe o menu inferior em desktop', () => {
+            expect(mountLayout().findComponent(MaxBottomMenu).exists()).toBe(false);
+        });
+
+        it('repassa addItems ao menu superior', () => {
+            const addItems = [{ label: 'Novo Projeto', icon: 'mdi:plus', route: 'new_project' }];
+            const wrapper = mountLayout({ props: { addItems } });
+
+            expect(wrapper.findComponent(MaxTopMenu).props('addItems')).toEqual(addItems);
+        });
+
+        it('repassa a logo ao menu lateral', () => {
+            const wrapper = mountLayout({ props: { logo: '/get_file?file=logo.svg' } });
+
+            expect(wrapper.findComponent(MaxSideMenu).props('logo')).toBe('/get_file?file=logo.svg');
+        });
+
+        it.each(['status', 'chat', 'bugs', 'notifications', 'voip', 'live'])('repassa o slot %s ao menu superior', (slot) => {
+            const wrapper = mountLayout({ slots: { [slot]: `<div class="slot-${slot}">x</div>` } });
+
+            expect(wrapper.find(`.slot-${slot}`).exists()).toBe(true);
+        });
+
+        it('permite substituir a seção de usuário', () => {
+            const wrapper = mountLayout({ slots: { user: '<div class="usuario-custom">x</div>' } });
+
+            expect(wrapper.find('.usuario-custom').exists()).toBe(true);
+        });
+
+        it('usa a busca padrão quando o slot não é informado', () => {
+            const wrapper = mountLayout();
+
+            expect(wrapper.findComponent({ name: 'MaxTopMenuSearchBar' }).exists()).toBe(true);
+        });
+
+        it('permite substituir a busca pelo slot', () => {
+            const wrapper = mountLayout({ slots: { search: '<div class="busca-custom">x</div>' } });
+
+            expect(wrapper.find('.busca-custom').exists()).toBe(true);
+            expect(wrapper.findComponent({ name: 'MaxTopMenuSearchBar' }).exists()).toBe(false);
+        });
     });
 
-    it('renderiza o conteúdo da página no slot padrão', () => {
-        const wrapper = mountLayout({ slots: { default: '<div class="pagina">x</div>' } });
+    describe('mobile layout', () => {
+        it('renderiza MaxPageMobileLayout quando screen="mobile"', () => {
+            const wrapper = mountLayout({ attrs: { screen: 'mobile' } });
 
-        expect(wrapper.find('.pagina').exists()).toBe(true);
-    });
+            expect(wrapper.findComponent(MaxPageMobileLayout).exists()).toBe(true);
+            expect(wrapper.findComponent(MaxContainerApp).exists()).toBe(false);
+            expect(wrapper.findComponent(MaxBottomMenu).exists()).toBe(true);
+        });
 
-    it('não exibe o menu inferior em desktop', () => {
-        expect(mountLayout().findComponent(MaxBottomMenu).exists()).toBe(false);
-    });
+        it('renderiza MaxPageMobileLayout via prop screen', () => {
+            const wrapper = mountLayout({ props: { screen: 'mobile' } });
 
-    it('exibe o menu inferior em mobile', () => {
-        const wrapper = mountLayout({ attrs: { screen: 'mobile' } });
+            expect(wrapper.findComponent(MaxPageMobileLayout).exists()).toBe(true);
+        });
 
-        expect(wrapper.findComponent(MaxBottomMenu).exists()).toBe(true);
-    });
+        it('repassa bottomTabs e addItems ao layout mobile', () => {
+            const bottomTabs = [{ name: 'a', label: 'Alfa', icon: 'mdi:a' }];
+            const addItems = [{ label: 'Novo', icon: 'mdi:plus' }];
 
-    it('repassa o screen aos filhos', () => {
-        const wrapper = mountLayout({ attrs: { screen: 'mobile' } });
+            const wrapper = mountLayout({
+                props: { screen: 'mobile', bottomTabs, addItems }
+            });
 
-        expect(wrapper.findComponent(MaxContainerApp).attributes('screen')).toBe('mobile');
-    });
+            const mobileLayout = wrapper.findComponent(MaxPageMobileLayout);
+            expect(mobileLayout.props('bottomTabs')).toEqual(bottomTabs);
+            expect(mobileLayout.props('addItems')).toEqual(addItems);
+        });
 
-    it('repassa addItems ao menu superior', () => {
-        const addItems = [{ label: 'Novo Projeto', icon: 'mdi:plus', route: 'new_project' }];
-        const wrapper = mountLayout({ props: { addItems } });
+        it.each(['profile', 'settings', 'support', 'toggleDarkMode', 'logout', 'endImpersonate'])(
+            'propaga o evento %s do layout mobile',
+            async (evento) => {
+                const wrapper = mountLayout({ props: { screen: 'mobile' } });
+                wrapper.findComponent(MaxPageMobileLayout).vm.$emit(evento);
+                await wrapper.vm.$nextTick();
 
-        expect(wrapper.findComponent(MaxTopMenu).props('addItems')).toEqual(addItems);
-    });
-
-    it('repassa bottomTabs ao menu inferior', () => {
-        const bottomTabs = [{ name: 'a', label: 'Alfa', icon: 'mdi:a' }];
-        const wrapper = mountLayout({ attrs: { screen: 'mobile' }, props: { bottomTabs } });
-
-        expect(wrapper.findComponent(MaxBottomMenu).props('tabs')).toEqual(bottomTabs);
-    });
-
-    it('repassa a logo ao menu lateral', () => {
-        const wrapper = mountLayout({ props: { logo: '/get_file?file=logo.svg' } });
-
-        expect(wrapper.findComponent(MaxSideMenu).props('logo')).toBe('/get_file?file=logo.svg');
-    });
-
-    it.each(['status', 'chat', 'bugs', 'notifications', 'voip', 'live'])('repassa o slot %s ao menu superior', (slot) => {
-        const wrapper = mountLayout({ slots: { [slot]: `<div class="slot-${slot}">x</div>` } });
-
-        expect(wrapper.find(`.slot-${slot}`).exists()).toBe(true);
-    });
-
-    it('permite substituir a seção de usuário', () => {
-        const wrapper = mountLayout({ slots: { user: '<div class="usuario-custom">x</div>' } });
-
-        expect(wrapper.find('.usuario-custom').exists()).toBe(true);
-    });
-
-    it('usa a busca padrão quando o slot não é informado', () => {
-        const wrapper = mountLayout();
-
-        expect(wrapper.findComponent({ name: 'MaxTopMenuSearchBar' }).exists()).toBe(true);
-    });
-
-    it('permite substituir a busca pelo slot', () => {
-        const wrapper = mountLayout({ slots: { search: '<div class="busca-custom">x</div>' } });
-
-        expect(wrapper.find('.busca-custom').exists()).toBe(true);
-        expect(wrapper.findComponent({ name: 'MaxTopMenuSearchBar' }).exists()).toBe(false);
+                expect(wrapper.emitted(evento)).toHaveLength(1);
+            }
+        );
     });
 });

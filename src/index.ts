@@ -130,6 +130,7 @@ export { default as MaxLoadScreenTarget } from './components/MaxLoadScreenTarget
 export { default as MaxContainerApp } from './components/MaxContainerApp.vue';
 export { default as MaxBottomMenu } from './components/MaxBottomMenu.vue';
 export { default as MaxSideMenu } from './components/MaxSideMenu.vue';
+export { default as MaxSideMenuMobile } from './components/MaxSideMenuMobile.vue';
 export { default as MaxMenuVerticalItem } from './components/MaxMenuVerticalItem.vue';
 export { default as MaxTopMenu } from './components/MaxTopMenu.vue';
 export { default as MaxTopMenuSearchBar } from './components/MaxTopMenuSearchBar.vue';
@@ -138,6 +139,7 @@ export { default as MaxTopToolbarSubmenu } from './components/MaxTopToolbarSubme
 // O MaxUserSection é exportado mais abaixo, junto do seu alias UserSection.
 export { default as MaxPageContent } from './components/MaxPageContent.vue';
 export { default as MaxPageLayout } from './components/MaxPageLayout.vue';
+export { default as MaxPageMobileLayout } from './components/MaxPageMobileLayout.vue';
 export { default as MaxApp } from './components/MaxApp.vue';
 
 // Data & Display
