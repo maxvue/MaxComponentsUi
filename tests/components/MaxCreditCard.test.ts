@@ -320,4 +320,53 @@ describe('MaxCreditCard', () => {
             expect(vm.temp_value).toBe('12/30');
         });
     });
+
+    describe('Renderização de imagens de fundo e bandeiras (Data URI)', () => {
+        it('renderiza a imagem de fundo frontal com href válido em Data URI', () => {
+            const wrapper = mountCard({});
+            const frontImage = wrapper.find('.flip-card-front svg image');
+            expect(frontImage.exists()).toBe(true);
+
+            const href = frontImage.attributes('href');
+            expect(href).toMatch(/^data:image\/svg\+xml;base64,/);
+
+            const base64Data = href!.replace('data:image/svg+xml;base64,', '');
+            const decoded = Buffer.from(base64Data, 'base64').toString('utf-8');
+            expect(decoded).toMatch(/^<svg/);
+            expect(decoded).not.toContain('<?xml');
+            expect(decoded).not.toContain('<!DOCTYPE');
+        });
+
+        it('renderiza a imagem de fundo traseira com href válido em Data URI', () => {
+            const wrapper = mountCard({ side: 'back' });
+            const rearImage = wrapper.find('.flip-card-back svg image');
+            expect(rearImage.exists()).toBe(true);
+
+            const href = rearImage.attributes('href');
+            expect(href).toMatch(/^data:image\/svg\+xml;base64,/);
+
+            const base64Data = href!.replace('data:image/svg+xml;base64,', '');
+            const decoded = Buffer.from(base64Data, 'base64').toString('utf-8');
+            expect(decoded).toMatch(/^<svg/);
+            expect(decoded).not.toContain('<?xml');
+            expect(decoded).not.toContain('<!DOCTYPE');
+        });
+
+        it('renderiza o logo da bandeira quando informada ou deduzida', () => {
+            const wrapper = mountCard({ cardType: 'visa' });
+            const brandImages = wrapper.findAll('.flip-card-front svg image');
+            // Primeiro image é o background, segundo é a bandeira
+            expect(brandImages.length).toBe(2);
+
+            const brandHref = brandImages[1].attributes('href');
+            expect(brandHref).toMatch(/^data:image\/svg\+xml;base64,/);
+
+            const base64Data = brandHref!.replace('data:image/svg+xml;base64,', '');
+            const decoded = Buffer.from(base64Data, 'base64').toString('utf-8');
+            expect(decoded).toMatch(/^<svg/);
+            expect(decoded).not.toContain('<?xml');
+            expect(decoded).not.toContain('<!DOCTYPE');
+        });
+    });
 });
+
