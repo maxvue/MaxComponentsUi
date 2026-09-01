@@ -17,20 +17,8 @@
         <!-- Usuário autenticado: aplicação completa. -->
         <div v-else-if="isLoaded && isLogged">
             <slot name="authenticated">
-                <MaxPageLayout
-                    :screen="system.type_device"
-                    :add-items="props.addItems"
-                    :bottom-tabs="props.bottomTabs"
-                    :logo="props.logo"
-                    @profile="emit('profile')"
-                    @settings="emit('settings')"
-                    @support="emit('support')"
-                    @toggle-dark-mode="emit('toggleDarkMode')"
-                    @logout="emit('logout')"
-                    @end-impersonate="emit('endImpersonate')"
-                >
+                <MaxPageLayout :screen="system.type_device" :add-items="props.addItems" :bottom-tabs="props.bottomTabs" :logo="props.logo" @profile="emit('profile')" @settings="emit('settings')" @support="emit('support')" @toggle-dark-mode="emit('toggleDarkMode')" @logout="emit('logout')" @end-impersonate="emit('endImpersonate')" >
                     <RouterView />
-
                     <template v-for="(_, name) in forwardedSlots" #[name]="slotProps" :key="name">
                         <slot :name="name" v-bind="slotProps ?? {}"></slot>
                     </template>
@@ -166,6 +154,8 @@
 <style lang="scss">
     .max-app {
         min-height: 100vh;
+        height: 100vh;
+        width: 100vw;
 
         .fade-enter-active,
         .fade-leave-active {
