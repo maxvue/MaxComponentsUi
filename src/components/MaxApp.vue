@@ -34,7 +34,6 @@
                     @fab-click="emit('fabClick')"
                 >
                     <RouterView />
-
                     <template v-for="(_, name) in forwardedSlots" #[name]="slotProps" :key="name">
                         <slot :name="name" v-bind="slotProps ?? {}"></slot>
                     </template>
@@ -178,6 +177,8 @@
 <style lang="scss">
     .max-app {
         min-height: 100vh;
+        height: 100vh;
+        width: 100vw;
 
         .fade-enter-active,
         .fade-leave-active {
