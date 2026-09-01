@@ -4,7 +4,7 @@
             <div class="flip-card-inner">
                 <div class="flip-card-front">
                     <svg viewBox="0 0 700 430">
-                        <image :href="creditCardFrontUri" x="0" y="0" width="700" height="430" />
+                        <image :href="creditCardFrontUri" :xlink:href="creditCardFrontUri" x="0" y="0" width="700" height="430" />
                         <text
                             ref="numberTextEl"
                             x="105"
@@ -36,12 +36,12 @@
                             :textLength="dateTextLength"
                             :lengthAdjust="dateTextLength ? 'spacingAndGlyphs' : undefined"
                         >{{ date }}</text>
-                        <image v-if="card_type_image" :href="card_type_image" x="540" y="320" width="138" height="92" />
+                        <image v-if="card_type_image" :href="card_type_image" :xlink:href="card_type_image" x="540" y="320" width="138" height="92" />
                     </svg>
                 </div>
                 <div class="flip-card-back">
                     <svg viewBox="0 0 700 430">
-                        <image :href="creditCardRearUri" x="0" y="0" width="700" height="430" />
+                        <image :href="creditCardRearUri" :xlink:href="creditCardRearUri" x="0" y="0" width="700" height="430" />
                         <text
                             ref="cvvTextEl"
                             x="548"
@@ -52,7 +52,7 @@
                             :textLength="cvvTextLength"
                             :lengthAdjust="cvvTextLength ? 'spacingAndGlyphs' : undefined"
                         >{{ cvv }}</text>
-                        <image v-if="card_type_image" :href="card_type_image" x="540" y="320" width="138" height="92" />
+                        <image v-if="card_type_image" :href="card_type_image" :xlink:href="card_type_image" x="540" y="320" width="138" height="92" />
                     </svg>
                 </div>
             </div>
