@@ -121,7 +121,20 @@ describe('MaxAuthCard', () => {
             expect(wrapper.find('input[type="password"]').exists()).toBe(false);
         });
 
-        it('dispara send-code com 1º endpoint prioritário ao submeter telefone e passa a exibir MaxInputOTP', async () => {
+        it('não exibe MaxInputOTP nem envia código ao apenas digitar o telefone ou apertar ENTER no telefone', async () => {
+            const wrapper = mountAuthCard({ mode: 'phone-otp', phone: '62999999999' });
+
+            expect(wrapper.findComponent({ name: 'MaxInputOTP' }).exists()).toBe(false);
+
+            // Pressiona ENTER no campo de telefone sem ter enviado código
+            await wrapper.find('.max-auth-page').trigger('keyup.enter');
+
+            expect(wrapper.emitted('send-code')).toBeFalsy();
+            expect(wrapper.emitted('submit')).toBeFalsy();
+            expect(wrapper.findComponent({ name: 'MaxInputOTP' }).exists()).toBe(false);
+        });
+
+        it('dispara send-code com 1º endpoint prioritário ao clicar no botão de envio e passa a exibir MaxInputOTP', async () => {
             const wrapper = mountAuthCard({
                 mode: 'phone-otp',
                 phone: '62999999999'
@@ -140,7 +153,7 @@ describe('MaxAuthCard', () => {
             expect(wrapper.findComponent({ name: 'MaxInputOTP' }).exists()).toBe(true);
         });
 
-        it('salva o timestamp no localStorage ao enviar código para persistir cooldown', async () => {
+        it('salva a sessão em JSON no localStorage ao enviar código', async () => {
             const wrapper = mountAuthCard({
                 mode: 'phone-otp',
                 phone: '62999999999'
@@ -149,25 +162,79 @@ describe('MaxAuthCard', () => {
             const button = wrapper.findComponent({ name: 'MaxButton' });
             await (button.props('action') as any)?.();
 
-            const saved = window.localStorage.getItem('max_auth_otp_62999999999');
-            expect(saved).toBeTruthy();
-            expect(Number(saved)).toBeGreaterThan(0);
+            const sessionRaw = window.localStorage.getItem('max_auth_otp_session');
+            expect(sessionRaw).toBeTruthy();
+            const session = JSON.parse(sessionRaw!);
+            expect(session.phone).toBe('62999999999');
+            expect(session.timestamp).toBeGreaterThan(0);
         });
 
-        it('restaura cooldown e exibe MaxInputOTP ao montar com timestamp recente no cache', () => {
+        it('restaura sessão, número de telefone, cooldown e exibe MaxInputOTP ao recarregar a página (mount com cache)', () => {
             const now = Date.now();
-            // Simula envio realizado há 20 segundos
-            window.localStorage.setItem('max_auth_otp_62999999999', String(now - 20000));
+            const session = {
+                phone: '62988881111',
+                timestamp: now - 20000,
+                channel: 'whatsapp',
+                endpointIndex: 0
+            };
+            window.localStorage.setItem('max_auth_otp_session', JSON.stringify(session));
+            window.localStorage.setItem('max_auth_otp_62988881111', JSON.stringify(session));
 
             const wrapper = mountAuthCard({
                 mode: 'phone-otp',
-                phone: '62999999999',
                 cooldown: 60
             });
 
             expect(wrapper.findComponent({ name: 'MaxInputOTP' }).exists()).toBe(true);
             const button = wrapper.findComponent({ name: 'MaxButton' });
             expect(button.props('label')).toBe('Solicitar novamente (40s)');
+        });
+
+        it('ao pressionar ENTER com código incompleto: nada acontece', async () => {
+            const wrapper = mountAuthCard({
+                mode: 'phone-otp',
+                phone: '62999999999',
+                cooldown: 60
+            });
+
+            // Envia código
+            const button = wrapper.findComponent({ name: 'MaxButton' });
+            await (button.props('action') as any)?.();
+            await wrapper.vm.$nextTick();
+
+            // Código com apenas 3 dígitos
+            await wrapper.setProps({ code: '123' });
+            await wrapper.vm.$nextTick();
+
+            // Pressiona ENTER
+            await wrapper.find('.max-auth-page').trigger('keyup.enter');
+
+            expect(wrapper.emitted('submit')).toBeFalsy();
+        });
+
+        it('ao pressionar ENTER com código completo de 6 dígitos: efetua login', async () => {
+            const wrapper = mountAuthCard({
+                mode: 'phone-otp',
+                phone: '62999999999',
+                cooldown: 60
+            });
+
+            // Envia código
+            const button = wrapper.findComponent({ name: 'MaxButton' });
+            await (button.props('action') as any)?.();
+            await wrapper.vm.$nextTick();
+
+            // Código completo de 6 dígitos
+            await wrapper.setProps({ code: '654321' });
+            await wrapper.vm.$nextTick();
+
+            // Pressiona ENTER
+            await wrapper.find('.max-auth-page').trigger('keyup.enter');
+
+            expect(wrapper.emitted('submit')).toBeTruthy();
+            const submitPayload = wrapper.emitted('submit')![0][0] as any;
+            expect(submitPayload.phone).toBe('62999999999');
+            expect(submitPayload.code).toBe('654321');
         });
 
         it('comportamento dinâmico do botão durante o cooldown com código incompleto (no-op e sem disabled)', async () => {
@@ -183,7 +250,6 @@ describe('MaxAuthCard', () => {
 
             // Botão deve mostrar "Solicitar novamente (60s)"
             expect(button.props('label')).toBe('Solicitar novamente (60s)');
-            // Não deve ter atributo disabled
             expect(button.attributes('disabled')).toBeUndefined();
 
             // Clica no botão durante o cooldown com código incompleto

@@ -1,5 +1,5 @@
 <template>
-    <div class="max-auth-page" s100 flex items-center justify-center>
+    <div class="max-auth-page" s100 flex items-center justify-center @keyup.enter="onEnter">
         <div class="max-auth-card">
             <slot name="header" :step="codeSent ? 'code' : 'phone'" :mode="mode" :phone="phone">
                 <MaxTitle2
@@ -14,9 +14,9 @@
             <MaxGrid mt-6 gap-4>
                 <!-- Modo Tradicional (E-mail / Senha) -->
                 <template v-if="mode === 'password'">
-                    <MaxInputPhoneMail s100 v-if="identifier === 'email-phone'" v-model="email" @keyup.enter="onSubmit" />
-                    <MaxInputText s100 v-else :label="t.email" type="email" v-model="email" icon="mdi:email-outline" @keyup.enter="onSubmit" />
-                    <MaxInputText s100 :label="t.password" type="password" v-model="password" icon="mdi:lock-outline" @keyup.enter="onSubmit" />
+                    <MaxInputPhoneMail s100 v-if="identifier === 'email-phone'" v-model="email" @keyup.enter="onEnter" />
+                    <MaxInputText s100 v-else :label="t.email" type="email" v-model="email" icon="mdi:email-outline" @keyup.enter="onEnter" />
+                    <MaxInputText s100 :label="t.password" type="password" v-model="password" icon="mdi:lock-outline" @keyup.enter="onEnter" />
 
                     <div class="max-auth-options" s100 v-if="showRemember || forgotTo">
                         <label class="max-auth-remember" v-if="showRemember">
@@ -36,7 +36,7 @@
                 <!-- Modo Phone OTP (Telefone + MaxInputOTP + Botão Dinâmico) -->
                 <template v-else-if="mode === 'phone-otp'">
                     <slot name="phone-input">
-                        <MaxPhoneField s100 v-model="phone" :label="t.phone" @keyup.enter="handleDynamicSubmit" />
+                        <MaxPhoneField s100 v-model="phone" :label="t.phone" @keyup.enter="onEnter" />
                     </slot>
 
                     <!-- Campo de Código de 6 Dígitos (exibido apenas após o envio) -->
@@ -48,7 +48,7 @@
                                 :length="codeLength"
                                 :integer-only="true"
                                 :autofocus="true"
-                                @complete="handleDynamicSubmit"
+                                @complete="onEnter"
                             />
                         </slot>
                     </template>
@@ -140,6 +140,14 @@
         icon?: string;
         /** Payload extra opcional enviado junto aos eventos */
         payload?: Record<string, any>;
+    }
+
+    /** Estado da sessão OTP salvo em cache */
+    interface AuthOtpSession {
+        phone: string;
+        timestamp: number;
+        channel?: string;
+        endpointIndex?: number;
     }
 
     export type AuthMode = 'password' | 'phone-otp';
@@ -298,11 +306,6 @@
         return props.subtitle;
     });
 
-    const getStorageKey = (rawPhone: string) => {
-        const clean = (rawPhone || '').replace(/\D/g, '');
-        return clean ? `${props.cacheKeyPrefix}${clean}` : `${props.cacheKeyPrefix}last`;
-    };
-
     const stopCooldown = () => {
         if (cooldownTimer) {
             clearInterval(cooldownTimer);
@@ -328,32 +331,62 @@
         startCooldownInterval();
     };
 
-    const persistTimestamp = (phoneVal: string) => {
+    const persistSession = (phoneVal: string, endpointIndex: number, channel?: string) => {
         if (typeof window === 'undefined' || !window.localStorage) return;
-        const key = getStorageKey(phoneVal);
-        localStorage.setItem(key, String(Date.now()));
+        const clean = phoneVal.replace(/\D/g, '');
+        if (!clean) return;
+
+        const session: AuthOtpSession = {
+            phone: phoneVal,
+            timestamp: Date.now(),
+            channel,
+            endpointIndex
+        };
+        const serialized = JSON.stringify(session);
+        localStorage.setItem(`${props.cacheKeyPrefix}session`, serialized);
+        localStorage.setItem(`${props.cacheKeyPrefix}${clean}`, serialized);
     };
 
-    const checkAndRestoreCooldown = (phoneVal: string) => {
-        if (typeof window === 'undefined' || !window.localStorage) return;
-        const key = getStorageKey(phoneVal);
-        const cached = localStorage.getItem(key);
-        if (!cached) return;
+    const initSession = () => {
+        if (typeof window === 'undefined' || !window.localStorage || props.mode !== 'phone-otp') return;
 
-        const timestamp = parseInt(cached, 10);
-        if (Number.isNaN(timestamp)) return;
+        const phoneToLookup = phone.value || '';
+        const cleanLookup = phoneToLookup.replace(/\D/g, '');
 
-        const elapsed = Math.floor((Date.now() - timestamp) / 1000);
-        if (elapsed < props.cooldown) {
-            codeSent.value = true;
-            remainingCooldown.value = props.cooldown - elapsed;
-            startCooldownInterval();
-        } else {
-            codeSent.value = true;
-            remainingCooldown.value = 0;
-            stopCooldown();
+        const raw = cleanLookup
+            ? localStorage.getItem(`${props.cacheKeyPrefix}${cleanLookup}`)
+            : localStorage.getItem(`${props.cacheKeyPrefix}session`);
+
+        if (!raw) return;
+
+        try {
+            const session: AuthOtpSession = JSON.parse(raw);
+            if (!session || !session.phone || !session.timestamp) return;
+
+            const elapsed = Math.floor((Date.now() - session.timestamp) / 1000);
+            if (elapsed < 600) {
+                if (!phone.value) phone.value = session.phone;
+                codeSent.value = true;
+                currentEndpointIndex.value = session.endpointIndex ?? 0;
+
+                if (elapsed < props.cooldown) {
+                    remainingCooldown.value = props.cooldown - elapsed;
+                    startCooldownInterval();
+                } else {
+                    remainingCooldown.value = 0;
+                    stopCooldown();
+                }
+            } else {
+                localStorage.removeItem(`${props.cacheKeyPrefix}session`);
+                codeSent.value = false;
+                remainingCooldown.value = 0;
+            }
+        } catch {
+            // Ignora erro de parse
         }
     };
+
+    initSession();
 
     const dynamicButtonLabel = computed<string>(() => {
         if (props.mode === 'password') return t.value.submit;
@@ -386,7 +419,8 @@
         currentEndpointIndex.value = 0;
         const endpoint = firstEndpoint.value;
         codeSent.value = true;
-        persistTimestamp(phone.value);
+        persistSession(phone.value, 0, endpoint.channel ?? 'whatsapp');
+
         emit('send-code', {
             phone: phone.value,
             endpoint,
@@ -402,7 +436,7 @@
         const list = activeEndpoints.value;
         currentEndpointIndex.value = (currentEndpointIndex.value + 1) % list.length;
         const endpoint = list[currentEndpointIndex.value];
-        persistTimestamp(phone.value);
+        persistSession(phone.value, currentEndpointIndex.value, endpoint.channel ?? '');
 
         emit('resend-code', {
             phone: phone.value,
@@ -452,6 +486,20 @@
         // Durante cooldown ativo com código incompleto: não faz nada
     };
 
+    const onEnter = (): void => {
+        if (props.loading) return;
+
+        if (props.mode === 'password') {
+            emit('submit', { email: email.value, password: password.value, remember: remember.value });
+            return;
+        }
+
+        // Modo phone-otp:
+        // 1. Se não tiver digitado os dígitos do código: Nada acontece
+        // 2. Se tiver digitado corretamente os dígitos: Tenta fazer login
+        if (codeSent.value && code.value && String(code.value).length >= props.codeLength) onVerifyCode();
+    };
+
     const onSubmit = (): void => {
         if (props.loading) return;
         if (props.mode === 'phone-otp') {
@@ -464,14 +512,44 @@
 
     watch(
         phone,
-        (newPhone) => {
-            if (newPhone) checkAndRestoreCooldown(newPhone);
-        },
-        { immediate: true }
+        (newPhone, oldPhone) => {
+            if (props.mode !== 'phone-otp') return;
+            const cleanNew = (newPhone || '').replace(/\D/g, '');
+            const cleanOld = (oldPhone || '').replace(/\D/g, '');
+            if (cleanNew && cleanNew === cleanOld) return;
+
+            if (!cleanNew) {
+                codeSent.value = false;
+                remainingCooldown.value = 0;
+                stopCooldown();
+                return;
+            }
+
+            if (typeof window !== 'undefined' && window.localStorage) {
+                const raw = localStorage.getItem(`${props.cacheKeyPrefix}${cleanNew}`);
+                if (raw) try {
+                    const session: AuthOtpSession = JSON.parse(raw);
+                    const elapsed = Math.floor((Date.now() - session.timestamp) / 1000);
+                    if (elapsed < props.cooldown) {
+                        codeSent.value = true;
+                        remainingCooldown.value = props.cooldown - elapsed;
+                        currentEndpointIndex.value = session.endpointIndex ?? 0;
+                        startCooldownInterval();
+                        return;
+                    }
+                } catch {
+                    // Ignora
+                }
+            }
+
+            codeSent.value = false;
+            remainingCooldown.value = 0;
+            stopCooldown();
+        }
     );
 
     onMounted(() => {
-        if (phone.value) checkAndRestoreCooldown(phone.value);
+        initSession();
     });
 
     onBeforeUnmount(() => {
