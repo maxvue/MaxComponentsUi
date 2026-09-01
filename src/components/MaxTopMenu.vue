@@ -1,10 +1,25 @@
 <template>
     <div class="top-menu" v-bind="attrs">
         <div class="top-menu-elementos" v-bind="attrs">
-            <div v-if="attrs.screen === 'mobile'" class="btn_side_menu">
-                <MaxIcon icon="uil:bars" />
+            <div
+                v-if="attrs.screen === 'mobile'"
+                class="btn_side_menu"
+                role="button"
+                tabindex="0"
+                aria-label="Abrir menu"
+                @click.stop="toggleSideMenu"
+                @keydown.enter.stop="toggleSideMenu"
+            >
+                <MaxIcon icon="uil:bars" size="1.3" />
             </div>
-            <div class="icons-save-div">
+
+            <div v-if="attrs.screen === 'mobile' && (system.top_menu_title || $slots['mobile-center'])" class="top-menu-mobile-center">
+                <slot name="mobile-center">
+                    <span class="mobile-header-title">{{ system.top_menu_title }}</span>
+                </slot>
+            </div>
+
+            <div v-else class="icons-save-div">
                 <slot name="status"></slot>
             </div>
 
@@ -98,6 +113,10 @@
 
     const reloading = ref(false);
 
+    const toggleSideMenu = (): void => {
+        system.side_menu_open = !system.side_menu_open;
+    };
+
     const reloadAll = (): void => {
         reloading.value = true;
         system.reloadAll();
@@ -110,23 +129,56 @@
         position: fixed;
         top: 0;
         left: 0;
-        z-index: 2;
+        z-index: 20;
         width: 100%;
         height: 64px;
         grid-template-columns: auto 1fr;
-        color: var(--text-c);
+        color: var(--text-c, #fff);
         display: grid !important;
         place-items: center end;
 
         &[screen='mobile'] {
             place-items: center;
             grid-template-columns: 1fr !important;
+            height: var(--top-menu-height, 60px);
+            background-color: var(--blue-850, #0f172a);
+            padding: 0 0.75rem;
+            padding-left: max(0.75rem, env(safe-area-inset-left));
+            padding-right: max(0.75rem, env(safe-area-inset-right));
+            box-sizing: border-box;
         }
 
         .btn_side_menu {
-            padding-left: 5px;
+            display: grid;
+            place-items: center;
+            min-width: 44px;
+            min-height: 44px;
+            border-radius: 999px;
             font-size: 1.3rem;
-            color: rgb(255 255 255 / 60%);
+            color: rgb(255 255 255 / 80%);
+            cursor: pointer;
+            transition: background-color 0.18s ease;
+
+            &:hover {
+                background-color: rgb(255 255 255 / 10%);
+            }
+        }
+
+        .top-menu-mobile-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 0;
+            overflow: hidden;
+
+            .mobile-header-title {
+                font-size: 0.95rem;
+                font-weight: 600;
+                color: var(--background-25, #fff);
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
         }
 
         .top-menu-elementos {
@@ -150,9 +202,11 @@
             &[screen='mobile'] {
                 width: 100%;
                 grid-column: 1;
+                padding: 0 !important;
                 place-items: center start;
-                grid-template-columns: 1fr 40px 40px !important;
-                gap: 1rem !important;
+                grid-template-columns: 44px 1fr auto !important;
+                gap: 0.5rem !important;
+                height: var(--top-menu-height, 60px) !important;
             }
 
             .icons-save-div {

@@ -129,4 +129,58 @@ describe('MaxInputDatePicker', () => {
         await wrapper.vm.$nextTick();
         expect(wrapper.props('modelValue')).toBe('2024-01-01 00:00:00');
     });
+
+    it('formata valor inicial em DD/MM/AAAA no displayValue', async () => {
+        const wrapper = mountDatePicker({ modelValue: '2024-06-15' });
+        const input = wrapper.find('input');
+        expect(input.element.value).toBe('15/06/2024');
+        expect((wrapper.vm as any).displayValue).toBe('15/06/2024');
+    });
+
+    it('atualiza internalDate e modelValue ao digitar data manual completa válida', async () => {
+        const wrapper = mountDatePicker({ modelValue: '' });
+        const input = wrapper.find('input');
+        input.element.value = '25/12/2024';
+        await input.trigger('input');
+        await wrapper.vm.$nextTick();
+
+        expect((wrapper.vm as any).internalDate).not.toBeNull();
+        expect((wrapper.vm as any).internalDate.getFullYear()).toBe(2024);
+        expect((wrapper.vm as any).internalDate.getMonth()).toBe(11);
+        expect((wrapper.vm as any).internalDate.getDate()).toBe(25);
+        expect(wrapper.emitted('update:modelValue')).toBeTruthy();
+        expect(wrapper.emitted('update:modelValue')?.pop()).toEqual(['2024-12-25 00:00:00']);
+    });
+
+    it('limpa internalDate e modelValue ao digitar data incompleta', async () => {
+        const wrapper = mountDatePicker({ modelValue: '2024-06-15' });
+        const input = wrapper.find('input');
+        input.element.value = '15/06';
+        await input.trigger('input');
+        await wrapper.vm.$nextTick();
+
+        expect((wrapper.vm as any).internalDate).toBeNull();
+        expect(wrapper.emitted('update:modelValue')?.pop()).toEqual(['']);
+    });
+
+    it('rejeita data inválida no calendário (ex: 31/02/2024) mantendo internalDate nulo', async () => {
+        const wrapper = mountDatePicker({ modelValue: '' });
+        const input = wrapper.find('input');
+        input.element.value = '31/02/2024';
+        await input.trigger('input');
+        await wrapper.vm.$nextTick();
+
+        expect((wrapper.vm as any).internalDate).toBeNull();
+    });
+
+    it('limpa internalDate ao esvaziar o input manualmente', async () => {
+        const wrapper = mountDatePicker({ modelValue: '2024-06-15' });
+        const input = wrapper.find('input');
+        input.element.value = '';
+        await input.trigger('input');
+        await wrapper.vm.$nextTick();
+
+        expect((wrapper.vm as any).internalDate).toBeNull();
+        expect((wrapper.vm as any).displayValue).toBe('');
+    });
 });

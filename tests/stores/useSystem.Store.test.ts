@@ -152,6 +152,20 @@ describe('useSystemStore', () => {
         it('content_page_size inicia zerado', () => {
             expect(useSystemStore().content_page_size).toEqual({ width: 0, height: 0 });
         });
+
+        it('side_menu_open inicia falso e é reativo', () => {
+            const store = useSystemStore();
+            expect(store.side_menu_open).toBe(false);
+            store.side_menu_open = true;
+            expect(store.side_menu_open).toBe(true);
+        });
+
+        it('top_menu_title inicia como string vazia e é reativo', () => {
+            const store = useSystemStore();
+            expect(store.top_menu_title).toBe('');
+            store.top_menu_title = 'Dashboard';
+            expect(store.top_menu_title).toBe('Dashboard');
+        });
     });
 
     describe('reloadAll', () => {
