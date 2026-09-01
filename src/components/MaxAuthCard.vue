@@ -53,6 +53,12 @@
                         />
                     </slot>
 
+                    <div class="max-auth-options" s100 v-if="showRemember">
+                        <label class="max-auth-remember">
+                            <input type="checkbox" v-model="remember" />
+                            <span>{{ t.remember }}</span>
+                        </label>
+                    </div>
 
                     <slot name="extra"></slot>
 
@@ -267,7 +273,7 @@
     const defaults: Required<AuthLabels> = {
         email: 'E-mail',
         password: 'Senha',
-        remember: 'Lembrar-me por 30 dias',
+        remember: 'Manter conectado',
         forgot: 'Esqueci a senha',
         submit: 'Entrar',
         socialDivider: 'ou acesse com',
@@ -455,6 +461,7 @@
         emit('submit', {
             phone: phone.value,
             code: code.value,
+            remember: remember.value,
             endpoint,
             channel: endpoint.channel
         });

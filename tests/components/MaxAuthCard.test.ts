@@ -212,11 +212,22 @@ describe('MaxAuthCard', () => {
             expect(wrapper.emitted('submit')).toBeFalsy();
         });
 
-        it('ao pressionar ENTER com código completo de 6 dígitos: efetua login', async () => {
+        it('renderiza a opção "Manter conectado" no modo phone-otp por padrão e permite ocultar via showRemember=false', async () => {
+            const wrapper = mountAuthCard({ mode: 'phone-otp' });
+
+            expect(wrapper.find('.max-auth-remember').exists()).toBe(true);
+            expect(wrapper.text()).toContain('Manter conectado');
+
+            const wrapperNoRemember = mountAuthCard({ mode: 'phone-otp', showRemember: false });
+            expect(wrapperNoRemember.find('.max-auth-remember').exists()).toBe(false);
+        });
+
+        it('ao pressionar ENTER com código completo de 6 dígitos: efetua login com remember', async () => {
             const wrapper = mountAuthCard({
                 mode: 'phone-otp',
                 phone: '62999999999',
-                cooldown: 60
+                cooldown: 60,
+                remember: true
             });
 
             // Envia código
@@ -235,6 +246,7 @@ describe('MaxAuthCard', () => {
             const submitPayload = wrapper.emitted('submit')![0][0] as any;
             expect(submitPayload.phone).toBe('62999999999');
             expect(submitPayload.code).toBe('654321');
+            expect(submitPayload.remember).toBe(true);
         });
 
         it('comportamento dinâmico do botão durante o cooldown com código incompleto (no-op e sem disabled)', async () => {
@@ -270,7 +282,8 @@ describe('MaxAuthCard', () => {
             const wrapper = mountAuthCard({
                 mode: 'phone-otp',
                 phone: '62999999999',
-                cooldown: 60
+                cooldown: 60,
+                remember: false
             });
 
             const button = wrapper.findComponent({ name: 'MaxButton' });
@@ -291,6 +304,7 @@ describe('MaxAuthCard', () => {
             const submitPayload = wrapper.emitted('submit')![0][0] as any;
             expect(submitPayload.phone).toBe('62999999999');
             expect(submitPayload.code).toBe('123456');
+            expect(submitPayload.remember).toBe(false);
             expect(submitPayload.endpoint.channel).toBe('whatsapp');
         });
 
