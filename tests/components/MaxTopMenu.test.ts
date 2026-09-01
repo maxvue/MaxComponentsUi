@@ -22,6 +22,7 @@ import MaxTopMenuSearchBar from '../../src/components/MaxTopMenuSearchBar.vue';
 import { useTopToolbarStore } from '../../src/stores/useTopToolbar.Store';
 import { useSearchBarStore } from '../../src/stores/useSearchBar.Store';
 import { useUserStore } from '../../src/stores/useUser.Store';
+import { useSystemStore } from '../../src/stores/useSystem.Store';
 import { configureMaxApp, resetMaxAppConfig } from '../../src/helpers/maxAppConfig';
 
 let pinia: Pinia;
@@ -61,12 +62,26 @@ describe('MaxTopMenu', () => {
         expect(mountWithPinia(MaxTopMenu).findComponent(MaxUserSection).exists()).toBe(true);
     });
 
-    it('exibe o botão de menu lateral apenas em mobile', () => {
+    it('exibe o botão de menu lateral apenas em mobile e alterna a abertura da gaveta', async () => {
         expect(mountWithPinia(MaxTopMenu).find('.btn_side_menu').exists()).toBe(false);
 
-        const mobile = mountWithPinia(MaxTopMenu, { attrs: { screen: 'mobile' } });
+        const system = useSystemStore();
+        expect(system.side_menu_open).toBe(false);
 
-        expect(mobile.find('.btn_side_menu').exists()).toBe(true);
+        const mobile = mountWithPinia(MaxTopMenu, { attrs: { screen: 'mobile' } });
+        const btn = mobile.find('.btn_side_menu');
+
+        expect(btn.exists()).toBe(true);
+        await btn.trigger('click');
+        expect(system.side_menu_open).toBe(true);
+    });
+
+    it('exibe o título móvel central quando top_menu_title está preenchido', () => {
+        const system = useSystemStore();
+        system.top_menu_title = 'Extrato Financeiro';
+
+        const mobile = mountWithPinia(MaxTopMenu, { attrs: { screen: 'mobile' } });
+        expect(mobile.find('.mobile-header-title').text()).toBe('Extrato Financeiro');
     });
 
     it('não exibe o menu adicionar sem itens', () => {

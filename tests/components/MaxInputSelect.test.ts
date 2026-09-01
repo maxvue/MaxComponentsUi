@@ -166,5 +166,54 @@ describe('MaxInputSelect', () => {
         expect(wrapper.find('.placeholder-select').text()).toBe('Selecione');
         expect(wrapper.find('.value-div').exists()).toBe(false);
     });
+
+    it('aplica height padrão de 27px nos itens da lista', async () => {
+        const options = [
+            { value: '1', name: 'Opção 1' },
+            { value: '2', name: 'Opção 2' }
+        ];
+        const wrapper = mountSelect({ options }, {}, true);
+        await wrapper.find('.p-select').trigger('click');
+        await wrapper.vm.$nextTick();
+
+        const item = document.body.querySelector('.p-select-option') as HTMLElement;
+        expect(item).not.toBeNull();
+        expect(item.style.height).toBe('27px');
+    });
+
+    it('aplica height customizado quando listHeight é informado como número ou string', async () => {
+        const options = [{ value: '1', name: 'Opção 1' }];
+        const wrapper = mountSelect({ options, listHeight: 40 }, {}, true);
+        await wrapper.find('.p-select').trigger('click');
+        await wrapper.vm.$nextTick();
+
+        const item = document.body.querySelector('.p-select-option') as HTMLElement;
+        expect(item).not.toBeNull();
+        expect(item.style.height).toBe('40px');
+    });
+
+    it('aplica height customizado quando listHeight é informado com unidade CSS', async () => {
+        const options = [{ value: '1', name: 'Opção 1' }];
+        const wrapper = mountSelect({ options, listHeight: '2.5rem' }, {}, true);
+        await wrapper.find('.p-select').trigger('click');
+        await wrapper.vm.$nextTick();
+
+        const item = document.body.querySelector('.p-select-option') as HTMLElement;
+        expect(item).not.toBeNull();
+        expect(item.style.height).toBe('2.5rem');
+    });
+
+    it('foca no input de filtro ao abrir quando filter=true', async () => {
+        const options = [{ value: '1', name: 'Opção 1' }];
+        const focusSpy = vi.spyOn(HTMLInputElement.prototype, 'focus');
+        const wrapper = mountSelect({ options, filter: true }, {}, true);
+
+        await wrapper.find('.p-select').trigger('click');
+        await wrapper.vm.$nextTick();
+
+        expect(focusSpy).toHaveBeenCalled();
+        focusSpy.mockRestore();
+    });
 });
+
 

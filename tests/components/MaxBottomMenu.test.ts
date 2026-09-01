@@ -97,6 +97,40 @@ describe('MaxBottomMenu', () => {
 
         expect(wrapper.find('.bottom-menu-bar').attributes('style')).toContain('repeat(1, 1fr)');
     });
+
+    it('renderiza o botão FAB central e o SVG côncavo quando addItems é fornecido', () => {
+        const wrapper = mount(MaxBottomMenu, {
+            props: {
+                addItems: [{ label: 'Novo Item', icon: 'mdi:plus', route: 'new_item' }]
+            }
+        });
+
+        expect(wrapper.find('.fab').exists()).toBe(true);
+        expect(wrapper.find('.img-background').exists()).toBe(true);
+        expect(wrapper.classes()).toContain('is-curved');
+        expect(wrapper.find('.bottom-menu-bar').attributes('style')).toContain('64px');
+    });
+
+    it('emite o evento fabClick quando o FAB simples é clicado', async () => {
+        const wrapper = mount(MaxBottomMenu, {
+            props: { showFab: true }
+        });
+
+        const fabBtn = wrapper.find('.fab');
+        expect(fabBtn.exists()).toBe(true);
+
+        await fabBtn.trigger('click');
+        expect(wrapper.emitted('fabClick')).toHaveLength(1);
+    });
+
+    it('permite customizar o FAB via slot', () => {
+        const wrapper = mount(MaxBottomMenu, {
+            props: { showFab: true },
+            slots: { fab: '<button class="custom-fab-btn">Adicionar</button>' }
+        });
+
+        expect(wrapper.find('.custom-fab-btn').exists()).toBe(true);
+    });
 });
 
 describe('MaxContainerApp', () => {
