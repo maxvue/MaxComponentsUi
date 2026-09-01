@@ -53,11 +53,8 @@
                         />
                     </slot>
 
-                    <div class="max-auth-options" s100 v-if="showRemember">
-                        <label class="max-auth-remember">
-                            <input type="checkbox" v-model="remember" />
-                            <span>{{ t.remember }}</span>
-                        </label>
+                    <div class="max-auth-options" s100 v-if="showRemember" pb-15 grid-center>
+                        <MaxInputCheckbox v-model="remember" :label="t.remember" />
                     </div>
 
                     <slot name="extra"></slot>
@@ -122,6 +119,7 @@
     import MaxPhoneField from './MaxPhoneField.vue';
     import MaxInputOTP from './MaxInputOTP.vue';
     import MaxButton from './MaxButton.vue';
+    import MaxInputCheckbox from './MaxInputCheckbox.vue';
 
     /** Provedor de login social configurável */
     export interface AuthProvider {
@@ -582,9 +580,6 @@
         }
 
         .max-auth-options {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
             gap: 0.5rem;
         }
 
