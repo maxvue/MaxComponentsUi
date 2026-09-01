@@ -540,7 +540,6 @@
 }
 
 .p-select-header {
-    box-shadow: 0 7px 12px 5px #fff !important;
     padding: 6px !important;
     z-index: 1 !important;
 
