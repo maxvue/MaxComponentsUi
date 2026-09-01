@@ -21,6 +21,9 @@
                     :screen="system.type_device"
                     :add-items="props.addItems"
                     :bottom-tabs="props.bottomTabs"
+                    :side-menu-groups="props.sideMenuGroups"
+                    :side-menu-items="props.sideMenuItems"
+                    :avatar-path="props.avatarPath"
                     :logo="props.logo"
                     @profile="emit('profile')"
                     @settings="emit('settings')"
@@ -28,9 +31,9 @@
                     @toggle-dark-mode="emit('toggleDarkMode')"
                     @logout="emit('logout')"
                     @end-impersonate="emit('endImpersonate')"
+                    @fab-click="emit('fabClick')"
                 >
                     <RouterView />
-
                     <template v-for="(_, name) in forwardedSlots" #[name]="slotProps" :key="name">
                         <slot :name="name" v-bind="slotProps ?? {}"></slot>
                     </template>
@@ -60,9 +63,10 @@
     import { useLoginStore } from '../stores/useLogin.Store';
     import { configureMaxApp } from '../helpers/maxAppConfig';
     import type { BottomTab } from './MaxBottomMenu.vue';
+    import type { MenuGroup } from './MaxSideMenuMobile.vue';
 
     /** Slots repassados ao `MaxPageLayout`. */
-    const LAYOUT_SLOTS = ['status', 'search', 'add', 'chat', 'bugs', 'notifications', 'voip', 'live', 'user'] as const;
+    const LAYOUT_SLOTS = ['status', 'search', 'add', 'chat', 'bugs', 'notifications', 'voip', 'live', 'user', 'mobile-center'] as const;
 
     const props = withDefaults(defineProps<{
         /** Rota de submissão do login. */
@@ -82,10 +86,16 @@
          * `App.vue` ('Page', 'contatos', 'Contract', 'Wire', ...).
          */
         blankPages?: string[];
-        /** Itens do menu "Adicionar Novo" do topo. */
+        /** Itens do menu "Adicionar Novo" do topo e do FAB mobile. */
         addItems?: Array<Record<string, any>>;
         /** Abas do menu inferior (mobile). */
         bottomTabs?: BottomTab[];
+        /** Grupos de navegação para o menu lateral móvel (gaveta). */
+        sideMenuGroups?: MenuGroup[];
+        /** Itens de navegação para o menu lateral móvel. */
+        sideMenuItems?: any[];
+        /** Caminho base do avatar do usuário. */
+        avatarPath?: string;
         /**
          * Logo do menu lateral. Aceita uma URL (`/get_file?file=logo.svg`,
          * `https://…`) ou o nome de uma rota, resolvido pelo `getRoute`.
@@ -111,6 +121,7 @@
         toggleDarkMode: [];
         logout: [];
         endImpersonate: [];
+        fabClick: [];
     }>();
 
     // A configuração precisa ser aplicada antes das stores resolverem suas rotas.
@@ -166,6 +177,8 @@
 <style lang="scss">
     .max-app {
         min-height: 100vh;
+        height: 100vh;
+        width: 100vw;
 
         .fade-enter-active,
         .fade-leave-active {

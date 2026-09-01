@@ -12,12 +12,14 @@
                 ref="inputElement"
                 type="text"
                 class="p-inputtext max-datepicker-input"
-                :value="formattedDisplay"
+                :value="displayValue"
+                v-maska="maskValue"
                 :placeholder="props.placeholder ?? 'dd/mm/aaaa'"
                 :disabled="props.disabled"
                 @focus="open"
                 @click="open"
                 @blur="onBlur"
+                @input="onInput"
                 @change="onInputChange"
             />
         </div>
@@ -76,11 +78,21 @@
     import InputBase from './InputBase.vue';
     import MaxIcon from './MaxIcon.vue';
     import { useDateFormat, useElementBounding, useElementSize, useWindowSize } from '@maxvue/max-use';
+    import { vMaska } from 'maska/vue';
     import { SelectGroupOptions } from '../types';
 
     const modelValue = defineModel<any>({ default: '' });
     const internalDate = ref<Date | null>(null);
     const hasBeenTouched = ref(false);
+    const displayValue = ref('');
+    const isTyping = ref(false);
+
+    const maskValue = computed(() => ({
+        tokens: {
+            '#': { pattern: /[0-9]/ }
+        },
+        mask: '##/##/####'
+    }));
 
     interface Props {
         /** Valor do input (suporta v-model) */
@@ -189,14 +201,13 @@
     ];
     const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
-    const { x, y, width: width_btn, height: height_btn } = useElementBounding(triggerEl as any);
+    const { x, y, height: height_btn } = useElementBounding(triggerEl as any);
     const { width: width_el, height: height_el } = useElementSize(overlayEl as any);
     const { width: window_width, height: window_height } = useWindowSize();
 
     const position = computed(() => {
         const targetX = x.value;
         const targetY = y.value;
-        const targetW = width_btn.value;
         const targetH = height_btn.value;
 
         let top = targetY + targetH + 4;
@@ -211,12 +222,15 @@
         return { top, left };
     });
 
-    // Sincroniza modelValue -> internalDate
+    // Sincroniza modelValue -> internalDate e displayValue
     watch(
         modelValue,
         (val) => {
             if (!val) {
-                internalDate.value = null;
+                if (internalDate.value !== null) internalDate.value = null;
+
+                if (!isTyping.value) displayValue.value = '';
+
                 return;
             }
             const dateObj =
@@ -229,29 +243,41 @@
                     currentMonth.value = dateObj.getMonth();
                     currentYear.value = dateObj.getFullYear();
                 }
-            } else internalDate.value = null;
+                if (!isTyping.value) {
+                    const d = String(dateObj.getDate()).padStart(2, '0');
+                    const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+                    const y = String(dateObj.getFullYear());
+                    displayValue.value = `${d}/${m}/${y}`;
+                }
+            } else {
+                if (internalDate.value !== null) internalDate.value = null;
 
+                if (!isTyping.value) displayValue.value = '';
+
+            }
         },
         { immediate: true }
     );
 
-    // Sincroniza internalDate -> modelValue
+    // Sincroniza internalDate -> modelValue e displayValue
     watch(internalDate, (newDate) => {
         if (!newDate) {
+            if (!isTyping.value) displayValue.value = '';
+
             if (modelValue.value !== '') modelValue.value = '';
             return;
         }
-        const formatted = useDateFormat(newDate, 'YYYY-MM-DD HH:mm:ss').value;
-        if (formatted !== modelValue.value) modelValue.value = formatted;
+        const d = String(newDate.getDate()).padStart(2, '0');
+        const m = String(newDate.getMonth() + 1).padStart(2, '0');
+        const y = String(newDate.getFullYear());
+        const formatted = `${d}/${m}/${y}`;
+        if (!isTyping.value && displayValue.value !== formatted) displayValue.value = formatted;
+
+        const formattedModel = useDateFormat(newDate, 'YYYY-MM-DD HH:mm:ss').value;
+        if (formattedModel !== modelValue.value) modelValue.value = formattedModel;
     });
 
-    const formattedDisplay = computed(() => {
-        if (!internalDate.value) return '';
-        const d = String(internalDate.value.getDate()).padStart(2, '0');
-        const m = String(internalDate.value.getMonth() + 1).padStart(2, '0');
-        const y = String(internalDate.value.getFullYear());
-        return `${d}/${m}/${y}`;
-    });
+    const formattedDisplay = computed(() => displayValue.value);
 
     const calendarDays = computed(() => {
         const year = currentYear.value;
@@ -353,26 +379,42 @@
         validate();
     };
 
-    const onInputChange = (e: Event) => {
-        const val = (e.target as HTMLInputElement).value.trim();
-        if (!val) {
-            internalDate.value = null;
-            return;
-        }
-        const parts = val.split(/[\/\-.]/);
-        if (parts.length === 3) {
-            let day = parseInt(parts[0], 10);
-            let month = parseInt(parts[1], 10) - 1;
-            let year = parseInt(parts[2], 10);
-            if (parts[0].length === 4) {
-                year = parseInt(parts[0], 10);
-                month = parseInt(parts[1], 10) - 1;
-                day = parseInt(parts[2], 10);
-            }
-            const date = new Date(year, month, day);
-            if (!isNaN(date.getTime()) && date.getDate() === day) internalDate.value = date;
+    const onInput = (e: Event) => {
+        const el = e.target as HTMLInputElement;
+        const val = el.value;
+        displayValue.value = val;
+        isTyping.value = true;
 
+        try {
+            if (!val) {
+                internalDate.value = null;
+                return;
+            }
+            const digits = val.replace(/\D/g, '');
+            if (digits.length === 8) {
+                const day = parseInt(digits.slice(0, 2), 10);
+                const month = parseInt(digits.slice(2, 4), 10) - 1;
+                const year = parseInt(digits.slice(4, 8), 10);
+
+                if (month >= 0 && month <= 11 && year >= 1000 && year <= 9999) {
+                    const date = new Date(year, month, day);
+                    if (date.getFullYear() === year && date.getMonth() === month && date.getDate() === day) {
+                        internalDate.value = date;
+                        currentMonth.value = month;
+                        currentYear.value = year;
+                        return;
+                    }
+                }
+            }
+            if (internalDate.value !== null) internalDate.value = null;
+
+        } finally {
+            isTyping.value = false;
         }
+    };
+
+    const onInputChange = (e: Event) => {
+        onInput(e);
     };
 
     const validate = () => {
@@ -416,6 +458,8 @@
 
     defineExpose({
         internalDate,
+        displayValue,
+        formattedDisplay,
         validate,
         open,
         hide

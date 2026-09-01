@@ -33,6 +33,7 @@ export { default as MaxTitle2 } from './components/MaxTitle2.vue';
 // Auth
 export { default as MaxAuthCard } from './components/MaxAuthCard.vue';
 export { default as AuthCard } from './components/MaxAuthCard.vue';
+export type { AuthProvider, AuthOtpEndpoint, AuthMode, AuthStep, AuthLabels } from './components/MaxAuthCard.vue';
 
 // Tabs
 export { default as MaxTabs } from './components/MaxTabs.vue';
@@ -95,6 +96,10 @@ export { default as MaxInputFileUpload } from './components/MaxInputFileUpload.v
 export { default as MaxInputFileUploadBig } from './components/MaxInputFileUploadBig.vue';
 export { default as MaxInputFileUploadButton } from './components/MaxInputFileUploadButton.vue';
 export { default as MaxInputNumber } from './components/MaxInputNumber.vue';
+export { default as MaxInputOTP } from './components/MaxInputOTP.vue';
+export { default as MaxInputOtp } from './components/MaxInputOTP.vue';
+export { default as InputOTP } from './components/MaxInputOTP.vue';
+export { default as InputOtp } from './components/MaxInputOTP.vue';
 export { default as MaxInputPhoneMail } from './components/MaxInputPhoneMail.vue';
 export { default as MaxInputRadio } from './components/MaxInputRadio.vue';
 export { default as MaxInputSearch } from './components/MaxInputSearch.vue';
@@ -126,6 +131,7 @@ export { default as MaxLoadScreenTarget } from './components/MaxLoadScreenTarget
 export { default as MaxContainerApp } from './components/MaxContainerApp.vue';
 export { default as MaxBottomMenu } from './components/MaxBottomMenu.vue';
 export { default as MaxSideMenu } from './components/MaxSideMenu.vue';
+export { default as MaxSideMenuMobile } from './components/MaxSideMenuMobile.vue';
 export { default as MaxMenuVerticalItem } from './components/MaxMenuVerticalItem.vue';
 export { default as MaxTopMenu } from './components/MaxTopMenu.vue';
 export { default as MaxTopMenuSearchBar } from './components/MaxTopMenuSearchBar.vue';
@@ -134,6 +140,7 @@ export { default as MaxTopToolbarSubmenu } from './components/MaxTopToolbarSubme
 // O MaxUserSection é exportado mais abaixo, junto do seu alias UserSection.
 export { default as MaxPageContent } from './components/MaxPageContent.vue';
 export { default as MaxPageLayout } from './components/MaxPageLayout.vue';
+export { default as MaxPageMobileLayout } from './components/MaxPageMobileLayout.vue';
 export { default as MaxApp } from './components/MaxApp.vue';
 
 // Data & Display

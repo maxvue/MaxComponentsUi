@@ -98,6 +98,8 @@
             caution?: string | boolean;
             required?: boolean;
             placeholder?: string;
+            /** Habilita ou desabilita a verificação ortográfica nativa */
+            spellcheck?: boolean;
             minHeight?: string;
             maxHeight?: string;
             onImageUpload?: (file: File) => Promise<string>;
@@ -107,6 +109,7 @@
             modelValue: '',
             disabled: false,
             inLine: false,
+            spellcheck: true,
             minHeight: '200px',
             maxHeight: '500px',
             onImageUpload: undefined,
@@ -331,6 +334,7 @@
         editorProps: {
             attributes: {
                 class: 'max-input-markdown__prosemirror',
+                spellcheck: props.spellcheck ? 'true' : 'false',
                 ...(props.placeholder ? { 'data-placeholder': props.placeholder } : {})
             },
             handleClick: (_view, _pos, event) => {

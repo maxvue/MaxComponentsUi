@@ -13,6 +13,7 @@
             :type="props.type"
             :placeholder="props.placeholder"
             :disabled="props.disabled"
+            :spellcheck="props.spellcheck"
             :value="temp_value"
             @input="temp_value = ($event.target as HTMLInputElement).value"
             @blur="isDone = testIsDone()"
@@ -66,8 +67,10 @@
             required?: boolean;
             /** Texto de placeholder do campo */
             placeholder?: string | undefined;
+            /** Habilita ou desabilita a verificação ortográfica nativa */
+            spellcheck?: boolean | undefined;
         }>(),
-        { modelValue: '', done: undefined, required: false, type: 'text', caution: undefined, disabled: false, error: undefined }
+        { modelValue: '', done: undefined, required: false, type: 'text', caution: undefined, disabled: false, error: undefined, spellcheck: undefined }
     );
 
     const temp_value = ref<any>(props.modelValue);

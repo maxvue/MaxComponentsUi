@@ -23,7 +23,6 @@ vi.mock('@maxvue/max-use', async (importOriginal) => ({
 import MaxApp from '../../src/components/MaxApp.vue';
 import MaxPageLayout from '../../src/components/MaxPageLayout.vue';
 import { useUserStore } from '../../src/stores/useUser.Store';
-import { useSystemStore } from '../../src/stores/useSystem.Store';
 import { useLoginStore } from '../../src/stores/useLogin.Store';
 import { getMaxAppConfig, resetMaxAppConfig } from '../../src/helpers/maxAppConfig';
 
@@ -266,6 +265,28 @@ describe('MaxApp', () => {
             const wrapper = mountApp({ props: { addItems } });
 
             expect(wrapper.findComponent(MaxPageLayout).props('addItems')).toEqual(addItems);
+        });
+
+        it('repassa bottomTabs e sideMenuGroups ao layout', () => {
+            loadUser();
+            const bottomTabs = [{ name: 'inicio', label: 'Início', icon: 'mdi:home' }];
+            const sideMenuGroups = [{ title: 'Geral', items: [] }];
+
+            const wrapper = mountApp({ props: { bottomTabs, sideMenuGroups } });
+
+            const layout = wrapper.findComponent(MaxPageLayout);
+            expect(layout.props('bottomTabs')).toEqual(bottomTabs);
+            expect(layout.props('sideMenuGroups')).toEqual(sideMenuGroups);
+        });
+
+        it('propaga o evento fabClick do layout', async () => {
+            loadUser();
+
+            const wrapper = mountApp();
+            wrapper.findComponent(MaxPageLayout).vm.$emit('fabClick');
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.emitted('fabClick')).toHaveLength(1);
         });
     });
 

@@ -1,7 +1,7 @@
 <template>
     <InputBase v-bind="{ ...props, ...attrsWithoutModelProps }" class="select_input_div">
-        <div v-if="attrs.placeholder !== undefined && (!temp_value || temp_value === '')" class="placeholder-select">
-            {{ attrs.placeholder }}
+        <div v-if="showPlaceholder" class="placeholder-select">
+            {{ placeholderText }}
         </div>
 
         <div
@@ -21,7 +21,7 @@
                 <slot name="value" :value="temp_value">
                     <div
                         class="value-div"
-                        v-if="option_selected && Object.keys(option_selected).length > 0"
+                        v-if="hasSelectedOption"
                         :style="{ color: option_selected.color }"
                     >
                         <MaxIcon
@@ -51,6 +51,7 @@
                     <div v-if="props.filter" class="p-select-header">
                         <div class="p-select-filter-container">
                             <input
+                                ref="filterInputEl"
                                 type="text"
                                 class="p-select-filter"
                                 v-model="searchQuery"
@@ -80,6 +81,7 @@
                                         :key="oIdx"
                                         class="p-select-option"
                                         :class="{ 'p-select-option-selected': option[props.optionValue] === temp_value }"
+                                        :style="{ height: itemHeight }"
                                         role="option"
                                         :aria-selected="option[props.optionValue] === temp_value"
                                         @click.stop="selectOption(option)"
@@ -107,6 +109,7 @@
                                     :key="index"
                                     class="p-select-option"
                                     :class="{ 'p-select-option-selected': option[props.optionValue] === temp_value }"
+                                    :style="{ height: itemHeight }"
                                     role="option"
                                     :aria-selected="option[props.optionValue] === temp_value"
                                     @click.stop="selectOption(option)"
@@ -142,7 +145,7 @@
  * Suporta opções simples, agrupadas e carregamento dinâmico via callback.
  */
 <script setup lang="ts">
-    import { ref, computed, watch, useAttrs, onBeforeUnmount, Ref } from 'vue';
+    import { ref, computed, watch, useAttrs, onBeforeUnmount, nextTick, Ref } from 'vue';
     import InputBase from './InputBase.vue';
     import MaxIcon from './MaxIcon.vue';
     import { SelectGroupOptions } from '../types';
@@ -193,6 +196,9 @@
             groupOptions?: SelectGroupOptions;
             disabled?: boolean | undefined;
             filter?: boolean | undefined;
+            placeholder?: string | undefined;
+            /** Altura dos itens da lista (em px ou com unidade CSS). Padrão: 27 */
+            listHeight?: number | string | undefined;
         }>(),
         {
             modelValue: null,
@@ -205,7 +211,9 @@
             caution: undefined,
             required: false,
             default: undefined,
-            disabled: false
+            disabled: false,
+            placeholder: undefined,
+            listHeight: 27
         }
     );
 
@@ -222,12 +230,25 @@
         'loadOptions',
         'default',
         'filter',
-        'disabled'
+        'disabled',
+        'listHeight',
+        'list-height'
     ];
     const attrsWithoutModelProps = computed(() => {
         const result: Record<string, any> = {};
         for (const key in attrs) if (!modelPropKeys.includes(key)) result[key] = attrs[key];
         return result;
+    });
+
+    const itemHeight = computed(() => {
+        if (props.listHeight === undefined || props.listHeight === null || props.listHeight === '') return '27px';
+
+        if (typeof props.listHeight === 'number') return `${props.listHeight}px`;
+
+        const str = String(props.listHeight).trim();
+        if (/^\d+(\.\d+)?$/.test(str)) return `${str}px`;
+
+        return str;
     });
 
     watch(temp_value, (val) => emit('update:modelValue', val));
@@ -240,6 +261,7 @@
 
     const triggerEl = ref<HTMLElement | null>(null);
     const overlayEl = ref<HTMLElement | null>(null);
+    const filterInputEl = ref<HTMLInputElement | null>(null);
 
     const { x, y, width: width_btn, height: height_btn } = useElementBounding(triggerEl as any);
     const { height: height_el } = useElementSize(overlayEl as any);
@@ -288,6 +310,12 @@
 
         return {};
     });
+
+    const hasSelectedOption = computed(() => Boolean(option_selected.value && Object.keys(option_selected.value).length > 0));
+
+    const placeholderText = computed(() => (props.placeholder !== undefined ? props.placeholder : attrs.placeholder));
+
+    const showPlaceholder = computed(() => placeholderText.value !== undefined && !hasSelectedOption.value);
 
     const filteredOptions = computed(() => {
         const raw = options.value;
@@ -340,6 +368,10 @@
             await before_show(event);
             searchQuery.value = '';
             isOpen.value = true;
+            if (props.filter) {
+                await nextTick();
+                filterInputEl.value?.focus();
+            }
         } else hide();
 
     };
@@ -367,6 +399,13 @@
 
     });
 
+    watch(isOpen, async (open) => {
+        if (open && props.filter) {
+            await nextTick();
+            filterInputEl.value?.focus();
+        }
+    });
+
     watch(
         () => props.modelValue,
         () => {
@@ -388,6 +427,10 @@
                 font-size: 0.85rem !important;
             }
         }
+    }
+
+    .placeholder-select{
+        padding-left: 7px !important;
     }
 
     .p-select {
@@ -462,6 +505,7 @@
     padding: 6px;
     border-bottom: 1px solid var(--surface-border, #e2e8f0);
     background: var(--background-0, #fff);
+    box-shadow: none !important;
 
     .p-select-filter-container {
         width: 100%;
@@ -510,7 +554,9 @@
 .p-select-option {
     display: flex;
     align-items: center;
-    padding: 6px 10px;
+    padding: 0 10px;
+    min-height: 27px;
+    box-sizing: border-box;
     cursor: pointer;
     font-size: 0.85rem;
     color: var(--text-c);

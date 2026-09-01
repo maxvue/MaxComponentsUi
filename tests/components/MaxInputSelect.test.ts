@@ -116,4 +116,104 @@ describe('MaxInputSelect', () => {
         expect(() => vm.option_selected).not.toThrow();
         expect(vm.option_selected.name).toBe('Flat Option');
     });
+
+    it('não exibe placeholder e exibe option quando modelValue é 0', async () => {
+        const options = [{ value: 0, name: 'Opção Zero' }];
+        const wrapper = mountSelect({ modelValue: 0, options, placeholder: 'Selecione' });
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find('.placeholder-select').exists()).toBe(false);
+        expect(wrapper.find('.value-div').exists()).toBe(true);
+        expect(wrapper.find('.value-div').text()).toContain('Opção Zero');
+    });
+
+    it('não exibe placeholder e exibe option quando modelValue é false', async () => {
+        const options = [{ value: false, name: 'Opção Falsa' }];
+        const wrapper = mountSelect({ modelValue: false, options, placeholder: 'Selecione' });
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find('.placeholder-select').exists()).toBe(false);
+        expect(wrapper.find('.value-div').exists()).toBe(true);
+        expect(wrapper.find('.value-div').text()).toContain('Opção Falsa');
+    });
+
+    it('não exibe placeholder e exibe option quando modelValue é null e há opção com valor null', async () => {
+        const options = [{ value: null, name: 'Opção Nula' }];
+        const wrapper = mountSelect({ modelValue: null, options, placeholder: 'Selecione' });
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find('.placeholder-select').exists()).toBe(false);
+        expect(wrapper.find('.value-div').exists()).toBe(true);
+        expect(wrapper.find('.value-div').text()).toContain('Opção Nula');
+    });
+
+    it('exibe placeholder e não exibe value-div quando modelValue é órfão', async () => {
+        const options = [{ value: 'a', name: 'Opção A' }];
+        const wrapper = mountSelect({ modelValue: 'orfao', options, placeholder: 'Selecione' });
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find('.placeholder-select').exists()).toBe(true);
+        expect(wrapper.find('.placeholder-select').text()).toBe('Selecione');
+        expect(wrapper.find('.value-div').exists()).toBe(false);
+    });
+
+    it('exibe placeholder e não exibe value-div quando modelValue é null sem opção correspondente', async () => {
+        const options = [{ value: 'a', name: 'Opção A' }];
+        const wrapper = mountSelect({ modelValue: null, options, placeholder: 'Selecione' });
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find('.placeholder-select').exists()).toBe(true);
+        expect(wrapper.find('.placeholder-select').text()).toBe('Selecione');
+        expect(wrapper.find('.value-div').exists()).toBe(false);
+    });
+
+    it('aplica height padrão de 27px nos itens da lista', async () => {
+        const options = [
+            { value: '1', name: 'Opção 1' },
+            { value: '2', name: 'Opção 2' }
+        ];
+        const wrapper = mountSelect({ options }, {}, true);
+        await wrapper.find('.p-select').trigger('click');
+        await wrapper.vm.$nextTick();
+
+        const item = document.body.querySelector('.p-select-option') as HTMLElement;
+        expect(item).not.toBeNull();
+        expect(item.style.height).toBe('27px');
+    });
+
+    it('aplica height customizado quando listHeight é informado como número ou string', async () => {
+        const options = [{ value: '1', name: 'Opção 1' }];
+        const wrapper = mountSelect({ options, listHeight: 40 }, {}, true);
+        await wrapper.find('.p-select').trigger('click');
+        await wrapper.vm.$nextTick();
+
+        const item = document.body.querySelector('.p-select-option') as HTMLElement;
+        expect(item).not.toBeNull();
+        expect(item.style.height).toBe('40px');
+    });
+
+    it('aplica height customizado quando listHeight é informado com unidade CSS', async () => {
+        const options = [{ value: '1', name: 'Opção 1' }];
+        const wrapper = mountSelect({ options, listHeight: '2.5rem' }, {}, true);
+        await wrapper.find('.p-select').trigger('click');
+        await wrapper.vm.$nextTick();
+
+        const item = document.body.querySelector('.p-select-option') as HTMLElement;
+        expect(item).not.toBeNull();
+        expect(item.style.height).toBe('2.5rem');
+    });
+
+    it('foca no input de filtro ao abrir quando filter=true', async () => {
+        const options = [{ value: '1', name: 'Opção 1' }];
+        const focusSpy = vi.spyOn(HTMLInputElement.prototype, 'focus');
+        const wrapper = mountSelect({ options, filter: true }, {}, true);
+
+        await wrapper.find('.p-select').trigger('click');
+        await wrapper.vm.$nextTick();
+
+        expect(focusSpy).toHaveBeenCalled();
+        focusSpy.mockRestore();
+    });
 });
+
+

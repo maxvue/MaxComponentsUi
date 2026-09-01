@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import type { Ref } from 'vue';
 import { ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { useWindowSize, useBreakpoints, useRefCached } from '@maxvue/max-use';
+import { useWindowSize, useBreakpoints } from '@maxvue/max-use';
 
 import { useUserStore } from './useUser.Store';
 import { useLoadingStore } from './useLoading.Store';
@@ -92,6 +92,12 @@ export const useSystemStore = defineStore('system', () => {
     /** Dimensões da área de conteúdo, preenchidas pelo layout. */
     const content_page_size = ref<{ width: number; height: number }>({ width: 0, height: 0 });
 
+    /** Controla a abertura do menu lateral (gaveta off-canvas) no mobile. */
+    const side_menu_open: Ref<boolean> = ref(false);
+
+    /** Título opcional exibido no cabeçalho do menu superior (útil no mobile). */
+    const top_menu_title: Ref<string> = ref('');
+
     /** Indica que a aplicação terminou de inicializar (gate de loading do MaxPinia). */
     const started: Ref<boolean> = ref(true);
 
@@ -148,6 +154,8 @@ export const useSystemStore = defineStore('system', () => {
         isMobile,
         type_device,
         content_page_size,
+        side_menu_open,
+        top_menu_title,
         started,
         reloadAll
     };

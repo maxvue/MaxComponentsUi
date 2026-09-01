@@ -204,4 +204,67 @@ describe('MaxInputCpfCnpj', () => {
         expect(input.classes()).toContain('p-inputtext');
         expect(input.classes()).toContain('p-component');
     });
+
+    it('campo vazio não-obrigatório permanece com done=null e sem caution', () => {
+        const wrapper = mountCpfCnpj();
+        expect((wrapper.vm as any).done).toBeNull();
+        expect((wrapper.vm as any).caution).toBe(false);
+    });
+
+    it('valida CPF com zeros à esquerda corretamente e marca done=true', async () => {
+        const wrapper = mountCpfCnpj({ modelValue: '00793746973' });
+        (wrapper.vm as any).temp_value = '00793746973';
+        await wrapper.vm.$nextTick();
+        expect((wrapper.vm as any).done).toBe(true);
+        expect((wrapper.vm as any).caution).toBe(false);
+        expect((wrapper.vm as any).error_msg).toBeNull();
+    });
+
+    it('valida CNPJ com zeros à esquerda corretamente e marca done=true', async () => {
+        const wrapper = mountCpfCnpj({ modelValue: '00000000000191' });
+        (wrapper.vm as any).temp_value = '00000000000191';
+        await wrapper.vm.$nextTick();
+        expect((wrapper.vm as any).done).toBe(true);
+        expect((wrapper.vm as any).caution).toBe(false);
+        expect((wrapper.vm as any).error_msg).toBeNull();
+    });
+
+    it('utiliza array nativo do Maska para máscara dinâmica', () => {
+        const wrapper = mountCpfCnpj();
+        const maskValue = (wrapper.vm as any).maskValue;
+        expect(maskValue.mask).toEqual(['###.###.###-##', '##.###.###/####-##']);
+    });
+
+    it('repassa a prop disabled para o elemento <input>', () => {
+        const wrapper = mountCpfCnpj({ disabled: true });
+        const input = wrapper.find('input');
+        expect(input.attributes('disabled')).toBeDefined();
+    });
+
+    it('formata adequadamente ao colar CNPJ de 14 dígitos', async () => {
+        const wrapper = mountCpfCnpj();
+        const input = wrapper.find('input');
+        await input.setValue('11222333000181');
+        expect(input.element.value).toBe('11.222.333/0001-81');
+        expect((wrapper.vm as any).done).toBe(true);
+        expect((wrapper.vm as any).error_msg).toBeNull();
+    });
+
+    it('formata adequadamente ao receber CNPJ formatado via modelValue', async () => {
+        const wrapper = mountCpfCnpj();
+        await wrapper.setProps({ modelValue: '11.222.333/0001-81' });
+        await wrapper.vm.$nextTick();
+        expect(wrapper.find('input').element.value).toBe('11.222.333/0001-81');
+        expect((wrapper.vm as any).done).toBe(true);
+    });
+
+    it('formata adequadamente ao receber CPF formatado via modelValue', async () => {
+        const wrapper = mountCpfCnpj();
+        await wrapper.setProps({ modelValue: '007.937.469-73' });
+        await wrapper.vm.$nextTick();
+        expect(wrapper.find('input').element.value).toBe('007.937.469-73');
+        expect((wrapper.vm as any).done).toBe(true);
+        expect((wrapper.vm as any).caution).toBe(false);
+        expect((wrapper.vm as any).error_msg).toBeNull();
+    });
 });
