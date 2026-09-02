@@ -189,6 +189,44 @@ export interface InputBaseProps {
 }
 
 /**
+ * Estrutura aceita para itens do tipo objeto no MaxChips.
+ * Ao menos uma das propriedades id, label, name ou value deve estar presente.
+ */
+export interface ChipObjectItem {
+    id?: string | number;
+    label?: string | number;
+    name?: string | number;
+    value?: string | number;
+    [key: string]: any;
+}
+
+export type ChipItem = string | number | ChipObjectItem;
+
+/**
+ * Propriedades para o componente MaxChips.
+ */
+export interface MaxChipsProps extends InputBaseProps {
+    /** Valor do v-model contendo a lista de chips (strings, números ou objetos) */
+    modelValue?: ChipItem[];
+    /** Placeholder exibido quando o campo está vazio */
+    placeholder?: string;
+    /** Permite ou bloqueia valores duplicados (padrão: false) */
+    allowDuplicate?: boolean;
+    /** Número máximo de chips permitidos */
+    max?: number;
+    /** Adiciona o chip ao perder o foco do input (padrão: false) */
+    addOnBlur?: boolean;
+    /** Caractere ou separador usado para dividir chips ao digitar/colar (padrão: ',') */
+    separator?: string | RegExp;
+    /** Força novos itens inseridos como objetos { label, value } mesmo com lista vazia */
+    asObject?: boolean;
+    /** Função customizada para instanciar novos objetos a partir do texto digitado */
+    createItem?: (text: string) => ChipObjectItem;
+    /** Permite remover chips individualmente (padrão: true) */
+    removable?: boolean;
+}
+
+/**
  * Eventos comuns emitidos pelos componentes.
  */
 export interface ComponentEmits {

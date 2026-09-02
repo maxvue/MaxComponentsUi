@@ -108,6 +108,8 @@ export { default as MaxTagsList } from './components/MaxTagsList.vue';
 export { default as MaxTagSelect } from './components/MaxTagSelect.vue';
 export { default as MaxInputSelectTag } from './components/MaxTagSelect.vue';
 export { default as MaxSelectTag } from './components/MaxTagSelect.vue';
+export { default as MaxChips } from './components/MaxChips.vue';
+export { default as Chips } from './components/MaxChips.vue';
 export { default as MaxInputSwitch } from './components/MaxInputSwitch.vue';
 export { default as MaxInputTextArea } from './components/MaxInputTextArea.vue';
 export { default as MaxInputTextList } from './components/MaxInputTextList.vue';
