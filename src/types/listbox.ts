@@ -1,7 +1,8 @@
 /**
  * Shape recomendado de um item do MaxListBox.
  * Os nomes dos campos são configuráveis pelas props optionValue/optionLabel/
- * optionSubLabel/optionDisabled, então este tipo é um guia, não uma imposição.
+ * optionSubLabel/optionDisabled/optionIcon/optionBadge/optionBadgeColor,
+ * então este tipo é um guia, não uma imposição.
  */
 export type ListBoxOption = {
     /** Valor único do item (campo definido por optionValue) */

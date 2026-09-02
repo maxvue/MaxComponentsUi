@@ -849,4 +849,141 @@ describe('MaxListBox - teclado', () => {
         expect(focusedEl.exists()).toBe(true);
         expect(focusedEl.classes()).toContain('is-focused');
     });
+
+    it('PageDown avanca 10 itens e PageUp recua 10 itens', async () => {
+        const manyOptions = Array.from({ length: 50 }, (_, index) => ({ value: index, label: `Item ${index}` }));
+        const wrapper = mountListBox({ options: manyOptions });
+        const list = wrapper.find('.max-listbox-list');
+
+        await list.trigger('keydown', { key: 'PageDown' });
+        expect(wrapper.findAll('.max-listbox-item')[10].classes()).toContain('is-focused');
+
+        await list.trigger('keydown', { key: 'PageDown' });
+        expect(wrapper.findAll('.max-listbox-item')[20].classes()).toContain('is-focused');
+
+        await list.trigger('keydown', { key: 'PageUp' });
+        expect(wrapper.findAll('.max-listbox-item')[10].classes()).toContain('is-focused');
+    });
+
+    it('ArrowDown no campo de filtro transfere foco para o primeiro item da lista', async () => {
+        const wrapper = mountListBox({ filter: true });
+        const input = wrapper.find('.max-listbox-filter-input');
+
+        await input.trigger('keydown', { key: 'ArrowDown' });
+        expect(wrapper.findAll('.max-listbox-item')[0].classes()).toContain('is-focused');
+    });
 });
+
+describe('MaxListBox - layout de itens, badges e mapeamento customizado', () => {
+    beforeEach(() => {
+        setActivePinia(createPinia());
+    });
+
+    it('renderiza badge mesmo sem icone, com classe max-listbox-item-badge', () => {
+        const wrapper = mountListBox({
+            options: [
+                { value: 1, label: 'Bairro Goyá', sub_label: 'Goiânia', badge: '0 m.' }
+            ]
+        });
+
+        const item = wrapper.find('.max-listbox-item');
+        expect(item.find('.max-listbox-item-icon').exists()).toBe(false);
+        expect(item.find('.max-listbox-item-labels').exists()).toBe(true);
+        expect(item.find('.max-listbox-item-badge').exists()).toBe(true);
+        expect(item.find('.max-listbox-item-badge').text()).toContain('0 m.');
+    });
+
+    it('renderiza icone e badge juntos quando ambos estao presentes', () => {
+        const wrapper = mountListBox({
+            options: [
+                { value: 1, label: 'Alfa', icon: 'mdi:office-building', badge: '12', badgeColor: 'var(--blue-600)' }
+            ]
+        });
+
+        const item = wrapper.find('.max-listbox-item');
+        expect(item.find('.max-listbox-item-icon').exists()).toBe(true);
+        expect(item.find('.max-listbox-item-labels').exists()).toBe(true);
+        expect(item.find('.max-listbox-item-badge').exists()).toBe(true);
+    });
+
+    it('respeita optionIcon, optionBadge e optionBadgeColor customizados', () => {
+        const wrapper = mountListBox({
+            options: [
+                { id: 100, nome: 'Local', icone: 'mdi:map-marker', tag: 'Destaque', corTag: 'var(--green-600)' }
+            ],
+            optionValue: 'id',
+            optionLabel: 'nome',
+            optionIcon: 'icone',
+            optionBadge: 'tag',
+            optionBadgeColor: 'corTag'
+        });
+
+        const item = wrapper.find('.max-listbox-item');
+        expect(item.find('.max-listbox-item-icon').exists()).toBe(true);
+        expect(item.text()).toContain('Local');
+        expect(item.find('.max-listbox-item-badge').text()).toContain('Destaque');
+    });
+
+    it('renderiza corretamente em modo two-lines com badge', () => {
+        const wrapper = mountListBox({
+            options: [
+                { value: 1, label: 'Carolina Park', sub_label: 'Goiânia', badge: '0 m.' }
+            ],
+            twoLines: true
+        });
+
+        expect(wrapper.find('.max-listbox').classes()).toContain('two-lines');
+        const item = wrapper.find('.max-listbox-item');
+        expect(item.find('.max-listbox-item-labels').text()).toContain('Carolina Park');
+        expect(item.find('.max-listbox-item-labels').text()).toContain('Goiânia');
+        expect(item.find('.max-listbox-item-badge').text()).toContain('0 m.');
+    });
+});
+
+describe('MaxListBox - suporte a opcoes primitivas', () => {
+    beforeEach(() => {
+        setActivePinia(createPinia());
+    });
+
+    it('renderiza e seleciona array de strings primitivas', async () => {
+        const wrapper = mountListBox({
+            options: ['Goiás', 'São Paulo', 'Rio de Janeiro']
+        });
+
+        const items = wrapper.findAll('.max-listbox-item');
+        expect(items).toHaveLength(3);
+        expect(items[0].text()).toContain('Goiás');
+
+        await items[1].trigger('click');
+        expect(wrapper.emitted('update:modelValue')?.[0]).toEqual(['São Paulo']);
+        expect(wrapper.emitted('change')?.[0][0]).toEqual({ value: 'São Paulo', option: 'São Paulo' });
+    });
+
+    it('renderiza e seleciona array de numeros primitivos', async () => {
+        const wrapper = mountListBox({
+            options: [10, 20, 30],
+            modelValue: 20
+        });
+
+        const items = wrapper.findAll('.max-listbox-item');
+        expect(items[1].attributes('aria-selected')).toBe('true');
+
+        await items[2].trigger('click');
+        expect(wrapper.emitted('update:modelValue')?.[0]).toEqual([30]);
+    });
+
+    it('filtra opcoes primitivas por texto ignorando acentos', async () => {
+        const wrapper = mountListBox({
+            options: ['Goiás', 'São Paulo', 'Minas Gerais'],
+            filter: true
+        });
+
+        await wrapper.find('.max-listbox-filter-input').setValue('goias');
+        await wrapper.vm.$nextTick();
+
+        const items = wrapper.findAll('.max-listbox-item');
+        expect(items).toHaveLength(1);
+        expect(items[0].text()).toContain('Goiás');
+    });
+});
+
