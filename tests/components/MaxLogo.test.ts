@@ -50,4 +50,15 @@ describe('MaxLogo', () => {
         const wrapper = mountLogo();
         expect(wrapper.find('.logo').attributes('rounded')).toBeUndefined();
     });
+
+    it('aplica atributo no-padding quando prop noPadding=true', () => {
+        const wrapper = mountLogo({ noPadding: true });
+        expect(wrapper.find('.logo').attributes('no-padding')).toBeDefined();
+    });
+
+    it('não aplica atributo no-padding por padrão', () => {
+        const wrapper = mountLogo();
+        expect(wrapper.find('.logo').attributes('no-padding')).toBeUndefined();
+    });
 });
+

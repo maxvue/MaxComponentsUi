@@ -107,12 +107,16 @@
 
             .space-logo {
                 position: relative;
-                top: 5px;
-                left: 5px;
-                width: 55px;
-                height: 55px;
-                margin-bottom: 40px;
-                padding: 7px;
+                top: 0;
+                left: 0;
+                width: 45px;
+                height: 45px;
+                margin: 5px auto 40px auto;
+                padding: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-sizing: border-box;
                 flex-shrink: 0;
             }
 
