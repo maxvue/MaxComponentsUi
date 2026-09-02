@@ -148,6 +148,14 @@ describe('MaxInputAutoComplete.vue', () => {
         const wrapper = mountAutoComplete({ caution: true, done: false });
         expect((wrapper.vm as any).caution).toBe(true);
     });
+
+    it('repassa a prop spellcheck para o elemento input', () => {
+        const wrapper = mountAutoComplete({ spellcheck: true });
+        expect(wrapper.find('input').attributes('spellcheck')).toBe('true');
+
+        const wrapperFalse = mountAutoComplete({ spellcheck: false });
+        expect(wrapperFalse.find('input').attributes('spellcheck')).toBe('false');
+    });
 });
 
 describe('MaxInputAutoComplete.vue — forceSelection', () => {

@@ -18,8 +18,8 @@ function mountIconButton(props: Record<string, any> = {}) {
         global: {
             stubs: {
                 MaxIcon: {
-                    template: '<span class="max-icon" :data-size="String(size)"></span>',
-                    props: ['icon', 'i', 'size', 'dark', 'light', 'pointer']
+                    template: '<span class="max-icon" :data-size="String(size)" :data-color="color !== undefined ? String(color) : undefined"></span>',
+                    props: ['icon', 'i', 'size', 'dark', 'light', 'pointer', 'color', 'iconColor']
                 }
             }
         }
@@ -145,6 +145,23 @@ describe('MaxIconButton', () => {
         it('sem size usa o padrão', () => {
             const wrapper = mountIconButton();
             expect(wrapper.find('.max-icon').attributes('data-size')).toBe('16px');
+        });
+    });
+
+    describe('cor do ícone', () => {
+        it('repassa a prop color para o MaxIcon interno', () => {
+            const wrapper = mountIconButton({ color: '#ffffff' });
+            expect(wrapper.find('.max-icon').attributes('data-color')).toBe('#ffffff');
+        });
+
+        it('repassa a prop iconColor como fallback para o MaxIcon interno', () => {
+            const wrapper = mountIconButton({ iconColor: '#ff0000' });
+            expect(wrapper.find('.max-icon').attributes('data-color')).toBe('#ff0000');
+        });
+
+        it('prop color tem precedência sobre iconColor', () => {
+            const wrapper = mountIconButton({ color: '#00ff00', iconColor: '#ff0000' });
+            expect(wrapper.find('.max-icon').attributes('data-color')).toBe('#00ff00');
         });
     });
 });

@@ -317,19 +317,27 @@
 
     const showPlaceholder = computed(() => placeholderText.value !== undefined && !hasSelectedOption.value);
 
+    function normalizeText(value: any): string {
+        return String(value ?? '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .trim();
+    }
+
     const filteredOptions = computed(() => {
         const raw = options.value;
         if (!props.filter || !searchQuery.value.trim()) return raw;
 
-        const q = searchQuery.value.toLowerCase().trim();
+        const q = normalizeText(searchQuery.value);
         const labelKey = props.optionLabel;
 
         if (props.groupOptions !== undefined) return (raw as any[])
             .map((group) => {
                 if (!group || !Array.isArray(group.items)) return group;
                 const items = group.items.filter((item: any) => {
-                    const txt = String(item[labelKey] ?? item.label ?? item.name ?? '').toLowerCase();
-                    const sub = String(item.sub_label ?? item.sub ?? item.subLabel ?? '').toLowerCase();
+                    const txt = normalizeText(item[labelKey] ?? item.label ?? item.name ?? '');
+                    const sub = normalizeText(item.sub_label ?? item.sub ?? item.subLabel ?? '');
                     return txt.includes(q) || sub.includes(q);
                 });
                 return items.length > 0 ? { ...group, items } : null;
@@ -338,8 +346,8 @@
 
 
         return (raw as any[]).filter((opt: any) => {
-            const txt = String(opt[labelKey] ?? opt.label ?? opt.name ?? '').toLowerCase();
-            const sub = String(opt.sub_label ?? opt.sub ?? opt.subLabel ?? '').toLowerCase();
+            const txt = normalizeText(opt[labelKey] ?? opt.label ?? opt.name ?? '');
+            const sub = normalizeText(opt.sub_label ?? opt.sub ?? opt.subLabel ?? '');
             return txt.includes(q) || sub.includes(q);
         });
     });
