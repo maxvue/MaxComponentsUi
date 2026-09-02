@@ -72,9 +72,8 @@
         const el = list_el.value;
         if (! el) return;
         const distance = direction * (el.clientWidth / 2);
-        if (typeof el.scrollBy === 'function') {
-            el.scrollBy({ left: distance, behavior: 'smooth' });
-        } else {
+        if (typeof el.scrollBy === 'function') el.scrollBy({ left: distance, behavior: 'smooth' });
+        else {
             el.scrollLeft += distance;
             updateScrollState();
         }
@@ -92,18 +91,15 @@
         const scrollLeft = el.scrollLeft;
         const clientWidth = el.clientWidth;
 
-        if (tabLeft < scrollLeft) {
-            if (typeof el.scrollTo === 'function') {
-                el.scrollTo({ left: tabLeft, behavior: 'smooth' });
-            } else {
-                el.scrollLeft = tabLeft;
-                updateScrollState();
-            }
-        } else if (tabRight > scrollLeft + clientWidth) {
+        if (tabLeft < scrollLeft) if (typeof el.scrollTo === 'function') el.scrollTo({ left: tabLeft, behavior: 'smooth' });
+        else {
+            el.scrollLeft = tabLeft;
+            updateScrollState();
+        }
+        else if (tabRight > scrollLeft + clientWidth) {
             const targetScroll = tabRight - clientWidth;
-            if (typeof el.scrollTo === 'function') {
-                el.scrollTo({ left: targetScroll, behavior: 'smooth' });
-            } else {
+            if (typeof el.scrollTo === 'function') el.scrollTo({ left: targetScroll, behavior: 'smooth' });
+            else {
                 el.scrollLeft = targetScroll;
                 updateScrollState();
             }
@@ -176,9 +172,8 @@
                 updateScrollState();
             });
             resize_observer.observe(list_el.value);
-            for (const child of Array.from(list_el.value.children)) {
-                resize_observer.observe(child);
-            }
+            for (const child of Array.from(list_el.value.children)) resize_observer.observe(child);
+
         }
     });
 

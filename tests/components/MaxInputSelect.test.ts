@@ -214,6 +214,54 @@ describe('MaxInputSelect', () => {
         expect(focusSpy).toHaveBeenCalled();
         focusSpy.mockRestore();
     });
+
+    it('filtra opções ignorando acentos gráficos (accent-insensitive)', async () => {
+        const options = [
+            { value: '1', label: 'São Paulo' },
+            { value: '2', label: 'Goiânia' },
+            { value: '3', label: 'Brasília' },
+            { value: '4', label: 'Belo Horizonte' }
+        ];
+        const wrapper = mountSelect({ options, filter: true });
+        (wrapper.vm as any).searchQuery = 'sao paulo';
+        await wrapper.vm.$nextTick();
+
+        const vm = wrapper.vm as any;
+        expect(vm.filteredOptions).toHaveLength(1);
+        expect(vm.filteredOptions[0].label).toBe('São Paulo');
+
+        (wrapper.vm as any).searchQuery = 'goiania';
+        await wrapper.vm.$nextTick();
+        expect(vm.filteredOptions).toHaveLength(1);
+        expect(vm.filteredOptions[0].label).toBe('Goiânia');
+    });
+
+    it('filtra groupOptions ignorando acentos gráficos (accent-insensitive)', async () => {
+        const groupOptions = [
+            {
+                label: 'Sudeste',
+                items: [
+                    { value: '1', label: 'São Paulo' },
+                    { value: '2', label: 'Rio de Janeiro' }
+                ]
+            },
+            {
+                label: 'Centro-Oeste',
+                items: [
+                    { value: '3', label: 'Goiânia' },
+                    { value: '4', label: 'Brasília' }
+                ]
+            }
+        ];
+        const wrapper = mountSelect({ groupOptions, filter: true });
+        (wrapper.vm as any).searchQuery = 'brasilia';
+        await wrapper.vm.$nextTick();
+
+        const vm = wrapper.vm as any;
+        expect(vm.filteredOptions).toHaveLength(1);
+        expect(vm.filteredOptions[0].items).toHaveLength(1);
+        expect(vm.filteredOptions[0].items[0].label).toBe('Brasília');
+    });
 });
 
 

@@ -75,4 +75,22 @@ describe('MaxInputText', () => {
         const inputBase = wrapper.findComponent(InputBase);
         expect(inputBase.props('error')).toBe('Valor inválido');
     });
+
+    it('possui spellcheck ativado por padrão', () => {
+        const wrapper = mountInputText();
+        const input = wrapper.find('input');
+        expect(input.attributes('spellcheck')).toBe('true');
+    });
+
+    it('respeita spellcheck=false quando definido explicitamente', () => {
+        const wrapper = mountInputText({ spellcheck: false });
+        const input = wrapper.find('input');
+        expect(input.attributes('spellcheck')).toBe('false');
+    });
+
+    it('desativa spellcheck quando type="password"', () => {
+        const wrapper = mountInputText({ type: 'password' });
+        const input = wrapper.find('input');
+        expect(input.attributes('spellcheck')).toBe('false');
+    });
 });

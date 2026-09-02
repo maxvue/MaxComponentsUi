@@ -1,7 +1,7 @@
 <template>
     <div :class="`icon-div ico-btn ${hover ? 'hover' : ''}`" ref="icon_ref" :style="{width: size, height: size, transform: 'scale('+ (hover? props.hoverScale : 1) +')'}" @click="onClick" @mouseenter="hover = true" @mouseleave="hover = false">
         <slot>
-            <MaxIcon pointer :icon="props.icon" :i="props.i" :dark="props.dark" :light="props.light" :checked="props.checked" :plus="props.plus" :rotate="props.rotate" :flip="props.flip" :size="size" />
+            <MaxIcon pointer :icon="props.icon" :i="props.i" :dark="props.dark" :light="props.light" :checked="props.checked" :plus="props.plus" :rotate="props.rotate" :flip="props.flip" :size="size" :color="props.color ?? props.iconColor" />
         </slot>
     </div>
 </template>

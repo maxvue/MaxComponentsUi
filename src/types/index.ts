@@ -113,6 +113,10 @@ export interface MaxButtonsType extends /* @vue-ignore */ MaxButtonBaseProps {
     checked?: boolean | string | number | undefined;
     /** Icone de adição */
     plus?: boolean | string | number | undefined;
+    /** Cor do ícone */
+    color?: string;
+    /** Alias para a cor do ícone */
+    iconColor?: string;
     /** Hover color */
     hoverColor?: string | undefined;
     /** Action */
