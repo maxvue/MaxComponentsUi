@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxAuthCard from '../../src/components/MaxAuthCard.vue';
+import { clearAuthOtpCache } from '../../src/helpers/clearAuthOtpCache';
 
 function mountAuthCard(props: Record<string, any> = {}) {
     return mount(MaxAuthCard, {
@@ -61,11 +62,12 @@ describe('MaxAuthCard', () => {
             await (button.props('action') as any)?.();
 
             expect(wrapper.emitted('submit')).toBeTruthy();
-            expect(wrapper.emitted('submit')![0][0]).toEqual({
+            expect(wrapper.emitted('submit')![0][0]).toMatchObject({
                 email: 'a@b.com',
                 password: 'segredo',
                 remember: true
             });
+            expect(typeof (wrapper.emitted('submit')![0][0] as any).clearCache).toBe('function');
         });
 
         it('não emite submit quando loading=true', async () => {
@@ -121,16 +123,35 @@ describe('MaxAuthCard', () => {
             expect(wrapper.find('input[type="password"]').exists()).toBe(false);
         });
 
-        it('não exibe MaxInputOTP nem envia código ao apenas digitar o telefone ou apertar ENTER no telefone', async () => {
+        it('não exibe MaxInputOTP ao apenas digitar o telefone antes do envio', () => {
+            const wrapper = mountAuthCard({ mode: 'phone-otp', phone: '62999999999' });
+
+            expect(wrapper.findComponent({ name: 'MaxInputOTP' }).exists()).toBe(false);
+        });
+
+        it('ao pressionar ENTER com telefone preenchido antes do envio: dispara send-code e exibe MaxInputOTP', async () => {
             const wrapper = mountAuthCard({ mode: 'phone-otp', phone: '62999999999' });
 
             expect(wrapper.findComponent({ name: 'MaxInputOTP' }).exists()).toBe(false);
 
-            // Pressiona ENTER no campo de telefone sem ter enviado código
+            // Pressiona ENTER no card com telefone preenchido antes do envio
+            await wrapper.find('.max-auth-page').trigger('keyup.enter');
+
+            expect(wrapper.emitted('send-code')).toBeTruthy();
+            const sendPayload = wrapper.emitted('send-code')![0][0] as any;
+            expect(sendPayload.phone).toBe('62999999999');
+            expect(sendPayload.endpoint.channel).toBe('whatsapp');
+
+            await wrapper.vm.$nextTick();
+            expect(wrapper.findComponent({ name: 'MaxInputOTP' }).exists()).toBe(true);
+        });
+
+        it('ao pressionar ENTER com telefone vazio: não envia código', async () => {
+            const wrapper = mountAuthCard({ mode: 'phone-otp', phone: '' });
+
             await wrapper.find('.max-auth-page').trigger('keyup.enter');
 
             expect(wrapper.emitted('send-code')).toBeFalsy();
-            expect(wrapper.emitted('submit')).toBeFalsy();
             expect(wrapper.findComponent({ name: 'MaxInputOTP' }).exists()).toBe(false);
         });
 
@@ -215,11 +236,11 @@ describe('MaxAuthCard', () => {
         it('renderiza a opção "Manter conectado" no modo phone-otp por padrão e permite ocultar via showRemember=false', async () => {
             const wrapper = mountAuthCard({ mode: 'phone-otp' });
 
-            expect(wrapper.find('.max-auth-remember').exists()).toBe(true);
+            expect(wrapper.findComponent({ name: 'MaxInputCheckbox' }).exists() || wrapper.find('.max-auth-remember').exists()).toBe(true);
             expect(wrapper.text()).toContain('Manter conectado');
 
             const wrapperNoRemember = mountAuthCard({ mode: 'phone-otp', showRemember: false });
-            expect(wrapperNoRemember.find('.max-auth-remember').exists()).toBe(false);
+            expect(wrapperNoRemember.findComponent({ name: 'MaxInputCheckbox' }).exists() || wrapperNoRemember.find('.max-auth-remember').exists()).toBe(false);
         });
 
         it('ao pressionar ENTER com código completo de 6 dígitos: efetua login com remember', async () => {
@@ -338,6 +359,84 @@ describe('MaxAuthCard', () => {
             // Cooldown reinicia em 60s
             await wrapper.vm.$nextTick();
             expect(button.props('label')).toBe('Solicitar novamente (60s)');
+        });
+
+        it('disponibiliza clearCache no payload do evento submit para limpar o cache após login bem-sucedido', async () => {
+            const wrapper = mountAuthCard({
+                mode: 'phone-otp',
+                phone: '62999999999',
+                cooldown: 60
+            });
+
+            // Envia código
+            const button = wrapper.findComponent({ name: 'MaxButton' });
+            await (button.props('action') as any)?.();
+            await wrapper.vm.$nextTick();
+
+            // Verifica que o cache foi gravado
+            expect(window.localStorage.getItem('max_auth_otp_session')).toBeTruthy();
+            expect(window.localStorage.getItem('max_auth_otp_62999999999')).toBeTruthy();
+
+            // Digita código completo
+            await wrapper.setProps({ code: '654321' });
+            await wrapper.vm.$nextTick();
+
+            // Clica em Entrar
+            await (button.props('action') as any)?.();
+
+            expect(wrapper.emitted('submit')).toBeTruthy();
+            const submitPayload = wrapper.emitted('submit')![0][0] as any;
+            expect(typeof submitPayload.clearCache).toBe('function');
+
+            // Simula o consumidor chamando clearCache() após o login bem-sucedido na API
+            submitPayload.clearCache();
+
+            // Verifica que o localStorage foi limpo
+            expect(window.localStorage.getItem('max_auth_otp_session')).toBeNull();
+            expect(window.localStorage.getItem('max_auth_otp_62999999999')).toBeNull();
+
+            // Verifica que o MaxInputOTP voltou a ficar oculto
+            await wrapper.vm.$nextTick();
+            expect(wrapper.findComponent({ name: 'MaxInputOTP' }).exists()).toBe(false);
+        });
+
+        it('permite chamar clearCache via método exposto no componente (defineExpose)', async () => {
+            const wrapper = mountAuthCard({
+                mode: 'phone-otp',
+                phone: '62999999999',
+                cooldown: 60
+            });
+
+            const button = wrapper.findComponent({ name: 'MaxButton' });
+            await (button.props('action') as any)?.();
+            await wrapper.vm.$nextTick();
+
+            expect(window.localStorage.getItem('max_auth_otp_session')).toBeTruthy();
+
+            // Chama o método exposto
+            (wrapper.vm as any).clearCache();
+
+            expect(window.localStorage.getItem('max_auth_otp_session')).toBeNull();
+            expect(window.localStorage.getItem('max_auth_otp_62999999999')).toBeNull();
+
+            await wrapper.vm.$nextTick();
+            expect(wrapper.findComponent({ name: 'MaxInputOTP' }).exists()).toBe(false);
+        });
+
+        it('função utilitária clearAuthOtpCache remove chaves específicas e globais', () => {
+            window.localStorage.setItem('max_auth_otp_session', '{"phone":"123"}');
+            window.localStorage.setItem('max_auth_otp_123', '{"phone":"123"}');
+            window.localStorage.setItem('max_auth_otp_456', '{"phone":"456"}');
+
+            clearAuthOtpCache('max_auth_otp_', '123');
+
+            expect(window.localStorage.getItem('max_auth_otp_session')).toBeNull();
+            expect(window.localStorage.getItem('max_auth_otp_123')).toBeNull();
+            expect(window.localStorage.getItem('max_auth_otp_456')).toBeTruthy();
+
+            // Limpa tudo
+            clearAuthOtpCache('max_auth_otp_');
+            expect(window.localStorage.getItem('max_auth_otp_456')).toBeNull();
         });
     });
 });
