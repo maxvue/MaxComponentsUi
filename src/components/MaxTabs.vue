@@ -1,10 +1,9 @@
 <template>
-    <div class="max-tabs">
+    <div class="max-tabs" :class="{ 'max-tabs-scrollable': props.scrollable }">
         <div class="max-tabs-content">
             <div :class="`max-tabs-title ${spread ? 'spread' : ''}`">
                 <div class="max-tabs-title-items" :id="'max-tab-' + tabs_id"></div>
                 <div class="max-tabs-title-buttons" :id="'max-tab-buttons-' + tabs_id"></div>
-
             </div>
 
             <div class="max-tab-content">
@@ -200,11 +199,11 @@
 
 <style lang="scss">
 .max-tabs {
-    display: grid;
+    display: flex;
+    flex-direction: column;
     max-height: 100%;
     max-width: 100%;
     width: 100%;
-    height: 100%;
     overflow: hidden;
 
     .max-tabs-content {
@@ -214,18 +213,22 @@
         border: 1px solid var(--background-300);
         height: 100%;
         border-radius: 1rem;
-        overflow: auto;
+        overflow: hidden;
 
         .max-tabs-title {
             display: grid;
             grid-template-columns: 1fr auto;
-            border-bottom: 1px solid var(--background-300);
             width: 100%;
             place-items: center start;
+            flex-shrink: 0;
+
+            &:has(.max-tab-item-title),
+            &:has(.button-tab-item) {
+                border-bottom: 1px solid var(--background-300);
+            }
 
             &.spread{
                 .max-tabs-title-items {
-
                     width: 100%;
                     .max-tab-item-title{
                         flex-grow: 1 !important;
@@ -236,6 +239,12 @@
             .max-tabs-title-items {
                 display: flex;
                 background-color: var(--background-50);
+                overflow-x: auto;
+                scrollbar-width: none;
+
+                &::-webkit-scrollbar {
+                    display: none;
+                }
             }
 
             .max-tabs-title-buttons {
@@ -245,12 +254,12 @@
         }
 
         .max-tab-content {
-            overflow: hidden;
+            overflow: auto;
             width: 100%;
             height: 100%;
-            display: grid;
+            display: flex;
+            flex-direction: column;
         }
     }
 }
-
 </style>

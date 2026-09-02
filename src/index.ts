@@ -33,6 +33,7 @@ export { default as MaxTitle2 } from './components/MaxTitle2.vue';
 // Auth
 export { default as MaxAuthCard } from './components/MaxAuthCard.vue';
 export { default as AuthCard } from './components/MaxAuthCard.vue';
+export { clearAuthOtpCache } from './helpers/clearAuthOtpCache';
 export type { AuthProvider, AuthOtpEndpoint, AuthMode, AuthStep, AuthLabels } from './components/MaxAuthCard.vue';
 
 // Tabs

@@ -1,21 +1,21 @@
 <template>
     <div v-if="route.name" class="max-app">
         <!-- Páginas de site e telas sem layout: apenas o conteúdo da rota. -->
-        <div v-if="isSite || isBlank">
+        <div v-if="isSite || isBlank" class="max-app-view max-app-blank">
             <slot name="blank">
                 <RouterView />
             </slot>
         </div>
 
         <!-- Usuário carregado, mas sem sessão: tela de login. -->
-        <div v-else-if="isLoaded && !isLogged">
+        <div v-else-if="isLoaded && !isLogged" class="max-app-view max-app-login">
             <slot name="login">
                 <RouterView />
             </slot>
         </div>
 
         <!-- Usuário autenticado: aplicação completa. -->
-        <div v-else-if="isLoaded && isLogged">
+        <div v-else-if="isLoaded && isLogged" class="max-app-view max-app-authenticated">
             <slot name="authenticated">
                 <MaxPageLayout
                     :screen="system.type_device"
@@ -177,8 +177,18 @@
 <style lang="scss">
     .max-app {
         min-height: 100vh;
-        height: 100vh;
-        width: 100vw;
+        min-height: 100dvh;
+        width: 100%;
+        box-sizing: border-box;
+
+        .max-app-view {
+            width: 100%;
+            height: 100%;
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+        }
 
         .fade-enter-active,
         .fade-leave-active {
@@ -188,6 +198,17 @@
         .fade-enter-from,
         .fade-leave-to {
             opacity: 0;
+        }
+    }
+
+    html.max-scroll-locked {
+        overflow: hidden !important;
+        touch-action: none;
+
+        .mobile-page-content,
+        .board_page_content_main_div .pane1 {
+            overflow: hidden !important;
+            touch-action: none;
         }
     }
 </style>

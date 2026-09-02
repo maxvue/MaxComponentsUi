@@ -14,8 +14,10 @@
     .container-app {
         display: grid;
         overflow: hidden;
-        width: 100vw;
+        width: 100%;
         height: 100vh;
+        height: 100dvh;
+        box-sizing: border-box;
         grid-template-columns: auto 1fr;
         background-color: var(--blue-850) !important;
 

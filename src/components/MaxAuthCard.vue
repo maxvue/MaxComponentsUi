@@ -120,6 +120,7 @@
     import MaxInputOTP from './MaxInputOTP.vue';
     import MaxButton from './MaxButton.vue';
     import MaxInputCheckbox from './MaxInputCheckbox.vue';
+    import { clearAuthOtpCache } from '../helpers/clearAuthOtpCache';
 
     /** Provedor de login social configurável */
     export interface AuthProvider {
@@ -251,6 +252,7 @@
             code?: string;
             endpoint?: AuthOtpEndpoint;
             channel?: string;
+            clearCache: () => void;
         }];
         'send-code': [payload: { phone: string; endpoint: AuthOtpEndpoint; channel: string; index: number }];
         'resend-code': [payload: { phone: string; endpoint: AuthOtpEndpoint; channel: string; index: number }];
@@ -453,6 +455,14 @@
         startCooldown();
     };
 
+    const clearCache = (): void => {
+        clearAuthOtpCache(props.cacheKeyPrefix, phone.value);
+        codeSent.value = false;
+        remainingCooldown.value = 0;
+        code.value = '';
+        stopCooldown();
+    };
+
     const onVerifyCode = (): void => {
         if (props.loading) return;
         const endpoint = activeEndpoints.value[currentEndpointIndex.value];
@@ -461,7 +471,8 @@
             code: code.value,
             remember: remember.value,
             endpoint,
-            channel: endpoint.channel
+            channel: endpoint.channel,
+            clearCache
         });
     };
 
@@ -469,7 +480,12 @@
         if (props.loading) return;
 
         if (props.mode === 'password') {
-            emit('submit', { email: email.value, password: password.value, remember: remember.value });
+            emit('submit', {
+                email: email.value,
+                password: password.value,
+                remember: remember.value,
+                clearCache
+            });
             return;
         }
 
@@ -496,14 +512,24 @@
         if (props.loading) return;
 
         if (props.mode === 'password') {
-            emit('submit', { email: email.value, password: password.value, remember: remember.value });
+            emit('submit', {
+                email: email.value,
+                password: password.value,
+                remember: remember.value,
+                clearCache
+            });
             return;
         }
 
         // Modo phone-otp:
-        // 1. Se não tiver digitado os dígitos do código: Nada acontece
-        // 2. Se tiver digitado corretamente os dígitos: Tenta fazer login
-        if (codeSent.value && code.value && String(code.value).length >= props.codeLength) onVerifyCode();
+        // 1. Se ainda não tiver sido enviado código: Envia o código
+        if (!codeSent.value) {
+            onSendCode();
+            return;
+        }
+
+        // 2. Se já tiver sido enviado e os dígitos estiverem completos: Tenta fazer login
+        if (code.value && String(code.value).length >= props.codeLength) onVerifyCode();
     };
 
     const onSubmit = (): void => {
@@ -513,8 +539,18 @@
             return;
         }
 
-        emit('submit', { email: email.value, password: password.value, remember: remember.value });
+        emit('submit', {
+            email: email.value,
+            password: password.value,
+            remember: remember.value,
+            clearCache
+        });
     };
+
+    defineExpose({
+        clearCache,
+        resetSession: clearCache
+    });
 
     watch(
         phone,
