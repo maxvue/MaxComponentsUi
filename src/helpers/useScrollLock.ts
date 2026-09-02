@@ -28,15 +28,22 @@ let previous_overflow = '';
 export const useScrollLock = (): ScrollLock => {
 
     const lock = () => {
-        if (lock_count === 0) previous_overflow = document.body.style.overflow;
+        if (typeof document === 'undefined') return;
+        if (lock_count === 0) {
+            previous_overflow = document.body.style.overflow;
+            document.documentElement.classList.add('max-scroll-locked');
+        }
         lock_count += 1;
         document.body.style.overflow = 'hidden';
     };
 
     const unlock = () => {
-        if (lock_count === 0) return;
+        if (typeof document === 'undefined' || lock_count === 0) return;
         lock_count -= 1;
-        if (lock_count === 0) document.body.style.overflow = previous_overflow;
+        if (lock_count === 0) {
+            document.body.style.overflow = previous_overflow;
+            document.documentElement.classList.remove('max-scroll-locked');
+        }
     };
 
     return { lock, unlock };

@@ -48,8 +48,6 @@
         <MaxPageContent v-bind="attrs">
             <slot></slot>
         </MaxPageContent>
-
-        <MaxBottomMenu v-if="attrs.screen === 'mobile'" v-bind="attrs" :tabs="props.bottomTabs" />
     </MaxContainerApp>
 </template>
 
