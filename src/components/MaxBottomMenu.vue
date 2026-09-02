@@ -195,7 +195,7 @@
         bottom: 0;
         left: 0;
         z-index: 900;
-        width: 100vw;
+        width: 100%;
         height: calc(var(--bottom-menu-height, 58px) + var(--safe-area-bottom, env(safe-area-inset-bottom, 0px)));
         box-sizing: border-box;
         padding: 0 0.75rem calc(0.5rem + var(--safe-area-bottom, env(safe-area-inset-bottom, 0px)));
@@ -205,7 +205,7 @@
 
         &.is-curved {
             background-color: transparent;
-            padding: 0;
+            padding: 0 0 calc(var(--safe-area-bottom, env(safe-area-inset-bottom, 0px)));
 
             .bottom-menu-bar {
                 background-color: transparent;
