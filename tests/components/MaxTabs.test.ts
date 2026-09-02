@@ -230,6 +230,120 @@ describe('MaxTabList', () => {
         await wrapper.findAll('.max-tab')[2].trigger('keydown', { key: 'Enter' });
         expect(wrapper.emitted('update:value')?.[0]).toEqual(['2']);
     });
+
+    it('nao exibe botoes de navegacao quando nao ha overflow', () => {
+        const wrapper = mountTabList({ scrollable: true });
+        expect(wrapper.find('.max-tab-nav-prev').exists()).toBe(false);
+        expect(wrapper.find('.max-tab-nav-next').exists()).toBe(false);
+    });
+
+    it('exibe e desabilita o botao anterior quando ha overflow e scrollLeft eh 0', async () => {
+        const wrapper = mount(MaxTabs, {
+            props: { value: '0', scrollable: true },
+            slots: {
+                default: `
+                    <MaxTabList>
+                        <MaxTab value="0">Aba 1</MaxTab>
+                        <MaxTab value="1">Aba 2</MaxTab>
+                        <MaxTab value="2">Aba 3</MaxTab>
+                    </MaxTabList>
+                `
+            },
+            global: { components: { MaxTabList, MaxTab } }
+        });
+        const tabListComp = wrapper.findComponent(MaxTabList);
+        const listEl = tabListComp.find('.max-tab-list').element as HTMLElement;
+        Object.defineProperty(listEl, 'clientWidth', { configurable: true, value: 200 });
+        Object.defineProperty(listEl, 'scrollWidth', { configurable: true, value: 600 });
+        Object.defineProperty(listEl, 'scrollLeft', { configurable: true, writable: true, value: 0 });
+
+        tabListComp.vm.updateScrollState();
+        await nextTick();
+
+        expect(tabListComp.find('.max-tab-nav-prev').exists()).toBe(true);
+        expect(tabListComp.find('.max-tab-nav-prev').attributes('disabled')).toBeDefined();
+        expect(tabListComp.find('.max-tab-nav-next').exists()).toBe(true);
+        expect(tabListComp.find('.max-tab-nav-next').attributes('disabled')).toBeUndefined();
+    });
+
+    it('desabilita o botao proximo quando scrollLeft atinge o final', async () => {
+        const wrapper = mount(MaxTabs, {
+            props: { value: '0', scrollable: true },
+            slots: {
+                default: `
+                    <MaxTabList>
+                        <MaxTab value="0">Aba 1</MaxTab>
+                        <MaxTab value="1">Aba 2</MaxTab>
+                        <MaxTab value="2">Aba 3</MaxTab>
+                    </MaxTabList>
+                `
+            },
+            global: { components: { MaxTabList, MaxTab } }
+        });
+        const tabListComp = wrapper.findComponent(MaxTabList);
+        const listEl = tabListComp.find('.max-tab-list').element as HTMLElement;
+        Object.defineProperty(listEl, 'clientWidth', { configurable: true, value: 200 });
+        Object.defineProperty(listEl, 'scrollWidth', { configurable: true, value: 600 });
+        Object.defineProperty(listEl, 'scrollLeft', { configurable: true, writable: true, value: 400 });
+
+        tabListComp.vm.updateScrollState();
+        await nextTick();
+
+        expect(tabListComp.find('.max-tab-nav-prev').attributes('disabled')).toBeUndefined();
+        expect(tabListComp.find('.max-tab-nav-next').attributes('disabled')).toBeDefined();
+    });
+
+    it('scrollBy translada scrollLeft', async () => {
+        const wrapper = mount(MaxTabs, {
+            props: { value: '0', scrollable: true },
+            slots: {
+                default: `
+                    <MaxTabList>
+                        <MaxTab value="0">Aba 1</MaxTab>
+                        <MaxTab value="1">Aba 2</MaxTab>
+                    </MaxTabList>
+                `
+            },
+            global: { components: { MaxTabList, MaxTab } }
+        });
+        const tabListComp = wrapper.findComponent(MaxTabList);
+        const listEl = tabListComp.find('.max-tab-list').element as HTMLElement;
+        Object.defineProperty(listEl, 'clientWidth', { configurable: true, value: 200 });
+        Object.defineProperty(listEl, 'scrollWidth', { configurable: true, value: 600 });
+        listEl.scrollLeft = 100;
+        listEl.scrollBy = function(opts: any) {
+            this.scrollLeft += (typeof opts === 'object' ? opts.left : opts) || 0;
+        };
+
+        tabListComp.vm.scrollBy(1);
+        expect(listEl.scrollLeft).toBe(200);
+    });
+
+    it('wheel horizontaliza a rolagem do mouse quando scrollable e com overflow', async () => {
+        const wrapper = mount(MaxTabs, {
+            props: { value: '0', scrollable: true },
+            slots: {
+                default: `
+                    <MaxTabList>
+                        <MaxTab value="0">Aba 1</MaxTab>
+                        <MaxTab value="1">Aba 2</MaxTab>
+                    </MaxTabList>
+                `
+            },
+            global: { components: { MaxTabList, MaxTab } }
+        });
+        const tabListComp = wrapper.findComponent(MaxTabList);
+        const listEl = tabListComp.find('.max-tab-list').element as HTMLElement;
+        Object.defineProperty(listEl, 'clientWidth', { configurable: true, value: 200 });
+        Object.defineProperty(listEl, 'scrollWidth', { configurable: true, value: 600 });
+        listEl.scrollLeft = 50;
+        tabListComp.vm.updateScrollState();
+        await nextTick();
+
+        const preventDefault = vitest.fn();
+        await tabListComp.find('.max-tab-list').trigger('wheel', { deltaY: 30, preventDefault });
+        expect(listEl.scrollLeft).toBe(80);
+    });
 });
 
 /** Monta a estrutura completa de tabs com painéis. */
