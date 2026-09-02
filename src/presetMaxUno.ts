@@ -64,6 +64,13 @@ export const presetMaxUno = () => {
                     selector: (sel: string) => `${sel}:hover, ${sel}:hover .max-icon-div, ${sel}:hover .max-icon, ${sel}:hover svg`
                 }
             ]],
+            [/^no-scrollbar/, () => [
+                {
+                    'scrollbar-width': 'none',
+                    '-ms-overflow-style': 'none',
+                    'overflow-y': 'auto'
+                }
+            ]],
 
             // Grid system
             [/^grid-?(cols|rows)-?(.+)$/i, ([, tp, vl]) => ({ ['grid-template-' + (tp.toLowerCase() === 'cols' ? 'columns' : 'rows')]: vl.replace(/-/g, ' ') })],
