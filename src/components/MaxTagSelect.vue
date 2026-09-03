@@ -39,7 +39,7 @@
                         </div>
                         <slot name="btn-right"></slot>
                     </div>
-                    <div v-else>
+                    <div v-else-if="isButton">
                         <MaxIconButton :icon="props.i ?? props.icon ?? props.iconLeft" :size="option_selected?.icon_size ?? 1.8" />
                     </div>
                 </slot>

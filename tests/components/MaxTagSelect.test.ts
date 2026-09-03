@@ -210,7 +210,7 @@ describe('MaxTagSelect', () => {
         expect(wrapper.find('.tag-value-text').text()).toBe('Desativado');
     });
 
-    it('renderiza placeholder e NÃO renderiza .value-tag-div quando modelValue é vazio ("")', async () => {
+    it('renderiza placeholder e NÃO renderiza .value-tag-div nem .max-icon-button-stub quando modelValue é vazio ("")', async () => {
         const options = [{ value: 'a', name: 'Tag A' }];
         const wrapper = mountTagSelect({ modelValue: '', options }, { placeholder: 'Selecione' });
         await wrapper.vm.$nextTick();
@@ -218,14 +218,24 @@ describe('MaxTagSelect', () => {
         expect(wrapper.find('.tab-placeholder-select').exists()).toBe(true);
         expect(wrapper.find('.tab-placeholder-select').text()).toBe('Selecione');
         expect(wrapper.find('.value-tag-div').exists()).toBe(false);
+        expect(wrapper.find('.max-icon-button-stub').exists()).toBe(false);
     });
 
-    it('não renderiza .value-tag-div quando modelValue é null e nenhum placeholder foi informado', async () => {
+    it('não renderiza .value-tag-div nem .max-icon-button-stub quando modelValue é null e possui propriedades de ícone', async () => {
         const options = [{ value: 'a', name: 'Tag A' }];
-        const wrapper = mountTagSelect({ modelValue: null, options });
+        const wrapper = mountTagSelect({ modelValue: null, iconLeft: 'mdi:user', options });
         await wrapper.vm.$nextTick();
 
         expect(wrapper.find('.tab-placeholder-select').exists()).toBe(false);
+        expect(wrapper.find('.value-tag-div').exists()).toBe(false);
+        expect(wrapper.find('.max-icon-button-stub').exists()).toBe(false);
+    });
+
+    it('modo isButton com modelValue null: renderiza MaxIconButton e não renderiza .value-tag-div', async () => {
+        const wrapper = mountTagSelect({ isButton: true, icon: 'mdi:tag', modelValue: null });
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find('.max-icon-button-stub').exists()).toBe(true);
         expect(wrapper.find('.value-tag-div').exists()).toBe(false);
     });
 });

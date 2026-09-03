@@ -1,186 +1,164 @@
-# Plano de Implementação — Issue #58
+# Plano de Implementação - Issue #58
 
-> **Issue:** #58 — [Audit] MaxTagSelect: renderiza placeholder junto com valor para 0/false e badge vazia quando nada esta selecionado  
-> **Componente:** `src/components/MaxTagSelect.vue`  
-> **Status:** Planejado (`planned: true`)
+## Descrição e Causa Raiz
 
----
+### Problema Relatado
+No componente [MaxTagSelect.vue](file:///home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-implement-issue-58/src/components/MaxTagSelect.vue), foram identificados dois comportamentos anômalos de renderização condicional:
+1. **Renderização indevida de placeholder para valores falsy válidos:** Ao selecionar opções com `value: 0` ou `value: false`, o elemento de placeholder (`.tab-placeholder-select`) é renderizado simultaneamente com a tag de valor selecionada (`.value-tag-div`).
+2. **Renderização indevida de badge vazia / botão de ícone em estado desmarcado:** Quando nenhuma opção está selecionada (`modelValue: null`, `undefined` ou `''`), o slot `#value` renderiza incondicionalmente um container vazio (`.value-tag-div`) com estilos de cor aplicados sobre o placeholder no modo normal (`isButton: false`). Caso a condição seja restringida sem tratar adequadamente a ramificação de botão, o componente cai indevidamente no branch `<div v-else>`, renderizando um `<MaxIconButton>` espúrio dentro de `.p-select-label` mesmo com `isButton: false`.
 
-### Descrição e Causa Raiz
+### Causa Raiz Comprovada
+- **Linha de Renderização de Placeholder ([src/components/MaxTagSelect.vue:L3](file:///home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-implement-issue-58/src/components/MaxTagSelect.vue#L3)):**
+  ```vue
+  <div v-if="attrs.placeholder !== undefined && (!temp_value || temp_value === '')" class="tab-placeholder-select">
+  ```
+  A expressão `(!temp_value || temp_value === '')` utiliza uma checagem *falsy* genérica (`!temp_value`). Em JavaScript, `!0 === true` e `!false === true`, fazendo com que valores `0` (numérico) e `false` (booleano) sejam avaliados erroneamente como "vazio", forçando a exibição do placeholder mesmo quando há uma opção válida selecionada.
+- **Linhas de Renderização do Slot `#value` ([src/components/MaxTagSelect.vue:L20-46](file:///home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-implement-issue-58/src/components/MaxTagSelect.vue#L20-L46)):**
+  ```vue
+  <div class="p-select-label">
+      <slot name="value">
+          <div
+              class="value-tag-div"
+              :style="getStyleColor(option_selected, false, true)"
+              :color-string="getColorString(option_selected)"
+              v-if="!isButton"
+          >
+              ...
+          </div>
+          <div v-else>
+              <MaxIconButton :icon="props.i ?? props.icon ?? props.iconLeft" :size="option_selected?.icon_size ?? 1.8" />
+          </div>
+      </slot>
+  </div>
+  ```
+  1. A condição `v-if="!isButton"` não verifica se existe uma opção efetivamente selecionada (`option_selected` retorna `{}` quando não há seleção correspondente). Com isso, `.value-tag-div` é renderizado como uma pill/badge vazia com estilo de cor de fundo padrão (`var(--background-500)`), poluindo visualmente a área do input sobre o placeholder.
+  2. Ao corrigir a condição da badge para `v-if="!isButton && hasSelected"`, a manutenção de um `<div v-else>` incondicional faz com que qualquer estado sem seleção (`hasSelected === false`) com `isButton === false` caia no `v-else`, renderizando `<MaxIconButton>` indevidamente. A ramificação do botão deve ser explicitamente condicionada com `v-else-if="isButton"`.
 
-#### Problema Detalhado
-O componente [MaxTagSelect.vue](file:///home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-implement-issue-58/src/components/MaxTagSelect.vue) apresenta duas falhas correlacionadas de reatividade e renderização condicional na camada de apresentação:
-
-1. **Colisão de Renderização (Placeholder + Valor 0 / false):**  
-   Ao utilizar o componente com opções que possuam valores `0` (número) ou `false` (booleano) como `modelValue` válido (por exemplo, status inativo `0`, flag binária `false`), o elemento de placeholder (`.tab-placeholder-select`) é renderizado simultaneamente com a tag de valor selecionada (`.value-tag-div`). O usuário enxerga o texto do placeholder e a tag selecionada sobrepostos no mesmo campo.
-2. **Renderização Indevida de Badge Vazia (Sem seleção):**  
-   Quando nenhuma opção está selecionada (`modelValue: null`, `modelValue: undefined` ou `modelValue: ''`), a propriedade computada `option_selected` retorna um objeto vazio `{}`. O container `.value-tag-div` é renderizado incondicionalmente no slot padrão `#value` quando `!isButton`, aplicando estilos de background (cor padrão `var(--background-500)`), padding e border-radius sobre uma tag sem texto (`.tag-value-text` vazio). Isso gera uma badge/pílula vazia visível dentro do campo, seja sozinha ou sobreposta ao placeholder.
-
----
-
-#### Causa Raiz Comprovada
-
-1. **Verificação Falha de Falsy no Placeholder ([src/components/MaxTagSelect.vue:L3](file:///home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-implement-issue-58/src/components/MaxTagSelect.vue#L3)):**
-   ```html
-   <div v-if="attrs.placeholder !== undefined && (!temp_value || temp_value === '')" class="tab-placeholder-select">
-       {{ attrs.placeholder }}
-   </div>
-   ```
-   - Em JavaScript, as expressões `!0` e `!false` avaliam para `true`.
-   - Consequentemente, para valores primitivos válidos `temp_value = 0` ou `temp_value = false`, a condição `(!temp_value || temp_value === '')` é satisfeita como verdadeira, forçando a exibição do placeholder mesmo havendo seleção ativa.
-
-2. **Renderização Incondicional da Tag de Valor ([src/components/MaxTagSelect.vue:L26](file:///home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-implement-issue-58/src/components/MaxTagSelect.vue#L26)):**
-   ```html
-   <div
-       class="value-tag-div"
-       :style="getStyleColor(option_selected, false, true)"
-       :color-string="getColorString(option_selected)"
-       v-if="!isButton"
-   >
-   ```
-   - A diretiva `v-if="!isButton"` apenas valida se o componente não está em modo botão (`isButton: false`), ignorando se há de fato uma opção selecionada.
-   - Quando `temp_value` não corresponde a nenhuma opção, `option_selected` retorna `{}`. A função `getStyleColor({}, false, true)` gera propriedades visuais completas (`backgroundColor: var(--background-500)`, `borderRadius: '6px'`, `padding: '0 10px 0 6px !important'`), desenhando uma badge retangular vazia.
+### Rastreamento Reverso de Dados
+- **Camada UI / DOM:** [MaxTagSelect.vue](file:///home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-implement-issue-58/src/components/MaxTagSelect.vue) renderiza `.p-select-label` contendo o slot `#value` (`.value-tag-div` ou `MaxIconButton`) e o elemento `.tab-placeholder-select`.
+- **Reatividade do Componente (Vue SFC):** `props.modelValue` ⇄ `temp_value` (ref sincronizado bidirecionalmente com `emit('update:modelValue')` e `watch`) ⇄ `option_selected` (propriedade computada baseada em `options`, `groupOptions` ou `optionsField`) ⇄ `hasSelected` (propriedade computada booleana que verifica se `option_selected` possui chaves) ⇄ Condições `v-if`/`v-else-if` do template.
+- **Camada API / Backend / DB:** Não aplicável (componente visual isolado do Design System UI em Vue 3 / Vite).
 
 ---
 
-#### Rastreamento Reverso de Dados (UI ⇄ Store ⇄ API/Rotas ⇄ Controller/Service ⇄ DB)
+## Arquivos Afetados
 
-- **UI (Apresentação / DOM):** `.tab-placeholder-select` e `.value-tag-div` dentro de `.p-select-label` em [MaxTagSelect.vue](file:///home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-implement-issue-58/src/components/MaxTagSelect.vue#L1-L48).
-- **Estado Reativo do Componente:** `temp_value` (`ref`) sincronizado com `props.modelValue` via watchers, e `option_selected` (`computed`) que busca o item em `props.options` / `props.groupOptions` por `optionValue`.
-- **Formulários / Consumidores:** Telas e modais da aplicação que vinculam campos `v-model="form.status"` com `options="[{ value: 0, name: 'Inativo' }, { value: 1, name: 'Ativo' }]"` ou flags booleanas.
-- **Store (Pinia):** Estados globais ou locais contendo modelos com campos numéricos (`0`) ou booleanos (`false`).
-- **API / Rotas / Controller / DB:** Respostas JSON de endpoints REST contendo colunas do banco de dados tipadas como `tinyint(1)`, `integer` ou `boolean` (`0`, `false`). O front-end precisa tratar esses dados como valores selecionados válidos.
+1. [src/components/MaxTagSelect.vue](file:///home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-implement-issue-58/src/components/MaxTagSelect.vue) — Componente principal (correção da condição do placeholder, criação da computed `hasSelected` e ajuste de ramificação no template).
+2. [tests/components/MaxTagSelect.test.ts](file:///home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-implement-issue-58/tests/components/MaxTagSelect.test.ts) — Suíte de testes unitários (inclusão de asserções cobrindo `0`, `false`, `null`, `undefined`, `''`, `isButton: true` e ausência de `MaxIconButton` quando `isButton: false` sem seleção).
 
 ---
 
-### Arquivos Afetados
+## Execuções Propostas
 
-| Arquivo | Descrição da Modificação |
-|---------|--------------------------|
-| [src/components/MaxTagSelect.vue](file:///home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-implement-issue-58/src/components/MaxTagSelect.vue) | Ajuste na condição de exibição do placeholder (não ocultar para `0`/`false`) e inclusão da guarda `hasSelected` para `.value-tag-div`. |
-| [tests/components/MaxTagSelect.test.ts](file:///home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-implement-issue-58/tests/components/MaxTagSelect.test.ts) | Adição de novos casos de teste TDD cobrindo `modelValue: 0`, `modelValue: false`, `modelValue: ''` e `modelValue: null`. |
-
----
-
-### Execuções Propostas
-
-#### Passo 1: Adicionar propriedade computada `hasSelected`
-No bloco `<script setup lang="ts">` de [src/components/MaxTagSelect.vue](file:///home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-implement-issue-58/src/components/MaxTagSelect.vue):
-```ts
-const hasSelected = computed(() => Boolean(option_selected.value && Object.keys(option_selected.value).length > 0));
-```
-
-#### Passo 2: Corrigir a condição de renderização do placeholder (Linha 3)
-Substituir a verificação que usa falsy check por uma verificação explícita de nulidade/vazio:
+### 1. Correção da Checagem de Placeholder
+Em [src/components/MaxTagSelect.vue:L3](file:///home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-implement-issue-58/src/components/MaxTagSelect.vue#L3), alterar a checagem de falsy para verificação estrita de nulidade/vazio:
 ```html
 <div v-if="attrs.placeholder !== undefined && (temp_value === null || temp_value === undefined || temp_value === '')" class="tab-placeholder-select">
     {{ attrs.placeholder }}
 </div>
 ```
 
-#### Passo 3: Condicionar a renderização de `.value-tag-div` ao `hasSelected` (Linha 26)
-Garantir que a tag de valor só seja desenhada quando houver uma opção válida selecionada:
+### 2. Criação da Propriedade Computada `hasSelected`
+No script de [src/components/MaxTagSelect.vue](file:///home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-implement-issue-58/src/components/MaxTagSelect.vue), definir a propriedade computada `hasSelected` logo após `option_selected`:
+```typescript
+const hasSelected = computed(() => Boolean(option_selected.value && Object.keys(option_selected.value).length > 0));
+```
+
+### 3. Ajuste Cirúrgico na Renderização do Slot `#value`
+No template de [src/components/MaxTagSelect.vue:L20-46](file:///home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-implement-issue-58/src/components/MaxTagSelect.vue#L20-L46), estruturar as condições do slot `#value`:
+- Aplicar `v-if="!isButton && hasSelected"` na `div.value-tag-div`.
+- Aplicar `v-else-if="isButton"` na `div` que encapsula o `<MaxIconButton>`.
 ```html
-<div
-    class="value-tag-div"
-    :style="getStyleColor(option_selected, false, true)"
-    :color-string="getColorString(option_selected)"
-    v-if="!isButton && hasSelected"
->
+<div class="p-select-label">
+    <slot name="value">
+        <div
+            class="value-tag-div"
+            :style="getStyleColor(option_selected, false, true)"
+            :color-string="getColorString(option_selected)"
+            v-if="!isButton && hasSelected"
+        >
+            <MaxIcon
+                :icon="option_selected?.icon ?? null"
+                :size="option_selected?.icon_size ?? 1.4"
+                v-if="option_selected.icon"
+                :color="getStyleColor(option_selected, false, true).color"
+            />
+            <div
+                class="tag-value-text"
+                :style="{ color: getStyleColor(option_selected, false, true).color }"
+            >
+                {{ option_selected?.[props.optionName] ?? option_selected?.name ?? option_selected?.label }}
+            </div>
+            <slot name="btn-right"></slot>
+        </div>
+        <div v-else-if="isButton">
+            <MaxIconButton :icon="props.i ?? props.icon ?? props.iconLeft" :size="option_selected?.icon_size ?? 1.8" />
+        </div>
+    </slot>
+</div>
 ```
 
 ---
 
-### Especificação de Teste TDD (Red-Green)
+## Especificação de Teste TDD (Red-Green)
 
-Arquivo: [tests/components/MaxTagSelect.test.ts](file:///home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-implement-issue-58/tests/components/MaxTagSelect.test.ts)
+Arquivo de teste: [tests/components/MaxTagSelect.test.ts](file:///home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-implement-issue-58/tests/components/MaxTagSelect.test.ts)
 
-#### Casos de Teste a Implementar:
+### Casos de Teste a Implementar:
+1. **Seleção de valor numérico `0`:**
+   - Montar `MaxTagSelect` com `modelValue: 0`, `options: [{ value: 0, name: 'Opção Zero' }]`, `placeholder: 'Selecione'`.
+   - Asserção: `.tab-placeholder-select` **não existe** (`false`), `.value-tag-div` **existe** (`true`) e o texto exibido é `'Opção Zero'`.
+2. **Seleção de valor booleano `false`:**
+   - Montar `MaxTagSelect` com `modelValue: false`, `options: [{ value: false, name: 'Desativado' }]`, `placeholder: 'Selecione'`.
+   - Asserção: `.tab-placeholder-select` **não existe** (`false`), `.value-tag-div` **existe** (`true`) e o texto exibido é `'Desativado'`.
+3. **Estado vazio com string vazia `''`:**
+   - Montar `MaxTagSelect` com `modelValue: ''`, `placeholder: 'Selecione'`, `options: [...]`.
+   - Asserção: `.tab-placeholder-select` **existe** (`true`) com texto `'Selecione'`, `.value-tag-div` **não existe** (`false`), e `.max-icon-button-stub` **não existe** (`false`).
+4. **Estado desmarcado com `null` e propriedades de ícone:**
+   - Montar `MaxTagSelect` com `modelValue: null`, `iconLeft: 'mdi:user'`, `options: [...]`.
+   - Asserção: `.tab-placeholder-select` **não existe** (`false`), `.value-tag-div` **não existe** (`false`), e `.max-icon-button-stub` **não existe** (`false`).
+5. **Modo Botão (`isButton: true`):**
+   - Montar `MaxTagSelect` com `isButton: true`, `icon: 'mdi:tag'`, `modelValue: null`.
+   - Asserção: `.max-icon-button-stub` **existe** (`true`) e `.value-tag-div` **não existe** (`false`).
 
-```ts
-it('não renderiza placeholder quando modelValue é 0 e exibe a tag correspondente', async () => {
-    const options = [
-        { value: 0, name: 'Opção Zero' },
-        { value: 1, name: 'Opção Um' }
-    ];
-    const wrapper = mountTagSelect({ modelValue: 0, options }, { placeholder: 'Selecione uma opção' });
-    await wrapper.vm.$nextTick();
-
-    expect(wrapper.find('.tab-placeholder-select').exists()).toBe(false);
-    expect(wrapper.find('.value-tag-div').exists()).toBe(true);
-    expect(wrapper.find('.tag-value-text').text()).toBe('Opção Zero');
-});
-
-it('não renderiza placeholder quando modelValue é false e exibe a tag correspondente', async () => {
-    const options = [
-        { value: false, name: 'Desativado' },
-        { value: true, name: 'Ativado' }
-    ];
-    const wrapper = mountTagSelect({ modelValue: false, options }, { placeholder: 'Selecione o estado' });
-    await wrapper.vm.$nextTick();
-
-    expect(wrapper.find('.tab-placeholder-select').exists()).toBe(false);
-    expect(wrapper.find('.value-tag-div').exists()).toBe(true);
-    expect(wrapper.find('.tag-value-text').text()).toBe('Desativado');
-});
-
-it('renderiza placeholder e NÃO renderiza .value-tag-div quando modelValue é vazio ("")', async () => {
-    const options = [{ value: 'a', name: 'Tag A' }];
-    const wrapper = mountTagSelect({ modelValue: '', options }, { placeholder: 'Selecione' });
-    await wrapper.vm.$nextTick();
-
-    expect(wrapper.find('.tab-placeholder-select').exists()).toBe(true);
-    expect(wrapper.find('.tab-placeholder-select').text()).toBe('Selecione');
-    expect(wrapper.find('.value-tag-div').exists()).toBe(false);
-});
-
-it('não renderiza .value-tag-div quando modelValue é null e nenhum placeholder foi informado', async () => {
-    const options = [{ value: 'a', name: 'Tag A' }];
-    const wrapper = mountTagSelect({ modelValue: null, options });
-    await wrapper.vm.$nextTick();
-
-    expect(wrapper.find('.tab-placeholder-select').exists()).toBe(false);
-    expect(wrapper.find('.value-tag-div').exists()).toBe(false);
-});
-```
-
-- **Fase Red:** Antes da modificação no SFC, os testes com `0` e `false` falham na asserção do placeholder (`.tab-placeholder-select` existe indevidamente), e os testes com `''` / `null` falham na asserção da badge (`.value-tag-div` existe indevidamente).
-- **Fase Green:** Após a aplicação das correções cirúrgicas em [MaxTagSelect.vue](file:///home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-implement-issue-58/src/components/MaxTagSelect.vue), todos os novos testes e os 17 testes existentes passam com sucesso.
+### Ciclo Red-Green:
+- **Red:** No código original, testes com `0` e `false` falham pela renderização simultânea do placeholder; testes com `''` falham pela presença de `.value-tag-div`; testes com `null` e `iconLeft` em modo padrão falham caso `v-else-if="isButton"` não seja utilizado (renderizando `<MaxIconButton>` indevidamente).
+- **Green:** Com as correções aplicadas, todos os cenários passam com 100% de conformidade.
 
 ---
 
-### Banco de Dados
-**Nenhuma.** A alteração é estritamente restrita à biblioteca de componentes de interface front-end (Vue 3 / TypeScript).
+## Banco de Dados
+**Nenhuma.** A alteração é restrita exclusivamente a componentes front-end Vue 3 / TypeScript.
 
 ---
 
-### Riscos de Quebra e Não-Regressão
+## Riscos de Quebra e Não-Regressão
 
-- **Contrato de Props e Eventos:** Nenhuma prop, emit ou tipo público foi modificado. `modelValue`, `options`, `groupOptions`, `optionValue`, `optionName`, `optionLabel`, `isButton` e atributos repassados mantêm 100% de compatibilidade retroativa.
-- **Customização de Slots:** O slot `#value` continua funcional. Consumidores que fornecem template customizado para `#value` continuarão sobrescrevendo o render padrão normalmente.
-- **Modo Botão (`isButton`):** O fluxo quando `isButton: true` continua renderizando `MaxIconButton` independentemente da seleção.
-- **Não-Regressão:** A suíte de testes unitários existente (17 testes) continuará passando integralmente.
+- **Contrato de Props e Emits:** Nenhuma alteração de assinatura de props (`modelValue`, `options`, `groupOptions`, `isButton`, `placeholder`, etc.) ou eventos (`update:modelValue`, `before-show`).
+- **Compatibilidade com Slots:** O slot `#value` e o sub-slot `#btn-right` mantêm o mesmo comportamento e hierarquia quando há opção selecionada.
+- **Isolamento de Modo Botão:** O modo `isButton: true` permanece inalterado e funcionando conforme esperado.
+- **Suíte de Testes Existente:** Todos os 17 testes unitários pré-existentes devem continuar passando sem regressão.
 
 ---
 
-### Validação
+## Validação
 
-Execução dos comandos automatizados de validação:
+A validação conclusiva é realizada por meio dos seguintes comandos no terminal:
 
 ```bash
-# Executar a suíte de testes do componente
+# Executar a suíte de testes unitários do MaxTagSelect
 npm test tests/components/MaxTagSelect.test.ts
 
-# Validação estática de tipos TypeScript
+# Checagem estática de tipos TypeScript
 npm run type-check
 
-# Validação de regras de estilo e linting
+# Validação de regras de lint e estilo
 npm run lint
 ```
 
 ---
 
-### Skills Aplicáveis
+## Skills Aplicáveis
 
 - `systematic-debugging-best-practices`
 - `vue-debugging-best-practices`
