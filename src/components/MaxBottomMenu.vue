@@ -207,7 +207,7 @@
         align-items: center;
 
         &:not(.is-curved) {
-            box-shadow: 0 -4px 16px rgb(0 32 58 / 8%), 0 -1px 3px rgb(0 32 58 / 5%);
+            box-shadow: 0 -6px 20px rgb(0 32 58 / 16%), 0 -2px 6px rgb(0 32 58 / 10%);
         }
 
         &.is-curved {
@@ -227,7 +227,7 @@
             width: 100%;
             height: 100%;
             fill: var(--background-25, #fff);
-            filter: drop-shadow(0 -4px 12px rgb(0 32 58 / 12%)) drop-shadow(0 -1px 3px rgb(0 32 58 / 6%));
+            filter: drop-shadow(0 -6px 16px rgb(0 32 58 / 20%)) drop-shadow(0 -2px 4px rgb(0 32 58 / 12%));
         }
 
         .bottom-menu-bar {

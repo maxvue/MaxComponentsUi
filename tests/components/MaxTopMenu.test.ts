@@ -485,18 +485,27 @@ describe('MaxTopMenu Mobile (estilo AgenteDeBolso)', () => {
         expect(wrapper.find('.top-menu-mobile-actions').exists()).toBe(true);
     });
 
-    it('não renderiza o MaxUserSection desktop no mobile e exibe o avatar compacto', () => {
+    it('renderiza o MaxUserSection em modo compacto/mobile no cabeçalho mobile', () => {
         const wrapper = mountWithPinia(MaxTopMenu, { attrs: { screen: 'mobile' } });
 
-        expect(wrapper.findComponent(MaxUserSection).exists()).toBe(false);
+        const userSection = wrapper.findComponent(MaxUserSection);
+        expect(userSection.exists()).toBe(true);
+        expect(userSection.props('onlyAvatar')).toBe(true);
+        expect(userSection.props('screen')).toBe('mobile');
         expect(wrapper.find('.mobile-user-avatar').exists()).toBe(true);
     });
 
-    it('emite evento profile ao clicar no avatar compacto em mobile', async () => {
-        const wrapper = mountWithPinia(MaxTopMenu, { attrs: { screen: 'mobile' } });
+    it('abre o menu do avatar ao clicar no avatar compacto em mobile', async () => {
+        const wrapper = mountWithPinia(MaxTopMenu, { attrs: { screen: 'mobile' }, attachTo: document.body });
+
+        expect(document.querySelector('.max-user-section-overlay')).toBeNull();
 
         await wrapper.find('.mobile-user-avatar').trigger('click');
-        expect(wrapper.emitted('profile')).toHaveLength(1);
+
+        expect(document.querySelector('.max-user-section-overlay')).not.toBeNull();
+        expect(document.querySelector('#overlay_tmenu')).not.toBeNull();
+
+        wrapper.unmount();
     });
 
     it('permite customizar a área de ações via slot mobile-actions', () => {

@@ -31,23 +31,23 @@
                     <slot name="voip"></slot>
                     <slot name="live"></slot>
                     <slot name="user">
-                        <div
-                            class="mobile-user-avatar"
-                            role="button"
-                            tabindex="0"
-                            aria-label="Perfil do usuário"
-                            @click.stop="emit('profile')"
-                            @keydown.enter.stop="emit('profile')"
-                        >
-                            <MaxUserAvatar
-                                v-if="user.data?.id"
-                                :user-id="user.data?.id"
-                                :name="user.data?.name ?? ''"
-                                :image-url="avatarUrl"
-                                :show-tooltip="false"
-                            />
-                            <MaxIcon v-else icon="clarity:avatar-solid" size="1.2" light />
-                        </div>
+                        <MaxUserSection
+                            :name="user.data?.name ?? ''"
+                            :company-name="user.data?.solar_company_name ?? undefined"
+                            :user-id="user.data?.id ?? undefined"
+                            :avatar-url="avatarUrl"
+                            :dark-mode="user.data?.settings?.darkMode === true"
+                            :is-impersonated="isImpersonated"
+                            :version="system.version || undefined"
+                            only-avatar
+                            screen="mobile"
+                            @profile="emit('profile')"
+                            @settings="emit('settings')"
+                            @support="emit('support')"
+                            @toggle-dark-mode="emit('toggleDarkMode')"
+                            @logout="emit('logout')"
+                            @end-impersonate="emit('endImpersonate')"
+                        />
                     </slot>
                 </slot>
             </div>
@@ -112,7 +112,6 @@
     import MaxTopToolbar from './MaxTopToolbar.vue';
     import MaxTopMenuSearchBar from './MaxTopMenuSearchBar.vue';
     import MaxUserSection from './MaxUserSection.vue';
-    import MaxUserAvatar from './MaxUserAvatar.vue';
     import { useSystemStore } from '../stores/useSystem.Store';
     import { useUserStore } from '../stores/useUser.Store';
     import { useTopToolbarStore } from '../stores/useTopToolbar.Store';
@@ -209,7 +208,7 @@
             }
 
             :deep(.max-icon-div) {
-                color: currentColor !important;
+                color: currentcolor !important;
             }
         }
 
@@ -238,7 +237,7 @@
             grid-auto-columns: auto;
             align-items: center;
             justify-content: end;
-            gap: 0.5rem;
+            gap: 1.125rem;
 
             .mobile-user-avatar {
                 display: grid;

@@ -1,6 +1,13 @@
 <template>
-    <div class="user-section" ref="root_el" @click.stop="toggle" pointer>
-        <div class="user-text-div">
+    <div
+        class="user-section"
+        :class="{ 'only-avatar': isCompact }"
+        :screen="props.screen"
+        ref="root_el"
+        @click.stop="toggle"
+        pointer
+    >
+        <div v-if="!isCompact" class="user-text-div">
             <div v-if="props.companyName" class="solar-company-text">
                 {{ props.companyName }}
             </div>
@@ -8,10 +15,16 @@
                 {{ props.name }}
             </div>
         </div>
-        <div class="button-avatar">
-            <MaxUserAvatar :image-url="props.avatarUrl" :name="props.name" :show-tooltip="false" v-if="props.userId" />
+        <div class="button-avatar" :class="{ 'mobile-user-avatar': isCompact }">
+            <MaxUserAvatar
+                v-if="props.userId || props.avatarUrl"
+                :image-url="props.avatarUrl"
+                :name="props.name"
+                :show-tooltip="false"
+            />
+            <MaxIcon v-else icon="clarity:avatar-solid" size="1.2" light />
         </div>
-        <div v-if="props.isImpersonated" class="impersonated-btn" @click.stop="onEndImpersonate">
+        <div v-if="props.isImpersonated && !isCompact" class="impersonated-btn" @click.stop="onEndImpersonate">
             <div class="impersonated-btn-grid">
                 <MaxIcon i="ci:user-close" icon-blue size="1.3" />
 
@@ -90,6 +103,10 @@
         labelLogout?: string;
         labelEndImpersonate?: string;
         labelEndImpersonateSub?: string;
+        /** Exibe apenas o avatar (modo compacto/mobile) */
+        onlyAvatar?: boolean;
+        /** Tipo de tela: 'desktop' | 'mobile' */
+        screen?: 'desktop' | 'mobile';
     }>(), {
         labelProfile: 'Meu perfil',
         labelSettings: 'Configurações',
@@ -98,8 +115,12 @@
         labelSupport: 'Suporte',
         labelLogout: 'Sair',
         labelEndImpersonate: 'SAIR',
-        labelEndImpersonateSub: '(RETORNAR)'
+        labelEndImpersonateSub: '(RETORNAR)',
+        onlyAvatar: false,
+        screen: 'desktop'
     });
+
+    const isCompact = computed(() => props.onlyAvatar || props.screen === 'mobile');
 
     const emit = defineEmits<{
         profile: [];
@@ -132,7 +153,7 @@
 
 
         if (left < 10) left = 10;
-
+        if (window_width.value && left + (width_el.value || 180) > window_width.value - 10) left = Math.max(10, window_width.value - (width_el.value || 180) - 10);
 
         return { top, left };
     });
@@ -230,6 +251,41 @@
         grid-auto-columns: auto 50px;
         gap: 1rem;
         position: relative;
+
+        &.only-avatar,
+        &[screen='mobile'] {
+            display: flex;
+            place-items: center;
+            justify-content: center;
+            width: auto;
+            height: auto;
+            gap: 0;
+
+            .button-avatar {
+                grid-column: 1;
+                width: 34px;
+                height: 34px;
+                border-radius: 50%;
+                overflow: hidden;
+                cursor: pointer;
+                transition: opacity 0.18s ease;
+
+                .p-avatar,
+                .max-user-avatar {
+                    width: 34px;
+                    height: 34px;
+                }
+
+                &:hover {
+                    opacity: 0.85;
+                }
+
+                &:focus-visible {
+                    outline: 2px solid var(--blue-500, #38bdf8);
+                    outline-offset: 2px;
+                }
+            }
+        }
 
         .user-text-div {
             grid-column: 1;

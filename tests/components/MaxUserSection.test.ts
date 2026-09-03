@@ -136,4 +136,19 @@ describe('MaxUserSection', () => {
         const labels = Array.from(document.body.querySelectorAll('.main-item-menu-div')).map((d) => d.textContent?.trim());
         expect(labels).toEqual(['Custom']);
     });
+
+    it('oculta o bloco de texto e botão de impersonate em modo onlyAvatar ou screen mobile', () => {
+        const wrapper = mountSection({ name: 'João', userId: 1, onlyAvatar: true, isImpersonated: true }, false);
+        expect(wrapper.find('.user-text-div').exists()).toBe(false);
+        expect(wrapper.find('.impersonated-btn').exists()).toBe(false);
+        expect(wrapper.find('.button-avatar.mobile-user-avatar').exists()).toBe(true);
+    });
+
+    it('abre o menu ao clicar no avatar em modo onlyAvatar', async () => {
+        const wrapper = mountSection({ name: 'João', userId: 1, onlyAvatar: true }, false);
+        expect(document.body.querySelector('.max-user-section-overlay')).toBeNull();
+
+        await wrapper.find('.button-avatar').trigger('click');
+        expect(document.body.querySelector('.max-user-section-overlay')).not.toBeNull();
+    });
 });
