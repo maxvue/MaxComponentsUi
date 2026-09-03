@@ -18,6 +18,9 @@ export { default as MaxDoneIcon } from './components/MaxDoneIcon.vue';
 export { default as MaxWaitIcon } from './components/MaxWaitIcon.vue';
 export { default as MaxErrorIcon } from './components/MaxErrorIcon.vue';
 export { default as MaxGrid } from './components/MaxGrid.vue';
+export { default as MaxDividers } from './components/MaxDividers.vue';
+export { default as MaxDivider } from './components/MaxDividers.vue';
+export type { MaxDividersProps } from './components/MaxDividers.vue';
 
 // Button
 export { default as MaxButton } from './components/MaxButton.vue';
