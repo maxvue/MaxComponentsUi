@@ -12,7 +12,7 @@
                     <div
                         ref="panel_el"
                         class="max-drawer"
-                        :class="`max-drawer-${props.position}`"
+                        :class="[`max-drawer-${props.position}`, { 'max-drawer-no-padding': props.noPadding }, $attrs.class]"
                         role="complementary"
                         aria-modal="true"
                         @keydown="trap.onKeydown"
@@ -61,6 +61,10 @@
     import { computed, watch, onBeforeUnmount, useTemplateRef } from 'vue';
     import MaxIcon from './MaxIcon.vue';
 
+    defineOptions({
+        inheritAttrs: false
+    });
+
     const props = withDefaults(defineProps<{
         /** Controla a visibilidade. Funciona com v-model:visible ou como prop controlada. */
         visible?: boolean;
@@ -86,6 +90,8 @@
         baseZIndex?: number;
         /** Calcula o z-index automaticamente a partir do baseZIndex. */
         autoZIndex?: boolean;
+        /** Desativa o padding padrão (1rem) de .max-drawer-content. */
+        noPadding?: boolean;
     }>(), {
         visible: false,
         position: 'left',
@@ -98,7 +104,8 @@
         closeIcon: undefined,
         closeButtonProps: () => ({ severity: 'secondary', text: true, rounded: true }),
         baseZIndex: 0,
-        autoZIndex: true
+        autoZIndex: true,
+        noPadding: false
     });
 
     const emit = defineEmits<{
@@ -282,6 +289,12 @@
                 flex: 1;
                 overflow: auto;
                 padding: 1rem;
+            }
+
+            &.max-drawer-no-padding {
+                .max-drawer-content {
+                    padding: 0 !important;
+                }
             }
 
             .max-drawer-footer {

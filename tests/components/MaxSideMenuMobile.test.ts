@@ -148,11 +148,17 @@ describe('MaxSideMenuMobile', () => {
         expect(system.side_menu_open).toBe(false);
     });
 
-    it('emite toggleDarkMode ao clicar no botão de tema', async () => {
-        const wrapper = mountWithPinia(MaxSideMenuMobile);
-        await wrapper.find('.mobile-footer-btn:not(.logout)').trigger('click');
+    it('oculta o botão de tema por padrão e o exibe quando showThemeToggle é true', async () => {
+        const wrapperDefault = mountWithPinia(MaxSideMenuMobile);
+        expect(wrapperDefault.findAll('.mobile-footer-btn:not(.logout)')).toHaveLength(0);
 
-        expect(wrapper.emitted('toggleDarkMode')).toHaveLength(1);
+        const wrapperEnabled = mountWithPinia(MaxSideMenuMobile, {
+            props: { showThemeToggle: true }
+        });
+        const themeBtn = wrapperEnabled.find('.mobile-footer-btn:not(.logout)');
+        expect(themeBtn.exists()).toBe(true);
+        await themeBtn.trigger('click');
+        expect(wrapperEnabled.emitted('toggleDarkMode')).toHaveLength(1);
     });
 
     it('renderiza o slot switcher quando fornecido', () => {
@@ -162,5 +168,14 @@ describe('MaxSideMenuMobile', () => {
 
         expect(wrapper.find('.switcher .profile-switcher-stub').exists()).toBe(true);
         expect(wrapper.text()).toContain('Trocar Perfil');
+    });
+
+    it('configura o MaxDrawer com noPadding e baseZIndex 1000', () => {
+        const wrapper = mountWithPinia(MaxSideMenuMobile);
+        const drawer = wrapper.findComponent({ name: 'MaxDrawer' });
+
+        expect(drawer.exists()).toBe(true);
+        expect(drawer.props('noPadding')).toBe(true);
+        expect(drawer.props('baseZIndex')).toBe(1000);
     });
 });

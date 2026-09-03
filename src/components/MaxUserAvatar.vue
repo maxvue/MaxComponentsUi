@@ -1,6 +1,6 @@
 <template>
     <div
-        class="p-avatar max-user-avatar"
+        class="p-avatar p-avatar-circle max-user-avatar"
         :class="{ removable: remove, 'has-fallback-icon': !props.imageUrl || has_image_error }"
         @click="onAvatarClick"
         v-tooltip.top="showTooltip ? (remove ? (labelRemove ?? name) : name) : null"
@@ -12,12 +12,14 @@
             :alt="name ?? ''"
             @error="has_image_error = true"
         />
-        <MaxIcon
-            v-else
-            icon="clarity:avatar-solid"
-            size="1.2"
-            class="max-user-avatar__icon"
-        />
+        <div v-else class="max-user-avatar__icon-wrapper">
+            <MaxIcon
+                icon="clarity:avatar-solid"
+                class="max-user-avatar__icon"
+                size="72%"
+                color="#fff"
+            />
+        </div>
     </div>
 </template>
 
@@ -79,8 +81,9 @@
         justify-content: center;
         width: 2rem;
         height: 2rem;
-        border-radius: 50%;
-        overflow: hidden;
+        border-radius: 50% !important;
+        overflow: hidden !important;
+        aspect-ratio: 1 / 1;
         font-size: 0.875rem;
         line-height: 1;
         user-select: none;
@@ -92,15 +95,46 @@
         height: 100%;
         object-fit: cover;
         display: block;
+        border-radius: 50%;
     }
 
-    .max-user-avatar__icon {
+    .max-user-avatar__icon-wrapper {
         width: 100%;
         height: 100%;
-        display: grid;
-        place-items: center;
-        background-color: var(--max-user-avatar-background, #0a5878);
+        border-radius: 50% !important;
+        overflow: hidden !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--blue-750, #1e3a5f);
         color: var(--max-user-avatar-color, #fff);
+
+        .max-user-avatar__icon {
+            width: 72% !important;
+            height: 72% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            color: #fff !important;
+
+            .max-icon {
+                width: 100% !important;
+                height: 100% !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                color: #fff !important;
+            }
+
+            svg {
+                width: 100% !important;
+                height: 100% !important;
+                max-width: 100% !important;
+                max-height: 100% !important;
+                display: block;
+                transform: none;
+            }
+        }
     }
 
     .p-avatar.removable {

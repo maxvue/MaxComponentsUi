@@ -13,7 +13,7 @@
                 <MaxIcon icon="uil:bars" size="1.3" light />
             </div>
 
-            <div class="top-menu-mobile-center">
+            <div id="top_menu_mobile_center" class="top-menu-mobile-center">
                 <slot name="mobile-center">
                     <span v-if="system.top_menu_title" class="mobile-header-title">{{ system.top_menu_title }}</span>
                     <slot v-else name="status"></slot>
@@ -31,23 +31,23 @@
                     <slot name="voip"></slot>
                     <slot name="live"></slot>
                     <slot name="user">
-                        <div
-                            class="mobile-user-avatar"
-                            role="button"
-                            tabindex="0"
-                            aria-label="Perfil do usuário"
-                            @click.stop="emit('profile')"
-                            @keydown.enter.stop="emit('profile')"
-                        >
-                            <MaxUserAvatar
-                                v-if="user.data?.id"
-                                :user-id="user.data?.id"
-                                :name="user.data?.name ?? ''"
-                                :image-url="avatarUrl"
-                                :show-tooltip="false"
-                            />
-                            <MaxIcon v-else icon="clarity:avatar-solid" size="1.2" light />
-                        </div>
+                        <MaxUserSection
+                            :name="user.data?.name ?? ''"
+                            :company-name="user.data?.solar_company_name ?? undefined"
+                            :user-id="user.data?.id ?? undefined"
+                            :avatar-url="avatarUrl"
+                            :dark-mode="user.data?.settings?.darkMode === true"
+                            :is-impersonated="isImpersonated"
+                            :version="system.version || undefined"
+                            only-avatar
+                            screen="mobile"
+                            @profile="emit('profile')"
+                            @settings="emit('settings')"
+                            @support="emit('support')"
+                            @toggle-dark-mode="emit('toggleDarkMode')"
+                            @logout="emit('logout')"
+                            @end-impersonate="emit('endImpersonate')"
+                        />
                     </slot>
                 </slot>
             </div>
@@ -112,7 +112,6 @@
     import MaxTopToolbar from './MaxTopToolbar.vue';
     import MaxTopMenuSearchBar from './MaxTopMenuSearchBar.vue';
     import MaxUserSection from './MaxUserSection.vue';
-    import MaxUserAvatar from './MaxUserAvatar.vue';
     import { useSystemStore } from '../stores/useSystem.Store';
     import { useUserStore } from '../stores/useUser.Store';
     import { useTopToolbarStore } from '../stores/useTopToolbar.Store';
@@ -196,7 +195,8 @@
         .btn_side_menu {
             display: grid;
             place-items: center;
-            min-width: 44px;
+            width: 38px;
+            min-width: 38px;
             min-height: 44px;
             border-radius: 999px;
             font-size: 1.3rem;
@@ -209,7 +209,7 @@
             }
 
             :deep(.max-icon-div) {
-                color: currentColor !important;
+                color: currentcolor !important;
             }
         }
 
@@ -238,14 +238,23 @@
             grid-auto-columns: auto;
             align-items: center;
             justify-content: end;
-            gap: 0.5rem;
+            gap: 1.125rem;
+            padding-left: 5px;
 
             .mobile-user-avatar {
                 display: grid;
                 place-items: center;
+                width: 34px;
+                height: 34px;
+                border-radius: 50%;
+                overflow: hidden;
                 cursor: pointer;
-                border-radius: 999px;
                 transition: opacity 0.18s ease;
+
+                .max-user-avatar {
+                    width: 34px;
+                    height: 34px;
+                }
 
                 &:hover {
                     opacity: 0.85;
@@ -281,7 +290,7 @@
                 grid-column: 1;
                 padding: 0 !important;
                 place-items: center start;
-                grid-template-columns: 44px 1fr auto !important;
+                grid-template-columns: 38px 1fr auto !important;
                 gap: 0.5rem !important;
                 height: var(--top-menu-height, 60px) !important;
             }

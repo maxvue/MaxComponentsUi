@@ -161,6 +161,20 @@ describe('MaxBottomMenu', () => {
             expect(icon.props('color')).toBe('currentColor');
         });
     });
+
+    it('aplica a classe is-curved apenas quando há FAB e curved é true, e não aplica quando sem FAB', () => {
+        const wrapperPlano = mount(MaxBottomMenu);
+        expect(wrapperPlano.classes()).toContain('bottom-menu');
+        expect(wrapperPlano.classes()).not.toContain('is-curved');
+        expect(wrapperPlano.find('.img-background').exists()).toBe(false);
+
+        const wrapperCurvo = mount(MaxBottomMenu, {
+            props: { showFab: true, curved: true }
+        });
+        expect(wrapperCurvo.classes()).toContain('bottom-menu');
+        expect(wrapperCurvo.classes()).toContain('is-curved');
+        expect(wrapperCurvo.find('.img-background').exists()).toBe(true);
+    });
 });
 
 describe('MaxContainerApp', () => {

@@ -3,6 +3,8 @@
         v-model:visible="system.side_menu_open"
         position="left"
         :show-close-icon="false"
+        :base-z-index="1000"
+        no-padding
         class="max-side-menu-mobile-drawer"
     >
         <div class="mobile-side-menu">
@@ -56,7 +58,12 @@
             <!-- Rodapé com ações de sessão e suporte -->
             <div class="mobile-menu-footer">
                 <div class="mobile-footer-actions">
-                    <button type="button" class="mobile-footer-btn" @click="emitToggleDarkMode">
+                    <button
+                        v-if="props.showThemeToggle"
+                        type="button"
+                        class="mobile-footer-btn"
+                        @click="emitToggleDarkMode"
+                    >
                         <MaxIcon :icon="isDark ? 'solar:sun-2-bold-duotone' : 'solar:moon-bold-duotone'" size="1.2" />
                         <span>{{ isDark ? 'Tema Claro' : 'Tema Escuro' }}</span>
                     </button>
@@ -89,14 +96,18 @@
         items: any[];
     }
 
-    const props = defineProps<{
+    const props = withDefaults(defineProps<{
         /** Itens ou grupos customizados de navegação. */
         groups?: MenuGroup[];
         /** Lista de itens não agrupados (opcional). */
         items?: any[];
         /** Caminho base do avatar do usuário. Padrão: `/avatar/`. */
         avatarPath?: string;
-    }>();
+        /** Exibe o alternador de temas claro/escuro no rodapé. Padrão false (oculto temporariamente). */
+        showThemeToggle?: boolean;
+    }>(), {
+        showThemeToggle: false
+    });
 
     const emit = defineEmits<{
         profile: [];
@@ -186,14 +197,13 @@
 </script>
 
 <style lang="scss">
+    .max-drawer.max-side-menu-mobile-drawer,
     .max-side-menu-mobile-drawer {
-        .max-drawer {
-            width: min(88%, 340px) !important;
-            padding: 0;
-            background-color: var(--background-0, #fff);
-            display: flex;
-            flex-direction: column;
-        }
+        width: min(88%, 340px) !important;
+        padding: 0;
+        background-color: var(--background-0, #fff);
+        display: flex;
+        flex-direction: column;
 
         .max-drawer-content {
             padding: 0 !important;
@@ -230,6 +240,11 @@
                 display: grid;
                 place-items: center;
                 overflow: hidden;
+
+                :deep(.max-user-avatar) {
+                    width: 100%;
+                    height: 100%;
+                }
             }
 
             .mobile-profile-details {
