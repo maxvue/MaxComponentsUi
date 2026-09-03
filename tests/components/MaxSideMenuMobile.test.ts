@@ -154,4 +154,13 @@ describe('MaxSideMenuMobile', () => {
 
         expect(wrapper.emitted('toggleDarkMode')).toHaveLength(1);
     });
+
+    it('renderiza o slot switcher quando fornecido', () => {
+        const wrapper = mountWithPinia(MaxSideMenuMobile, {
+            slots: { switcher: '<div class="profile-switcher-stub">Trocar Perfil</div>' }
+        });
+
+        expect(wrapper.find('.switcher .profile-switcher-stub').exists()).toBe(true);
+        expect(wrapper.text()).toContain('Trocar Perfil');
+    });
 });

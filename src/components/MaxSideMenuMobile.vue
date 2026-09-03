@@ -26,6 +26,11 @@
                 </button>
             </div>
 
+            <!-- Slot de switcher / seleção de perfis (estilo AgenteDeBolso) -->
+            <div v-if="$slots.switcher" class="switcher">
+                <slot name="switcher"></slot>
+            </div>
+
             <!-- Grupos e itens de navegação -->
             <div class="mobile-menu-content">
                 <div v-for="(group, gIdx) in menuGroups" :key="group.title ?? gIdx" class="mobile-menu-group">
@@ -259,6 +264,10 @@
                 cursor: pointer;
                 padding: 0;
             }
+        }
+
+        .switcher {
+            padding: 0.3rem 1rem 0;
         }
 
         .mobile-menu-content {

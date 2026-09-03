@@ -2,6 +2,7 @@
     <div class="container-app-mobile" v-bind="attrs">
         <MaxTopMenu
             v-bind="attrs"
+            screen="mobile"
             :add-items="props.addItems"
             :avatar-path="props.avatarPath"
             @profile="emit('profile')"
@@ -26,6 +27,7 @@
                 v-bind="attrs"
                 :tabs="props.bottomTabs"
                 :add-items="props.addItems"
+                :show-labels="props.bottomShowLabels"
                 @fab-click="emit('fabClick')"
             />
         </slot>
@@ -41,7 +43,11 @@
                 @support="emit('support')"
                 @toggle-dark-mode="emit('toggleDarkMode')"
                 @logout="emit('logout')"
-            />
+            >
+                <template v-if="$slots.switcher" #switcher="slotProps">
+                    <slot name="switcher" v-bind="slotProps ?? {}"></slot>
+                </template>
+            </MaxSideMenuMobile>
         </slot>
     </div>
 </template>
@@ -55,13 +61,15 @@
     import type { MenuGroup } from './MaxSideMenuMobile.vue';
 
     /** Slots repassados ao `MaxTopMenu`. */
-    const TOP_MENU_SLOTS = ['status', 'search', 'add', 'chat', 'bugs', 'notifications', 'voip', 'live', 'user', 'mobile-center'] as const;
+    const TOP_MENU_SLOTS = ['status', 'search', 'add', 'chat', 'bugs', 'notifications', 'voip', 'live', 'user', 'mobile-center', 'mobile-actions'] as const;
 
     const props = defineProps<{
         /** Itens do menu "Adicionar Novo" do topo e do FAB inferior. */
         addItems?: Array<Record<string, any>>;
         /** Abas do menu inferior (mobile). Omitido, usa o padrão do `MaxBottomMenu`. */
         bottomTabs?: BottomTab[];
+        /** Exibe rótulos textuais no menu inferior. Padrão false (estilo AgenteDeBolso). */
+        bottomShowLabels?: boolean;
         /** Grupos de menu para a gaveta lateral. */
         sideMenuGroups?: MenuGroup[];
         /** Itens de menu simples para a gaveta lateral. */

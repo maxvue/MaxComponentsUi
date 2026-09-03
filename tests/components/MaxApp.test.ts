@@ -24,6 +24,7 @@ import MaxApp from '../../src/components/MaxApp.vue';
 import MaxPageLayout from '../../src/components/MaxPageLayout.vue';
 import { useUserStore } from '../../src/stores/useUser.Store';
 import { useLoginStore } from '../../src/stores/useLogin.Store';
+import { useSystemStore } from '../../src/stores/useSystem.Store';
 import { getMaxAppConfig, resetMaxAppConfig } from '../../src/helpers/maxAppConfig';
 
 let pinia: Pinia;
@@ -33,7 +34,7 @@ const mountApp = (options: Record<string, any> = {}) => mount(MaxApp, {
     global: {
         ...(options.global ?? {}),
         plugins: [pinia],
-        stubs: { MaxLogo: { template: '<div class="max-logo-stub" />' }, ...(options.global?.stubs ?? {}) }
+        stubs: { teleport: true, MaxLogo: { template: '<div class="max-logo-stub" />' }, ...(options.global?.stubs ?? {}) }
     }
 });
 
@@ -175,6 +176,18 @@ describe('MaxApp', () => {
 
             expect(wrapper.find('.usuario-custom').exists()).toBe(true);
         });
+
+        it.each(['mobile-center', 'mobile-actions', 'switcher'])('repassa o slot mobile %s ao layout', (slot) => {
+            loadUser();
+            if (slot === 'switcher') useSystemStore().side_menu_open = true;
+
+            const wrapper = mountApp({
+                props: { screen: 'mobile' },
+                slots: { [slot]: `<div class="slot-${slot}">x</div>` }
+            });
+
+            expect(wrapper.find(`.slot-${slot}`).exists()).toBe(true);
+        });
     });
 
     describe('configuração por props', () => {
@@ -277,6 +290,14 @@ describe('MaxApp', () => {
             const layout = wrapper.findComponent(MaxPageLayout);
             expect(layout.props('bottomTabs')).toEqual(bottomTabs);
             expect(layout.props('sideMenuGroups')).toEqual(sideMenuGroups);
+        });
+
+        it('repassa bottomShowLabels ao layout', () => {
+            loadUser();
+
+            const wrapper = mountApp({ props: { bottomShowLabels: true } });
+
+            expect(wrapper.findComponent(MaxPageLayout).props('bottomShowLabels')).toBe(true);
         });
 
         it('propaga o evento fabClick do layout', async () => {

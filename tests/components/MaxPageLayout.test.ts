@@ -26,6 +26,7 @@ import MaxSideMenu from '../../src/components/MaxSideMenu.vue';
 import MaxPageContent from '../../src/components/MaxPageContent.vue';
 import MaxBottomMenu from '../../src/components/MaxBottomMenu.vue';
 import MaxPageMobileLayout from '../../src/components/MaxPageMobileLayout.vue';
+import { useSystemStore } from '../../src/stores/useSystem.Store';
 
 let pinia: Pinia;
 
@@ -149,5 +150,24 @@ describe('MaxPageLayout', () => {
                 expect(wrapper.emitted(evento)).toHaveLength(1);
             }
         );
+
+        it('repassa a prop bottomShowLabels ao layout mobile', () => {
+            const wrapper = mountLayout({
+                props: { screen: 'mobile', bottomShowLabels: true }
+            });
+
+            expect(wrapper.findComponent(MaxPageMobileLayout).props('bottomShowLabels')).toBe(true);
+        });
+
+        it.each(['mobile-center', 'mobile-actions', 'switcher'])('repassa o slot mobile %s ao layout mobile', (slot) => {
+            if (slot === 'switcher') useSystemStore().side_menu_open = true;
+
+            const wrapper = mountLayout({
+                props: { screen: 'mobile' },
+                slots: { [slot]: `<div class="slot-${slot}">x</div>` }
+            });
+
+            expect(wrapper.find(`.slot-${slot}`).exists()).toBe(true);
+        });
     });
 });
