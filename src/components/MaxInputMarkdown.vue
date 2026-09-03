@@ -610,8 +610,8 @@
                 }
 
                 // Estilização diferenciada para links de PDF (card/chip com ícone de documento)
-                &[href*=".pdf"],
-                &[href$=".pdf"] {
+                &[href*='.pdf'],
+                &[href$='.pdf'] {
                     display: inline-flex;
                     align-items: center;
                     gap: 6px;

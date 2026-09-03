@@ -227,10 +227,11 @@
                 border-bottom: 1px solid var(--background-300);
             }
 
-            &.spread{
+            &.spread {
                 .max-tabs-title-items {
                     width: 100%;
-                    .max-tab-item-title{
+
+                    .max-tab-item-title {
                         flex-grow: 1 !important;
                     }
                 }

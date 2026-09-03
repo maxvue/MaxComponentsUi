@@ -312,4 +312,20 @@ describe('MaxDividers', () => {
         expect(emittedSizes[0]).toBe(40);
         expect(emittedSizes[1]).toBe(60);
     });
+
+    it('aplica offset de gap/gutter no cálculo de tamanhos para evitar overflow', () => {
+        const wrapper = mount(MaxDividers, {
+            props: {
+                sizes: [50, 50],
+                gap: '1rem',
+                mobile: false
+            }
+        });
+
+        const firstPane = wrapper.find('.max-divider-pane--first');
+        const secondPane = wrapper.find('.max-divider-pane--second');
+
+        expect(firstPane.attributes('style')).toContain('calc(50% -');
+        expect(secondPane.attributes('style')).toContain('calc(50% -');
+    });
 });

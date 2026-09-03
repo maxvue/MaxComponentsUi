@@ -277,7 +277,7 @@
     });
 
     const rootStyle = computed(() => {
-        const gapVal = typeof props.gap === 'number' ? `${props.gap}px` : props.gap;
+        const gapVal = props.resizable ? '0px' : (typeof props.gap === 'number' ? `${props.gap}px` : props.gap);
         return {
             '--max-divider-gap': gapVal
         };
@@ -306,13 +306,14 @@
 
         if (parsedSizes.value) {
             const p1 = parsedSizes.value[0];
+            const offset = props.resizable ? '3px' : 'calc(var(--max-divider-gap, 1rem) / 2)';
             if (isColumn.value) return {
-                flex: `0 0 ${p1}%`,
-                maxWidth: `${p1}%`
+                flex: `0 0 calc(${p1}% - ${offset})`,
+                maxWidth: `calc(${p1}% - ${offset})`
             };
             return {
-                flex: `0 0 ${p1}%`,
-                maxHeight: `${p1}%`
+                flex: `0 0 calc(${p1}% - ${offset})`,
+                maxHeight: `calc(${p1}% - ${offset})`
             };
         }
 
@@ -334,13 +335,14 @@
 
         if (parsedSizes.value) {
             const p2 = parsedSizes.value[1];
+            const offset = props.resizable ? '3px' : 'calc(var(--max-divider-gap, 1rem) / 2)';
             if (isColumn.value) return {
-                flex: `0 0 ${p2}%`,
-                maxWidth: `${p2}%`
+                flex: `0 0 calc(${p2}% - ${offset})`,
+                maxWidth: `calc(${p2}% - ${offset})`
             };
             return {
-                flex: `0 0 ${p2}%`,
-                maxHeight: `${p2}%`
+                flex: `0 0 calc(${p2}% - ${offset})`,
+                maxHeight: `calc(${p2}% - ${offset})`
             };
         }
 
@@ -541,8 +543,8 @@
             display: flex;
             align-items: center;
             padding: 0.5rem 0.75rem;
-            border-bottom: 1px solid var(--gray-200, #e5e7eb);
-            background-color: var(--surface-card, #fff);
+            border-bottom: 1px solid var(--background-200, #e5e7eb);
+            background-color: var(--background-0, #fff);
             flex-shrink: 0;
             z-index: 10;
         }
@@ -560,14 +562,14 @@
             justify-content: center;
             padding: 0.375rem;
             border-radius: 0.5rem;
-            border: 1px solid var(--gray-200, #e5e7eb);
+            border: 1px solid var(--background-200, #e5e7eb);
             background-color: var(--background-0, #f8fafc);
-            color: var(--gray-700, #374151);
+            color: var(--background-800, #374151);
             cursor: pointer;
             transition: background-color 0.15s ease, transform 0.1s ease;
 
             &:hover {
-                background-color: var(--gray-100, #f3f4f6);
+                background-color: var(--background-100, #f3f4f6);
             }
 
             &:active {
@@ -578,7 +580,7 @@
         .max-divider-mobile-title {
             font-size: 0.875rem;
             font-weight: 600;
-            color: var(--gray-800, #1f2937);
+            color: var(--background-900, #1f2937);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;

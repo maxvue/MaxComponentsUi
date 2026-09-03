@@ -255,7 +255,7 @@
             color: var(--background-600, #64748b);
             transition: color 0.18s ease;
 
-            :deep(.max-icon-div) {
+            .max-icon-div {
                 color: inherit !important;
             }
 

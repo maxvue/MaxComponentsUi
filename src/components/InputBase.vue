@@ -250,7 +250,7 @@
         }
 
         input, textarea, label, .p-select, .p-select-label {
-            &:not(.max-input-otp-cell){
+            &:not(.max-input-otp-cell) {
                 outline: none !important;
                 background-color: transparent !important;
                 height: 100% !important;
@@ -387,7 +387,7 @@
             }
 
             span, input, select, .p-select, .p-inputnumber {
-                &:not(.max-input-otp-cell){
+                &:not(.max-input-otp-cell) {
                     width: 100% !important;
                     border: none !important;
                     border-color: transparent !important;
@@ -440,7 +440,6 @@
     // Encadeado com `&.error`/`&.caution` para vencer a especificidade daquelas
     // regras, ja que `!important` sozinho nao desempata entre seletores iguais.
     &[no-border]:not([no-border='false']) {
-
         &, &.error, &.caution {
             .max-input-field-div {
                 outline: none !important;
@@ -456,7 +455,7 @@
         }
 
         input, textarea, select, .p-select, .p-select-label, .p-inputtext, .p-inputnumber, .value-div {
-            &:not(.max-input-otp-cell){
+            &:not(.max-input-otp-cell) {
                 outline: none !important;
                 border: none !important;
                 box-shadow: none !important;

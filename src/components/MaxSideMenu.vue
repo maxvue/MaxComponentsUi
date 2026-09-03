@@ -111,7 +111,7 @@
                 left: 10px;
                 width: 45px;
                 height: 45px;
-                margin: 5px auto 40px auto;
+                margin: 5px auto 40px;
                 padding: 0;
                 display: flex;
                 align-items: center;
@@ -125,8 +125,7 @@
                 width: 100%;
                 height: 100%;
                 min-height: 0;
-                overflow-y: auto;
-                overflow-x: hidden;
+                overflow: hidden auto;
                 scrollbar-width: none;
                 padding-bottom: 2rem;
                 grid-template-rows: 1fr auto;
