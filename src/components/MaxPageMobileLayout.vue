@@ -22,6 +22,16 @@
             <slot></slot>
         </main>
 
+        <!-- Slot bugs flutuante e arrastável fora da barra de navegação -->
+        <div
+            v-if="$slots.bugs"
+            ref="bugDraggableEl"
+            class="mobile-bug-draggable"
+            :style="bugDraggableStyle"
+        >
+            <slot name="bugs"></slot>
+        </div>
+
         <slot name="bottom-menu">
             <MaxBottomMenu
                 v-bind="attrs"
@@ -53,15 +63,25 @@
 </template>
 
 <script setup lang="ts">
-    import { computed, useAttrs, useSlots } from 'vue';
+    import { computed, ref, useAttrs, useSlots } from 'vue';
+    import { useDraggable } from '@maxvue/max-use';
     import MaxTopMenu from './MaxTopMenu.vue';
     import MaxBottomMenu from './MaxBottomMenu.vue';
     import MaxSideMenuMobile from './MaxSideMenuMobile.vue';
     import type { BottomTab } from './MaxBottomMenu.vue';
     import type { MenuGroup } from './MaxSideMenuMobile.vue';
 
-    /** Slots repassados ao `MaxTopMenu`. */
-    const TOP_MENU_SLOTS = ['status', 'search', 'add', 'chat', 'bugs', 'notifications', 'voip', 'live', 'user', 'mobile-center', 'mobile-actions'] as const;
+    /** Slots repassados ao `MaxTopMenu`. 'bugs' agora é flutuante no layout móvel. */
+    const TOP_MENU_SLOTS = ['status', 'search', 'add', 'chat', 'notifications', 'voip', 'live', 'user', 'mobile-center', 'mobile-actions'] as const;
+
+    const bugDraggableEl = ref<HTMLElement | null>(null);
+
+    const { style: bugDraggableStyle } = useDraggable(bugDraggableEl, {
+        initialValue: {
+            x: typeof window !== 'undefined' ? Math.max(15, window.innerWidth - 65) : 300,
+            y: typeof window !== 'undefined' ? Math.max(15, window.innerHeight - 130) : 550
+        }
+    });
 
     const props = defineProps<{
         /** Itens do menu "Adicionar Novo" do topo e do FAB inferior. */
@@ -133,6 +153,18 @@
             &::-webkit-scrollbar {
                 width: 0;
                 height: 0;
+            }
+        }
+
+        .mobile-bug-draggable {
+            position: fixed;
+            z-index: 850;
+            touch-action: none;
+            cursor: grab;
+            user-select: none;
+
+            &:active {
+                cursor: grabbing;
             }
         }
     }

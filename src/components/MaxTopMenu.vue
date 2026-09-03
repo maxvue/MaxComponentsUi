@@ -10,7 +10,7 @@
                 @click.stop="toggleSideMenu"
                 @keydown.enter.stop="toggleSideMenu"
             >
-                <MaxIcon icon="uil:bars" size="1.3" />
+                <MaxIcon icon="uil:bars" size="1.3" light />
             </div>
 
             <div class="top-menu-mobile-center">
@@ -23,11 +23,10 @@
             <div class="top-menu-mobile-actions">
                 <slot name="mobile-actions">
                     <slot name="search">
-                        <MaxTopMenuSearchBar v-if="!toolbar.show" />
+                        <MaxTopMenuSearchBar v-if="!toolbar.show" screen="mobile" />
                     </slot>
                     <slot name="add"></slot>
                     <slot name="chat"></slot>
-                    <slot name="bugs"></slot>
                     <slot name="notifications"></slot>
                     <slot name="voip"></slot>
                     <slot name="live"></slot>
@@ -47,7 +46,7 @@
                                 :image-url="avatarUrl"
                                 :show-tooltip="false"
                             />
-                            <MaxIcon v-else icon="fa6-solid:user" size="1.2" />
+                            <MaxIcon v-else icon="clarity:avatar-solid" size="1.2" light />
                         </div>
                     </slot>
                 </slot>
@@ -207,6 +206,10 @@
 
             &:hover {
                 background-color: rgb(255 255 255 / 10%);
+            }
+
+            :deep(.max-icon-div) {
+                color: currentColor !important;
             }
         }
 

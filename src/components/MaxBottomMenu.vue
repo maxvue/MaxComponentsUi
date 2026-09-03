@@ -27,7 +27,7 @@
                     @click="goTo(tab.name)"
                     @keydown.enter="goTo(tab.name)"
                 >
-                    <MaxIcon :icon="tab.icon" size="1.3" />
+                    <MaxIcon :icon="tab.icon" size="1.3" color="currentColor" />
                     <span v-if="props.showLabels && tab.label" class="bottom-menu-label">{{ tab.label }}</span>
                 </div>
 
@@ -71,7 +71,7 @@
                     @click="goTo(tab.name)"
                     @keydown.enter="goTo(tab.name)"
                 >
-                    <MaxIcon :icon="tab.icon" size="1.3" />
+                    <MaxIcon :icon="tab.icon" size="1.3" color="currentColor" />
                     <span v-if="props.showLabels && tab.label" class="bottom-menu-label">{{ tab.label }}</span>
                 </div>
             </template>
@@ -89,7 +89,7 @@
                     @click="goTo(tab.name)"
                     @keydown.enter="goTo(tab.name)"
                 >
-                    <MaxIcon :icon="tab.icon" size="1.3" />
+                    <MaxIcon :icon="tab.icon" size="1.3" color="currentColor" />
                     <span v-if="props.showLabels && tab.label" class="bottom-menu-label">{{ tab.label }}</span>
                 </div>
             </template>
@@ -202,17 +202,17 @@
         height: calc(var(--bottom-menu-height, 58px) + var(--safe-area-bottom, env(safe-area-inset-bottom, 0px)));
         box-sizing: border-box;
         padding: 0 0.75rem calc(0.5rem + var(--safe-area-bottom, env(safe-area-inset-bottom, 0px)));
-        background-color: var(--background-50, #f8fafc);
+        background-color: var(--background-25, #fff);
         display: flex;
         align-items: center;
 
         &.is-curved {
-            background-color: transparent;
             padding: 0 0 calc(var(--safe-area-bottom, env(safe-area-inset-bottom, 0px)));
 
             .bottom-menu-bar {
                 background-color: transparent;
                 border-radius: 0;
+                border-top: none;
             }
         }
 
@@ -233,8 +233,9 @@
             width: 100%;
             height: var(--bottom-menu-height, 58px);
             border-radius: 15px;
-            background-color: var(--blue-850, #0f172a);
-            color: var(--background-0, #fff);
+            background-color: var(--background-25, #fff);
+            border-top: 1px solid var(--background-100, #e2e8f0);
+            color: var(--background-800, #1e293b);
             place-items: center;
         }
 
@@ -248,9 +249,12 @@
             height: 100%;
             min-height: 44px;
             cursor: pointer;
-            color: var(--background-600, #94a3b8);
-            opacity: 0.75;
-            transition: color 0.18s ease, opacity 0.18s ease;
+            color: var(--background-600, #64748b);
+            transition: color 0.18s ease;
+
+            :deep(.max-icon-div) {
+                color: inherit !important;
+            }
 
             &:focus-visible {
                 outline: 2px solid var(--blue-500, #3b82f6);
@@ -259,13 +263,11 @@
             }
 
             &.active {
-                opacity: 1;
-                color: var(--blue-700, #38bdf8);
+                color: var(--blue-700, #0284c7);
             }
 
             &:not(.active):hover {
-                opacity: 0.95;
-                color: var(--background-800, #cbd5e1);
+                color: var(--background-800, #1e293b);
             }
         }
 

@@ -151,6 +151,16 @@ describe('MaxBottomMenu', () => {
 
         expect(wrapper.find('.custom-fab-btn').exists()).toBe(true);
     });
+
+    it('repassa color="currentColor" para os MaxIcon das abas garantindo herança de cor', () => {
+        const wrapper = mount(MaxBottomMenu);
+        const tabIcons = wrapper.findAll('.bottom-menu-tab').map((tab) => tab.findComponent({ name: 'MaxIcon' }));
+
+        expect(tabIcons).toHaveLength(4);
+        tabIcons.forEach((icon) => {
+            expect(icon.props('color')).toBe('currentColor');
+        });
+    });
 });
 
 describe('MaxContainerApp', () => {

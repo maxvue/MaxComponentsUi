@@ -1,25 +1,34 @@
 <template>
     <div
         class="p-avatar max-user-avatar"
-        :class="{ removable: remove }"
+        :class="{ removable: remove, 'has-fallback-icon': !props.imageUrl || has_image_error }"
         @click="onAvatarClick"
         v-tooltip.top="showTooltip ? (remove ? (labelRemove ?? name) : name) : null"
     >
-        <img v-if="props.imageUrl" class="max-user-avatar__image" :src="props.imageUrl" :alt="name ?? ''" />
-        <span v-else class="max-user-avatar__initials">{{ name?.substring(0, 2).toUpperCase() ?? '' }}</span>
+        <img
+            v-if="props.imageUrl && !has_image_error"
+            class="max-user-avatar__image"
+            :src="props.imageUrl"
+            :alt="name ?? ''"
+            @error="has_image_error = true"
+        />
+        <MaxIcon
+            v-else
+            icon="clarity:avatar-solid"
+            size="1.2"
+            class="max-user-avatar__icon"
+        />
     </div>
 </template>
 
-/**
- * Componente de avatar do usuário.
- * Exibe a imagem do usuário ou as iniciais baseadas no nome.
- * Quando `remove` está ativo, exibe um overlay "×" no hover e, ao clicar,
- * solicita confirmação (via useConfirmStore) antes de emitir o evento `remove`.
- */
 <script setup lang="ts">
+    import { ref, watch } from 'vue';
+    import MaxIcon from './MaxIcon.vue';
     import { useConfirmStore } from '../stores/useConfirm.Store';
 
     const confirm_store = useConfirmStore();
+
+    const has_image_error = ref(false);
 
     const props = withDefaults(defineProps<{
         /** URL da imagem do avatar */
@@ -42,6 +51,10 @@
     });
 
     const emit = defineEmits<{ remove: [] }>();
+
+    watch(() => props.imageUrl, () => {
+        has_image_error.value = false;
+    });
 
     const onAvatarClick = (event: MouseEvent) => {
         if (!props.remove) return;
@@ -81,14 +94,13 @@
         display: block;
     }
 
-    .max-user-avatar__initials {
+    .max-user-avatar__icon {
         width: 100%;
         height: 100%;
         display: grid;
         place-items: center;
-        background-color: #ece9fc;
-        color: #2a1261;
-        font-weight: 600;
+        background-color: var(--max-user-avatar-background, #0a5878);
+        color: var(--max-user-avatar-color, #fff);
     }
 
     .p-avatar.removable {

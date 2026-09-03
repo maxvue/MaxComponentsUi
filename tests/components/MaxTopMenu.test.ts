@@ -447,6 +447,27 @@ describe('MaxTopMenuSearchBar', () => {
 
         expect(wrapper.find('.extra-busca').exists()).toBe(true);
     });
+
+    it('renderiza MaxIconButton com prop light no mobile e abre painel flutuante ao clicar', async () => {
+        const wrapper = mountWithPinia(MaxTopMenuSearchBar, {
+            props: { screen: 'mobile' }
+        });
+
+        // No mobile, o trigger inicial é um MaxIconButton
+        const btn = wrapper.findComponent({ name: 'MaxIconButton' });
+        expect(btn.exists()).toBe(true);
+        expect(btn.props('light')).toBe(true);
+
+        // Painel flutuante fechado inicialmente
+        expect(document.body.querySelector('.mobile-search-panel')).toBeNull();
+
+        // Clica no botão para abrir
+        await btn.trigger('click');
+
+        // Painel flutuante aberto no body (Teleport)
+        const panel = document.body.querySelector('.mobile-search-panel');
+        expect(panel).not.toBeNull();
+    });
 });
 
 describe('MaxTopMenu Mobile (estilo AgenteDeBolso)', () => {
@@ -495,5 +516,22 @@ describe('MaxTopMenu Mobile (estilo AgenteDeBolso)', () => {
 
         expect(wrapper.find('.filtro-mes').exists()).toBe(true);
         expect(wrapper.text()).toContain('Setembro 2026');
+    });
+
+    it('utiliza prop light no botão hambúrguer do menu mobile', () => {
+        const wrapper = mountWithPinia(MaxTopMenu, { attrs: { screen: 'mobile' } });
+        const hamburgerIcon = wrapper.find('.btn_side_menu').findComponent({ name: 'MaxIcon' });
+
+        expect(hamburgerIcon.exists()).toBe(true);
+        expect(hamburgerIcon.props('light')).toBeTruthy();
+    });
+
+    it('não renderiza o slot bugs no cabeçalho mobile (para exibição flutuante)', () => {
+        const wrapper = mountWithPinia(MaxTopMenu, {
+            attrs: { screen: 'mobile' },
+            slots: { bugs: '<div class="bug-slot-content">Bug</div>' }
+        });
+
+        expect(wrapper.find('.top-menu-mobile-actions .bug-slot-content').exists()).toBe(false);
     });
 });

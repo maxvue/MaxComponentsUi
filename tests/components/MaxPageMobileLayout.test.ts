@@ -69,12 +69,23 @@ describe('MaxPageMobileLayout', () => {
         expect(wrapper.find('.mobile-page-content .conteudo-pagina').text()).toBe('Meu Conteúdo');
     });
 
-    it.each(['status', 'search', 'add', 'chat', 'bugs', 'notifications', 'voip', 'live', 'mobile-center', 'mobile-actions'])('repassa o slot %s para o TopMenu', (slot) => {
+    it.each(['status', 'search', 'add', 'chat', 'notifications', 'voip', 'live', 'mobile-center', 'mobile-actions'])('repassa o slot %s para o TopMenu', (slot) => {
         const wrapper = mountWithPinia(MaxPageMobileLayout, {
             slots: { [slot]: `<div class="slot-${slot}">x</div>` }
         });
 
         expect(wrapper.find(`.slot-${slot}`).exists()).toBe(true);
+    });
+
+    it('renderiza o slot bugs em um container flutuante e arrastável fora do TopMenu', () => {
+        const wrapper = mountWithPinia(MaxPageMobileLayout, {
+            slots: { bugs: '<div class="meu-bug-report">Reportar</div>' }
+        });
+
+        const draggableEl = wrapper.find('.mobile-bug-draggable');
+        expect(draggableEl.exists()).toBe(true);
+        expect(draggableEl.find('.meu-bug-report').exists()).toBe(true);
+        expect(wrapper.findComponent(MaxTopMenu).find('.meu-bug-report').exists()).toBe(false);
     });
 
     it('repassa o slot switcher para o SideMenuMobile', () => {

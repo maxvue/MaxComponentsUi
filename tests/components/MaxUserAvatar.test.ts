@@ -26,17 +26,25 @@ describe('MaxUserAvatar', () => {
         expect(img.attributes('src')).toBe('https://example.com/photo.jpg');
     });
 
-    it('exibe iniciais quando imageUrl não é fornecido', () => {
+    it('exibe o ícone clarity:avatar-solid quando imageUrl não é fornecido', () => {
         const wrapper = mountAvatar({ name: 'Maria' });
-        const initials = wrapper.find('.max-user-avatar__initials');
-        expect(initials.exists()).toBe(true);
-        expect(initials.text()).toBe('MA');
+        expect(wrapper.find('img.max-user-avatar__image').exists()).toBe(false);
+        const icon = wrapper.findComponent({ name: 'MaxIcon' });
+        expect(icon.exists()).toBe(true);
+        expect(icon.props('icon')).toBe('clarity:avatar-solid');
     });
 
-    it('gera iniciais com 2 caracteres maiúsculos', () => {
-        const wrapper = mountAvatar({ name: 'joão silva' });
-        const initials = wrapper.find('.max-user-avatar__initials');
-        expect(initials.text()).toBe('JO');
+    it('exibe o ícone clarity:avatar-solid quando ocorre erro no carregamento da imagem', async () => {
+        const wrapper = mountAvatar({ imageUrl: 'https://example.com/not-found.jpg', name: 'João' });
+        const img = wrapper.find('img.max-user-avatar__image');
+        expect(img.exists()).toBe(true);
+
+        await img.trigger('error');
+
+        expect(wrapper.find('img.max-user-avatar__image').exists()).toBe(false);
+        const icon = wrapper.findComponent({ name: 'MaxIcon' });
+        expect(icon.exists()).toBe(true);
+        expect(icon.props('icon')).toBe('clarity:avatar-solid');
     });
 
     it('aplica v-tooltip condicionalmente dependendo do showTooltip', () => {
