@@ -5,6 +5,7 @@
         v-bind="attrs"
         :add-items="props.addItems"
         :bottom-tabs="props.bottomTabs"
+        :bottom-show-labels="props.bottomShowLabels"
         :side-menu-groups="props.sideMenuGroups"
         :side-menu-items="props.sideMenuItems"
         :avatar-path="props.avatarPath"
@@ -57,14 +58,13 @@
     import MaxTopMenu from './MaxTopMenu.vue';
     import MaxSideMenu from './MaxSideMenu.vue';
     import MaxPageContent from './MaxPageContent.vue';
-    import MaxBottomMenu from './MaxBottomMenu.vue';
     import MaxPageMobileLayout from './MaxPageMobileLayout.vue';
     import { useSystemStore } from '../stores/useSystem.Store';
     import type { BottomTab } from './MaxBottomMenu.vue';
     import type { MenuGroup } from './MaxSideMenuMobile.vue';
 
     /** Slots repassados ao `MaxTopMenu`. */
-    const TOP_MENU_SLOTS = ['status', 'search', 'add', 'chat', 'bugs', 'notifications', 'voip', 'live', 'user', 'mobile-center'] as const;
+    const TOP_MENU_SLOTS = ['status', 'search', 'add', 'chat', 'bugs', 'notifications', 'voip', 'live', 'user', 'mobile-center', 'mobile-actions', 'switcher'] as const;
 
     const props = defineProps<{
         /** Dispositivo atual ('desktop' | 'mobile'). Quando omitido, consulta useSystemStore(). */
@@ -73,6 +73,8 @@
         addItems?: Array<Record<string, any>>;
         /** Abas do menu inferior (mobile). Omitido, usa o padrão do `MaxBottomMenu`. */
         bottomTabs?: BottomTab[];
+        /** Exibe rótulos textuais no menu inferior (mobile). Padrão false (estilo AgenteDeBolso). */
+        bottomShowLabels?: boolean;
         /** Grupos de menu da gaveta lateral no mobile. */
         sideMenuGroups?: MenuGroup[];
         /** Itens de menu simples para a gaveta lateral no mobile. */

@@ -28,7 +28,7 @@
                     @keydown.enter="goTo(tab.name)"
                 >
                     <MaxIcon :icon="tab.icon" size="1.3" />
-                    <span v-if="tab.label" class="bottom-menu-label">{{ tab.label }}</span>
+                    <span v-if="props.showLabels && tab.label" class="bottom-menu-label">{{ tab.label }}</span>
                 </div>
 
                 <!-- FAB Central com menu de adição ou clique -->
@@ -72,7 +72,7 @@
                     @keydown.enter="goTo(tab.name)"
                 >
                     <MaxIcon :icon="tab.icon" size="1.3" />
-                    <span v-if="tab.label" class="bottom-menu-label">{{ tab.label }}</span>
+                    <span v-if="props.showLabels && tab.label" class="bottom-menu-label">{{ tab.label }}</span>
                 </div>
             </template>
 
@@ -90,7 +90,7 @@
                     @keydown.enter="goTo(tab.name)"
                 >
                     <MaxIcon :icon="tab.icon" size="1.3" />
-                    <span v-if="tab.label" class="bottom-menu-label">{{ tab.label }}</span>
+                    <span v-if="props.showLabels && tab.label" class="bottom-menu-label">{{ tab.label }}</span>
                 </div>
             </template>
         </div>
@@ -127,6 +127,8 @@
         showFab?: boolean;
         /** Habilita o recorte côncavo suave em SVG para o FAB central. */
         curved?: boolean;
+        /** Exibe rótulos textuais abaixo dos ícones. Padrão false (estilo minimalista AgenteDeBolso). */
+        showLabels?: boolean;
     }>(), {
         tabs: () => [
             { name: 'integrador_dashboard', label: 'Início', icon: 'mdi:view-dashboard-outline' },
@@ -136,7 +138,8 @@
         ],
         addItems: () => [],
         showFab: undefined,
-        curved: true
+        curved: true,
+        showLabels: false
     });
 
     const emit = defineEmits<{

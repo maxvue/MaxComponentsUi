@@ -1,8 +1,8 @@
 <template>
-    <div class="top-menu" v-bind="attrs">
-        <div class="top-menu-elementos" v-bind="attrs">
+    <div class="top-menu" v-bind="attrs" :screen="isMobile ? 'mobile' : 'desktop'">
+        <!-- Estrutura Mobile: 3 Colunas Estritas (Hambúrguer 44px, Centro 1fr, Ações auto) estilo AgenteDeBolso -->
+        <div v-if="isMobile" class="top-menu-elementos" :screen="'mobile'" v-bind="attrs">
             <div
-                v-if="attrs.screen === 'mobile'"
                 class="btn_side_menu"
                 role="button"
                 tabindex="0"
@@ -13,13 +13,50 @@
                 <MaxIcon icon="uil:bars" size="1.3" />
             </div>
 
-            <div v-if="attrs.screen === 'mobile' && (system.top_menu_title || $slots['mobile-center'])" class="top-menu-mobile-center">
+            <div class="top-menu-mobile-center">
                 <slot name="mobile-center">
-                    <span class="mobile-header-title">{{ system.top_menu_title }}</span>
+                    <span v-if="system.top_menu_title" class="mobile-header-title">{{ system.top_menu_title }}</span>
+                    <slot v-else name="status"></slot>
                 </slot>
             </div>
 
-            <div v-else class="icons-save-div">
+            <div class="top-menu-mobile-actions">
+                <slot name="mobile-actions">
+                    <slot name="search">
+                        <MaxTopMenuSearchBar v-if="!toolbar.show" />
+                    </slot>
+                    <slot name="add"></slot>
+                    <slot name="chat"></slot>
+                    <slot name="bugs"></slot>
+                    <slot name="notifications"></slot>
+                    <slot name="voip"></slot>
+                    <slot name="live"></slot>
+                    <slot name="user">
+                        <div
+                            class="mobile-user-avatar"
+                            role="button"
+                            tabindex="0"
+                            aria-label="Perfil do usuário"
+                            @click.stop="emit('profile')"
+                            @keydown.enter.stop="emit('profile')"
+                        >
+                            <MaxUserAvatar
+                                v-if="user.data?.id"
+                                :user-id="user.data?.id"
+                                :name="user.data?.name ?? ''"
+                                :image-url="avatarUrl"
+                                :show-tooltip="false"
+                            />
+                            <MaxIcon v-else icon="fa6-solid:user" size="1.2" />
+                        </div>
+                    </slot>
+                </slot>
+            </div>
+        </div>
+
+        <!-- Estrutura Desktop: Fluxo Completo -->
+        <div v-else class="top-menu-elementos" v-bind="attrs">
+            <div class="icons-save-div">
                 <slot name="status"></slot>
             </div>
 
@@ -76,6 +113,7 @@
     import MaxTopToolbar from './MaxTopToolbar.vue';
     import MaxTopMenuSearchBar from './MaxTopMenuSearchBar.vue';
     import MaxUserSection from './MaxUserSection.vue';
+    import MaxUserAvatar from './MaxUserAvatar.vue';
     import { useSystemStore } from '../stores/useSystem.Store';
     import { useUserStore } from '../stores/useUser.Store';
     import { useTopToolbarStore } from '../stores/useTopToolbar.Store';
@@ -104,6 +142,14 @@
     const system = useSystemStore();
     const user = useUserStore();
     const toolbar = useTopToolbarStore();
+
+    /** Determina se deve renderizar a versão mobile. */
+    const isMobile = computed<boolean>(() => {
+        const target = attrs.screen as string | undefined;
+        if (target) return target === 'mobile';
+
+        return system.type_device === 'mobile';
+    });
 
     /** URL do avatar do usuário logado. */
     const avatarUrl = computed(() => (user.data?.id ? `${props.avatarPath ?? '/avatar/'}${user.data.id}` : undefined));
@@ -169,6 +215,7 @@
             align-items: center;
             justify-content: center;
             min-width: 0;
+            width: 100%;
             overflow: hidden;
 
             .mobile-header-title {
@@ -178,6 +225,33 @@
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
+                text-align: center;
+            }
+        }
+
+        .top-menu-mobile-actions {
+            display: grid;
+            grid-auto-flow: column;
+            grid-auto-columns: auto;
+            align-items: center;
+            justify-content: end;
+            gap: 0.5rem;
+
+            .mobile-user-avatar {
+                display: grid;
+                place-items: center;
+                cursor: pointer;
+                border-radius: 999px;
+                transition: opacity 0.18s ease;
+
+                &:hover {
+                    opacity: 0.85;
+                }
+
+                &:focus-visible {
+                    outline: 2px solid var(--blue-500, #38bdf8);
+                    outline-offset: 2px;
+                }
             }
         }
 

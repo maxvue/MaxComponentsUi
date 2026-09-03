@@ -18,9 +18,10 @@
         <div v-else-if="isLoaded && isLogged" class="max-app-view max-app-authenticated">
             <slot name="authenticated">
                 <MaxPageLayout
-                    :screen="system.type_device"
+                    :screen="props.screen ?? system.type_device"
                     :add-items="props.addItems"
                     :bottom-tabs="props.bottomTabs"
+                    :bottom-show-labels="props.bottomShowLabels"
                     :side-menu-groups="props.sideMenuGroups"
                     :side-menu-items="props.sideMenuItems"
                     :avatar-path="props.avatarPath"
@@ -66,9 +67,11 @@
     import type { MenuGroup } from './MaxSideMenuMobile.vue';
 
     /** Slots repassados ao `MaxPageLayout`. */
-    const LAYOUT_SLOTS = ['status', 'search', 'add', 'chat', 'bugs', 'notifications', 'voip', 'live', 'user', 'mobile-center'] as const;
+    const LAYOUT_SLOTS = ['status', 'search', 'add', 'chat', 'bugs', 'notifications', 'voip', 'live', 'user', 'mobile-center', 'mobile-actions', 'switcher'] as const;
 
     const props = withDefaults(defineProps<{
+        /** Dispositivo atual ('desktop' | 'mobile'). Quando omitido, consulta system.type_device. */
+        screen?: string;
         /** Rota de submissão do login. */
         routeLogin?: string;
         /** Rota que lista os provedores sociais. */
@@ -90,6 +93,8 @@
         addItems?: Array<Record<string, any>>;
         /** Abas do menu inferior (mobile). */
         bottomTabs?: BottomTab[];
+        /** Exibe rótulos textuais no menu inferior (mobile). Padrão false (estilo AgenteDeBolso). */
+        bottomShowLabels?: boolean;
         /** Grupos de navegação para o menu lateral móvel (gaveta). */
         sideMenuGroups?: MenuGroup[];
         /** Itens de navegação para o menu lateral móvel. */

@@ -26,8 +26,27 @@ describe('MaxBottomMenu', () => {
         expect(wrapper.findAll('.bottom-menu-tab')).toHaveLength(4);
     });
 
-    it('exibe os rótulos das abas', () => {
+    it('não exibe os rótulos visuais das abas por padrão (estilo AgenteDeBolso minimalista)', () => {
         const wrapper = mount(MaxBottomMenu);
+
+        expect(wrapper.findAll('.bottom-menu-label')).toHaveLength(0);
+        expect(wrapper.text()).toBe('');
+    });
+
+    it('mantém o aria-label nas abas para acessibilidade', () => {
+        const wrapper = mount(MaxBottomMenu);
+        const tabs = wrapper.findAll('.bottom-menu-tab');
+
+        expect(tabs[0].attributes('aria-label')).toBe('Início');
+        expect(tabs[1].attributes('aria-label')).toBe('Clientes');
+        expect(tabs[2].attributes('aria-label')).toBe('Projetos');
+        expect(tabs[3].attributes('aria-label')).toBe('Perfil');
+    });
+
+    it('exibe os rótulos das abas quando showLabels é true', () => {
+        const wrapper = mount(MaxBottomMenu, {
+            props: { showLabels: true }
+        });
 
         expect(wrapper.text()).toContain('Início');
         expect(wrapper.text()).toContain('Clientes');
@@ -40,7 +59,7 @@ describe('MaxBottomMenu', () => {
         const ativas = wrapper.findAll('.bottom-menu-tab.active');
 
         expect(ativas).toHaveLength(1);
-        expect(ativas[0].text()).toContain('Projetos');
+        expect(ativas[0].attributes('aria-label')).toBe('Projetos');
     });
 
     it('considera as rotas de matches como parte da mesma aba', () => {
@@ -50,7 +69,7 @@ describe('MaxBottomMenu', () => {
         const ativas = wrapper.findAll('.bottom-menu-tab.active');
 
         expect(ativas).toHaveLength(1);
-        expect(ativas[0].text()).toContain('Clientes');
+        expect(ativas[0].attributes('aria-label')).toBe('Clientes');
     });
 
     it('não marca nenhuma aba em rota desconhecida', () => {
@@ -78,6 +97,7 @@ describe('MaxBottomMenu', () => {
     it('aceita abas customizadas', () => {
         const wrapper = mount(MaxBottomMenu, {
             props: {
+                showLabels: true,
                 tabs: [
                     { name: 'a', label: 'Alfa', icon: 'mdi:a' },
                     { name: 'b', label: 'Beta', icon: 'mdi:b' }

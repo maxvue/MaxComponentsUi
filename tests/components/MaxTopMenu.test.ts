@@ -448,3 +448,52 @@ describe('MaxTopMenuSearchBar', () => {
         expect(wrapper.find('.extra-busca').exists()).toBe(true);
     });
 });
+
+describe('MaxTopMenu Mobile (estilo AgenteDeBolso)', () => {
+    beforeEach(() => {
+        pinia = createPinia();
+        setActivePinia(pinia);
+        useUserStore().data = { id: 1, name: 'João Santos' };
+    });
+
+    it('renderiza a estrutura de 3 colunas estritas em mobile: hambúrguer, centro e ações', () => {
+        const wrapper = mountWithPinia(MaxTopMenu, { attrs: { screen: 'mobile' } });
+
+        expect(wrapper.find('.btn_side_menu').exists()).toBe(true);
+        expect(wrapper.find('.top-menu-mobile-center').exists()).toBe(true);
+        expect(wrapper.find('.top-menu-mobile-actions').exists()).toBe(true);
+    });
+
+    it('não renderiza o MaxUserSection desktop no mobile e exibe o avatar compacto', () => {
+        const wrapper = mountWithPinia(MaxTopMenu, { attrs: { screen: 'mobile' } });
+
+        expect(wrapper.findComponent(MaxUserSection).exists()).toBe(false);
+        expect(wrapper.find('.mobile-user-avatar').exists()).toBe(true);
+    });
+
+    it('emite evento profile ao clicar no avatar compacto em mobile', async () => {
+        const wrapper = mountWithPinia(MaxTopMenu, { attrs: { screen: 'mobile' } });
+
+        await wrapper.find('.mobile-user-avatar').trigger('click');
+        expect(wrapper.emitted('profile')).toHaveLength(1);
+    });
+
+    it('permite customizar a área de ações via slot mobile-actions', () => {
+        const wrapper = mountWithPinia(MaxTopMenu, {
+            attrs: { screen: 'mobile' },
+            slots: { 'mobile-actions': '<div class="custom-mobile-actions">Ações Custom</div>' }
+        });
+
+        expect(wrapper.find('.custom-mobile-actions').exists()).toBe(true);
+    });
+
+    it('permite customizar o centro do topo via slot mobile-center', () => {
+        const wrapper = mountWithPinia(MaxTopMenu, {
+            attrs: { screen: 'mobile' },
+            slots: { 'mobile-center': '<div class="filtro-mes">Setembro 2026</div>' }
+        });
+
+        expect(wrapper.find('.filtro-mes').exists()).toBe(true);
+        expect(wrapper.text()).toContain('Setembro 2026');
+    });
+});

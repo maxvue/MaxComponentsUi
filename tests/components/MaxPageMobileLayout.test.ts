@@ -25,6 +25,7 @@ import MaxTopMenu from '../../src/components/MaxTopMenu.vue';
 import MaxBottomMenu from '../../src/components/MaxBottomMenu.vue';
 import MaxSideMenuMobile from '../../src/components/MaxSideMenuMobile.vue';
 import { useUserStore } from '../../src/stores/useUser.Store';
+import { useSystemStore } from '../../src/stores/useSystem.Store';
 
 let pinia: Pinia;
 
@@ -68,7 +69,7 @@ describe('MaxPageMobileLayout', () => {
         expect(wrapper.find('.mobile-page-content .conteudo-pagina').text()).toBe('Meu Conteúdo');
     });
 
-    it.each(['status', 'search', 'add', 'chat', 'bugs', 'notifications', 'voip', 'live'])('repassa o slot %s para o TopMenu', (slot) => {
+    it.each(['status', 'search', 'add', 'chat', 'bugs', 'notifications', 'voip', 'live', 'mobile-center', 'mobile-actions'])('repassa o slot %s para o TopMenu', (slot) => {
         const wrapper = mountWithPinia(MaxPageMobileLayout, {
             slots: { [slot]: `<div class="slot-${slot}">x</div>` }
         });
@@ -76,17 +77,28 @@ describe('MaxPageMobileLayout', () => {
         expect(wrapper.find(`.slot-${slot}`).exists()).toBe(true);
     });
 
+    it('repassa o slot switcher para o SideMenuMobile', () => {
+        useSystemStore().side_menu_open = true;
+
+        const wrapper = mountWithPinia(MaxPageMobileLayout, {
+            slots: { switcher: '<div class="slot-switcher">Perfil Switcher</div>' }
+        });
+
+        expect(wrapper.find('.slot-switcher').exists()).toBe(true);
+    });
+
     it('repassa props para o MaxBottomMenu', () => {
         const addItems = [{ label: 'Novo Item', icon: 'mdi:plus', route: 'novo' }];
         const bottomTabs = [{ name: 'inicio', label: 'Início', icon: 'mdi:home' }];
 
         const wrapper = mountWithPinia(MaxPageMobileLayout, {
-            props: { addItems, bottomTabs }
+            props: { addItems, bottomTabs, bottomShowLabels: true }
         });
 
         const bottomMenu = wrapper.findComponent(MaxBottomMenu);
         expect(bottomMenu.props('addItems')).toEqual(addItems);
         expect(bottomMenu.props('tabs')).toEqual(bottomTabs);
+        expect(bottomMenu.props('showLabels')).toBe(true);
     });
 
     it.each(['logout', 'profile', 'settings', 'support', 'toggleDarkMode', 'endImpersonate'])(
