@@ -153,6 +153,8 @@ export { default as MaxApp } from './components/MaxApp.vue';
 
 // Data & Display
 export { default as MaxBadgeComponent } from './components/MaxBadgeComponent.vue';
+export { default as MaxImage } from './components/MaxImage.vue';
+export type { MaxImageProps, MaxImageEditPayload } from './components/MaxImage.vue';
 // Async: o MaxChart arrasta o chart.js (~200 KB) por import dinâmico dentro do
 // componente; como export estático ele ainda assim entraria no grafo eager.
 export const MaxChart = defineAsyncComponent(() => import('./components/MaxChart.vue'));

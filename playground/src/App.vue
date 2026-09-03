@@ -306,8 +306,43 @@
                             @load-error="lastClickEvent = 'erro ao carregar'"
                         />
                     </div>
-                </div>
-            </section>
+                    <section class="component-section">
+                        <h2>MaxImage (Visualizador e Editor de Imagem)</h2>
+                        <div class="component-grid">
+                            <div class="component-item">
+                                <h3>Visualização com Zoom (Clique para abrir maior)</h3>
+                                <p style="margin-bottom: 12px; color: #666; font-size: 0.9rem;">
+                                    Clique na imagem para abrir em tela cheia com efeito de zoom in, controles flutuantes de zoom (+ / -) e fechamento pelo backdrop ou botão sair.
+                                </p>
+                                <MaxImage
+                                    :src="sampleImage1"
+                                    alt="Paisagem Abstrata"
+                                    width="280px"
+                                    height="180px"
+                                    style="border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"
+                                />
+                            </div>
+
+                            <div class="component-item">
+                                <h3>Com Edição e Recorte (allow-edit="true" e on-edit)</h3>
+                                <p style="margin-bottom: 12px; color: #666; font-size: 0.9rem;">
+                                    Abra a visualização e clique no ícone de corte na barra flutuante para recortar a imagem.
+                                </p>
+                                <MaxImage
+                                    v-model:src="sampleImage2"
+                                    alt="Aurora Boreal"
+                                    width="280px"
+                                    height="180px"
+                                    allow-edit
+                                    :on-edit="handleImageEdit"
+                                    style="border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"
+                                />
+                                <p v-if="lastEditedInfo" style="margin-top: 8px; color: #10b981; font-weight: 500; font-size: 0.85rem;">
+                                    {{ lastEditedInfo }}
+                                </p>
+                            </div>
+                        </div>
+                    </section>
         </main>
     </div>
 </template>
@@ -315,6 +350,15 @@
 <script setup lang="ts">
 
     import { ref } from 'vue';
+    import type { MaxImageEditPayload } from '../../src';
+
+    const sampleImage1 = ref('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=600');
+    const sampleImage2 = ref('https://images.unsplash.com/photo-1534447677768-be436bb09401?w=600');
+    const lastEditedInfo = ref<string>('');
+
+    const handleImageEdit = (payload: MaxImageEditPayload) => {
+        lastEditedInfo.value = `Recortado com sucesso! Resolução: ${payload.width}x${payload.height}px (${payload.mimeType})`;
+    };
 
     const lastClickEvent = ref<string>('');
 
