@@ -121,6 +121,13 @@ describe('MaxListBox - renderizacao e selecao', () => {
         expect(wrapper.find('[role="listbox"]').exists()).toBe(true);
         expect(wrapper.findAll('[role="option"]')).toHaveLength(3);
     });
+
+    it('renderiza o container rolável com a classe max-listbox-list', () => {
+        const wrapper = mountListBox();
+        const list = wrapper.find('.max-listbox-list');
+        expect(list.exists()).toBe(true);
+        expect(list.attributes('role')).toBe('listbox');
+    });
 });
 
 describe('MaxListBox - filtro local', () => {
