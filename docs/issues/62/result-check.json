@@ -1,0 +1,4 @@
+{
+  "status": "Aprovado",
+  "message": "A implementação resolveu comprovadamente a causa raiz dos erros TS2614 ao desacoplar os contratos de tipos dos componentes SFC (.vue) e alocá-los em módulos dedicados em src/types/. Todas as etapas da seção Validação foram executadas com sucesso: npx tsc --noEmit (código de saída 0, 0 erros), npm run type-check (vue-tsc --noEmit com sucesso), npx vitest run tests/types/index-exports.test.ts (4/4 testes de tipo aprovados), npm test (133/133 arquivos e 1781/1781 testes unitários aprovados) e npm run build (dist e .d.ts gerados sem erros). Nenhuma regressão foi introduzida e o escopo do diff confere estritamente com o plano de execução aprovado."
+}
