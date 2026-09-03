@@ -130,6 +130,58 @@ export interface MaxButtonsType extends /* @vue-ignore */ MaxButtonBaseProps {
 }
 
 /**
+ * Propriedades para o componente de botão de Like (MaxLikeButton).
+ */
+export interface MaxLikeButtonProps {
+    /** Número de likes (suporta v-model) */
+    modelValue?: number;
+    /** Estado de curtido (suporta v-model:liked ou prop controlada) */
+    liked?: boolean;
+    /** Exibe apenas o ícone e badge com a contagem de likes */
+    onlyIcon?: boolean;
+    /** Oculta o valor do número de likes */
+    noNumber?: boolean;
+    /** Texto de exibição do botão (padrão: "Gostei") */
+    label?: string;
+    /** Ícone principal ou base do botão */
+    icon?: string;
+    /** Ícone para quando estiver curtido */
+    iconTrue?: string;
+    /** Alias kebab-case para iconTrue */
+    'icon-true'?: string;
+    /** Ícone para quando não estiver curtido */
+    iconFalse?: string;
+    /** Alias kebab-case para iconFalse */
+    'icon-false'?: string;
+    /** Ícone no estado curtido (alias compatível com iconTrue) */
+    iconLiked?: string;
+    /** Permite repetir o like após um intervalo em minutos (true = 60 min, ou número em minutos, padrão: false) */
+    repeat?: boolean | number;
+    /** Alias de repeat (padrão: false) */
+    allowRepeat?: boolean | number;
+    /** Alias kebab-case de repeat (padrão: false) */
+    'allow-repeat'?: boolean | number;
+    /** Identificador único para persistência do cooldown no localStorage */
+    id?: string;
+    /** Chave customizada para persistência no localStorage */
+    storageKey?: string;
+    /** Função executada ao clicar no botão */
+    onClick?: (event: MouseEvent) => void;
+    /** Desabilita o botão */
+    disabled?: boolean;
+    /** Estado de carregamento do botão */
+    loading?: boolean;
+    /** Tamanho do botão ('small' | 'large' ou escala) */
+    size?: 'small' | 'large' | string | number | null;
+    /** Tamanho do ícone */
+    iconSize?: number | string | null;
+    /** Classe CSS personalizada para o badge */
+    badgeClass?: string;
+    /** Classe CSS personalizada para o botão */
+    class?: string;
+}
+
+/**
  * Propriedades compartilhadas pelos componentes de confirmação
  * (`MaxButtonConfirm`, `MaxIconConfirm`, `MaxTogglePopover`).
  * As props de identidade visual (label, ícone, etc.) variam entre os 3

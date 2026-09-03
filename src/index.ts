@@ -25,6 +25,8 @@ export { default as MaxIconButton } from './components/MaxIconButton.vue';
 export { default as MaxIconConfirm } from './components/MaxIconConfirm.vue';
 export { default as MaxButtonIconConfirm } from './components/MaxIconConfirm.vue';
 export { default as MaxButtonConfirm } from './components/MaxButtonConfirm.vue';
+export { default as MaxLikeButton } from './components/MaxLikeButton.vue';
+export { default as LikeButton } from './components/MaxLikeButton.vue';
 
 // Titles && Strings
 export { default as MaxTitle1 } from './components/MaxTitle1.vue';
