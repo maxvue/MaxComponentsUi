@@ -89,12 +89,7 @@
     import { useSystemStore } from '../stores/useSystem.Store';
     import { useUserStore } from '../stores/useUser.Store';
     import { useListMenusStore } from '../stores/useListMenus.Store';
-    import type { SideMenuItem } from '../types/app';
-
-    export interface MenuGroup {
-        title?: string;
-        items: any[];
-    }
+    import type { SideMenuItem, MenuGroup } from '../types';
 
     const props = withDefaults(defineProps<{
         /** Itens ou grupos customizados de navegação. */

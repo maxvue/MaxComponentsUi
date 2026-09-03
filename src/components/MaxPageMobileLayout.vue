@@ -68,8 +68,7 @@
     import MaxTopMenu from './MaxTopMenu.vue';
     import MaxBottomMenu from './MaxBottomMenu.vue';
     import MaxSideMenuMobile from './MaxSideMenuMobile.vue';
-    import type { BottomTab } from './MaxBottomMenu.vue';
-    import type { MenuGroup } from './MaxSideMenuMobile.vue';
+    import type { BottomTab, MenuGroup } from '../types';
 
     /** Slots repassados ao `MaxTopMenu`. 'bugs' agora é flutuante no layout móvel. */
     const TOP_MENU_SLOTS = ['status', 'search', 'add', 'chat', 'notifications', 'voip', 'live', 'user', 'mobile-center', 'mobile-actions'] as const;

@@ -20,7 +20,6 @@ export { default as MaxErrorIcon } from './components/MaxErrorIcon.vue';
 export { default as MaxGrid } from './components/MaxGrid.vue';
 export { default as MaxDividers } from './components/MaxDividers.vue';
 export { default as MaxDivider } from './components/MaxDividers.vue';
-export type { MaxDividersProps } from './components/MaxDividers.vue';
 
 // Button
 export { default as MaxButton } from './components/MaxButton.vue';
@@ -39,7 +38,6 @@ export { default as MaxTitle2 } from './components/MaxTitle2.vue';
 export { default as MaxAuthCard } from './components/MaxAuthCard.vue';
 export { default as AuthCard } from './components/MaxAuthCard.vue';
 export { clearAuthOtpCache } from './helpers/clearAuthOtpCache';
-export type { AuthProvider, AuthOtpEndpoint, AuthMode, AuthStep, AuthLabels } from './components/MaxAuthCard.vue';
 
 // Tabs
 export { default as MaxTabs } from './components/MaxTabs.vue';
@@ -154,7 +152,6 @@ export { default as MaxApp } from './components/MaxApp.vue';
 // Data & Display
 export { default as MaxBadgeComponent } from './components/MaxBadgeComponent.vue';
 export { default as MaxImage } from './components/MaxImage.vue';
-export type { MaxImageProps, MaxImageEditPayload } from './components/MaxImage.vue';
 // Async: o MaxChart arrasta o chart.js (~200 KB) por import dinâmico dentro do
 // componente; como export estático ele ainda assim entraria no grafo eager.
 export const MaxChart = defineAsyncComponent(() => import('./components/MaxChart.vue'));

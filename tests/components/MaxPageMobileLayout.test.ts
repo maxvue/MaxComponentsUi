@@ -37,6 +37,7 @@ const mountWithPinia = (component: any, options: Record<string, any> = {}) => mo
         stubs: {
             teleport: true,
             MaxLogo: { template: '<div class="max-logo-stub" />' },
+            MaxIcon: { template: '<i class="max-icon-stub" />', props: ['icon', 'size', 'color'] },
             ...(options.global?.stubs ?? {})
         }
     }

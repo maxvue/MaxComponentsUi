@@ -403,3 +403,12 @@ export type * from './app';
 
 // Tipos do MaxListBox.
 export type * from './listbox';
+
+// Tipos do MaxDividers
+export type * from './dividers';
+
+// Tipos do MaxAuthCard
+export type * from './auth';
+
+// Tipos do MaxImage
+export type * from './image';

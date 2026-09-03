@@ -60,8 +60,7 @@
     import MaxPageContent from './MaxPageContent.vue';
     import MaxPageMobileLayout from './MaxPageMobileLayout.vue';
     import { useSystemStore } from '../stores/useSystem.Store';
-    import type { BottomTab } from './MaxBottomMenu.vue';
-    import type { MenuGroup } from './MaxSideMenuMobile.vue';
+    import type { BottomTab, MenuGroup } from '../types';
 
     /** Slots repassados ao `MaxTopMenu`. */
     const TOP_MENU_SLOTS = ['status', 'search', 'add', 'chat', 'bugs', 'notifications', 'voip', 'live', 'user', 'mobile-center', 'mobile-actions', 'switcher'] as const;
