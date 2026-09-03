@@ -22,7 +22,7 @@ function mountModal(props: Record<string, any> = {}, slots: Record<string, any> 
                 },
                 MaxTitle1: {
                     template: '<div class="title"></div>',
-                    props: ['h1', 'h2']
+                    props: ['h1', 'h2', 'title', 'subtitle', 'subTitle']
                 },
                 MaxGrid: {
                     template: '<div class="grid"><slot /></div>',

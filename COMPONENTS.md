@@ -163,10 +163,16 @@ Título principal com subtítulo opcional. Estilo grande e proeminente.
 **Arquivo:** [`src/components/MaxTitle1.vue`](src/components/MaxTitle1.vue)
 **Aliases:** `Title1`, `T1`
 
-| Prop (via attrs) | Tipo | Descrição |
-|------|------|-----------|
-| `h1` | `string` | Texto do título principal |
-| `h2` | `string` | Texto do subtítulo |
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `title` | `string` | — | Texto do título principal (prioritário sobre `h1`) |
+| `h1` | `string` | — | Alias legado para o título principal |
+| `subtitle` | `string` | — | Texto do subtítulo (prioritário sobre `subTitle` e `h2`, renderizado com `v-html`) |
+| `subTitle` | `string` | — | Suporte a camelCase / `:sub-title` para o subtítulo |
+| `h2` | `string` | — | Alias legado para o subtítulo |
+| `icon` | `string` | — | Nome do ícone a ser renderizado (aliases: `i`, `icone`) |
+| `iconSize` | `string \| number` | `1.3` | Tamanho do ícone (alias: `sizeIcon`) |
+| `center` | `boolean` | `false` | Centraliza o título e ícone |
 
 ---
 
@@ -177,10 +183,15 @@ Título secundário com subtítulo opcional. Estilo menor e mais sutil (uppercas
 **Arquivo:** [`src/components/MaxTitle2.vue`](src/components/MaxTitle2.vue)
 **Aliases:** `Title2`, `T2`
 
-| Prop (via attrs) | Tipo | Descrição |
-|------|------|-----------|
-| `h1` | `string` | Texto do título (uppercase, weight 500) |
-| `h2` | `string` | Texto do subtítulo (weight 300, renderizado com v-html) |
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `title` | `string` | — | Texto do título (uppercase, weight 500, prioritário sobre `h1`) |
+| `h1` | `string` | — | Alias legado para o título |
+| `subtitle` | `string` | — | Texto do subtítulo (weight 300, renderizado com `v-html`, prioritário sobre `subTitle` e `h2`) |
+| `subTitle` | `string` | — | Suporte a camelCase / `:sub-title` para o subtítulo |
+| `h2` | `string` | — | Alias legado para o subtítulo |
+| `icon` | `string` | — | Nome do ícone a ser renderizado (aliases: `i`, `icone`) |
+| `iconSize` | `string \| number` | `1.3` | Tamanho do ícone (alias: `sizeIcon`) |
 
 ---
 

@@ -31,7 +31,7 @@ function mountPopover(props: Record<string, any> = {}, slots: Record<string, any
                 },
                 MaxTitle1: {
                     template: '<div class="title" v-bind="$attrs"><slot /></div>',
-                    props: ['h1', 'h2']
+                    props: ['h1', 'h2', 'title', 'subtitle', 'subTitle']
                 },
                 MaxGrid: {
                     template: '<div class="grid" v-bind="$attrs"><slot /></div>',
@@ -180,7 +180,7 @@ describe('MaxPopover', () => {
             },
             MaxTitle1: {
                 template: '<div class="title"><slot /></div>',
-                props: ['h1', 'h2']
+                props: ['h1', 'h2', 'title', 'subtitle', 'subTitle']
             },
             MaxGrid: {
                 template: '<div class="grid"><slot /></div>',
