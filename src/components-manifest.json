@@ -18,6 +18,7 @@
     "MaxCreditCard",
     "MaxDoneIcon",
     "MaxDrawer",
+    "MaxDividers",
     "MaxEmptyDiv",
     "MaxErrorIcon",
     "MaxGrid",
@@ -107,6 +108,8 @@
     "TransitionFade"
   ],
   "aliases": {
+    "MaxDivider": "MaxDividers",
+    "Dividers": "MaxDividers",
     "Botao": "MaxButton",
     "InputField": "MaxInputText",
     "InputPhone": "MaxPhoneField",
