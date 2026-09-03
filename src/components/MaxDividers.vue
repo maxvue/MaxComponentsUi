@@ -93,6 +93,7 @@
 <script setup lang="ts">
     import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
     import MaxIcon from './MaxIcon.vue';
+    import { useSystemStore } from '../stores/useSystem.Store';
 
     /**
      * Componente MaxDividers
@@ -203,8 +204,16 @@
         return breakpoints[props.breakpoint] ?? 1024;
     });
 
+    let systemStore: any = null;
+    try {
+        systemStore = useSystemStore();
+    } catch {
+        // Ignora caso Pinia não esteja ativo no escopo
+    }
+
     const isMobile = computed(() => {
         if (typeof props.mobile === 'boolean') return props.mobile;
+        if (systemStore && typeof systemStore.isMobile === 'boolean') return systemStore.isMobile;
         return windowWidth.value < breakpointPixels.value;
     });
 
@@ -430,7 +439,7 @@
 
     /* Desktop Layout */
     &.is-desktop {
-        .max-dividers-track {
+        > .max-dividers-track {
             display: flex;
             width: 100%;
             height: 100%;
@@ -439,15 +448,15 @@
             gap: var(--max-divider-gap, 1rem);
         }
 
-        &.is-column .max-dividers-track {
+        &.is-column > .max-dividers-track {
             flex-direction: row;
         }
 
-        &.is-line .max-dividers-track {
+        &.is-line > .max-dividers-track {
             flex-direction: column;
         }
 
-        .max-divider-pane {
+        > .max-dividers-track > .max-divider-pane {
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -471,7 +480,7 @@
         overflow: hidden;
 
         &.is-column {
-            .max-dividers-track {
+            > .max-dividers-track {
                 display: flex;
                 flex-direction: row;
                 width: 200%;
@@ -487,7 +496,7 @@
                     transform: translate3d(-50%, 0, 0);
                 }
 
-                .max-divider-pane {
+                > .max-divider-pane {
                     width: 50%;
                     height: 100%;
                     min-height: 0;
@@ -498,7 +507,7 @@
         }
 
         &.is-line {
-            .max-dividers-track {
+            > .max-dividers-track {
                 display: flex;
                 flex-direction: column;
                 width: 100%;
@@ -514,7 +523,7 @@
                     transform: translate3d(0, -50%, 0);
                 }
 
-                .max-divider-pane {
+                > .max-divider-pane {
                     width: 100%;
                     height: 50%;
                     min-height: 0;
