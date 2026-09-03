@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { mount } from '@vue/test-utils';
+import { mount, enableAutoUnmount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxPhoneField from '../../src/components/MaxPhoneField.vue';
+
+enableAutoUnmount(afterEach);
 
 function mountPhoneField(props: Record<string, any> = {}, attrs: Record<string, any> = {}) {
     return mount(MaxPhoneField, {
@@ -243,4 +245,49 @@ describe('MaxPhoneField', () => {
         expect(base.props('label')).toBeUndefined();
         expect(base.props('iconRight')).toBeUndefined();
     });
+
+    it('agrupa múltiplos eventos de scroll em um único requestAnimationFrame evitando layout thrashing', async () => {
+        const rafSpy = vi.spyOn(window, 'requestAnimationFrame');
+        const wrapper = mountPhoneField();
+
+        await wrapper.find('.max-phone-select').trigger('click');
+        await wrapper.vm.$nextTick();
+
+        rafSpy.mockClear();
+
+        // Dispara múltiplos eventos de rolagem sucessivos
+        window.dispatchEvent(new Event('scroll'));
+        window.dispatchEvent(new Event('scroll'));
+        window.dispatchEvent(new Event('scroll'));
+
+        // Deve agendar apenas 1 frame de animação enquanto pendente
+        expect(rafSpy).toHaveBeenCalledTimes(1);
+
+        rafSpy.mockRestore();
+    });
+
+    it('cancela requestAnimationFrame pendente e remove listeners ao fechar dropdown', async () => {
+        const cancelRafSpy = vi.spyOn(window, 'cancelAnimationFrame');
+        const removeListenerSpy = vi.spyOn(window, 'removeEventListener');
+        const wrapper = mountPhoneField();
+
+        await wrapper.find('.max-phone-select').trigger('click');
+        await wrapper.vm.$nextTick();
+
+        // Dispara scroll para agendar RAF
+        window.dispatchEvent(new Event('scroll'));
+
+        // Fecha o overlay (via close / clique na máscara / método)
+        const mask = document.querySelector('.max-phone-overlay-mask') as HTMLElement;
+        mask?.click();
+        await wrapper.vm.$nextTick();
+
+        expect(cancelRafSpy).toHaveBeenCalled();
+        expect(removeListenerSpy).toHaveBeenCalledWith('scroll', expect.any(Function), true);
+        expect(removeListenerSpy).toHaveBeenCalledWith('resize', expect.any(Function));
+
+        cancelRafSpy.mockRestore();
+        removeListenerSpy.mockRestore();
+    });
 });
+
