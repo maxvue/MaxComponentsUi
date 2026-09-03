@@ -206,7 +206,13 @@
         display: flex;
         align-items: center;
 
+        &:not(.is-curved) {
+            box-shadow: 0 -4px 16px rgb(0 32 58 / 8%), 0 -1px 3px rgb(0 32 58 / 5%);
+        }
+
         &.is-curved {
+            background-color: transparent;
+
             .bottom-menu-bar {
                 background-color: transparent;
                 border-radius: 0;
@@ -221,7 +227,7 @@
             width: 100%;
             height: 100%;
             fill: var(--background-25, #fff);
-            filter: drop-shadow(0 -2px 10px rgb(0 32 58 / 8%));
+            filter: drop-shadow(0 -4px 12px rgb(0 32 58 / 12%)) drop-shadow(0 -1px 3px rgb(0 32 58 / 6%));
         }
 
         .bottom-menu-bar {

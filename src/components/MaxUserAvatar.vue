@@ -16,6 +16,8 @@
             <MaxIcon
                 icon="clarity:avatar-solid"
                 class="max-user-avatar__icon"
+                size="72%"
+                color="#fff"
             />
         </div>
     </div>
@@ -102,31 +104,35 @@
         border-radius: 50% !important;
         overflow: hidden !important;
         display: flex;
-        align-items: flex-end;
+        align-items: center;
         justify-content: center;
         background-color: var(--blue-750, #1e3a5f);
         color: var(--max-user-avatar-color, #fff);
 
         .max-user-avatar__icon {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
+            width: 72% !important;
+            height: 72% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            color: #fff !important;
 
-            :deep(.max-icon-div) {
-                width: 100%;
-                height: 100%;
-                display: flex;
-                align-items: flex-end;
-                justify-content: center;
+            .max-icon {
+                width: 100% !important;
+                height: 100% !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
                 color: #fff !important;
+            }
 
-                svg {
-                    width: 88%;
-                    height: 88%;
-                    transform: translateY(8%) scale(1.18);
-                }
+            svg {
+                width: 100% !important;
+                height: 100% !important;
+                max-width: 100% !important;
+                max-height: 100% !important;
+                display: block;
+                transform: none;
             }
         }
     }

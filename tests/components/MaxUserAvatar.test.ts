@@ -74,4 +74,17 @@ describe('MaxUserAvatar', () => {
         const callArgs2 = tooltipDirective.mock.calls[1];
         expect(callArgs2[1].value).toBe('João');
     });
+
+    it('renderiza o wrapper e ícone de fallback com classes estruturais corretas', () => {
+        const wrapper = mountAvatar();
+        const iconWrapper = wrapper.find('.max-user-avatar__icon-wrapper');
+        expect(iconWrapper.exists()).toBe(true);
+
+        const iconComponent = iconWrapper.findComponent({ name: 'MaxIcon' });
+        expect(iconComponent.exists()).toBe(true);
+        expect(iconComponent.classes()).toContain('max-user-avatar__icon');
+        expect(iconComponent.props('icon')).toBe('clarity:avatar-solid');
+        expect(iconComponent.props('size')).toBe('72%');
+        expect(iconComponent.props('color')).toBe('#fff');
+    });
 });
