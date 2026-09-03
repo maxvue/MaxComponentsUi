@@ -1,10 +1,15 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
+import { setActivePinia, createPinia } from 'pinia';
 import MaxPdfView from '../../src/components/MaxPdfView.vue';
 
-vi.mock('@maxvue/max-use', () => ({
-    useWindowSize: () => ({ width: { value: 1024 }, height: { value: 768 } })
-}));
+vi.mock('@maxvue/max-use', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('@maxvue/max-use')>();
+    return {
+        ...actual,
+        useWindowSize: () => ({ width: { value: 1024 }, height: { value: 768 } })
+    };
+});
 
 function mountPdf(props: Record<string, any> = {}) {
     return mount(MaxPdfView, {
@@ -14,6 +19,10 @@ function mountPdf(props: Record<string, any> = {}) {
 }
 
 describe('MaxPdfView.vue', () => {
+    beforeEach(() => {
+        setActivePinia(createPinia());
+    });
+
     it('não exibe o visualizador enquanto não há arquivo', () => {
         const wrapper = mountPdf();
         expect(wrapper.find('.viewPDF').exists()).toBe(false);
@@ -72,6 +81,56 @@ describe('MaxPdfView.vue', () => {
             expect(dialog.attributes('role')).toBe('dialog');
             expect(dialog.attributes('aria-modal')).toBe('true');
             expect(dialog.attributes('aria-label')).toBe('Visualizador de PDF');
+        });
+
+        it('renderiza a barra de ferramentas .pdf-div-bar-tools dentro do container dialog .viewPDF', async () => {
+            const wrapper = mountPdf({ file: 'teste.pdf' });
+            await wrapper.vm.$nextTick();
+
+            const dialog = wrapper.find('.viewPDF');
+            expect(dialog.exists()).toBe(true);
+
+            const toolbarInsideDialog = dialog.find('.pdf-div-bar-tools');
+            expect(toolbarInsideDialog.exists()).toBe(true);
+        });
+
+        it('possui atributos acessíveis (aria-label e tabindex) nos botões da barra de ferramentas', async () => {
+            const wrapper = mount(MaxPdfView, {
+                props: { file: 'teste.pdf' },
+                global: { stubs: { VuePdfEmbed: true } }
+            });
+            await wrapper.vm.$nextTick();
+
+            const buttons = wrapper.findAll('.pdf-div-bar-tools [aria-label]');
+            expect(buttons.length).toBe(3);
+
+            const labels = buttons.map((b) => b.attributes('aria-label'));
+            expect(labels).toContain('Diminuir zoom');
+            expect(labels).toContain('Aumentar zoom');
+            expect(labels).toContain('Fechar visualizador de PDF');
+
+            const tabindexes = buttons.map((b) => b.attributes('tabindex'));
+            expect(tabindexes.every((t) => t === '0')).toBe(true);
+        });
+
+        it('permite que o foco do teclado (focus trap) acesse os controles da barra de ferramentas', async () => {
+            const wrapper = mount(MaxPdfView, {
+                props: { file: 'teste.pdf' },
+                global: { stubs: { VuePdfEmbed: true } },
+                attachTo: document.body
+            });
+            await wrapper.vm.$nextTick();
+
+            const dialog = wrapper.find('.viewPDF');
+            const buttons = dialog.findAll('.pdf-div-bar-tools [aria-label]');
+            expect(buttons.length).toBe(3);
+
+            // Simula tecla Tab no dialog
+            const firstButton = buttons[0].element as HTMLElement;
+            firstButton.focus();
+            expect(document.activeElement).toBe(firstButton);
+
+            wrapper.unmount();
         });
 
         it('fecha o visualizador ao pressionar a tecla Escape', async () => {

@@ -47,9 +47,10 @@ describe('MaxIcon', () => {
 
     it('aplica tamanho via prop size', () => {
         const wrapper = mountIcon({ size: '2rem' });
-        const style = wrapper.find('.max-icon-div')?.attributes('style');
-        if (style) expect(style).toContain('2rem');
+        const style = wrapper.find('.max-icon-div').attributes('style');
 
+        expect(style).toBeDefined();
+        expect(style).toContain('2rem');
     });
 
     // Defesa de última linha: o svg interno é width:100%, então um tamanho
@@ -64,11 +65,11 @@ describe('MaxIcon', () => {
 
     it('aplica cor escura via dark', () => {
         const wrapper = mountIcon({ dark: 0.6 });
-        const style = wrapper.find('.max-icon-div')?.attributes('style');
-        if (style) {
-            expect(style).toContain('0.6');
-            expect(style).toContain('0, 0, 0');
-        }
+        const style = wrapper.find('.max-icon-div').attributes('style');
+
+        expect(style).toBeDefined();
+        expect(style).toContain('0.6');
+        expect(style).toContain('0, 0, 0');
     });
 
     it('dark booleano escurece de forma perceptível em relação ao padrão', () => {
@@ -81,11 +82,11 @@ describe('MaxIcon', () => {
 
     it('aplica cor clara via light', () => {
         const wrapper = mountIcon({ light: 0.8 });
-        const style = wrapper.find('.max-icon-div')?.attributes('style');
-        if (style) {
-            expect(style).toContain('0.8');
-            expect(style).toContain('255, 255, 255');
-        }
+        const style = wrapper.find('.max-icon-div').attributes('style');
+
+        expect(style).toBeDefined();
+        expect(style).toContain('0.8');
+        expect(style).toContain('255, 255, 255');
     });
 
     it('exibe sub-ícone checked quando checked=true', () => {

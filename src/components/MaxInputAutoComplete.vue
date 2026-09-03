@@ -141,7 +141,14 @@
 
     const displayedText = computed(() => {
         if (!temp_value.value) return '';
-        if (typeof temp_value.value === 'string') return temp_value.value;
+        if (typeof temp_value.value === 'string') {
+            const opt = list.value.find((item: any) => item[props.optionValue ?? 'value'] === temp_value.value || item.id === temp_value.value || item.value === temp_value.value);
+            if (opt) {
+                const labelKey = props.optionLabel ?? 'name';
+                return opt[labelKey] ?? opt.label ?? opt.name ?? opt.value ?? '';
+            }
+            return temp_value.value;
+        }
         const opt = temp_value.value;
         const labelKey = props.optionLabel ?? 'name';
         return opt[labelKey] ?? opt.label ?? opt.name ?? opt.value ?? '';
@@ -187,6 +194,8 @@
         temp_value.value = val;
         search();
         isOpen.value = filtered_values.value.length > 0;
+        if (!props.forceSelection) emit('update:modelValue', val);
+
     };
 
     const onFocus = () => {
@@ -197,6 +206,8 @@
     };
 
     const onBlur = () => {
+        if (!props.forceSelection) emit('update:modelValue', temp_value.value);
+
         isDone.value = testIsDone();
         emit('blur');
         setTimeout(() => {
@@ -205,7 +216,7 @@
     };
 
     const onChange = () => {
-        if (props.forceSelection) if (typeof temp_value.value === 'string') if (input_text.value) if (props.restoreOnInvalid && last_valid.value) {
+        if (props.forceSelection) if (typeof temp_value.value === 'string') if (input_text.value && props.restoreOnInvalid && last_valid.value) {
             temp_value.value = last_valid.value;
             input_text.value = '';
         } else {
@@ -219,7 +230,7 @@
             temp_value.value = null;
             emit('update:modelValue', null);
         }
-
+        else emit('update:modelValue', temp_value.value);
 
     };
 
@@ -237,17 +248,18 @@
             return;
         }
         if (activeIndex.value < filtered_values.value.length - 1) activeIndex.value++;
-
     };
 
     const onArrowUp = () => {
         if (activeIndex.value > 0) activeIndex.value--;
-
     };
 
     const onEnter = () => {
         if (isOpen.value && activeIndex.value >= 0 && activeIndex.value < filtered_values.value.length) selectOption(filtered_values.value[activeIndex.value]);
-
+        else if (!props.forceSelection) {
+            hide();
+            emit('update:modelValue', temp_value.value);
+        }
     };
 
     watch(temp_value, (novo: any, antigo: any) => {
@@ -262,13 +274,17 @@
         }
 
         // Digitação livre em andamento: mantém a string no v-model.
-        if (novo) return;
+        if (novo) {
+            if (!props.forceSelection) emit('update:modelValue', novo);
+
+            return;
+        }
 
         // Daqui para baixo o valor foi zerado. Só interessa quando havia algo antes.
         if (!antigo) return;
 
         if (input_text.value) {
-            if (props.restoreOnInvalid && last_valid.value) {
+            if (props.forceSelection && props.restoreOnInvalid && last_valid.value) {
                 nextTick(() => {
                     temp_value.value = last_valid.value;
                     input_text.value = '';

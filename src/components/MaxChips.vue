@@ -414,7 +414,7 @@
                     font-size: 0.875rem;
                     line-height: 1.4;
                     max-width: 100%;
-                    word-break: break-word;
+                    overflow-wrap: break-word;
                     transition: background-color 0.15s ease;
 
                     .max-chip-label {
