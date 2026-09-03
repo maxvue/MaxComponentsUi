@@ -1,6 +1,6 @@
 # Catálogo de Componentes — MaxComponentsUi
 
-Referência completa dos **60 componentes** disponíveis na biblioteca.
+Referência completa dos **61 componentes** disponíveis na biblioteca.
 Todos os componentes utilizam `<script setup lang="ts">` e suportam v-model quando aplicável.
 
 ---
@@ -150,6 +150,64 @@ Ao clicar, abre o `MaxPopoverConfirm` posicionado sobre o botão com mensagem e 
   :acceptProps="{ label: 'Sim, excluir', icon: 'mdi:check', action: () => excluir(item) }"
   :rejectProps="{ label: 'Cancelar', action: () => {} }"
 />
+```
+
+---
+
+### MaxLikeButton
+
+Botão de Like com alternância automática de estado (curtido/não curtido), suporte a contagem via `v-model`, badge configurável, modo compacto com apenas ícone e cores temáticas (`--blue-700` curtido / `--background-300` não curtido).
+
+**Arquivo:** [`src/components/MaxLikeButton.vue`](src/components/MaxLikeButton.vue)
+**Aliases:** `LikeButton`
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `v-model` (`modelValue`) | `number` | `0` | Número de likes exibido no badge |
+| `liked` (`v-model:liked`) | `boolean` | — | Estado de curtido (controlado ou inicial) |
+| `onlyIcon` / `only-icon` | `boolean` | `false` | Exibe apenas o ícone e badge (overlay) |
+| `noNumber` / `no-number` | `boolean` | `false` | Oculta o valor numérico de likes |
+| `label` | `string` | `'Gostei'` | Texto de exibição do botão |
+| `icon` | `string` | — | Ícone base ou quando não curtido (auto-adapta se único) |
+| `iconTrue` / `icon-true` | `string` | — | Ícone específico para quando curtido |
+| `iconFalse` / `icon-false` | `string` | — | Ícone específico para quando não curtido |
+| `iconLiked` | `string` | — | Alias compatível com `iconTrue` |
+| `repeat` | `boolean \| number` | `false` | Permite repetir like após intervalo em minutos (`true` = 60 min) |
+| `storageKey` / `id` | `string` | — | Chave para persistência do cooldown no localStorage |
+| `onClick` | `(event: MouseEvent) => void` | — | Callback executado ao clicar |
+| `disabled` | `boolean` | `false` | Desabilita o botão |
+| `loading` | `boolean` | `false` | Exibe ícone de carregamento |
+| `size` | `'small' \| 'large'` | — | Tamanho do botão |
+| `iconSize` | `number \| string` | `1.2` | Tamanho do ícone |
+| `badgeClass` | `string` | — | Classe CSS personalizada para o badge |
+
+**Eventos:**
+- `update:modelValue` — Emitido com a nova contagem de likes (`number`)
+- `update:liked` — Emitido com o novo estado (`boolean`)
+- `click` — Emitido no clique com `(event: MouseEvent, state: { liked: boolean, count: number })`
+
+**Exemplo de uso:**
+```vue
+<!-- Padrão com v-model -->
+<MaxLikeButton v-model="totalLikes" />
+
+<!-- Modo compacto apenas ícone com badge em overlay -->
+<MaxLikeButton only-icon v-model="totalLikes" />
+
+<!-- Com repetição de like a cada 60 minutos (com toast automático) -->
+<MaxLikeButton repeat v-model="post.likes" storageKey="post-123" />
+
+<!-- Com repetição customizada para 120 minutos (2h) -->
+<MaxLikeButton :repeat="120" v-model="post.likes" storageKey="post-123" />
+
+<!-- Ícones customizados com icon e icon-false / icon-true -->
+<MaxLikeButton icon="mdi:thumb-up" icon-false="mdi:thumb-up-outline" v-model="likes" />
+
+<!-- Sem exibição do número e com texto customizado -->
+<MaxLikeButton no-number label="Favoritar" icon-true="mdi:star" icon-false="mdi:star-outline" />
+
+<!-- Com callback customizado -->
+<MaxLikeButton v-model="post.likes" :onClick="handleLike" />
 ```
 
 ---
