@@ -130,7 +130,7 @@
     }
 }
 
-[rotate='false'], [spinner] {
+[rotate='false'], [spinner='false'] {
     &:not(svg) {
         animation: unset;
         border-radius: unset;

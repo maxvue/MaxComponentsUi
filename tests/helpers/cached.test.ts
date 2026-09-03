@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { getCached } from '../../src/helpers/getCached';
 import { setCached } from '../../src/helpers/setCached';
 
@@ -61,5 +61,42 @@ describe('getCached e setCached', () => {
 
         const resultado = await getCached('key');
         expect(resultado).toBe('valor2');
+    });
+
+    it('não lança erro quando localStorage.setItem estoura QuotaExceededError', () => {
+        const spy = vi.spyOn(localStorage, 'setItem').mockImplementation(() => {
+            throw new DOMException('Quota exceeded', 'QuotaExceededError');
+        });
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        expect(() => setCached('chave_teste', 'valor_teste')).not.toThrow();
+        expect(consoleSpy).toHaveBeenCalledWith('Erro ao salvar no localStorage:', expect.any(DOMException));
+
+        spy.mockRestore();
+        consoleSpy.mockRestore();
+    });
+
+    it('não lança erro quando localStorage.setItem bloqueia com SecurityError', () => {
+        const spy = vi.spyOn(localStorage, 'setItem').mockImplementation(() => {
+            throw new DOMException('The operation is insecure.', 'SecurityError');
+        });
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        expect(() => setCached('chave_teste', 'valor_teste')).not.toThrow();
+        expect(consoleSpy).toHaveBeenCalledWith('Erro ao salvar no localStorage:', expect.any(DOMException));
+
+        spy.mockRestore();
+        consoleSpy.mockRestore();
+    });
+
+    it('não lança erro quando os dados possuem referência circular', () => {
+        const circular: any = {};
+        circular.self = circular;
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        expect(() => setCached('circular_key', circular)).not.toThrow();
+        expect(consoleSpy).toHaveBeenCalledWith('Erro ao salvar no localStorage:', expect.any(TypeError));
+
+        consoleSpy.mockRestore();
     });
 });

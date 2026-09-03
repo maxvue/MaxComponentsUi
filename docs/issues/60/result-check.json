@@ -1,0 +1,4 @@
+{
+  "status": "Aprovado",
+  "message": "A implementação resolveu a causa raiz (dupla emissão do evento update:modelValue ao alternar MaxInputToggle) removendo a chamada redundante update_value() de on_toggle(), preservando o watcher reativo e expondo update_value/modelvalue via defineExpose. A validação com 'npx vitest run tests/components/MaxInputToggle.test.ts' passou com 9/9 testes bem-sucedidos ('✓ tests/components/MaxInputToggle.test.ts (9 tests) 44ms', 1 passed). O type-check com 'npm run type-check' (vue-tsc --noEmit) executou com código 0 e sem erros. A verificação de linting com 'npx eslint' e 'npx stylelint' nos arquivos tocados passou com 0 erros. O escopo conferiu estritamente com os arquivos previstos no plano."
+}

@@ -19,6 +19,7 @@
         title?: string;
         h2?: string;
         subtitle?: string;
+        subTitle?: string;
         icon?: string;
         i?: string;
         icone?: string;
@@ -26,8 +27,8 @@
         sizeIcon?: string | number;
     }>();
 
-    const resolvedTitle = computed(() => props.h1 ?? props.title);
-    const resolvedSubtitle = computed(() => props.h2 ?? props.subtitle);
+    const resolvedTitle = computed(() => props.title ?? props.h1);
+    const resolvedSubtitle = computed(() => props.subtitle ?? props.subTitle ?? props.h2);
     const resolvedIcon = computed(() => props.icon ?? props.i ?? props.icone);
     const resolvedIconSize = computed(() => props.sizeIcon ?? props.iconSize ?? 1.3);
 </script>

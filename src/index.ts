@@ -18,6 +18,9 @@ export { default as MaxDoneIcon } from './components/MaxDoneIcon.vue';
 export { default as MaxWaitIcon } from './components/MaxWaitIcon.vue';
 export { default as MaxErrorIcon } from './components/MaxErrorIcon.vue';
 export { default as MaxGrid } from './components/MaxGrid.vue';
+export { default as MaxDividers } from './components/MaxDividers.vue';
+export { default as MaxDivider } from './components/MaxDividers.vue';
+export type { MaxDividersProps } from './components/MaxDividers.vue';
 
 // Button
 export { default as MaxButton } from './components/MaxButton.vue';
@@ -25,6 +28,8 @@ export { default as MaxIconButton } from './components/MaxIconButton.vue';
 export { default as MaxIconConfirm } from './components/MaxIconConfirm.vue';
 export { default as MaxButtonIconConfirm } from './components/MaxIconConfirm.vue';
 export { default as MaxButtonConfirm } from './components/MaxButtonConfirm.vue';
+export { default as MaxLikeButton } from './components/MaxLikeButton.vue';
+export { default as LikeButton } from './components/MaxLikeButton.vue';
 
 // Titles && Strings
 export { default as MaxTitle1 } from './components/MaxTitle1.vue';
@@ -33,6 +38,8 @@ export { default as MaxTitle2 } from './components/MaxTitle2.vue';
 // Auth
 export { default as MaxAuthCard } from './components/MaxAuthCard.vue';
 export { default as AuthCard } from './components/MaxAuthCard.vue';
+export { clearAuthOtpCache } from './helpers/clearAuthOtpCache';
+export type { AuthProvider, AuthOtpEndpoint, AuthMode, AuthStep, AuthLabels } from './components/MaxAuthCard.vue';
 
 // Tabs
 export { default as MaxTabs } from './components/MaxTabs.vue';
@@ -95,6 +102,10 @@ export { default as MaxInputFileUpload } from './components/MaxInputFileUpload.v
 export { default as MaxInputFileUploadBig } from './components/MaxInputFileUploadBig.vue';
 export { default as MaxInputFileUploadButton } from './components/MaxInputFileUploadButton.vue';
 export { default as MaxInputNumber } from './components/MaxInputNumber.vue';
+export { default as MaxInputOTP } from './components/MaxInputOTP.vue';
+export { default as MaxInputOtp } from './components/MaxInputOTP.vue';
+export { default as InputOTP } from './components/MaxInputOTP.vue';
+export { default as InputOtp } from './components/MaxInputOTP.vue';
 export { default as MaxInputPhoneMail } from './components/MaxInputPhoneMail.vue';
 export { default as MaxInputRadio } from './components/MaxInputRadio.vue';
 export { default as MaxInputSearch } from './components/MaxInputSearch.vue';
@@ -103,6 +114,8 @@ export { default as MaxTagsList } from './components/MaxTagsList.vue';
 export { default as MaxTagSelect } from './components/MaxTagSelect.vue';
 export { default as MaxInputSelectTag } from './components/MaxTagSelect.vue';
 export { default as MaxSelectTag } from './components/MaxTagSelect.vue';
+export { default as MaxChips } from './components/MaxChips.vue';
+export { default as Chips } from './components/MaxChips.vue';
 export { default as MaxInputSwitch } from './components/MaxInputSwitch.vue';
 export { default as MaxInputTextArea } from './components/MaxInputTextArea.vue';
 export { default as MaxInputTextList } from './components/MaxInputTextList.vue';
@@ -126,6 +139,7 @@ export { default as MaxLoadScreenTarget } from './components/MaxLoadScreenTarget
 export { default as MaxContainerApp } from './components/MaxContainerApp.vue';
 export { default as MaxBottomMenu } from './components/MaxBottomMenu.vue';
 export { default as MaxSideMenu } from './components/MaxSideMenu.vue';
+export { default as MaxSideMenuMobile } from './components/MaxSideMenuMobile.vue';
 export { default as MaxMenuVerticalItem } from './components/MaxMenuVerticalItem.vue';
 export { default as MaxTopMenu } from './components/MaxTopMenu.vue';
 export { default as MaxTopMenuSearchBar } from './components/MaxTopMenuSearchBar.vue';
@@ -134,10 +148,13 @@ export { default as MaxTopToolbarSubmenu } from './components/MaxTopToolbarSubme
 // O MaxUserSection é exportado mais abaixo, junto do seu alias UserSection.
 export { default as MaxPageContent } from './components/MaxPageContent.vue';
 export { default as MaxPageLayout } from './components/MaxPageLayout.vue';
+export { default as MaxPageMobileLayout } from './components/MaxPageMobileLayout.vue';
 export { default as MaxApp } from './components/MaxApp.vue';
 
 // Data & Display
 export { default as MaxBadgeComponent } from './components/MaxBadgeComponent.vue';
+export { default as MaxImage } from './components/MaxImage.vue';
+export type { MaxImageProps, MaxImageEditPayload } from './components/MaxImage.vue';
 // Async: o MaxChart arrasta o chart.js (~200 KB) por import dinâmico dentro do
 // componente; como export estático ele ainda assim entraria no grafo eager.
 export const MaxChart = defineAsyncComponent(() => import('./components/MaxChart.vue'));

@@ -22,9 +22,9 @@ describe('MaxColorPicker', () => {
         expect(wrapper.findComponent(InputBase).exists()).toBe(true);
     });
 
-    it('emite update:modelValue ao alterar o valor do input de texto', async () => {
+    it('emite update:modelValue ao alterar o valor do input de cor', async () => {
         const wrapper = mountColorPicker();
-        const input = wrapper.find('input.p-inputtext');
+        const input = wrapper.find('input[type="color"]');
         await input.setValue('#00ff00');
 
         expect(wrapper.emitted('update:modelValue')).toBeTruthy();
@@ -32,9 +32,9 @@ describe('MaxColorPicker', () => {
         expect(emitted[emitted.length - 1]).toEqual(['#00ff00']);
     });
 
-    it('reflete o valor do modelValue passado externamente no input de texto', async () => {
+    it('reflete o valor do modelValue passado externamente no input de cor', async () => {
         const wrapper = mountColorPicker({ modelValue: '#123456' });
-        const input = wrapper.find('input.p-inputtext');
+        const input = wrapper.find('input[type="color"]');
 
         expect((input.element as HTMLInputElement).value).toBe('#123456');
 

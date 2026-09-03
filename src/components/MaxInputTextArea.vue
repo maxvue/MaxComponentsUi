@@ -8,6 +8,7 @@
             :disabled="props.disabled"
             :autofocus="props.autofocus"
             :wrap="props.wrap"
+            :spellcheck="props.spellcheck"
             :auto-resize="props.autoResize ? '' : undefined"
             v-bind="attrs"
             @input="onInput"
@@ -43,6 +44,8 @@
             caution?: string | boolean | undefined;
             required?: boolean;
             autoResize?: boolean;
+            /** Habilita ou desabilita a verificação ortográfica nativa */
+            spellcheck?: boolean;
             rows?: string | number;
             minRows?: number | string;
             minLines?: string | number;
@@ -50,7 +53,7 @@
             maxRows?: number | string;
             wrap?: string;
         }>(),
-        { modelValue: '', autoResize: true, maxRows: 10, minRows: 1, done: undefined }
+        { modelValue: '', autoResize: true, maxRows: 10, minRows: 1, done: undefined, spellcheck: true }
     );
 
     const isDone = ref(props.done ?? null);

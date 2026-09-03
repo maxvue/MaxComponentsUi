@@ -13,6 +13,7 @@
             :type="props.type"
             :placeholder="props.placeholder"
             :disabled="props.disabled"
+            :spellcheck="resolvedSpellcheck"
             :value="temp_value"
             @input="temp_value = ($event.target as HTMLInputElement).value"
             @blur="isDone = testIsDone()"
@@ -21,10 +22,6 @@
     </InputBase>
 </template>
 
-/**
- * Componente de entrada de texto padrão.
- * Oferece suporte a validação de obrigatoriedade e comparação de valores.
- */
 <script setup lang="ts">
     import { toSearchableString, hasContent } from '@maxvue/max-use';
     import type { Ref } from 'vue';
@@ -66,9 +63,16 @@
             required?: boolean;
             /** Texto de placeholder do campo */
             placeholder?: string | undefined;
+            /** Habilita ou desabilita a verificação ortográfica nativa */
+            spellcheck?: boolean | undefined;
         }>(),
-        { modelValue: '', done: undefined, required: false, type: 'text', caution: undefined, disabled: false, error: undefined }
+        { modelValue: '', done: undefined, required: false, type: 'text', caution: undefined, disabled: false, error: undefined, spellcheck: true }
     );
+
+    const resolvedSpellcheck = computed(() => {
+        if (props.type === 'password') return false;
+        return props.spellcheck;
+    });
 
     const temp_value = ref<any>(props.modelValue);
 

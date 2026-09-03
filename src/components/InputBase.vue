@@ -250,14 +250,16 @@
         }
 
         input, textarea, label, .p-select, .p-select-label {
-            outline: none !important;
-            background-color: transparent !important;
-            height: 100% !important;
-            position: relative !important;
-            padding: 0 7px;
-            border: none !important;
-            box-shadow: none !important;
-            width: 100% !important;
+            &:not(.max-input-otp-cell) {
+                outline: none !important;
+                background-color: transparent !important;
+                height: 100% !important;
+                position: relative !important;
+                padding: 0 7px;
+                border: none !important;
+                box-shadow: none !important;
+                width: 100% !important;
+            }
         }
 
         .input-status-icon {
@@ -385,16 +387,18 @@
             }
 
             span, input, select, .p-select, .p-inputnumber {
-                width: 100% !important;
-                border: none !important;
-                border-color: transparent !important;
-                outline: none !important;
-                outline-color: transparent !important;
-                box-shadow: none !important;
-                font-size: 0.9rem;
-                color: var(--background-700);
-                font-weight: 450;
-                padding: 0 5px;
+                &:not(.max-input-otp-cell) {
+                    width: 100% !important;
+                    border: none !important;
+                    border-color: transparent !important;
+                    outline: none !important;
+                    outline-color: transparent !important;
+                    box-shadow: none !important;
+                    font-size: 0.9rem;
+                    color: var(--background-700);
+                    font-weight: 450;
+                    padding: 0 5px;
+                }
 
             }
         }
@@ -451,9 +455,11 @@
         }
 
         input, textarea, select, .p-select, .p-select-label, .p-inputtext, .p-inputnumber, .value-div {
-            outline: none !important;
-            border: none !important;
-            box-shadow: none !important;
+            &:not(.max-input-otp-cell) {
+                outline: none !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
         }
     }
 

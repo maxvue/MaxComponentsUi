@@ -26,8 +26,27 @@ describe('MaxBottomMenu', () => {
         expect(wrapper.findAll('.bottom-menu-tab')).toHaveLength(4);
     });
 
-    it('exibe os rótulos das abas', () => {
+    it('não exibe os rótulos visuais das abas por padrão (estilo AgenteDeBolso minimalista)', () => {
         const wrapper = mount(MaxBottomMenu);
+
+        expect(wrapper.findAll('.bottom-menu-label')).toHaveLength(0);
+        expect(wrapper.text()).toBe('');
+    });
+
+    it('mantém o aria-label nas abas para acessibilidade', () => {
+        const wrapper = mount(MaxBottomMenu);
+        const tabs = wrapper.findAll('.bottom-menu-tab');
+
+        expect(tabs[0].attributes('aria-label')).toBe('Início');
+        expect(tabs[1].attributes('aria-label')).toBe('Clientes');
+        expect(tabs[2].attributes('aria-label')).toBe('Projetos');
+        expect(tabs[3].attributes('aria-label')).toBe('Perfil');
+    });
+
+    it('exibe os rótulos das abas quando showLabels é true', () => {
+        const wrapper = mount(MaxBottomMenu, {
+            props: { showLabels: true }
+        });
 
         expect(wrapper.text()).toContain('Início');
         expect(wrapper.text()).toContain('Clientes');
@@ -40,7 +59,7 @@ describe('MaxBottomMenu', () => {
         const ativas = wrapper.findAll('.bottom-menu-tab.active');
 
         expect(ativas).toHaveLength(1);
-        expect(ativas[0].text()).toContain('Projetos');
+        expect(ativas[0].attributes('aria-label')).toBe('Projetos');
     });
 
     it('considera as rotas de matches como parte da mesma aba', () => {
@@ -50,7 +69,7 @@ describe('MaxBottomMenu', () => {
         const ativas = wrapper.findAll('.bottom-menu-tab.active');
 
         expect(ativas).toHaveLength(1);
-        expect(ativas[0].text()).toContain('Clientes');
+        expect(ativas[0].attributes('aria-label')).toBe('Clientes');
     });
 
     it('não marca nenhuma aba em rota desconhecida', () => {
@@ -78,6 +97,7 @@ describe('MaxBottomMenu', () => {
     it('aceita abas customizadas', () => {
         const wrapper = mount(MaxBottomMenu, {
             props: {
+                showLabels: true,
                 tabs: [
                     { name: 'a', label: 'Alfa', icon: 'mdi:a' },
                     { name: 'b', label: 'Beta', icon: 'mdi:b' }
@@ -96,6 +116,64 @@ describe('MaxBottomMenu', () => {
         });
 
         expect(wrapper.find('.bottom-menu-bar').attributes('style')).toContain('repeat(1, 1fr)');
+    });
+
+    it('renderiza o botão FAB central e o SVG côncavo quando addItems é fornecido', () => {
+        const wrapper = mount(MaxBottomMenu, {
+            props: {
+                addItems: [{ label: 'Novo Item', icon: 'mdi:plus', route: 'new_item' }]
+            }
+        });
+
+        expect(wrapper.find('.fab').exists()).toBe(true);
+        expect(wrapper.find('.img-background').exists()).toBe(true);
+        expect(wrapper.classes()).toContain('is-curved');
+        expect(wrapper.find('.bottom-menu-bar').attributes('style')).toContain('64px');
+    });
+
+    it('emite o evento fabClick quando o FAB simples é clicado', async () => {
+        const wrapper = mount(MaxBottomMenu, {
+            props: { showFab: true }
+        });
+
+        const fabBtn = wrapper.find('.fab');
+        expect(fabBtn.exists()).toBe(true);
+
+        await fabBtn.trigger('click');
+        expect(wrapper.emitted('fabClick')).toHaveLength(1);
+    });
+
+    it('permite customizar o FAB via slot', () => {
+        const wrapper = mount(MaxBottomMenu, {
+            props: { showFab: true },
+            slots: { fab: '<button class="custom-fab-btn">Adicionar</button>' }
+        });
+
+        expect(wrapper.find('.custom-fab-btn').exists()).toBe(true);
+    });
+
+    it('repassa color="currentColor" para os MaxIcon das abas garantindo herança de cor', () => {
+        const wrapper = mount(MaxBottomMenu);
+        const tabIcons = wrapper.findAll('.bottom-menu-tab').map((tab) => tab.findComponent({ name: 'MaxIcon' }));
+
+        expect(tabIcons).toHaveLength(4);
+        tabIcons.forEach((icon) => {
+            expect(icon.props('color')).toBe('currentColor');
+        });
+    });
+
+    it('aplica a classe is-curved apenas quando há FAB e curved é true, e não aplica quando sem FAB', () => {
+        const wrapperPlano = mount(MaxBottomMenu);
+        expect(wrapperPlano.classes()).toContain('bottom-menu');
+        expect(wrapperPlano.classes()).not.toContain('is-curved');
+        expect(wrapperPlano.find('.img-background').exists()).toBe(false);
+
+        const wrapperCurvo = mount(MaxBottomMenu, {
+            props: { showFab: true, curved: true }
+        });
+        expect(wrapperCurvo.classes()).toContain('bottom-menu');
+        expect(wrapperCurvo.classes()).toContain('is-curved');
+        expect(wrapperCurvo.find('.img-background').exists()).toBe(true);
     });
 });
 

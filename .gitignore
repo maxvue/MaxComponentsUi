@@ -1,6 +1,6 @@
 # Dependências
-node_modules/
-playground/node_modules/
+node_modules
+playground/node_modules
 
 # Build e Cache
 dist/

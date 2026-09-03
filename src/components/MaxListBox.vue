@@ -14,6 +14,7 @@
                 :placeholder="props.filterPlaceholder"
                 :disabled="props.disabled"
                 @input="onFilterInput"
+                @keydown="onFilterKeydown"
             >
         </div>
 
@@ -48,12 +49,17 @@
                     @click="selectOption(entry.item)"
                 >
                     <slot name="option" :option="entry.item" :selected="isSelected(entry.item)" :index="entry.index">
-                        <MaxIcon v-if="entry.item.icon" :icon="entry.item.icon" class="max-listbox-item-icon" />
+                        <MaxIcon v-if="iconOf(entry.item)" :icon="iconOf(entry.item)" class="max-listbox-item-icon" />
                         <div class="max-listbox-item-labels">
                             <span class="max-listbox-item-label">{{ labelOf(entry.item) }}</span>
                             <span v-if="subLabelOf(entry.item)" class="max-listbox-item-sublabel">{{ subLabelOf(entry.item) }}</span>
                         </div>
-                        <MaxBadgeComponent v-if="entry.item.badge !== undefined && entry.item.badge !== null" :label="String(entry.item.badge)" :background="entry.item.badgeColor" class="max-listbox-item-badge" />
+                        <MaxBadgeComponent
+                            v-if="badgeOf(entry.item) !== undefined && badgeOf(entry.item) !== null"
+                            :label="String(badgeOf(entry.item))"
+                            :background="badgeColorOf(entry.item)"
+                            class="max-listbox-item-badge"
+                        />
                     </slot>
                 </li>
             </ul>
@@ -116,6 +122,12 @@
             optionSubLabel?: string;
             /** Campo que marca o item como não selecionável */
             optionDisabled?: string;
+            /** Campo que contém o ícone do item */
+            optionIcon?: string;
+            /** Campo que contém o badge do item */
+            optionBadge?: string;
+            /** Campo que contém a cor do badge */
+            optionBadgeColor?: string;
             /** Exibe o sublabel abaixo do label em vez de à direita */
             twoLines?: boolean;
             /** Mensagem exibida quando não há itens */
@@ -156,6 +168,9 @@
             optionLabel: 'label',
             optionSubLabel: 'sub_label',
             optionDisabled: 'disabled',
+            optionIcon: 'icon',
+            optionBadge: 'badge',
+            optionBadgeColor: 'badgeColor',
             twoLines: false,
             emptyMessage: 'Nenhum registro encontrado',
             disabled: false,
@@ -204,11 +219,25 @@
         }, 300);
     }
 
+    function onFilterKeydown(event: KeyboardEvent) {
+        if (props.disabled) return;
+        if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            if (visibleOptions.value.length > 0) {
+                if (focusedIndex.value < 0) focusedIndex.value = 0;
+                scrollFocusedIntoView();
+                listElem.value?.focus();
+            }
+        }
+    }
+
     const filterFieldList = computed(() => props.filterFields ?? [props.optionLabel, props.optionSubLabel]);
 
     /** Verifica se uma opção casa com o termo de busca já normalizado. */
     function matchesTerm(option: any, term: string): boolean {
         if (term === '') return true;
+        if (option === null || option === undefined) return false;
+        if (typeof option !== 'object') return normalize(option).includes(term);
         return filterFieldList.value.some((field) => normalize(option?.[field]).includes(term));
     }
 
@@ -434,19 +463,40 @@
     }
 
     function valueOf(option: any): any {
-        return option?.[props.optionValue];
+        if (option === null || option === undefined) return undefined;
+        if (typeof option !== 'object') return option;
+        return option?.[props.optionValue] ?? option?.value;
     }
 
     function labelOf(option: any): string {
-        return option?.[props.optionLabel] ?? '';
+        if (option === null || option === undefined) return '';
+        if (typeof option !== 'object') return String(option);
+        return option?.[props.optionLabel] ?? option?.label ?? option?.name ?? '';
     }
 
     function subLabelOf(option: any): string {
-        return option?.[props.optionSubLabel] ?? '';
+        if (option === null || option === undefined || typeof option !== 'object') return '';
+        return option?.[props.optionSubLabel] ?? option?.sub_label ?? option?.subLabel ?? '';
+    }
+
+    function iconOf(option: any): string | undefined {
+        if (option === null || option === undefined || typeof option !== 'object') return undefined;
+        return option?.[props.optionIcon] ?? option?.icon;
+    }
+
+    function badgeOf(option: any): any {
+        if (option === null || option === undefined || typeof option !== 'object') return undefined;
+        return option?.[props.optionBadge] ?? option?.badge;
+    }
+
+    function badgeColorOf(option: any): string | undefined {
+        if (option === null || option === undefined || typeof option !== 'object') return undefined;
+        return option?.[props.optionBadgeColor] ?? option?.badgeColor;
     }
 
     function isDisabled(option: any): boolean {
-        return option?.[props.optionDisabled] === true;
+        if (option === null || option === undefined || typeof option !== 'object') return false;
+        return option?.[props.optionDisabled] === true || option?.disabled === true;
     }
 
     function isSelected(option: any): boolean {
@@ -498,8 +548,8 @@
         const total = visibleOptions.value.length;
         if (total === 0) return;
 
-        const next = focusedIndex.value < 0 ? 0 : focusedIndex.value + delta;
-        focusedIndex.value = Math.min(total - 1, Math.max(0, next));
+        if (focusedIndex.value < 0) focusedIndex.value = delta > 0 ? Math.min(total - 1, delta > 1 ? delta : 0) : 0;
+        else focusedIndex.value = Math.min(total - 1, Math.max(0, focusedIndex.value + delta));
         scrollFocusedIntoView();
     }
 
@@ -537,6 +587,14 @@
             case 'ArrowUp':
                 event.preventDefault();
                 moveFocus(-1);
+                break;
+            case 'PageDown':
+                event.preventDefault();
+                moveFocus(10);
+                break;
+            case 'PageUp':
+                event.preventDefault();
+                moveFocus(-10);
                 break;
             case 'Home':
                 event.preventDefault();
@@ -622,11 +680,13 @@
     flex: 1;
     overflow-y: auto;
     outline: none;
-    scrollbar-width: thin;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 
     &::-webkit-scrollbar {
-        width: 3px;
-        height: 3px;
+        display: none;
+        width: 0;
+        height: 0;
     }
 }
 
@@ -652,8 +712,7 @@
 }
 
 .max-listbox-item {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
+    display: flex;
     align-items: center;
     gap: 10px;
     padding: 0 12px;
@@ -679,11 +738,15 @@
 
     &.is-selected {
         background-color: var(--blue-600);
-        color: var(--background-0);
+        color: var(--background-0, #fff);
+
+        .max-listbox-item-label {
+            color: var(--background-0, #fff);
+        }
 
         .max-listbox-item-sublabel,
         .max-listbox-item-icon {
-            color: var(--background-200);
+            color: var(--background-200, #eee);
         }
 
         &:hover {
@@ -694,7 +757,7 @@
         // do fundo aqui: sem isso, uma linha focada E selecionada não mostra
         // nenhuma indicação de foco para quem navega por teclado.
         &.is-focused {
-            outline-color: var(--background-0);
+            outline-color: var(--background-0, #fff);
         }
     }
 
@@ -708,11 +771,16 @@
     }
 }
 
+.max-listbox-item-icon {
+    flex-shrink: 0;
+}
+
 .max-listbox-item-labels {
     display: flex;
     align-items: center;
     gap: 10px;
     min-width: 0;
+    flex: 1;
 }
 
 .max-listbox-item-label {
@@ -729,12 +797,22 @@
     white-space: nowrap;
 }
 
+.max-listbox-item-badge {
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
 // Layout de duas linhas: sublabel abaixo do label em vez de ao lado.
 .max-listbox.two-lines {
     .max-listbox-item-labels {
         flex-direction: column;
         align-items: flex-start;
         gap: 2px;
+    }
+
+    .max-listbox-item-label,
+    .max-listbox-item-sublabel {
+        max-width: 100%;
     }
 }
 

@@ -88,6 +88,8 @@
         overflow: hidden;
         width: 55px;
         height: 100vh;
+        height: 100dvh;
+        box-sizing: border-box;
         z-index: 3;
 
         &[screen='mobile'] {
@@ -99,31 +101,47 @@
             display: grid;
             width: 100%;
             height: 100%;
+            min-height: 0;
             padding-bottom: 5px;
             grid-template-rows: auto 1fr;
 
             .space-logo {
                 position: relative;
-                top: 5px;
-                left: 5px;
-                width: 55px;
-                height: 55px;
-                margin-bottom: 40px;
-                padding: 7px;
+                top: 10px;
+                left: 10px;
+                width: 45px;
+                height: 45px;
+                margin: 5px auto 40px;
+                padding: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-sizing: border-box;
+                flex-shrink: 0;
             }
 
             .menu {
                 display: grid;
                 width: 100%;
                 height: 100%;
+                min-height: 0;
+                overflow: hidden auto;
+                scrollbar-width: none;
                 padding-bottom: 2rem;
                 grid-template-rows: 1fr auto;
+
+                &::-webkit-scrollbar {
+                    display: none;
+                    width: 0;
+                    height: 0;
+                }
 
                 .grupo {
                     display: grid;
                     gap: 4px;
                     width: 100%;
                     height: 100%;
+                    min-height: 0;
                     grid-template-columns: 1fr;
                     grid-template-rows: repeat(auto-fill, minmax(2.7rem, 1fr));
                     place-items: center;

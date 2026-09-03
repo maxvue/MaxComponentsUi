@@ -1,6 +1,6 @@
 # Catálogo de Componentes — MaxComponentsUi
 
-Referência completa dos **59 componentes** disponíveis na biblioteca.
+Referência completa dos **61 componentes** disponíveis na biblioteca.
 Todos os componentes utilizam `<script setup lang="ts">` e suportam v-model quando aplicável.
 
 ---
@@ -154,6 +154,65 @@ Ao clicar, abre o `MaxPopoverConfirm` posicionado sobre o botão com mensagem e 
 
 ---
 
+### MaxLikeButton
+
+Botão de Like com alternância automática de estado (curtido/não curtido), suporte a contagem via `v-model`, badge configurável, modo compacto com apenas ícone e cores temáticas (`--blue-700` curtido / `--background-300` não curtido).
+
+**Arquivo:** [`src/components/MaxLikeButton.vue`](src/components/MaxLikeButton.vue)
+**Aliases:** `LikeButton`
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `v-model` (`modelValue`) | `number` | `0` | Número de likes exibido no badge |
+| `liked` (`v-model:liked`) | `boolean` | — | Estado de curtido (controlado ou inicial) |
+| `onlyIcon` / `only-icon` | `boolean` | `false` | Exibe apenas o ícone e badge (overlay) |
+| `noNumber` / `no-number` | `boolean` | `false` | Oculta o valor numérico de likes |
+| `label` | `string` | `'Gostei'` | Texto de exibição do botão |
+| `icon` | `string` | — | Ícone base ou quando não curtido (auto-adapta se único) |
+| `iconTrue` / `icon-true` | `string` | — | Ícone específico para quando curtido |
+| `iconFalse` / `icon-false` | `string` | — | Ícone específico para quando não curtido |
+| `iconLiked` | `string` | — | Alias compatível com `iconTrue` |
+| `repeat` | `boolean \| number` | `false` | Permite repetir like após intervalo em minutos (`true` = 60 min) |
+| `allow-repeat` / `allowRepeat` | `boolean \| number` | `false` | Alias de `repeat` |
+| `storageKey` / `id` | `string` | — | Chave para persistência do cooldown no localStorage |
+| `onClick` | `(event: MouseEvent) => void` | — | Callback executado ao clicar |
+| `disabled` | `boolean` | `false` | Desabilita o botão |
+| `loading` | `boolean` | `false` | Exibe ícone de carregamento |
+| `size` | `'small' \| 'large'` | — | Tamanho do botão |
+| `iconSize` | `number \| string` | `1.2` | Tamanho do ícone |
+| `badgeClass` | `string` | — | Classe CSS personalizada para o badge |
+
+**Eventos:**
+- `update:modelValue` — Emitido com a nova contagem de likes (`number`)
+- `update:liked` — Emitido com o novo estado (`boolean`)
+- `click` — Emitido no clique com `(event: MouseEvent, state: { liked: boolean, count: number })`
+
+**Exemplo de uso:**
+```vue
+<!-- Padrão com v-model -->
+<MaxLikeButton v-model="totalLikes" />
+
+<!-- Modo compacto apenas ícone com badge em overlay -->
+<MaxLikeButton only-icon v-model="totalLikes" />
+
+<!-- Com repetição de like a cada 60 minutos (com toast automático) -->
+<MaxLikeButton repeat v-model="post.likes" storageKey="post-123" />
+
+<!-- Com repetição customizada para 120 minutos (2h) -->
+<MaxLikeButton :repeat="120" v-model="post.likes" storageKey="post-123" />
+
+<!-- Ícones customizados com icon e icon-false / icon-true -->
+<MaxLikeButton icon="mdi:thumb-up" icon-false="mdi:thumb-up-outline" v-model="likes" />
+
+<!-- Sem exibição do número e com texto customizado -->
+<MaxLikeButton no-number label="Favoritar" icon-true="mdi:star" icon-false="mdi:star-outline" />
+
+<!-- Com callback customizado -->
+<MaxLikeButton v-model="post.likes" :onClick="handleLike" />
+```
+
+---
+
 ## Tipografia
 
 ### MaxTitle1
@@ -163,10 +222,16 @@ Título principal com subtítulo opcional. Estilo grande e proeminente.
 **Arquivo:** [`src/components/MaxTitle1.vue`](src/components/MaxTitle1.vue)
 **Aliases:** `Title1`, `T1`
 
-| Prop (via attrs) | Tipo | Descrição |
-|------|------|-----------|
-| `h1` | `string` | Texto do título principal |
-| `h2` | `string` | Texto do subtítulo |
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `title` | `string` | — | Texto do título principal (prioritário sobre `h1`) |
+| `h1` | `string` | — | Alias legado para o título principal |
+| `subtitle` | `string` | — | Texto do subtítulo (prioritário sobre `subTitle` e `h2`, renderizado com `v-html`) |
+| `subTitle` | `string` | — | Suporte a camelCase / `:sub-title` para o subtítulo |
+| `h2` | `string` | — | Alias legado para o subtítulo |
+| `icon` | `string` | — | Nome do ícone a ser renderizado (aliases: `i`, `icone`) |
+| `iconSize` | `string \| number` | `1.3` | Tamanho do ícone (alias: `sizeIcon`) |
+| `center` | `boolean` | `false` | Centraliza o título e ícone |
 
 ---
 
@@ -177,10 +242,15 @@ Título secundário com subtítulo opcional. Estilo menor e mais sutil (uppercas
 **Arquivo:** [`src/components/MaxTitle2.vue`](src/components/MaxTitle2.vue)
 **Aliases:** `Title2`, `T2`
 
-| Prop (via attrs) | Tipo | Descrição |
-|------|------|-----------|
-| `h1` | `string` | Texto do título (uppercase, weight 500) |
-| `h2` | `string` | Texto do subtítulo (weight 300, renderizado com v-html) |
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `title` | `string` | — | Texto do título (uppercase, weight 500, prioritário sobre `h1`) |
+| `h1` | `string` | — | Alias legado para o título |
+| `subtitle` | `string` | — | Texto do subtítulo (weight 300, renderizado com `v-html`, prioritário sobre `subTitle` e `h2`) |
+| `subTitle` | `string` | — | Suporte a camelCase / `:sub-title` para o subtítulo |
+| `h2` | `string` | — | Alias legado para o subtítulo |
+| `icon` | `string` | — | Nome do ícone a ser renderizado (aliases: `i`, `icone`) |
+| `iconSize` | `string \| number` | `1.3` | Tamanho do ícone (alias: `sizeIcon`) |
 
 ---
 
@@ -326,6 +396,34 @@ Possui validação de **dígito verificador** integrada.
 **Máscara dinâmica:** `###.###.###-##` (CPF) ↔ `##.###.###/####-##` (CNPJ)
 **Eventos:** `update:modelValue` (debounce 500ms), `complete`
 **Erros automáticos:** "CPF inválido", "CNPJ inválido", "Documento inválido"
+
+---
+
+### MaxInputOTP
+
+Input OTP com **caixas de entrada separadas** estilo login do WhatsApp (padrão de 6 dígitos com agrupamento 3 - 3 e separador central).
+100% nativo em Vue 3 + TypeScript, com navegação de teclado, avanço de foco automático, suporte a colar código completo (paste) e autofill de SMS (`autocomplete="one-time-code"`).
+
+**Arquivo:** [`src/components/MaxInputOTP.vue`](src/components/MaxInputOTP.vue)
+**Aliases:** `MaxInputOtp`, `InputOTP`, `InputOtp`
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `modelValue` | `string \| number` | `''` | Valor numérico do código OTP |
+| `length` / `len` | `number` | `6` | Quantidade total de dígitos |
+| `groupLength` | `number` | `3` | Quantidade de dígitos em cada grupo separado |
+| `separator` | `boolean \| string` | `true` | Habilita ou customiza o separador central |
+| `separatorChar` | `string` | `'-'` | Caractere usado como separador visual |
+| `integerOnly` | `boolean` | `true` | Aceita somente números (0-9) |
+| `mask` | `boolean` | `false` | Oculta os caracteres digitados (modo senha/PIN) |
+| `autofocus` | `boolean` | `false` | Foca automaticamente no 1º dígito ao montar |
+| `disabled` | `boolean` | `false` | Desabilita todos os campos |
+| `required` | `boolean` | `false` | Campo obrigatório |
+| + todas as props do `InputBase` | | |
+
+**Eventos:** `update:modelValue`, `complete` (disparado quando todos os dígitos forem preenchidos), `change`, `focus`, `blur`
+**Métodos expostos:** `focus(index?)`, `clear()`, `values`, `inputs`, `unmaskedValue`
+**Erros automáticos:** "Código incompleto", "Campo obrigatório"
 
 ---
 

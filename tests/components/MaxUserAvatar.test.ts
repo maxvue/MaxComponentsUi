@@ -15,8 +15,10 @@ describe('MaxUserAvatar', () => {
     });
 
     it('renderiza corretamente', () => {
-        const wrapper = mountAvatar({ name: 'João' });
+        const wrapper = mountAvatar();
         expect(wrapper.exists()).toBe(true);
+        expect(wrapper.classes()).toContain('max-user-avatar');
+        expect(wrapper.classes()).toContain('p-avatar-circle');
     });
 
     it('exibe imagem quando imageUrl é fornecido', () => {
@@ -26,17 +28,25 @@ describe('MaxUserAvatar', () => {
         expect(img.attributes('src')).toBe('https://example.com/photo.jpg');
     });
 
-    it('exibe iniciais quando imageUrl não é fornecido', () => {
+    it('exibe o ícone clarity:avatar-solid quando imageUrl não é fornecido', () => {
         const wrapper = mountAvatar({ name: 'Maria' });
-        const initials = wrapper.find('.max-user-avatar__initials');
-        expect(initials.exists()).toBe(true);
-        expect(initials.text()).toBe('MA');
+        expect(wrapper.find('img.max-user-avatar__image').exists()).toBe(false);
+        const icon = wrapper.findComponent({ name: 'MaxIcon' });
+        expect(icon.exists()).toBe(true);
+        expect(icon.props('icon')).toBe('clarity:avatar-solid');
     });
 
-    it('gera iniciais com 2 caracteres maiúsculos', () => {
-        const wrapper = mountAvatar({ name: 'joão silva' });
-        const initials = wrapper.find('.max-user-avatar__initials');
-        expect(initials.text()).toBe('JO');
+    it('exibe o ícone clarity:avatar-solid quando ocorre erro no carregamento da imagem', async () => {
+        const wrapper = mountAvatar({ imageUrl: 'https://example.com/not-found.jpg', name: 'João' });
+        const img = wrapper.find('img.max-user-avatar__image');
+        expect(img.exists()).toBe(true);
+
+        await img.trigger('error');
+
+        expect(wrapper.find('img.max-user-avatar__image').exists()).toBe(false);
+        const icon = wrapper.findComponent({ name: 'MaxIcon' });
+        expect(icon.exists()).toBe(true);
+        expect(icon.props('icon')).toBe('clarity:avatar-solid');
     });
 
     it('aplica v-tooltip condicionalmente dependendo do showTooltip', () => {
@@ -63,5 +73,18 @@ describe('MaxUserAvatar', () => {
         // Quando showTooltip é true e tem name, recebe name
         const callArgs2 = tooltipDirective.mock.calls[1];
         expect(callArgs2[1].value).toBe('João');
+    });
+
+    it('renderiza o wrapper e ícone de fallback com classes estruturais corretas', () => {
+        const wrapper = mountAvatar();
+        const iconWrapper = wrapper.find('.max-user-avatar__icon-wrapper');
+        expect(iconWrapper.exists()).toBe(true);
+
+        const iconComponent = iconWrapper.findComponent({ name: 'MaxIcon' });
+        expect(iconComponent.exists()).toBe(true);
+        expect(iconComponent.classes()).toContain('max-user-avatar__icon');
+        expect(iconComponent.props('icon')).toBe('clarity:avatar-solid');
+        expect(iconComponent.props('size')).toBe('72%');
+        expect(iconComponent.props('color')).toBe('#fff');
     });
 });

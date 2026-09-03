@@ -1,9 +1,60 @@
 <template>
-    <div class="top-menu" v-bind="attrs">
-        <div class="top-menu-elementos" v-bind="attrs">
-            <div v-if="attrs.screen === 'mobile'" class="btn_side_menu">
-                <MaxIcon icon="uil:bars" />
+    <div class="top-menu" v-bind="attrs" :screen="isMobile ? 'mobile' : 'desktop'">
+        <!-- Estrutura Mobile: 3 Colunas Estritas (Hambúrguer 44px, Centro 1fr, Ações auto) estilo AgenteDeBolso -->
+        <div v-if="isMobile" class="top-menu-elementos" :screen="'mobile'" v-bind="attrs">
+            <div
+                class="btn_side_menu"
+                role="button"
+                tabindex="0"
+                aria-label="Abrir menu"
+                @click.stop="toggleSideMenu"
+                @keydown.enter.stop="toggleSideMenu"
+            >
+                <MaxIcon icon="uil:bars" size="1.3" light />
             </div>
+
+            <div id="top_menu_mobile_center" class="top-menu-mobile-center">
+                <slot name="mobile-center">
+                    <span v-if="system.top_menu_title" class="mobile-header-title">{{ system.top_menu_title }}</span>
+                    <slot v-else name="status"></slot>
+                </slot>
+            </div>
+
+            <div class="top-menu-mobile-actions">
+                <slot name="mobile-actions">
+                    <slot name="search">
+                        <MaxTopMenuSearchBar v-if="!toolbar.show" screen="mobile" />
+                    </slot>
+                    <slot name="add"></slot>
+                    <slot name="chat"></slot>
+                    <slot name="notifications"></slot>
+                    <slot name="voip"></slot>
+                    <slot name="live"></slot>
+                    <slot name="user">
+                        <MaxUserSection
+                            :name="user.data?.name ?? ''"
+                            :company-name="user.data?.solar_company_name ?? undefined"
+                            :user-id="user.data?.id ?? undefined"
+                            :avatar-url="avatarUrl"
+                            :dark-mode="user.data?.settings?.darkMode === true"
+                            :is-impersonated="isImpersonated"
+                            :version="system.version || undefined"
+                            only-avatar
+                            screen="mobile"
+                            @profile="emit('profile')"
+                            @settings="emit('settings')"
+                            @support="emit('support')"
+                            @toggle-dark-mode="emit('toggleDarkMode')"
+                            @logout="emit('logout')"
+                            @end-impersonate="emit('endImpersonate')"
+                        />
+                    </slot>
+                </slot>
+            </div>
+        </div>
+
+        <!-- Estrutura Desktop: Fluxo Completo -->
+        <div v-else class="top-menu-elementos" v-bind="attrs">
             <div class="icons-save-div">
                 <slot name="status"></slot>
             </div>
@@ -90,6 +141,14 @@
     const user = useUserStore();
     const toolbar = useTopToolbarStore();
 
+    /** Determina se deve renderizar a versão mobile. */
+    const isMobile = computed<boolean>(() => {
+        const target = attrs.screen as string | undefined;
+        if (target) return target === 'mobile';
+
+        return system.type_device === 'mobile';
+    });
+
     /** URL do avatar do usuário logado. */
     const avatarUrl = computed(() => (user.data?.id ? `${props.avatarPath ?? '/avatar/'}${user.data.id}` : undefined));
 
@@ -97,6 +156,10 @@
     const isImpersonated = computed<boolean>(() => Boolean((user as any).isImpersonated));
 
     const reloading = ref(false);
+
+    const toggleSideMenu = (): void => {
+        system.side_menu_open = !system.side_menu_open;
+    };
 
     const reloadAll = (): void => {
         reloading.value = true;
@@ -110,23 +173,98 @@
         position: fixed;
         top: 0;
         left: 0;
-        z-index: 2;
+        z-index: 20;
         width: 100%;
         height: 64px;
         grid-template-columns: auto 1fr;
-        color: var(--text-c);
+        color: var(--text-c, #fff);
         display: grid !important;
         place-items: center end;
 
         &[screen='mobile'] {
             place-items: center;
             grid-template-columns: 1fr !important;
+            height: var(--top-menu-height, 60px);
+            background-color: var(--blue-850, #0f172a);
+            padding: 0 0.75rem;
+            padding-left: max(0.75rem, env(safe-area-inset-left));
+            padding-right: max(0.75rem, env(safe-area-inset-right));
+            box-sizing: border-box;
         }
 
         .btn_side_menu {
-            padding-left: 5px;
+            display: grid;
+            place-items: center;
+            width: 38px;
+            min-width: 38px;
+            min-height: 44px;
+            border-radius: 999px;
             font-size: 1.3rem;
-            color: rgb(255 255 255 / 60%);
+            color: rgb(255 255 255 / 80%);
+            cursor: pointer;
+            transition: background-color 0.18s ease;
+
+            &:hover {
+                background-color: rgb(255 255 255 / 10%);
+            }
+
+            .max-icon-div {
+                color: currentcolor !important;
+            }
+        }
+
+        .top-menu-mobile-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 0;
+            width: 100%;
+            overflow: hidden;
+
+            .mobile-header-title {
+                font-size: 0.95rem;
+                font-weight: 600;
+                color: var(--background-25, #fff);
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                text-align: center;
+            }
+        }
+
+        .top-menu-mobile-actions {
+            display: grid;
+            grid-auto-flow: column;
+            grid-auto-columns: auto;
+            align-items: center;
+            justify-content: end;
+            gap: 1.125rem;
+            padding-left: 5px;
+
+            .mobile-user-avatar {
+                display: grid;
+                place-items: center;
+                width: 34px;
+                height: 34px;
+                border-radius: 50%;
+                overflow: hidden;
+                cursor: pointer;
+                transition: opacity 0.18s ease;
+
+                .max-user-avatar {
+                    width: 34px;
+                    height: 34px;
+                }
+
+                &:hover {
+                    opacity: 0.85;
+                }
+
+                &:focus-visible {
+                    outline: 2px solid var(--blue-500, #38bdf8);
+                    outline-offset: 2px;
+                }
+            }
         }
 
         .top-menu-elementos {
@@ -150,9 +288,11 @@
             &[screen='mobile'] {
                 width: 100%;
                 grid-column: 1;
+                padding: 0 !important;
                 place-items: center start;
-                grid-template-columns: 1fr 40px 40px !important;
-                gap: 1rem !important;
+                grid-template-columns: 38px 1fr auto !important;
+                gap: 0.5rem !important;
+                height: var(--top-menu-height, 60px) !important;
             }
 
             .icons-save-div {

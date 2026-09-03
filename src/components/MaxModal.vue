@@ -22,7 +22,7 @@
                     <slot name="header" v-if="!props.noHeader">
                         <MaxGrid s100 class="max-modal-header" pt0 mt0 mb-15 :id="title_id">
                             <slot name="title" v-bind="props">
-                                <MaxTitle1 s90 :h1="props.title ?? 'Titulo'" :h2="props.subTitle ?? 'Sub Titulo'" p0 m0 />
+                                <MaxTitle1 s90 :title="props.title ?? 'Titulo'" :subtitle="props.subTitle ?? 'Sub Titulo'" p0 m0 />
                             </slot>
                             <div s1 w-max-23>
                                 <slot name="close" :close="close" :hide="modal_store.hide">

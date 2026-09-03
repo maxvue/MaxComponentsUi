@@ -1,26 +1,30 @@
 <template>
     <div v-if="route.name" class="max-app">
         <!-- Páginas de site e telas sem layout: apenas o conteúdo da rota. -->
-        <div v-if="isSite || isBlank">
+        <div v-if="isSite || isBlank" class="max-app-view max-app-blank">
             <slot name="blank">
                 <RouterView />
             </slot>
         </div>
 
         <!-- Usuário carregado, mas sem sessão: tela de login. -->
-        <div v-else-if="isLoaded && !isLogged">
+        <div v-else-if="isLoaded && !isLogged" class="max-app-view max-app-login">
             <slot name="login">
                 <RouterView />
             </slot>
         </div>
 
         <!-- Usuário autenticado: aplicação completa. -->
-        <div v-else-if="isLoaded && isLogged">
+        <div v-else-if="isLoaded && isLogged" class="max-app-view max-app-authenticated">
             <slot name="authenticated">
                 <MaxPageLayout
-                    :screen="system.type_device"
+                    :screen="props.screen ?? system.type_device"
                     :add-items="props.addItems"
                     :bottom-tabs="props.bottomTabs"
+                    :bottom-show-labels="props.bottomShowLabels"
+                    :side-menu-groups="props.sideMenuGroups"
+                    :side-menu-items="props.sideMenuItems"
+                    :avatar-path="props.avatarPath"
                     :logo="props.logo"
                     @profile="emit('profile')"
                     @settings="emit('settings')"
@@ -28,9 +32,9 @@
                     @toggle-dark-mode="emit('toggleDarkMode')"
                     @logout="emit('logout')"
                     @end-impersonate="emit('endImpersonate')"
+                    @fab-click="emit('fabClick')"
                 >
                     <RouterView />
-
                     <template v-for="(_, name) in forwardedSlots" #[name]="slotProps" :key="name">
                         <slot :name="name" v-bind="slotProps ?? {}"></slot>
                     </template>
@@ -60,11 +64,14 @@
     import { useLoginStore } from '../stores/useLogin.Store';
     import { configureMaxApp } from '../helpers/maxAppConfig';
     import type { BottomTab } from './MaxBottomMenu.vue';
+    import type { MenuGroup } from './MaxSideMenuMobile.vue';
 
     /** Slots repassados ao `MaxPageLayout`. */
-    const LAYOUT_SLOTS = ['status', 'search', 'add', 'chat', 'bugs', 'notifications', 'voip', 'live', 'user'] as const;
+    const LAYOUT_SLOTS = ['status', 'search', 'add', 'chat', 'bugs', 'notifications', 'voip', 'live', 'user', 'mobile-center', 'mobile-actions', 'switcher'] as const;
 
     const props = withDefaults(defineProps<{
+        /** Dispositivo atual ('desktop' | 'mobile'). Quando omitido, consulta system.type_device. */
+        screen?: string;
         /** Rota de submissão do login. */
         routeLogin?: string;
         /** Rota que lista os provedores sociais. */
@@ -82,10 +89,18 @@
          * `App.vue` ('Page', 'contatos', 'Contract', 'Wire', ...).
          */
         blankPages?: string[];
-        /** Itens do menu "Adicionar Novo" do topo. */
+        /** Itens do menu "Adicionar Novo" do topo e do FAB mobile. */
         addItems?: Array<Record<string, any>>;
         /** Abas do menu inferior (mobile). */
         bottomTabs?: BottomTab[];
+        /** Exibe rótulos textuais no menu inferior (mobile). Padrão false (estilo AgenteDeBolso). */
+        bottomShowLabels?: boolean;
+        /** Grupos de navegação para o menu lateral móvel (gaveta). */
+        sideMenuGroups?: MenuGroup[];
+        /** Itens de navegação para o menu lateral móvel. */
+        sideMenuItems?: any[];
+        /** Caminho base do avatar do usuário. */
+        avatarPath?: string;
         /**
          * Logo do menu lateral. Aceita uma URL (`/get_file?file=logo.svg`,
          * `https://…`) ou o nome de uma rota, resolvido pelo `getRoute`.
@@ -111,6 +126,7 @@
         toggleDarkMode: [];
         logout: [];
         endImpersonate: [];
+        fabClick: [];
     }>();
 
     // A configuração precisa ser aplicada antes das stores resolverem suas rotas.
@@ -166,6 +182,18 @@
 <style lang="scss">
     .max-app {
         min-height: 100vh;
+        min-height: 100dvh;
+        width: 100%;
+        box-sizing: border-box;
+
+        .max-app-view {
+            width: 100%;
+            height: 100%;
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+        }
 
         .fade-enter-active,
         .fade-leave-active {
@@ -175,6 +203,17 @@
         .fade-enter-from,
         .fade-leave-to {
             opacity: 0;
+        }
+    }
+
+    html.max-scroll-locked {
+        overflow: hidden !important;
+        touch-action: none;
+
+        .mobile-page-content,
+        .board_page_content_main_div .pane1 {
+            overflow: hidden !important;
+            touch-action: none;
         }
     }
 </style>

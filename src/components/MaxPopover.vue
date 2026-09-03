@@ -34,7 +34,7 @@
                         >
                             <slot name="header">
                                 <MaxGrid s100 class="max-popover-header" pt0 mt0 mb-15 :id="title_id">
-                                    <MaxTitle1 s90 :h1="props.title ?? 'Titulo'" :h2="props.subTitle ?? 'Sub Titulo'" p0 m0 />
+                                    <MaxTitle1 s90 :title="props.title ?? 'Titulo'" :subtitle="props.subTitle ?? 'Sub Titulo'" p0 m0 />
                                     <MaxIconButton s10 i="iconoir:xmark" size="1.3" aria-label="Fechar" @click.stop="hide" />
                                 </MaxGrid>
                             </slot>

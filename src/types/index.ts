@@ -113,6 +113,10 @@ export interface MaxButtonsType extends /* @vue-ignore */ MaxButtonBaseProps {
     checked?: boolean | string | number | undefined;
     /** Icone de adição */
     plus?: boolean | string | number | undefined;
+    /** Cor do ícone */
+    color?: string;
+    /** Alias para a cor do ícone */
+    iconColor?: string;
     /** Hover color */
     hoverColor?: string | undefined;
     /** Action */
@@ -123,6 +127,58 @@ export interface MaxButtonsType extends /* @vue-ignore */ MaxButtonBaseProps {
     uppercase?: boolean;
     /** Borda tracejada com fundo transparente */
     dashed?: boolean;
+}
+
+/**
+ * Propriedades para o componente de botão de Like (MaxLikeButton).
+ */
+export interface MaxLikeButtonProps {
+    /** Número de likes (suporta v-model) */
+    modelValue?: number;
+    /** Estado de curtido (suporta v-model:liked ou prop controlada) */
+    liked?: boolean;
+    /** Exibe apenas o ícone e badge com a contagem de likes */
+    onlyIcon?: boolean;
+    /** Oculta o valor do número de likes */
+    noNumber?: boolean;
+    /** Texto de exibição do botão (padrão: "Gostei") */
+    label?: string;
+    /** Ícone principal ou base do botão */
+    icon?: string;
+    /** Ícone para quando estiver curtido */
+    iconTrue?: string;
+    /** Alias kebab-case para iconTrue */
+    'icon-true'?: string;
+    /** Ícone para quando não estiver curtido */
+    iconFalse?: string;
+    /** Alias kebab-case para iconFalse */
+    'icon-false'?: string;
+    /** Ícone no estado curtido (alias compatível com iconTrue) */
+    iconLiked?: string;
+    /** Permite repetir o like após um intervalo em minutos (true = 60 min, ou número em minutos, padrão: false) */
+    repeat?: boolean | number;
+    /** Alias de repeat (padrão: false) */
+    allowRepeat?: boolean | number;
+    /** Alias kebab-case de repeat (padrão: false) */
+    'allow-repeat'?: boolean | number;
+    /** Identificador único para persistência do cooldown no localStorage */
+    id?: string;
+    /** Chave customizada para persistência no localStorage */
+    storageKey?: string;
+    /** Função executada ao clicar no botão */
+    onClick?: (event: MouseEvent) => void;
+    /** Desabilita o botão */
+    disabled?: boolean;
+    /** Estado de carregamento do botão */
+    loading?: boolean;
+    /** Tamanho do botão ('small' | 'large' ou escala) */
+    size?: 'small' | 'large' | string | number | null;
+    /** Tamanho do ícone */
+    iconSize?: number | string | null;
+    /** Classe CSS personalizada para o badge */
+    badgeClass?: string;
+    /** Classe CSS personalizada para o botão */
+    class?: string;
 }
 
 /**
@@ -186,6 +242,44 @@ export interface InputBaseProps {
     caution?: string | boolean | undefined;
     /** Define se o campo é obrigatório */
     required?: boolean;
+}
+
+/**
+ * Estrutura aceita para itens do tipo objeto no MaxChips.
+ * Ao menos uma das propriedades id, label, name ou value deve estar presente.
+ */
+export interface ChipObjectItem {
+    id?: string | number;
+    label?: string | number;
+    name?: string | number;
+    value?: string | number;
+    [key: string]: any;
+}
+
+export type ChipItem = string | number | ChipObjectItem;
+
+/**
+ * Propriedades para o componente MaxChips.
+ */
+export interface MaxChipsProps extends InputBaseProps {
+    /** Valor do v-model contendo a lista de chips (strings, números ou objetos) */
+    modelValue?: ChipItem[];
+    /** Placeholder exibido quando o campo está vazio */
+    placeholder?: string;
+    /** Permite ou bloqueia valores duplicados (padrão: false) */
+    allowDuplicate?: boolean;
+    /** Número máximo de chips permitidos */
+    max?: number;
+    /** Adiciona o chip ao perder o foco do input (padrão: false) */
+    addOnBlur?: boolean;
+    /** Caractere ou separador usado para dividir chips ao digitar/colar (padrão: ',') */
+    separator?: string | RegExp;
+    /** Força novos itens inseridos como objetos { label, value } mesmo com lista vazia */
+    asObject?: boolean;
+    /** Função customizada para instanciar novos objetos a partir do texto digitado */
+    createItem?: (text: string) => ChipObjectItem;
+    /** Permite remover chips individualmente (padrão: true) */
+    removable?: boolean;
 }
 
 /**

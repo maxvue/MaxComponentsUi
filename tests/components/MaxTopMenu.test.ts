@@ -22,6 +22,7 @@ import MaxTopMenuSearchBar from '../../src/components/MaxTopMenuSearchBar.vue';
 import { useTopToolbarStore } from '../../src/stores/useTopToolbar.Store';
 import { useSearchBarStore } from '../../src/stores/useSearchBar.Store';
 import { useUserStore } from '../../src/stores/useUser.Store';
+import { useSystemStore } from '../../src/stores/useSystem.Store';
 import { configureMaxApp, resetMaxAppConfig } from '../../src/helpers/maxAppConfig';
 
 let pinia: Pinia;
@@ -61,12 +62,26 @@ describe('MaxTopMenu', () => {
         expect(mountWithPinia(MaxTopMenu).findComponent(MaxUserSection).exists()).toBe(true);
     });
 
-    it('exibe o botão de menu lateral apenas em mobile', () => {
+    it('exibe o botão de menu lateral apenas em mobile e alterna a abertura da gaveta', async () => {
         expect(mountWithPinia(MaxTopMenu).find('.btn_side_menu').exists()).toBe(false);
 
-        const mobile = mountWithPinia(MaxTopMenu, { attrs: { screen: 'mobile' } });
+        const system = useSystemStore();
+        expect(system.side_menu_open).toBe(false);
 
-        expect(mobile.find('.btn_side_menu').exists()).toBe(true);
+        const mobile = mountWithPinia(MaxTopMenu, { attrs: { screen: 'mobile' } });
+        const btn = mobile.find('.btn_side_menu');
+
+        expect(btn.exists()).toBe(true);
+        await btn.trigger('click');
+        expect(system.side_menu_open).toBe(true);
+    });
+
+    it('exibe o título móvel central quando top_menu_title está preenchido', () => {
+        const system = useSystemStore();
+        system.top_menu_title = 'Extrato Financeiro';
+
+        const mobile = mountWithPinia(MaxTopMenu, { attrs: { screen: 'mobile' } });
+        expect(mobile.find('.mobile-header-title').text()).toBe('Extrato Financeiro');
     });
 
     it('não exibe o menu adicionar sem itens', () => {
@@ -431,5 +446,103 @@ describe('MaxTopMenuSearchBar', () => {
         });
 
         expect(wrapper.find('.extra-busca').exists()).toBe(true);
+    });
+
+    it('renderiza MaxIconButton com prop light no mobile e abre painel flutuante ao clicar', async () => {
+        const wrapper = mountWithPinia(MaxTopMenuSearchBar, {
+            props: { screen: 'mobile' }
+        });
+
+        // No mobile, o trigger inicial é um MaxIconButton
+        const btn = wrapper.findComponent({ name: 'MaxIconButton' });
+        expect(btn.exists()).toBe(true);
+        expect(btn.props('light')).toBe(true);
+
+        // Painel flutuante fechado inicialmente
+        expect(document.body.querySelector('.mobile-search-panel')).toBeNull();
+
+        // Clica no botão para abrir
+        await btn.trigger('click');
+
+        // Painel flutuante aberto no body (Teleport)
+        const panel = document.body.querySelector('.mobile-search-panel');
+        expect(panel).not.toBeNull();
+    });
+});
+
+describe('MaxTopMenu Mobile (estilo AgenteDeBolso)', () => {
+    beforeEach(() => {
+        pinia = createPinia();
+        setActivePinia(pinia);
+        useUserStore().data = { id: 1, name: 'João Santos' };
+    });
+
+    it('renderiza a estrutura de 3 colunas estritas em mobile: hambúrguer, centro com id e ações', () => {
+        const wrapper = mountWithPinia(MaxTopMenu, { attrs: { screen: 'mobile' } });
+
+        expect(wrapper.find('.btn_side_menu').exists()).toBe(true);
+        const center = wrapper.find('.top-menu-mobile-center');
+        expect(center.exists()).toBe(true);
+        expect(center.attributes('id')).toBe('top_menu_mobile_center');
+        expect(wrapper.find('.top-menu-mobile-actions').exists()).toBe(true);
+    });
+
+    it('renderiza o MaxUserSection em modo compacto/mobile no cabeçalho mobile', () => {
+        const wrapper = mountWithPinia(MaxTopMenu, { attrs: { screen: 'mobile' } });
+
+        const userSection = wrapper.findComponent(MaxUserSection);
+        expect(userSection.exists()).toBe(true);
+        expect(userSection.props('onlyAvatar')).toBe(true);
+        expect(userSection.props('screen')).toBe('mobile');
+        expect(wrapper.find('.mobile-user-avatar').exists()).toBe(true);
+    });
+
+    it('abre o menu do avatar ao clicar no avatar compacto em mobile', async () => {
+        const wrapper = mountWithPinia(MaxTopMenu, { attrs: { screen: 'mobile' }, attachTo: document.body });
+
+        expect(document.querySelector('.max-user-section-overlay')).toBeNull();
+
+        await wrapper.find('.mobile-user-avatar').trigger('click');
+
+        expect(document.querySelector('.max-user-section-overlay')).not.toBeNull();
+        expect(document.querySelector('#overlay_tmenu')).not.toBeNull();
+
+        wrapper.unmount();
+    });
+
+    it('permite customizar a área de ações via slot mobile-actions', () => {
+        const wrapper = mountWithPinia(MaxTopMenu, {
+            attrs: { screen: 'mobile' },
+            slots: { 'mobile-actions': '<div class="custom-mobile-actions">Ações Custom</div>' }
+        });
+
+        expect(wrapper.find('.custom-mobile-actions').exists()).toBe(true);
+    });
+
+    it('permite customizar o centro do topo via slot mobile-center', () => {
+        const wrapper = mountWithPinia(MaxTopMenu, {
+            attrs: { screen: 'mobile' },
+            slots: { 'mobile-center': '<div class="filtro-mes">Setembro 2026</div>' }
+        });
+
+        expect(wrapper.find('.filtro-mes').exists()).toBe(true);
+        expect(wrapper.text()).toContain('Setembro 2026');
+    });
+
+    it('utiliza prop light no botão hambúrguer do menu mobile', () => {
+        const wrapper = mountWithPinia(MaxTopMenu, { attrs: { screen: 'mobile' } });
+        const hamburgerIcon = wrapper.find('.btn_side_menu').findComponent({ name: 'MaxIcon' });
+
+        expect(hamburgerIcon.exists()).toBe(true);
+        expect(hamburgerIcon.props('light')).toBeTruthy();
+    });
+
+    it('não renderiza o slot bugs no cabeçalho mobile (para exibição flutuante)', () => {
+        const wrapper = mountWithPinia(MaxTopMenu, {
+            attrs: { screen: 'mobile' },
+            slots: { bugs: '<div class="bug-slot-content">Bug</div>' }
+        });
+
+        expect(wrapper.find('.top-menu-mobile-actions .bug-slot-content').exists()).toBe(false);
     });
 });
