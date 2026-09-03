@@ -153,19 +153,19 @@
     height: 30px;
     cursor: pointer !important;
 
-    .max-input-field-div{
+    .max-input-field-div {
         display: flex !important;
         position: relative;
         overflow: hidden;
         border-radius: 50%;
-        outline: 2px solid rgba(0,0,0,0.2) !important;
+        outline: 2px solid rgb(0 0 0 / 20%) !important;
         aspect-ratio: 1 / 1 !important;
         width: 100% !important;
         height: 100% !important;
         cursor: pointer !important;
     }
 
-    .input-slot-div{
+    .input-slot-div {
         overflow: hidden;
         border: none;
         height: calc(100% + 30px) !important;
@@ -176,13 +176,14 @@
         cursor: pointer !important;
     }
 
-    .item-color{
+    .item-color {
         position: absolute;
         width: calc(100% + 30px);
         left: -10px;
         top: 0;
         height: calc(100% + 30px);
         cursor: pointer !important;
+
         input {
             cursor: pointer !important;
         }

@@ -468,7 +468,7 @@
             place-items: center;
             width: 1.5rem;
             height: 1.5rem;
-            color: rgb(0 0 0 / 50%);
+            color: var(--background-700, rgb(0 0 0 / 50%));
 
             svg {
                 min-width: 100% !important;

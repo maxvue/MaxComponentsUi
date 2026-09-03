@@ -28,6 +28,16 @@
                     "v-slotted"
                 ]
             }
+        ],
+        "selector-pseudo-class-no-unknown": [
+            true,
+            {
+                "ignorePseudoClasses": [
+                    "deep",
+                    "global",
+                    "slotted"
+                ]
+            }
         ]
     },
     "overrides": [
