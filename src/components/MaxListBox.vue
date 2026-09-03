@@ -680,11 +680,13 @@
     flex: 1;
     overflow-y: auto;
     outline: none;
-    scrollbar-width: thin;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 
     &::-webkit-scrollbar {
-        width: 3px;
-        height: 3px;
+        display: none;
+        width: 0;
+        height: 0;
     }
 }
 
