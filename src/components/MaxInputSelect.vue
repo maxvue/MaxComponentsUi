@@ -437,7 +437,7 @@
         }
     }
 
-    .placeholder-select{
+    .placeholder-select {
         padding-left: 7px !important;
     }
 

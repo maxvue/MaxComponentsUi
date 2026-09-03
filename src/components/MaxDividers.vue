@@ -93,6 +93,7 @@
 <script setup lang="ts">
     import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
     import MaxIcon from './MaxIcon.vue';
+    import { useSystemStore } from '../stores/useSystem.Store';
 
     /**
      * Componente MaxDividers
@@ -203,8 +204,16 @@
         return breakpoints[props.breakpoint] ?? 1024;
     });
 
+    let systemStore: any = null;
+    try {
+        systemStore = useSystemStore();
+    } catch {
+        // Ignora caso Pinia não esteja ativo no escopo
+    }
+
     const isMobile = computed(() => {
         if (typeof props.mobile === 'boolean') return props.mobile;
+        if (systemStore && typeof systemStore.isMobile === 'boolean') return systemStore.isMobile;
         return windowWidth.value < breakpointPixels.value;
     });
 
@@ -277,7 +286,7 @@
     });
 
     const rootStyle = computed(() => {
-        const gapVal = typeof props.gap === 'number' ? `${props.gap}px` : props.gap;
+        const gapVal = props.resizable ? '0px' : (typeof props.gap === 'number' ? `${props.gap}px` : props.gap);
         return {
             '--max-divider-gap': gapVal
         };
@@ -306,13 +315,14 @@
 
         if (parsedSizes.value) {
             const p1 = parsedSizes.value[0];
+            const offset = props.resizable ? '3px' : 'calc(var(--max-divider-gap, 1rem) / 2)';
             if (isColumn.value) return {
-                flex: `0 0 ${p1}%`,
-                maxWidth: `${p1}%`
+                flex: `0 0 calc(${p1}% - ${offset})`,
+                maxWidth: `calc(${p1}% - ${offset})`
             };
             return {
-                flex: `0 0 ${p1}%`,
-                maxHeight: `${p1}%`
+                flex: `0 0 calc(${p1}% - ${offset})`,
+                maxHeight: `calc(${p1}% - ${offset})`
             };
         }
 
@@ -334,13 +344,14 @@
 
         if (parsedSizes.value) {
             const p2 = parsedSizes.value[1];
+            const offset = props.resizable ? '3px' : 'calc(var(--max-divider-gap, 1rem) / 2)';
             if (isColumn.value) return {
-                flex: `0 0 ${p2}%`,
-                maxWidth: `${p2}%`
+                flex: `0 0 calc(${p2}% - ${offset})`,
+                maxWidth: `calc(${p2}% - ${offset})`
             };
             return {
-                flex: `0 0 ${p2}%`,
-                maxHeight: `${p2}%`
+                flex: `0 0 calc(${p2}% - ${offset})`,
+                maxHeight: `calc(${p2}% - ${offset})`
             };
         }
 
@@ -428,7 +439,7 @@
 
     /* Desktop Layout */
     &.is-desktop {
-        .max-dividers-track {
+        > .max-dividers-track {
             display: flex;
             width: 100%;
             height: 100%;
@@ -437,15 +448,15 @@
             gap: var(--max-divider-gap, 1rem);
         }
 
-        &.is-column .max-dividers-track {
+        &.is-column > .max-dividers-track {
             flex-direction: row;
         }
 
-        &.is-line .max-dividers-track {
+        &.is-line > .max-dividers-track {
             flex-direction: column;
         }
 
-        .max-divider-pane {
+        > .max-dividers-track > .max-divider-pane {
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -469,7 +480,7 @@
         overflow: hidden;
 
         &.is-column {
-            .max-dividers-track {
+            > .max-dividers-track {
                 display: flex;
                 flex-direction: row;
                 width: 200%;
@@ -485,7 +496,7 @@
                     transform: translate3d(-50%, 0, 0);
                 }
 
-                .max-divider-pane {
+                > .max-divider-pane {
                     width: 50%;
                     height: 100%;
                     min-height: 0;
@@ -496,7 +507,7 @@
         }
 
         &.is-line {
-            .max-dividers-track {
+            > .max-dividers-track {
                 display: flex;
                 flex-direction: column;
                 width: 100%;
@@ -512,7 +523,7 @@
                     transform: translate3d(0, -50%, 0);
                 }
 
-                .max-divider-pane {
+                > .max-divider-pane {
                     width: 100%;
                     height: 50%;
                     min-height: 0;
@@ -541,8 +552,8 @@
             display: flex;
             align-items: center;
             padding: 0.5rem 0.75rem;
-            border-bottom: 1px solid var(--gray-200, #e5e7eb);
-            background-color: var(--surface-card, #fff);
+            border-bottom: 1px solid var(--background-200, #e5e7eb);
+            background-color: var(--background-0, #fff);
             flex-shrink: 0;
             z-index: 10;
         }
@@ -560,14 +571,14 @@
             justify-content: center;
             padding: 0.375rem;
             border-radius: 0.5rem;
-            border: 1px solid var(--gray-200, #e5e7eb);
+            border: 1px solid var(--background-200, #e5e7eb);
             background-color: var(--background-0, #f8fafc);
-            color: var(--gray-700, #374151);
+            color: var(--background-800, #374151);
             cursor: pointer;
             transition: background-color 0.15s ease, transform 0.1s ease;
 
             &:hover {
-                background-color: var(--gray-100, #f3f4f6);
+                background-color: var(--background-100, #f3f4f6);
             }
 
             &:active {
@@ -578,7 +589,7 @@
         .max-divider-mobile-title {
             font-size: 0.875rem;
             font-weight: 600;
-            color: var(--gray-800, #1f2937);
+            color: var(--background-900, #1f2937);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;

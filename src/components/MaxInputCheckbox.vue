@@ -90,7 +90,7 @@
                 border-width: 0 2px 2px 0;
                 transform: rotate(45deg) scale(0);
                 transition: transform 0.1s;
-                margin: 0 0 1px 0;
+                margin: 0 0 1px;
             }
 
             &:checked {
