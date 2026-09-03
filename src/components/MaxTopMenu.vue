@@ -13,7 +13,7 @@
                 <MaxIcon icon="uil:bars" size="1.3" light />
             </div>
 
-            <div class="top-menu-mobile-center">
+            <div id="top_menu_mobile_center" class="top-menu-mobile-center">
                 <slot name="mobile-center">
                     <span v-if="system.top_menu_title" class="mobile-header-title">{{ system.top_menu_title }}</span>
                     <slot v-else name="status"></slot>
@@ -195,7 +195,8 @@
         .btn_side_menu {
             display: grid;
             place-items: center;
-            min-width: 44px;
+            width: 38px;
+            min-width: 38px;
             min-height: 44px;
             border-radius: 999px;
             font-size: 1.3rem;
@@ -238,6 +239,7 @@
             align-items: center;
             justify-content: end;
             gap: 1.125rem;
+            padding-left: 5px;
 
             .mobile-user-avatar {
                 display: grid;
@@ -288,7 +290,7 @@
                 grid-column: 1;
                 padding: 0 !important;
                 place-items: center start;
-                grid-template-columns: 44px 1fr auto !important;
+                grid-template-columns: 38px 1fr auto !important;
                 gap: 0.5rem !important;
                 height: var(--top-menu-height, 60px) !important;
             }
