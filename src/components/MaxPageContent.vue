@@ -44,8 +44,7 @@
         }
 
         .pane1 {
-            overflow-y: auto;
-            overflow-x: hidden;
+            overflow: hidden auto;
             -webkit-overflow-scrolling: touch;
             overscroll-behavior-y: contain;
             min-height: 0;

@@ -210,7 +210,7 @@
         position: fixed;
         inset: 0;
         z-index: 940;
-        background-color: rgba(0, 0, 0, 0.5);
+        background-color: rgb(0 0 0 / 50%);
     }
 
     .mobile-search-panel {
@@ -222,7 +222,7 @@
         box-sizing: border-box;
         padding: 0.6rem 0.75rem;
         background-color: var(--blue-850, #0f172a);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+        box-shadow: 0 8px 24px rgb(0 0 0 / 35%);
 
         .mobile-search-content {
             display: flex;

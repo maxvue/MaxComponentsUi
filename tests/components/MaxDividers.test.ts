@@ -312,4 +312,55 @@ describe('MaxDividers', () => {
         expect(emittedSizes[0]).toBe(40);
         expect(emittedSizes[1]).toBe(60);
     });
+
+    it('aplica offset de gap/gutter no cálculo de tamanhos para evitar overflow', () => {
+        const wrapper = mount(MaxDividers, {
+            props: {
+                sizes: [50, 50],
+                gap: '1rem',
+                mobile: false
+            }
+        });
+
+        const firstPane = wrapper.find('.max-divider-pane--first');
+        const secondPane = wrapper.find('.max-divider-pane--second');
+
+        expect(firstPane.attributes('style')).toContain('calc(50% -');
+        expect(secondPane.attributes('style')).toContain('calc(50% -');
+    });
+
+    it('suporta aninhamento de MaxDividers no mobile com estados de pane isolados', async () => {
+        const wrapper = mount(MaxDividers, {
+            props: {
+                mobile: true,
+                active: 1
+            },
+            slots: {
+                first: '<div class="districts-list">Lista de Distritos</div>',
+                second: {
+                    components: { MaxDividers },
+                    template: `
+                        <MaxDividers :mobile="true" :active="1" class="nested-dividers">
+                            <template #first><div class="churches-list">Lista de Igrejas</div></template>
+                            <template #second><div class="church-details">Detalhes da Igreja</div></template>
+                        </MaxDividers>
+                    `
+                }
+            }
+        });
+
+        // Nível externo começa no painel 1
+        expect(wrapper.find('.max-dividers.is-mobile').exists()).toBe(true);
+        expect(wrapper.find('.max-dividers-track.active-pane-1').exists()).toBe(true);
+
+        // Avança o nível externo para o painel 2
+        await wrapper.setProps({ active: 2 });
+        expect(wrapper.find('.max-dividers-track.active-pane-2').exists()).toBe(true);
+
+        // O nível interno deve estar presente e com active-pane-1 isolado
+        const nested = wrapper.findComponent('.nested-dividers');
+        expect(nested.exists()).toBe(true);
+        expect(nested.find('.max-dividers-track.active-pane-1').exists()).toBe(true);
+        expect(nested.find('.churches-list').exists()).toBe(true);
+    });
 });
