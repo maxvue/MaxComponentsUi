@@ -38,7 +38,6 @@ const mountLayout = (options: Record<string, any> = {}) => mount(MaxPageLayout, 
         stubs: {
             teleport: true,
             MaxLogo: { template: '<div class="max-logo-stub" />' },
-            MaxIcon: { template: '<i class="max-icon-stub" />', props: ['icon', 'size', 'color'] },
             ...(options.global?.stubs ?? {})
         }
     }

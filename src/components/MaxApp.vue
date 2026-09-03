@@ -63,7 +63,8 @@
     import { useUserStore } from '../stores/useUser.Store';
     import { useLoginStore } from '../stores/useLogin.Store';
     import { configureMaxApp } from '../helpers/maxAppConfig';
-    import type { BottomTab, MenuGroup } from '../types';
+    import type { BottomTab } from './MaxBottomMenu.vue';
+    import type { MenuGroup } from './MaxSideMenuMobile.vue';
 
     /** Slots repassados ao `MaxPageLayout`. */
     const LAYOUT_SLOTS = ['status', 'search', 'add', 'chat', 'bugs', 'notifications', 'voip', 'live', 'user', 'mobile-center', 'mobile-actions', 'switcher'] as const;

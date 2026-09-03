@@ -4,7 +4,6 @@
  * Estes tipos eram ambientes (globais) no engeapp (`resources/Types/Global.d.ts`).
  * Aqui são exportados explicitamente, já que a biblioteca não usa auto-import.
  */
-import type { MenuItem } from './index';
 
 /** Estado de um item de carregamento. */
 export type ItemStatus = 'loading' | 'done' | 'error' | 'waiting';
@@ -133,29 +132,5 @@ export interface MaxAppConfig {
     googleMapsApiKey?: string;
     /** ID do mapa do Google Maps usado pelo componente MaxMaps. */
     googleMapsMapId?: string;
-}
-
-/** Item de aba para o menu inferior móvel (MaxBottomMenu). */
-export interface BottomTab {
-    id?: string;
-    name?: string;
-    icon?: string;
-    label?: string;
-    route?: string;
-    badge?: number | string;
-    disabled?: boolean;
-    matches?: string[];
-    action?: () => void;
-    [key: string]: any;
-}
-
-/** Grupo de itens para o menu lateral móvel (MaxSideMenuMobile). */
-export interface MenuGroup {
-    id?: string;
-    title?: string;
-    items: MenuItem[] | any[];
-    class?: string;
-    role?: string;
-    [key: string]: any;
 }
 

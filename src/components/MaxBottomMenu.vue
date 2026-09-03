@@ -102,7 +102,21 @@
     import { useRoute, useRouter } from 'vue-router';
     import MaxIcon from './MaxIcon.vue';
     import MaxPopoverMenu from './MaxPopoverMenu.vue';
-    import type { BottomTab } from '../types';
+
+    /** Aba exibida no menu inferior. */
+    export interface BottomTab {
+        /** Nome da rota de destino. */
+        name: string;
+        /** Rótulo exibido abaixo do ícone. */
+        label?: string;
+        /** Ícone da aba. */
+        icon: string;
+        /**
+         * Rotas adicionais que também marcam esta aba como ativa — útil para
+         * telas de detalhe que pertencem à mesma seção.
+         */
+        matches?: string[];
+    }
 
     const props = withDefaults(defineProps<{
         /** Abas exibidas. O padrão reproduz o menu do engeapp. */
@@ -171,8 +185,8 @@
         return current === tab.name || (tab.matches?.includes(current) ?? false);
     }
 
-    function goTo(name?: string): void {
-        if (!name || currentRoute?.name === name) return;
+    function goTo(name: string): void {
+        if (currentRoute?.name === name) return;
 
         router.push({ name });
     }
