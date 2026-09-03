@@ -4,7 +4,7 @@
             <MaxTagSelect flex :modelValue="item.value" :options="options_array" no-dropdown uppercase @update:modelValue="(val: any) => replaceItem(item, val)">
                 <template #btn-right>
                     <div class="max-tag-remove-action" v-tooltip="'Remover'" @click.stop="removeItem(item)">
-                        <MaxIconButton i="material-symbols:close-rounded" size="1.35" :color="getStyleColor(item, false, true).color" />
+                        <MaxIconButton i="material-symbols:close-rounded" size="1.2" :color="getStyleColor(item, false, true).color" />
                     </div>
                 </template>
             </MaxTagSelect>
@@ -111,7 +111,7 @@
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        opacity: 0.85;
+        opacity: 0.9;
         margin-left: 4px;
         padding: 2px;
         border-radius: 4px;
@@ -120,7 +120,7 @@
         &:hover {
             opacity: 1;
             transform: scale(1.15);
-            background-color: rgb(0 0 0 / 12%);
+            background-color: rgb(0 0 0 / 15%);
         }
     }
 }

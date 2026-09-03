@@ -8,6 +8,7 @@
                 :value="displayedText"
                 :placeholder="props.placeholder ?? 'SELECIONE'"
                 :disabled="props.disabled"
+                :spellcheck="props.spellcheck"
                 autocomplete="off"
                 @input="onInput"
                 @change="onChange"
@@ -88,6 +89,7 @@
             required?: boolean;
             forceSelection?: boolean;
             restoreOnInvalid?: boolean;
+            spellcheck?: boolean | undefined;
         }>(),
         {
             modelValue: '',

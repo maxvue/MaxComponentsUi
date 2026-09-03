@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import { watch } from 'vue';
+import { contrastColor } from '@maxvue/max-use';
 
 // `watchTrue` (alias de `whenever` do VueUse) é importado por `@maxvue/max-use`, que em teste
 // resolve para o pacote irmão `../MaxUse/src` — uma árvore `node_modules` própria, com sua
@@ -132,7 +133,17 @@ describe('MaxTagsList', () => {
         const iconButton = wrapper.findComponent({ name: 'MaxIconButton' });
         expect(iconButton.exists()).toBe(true);
         expect(iconButton.props('i')).toBe('material-symbols:close-rounded');
-        expect(iconButton.props('size')).toBe('1.35');
+        expect(iconButton.props('size')).toBe('1.2');
+        expect(iconButton.props('color')).toBeDefined();
+    });
+
+    it('botão de remoção recebe a cor de contraste calculada da tag', () => {
+        const customOption = { value: 'custom-tag', name: 'Custom Tag', background_color: '#3b82f6' };
+        const wrapper = mountTagsList({ modelValue: [customOption], options: [customOption] });
+        const iconButton = wrapper.findComponent({ name: 'MaxIconButton' });
+
+        expect(iconButton.exists()).toBe(true);
+        expect(iconButton.props('color')).toBe(contrastColor('#3b82f6'));
     });
 
     it('substituir um item (replaceItem) troca o item na posição correta sem duplicar', async () => {

@@ -44,6 +44,7 @@ const mountWithPinia = (component: any, options: Record<string, any> = {}) => mo
         // inspecionar o valor que chega ao MaxLogo.
         stubs: {
             MaxLogo: { name: 'MaxLogo', props: ['src'], template: '<div class="max-logo-stub" />' },
+            MaxIcon: { template: '<span class="max-icon-stub" />' },
             ...(options.global?.stubs ?? {})
         }
     }
