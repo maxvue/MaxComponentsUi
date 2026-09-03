@@ -219,6 +219,22 @@ describe('MaxDrawer', () => {
         expect(drawer?.getAttribute('aria-modal')).toBe('true');
     });
 
+    it('aplica a classe max-drawer-no-padding quando noPadding é true', () => {
+        mountDrawer({ noPadding: true });
+        const drawer = document.querySelector('.max-drawer');
+        expect(drawer?.classList.contains('max-drawer-no-padding')).toBe(true);
+    });
+
+    it('repassa classes de attrs para o elemento .max-drawer', () => {
+        mount(MaxDrawer, {
+            props: { visible: true },
+            attrs: { class: 'custom-drawer-class' },
+            attachTo: document.body
+        });
+        const drawer = document.querySelector('.max-drawer');
+        expect(drawer?.classList.contains('custom-drawer-class')).toBe(true);
+    });
+
     it('renderiza o header quando a prop header e informada', () => {
         mountDrawer({ header: 'Titulo' });
         expect(document.querySelector('.max-drawer-header')?.textContent).toContain('Titulo');

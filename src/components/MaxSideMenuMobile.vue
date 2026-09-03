@@ -3,6 +3,8 @@
         v-model:visible="system.side_menu_open"
         position="left"
         :show-close-icon="false"
+        :base-z-index="1000"
+        no-padding
         class="max-side-menu-mobile-drawer"
     >
         <div class="mobile-side-menu">
@@ -186,14 +188,13 @@
 </script>
 
 <style lang="scss">
+    .max-drawer.max-side-menu-mobile-drawer,
     .max-side-menu-mobile-drawer {
-        .max-drawer {
-            width: min(88%, 340px) !important;
-            padding: 0;
-            background-color: var(--background-0, #fff);
-            display: flex;
-            flex-direction: column;
-        }
+        width: min(88%, 340px) !important;
+        padding: 0;
+        background-color: var(--background-0, #fff);
+        display: flex;
+        flex-direction: column;
 
         .max-drawer-content {
             padding: 0 !important;
@@ -230,6 +231,11 @@
                 display: grid;
                 place-items: center;
                 overflow: hidden;
+
+                :deep(.max-user-avatar) {
+                    width: 100%;
+                    height: 100%;
+                }
             }
 
             .mobile-profile-details {

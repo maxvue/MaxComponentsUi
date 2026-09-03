@@ -197,18 +197,16 @@
         position: fixed;
         bottom: 0;
         left: 0;
-        z-index: 900;
+        z-index: 20;
         width: 100%;
         height: calc(var(--bottom-menu-height, 58px) + var(--safe-area-bottom, env(safe-area-inset-bottom, 0px)));
         box-sizing: border-box;
-        padding: 0 0.75rem calc(0.5rem + var(--safe-area-bottom, env(safe-area-inset-bottom, 0px)));
+        padding: 0 0 calc(var(--safe-area-bottom, env(safe-area-inset-bottom, 0px)));
         background-color: var(--background-25, #fff);
         display: flex;
         align-items: center;
 
         &.is-curved {
-            padding: 0 0 calc(var(--safe-area-bottom, env(safe-area-inset-bottom, 0px)));
-
             .bottom-menu-bar {
                 background-color: transparent;
                 border-radius: 0;
@@ -232,7 +230,6 @@
             display: grid;
             width: 100%;
             height: var(--bottom-menu-height, 58px);
-            border-radius: 15px;
             background-color: var(--background-25, #fff);
             border-top: 1px solid var(--background-100, #e2e8f0);
             color: var(--background-800, #1e293b);

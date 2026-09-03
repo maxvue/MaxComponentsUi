@@ -15,8 +15,10 @@ describe('MaxUserAvatar', () => {
     });
 
     it('renderiza corretamente', () => {
-        const wrapper = mountAvatar({ name: 'João' });
+        const wrapper = mountAvatar();
         expect(wrapper.exists()).toBe(true);
+        expect(wrapper.classes()).toContain('max-user-avatar');
+        expect(wrapper.classes()).toContain('p-avatar-circle');
     });
 
     it('exibe imagem quando imageUrl é fornecido', () => {

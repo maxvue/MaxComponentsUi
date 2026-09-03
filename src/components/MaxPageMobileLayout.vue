@@ -136,7 +136,7 @@
         height: 100vh;
         height: 100dvh;
         overflow: hidden;
-        background-color: var(--blue-850, #0f172a);
+        background-color: var(--background-25, #f8fafc);
         box-sizing: border-box;
 
         .mobile-page-content {

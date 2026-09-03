@@ -243,9 +243,17 @@
             .mobile-user-avatar {
                 display: grid;
                 place-items: center;
+                width: 34px;
+                height: 34px;
+                border-radius: 50%;
+                overflow: hidden;
                 cursor: pointer;
-                border-radius: 999px;
                 transition: opacity 0.18s ease;
+
+                .max-user-avatar {
+                    width: 34px;
+                    height: 34px;
+                }
 
                 &:hover {
                     opacity: 0.85;
