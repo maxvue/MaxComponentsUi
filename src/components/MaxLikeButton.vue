@@ -49,6 +49,8 @@
         'icon-false': undefined,
         iconLiked: undefined,
         repeat: false,
+        allowRepeat: false,
+        'allow-repeat': false,
         id: undefined,
         storageKey: undefined,
         disabled: false,
@@ -136,9 +138,17 @@
         return undefined;
     });
 
+    const effectiveRepeat = computed<boolean | number>(() => {
+        if (props.repeat !== false && props.repeat !== undefined) return props.repeat;
+        if (props.allowRepeat !== false && props.allowRepeat !== undefined) return props.allowRepeat;
+        if (props['allow-repeat'] !== false && props['allow-repeat'] !== undefined) return props['allow-repeat'];
+        return false;
+    });
+
     const repeatMinutes = computed<number>(() => {
-        if (typeof props.repeat === 'number' && props.repeat > 0) return props.repeat;
-        if (props.repeat === true) return 60;
+        const rep = effectiveRepeat.value;
+        if (typeof rep === 'number' && rep > 0) return rep;
+        if (rep === true) return 60;
         return 0;
     });
 

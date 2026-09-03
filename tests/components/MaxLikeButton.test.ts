@@ -303,5 +303,43 @@ describe('MaxLikeButton', () => {
             expect(toastStore.items.length).toBe(1);
             expect(toastStore.items[0].message).toContain('1h');
         });
+
+        it('por padrão repeat e allow-repeat são false (modo toggle normal sem toast)', async () => {
+            const { useToastStore } = await import('../../src/stores/useToast.Store');
+            const toastStore = useToastStore(pinia);
+            toastStore.clear();
+
+            const wrapper = mountLikeButton({ storageKey: 'post-default-repeat' });
+            await wrapper.trigger('click');
+
+            expect(toastStore.items.length).toBe(0);
+            expect(localStorage.getItem('max_like_post-default-repeat')).toBeNull();
+        });
+
+        it('suporta allowRepeat=true como alias de repeat=true', async () => {
+            const { useToastStore } = await import('../../src/stores/useToast.Store');
+            const toastStore = useToastStore(pinia);
+            toastStore.clear();
+
+            const wrapper = mountLikeButton({ allowRepeat: true, storageKey: 'post-allow-repeat' });
+            await wrapper.trigger('click');
+
+            expect(toastStore.items.length).toBe(1);
+            expect(toastStore.items[0].message).toContain('1h');
+            expect(localStorage.getItem('max_like_post-allow-repeat')).toBeTruthy();
+        });
+
+        it('suporta kebab-case allow-repeat="90" como alias numérico de repeat', async () => {
+            const { useToastStore } = await import('../../src/stores/useToast.Store');
+            const toastStore = useToastStore(pinia);
+            toastStore.clear();
+
+            const wrapper = mountLikeButton({ 'allow-repeat': 90, storageKey: 'post-kebab-repeat' });
+            await wrapper.trigger('click');
+
+            expect(toastStore.items.length).toBe(1);
+            expect(toastStore.items[0].message).toContain('1h30m');
+            expect(localStorage.getItem('max_like_post-kebab-repeat')).toBeTruthy();
+        });
     });
 });

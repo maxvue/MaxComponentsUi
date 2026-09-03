@@ -155,8 +155,12 @@ export interface MaxLikeButtonProps {
     'icon-false'?: string;
     /** Ícone no estado curtido (alias compatível com iconTrue) */
     iconLiked?: string;
-    /** Permite repetir o like após um intervalo em minutos (true = 60 min, ou número em minutos) */
+    /** Permite repetir o like após um intervalo em minutos (true = 60 min, ou número em minutos, padrão: false) */
     repeat?: boolean | number;
+    /** Alias de repeat (padrão: false) */
+    allowRepeat?: boolean | number;
+    /** Alias kebab-case de repeat (padrão: false) */
+    'allow-repeat'?: boolean | number;
     /** Identificador único para persistência do cooldown no localStorage */
     id?: string;
     /** Chave customizada para persistência no localStorage */

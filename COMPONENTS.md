@@ -173,6 +173,7 @@ Botão de Like com alternância automática de estado (curtido/não curtido), su
 | `iconFalse` / `icon-false` | `string` | — | Ícone específico para quando não curtido |
 | `iconLiked` | `string` | — | Alias compatível com `iconTrue` |
 | `repeat` | `boolean \| number` | `false` | Permite repetir like após intervalo em minutos (`true` = 60 min) |
+| `allow-repeat` / `allowRepeat` | `boolean \| number` | `false` | Alias de `repeat` |
 | `storageKey` / `id` | `string` | — | Chave para persistência do cooldown no localStorage |
 | `onClick` | `(event: MouseEvent) => void` | — | Callback executado ao clicar |
 | `disabled` | `boolean` | `false` | Desabilita o botão |
