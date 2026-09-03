@@ -94,21 +94,64 @@
     import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
     import MaxIcon from './MaxIcon.vue';
 
+    /**
+     * Componente MaxDividers
+     *
+     * Responsável por criar divisões de layout em duas colunas ou duas linhas, com comportamento
+     * responsivo avançado para desktop e mobile, permitindo aninhamento hierárquico (master-detail drill-down).
+     *
+     * Principais Funcionalidades:
+     * 1. Modos de Orientação:
+     *    - 'in-column' (padrão / prop booleana `in-column`): Divide o contêiner em duas colunas lado a lado.
+     *    - 'in-line' (prop booleana `in-line`): Divide o contêiner em duas linhas empilhadas verticalmente.
+     *
+     * 2. Comportamento Desktop (>= breakpoint, padrão 1024px / 'lg'):
+     *    - Exibe ambos os painéis (`#first` e `#second`) simultaneamente.
+     *    - Suporta proporções flexíveis via prop `sizes` (ex.: `[33, 67]` ou `[4, 8]`) ou tamanho fixo via `firstSize` (ex.: '380px').
+     *    - Divisor arrastável opcional (`resizable`) para redimensionamento manual em tempo real via mouse ou touch.
+     *
+     * 3. Comportamento Mobile (< breakpoint):
+     *    - Efeito deslizante suave (300ms com aceleração por hardware via translate3d):
+     *      * Horizontal (eixo X) no modo 'in-column'.
+     *      * Vertical (eixo Y) no modo 'in-line'.
+     *    - Ao navegar para o segundo painel (`active = 2` ou chamada a `next()`), exibe uma barra de cabeçalho
+     *      superior com botão de voltar (setinha) e título opcional (`secondTitle`).
+     *    - Ao clicar na setinha de voltar (ou chamar `back()`), retorna suavemente ao primeiro painel.
+     *
+     * 4. Aninhamento Hierárquico:
+     *    - Permite aninhar múltiplos MaxDividers (ex.: Lista de Distritos -> Lista de Igrejas -> Detalhes da Igreja)
+     *      onde cada nível gerencia seu estado e transição de forma isolada, criando uma navegação em cascata perfeita no mobile.
+     */
     export interface MaxDividersProps {
+        /** Direção do divisor: 'in-column' (colunas horizontais) ou 'in-line' (linhas verticais) */
         direction?: 'in-column' | 'in-line';
+        /** Flag booleana de atalho para dividir em duas linhas empilhadas (<MaxDividers in-line>) */
         inLine?: boolean;
+        /** Flag booleana de atalho para dividir em duas colunas lado a lado (<MaxDividers in-column>) */
         inColumn?: boolean;
+        /** Painel atualmente ativo no mobile (1 para primeiro, 2 para segundo) - controle v-model padrão */
         modelValue?: 1 | 2;
+        /** Painel atualmente ativo no mobile com controle v-model:active */
         active?: 1 | 2;
+        /** Breakpoint em pixels ou alias ('sm', 'md', 'lg', 'xl') abaixo do qual ativa o modo mobile (padrão 1024) */
         breakpoint?: number | 'sm' | 'md' | 'lg' | 'xl';
+        /** Força explicitamente o modo mobile (true) ou desktop (false), ignorando o resize de tela */
         mobile?: boolean;
+        /** Proporções entre o primeiro e o segundo painel no desktop (ex: [35, 65] ou [4, 8]) */
         sizes?: [number, number] | string;
+        /** Tamanho fixo do primeiro painel no desktop (ex: '380px' ou '30%') */
         firstSize?: string;
+        /** Espaçamento entre os painéis no modo desktop (padrão '1rem') */
         gap?: string | number;
+        /** Habilita barra divisora arrastável para redimensionamento manual no desktop */
         resizable?: boolean;
+        /** Se true, exibe barra de cabeçalho com botão de voltar no topo do segundo painel no mobile */
         showBackButton?: boolean;
+        /** Ícone do botão voltar no mobile (padrão 'mdi:arrow-left') */
         backButtonIcon?: string;
+        /** Título exibido na barra superior do segundo painel no mobile */
         secondTitle?: string;
+        /** Desativa animação de transição deslizante no mobile se true */
         disabledTransition?: boolean;
     }
 
