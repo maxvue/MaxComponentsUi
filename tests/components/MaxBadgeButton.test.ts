@@ -139,4 +139,15 @@ describe('MaxBadgeButton', () => {
         expect(onActive).not.toHaveBeenCalled();
         expect(wrapper.emitted('update:modelValue')).toBeUndefined();
     });
+
+    it('repassa e renderiza o overlay corretamente dentro do botão', () => {
+        const wrapper = mountBadgeButton({
+            label: 'Notificações',
+            overlay: 7
+        });
+
+        const overlayEl = wrapper.find('.max-badge-overlay');
+        expect(overlayEl.exists()).toBe(true);
+        expect(overlayEl.text()).toBe('7');
+    });
 });
