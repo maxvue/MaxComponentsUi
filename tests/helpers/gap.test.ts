@@ -25,8 +25,18 @@ describe('gap', () => {
         expect(gap(['class', 'gap', '15'])).toEqual({ 'column-gap': '15px !important' });
     });
 
+    it('retorna column-gap quando segundo parâmetro é "col"', () => {
+        expect(gap(['class', 'col', '10'])).toEqual({ 'column-gap': '10px !important' });
+    });
+
+    it('retorna column-gap quando segundo parâmetro é "column"', () => {
+        expect(gap(['class', 'column', '10'])).toEqual({ 'column-gap': '10px !important' });
+    });
+
     it('retorna column-gap com case insensitive', () => {
         expect(gap(['class', 'GAP', '12'])).toEqual({ 'column-gap': '12px !important' });
+        expect(gap(['class', 'COL', '15'])).toEqual({ 'column-gap': '15px !important' });
+        expect(gap(['class', 'COLUMN', '20'])).toEqual({ 'column-gap': '20px !important' });
     });
 
     it('retorna gap genérico para outros valores', () => {
