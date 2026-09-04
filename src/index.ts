@@ -73,10 +73,11 @@ export { default as MaxInputText } from './components/MaxInputText.vue';
 export { default as InputText } from './components/MaxInputText.vue';
 export { default as InputField } from './components/MaxInputText.vue';
 
-// Phone Field
-export { default as MaxPhoneField } from './components/MaxPhoneField.vue';
-export { default as PhoneField } from './components/MaxPhoneField.vue';
-export { default as InputPhone } from './components/MaxPhoneField.vue';
+// Input Phone
+export { default as MaxInputPhone } from './components/MaxInputPhone.vue';
+export { default as MaxPhoneField } from './components/MaxInputPhone.vue';
+export { default as InputPhone } from './components/MaxInputPhone.vue';
+export { default as PhoneField } from './components/MaxInputPhone.vue';
 
 // Inputs
 export { default as MaxColorPicker } from './components/MaxColorPicker.vue';

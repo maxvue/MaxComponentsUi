@@ -1,19 +1,25 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mount, enableAutoUnmount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
-import MaxPhoneField from '../../src/components/MaxPhoneField.vue';
+import MaxInputPhone from '../../src/components/MaxInputPhone.vue';
+import {
+    MaxInputPhone as ExportedMaxInputPhone,
+    MaxPhoneField as ExportedMaxPhoneField,
+    PhoneField,
+    InputPhone
+} from '../../src/index';
 
 enableAutoUnmount(afterEach);
 
 function mountPhoneField(props: Record<string, any> = {}, attrs: Record<string, any> = {}) {
-    return mount(MaxPhoneField, {
+    return mount(MaxInputPhone, {
         props: { modelValue: '', ...props },
         attrs,
         attachTo: document.body
     });
 }
 
-describe('MaxPhoneField', () => {
+describe('MaxInputPhone', () => {
     beforeEach(() => {
         setActivePinia(createPinia());
     });
@@ -195,7 +201,7 @@ describe('MaxPhoneField', () => {
     });
 
     it('slot #option sobrescreve o markup padrão do item', async () => {
-        const wrapper = mount(MaxPhoneField, {
+        const wrapper = mount(MaxInputPhone, {
             props: { modelValue: '' },
             attachTo: document.body,
             slots: {
@@ -213,7 +219,7 @@ describe('MaxPhoneField', () => {
     it('emite update:modelValue com DDI + dígitos após o debounce de 500ms', async () => {
         vi.useFakeTimers();
         try {
-            const wrapper = mount(MaxPhoneField, { props: { modelValue: '' } });
+            const wrapper = mount(MaxInputPhone, { props: { modelValue: '' } });
             (wrapper.vm as any).phone = '11988887777';
             await wrapper.vm.$nextTick();
 
@@ -288,6 +294,13 @@ describe('MaxPhoneField', () => {
 
         cancelRafSpy.mockRestore();
         removeListenerSpy.mockRestore();
+    });
+
+    it('exporta MaxPhoneField, PhoneField e InputPhone como aliases idênticos a MaxInputPhone no index', () => {
+        expect(ExportedMaxInputPhone).toBe(MaxInputPhone);
+        expect(ExportedMaxPhoneField).toBe(MaxInputPhone);
+        expect(PhoneField).toBe(MaxInputPhone);
+        expect(InputPhone).toBe(MaxInputPhone);
     });
 });
 

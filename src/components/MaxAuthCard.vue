@@ -36,7 +36,7 @@
                 <!-- Modo Phone OTP (Telefone + MaxInputOTP + Botão Dinâmico) -->
                 <template v-else-if="mode === 'phone-otp'">
                     <slot name="phone-input">
-                        <MaxPhoneField s100 v-model="phone" :label="t.phone" @keyup.enter="onEnter" />
+                        <MaxInputPhone s100 v-model="phone" :label="t.phone" @keyup.enter="onEnter" />
                     </slot>
 
                     <!-- Campo de Código de 6 Dígitos (exibido apenas após o envio) -->
@@ -116,7 +116,7 @@
     import MaxGrid from './MaxGrid.vue';
     import MaxInputText from './MaxInputText.vue';
     import MaxInputPhoneMail from './MaxInputPhoneMail.vue';
-    import MaxPhoneField from './MaxPhoneField.vue';
+    import MaxInputPhone from './MaxInputPhone.vue';
     import MaxInputOTP from './MaxInputOTP.vue';
     import MaxButton from './MaxButton.vue';
     import MaxInputCheckbox from './MaxInputCheckbox.vue';

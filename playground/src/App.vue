@@ -34,7 +34,7 @@
 
                         <h3>Especiais</h3>
                         <MaxGrid>
-                            <MaxPhoneField v-model="value.e" s80 message="Mensagem simples" />
+                            <MaxInputPhone v-model="value.e" s80 message="Mensagem simples" />
                             <MaxInputSelect v-model="selectValue" :options="options" s40 label="Select básico" />
                             <MaxInputSelect v-model="selectValue" :options="optionsWithIcons" s40 label="Select com ícones" icon="humbleicons:box" />
                             <div s60></div>

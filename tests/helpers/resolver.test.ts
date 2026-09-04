@@ -86,12 +86,42 @@ describe('MaxComponentsUiResolver', () => {
         });
     });
 
+    it('resolve MaxInputPhone e seus aliases (MaxPhoneField, PhoneField, InputPhone)', () => {
+        expect(resolver.resolve('MaxInputPhone')).toEqual({
+            name: 'MaxInputPhone',
+            from: '@maxvue/max-components-ui'
+        });
+        expect(resolver.resolve('MaxPhoneField')).toEqual({
+            name: 'MaxInputPhone',
+            from: '@maxvue/max-components-ui'
+        });
+        expect(resolver.resolve('PhoneField')).toEqual({
+            name: 'MaxInputPhone',
+            from: '@maxvue/max-components-ui'
+        });
+        expect(resolver.resolve('InputPhone')).toEqual({
+            name: 'MaxInputPhone',
+            from: '@maxvue/max-components-ui'
+        });
+        expect(resolver.resolve('max-input-phone')).toEqual({
+            name: 'MaxInputPhone',
+            from: '@maxvue/max-components-ui'
+        });
+        expect(resolver.resolve('max-phone-field')).toEqual({
+            name: 'MaxInputPhone',
+            from: '@maxvue/max-components-ui'
+        });
+    });
+
     it('manifest contém todos os aliases esperados', () => {
         const aliases = manifest.aliases as Record<string, string>;
         // Verifica alguns aliases-chave
         expect(aliases['Botao']).toBe('MaxButton');
         expect(aliases['InputField']).toBe('MaxInputText');
-        expect(aliases['InputPhone']).toBe('MaxPhoneField');
+        expect(aliases['MaxInputPhone']).toBe('MaxInputPhone');
+        expect(aliases['MaxPhoneField']).toBe('MaxInputPhone');
+        expect(aliases['PhoneField']).toBe('MaxInputPhone');
+        expect(aliases['InputPhone']).toBe('MaxInputPhone');
         expect(aliases['T1']).toBe('MaxTitle1');
         expect(aliases['T2']).toBe('MaxTitle2');
     });
