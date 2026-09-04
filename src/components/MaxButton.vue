@@ -89,7 +89,7 @@
     const data = computed(() => ({ ...(props.data ?? {}), ...(props.query ?? {}), ...(props.params ?? {}) }));
 
     const emit = defineEmits<{
-        click: [event: MouseEvent | boolean];
+        click: [event: MouseEvent];
     }>();
 
     const onClick = (event: MouseEvent) => {

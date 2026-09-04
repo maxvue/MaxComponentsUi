@@ -71,9 +71,9 @@ describe('MaxButton', () => {
 
     it('emite click quando não há route nem action', async () => {
         const wrapper = mountButton({ label: 'Click Me' });
-        (wrapper.vm as any).onClick(new MouseEvent('click'));
+        await wrapper.find('button').trigger('click');
         expect(wrapper.emitted('click')).toBeTruthy();
-        expect(wrapper.emitted('click')?.[0]).toEqual([true]);
+        expect(wrapper.emitted('click')?.[0]?.[0]).toBeInstanceOf(MouseEvent);
     });
 
     it('chama action ao invés de click se existir', () => {
