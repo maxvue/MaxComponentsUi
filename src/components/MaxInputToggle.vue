@@ -162,9 +162,10 @@
 
             .input-toggle-field {
                 max-height: 26px;
-                display: grid;
-                grid-template-columns: auto auto 1fr;
-                place-items: center;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
 
                 .input-toggle-field-input {
                     padding: 0 10px;

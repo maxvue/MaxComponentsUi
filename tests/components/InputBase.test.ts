@@ -195,4 +195,13 @@ describe('InputBase.vue', () => {
         });
         expect(wrapper.find('.required').attributes('aria-hidden')).toBe('true');
     });
+
+    it('aplica classe with-icon-right em .input-status-icon quando iconRight está presente', () => {
+        const wrapper = mount(InputBase, {
+            props: { iconRight: 'mdi:magnify', done: true }
+        });
+        const statusIcon = wrapper.find('.input-status-icon');
+        expect(statusIcon.exists()).toBe(true);
+        expect(statusIcon.classes()).toContain('with-icon-right');
+    });
 });

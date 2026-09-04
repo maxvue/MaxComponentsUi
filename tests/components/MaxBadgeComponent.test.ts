@@ -61,4 +61,10 @@ describe('MaxBadgeComponent', () => {
         });
         expect(wrapper.find('.circle-color-badge-text').text()).toContain('A');
     });
+
+    it('NÃO renderiza .circle-color-badge quando iconColor e iconValue não são fornecidos', () => {
+        const wrapper = mountBadge({ label: 'Simples' });
+        expect(wrapper.find('.circle-color-badge').exists()).toBe(false);
+    });
 });
+

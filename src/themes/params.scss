@@ -57,7 +57,7 @@
 
 .p-button {
     [disabled] {
-        cursor: pointer !important;
+        cursor: not-allowed !important;
         color: var(--blue-200) !important;
 
         .icon-div {

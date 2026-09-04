@@ -469,33 +469,4 @@
             }
         }
     }
-
-    .dark {
-        .max-chips-wrapper {
-            .max-chips-container {
-                .max-chips-list {
-                    .max-chip-token {
-                        background-color: var(--background-700);
-                        color: var(--background-100);
-
-                        .max-chip-remove-btn {
-                            color: var(--background-400);
-
-                            &:hover {
-                                color: var(--red-400);
-                            }
-                        }
-                    }
-
-                    .max-chips-input-token {
-                        .max-chips-input {
-                            &::placeholder {
-                                color: var(--background-500);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
 </style>

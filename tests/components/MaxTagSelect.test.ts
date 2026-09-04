@@ -183,4 +183,43 @@ describe('MaxTagSelect', () => {
         expect((wrapper.vm as any).optionsField).toEqual([{ value: 'z', name: 'Loaded', hover: false }]);
         expect((wrapper.vm as any).loading).toBe(false);
     });
+
+    it('não exibe placeholder quando modelValue é 0 (numérico) e opção correspondente existe', async () => {
+        const options = [{ value: 0, name: 'Opção Zero' }, { value: 1, name: 'Opção Um' }];
+        const wrapper = mountTagSelect({ modelValue: 0, options }, { placeholder: 'Selecione...' });
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find('.tab-placeholder-select').exists()).toBe(false);
+        expect(wrapper.find('.value-tag-div').exists()).toBe(true);
+        expect(wrapper.find('.tag-value-text').text()).toBe('Opção Zero');
+    });
+
+    it('não exibe placeholder quando modelValue é false (booleano) e opção correspondente existe', async () => {
+        const options = [{ value: false, name: 'Inativo' }, { value: true, name: 'Ativo' }];
+        const wrapper = mountTagSelect({ modelValue: false, options }, { placeholder: 'Selecione...' });
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find('.tab-placeholder-select').exists()).toBe(false);
+        expect(wrapper.find('.value-tag-div').exists()).toBe(true);
+        expect(wrapper.find('.tag-value-text').text()).toBe('Inativo');
+    });
+
+    it('NÃO renderiza badge vazia quando nada está selecionado (modelValue null)', async () => {
+        const options = [{ value: 'a', name: 'Opção A' }];
+        const wrapper = mountTagSelect({ modelValue: null, options }, { placeholder: 'Escolha uma opção' });
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find('.value-tag-div').exists()).toBe(false);
+        expect(wrapper.find('.tab-placeholder-select').exists()).toBe(true);
+    });
+
+    it('NÃO renderiza badge vazia quando modelValue é valor órfão', async () => {
+        const options = [{ value: 'a', name: 'Opção A' }];
+        const wrapper = mountTagSelect({ modelValue: 'inexistente', options }, { placeholder: 'Escolha uma opção' });
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find('.value-tag-div').exists()).toBe(false);
+        expect(wrapper.find('.tab-placeholder-select').exists()).toBe(true);
+    });
 });
+

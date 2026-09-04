@@ -15,11 +15,11 @@
     </InputBase>
 </template>
 
-/**
- * Componente de seleção e entrada de cores.
- * Oferece preview com seletor de cores nativo e campo de texto sincronizado.
- */
 <script setup lang="ts">
+    /**
+     * Componente de seleção e entrada de cores.
+     * Oferece preview com seletor de cores nativo e campo de texto sincronizado.
+     */
     import { toSearchableString, hasContent } from '@maxvue/max-use';
     import type { Ref } from 'vue';
     import { ref, computed, watch, useAttrs } from 'vue';
@@ -151,7 +151,12 @@
     position: relative;
     width: 30px;
     height: 30px;
+    grid-template-rows: 1fr !important;
     cursor: pointer !important;
+
+    .input-message {
+        display: none !important;
+    }
 
     .max-input-field-div {
         display: flex !important;
@@ -186,30 +191,6 @@
 
         input {
             cursor: pointer !important;
-        }
-    }
-
-    .p-colorpicker-preview {
-        outline: 1px solid var(--background-400);
-        border-radius: 0.5rem;
-        width: 30px;
-        height: 30px;
-        cursor: pointer;
-        display: block;
-        position: relative;
-        overflow: hidden;
-
-        .max-colorpicker-native {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            cursor: pointer;
-            border: none;
-            padding: 0;
-            margin: 0;
         }
     }
 }

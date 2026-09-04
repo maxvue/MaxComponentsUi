@@ -76,3 +76,27 @@ describe('MaxTabItem — slot #title', () => {
         wrapper.unmount();
     });
 });
+
+describe('MaxTabItem — actionButton', () => {
+    it('renderiza MaxButton com label quando actionButtonLabel e actionButton são fornecidos (sem actionButtonIcon)', async () => {
+        const wrapper = mountTabs(`
+            <MaxTabItem value="a" title="Aba A" actionButtonLabel="Salvar" :actionButton="() => {}" />
+        `);
+        await settle();
+        const buttonItem = wrapper.find('.button-tab-item');
+        expect(buttonItem.exists()).toBe(true);
+        expect(buttonItem.text()).toContain('Salvar');
+        wrapper.unmount();
+    });
+
+    it('renderiza MaxIconButton quando apenas actionButtonIcon e actionButton são fornecidos', async () => {
+        const wrapper = mountTabs(`
+            <MaxTabItem value="a" title="Aba A" actionButtonIcon="mdi:plus" :actionButton="() => {}" />
+        `);
+        await settle();
+        const buttonItem = wrapper.find('.button-tab-item');
+        expect(buttonItem.exists()).toBe(true);
+        wrapper.unmount();
+    });
+});
+

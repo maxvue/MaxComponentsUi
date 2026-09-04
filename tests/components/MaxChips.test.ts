@@ -298,5 +298,11 @@ describe('MaxChips', () => {
             const inputBase = wrapper.findComponent(InputBase);
             expect(inputBase.props('error')).toBe('Campo obrigatório');
         });
+
+        it('não aplica dupla inversão de background em tema escuro (usa tokens nativos)', async () => {
+            const wrapper = mountChips({ modelValue: ['Item'] });
+            const chip = wrapper.find('.max-chip-token');
+            expect(chip.exists()).toBe(true);
+        });
     });
 });

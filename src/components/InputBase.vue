@@ -30,7 +30,7 @@
             <div v-else></div>
 
             <!-- INPUT STATUS ICON -->
-            <div class="input-status-icon">
+            <div class="input-status-icon" :class="{ 'with-icon-right': hasIconRight }">
                 <div class="is-done" v-if="done && !noDone && !noStatus">
                     <MaxIcon icon="lets-icons:check-fill" :size="0.8" :light="light" :dark="dark" color-green-700 />
                 </div>
@@ -178,6 +178,8 @@
         // o espaco sem interpolar o literal "false" no template.
         return '';
     });
+
+    const hasIconRight = computed(() => hasContent(props.iconRight ?? props.icon ?? props.i) && !props.noIcon && Boolean(props.iconRight || props.iconPos === 'right'));
 </script>
 
 <style lang="scss">
@@ -225,10 +227,6 @@
             font-weight: var(--max-floatlabel-active-font-weight, 400);
             inset-inline-start: 15px !important;
         }
-
-        input {
-            color: green !important;
-        }
     }
 
     &:has(.max-input-field-div:focus-within) .max-input-label {
@@ -267,19 +265,27 @@
             top: 2px;
             right: 3px;
 
+            &.with-icon-right {
+                right: 26px;
+            }
+
             .is-done {
-                color: #16a34a;
+                color: var(--emerald-600);
             }
 
             .is-caution {
-                color: #da422b;
+                color: var(--orange-600);
+            }
+
+            .is-error {
+                color: var(--red-600);
             }
 
             .required {
                 position: absolute;
                 top: 1px;
                 right: 3px;
-                color: darkred;
+                color: var(--red-600);
             }
         }
     }

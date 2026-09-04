@@ -10,9 +10,9 @@
             <slot name="title">{{ props.title }}</slot>
         </div>
     </teleport>
-    <teleport :to="'#max-tab-buttons-' + toValue(tabs_info?.tabs_id)" v-if="toValue(tabs_info?.tabs_id) && is_mounted && props.actionButtonLabel && props.actionButton">
+    <teleport :to="'#max-tab-buttons-' + toValue(tabs_info?.tabs_id)" v-if="toValue(tabs_info?.tabs_id) && is_mounted && (props.actionButtonLabel || props.actionButtonIcon) && props.actionButton">
         <div @click="props.actionButton" class="button-tab-item" h-full>
-            <max-button h-full :label="props.actionButtonLabel" :icon="props.actionButtonIcon" v-if="props.actionButtonIcon" />
+            <max-button h-full :label="props.actionButtonLabel" :icon="props.actionButtonIcon" v-if="props.actionButtonLabel" />
             <max-icon-button h-full :icon="props.actionButtonIcon" v-else />
         </div>
     </teleport>

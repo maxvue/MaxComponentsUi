@@ -11,7 +11,7 @@
             v-bind="inputAttrs"
             @change="onChange"
         />
-        <div v-if="attrs.label">{{ attrs.label }}</div>
+        <label :for="id" v-if="attrs.label" class="max-radio-label">{{ attrs.label }}</label>
         <MaxIcon v-if="attrs.icon" :icon="attrs.icon" />
     </div>
 </template>
@@ -38,7 +38,7 @@
     const isChecked = computed(() => temp_value.value === props.value);
 
     const inputAttrs = computed(() => {
-        const { label, icon, ...rest } = attrs as Record<string, unknown>;
+        const { label: _label, icon: _icon, ...rest } = attrs as Record<string, unknown>;
         return rest;
     });
 
@@ -61,11 +61,14 @@
 
 <style lang="scss">
     .radio-button-input-main-div {
-        display: grid;
+        display: flex;
+        align-items: center;
         gap: 10px;
-        grid-template-columns: auto 1fr;
         cursor: pointer;
-        place-items: center start;
+
+        .max-radio-label {
+            cursor: pointer;
+        }
 
         .max-radio-native {
             appearance: none;

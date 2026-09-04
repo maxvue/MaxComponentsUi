@@ -9,7 +9,7 @@
             :class="`p-badge p-component ${badge_size_class} ${props.icon || props.iconColor ? 'with-icon' : ''} ${props.iconValue ? 'with-icon-value' : ''}`"
             :style="{ backgroundColor: bg_color, color: text_color }"
         >{{ message }}</span>
-        <div class="circle-color-badge">
+        <div class="circle-color-badge" v-if="props.iconColor || props.iconValue">
             <div :style="{ background: (props.iconColor ?? 'none') as string }" class="circle-color-badge-text">
                 {{ props.iconValue ?? '' }}
             </div>
@@ -198,7 +198,7 @@
                 display: grid;
                 place-items: center;
                 font-size: 9px;
-                color: white;
+                color: var(--primary-0);
             }
         }
 

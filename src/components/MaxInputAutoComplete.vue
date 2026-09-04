@@ -194,9 +194,8 @@
         temp_value.value = val;
         search();
         isOpen.value = filtered_values.value.length > 0;
-        if (!props.forceSelection) {
-            emit('update:modelValue', val);
-        }
+        if (!props.forceSelection) emit('update:modelValue', val);
+
     };
 
     const onFocus = () => {
@@ -207,9 +206,8 @@
     };
 
     const onBlur = () => {
-        if (!props.forceSelection) {
-            emit('update:modelValue', temp_value.value);
-        }
+        if (!props.forceSelection) emit('update:modelValue', temp_value.value);
+
         isDone.value = testIsDone();
         emit('blur');
         setTimeout(() => {
@@ -218,25 +216,22 @@
     };
 
     const onChange = () => {
-        if (props.forceSelection) {
-            if (typeof temp_value.value === 'string') {
-                if (input_text.value && props.restoreOnInvalid && last_valid.value) {
-                    temp_value.value = last_valid.value;
-                    input_text.value = '';
-                } else {
-                    input_text.value = '';
-                    last_valid.value = null;
-                    temp_value.value = null;
-                    emit('update:modelValue', null);
-                }
-            } else {
-                last_valid.value = null;
-                temp_value.value = null;
-                emit('update:modelValue', null);
-            }
+        if (props.forceSelection) if (typeof temp_value.value === 'string') if (input_text.value && props.restoreOnInvalid && last_valid.value) {
+            temp_value.value = last_valid.value;
+            input_text.value = '';
         } else {
-            emit('update:modelValue', temp_value.value);
+            input_text.value = '';
+            last_valid.value = null;
+            temp_value.value = null;
+            emit('update:modelValue', null);
         }
+        else {
+            last_valid.value = null;
+            temp_value.value = null;
+            emit('update:modelValue', null);
+        }
+        else emit('update:modelValue', temp_value.value);
+
     };
 
     const selectOption = (item: any) => {
@@ -260,9 +255,8 @@
     };
 
     const onEnter = () => {
-        if (isOpen.value && activeIndex.value >= 0 && activeIndex.value < filtered_values.value.length) {
-            selectOption(filtered_values.value[activeIndex.value]);
-        } else if (!props.forceSelection) {
+        if (isOpen.value && activeIndex.value >= 0 && activeIndex.value < filtered_values.value.length) selectOption(filtered_values.value[activeIndex.value]);
+        else if (!props.forceSelection) {
             hide();
             emit('update:modelValue', temp_value.value);
         }
@@ -281,9 +275,8 @@
 
         // Digitação livre em andamento: mantém a string no v-model.
         if (novo) {
-            if (!props.forceSelection) {
-                emit('update:modelValue', novo);
-            }
+            if (!props.forceSelection) emit('update:modelValue', novo);
+
             return;
         }
 

@@ -105,3 +105,12 @@ config.global.directives = {
     tooltip: {},
     maska: {}
 };
+
+// Suprime logs de erro assíncronos de ícones em segundo plano que causam
+// EnvironmentTeardownError no teardown de workers RPC do Vitest.
+const originalConsoleError = console.error;
+console.error = (...args: any[]) => {
+    if (typeof args[0] === 'string' && (args[0].includes('Erro na obtenção do ícone') || args[0].includes('Erro na Requisição dos ícones'))) return;
+    originalConsoleError(...args);
+};
+

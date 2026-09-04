@@ -1,7 +1,7 @@
 <template>
     <InputBase v-bind="{ ...props, ...attrs }" class="max-select-tag" input-click-auto no-dropdown>
-        <div v-if="attrs.placeholder !== undefined && (!temp_value || temp_value === '')" class="tab-placeholder-select">
-            {{ attrs.placeholder }}
+        <div v-if="showPlaceholder" class="tab-placeholder-select">
+            {{ placeholderText }}
         </div>
 
         <div
@@ -23,8 +23,7 @@
                         class="value-tag-div"
                         :style="getStyleColor(option_selected, false, true)"
                         :color-string="getColorString(option_selected)"
-                        v-if="!isButton"
-
+                        v-if="!isButton && hasSelectedOption"
                     >
                         <MaxIcon
                             :icon="option_selected?.icon ?? null"
@@ -118,11 +117,11 @@
     </InputBase>
 </template>
 
-/**
- * Componente de seleção (dropdown).
- * Suporta opções simples, agrupadas e carregamento dinâmico via callback.
- */
 <script setup lang="ts">
+    /**
+     * Componente de seleção (dropdown).
+     * Suporta opções simples, agrupadas e carregamento dinâmico via callback.
+     */
     import { ref, computed, watch, useAttrs, onBeforeUnmount, Ref } from 'vue';
     import InputBase from './InputBase.vue';
     import { SelectGroupOptions } from '../types';
@@ -135,6 +134,8 @@
 
     const props = withDefaults(
         defineProps<{
+            /** Texto de placeholder do campo */
+            placeholder?: string | undefined;
             /** Valor selecionado */
             modelValue: any;
             /** Função assíncrona para carregar opções ao abrir o select */
@@ -189,6 +190,7 @@
             error: undefined,
             caution: undefined,
             required: false,
+            placeholder: undefined,
             default: undefined,
             disabled: false,
             isButton: false,
@@ -283,6 +285,12 @@
         }
         return {};
     });
+
+    const hasSelectedOption = computed(() => Boolean(option_selected.value && Object.keys(option_selected.value).length > 0));
+
+    const placeholderText = computed(() => (props.placeholder !== undefined ? props.placeholder : attrs.placeholder));
+
+    const showPlaceholder = computed(() => placeholderText.value !== undefined && !hasSelectedOption.value);
 
     const filteredOptions = computed(() => {
         const raw = options.value;
