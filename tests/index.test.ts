@@ -82,4 +82,16 @@ describe('index install', () => {
 
         expect(app.use.mock.calls[0][1].theme.preset).toBe(MaxStyle);
     });
+
+    it('exporta MaxBadgeButtonsGroup e seus aliases', async () => {
+        const indexExports = await import('../src/index');
+        expect(indexExports.MaxBadgeButtonsGroup).toBeDefined();
+        expect(indexExports.MaxBadgeButtonGroup).toBeDefined();
+        expect(indexExports.BadgeButtonsGroup).toBeDefined();
+        expect(indexExports.BadgeButtonGroup).toBeDefined();
+        expect(indexExports.MaxBadgeButtonGroup).toBe(indexExports.MaxBadgeButtonsGroup);
+        expect(indexExports.BadgeButtonsGroup).toBe(indexExports.MaxBadgeButtonsGroup);
+        expect(indexExports.BadgeButtonGroup).toBe(indexExports.MaxBadgeButtonsGroup);
+    });
 });
+
