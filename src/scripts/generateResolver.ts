@@ -48,7 +48,10 @@ const aliases: Record<string, string> = {
     'MaxPhoneField': 'MaxInputPhone',
     'PhoneField': 'MaxInputPhone',
     'T1': 'MaxTitle1',
-    'T2': 'MaxTitle2'
+    'T2': 'MaxTitle2',
+    'MaxTag': 'MaxBadge',
+    'Tag': 'MaxBadge',
+    'MaxBadgeComponent': 'MaxBadge'
 };
 
 for (const k of Object.keys(aliases)) {

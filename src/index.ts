@@ -153,7 +153,15 @@ export { default as MaxPageMobileLayout } from './components/MaxPageMobileLayout
 export { default as MaxApp } from './components/MaxApp.vue';
 
 // Data & Display
-export { default as MaxBadgeComponent } from './components/MaxBadgeComponent.vue';
+export { default as MaxBadge } from './components/MaxBadge.vue';
+export { default as MaxBadgeComponent } from './components/MaxBadge.vue';
+export { default as MaxTag } from './components/MaxBadge.vue';
+export { default as Badge } from './components/MaxBadge.vue';
+export { default as Tag } from './components/MaxBadge.vue';
+export { default as MaxBadgeButton } from './components/MaxBadgeButton.vue';
+export { default as BadgeButton } from './components/MaxBadgeButton.vue';
+export type { MaxBadgeProps, MaxBadgeStatus } from './components/MaxBadge.vue';
+export type { MaxBadgeButtonProps } from './components/MaxBadgeButton.vue';
 export { default as MaxImage } from './components/MaxImage.vue';
 export type { MaxImageProps, MaxImageEditPayload } from './components/MaxImage.vue';
 // Async: o MaxChart arrasta o chart.js (~200 KB) por import dinâmico dentro do
@@ -196,9 +204,11 @@ export type { MaxStatsItem, MaxStatsProps } from './components/MaxStats.vue';
 export {
     adjustToWcagLuminance,
     getWcagRelativeLuminance,
-    resolveStatItemColors
+    resolveStatItemColors,
+    resolveBadgeColors,
+    BADGE_STATUS_COLORS
 } from './helpers/colorLuminance';
-export type { StatItemColors } from './helpers/colorLuminance';
+export type { StatItemColors, BadgeColors } from './helpers/colorLuminance';
 
 // Configuração do app shell (MaxApp) — deve ser chamada no boot da aplicação.
 export { configureMaxApp, getMaxAppConfig, resetMaxAppConfig } from './helpers/maxAppConfig';

@@ -183,3 +183,100 @@ export function resolveStatItemColors(baseColor: string, isDark: boolean = false
     colorCache.set(key, result);
     return result;
 }
+
+export interface BadgeColors {
+    /** Fundo do badge */
+    background: string;
+    /** Cor do texto e do ícone */
+    text: string;
+    /** Fundo do overlay de contagem/notificação */
+    overlayBg: string;
+    /** Cor do texto dentro do overlay */
+    overlayText: string;
+    /** Borda opcional (estilo neon) */
+    border?: string;
+    /** Sombra com brilho opcional (estilo neon) */
+    boxShadow?: string;
+}
+
+export const BADGE_STATUS_COLORS: Record<string, string> = {
+    done: 'var(--emerald-650)',
+    success: 'var(--emerald-650)',
+    error: 'var(--red-b-650)',
+    danger: 'var(--red-b-650)',
+    info: 'var(--blue-650)',
+    help: 'var(--violet-650)',
+    warn: 'var(--orange-b-650)',
+    caution: 'var(--yellow-650)'
+};
+
+const badgeColorCache = new Map<string, BadgeColors>();
+
+/**
+ * Resolve as cores do MaxBadge de acordo com as especificações WCAG, tema e estilo neon.
+ *
+ * - Cor escura (Luminância Relativa WCAG < 0.5):
+ *   - Modo Claro: Background 83%, Texto/Ícone 18%, Background Overlay 50%, Texto Overlay 83%
+ *   - Modo Escuro: Invertido (Background 18%, Texto/Ícone 83%, Background Overlay 50%, Texto Overlay 18%)
+ * - Cor clara (Luminância Relativa WCAG >= 0.5):
+ *   - Modo Claro: Background 18%, Texto/Ícone 83%, Background Overlay 50%, Texto Overlay 18%
+ *   - Modo Escuro: Invertido (Background 83%, Texto/Ícone 18%, Background Overlay 50%, Texto Overlay 83%)
+ * - Estilo Neon:
+ *   - Fundo semitransparente (~12% opacidade)
+ *   - Texto vibrante com a cor calculada
+ *   - Borda de 1px com a mesma cor do texto e ícone
+ *   - Glow suave (box-shadow)
+ */
+export function resolveBadgeColors(
+    baseColor: string = 'var(--blue-600)',
+    isDark: boolean = false,
+    isNeon: boolean = false
+): BadgeColors {
+    const key = `${baseColor || 'var(--blue-600)'}_${isDark ? 'dark' : 'light'}_${isNeon ? 'neon' : 'normal'}`;
+    const cached = badgeColorCache.get(key);
+    if (cached) return cached;
+
+    const [r, g, b] = parseColorToRgb(baseColor);
+    const lum = getWcagRelativeLuminance(r, g, b);
+    const isBaseDark = lum < 0.5;
+
+    // Se a base é escura, no modo claro o fundo é claro (83%) e o texto é escuro (18%).
+    // No modo escuro, inverte: o fundo é escuro (18%) e o texto é claro (83%).
+    // Se a base é clara, no modo claro o fundo é escuro (18%) e o texto é claro (83%).
+    // No modo escuro, inverte: o fundo é claro (83%) e o texto é escuro (18%).
+    const hasLightBackground = isDark ? !isBaseDark : isBaseDark;
+
+    const bgLum = hasLightBackground ? 0.83 : 0.18;
+    const textLum = hasLightBackground ? 0.18 : 0.83;
+    const overlayBgLum = 0.50;
+    const overlayTextLum = hasLightBackground ? 0.83 : 0.18;
+
+    const background = adjustToWcagLuminance(baseColor, bgLum);
+    const text = adjustToWcagLuminance(baseColor, textLum);
+    const overlayBg = adjustToWcagLuminance(baseColor, overlayBgLum);
+    const overlayText = adjustToWcagLuminance(baseColor, overlayTextLum);
+
+    let result: BadgeColors;
+
+    if (isNeon) {
+        const [tr, tg, tb] = parseColorToRgb(text);
+        result = {
+            background: `rgba(${tr}, ${tg}, ${tb}, 0.12)`,
+            text,
+            overlayBg,
+            overlayText,
+            border: `1px solid ${text}`,
+            boxShadow: `0 0 8px rgba(${tr}, ${tg}, ${tb}, 0.35)`
+        };
+    } else result = {
+        background,
+        text,
+        overlayBg,
+        overlayText
+    };
+
+
+    badgeColorCache.set(key, result);
+    return result;
+}
+
