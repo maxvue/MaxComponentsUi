@@ -149,10 +149,10 @@ const colorCache = new Map<string, StatItemColors>();
  * Resolve as cores do item estatístico de acordo com as especificações WCAG.
  *
  * Paleta Unificada (sem distinção entre Dark e Light Mode):
- * - Fundo do item (Background): Luminância Relativa WCAG em 92% (0.92) -> Mais Claro
- * - Fundo do ícone: Luminância Relativa WCAG em 80% (0.80) -> Suave
+ * - Fundo do item (Background): Luminância Relativa WCAG em 90% (0.90) -> Mais Claro
+ * - Fundo do ícone: Luminância Relativa WCAG em 77% (0.77) -> Suave
  * - Label e Sublabel (Título e Subtítulo): Luminância Relativa WCAG em 18% (0.18) -> Levemente mais claro que Ícones e Valor
- * - Value e Ícone (Ícone e Valor): Luminância Relativa WCAG em 5% (0.05) -> Mais Escuro / Alto Contraste
+ * - Value e Ícone (Ícone e Valor): Luminância Relativa WCAG em 10% (0.10) -> Mais Escuro / Alto Contraste
  *
  * @param baseColor - Cor base do indicador
  * @param _isDark - Mantido por retrocompatibilidade de API, sem distinção de tema
@@ -163,10 +163,10 @@ export function resolveStatItemColors(baseColor: string, _isDark?: boolean): Sta
     if (cached) return cached;
 
     const result: StatItemColors = {
-        background: adjustToWcagLuminance(baseColor, 0.92),
-        iconBackground: adjustToWcagLuminance(baseColor, 0.80),
+        background: adjustToWcagLuminance(baseColor, 0.90),
+        iconBackground: adjustToWcagLuminance(baseColor, 0.77),
         textColor: adjustToWcagLuminance(baseColor, 0.18),
-        accentColor: adjustToWcagLuminance(baseColor, 0.05)
+        accentColor: adjustToWcagLuminance(baseColor, 0.10)
     };
 
     colorCache.set(key, result);
