@@ -50,7 +50,7 @@ describe('colorLuminance Helper', () => {
     });
 
     describe('resolveStatItemColors', () => {
-        it('devolve paleta unificada com luminâncias 90%, 77%, 18% e 10%', () => {
+        it('devolve paleta unificada com luminâncias 87%, 75%, 20% e 15%', () => {
             const colors = resolveStatItemColors('#3b82f6');
 
             expect(colors.background).toMatch(/^#[0-9a-f]{6}$/i);
@@ -66,10 +66,10 @@ describe('colorLuminance Helper', () => {
                 return getWcagRelativeLuminance(r, g, b);
             };
 
-            expect(parseLum(colors.background)).toBeCloseTo(0.90, 1);
-            expect(parseLum(colors.iconBackground)).toBeCloseTo(0.77, 1);
-            expect(parseLum(colors.textColor)).toBeCloseTo(0.18, 1);
-            expect(parseLum(colors.accentColor)).toBeCloseTo(0.10, 1);
+            expect(parseLum(colors.background)).toBeCloseTo(0.87, 1);
+            expect(parseLum(colors.iconBackground)).toBeCloseTo(0.75, 1);
+            expect(parseLum(colors.textColor)).toBeCloseTo(0.20, 1);
+            expect(parseLum(colors.accentColor)).toBeCloseTo(0.15, 1);
         });
 
         it('não possui distinção entre modo Dark e modo Light (retorna a mesma paleta unificada)', () => {
