@@ -47,6 +47,19 @@
     const method = ref();
     const name_method = ref('Email ou Whatsapp');
 
+    const checkAttrsMode = () => {
+        if (attrs.phone !== undefined || attrs.whatsapp !== undefined || attrs.zap !== undefined) {
+            method.value = 'whatsapp';
+            name_method.value = 'Whatsapp';
+        }
+        if (attrs.email !== undefined || attrs['e-mail'] !== undefined || attrs.mail !== undefined) {
+            method.value = 'email';
+            name_method.value = 'Email';
+        }
+    };
+
+    checkAttrsMode();
+
     /**
      * Normaliza o valor recebido para string.
      * `withDefaults` só cobre `undefined`, então um `null` vindo de coluna anulável do banco
@@ -215,14 +228,7 @@
     );
 
     onMounted(() => {
-        if (attrs.phone !== undefined || attrs.whatsapp !== undefined || attrs.zap !== undefined) {
-            method.value = 'whatsapp';
-            name_method.value = 'Whatsapp';
-        }
-        if (attrs.email !== undefined || attrs['e-mail'] !== undefined || attrs.mail !== undefined) {
-            method.value = 'email';
-            name_method.value = 'Email';
-        }
+        checkAttrsMode();
     });
 
     defineExpose({ unmaskedValue });

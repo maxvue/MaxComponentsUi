@@ -144,8 +144,9 @@
             overflow: hidden auto;
             -webkit-overflow-scrolling: touch;
             overscroll-behavior-y: contain;
-            padding-left: env(safe-area-inset-left, 0);
-            padding-right: env(safe-area-inset-right, 0);
+            padding: 20px;
+            padding-left: calc(20px + env(safe-area-inset-left, 0px));
+            padding-right: calc(20px + env(safe-area-inset-right, 0px));
             background-color: var(--background-25, #f8fafc);
             height: 100%;
             box-sizing: border-box;

@@ -13,6 +13,7 @@
 
 <script setup lang="ts">
     import { computed } from 'vue';
+    import { sanitizeHtml } from '../helpers/sanitizeHtml';
 
     const props = defineProps<{
         h1?: string;
@@ -28,7 +29,8 @@
     }>();
 
     const resolvedTitle = computed(() => props.title ?? props.h1);
-    const resolvedSubtitle = computed(() => props.subtitle ?? props.subTitle ?? props.h2);
+    const rawSubtitle = computed(() => props.subtitle ?? props.subTitle ?? props.h2);
+    const resolvedSubtitle = computed(() => (rawSubtitle.value ? sanitizeHtml(rawSubtitle.value) : ''));
     const resolvedIcon = computed(() => props.icon ?? props.i ?? props.icone);
     const resolvedIconSize = computed(() => props.sizeIcon ?? props.iconSize ?? 1.3);
 </script>

@@ -185,6 +185,25 @@
         min-height: 100dvh;
         width: 100%;
         box-sizing: border-box;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+
+        &::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+            display: none;
+        }
+
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+
+            &::-webkit-scrollbar {
+                width: 0;
+                height: 0;
+                display: none;
+            }
+        }
 
         .max-app-view {
             width: 100%;

@@ -26,11 +26,43 @@ describe('MaxInputNumber', () => {
         expect(wrapper.exists()).toBe(true);
     });
 
-    it('emite update:modelValue ao alterar valor', async () => {
+    it('emite update:modelValue ao alterar o valor do input', async () => {
         const wrapper = mountInputNumber({ modelValue: 10 });
-        await wrapper.setProps({ modelValue: 20 });
+        const input = wrapper.find('input');
+        await input.setValue('25');
 
-        expect(wrapper.findComponent(InputBase).exists()).toBe(true);
+        expect(wrapper.emitted('update:modelValue')).toBeTruthy();
+        const emitted = wrapper.emitted('update:modelValue')!;
+        expect(emitted[emitted.length - 1]).toEqual([25]);
+    });
+
+    it('emite update:modelValue com número parseado ao digitar formato pt-BR', async () => {
+        const wrapper = mountInputNumber({ modelValue: 0 });
+        const input = wrapper.find('input');
+        await input.setValue('1.250,50');
+
+        expect(wrapper.emitted('update:modelValue')).toBeTruthy();
+        const emitted = wrapper.emitted('update:modelValue')!;
+        expect(emitted[emitted.length - 1]).toEqual([1250.5]);
+    });
+
+    it('emite update:modelValue com null ao limpar o input', async () => {
+        const wrapper = mountInputNumber({ modelValue: 100 });
+        const input = wrapper.find('input');
+        await input.setValue('');
+
+        expect(wrapper.emitted('update:modelValue')).toBeTruthy();
+        const emitted = wrapper.emitted('update:modelValue')!;
+        expect(emitted[emitted.length - 1]).toEqual([null]);
+    });
+
+    it('atualiza o valor exibido quando modelValue muda externamente', async () => {
+        const wrapper = mountInputNumber({ modelValue: 10 });
+        const input = wrapper.find('input');
+        expect((input.element as HTMLInputElement).value).toBe('10');
+
+        await wrapper.setProps({ modelValue: 42 });
+        expect((input.element as HTMLInputElement).value).toBe('42');
     });
 
     it('valida done=true após blur quando required e preenchido', async () => {
