@@ -1,6 +1,6 @@
 <template>
     <InputBase v-bind="{ ...props, ...attrs }" class="max-select-tag" input-click-auto no-dropdown>
-        <div v-if="attrs.placeholder !== undefined && (!temp_value || temp_value === '')" class="tab-placeholder-select">
+        <div v-if="attrs.placeholder !== undefined && (temp_value === null || temp_value === undefined || temp_value === '')" class="tab-placeholder-select">
             {{ attrs.placeholder }}
         </div>
 
@@ -23,8 +23,7 @@
                         class="value-tag-div"
                         :style="getStyleColor(option_selected, false, true)"
                         :color-string="getColorString(option_selected)"
-                        v-if="!isButton"
-
+                        v-if="!isButton && hasSelected"
                     >
                         <MaxIcon
                             :icon="option_selected?.icon ?? null"
@@ -40,7 +39,7 @@
                         </div>
                         <slot name="btn-right"></slot>
                     </div>
-                    <div v-else>
+                    <div v-else-if="isButton">
                         <MaxIconButton :icon="props.i ?? props.icon ?? props.iconLeft" :size="option_selected?.icon_size ?? 1.8" />
                     </div>
                 </slot>
@@ -283,6 +282,8 @@
         }
         return {};
     });
+
+    const hasSelected = computed(() => Boolean(option_selected.value && Object.keys(option_selected.value).length > 0));
 
     const filteredOptions = computed(() => {
         const raw = options.value;

@@ -208,7 +208,7 @@
                 background-color: rgb(255 255 255 / 10%);
             }
 
-            :deep(.max-icon-div) {
+            .max-icon-div {
                 color: currentcolor !important;
             }
         }

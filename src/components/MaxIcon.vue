@@ -14,12 +14,12 @@
     <div v-else></div>
 </template>
 
-/**
- * Componente de ícone padronizado.
- * Busca ícones do ecossistema Iconify e os exibe como SVG.
- * Possui sistema de cache local para performance.
- */
 <script setup lang="ts">
+    /**
+     * Componente de ícone padronizado.
+     * Busca ícones do ecossistema Iconify e os exibe como SVG.
+     * Possui sistema de cache local para performance.
+     */
     import { useIconStore } from '../stores/useIcon.Store';
     import { ref, computed, useAttrs, watchEffect } from 'vue';
     import { useElementHover, isNumber, getColorFromVar } from '@maxvue/max-use';

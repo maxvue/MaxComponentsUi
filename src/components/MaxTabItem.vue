@@ -10,9 +10,9 @@
             <slot name="title">{{ props.title }}</slot>
         </div>
     </teleport>
-    <teleport :to="'#max-tab-buttons-' + toValue(tabs_info?.tabs_id)" v-if="toValue(tabs_info?.tabs_id) && is_mounted && props.actionButtonLabel && props.actionButton">
+    <teleport :to="'#max-tab-buttons-' + toValue(tabs_info?.tabs_id)" v-if="toValue(tabs_info?.tabs_id) && is_mounted && is_active && props.actionButton && (props.actionButtonLabel || props.actionButtonIcon)">
         <div @click="props.actionButton" class="button-tab-item" h-full>
-            <max-button h-full :label="props.actionButtonLabel" :icon="props.actionButtonIcon" v-if="props.actionButtonIcon" />
+            <max-button h-full :label="props.actionButtonLabel" :icon="props.actionButtonIcon" v-if="props.actionButtonLabel" />
             <max-icon-button h-full :icon="props.actionButtonIcon" v-else />
         </div>
     </teleport>
@@ -25,7 +25,6 @@
     import { inject, ref, onMounted, toValue, computed } from 'vue';
     import MaxButton from './MaxButton.vue';
     import MaxIconButton from './MaxIconButton.vue';
-    // import MaxIcon from './MaxIcon.vue';
 
     type Props = {
         title?: string;
@@ -34,7 +33,7 @@
         value?: string | number;
         actionButtonLabel?: string;
         actionButtonIcon?: string;
-        actionButton?: () => {};
+        actionButton?: (event?: MouseEvent) => unknown;
         disabled?: boolean;
     };
 

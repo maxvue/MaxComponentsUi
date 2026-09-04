@@ -181,13 +181,13 @@ describe('MaxTableFields.vue', () => {
                     MaxInputTextArea: true,
                     MaxInputAutoComplete: true,
                     MaxInputAutoCompleteApi: true,
-                    MaxPhoneField: true
+                    MaxInputPhone: true
                 }
             }
         });
         expect(wrapper.exists()).toBe(true);
         // Fire updates to test setFieldValue for each input
-        ['MaxInputNumber', 'MaxInputSelect', 'MaxInputDatePicker', 'MaxInputCheckbox', 'MaxInputTextArea', 'MaxInputAutoComplete', 'MaxInputAutoCompleteApi', 'MaxPhoneField'].forEach((comp, _idx) => {
+        ['MaxInputNumber', 'MaxInputSelect', 'MaxInputDatePicker', 'MaxInputCheckbox', 'MaxInputTextArea', 'MaxInputAutoComplete', 'MaxInputAutoCompleteApi', 'MaxInputPhone'].forEach((comp, _idx) => {
             const compWrapper = wrapper.findComponent({ name: comp });
             if(compWrapper.exists()) compWrapper.vm.$emit('update:modelValue', 'new-val');
 

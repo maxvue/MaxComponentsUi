@@ -183,4 +183,60 @@ describe('MaxInputDatePicker', () => {
         expect((wrapper.vm as any).internalDate).toBeNull();
         expect((wrapper.vm as any).displayValue).toBe('');
     });
+
+    it('converte string DD/MM/YYYY para Date internamente e preenche displayValue', async () => {
+        const wrapper = mountDatePicker({ modelValue: '15/05/2026' });
+        const ib = wrapper.findComponent(InputBase);
+        const input = wrapper.find('input');
+
+        expect(ib.props('done')).toBe(true);
+        expect((wrapper.vm as any).internalDate).not.toBeNull();
+        expect((wrapper.vm as any).internalDate.getFullYear()).toBe(2026);
+        expect((wrapper.vm as any).internalDate.getMonth()).toBe(4); // Maio = 4 (0-indexed)
+        expect((wrapper.vm as any).internalDate.getDate()).toBe(15);
+        expect(input.element.value).toBe('15/05/2026');
+        expect((wrapper.vm as any).displayValue).toBe('15/05/2026');
+    });
+
+    it('converte string DD/MM/YYYY HH:mm:ss para Date internamente', async () => {
+        const wrapper = mountDatePicker({ modelValue: '15/05/2026 14:30:00' });
+        const ib = wrapper.findComponent(InputBase);
+        const input = wrapper.find('input');
+
+        expect(ib.props('done')).toBe(true);
+        expect((wrapper.vm as any).internalDate).not.toBeNull();
+        expect((wrapper.vm as any).internalDate.getHours()).toBe(14);
+        expect((wrapper.vm as any).internalDate.getMinutes()).toBe(30);
+        expect(input.element.value).toBe('15/05/2026');
+    });
+
+    it('converte string DD-MM-YYYY para Date internamente', async () => {
+        const wrapper = mountDatePicker({ modelValue: '15-05-2026' });
+        const input = wrapper.find('input');
+
+        expect((wrapper.vm as any).internalDate).not.toBeNull();
+        expect((wrapper.vm as any).internalDate.getDate()).toBe(15);
+        expect(input.element.value).toBe('15/05/2026');
+    });
+
+    it('rejeita data brasileira inválida no calendário (ex: 31/02/2026) mantendo internalDate nulo', async () => {
+        const wrapper = mountDatePicker({ modelValue: '31/02/2026' });
+        const ib = wrapper.findComponent(InputBase);
+        const input = wrapper.find('input');
+
+        expect(ib.props('done')).toBe(false);
+        expect((wrapper.vm as any).internalDate).toBeNull();
+        expect(input.element.value).toBe('');
+    });
+
+    it('atualiza internalDate e displayValue quando modelValue muda dinamicamente para DD/MM/YYYY', async () => {
+        const wrapper = mountDatePicker({ modelValue: '' });
+        await wrapper.setProps({ modelValue: '20/11/2025' });
+
+        expect((wrapper.vm as any).internalDate).not.toBeNull();
+        expect((wrapper.vm as any).internalDate.getFullYear()).toBe(2025);
+        expect((wrapper.vm as any).internalDate.getMonth()).toBe(10); // Novembro = 10
+        expect((wrapper.vm as any).internalDate.getDate()).toBe(20);
+        expect(wrapper.find('input').element.value).toBe('20/11/2025');
+    });
 });

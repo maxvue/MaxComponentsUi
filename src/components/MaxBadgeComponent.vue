@@ -1,210 +1,77 @@
 <template>
-    <div :class="`badge-component-main-div ${props.size ?? ''}`">
-        <MaxIcon v-if="props.icon || props.i" :icon="props.icon ?? props.i" class="icon-badge" dark="0.3" :color="icon_color" />
-        <span v-if="is_overlay" class="p-badge p-overlay-badge" :style="{ backgroundColor: bg_color }"></span>
-        <span
-            v-else
-            ref="badgeElem"
-            v-bind="passthrough_attrs"
-            :class="`p-badge p-component ${badge_size_class} ${props.icon || props.iconColor ? 'with-icon' : ''} ${props.iconValue ? 'with-icon-value' : ''}`"
-            :style="{ backgroundColor: bg_color, color: text_color }"
-        >{{ message }}</span>
-        <div class="circle-color-badge">
-            <div :style="{ background: (props.iconColor ?? 'none') as string }" class="circle-color-badge-text">
-                {{ props.iconValue ?? '' }}
-            </div>
-        </div>
-    </div>
+    <MaxBadge
+        :label="resolvedLabel"
+        :icon="props.icon ?? props.i"
+        :color="props.color"
+        :neon="props.neon"
+        :status="props.status"
+        :overlay="props.overlay"
+        :uppercase="props.uppercase"
+        :size="props.size ?? props.scale"
+        :background="props.background"
+        :text-color="props.textColor"
+        v-bind="passthroughAttrs"
+    />
 </template>
 
 <script setup lang="ts">
-    import MaxIcon from './MaxIcon.vue';
-    import { useAttrs, computed } from 'vue';
-    import { getColorFromVar } from '@maxvue/max-use';
+    import { computed, useAttrs } from 'vue';
+    import MaxBadge from './MaxBadge.vue';
+    import type { MaxBadgeStatus } from './MaxBadge.vue';
 
     const attrs = useAttrs();
 
     const props = withDefaults(defineProps<{
-        /** Nome do ícone (ex: 'mdi:home') */
+        /** Texto principal do badge */
+        label?: string | number;
+        /** Alias legado */
+        value?: string | number;
+        /** Alias legado */
+        msg?: string | number;
+        /** Alias legado */
+        mensagem?: string | number;
+        /** Alias legado */
+        text?: string | number;
+        /** Alias legado */
+        txt?: string | number;
+        /** Alias legado */
+        number?: string | number;
+        /** Ícone Iconify */
         icon?: string;
-        /** Alias para o nome do ícone */
+        /** Alias legado para ícone */
         i?: string;
-        /** Texto do badge */
-        label?: string;
-        /** Alias para o texto do badge */
-        value?: string;
-        /** Alias para o texto do badge */
-        msg?: string;
-        /** Alias para o texto do badge */
-        mensagem?: string;
-        /** Alias para o texto do badge */
-        text?: string;
-        /** Alias para o texto do badge */
-        txt?: string;
-        /** Alias para o nome do ícone */
-        number?: string;
-        /** Rotação do ícone em graus */
-        rotate?: number;
-        /** Inversão do ícone */
-        flip?: 'horizontal' | 'vertical' | 'h' | 'v' | 'x' | 'y' | 'xy';
-        /** Tamanho do ícone (em px ou multiplicador) */
+        /** Cor base do badge */
+        color?: string;
+        /** Estilo visual neon */
+        neon?: boolean;
+        /** Indicador de status */
+        status?: MaxBadgeStatus;
+        /** Notificação overlay */
+        overlay?: boolean | string | number;
+        /** Forçar ou desativar caixa alta */
+        uppercase?: boolean;
+        /** Tamanho */
         size?: string | number;
-        /** Alias para o tamanho */
+        /** Alias legado para tamanho */
         scale?: string | number;
-        /** Largura específica */
-        width?: string | number;
-        /** Altura específica */
-        height?: string | number;
-        /** Cor do ícone */
-        iconColor?: string;
-        /** Valor do ícone */
-        iconValue?: string;
-        /** Apenas se estiver usando overlay = true */
-        badge?: any;
-        /** Apenas se estiver usando overlay = true */
-        overlay?: boolean | undefined;
-        /** Cor do Fundo */
+        /** Cor de fundo legada */
         background?: string;
-        /** Cor da Texto */
+        /** Cor de texto legada */
         textColor?: string;
+        /** Compatibilidade com ícone legado */
+        iconColor?: string;
+        /** Compatibilidade com ícone legado */
+        iconValue?: string;
     }>(), {});
 
-    const message = computed<string>(() => String(props.label ?? props.msg ?? props.value ?? props.mensagem ?? props.text ?? props.txt ?? props.number ?? ''));
-    const is_overlay = computed(() => props.overlay === true);
-
-    const badge_size_class = computed<string>(() => {
-        const size = (attrs.size ?? attrs['size']) as string | undefined;
-        if (size === 'large') return 'p-badge-lg';
-        if (size === 'xlarge') return 'p-badge-xl';
-        return '';
+    const resolvedLabel = computed<string | number>(() => {
+        return props.label ?? props.msg ?? props.value ?? props.mensagem ?? props.text ?? props.txt ?? props.number ?? '';
     });
 
-    const passthrough_attrs = computed(() => {
+    const passthroughAttrs = computed(() => {
         const out: Record<string, unknown> = {};
-        for (const key in attrs) {
-            if (key.startsWith('color-')) continue;
-            if (key === 'size') continue;
-            out[key] = attrs[key];
-        }
+        for (const key in attrs) out[key] = attrs[key];
+
         return out;
     });
-
-    const bg_color = computed<string>(() => {
-        if (props.background) return props.background;
-
-        for (const key in attrs) if (key.startsWith('color-')) {
-            const color = key.replace('color-hover-', '').replace('color-', '');
-            return `var(--${color}) !important`;
-        }
-
-        return 'var(--orange-600)';
-    });
-
-    const text_color = computed(() => {
-        if (props.textColor) return props.textColor;
-
-        const Color = getColorFromVar(bg_color.value);
-        if (Color.isLight()) return Color.darken(0.5).hexa();
-
-        return Color.lighten(0.6).hexa();
-    });
-
-    const icon_color = computed(() => {
-        if (props.iconColor) return props.iconColor;
-        const Color = getColorFromVar(text_color.value);
-        if (Color.isDark()) return Color.darken(0.5).hexa();
-
-        return Color.lighten(0.6).hexa();
-    });
 </script>
-
-<style lang="scss">
-    .badge-component-main-div {
-        position: relative;
-        display: grid;
-        place-items: center start;
-        grid-template-columns: auto 1fr;
-
-        .p-badge {
-            font-size: 0.6rem;
-            font-weight: 500;
-            height: 22.5px;
-            text-transform: uppercase;
-            display: grid;
-            place-items: center;
-            border-radius: 6px;
-            padding: 0 6px;
-
-            &.p-badge-lg {
-                font-size: 0.65rem;
-                font-weight: 500;
-                padding: 2px 8px 0;
-                height: 23px;
-
-                &.with-icon {
-                    padding-left: 25px;
-                }
-
-                &.with-icon-value {
-                    padding-left: 28px !important;
-                }
-            }
-
-            &.p-badge-xl {
-                font-size: 0.6rem;
-                font-weight: 500;
-                padding: 0 6px;
-                height: 20px;
-
-                &.with-icon {
-                    padding-left: 23px;
-                }
-
-                &.with-icon-value {
-                    padding-left: 25px;
-                }
-            }
-
-            &.with-icon, &.with-icon-value {
-                padding-left: 26px;
-            }
-
-            &.p-overlay-badge {
-                position: absolute;
-                top: 0;
-                right: 0;
-                transform: translate(50%, -50%);
-                min-width: 8px;
-                height: 8px;
-                border-radius: 50%;
-                padding: 0;
-            }
-        }
-
-        .circle-color-badge {
-            position: absolute;
-            top: 1px;
-            left: 0;
-            width: 21px;
-            height: 100%;
-            border-radius: 3px;
-            display: grid;
-            place-items: center;
-
-            .circle-color-badge-text {
-                width: 14px;
-                height: 14px;
-                border-radius: 6px;
-                display: grid;
-                place-items: center;
-                font-size: 9px;
-                color: white;
-            }
-        }
-
-        .icon-badge {
-            position: absolute;
-            left: 4px;
-        }
-    }
-</style>

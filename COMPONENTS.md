@@ -892,12 +892,12 @@ Ao receber um endereço via prop `street`, identifica automaticamente o tipo pel
 
 ## Telefone
 
-### MaxPhoneField
+### MaxInputPhone
 
 Campo de **telefone internacional** com seletor de DDI, bandeira do país e máscara dinâmica.
 
-**Arquivo:** [`src/components/MaxPhoneField.vue`](src/components/MaxPhoneField.vue)
-**Aliases:** `PhoneField`, `InputPhone`
+**Arquivo:** [`src/components/MaxInputPhone.vue`](src/components/MaxInputPhone.vue)
+**Aliases:** `MaxPhoneField`, `PhoneField`, `InputPhone`
 
 | Prop | Tipo | Padrão | Descrição |
 |------|------|--------|-----------|

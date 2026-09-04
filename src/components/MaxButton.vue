@@ -89,10 +89,10 @@
     const data = computed(() => ({ ...(props.data ?? {}), ...(props.query ?? {}), ...(props.params ?? {}) }));
 
     const emit = defineEmits<{
-        click: [value: boolean];
+        click: [event: MouseEvent | boolean];
     }>();
 
-    const onClick = (event: any) => {
+    const onClick = (event: MouseEvent) => {
         if (props.route) {
             goToRoute(props.route, { ...(props.params ?? {}), ...(props.data ?? {}), ...(props.query ?? {}) });
             return;
@@ -103,7 +103,7 @@
             return;
         }
 
-        emit('click', true);
+        emit('click', event);
     };
 </script>
 

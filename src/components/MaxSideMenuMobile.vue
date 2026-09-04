@@ -241,7 +241,7 @@
                 place-items: center;
                 overflow: hidden;
 
-                :deep(.max-user-avatar) {
+                .max-user-avatar {
                     width: 100%;
                     height: 100%;
                 }

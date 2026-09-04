@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+import { defineComponent } from 'vue';
 import { mount } from '@vue/test-utils';
 import MaxTabs from '../../src/components/MaxTabs.vue';
 import MaxTabItem from '../../src/components/MaxTabItem.vue';
@@ -76,3 +77,89 @@ describe('MaxTabItem — slot #title', () => {
         wrapper.unmount();
     });
 });
+
+describe('MaxTabItem — actionButton', () => {
+    it('renderiza o botao apenas para a aba ativa', async () => {
+        const fnA = vi.fn();
+        const fnB = vi.fn();
+        const wrapper = mount(defineComponent({
+            components: { MaxTabs, MaxTabItem },
+            setup() {
+                return { fnA, fnB };
+            },
+            template: `
+                <MaxTabs id="test-tabs-action" :cached="false" value="a">
+                    <MaxTabItem value="a" title="Um" actionButtonLabel="Btn A" :actionButton="fnA">
+                        <span class="c-a">A</span>
+                    </MaxTabItem>
+                    <MaxTabItem value="b" title="Dois" actionButtonLabel="Btn B" :actionButton="fnB">
+                        <span class="c-b">B</span>
+                    </MaxTabItem>
+                </MaxTabs>
+            `
+        }), { attachTo: document.body });
+
+        await settle();
+        const buttonsContainer = wrapper.find('.max-tabs-title-buttons');
+        expect(buttonsContainer.text()).toContain('Btn A');
+        expect(buttonsContainer.text()).not.toContain('Btn B');
+
+        // Troca para a aba b
+        await wrapper.findAll('.max-tab-item-title')[1].trigger('click');
+        await settle();
+
+        expect(buttonsContainer.text()).not.toContain('Btn A');
+        expect(buttonsContainer.text()).toContain('Btn B');
+        wrapper.unmount();
+    });
+
+    it('permite botao apenas com icone renderizando MaxIconButton', async () => {
+        const fn = vi.fn();
+        const wrapper = mount(defineComponent({
+            components: { MaxTabs, MaxTabItem },
+            setup() {
+                return { fn };
+            },
+            template: `
+                <MaxTabs id="test-tabs-icon-only" :cached="false" value="a">
+                    <MaxTabItem value="a" title="Um" actionButtonIcon="plus" :actionButton="fn">
+                        <span>A</span>
+                    </MaxTabItem>
+                </MaxTabs>
+            `
+        }), { attachTo: document.body });
+
+        await settle();
+        const button = wrapper.find('.max-tabs-title-buttons .button-tab-item');
+        expect(button.exists()).toBe(true);
+        expect(button.findComponent({ name: 'MaxIconButton' }).exists()).toBe(true);
+        wrapper.unmount();
+    });
+
+    it('renderiza botao global do MaxTabs junto com o botao da aba ativa', async () => {
+        const fnGlobal = vi.fn();
+        const fnItem = vi.fn();
+        const wrapper = mount(defineComponent({
+            components: { MaxTabs, MaxTabItem },
+            setup() {
+                return { fnGlobal, fnItem };
+            },
+            template: `
+                <MaxTabs id="test-tabs-both" :cached="false" value="a" actionButtonLabel="Global" :actionButton="fnGlobal">
+                    <MaxTabItem value="a" title="Um" actionButtonLabel="Item A" :actionButton="fnItem">
+                        <span>A</span>
+                    </MaxTabItem>
+                </MaxTabs>
+            `
+        }), { attachTo: document.body });
+
+        await settle();
+        const buttonsContainer = wrapper.find('.max-tabs-title-buttons');
+        expect(buttonsContainer.text()).toContain('Global');
+        expect(buttonsContainer.text()).toContain('Item A');
+        const buttons = buttonsContainer.findAll('.button-tab-item');
+        expect(buttons.length).toBe(2);
+        wrapper.unmount();
+    });
+});
+
