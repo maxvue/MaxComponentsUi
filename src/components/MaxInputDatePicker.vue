@@ -222,6 +222,71 @@
         return { top, left };
     });
 
+    const parseDateValue = (val: unknown): Date | null => {
+        if (!val) return null;
+        if (val instanceof Date) return isNaN(val.getTime()) ? null : val;
+
+        if (typeof val === 'number') {
+            const d = new Date(val);
+            return isNaN(d.getTime()) ? null : d;
+        }
+        if (typeof val !== 'string') return null;
+
+        const trimmed = val.trim();
+        if (!trimmed) return null;
+
+        // Formato brasileiro: DD/MM/YYYY ou DD-MM-YYYY (com ou sem hora)
+        const brMatch = trimmed.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:[\sT](\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/);
+        if (brMatch) {
+            const day = parseInt(brMatch[1], 10);
+            const month = parseInt(brMatch[2], 10) - 1;
+            const year = parseInt(brMatch[3], 10);
+            const hour = brMatch[4] ? parseInt(brMatch[4], 10) : 0;
+            const minute = brMatch[5] ? parseInt(brMatch[5], 10) : 0;
+            const second = brMatch[6] ? parseInt(brMatch[6], 10) : 0;
+
+            if (month >= 0 && month <= 11 && year >= 1000 && year <= 9999) {
+                const date = new Date(year, month, day, hour, minute, second);
+                if (
+                    date.getFullYear() === year &&
+                    date.getMonth() === month &&
+                    date.getDate() === day &&
+                    date.getHours() === hour &&
+                    date.getMinutes() === minute &&
+                    date.getSeconds() === second
+                ) return date;
+            }
+            return null;
+        }
+
+        // Formato ISO: YYYY-MM-DD ou YYYY-MM-DD HH:mm:ss ou YYYY-MM-DDTHH:mm:ss
+        const isoMatch = trimmed.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})(?:[\sT](\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/);
+        if (isoMatch) {
+            const year = parseInt(isoMatch[1], 10);
+            const month = parseInt(isoMatch[2], 10) - 1;
+            const day = parseInt(isoMatch[3], 10);
+            const hour = isoMatch[4] ? parseInt(isoMatch[4], 10) : 0;
+            const minute = isoMatch[5] ? parseInt(isoMatch[5], 10) : 0;
+            const second = isoMatch[6] ? parseInt(isoMatch[6], 10) : 0;
+
+            if (month >= 0 && month <= 11 && year >= 1000 && year <= 9999) {
+                const date = new Date(year, month, day, hour, minute, second);
+                if (
+                    date.getFullYear() === year &&
+                    date.getMonth() === month &&
+                    date.getDate() === day &&
+                    date.getHours() === hour &&
+                    date.getMinutes() === minute &&
+                    date.getSeconds() === second
+                ) return date;
+            }
+            return null;
+        }
+
+        const fallback = new Date(trimmed);
+        return isNaN(fallback.getTime()) ? null : fallback;
+    };
+
     // Sincroniza modelValue -> internalDate e displayValue
     watch(
         modelValue,
@@ -233,11 +298,8 @@
 
                 return;
             }
-            const dateObj =
-                val instanceof Date
-                    ? val
-                    : new Date(typeof val === 'string' && !val.includes('T') && !val.includes(' ') ? val + 'T00:00:00' : val);
-            if (!isNaN(dateObj.getTime())) {
+            const dateObj = parseDateValue(val);
+            if (dateObj) {
                 if (!internalDate.value || internalDate.value.getTime() !== dateObj.getTime()) {
                     internalDate.value = dateObj;
                     currentMonth.value = dateObj.getMonth();

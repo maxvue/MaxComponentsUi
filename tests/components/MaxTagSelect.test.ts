@@ -184,9 +184,12 @@ describe('MaxTagSelect', () => {
         expect((wrapper.vm as any).loading).toBe(false);
     });
 
-    it('não exibe placeholder quando modelValue é 0 (numérico) e opção correspondente existe', async () => {
-        const options = [{ value: 0, name: 'Opção Zero' }, { value: 1, name: 'Opção Um' }];
-        const wrapper = mountTagSelect({ modelValue: 0, options }, { placeholder: 'Selecione...' });
+    it('não renderiza placeholder quando modelValue é 0 e exibe a tag correspondente', async () => {
+        const options = [
+            { value: 0, name: 'Opção Zero' },
+            { value: 1, name: 'Opção Um' }
+        ];
+        const wrapper = mountTagSelect({ modelValue: 0, options }, { placeholder: 'Selecione uma opção' });
         await wrapper.vm.$nextTick();
 
         expect(wrapper.find('.tab-placeholder-select').exists()).toBe(false);
@@ -194,14 +197,17 @@ describe('MaxTagSelect', () => {
         expect(wrapper.find('.tag-value-text').text()).toBe('Opção Zero');
     });
 
-    it('não exibe placeholder quando modelValue é false (booleano) e opção correspondente existe', async () => {
-        const options = [{ value: false, name: 'Inativo' }, { value: true, name: 'Ativo' }];
-        const wrapper = mountTagSelect({ modelValue: false, options }, { placeholder: 'Selecione...' });
+    it('não renderiza placeholder quando modelValue é false e exibe a tag correspondente', async () => {
+        const options = [
+            { value: false, name: 'Desativado' },
+            { value: true, name: 'Ativado' }
+        ];
+        const wrapper = mountTagSelect({ modelValue: false, options }, { placeholder: 'Selecione o estado' });
         await wrapper.vm.$nextTick();
 
         expect(wrapper.find('.tab-placeholder-select').exists()).toBe(false);
         expect(wrapper.find('.value-tag-div').exists()).toBe(true);
-        expect(wrapper.find('.tag-value-text').text()).toBe('Inativo');
+        expect(wrapper.find('.tag-value-text').text()).toBe('Desativado');
     });
 
     it('NÃO renderiza badge vazia quando nada está selecionado (modelValue null)', async () => {
@@ -220,6 +226,35 @@ describe('MaxTagSelect', () => {
 
         expect(wrapper.find('.value-tag-div').exists()).toBe(false);
         expect(wrapper.find('.tab-placeholder-select').exists()).toBe(true);
+    });
+
+    it('renderiza placeholder e NÃO renderiza .value-tag-div nem .max-icon-button-stub quando modelValue é vazio ("")', async () => {
+        const options = [{ value: 'a', name: 'Tag A' }];
+        const wrapper = mountTagSelect({ modelValue: '', options }, { placeholder: 'Selecione' });
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find('.tab-placeholder-select').exists()).toBe(true);
+        expect(wrapper.find('.tab-placeholder-select').text()).toBe('Selecione');
+        expect(wrapper.find('.value-tag-div').exists()).toBe(false);
+        expect(wrapper.find('.max-icon-button-stub').exists()).toBe(false);
+    });
+
+    it('não renderiza .value-tag-div nem .max-icon-button-stub quando modelValue é null e possui propriedades de ícone', async () => {
+        const options = [{ value: 'a', name: 'Tag A' }];
+        const wrapper = mountTagSelect({ modelValue: null, iconLeft: 'mdi:user', options });
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find('.tab-placeholder-select').exists()).toBe(false);
+        expect(wrapper.find('.value-tag-div').exists()).toBe(false);
+        expect(wrapper.find('.max-icon-button-stub').exists()).toBe(false);
+    });
+
+    it('modo isButton com modelValue null: renderiza MaxIconButton e não renderiza .value-tag-div', async () => {
+        const wrapper = mountTagSelect({ isButton: true, icon: 'mdi:tag', modelValue: null });
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find('.max-icon-button-stub').exists()).toBe(true);
+        expect(wrapper.find('.value-tag-div').exists()).toBe(false);
     });
 });
 

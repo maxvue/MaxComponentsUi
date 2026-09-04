@@ -199,6 +199,8 @@
         );
     });
 
+    let rafId: number | null = null;
+
     function updatePosition() {
         const el = select_el.value;
         if (!el) return;
@@ -212,6 +214,14 @@
             left: rect.left,
             width: Math.max(rect.width, 260)
         };
+    }
+
+    function onScrollOrResize() {
+        if (rafId !== null) return;
+        rafId = requestAnimationFrame(() => {
+            updatePosition();
+            rafId = null;
+        });
     }
 
     function scrollFocusedIntoView() {
@@ -234,16 +244,21 @@
         filter_el.value?.focus();
         scrollFocusedIntoView();
 
-        window.addEventListener('scroll', updatePosition, true);
-        window.addEventListener('resize', updatePosition);
+        window.addEventListener('scroll', onScrollOrResize, true);
+        window.addEventListener('resize', onScrollOrResize);
     }
 
     function close() {
         if (!isOpen.value) return;
 
+        if (rafId !== null) {
+            cancelAnimationFrame(rafId);
+            rafId = null;
+        }
+
         isOpen.value = false;
-        window.removeEventListener('scroll', updatePosition, true);
-        window.removeEventListener('resize', updatePosition);
+        window.removeEventListener('scroll', onScrollOrResize, true);
+        window.removeEventListener('resize', onScrollOrResize);
     }
 
     function toggle() {

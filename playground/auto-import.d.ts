@@ -80,6 +80,7 @@ declare global {
   const MaxInputNumber: typeof import('../src/index.ts').MaxInputNumber
   const MaxInputOTP: typeof import('../src/index.ts').MaxInputOTP
   const MaxInputOtp: typeof import('../src/index.ts').MaxInputOtp
+  const MaxInputPhone: typeof import('../src/index.ts').MaxInputPhone
   const MaxInputPhoneMail: typeof import('../src/index.ts').MaxInputPhoneMail
   const MaxInputRadio: typeof import('../src/index.ts').MaxInputRadio
   const MaxInputSearch: typeof import('../src/index.ts').MaxInputSearch
@@ -1159,6 +1160,7 @@ declare module 'vue' {
     readonly MaxInputNumber: UnwrapRef<typeof import('../src/index.ts')['MaxInputNumber']>
     readonly MaxInputOTP: UnwrapRef<typeof import('../src/index.ts')['MaxInputOTP']>
     readonly MaxInputOtp: UnwrapRef<typeof import('../src/index.ts')['MaxInputOtp']>
+    readonly MaxInputPhone: UnwrapRef<typeof import('../src/index.ts')['MaxInputPhone']>
     readonly MaxInputPhoneMail: UnwrapRef<typeof import('../src/index.ts')['MaxInputPhoneMail']>
     readonly MaxInputRadio: UnwrapRef<typeof import('../src/index.ts')['MaxInputRadio']>
     readonly MaxInputSearch: UnwrapRef<typeof import('../src/index.ts')['MaxInputSearch']>

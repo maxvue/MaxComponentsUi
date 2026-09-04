@@ -45,9 +45,13 @@ const componentNames = files
 const aliases: Record<string, string> = {
     'Botao': 'MaxButton',
     'InputField': 'MaxInputText',
-    'InputPhone': 'MaxPhoneField',
+    'MaxPhoneField': 'MaxInputPhone',
+    'PhoneField': 'MaxInputPhone',
     'T1': 'MaxTitle1',
-    'T2': 'MaxTitle2'
+    'T2': 'MaxTitle2',
+    'MaxTag': 'MaxBadge',
+    'Tag': 'MaxBadge',
+    'MaxBadgeComponent': 'MaxBadge'
 };
 
 for (const k of Object.keys(aliases)) {

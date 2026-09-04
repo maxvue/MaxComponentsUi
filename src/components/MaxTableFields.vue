@@ -63,7 +63,7 @@
                             <!-- AutoComplete via API -->
                             <MaxInputAutoCompleteApi v-else-if="col.input === 'auto-complete-api'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" w-full :route="col.route ?? ''" :data="resolveData(row, col.data)" :placeholder="col.placeholder" :required="col.required" />
                             <!-- Phone Number -->
-                            <MaxPhoneField v-else-if="col.input === 'phone-number'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" w-full :placeholder="col.placeholder" :required="col.required" />
+                            <MaxInputPhone v-else-if="col.input === 'phone-number'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" w-full :placeholder="col.placeholder" :required="col.required" />
 
                             <!-- Sem input: exibe o valor como texto -->
                             <template v-else>
@@ -106,7 +106,7 @@
     import MaxInputTextArea from './MaxInputTextArea.vue';
     import MaxInputAutoComplete from './MaxInputAutoComplete.vue';
     import MaxInputAutoCompleteApi from './MaxInputAutoCompleteApi.vue';
-    import MaxPhoneField from './MaxPhoneField.vue';
+    import MaxInputPhone from './MaxInputPhone.vue';
     import MaxIconButton from './MaxIconButton.vue';
     import { getCssSize } from '../helpers/getCssSize';
 

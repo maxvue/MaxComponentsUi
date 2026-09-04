@@ -114,10 +114,10 @@ describe('MaxAuthCard', () => {
     });
 
     describe('Modo Telefone / OTP (mode=phone-otp)', () => {
-        it('renderiza MaxPhoneField com bandeiras e não exibe MaxInputOTP antes do envio', () => {
+        it('renderiza MaxInputPhone com bandeiras e não exibe MaxInputOTP antes do envio', () => {
             const wrapper = mountAuthCard({ mode: 'phone-otp' });
 
-            expect(wrapper.findComponent({ name: 'MaxPhoneField' }).exists()).toBe(true);
+            expect(wrapper.findComponent({ name: 'MaxInputPhone' }).exists()).toBe(true);
             expect(wrapper.findComponent({ name: 'MaxInputOTP' }).exists()).toBe(false);
             expect(wrapper.text()).toContain('Receber via WhatsApp');
             expect(wrapper.find('input[type="password"]').exists()).toBe(false);

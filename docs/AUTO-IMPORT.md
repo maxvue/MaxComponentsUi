@@ -45,7 +45,7 @@ Cada componente pode ser usado com múltiplos nomes. Exemplos:
 |------------|----------------|
 | `MaxButton` | `Button`, `Botao`, `max-button`, `max_button` |
 | `MaxInputText` | `InputText`, `InputField`, `input-text`, `input_text` |
-| `MaxPhoneField` | `PhoneField`, `InputPhone`, `phone-field`, `input_phone` |
+| `MaxInputPhone` | `MaxPhoneField`, `PhoneField`, `InputPhone`, `phone-field`, `input_phone` |
 | `MaxTitle1` | `Title1`, `T1`, `t-1`, `t_1` |
 | `MaxTable` | `Table`, `table`, `max-table` |
 | `MaxGrid` | `Grid`, `grid`, `max-grid` |

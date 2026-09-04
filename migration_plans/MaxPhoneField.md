@@ -326,3 +326,4 @@ Base: `/home/johnattas/GitHub/MaxComponentsUi/.claude/skills/`
     são mockadas — não asserir carregamento real, apenas o `src` gerado a partir de `sigla`.
 11. **Aliases de export:** conferir em `src/index.ts` se `MaxPhoneField` tem aliases; a API exportada
     (nome/aliases) NÃO deve mudar. Rodar `generateResolver.ts` só se um novo `.vue` for criado.
+P

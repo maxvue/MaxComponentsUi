@@ -17,7 +17,7 @@ function mountBadge(props: Record<string, any> = {}) {
     });
 }
 
-describe('MaxBadgeComponent', () => {
+describe('MaxBadgeComponent (alias para MaxBadge)', () => {
     beforeEach(() => {
         setActivePinia(createPinia());
     });
@@ -32,7 +32,7 @@ describe('MaxBadgeComponent', () => {
         expect(wrapper.text()).toContain('Pendente');
     });
 
-    it('exibe texto via aliases (msg, value, text)', () => {
+    it('exibe texto via aliases legados (msg, value, text)', () => {
         const wrapper1 = mountBadge({ msg: 'Teste1' });
         expect(wrapper1.text()).toContain('Teste1');
 
@@ -53,13 +53,15 @@ describe('MaxBadgeComponent', () => {
         expect(wrapper.find('.max-icon').exists()).toBe(false);
     });
 
-    it('aceita iconColor e iconValue para círculo de cor', () => {
+    it('repassa props de status, overlay e color para o MaxBadge interno', () => {
         const wrapper = mountBadge({
-            label: 'Status',
-            iconColor: '#ff0000',
-            iconValue: 'A'
+            label: 'Processamento',
+            color: 'var(--purple-600)',
+            status: 'done',
+            overlay: 3
         });
-        expect(wrapper.find('.circle-color-badge-text').text()).toContain('A');
+        expect(wrapper.find('.max-badge-status-dot').exists()).toBe(true);
+        expect(wrapper.find('.max-badge-overlay').text()).toBe('3');
     });
 
     it('NÃO renderiza .circle-color-badge quando iconColor e iconValue não são fornecidos', () => {
