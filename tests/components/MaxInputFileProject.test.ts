@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import MaxInputFileProject from '../../src/components/MaxInputFileProject.vue';
 import axios from 'axios';
@@ -7,15 +7,16 @@ vi.mock('axios', () => ({
     default: { post: vi.fn().mockResolvedValue({}) }
 }));
 
-let onChangeCallback: any;
-let openMock = vi.fn();
+let onChangeCallback: ((files: any) => void) | undefined;
+const openMock = vi.fn();
+const resetMock = vi.fn();
 
 vi.mock('@maxvue/max-use', () => ({
     getRoute: vi.fn(),
     useDropZone: () => ({ isOverDropZone: { value: false } }),
     useFileDialog: () => ({
         open: openMock,
-        reset: vi.fn(),
+        reset: resetMock,
         onChange: vi.fn((cb) => { onChangeCallback = cb; })
     }),
     ulid: vi.fn(() => '12345'),
@@ -24,6 +25,11 @@ vi.mock('@maxvue/max-use', () => ({
 }));
 
 describe('MaxInputFileProject', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        onChangeCallback = undefined;
+    });
+
     it('deve renderizar o componente e exibir as instruções de upload', async () => {
         const wrapper = mount(MaxInputFileProject, {
             props: { files: [], buttons: [{ action: vi.fn() }] },
@@ -76,23 +82,90 @@ describe('MaxInputFileProject', () => {
         expect(actionMock).toHaveBeenCalled();
     });
 
-    it('covers axios.catch na onFileUpload e formData uploadData e onChange', async () => {
-        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-        // @ts-ignore
-        axios.post.mockRejectedValue(new Error('Network error'));
+    it('atualiza temp_files e chama reset() ao selecionar arquivos via useFileDialog onChange', async () => {
         const wrapper = mount(MaxInputFileProject, {
-            props: { files: [], url: '/upload', uploadData: { a: 1, b: { c: 2 } } },
+            props: { files: [], auto: false },
             global: { stubs: ['MaxIconButton', 'MaxIcon', 'MaxLoaderIcon', 'MaxButton'] }
         });
 
-        // cover onChange callback
-        if (onChangeCallback) onChangeCallback([{ name: 'file_test.png' }]);
+        expect(onChangeCallback).toBeDefined();
 
+        const mockFile = { name: 'documento_novo.png', type: 'image/png' };
+        onChangeCallback!([mockFile]);
+        await wrapper.vm.$nextTick();
 
-        const file = new File(['content'], 'test.png', { type: 'image/png' });
+        expect(resetMock).toHaveBeenCalledTimes(1);
+        expect(wrapper.vm.temp_files).toHaveLength(1);
+        expect(wrapper.vm.temp_files[0]).toMatchObject({
+            id: '12345',
+            name: 'documento_novo.png',
+            extension: 'png',
+            message_type: 'image',
+            in_server: false,
+            to_request_ai: true
+        });
+    });
+
+    it('não altera temp_files nem chama reset() quando onChange recebe lista vazia ou nula', async () => {
+        const wrapper = mount(MaxInputFileProject, {
+            props: { files: [], auto: false },
+            global: { stubs: ['MaxIconButton', 'MaxIcon', 'MaxLoaderIcon', 'MaxButton'] }
+        });
+
+        expect(onChangeCallback).toBeDefined();
+
+        onChangeCallback!([]);
+        onChangeCallback!(null as any);
+        await wrapper.vm.$nextTick();
+
+        expect(resetMock).not.toHaveBeenCalled();
+        expect(wrapper.vm.temp_files).toHaveLength(0);
+    });
+
+    it('monta FormData com uploadData serializado e arquivos ao executar sendFile', async () => {
+        // @ts-ignore
+        axios.post.mockResolvedValue({ data: { success: true } });
+
+        const wrapper = mount(MaxInputFileProject, {
+            props: {
+                files: [],
+                url: '/api/upload',
+                uploadData: { category: 'docs', meta: { folderId: 42 } },
+                auto: false
+            },
+            global: { stubs: ['MaxIconButton', 'MaxIcon', 'MaxLoaderIcon', 'MaxButton'] }
+        });
+
+        const file = new File(['conteudo'], 'recibo.pdf', { type: 'application/pdf' });
         wrapper.vm.sendFile([file]);
         await new Promise((r) => setTimeout(r, 10));
-        expect(consoleSpy).toHaveBeenCalled();
+
+        expect(axios.post).toHaveBeenCalledTimes(1);
+        const [targetUrl, formDataArg, configArg] = (axios.post as any).mock.calls[0];
+
+        expect(targetUrl).toBe('/api/upload');
+        expect(formDataArg).toBeInstanceOf(FormData);
+        expect(formDataArg.get('category')).toBe('docs');
+        expect(formDataArg.get('meta')).toBe(JSON.stringify({ folderId: 42 }));
+        expect(configArg.withCredentials).toBe(true);
+    });
+
+    it('captura erro do axios e exibe no console.error ao falhar envio em sendFile', async () => {
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const networkError = new Error('Falha de conexão');
+        // @ts-ignore
+        axios.post.mockRejectedValue(networkError);
+
+        const wrapper = mount(MaxInputFileProject, {
+            props: { files: [], url: '/api/upload', auto: false },
+            global: { stubs: ['MaxIconButton', 'MaxIcon', 'MaxLoaderIcon', 'MaxButton'] }
+        });
+
+        const file = new File(['teste'], 'falha.png', { type: 'image/png' });
+        wrapper.vm.sendFile([file]);
+        await new Promise((r) => setTimeout(r, 10));
+
+        expect(consoleSpy).toHaveBeenCalledWith('Erro ao enviar arquivo. ', networkError);
         consoleSpy.mockRestore();
     });
 
