@@ -30,7 +30,7 @@
                 <div class="max-stat-icon-wrapper">
                     <MaxIcon
                         :icon="item.icon"
-                        :size="24"
+                        size="24px"
                         :color="getItemColors(item).accentColor"
                     />
                 </div>
@@ -47,7 +47,7 @@
                 <div class="max-stat-pill-icon-wrapper">
                     <MaxIcon
                         :icon="item.icon"
-                        :size="18"
+                        size="18px"
                         :color="getItemColors(item).accentColor"
                     />
                 </div>
@@ -69,7 +69,7 @@
      * e controle flexível de quebra de linha.
      */
     import { computed, useAttrs } from 'vue';
-    import { useBreakpoints, useDark } from '@maxvue/max-use';
+    import { useBreakpoints } from '@maxvue/max-use';
     import MaxIcon from './MaxIcon.vue';
     import { resolveStatItemColors, type StatItemColors } from '../helpers/colorLuminance';
 
@@ -112,8 +112,6 @@
         layout: 'auto'
     });
 
-    const isDark = useDark();
-
     // Sistema de detecção de viewport
     const breakpoints = useBreakpoints({ sm: 640, md: 768, lg: 1024, xl: 1280 });
     const isMobile = breakpoints.smaller('md');
@@ -134,7 +132,7 @@
 
     /** Retorna a paleta de cores calculada por luminância WCAG */
     const getItemColors = (item: MaxStatsItem): StatItemColors => {
-        return resolveStatItemColors(item.color, isDark.value);
+        return resolveStatItemColors(item.color);
     };
 
     /** Retorna as propriedades CSS personalizadas injetadas no estilo do elemento */

@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxStats from '../../src/components/MaxStats.vue';
+import MaxIcon from '../../src/components/MaxIcon.vue';
 import type { MaxStatsItem } from '../../src/components/MaxStats.vue';
 
 const sampleItems: MaxStatsItem[] = [
@@ -72,6 +73,9 @@ describe('MaxStats Component', () => {
             expect(firstCard.find('.max-stat-value').text()).toBe('125');
             expect(firstCard.find('.max-stat-sublabel').text()).toBe('Em acompanhamento');
             expect(firstCard.find('.max-stat-icon-wrapper').exists()).toBe(true);
+            const icon = firstCard.findComponent(MaxIcon);
+            expect(icon.exists()).toBe(true);
+            expect(icon.props('size')).toBe('24px');
         });
 
         it('oculta o sublabel quando o item não tiver sublabel definido', () => {
@@ -90,6 +94,9 @@ describe('MaxStats Component', () => {
             expect(pills.length).toBe(3);
             const firstPill = pills[0];
             expect(firstPill.find('.max-stat-pill-icon-wrapper').exists()).toBe(true);
+            const pillIcon = firstPill.findComponent(MaxIcon);
+            expect(pillIcon.exists()).toBe(true);
+            expect(pillIcon.props('size')).toBe('18px');
             expect(firstPill.find('.max-stat-pill-value').text()).toBe('125');
             // No modo pílula não deve exibir o texto do label na interface visível
             expect(firstPill.find('.max-stat-label').exists()).toBe(false);

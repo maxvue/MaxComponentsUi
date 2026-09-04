@@ -50,8 +50,8 @@ describe('colorLuminance Helper', () => {
     });
 
     describe('resolveStatItemColors', () => {
-        it('devolve paleta completa para Light Mode com luminâncias 83%, 65%, 23% e 10%', () => {
-            const colors = resolveStatItemColors('#3b82f6', false);
+        it('devolve paleta unificada com luminâncias 92%, 80%, 18% e 5%', () => {
+            const colors = resolveStatItemColors('#3b82f6');
 
             expect(colors.background).toMatch(/^#[0-9a-f]{6}$/i);
             expect(colors.iconBackground).toMatch(/^#[0-9a-f]{6}$/i);
@@ -66,37 +66,25 @@ describe('colorLuminance Helper', () => {
                 return getWcagRelativeLuminance(r, g, b);
             };
 
-            expect(parseLum(colors.background)).toBeCloseTo(0.83, 1);
-            expect(parseLum(colors.iconBackground)).toBeCloseTo(0.65, 1);
-            expect(parseLum(colors.textColor)).toBeCloseTo(0.23, 1);
-            expect(parseLum(colors.accentColor)).toBeCloseTo(0.10, 1);
+            expect(parseLum(colors.background)).toBeCloseTo(0.92, 1);
+            expect(parseLum(colors.iconBackground)).toBeCloseTo(0.80, 1);
+            expect(parseLum(colors.textColor)).toBeCloseTo(0.18, 1);
+            expect(parseLum(colors.accentColor)).toBeCloseTo(0.05, 1);
         });
 
-        it('devolve paleta invertida com alto contraste para Dark Mode', () => {
-            const colors = resolveStatItemColors('#3b82f6', true);
+        it('não possui distinção entre modo Dark e modo Light (retorna a mesma paleta unificada)', () => {
+            const lightColors = resolveStatItemColors('#3b82f6', false);
+            const darkColors = resolveStatItemColors('#3b82f6', true);
 
-            const parseLum = (hex: string) => {
-                const r = parseInt(hex.slice(1, 3), 16);
-                const g = parseInt(hex.slice(3, 5), 16);
-                const b = parseInt(hex.slice(5, 7), 16);
-                return getWcagRelativeLuminance(r, g, b);
-            };
-
-            const bgLum = parseLum(colors.background);
-            const iconBgLum = parseLum(colors.iconBackground);
-            const textLum = parseLum(colors.textColor);
-            const accentLum = parseLum(colors.accentColor);
-
-            // No Dark Mode, fundos são escuros (< 0.20) e textos/valores são claros (> 0.60)
-            expect(bgLum).toBeLessThan(0.15);
-            expect(iconBgLum).toBeLessThan(0.25);
-            expect(textLum).toBeGreaterThan(0.55);
-            expect(accentLum).toBeGreaterThan(0.75);
+            expect(lightColors.background).toBe(darkColors.background);
+            expect(lightColors.iconBackground).toBe(darkColors.iconBackground);
+            expect(lightColors.textColor).toBe(darkColors.textColor);
+            expect(lightColors.accentColor).toBe(darkColors.accentColor);
         });
 
         it('utiliza cache de memoização para chamadas subsequentes com mesmos parâmetros', () => {
-            const first = resolveStatItemColors('#10b981', false);
-            const second = resolveStatItemColors('#10b981', false);
+            const first = resolveStatItemColors('#10b981');
+            const second = resolveStatItemColors('#10b981');
             expect(first).toBe(second);
         });
     });
