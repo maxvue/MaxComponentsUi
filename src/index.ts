@@ -190,6 +190,16 @@ export { default as MaxPopoverMenu } from './components/MaxPopoverMenu.vue';
 export { default as MaxToast } from './components/MaxToast.vue';
 export { Toast } from './helpers/Toast';
 
+// Stats
+export { default as MaxStats } from './components/MaxStats.vue';
+export type { MaxStatsItem, MaxStatsProps } from './components/MaxStats.vue';
+export {
+    adjustToWcagLuminance,
+    getWcagRelativeLuminance,
+    resolveStatItemColors
+} from './helpers/colorLuminance';
+export type { StatItemColors } from './helpers/colorLuminance';
+
 // Configuração do app shell (MaxApp) — deve ser chamada no boot da aplicação.
 export { configureMaxApp, getMaxAppConfig, resetMaxAppConfig } from './helpers/maxAppConfig';
 export { clearMaxCache, registerMaxCacheKey, isMaxCacheKey, ICON_CACHE_KEY } from './helpers/maxCacheKeys';
