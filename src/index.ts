@@ -160,8 +160,13 @@ export { default as Badge } from './components/MaxBadge.vue';
 export { default as Tag } from './components/MaxBadge.vue';
 export { default as MaxBadgeButton } from './components/MaxBadgeButton.vue';
 export { default as BadgeButton } from './components/MaxBadgeButton.vue';
+export { default as MaxBadgeButtonsGroup } from './components/MaxBadgeButtonsGroup.vue';
+export { default as MaxBadgeButtonGroup } from './components/MaxBadgeButtonsGroup.vue';
+export { default as BadgeButtonsGroup } from './components/MaxBadgeButtonsGroup.vue';
+export { default as BadgeButtonGroup } from './components/MaxBadgeButtonsGroup.vue';
 export type { MaxBadgeProps, MaxBadgeStatus } from './components/MaxBadge.vue';
 export type { MaxBadgeButtonProps } from './components/MaxBadgeButton.vue';
+export type { MaxBadgeButtonsGroupProps, MaxBadgeButtonsGroupItem } from './components/MaxBadgeButtonsGroup.vue';
 export { default as MaxImage } from './components/MaxImage.vue';
 export type { MaxImageProps, MaxImageEditPayload } from './components/MaxImage.vue';
 // Async: o MaxChart arrasta o chart.js (~200 KB) por import dinâmico dentro do
