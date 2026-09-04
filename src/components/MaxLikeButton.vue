@@ -31,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, computed, watch } from 'vue';
+    import { ref, computed, watch, onBeforeUnmount } from 'vue';
     import MaxIcon from './MaxIcon.vue';
     import { Toast } from '../helpers/Toast';
     import type { MaxLikeButtonProps } from '../types';
@@ -70,6 +70,26 @@
     const internalLiked = ref(props.liked ?? false);
     const internalCount = ref(props.modelValue ?? 0);
     const isAnimating = ref(false);
+    const ANIMATION_DURATION_MS = 350;
+    let animationTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const clearAnimationTimer = (): void => {
+        if (animationTimer !== null) {
+            clearTimeout(animationTimer);
+            animationTimer = null;
+        }
+    };
+
+    const triggerAnimation = (): void => {
+        clearAnimationTimer();
+        isAnimating.value = true;
+        animationTimer = setTimeout(() => {
+            isAnimating.value = false;
+            animationTimer = null;
+        }, ANIMATION_DURATION_MS);
+    };
+
+    onBeforeUnmount(clearAnimationTimer);
 
     watch(() => props.liked, (newVal) => {
         if (newVal !== undefined) internalLiked.value = newVal;
@@ -247,10 +267,7 @@
             internalCount.value = nextCount;
             setStoredTimestamp(now);
 
-            isAnimating.value = true;
-            setTimeout(() => {
-                isAnimating.value = false;
-            }, 350);
+            triggerAnimation();
 
             const durationText = formatDuration(repeatMinutes.value);
             Toast.show({
@@ -272,12 +289,7 @@
         internalLiked.value = nextLiked;
         internalCount.value = nextCount;
 
-        if (nextLiked) {
-            isAnimating.value = true;
-            setTimeout(() => {
-                isAnimating.value = false;
-            }, 350);
-        }
+        if (nextLiked) triggerAnimation();
 
         emit('update:liked', nextLiked);
         emit('update:modelValue', nextCount);
