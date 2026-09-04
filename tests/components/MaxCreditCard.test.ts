@@ -147,10 +147,32 @@ describe('MaxCreditCard', () => {
 
             const texts = wrapper.findAll('svg text');
             const dateText = texts[2].element as unknown as SVGTextElement;
+            const naturalWidth = dateText.getComputedTextLength();
             const textLengthAttr = dateText.getAttribute('textLength');
 
-            if (textLengthAttr !== null) expect(Number(textLengthAttr)).toBeLessThanOrEqual(DATE_MAX_WIDTH);
+            expect(dateText.textContent).toBe('12/30');
+            expect(naturalWidth).toBeLessThanOrEqual(DATE_MAX_WIDTH);
+            expect(textLengthAttr).toBeNull();
 
+            const effectiveWidth = textLengthAttr !== null ? Number(textLengthAttr) : naturalWidth;
+            expect(effectiveWidth).toBeLessThanOrEqual(DATE_MAX_WIDTH);
+        });
+
+        it('validade com fonte muito larga é clampada à caixa reservada', async () => {
+            // Glifo largo para garantir overflow determinístico na validade (5 * 28 * 1.2 = 168 > 150).
+            mockTextMetrics(1.2);
+
+            const wrapper = mountCard({ date: '1230' });
+            await nextTick();
+            await nextTick();
+
+            const texts = wrapper.findAll('svg text');
+            const dateText = texts[2].element as unknown as SVGTextElement;
+            const textLengthAttr = dateText.getAttribute('textLength');
+
+            expect(textLengthAttr).not.toBeNull();
+            expect(Number(textLengthAttr)).toBe(DATE_MAX_WIDTH);
+            expect(dateText.getAttribute('lengthAdjust')).toBe('spacingAndGlyphs');
         });
 
         it('CVV no verso cabe na caixa reservada, mesmo overflowando com o fallback monospace', async () => {

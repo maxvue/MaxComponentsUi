@@ -280,4 +280,103 @@ describe('MaxTableFields.vue', () => {
 
         expect(wrapper.find('.max-table-fields-td').text()).toBe('Desenvolvedor');
     });
+
+    it('aplica buttonsWidth na coluna de ações quando fornecido', () => {
+        const wrapper = mount(MaxTableFields, {
+            props: {
+                list: [{ id: 1 }],
+                columns: [{ field: 'id', header: 'ID' }],
+                buttonsWidth: '150px',
+                buttons: [{ id: 'btn1', icon: 'test' }]
+            },
+            global: { stubs: { MaxIconButton: true } }
+        });
+
+        const thButtons = wrapper.find('.max-table-fields-th-buttons');
+        const tdButtons = wrapper.find('.max-table-fields-buttons');
+
+        expect(thButtons.attributes('style')).toContain('width: 150px');
+        expect(thButtons.attributes('style')).toContain('max-width: 150px');
+        expect(tdButtons.attributes('style')).toContain('width: 150px');
+        expect(tdButtons.attributes('style')).toContain('max-width: 150px');
+    });
+
+    it('não colapsa para width: 0px quando renderizado apenas com slot buttons', () => {
+        const wrapper = mount(MaxTableFields, {
+            props: {
+                list: [{ id: 1 }],
+                columns: [{ field: 'id', header: 'ID' }]
+            },
+            slots: {
+                buttons: '<button class="custom-btn">Ação</button>'
+            }
+        });
+
+        const thButtons = wrapper.find('.max-table-fields-th-buttons');
+        const tdButtons = wrapper.find('.max-table-fields-buttons');
+
+        expect(thButtons.exists()).toBe(true);
+        expect(tdButtons.exists()).toBe(true);
+        expect(thButtons.attributes('style') || '').not.toContain('width: 0px');
+        expect(tdButtons.attributes('style') || '').not.toContain('width: 0px');
+    });
+
+    it('aplica buttonsWidth na coluna de ações quando usado apenas com slot buttons', () => {
+        const wrapper = mount(MaxTableFields, {
+            props: {
+                list: [{ id: 1 }],
+                columns: [{ field: 'id', header: 'ID' }],
+                buttonsWidth: '140px'
+            },
+            slots: {
+                buttons: '<button class="custom-btn">Ação</button>'
+            }
+        });
+
+        const thButtons = wrapper.find('.max-table-fields-th-buttons');
+        const tdButtons = wrapper.find('.max-table-fields-buttons');
+
+        expect(thButtons.attributes('style')).toContain('width: 140px');
+        expect(tdButtons.attributes('style')).toContain('width: 140px');
+    });
+
+    it('calcula largura automática da coluna de ações com base na quantidade de botões quando buttonsWidth for omitido', () => {
+        const wrapper = mount(MaxTableFields, {
+            props: {
+                list: [{ id: 1 }],
+                columns: [{ field: 'id', header: 'ID' }],
+                buttons: [
+                    { id: 'b1', icon: 'i1' },
+                    { id: 'b2', icon: 'i2' },
+                    { id: 'b3', icon: 'i3' }
+                ]
+            },
+            global: { stubs: { MaxIconButton: true } }
+        });
+
+        const thButtons = wrapper.find('.max-table-fields-th-buttons');
+        const tdButtons = wrapper.find('.max-table-fields-buttons');
+
+        // 3 botões * 32px = 96px
+        expect(thButtons.attributes('style')).toContain('width: 96px');
+        expect(tdButtons.attributes('style')).toContain('width: 96px');
+    });
+
+    it('aceita buttonsWidth numérico e converte para pixels via getCssSize', () => {
+        const wrapper = mount(MaxTableFields, {
+            props: {
+                list: [{ id: 1 }],
+                columns: [{ field: 'id', header: 'ID' }],
+                buttonsWidth: 160,
+                buttons: [{ id: 'b1' }]
+            },
+            global: { stubs: { MaxIconButton: true } }
+        });
+
+        const thButtons = wrapper.find('.max-table-fields-th-buttons');
+        const tdButtons = wrapper.find('.max-table-fields-buttons');
+
+        expect(thButtons.attributes('style')).toContain('width: 160px');
+        expect(tdButtons.attributes('style')).toContain('width: 160px');
+    });
 });
