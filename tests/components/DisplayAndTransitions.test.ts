@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { describe, it, expect, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
@@ -69,6 +71,34 @@ describe('MaxTitle1', () => {
         expect(wrapper.find('.t1-main-text').exists()).toBe(false);
         expect(wrapper.find('.t2-main-text').exists()).toBe(false);
     });
+
+    it('sanitiza código malicioso no subtítulo prevenindo XSS via v-html', () => {
+        const wrapper = mount(MaxTitle1, {
+            props: {
+                title: 'Título Seguro',
+                subtitle: '<img src="x" onerror="alert(1)">Texto Seguro <b>Negrito</b>'
+            },
+            global: defaultGlobal
+        });
+
+        const subtitleEl = wrapper.find('.t2-main-text');
+        expect(subtitleEl.exists()).toBe(true);
+        expect(subtitleEl.html()).not.toContain('onerror');
+        expect(subtitleEl.html()).toContain('<b>Negrito</b>');
+        expect(subtitleEl.html()).toContain('<img src="x">');
+    });
+
+    it('remove tags de script completamente do subtítulo', () => {
+        const wrapper = mount(MaxTitle1, {
+            props: {
+                title: 'Título Seguro',
+                subtitle: '<script>alert("xss")</script>'
+            },
+            global: defaultGlobal
+        });
+
+        expect(wrapper.find('.t2-main-text').exists()).toBe(false);
+    });
 });
 
 describe('MaxTitle2', () => {
@@ -127,6 +157,21 @@ describe('MaxTitle2', () => {
         expect(wrapper.classes()).toContain('center');
         expect(wrapper.find('.text-h1').exists()).toBe(false);
     });
+
+    it('sanitiza código malicioso no subtítulo prevenindo XSS via v-html', () => {
+        const wrapper = mount(MaxTitle2, {
+            props: {
+                title: 'Título 2',
+                subtitle: '<img src="x" onerror="alert(1)">Subtítulo <i>Itálico</i>'
+            },
+            global: defaultGlobal
+        });
+
+        const subtitleEl = wrapper.find('.text-h2');
+        expect(subtitleEl.exists()).toBe(true);
+        expect(subtitleEl.html()).not.toContain('onerror');
+        expect(subtitleEl.html()).toContain('<i>Itálico</i>');
+    });
 });
 
 describe('MaxEmptyDiv', () => {
@@ -155,6 +200,24 @@ describe('MaxEmptyDiv', () => {
             }
         });
         expect(wrapper.text()).toContain('Nenhum dado encontrado');
+    });
+
+    it('sanitiza código malicioso no label prevenindo XSS via v-html', () => {
+        const wrapper = mount(MaxEmptyDiv, {
+            attrs: {
+                label: '<img src="x" onerror="alert(1)">Nenhum registro <strong>encontrado</strong>'
+            },
+            global: {
+                stubs: {
+                    MaxIcon: { template: '<span class="max-icon"></span>' }
+                }
+            }
+        });
+
+        const labelEl = wrapper.find('.label');
+        expect(labelEl.exists()).toBe(true);
+        expect(labelEl.html()).not.toContain('onerror');
+        expect(labelEl.html()).toContain('<strong>encontrado</strong>');
     });
 });
 
