@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
 import MaxTabs from '../../src/components/MaxTabs.vue';
@@ -432,5 +432,59 @@ describe('MaxTabPanel', () => {
         expect(tabs[1].attributes('aria-selected')).toBe('false');
         expect(wrapper.find('.p0').isVisible()).toBe(true);
         expect(wrapper.find('.p1').isVisible()).toBe(false);
+    });
+});
+
+describe('MaxTabs — actionButton', () => {
+    it('renderiza o botao global na barra de botoes quando actionButton e actionButtonLabel sao informados', () => {
+        const fn = vi.fn();
+        const wrapper = mount(MaxTabs, {
+            props: {
+                value: '0',
+                actionButton: fn,
+                actionButtonLabel: 'Novo Item'
+            }
+        });
+        const button = wrapper.find('.max-tabs-title-buttons .button-tab-item');
+        expect(button.exists()).toBe(true);
+        expect(button.text()).toContain('Novo Item');
+    });
+
+    it('renderiza MaxIconButton quando actionButton e actionButtonIcon sao informados sem label', () => {
+        const fn = vi.fn();
+        const wrapper = mount(MaxTabs, {
+            props: {
+                value: '0',
+                actionButton: fn,
+                actionButtonIcon: 'plus'
+            }
+        });
+        const button = wrapper.find('.max-tabs-title-buttons .button-tab-item');
+        expect(button.exists()).toBe(true);
+        expect(button.findComponent({ name: 'MaxIconButton' }).exists()).toBe(true);
+    });
+
+    it('dispara a funcao actionButton ao clicar', async () => {
+        const fn = vi.fn();
+        const wrapper = mount(MaxTabs, {
+            props: {
+                value: '0',
+                actionButton: fn,
+                actionButtonLabel: 'Salvar'
+            }
+        });
+        const button = wrapper.find('.max-tabs-title-buttons .button-tab-item');
+        await button.trigger('click');
+        expect(fn).toHaveBeenCalledTimes(1);
+    });
+
+    it('nao renderiza botao quando actionButton nao e fornecido', () => {
+        const wrapper = mount(MaxTabs, {
+            props: {
+                value: '0',
+                actionButtonLabel: 'Sem Acao'
+            }
+        });
+        expect(wrapper.find('.max-tabs-title-buttons .button-tab-item').exists()).toBe(false);
     });
 });
