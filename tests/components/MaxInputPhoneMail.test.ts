@@ -21,14 +21,22 @@ describe('MaxInputPhoneMail', () => {
         expect(wrapper.exists()).toBe(true);
     });
 
-    it('detecta modo email quando valor contém letras', async () => {
+    it('detecta modo email quando valor contém letras', () => {
         const wrapper = mountPhoneMail({ modelValue: 'test@email.com' });
-        expect(wrapper.findComponent(InputBase).exists()).toBe(true);
+
+        expect((wrapper.vm as any).method).toBe('email');
+        expect((wrapper.vm as any).name_method).toBe('Email');
+        expect(wrapper.findComponent(InputBase).props('label')).toBe('Email');
+        expect(wrapper.findComponent(InputBase).props('icon')).toBe('prime:at');
     });
 
-    it('detecta modo whatsapp quando valor contém números', async () => {
+    it('detecta modo whatsapp quando valor contém números', () => {
         const wrapper = mountPhoneMail({ modelValue: '11999887766' });
-        expect(wrapper.findComponent(InputBase).exists()).toBe(true);
+
+        expect((wrapper.vm as any).method).toBe('whatsapp');
+        expect((wrapper.vm as any).name_method).toBe('Whatsapp');
+        expect(wrapper.findComponent(InputBase).props('label')).toBe('Whatsapp');
+        expect(wrapper.findComponent(InputBase).props('icon')).toBe('ic:baseline-whatsapp');
     });
 
     it('reflete o modo email imediatamente no mount, sem interação do usuário (regressão)', () => {
@@ -67,17 +75,32 @@ describe('MaxInputPhoneMail', () => {
 
     it('força modo whatsapp via attr phone', () => {
         const wrapper = mountPhoneMail({}, { phone: true });
-        expect(wrapper.findComponent(InputBase).exists()).toBe(true);
+
+        expect((wrapper.vm as any).method).toBe('whatsapp');
+        expect((wrapper.vm as any).name_method).toBe('Whatsapp');
+        expect(wrapper.findComponent(InputBase).props('label')).toBe('Whatsapp');
+        expect(wrapper.findComponent(InputBase).props('icon')).toBe('ic:baseline-whatsapp');
+        expect(wrapper.find('input').attributes('placeholder')).toBe('(99) 9 9999 - 9999');
     });
 
     it('força modo whatsapp via attr whatsapp', () => {
         const wrapper = mountPhoneMail({}, { whatsapp: true });
-        expect(wrapper.findComponent(InputBase).exists()).toBe(true);
+
+        expect((wrapper.vm as any).method).toBe('whatsapp');
+        expect((wrapper.vm as any).name_method).toBe('Whatsapp');
+        expect(wrapper.findComponent(InputBase).props('label')).toBe('Whatsapp');
+        expect(wrapper.findComponent(InputBase).props('icon')).toBe('ic:baseline-whatsapp');
+        expect(wrapper.find('input').attributes('placeholder')).toBe('(99) 9 9999 - 9999');
     });
 
     it('força modo email via attr email', () => {
         const wrapper = mountPhoneMail({}, { email: true });
-        expect(wrapper.findComponent(InputBase).exists()).toBe(true);
+
+        expect((wrapper.vm as any).method).toBe('email');
+        expect((wrapper.vm as any).name_method).toBe('Email');
+        expect(wrapper.findComponent(InputBase).props('label')).toBe('Email');
+        expect(wrapper.findComponent(InputBase).props('icon')).toBe('prime:at');
+        expect(wrapper.find('input').attributes('placeholder')).toBe('usuario@email.com');
     });
 
     it('emite update:modelValue ao digitar', async () => {
