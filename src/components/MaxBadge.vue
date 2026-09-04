@@ -253,11 +253,12 @@
             justify-content: center;
             min-width: 16px;
             height: 16px;
-            padding: 0 5px;
+            padding: 1px 5px 0;
             border-radius: 9999px;
             font-size: 0.6rem;
             font-weight: 700;
-            line-height: 1;
+            line-height: normal;
+            box-sizing: border-box;
             flex-shrink: 0;
             text-transform: none;
         }
