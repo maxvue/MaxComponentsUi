@@ -3,7 +3,26 @@
         <div class="max-tabs-content">
             <div :class="`max-tabs-title ${spread ? 'spread' : ''}`">
                 <div class="max-tabs-title-items" :id="'max-tab-' + tabs_id"></div>
-                <div class="max-tabs-title-buttons" :id="'max-tab-buttons-' + tabs_id"></div>
+                <div class="max-tabs-title-buttons" :id="'max-tab-buttons-' + tabs_id">
+                    <div
+                        v-if="props.actionButton && (props.actionButtonLabel || props.actionButtonIcon)"
+                        class="button-tab-item"
+                        h-full
+                        @click="props.actionButton"
+                    >
+                        <MaxButton
+                            v-if="props.actionButtonLabel"
+                            h-full
+                            :label="props.actionButtonLabel"
+                            :icon="props.actionButtonIcon"
+                        />
+                        <MaxIconButton
+                            v-else
+                            h-full
+                            :icon="props.actionButtonIcon"
+                        />
+                    </div>
+                </div>
             </div>
 
             <div class="max-tab-content">
@@ -17,6 +36,8 @@
     import { isValid, Random, useRefCached } from '@maxvue/max-use';
     import { TABS_INJECTION_KEY } from '../helpers/tabsContext';
     import { provide, computed, watch, ref, toRef } from 'vue';
+    import MaxButton from './MaxButton.vue';
+    import MaxIconButton from './MaxIconButton.vue';
 
     type Props = {
         title?: string;
@@ -33,7 +54,10 @@
         scrollable?: boolean;
         /** Exibe os botoes de navegacao no modo scrollable. */
         showNavigators?: boolean;
-        spread?:boolean;
+        spread?: boolean;
+        actionButtonLabel?: string;
+        actionButtonIcon?: string;
+        actionButton?: (event?: MouseEvent) => unknown;
     };
 
     const props = withDefaults( defineProps<Props>(), {
@@ -249,7 +273,13 @@
             }
 
             .max-tabs-title-buttons {
-                display: grid;
+                display: flex;
+                align-items: center;
+            }
+
+            .button-tab-item {
+                padding: 0 8px;
+                max-height: 25px;
             }
 
         }
