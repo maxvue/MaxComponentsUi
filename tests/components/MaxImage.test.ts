@@ -209,4 +209,96 @@ describe('MaxImage', () => {
         expect(onEditMock).toHaveBeenCalledWith(fakePayload);
         expect((wrapper.vm as any).isCropping).toBe(false);
     });
+
+    it('não registra listener keydown no window ao montar com isOpen=false', () => {
+        const addEventListenerSpy = vi.spyOn(window, 'addEventListener');
+        mountImage();
+
+        const keydownCalls = addEventListenerSpy.mock.calls.filter(([event]) => event === 'keydown');
+        expect(keydownCalls.length).toBe(0);
+
+        addEventListenerSpy.mockRestore();
+    });
+
+    it('registra listener keydown no window ao abrir preview e remove ao fechar', async () => {
+        const addEventListenerSpy = vi.spyOn(window, 'addEventListener');
+        const removeEventListenerSpy = vi.spyOn(window, 'removeEventListener');
+
+        const wrapper = mountImage({ preview: true });
+        await wrapper.find('.max-image__preview-trigger').trigger('click');
+
+        expect(addEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+
+        await wrapper.find('.max-image-modal').trigger('click');
+        expect(removeEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+
+        addEventListenerSpy.mockRestore();
+        removeEventListenerSpy.mockRestore();
+    });
+
+    it('remove listeners de ponteiro no window ao desmontar componente durante arraste de crop', async () => {
+        const removeEventListenerSpy = vi.spyOn(window, 'removeEventListener');
+
+        const wrapper = mountImage({ preview: true, allowEdit: true });
+        await wrapper.find('.max-image__preview-trigger').trigger('click');
+
+        const editBtn = wrapper.findAllComponents({ name: 'MaxIconButton' })
+            .find((btn) => btn.attributes('title') === 'Recortar imagem');
+        await editBtn!.trigger('click');
+
+        // Simula carregamento da imagem de crop
+        const cropImg = wrapper.find('.max-image-crop-stage__img');
+        Object.defineProperty(cropImg.element, 'clientWidth', { value: 300, configurable: true });
+        Object.defineProperty(cropImg.element, 'clientHeight', { value: 200, configurable: true });
+        await cropImg.trigger('load');
+
+        // Inicia arraste da crop box
+        const cropBoxEl = wrapper.find('.max-image-crop-box');
+        expect(cropBoxEl.exists()).toBe(true);
+        await cropBoxEl.trigger('pointerdown', { clientX: 100, clientY: 100 });
+
+        removeEventListenerSpy.mockClear();
+
+        // Desmonta o componente durante o arraste
+        wrapper.unmount();
+
+        expect(removeEventListenerSpy).toHaveBeenCalledWith('pointermove', expect.any(Function));
+        expect(removeEventListenerSpy).toHaveBeenCalledWith('pointerup', expect.any(Function));
+        expect(removeEventListenerSpy).toHaveBeenCalledWith('pointercancel', expect.any(Function));
+
+        removeEventListenerSpy.mockRestore();
+    });
+
+    it('remove listeners de ponteiro no window ao cancelar recorte durante arraste de alça', async () => {
+        const removeEventListenerSpy = vi.spyOn(window, 'removeEventListener');
+
+        const wrapper = mountImage({ preview: true, allowEdit: true });
+        await wrapper.find('.max-image__preview-trigger').trigger('click');
+
+        const editBtn = wrapper.findAllComponents({ name: 'MaxIconButton' })
+            .find((btn) => btn.attributes('title') === 'Recortar imagem');
+        await editBtn!.trigger('click');
+
+        const cropImg = wrapper.find('.max-image-crop-stage__img');
+        Object.defineProperty(cropImg.element, 'clientWidth', { value: 300, configurable: true });
+        Object.defineProperty(cropImg.element, 'clientHeight', { value: 200, configurable: true });
+        await cropImg.trigger('load');
+
+        // Inicia arraste da alça tl
+        const handleTl = wrapper.find('.max-image-crop-handle--tl');
+        expect(handleTl.exists()).toBe(true);
+        await handleTl.trigger('pointerdown', { clientX: 50, clientY: 50 });
+
+        removeEventListenerSpy.mockClear();
+
+        const cancelBtn = wrapper.findAllComponents({ name: 'MaxIconButton' })
+            .find((btn) => btn.attributes('title') === 'Cancelar Recorte');
+        await cancelBtn!.trigger('click');
+
+        expect(removeEventListenerSpy).toHaveBeenCalledWith('pointermove', expect.any(Function));
+        expect(removeEventListenerSpy).toHaveBeenCalledWith('pointerup', expect.any(Function));
+        expect(removeEventListenerSpy).toHaveBeenCalledWith('pointercancel', expect.any(Function));
+
+        removeEventListenerSpy.mockRestore();
+    });
 });

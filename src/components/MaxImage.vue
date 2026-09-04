@@ -162,7 +162,7 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick, type StyleValue } from 'vue';
+    import { ref, computed, watch, onBeforeUnmount, nextTick, type StyleValue } from 'vue';
     import MaxIconButton from './MaxIconButton.vue';
     import { useScrollLock } from '../helpers/useScrollLock';
 
@@ -285,6 +285,7 @@
 
     const closePreview = () => {
         if (!isOpen.value) return;
+        cleanupPointerListeners();
         isOpen.value = false;
         isCropping.value = false;
         zoomScale.value = 1;
@@ -311,6 +312,7 @@
     };
 
     const cancelCrop = () => {
+        cleanupPointerListeners();
         isCropping.value = false;
         cropReady.value = false;
     };
@@ -443,6 +445,17 @@
         window.removeEventListener('pointercancel', onHandlePointerUp);
     };
 
+    const cleanupPointerListeners = () => {
+        isDraggingBox = false;
+        activeHandle = null;
+        window.removeEventListener('pointermove', onCropBoxPointerMove);
+        window.removeEventListener('pointerup', onCropBoxPointerUp);
+        window.removeEventListener('pointercancel', onCropBoxPointerUp);
+        window.removeEventListener('pointermove', onHandlePointerMove);
+        window.removeEventListener('pointerup', onHandlePointerUp);
+        window.removeEventListener('pointercancel', onHandlePointerUp);
+    };
+
     const applyCropPayload = async (payload: MaxImageEditPayload) => {
         currentSrc.value = payload.dataUrl;
         emit('update:src', payload.dataUrl);
@@ -509,13 +522,17 @@
         if (e.key === 'Escape' && isOpen.value) closePreview();
     };
 
-    onMounted(() => {
-        window.addEventListener('keydown', onKeydown);
+    watch(isOpen, (value) => {
+        if (value) window.addEventListener('keydown', onKeydown);
+        else window.removeEventListener('keydown', onKeydown);
     });
 
     onBeforeUnmount(() => {
-        window.removeEventListener('keydown', onKeydown);
-        if (isOpen.value) scrollLock.unlock();
+        cleanupPointerListeners();
+        if (isOpen.value) {
+            window.removeEventListener('keydown', onKeydown);
+            scrollLock.unlock();
+        }
     });
 
     defineExpose({

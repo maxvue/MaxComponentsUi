@@ -6,7 +6,7 @@
                     <MaxIcon :icon="String(attrs.icon ?? attrs.i ?? 'ph:empty')" :size="Number(attrs.iconSize ?? 2)" />
                 </slot>
                 <slot name="label">
-                    <div v-html="attrs.label ?? 'Sem Registros' " class="label" />
+                    <div v-html="sanitizedLabel" class="label" />
                 </slot>
             </slot>
 
@@ -15,10 +15,15 @@
 </template>
 
 <script setup lang="ts">
-    import { useAttrs } from 'vue';
+    import { computed, useAttrs } from 'vue';
     import MaxIcon from './MaxIcon.vue';
+    import { sanitizeHtml } from '../helpers/sanitizeHtml';
 
     const attrs = useAttrs();
+    const sanitizedLabel = computed(() => {
+        const raw = attrs.label ?? 'Sem Registros';
+        return sanitizeHtml(String(raw));
+    });
 </script>
 
 <style scoped lang="scss">
