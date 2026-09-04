@@ -359,7 +359,13 @@
             /* O drop-shadow traça o contorno real do elemento + seus ::before, criando o balão perfeito */
             filter: drop-shadow(0 4px 8px rgb(0 0 0 / 20%));
             border-radius: 0.75rem;
-            padding: 10px;
+            padding: 20px;
+            box-sizing: border-box;
+
+            @media (width <= 768px) {
+                padding: 12px;
+                max-width: calc(100vw - 50px);
+            }
 
             .max-modal-content {
                 width: auto;

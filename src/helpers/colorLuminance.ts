@@ -146,39 +146,28 @@ export function adjustToWcagLuminance(colorStr: string, targetLuminance: number)
 const colorCache = new Map<string, StatItemColors>();
 
 /**
- * Resolve as cores do item estatístico de acordo com as especificações WCAG e tema (Light/Dark).
+ * Resolve as cores do item estatístico de acordo com as especificações WCAG.
  *
- * Modo Claro (Light Mode):
- * - Fundo do item: Luminância Relativa WCAG em 83% (0.83)
- * - Fundo do ícone: Luminância Relativa WCAG em 65% (0.65)
- * - Label e Sublabel: Luminância Relativa WCAG em 23% (0.23)
- * - Value e Ícone: Luminância Relativa WCAG em 10% (0.10)
+ * Paleta Unificada (sem distinção entre Dark e Light Mode):
+ * - Fundo do item (Background): Luminância Relativa WCAG em 87% (0.87) -> Mais Claro
+ * - Fundo do ícone: Luminância Relativa WCAG em 75% (0.75) -> Suave
+ * - Label e Sublabel (Título e Subtítulo): Luminância Relativa WCAG em 20% (0.20) -> Levemente mais claro que Ícones e Valor
+ * - Value e Ícone (Ícone e Valor): Luminância Relativa WCAG em 15% (0.15) -> Mais Escuro / Alto Contraste
  *
- * Modo Escuro (Dark Mode):
- * - Inversão proporcional para manter alto contraste WCAG e conforto visual:
- *   - Fundo do item: ~5% (0.05)
- *   - Fundo do ícone: ~12% (0.12)
- *   - Label e Sublabel: ~65% (0.65)
- *   - Value e Ícone: ~83% (0.83)
+ * @param baseColor - Cor base do indicador
+ * @param _isDark - Mantido por retrocompatibilidade de API, sem distinção de tema
  */
-export function resolveStatItemColors(baseColor: string, isDark: boolean = false): StatItemColors {
-    const key = `${baseColor || '#3b82f6'}_${isDark ? 'dark' : 'light'}`;
+export function resolveStatItemColors(baseColor: string, _isDark?: boolean): StatItemColors {
+    const key = baseColor || '#3b82f6';
     const cached = colorCache.get(key);
     if (cached) return cached;
 
-    const result: StatItemColors = isDark
-        ? {
-            background: adjustToWcagLuminance(baseColor, 0.05),
-            iconBackground: adjustToWcagLuminance(baseColor, 0.12),
-            textColor: adjustToWcagLuminance(baseColor, 0.65),
-            accentColor: adjustToWcagLuminance(baseColor, 0.83)
-        }
-        : {
-            background: adjustToWcagLuminance(baseColor, 0.83),
-            iconBackground: adjustToWcagLuminance(baseColor, 0.65),
-            textColor: adjustToWcagLuminance(baseColor, 0.23),
-            accentColor: adjustToWcagLuminance(baseColor, 0.10)
-        };
+    const result: StatItemColors = {
+        background: adjustToWcagLuminance(baseColor, 0.87),
+        iconBackground: adjustToWcagLuminance(baseColor, 0.75),
+        textColor: adjustToWcagLuminance(baseColor, 0.20),
+        accentColor: adjustToWcagLuminance(baseColor, 0.15)
+    };
 
     colorCache.set(key, result);
     return result;

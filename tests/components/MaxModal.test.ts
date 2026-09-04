@@ -444,4 +444,34 @@ describe('MaxModal', () => {
             document.body.removeChild(botaoOrigem);
         });
     });
+
+    describe('Layout e Padding (Mobile e Desktop)', () => {
+        it('não injeta padding inline quando a prop padding não for informada', async () => {
+            const wrapper = mountModal();
+            const vm = wrapper.vm as any;
+            vm.open();
+            await wrapper.vm.$nextTick();
+
+            const modalEl = wrapper.find('.max-modal');
+            expect(modalEl.exists()).toBe(true);
+            const style = modalEl.attributes('style') ?? '';
+            expect(style).not.toMatch(/padding:/);
+        });
+
+        it('aplica padding inline quando a prop padding for informada como string ou número', async () => {
+            const wrapperString = mountModal({ padding: '30px' });
+            (wrapperString.vm as any).open();
+            await wrapperString.vm.$nextTick();
+
+            const modalString = wrapperString.find('.max-modal');
+            expect(modalString.attributes('style')).toContain('padding: 30px');
+
+            const wrapperNumber = mountModal({ padding: 16 });
+            (wrapperNumber.vm as any).open();
+            await wrapperNumber.vm.$nextTick();
+
+            const modalNumber = wrapperNumber.find('.max-modal');
+            expect(modalNumber.attributes('style')).toContain('padding: 16px');
+        });
+    });
 });
