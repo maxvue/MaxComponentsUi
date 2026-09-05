@@ -239,5 +239,21 @@ describe('MaxBadgeButtonsGroup', () => {
         expect(wrapper.emitted('update:modelValue')?.[0]).toEqual([[mockItems[0]]]);
         expect(wrapper.emitted('update:modelValue')?.[1]).toEqual([[mockItems[0], mockItems[1]]]);
     });
+
+    it('renderiza corretamente itens que possuem overlay de notificação', () => {
+        const itemsWithOverlay: MaxBadgeButtonsGroupItem[] = [
+            { label: 'Entrada', value: 'inbox', overlay: 12 },
+            { label: 'Spam', value: 'spam', overlay: '99+' }
+        ];
+
+        const wrapper = mountBadgeButtonsGroup({
+            items: itemsWithOverlay
+        });
+
+        const overlays = wrapper.findAll('.max-badge-overlay');
+        expect(overlays).toHaveLength(2);
+        expect(overlays[0].text()).toBe('12');
+        expect(overlays[1].text()).toBe('99+');
+    });
 });
 

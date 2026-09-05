@@ -253,7 +253,7 @@
             justify-content: center;
             min-width: 16px;
             height: 16px;
-            padding: 1px 5px 0;
+            padding: 2px 5px 0;
             border-radius: 9999px;
             font-size: 0.6rem;
             font-weight: 700;
