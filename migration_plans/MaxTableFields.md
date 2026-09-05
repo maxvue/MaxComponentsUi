@@ -99,8 +99,8 @@ Todos em `src/components/`:
 - `@maxvue/max-use` (pacote irmão, fonte em `../MaxUse/src`):
   - `ulid` — gera id único; usado em `tableId = computed(() => props.id ?? ulid())`.
     Fonte: `../MaxUse/src/Helpers/Strings/random.ts` (reexporta lib `ulid`). Sem PrimeVue.
-  - `size` — conta elementos de array/objeto; usado em `size(props.buttons) > 0` e na
-    largura da coluna de botões. Fonte: `../MaxUse/src/Helpers/Iterables/size.ts`. Sem PrimeVue.
+  - `size` — conta elementos de array/objeto; usado em `size(props.buttons) > 0` e no
+    cálculo de fallback da largura da coluna de botões quando `buttonsWidth` não for informado. Fonte: `../MaxUse/src/Helpers/Iterables/size.ts`. Sem PrimeVue.
   - `refAutoReset` — cria ref que retorna ao valor inicial após um timeout; usado em
     `const action_click = refAutoReset(false, 100)` para debounce da emissão de
     `update:field`. Fonte: `../MaxUse/src/Composables` (reexportado em
@@ -132,7 +132,7 @@ Todos em `src/components/`:
 | `headerButton` | `string?` | — | Texto do cabeçalho da coluna de ações |
 | `id` | `string?` | — | Id da tabela (fallback `ulid()`) |
 | `emptyMessage` | `string?` | `'Nenhum registro encontrado'` | Mensagem de estado vazio |
-| `buttonsWidth` | `string?` | — | Largura da coluna de botões |
+| `buttonsWidth` | `(string \| number)?` | — | Largura da coluna de botões (ex: '120px' ou 120). Prioritária sobre o cálculo dinâmico baseado em `buttons`. Se omitida e apenas o slot `#buttons` for utilizado, adota largura neutra (`width: auto`). |
 | `buttons` | `MaxButtonsType[]?` | — | Lista de botões de ação por linha |
 
 ### 4.2 Emits

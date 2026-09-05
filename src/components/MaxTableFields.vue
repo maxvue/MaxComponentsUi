@@ -10,7 +10,7 @@
                         </slot>
                     </th>
                     <!-- Coluna extra para botões de ação -->
-                    <th v-if="hasActionsColumn" class="max-table-fields-th max-table-fields-th-buttons" :style="`width: ${size(props.buttons) * 32}px`" >
+                    <th v-if="hasActionsColumn" class="max-table-fields-th max-table-fields-th-buttons" :style="buttonsColumnStyle" >
                         <slot name="buttons-header">
                             {{props.headerButton}}
                         </slot>
@@ -72,7 +72,7 @@
                         </td>
 
                         <!-- Coluna de botões -->
-                        <td v-if="hasActionsColumn" class="max-table-fields-td max-table-fields-buttons" :style="`width: ${size(props.buttons) * 32}px`" >
+                        <td v-if="hasActionsColumn" class="max-table-fields-td max-table-fields-buttons" :style="buttonsColumnStyle" >
                             <slot name="buttons" :data="row" :index="index">
                                 <MaxIconButton v-for="btn in props.buttons" v-bind="btn" :key="btn.id" :data="btn.data ? resolveData(row, btn.data) : row" :size="btn.size ?? 1.2" class="table-icon-button"/>
                             </slot>
@@ -124,8 +124,8 @@
             dataKey?: string;
             /** Mensagem exibida quando a lista está vazia */
             emptyMessage?: string;
-            /** Largura da coluna de botões (ex: '120px') */
-            buttonsWidth?: string;
+            /** Largura da coluna de botões (ex: '120px' ou 120) */
+            buttonsWidth?: string | number;
             /** Lista de botões */
             buttons?: MaxButtonsType[];
         }>(),
@@ -141,6 +141,28 @@
 
     /** Verifica se a coluna de ações deve ser exibida (via prop buttons ou slot buttons) */
     const hasActionsColumn: ComputedRef<boolean> = computed((): boolean => size(props.buttons) > 0 || !!slots['buttons']);
+
+    /** Gera o estilo inline da coluna de ações/botões */
+    const buttonsColumnStyle: ComputedRef<Record<string, string>> = computed((): Record<string, string> => {
+        const style: Record<string, string> = {};
+
+        if (props.buttonsWidth !== undefined && props.buttonsWidth !== null && props.buttonsWidth !== '') {
+            const width = getCssSize(props.buttonsWidth);
+            style.width = width;
+            style.maxWidth = width;
+            return style;
+        }
+
+        const buttonCount = size(props.buttons);
+        if (buttonCount > 0) {
+            const width = `${buttonCount * 32}px`;
+            style.width = width;
+            style.maxWidth = width;
+            return style;
+        }
+
+        return style;
+    });
 
     /** Total de colunas para o colspan do estado vazio */
     const totalColspan: ComputedRef<number> = computed((): number => props.columns.length + (hasActionsColumn.value ? 1 : 0));

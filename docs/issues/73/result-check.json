@@ -1,0 +1,4 @@
+{
+  "status": "Aprovado",
+  "message": "A implementação resolveu comprovadamente a causa raiz eliminando a condicional if (textLengthAttr !== null) e tornando as asserções incondicionais e determinísticas no teste 'validade cabe na caixa reservada', além de adicionar o teste complementar 'validade com fonte muito larga é clampada à caixa reservada' com mockTextMetrics(1.2). Todos os comandos da seção Validação do plano foram executados com sucesso: 'npx vitest run tests/components/MaxCreditCard.test.ts' (1 arquivo aprovado, 26/26 testes aprovados), 'npm test' (139 arquivos aprovados, 1879/1879 testes aprovados), 'npm run type-check' (vue-tsc --noEmit com zero erros) e validação de linter sem erros no arquivo modificado. Não foram introduzidas regressões nem alterações fora de escopo."
+}

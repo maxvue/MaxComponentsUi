@@ -19,7 +19,13 @@
         </MaxTopMenu>
 
         <main class="mobile-page-content">
-            <slot></slot>
+            <div class="mobile-space top">
+            </div>
+            <div pb-30 pt-20>
+                <slot></slot>
+            </div>
+            <div class="mobile-space bottom">
+            </div>
         </main>
 
         <!-- Slot bugs flutuante e arrastável fora da barra de navegação -->
@@ -141,19 +147,49 @@
 
         .mobile-page-content {
             grid-row: 2;
-            overflow: hidden auto;
+            overflow-x: hidden;
+            overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-            overscroll-behavior-y: contain;
-            padding: 20px;
             padding-left: calc(20px + env(safe-area-inset-left, 0px));
             padding-right: calc(20px + env(safe-area-inset-right, 0px));
             background-color: var(--background-25, #f8fafc);
-            height: 100%;
-            box-sizing: border-box;
+            min-height: 100%;
+            display: grid;
+            position: relative;
+            max-width: 100vw;
 
             &::-webkit-scrollbar {
                 width: 0;
                 height: 0;
+            }
+
+            .mobile-space{
+                width: 100%;
+                height: 20px;
+                z-index: 5;
+                &.top {
+                    top: 60px;
+                    position: fixed;
+                    background: linear-gradient(to bottom, white, transparent);
+                }
+                &.bottom {
+                    bottom: 57px;
+                    position: fixed;
+                    background: linear-gradient(to bottom, transparent, white);
+                }
+
+
+            }
+
+            &::before{
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 3;
+                content: '';
+                width: 100%;
+                height: 50px;
+
             }
         }
 
