@@ -88,4 +88,17 @@ describe('presetMaxUno — CSS gerado', () => {
         expect(css).not.toContain('opacity:1.5');
         expect(css).not.toContain('opacity:NaN');
     });
+
+    it('gera CSS válido para col-gap, column-gap, row-gap, ph e pw', async () => {
+        const css = await generate('<div class="col-gap-4 column-gap-8 row-gap-12 ph-16 pw-20"></div>');
+
+        expectParsavel(css);
+        expect(css).toContain('column-gap:4px !important');
+        expect(css).toContain('column-gap:8px !important');
+        expect(css).toContain('row-gap:12px !important');
+        expect(css).toContain('padding-top:16px !important');
+        expect(css).toContain('padding-bottom:16px !important');
+        expect(css).toContain('padding-left:20px !important');
+        expect(css).toContain('padding-right:20px !important');
+    });
 });

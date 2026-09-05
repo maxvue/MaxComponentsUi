@@ -3,6 +3,9 @@ import { mount } from '@vue/test-utils';
 import type { Pinia } from 'pinia';
 import { setActivePinia, createPinia } from 'pinia';
 import { reactive, ref } from 'vue';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import * as sass from 'sass';
 
 const route = reactive<Record<string, any>>({ name: 'board', meta: {}, query: {}, params: {} });
 
@@ -71,5 +74,25 @@ describe('MaxApp - Estrutura de Scroll e Classes de View', () => {
         loadUser({ id: 1, name: 'Maria' });
         wrapper = mountApp();
         expect(wrapper.find('.max-app-view.max-app-authenticated').exists()).toBe(true);
+    });
+
+    it('declara regras CSS para barras de rolagem internas invisíveis (0px de largura e altura) no MaxApp e descendentes', () => {
+        const sfc = readFileSync(resolve(__dirname, '../../src/components/MaxApp.vue'), 'utf-8');
+        const styleMatch = /<style[^>]*>([\s\S]*?)<\/style>/.exec(sfc);
+        expect(styleMatch).not.toBeNull();
+
+        const compiledCss = sass.compileString(styleMatch![1]).css;
+
+        // Valida no container raiz .max-app
+        expect(compiledCss).toMatch(/\.max-app\s*\{[^}]*scrollbar-width:\s*none/);
+        expect(compiledCss).toMatch(/\.max-app\s*\{[^}]*-ms-overflow-style:\s*none/);
+        expect(compiledCss).toMatch(/\.max-app::-webkit-scrollbar\s*\{[^}]*width:\s*0/);
+        expect(compiledCss).toMatch(/\.max-app::-webkit-scrollbar\s*\{[^}]*height:\s*0/);
+
+        // Valida nos elementos internos descendentes .max-app *
+        expect(compiledCss).toMatch(/\.max-app\s+\*\s*\{[^}]*scrollbar-width:\s*none/);
+        expect(compiledCss).toMatch(/\.max-app\s+\*\s*\{[^}]*-ms-overflow-style:\s*none/);
+        expect(compiledCss).toMatch(/\.max-app\s+\*::-webkit-scrollbar\s*\{[^}]*width:\s*0/);
+        expect(compiledCss).toMatch(/\.max-app\s+\*::-webkit-scrollbar\s*\{[^}]*height:\s*0/);
     });
 });

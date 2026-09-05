@@ -342,4 +342,65 @@ describe('MaxLikeButton', () => {
             expect(localStorage.getItem('max_like_post-kebab-repeat')).toBeTruthy();
         });
     });
+
+    describe('cancelamento de animação e ciclo de vida (unmount)', () => {
+        it('cancela o timer de animação ao desmontar o componente antes de 350ms (modo toggle)', async () => {
+            vi.useFakeTimers();
+            const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
+            const wrapper = mountLikeButton();
+
+            await wrapper.trigger('click');
+            expect(wrapper.find('.max-like-icon-container').classes()).toContain('animating');
+
+            wrapper.unmount();
+            expect(clearTimeoutSpy).toHaveBeenCalled();
+
+            vi.advanceTimersByTime(350);
+
+            vi.useRealTimers();
+            clearTimeoutSpy.mockRestore();
+        });
+
+        it('cancela o timer de animação ao desmontar o componente antes de 350ms (modo repeat)', async () => {
+            vi.useFakeTimers();
+            const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
+            const wrapper = mountLikeButton({ repeat: true });
+
+            await wrapper.trigger('click');
+            expect(wrapper.find('.max-like-icon-container').classes()).toContain('animating');
+
+            wrapper.unmount();
+            expect(clearTimeoutSpy).toHaveBeenCalled();
+
+            vi.advanceTimersByTime(350);
+
+            vi.useRealTimers();
+            clearTimeoutSpy.mockRestore();
+        });
+
+        it('cancela o timer da animação anterior ao disparar cliques rápidos que iniciam nova animação', async () => {
+            vi.useFakeTimers();
+            const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
+            const wrapper = mountLikeButton();
+
+            await wrapper.trigger('click');
+            expect(wrapper.find('.max-like-icon-container').classes()).toContain('animating');
+
+            vi.advanceTimersByTime(100);
+            await wrapper.trigger('click');
+
+            vi.advanceTimersByTime(50);
+            await wrapper.trigger('click');
+
+            expect(clearTimeoutSpy).toHaveBeenCalled();
+
+            vi.advanceTimersByTime(350);
+            await wrapper.vm.$nextTick();
+            expect(wrapper.find('.max-like-icon-container').classes()).not.toContain('animating');
+
+            vi.useRealTimers();
+            clearTimeoutSpy.mockRestore();
+        });
+    });
 });
+
