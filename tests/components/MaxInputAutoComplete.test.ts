@@ -149,6 +149,21 @@ describe('MaxInputAutoComplete.vue', () => {
         expect((wrapper.vm as any).caution).toBe(true);
     });
 
+    it('mantém caution=true quando caution é passado via prop sem necessidade de done=false', () => {
+        const wrapper = mountAutoComplete({ caution: true });
+        expect((wrapper.vm as any).caution).toBe(true);
+    });
+
+    it('mantém caution string quando informada', () => {
+        const wrapper = mountAutoComplete({ caution: 'Atenção ao selecionar' });
+        expect((wrapper.vm as any).caution).toBe('Atenção ao selecionar');
+    });
+
+    it('respeita caution=false explicitamente passado', () => {
+        const wrapper = mountAutoComplete({ caution: false });
+        expect((wrapper.vm as any).caution).toBe(false);
+    });
+
     it('repassa a prop spellcheck para o elemento input', () => {
         const wrapper = mountAutoComplete({ spellcheck: true });
         expect(wrapper.find('input').attributes('spellcheck')).toBe('true');
