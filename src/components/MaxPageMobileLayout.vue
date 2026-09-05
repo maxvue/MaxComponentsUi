@@ -177,8 +177,6 @@
                     position: fixed;
                     background: linear-gradient(to bottom, transparent, white);
                 }
-
-
             }
 
             &::before{
