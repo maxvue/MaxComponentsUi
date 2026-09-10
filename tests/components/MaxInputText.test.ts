@@ -93,4 +93,36 @@ describe('MaxInputText', () => {
         const input = wrapper.find('input');
         expect(input.attributes('spellcheck')).toBe('false');
     });
+
+    it('mantém caution=true quando prop caution=true é passada mesmo com required e valor preenchido (isDone=true)', async () => {
+        const wrapper = mountInputText({ required: true, modelValue: 'Teste', caution: true });
+        const input = wrapper.find('input');
+        await input.trigger('blur');
+
+        const inputBase = wrapper.findComponent(InputBase);
+        expect(inputBase.props('caution')).toBe(true);
+        expect(inputBase.props('error')).toBeNull();
+    });
+
+    it('mantém caution string quando informada e não polui error com Valor inválido', async () => {
+        const wrapper = mountInputText({ modelValue: 'Preenchido', caution: 'Atenção ao limite' });
+        const inputBase = wrapper.findComponent(InputBase);
+
+        expect(inputBase.props('caution')).toBe('Atenção ao limite');
+        expect(inputBase.props('error')).toBeNull();
+    });
+
+    it('mantém caution=true na montagem inicial antes de qualquer interação do usuário (isDone=null)', () => {
+        const wrapper = mountInputText({ caution: true });
+        const inputBase = wrapper.findComponent(InputBase);
+
+        expect(inputBase.props('caution')).toBe(true);
+    });
+
+    it('respeita caution=false explicitamente passado', () => {
+        const wrapper = mountInputText({ caution: false });
+        const inputBase = wrapper.findComponent(InputBase);
+
+        expect(inputBase.props('caution')).toBe(false);
+    });
 });

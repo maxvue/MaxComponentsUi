@@ -154,7 +154,7 @@
 </template>
 
 <script setup lang="ts">
-    import { computed, ref } from 'vue';
+    import { computed, onBeforeUnmount, ref } from 'vue';
     import MaxIcon from './MaxIcon.vue';
 
     export interface CodeLanguageOption {
@@ -236,6 +236,13 @@
             isCopied.value = false;
         }, 1800);
     };
+
+    onBeforeUnmount(() => {
+        if (copyTimeout) {
+            clearTimeout(copyTimeout);
+            copyTimeout = null;
+        }
+    });
 </script>
 
 <style lang="scss" scoped>

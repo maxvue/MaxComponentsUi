@@ -116,10 +116,10 @@
         return null;
     };
 
-    const caution = computed(() => (props.caution !== undefined ? props.caution && isDone.value === false : isDone.value === false));
+    const caution = computed(() => (props.caution !== undefined ? props.caution : isDone.value === false));
 
     const error_msg = computed(() => {
-        if (!caution.value) return null;
+        if (isDone.value !== false) return null;
         const attrs_error_message = attrs.errMsg ?? attrs.error_message ?? attrs.error_msg ?? null;
         if (isEqual.value === false) return attrs_error_message ?? 'Valor esperado: ' + (attrs.target_value ?? attrs.targetValue ?? attrs['target-value']);
         if (isRequiredDone.value === false) return attrs_error_message ?? 'Campo obrigatório';
