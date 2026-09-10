@@ -1,0 +1,4 @@
+{
+  "status": "Reprovado",
+  "message": "A implementação foi reprovada no Portão de Qualidade (Pergunta 1 - Validação). O comando 'npm run lint' especificado no item 4 da seção 'Validação' do plano falhou na execução com erro fatal de memória e código de saída 134. Saída real do comando: 'FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory' seguido de 'bash: linha 1: 3159090 Abortado (imagem do núcleo gravada) npm run lint' e 'EXIT_CODE: 134'. Conforme a regra mandatória de validação: 'Comando que não existe, ou que falha por erro de ambiente, não é aprovação: é um plano com validação inválida. Reprove e diga qual comando falhou e com que mensagem.' Além disso, foram identificados usos de tipagem frouxa com '(wrapper.vm as any)' nos novos testes em tests/components/MaxInputAutoComplete.test.ts."
+}
