@@ -588,6 +588,7 @@ Layout em grid (ícone + label lado a lado).
 |------|------|--------|-----------|
 | `modelValue` | `boolean` | `false` | Estado do checkbox (v-model) |
 | `label` | `string` | — | Texto exibido ao lado do checkbox |
+| `disabled` | `boolean` | `false` | Desabilita a interação com o checkbox |
 
 **Atributos HTML especiais:**
 - `circle` — Aplica borda arredondada ao checkbox (estilo radio)

@@ -72,4 +72,61 @@ describe('MaxInputCheckbox', () => {
         });
         expect(wrapper.attributes('circle')).toBeDefined();
     });
+
+    it('repassa atributo disabled para o input nativo quando desabilitado via prop', () => {
+        const wrapper = mount(MaxInputCheckbox, {
+            props: { modelValue: false, disabled: true }
+        });
+        const input = wrapper.find<HTMLInputElement>('input[type="checkbox"]');
+        expect(input.attributes('disabled')).toBeDefined();
+        expect(input.element.disabled).toBe(true);
+    });
+
+    it('repassa atributo disabled para o input nativo quando desabilitado via attrs', () => {
+        const wrapper = mount(MaxInputCheckbox, {
+            props: { modelValue: false },
+            attrs: { disabled: true }
+        });
+        const input = wrapper.find<HTMLInputElement>('input[type="checkbox"]');
+        expect(input.attributes('disabled')).toBeDefined();
+        expect(input.element.disabled).toBe(true);
+    });
+
+    it('impede emissao de update:modelValue quando interage com componente desabilitado', async () => {
+        const wrapper = mount(MaxInputCheckbox, {
+            props: { modelValue: false, disabled: true }
+        });
+        const input = wrapper.find<HTMLInputElement>('input[type="checkbox"]');
+        await input.setValue(true);
+        expect(wrapper.emitted('update:modelValue')).toBeUndefined();
+    });
+
+    it('bloqueia interacao ao clicar na label associada quando desabilitado', async () => {
+        const wrapper = mount(MaxInputCheckbox, {
+            props: { modelValue: false, disabled: true, label: 'Termos' }
+        });
+        const label = wrapper.find('label.label-checkbox');
+        await label.trigger('click');
+        expect(wrapper.emitted('update:modelValue')).toBeUndefined();
+    });
+
+    it('repassa atributos de formulario (name, required) para o input nativo', () => {
+        const wrapper = mount(MaxInputCheckbox, {
+            props: { modelValue: false },
+            attrs: { name: 'termo_aceite', required: true }
+        });
+        const input = wrapper.find('input[type="checkbox"]');
+        expect(input.attributes('name')).toBe('termo_aceite');
+        expect(input.attributes('required')).toBeDefined();
+        expect(wrapper.attributes('name')).toBeUndefined();
+        expect(wrapper.attributes('required')).toBeUndefined();
+    });
+
+    it('aplica classe disabled no wrapper quando desabilitado', () => {
+        const wrapper = mount(MaxInputCheckbox, {
+            props: { modelValue: false, disabled: true }
+        });
+        expect(wrapper.classes()).toContain('disabled');
+        expect(wrapper.attributes('disabled')).toBeDefined();
+    });
 });
