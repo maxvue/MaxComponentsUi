@@ -1,92 +1,102 @@
 # GEMINI.md
 
-Este arquivo fornece orientações obrigatórias para o Gemini CLI e assistentes de IA baseados em modelos Gemini ao trabalhar com o código deste repositório.
+Este arquivo fornece as diretrizes canônicas e obrigatórias para o Gemini CLI, Claude, e assistentes de IA ao trabalhar com o código deste repositório.
 
-## Visão geral do projeto
+## Visão Geral do Projeto
 
-`@maxvue/max-components-ui` é uma biblioteca de componentes Vue 3 construída sobre o PrimeVue 4, distribuída como um módulo ES via npm. Ela encapsula e estende o PrimeVue com um tema customizado (`MaxStyle`), locale (pt-BR), preset do UnoCSS e um conjunto de componentes de formulário/layout/exibição.
+`@maxvue/max-components-ui` é a biblioteca de componentes e design system oficial do ecossistema Max / Engeapp, desenvolvida em **Vue 3** (Composition API, TypeScript) e distribuída como módulo ES via npm. Ela fornece uma suíte completa de componentes de formulário, layout, modais, navegação e tabelas, orientados por consistência visual, acessibilidade, alta performance e usabilidade.
 
-Ela depende de um pacote local irmão `@maxvue/max-use` (referenciado como `file:../MaxUse`), que precisa ser clonado ao lado deste repositório, no mesmo diretório pai.
+Ela depende do pacote local irmão `@maxvue/max-use` (referenciado como `file:../MaxUse`), que reside no mesmo diretório pai.
 
-## Migração em andamento: independência do PrimeVue
+---
 
-A partir do PrimeVue 5 a biblioteca deixará de ser open source. Existe um esforço ativo para tornar a `@maxvue/max-components-ui` **independente do PrimeVue**, reimplementando ou substituindo cada componente dependente do PrimeVue enquanto preserva a API pública, os estilos e o comportamento atuais. **O código ainda depende do PrimeVue hoje** — a migração está planejada, mas ainda não foi executada.
+## PADRÕES DE IDENTIDADE VISUAL DO DESIGN SYSTEM
 
-Arquivos de controle (todos na raiz do repositório):
+A identidade visual da biblioteca segue uma linguagem moderna, limpa e funcional, focada em produtividade operacional.
 
-| Arquivo | Papel |
-|---|---|
-| [`migration_plan.md`](migration_plan.md) | Brief original do orquestrador — como os planos por componente foram gerados. |
-| [`status-primevue.migration.yaml`](status-primevue.migration.yaml) | Fonte de verdade do progresso: lista cada componente dependente do PrimeVue com `level` e `status` (`waiting`/`in_progress`/`done`/`blocked`). |
-| [`migration_plans/`](migration_plans/) | Um plano de migração autossuficiente por componente (`migration_plans/[NomeComponente].md`), 34 no total. |
-| [`migration_executor.md`](migration_executor.md) | Painel de controle + protocolo do **agente executor**: uma fila ordenada e a regra de que cada invocação migra exatamente **um** componente, depois para e atualiza o status. |
+### 1. Sistema de Cores e Superfícies
 
-**Se pedirem para avançar a migração**, siga o `migration_executor.md`: pegue o próximo item `waiting` de menor número, execute o plano dele, verifique, atualize o status **tanto no YAML quanto na fila do executor** e então pare. Não migre mais de um componente por invocação, não pule etapas e não reordene. Restrições de ordem principais: `InputBase` primeiro (destrava ~19 inputs); `MaxInputSelect` antes dos dropdowns que o reutilizam; o conjunto `MaxTable` → `MaxTableColumn` → `MaxTableFields` migra junto.
+Todas as cores devem ser consumidas obrigatoriamente através das variáveis CSS do design system declaradas em `src/themes/`:
 
-## Comandos
+#### A. Superfícies e Backgrounds (Modo Claro e Modo Escuro)
+- `--background-0`: Superfície base mais clara / fundo de cards e inputs no modo claro (`#ffffff`).
+- `--background-75`: Fundo neutro suave / estado desabilitado de inputs (`#f8fafc`).
+- `--background-100` a `--background-200`: Fundos de áreas secundárias, bordas sutis e divisórias.
+- `--background-300` a `--background-400`: Bordas neutras e estados inativos.
+- `--background-600` a `--background-650`: Textos secundários, placeholders e ícones desabilitados.
+- `--background-700` a `--background-775`: Textos principais, rótulos e títulos no modo claro.
+- `--background-800` a `--background-900`: Superfície escura, tooltips e fundos de overlays.
 
-```bash
-npm install               # Instala as dependências (requer que ../MaxUse exista)
-npm run dev:playground    # Roda o playground para teste manual de componentes
-npm run type-check        # Roda a checagem de tipos com vue-tsc
-npm run lint              # Roda ESLint + Stylelint com correção automática
-npm run build             # vue-tsc + build do vite + copia os temas para dist/
-npm run test              # Roda todos os testes (vitest run)
-npm run test:watch        # Roda os testes em modo watch
-npm run test:coverage     # Roda os testes com relatório de cobertura v8
-```
+#### B. Rampa Primária Institucional (Teal)
+A rampa primária expressa a identidade Max:
+- `--max-primary-50`: `#f0fdfa` (tint suave)
+- `--max-primary-100`: `#56C2D7`
+- `--max-primary-200`: `#46BCD4`
+- `--max-primary-400`: `#178DA5`
+- `--max-primary-500`: `#00768E` (cor primária canônica para ações de destaque e foco)
+- `--max-primary-600`: `#005F77` (hover primário e ênfase)
+- `--max-primary-700` a `--max-primary-900`: Variações profundas de contraste
 
-**Rodar um único arquivo de teste:**
-```bash
-npx vitest run tests/components/MaxButton.test.ts
-```
+#### C. Cores Semânticas de Estado
+- **Sucesso / Done / Confirm**:
+  - `--max-success-500`: `#10B981` (verde esmeralda canônico)
+  - `--emerald-700`: `#047857` (botões de confirmação)
+- **Atenção / Alerta / Caution**:
+  - `--max-warning-500`: `#F59E0B`
+  - `--max-orange-500`: `#f97316` (bordas e ícones de aviso)
+- **Erro / Danger / Exclusão**:
+  - `--max-danger-500`: `#EF4444` (vermelho erro)
+  - `--red-700`: `#b91c1c` (botões e ações destrutivas)
+- **Informativo**:
+  - `--max-info-500`: `#0EA5E9`
+  - `--blue-600`: `#2563eb` (destaque informativo e links)
 
-**Após adicionar um novo componente, regenere o manifesto do resolver:**
-```bash
-npx tsx src/scripts/generateResolver.ts
-```
+#### D. Estados Interativos e Acessibilidade
+- **Hover**: Transição suave de cor/superfície (ex.: `var(--max-primary-600)`, `var(--background-725)`).
+- **Focus Visible**: Borda e anel de foco identificável via `var(--max-primary-500)` ou `--max-inputtext-focus-border-color`.
+- **Disabled**: Background em `var(--background-75)`, tipografia e ícones em `var(--background-650)`, cursor `not-allowed`.
 
-## Arquitetura
+---
 
-### Saídas de build (multi-entrada)
+### 2. Tipografia e Escala Visual
 
-A biblioteca gera quatro entradas ES separadas:
+- **Família Tipográfica**: `Quicksand, 'Instrument Sans', ui-sans-serif, sans-serif`.
+- **Escala de Tamanhos**:
+  - Rótulos de inputs e textos de formulário: `12px` (`0.75rem` / `$font-label-inputs` / `$size-text-input`).
+  - Textos secundários, feedbacks de validação e tooltips: `10px` a `13px` (`0.8125rem`).
+  - Títulos e Cabeçalhos:
+    - H1: `21px` (`$size-h1`)
+    - H2: `18px` (`$size-h2`)
+    - H3: `16px` (`$size-h3`)
+    - H4: `14px` (`$size-h4`)
+- **Altura Padrão de Inputs e Botões**: `36px` (tamanho touch/desktop otimizado para densidade de dashboards operacionais).
+- **Border Radius**:
+  - Padrão para inputs, campos e botões: `4px`.
+  - Padrão para cards, popovers e modais: `6px` a `8px`.
+  - Padrão para badges e float labels: `2px`.
 
-| Entrada | Caminho de export | Origem |
-|---|---|---|
-| `index.es.js` | `.` (padrão) | `src/index.ts` — todos os componentes Max + plugin `install()` |
-| `preset.es.js` | `./preset` | `src/presetMaxUno.ts` — preset do UnoCSS para apps consumidoras |
-| `resolver.es.js` | `./resolver` | `src/helpers/MaxComponentsUiResolver.ts` — resolver do unplugin |
-| `prime.es.js` | `./prime` | `src/prime/index.ts` — re-exports crus do PrimeVue |
+---
 
-O CSS é injetado apenas no `index.es.js` (via `vite-plugin-css-injected-by-js`). Os temas (`src/themes/`) são copiados literalmente para `dist/themes/` após o build e não são empacotados.
+### 3. Padrão Arquitetural de Componentes de Formulário
 
-### `InputBase` — o wrapper central
+- **`InputBase` (`src/components/InputBase.vue`) é o wrapper universal obrigatório** para todos os inputs de dados (texto, números, datas, CEP, CPF, telefones, markdown, seletores).
+- Ele encapsula de forma padronizada:
+  - Posicionamento de rótulos (modo padrão ou flutuante `float`).
+  - Área para ícones laterais (`iconLeft`, `iconRight`, `iconPos`).
+  - Indicadores visuais de estado semântico no canto do campo: `done` (check verde), `caution` (exclamação laranja), `error` (exclamação vermelha), `required` (asterisco).
+  - Linha inferior de feedback (`input-message`) acessível via `aria-live="polite"`.
+- **Exceções Legítimas**:
+  - `MaxInputCheckbox`, `MaxInputRadio` e `MaxInputToggle` não usam `InputBase` por possuírem anatomia de controle binário/múltipla escolha (renderizados diretamente com raiz semântica própria).
 
-Todos os componentes de input de formulário devem ser encapsulados pelo `InputBase` (`src/components/InputBase.vue`). Ele fornece:
-- Layout com `FloatLabel` + `IconField`/`InputIcon` do PrimeVue
-- Estados visuais: `done`, `error`, `caution`, `required`, `noStatus`
-- Modo de label inline, linha de mensagem/feedback abaixo do campo
-- Slots de ícone à esquerda/direita (`icon`, `iconLeft`, `iconRight`, `iconPos`)
+---
 
-Qualquer novo componente de input deve usar `<InputBase>` como seu elemento mais externo.
+### 4. Independência Total do PrimeVue (Zero Dependências Externas)
 
-**Exceção documentada:** `MaxInputCheckbox`, `MaxInputRadio` e `MaxInputToggle` não usam `InputBase` — têm `<div>` como raiz e layout próprio, por serem controles binários/múltipla escolha com necessidades visuais distintas dos inputs de texto/seleção (o próprio PrimeVue renderiza `Checkbox`/`RadioButton` de forma bem diferente de um input de texto). Essa distinção não é arbitrária: `MaxInputSwitch` (comparável a esses três) usa `InputBase` porque seu caso de uso e visual são mais próximos de um input tradicional.
-
-### Stores (Pinia)
-
-Cinco stores exportadas pelo barrel `src/stores/index.ts`:
-- `useIconStore` — faz cache dos fetches de ícones SVG do Iconify
-- `usePopoverStore` — controla o estado de abrir/fechar do `MaxPopover`
-- `useToastStore` — controla a fila do `MaxToast`
-- `useConfirmStore` — controla o estado do popover de confirmação usado por `MaxButtonConfirm`/`MaxIconConfirm`/`MaxTogglePopover`
-- `useModalStore` — controla qual `MaxModal` está aberto (por `id`)
-
-### Auto-import de componentes
-
-`src/components-manifest.json` é gerado por `src/scripts/generateResolver.ts`. Ele lista todos os nomes de componentes e seus aliases (snake_case, kebab-case, sem o prefixo Max). O resolver (`MaxComponentsUiResolver`) lê esse arquivo para resolver os imports nas apps consumidoras.
-
-Quando um novo arquivo `.vue` é adicionado a `src/components/`, rode `generateResolver.ts` para atualizar o manifesto e os aliases.
+A biblioteca é **100% autônoma e independente do PrimeVue**:
+- Nenhum componente do design system deve importar ou referenciar pacotes do ecossistema PrimeVue (`primevue/*`, `@primevue/*`, `@primeuix/*`).
+- A estilização não deve fazer uso de classes utilitárias ou internas do PrimeVue (ex.: `.p-inputtext`, `.p-select`, `.p-floatlabel`).
+- Todo componente deve possuir marcação HTML semântica própria e estilização isolada.
+- Quaisquer imports residuais do PrimeVue encontrados no projeto devem ser tratados como inconformidade técnica e eliminados.
 
 ---
 
@@ -105,7 +115,7 @@ Quando um novo arquivo `.vue` é adicionado a `src/components/`, rode `generateR
   </style>
   ```
 - O bloco de estilo DEVE obrigatoriamente utilizar `lang="scss"` e conter o modificador `scoped` para garantir isolamento e encapsulamento dos estilos do componente.
-- Para estilizar nós ou elementos internos do PrimeVue ou de subcomponentes filhos quando indispensável, utilize a pseudo-classe `:deep(...)` dentro do bloco com escopo.
+- Para estilizar nós ou elementos de subcomponentes filhos quando indispensável, utilize a pseudo-classe `:deep(...)` dentro do bloco com escopo.
 - Para estilizar elementos fora da raiz do componente montados no documento/body (como transições de `<slot>` ou travas de scroll em `html`), utilize `:global(...)` dentro do bloco com escopo.
 
 ### 3. Aninhamento Obrigatório Conforme a Hierarquia do Template
@@ -149,20 +159,39 @@ Quando um novo arquivo `.vue` é adicionado a `src/components/`, rode `generateR
   </style>
   ```
 
-### 4. Variáveis de Tema
-- Sempre utilize as variáveis CSS do design system para cores e superfícies:
-  - Backgrounds: `var(--background-0)` até `var(--background-900)`
-  - Primárias: `var(--max-primary-500)`, `var(--primary-600)`
-  - Acentos: `var(--blue-600)`, `var(--red-600)`, etc.
+---
+
+## Convenções de Código e Arquitetura
+
+- `<script setup lang="ts">` com `defineProps<Interface>()` e `defineEmits<{...}>()` estritamente tipados.
+- Indentação de 4 espaços (imposta pelo ESLint `@stylistic/indent`).
+- Aspas simples, sem vírgula final, ponto e vírgula obrigatório.
+- Ordem obrigatória dos blocos SFC: 1º `<template>`, 2º `<script setup>`, 3º `<style lang="scss" scoped>`.
+- Stores exportadas em `src/stores/index.ts`: `useIconStore`, `usePopoverStore`, `useToastStore`, `useConfirmStore`, `useModalStore`.
+- Múltiplos aliases de export para o mesmo componente são definidos em `src/index.ts`.
+- `MaxInputText` (e `MaxInputTextArea`) usa `v-bind="props"` no `InputBase`, repassando attrs adicionais para o elemento raiz do `InputBase`.
 
 ---
 
-## Convenções de Código
+## Comandos do Projeto
 
-- `<script setup lang="ts">` com `defineProps<Interface>()` e `defineEmits<{...}>()` tipados
-- Indentação de 4 espaços (imposta pelo ESLint `@stylistic/indent`)
-- Aspas simples, sem vírgula final, ponto e vírgula obrigatório
-- Ordem obrigatória dos blocos SFC: 1º `<template>`, 2º `<script setup>`, 3º `<style lang="scss" scoped>`
-- Múltiplos aliases de export para o mesmo componente são definidos em `src/index.ts`
-- `src/prime/index.ts` re-exporta componentes crus do PrimeVue que não têm wrapper Max
-- `MaxInputText` (e, pelo mesmo padrão, `MaxInputTextArea`) usa `v-bind="props"` no `InputBase`, não repassa attrs extras para o `<input>`/`<textarea>` interno
+```bash
+npm install               # Instala as dependências
+npm run dev:playground    # Roda o playground para teste manual de componentes
+npm run type-check        # Roda a checagem de tipos com vue-tsc
+npm run lint              # Roda ESLint + Stylelint com correção automática
+npm run build             # vue-tsc + build do vite + copia os temas para dist/
+npm run test              # Roda todos os testes (vitest run)
+npm run test:watch        # Roda os testes em modo watch
+npm run test:coverage     # Roda os testes com relatório de cobertura v8
+```
+
+**Rodar um único arquivo de teste:**
+```bash
+npx vitest run tests/components/MaxButton.test.ts
+```
+
+**Regenerar o manifesto de componentes:**
+```bash
+npx tsx src/scripts/generateResolver.ts
+```
