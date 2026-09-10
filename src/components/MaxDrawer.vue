@@ -208,6 +208,7 @@
     }, { immediate: true });
 
     onBeforeUnmount(() => {
+        trap.deactivate();
         document.removeEventListener('keydown', onEscape);
         if (has_scroll_lock) {
             scroll_lock.unlock();

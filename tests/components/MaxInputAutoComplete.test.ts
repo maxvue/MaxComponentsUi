@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxInputAutoComplete from '../../src/components/MaxInputAutoComplete.vue';
+import InputBase from '../../src/components/InputBase.vue';
 
 function mountAutoComplete(props: Record<string, any> = {}, attrs: Record<string, any> = {}) {
     return mount(MaxInputAutoComplete, {
@@ -146,7 +147,26 @@ describe('MaxInputAutoComplete.vue', () => {
 
     it('caution computed quando isDone é falso mas caution é passado via prop', () => {
         const wrapper = mountAutoComplete({ caution: true, done: false });
-        expect((wrapper.vm as any).caution).toBe(true);
+        const inputBase = wrapper.findComponent(InputBase);
+        expect(inputBase.props('caution')).toBe(true);
+    });
+
+    it('mantém caution=true quando caution é passado via prop sem necessidade de done=false', () => {
+        const wrapper = mountAutoComplete({ caution: true });
+        const inputBase = wrapper.findComponent(InputBase);
+        expect(inputBase.props('caution')).toBe(true);
+    });
+
+    it('mantém caution string quando informada', () => {
+        const wrapper = mountAutoComplete({ caution: 'Atenção ao selecionar' });
+        const inputBase = wrapper.findComponent(InputBase);
+        expect(inputBase.props('caution')).toBe('Atenção ao selecionar');
+    });
+
+    it('respeita caution=false explicitamente passado', () => {
+        const wrapper = mountAutoComplete({ caution: false });
+        const inputBase = wrapper.findComponent(InputBase);
+        expect(inputBase.props('caution')).toBe(false);
     });
 
     it('repassa a prop spellcheck para o elemento input', () => {
