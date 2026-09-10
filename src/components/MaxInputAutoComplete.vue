@@ -170,7 +170,7 @@
         return null;
     };
 
-    const caution = computed(() => (props.caution !== undefined ? props.caution && isDone.value === false : isDone.value === false));
+    const caution = computed(() => (props.caution !== undefined ? props.caution : isDone.value === false));
 
     const emit = defineEmits(['update:modelValue', 'complete', 'blur']);
 

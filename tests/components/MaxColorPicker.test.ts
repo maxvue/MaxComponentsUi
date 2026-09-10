@@ -66,4 +66,36 @@ describe('MaxColorPicker', () => {
         const colorInput = wrapper.find('input[type="color"]');
         expect(colorInput.exists()).toBe(true);
     });
+
+    it('mantém caution=true quando prop caution=true é passada mesmo com required e preenchido', async () => {
+        const wrapper = mountColorPicker({ required: true, modelValue: '#ff0000', caution: true });
+        await wrapper.vm.$nextTick();
+
+        const inputBase = wrapper.findComponent(InputBase);
+        expect(inputBase.props('caution')).toBe(true);
+        expect(inputBase.props('error')).toBeNull();
+    });
+
+    it('mantém caution string quando informada e não polui error com Valor inválido', async () => {
+        const wrapper = mountColorPicker({ required: true, modelValue: '#ff0000', caution: 'Atenção à cor selecionada' });
+        await wrapper.vm.$nextTick();
+
+        const inputBase = wrapper.findComponent(InputBase);
+        expect(inputBase.props('caution')).toBe('Atenção à cor selecionada');
+        expect(inputBase.props('error')).toBeNull();
+    });
+
+    it('mantém caution=true na montagem inicial antes de interação', () => {
+        const wrapper = mountColorPicker({ caution: true });
+        const inputBase = wrapper.findComponent(InputBase);
+
+        expect(inputBase.props('caution')).toBe(true);
+    });
+
+    it('respeita caution=false explicitamente passado', () => {
+        const wrapper = mountColorPicker({ caution: false });
+        const inputBase = wrapper.findComponent(InputBase);
+
+        expect(inputBase.props('caution')).toBe(false);
+    });
 });

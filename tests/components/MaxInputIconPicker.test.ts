@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxInputIconPicker from '../../src/components/MaxInputIconPicker.vue';
+import InputBase from '../../src/components/InputBase.vue';
 
 describe('MaxInputIconPicker', () => {
     beforeEach(() => {
@@ -42,5 +43,39 @@ describe('MaxInputIconPicker', () => {
         expect(svgCache['mdi:evil']).toBeDefined();
         expect(svgCache['mdi:evil']).not.toContain('<script');
         expect(svgCache['mdi:evil']).not.toMatch(/\son\w+\s*=/i);
+    });
+
+    it('mantém caution=true quando prop caution=true é passada mesmo com required e preenchido', () => {
+        const wrapper = mount(MaxInputIconPicker, {
+            props: { modelValue: 'mdi:home', required: true, caution: true }
+        });
+        const inputBase = wrapper.findComponent(InputBase);
+        expect(inputBase.props('caution')).toBe(true);
+        expect(inputBase.props('error')).toBeNull();
+    });
+
+    it('mantém caution string quando informada e não polui error com Valor inválido', () => {
+        const wrapper = mount(MaxInputIconPicker, {
+            props: { modelValue: 'mdi:home', caution: 'Atenção ao ícone' }
+        });
+        const inputBase = wrapper.findComponent(InputBase);
+        expect(inputBase.props('caution')).toBe('Atenção ao ícone');
+        expect(inputBase.props('error')).toBeNull();
+    });
+
+    it('mantém caution=true na montagem inicial antes de interação', () => {
+        const wrapper = mount(MaxInputIconPicker, {
+            props: { modelValue: '', caution: true }
+        });
+        const inputBase = wrapper.findComponent(InputBase);
+        expect(inputBase.props('caution')).toBe(true);
+    });
+
+    it('respeita caution=false explicitamente passado', () => {
+        const wrapper = mount(MaxInputIconPicker, {
+            props: { modelValue: '', caution: false }
+        });
+        const inputBase = wrapper.findComponent(InputBase);
+        expect(inputBase.props('caution')).toBe(false);
     });
 });

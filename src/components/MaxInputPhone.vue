@@ -1,5 +1,5 @@
 <template>
-    <InputBase class="max-input-phone input-phone" v-bind="props" :value="temp_value" :done="done" :error="error" :caution="caution" :label="props.noLabel ? undefined : props.label ?? ('Telefone' + String(props.noLabel)) " :icon-right="props.noIcon ? undefined : 'ic:baseline-whatsapp'" >
+    <InputBase class="max-input-phone input-phone" v-bind="props" :value="temp_value" :done="done" :error="error" :caution="caution" :label="props.noLabel ? undefined : (props.label ?? 'Telefone')" :icon-right="props.noIcon ? undefined : 'ic:baseline-whatsapp'">
         <div class="inputs-div">
             <div
                 ref="select_el"

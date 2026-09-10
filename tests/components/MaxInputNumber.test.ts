@@ -113,4 +113,34 @@ describe('MaxInputNumber', () => {
             expect(ib.props('error')).toBe('Valor inválido');
         }
     });
+
+    it('mantém caution=true quando prop caution=true é passada mesmo com required e valor preenchido (isDone=true)', async () => {
+        const wrapper = mountInputNumber({ required: true, modelValue: 42, caution: true });
+        const inputs = wrapper.findAll('input');
+        if (inputs.length > 0) {
+            await inputs[0].trigger('blur');
+            const ib = wrapper.findComponent(InputBase);
+            expect(ib.props('caution')).toBe(true);
+            expect(ib.props('error')).toBeNull();
+        }
+    });
+
+    it('mantém caution string quando informada e não polui error com Valor inválido', () => {
+        const wrapper = mountInputNumber({ modelValue: 10, caution: 'Atenção ao número' });
+        const ib = wrapper.findComponent(InputBase);
+        expect(ib.props('caution')).toBe('Atenção ao número');
+        expect(ib.props('error')).toBeNull();
+    });
+
+    it('mantém caution=true na montagem inicial antes de qualquer interação do usuário (isDone=null)', () => {
+        const wrapper = mountInputNumber({ caution: true });
+        const ib = wrapper.findComponent(InputBase);
+        expect(ib.props('caution')).toBe(true);
+    });
+
+    it('respeita caution=false explicitamente passado', () => {
+        const wrapper = mountInputNumber({ caution: false });
+        const ib = wrapper.findComponent(InputBase);
+        expect(ib.props('caution')).toBe(false);
+    });
 });
