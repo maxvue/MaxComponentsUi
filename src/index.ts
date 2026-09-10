@@ -187,6 +187,8 @@ export { default as MaxPdfView } from './components/MaxPdfView.vue';
 export { default as MaxTable } from './components/MaxTable.vue';
 export { default as MaxTableFields } from './components/MaxTableFields.vue';
 export { default as MaxTableColumn } from './components/MaxTableColumn.vue';
+export { default as Column } from './components/MaxTableColumn.vue';
+export { default as MaxColumn } from './components/MaxTableColumn.vue';
 
 // Utils / Others
 export { default as MaxMsgLabels } from './components/MaxMsgLabels.vue';
