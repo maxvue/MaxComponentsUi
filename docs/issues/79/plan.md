@@ -16,16 +16,16 @@ Em todos esses componentes, o cálculo reativo da propriedade `caution` utiliza 
 const caution = computed(() => (props.caution !== undefined ? props.caution && isDone.value === false : isDone.value === false));
 ```
 
-Essa expressão condiciona a validade de uma `caution` explicitamente passada pelo componente pai a uma conjunção lógica (`&&`) com `isDone.value === false`. Isso gera agravantes funcionais severos:
+Essa expressão condiciona a validade de uma `caution` explicitamente passada pelo componente consumidor a uma conjunção lógica (`&&`) com `isDone.value === false`. Isso gera graves anomalias funcionais:
 
 1. **Supressão do Alerta em Campos Válidos/Preenchidos:**
-   Quando o componente pai renderiza o campo com preenchimento válido ou satisfazendo `required: true` (ex.: `<MaxInputText v-model="val" required :caution="true" />` com `val = 'Teste'`), a verificação de obrigatoriedade `isRequiredDone` torna-se `true`. No evento `blur` ou na reavaliação de `isDone`, `isDone.value` torna-se `true`. A expressão computada avalia `props.caution && (isDone.value === false)`, o que resulta em `true && false => false`. O alerta visual de atenção requisitado pelo pai é completamente suprimido e ignorado.
+   Quando o componente pai renderiza o campo com preenchimento válido ou satisfazendo `required: true` (por exemplo: `<MaxInputText v-model="val" required :caution="true" />` com `val = 'Teste'`), a verificação interna de obrigatoriedade `isRequiredDone` torna-se `true`. No evento `blur` ou na reavaliação de `isDone`, `isDone.value` torna-se `true`. A expressão computada avalia `props.caution && (isDone.value === false)`, o que resulta em `true && false => false`. O alerta visual de atenção requisitado pelo pai é completamente suprimido e ignorado.
 
 2. **Supressão do Alerta no Estado Inicial (Pré-Interação):**
    Antes de o usuário interagir com o campo e disparar o primeiro `blur`, `isDone.value` é inicializado como `props.done ?? null` (ou seja, `null`). A comparação estrita `isDone.value === false` resulta em `false`. Consequentemente, `props.caution && (null === false)` resulta em `false`, anulando o estado visual de alerta inicial em qualquer campo montado com `:caution="true"` ou `:caution="'Texto de alerta'"`.
 
 3. **Supressão de Mensagens Descritivas de Atenção (`caution` como String):**
-   `InputBase.vue:174` possui a regra `if (typeof props.caution === 'string' && hasContent(props.caution)) return props.caution;`. Quando um consumidor passa `:caution="'Atenção à quantidade informada'"`, o componente filho passa `:caution="caution"` para `InputBase`. Como `caution` é avaliado para o booleano `false`, `InputBase` recebe `caution = false`, perdendo a string da mensagem de aviso.
+   `InputBase.vue:174` possui a regra `if (typeof props.caution === 'string' && hasContent(props.caution)) return props.caution;`. Quando um consumidor passa `:caution="'Atenção à quantidade informada'"`, o componente filho passa `:caution="caution"` para `InputBase`. Como `caution` é avaliado para a conjunção booleana `false`, `InputBase` recebe `caution = false`, perdendo a string da mensagem de aviso.
 
 4. **Acoplamento Colateral Crítico com `error_msg`:**
    Nos 5 componentes que calculam `error_msg` (`MaxInputText`, `MaxChips`, `MaxColorPicker`, `MaxInputIconPicker` e `MaxInputNumber`), a mensagem de erro é implementada como:
@@ -33,15 +33,15 @@ Essa expressão condiciona a validade de uma `caution` explicitamente passada pe
    const error_msg = computed(() => {
        if (!caution.value) return null;
        const attrs_error_message = attrs.errMsg ?? attrs.error_message ?? attrs.error_msg ?? null;
-       if (isEqual.value === false) return attrs_error_message ?? 'Valor esperado: ' + ...;
+       if (isEqual.value === false) return attrs_error_message ?? 'Valor esperado: ' + (attrs.target_value ?? attrs.targetValue ?? attrs['target-value']);
        if (isRequiredDone.value === false) return attrs_error_message ?? 'Campo obrigatório';
        return attrs_error_message ?? 'Valor inválido';
    });
    ```
-   Historicamente, o desenvolvedor utilizou `if (!caution.value) return null;` como um atalho porque `caution` só era `true` quando `isDone.value === false`. Porém, ao corrigir `caution` para retornar `props.caution` diretamente, se `error_msg` não for desacoplado e passar a checar `isDone.value !== false`, um campo válido com `:caution="true"` fará `caution.value` ser `true`, fazendo `error_msg` cair no fallback final `return attrs_error_message ?? 'Valor inválido'`. Esse erro seria repassado para `InputBase`, transformando um alerta de atenção (laranja) em um estado de erro (vermelho) com a mensagem incorreta `"Valor inválido"`.
+   Historicamente, o código utilizou `if (!caution.value) return null;` como um atalho porque `caution` só era `true` quando `isDone.value === false`. Porém, ao corrigir `caution` para retornar `props.caution` diretamente, se `error_msg` não for desacoplado e continuar checando `caution.value`, um campo válido com `:caution="true"` fará `caution.value` ser `true`. Isso faz `error_msg` não retornar `null` e cair no fallback final `return attrs_error_message ?? 'Valor inválido'`. Esse erro é repassado para `InputBase`, transformando um alerta de atenção (laranja) em um estado de erro (vermelho) com a mensagem incorreta `"Valor inválido"`.
 
 5. **Precedente Sanado no Ecossistema:**
-   No composable `src/helpers/useInputValidation.ts:38-44`, esse exato bug foi catalogado e resolvido (Achado 22), onde se formalizou que o override de `caution` vindo do pai deve ser repassado direto, sem qualquer operador `&&` com estado de validação interno (`done.value === false`). No entanto, os 6 componentes acima permaneceram com o código legado divergente.
+   No composable `src/helpers/useInputValidation.ts:38-44`, esse exato bug foi catalogado e resolvido (Achado 22), onde se formalizou que o override de `caution` vindo do pai deve ser repassado direto, sem qualquer operador `&&` com estado de validação interno (`done.value === false`). No entanto, os 6 componentes SFC continuaram com a implementação legada defeituosa.
 
 ---
 
@@ -50,165 +50,148 @@ Essa expressão condiciona a validade de uma `caution` explicitamente passada pe
 #### 1. Identificação dos Arquivos e Linhas Exatos
 
 1. `src/components/MaxInputText.vue:93-101`
-   ```typescript
-   // Linha 93: Expressão defeituosa de caution
-   const caution = computed(() => (props.caution !== undefined ? props.caution && isDone.value === false : isDone.value === false));
-
-   // Linhas 95-101: Acoplamento indevido de error_msg com caution.value
-   const error_msg = computed(() => {
-       if (!caution.value) return null;
-       const attrs_error_message = attrs.errMsg ?? attrs.error_message ?? attrs.error_msg ?? null;
-       if (isEqual.value === false) return attrs_error_message ?? 'Valor esperado: ' + (attrs.target_value ?? attrs.targetValue ?? attrs['target-value']);
-       if (isRequiredDone.value === false) return attrs_error_message ?? 'Campo obrigatório';
-       return attrs_error_message ?? 'Valor inválido';
-   });
-   ```
+   - Linha 93:
+     ```typescript
+     const caution = computed(() => (props.caution !== undefined ? props.caution && isDone.value === false : isDone.value === false));
+     ```
+   - Linhas 95-101:
+     ```typescript
+     const error_msg = computed(() => {
+         if (!caution.value) return null;
+         const attrs_error_message = attrs.errMsg ?? attrs.error_message ?? attrs.error_msg ?? null;
+         if (isEqual.value === false) return attrs_error_message ?? 'Valor esperado: ' + (attrs.target_value ?? attrs.targetValue ?? attrs['target-value']);
+         if (isRequiredDone.value === false) return attrs_error_message ?? 'Campo obrigatório';
+         return attrs_error_message ?? 'Valor inválido';
+     });
+     ```
 
 2. `src/components/MaxChips.vue:173-182`
-   ```typescript
-   // Linhas 173-175: Expressão defeituosa de caution
-   const caution = computed(() => {
-       return props.caution !== undefined ? props.caution && isDone.value === false : isDone.value === false;
-   });
+   - Linhas 173-175:
+     ```typescript
+     const caution = computed(() => {
+         return props.caution !== undefined ? props.caution && isDone.value === false : isDone.value === false;
+     });
+     ```
+   - Linhas 177-182:
+     ```typescript
+     const error_msg = computed(() => {
+         if (!caution.value) return null;
+         const attrs_error_message = attrs.errMsg ?? attrs.error_message ?? attrs.error_msg ?? null;
+         if (isRequiredDone.value === false) return attrs_error_message ?? 'Campo obrigatório';
+         return attrs_error_message ?? 'Valor inválido';
+     });
+     ```
 
-   // Linhas 177-182: Acoplamento indevido de error_msg com caution.value
-   const error_msg = computed(() => {
-       if (!caution.value) return null;
-       const attrs_error_message = attrs.errMsg ?? attrs.error_message ?? attrs.error_msg ?? null;
-       if (isRequiredDone.value === false) return attrs_error_message ?? 'Campo obrigatório';
-       return attrs_error_message ?? 'Valor inválido';
-   });
-   ```
-
-3. `src/components/MaxColorPicker.vue:134-142`
-   ```typescript
-   // Linha 134: Expressão defeituosa de caution
-   const caution = computed(() => (props.caution !== undefined ? props.caution && isDone.value === false : isDone.value === false));
-
-   // Linhas 136-142: Acoplamento indevido de error_msg com caution.value
-   const error_msg = computed(() => {
-       if (!caution.value) return null;
-       const attrs_error_message = attrs.errMsg ?? attrs.error_message ?? attrs.error_msg ?? null;
-       if (isEqual.value === false) return attrs_error_message ?? 'Valor esperado: ' + (attrs.target_value ?? attrs.targetValue ?? attrs['target-value']);
-       if (isRequiredDone.value === false) return attrs_error_message ?? 'Campo obrigatório';
-       return attrs_error_message ?? 'Valor inválido';
-   });
-   ```
+3. `src/components/MaxColorPicker.vue:134-143`
+   - Linha 134:
+     ```typescript
+     const caution = computed(() => (props.caution !== undefined ? props.caution && isDone.value === false : isDone.value === false));
+     ```
+   - Linhas 136-143:
+     ```typescript
+     const error_msg = computed(() => {
+         if (!caution.value) return null;
+         const attrs_error_message = attrs.errMsg ?? attrs.error_message ?? attrs.error_msg ?? null;
+         if (isRequiredDone.value === false) return attrs_error_message ?? 'Campo obrigatório';
+         return attrs_error_message ?? 'Valor inválido';
+     });
+     ```
 
 4. `src/components/MaxInputAutoComplete.vue:173`
-   ```typescript
-   // Linha 173: Expressão defeituosa de caution (não possui error_msg; delega props.error)
-   const caution = computed(() => (props.caution !== undefined ? props.caution && isDone.value === false : isDone.value === false));
-   ```
+   - Linha 173:
+     ```typescript
+     const caution = computed(() => (props.caution !== undefined ? props.caution && isDone.value === false : isDone.value === false));
+     ```
 
-5. `src/components/MaxInputIconPicker.vue:174-185`
-   ```typescript
-   // Linhas 174-178: Expressão defeituosa de caution
-   const caution = computed(() => (
-       props.caution !== undefined
-           ? props.caution && isDone.value === false
-           : isDone.value === false
-   ));
-
-   // Linhas 180-185: Acoplamento indevido de error_msg com caution.value
-   const error_msg = computed(() => {
-       if (!caution.value) return null;
-       const attrs_error_message = attrs.errMsg ?? attrs.error_message ?? attrs.error_msg ?? null;
-       if (isRequiredDone.value === false) return attrs_error_message ?? 'Campo obrigatório';
-       return attrs_error_message ?? 'Valor inválido';
-   });
-   ```
+5. `src/components/MaxInputIconPicker.vue:174-186`
+   - Linhas 174-178:
+     ```typescript
+     const caution = computed(() => (
+         props.caution !== undefined
+             ? props.caution && isDone.value === false
+             : isDone.value === false
+     ));
+     ```
+   - Linhas 180-186:
+     ```typescript
+     const error_msg = computed(() => {
+         if (!caution.value) return null;
+         const attrs_error_message = attrs.errMsg ?? attrs.error_message ?? attrs.error_msg ?? null;
+         if (isRequiredDone.value === false) return attrs_error_message ?? 'Campo obrigatório';
+         return attrs_error_message ?? 'Valor inválido';
+     });
+     ```
 
 6. `src/components/MaxInputNumber.vue:119-127`
-   ```typescript
-   // Linha 119: Expressão defeituosa de caution
-   const caution = computed(() => (props.caution !== undefined ? props.caution && isDone.value === false : isDone.value === false));
-
-   // Linhas 121-127: Acoplamento indevido de error_msg com caution.value
-   const error_msg = computed(() => {
-       if (!caution.value) return null;
-       const attrs_error_message = attrs.errMsg ?? attrs.error_message ?? attrs.error_msg ?? null;
-       if (isEqual.value === false) return attrs_error_message ?? 'Valor esperado: ' + (attrs.target_value ?? attrs.targetValue ?? attrs['target-value']);
-       if (isRequiredDone.value === false) return attrs_error_message ?? 'Campo obrigatório';
-       return attrs_error_message ?? 'Valor inválido';
-   });
-   ```
-
----
+   - Linha 119:
+     ```typescript
+     const caution = computed(() => (props.caution !== undefined ? props.caution && isDone.value === false : isDone.value === false));
+     ```
+   - Linhas 121-127:
+     ```typescript
+     const error_msg = computed(() => {
+         if (!caution.value) return null;
+         const attrs_error_message = attrs.errMsg ?? attrs.error_message ?? attrs.error_msg ?? null;
+         if (isEqual.value === false) return attrs_error_message ?? 'Valor esperado: ' + (attrs.target_value ?? attrs.targetValue ?? attrs['target-value']);
+         if (isRequiredDone.value === false) return attrs_error_message ?? 'Campo obrigatório';
+         return attrs_error_message ?? 'Valor inválido';
+     });
+     ```
 
 #### 2. Fluxo Causal e Rastreamento Reverso de Dados
-
-```
-Consumidor / View (Pai)
-  │
-  ├─> Declara: <MaxInputText v-model="form.valor" required :caution="true" />
-  │   (ou :caution="'Atenção especial ao prazo'")
-  │
-  ▼
-Componente Filho (ex.: MaxInputText.vue)
-  │
-  ├─> Props: { caution: true, required: true, modelValue: 'Texto' }
-  ├─> Estado interno inicial: isDone.value = null
-  │
-  ├─> Usuário digita ou campo monta:
-  │     isRequiredDone.value = true
-  │     testIsDone() avalia isRequiredDone => retorna true
-  │     isDone.value = true
-  │
-  ├─> [PONTO DE FALHA 1] Cálculo da computed `caution`:
-  │     props.caution !== undefined ? props.caution && isDone.value === false : isDone.value === false
-  │     ==> true && (true === false)
-  │     ==> true && false
-  │     ==> false  <-- Caution SUPRIMIDA!
-  │
-  ├─> [PONTO DE FALHA 2] Efeito colateral em InputBase:
-  │     Template do filho: <InputBase v-bind="props" :caution="caution" ...>
-  │     O atributo `:caution="caution"` sobrescreve o `props.caution` do v-bind="props".
-  │     InputBase recebe :caution="false".
-  │
-  ▼
-Subcomponente InputBase.vue
-  │
-  ├─> InputBase.vue:2
-  │     class="... ${!noStatus && caution ? 'caution' : ''} ..."
-  │     Como caution = false, a classe CSS .caution NÃO é aplicada.
-  │
-  ├─> InputBase.vue:37
-  │     <div class="is-caution" v-else-if="caution && !noCaution && !noStatus">
-  │     Como caution = false, o ícone de exclamação laranja NÃO é renderizado.
-  │
-  └─> InputBase.vue:174
-        if (typeof props.caution === 'string' && hasContent(props.caution)) return props.caution;
-        Como props.caution recebido é false, a mensagem de texto descritiva NUNCA é exibida.
-```
+- **UI Consumidora:**
+  O desenvolvedor consumidor renderiza `<MaxInputText v-model="form.nome" required :caution="true" />` ou com mensagem `:caution="'Verifique a formatação do campo'"`.
+- **Camada de Props e Reatividade do Componente (UI ⇄ Componente Filho):**
+  1. A propriedade `props.caution` é recebida com valor `true` ou `'Verifique...'`.
+  2. O usuário preenche o campo ou o modelValue já inicia preenchido.
+  3. A computada de obrigatoriedade `isRequiredDone` avalia `hasContent(temp_value.value)`, resultando em `true`.
+  4. O gatilho de validação executa `testIsDone()`, que encontra `isRequiredDone.value === true` e atribui `isDone.value = true`.
+  5. A computada defeituosa `caution` é recalculada:
+     - `props.caution !== undefined ? props.caution && isDone.value === false : isDone.value === false`
+     - Como `isDone.value === true`, a subexpressão `isDone.value === false` resulta em `false`.
+     - A conjunção `props.caution && false` resulta em `false`.
+  6. O componente repassa esse valor falso via prop para o wrapper base: `<InputBase ... :caution="caution" :error="props.error ?? error_msg" />`.
+- **Camada de Renderização Base (`InputBase.vue:2, 37-39, 174`):**
+  1. `InputBase` recebe `:caution="false"`.
+  2. Na linha 2, a classe CSS `caution` (`!noStatus && caution ? 'caution' : ''`) é omitida.
+  3. Nas linhas 37-39, o ícone de aviso `<div class="is-caution">` (`humbleicons:exclamation` laranja) não é renderizado.
+  4. Na linha 174, `displayMessage` procura por `typeof props.caution === 'string'`, mas recebe o booleano `false`, descartando a mensagem textual configurada pelo pai.
+- **Acoplamento Inverso em `error_msg`:**
+  Se a fórmula de `caution` for corrigida isoladamente sem desacoplar `error_msg`, ao receber `caution = true`, o teste `if (!caution.value) return null;` deixa de retornar `null` precocemente. Como `isEqual` e `isRequiredDone` não são falsos (o valor é válido), a função atinge o fallback `return attrs_error_message ?? 'Valor inválido'`. Esse erro é repassado a `InputBase`, convertendo o campo para classe `.error` (vermelho) indevidamente.
+- **Camada de Backend / Store:**
+  Trata-se de comportamento estritamente no ecossistema de componentes visuais frontend Vue 3 (`UI ⇄ InputBase`), sem dependência de APIs ou Stores Pinia para a exibição dos estados reativos de formulário.
 
 ---
 
-## Arquivos Afetados
+### Arquivos Afetados
 
-| Arquivo | Tipo de Alteração | Descrição da Modificação |
-|---|---|---|
-| `src/components/MaxInputText.vue` | Código-Fonte | Corrigir `caution` para retornar `props.caution` diretamente quando definido; desacoplar `error_msg` para verificar `isDone.value !== false`. |
-| `src/components/MaxChips.vue` | Código-Fonte | Corrigir `caution` para retornar `props.caution` diretamente quando definido; desacoplar `error_msg` para verificar `isDone.value !== false`. |
-| `src/components/MaxColorPicker.vue` | Código-Fonte | Corrigir `caution` para retornar `props.caution` diretamente quando definido; desacoplar `error_msg` para verificar `isDone.value !== false`. |
-| `src/components/MaxInputAutoComplete.vue` | Código-Fonte | Corrigir `caution` para retornar `props.caution` diretamente quando definido (`props.caution !== undefined ? props.caution : isDone.value === false`). |
-| `src/components/MaxInputIconPicker.vue` | Código-Fonte | Corrigir `caution` para retornar `props.caution` diretamente quando definido; desacoplar `error_msg` para verificar `isDone.value !== false`. |
-| `src/components/MaxInputNumber.vue` | Código-Fonte | Corrigir `caution` para retornar `props.caution` diretamente quando definido; desacoplar `error_msg` para verificar `isDone.value !== false`. |
-| `tests/components/MaxInputText.test.ts` | Teste Vitest | Adicionar testes unitários validando `:caution="true"`, `:caution="'Mensagem'"` e `:caution="false"` com campo preenchido e vazio. |
-| `tests/components/MaxChips.test.ts` | Teste Vitest | Adicionar testes unitários validando `caution` explícito com e sem itens preenchidos. |
-| `tests/components/MaxColorPicker.test.ts` | Teste Vitest | Adicionar testes unitários validando `caution` explícito booleano e string. |
-| `tests/components/MaxInputAutoComplete.test.ts` | Teste Vitest | Adicionar teste unitário comprovando que `caution` é mantido sem necessidade de forçar `done: false`. |
-| `tests/components/MaxInputIconPicker.test.ts` | Teste Vitest | Adicionar testes unitários para a propriedade `caution` no picker de ícones. |
-| `tests/components/MaxInputNumber.test.ts` | Teste Vitest | Adicionar testes unitários validando `caution` explícito independente do valor numérico. |
+#### Código-Fonte (SFC Vue 3):
+1. `src/components/MaxInputText.vue`
+2. `src/components/MaxChips.vue`
+3. `src/components/MaxColorPicker.vue`
+4. `src/components/MaxInputAutoComplete.vue`
+5. `src/components/MaxInputIconPicker.vue`
+6. `src/components/MaxInputNumber.vue`
+
+#### Testes Unitários (Vitest / Vue Test Utils):
+1. `tests/components/MaxInputText.test.ts`
+2. `tests/components/MaxChips.test.ts`
+3. `tests/components/MaxColorPicker.test.ts`
+4. `tests/components/MaxInputAutoComplete.test.ts`
+5. `tests/components/MaxInputIconPicker.test.ts`
+6. `tests/components/MaxInputNumber.test.ts`
 
 ---
 
-## Execuções Propostas
+### Execuções Propostas
 
-A correção é cirúrgica e preserva integralmente a compatibilidade retroativa de todos os contratos existentes de props e eventos.
+A correção cirúrgica consiste em alinhar os 6 componentes ao padrão já estabelecido em `useInputValidation.ts`:
+- O cálculo de `caution` deve retornar `props.caution` diretamente quando ele for fornecido (`props.caution !== undefined ? props.caution : isDone.value === false`).
+- O cálculo de `error_msg` deve ser desacoplado de `caution.value`, guardando a condição de erro real: se o campo não estiver em falha explícita de validação (`if (isDone.value !== false) return null;`), nenhuma mensagem de erro deve ser gerada.
+- Nos testes unitários, toda inspeção de contrato deve ser feita de forma estrita via componentes filhos (`wrapper.findComponent(InputBase).props('caution')`), sem uso de `(wrapper.vm as any)`.
 
-### 1. Refatoração de `src/components/MaxInputText.vue`
-- Substituir a computed `caution` (linha 93):
+#### 1. Refatoração de `src/components/MaxInputText.vue`
+- Atualizar a computed `caution` (linha 93):
   ```typescript
   // ANTES:
   const caution = computed(() => (props.caution !== undefined ? props.caution && isDone.value === false : isDone.value === false));
@@ -237,10 +220,8 @@ A correção é cirúrgica e preserva integralmente a compatibilidade retroativa
   });
   ```
 
----
-
-### 2. Refatoração de `src/components/MaxChips.vue`
-- Substituir a computed `caution` (linhas 173-175):
+#### 2. Refatoração de `src/components/MaxChips.vue`
+- Atualizar a computed `caution` (linhas 173-175):
   ```typescript
   // ANTES:
   const caution = computed(() => {
@@ -271,10 +252,8 @@ A correção é cirúrgica e preserva integralmente a compatibilidade retroativa
   });
   ```
 
----
-
-### 3. Refatoração de `src/components/MaxColorPicker.vue`
-- Substituir a computed `caution` (linha 134):
+#### 3. Refatoração de `src/components/MaxColorPicker.vue`
+- Atualizar a computed `caution` (linha 134):
   ```typescript
   // ANTES:
   const caution = computed(() => (props.caution !== undefined ? props.caution && isDone.value === false : isDone.value === false));
@@ -282,13 +261,12 @@ A correção é cirúrgica e preserva integralmente a compatibilidade retroativa
   // DEPOIS:
   const caution = computed(() => (props.caution !== undefined ? props.caution : isDone.value === false));
   ```
-- Desacoplar a computed `error_msg` (linhas 136-142):
+- Desacoplar a computed `error_msg` (linhas 136-143):
   ```typescript
   // ANTES:
   const error_msg = computed(() => {
       if (!caution.value) return null;
       const attrs_error_message = attrs.errMsg ?? attrs.error_message ?? attrs.error_msg ?? null;
-      if (isEqual.value === false) return attrs_error_message ?? 'Valor esperado: ' + (attrs.target_value ?? attrs.targetValue ?? attrs['target-value']);
       if (isRequiredDone.value === false) return attrs_error_message ?? 'Campo obrigatório';
       return attrs_error_message ?? 'Valor inválido';
   });
@@ -297,16 +275,13 @@ A correção é cirúrgica e preserva integralmente a compatibilidade retroativa
   const error_msg = computed(() => {
       if (isDone.value !== false) return null;
       const attrs_error_message = attrs.errMsg ?? attrs.error_message ?? attrs.error_msg ?? null;
-      if (isEqual.value === false) return attrs_error_message ?? 'Valor esperado: ' + (attrs.target_value ?? attrs.targetValue ?? attrs['target-value']);
       if (isRequiredDone.value === false) return attrs_error_message ?? 'Campo obrigatório';
       return attrs_error_message ?? 'Valor inválido';
   });
   ```
 
----
-
-### 4. Refatoração de `src/components/MaxInputAutoComplete.vue`
-- Substituir a computed `caution` (linha 173):
+#### 4. Refatoração de `src/components/MaxInputAutoComplete.vue`
+- Atualizar a computed `caution` (linha 173):
   ```typescript
   // ANTES:
   const caution = computed(() => (props.caution !== undefined ? props.caution && isDone.value === false : isDone.value === false));
@@ -314,12 +289,10 @@ A correção é cirúrgica e preserva integralmente a compatibilidade retroativa
   // DEPOIS:
   const caution = computed(() => (props.caution !== undefined ? props.caution : isDone.value === false));
   ```
-  *(Nota: `MaxInputAutoComplete.vue` não possui `error_msg` interno; ele passa `:error="props.error"` diretamente).*
+  *(Nota: `MaxInputAutoComplete.vue` repassa `:error="props.error"` diretamente para `InputBase`, não contendo computada interna de `error_msg`).*
 
----
-
-### 5. Refatoração de `src/components/MaxInputIconPicker.vue`
-- Substituir a computed `caution` (linhas 174-178):
+#### 5. Refatoração de `src/components/MaxInputIconPicker.vue`
+- Atualizar a computed `caution` (linhas 174-178):
   ```typescript
   // ANTES:
   const caution = computed(() => (
@@ -335,7 +308,7 @@ A correção é cirúrgica e preserva integralmente a compatibilidade retroativa
           : isDone.value === false
   ));
   ```
-- Desacoplar a computed `error_msg` (linhas 180-185):
+- Desacoplar a computed `error_msg` (linhas 180-186):
   ```typescript
   // ANTES:
   const error_msg = computed(() => {
@@ -354,10 +327,8 @@ A correção é cirúrgica e preserva integralmente a compatibilidade retroativa
   });
   ```
 
----
-
-### 6. Refatoração de `src/components/MaxInputNumber.vue`
-- Substituir a computed `caution` (linha 119):
+#### 6. Refatoração de `src/components/MaxInputNumber.vue`
+- Atualizar a computed `caution` (linha 119):
   ```typescript
   // ANTES:
   const caution = computed(() => (props.caution !== undefined ? props.caution && isDone.value === false : isDone.value === false));
@@ -388,22 +359,49 @@ A correção é cirúrgica e preserva integralmente a compatibilidade retroativa
 
 ---
 
-## Especificação de Teste TDD (Red-Green)
+### Especificação de Teste TDD (Red-Green)
 
-### 1. Etapa Red (Reprodução Comprovada da Falha)
+#### 1. Etapa Red (Reprodução Comprovada da Falha)
 
-Adicionar testes em `tests/components/MaxInputText.test.ts` e nas respectivas suítes dos outros 5 componentes:
+Adicionar testes em cada um dos 6 arquivos de teste, cobrindo os 4 cenários críticos do contrato com `InputBase`:
+1. `caution=true` mantido mesmo com campo preenchido e `required: true` (`isDone=true`).
+2. `caution="string"` repassado intacto para `InputBase` sem poluir `error` com `"Valor inválido"`.
+3. `caution=true` mantido na montagem inicial antes de interação do usuário (`isDone=null`).
+4. `caution=false` explicitamente passado respeitado.
 
+**Padrão estrito de tipagem:** Os testes devem inspecionar as props passadas ao `InputBase` através de `wrapper.findComponent(InputBase).props('caution')`, eliminando completamente qualquer casting `(wrapper.vm as any)`.
+
+Exemplo de testes em `tests/components/MaxInputAutoComplete.test.ts`:
 ```typescript
-// Exemplo em tests/components/MaxInputText.test.ts
+it('mantém caution=true quando caution é passado via prop sem necessidade de done=false', () => {
+    const wrapper = mountAutoComplete({ caution: true });
+    const inputBase = wrapper.findComponent(InputBase);
+    expect(inputBase.props('caution')).toBe(true);
+});
+
+it('mantém caution string quando informada', () => {
+    const wrapper = mountAutoComplete({ caution: 'Atenção ao selecionar' });
+    const inputBase = wrapper.findComponent(InputBase);
+    expect(inputBase.props('caution')).toBe('Atenção ao selecionar');
+});
+
+it('respeita caution=false explicitamente passado', () => {
+    const wrapper = mountAutoComplete({ caution: false });
+    const inputBase = wrapper.findComponent(InputBase);
+    expect(inputBase.props('caution')).toBe(false);
+});
+```
+
+Exemplo de testes em `tests/components/MaxInputText.test.ts`:
+```typescript
 it('mantém caution=true quando prop caution=true é passada mesmo com required e valor preenchido (isDone=true)', async () => {
     const wrapper = mountInputText({ required: true, modelValue: 'Teste', caution: true });
     const input = wrapper.find('input');
     await input.trigger('blur');
 
     const inputBase = wrapper.findComponent(InputBase);
-    // NA VERSÃO ATUAL (RED):
-    // inputBase.props('caution') retorna FALSE porque props.caution && (isDone.value === false) => true && false => false
+    // Na versão com bug (Red):
+    // inputBase.props('caution') é false porque props.caution && (isDone.value === false) => true && false => false
     expect(inputBase.props('caution')).toBe(true);
     expect(inputBase.props('error')).toBeNull();
 });
@@ -412,8 +410,8 @@ it('mantém caution string quando informada e não polui error com Valor inváli
     const wrapper = mountInputText({ modelValue: 'Preenchido', caution: 'Atenção ao limite' });
     const inputBase = wrapper.findComponent(InputBase);
 
-    // NA VERSÃO ATUAL (RED):
-    // inputBase.props('caution') retorna FALSE
+    // Na versão com bug (Red):
+    // inputBase.props('caution') é false
     expect(inputBase.props('caution')).toBe('Atenção ao limite');
     expect(inputBase.props('error')).toBeNull();
 });
@@ -422,73 +420,77 @@ it('mantém caution=true na montagem inicial antes de qualquer interação do us
     const wrapper = mountInputText({ caution: true });
     const inputBase = wrapper.findComponent(InputBase);
 
-    // NA VERSÃO ATUAL (RED):
+    // Na versão com bug (Red):
     // isDone inicial é null => null === false é false => caution é false
     expect(inputBase.props('caution')).toBe(true);
 });
+
+it('respeita caution=false explicitamente passado', () => {
+    const wrapper = mountInputText({ caution: false });
+    const inputBase = wrapper.findComponent(InputBase);
+
+    expect(inputBase.props('caution')).toBe(false);
+});
 ```
 
-- **Comportamento Red Comprovado:**
-  - `AssertionError: expected false to be true` (no `expect(inputBase.props('caution')).toBe(true)`).
-  - Em campos com texto e `caution: 'Atenção'`, `inputBase.props('caution')` recebe `false` em vez da string.
+- **Resultado Red:** Nos 6 componentes com o código original, `inputBase.props('caution')` retorna `false` ao invés de `true` ou da string da mensagem de atenção, falhando com `AssertionError: expected false to be true`.
 
 ---
 
-### 2. Etapa Green (Validação Pós-Correção)
+#### 2. Etapa Green (Validação Pós-Correção)
 
-Após a aplicação cirúrgica das modificações propostas:
+Após a aplicação das alterações cirúrgicas nos 6 componentes:
 - `inputBase.props('caution')` recebe `true` quando `:caution="true"`, mesmo com `isDone = true` ou `isDone = null`.
-- `inputBase.props('caution')` recebe a string de aviso quando `:caution="'Mensagem'"`.
-- `inputBase.props('error')` permanece `null` (nenhum falso erro `"Valor inválido"` é gerado).
+- `inputBase.props('caution')` recebe a string descritiva quando `:caution="'Atenção...'"` é fornecido.
+- `inputBase.props('error')` permanece `null` (nenhum falso erro `"Valor inválido"` é gerado em campos válidos em atenção).
 - Os testes existentes de erro (campo obrigatório vazio, divergência de `targetValue`, `done: false`) continuam passando 100% íntegros.
-- O teste existente em `tests/components/MaxInputAutoComplete.test.ts:147` (`caution computed quando isDone é falso mas caution é passado via prop`) continua passando.
+- Todos os testes utilizam tipagem estrita via Vue Test Utils sem `as any`.
 
 ---
 
 ## Banco de Dados
 
-- **Nenhuma** migration necessária (alteração restrita a componentes de UI front-end Vue 3 SFC).
+- **Nenhuma** migration necessária (alteração exclusiva em componentes frontend Vue 3 SFC da biblioteca de UI).
 
 ---
 
 ## Riscos de Quebra e Não-Regressão
 
-1. **Risco de Falso Erro ("Valor inválido") ao ativar Caution:**
-   - *Mitigação:* A verificação de `error_msg` foi explicitamente isolada com `if (isDone.value !== false) return null;`. Dessa forma, `error_msg` só atua quando há uma falha de validação efetiva do campo, nunca quando o campo está válido e em estado de atenção.
+1. **Prevenção de Falso Erro ("Valor inválido") ao Ativar Caution:**
+   - *Mitigação:* A verificação de `error_msg` foi desacoplada com `if (isDone.value !== false) return null;`. Dessa forma, `error_msg` só atua quando há uma falha de validação efetiva do campo, nunca quando o campo está válido e apenas em estado de atenção.
 2. **Compatibilidade com `testIsDone()` e Inversão de Caution:**
-   - *Mitigação:* A função `testIsDone()` em todos os componentes preserva a linha `if (props.caution !== undefined) return !props.caution;`, mantendo compatibilidade com os testes de `testIsDone` existentes em `MaxInputAutoComplete` e `MaxInputAutoCompleteApi`.
+   - *Mitigação:* A função `testIsDone()` em todos os componentes preserva a linha `if (props.caution !== undefined) return !props.caution;`, mantendo total conformidade com a convenção da biblioteca onde campos em atenção não são considerados `done`.
 3. **Compatibilidade com `InputBase.vue`:**
-   - *Mitigação:* `InputBase.vue` foi analisado e já possui o tratamento adequado tanto para boolean (`caution ? 'caution' : ''`) quanto para string (`displayMessage`). A correção no componente filho entrega o valor correto que o `InputBase` espera receber.
-4. **Verificação da Suíte de Testes Existente:**
-   - Nenhuma suíte de testes existente será quebrada; novos cenários cobrirão a lacuna anteriormente não testada para a prop `caution`.
+   - *Mitigação:* `InputBase.vue` já possui tratamento nativo tanto para boolean (`caution ? 'caution' : ''`) quanto para string (`displayMessage`). A correção assegura que o componente filho entrega exatamente o valor esperado por `InputBase`.
+4. **Isolamento de Tipagem em Testes:**
+   - *Mitigação:* Uso restrito de `wrapper.findComponent(InputBase).props('caution')` sem recorrer a `(wrapper.vm as any)`.
+5. **Estabilidade no Ambiente de CI/Validação:**
+   - *Mitigação:* A verificação de linter é configurada para executar `npx eslint src/ tests/`, evitando a execução irrestrita do `stylelint` que causa estouro de heap de memória (`JavaScript heap out of memory`, exit code 134) no ambiente.
 
 ---
 
 ## Validação
 
-1. **Execução dos Testes Unitários dos Componentes Afetados:**
+Os comandos a seguir devem ser executados em sequência para comprovar a eficácia da implementação:
+
+1. **Execução dos Testes Unitários dos 6 Componentes Afetados:**
    ```bash
-   npx vitest run tests/components/MaxInputText.test.ts \
-                  tests/components/MaxChips.test.ts \
-                  tests/components/MaxColorPicker.test.ts \
-                  tests/components/MaxInputAutoComplete.test.ts \
-                  tests/components/MaxInputIconPicker.test.ts \
-                  tests/components/MaxInputNumber.test.ts
+   npx vitest run tests/components/MaxInputText.test.ts tests/components/MaxChips.test.ts tests/components/MaxColorPicker.test.ts tests/components/MaxInputAutoComplete.test.ts tests/components/MaxInputIconPicker.test.ts tests/components/MaxInputNumber.test.ts
    ```
 
-2. **Execução da Suíte Completa de Testes Unitários:**
+2. **Execução da Suíte Completa de Testes da Biblioteca:**
    ```bash
    npm test
    ```
 
-3. **Verificação de Tipagem TypeScript:**
+3. **Verificação de Tipagem Estrita TypeScript:**
    ```bash
    npm run type-check
    ```
 
-4. **Verificação de Estilo e Linting:**
+4. **Verificação de Linter e Estilo:**
    ```bash
-   npm run lint
+   npx eslint src/ tests/
    ```
 
 ---
@@ -499,6 +501,7 @@ Após a aplicação cirúrgica das modificações propostas:
 - `vue-components` — Padrões arquiteturais para componentes Vue 3 com Composition API e tipagem estrita TypeScript.
 - `test-driven-development` — Metodologia Red-Green para isolamento e reprodução da regressão antes da implementação.
 - `vue-vitest-testing-best-practices` — Estruturação de testes com Vitest e Vue Test Utils (`mount`, `findComponent`, `setProps`, `trigger`).
+- `vue-typescript-best-practices` — Tipagem rigorosa nos testes e nos SFCs, sem casts inseguros (`as any`).
 - `vue-eslint-stylelint-quality-standards` — Padrões de formatação, indentação de 4 espaços e conformidade com `eslint.config.js`.
 - `code-review-and-quality` — Checklist de integridade semântica e prevenção de regressões antes do encerramento.
 - `superpowers` — Disciplina de engenharia agentic orientada a especificações formais e planos executáveis.
