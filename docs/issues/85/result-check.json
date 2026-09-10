@@ -1,0 +1,4 @@
+{
+  "status": "Aprovado",
+  "message": "A implementação da issue #85 resolveu comprovadamente a causa raiz em MaxInputCheckbox.vue, repassando disabled e atributos de formulário para o input nativo, bloqueando a emissão de update:modelValue e aplicando a estilização scoped de desabilitação. Validação executada com sucesso: 'npx vitest run tests/components/MaxInputCheckbox.test.ts' (13/13 testes aprovados), 'npm run test' (146 arquivos e 2073 testes aprovados), 'npm run type-check' (0 erros de tipagem com vue-tsc) e linters eslint/stylelint aprovados sem violações. O escopo e a estrutura de código respeitam rigorosamente todos os padrões do projeto."
+}
