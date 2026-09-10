@@ -252,6 +252,16 @@ describe('MaxInputPhone', () => {
         expect(base.props('iconRight')).toBeUndefined();
     });
 
+    it('utiliza "Telefone" como label padrão quando label não é informado', () => {
+        const wrapper = mountPhoneField();
+        const base = wrapper.findComponent({ name: 'InputBase' });
+        expect(base.exists()).toBe(true);
+        expect(base.props('label')).toBe('Telefone');
+        const labelEl = wrapper.find('label');
+        expect(labelEl.exists()).toBe(true);
+        expect(labelEl.text()).toBe('Telefone');
+    });
+
     it('agrupa múltiplos eventos de scroll em um único requestAnimationFrame evitando layout thrashing', async () => {
         const rafSpy = vi.spyOn(window, 'requestAnimationFrame');
         const wrapper = mountPhoneField();
