@@ -74,11 +74,12 @@
     import { ref, computed, watch, useAttrs, onBeforeUnmount } from 'vue';
     import { useDropZone, useEventListener } from '@maxvue/max-use';
     import MaxIcon from './MaxIcon.vue';
+    import { sanitizeHtml } from '../helpers/sanitizeHtml';
 
     /**
      * Componente de seleção de arquivos com drag-and-drop, drop zone e suporte a colagem (Ctrl+V).
      */
-    const attrs: any = useAttrs();
+    const attrs = useAttrs();
 
     const props = withDefaults(
         defineProps<{
@@ -97,26 +98,30 @@
     }>();
 
     const nativeInputRef = ref<HTMLInputElement | null>(null);
-    const dropZoneRef = ref<HTMLElement | null>(null);
+    const dropZoneRef = ref<HTMLDivElement | null>(null);
     const temp_value = ref<File[]>([...props.modelValue]);
 
     // Mapa de Object URLs geradas para pré-visualização de imagens, garantindo cleanup em onBeforeUnmount
     const previewUrlMap = new Map<File, string>();
 
-    const displayLabel = computed(() => {
-        return props.label ?? attrs.label ?? 'Clique aqui, arraste e solte, <br>ou cole (CTRL + V) arquivos para carregar.';
+    const displayLabel = computed((): string => {
+        const rawLabel = props.label
+            ?? (typeof attrs['label'] === 'string' ? attrs['label'] : undefined)
+            ?? 'Clique aqui, arraste e solte seus arquivos para enviar ou <b>Cole com Ctrl+V</b>';
+        return sanitizeHtml(String(rawLabel));
     });
 
-    const isVisibleFiles = computed(() => {
-        const hasNoView = attrs.noView !== undefined && attrs.noView !== false && attrs.noView !== 'false';
-        const hasNoPreview = attrs.noPreview !== undefined && attrs.noPreview !== false && attrs.noPreview !== 'false';
-        const hasKebabNoView = attrs['no-view'] !== undefined && attrs['no-view'] !== false && attrs['no-view'] !== 'false';
-        const hasKebabNoPreview = attrs['no-preview'] !== undefined && attrs['no-preview'] !== false && attrs['no-preview'] !== 'false';
-        return !hasNoView && !hasNoPreview && !hasKebabNoView && !hasKebabNoPreview;
+    const isVisibleFiles = computed((): boolean => {
+        const noView = attrs['no-view'] ?? attrs['noView'];
+        const noPreview = attrs['no-preview'] ?? attrs['noPreview'];
+        const hasNoView = noView !== undefined && noView !== false && noView !== 'false';
+        const hasNoPreview = noPreview !== undefined && noPreview !== false && noPreview !== 'false';
+        return !hasNoView && !hasNoPreview;
     });
 
-    const sizePreview = computed(() => {
-        return attrs.sizeFiles ?? attrs.sizePreview ?? attrs['size-files'] ?? attrs['size-preview'] ?? '';
+    const sizePreview = computed((): string => {
+        const size = attrs['size-files'] ?? attrs['size-preview'] ?? attrs['sizeFiles'] ?? attrs['sizePreview'];
+        return typeof size === 'string' ? size : '';
     });
 
     const getFilePreviewUrl = (file: File): string => {
@@ -209,7 +214,7 @@
 
     useEventListener(window, 'paste', handlePaste);
 
-    const { isOverDropZone } = useDropZone(dropZoneRef as any, {
+    const { isOverDropZone } = useDropZone(dropZoneRef, {
         onDrop: (files: File[] | null) => {
             if (files && files.length > 0) addFiles(files);
         },

@@ -1,6 +1,13 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import MaxInputFile from '../../src/components/MaxInputFile.vue';
+
+if (typeof window.DragEvent === 'undefined') {
+    class DragEventPolyfill extends MouseEvent {}
+    window.DragEvent = DragEventPolyfill as unknown as typeof DragEvent;
+    globalThis.DragEvent = DragEventPolyfill as unknown as typeof DragEvent;
+}
 
 describe('MaxInputFile', () => {
     beforeEach(() => {
@@ -38,6 +45,16 @@ describe('MaxInputFile', () => {
             }
         });
         expect(wrapperAttr.find('.input-file-content-label').text()).toContain('Upload via atributo');
+    });
+
+    it('higieniza conteúdo de label contra XSS', () => {
+        const wrapper = mount(MaxInputFile, {
+            props: {
+                label: 'Upload seguro <img src=x onerror="alert(1)">'
+            }
+        });
+        expect(wrapper.html()).not.toContain('onerror');
+        expect(wrapper.find('.input-file-content-label').text()).toContain('Upload seguro');
     });
 
     it('aciona o clique no input oculto ao clicar no container principal', async () => {
@@ -98,17 +115,18 @@ describe('MaxInputFile', () => {
         const wrapper = mount(MaxInputFile);
         const pastedImage = new File(['img-data'], 'captura.png', { type: 'image/png' });
 
-        const pasteEvent = new Event('paste', { bubbles: true, cancelable: true }) as any;
-        pasteEvent.clipboardData = {
-            items: [
-                {
-                    kind: 'file',
-                    type: 'image/png',
-                    getAsFile: () => pastedImage
-                }
-            ],
-            files: [pastedImage]
-        };
+        const pasteEvent = Object.assign(new Event('paste', { bubbles: true, cancelable: true }), {
+            clipboardData: {
+                items: [
+                    {
+                        kind: 'file',
+                        type: 'image/png',
+                        getAsFile: () => pastedImage
+                    }
+                ],
+                files: [pastedImage]
+            }
+        });
 
         window.dispatchEvent(pasteEvent);
         await wrapper.vm.$nextTick();
