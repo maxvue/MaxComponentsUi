@@ -1,5 +1,5 @@
 <template>
-    <InputBase class="input-phone" v-bind="props" :value="temp_value" :done="done" :error="error" :caution="caution" :label="props.noLabel ? undefined : props.label ?? ('Telefone' + String(props.noLabel)) " :icon-right="props.noIcon ? undefined : 'ic:baseline-whatsapp'" >
+    <InputBase class="max-input-phone input-phone" v-bind="props" :value="temp_value" :done="done" :error="error" :caution="caution" :label="props.noLabel ? undefined : (props.label ?? 'Telefone')" :icon-right="props.noIcon ? undefined : 'ic:baseline-whatsapp'">
         <div class="inputs-div">
             <div
                 ref="select_el"
@@ -16,13 +16,13 @@
                 <div class="max-phone-select-label">
                     <div class="item-selected">
                         <div class="item-flag">
-                            <img :src="'https://flagcdn.com/w40/' + country.sigla.toLowerCase() + '.png'" alt="bandeira" flex />
+                            <img :src="'https://flagcdn.com/w40/' + country.sigla.toLowerCase() + '.png'" alt="bandeira" />
                         </div>
-                        <div class="label-flag" style="color: var(--background-600);">+ {{ country.value }}</div>
+                        <div class="label-flag">+ {{ country.value }}</div>
                     </div>
                 </div>
             </div>
-            <input type="text" slot-b v-model="phone" v-maska:unmaskedValue.unmasked="maskValue" flex :placeholder="country.value === 55 ? '(99) 9 9999 - 9999' : ''" p0 class="p-inputtext" @focus="onFocus = true" @blur="onFocus = false" />
+            <input type="text" slot-b v-model="phone" v-maska:unmaskedValue.unmasked="maskValue" :placeholder="country.value === 55 ? '(99) 9 9999 - 9999' : ''" class="p-inputtext phone-number-input" @focus="onFocus = true" @blur="onFocus = false" />
         </div>
 
         <Teleport to="body" v-if="isOpen">
@@ -59,7 +59,7 @@
                             <div class="input-phone-label-div">
                                 <img :src="'https://flagcdn.com/w40/' + option.sigla.toLowerCase() + '.png'" alt="flag" />
                                 <div class="labelz">
-                                    <div pt2 elipsis >{{ option.label }}</div>
+                                    <div class="phone-option-label">{{ option.label }}</div>
                                 </div>
                                 <div class="subLabel">( +{{ option?.value }} )</div>
                             </div>
@@ -307,9 +307,9 @@
     onBeforeUnmount(close);
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .input-phone {
-    .input-slot {
+    :deep(.input-slot) {
         grid-template-columns: 1fr;
     }
 
@@ -321,7 +321,6 @@
         grid-column: 1 !important;
         place-items: center;
         height: 36px !important;
-
 
         &:focus-within {
             border-color: var(--max-inputtext-focus-border-color);
@@ -371,19 +370,22 @@
 
                     .label-flag {
                         height: 16px !important;
+                        color: var(--background-700);
                     }
                 }
             }
         }
 
-        input {
+        input,
+        .phone-number-input {
             border: none !important;
             box-shadow: none !important;
             background-color: transparent !important;
+            display: flex;
         }
     }
 
-    .p-inputicon {
+    :deep(.p-inputicon) {
         transform: translateY(-2px) !important;
     }
 
@@ -395,7 +397,7 @@
         grid-column: 2 !important;
     }
 
-    .p-inputtext {
+    :deep(.p-inputtext) {
         padding: 0 2px !important;
     }
 }
@@ -438,60 +440,67 @@
 
     .max-phone-select-list {
         overflow-y: auto;
-    }
 
-    .max-phone-select-option {
-        display: grid !important;
-        gap: 0 !important;
-        padding: 4px 8px;
-        cursor: pointer;
+        .max-phone-select-option {
+            display: grid !important;
+            gap: 0 !important;
+            padding: 4px 8px;
+            cursor: pointer;
 
-        &.is-focused {
-            background-color: var(--background-100);
+            &.is-focused {
+                background-color: var(--background-100);
+            }
+
+            &.is-selected {
+                background-color: var(--background-200);
+            }
+
+            .input-phone-label-div {
+                display: grid;
+                grid-template-columns: auto 1fr auto;
+                width: 100% !important;
+                place-items: center start;
+                gap: 10px;
+
+                .icon-div {
+                    color: var(--background-700) !important;
+                }
+
+                &:hover {
+                    .icon-div {
+                        color: var(--background-700) !important;
+                    }
+                }
+
+                .subLabel {
+                    color: var(--background-650);
+                    padding-left: 1rem;
+                    text-align: right;
+                    width: 100%;
+                    font-size: 0.85rem;
+                }
+
+                .labelz {
+                    display: grid;
+                    place-items: center;
+                    color: var(--background-775);
+
+                    .phone-option-label {
+                        padding-top: 2px;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
+                }
+
+                img {
+                    width: 40px;
+                    height: 28px;
+                    border-radius: 5px;
+                    border: 1px solid rgb(0 0 0 / 20%);
+                }
+            }
         }
-
-        &.is-selected {
-            background-color: var(--background-200);
-        }
-    }
-}
-
-.input-phone-label-div {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    width: 100% !important;
-    place-items: center start;
-    gap: 10px;
-
-    .icon-div {
-        color: var(--background-650) !important;
-    }
-
-    &:hover {
-        .icon-div {
-            color: var(--background-650) !important;
-        }
-    }
-
-    .subLabel {
-        color: var(--background-600);
-        padding-left: 1rem;
-        text-align: right;
-        width: 100%;
-        font-size: 0.85rem;
-    }
-
-    .labelz {
-        display: grid;
-        place-items: center;
-        color: var(--background-750);
-    }
-
-    img {
-        width: 40px;
-        height: 28px;
-        border-radius: 5px;
-        border: 1px solid rgb(0 0 0 / 20%);
     }
 }
 </style>

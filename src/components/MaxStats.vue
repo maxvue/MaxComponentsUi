@@ -152,7 +152,7 @@
     };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .max-stats-container {
         display: flex;
         width: 100%;
@@ -186,113 +186,113 @@
                 background: rgb(150 150 150 / 45%);
             }
         }
-    }
 
-    // Modo Desktop: Card Retangular com Cantos Arredondados
-    .max-stat-card {
-        display: flex;
-        flex: 1 1 0%;
-        min-width: 200px;
-        align-items: center;
-        justify-content: space-between;
-        padding: 1rem 1.25rem;
-        background-color: var(--stat-bg);
-        border-radius: 1rem;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-
-        &:hover {
-            transform: translateY(-1px);
-        }
-
-        .max-stat-card-content {
+        // Modo Desktop: Card Retangular com Cantos Arredondados
+        .max-stat-card {
             display: flex;
-            flex-direction: column;
-            justify-content: center;
-            min-width: 0;
-            flex: 1;
-            margin-right: 0.75rem;
-        }
-
-        .max-stat-label {
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            line-height: 1.2;
-            color: var(--stat-text);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .max-stat-value {
-            font-size: 1.875rem;
-            font-weight: 800;
-            line-height: 1.1;
-            margin-top: 0.25rem;
-            margin-bottom: 0.25rem;
-            color: var(--stat-accent);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .max-stat-sublabel {
-            font-size: 0.75rem;
-            font-weight: 500;
-            line-height: 1.2;
-            color: var(--stat-text);
-            opacity: 0.85;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .max-stat-icon-wrapper {
-            display: flex;
+            flex: 1 1 0%;
+            min-width: 200px;
             align-items: center;
-            justify-content: center;
-            width: 3.25rem;
-            height: 3.25rem;
+            justify-content: space-between;
+            padding: 1rem 1.25rem;
+            background-color: var(--stat-bg);
             border-radius: 1rem;
-            background-color: var(--stat-icon-bg);
-            flex-shrink: 0;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+            &:hover {
+                transform: translateY(-1px);
+            }
+
+            .max-stat-card-content {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                min-width: 0;
+                flex: 1;
+                margin-right: 0.75rem;
+
+                .max-stat-label {
+                    font-size: 0.75rem;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                    line-height: 1.2;
+                    color: var(--stat-text);
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                .max-stat-value {
+                    font-size: 1.875rem;
+                    font-weight: 800;
+                    line-height: 1.1;
+                    margin-top: 0.25rem;
+                    margin-bottom: 0.25rem;
+                    color: var(--stat-accent);
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                .max-stat-sublabel {
+                    font-size: 0.75rem;
+                    font-weight: 500;
+                    line-height: 1.2;
+                    color: var(--stat-text);
+                    opacity: 0.85;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+            }
+
+            .max-stat-icon-wrapper {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 3.25rem;
+                height: 3.25rem;
+                border-radius: 1rem;
+                background-color: var(--stat-icon-bg);
+                flex-shrink: 0;
+            }
         }
-    }
 
-    // Modo Mobile: Pílula Compacta
-    .max-stat-pill {
-        display: inline-flex;
-        align-items: center;
-        height: 2.375rem;
-        padding: 0.25rem 0.875rem 0.25rem 0.3125rem;
-        background-color: var(--stat-bg);
-        border-radius: 9999px;
-        flex-shrink: 0;
-        cursor: default;
-        transition: transform 0.15s ease;
-
-        &:hover {
-            transform: scale(1.02);
-        }
-
-        .max-stat-pill-icon-wrapper {
-            display: flex;
+        // Modo Mobile: Pílula Compacta
+        .max-stat-pill {
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            width: 1.875rem;
-            height: 1.875rem;
+            height: 2.375rem;
+            padding: 0.25rem 0.875rem 0.25rem 0.3125rem;
+            background-color: var(--stat-bg);
             border-radius: 9999px;
-            background-color: var(--stat-icon-bg);
             flex-shrink: 0;
-        }
+            cursor: default;
+            transition: transform 0.15s ease;
 
-        .max-stat-pill-value {
-            font-size: 0.9375rem;
-            font-weight: 800;
-            line-height: 1;
-            margin-left: 0.625rem;
-            color: var(--stat-accent);
+            &:hover {
+                transform: scale(1.02);
+            }
+
+            .max-stat-pill-icon-wrapper {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 1.875rem;
+                height: 1.875rem;
+                border-radius: 9999px;
+                background-color: var(--stat-icon-bg);
+                flex-shrink: 0;
+            }
+
+            .max-stat-pill-value {
+                font-size: 0.9375rem;
+                font-weight: 800;
+                line-height: 1;
+                margin-left: 0.625rem;
+                color: var(--stat-accent);
+            }
         }
     }
 </style>

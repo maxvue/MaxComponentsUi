@@ -60,14 +60,14 @@
     onBeforeUnmount(() => unregister?.());
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .max-tab {
         background: none;
         border: none;
         border-bottom: 2px solid transparent;
         padding: 0.75rem 1rem;
         cursor: pointer;
-        color: var(--text-color, inherit);
+        color: var(--background-700);
         white-space: nowrap;
         transition: color 0.2s ease, border-color 0.2s ease;
 
@@ -79,6 +79,7 @@
         &.max-tab-disabled {
             opacity: 0.5;
             cursor: not-allowed;
+            color: var(--background-650);
         }
     }
 

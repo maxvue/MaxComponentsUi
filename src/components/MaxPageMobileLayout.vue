@@ -1,5 +1,5 @@
 <template>
-    <div class="container-app-mobile" v-bind="attrs">
+    <div class="max-page-mobile-layout container-app-mobile" v-bind="attrs">
         <MaxTopMenu
             v-bind="attrs"
             screen="mobile"
@@ -21,7 +21,7 @@
         <main class="mobile-page-content">
             <div class="mobile-space top">
             </div>
-            <div pb-30 pt-20>
+            <div class="mobile-page-body">
                 <slot></slot>
             </div>
             <div class="mobile-space bottom">
@@ -131,7 +131,7 @@
     });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .container-app-mobile {
         display: grid;
         grid-template-rows:
@@ -147,8 +147,7 @@
 
         .mobile-page-content {
             grid-row: 2;
-            overflow-x: hidden;
-            overflow-y: auto;
+            overflow: hidden auto;
             -webkit-overflow-scrolling: touch;
             padding-left: calc(20px + env(safe-area-inset-left, 0px));
             padding-right: calc(20px + env(safe-area-inset-right, 0px));
@@ -163,23 +162,31 @@
                 height: 0;
             }
 
-            .mobile-space{
+            .mobile-space {
                 width: 100%;
                 height: 20px;
                 z-index: 5;
+                pointer-events: none;
+
                 &.top {
                     top: 60px;
                     position: fixed;
-                    background: linear-gradient(to bottom, white, transparent);
+                    background: linear-gradient(to bottom, var(--background-25, #f8fafc), transparent);
                 }
+
                 &.bottom {
                     bottom: 57px;
                     position: fixed;
-                    background: linear-gradient(to bottom, transparent, white);
+                    background: linear-gradient(to bottom, transparent, var(--background-25, #f8fafc));
                 }
             }
 
-            &::before{
+            .mobile-page-body {
+                padding-top: 20px;
+                padding-bottom: 30px;
+            }
+
+            &::before {
                 position: absolute;
                 top: 0;
                 left: 0;

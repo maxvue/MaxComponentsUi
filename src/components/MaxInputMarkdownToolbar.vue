@@ -1,5 +1,5 @@
 <template>
-    <div class="md-toolbar" :class="{ 'md-toolbar--disabled': !editor || editor.isEditable === false }">
+    <div class="max-input-markdown-toolbar md-toolbar" :class="{ 'md-toolbar--disabled': !editor || editor.isEditable === false }">
         <span v-if="props.label" class="md-toolbar__label">{{ props.label }}</span>
         <span v-if="props.label" class="md-toolbar__divider" />
 
@@ -310,7 +310,7 @@
     };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .md-toolbar {
         display: flex;
         align-items: center;
@@ -333,7 +333,7 @@
         &__label {
             font-size: 0.8rem;
             font-weight: 600;
-            color: var(--background-600, #4b5563);
+            color: var(--background-650, #4b5563);
             white-space: nowrap;
             padding: 0 4px;
             height: auto;
@@ -368,13 +368,13 @@
             border-radius: 6px;
             background: transparent;
             cursor: pointer;
-            color: var(--background-650, #4b5563);
+            color: var(--background-700);
             transition: all 0.15s ease;
             box-sizing: border-box;
 
             &:hover:not(:disabled) {
                 background: var(--background-150, #e5e7eb);
-                color: var(--background-900, #111827);
+                color: var(--background-775);
             }
 
             &.active {
@@ -422,7 +422,7 @@
             font-size: 13px;
             outline: none;
             background: var(--background-0, #fff);
-            color: var(--background-900, #111827);
+            color: var(--background-700);
             transition: border-color 0.15s;
             box-sizing: border-box;
 
@@ -441,7 +441,7 @@
             background: var(--background-50, #f9fafb);
             cursor: pointer;
             white-space: nowrap;
-            color: var(--background-700, #374151);
+            color: var(--background-750, #374151);
             transition: all 0.15s;
             box-sizing: border-box;
 

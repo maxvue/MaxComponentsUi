@@ -1,24 +1,23 @@
 <template>
-    <div class="max-auth-page" s100 grid-center @keyup.enter="onEnter">
-        <div class="max-auth-card">
+    <div class="max-auth-card max-auth-page" @keyup.enter="onEnter">
+        <div class="max-auth-card-inner">
             <slot name="header" :step="codeSent ? 'code' : 'phone'" :mode="mode" :phone="phone">
                 <MaxTitle2
                     :icon="mode === 'phone-otp' && codeSent ? 'mdi:shield-check-outline' : icon"
                     :title="computedTitle"
                     :subtitle="computedSubtitle"
-                    center
-                    p0
+                    class="auth-card-title"
                 />
             </slot>
 
-            <MaxGrid mt-6 gap-4>
+            <MaxGrid class="auth-card-grid">
                 <!-- Modo Tradicional (E-mail / Senha) -->
                 <template v-if="mode === 'password'">
-                    <MaxInputPhoneMail s100 v-if="identifier === 'email-phone'" v-model="email" @keyup.enter="onEnter" />
-                    <MaxInputText s100 v-else :label="t.email" type="email" v-model="email" icon="mdi:email-outline" @keyup.enter="onEnter" />
-                    <MaxInputText s100 :label="t.password" type="password" v-model="password" icon="mdi:lock-outline" @keyup.enter="onEnter" />
+                    <MaxInputPhoneMail class="auth-card-field" v-if="identifier === 'email-phone'" v-model="email" @keyup.enter="onEnter" />
+                    <MaxInputText class="auth-card-field" v-else :label="t.email" type="email" v-model="email" icon="mdi:email-outline" @keyup.enter="onEnter" />
+                    <MaxInputText class="auth-card-field" :label="t.password" type="password" v-model="password" icon="mdi:lock-outline" @keyup.enter="onEnter" />
 
-                    <div class="max-auth-options" s100 v-if="showRemember || forgotTo">
+                    <div class="max-auth-options" v-if="showRemember || forgotTo">
                         <label class="max-auth-remember" v-if="showRemember">
                             <input type="checkbox" v-model="remember" />
                             <span>{{ t.remember }}</span>
@@ -28,42 +27,41 @@
 
                     <slot name="extra"></slot>
 
-                    <span s100 class="max-auth-error" v-if="error">{{ error }}</span>
+                    <span class="max-auth-error" v-if="error">{{ error }}</span>
 
-                    <MaxButton s100 :label="t.submit" icon="mdi:login" :loading="loading" :action="onSubmit" />
+                    <MaxButton class="auth-card-field" :label="t.submit" icon="mdi:login" :loading="loading" :action="onSubmit" />
                 </template>
 
                 <!-- Modo Phone OTP (Telefone + MaxInputOTP + Botão Dinâmico) -->
                 <template v-else-if="mode === 'phone-otp'">
                     <slot name="phone-input">
-                        <MaxInputPhone s100 v-model="phone" :label="t.phone" @keyup.enter="onEnter" />
+                        <MaxInputPhone class="auth-card-field" v-model="phone" :label="t.phone" @keyup.enter="onEnter" />
                     </slot>
 
                     <!-- Campo de Código de 6 Dígitos (exibido apenas após o envio) -->
 
                     <slot name="code-input" v-if="codeSent">
                         <MaxInputOTP
-                            s100
+                            class="auth-card-field"
                             v-model="code"
                             :length="codeLength"
                             :integer-only="true"
                             :autofocus="true"
                             @complete="onEnter"
-                            w-full
                         />
                     </slot>
 
-                    <div class="max-auth-options" s100 v-if="showRemember" pb-15 grid-center>
+                    <div class="max-auth-options remember-otp" v-if="showRemember">
                         <MaxInputCheckbox v-model="remember" :label="t.remember" />
                     </div>
 
                     <slot name="extra"></slot>
 
-                    <span s100 class="max-auth-error" v-if="error">{{ error }}</span>
+                    <span class="max-auth-error" v-if="error">{{ error }}</span>
 
                     <!-- Botão Dinâmico de Ação Única (sem disabled) -->
                     <MaxButton
-                        s100
+                        class="auth-card-field"
                         :label="dynamicButtonLabel"
                         :icon="dynamicButtonIcon"
                         :loading="loading"
@@ -73,13 +71,13 @@
 
                 <!-- Provedores Sociais -->
                 <template v-if="providers.length">
-                    <div class="max-auth-divider" s100>
+                    <div class="max-auth-divider">
                         <div class="line"></div>
                         <span class="text">{{ t.socialDivider }}</span>
                         <div class="line"></div>
                     </div>
 
-                    <div class="max-auth-social" s100>
+                    <div class="max-auth-social">
                         <MaxButton
                             v-for="provider in providers"
                             :key="provider.id"
@@ -94,9 +92,9 @@
 
                 <!-- Footer (ex: Cadastre-se) -->
                 <slot name="footer">
-                    <div flex justify-center mt-4 text-sm class="max-auth-register" v-if="registerTo">
-                        <span class="text-secondary">{{ t.registerPrompt }}</span>
-                        <router-link :to="registerTo" class="max-auth-link" ml-1>{{ t.register }}</router-link>
+                    <div class="max-auth-register" v-if="registerTo">
+                        <span class="register-prompt">{{ t.registerPrompt }}</span>
+                        <router-link :to="registerTo" class="max-auth-link">{{ t.register }}</router-link>
                     </div>
                 </slot>
             </MaxGrid>
@@ -599,12 +597,15 @@
     });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .max-auth-page {
         width: 100vw;
         height: 100vh;
         background: var(--background-75);
+        display: grid;
+        place-items: center;
 
+        .max-auth-card-inner,
         .max-auth-card {
             width: 360px;
             max-width: 90vw;
@@ -613,94 +614,131 @@
             border-radius: 12px;
             padding: 2rem;
             box-shadow: 0 8px 30px rgb(0 0 0 / 8%);
-        }
 
-        .max-auth-options {
-            gap: 0.5rem;
-        }
+            .auth-card-title {
+                padding: 0;
+                text-align: center;
+            }
 
-        .max-auth-remember {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            cursor: pointer;
-            font-size: 0.82rem;
-            color: var(--background-600);
-            user-select: none;
+            .auth-card-grid {
+                margin-top: 1.5rem;
+                gap: 1rem;
+            }
 
-            input[type='checkbox'] {
-                width: 16px;
-                height: 16px;
-                accent-color: var(--background-650);
+            .auth-card-field {
+                width: 100%;
+            }
+
+            .max-auth-options {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+                gap: 0.5rem;
+
+                &.remember-otp {
+                    padding-bottom: 15px;
+                    display: grid;
+                    place-items: center;
+                }
+            }
+
+            .max-auth-remember {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
                 cursor: pointer;
-            }
-
-            span {
-                font-weight: 500;
-            }
-        }
-
-        .max-auth-error {
-            color: var(--red-500, #ef4444);
-            font-size: 0.8rem;
-            text-align: center;
-        }
-
-        .max-auth-link {
-            color: var(--background-650);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.2s ease;
-            white-space: nowrap;
-
-            &:hover {
-                text-decoration: underline;
-                color: var(--background-750);
-            }
-
-            &--muted {
                 font-size: 0.82rem;
-                font-weight: 400;
-            }
-        }
+                color: var(--background-650);
+                user-select: none;
 
-        .max-auth-register {
-            color: var(--background-500);
+                input[type='checkbox'] {
+                    width: 16px;
+                    height: 16px;
+                    accent-color: var(--background-700);
+                    cursor: pointer;
+                }
 
-            .text-secondary {
-                color: var(--background-500);
-            }
-        }
-
-        .max-auth-divider {
-            display: flex;
-            align-items: center;
-            text-align: center;
-            color: var(--background-400);
-            margin: 1.5rem 0 1rem;
-
-            .line {
-                flex: 1;
-                height: 1px;
-                background: var(--background-200);
+                span {
+                    font-weight: 500;
+                }
             }
 
-            .text {
-                font-size: 0.7rem;
-                text-transform: uppercase;
-                letter-spacing: 0.05em;
-                color: var(--background-400);
-                padding: 0 0.5rem;
+            .max-auth-error {
+                display: block;
+                width: 100%;
+                color: var(--red-500, #ef4444);
+                font-size: 0.8rem;
+                text-align: center;
             }
-        }
 
-        .max-auth-social {
-            display: flex;
-            gap: 0.75rem;
-            justify-content: space-between;
+            .max-auth-link {
+                color: var(--background-700);
+                text-decoration: none;
+                font-weight: 500;
+                transition: color 0.2s ease;
+                white-space: nowrap;
 
-            .max-auth-social-btn {
-                flex: 1;
+                &:hover {
+                    text-decoration: underline;
+                    color: var(--background-775);
+                }
+
+                &--muted {
+                    font-size: 0.82rem;
+                    font-weight: 400;
+                }
+            }
+
+            .max-auth-register {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-top: 1rem;
+                font-size: 0.875rem;
+                color: var(--background-650);
+
+                .register-prompt {
+                    color: var(--background-650);
+                }
+
+                .max-auth-link {
+                    margin-left: 0.25rem;
+                }
+            }
+
+            .max-auth-divider {
+                display: flex;
+                align-items: center;
+                text-align: center;
+                color: var(--background-650);
+                margin: 1.5rem 0 1rem;
+                width: 100%;
+
+                .line {
+                    flex: 1;
+                    height: 1px;
+                    background: var(--background-200);
+                }
+
+                .text {
+                    font-size: 0.7rem;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                    color: var(--background-650);
+                    padding: 0 0.5rem;
+                }
+            }
+
+            .max-auth-social {
+                display: flex;
+                gap: 0.75rem;
+                justify-content: space-between;
+                width: 100%;
+
+                .max-auth-social-btn {
+                    flex: 1;
+                }
             }
         }
     }

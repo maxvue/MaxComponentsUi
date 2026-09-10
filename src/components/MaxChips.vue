@@ -4,7 +4,7 @@
         :done="props.done ?? isDone"
         :error="props.error ?? error_msg"
         :caution="caution"
-        class="max-chips-wrapper"
+        class="max-chips max-chips-wrapper"
     >
         <div
             class="max-chips-container p-inputtext p-component"
@@ -379,7 +379,7 @@
     });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .max-chips-wrapper {
         .max-chips-container {
             display: flex;
@@ -408,7 +408,7 @@
                     align-items: center;
                     gap: 6px;
                     background-color: var(--background-200);
-                    color: var(--background-800);
+                    color: var(--background-700);
                     border-radius: 6px;
                     padding: 2px 8px;
                     font-size: 0.875rem;
@@ -430,7 +430,7 @@
                         display: inline-flex;
                         align-items: center;
                         justify-content: center;
-                        color: var(--background-600);
+                        color: var(--background-650);
                         border-radius: 50%;
                         line-height: 1;
                         transition: color 0.15s ease, transform 0.15s ease;
@@ -457,7 +457,7 @@
                         color: inherit;
 
                         &::placeholder {
-                            color: var(--background-400);
+                            color: var(--background-650);
                         }
 
                         &:disabled {

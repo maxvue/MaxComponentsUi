@@ -1,7 +1,6 @@
 <template>
-    <InputBase v-bind="props" :error="error_msg ?? undefined" :caution="caution" :done="done ?? undefined">
+    <InputBase class="max-input-cpf-cnpj" v-bind="props" :error="error_msg ?? undefined" :caution="caution" :done="done ?? undefined">
         <input
-            ref="el"
             type="text"
             class="p-inputtext p-component"
             :value="masked_value"
@@ -13,12 +12,12 @@
     </InputBase>
 </template>
 
-/**
- * Componente de entrada para CPF ou CNPJ.
- * Detecta automaticamente o tipo de documento pelo tamanho ou pode ser fixado via props.
- * Possui máscara dinâmica e validação de dígito verificador.
- */
 <script setup lang="ts">
+    /**
+     * Componente de entrada para CPF ou CNPJ.
+     * Detecta automaticamente o tipo de documento pelo tamanho ou pode ser fixado via props.
+     * Possui máscara dinâmica e validação de dígito verificador.
+     */
     import { cnpjIsValid, cpfCnpjIsValid, cpfIsValid, onlyNumbers } from '@maxvue/max-use';
     import { ref, computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
@@ -76,8 +75,9 @@
     // "não fica congelado").
     const onUserInput = (event: Event) => {
         const el = event.target as HTMLInputElement;
-        masked_value.value = el.value;
-        temp_value.value = onlyNumbers(el.value);
+        if (masked_value.value !== el.value) masked_value.value = el.value;
+        const numbers = onlyNumbers(el.value);
+        if (temp_value.value !== numbers) temp_value.value = numbers;
     };
 
     // Valor vindo de fora (prop) em vez da digitação: alimenta a exibição. O guard por dígitos

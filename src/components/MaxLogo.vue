@@ -1,6 +1,6 @@
 <template>
-    <div class="logo" pointer :rounded="props.rounded ? true : undefined" :no-padding="props.noPadding ? true : undefined">
-        <RouterLink to="/">
+    <div class="max-logo logo" :rounded="props.rounded ? true : undefined" :no-padding="props.noPadding ? true : undefined">
+        <RouterLink :to="props.to">
             <img v-if="props.src" :src="`${props.src}`" alt="Image" />
         </RouterLink>
     </div>
@@ -14,8 +14,9 @@
             src?: string;
             rounded?: boolean;
             noPadding?: boolean;
+            to?: string;
         }>(),
-        { src: undefined, rounded: false, noPadding: false }
+        { src: undefined, rounded: false, noPadding: false, to: '/' }
     );
 </script>
 
@@ -25,6 +26,7 @@
     }
 
     .logo {
+        cursor: pointer;
         display: grid;
         place-items: center;
         width: 100%;
@@ -43,7 +45,7 @@
         }
 
         &[fill] {
-            background-color: var(--sky-950);
+            background-color: var(--layout-shell-bg, #003048);
         }
 
         &[rounded-3] {

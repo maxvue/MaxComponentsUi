@@ -13,7 +13,7 @@
     const attrs: any = useAttrs();
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .max-loader-main-div {
         height: 100%;
         width: 100%;
@@ -30,7 +30,7 @@
 
             .item-label {
                 padding-top: 20px;
-                color: var(--background-600);
+                color: var(--background-650);
             }
         }
     }

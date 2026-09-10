@@ -1,5 +1,5 @@
 <template>
-    <InputBase v-bind="props" :done="props.done ?? isDone" :error="props.error ?? error_msg" :caution="caution" class="max-input-color">
+    <InputBase v-bind="props" :done="props.done ?? isDone" :error="props.error ?? error_msg" :caution="caution" class="max-color-picker max-input-color">
         <div class="item-color" :style="{ backgroundColor: nativeColor }">
             <input
                 type="color"
@@ -146,52 +146,52 @@
     }, { immediate: true });
 </script>
 
-<style lang="scss">
-.max-input-color {
-    position: relative;
-    width: 30px;
-    height: 30px;
-    grid-template-rows: 1fr !important;
-    cursor: pointer !important;
-
-    .input-message {
-        display: none !important;
-    }
-
-    .max-input-field-div {
-        display: flex !important;
+<style lang="scss" scoped>
+    .max-input-color {
         position: relative;
-        overflow: hidden;
-        border-radius: 50%;
-        outline: 2px solid rgb(0 0 0 / 20%) !important;
-        aspect-ratio: 1 / 1 !important;
-        width: 100% !important;
-        height: 100% !important;
-        cursor: pointer !important;
-    }
-
-    .input-slot-div {
-        overflow: hidden;
-        border: none;
-        height: calc(100% + 30px) !important;
-        position: absolute;
-        width: calc(100% + 30px) !important;
-        left: -15px;
-        top: -15px;
-        cursor: pointer !important;
-    }
-
-    .item-color {
-        position: absolute;
-        width: calc(100% + 30px);
-        left: -10px;
-        top: 0;
-        height: calc(100% + 30px);
+        width: 30px;
+        height: 30px;
+        grid-template-rows: 1fr !important;
         cursor: pointer !important;
 
-        input {
+        :deep(.input-message) {
+            display: none !important;
+        }
+
+        :deep(.max-input-field-div) {
+            display: flex !important;
+            position: relative;
+            overflow: hidden;
+            border-radius: 50%;
+            outline: 2px solid rgb(0 0 0 / 20%) !important;
+            aspect-ratio: 1 / 1 !important;
+            width: 100% !important;
+            height: 100% !important;
             cursor: pointer !important;
         }
+
+        :deep(.input-slot-div) {
+            overflow: hidden;
+            border: none;
+            height: calc(100% + 30px) !important;
+            position: absolute;
+            width: calc(100% + 30px) !important;
+            left: -15px;
+            top: -15px;
+            cursor: pointer !important;
+        }
+
+        .item-color {
+            position: absolute;
+            width: calc(100% + 30px);
+            left: -10px;
+            top: 0;
+            height: calc(100% + 30px);
+            cursor: pointer !important;
+
+            input {
+                cursor: pointer !important;
+            }
+        }
     }
-}
 </style>

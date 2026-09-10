@@ -1,5 +1,5 @@
 <template>
-    <InputBase v-bind="props" :error="error" :caution="caution" :done="isDone">
+    <InputBase class="max-input-coordinate-decimal-lat" v-bind="props" :error="error" :caution="caution" :done="isDone">
         <input
             type="text"
             class="p-inputtext p-component"

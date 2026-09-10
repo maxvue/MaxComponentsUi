@@ -1,5 +1,5 @@
 <template>
-    <InputBase v-bind="props" :done="isDone" :error="props.error" :caution="props.caution">
+    <InputBase v-bind="props" :done="isDone" :error="props.error" :caution="props.caution" class="max-input-auto-complete-api">
         <div ref="ac" class="p-autocomplete" :class="{ 'p-disabled': props.disabled }">
             <input
                 ref="inputEl"
@@ -19,8 +19,8 @@
             />
         </div>
 
-        <Teleport to="body">
-            <div v-if="isOpen && filtered_values.length > 0" class="max-autocomplete-backdrop" @click="hide">
+        <Teleport to="body" v-if="isOpen && filtered_values.length > 0">
+            <div class="max-autocomplete-backdrop" @click="hide">
                 <div
                     ref="overlayEl"
                     class="p-autocomplete-overlay"
@@ -59,7 +59,7 @@
      * Componente Autocomplete que busca sugestões de uma API.
      * Integra-se com as rotas do backend Max para busca dinâmica.
      */
-    import { hasContent, toSearchableString, getCachedApiIDB, keyExists, isBlank, size, isEqual, useElementBounding, useElementSize, useWindowSize } from '@maxvue/max-use';
+    import { hasContent, toSearchableString, getCachedApiIDB, isBlank, size, isEqual, useElementBounding, useElementSize, useWindowSize } from '@maxvue/max-use';
     import { getOverlayWidth, getOverlayLeft } from '../helpers/useOverlayWidth';
     import type { Ref } from 'vue';
     import { ref, computed, watch, onBeforeUnmount } from 'vue';
@@ -149,11 +149,7 @@
     watch(() => props.data, (newValue, oldValue) => {
         if (isBlank(props.data) && isBlank(newValue) || isEqual(newValue, oldValue)) return;
 
-        const data_sent = keyExists(['files', 'file'], temp_value.value) ? { ...temp_value.value } : temp_value.value;
-        if (keyExists(['files', 'file'], temp_value.value)) {
-            data_sent['files'] = [];
-            data_sent['file'] = [];
-        }
+        const input_value = typeof temp_value.value === 'string' ? temp_value.value : '';
 
         const applyList = (res: any) => {
             if (isBlank(res) || size(res) === 0) return;
@@ -161,7 +157,7 @@
             search();
         };
 
-        getCachedApiIDB(props.route, { ...(props.data ?? {}), input_value: data_sent }, null, undefined, applyList).then(applyList);
+        getCachedApiIDB(props.route, { ...(props.data ?? {}), input_value }, null, undefined, applyList).then(applyList);
         return;
     }, { deep: true, immediate: true });
 
@@ -264,22 +260,24 @@
     });
 </script>
 
-<style lang="scss">
-.p-autocomplete {
-    width: 100%;
-    position: relative;
-    display: flex;
-    align-items: center;
-
-    .p-autocomplete-input {
+<style lang="scss" scoped>
+.max-input-auto-complete-api {
+    :deep(.p-autocomplete) {
         width: 100%;
-        height: 36px;
-        border: none;
-        outline: none;
-        background: transparent;
-        font-size: 0.9rem;
-        color: var(--text-c, #334155);
-        padding: 0 10px;
+        position: relative;
+        display: flex;
+        align-items: center;
+
+        .p-autocomplete-input {
+            width: 100%;
+            height: 36px;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 0.9rem;
+            color: var(--background-700);
+            padding: 0 10px;
+        }
     }
 }
 
@@ -288,58 +286,62 @@
     inset: 0;
     z-index: 1100;
     background: transparent;
-}
 
-.p-autocomplete-overlay {
-    position: fixed;
-    z-index: 1101;
-    background: var(--background-0, #fff);
-    border: 1px solid var(--surface-border, #e2e8f0);
-    border-radius: 6px;
-    box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
-    max-height: 240px;
-    overflow-y: auto;
-    scrollbar-width: thin;
+    .p-autocomplete-overlay {
+        position: fixed;
+        z-index: 1101;
+        background: var(--background-0, #fff);
+        border: 1px solid var(--surface-border, #e2e8f0);
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+        max-height: 240px;
+        overflow-y: auto;
+        scrollbar-width: thin;
 
-    .p-autocomplete-list {
-        list-style: none;
-        margin: 0;
-        padding: 4px 0;
+        .p-autocomplete-list-container {
+            .p-autocomplete-list {
+                list-style: none;
+                margin: 0;
+                padding: 4px 0;
 
-        .p-autocomplete-item {
-            cursor: pointer;
+                .p-autocomplete-item {
+                    cursor: pointer;
 
-            &:hover, &.p-autocomplete-item-active {
-                background-color: var(--background-100, #f1f5f9);
+                    &:hover,
+                    &.p-autocomplete-item-active {
+                        background-color: var(--background-100, #f1f5f9);
+                    }
+
+                    .autocomplete-item-select {
+                        height: 40px;
+                        padding: 10px;
+                        position: relative;
+                        display: grid;
+                        place-items: center start;
+                        grid-template-columns: 1fr auto;
+                        gap: 25px;
+                        width: 100%;
+
+                        .autocomplete-item-select-label {
+                            font-size: 0.9rem;
+                            max-width: 100%;
+                            white-space: nowrap;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            color: var(--background-700);
+                        }
+
+                        .autocomplete-item-select-sub-label {
+                            display: grid;
+                            place-items: center;
+                            font-size: 0.9em;
+                            min-width: 15px;
+                            color: var(--background-650);
+                        }
+                    }
+                }
             }
         }
-    }
-}
-
-.autocomplete-item-select {
-    height: 40px;
-    padding: 10px;
-    position: relative;
-    display: grid;
-    place-items: center start;
-    grid-template-columns: 1fr auto;
-    gap: 25px;
-    width: 100%;
-
-    .autocomplete-item-select-label {
-        font-size: 0.9rem;
-        max-width: 100%;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .autocomplete-item-select-sub-label {
-        display: grid;
-        place-items: center;
-        font-size: 0.9em;
-        min-width: 15px;
-        color: var(--background-500);
     }
 }
 </style>

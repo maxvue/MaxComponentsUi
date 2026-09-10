@@ -1,5 +1,5 @@
 <template>
-    <MaxButton :label="props.label" :icon="props.icon" :i="props.i" :blank="props.blank" :route="props.route" :data="props.data" :params="props.params" :rotate="props.rotate" :flip="props.flip" :size="props.size" :scale="props.scale" :severity="props.severity" :variant="props.variant" :loading="props.loading" :width="props.width" :height="props.height" :dark="props.dark" :light="props.light" v-tooltip="null" pointer :action="onClickToggle" ref="btn_el" />
+    <MaxButton class="max-button-confirm" :label="props.label" :icon="props.icon" :i="props.i" :blank="props.blank" :route="props.route" :data="props.data" :params="props.params" :rotate="props.rotate" :flip="props.flip" :size="props.size" :scale="props.scale" :severity="props.severity" :variant="props.variant" :loading="props.loading" :width="props.width" :height="props.height" :dark="props.dark" :light="props.light" v-tooltip="null" pointer :action="onClickToggle" ref="btn_el" />
 </template>
 
 <script setup lang="ts">

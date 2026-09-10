@@ -1,10 +1,8 @@
 <template>
-    <div v-if="!isMobile" class="search-top-bar">
+    <div v-if="!isMobile" class="max-top-menu-search-bar search-top-bar">
         <MaxInputText
             ref="input_search_ref"
             v-model="search_bar.input_value"
-            w-max-400
-            flex
             :placeholder="props.placeholder"
             class="search-top-bar-input"
             :icon="search_bar.is_filtering ? 'eos-icons:loading' : 'material-symbols:search-rounded'"
@@ -35,7 +33,6 @@
                         <MaxInputText
                             ref="input_search_mobile_ref"
                             v-model="search_bar.input_value"
-                            flex
                             :placeholder="props.placeholder"
                             class="search-top-bar-input mobile-input"
                             :icon="search_bar.is_filtering ? 'eos-icons:loading' : 'material-symbols:search-rounded'"
@@ -131,40 +128,61 @@
     onUnmounted(() => document.removeEventListener('keydown', handleSearchKeydown));
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .search-top-bar {
         position: relative;
         display: grid;
         width: 100%;
-        height: 36px;
+        height: 38px;
         place-items: center;
 
-        .max-input-field-div {
+        :deep(.max-input-main-div) {
+            grid-template-rows: 1fr !important;
+            height: 100% !important;
+            width: 100% !important;
+        }
+
+        :deep(.input-message) {
+            display: none !important;
+        }
+
+        :deep(.max-input-field-div) {
             border: none !important;
             outline: rgb(255 255 255 / 10%) 1px solid !important;
             background-color: rgb(0 0 0 / 10%) !important;
+            height: 38px !important;
+            width: 100% !important;
+            border-radius: 8px;
         }
 
         .search-top-bar-input {
             position: relative;
+            width: 100%;
+            max-width: 520px;
+            display: flex;
+            align-items: center;
 
-            input {
+            :deep(input) {
                 border-color: rgb(255 255 255 / 7%);
                 background-color: rgb(255 255 255 / 7%);
                 color: rgb(255 255 255 / 70%);
-                padding-left: 35px !important;
+                padding: 0 12px 0 38px !important;
+                height: 100% !important;
+                font-size: 0.9rem;
             }
 
-            .max-icon-div {
+            :deep(.max-icon-div) {
+                margin-left: 6px;
+
                 svg {
-                    color: rgb(255 255 255 / 20%) !important;
+                    color: rgb(255 255 255 / 40%) !important;
                 }
             }
 
-            .checkbox-search-top {
+            :deep(.checkbox-search-top) {
                 position: absolute;
-                right: 15px;
-                bottom: 8px;
+                right: 12px;
+                bottom: 9px;
                 display: grid;
                 place-items: center start;
 
@@ -182,7 +200,7 @@
             }
         }
 
-        .p-checkbox-box {
+        :deep(.p-checkbox-box) {
             border: 1px solid rgb(255 255 255 / 10%) !important;
             background-color: rgb(255 255 255 / 10%) !important;
             min-width: 16px !important;
@@ -192,11 +210,7 @@
             transform: translateX(-45px) !important;
         }
 
-        input {
-            padding: 0 !important;
-        }
-
-        .p-checkbox-input {
+        :deep(.p-checkbox-input) {
             padding: 0 !important;
         }
     }
@@ -221,7 +235,7 @@
         z-index: 950;
         box-sizing: border-box;
         padding: 0.6rem 0.75rem;
-        background-color: var(--blue-850, #0f172a);
+        background-color: var(--layout-shell-bg, #003048);
         box-shadow: 0 8px 24px rgb(0 0 0 / 35%);
 
         .mobile-search-content {
@@ -231,6 +245,7 @@
             width: 100%;
 
             .mobile-input {
+                display: flex;
                 flex: 1;
                 min-width: 0;
             }

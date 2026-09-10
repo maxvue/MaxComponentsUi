@@ -1,5 +1,5 @@
 <template>
-    <div class="max-icon-ai-animated" :class="{ 'is-animated': animated && !props.done }" :style="sizeStyles" >
+    <div class="max-ai-icon max-icon-ai-animated" :class="{ 'is-animated': animated && !props.done }" :style="sizeStyles" >
         <div class="img-p-top" v-if="!props.done" >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
                 <path d="M0 0h16v16H0z" fill="none" />

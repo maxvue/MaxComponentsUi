@@ -132,5 +132,9 @@ export interface MaxAppConfig {
     googleMapsApiKey?: string;
     /** ID do mapa do Google Maps usado pelo componente MaxMaps. */
     googleMapsMapId?: string;
+    /** Logo padrão da aplicação (URL ou nome de rota). */
+    logo?: string;
+    /** Rota de destino ao clicar na logo. Padrão: '/'. */
+    routeLogo?: string;
 }
 

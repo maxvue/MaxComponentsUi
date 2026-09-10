@@ -38,7 +38,7 @@
     const should_render = computed(() => ! context.lazy.value || was_active.value);
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .max-tab-panel {
         width: 100%;
     }

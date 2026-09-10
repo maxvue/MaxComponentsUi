@@ -1,5 +1,5 @@
 <template>
-    <div ref="rootRef" class="input-upload-file-main-div" :class="{ 'is-dragover': isOverDropZone }" v-bind="attrs">
+    <div ref="rootRef" class="max-input-file-upload input-upload-file-main-div" :class="{ 'is-dragover': isOverDropZone }" v-bind="attrs">
         <input
             ref="nativeInputRef"
             type="file"
@@ -48,9 +48,9 @@
                     </slot>
                 </div>
                 <div v-else-if="uploading || attrs.uploading">
-                    <div class="flex" gap-30>
+                    <div class="upload-loading-state">
                         <div class="max-spinner" role="status" aria-label="Loading"></div>
-                        <div>Carregando arquivos</div>
+                        <div class="upload-loading-text">Carregando arquivos</div>
                     </div>
                 </div>
                 <div v-else-if="showError">
@@ -76,8 +76,8 @@
         <div class="file-upload-content-div" :disabled="attrs.disabled ?? false">
             <div class="files-icons" v-if="modelValue.length > 0">
                 <div v-for="(file, index) in modelValue" :key="file.id || index" class="file-icon" @click="$emit('file-click', file)">
-                    <Icon icon="ph:file-pdf-light" v-if="getFileExtension(file?.file_name || '') === 'pdf'" size="1.8" p0 />
-                    <Icon icon="ph:file-jpg-light" v-if="['jpg', 'jpeg'].includes(getFileExtension(file?.file_name || ''))" size="1.8" p0 />
+                    <Icon icon="ph:file-pdf-light" v-if="getFileExtension(file?.file_name || '') === 'pdf'" size="1.8" />
+                    <Icon icon="ph:file-jpg-light" v-if="['jpg', 'jpeg'].includes(getFileExtension(file?.file_name || ''))" size="1.8" />
                     <Icon icon="ph:file-png-light" v-if="getFileExtension(file?.file_name || '') === 'png'" size="1.8" />
                     <Icon icon="fa:check-circle" class="file-check" size="0.7" />
                     <img :src="file?.thumbnail ? `/media/thumbnails/${file.thumbnail}` : file?.src" alt="Image" v-show="!file.file_name" />
@@ -247,7 +247,7 @@
     const getFileExtension = (fileName: string) => (fileName ? fileName.split('.').pop()?.toLowerCase() : '') || '';
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .input-upload-file-main-div {
         &:not(.no-style) {
             height: 100%;
@@ -255,6 +255,17 @@
             border-radius: calc(1rem - 5px);
             padding-left: 0;
             position: relative;
+
+            .upload-loading-state {
+                display: flex;
+                align-items: center;
+                gap: 30px;
+
+                .upload-loading-text {
+                    font-size: 0.9rem;
+                    color: var(--background-750);
+                }
+            }
 
             .max-spinner {
                 width: 20px;
@@ -309,7 +320,7 @@
                 &[disabled='true'] {
                     .label-file-upload {
                         font-weight: 400;
-                        color: var(--background-400);
+                        color: var(--background-650);
                         cursor: not-allowed;
                     }
                 }
@@ -319,7 +330,7 @@
                     display: grid;
                     place-items: center start !important;
                     height: auto;
-                    color: var(--background-600);
+                    color: var(--background-700);
                     cursor: pointer;
 
                     &:hover {
@@ -338,7 +349,7 @@
                 width: 100%;
                 font-size: 0.9rem;
                 font-weight: 300 !important;
-                color: var(--text-c);
+                color: var(--background-700);
                 cursor: pointer;
                 border: none !important;
                 position: absolute;
@@ -365,7 +376,7 @@
                 padding: 0 5px;
 
                 .icon-div {
-                    color: var(--background-600) !important;
+                    color: var(--background-650) !important;
                 }
 
                 &:hover {

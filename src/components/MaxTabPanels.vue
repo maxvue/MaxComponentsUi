@@ -11,7 +11,7 @@
     injectTabsContext('MaxTabPanels');
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .max-tab-panels {
         padding: 1rem 0;
     }

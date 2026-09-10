@@ -1,5 +1,5 @@
 <template>
-    <InputBase v-bind="{ ...props, ...attrs }" class="max-select-tag" input-click-auto no-dropdown>
+    <InputBase v-bind="{ ...props, ...attrs }" class="max-tag-select max-select-tag" input-click-auto no-dropdown>
         <div v-if="showPlaceholder" class="tab-placeholder-select">
             {{ placeholderText }}
         </div>
@@ -46,8 +46,8 @@
             </div>
         </div>
 
-        <Teleport to="body">
-            <div v-if="isOpen" class="max-select-tag-backdrop" @click="hide">
+        <Teleport to="body" v-if="isOpen">
+            <div class="max-select-tag-backdrop" @click="hide">
                 <div
                     ref="overlayEl"
                     class="p-select-overlay"
@@ -214,7 +214,7 @@
         let text = contrastColor(background);
         if (color_string === 'unset' && !is_value) {
             background = hover ? 'rgba(0,0,0, 0.1)' : 'transparent';
-            text = hover ? 'var(--background-600)' : 'var(--background-650)';
+            text = hover ? 'var(--background-775)' : 'var(--background-700)';
         }
 
         return {
@@ -360,265 +360,256 @@
     );
 </script>
 
-<style lang="scss">
-.max-select-tag-backdrop {
-    top: 0;
-    left: 0;
-    position: fixed;
-    width: 100vw;
-    height: 100vh;
-    z-index: 9999 !important;
-
-    .p-select-list-container {
-        padding: 10px;
-    }
-
-    .p-select-option.p-select-option-selected {
-        background-color: unset !important;
-    }
-
-    .label-tag-div {
-        background-color: none !important;
-    }
-}
-
-.max-select-tag {
-    &.max-input-main-div .max-input-field-div:focus-within {
-        outline: none !important;
-    }
-
-    .p-select {
-        width: 100% !important;
-    }
-
-    .value-tag-div > .max-icon-div {
-        width: auto !important;
-        padding: 3px 10px 3px 3px !important;
-
-        .max-icon {
-            padding: 0 !important;
+<style lang="scss" scoped>
+    .max-select-tag {
+        &.max-input-main-div :deep(.max-input-field-div:focus-within) {
+            outline: none !important;
         }
-    }
 
-    .max-input-field-div {
-        width: 100%;
+        :deep(.max-input-field-div) {
+            width: 100%;
 
-        .input-slot-div {
-            margin: 0 !important;
-            width: 100% !important;
-            padding: 0 !important;
-
-            .value-tag-div {
-                grid-template-columns: auto 1fr auto;
+            .input-slot-div {
+                margin: 0 !important;
                 width: 100% !important;
                 padding: 0 !important;
+
+                .value-tag-div {
+                    grid-template-columns: auto 1fr auto;
+                    width: 100% !important;
+                    padding: 0 !important;
+                }
             }
         }
-    }
 
-    .input-slot-div {
-        padding: 0 !important;
-    }
-
-    .p-select-label {
-        padding: 0 !important;
-    }
-
-    &[small] {
-        padding: 0 !important;
-
-        .p-select {
-            padding: 0 5px 0 0 !important;
-
-            span {
-                font-size: 0.85rem !important;
-            }
-        }
-    }
-
-    .p-select {
-        width: 100%;
-        height: 36px !important;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        outline: none;
-    }
-
-    .p-select-label {
-        border: none !important;
-        padding: 0 10px !important;
-        display: grid;
-        place-items: center start;
-        outline: none !important;
-        height: 32px !important;
-        flex: 1;
-
-        &:focus {
-            border: none !important;
-            outline: none !important;
-            outline-offset: 0 !important;
-            box-shadow: none;
-        }
-    }
-
-    .tab-placeholder-select {
-        position: absolute;
-        color: var(--background-650);
-        font-size: 0.9rem;
-        z-index: 1;
-        display: grid;
-        place-items: center;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-    }
-
-    &[flex], &[full] {
-        .p-select, .p-select-label, .value-tag-div, .tag-value-text {
-            height: 100% !important;
-            max-height: 100% !important;
-            display: grid;
-        }
-
-        .tag-value-text {
-            display: grid;
-            place-items: center start;
-        }
-    }
-}
-
-.label-tag-div {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    width: 100% !important;
-    place-items: center start;
-    gap: 10px;
-    height: 30px;
-
-    .sub-label-tag {
-        padding-left: 1rem;
-        text-align: right;
-        width: 100%;
-        font-size: 0.85rem;
-    }
-
-    .label-tag {
-        place-items: center;
-        display: flex;
-        flex-flow: row nowrap;
-    }
-
-    img {
-        max-height: 20px;
-    }
-}
-
-.value-tag-div {
-    grid-template-columns: auto 1fr auto;
-    place-items: center;
-    padding: unset;
-    display: grid;
-    overflow: hidden;
-    position: relative;
-    width: fit-content;
-    max-width: 100%;
-    gap: 4px;
-
-    .tag-value-text {
-        max-width: 100% !important;
-        position: relative;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-}
-
-.p-select-option {
-    cursor: pointer;
-    padding: 2px 4px;
-
-    .category {
-        width: 20px;
-        margin-right: 10px;
-        display: grid;
-        place-items: center;
-        border-radius: 5px;
-    }
-}
-
-.p-select-header {
-    padding: 6px !important;
-    z-index: 1 !important;
-
-    .p-select-filter-container {
-        width: 100%;
-
-        .p-select-filter {
-            width: 100%;
-            padding: 4px 8px;
-            border: 1px solid var(--surface-border, #e2e8f0);
-            border-radius: 4px;
-            outline: none;
-            font-size: 0.85rem;
-        }
-    }
-}
-
-.p-select-overlay {
-    position: fixed;
-    z-index: 1101;
-    background: var(--background-0, #fff);
-    border: 1px solid var(--surface-border, #e2e8f0);
-    border-radius: 6px;
-    box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    transform: translateY(-10px);
-
-    &:has(.label-tag-div) {
-        .p-select-option {
+        :deep(.input-slot-div) {
             padding: 0 !important;
         }
 
-        .p-select-list {
-            gap: 5px !important;
+        .tab-placeholder-select {
+            position: absolute;
+            color: var(--background-650);
+            font-size: 0.9rem;
+            z-index: 1;
+            display: grid;
+            place-items: center;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .p-select {
+            width: 100% !important;
+            height: 36px !important;
+            cursor: pointer;
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            outline: none;
+
+            .p-select-label {
+                border: none !important;
+                padding: 0 10px !important;
+                display: grid;
+                place-items: center start;
+                outline: none !important;
+                height: 32px !important;
+                flex: 1;
+
+                &:focus {
+                    border: none !important;
+                    outline: none !important;
+                    outline-offset: 0 !important;
+                    box-shadow: none;
+                }
+
+                .value-tag-div {
+                    grid-template-columns: auto 1fr auto;
+                    place-items: center;
+                    padding: unset;
+                    display: grid;
+                    overflow: hidden;
+                    position: relative;
+                    width: fit-content;
+                    max-width: 100%;
+                    gap: 4px;
+
+                    :deep(> .max-icon-div) {
+                        width: auto !important;
+                        padding: 3px 10px 3px 3px !important;
+
+                        .max-icon {
+                            padding: 0 !important;
+                        }
+                    }
+
+                    .tag-value-text {
+                        max-width: 100% !important;
+                        position: relative;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    }
+                }
+            }
         }
 
-        .p-select-list-container {
-            max-height: 635px !important;
+        &[small] {
+            padding: 0 !important;
+
+            .p-select {
+                padding: 0 5px 0 0 !important;
+
+                span {
+                    font-size: 0.85rem !important;
+                }
+            }
         }
 
-        &:has(.p-select-header) {
-            .p-select-list-container {
-                padding-top: 14px !important;
+        &[flex], &[full] {
+            .p-select,
+            .p-select .p-select-label,
+            .p-select .p-select-label .value-tag-div,
+            .p-select .p-select-label .value-tag-div .tag-value-text {
+                height: 100% !important;
+                max-height: 100% !important;
+                display: grid;
+            }
+
+            .p-select .p-select-label .value-tag-div .tag-value-text {
+                display: grid;
+                place-items: center start;
             }
         }
     }
-}
 
-.p-select-list-container {
-    scrollbar-width: thin;
-    overflow-y: auto;
+    .max-select-tag-backdrop {
+        top: 0;
+        left: 0;
+        position: fixed;
+        width: 100vw;
+        height: 100vh;
+        z-index: 9999 !important;
 
-    ::-webkit-scrollbar {
-        width: 3px;
-        height: 3px;
+        .p-select-overlay {
+            position: fixed;
+            z-index: 1101;
+            background: var(--background-0, #fff);
+            border: 1px solid var(--surface-border, #e2e8f0);
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transform: translateY(-10px);
+
+            .p-select-header {
+                padding: 6px !important;
+                z-index: 1 !important;
+
+                .p-select-filter-container {
+                    width: 100%;
+
+                    .p-select-filter {
+                        width: 100%;
+                        padding: 4px 8px;
+                        border: 1px solid var(--surface-border, #e2e8f0);
+                        border-radius: 4px;
+                        outline: none;
+                        font-size: 0.85rem;
+                    }
+                }
+            }
+
+            .p-select-list-container {
+                padding: 10px;
+                scrollbar-width: thin;
+                overflow-y: auto;
+
+                ::-webkit-scrollbar {
+                    width: 3px;
+                    height: 3px;
+                }
+
+                .p-virtualscroller {
+                    max-height: 250px !important;
+                    overflow: hidden !important;
+                    overflow-y: auto !important;
+                }
+
+                .p-select-list {
+                    .p-select-option {
+                        cursor: pointer;
+                        padding: 2px 4px;
+
+                        &.p-select-option-selected {
+                            background-color: unset !important;
+                        }
+
+                        .category {
+                            width: 20px;
+                            margin-right: 10px;
+                            display: grid;
+                            place-items: center;
+                            border-radius: 5px;
+                        }
+
+                        .label-tag-div {
+                            display: grid;
+                            grid-template-columns: auto 1fr auto;
+                            width: 100% !important;
+                            place-items: center start;
+                            gap: 10px;
+                            height: 30px;
+                            background-color: none !important;
+
+                            .label-tag {
+                                place-items: center;
+                                display: flex;
+                                flex-flow: row nowrap;
+                            }
+
+                            .sub-label-tag {
+                                padding-left: 1rem;
+                                text-align: right;
+                                width: 100%;
+                                font-size: 0.85rem;
+                            }
+
+                            img {
+                                max-height: 20px;
+                            }
+                        }
+                    }
+                }
+            }
+
+            &:has(.label-tag-div) {
+                .p-select-list-container {
+                    max-height: 635px !important;
+
+                    .p-select-list {
+                        gap: 5px !important;
+                        display: flex;
+                        flex-direction: column;
+
+                        .p-select-option {
+                            padding: 0 !important;
+                        }
+                    }
+                }
+
+                &:has(.p-select-header) {
+                    .p-select-list-container {
+                        padding-top: 14px !important;
+                    }
+                }
+            }
+        }
     }
 
-    .p-virtualscroller {
-        max-height: 250px !important;
-        overflow: hidden !important;
-        overflow-y: auto !important;
+    [transparent] {
+        :deep(.p-floatlabel), .p-select {
+            background-color: transparent !important;
+        }
     }
-}
-
-[transparent] {
-    .p-floatlabel, .p-select {
-        background-color: transparent !important;
-    }
-}
 </style>

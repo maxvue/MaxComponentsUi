@@ -1,5 +1,5 @@
 <template>
-    <div :class="`input-toggle-field-main-div ${attrs.label !== undefined ? 'labeled' : ''}`">
+    <div :class="`max-input-toggle input-toggle-field-main-div ${attrs.label !== undefined ? 'labeled' : ''}`">
         <div :class="`input-toggle-field-label-main-div ${attrs.labelCenter !== undefined ? 'label-center' : ''}`">
             <div class="input-toggle-field-label-div" v-if="attrs.label !== undefined">
                 {{ attrs.label }}
@@ -93,7 +93,7 @@
     defineExpose({ update_value, modelvalue });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .input-toggle-field-main-div {
         display: grid;
         place-items: start center;
@@ -129,7 +129,7 @@
                 z-index: 1;
                 font-family: Jost, sans-serif !important;
                 font-size: 0.85rem;
-                color: var(--background-600);
+                color: var(--background-750);
 
                 &::after {
                     content: '';
@@ -175,7 +175,7 @@
                 }
 
                 .input-toggle-field-label {
-                    color: var(--background-650);
+                    color: var(--background-700);
                     font-weight: 400;
 
                     &.active {

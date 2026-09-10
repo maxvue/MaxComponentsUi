@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import * as sass from 'sass';
 import MaxModal from '../../src/components/MaxModal.vue';
 import { useModalStore } from '../../src/stores/useModal.Store';
 
@@ -472,6 +475,28 @@ describe('MaxModal', () => {
 
             const modalNumber = wrapperNumber.find('.max-modal');
             expect(modalNumber.attributes('style')).toContain('padding: 16px');
+        });
+    });
+
+    describe('Barras de rolagem invisíveis (0px de largura)', () => {
+        it('declara regras CSS para barras de rolagem internas invisíveis (0px de largura e altura) no MaxModal e descendentes', () => {
+            const sfc = readFileSync(resolve(__dirname, '../../src/components/MaxModal.vue'), 'utf-8');
+            const styleMatch = /<style[^>]*>([\s\S]*?)<\/style>/.exec(sfc);
+            expect(styleMatch).not.toBeNull();
+
+            const compiledCss = sass.compileString(styleMatch![1]).css;
+
+            // Valida no container raiz do modal .max-modal
+            expect(compiledCss).toMatch(/\.max-modal\s*\{[^}]*scrollbar-width:\s*none/);
+            expect(compiledCss).toMatch(/\.max-modal\s*\{[^}]*-ms-overflow-style:\s*none/);
+            expect(compiledCss).toMatch(/\.max-modal::-webkit-scrollbar\s*\{[^}]*width:\s*0/);
+            expect(compiledCss).toMatch(/\.max-modal::-webkit-scrollbar\s*\{[^}]*height:\s*0/);
+
+            // Valida nos elementos internos descendentes .max-modal *
+            expect(compiledCss).toMatch(/\.max-modal\s+\*\s*\{[^}]*scrollbar-width:\s*none/);
+            expect(compiledCss).toMatch(/\.max-modal\s+\*\s*\{[^}]*-ms-overflow-style:\s*none/);
+            expect(compiledCss).toMatch(/\.max-modal\s+\*::-webkit-scrollbar\s*\{[^}]*width:\s*0/);
+            expect(compiledCss).toMatch(/\.max-modal\s+\*::-webkit-scrollbar\s*\{[^}]*height:\s*0/);
         });
     });
 });

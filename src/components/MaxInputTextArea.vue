@@ -1,5 +1,5 @@
 <template>
-    <InputBase v-bind="{...props}" class="input-text-area-main-div">
+    <InputBase v-bind="{...props}" class="max-input-text-area input-text-area-main-div">
         <textarea
             ref="textAreaEl"
             class="max-textarea"
@@ -145,11 +145,11 @@
     watch(() => props.modelValue, (val) => temp_value.value = val ?? '');
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .input-text-area-main-div {
         grid-template-rows: auto auto;
 
-        .max-input-field-div {
+        :deep(.max-input-field-div) {
             height: auto !important;
             padding: 8px 0 5px !important;
 
@@ -166,6 +166,12 @@
             outline: none;
             resize: none;
             overflow-y: auto;
+            color: var(--background-700);
+            font-family: inherit;
+
+            &::placeholder {
+                color: var(--background-650);
+            }
 
             &[no-border] {
                 border: none !important;

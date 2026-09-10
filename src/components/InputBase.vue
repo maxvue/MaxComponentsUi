@@ -1,5 +1,5 @@
 <template>
-    <div class="max-input-main-div" :class="`${props.float !== undefined ? 'float' : ''} ${done ? 'done' : ''} ${!noStatus && caution ? 'caution' : ''} ${textCenter ? 'text-center' : ''} ${textRight ? 'text-right' : ''} ${props.class ? props.class : ''} ${!noStatus &&  isError ? 'error' : ''} ${inLine ? 'in-line' : ''}`">
+    <div class="max-input-base max-input-main-div" :class="`${props.float !== undefined ? 'float' : ''} ${done ? 'done' : ''} ${!noStatus && caution ? 'caution' : ''} ${textCenter ? 'text-center' : ''} ${textRight ? 'text-right' : ''} ${props.class ? props.class : ''} ${!noStatus &&  isError ? 'error' : ''} ${inLine ? 'in-line' : ''}`">
         <!-- INPUT LABEL -->
         <!--
             `for` aponta para `input_id`, o id exposto via slot prop `inputId`.
@@ -21,24 +21,24 @@
             adicional ate que os consumidores adotem o slot prop `inputId`.
         -->
         <div class="max-input-field-div" :aria-invalid="isError ? 'true' : undefined">
-            <MaxIcon :icon="props.iconLeft ?? props.icon ?? props.i" :size="1.2" :light="light" :dark="dark" v-if="hasContent(props.iconLeft ?? props.icon ?? props.i) && !props.noIcon && (props.iconLeft || props.iconPos === 'left')" ml-5 />
+            <MaxIcon :icon="props.iconLeft ?? props.icon ?? props.i" :size="1.2" :light="light" :dark="dark" v-if="hasContent(props.iconLeft ?? props.icon ?? props.i) && !props.noIcon && (props.iconLeft || props.iconPos === 'left')" class="input-icon-left" />
             <div v-else></div>
-            <div mr-3 ml-3 w-full class="input-slot-div">
+            <div class="input-slot-div">
                 <slot :input-id="input_id" :message-id="message_id"></slot>
             </div>
-            <MaxIcon :icon="props.iconRight ?? props.icon ?? props.i" :size="1.2" :light="light" :dark="dark" v-if="hasContent(props.iconRight ?? props.icon ?? props.i) && !props.noIcon && (props.iconRight || props.iconPos === 'right')" mr-5  />
+            <MaxIcon :icon="props.iconRight ?? props.icon ?? props.i" :size="1.2" :light="light" :dark="dark" v-if="hasContent(props.iconRight ?? props.icon ?? props.i) && !props.noIcon && (props.iconRight || props.iconPos === 'right')" class="input-icon-right" />
             <div v-else></div>
 
             <!-- INPUT STATUS ICON -->
             <div class="input-status-icon" :class="{ 'with-icon-right': hasIconRight }">
                 <div class="is-done" v-if="done && !noDone && !noStatus">
-                    <MaxIcon icon="lets-icons:check-fill" :size="0.8" :light="light" :dark="dark" color-green-700 />
+                    <MaxIcon icon="lets-icons:check-fill" :size="0.8" :light="light" :dark="dark" />
                 </div>
                 <div class="is-caution" v-else-if="caution && !noCaution && !noStatus">
-                    <MaxIcon icon="humbleicons:exclamation" :size="0.8" :light="light" :dark="dark" color-orange-600 />
+                    <MaxIcon icon="humbleicons:exclamation" :size="0.8" :light="light" :dark="dark" />
                 </div>
                 <div class="is-error" v-else-if="error && !noError && !noStatus">
-                    <MaxIcon icon="humbleicons:exclamation" :size="0.8" :light="light" :dark="dark" color-red-700 />
+                    <MaxIcon icon="humbleicons:exclamation" :size="0.8" :light="light" :dark="dark" />
                 </div>
                 <!--
                     `aria-hidden` porque este asterisco e apenas um indicador visual
@@ -182,28 +182,32 @@
     const hasIconRight = computed(() => hasContent(props.iconRight ?? props.icon ?? props.i) && !props.noIcon && Boolean(props.iconRight || props.iconPos === 'right'));
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .max-input-main-div {
     display: grid !important;
     grid-template-rows: 36px 19px;
     position: relative;
     place-items: center;
 
-    input {
-        color: var(--background-700);
+    :deep() {
+        input, textarea {
+            color: var(--background-700);
+
+            &::placeholder {
+                color: var(--background-650);
+            }
+        }
     }
 
     .max-input-label {
         position: absolute;
         pointer-events: none;
         line-height: 1;
-
-        // color: var(--background-600);
         top: calc((0.75rem / 2) * -1);
         left: 20px;
         padding: 0 5px !important;
         font-size: 0.75rem;
-        color: var(--background-650) !important;
+        color: var(--background-750) !important;
         height: 0.75rem;
         z-index: 1;
 
@@ -247,7 +251,25 @@
             outline: 1px solid var(--blue-700) !important;
         }
 
-        input, textarea, label, .p-select, .p-select-label {
+        .input-icon-left {
+            margin-left: 5px;
+        }
+
+        .input-icon-right {
+            margin-right: 5px;
+        }
+
+        .input-slot-div {
+            margin-right: 3px;
+            margin-left: 3px;
+            width: 100%;
+        }
+
+        :deep(input),
+        :deep(textarea),
+        :deep(label),
+        :deep(.p-select),
+        :deep(.p-select-label) {
             &:not(.max-input-otp-cell) {
                 outline: none !important;
                 background-color: transparent !important;
@@ -290,21 +312,21 @@
         }
     }
 
-
     &.text-center {
-        input {
+        :deep(input) {
             text-align: center !important;
         }
     }
 
     &.text-right {
-        input {
+        :deep(input) {
             text-align: right !important;
         }
     }
 
     &.caution {
-        label, .max-input-label {
+        label,
+        .max-input-label {
             color: var(--orange-600);
         }
 
@@ -316,7 +338,7 @@
             }
         }
 
-        .p-select {
+        :deep(.p-select) {
             border-color: var(--orange-600);
         }
 
@@ -330,7 +352,8 @@
     }
 
     &.error {
-        label, .max-input-label {
+        label,
+        .max-input-label {
             color: var(--max-red-600);
         }
 
@@ -342,11 +365,11 @@
             }
         }
 
-        input {
+        :deep(input) {
             border-color: var(--max-red-600);
         }
 
-        .p-select {
+        :deep(.p-select) {
             border-color: var(--max-red-600);
         }
 
@@ -361,12 +384,16 @@
 
     &[input-click] {
         &:not([input-click='false']) {
-            .p-select-label {
+            :deep(.p-select-label) {
                 min-height: 10px !important;
                 max-height: 10px !important;
             }
 
-            span, input, select, .p-select, .p-inputnumber {
+            :deep(span),
+            :deep(input),
+            :deep(select),
+            :deep(.p-select),
+            :deep(.p-inputnumber) {
                 width: calc(100% - 4px) !important;
                 border: none !important;
                 border-color: transparent !important;
@@ -377,22 +404,25 @@
                 color: var(--background-700);
                 font-weight: 450;
                 padding: 0 5px;
-
             }
         }
     }
 
     &[input-click-auto] {
         &:not([input-click='false']) {
-            .p-select {
+            :deep(.p-select) {
                 padding: 0 !important;
             }
 
-            .p-select-label {
+            :deep(.p-select-label) {
                 padding: 0 !important;
             }
 
-            span, input, select, .p-select, .p-inputnumber {
+            :deep(span),
+            :deep(input),
+            :deep(select),
+            :deep(.p-select),
+            :deep(.p-inputnumber) {
                 &:not(.max-input-otp-cell) {
                     width: 100% !important;
                     border: none !important;
@@ -405,19 +435,18 @@
                     font-weight: 450;
                     padding: 0 5px;
                 }
-
             }
         }
     }
 
-    &[input-click], &[input-click-auto] {
+    &[input-click],
+    &[input-click-auto] {
         &:not([input-click='false']) {
             grid-template-rows: 1fr;
             height: 20px;
             padding: 0 !important;
 
-
-            .value-div {
+            :deep(.value-div) {
                 width: 100% !important;
                 border: none !important;
                 border-color: transparent !important;
@@ -441,12 +470,10 @@
         }
     }
 
-    // Remove forcadamente qualquer borda/outline do campo, inclusive nos estados
-    // de foco, erro e caution (que aplicam outline com !important mais acima).
-    // Encadeado com `&.error`/`&.caution` para vencer a especificidade daquelas
-    // regras, ja que `!important` sozinho nao desempata entre seletores iguais.
     &[no-border]:not([no-border='false']) {
-        &, &.error, &.caution {
+        &,
+        &.error,
+        &.caution {
             .max-input-field-div {
                 outline: none !important;
                 border: none !important;
@@ -460,7 +487,14 @@
             }
         }
 
-        input, textarea, select, .p-select, .p-select-label, .p-inputtext, .p-inputnumber, .value-div {
+        :deep(input),
+        :deep(textarea),
+        :deep(select),
+        :deep(.p-select),
+        :deep(.p-select-label),
+        :deep(.p-inputtext),
+        :deep(.p-inputnumber),
+        :deep(.value-div) {
             &:not(.max-input-otp-cell) {
                 outline: none !important;
                 border: none !important;
@@ -469,7 +503,8 @@
         }
     }
 
-    &[no-message], &[no-messages] {
+    &[no-message],
+    &[no-messages] {
         grid-template-rows: 1fr;
 
         .message-spacer {
@@ -477,11 +512,12 @@
         }
     }
 
-    &[full], &[flex] {
+    &[full],
+    &[flex] {
         width: 100% !important;
         height: 100% !important;
 
-        input {
+        :deep(input) {
             width: 100% !important;
             height: 100% !important;
             max-width: 100% !important;
@@ -490,32 +526,30 @@
         }
     }
 
-    &[slim], &[input-click] {
+    &[slim],
+    &[input-click] {
         grid-template-rows: 20px;
         height: 20px;
 
-        div, span, input, select, .p-select, .value-div, .value-text {
+        :deep(div),
+        :deep(span),
+        :deep(input),
+        :deep(select),
+        :deep(.p-select),
+        :deep(.value-div),
+        :deep(.value-text) {
             height: 20px !important;
             max-height: 20px !important;
             font-size: 0.8rem;
-
-
         }
 
         .message-spacer {
             display: none !important;
         }
 
-        .placeholder-select {
+        :deep(.placeholder-select) {
             left: 5px;
             top: 2px;
-
-        }
-    }
-
-    input {
-        &::placeholder {
-            color: var(--background-625);
         }
     }
 
@@ -530,7 +564,15 @@
             min-height: 100% !important;
         }
 
-        div, span, input, select, .p-select-label, .p-inputtext, .p-inputnumber, .p-component, .value-div {
+        :deep(div),
+        :deep(span),
+        :deep(input),
+        :deep(select),
+        :deep(.p-select-label),
+        :deep(.p-inputtext),
+        :deep(.p-inputnumber),
+        :deep(.p-component),
+        :deep(.value-div) {
             height: 100% !important;
 
             .value-div {
@@ -539,14 +581,22 @@
             }
         }
 
-        input, span, select, .p-select-label, .p-inputtext, .value-div, .value-text {
-            color: var(--background-650) !important;
+        :deep(input),
+        :deep(textarea),
+        :deep(span),
+        :deep(select),
+        :deep(.p-select-label),
+        :deep(.p-inputtext),
+        :deep(.value-div),
+        :deep(.value-text) {
+            color: var(--background-700) !important;
         }
 
-        // O select aninha .p-select > .p-select-label > .value-div > .value-text; sem isto
-        // cada nivel recebe o fundo acima e as pilulas aparecem empilhadas
-        .p-select {
-            .p-select-label, .value-div, .value-text, span {
+        :deep(.p-select) {
+            .p-select-label,
+            .value-div,
+            .value-text,
+            span {
                 background-color: transparent !important;
             }
         }
@@ -555,7 +605,7 @@
             font-size: 12px;
             font-weight: 500;
             background-color: transparent !important;
-            color: var(--background-650);
+            color: var(--background-700);
             text-align: left !important;
             width: fit-content !important;
             padding: 0 !important;
@@ -577,65 +627,84 @@
         }
     }
 
-    .p-inputtext, .p-datepicker, .p-autocomplete {
+    :deep(.p-inputtext),
+    :deep(.p-datepicker),
+    :deep(.p-autocomplete) {
         width: 100% !important;
     }
 
-    &.no-dropdown, &[no-dropdown] {
-        .p-select-dropdown {
+    &.no-dropdown,
+    &[no-dropdown] {
+        :deep(.p-select-dropdown) {
             display: none !important;
         }
 
         &.text-center {
-            .value-div, .p-select-label {
+            :deep(.value-div),
+            :deep(.p-select-label) {
                 padding: 0 !important;
             }
         }
     }
 
     &.text-center {
-        .value-div, .p-select-label {
+        :deep(.value-div),
+        :deep(.p-select-label) {
             width: 100%;
         }
 
-        .value-text, .p-select-label {
+        :deep(.value-text),
+        :deep(.p-select-label) {
             padding-left: 2.5rem;
         }
 
         &.no-dropdown {
-            .value-div, .p-select-label {
+            :deep(.value-div),
+            :deep(.p-select-label) {
                 padding-left: 0 !important;
             }
         }
 
-        input, .p-select-label {
+        :deep(input),
+        :deep(.p-select-label) {
             text-align: center !important;
         }
     }
-}
 
-.p-inputtext {
-    height: 36px;
+    :deep(.p-inputtext) {
+        height: 36px;
 
+        &[disabled] {
+            font-size: 12px;
+            font-weight: 500;
+            background: var(--background-75) !important;
+            color: var(--background-650) !important;
+        }
+    }
+
+    &[disabled='true'],
     &[disabled] {
-        background: var(--background-75) !important;
-        color: var(--background-400) !important;
+        background-color: unset !important;
+
+        :deep(input),
+        :deep(textarea),
+        :deep(span),
+        :deep(.p-floatlabel .p-select-label),
+        :deep(.p-inputtext) {
+            color: var(--background-650) !important;
+        }
+    }
+
+    :deep(.p-disabled) {
+        background-color: unset !important;
+
+        input,
+        textarea,
+        span,
+        .p-floatlabel .p-select-label,
+        .p-inputtext {
+            color: var(--background-650) !important;
+        }
     }
 }
-
-.p-disabled, [disabled='true'], [disabled] {
-    background-color: unset !important;
-
-    input, span, .p-floatlabel .p-select-label, .p-inputtext {
-        color: var(--background-575) !important;
-    }
-}
-
-.p-inputtext[disabled] {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--background-575) !important;
-}
-
-
 </style>

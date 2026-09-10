@@ -63,6 +63,18 @@ describe('MaxInputAutoCompleteApi.vue', () => {
         expect(maxUse.getCachedApiIDB).not.toHaveBeenCalled();
     });
 
+    it('não envia objeto complexo no input_value quando modelValue for objeto', async () => {
+        const wrapper = mountAutoCompleteApi({
+            data: { category: 1 },
+            modelValue: { id: '123', name: 'Painel Solar', specs: { voc: 40, isc: 10 } }
+        });
+        await wrapper.vm.$nextTick();
+
+        expect(maxUse.getCachedApiIDB).toHaveBeenCalled();
+        const [, payload] = (maxUse.getCachedApiIDB as any).mock.calls[0];
+        expect(payload).toEqual({ category: 1, input_value: '' });
+    });
+
     it('atualiza o valor quando modificado via props (não sobrescreve list)', async () => {
         const wrapper = mountAutoCompleteApi();
         (wrapper.vm as any).temp_value = '1';
