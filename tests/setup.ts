@@ -5,7 +5,6 @@
 import { vi } from 'vitest';
 import { config } from '@vue/test-utils';
 import { createPinia } from 'pinia';
-import PrimeVue from 'primevue/config';
 
 // Mock do localStorage para testes que utilizam cache
 const localStorageMock = (() => {
@@ -88,10 +87,9 @@ if (typeof globalThis.indexedDB === 'undefined') {
 // Mock do módulo virtual:uno.css (importado no index.ts)
 vi.mock('virtual:uno.css', () => ({}));
 
-// Configuração global do Vue Test Utils com PrimeVue + Pinia
+// Configuração global do Vue Test Utils com Pinia
 config.global.plugins = [
-    createPinia(),
-    [PrimeVue, { ripple: false }]
+    createPinia()
 ];
 
 // Stubs globais para componentes que dependem de diretivas externas.

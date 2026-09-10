@@ -1,7 +1,4 @@
-import Aura from '@primeuix/themes/aura';
-import { definePreset } from '@primeuix/themes';
-
-export const MaxStyle = definePreset(Aura, {
+export const MaxStyle = {
     semantic: {
         primary: {
             50: '#67C8DB',
@@ -69,4 +66,6 @@ export const MaxStyle = definePreset(Aura, {
             950: '#6C1919'
         }
     }
-});
+} as const;
+
+export default MaxStyle;

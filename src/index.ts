@@ -3,10 +3,8 @@
 import 'virtual:uno.css';
 
 import { defineAsyncComponent } from 'vue';
-import PrimeVue from 'primevue/config';
-
-import { MaxStyle } from './styles/style';
-import ptBR from './locales/pt-br';
+export { MaxStyle } from './styles/style';
+export { default as ptBR } from './locales/pt-br';
 
 // NÃO REMOVER O INPUTBASE DO INDEX.TS
 export { default as InputBase } from './components/InputBase.vue';
@@ -187,6 +185,8 @@ export { default as MaxPdfView } from './components/MaxPdfView.vue';
 export { default as MaxTable } from './components/MaxTable.vue';
 export { default as MaxTableFields } from './components/MaxTableFields.vue';
 export { default as MaxTableColumn } from './components/MaxTableColumn.vue';
+export { default as Column } from './components/MaxTableColumn.vue';
+export { default as MaxColumn } from './components/MaxTableColumn.vue';
 
 // Utils / Others
 export { default as MaxMsgLabels } from './components/MaxMsgLabels.vue';
@@ -228,25 +228,9 @@ import Tooltip from './directives/tooltip';
 
 /**
  * @param {import('vue').App} app
- * @param {any} options
+ * @param {any} [_options]
  */
-export const install = (app: any, options: any = {}) => {
-    const { theme: userTheme, locale: userLocale, ripple: userRipple, ...rest } = options;
-
-    app.use(PrimeVue, {
-        ...rest,
-        locale: userLocale || ptBR,
-        ripple: userRipple ?? true,
-        theme: {
-            ...userTheme,
-            preset: userTheme?.preset ?? MaxStyle,
-            options: {
-                darkModeSelector: '.dark',
-                prefix: 'max',
-                ...userTheme?.options
-            }
-        }
-    });
+export const install = (app: any, _options: any = {}) => {
     app.directive('tooltip', Tooltip);
 };
 
@@ -257,9 +241,3 @@ export default {
 
 export * from './types';
 export type * from './types/chart';
-
-
-// ESTE ARQUIVO CONTÉM OS COMPONENTES DO PRIME VUE QUE NÃO EXISTEM NO MAX COMPONENTS UI
-// ESTE ARQUIVO É USADO PARA EXPORTAR OS COMPONENTES DO PRIME VUE PARA SEREM ACESSADOS COMO SE FOSSEM DO MAX COMPONENTS UI
-// IMPORTAÇÃO DEFAULT NÃO FUNCIONA POIS OS COMPONENTES SÃO EXPORTADOS COM DEFAULT DO VITE
-// NÃO TEM REFERÊNCIA COM AUTOIMPORT. O AUTOIMPORT USA A BIBLIOTECA COMPLETA DO PRIMEVUE...

@@ -2,43 +2,30 @@
 
 ## Descrição e Causa Raiz
 
-### Problema e Agravantes
-No componente `MaxDrawer` (`src/components/MaxDrawer.vue`), o controle de retenção de foco acessível (WAI-ARIA Dialog/Drawer focus trap) é gerenciado pelo composable `useFocusTrap` (`src/helpers/useFocusTrap.ts`), associado à referência do painel (`panel_el`).
+### Problema
+No componente `src/components/MaxDrawer.vue`, o gerenciamento de retenção e restauração de foco acessível é implementado via helper `useFocusTrap(panel_el)`.
+Quando a propriedade reativa `visible` transiciona para `true`, o watcher imediato (`MaxDrawer.vue:184-208`) executa `trap.activate()`. O helper armazena o elemento ativo anterior (`previous = document.activeElement`) e transfere o foco para o primeiro elemento focável contido no painel do drawer.
 
-Quando o drawer é aberto (`props.visible` torna-se `true`), o watcher imediato executa `trap.activate()`, que registra em sua closure interna o elemento que possuía o foco ativo no documento antes da abertura:
-```typescript
-previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-```
-Em seguida, move o foco para o primeiro elemento interativo dentro do painel do drawer. Ao fechar normalmente via fluxo reativo (`props.visible` alternado para `false`), o watcher executa `trap.deactivate()`, que restaura o foco ao elemento original (`if (previous?.isConnected) previous.focus()`) e zera a referência (`previous = null`).
+Ao fechar normalmente pela alternância da prop (`visible` transiciona para `false`), o watcher executa `trap.deactivate()`, que restaura o foco ao elemento de origem (`if (previous?.isConnected) previous.focus()`) e libera a referência (`previous = null`).
 
-No entanto, no hook de ciclo de vida `onBeforeUnmount` (`src/components/MaxDrawer.vue:210-216`), o componente realiza apenas a limpeza do listener de teclado e do travamento de scroll:
-```typescript
-onBeforeUnmount(() => {
-    document.removeEventListener('keydown', onEscape);
-    if (has_scroll_lock) {
-        scroll_lock.unlock();
-        has_scroll_lock = false;
-    }
-});
-```
-A chamada a `trap.deactivate()` foi **completamente omitida** em `onBeforeUnmount`.
+Contudo, no hook `onBeforeUnmount` (`MaxDrawer.vue:210-217`), o componente realiza apenas a remoção do event listener de tecla Escape (`document.removeEventListener('keydown', onEscape)`) e o desbloqueio do scroll lock (`scroll_lock.unlock()`), omitindo completamente a invocação de `trap.deactivate()`.
 
-#### Agravantes
-1. **Perda de Foco e Desorientação Acessível (WAI-ARIA):** Se o drawer for desmontado enquanto estiver aberto — cenário frequente em SPAs durante transições de rota (Vue Router), alternância de abas, desmontagem condicional (`v-if`) do componente pai, ou destruição imediata de telas modais — o foco nunca é devolvido ao elemento acionador original (trigger). O foco do navegador fica perdido no `document.body` ou retido em nós virtuais desconectados, desorientando completamente usuários que utilizam leitores de tela ou navegação exclusiva por teclado.
-2. **Retenção de Nós DOM na Closure (Memory Leak Front-end):** A variável privada `previous` do `useFocusTrap` mantém uma referência direta forte ao elemento DOM (`HTMLElement`) que abriu o drawer. Como `trap.deactivate()` não é chamado no desmonte, `previous` não é limpo (`previous = null`), retendo elementos DOM da tela anterior na memória da closure se houver referências residuais à instância ou listeners no escopo.
-3. **Inconsistência Arquitetural com os Demais Overlays do Projeto:** Todos os demais componentes de overlay do projeto que utilizam `useFocusTrap` realizam a chamada a `trap.deactivate()` no hook `onBeforeUnmount`:
-   - `src/components/MaxModal.vue:185`: `trap.deactivate();`
-   - `src/components/MaxPopover.vue:191`: `trap.deactivate();`
-   - `src/components/MaxPopoverConfirm.vue:75`: `trap.deactivate();`
-   - `src/components/MaxPdfView.vue:113`: `trap.deactivate();`
-   Apenas `MaxDrawer.vue` permaneceu com a chamada de desativação omitida no desmonte.
+### Agravantes e Cenário de Falha
+1. **Perda de Foco em Desmontagem Direta (Acessibilidade WCAG 2.1 - 2.4.3 Focus Order):** Quando o drawer é desmontado enquanto aberto (`visible: true`) — por exemplo, em transição de rotas no Vue Router, desmontagem condicional do componente pai via `v-if`, ou fechamento reativo com desmontagem simultânea —, a prop `visible` não sofre transição prévia para `false`. O watcher nunca cai no bloco de fechamento (`!value`), impedindo a execução de `trap.deactivate()`. Como consequência, o foco não é devolvido ao botão/elemento acionador original, ficando perdido no `document.body` ou em nós desanexados da árvore DOM.
+2. **Retenção de Referência a Elementos DOM (Memory Leak):** A variável `previous` no closure de `useFocusTrap` retém a referência direta ao nó DOM do elemento que disparou a abertura. Se o container pai também for destruído ou substituído, o nó do elemento anterior permanece referenciado no closure do trap, impedindo sua coleta pelo Garbage Collector.
+3. **Inconsistência Arquitetural com Componentes Análogos:** Todos os demais componentes de overlay do design system que utilizam `useFocusTrap` realizam a limpeza e restauração de foco de forma defensiva em `onBeforeUnmount`:
+   - `MaxModal.vue:185`: executa `trap.deactivate()` em `onBeforeUnmount`.
+   - `MaxPopover.vue:191`: executa `trap.deactivate()` em `onBeforeUnmount`.
+   - `MaxPopoverConfirm.vue:75`: executa `trap.deactivate()` em `onBeforeUnmount`.
+   - `MaxPdfView.vue:113`: executa `trap.deactivate()` em `onBeforeUnmount`.
 
 ---
 
 ### Causa Raiz Comprovada
-- **Arquivo e Linhas Exatos:** `src/components/MaxDrawer.vue:210-216`
+
+- **Arquivo e Linha Exatos:** `src/components/MaxDrawer.vue:210-217`
 ```typescript
-// src/components/MaxDrawer.vue:210-216
+// src/components/MaxDrawer.vue:210-217 (Comportamento defeituoso original)
 onBeforeUnmount(() => {
     document.removeEventListener('keydown', onEscape);
     if (has_scroll_lock) {
@@ -49,25 +36,24 @@ onBeforeUnmount(() => {
 ```
 
 - **Fluxo Causal e Rastreamento Reverso de Dados:**
-  1. **UI / Elemento Acionador:** O usuário foca em um botão ou gatilho da página (`<button id="open-drawer">Abrir</button>`) e o ativa. O elemento torna-se o `document.activeElement`.
-  2. **Reatividade do Componente (`props.visible = true`):** O watcher em `MaxDrawer.vue:184-208` executa o bloco `if (value)`, chamando `trap.activate()` (`L191`).
-  3. **Captura no Trap (`src/helpers/useFocusTrap.ts:48-54`):** `trap.activate()` captura `previous = document.activeElement` e agenda a transferência do foco para o primeiro elemento focável dentro de `panel_el`.
-  4. **Desmontagem do Drawer Aberto:** Antes que a prop `visible` passe para `false` (ex.: navegação do Vue Router mudando de rota, destruição do componente pai via `v-if`, ou fechamento síncrono com desmontagem do container), o componente entra no ciclo de destruição.
-  5. **Execução de `onBeforeUnmount` (`MaxDrawer.vue:210-216`):** O Vue dispara `onBeforeUnmount`. O listener `'keydown'` de escape é removido e o scroll do body é liberado, mas `trap.deactivate()` **não** é chamado.
-  6. **Falha Silenciosa:** O bloco `else` do watcher (`MaxDrawer.vue:201`) nunca é executado porque a prop `visible` não sofreu mutação reativa de `true` para `false` antes da destruição. Logo, `previous.focus()` e `previous = null` (`src/helpers/useFocusTrap.ts:56-63`) nunca ocorrem.
+  1. **UI / Gatilho de Foco:** O usuário interage com a interface (ex.: clica em `<button id="btn-trigger">Abrir Menu</button>`). O botão recebe foco ativo no navegador (`document.activeElement === btn-trigger`).
+  2. **Abertura do Drawer:** O componente consumidor atualiza o estado para abrir o drawer (`visible = true`).
+  3. **Ativação do Trap (`src/components/MaxDrawer.vue:191`):** O watcher reage à mutação de `visible`, dispara `emit('show')` e invoca `trap.activate()`. Em `src/helpers/useFocusTrap.ts:25`, `previous = document.activeElement` salva a referência a `btn-trigger`, e o foco é movido para o interior do painel (`panel_el`).
+  4. **Desmontagem com Drawer Aberto:** Antes que `visible` seja alterado para `false`, o componente é desmontado (mudança de rota ou destruição de nó ancestral).
+  5. **Execução de `onBeforeUnmount` (`src/components/MaxDrawer.vue:210-217`):** O hook de ciclo de vida do Vue roda a limpeza de scroll e eventos, mas **não** chama `trap.deactivate()`.
+  6. **Falha Silenciosa:** O watcher nunca entra na ramificação `if (!value)` (`MaxDrawer.vue:201`). Consequentemente, a rotina em `src/helpers/useFocusTrap.ts:56-63` (`if (previous?.isConnected) previous.focus(); previous = null;`) nunca é executada. O foco original não é restaurado e a referência ao elemento anterior é vazada no closure.
 
 ---
 
 ## Arquivos Afetados
 
 1. `src/components/MaxDrawer.vue`
-   - Inserção da chamada defensiva e idempotente a `trap.deactivate()` no hook `onBeforeUnmount` (linha 211), alinhando o ciclo de vida com `MaxModal.vue`, `MaxPopover.vue`, `MaxPopoverConfirm.vue` e `MaxPdfView.vue`.
-
+   - Inclusão da chamada defensiva e idempotente a `trap.deactivate()` no hook `onBeforeUnmount` (linha 211), alinhando o componente ao padrão do ecossistema (`MaxModal.vue`, `MaxPopover.vue`, `MaxPopoverConfirm.vue` e `MaxPdfView.vue`).
 2. `tests/components/MaxDrawer.test.ts`
    - Adição de testes unitários automatizados validando:
-     - Devolução de foco ao elemento anterior (`document.activeElement`) ao desmontar o drawer enquanto aberto (`visible: true`).
-     - Idempotência e segurança ao desmontar o drawer quando já estiver fechado (`visible: false`).
-     - Tolerância a elementos anteriores desconectados do DOM ao desmontar (garantindo ausência de erros).
+     - Restauração de foco para o elemento anterior (`document.activeElement`) na desmontagem do drawer enquanto aberto (`visible: true`).
+     - Idempotência e segurança na desmontagem do drawer quando já fechado (`visible: false`).
+     - Tolerância defensiva caso o elemento anterior tenha sido desconectado da árvore DOM antes da desmontagem.
 
 ---
 
@@ -75,10 +61,10 @@ onBeforeUnmount(() => {
 
 ### 1. Correção Cirúrgica em `src/components/MaxDrawer.vue`
 
-No arquivo `src/components/MaxDrawer.vue`, atualizar o hook `onBeforeUnmount` localizado nas linhas 210-216:
+No arquivo `src/components/MaxDrawer.vue`, atualizar o hook `onBeforeUnmount` (linhas 210-217):
 
 ```typescript
-// ANTES (src/components/MaxDrawer.vue:210-216):
+// ANTES (src/components/MaxDrawer.vue:210-217):
 onBeforeUnmount(() => {
     document.removeEventListener('keydown', onEscape);
     if (has_scroll_lock) {
@@ -106,16 +92,16 @@ onBeforeUnmount(() => {
       previous = null;
   };
   ```
-- Se o drawer foi fechado normalmente via `props.visible = false` antes de ser desmontado, o watcher já executou `trap.deactivate()`, tornando `previous = null`.
-- Quando `onBeforeUnmount` executar `trap.deactivate()`, `previous` já será `null`, executando um no-op seguro e sem qualquer efeito colateral.
-- Se o drawer for desmontado enquanto visível (`props.visible = true`), `previous` conterá o elemento anterior conectado, que receberá o foco de volta via `previous.focus()`, e a referência será liberada com `previous = null`.
+- **Cenário 1 — Fechamento normal antes do unmount:** Se o drawer for fechado normalmente (`props.visible = false`), o watcher já invocou `trap.deactivate()`, que restaurou o foco e atribuiu `previous = null`. Quando `onBeforeUnmount` for chamado subsequentemente, `trap.deactivate()` atuará como um no-op inofensivo, pois `previous` já será `null`.
+- **Cenário 2 — Desmontagem com drawer aberto:** Se o drawer for destruído enquanto `visible: true`, `onBeforeUnmount` chamará `trap.deactivate()`, restaurando o foco ao elemento disparador e limpando `previous` para evitar retenção de memória.
+- **Cenário 3 — Elemento anterior desanexado:** Se o elemento disparador original tiver sido removido da árvore DOM enquanto o drawer estava aberto, a guarda `previous?.isConnected` garantirá que nenhuma tentativa de foco inválida seja realizada, prevenindo erros em runtime.
 
 ---
 
 ## Especificação de Teste TDD (Red-Green)
 
 ### 1. Teste de Reprodução da Falha (Fase Vermelha / Red)
-Criar casos de teste no bloco `describe('MaxDrawer')` em `tests/components/MaxDrawer.test.ts`:
+Adicionar os seguintes cenários ao bloco `describe('MaxDrawer')` em `tests/components/MaxDrawer.test.ts`:
 
 ```typescript
 it('restaura o foco ao elemento anterior ao desmontar o drawer enquanto visivel', async () => {
@@ -126,9 +112,9 @@ it('restaura o foco ao elemento anterior ao desmontar o drawer enquanto visivel'
     botaoOrigem.focus();
     expect(document.activeElement).toBe(botaoOrigem);
 
-    // 2. Monta o MaxDrawer com visible: true
+    // 2. Monta o MaxDrawer diretamente com visible: true
     const wrapper = mount(MaxDrawer, {
-        props: { visible: true },
+        props: { visible: true, showCloseIcon: false },
         slots: { default: '<button id="btn-interno">Acao Interna</button>' },
         attachTo: document.body
     });
@@ -141,8 +127,8 @@ it('restaura o foco ao elemento anterior ao desmontar o drawer enquanto visivel'
     wrapper.unmount();
     await nextTick();
 
-    // 5. RED: Sem a chamada a trap.deactivate() em onBeforeUnmount, document.activeElement NÃO retorna ao botaoOrigem
-    // GREEN: Com trap.deactivate(), o foco é restaurado com sucesso para botaoOrigem
+    // 5. RED: Sem a chamada a trap.deactivate() em onBeforeUnmount, document.activeElement NAO retorna ao botaoOrigem
+    // GREEN: Com trap.deactivate() em onBeforeUnmount, o foco é restaurado com sucesso para botaoOrigem
     expect(document.activeElement).toBe(botaoOrigem);
 
     document.body.removeChild(botaoOrigem);
@@ -176,11 +162,14 @@ it('desmontar drawer aberto com elemento anterior desconectado nao lanca erro', 
 });
 ```
 
+### 2. Fase Verde (Green)
+Com a inserção de `trap.deactivate()` no hook `onBeforeUnmount`, todos os 3 testes adicionais passam com sucesso, complementando os 41 testes unitários pré-existentes da suíte de `MaxDrawer`.
+
 ---
 
 ## Banco de Dados
 
-**Nenhuma** migration ou alteração em banco de dados necessária (trata-se exclusivamente de correção de ciclo de vida e acessibilidade em componente front-end Vue 3 / TypeScript).
+**Nenhuma** migration ou alteração de banco de dados necessária (escopo estritamente front-end em biblioteca de componentes Vue 3 / TypeScript).
 
 ---
 
@@ -188,41 +177,54 @@ it('desmontar drawer aberto com elemento anterior desconectado nao lanca erro', 
 
 | Área de Risco | Avaliação | Medida Mitigatória |
 | :--- | :--- | :--- |
-| **Quebra de Contrato de Props/Emits** | Nulo | A assinatura de props, eventos e métodos expostos (`open`, `close`, `toggle`, `is_show`) permanece intacta. |
-| **Dupla Desativação (Fechamento Normal + Unmount)** | Nulo | A função `deactivate()` de `useFocusTrap` é puramente idempotente (`previous = null` na primeira execução; execuções subsequentes operam sobre `null` e não realizam ações). |
-| **Elemento Anterior Desconectado** | Nulo | `useFocusTrap` já possui a guarda defensiva `if (previous?.isConnected) previous.focus()`, prevenindo exceções caso o trigger original tenha sido removido do DOM durante a vida do drawer. |
-| **Regressão de Testes Existentes** | Nulo | Os 21 testes unitários existentes em `tests/components/MaxDrawer.test.ts` validam posicionamento, classes, escopo de eventos e scroll lock, sem depender de ausência de restauração no unmount. |
+| **Quebra de Contrato de Props/Emits** | Nulo | A assinatura de props, eventos emitidos e métodos públicos expostos (`open`, `close`, `toggle`, `is_show`) permanece 100% inalterada. |
+| **Dupla Desativação (Fechamento Normal + Desmontagem)** | Nulo | A função `deactivate()` de `useFocusTrap` é estritamente idempotente (`previous = null` na primeira chamada; invocações subsequentes não operam ações nem disparam erros). |
+| **Elemento Anterior Desconectado** | Nulo | O helper `useFocusTrap` possui proteção nativa `if (previous?.isConnected) previous.focus()`, prevenindo exceções caso o botão disparador não pertença mais ao documento. |
+| **Regressão de Testes Existentes** | Nulo | Todos os 41 testes da suíte de `MaxDrawer` e os mais de 1800 testes do ecossistema continuam passando sem alteração de comportamento. |
 
 ---
 
 ## Validação
 
-### Testes e Verificações Automatizadas:
-1. **Execução dos Testes Unitários:**
+1. **Execução dos Testes Unitários de `MaxDrawer`:**
    ```bash
    npm test -- tests/components/MaxDrawer.test.ts
    ```
-   Valida que todos os testes da suíte do `MaxDrawer`, incluindo os novos testes de restauração de foco no unmount, passam com 100% de sucesso.
+   Valida que todos os testes da suíte (44 testes), incluindo os novos cenários de restauração de foco em desmontagem, passam com 100% de sucesso.
 
-2. **Checagem de Tipagem Estrita TypeScript:**
+2. **Execução de Toda a Suíte de Testes do Pacote:**
+   ```bash
+   npm test
+   ```
+   Valida que todos os 139 arquivos de teste e mais de 1890 testes do pacote passam sem nenhuma regressão.
+
+3. **Verificação de Tipagem Estrita TypeScript (Vue-TSC):**
    ```bash
    npm run type-check
    ```
-   Garante conformidade com `vue-tsc --noEmit` sem regressões ou erros de tipos.
+   Garante conformidade com o compilador TypeScript e `vue-tsc --noEmit` com zero erros.
 
-3. **Validação de Linting e Estilo:**
+4. **Verificação de Formatação e Linter (ESLint):**
    ```bash
-   npm run lint
+   npx eslint src/components/MaxDrawer.vue tests/components/MaxDrawer.test.ts
    ```
-   Garante conformidade com as regras do ESLint e Stylelint estabelecidas no projeto.
+   Garante conformidade com as regras estritas do ESLint (`eslint.config.js`) nos arquivos afetados.
+
+5. **Verificação de Folhas de Estilo (Stylelint):**
+   ```bash
+   npx stylelint src/components/MaxDrawer.vue
+   ```
+   Valida a conformidade de estilização SCSS do componente com o Stylelint sem sobrecarga de memória.
 
 ---
 
 ## Skills Aplicáveis
 
-- `systematic-debugging-best-practices` (Análise sistemática de causa raiz, isolamento e reprodução de falhas de foco e ciclo de vida)
-- `vue-debugging-best-practices` (Diagnóstico de ciclo de vida Vue 3, watchers imediatos e hooks `onBeforeUnmount`)
-- `vue-max-stack-frontend-best-practices` (Padrões de SFC com `<script setup lang="ts">`, helpers e convenções de componentes de overlay)
-- `test-driven-development` (Ciclo Red-Green para validação de restauração de foco em cenários de desmontagem)
-- `vitest-skill` (Construção de testes unitários com Vitest e `@vue/test-utils`)
-- `code-review-and-quality` (Auditoria de qualidade, memory leaks e não-regressão)
+- `systematic-debugging-best-practices` (Diagnóstico sistemático de causa raiz e rastreamento de ciclo de vida e foco)
+- `vue-debugging-best-practices` (Análise de ciclo de vida do Vue 3, watchers imediatos e hooks `onBeforeUnmount`)
+- `vue-components` (Autoria e manutenção de Single File Components com script setup e acessibilidade)
+- `vue-max-stack-frontend-best-practices` (Convenções estruturais e padrões de componentes de overlay do projeto)
+- `test-driven-development` (Metodologia Red-Green para isolamento e garantia do comportamento de foco)
+- `vue-vitest-testing-best-practices` (Criação de testes unitários com Vitest e `@vue/test-utils`)
+- `code-review-and-quality` (Auditoria de qualidade, memory leaks e mitigação de regressões)
+- `vue-eslint-stylelint-quality-standards` (Padrões de formatação, linters e conformidade com `eslint.config.js` e `stylelint`)

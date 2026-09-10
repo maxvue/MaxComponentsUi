@@ -8,6 +8,20 @@ Este arquivo fornece as diretrizes canônicas e obrigatórias para o Gemini CLI,
 
 Ela depende do pacote local irmão `@maxvue/max-use` (referenciado como `file:../MaxUse`), que reside no mesmo diretório pai.
 
+## Migração do PrimeVue: status e Fase 2
+
+A partir do PrimeVue 5 a biblioteca deixará de ser open source. Todos os **37 componentes** dependentes do PrimeVue listados em `status-primevue.migration.yaml` foram 100% migrados e estão com status `done`. Nenhum arquivo em `src/components/` importa mais nada do PrimeVue. A fase ativa atual é a **Fase 2 (Infraestrutura e Desacoplamento Total)**, que remove `app.use(PrimeVue)` de `src/index.ts`, desacopla `src/styles/style.ts` de `@primeuix/themes`, elimina o entry `./prime` e executa o sweep de nomenclatura.
+
+Arquivos de controle (todos na raiz do repositório):
+
+| Arquivo | Papel |
+|---|---|
+| [`migration_plan.md`](migration_plan.md) | Brief original do orquestrador — como os planos por componente foram gerados. |
+| [`status-primevue.migration.yaml`](status-primevue.migration.yaml) | Fonte de verdade do progresso: lista os 37 componentes com status `done`. |
+| [`migration_plans/`](migration_plans/) | Planos de migração autossuficientes por componente (`migration_plans/[NomeComponente].md`), 37 no total. |
+| [`migration_executor.md`](migration_executor.md) | Painel de controle e registro de conclusão dos 37 componentes. |
+| [`docs/superpowers/specs/2026-08-13-primevue-infra-independencia-design.md`](docs/superpowers/specs/2026-08-13-primevue-infra-independencia-design.md) | Especificação de infraestrutura da Fase 1 e Fase 2 de independência do PrimeVue. |
+
 ---
 
 ## PADRÕES DE IDENTIDADE VISUAL DO DESIGN SYSTEM
