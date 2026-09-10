@@ -305,4 +305,38 @@ describe('MaxChips', () => {
             expect(chip.exists()).toBe(true);
         });
     });
+
+    describe('Propriedade caution e desacoplamento de error_msg', () => {
+        it('mantém caution=true quando prop caution=true é passada mesmo com required e itens preenchidos', async () => {
+            const wrapper = mountChips({ required: true, modelValue: ['Tag 1'], caution: true });
+            const input = wrapper.find('input.max-chips-input');
+            await input.trigger('blur');
+
+            const inputBase = wrapper.findComponent(InputBase);
+            expect(inputBase.props('caution')).toBe(true);
+            expect(inputBase.props('error')).toBeNull();
+        });
+
+        it('mantém caution string quando informada e não polui error com Valor inválido', () => {
+            const wrapper = mountChips({ modelValue: ['Tag 1'], caution: 'Atenção às tags' });
+            const inputBase = wrapper.findComponent(InputBase);
+
+            expect(inputBase.props('caution')).toBe('Atenção às tags');
+            expect(inputBase.props('error')).toBeNull();
+        });
+
+        it('mantém caution=true na montagem inicial antes de interação', () => {
+            const wrapper = mountChips({ caution: true });
+            const inputBase = wrapper.findComponent(InputBase);
+
+            expect(inputBase.props('caution')).toBe(true);
+        });
+
+        it('respeita caution=false explicitamente passado', () => {
+            const wrapper = mountChips({ caution: false });
+            const inputBase = wrapper.findComponent(InputBase);
+
+            expect(inputBase.props('caution')).toBe(false);
+        });
+    });
 });
