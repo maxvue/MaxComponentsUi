@@ -1,22 +1,47 @@
+// @vitest-environment jsdom
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { useIconStore } from '../../src/stores/useIcon.Store';
 import { watch } from 'vue';
 
 
+const activeDebounceTimers = new Set<any>();
+
 vi.mock('@maxvue/max-use', async (importOriginal) => {
     const actual = await importOriginal() as any;
     return {
         ...actual,
-        watchDebounced: vi.fn((source, cb) => {
-            watch(source, cb, { deep: true, flush: 'sync' });
+        watchDebounced: vi.fn((source, cb, options) => {
+            let timer: any = null;
+            const unwatch = watch(source, () => {
+                if (timer) {
+                    clearTimeout(timer);
+                    activeDebounceTimers.delete(timer);
+                }
+                timer = setTimeout(() => {
+                    activeDebounceTimers.delete(timer);
+                    cb();
+                }, options?.debounce ?? 50);
+                activeDebounceTimers.add(timer);
+            }, { deep: options?.deep ?? true });
+
+            return () => {
+                if (timer) {
+                    clearTimeout(timer);
+                    activeDebounceTimers.delete(timer);
+                }
+                unwatch();
+            };
         })
     };
 });
 
 describe('useIconStore', () => {
+    let pinia: any;
+
     beforeEach(() => {
-        setActivePinia(createPinia());
+        pinia = createPinia();
+        setActivePinia(pinia);
         vi.stubGlobal('fetch', vi.fn().mockReturnValue(Promise.resolve({
             json: () => Promise.resolve({})
         })));
@@ -24,6 +49,9 @@ describe('useIconStore', () => {
     });
 
     afterEach(() => {
+        for (const t of activeDebounceTimers) clearTimeout(t);
+        activeDebounceTimers.clear();
+        if (pinia) pinia._e.stop();
         vi.restoreAllMocks();
     });
 
@@ -414,5 +442,111 @@ describe('useIconStore', () => {
         } finally {
             resetMaxAppConfig();
         }
+    });
+
+    it('agrupa múltiplos ícones recuperados via fallback em um único POST de sincronização e grava cache de forma consolidada', async () => {
+        const store = useIconStore();
+
+        const mockFetch = vi.spyOn(globalThis, 'fetch').mockImplementation((url, init) => {
+            const urlStr = String(url);
+
+            // POST de sincronização com backend
+            if (init?.method === 'POST') return Promise.resolve({
+                ok: true,
+                json: () => Promise.resolve({ success: true })
+            } as any);
+
+            // Fallback do Iconify
+            if (urlStr.includes('api.iconify.design')) {
+                const match = urlStr.match(/api\.iconify\.design\/([^.]+)\.svg/);
+                const iconName = match ? decodeURIComponent(match[1]) : 'icon';
+                return Promise.resolve({
+                    ok: true,
+                    text: () => Promise.resolve(`<svg data-icon="${iconName}"><circle r="4"/></svg>`)
+                } as any);
+            }
+
+            // Rota principal retornando ícones ausentes (null)
+            if (urlStr.includes('icons%5B%5D=')) return Promise.resolve({
+                ok: true,
+                json: () => Promise.resolve({
+                    'icon-batch-1': null,
+                    'icon-batch-2': null,
+                    'icon-batch-3': null
+                })
+            } as any);
+
+            return Promise.resolve({ ok: true, json: () => Promise.resolve({}) } as any);
+        });
+
+        // Solicita 3 ícones faltantes em lote
+        store.getIcon('icon-batch-1');
+        store.getIcon('icon-batch-2');
+        store.getIcon('icon-batch-3');
+
+        await new Promise((r) => setTimeout(r, 250)); // aguarda debounce da store
+        await new Promise((r) => setTimeout(r, 150)); // aguarda fallbacks e sincronização
+
+        // No código original (Red), foram disparadas 3 requisições POST concorrentes
+        // A asserção abaixo FALHA no código atual e passa no código corrigido (Green)
+        const postCalls = mockFetch.mock.calls.filter((call) => call[1]?.method === 'POST');
+        expect(postCalls).toHaveLength(1);
+
+        const postBody = JSON.parse(postCalls[0][1]!.body as string);
+        expect(postBody.icons).toBeDefined();
+        expect(postBody.icons['icon-batch-1']).toContain('data-icon="icon-batch-1"');
+        expect(postBody.icons['icon-batch-2']).toContain('data-icon="icon-batch-2"');
+        expect(postBody.icons['icon-batch-3']).toContain('data-icon="icon-batch-3"');
+
+        // Valida que todos os ícones estão disponíveis na store
+        expect(store.icons_data['icon-batch-1']).toContain('data-icon="icon-batch-1"');
+        expect(store.icons_data['icon-batch-2']).toContain('data-icon="icon-batch-2"');
+        expect(store.icons_data['icon-batch-3']).toContain('data-icon="icon-batch-3"');
+    });
+
+    it('agrupa múltiplos ícones recuperados via fallback em um único POST quando a rota principal falha com erro', async () => {
+        const store = useIconStore();
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        const mockFetch = vi.spyOn(globalThis, 'fetch').mockImplementation((url, init) => {
+            const urlStr = String(url);
+
+            if (init?.method === 'POST') return Promise.resolve({
+                ok: true,
+                json: () => Promise.resolve({ success: true })
+            } as any);
+
+            if (urlStr.includes('api.iconify.design')) {
+                const match = urlStr.match(/api\.iconify\.design\/([^.]+)\.svg/);
+                const iconName = match ? decodeURIComponent(match[1]) : 'icon';
+                return Promise.resolve({
+                    ok: true,
+                    text: () => Promise.resolve(`<svg data-icon="${iconName}"><circle r="4"/></svg>`)
+                } as any);
+            }
+
+            if (urlStr.includes('icons%5B%5D=')) return Promise.reject(new Error('Network error'));
+
+            return Promise.resolve({ ok: true, json: () => Promise.resolve({}) } as any);
+        });
+
+        store.getIcon('icon-catch-1');
+        store.getIcon('icon-catch-2');
+
+        await new Promise((r) => setTimeout(r, 250));
+        await new Promise((r) => setTimeout(r, 150));
+
+        const postCalls = mockFetch.mock.calls.filter((call) => call[1]?.method === 'POST');
+        expect(postCalls).toHaveLength(1);
+
+        const postBody = JSON.parse(postCalls[0][1]!.body as string);
+        expect(postBody.icons).toBeDefined();
+        expect(postBody.icons['icon-catch-1']).toContain('data-icon="icon-catch-1"');
+        expect(postBody.icons['icon-catch-2']).toContain('data-icon="icon-catch-2"');
+
+        expect(store.icons_data['icon-catch-1']).toContain('data-icon="icon-catch-1"');
+        expect(store.icons_data['icon-catch-2']).toContain('data-icon="icon-catch-2"');
+
+        consoleSpy.mockRestore();
     });
 });

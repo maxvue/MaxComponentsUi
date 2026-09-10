@@ -9,15 +9,14 @@
 <script setup lang="ts">
 </script>
 
-<style>
-
-    .slide-vertical-animation-enter-active {
+<style lang="scss" scoped>
+    :global(.slide-vertical-animation-enter-active) {
         animation: slide-up-in 0.2s ease-out forwards;
         animation-delay: 0.2s;
         opacity: 0;
     }
 
-    .slide-vertical-animation-leave-active {
+    :global(.slide-vertical-animation-leave-active) {
         animation: slide-down-out 0.2s ease-in forwards;
         opacity: 1;
     }

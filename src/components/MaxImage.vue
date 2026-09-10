@@ -548,7 +548,7 @@
     });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .max-image {
         position: relative;
 
@@ -668,52 +668,52 @@
             user-select: none;
             -webkit-user-drag: none;
         }
-    }
 
-    .max-image-crop-overlay {
-        position: absolute;
-        inset: 0;
-        pointer-events: auto;
-    }
-
-    .max-image-crop-box {
-        position: absolute;
-        box-sizing: border-box;
-        border: 2px solid #fff;
-        box-shadow: 0 0 0 9999px rgb(0 0 0 / 60%), 0 0 8px rgb(0 0 0 / 50%);
-        cursor: move;
-        touch-action: none;
-    }
-
-    .max-image-crop-grid {
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-
-        &-line {
+        .max-image-crop-overlay {
             position: absolute;
-            background-color: rgb(255 255 255 / 35%);
+            inset: 0;
+            pointer-events: auto;
 
-            &--h1 { top: 33.333%; left: 0; right: 0; height: 1px; }
-            &--h2 { top: 66.666%; left: 0; right: 0; height: 1px; }
-            &--v1 { left: 33.333%; top: 0; bottom: 0; width: 1px; }
-            &--v2 { left: 66.666%; top: 0; bottom: 0; width: 1px; }
+            .max-image-crop-box {
+                position: absolute;
+                box-sizing: border-box;
+                border: 2px solid #fff;
+                box-shadow: 0 0 0 9999px rgb(0 0 0 / 60%), 0 0 8px rgb(0 0 0 / 50%);
+                cursor: move;
+                touch-action: none;
+
+                .max-image-crop-grid {
+                    position: absolute;
+                    inset: 0;
+                    pointer-events: none;
+
+                    &-line {
+                        position: absolute;
+                        background-color: rgb(255 255 255 / 35%);
+
+                        &--h1 { top: 33.333%; left: 0; right: 0; height: 1px; }
+                        &--h2 { top: 66.666%; left: 0; right: 0; height: 1px; }
+                        &--v1 { left: 33.333%; top: 0; bottom: 0; width: 1px; }
+                        &--v2 { left: 66.666%; top: 0; bottom: 0; width: 1px; }
+                    }
+                }
+
+                .max-image-crop-handle {
+                    position: absolute;
+                    width: 14px;
+                    height: 14px;
+                    background-color: #fff;
+                    border: 1px solid rgb(0 0 0 / 30%);
+                    border-radius: 2px;
+                    box-shadow: 0 1px 4px rgb(0 0 0 / 40%);
+                    touch-action: none;
+
+                    &--tl { top: -7px; left: -7px; cursor: nwse-resize; }
+                    &--tr { top: -7px; right: -7px; cursor: nesw-resize; }
+                    &--bl { bottom: -7px; left: -7px; cursor: nesw-resize; }
+                    &--br { bottom: -7px; right: -7px; cursor: nwse-resize; }
+                }
+            }
         }
-    }
-
-    .max-image-crop-handle {
-        position: absolute;
-        width: 14px;
-        height: 14px;
-        background-color: #fff;
-        border: 1px solid rgb(0 0 0 / 30%);
-        border-radius: 2px;
-        box-shadow: 0 1px 4px rgb(0 0 0 / 40%);
-        touch-action: none;
-
-        &--tl { top: -7px; left: -7px; cursor: nwse-resize; }
-        &--tr { top: -7px; right: -7px; cursor: nesw-resize; }
-        &--bl { bottom: -7px; left: -7px; cursor: nesw-resize; }
-        &--br { bottom: -7px; right: -7px; cursor: nwse-resize; }
     }
 </style>

@@ -1,7 +1,7 @@
 <template>
-    <div class="max-tag-list" v-bind="attrs">
-        <div v-for="item in items_array" :key="item.value ?? item.id ?? item.name">
-            <MaxTagSelect flex :modelValue="item.value" :options="options_array" no-dropdown uppercase @update:modelValue="(val: any) => replaceItem(item, val)">
+    <div class="max-tags-list max-tag-list" v-bind="attrs">
+        <div v-for="item in items_array" :key="item.value ?? item.id ?? item.name" class="tag-item-wrapper">
+            <MaxTagSelect class="tag-select-item" :modelValue="item.value" :options="options_array" no-dropdown @update:modelValue="(val: any) => replaceItem(item, val)">
                 <template #btn-right>
                     <div class="max-tag-remove-action" v-tooltip="'Remover'" @click.stop="removeItem(item)">
                         <MaxIconButton i="material-symbols:close-rounded" size="1.2" :color="getStyleColor(item, false, true).color" />
@@ -9,7 +9,7 @@
                 </template>
             </MaxTagSelect>
         </div>
-        <div>
+        <div class="tag-add-wrapper">
             <MaxTagSelect v-model="add_tag" :options="options_array" is-button icon="fluent:tag-add-20-regular" icon-size="2" />
         </div>
     </div>
@@ -87,7 +87,7 @@
         let text = contrastColor(background);
         if (color_string === 'unset' && !is_value) {
             background = hover ? 'rgba(0,0,0, 0.1)' : 'transparent';
-            text = hover ? 'var(--background-600)' : 'var(--background-650)';
+            text = hover ? 'var(--background-775)' : 'var(--background-700)';
         }
 
         return {
@@ -100,28 +100,40 @@
     };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .max-tag-list {
     display: flex;
     align-items: center;
     gap: 6px;
 
-    .max-tag-remove-action {
+    .tag-item-wrapper {
+        .tag-select-item {
+            display: flex;
+            text-transform: uppercase;
+        }
+
+        .max-tag-remove-action {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0.9;
+            margin-left: 4px;
+            padding: 2px;
+            border-radius: 4px;
+            transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+
+            &:hover {
+                opacity: 1;
+                transform: scale(1.15);
+                background-color: rgb(0 0 0 / 15%);
+            }
+        }
+    }
+
+    .tag-add-wrapper {
         display: flex;
         align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        opacity: 0.9;
-        margin-left: 4px;
-        padding: 2px;
-        border-radius: 4px;
-        transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
-
-        &:hover {
-            opacity: 1;
-            transform: scale(1.15);
-            background-color: rgb(0 0 0 / 15%);
-        }
     }
 }
 </style>

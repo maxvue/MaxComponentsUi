@@ -20,4 +20,10 @@ describe('themes/colors.scss e themes/params.scss', () => {
         expect(css).not.toMatch(/\[rotate=['"]?false['"]?\]:not\(svg\),\s*\[spinner\]:not\(svg\)/);
         expect(css).toMatch(/\[rotate=['"]?false['"]?\]:not\(svg\),\s*\[spinner=['"]?false['"]?\]:not\(svg\)/);
     });
+
+    it('compila regras de .dark e :root.dark associando --background-0 e --background-700 para modo escuro', () => {
+        const css = sass.compile(resolve(__dirname, '../../src/themes/colors.scss')).css;
+        expect(css).toMatch(/:root\.dark,\s*\.dark/);
+        expect(css).not.toMatch(/:root\s+\.dark/);
+    });
 });

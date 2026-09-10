@@ -16,12 +16,14 @@
     const loading = useLoadingStore();
 </script>
 
-<style lang="scss">
-    .load-screen-target-item {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw !important;
-        height: 100vh !important;
+<style lang="scss" scoped>
+    .max-load-screen {
+        .load-screen-target-item {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw !important;
+            height: 100vh !important;
+        }
     }
 </style>

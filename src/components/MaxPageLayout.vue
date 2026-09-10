@@ -1,6 +1,7 @@
 <template>
     <!-- Layout dedicado para Mobile (inspirado no AgenteDeBolso) -->
     <MaxPageMobileLayout
+        class="max-page-layout"
         v-if="isMobile"
         v-bind="attrs"
         :add-items="props.addItems"
@@ -25,7 +26,7 @@
     </MaxPageMobileLayout>
 
     <!-- Layout padrão para Desktop -->
-    <MaxContainerApp v-else v-bind="attrs">
+    <MaxContainerApp class="max-page-layout" v-else v-bind="attrs">
         <MaxTopMenu
             v-bind="attrs"
             :add-items="props.addItems"
@@ -44,7 +45,7 @@
             </template>
         </MaxTopMenu>
 
-        <MaxSideMenu v-bind="attrs" :logo="props.logo" />
+        <MaxSideMenu v-bind="attrs" :screen="props.screen" :logo="props.logo" :route-logo="props.routeLogo" @logo-click="emit('logoClick')" />
 
         <MaxPageContent v-bind="attrs">
             <slot></slot>
@@ -66,7 +67,7 @@
     /** Slots repassados ao `MaxTopMenu`. */
     const TOP_MENU_SLOTS = ['status', 'search', 'add', 'chat', 'bugs', 'notifications', 'voip', 'live', 'user', 'mobile-center', 'mobile-actions', 'switcher'] as const;
 
-    const props = defineProps<{
+    const props = withDefaults(defineProps<{
         /** Dispositivo atual ('desktop' | 'mobile'). Quando omitido, consulta useSystemStore(). */
         screen?: string;
         /** Itens do menu "Adicionar Novo" do topo. */
@@ -83,7 +84,11 @@
         avatarPath?: string;
         /** Logo do menu lateral: URL ou nome de rota. Sem ela, nada é exibido. */
         logo?: string;
-    }>();
+        /** Rota de destino ao clicar na logo. Padrão: '/'. */
+        routeLogo?: string;
+    }>(), {
+        routeLogo: '/'
+    });
 
     /**
      * Eventos do `MaxUserSection`, repassados do `MaxTopMenu` para quem usa o
@@ -98,6 +103,7 @@
         logout: [];
         endImpersonate: [];
         fabClick: [];
+        logoClick: [];
     }>();
 
     const attrs = useAttrs();

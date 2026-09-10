@@ -1,5 +1,5 @@
 <template>
-    <InputBase v-bind="props" class="if" :value="temp_value" :done="isDone" :error="props.error" :caution="caution">
+    <InputBase v-bind="props" class="max-input-auto-complete if" :value="temp_value" :done="isDone" :error="props.error" :caution="caution">
         <div ref="ac" class="p-autocomplete" :class="{ 'p-disabled': props.disabled }">
             <input
                 ref="inputEl"
@@ -21,8 +21,8 @@
             />
         </div>
 
-        <Teleport to="body">
-            <div v-if="isOpen && filtered_values.length > 0" class="max-autocomplete-backdrop" @click="hide">
+        <Teleport to="body" v-if="isOpen && filtered_values.length > 0">
+            <div class="max-autocomplete-backdrop" @click="hide">
                 <div
                     ref="overlayEl"
                     class="p-autocomplete-overlay"
@@ -170,7 +170,7 @@
         return null;
     };
 
-    const caution = computed(() => (props.caution !== undefined ? props.caution && isDone.value === false : isDone.value === false));
+    const caution = computed(() => (props.caution !== undefined ? props.caution : isDone.value === false));
 
     const emit = defineEmits(['update:modelValue', 'complete', 'blur']);
 
@@ -321,38 +321,8 @@
     });
 </script>
 
-<style lang="scss">
-    .main-div-input-auto-complete-api {
-        width: 100% !important;
-
-        .p-autocomplete {
-            width: 100% !important;
-        }
-
-        .p-inputtext {
-            width: 100% !important;
-        }
-
-        .input-auto-complete-api {
-            width: 100% !important;
-
-            input {
-                width: 100% !important;
-            }
-        }
-
-        .icon-input-auto-complete-api {
-            position: absolute !important;
-            width: 20px;
-            right: 8px;
-            top: calc(50% + 1px);
-            color: var(--background-500);
-            transform: translateY(-50%);
-            z-index: 9;
-            pointer-events: none;
-        }
-    }
-
+<style lang="scss" scoped>
+.max-input-auto-complete {
     .p-autocomplete {
         width: 100%;
         position: relative;
@@ -366,44 +336,23 @@
             outline: none;
             background: transparent;
             font-size: 0.9rem;
-            color: var(--text-c, #334155);
+            color: var(--background-700);
             padding: 0 10px;
         }
     }
 
-    .autocomplete-item-select {
-        height: 40px;
-        padding: 10px;
-        position: relative;
-        display: grid;
-        place-items: center start;
-        grid-template-columns: 1fr auto;
-        gap: 25px;
-        width: 100%;
-
-        .autocomplete-item-select-label {
-            font-size: 0.9rem;
-            max-width: 100%;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .autocomplete-item-select-sub-label {
-            display: grid;
-            place-items: center;
-            font-size: 0.8rem;
-            min-width: 15px;
-            color: var(--background-500);
+    &.text-centereds {
+        :deep(input) {
+            padding-left: 32px !important;
         }
     }
+}
 
-    .max-autocomplete-backdrop {
-        position: fixed;
-        inset: 0;
-        z-index: 1100;
-        background: transparent;
-    }
+.max-autocomplete-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    background: transparent;
 
     .p-autocomplete-overlay {
         position: fixed;
@@ -424,16 +373,40 @@
             .p-autocomplete-item {
                 cursor: pointer;
 
-                &:hover, &.p-autocomplete-item-active {
+                &:hover,
+                &.p-autocomplete-item-active {
                     background-color: var(--background-100, #f1f5f9);
+                }
+
+                .autocomplete-item-select {
+                    height: 40px;
+                    padding: 10px;
+                    position: relative;
+                    display: grid;
+                    place-items: center start;
+                    grid-template-columns: 1fr auto;
+                    gap: 25px;
+                    width: 100%;
+
+                    .autocomplete-item-select-label {
+                        font-size: 0.9rem;
+                        max-width: 100%;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        color: var(--background-700);
+                    }
+
+                    .autocomplete-item-select-sub-label {
+                        display: grid;
+                        place-items: center;
+                        font-size: 0.8rem;
+                        min-width: 15px;
+                        color: var(--background-650);
+                    }
                 }
             }
         }
     }
-
-    .text-centereds {
-        input {
-            padding-left: 32px !important;
-        }
-    }
+}
 </style>

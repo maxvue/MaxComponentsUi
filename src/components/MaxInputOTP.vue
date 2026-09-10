@@ -1,9 +1,9 @@
 <template>
     <InputBase
         v-bind="props"
-        class="max-input-otp-base"
+        class="max-input-otp max-input-otp-base"
         no-border
-        text-center
+        :text-center="true"
         :label="props.label"
         :done="props.done ?? done"
         :required="props.required"
@@ -372,11 +372,11 @@
     });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .max-input-otp-base {
     width: auto;
 
-    .max-input-field-div {
+    :deep(.max-input-field-div) {
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
@@ -387,98 +387,98 @@
         box-shadow: none !important;
         background: transparent !important;
     }
-}
 
-.max-input-otp-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    user-select: none;
+    .max-input-otp-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        user-select: none;
 
-    &.is-disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-}
+        &.is-disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
 
-.max-input-otp-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
+        .max-input-otp-separator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            color: var(--background-650);
+            font-size: 1.25rem;
+            font-weight: 700;
+            line-height: 1;
+        }
 
-.max-input-otp-separator {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 4px;
-    color: var(--background-400);
-    font-size: 1.25rem;
-    font-weight: 700;
-    line-height: 1;
-}
+        .max-input-otp-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
 
-.max-input-otp-cell {
-    width: 100%;
-    height: 48px;
-    border-radius: 8px;
-    border: 1px solid var(--background-300);
-    background-color: var(--background-0);
-    color: var(--background-700);
-    font-size: 1.35rem;
-    font-weight: 600;
-    text-align: center;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
-    padding: 0 !important;
-    margin: 0;
-    caret-color: var(--max-primary-500);
+            .max-input-otp-cell {
+                width: 100%;
+                height: 48px;
+                border-radius: 8px;
+                border: 1px solid var(--background-300);
+                background-color: var(--background-0);
+                color: var(--background-750);
+                font-size: 1.35rem;
+                font-weight: 600;
+                text-align: center;
+                outline: none;
+                transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+                padding: 0 !important;
+                margin: 0;
+                caret-color: var(--max-primary-500);
 
-    &::placeholder {
-        color: var(--background-400);
-        opacity: 0.5;
-    }
+                &::placeholder {
+                    color: var(--background-650);
+                    opacity: 0.5;
+                }
 
-    &:hover:not(:disabled) {
-        border-color: var(--max-primary-400);
-    }
+                &:hover:not(:disabled) {
+                    border-color: var(--max-primary-400);
+                }
 
-    &:focus {
-        border-color: var(--max-primary-500) !important;
-        box-shadow: 0 0 0 2px var(--max-primary-200) !important;
-        background-color: var(--background-0);
-    }
+                &:focus {
+                    border-color: var(--max-primary-500) !important;
+                    box-shadow: 0 0 0 2px var(--max-primary-200) !important;
+                    background-color: var(--background-0);
+                }
 
-    &.has-value {
-        border-color: var(--background-400);
-    }
+                &.has-value {
+                    border-color: var(--background-400);
+                }
 
-    &:disabled {
-        background-color: var(--background-100);
-        color: var(--background-400);
-        cursor: not-allowed;
-        border-color: var(--background-200);
-    }
-}
-
-.max-input-main-div.error {
-    .max-input-otp-cell {
-        border-color: var(--max-red-600) !important;
-
-        &:focus {
-            box-shadow: 0 0 0 2px rgb(220 38 38 / 20%) !important;
+                &:disabled {
+                    background-color: var(--background-100);
+                    color: var(--background-650);
+                    cursor: not-allowed;
+                    border-color: var(--background-200);
+                }
+            }
         }
     }
-}
 
-.max-input-main-div.caution {
-    .max-input-otp-cell {
-        border-color: var(--orange-600) !important;
+    &.error {
+        .max-input-otp-cell {
+            border-color: var(--max-red-600) !important;
 
-        &:focus {
-            box-shadow: 0 0 0 2px rgb(234 88 12 / 20%) !important;
+            &:focus {
+                box-shadow: 0 0 0 2px rgb(220 38 38 / 20%) !important;
+            }
+        }
+    }
+
+    &.caution {
+        .max-input-otp-cell {
+            border-color: var(--orange-600) !important;
+
+            &:focus {
+                box-shadow: 0 0 0 2px rgb(234 88 12 / 20%) !important;
+            }
         }
     }
 }

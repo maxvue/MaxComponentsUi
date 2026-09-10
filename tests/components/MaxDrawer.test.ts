@@ -429,4 +429,54 @@ describe('MaxDrawer', () => {
         await wrapper.setProps({ visible: false });
         expect(document.body.style.overflow).toBe('');
     });
+
+    it('restaura o foco ao elemento anterior ao desmontar o drawer enquanto visivel', async () => {
+        const botaoOrigem = document.createElement('button');
+        botaoOrigem.id = 'trigger-abrir';
+        document.body.appendChild(botaoOrigem);
+        botaoOrigem.focus();
+        expect(document.activeElement).toBe(botaoOrigem);
+
+        const wrapper = mount(MaxDrawer, {
+            props: { visible: true, showCloseIcon: false },
+            slots: { default: '<button id="btn-interno">Acao Interna</button>' },
+            attachTo: document.body
+        });
+
+        await nextTick();
+        expect(document.activeElement?.id).toBe('btn-interno');
+
+        wrapper.unmount();
+        await nextTick();
+
+        expect(document.activeElement).toBe(botaoOrigem);
+
+        document.body.removeChild(botaoOrigem);
+    });
+
+    it('desmontar drawer fechado e seguro e idempotente', async () => {
+        const wrapper = mount(MaxDrawer, {
+            props: { visible: false },
+            attachTo: document.body
+        });
+
+        expect(() => wrapper.unmount()).not.toThrow();
+    });
+
+    it('desmontar drawer aberto com elemento anterior desconectado nao lanca erro', async () => {
+        const botaoRemovido = document.createElement('button');
+        document.body.appendChild(botaoRemovido);
+        botaoRemovido.focus();
+
+        const wrapper = mount(MaxDrawer, {
+            props: { visible: true },
+            slots: { default: '<button id="btn-seguro">Seguro</button>' },
+            attachTo: document.body
+        });
+        await nextTick();
+
+        document.body.removeChild(botaoRemovido);
+
+        expect(() => wrapper.unmount()).not.toThrow();
+    });
 });

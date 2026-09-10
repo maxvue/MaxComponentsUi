@@ -1,17 +1,17 @@
 <template>
     <div v-if="isMounted && size(props.target.items ?? {}) > 0" class="max-load-screen-target">
-        <Teleport :to="props.target.target" :disabled="!isMounted">
+        <Teleport :to="resolvedTarget" :disabled="!isMounted">
             <div v-if="size(props.target.items ?? {}) > 0" class="load-screen">
                 <slot>
                     <div class="load-screen-messages">
                         <div v-for="(item, index) in props.target.items" :key="index" class="load-screen-message-item" :index="index">
-                            <DotLottieVue v-if="item.lottie_icon" style="height: 400px; width: 400px;" autoplay loop :src="item.lottie_icon" />
-                            <MaxIcon v-if="item.icon" :icon="item.icon" :size="item.icon_size ?? 3" color-white-0 />
-                            <MaxLoaderIcon v-if="item.status === 'loading'" style="width: 24px; height: 24px;" />
+                            <DotLottieVue v-if="item.lottie_icon" class="load-screen-lottie" autoplay loop :src="item.lottie_icon" />
+                            <MaxIcon v-if="item.icon" :icon="item.icon" :size="item.icon_size ?? 3" class="load-screen-icon" />
+                            <MaxLoaderIcon v-if="item.status === 'loading'" class="load-screen-loader" />
                             <MaxDoneIcon v-else-if="item.status === 'done'" i="material-symbols:check-circle-outline-rounded" size="1.5" />
-                            <MaxWaitIcon v-else-if="item.status === 'waiting'" i="eos-icons:hourglass" color-background-0 size="1.5" />
+                            <MaxWaitIcon v-else-if="item.status === 'waiting'" i="eos-icons:hourglass" class="load-screen-wait" size="1.5" />
                             <MaxErrorIcon v-else-if="item.status === 'error'" i="mdi:error" size="1.5" />
-                            <MaxIcon v-else i="fluent:border-none-24-filled" color-green-300 size="1.5" />
+                            <MaxIcon v-else i="fluent:border-none-24-filled" class="load-screen-default-icon" size="1.5" />
                             <div>
                                 {{ item.message }}
                             </div>
@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, onMounted, defineAsyncComponent } from 'vue';
+    import { ref, computed, onMounted, defineAsyncComponent } from 'vue';
     import { size } from '@maxvue/max-use';
     import MaxIcon from './MaxIcon.vue';
     import MaxDoneIcon from './MaxDoneIcon.vue';
@@ -48,9 +48,27 @@
     const isMounted = ref(false);
 
     onMounted(() => isMounted.value = true);
+
+    /**
+     * Resolve o seletor de destino com fallback seguro para 'body'.
+     * Evita que um seletor inexistente no DOM cause container nulo no Teleport,
+     * o que geraria erro fatal de patchBlockChildren (__vnode null).
+     */
+    const resolvedTarget = computed(() => {
+        const raw = props.target?.target;
+        if (!raw || raw === 'body') return 'body';
+        if (typeof document !== 'undefined') try {
+            const el = document.querySelector(raw);
+            if (el) return raw;
+        } catch {
+            return 'body';
+        }
+
+        return 'body';
+    });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .load-screen {
         position: absolute;
         top: 0;
@@ -84,12 +102,40 @@
             background-color: rgb(255 255 255 / 65%);
             z-index: 10000 !important;
 
+            @media (width <= 768px) {
+                min-width: auto;
+                max-width: calc(100vw - 50px);
+                box-sizing: border-box;
+            }
+
             .load-screen-message-item {
                 display: grid;
                 grid-template-columns: 20px 1fr;
                 gap: 1rem;
                 color: var(--background-700);
                 place-items: center start;
+
+                .load-screen-lottie {
+                    width: 400px;
+                    height: 400px;
+                }
+
+                .load-screen-icon {
+                    color: var(--white-0, #fff);
+                }
+
+                .load-screen-loader {
+                    width: 24px;
+                    height: 24px;
+                }
+
+                .load-screen-wait {
+                    color: var(--background-0);
+                }
+
+                .load-screen-default-icon {
+                    color: var(--green-300);
+                }
             }
         }
     }

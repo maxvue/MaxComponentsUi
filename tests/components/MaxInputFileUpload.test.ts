@@ -117,4 +117,22 @@ describe('MaxInputFileUpload', () => {
 
         vi.useRealTimers();
     });
+
+    it('renderiza indicador de carregamento com classe semântica upload-loading-state', async () => {
+        const wrapper = mount(MaxInputFileUpload, {
+            props: { modelValue: [] },
+            global: {
+                stubs: { Icon: true },
+                directives: { tooltip: () => {} }
+            }
+        });
+
+        wrapper.vm.uploading = true;
+        await wrapper.vm.$nextTick();
+
+        const loadingDiv = wrapper.find('.upload-loading-state');
+        expect(loadingDiv.exists()).toBe(true);
+        expect(loadingDiv.classes()).not.toContain('flex');
+        expect(loadingDiv.find('.upload-loading-text').text()).toBe('Carregando arquivos');
+    });
 });

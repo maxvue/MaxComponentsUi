@@ -137,6 +137,7 @@ describe('MaxLoadScreenTarget', () => {
         });
         await wrapper.vm.$nextTick();
 
+        expect(document.querySelector('.load-screen-messages')).not.toBeNull();
         expect(document.querySelectorAll('.load-screen-message-item')).toHaveLength(2);
     });
 

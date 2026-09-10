@@ -1,5 +1,5 @@
 <template>
-    <router-link :to="{ name: props.route_name ?? props.route }">
+    <router-link class="max-link" :to="{ name: props.route_name ?? props.route }">
         <slot></slot>
     </router-link>
 </template>

@@ -1,5 +1,5 @@
 <template>
-    <div ref="drop_zone_ref" :class="`input-upload-file-big-main-div ${isOverDropZone ? 'in-drop' : 'not-in-drop'}`" @click="onAreaClick" >
+    <div ref="drop_zone_ref" :class="`max-input-file-upload-big input-upload-file-big-main-div ${isOverDropZone ? 'in-drop' : 'not-in-drop'}`" @click="onAreaClick" >
         <!-- Área principal clicável -->
         <div class="upload-area" v-if="!uploading && !showError">
             <slot>
@@ -110,7 +110,7 @@
 
     }
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
     .input-upload-file-big-main-div {
         height: 100%;
         width: 100%;
@@ -145,7 +145,7 @@
             place-items: center;
             text-align: center;
             gap: 10px;
-            color: var(--background-600);
+            color: var(--background-650);
             font-size: 1rem;
             font-weight: 300;
             width: 100%;

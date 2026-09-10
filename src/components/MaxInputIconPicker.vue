@@ -7,7 +7,7 @@
         class="max-input-icon-picker"
         @click.stop="openDrawer"
     >
-        <div class="icon-picker-trigger p-inputtext" pointer :class="{ 'is-disabled': props.disabled }">
+        <div class="icon-picker-trigger p-inputtext" :class="{ 'is-disabled': props.disabled }">
             <MaxIcon
                 :i="modelValue || 'tabler:icons-filled'"
                 size="1.2"
@@ -19,8 +19,8 @@
         </div>
     </InputBase>
 
-    <Teleport to="body">
-        <div v-if="visible" class="max-icon-picker-drawer-backdrop" @click="visible = false">
+    <Teleport to="body" v-if="visible">
+        <div class="max-icon-picker-drawer-backdrop" @click="visible = false">
             <div class="max-icon-picker-drawer p-drawer-bottom" @click.stop>
                 <div class="p-drawer-header">
                     <span class="p-drawer-title">Escolha um ícone</span>
@@ -173,12 +173,12 @@
 
     const caution = computed(() => (
         props.caution !== undefined
-            ? props.caution && isDone.value === false
+            ? props.caution
             : isDone.value === false
     ));
 
     const error_msg = computed(() => {
-        if (!caution.value) return null;
+        if (isDone.value !== false) return null;
         const attrs_error_message = attrs.errMsg ?? attrs.error_message ?? attrs.error_msg ?? null;
         if (isRequiredDone.value === false) return attrs_error_message ?? 'Campo obrigatório';
         return attrs_error_message ?? 'Valor inválido';
@@ -323,7 +323,7 @@
     }>();
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .max-input-icon-picker {
     .icon-picker-trigger {
         display: flex;
@@ -355,134 +355,139 @@
     background: rgb(0 0 0 / 40%);
     display: flex;
     align-items: flex-end;
-}
 
-.max-icon-picker-drawer {
-    height: 90dvh;
-    width: 100%;
-    background: var(--background-0, #fff);
-    border-top-left-radius: 16px;
-    border-top-right-radius: 16px;
-    box-shadow: 0 -4px 24px rgb(0 0 0 / 20%);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    animation: drawer-slide-up 0.25s ease-out;
-
-    .p-drawer-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 16px 20px;
-        border-bottom: 1px solid var(--surface-border, #e2e8f0);
-
-        .p-drawer-title {
-            font-weight: 600;
-            font-size: 1.1rem;
-            color: var(--text-c, #334155);
-        }
-
-        .p-drawer-close-button {
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            padding: 6px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--background-500, #94a3b8);
-
-            &:hover {
-                background: var(--background-100, #f1f5f9);
-                color: var(--text-c, #334155);
-            }
-        }
-    }
-
-    .p-drawer-content {
-        flex: 1;
-        padding: 16px 20px;
+    .max-icon-picker-drawer {
+        height: 90dvh;
+        width: 100%;
+        background: var(--background-0, #fff);
+        border-top-left-radius: 16px;
+        border-top-right-radius: 16px;
+        box-shadow: 0 -4px 24px rgb(0 0 0 / 20%);
         display: flex;
         flex-direction: column;
         overflow: hidden;
-    }
+        animation: drawer-slide-up 0.25s ease-out;
 
-    .picker-search-area {
-        padding: 0 0 14px;
+        .p-drawer-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--surface-border, #e2e8f0);
 
-        .picker-search-input {
-            width: 100%;
-            height: 38px;
-            padding: 0 12px;
-            border: 1px solid var(--surface-border, #e2e8f0);
-            border-radius: 8px;
-            outline: none;
-            font-size: 0.9rem;
-        }
-    }
+            .p-drawer-title {
+                font-weight: 600;
+                font-size: 1.1rem;
+                color: var(--background-775);
+            }
 
-    .picker-state-area {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: calc(90dvh - 140px);
-        color: var(--background-500);
-        font-size: 0.9rem;
-        gap: 0.5rem;
-    }
+            .p-drawer-close-button {
+                background: transparent;
+                border: none;
+                cursor: pointer;
+                padding: 6px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: var(--background-700);
 
-    .icon-virtual-list {
-        width: 100%;
-        scrollbar-width: thin;
-    }
-
-    .icon-row {
-        display: grid;
-        grid-template-columns: repeat(8, 1fr);
-        height: 40px;
-        align-items: center;
-    }
-
-    .icon-cell {
-        display: grid;
-        place-items: center;
-        height: 40px;
-        border-radius: 6px;
-        transition: background-color 0.15s ease;
-
-        &:hover {
-            background-color: var(--background-100);
-        }
-
-        &.selected {
-            background-color: var(--max-primary-100, #dbeafe);
-
-            .picker-icon-svg {
-                color: var(--max-primary-600, #2563eb);
+                &:hover {
+                    background: var(--background-100, #f1f5f9);
+                    color: var(--background-775);
+                }
             }
         }
 
-        .picker-icon-svg {
-            display: grid;
-            place-items: center;
-            width: 1.5rem;
-            height: 1.5rem;
-            color: var(--background-700, rgb(0 0 0 / 50%));
+        .p-drawer-content {
+            flex: 1;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
 
-            svg {
-                min-width: 100% !important;
-                min-height: 100% !important;
-                max-width: 100% !important;
-                max-height: 100% !important;
+            .picker-search-area {
+                padding: 0 0 14px;
+
+                .picker-search-input {
+                    width: 100%;
+                    height: 38px;
+                    padding: 0 12px;
+                    border: 1px solid var(--surface-border, #e2e8f0);
+                    border-radius: 8px;
+                    outline: none;
+                    font-size: 0.9rem;
+                    color: var(--background-700);
+
+                    &::placeholder {
+                        color: var(--background-650);
+                    }
+                }
             }
-        }
 
-        .picker-icon-placeholder {
-            width: 1.5rem;
-            height: 1.5rem;
-            border-radius: 4px;
-            background-color: var(--background-100);
+            .picker-state-area {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: calc(90dvh - 140px);
+                color: var(--background-650);
+                font-size: 0.9rem;
+                gap: 0.5rem;
+            }
+
+            .icon-virtual-list {
+                width: 100%;
+                scrollbar-width: thin;
+
+                .icon-row {
+                    display: grid;
+                    grid-template-columns: repeat(8, 1fr);
+                    height: 40px;
+                    align-items: center;
+
+                    .icon-cell {
+                        display: grid;
+                        place-items: center;
+                        height: 40px;
+                        border-radius: 6px;
+                        transition: background-color 0.15s ease;
+
+                        &:hover {
+                            background-color: var(--background-100);
+                        }
+
+                        &.selected {
+                            background-color: var(--max-primary-100, #dbeafe);
+
+                            .picker-icon-svg {
+                                color: var(--max-primary-600, #2563eb);
+                            }
+                        }
+
+                        .picker-icon-svg {
+                            display: grid;
+                            place-items: center;
+                            width: 1.5rem;
+                            height: 1.5rem;
+                            color: var(--background-700, rgb(0 0 0 / 50%));
+
+                            svg {
+                                min-width: 100% !important;
+                                min-height: 100% !important;
+                                max-width: 100% !important;
+                                max-height: 100% !important;
+                            }
+                        }
+
+                        .picker-icon-placeholder {
+                            width: 1.5rem;
+                            height: 1.5rem;
+                            border-radius: 4px;
+                            background-color: var(--background-100);
+                        }
+                    }
+                }
+            }
         }
     }
 }

@@ -34,7 +34,6 @@ vite_error.log
 .settings/
 
 # Inteligência Artificial
-GEMINI.md
 .gemini/
 .cursor/
 .windsurf/

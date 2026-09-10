@@ -223,7 +223,7 @@
     });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .input-file-main-div {
         display: grid;
         place-items: center;
@@ -322,7 +322,7 @@
             &.dropping {
                 opacity: 1;
                 background-color: var(--background-200);
-                color: var(--background-600);
+                color: var(--background-700);
             }
         }
     }

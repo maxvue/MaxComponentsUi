@@ -1,5 +1,5 @@
 <template>
-    <InputBase v-bind="props" class="max-switch">
+    <InputBase v-bind="props" class="max-input-switch max-switch">
         <div :class="`max-switch-input ${temp_value === props.trueValue ? 'active' : ''}`">
             <div class="max-switch-label left" v-if="has_left_label" @click="() => setValue(props.falseValue)">
                 {{ props.labelLeft ?? props.leftLabel ?? props.labelFalse ?? props.falseLabel ?? '' }}
@@ -112,7 +112,7 @@
 
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .max-switch {
     display: grid;
     grid-template-columns: 1fr;

@@ -1,5 +1,6 @@
 <template>
     <MaxBadge
+        class="max-badge-component"
         :label="resolvedLabel"
         :icon="props.icon ?? props.i"
         :color="props.color"

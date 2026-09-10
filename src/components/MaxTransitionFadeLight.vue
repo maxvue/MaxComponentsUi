@@ -4,16 +4,16 @@
     </Transition>
 </template>
 
-<style>
+<style lang="scss" scoped>
     /* Estado ATIVO (durante a animação) */
-    .fadelight-enter-active,
-    .fadelight-leave-active {
-        transition: opacity 0.5s ease; /* 0.5s é mais usual que 1.5s */
+    :global(.fadelight-enter-active),
+    :global(.fadelight-leave-active) {
+        transition: opacity 0.5s ease;
     }
 
     /* Estado INICIAL (entrada) e FINAL (saída) */
-    .fadelight-enter-from,
-    .fadelight-leave-to {
-        opacity: 0; /* Totalmente invisível */
+    :global(.fadelight-enter-from),
+    :global(.fadelight-leave-to) {
+        opacity: 0;
     }
 </style>

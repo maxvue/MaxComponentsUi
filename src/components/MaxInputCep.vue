@@ -1,5 +1,5 @@
 <template>
-    <InputBase v-bind="props" class="input-base-cep-main-div" :value="temp_value" :done="done ?? undefined" :caution="caution" :error="error_msg ?? undefined" :icon-right="loading ? 'loading' : undefined">
+    <InputBase v-bind="props" class="max-input-cep input-base-cep-main-div" :value="temp_value" :done="done ?? undefined" :caution="caution" :error="error_msg ?? undefined" :icon-right="loading ? 'loading' : undefined">
         <input type="text" class="p-inputtext p-component" v-model="temp_value" v-maska="maskValue" placeholder="00000-000" />
     </InputBase>
 </template>
@@ -74,10 +74,3 @@
         if (isValidCep.value) emit('complete', temp_value_numbers.value);
     });
 </script>
-
-<style lang="scss" scoped>
-    input {
-        grid-column: 2;
-        position: relative;
-    }
-</style>

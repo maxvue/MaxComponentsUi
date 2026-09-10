@@ -236,7 +236,7 @@
     });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .max-badge-buttons-group {
         display: inline-flex;
         flex-wrap: wrap;

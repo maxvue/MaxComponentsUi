@@ -1,5 +1,5 @@
 <template>
-    <div :class="`icon-div ico-btn ${hover ? 'hover' : ''}`" ref="icon_ref" :style="{width: size, height: size, transform: 'scale('+ (hover? props.hoverScale : 1) +')'}" @click="onClick" @mouseenter="hover = true" @mouseleave="hover = false">
+    <div :class="`max-icon-button icon-div ico-btn ${hover ? 'hover' : ''}`" ref="icon_ref" :style="{width: size, height: size, transform: 'scale('+ (hover? props.hoverScale : 1) +')'}" @click="onClick" @mouseenter="hover = true" @mouseleave="hover = false">
         <slot>
             <MaxIcon pointer :icon="props.icon" :i="props.i" :dark="props.dark" :light="props.light" :checked="props.checked" :plus="props.plus" :rotate="props.rotate" :flip="props.flip" :size="size" :color="props.color ?? props.iconColor" />
         </slot>
@@ -55,7 +55,7 @@
     };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .icon-div {
         display: grid;
         place-items: center;

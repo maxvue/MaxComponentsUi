@@ -573,12 +573,13 @@
             border-radius: 0.5rem;
             border: 1px solid var(--background-200, #e5e7eb);
             background-color: var(--background-0, #f8fafc);
-            color: var(--background-800, #374151);
+            color: var(--background-700);
             cursor: pointer;
             transition: background-color 0.15s ease, transform 0.1s ease;
 
             &:hover {
                 background-color: var(--background-100, #f3f4f6);
+                color: var(--background-775);
             }
 
             &:active {
@@ -589,7 +590,7 @@
         .max-divider-mobile-title {
             font-size: 0.875rem;
             font-weight: 600;
-            color: var(--background-900, #1f2937);
+            color: var(--background-775);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;

@@ -35,35 +35,35 @@
                             <!-- Input de incremento (+/-) -->
                             <div v-else-if="col.input === 'increment'" class="max-table-fields-increment">
                                 <MaxIconButton i="icons8:minus" size="1.3" dark @click.stop="decrementValue(row, col)" />
-                                <MaxInputText :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" w-full text-center :placeholder="col.placeholder" :required="col.required" />
+                                <MaxInputText :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-increment-input" :placeholder="col.placeholder" :required="col.required" />
                                 <MaxIconButton i="icons8:plus" size="1.3" dark @click.stop="incrementValue(row, col)" />
                             </div>
 
                             <!-- Input de texto -->
-                            <MaxInputText v-else-if="col.input === 'text' || col.input === 'input'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" w-full :placeholder="col.placeholder" :required="col.required" />
+                            <MaxInputText v-else-if="col.input === 'text' || col.input === 'input'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :placeholder="col.placeholder" :required="col.required" />
 
                             <!-- Input numérico -->
-                            <MaxInputNumber v-else-if="col.input === 'number'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" w-full :placeholder="col.placeholder" :required="col.required" />
+                            <MaxInputNumber v-else-if="col.input === 'number'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :placeholder="col.placeholder" :required="col.required" />
 
                             <!-- Select -->
-                            <MaxInputSelect v-else-if="col.input === 'select'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" w-full :options="col.options ?? []" :placeholder="col.placeholder" :required="col.required" />
+                            <MaxInputSelect v-else-if="col.input === 'select'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :options="col.options ?? []" :placeholder="col.placeholder" :required="col.required" />
 
                             <!-- Date Picker -->
-                            <MaxInputDatePicker v-else-if="col.input === 'date'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" w-full :placeholder="col.placeholder" :required="col.required" />
+                            <MaxInputDatePicker v-else-if="col.input === 'date'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :placeholder="col.placeholder" :required="col.required" />
 
                             <!-- Checkbox -->
-                            <MaxInputCheckbox v-else-if="col.input === 'checkbox'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" w-full />
+                            <MaxInputCheckbox v-else-if="col.input === 'checkbox'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" />
 
                             <!-- Textarea -->
-                            <MaxInputTextArea v-else-if="col.input === 'textarea'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" w-full :placeholder="col.placeholder" :required="col.required" />
+                            <MaxInputTextArea v-else-if="col.input === 'textarea'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :placeholder="col.placeholder" :required="col.required" />
 
                             <!-- AutoComplete -->
-                            <MaxInputAutoComplete v-else-if="col.input === 'auto-complete'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" w-full :options="col.options ?? []" :placeholder="col.placeholder" :required="col.required" />
+                            <MaxInputAutoComplete v-else-if="col.input === 'auto-complete'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :options="col.options ?? []" :placeholder="col.placeholder" :required="col.required" />
 
                             <!-- AutoComplete via API -->
-                            <MaxInputAutoCompleteApi v-else-if="col.input === 'auto-complete-api'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" w-full :route="col.route ?? ''" :data="resolveData(row, col.data)" :placeholder="col.placeholder" :required="col.required" />
+                            <MaxInputAutoCompleteApi v-else-if="col.input === 'auto-complete-api'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :route="col.route ?? ''" :data="resolveData(row, col.data)" :placeholder="col.placeholder" :required="col.required" />
                             <!-- Phone Number -->
-                            <MaxInputPhone v-else-if="col.input === 'phone-number'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" w-full :placeholder="col.placeholder" :required="col.required" />
+                            <MaxInputPhone v-else-if="col.input === 'phone-number'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :placeholder="col.placeholder" :required="col.required" />
 
                             <!-- Sem input: exibe o valor como texto -->
                             <template v-else>
@@ -237,7 +237,7 @@
         if (typeof data === 'object' && !Array.isArray(data)) {
             const resolved: Record<string, any> = {};
             for (const key in data) resolved[key] = typeof data[key] === 'string'
-                ? getFieldValue(row, data[key]) ?? data[key]
+                ? (data[key].includes('.') ? (getFieldValue(row, data[key]) ?? null) : (getFieldValue(row, data[key]) ?? data[key]))
                 : data[key];
 
             return resolved;
@@ -267,7 +267,7 @@
 </script>
 
 
-<style lang="scss">
+<style lang="scss" scoped>
 .max-table-fields-wrapper {
     border-radius: 1rem;
     overflow: hidden;
@@ -278,141 +278,154 @@
     position: relative;
     display: grid;
     grid-template-rows: 1fr;
-}
 
-.max-table-fields {
-    width: 100%;
-    height: 100%;
-    border-collapse: collapse;
-    display: grid;
-    grid-template-rows: auto 1fr;
-}
-
-// CABEÇALHO
-.max-table-fields-head {
-    display: grid;
-    position: sticky;
-    top: 0;
-    z-index: 1;
-
-    .max-table-fields-head-row {
-        display: flex;
-        height: 40px;
-        padding: 0 6px;
-        gap: 6px;
-        background-color: var(--blue-800);
-    }
-
-    .max-table-fields-th {
-        padding: 0;
-        background-color: transparent;
-        color: var(--blue-200);
-        font-family: Jost, sans-serif;
-        font-weight: 400;
-        flex-grow: 1;
-        border: none;
-        height: 100%;
-        display: grid;
-        place-items: center;
-        text-align: center;
-    }
-
-    .max-table-fields-th-buttons {
-        flex-grow: 0;
-        width: auto;
-    }
-}
-
-// CORPO DA TABELA
-.max-table-fields-body {
-    display: grid;
-    align-content: start;
-    overflow-y: auto;
-    font-family: Jost, sans-serif;
-
-    .max-table-fields-row {
-        display: flex;
+    .max-table-fields {
         width: 100%;
-        height: auto;
-        gap: 0 6px;
-        padding: 3px 6px;
-
-        &:first-of-type {
-            padding-top: 6px;
-        }
-
-        &:last-of-type {
-            padding-bottom: 6px;
-        }
-
-        // Linhas listradas
-        &.max-table-fields-row-even {
-            background-color: var(--primary-25);
-        }
-
-        &.max-table-fields-row-odd {
-            background-color: var(--primary-100);
-        }
-    }
-
-    .max-table-fields-td {
-        flex-grow: 1;
-        padding: 0;
+        height: 100%;
+        border-collapse: collapse;
         display: grid;
-        place-items: center start;
-        outline: none;
-        border: none;
-        border-radius: 0;
+        grid-template-rows: auto 1fr;
 
-        // Quando inputs estão dentro da célula
-        .max-input-main-div {
-            grid-template-rows: 1fr;
+        // CABEÇALHO
+        .max-table-fields-head {
+            display: grid;
+            position: sticky;
+            top: 0;
+            z-index: 1;
 
-            .message-spacer, .input-message {
-                display: none;
+            .max-table-fields-head-row {
+                display: flex;
+                height: 40px;
+                padding: 0 6px;
+                gap: 6px;
+                background-color: var(--table-header-bg, var(--blue-800));
+
+                .max-table-fields-th {
+                    padding: 0;
+                    background-color: transparent;
+                    color: var(--table-header-text, var(--blue-200));
+                    font-family: Jost, sans-serif;
+                    font-weight: 400;
+                    flex-grow: 1;
+                    border: none;
+                    height: 100%;
+                    display: grid;
+                    place-items: center;
+                    text-align: center;
+
+                    &.max-table-fields-th-buttons {
+                        flex-grow: 0;
+                        width: auto;
+                    }
+                }
             }
         }
-    }
 
-    // Input de incremento (+/-)
-    .max-table-fields-increment {
-        display: grid;
-        grid-template-columns: auto 1fr auto;
-        place-items: center;
-        gap: 10px;
-        width: 100%;
-        padding: 0 10px;
-    }
+        // CORPO DA TABELA
+        .max-table-fields-body {
+            display: grid;
+            align-content: start;
+            overflow-y: auto;
+            font-family: Jost, sans-serif;
 
-    // Botões de ação
-    .max-table-fields-buttons {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 8px;
-        width: auto;
-        flex-grow: 0;
-        padding: 0 6px;
-    }
+            .max-table-fields-row {
+                display: flex;
+                width: 100%;
+                height: auto;
+                gap: 0 6px;
+                padding: 3px 6px;
 
-    // Estado vazio
-    .max-table-fields-empty-cell {
-        padding: 24px;
-        text-align: center;
-        color: var(--text-400);
-        font-style: italic;
-    }
+                &:first-of-type {
+                    padding-top: 6px;
+                }
 
-    .default-slot {
-        width: 100%;
-        display: grid;
-        place-items: center start;
-    }
+                &:last-of-type {
+                    padding-bottom: 6px;
+                }
 
-    .table-icon-button {
-        svg {
-            width: 20px;
-            height: 20px;
+                // Linhas listradas
+                &.max-table-fields-row-even {
+                    background-color: var(--primary-25);
+                }
+
+                &.max-table-fields-row-odd {
+                    background-color: var(--primary-100);
+                }
+
+                .max-table-fields-td {
+                    flex-grow: 1;
+                    padding: 0;
+                    display: grid;
+                    place-items: center start;
+                    outline: none;
+                    border: none;
+                    border-radius: 0;
+
+                    .table-field-control {
+                        width: 100%;
+                    }
+
+                    // Quando inputs estão dentro da célula
+                    :deep(.max-input-main-div) {
+                        grid-template-rows: 1fr;
+
+                        .message-spacer,
+                        .input-message {
+                            display: none;
+                        }
+                    }
+
+                    // Input de incremento (+/-)
+                    .max-table-fields-increment {
+                        display: grid;
+                        grid-template-columns: auto 1fr auto;
+                        place-items: center;
+                        gap: 10px;
+                        width: 100%;
+                        padding: 0 10px;
+
+                        .table-field-increment-input {
+                            width: 100%;
+
+                            :deep(input) {
+                                text-align: center;
+                            }
+                        }
+                    }
+
+                    // Botões de ação
+                    &.max-table-fields-buttons {
+                        display: flex;
+                        flex-direction: row;
+                        align-items: center;
+                        gap: 8px;
+                        width: auto;
+                        flex-grow: 0;
+                        padding: 0 6px;
+                    }
+
+                    // Estado vazio
+                    &.max-table-fields-empty-cell {
+                        padding: 24px;
+                        text-align: center;
+                        color: var(--background-650);
+                        font-style: italic;
+                    }
+
+                    .default-slot {
+                        width: 100%;
+                        display: grid;
+                        place-items: center start;
+                    }
+
+                    .table-icon-button {
+                        :deep(svg) {
+                            width: 20px;
+                            height: 20px;
+                        }
+                    }
+                }
+            }
         }
     }
 }

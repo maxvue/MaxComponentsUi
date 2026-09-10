@@ -1,5 +1,5 @@
 <template>
-    <MaxPopover>
+    <MaxPopover class="max-toggle-popover">
         <slot name="button" v-if="! props.label">
             <MaxIconButton :icon="props.i ?? props.icon" pointer @click.stop="onClickToggle" ref="btn_el" />
         </slot>

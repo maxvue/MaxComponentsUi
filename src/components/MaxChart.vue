@@ -118,7 +118,7 @@
     });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .max-chart-main-div {
         // O canvas é dimensionado pelo container: sem altura definida por quem usa,
         // o chart.js com maintainAspectRatio:false colapsa para 0px de altura.

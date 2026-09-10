@@ -1,10 +1,10 @@
 <template>
-    <div class="input-upload-file-button-main-div" >
+    <div class="max-input-file-upload-button input-upload-file-button-main-div" >
         <MaxInputFileUpload v-bind="attrs" :modelValue="(attrs.modelValue as any)" class="no-style" @upload="onUpload" >
             <slot>
                 <div class="slot-main-div">
                     <Icon :i="attrs.ico ?? attrs.icon ?? attrs.i ?? 'material-symbols:upload-rounded'" size="1.4" />
-                    <div v-if="props.label" pl-10 class="input-file-button-label">{{ props.label }}</div>
+                    <div v-if="props.label" class="input-file-button-label">{{ props.label }}</div>
                 </div>
             </slot>
         </MaxInputFileUpload>
@@ -28,7 +28,7 @@
     };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .input-upload-file-button-main-div {
         position: absolute;
         height: 100%;
@@ -58,8 +58,9 @@
                     grid-template-columns: 1fr auto;
 
                     .input-file-button-label {
-                        color: var(--background-0);
+                        color: var(--background-700);
                         font-size: 0.9rem;
+                        padding-left: 10px;
                     }
                 }
 
@@ -84,7 +85,7 @@
                     display: grid;
                     place-items: center !important;
                     height: auto;
-                    color: var(--background-600);
+                    color: var(--background-700);
                     gap: 10px;
                     text-align: center;
                     font-size: 1rem;
@@ -139,7 +140,7 @@
                 padding: 0 5px;
 
                 .icon-div {
-                    color: var(--background-600) !important;
+                    color: var(--background-650) !important;
                 }
 
                 &:hover {
@@ -210,7 +211,7 @@
 
                         .file-size {
                             font-size: 9px;
-                            color: var(--background-600);
+                            color: var(--background-650);
                             text-align: center;
                             width: 100%;
                         }

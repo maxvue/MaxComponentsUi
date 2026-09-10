@@ -342,5 +342,12 @@ describe('MaxPopover', () => {
 
             expect(document.activeElement).toBe(iconBtn);
         });
+
+        it('calcula o tamanho do ícone corretamente em rem para fatores numéricos', () => {
+            const wrapper = mountPopover({ size: 1.4 });
+            const iconContainer = wrapper.find('.max-popover-icon');
+            expect(iconContainer.attributes('style')).toContain('width: 1.4rem');
+            expect(iconContainer.attributes('style')).toContain('height: 1.4rem');
+        });
     });
 });

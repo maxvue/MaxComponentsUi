@@ -2,7 +2,7 @@
     <input ref="inputRef" :class="inputClass" :value="modelValue" :disabled="disabled" :aria-invalid="invalid || undefined" @input="onInput" @blur="onBlur" @focus="onFocus" />
 </template>
 
-<script setup lang="ts">;
+<script setup lang="ts">
     import { computed, ref } from 'vue';
 
     defineOptions({ inheritAttrs: true });
@@ -37,6 +37,7 @@
     const hasValue = computed(() => props.modelValue !== null && props.modelValue !== undefined && props.modelValue !== '');
 
     const inputClass = computed(() => ({
+        'max-base-input': true,
         'max-input': true,
         'max-input-has-value': hasValue.value,
         'max-input-sm': props.size === 'small',
@@ -67,13 +68,13 @@
         border: 1px solid var(--background-400);
         border-radius: 6px;
         background: var(--background-100);
-        color: var(--text-color);
+        color: var(--background-700);
         font-family: inherit;
         font-size: 1rem;
         transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
 
         &::placeholder {
-            color: var(--text-color-secondary);
+            color: var(--background-650);
             opacity: 1;
         }
 

@@ -85,6 +85,14 @@
                                 s50
                             />
                         </MaxGrid>
+
+                        <h3>Code Editor (MaxInputCode - 100% Height & Width)</h3>
+                        <div style="height: 380px; width: 100%; margin-bottom: 1.5rem;">
+                            <MaxInputCode
+                                v-model="codeValue"
+                                language="typescript"
+                            />
+                        </div>
                     </div>
                 </div>
             </section>
@@ -418,6 +426,29 @@
     const markdownValue = ref('# Título Principal\n\nEste é um exemplo de texto **negrito**, *itálico* e `código inline`.\n\n- Item 1\n- Item 2\n\n> Citação importante do sistema.\n\n### Anexos e Mídias\n\n![Exemplo de Imagem](https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=400)\n\nConsulte o documento: [Manual do Usuário.pdf](https://raw.githubusercontent.com/mozilla/pdf.js/master/test/pdfs/helloworld.pdf)');
     const markdownDisabledValue = ref('**Conteúdo somente leitura**');
     const markdownRequiredValue = ref('');
+    const codeValue = ref(`// Exemplo de Código no MaxInputCode (Monaco Editor)
+interface ProjectConfig {
+    id: string;
+    title: string;
+    capacityKwp: number;
+    inverterModel: string;
+}
+
+export function calculateGeneration(capacityKwp: number, hsp = 4.8): number {
+    // Estimativa de geração mensal média em kWh
+    const performanceRatio = 0.78;
+    return Math.round(capacityKwp * hsp * 30 * performanceRatio);
+}
+
+const config: ProjectConfig = {
+    id: 'SOL-2026-001',
+    title: 'Usina Solar Fotovoltaica',
+    capacityKwp: 75.5,
+    inverterModel: 'Deye 75kW Trifásico 380V'
+};
+
+console.log('Geração estimada:', calculateGeneration(config.capacityKwp), 'kWh/mês');
+`);
 
     const value = ref({
         a: '',

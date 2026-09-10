@@ -25,14 +25,16 @@
                     :side-menu-groups="props.sideMenuGroups"
                     :side-menu-items="props.sideMenuItems"
                     :avatar-path="props.avatarPath"
-                    :logo="props.logo"
+                    :logo="effectiveLogo"
+                    :route-logo="effectiveRouteLogo"
                     @profile="emit('profile')"
                     @settings="emit('settings')"
                     @support="emit('support')"
-                    @toggle-dark-mode="emit('toggleDarkMode')"
+                    @toggle-dark-mode="handleToggleDarkMode"
                     @logout="emit('logout')"
                     @end-impersonate="emit('endImpersonate')"
                     @fab-click="emit('fabClick')"
+                    @logo-click="emit('logoClick')"
                 >
                     <RouterView />
                     <template v-for="(_, name) in forwardedSlots" #[name]="slotProps" :key="name">
@@ -62,7 +64,7 @@
     import { useSystemStore } from '../stores/useSystem.Store';
     import { useUserStore } from '../stores/useUser.Store';
     import { useLoginStore } from '../stores/useLogin.Store';
-    import { configureMaxApp } from '../helpers/maxAppConfig';
+    import { configureMaxApp, getMaxAppConfig } from '../helpers/maxAppConfig';
     import type { BottomTab } from './MaxBottomMenu.vue';
     import type { MenuGroup } from './MaxSideMenuMobile.vue';
 
@@ -104,9 +106,11 @@
         /**
          * Logo do menu lateral. Aceita uma URL (`/get_file?file=logo.svg`,
          * `https://…`) ou o nome de uma rota, resolvido pelo `getRoute`.
-         * Sem ela, o espaço fica vazio.
+         * Sem ela, consulta `getMaxAppConfig().logo`.
          */
         logo?: string;
+        /** Rota de destino ao clicar na logo. Padrão: '/'. */
+        routeLogo?: string;
     }>(), {
         allowUserName: true,
         allowEmail: true,
@@ -123,18 +127,27 @@
         profile: [];
         settings: [];
         support: [];
-        toggleDarkMode: [];
+        toggleDarkMode: [isDark?: boolean];
         logout: [];
         endImpersonate: [];
         fabClick: [];
+        logoClick: [];
     }>();
 
     // A configuração precisa ser aplicada antes das stores resolverem suas rotas.
     configureMaxApp({
         ...(props.routeLogin ? { routeLogin: props.routeLogin } : {}),
         ...(props.routeProviders ? { routeProviders: props.routeProviders } : {}),
-        ...(props.routeUser ? { routeUser: props.routeUser } : {})
+        ...(props.routeUser ? { routeUser: props.routeUser } : {}),
+        ...(props.logo ? { logo: props.logo } : {}),
+        ...(props.routeLogo ? { routeLogo: props.routeLogo } : {})
     });
+
+    /** Logo efetiva exibida no shell (prop ou fallback da configuração global). */
+    const effectiveLogo = computed<string | undefined>(() => props.logo ?? getMaxAppConfig().logo);
+
+    /** Rota efetiva de destino ao clicar na logo. */
+    const effectiveRouteLogo = computed<string>(() => props.routeLogo ?? getMaxAppConfig().routeLogo ?? '/');
 
     const route = useRoute();
     const system = useSystemStore();
@@ -177,9 +190,54 @@
         login.allow_phone = phone as boolean;
         login.allow_user_name = userName as boolean;
     }, { immediate: true });
+
+    /** Aplica ou remove a classe .dark no elemento raiz do documento. */
+    const applyDarkMode = (enabled: boolean): void => {
+        if (typeof document === 'undefined') return;
+        if (enabled) document.documentElement.classList.add('dark');
+        else document.documentElement.classList.remove('dark');
+
+    };
+
+    /**
+     * Alterna o modo escuro:
+     * 1. Atualiza a classe .dark no DOM (document.documentElement)
+     * 2. Atualiza a configuração reativa do usuário (user.data.settings.darkMode)
+     * 3. Dispara a persistência assíncrona se user.save() existir (@maxvue/max-pinia)
+     * 4. Emite o evento toggleDarkMode para compatibilidade com ouvintes externos
+     */
+    const handleToggleDarkMode = (): void => {
+        const currentDark = typeof document !== 'undefined'
+            ? document.documentElement.classList.contains('dark')
+            : Boolean(user.data?.settings?.darkMode);
+        const nextDark = !currentDark;
+
+        applyDarkMode(nextDark);
+
+        if (user.data) {
+            if (!user.data.settings || typeof user.data.settings !== 'object') user.data.settings = {};
+
+            user.data.settings.darkMode = nextDark;
+
+            if (typeof (user as any).save === 'function') (user as any).save();
+
+        }
+
+        emit('toggleDarkMode', nextDark);
+    };
+
+    // Sincroniza a classe .dark com a preferência persistida do usuário ao carregar
+    watch(
+        () => [isLoaded.value, user.data?.settings?.darkMode],
+        ([loaded, darkModeSetting]) => {
+            if (loaded) applyDarkMode(Boolean(darkModeSetting));
+
+        },
+        { immediate: true }
+    );
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .max-app {
         min-height: 100vh;
         min-height: 100dvh;
@@ -225,7 +283,7 @@
         }
     }
 
-    html.max-scroll-locked {
+    :global(html.max-scroll-locked) {
         overflow: hidden !important;
         touch-action: none;
 

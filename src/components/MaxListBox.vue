@@ -1,5 +1,5 @@
 <template>
-    <div class="max-listbox" :class="{ 'is-disabled': props.disabled, 'two-lines': props.twoLines }" :style="rootStyle">
+    <div class="max-list-box max-listbox" :class="{ 'is-disabled': props.disabled, 'two-lines': props.twoLines }" :style="rootStyle">
         <div v-if="$slots.header || props.title" class="max-listbox-header">
             <slot name="header">
                 <span class="max-listbox-title">{{ props.title }}</span>
@@ -621,7 +621,7 @@
     defineExpose({ listElem });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .max-listbox {
     display: flex;
     flex-direction: column;
@@ -636,210 +636,210 @@
         opacity: 0.6;
         pointer-events: none;
     }
-}
 
-.max-listbox-header {
-    padding: 10px 12px;
-    border-bottom: 1px solid var(--background-300);
-}
+    .max-listbox-header {
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--background-300);
 
-.max-listbox-title {
-    font-weight: 600;
-    color: var(--background-750);
-}
-
-.max-listbox-filter {
-    padding: 8px 10px;
-    border-bottom: 1px solid var(--background-300);
-}
-
-.max-listbox-filter-input {
-    width: 100%;
-    height: 32px;
-    padding: 0 10px;
-    border: 1px solid var(--background-300);
-    border-radius: 4px;
-    background-color: var(--background-0);
-    color: var(--background-750);
-    font-size: 0.9rem;
-    outline: none;
-
-    &::placeholder {
-        color: var(--background-600);
-    }
-
-    &:focus {
-        border-color: var(--blue-600);
-    }
-}
-
-// Elemento focável e rolável: role="listbox" vive aqui porque é ele quem
-// recebe foco/teclado; o <ul> interno é apenas um agrupamento de apresentação.
-.max-listbox-list {
-    position: relative;
-    flex: 1;
-    overflow-y: auto;
-    outline: none;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-
-    &::-webkit-scrollbar {
-        display: none;
-        width: 0;
-        height: 0;
-    }
-}
-
-.max-listbox-spacer {
-    width: 100%;
-}
-
-// Sem virtualização a janela fica em fluxo normal (position: static, o padrão),
-// então sua altura real soma a de todos os itens e o scroll do contêiner pai
-// funciona naturalmente. Só quando virtualizado ela flutua (is-virtual) sobre
-// o spacer que sustenta a altura total, deslocada por translateY.
-.max-listbox-window {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-
-    &.is-virtual {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-    }
-}
-
-.max-listbox-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 0 12px;
-
-    // Sem virtualização a altura mínima "natural" da linha é 44px (mantém o
-    // layout de hoje, já que itemHeight tem esse mesmo valor por padrão). Em
-    // modo virtual o <li> já recebe um `height` inline vindo de itemHeight (ver
-    // template); min-height precisa seguir o mesmo valor, senão ele vence sobre
-    // `height` e desalinha as linhas com o que useVirtualList calculou para
-    // totalHeight/offsetY/startIndex.
-    min-height: v-bind('`${props.itemHeight}px`');
-    cursor: pointer;
-    color: var(--background-750);
-
-    &:hover {
-        background-color: var(--background-300);
-    }
-
-    &.is-focused {
-        outline: 2px solid var(--blue-600);
-        outline-offset: -2px;
-    }
-
-    &.is-selected {
-        background-color: var(--blue-600);
-        color: var(--background-0, #fff);
-
-        .max-listbox-item-label {
-            color: var(--background-0, #fff);
-        }
-
-        .max-listbox-item-sublabel,
-        .max-listbox-item-icon {
-            color: var(--background-200, #eee);
-        }
-
-        &:hover {
-            background-color: var(--blue-700);
-        }
-
-        // .is-focused sozinho usa outline azul (--blue-600), que é a mesma cor
-        // do fundo aqui: sem isso, uma linha focada E selecionada não mostra
-        // nenhuma indicação de foco para quem navega por teclado.
-        &.is-focused {
-            outline-color: var(--background-0, #fff);
+        .max-listbox-title {
+            font-weight: 600;
+            color: var(--background-775);
         }
     }
 
-    &.is-disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
+    .max-listbox-filter {
+        padding: 8px 10px;
+        border-bottom: 1px solid var(--background-300);
 
-        &:hover {
-            background-color: transparent;
+        .max-listbox-filter-input {
+            width: 100%;
+            height: 32px;
+            padding: 0 10px;
+            border: 1px solid var(--background-300);
+            border-radius: 4px;
+            background-color: var(--background-0);
+            color: var(--background-700);
+            font-size: 0.9rem;
+            outline: none;
+
+            &::placeholder {
+                color: var(--background-650);
+            }
+
+            &:focus {
+                border-color: var(--blue-600);
+            }
         }
     }
-}
 
-.max-listbox-item-icon {
-    flex-shrink: 0;
-}
+    // Elemento focável e rolável: role="listbox" vive aqui porque é ele quem
+    // recebe foco/teclado; o <ul> interno é apenas um agrupamento de apresentação.
+    .max-listbox-list {
+        position: relative;
+        flex: 1;
+        overflow-y: auto;
+        outline: none;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
 
-.max-listbox-item-labels {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 0;
-    flex: 1;
-}
+        &::-webkit-scrollbar {
+            display: none;
+            width: 0;
+            height: 0;
+        }
 
-.max-listbox-item-label {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
+        .max-listbox-spacer {
+            width: 100%;
+        }
 
-.max-listbox-item-sublabel {
-    color: var(--background-600);
-    font-size: 0.85rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
+        // Sem virtualização a janela fica em fluxo normal (position: static, o padrão),
+        // então sua altura real soma a de todos os itens e o scroll do contêiner pai
+        // funciona naturalmente. Só quando virtualizado ela flutua (is-virtual) sobre
+        // o spacer que sustenta a altura total, deslocada por translateY.
+        .max-listbox-window {
+            margin: 0;
+            padding: 0;
+            list-style: none;
 
-.max-listbox-item-badge {
-    flex-shrink: 0;
-    margin-left: auto;
-}
+            &.is-virtual {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+            }
 
-// Layout de duas linhas: sublabel abaixo do label em vez de ao lado.
-.max-listbox.two-lines {
-    .max-listbox-item-labels {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 2px;
+            .max-listbox-item {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 0 12px;
+
+                // Sem virtualização a altura mínima "natural" da linha é 44px (mantém o
+                // layout de hoje, já que itemHeight tem esse mesmo valor por padrão). Em
+                // modo virtual o <li> já recebe um `height` inline vindo de itemHeight (ver
+                // template); min-height precisa seguir o mesmo valor, senão ele vence sobre
+                // `height` e desalinha as linhas com o que useVirtualList calculou para
+                // totalHeight/offsetY/startIndex.
+                min-height: v-bind('`${props.itemHeight}px`');
+                cursor: pointer;
+                color: var(--background-700);
+
+                &:hover {
+                    background-color: var(--background-100);
+                }
+
+                &.is-focused {
+                    outline: 2px solid var(--blue-600);
+                    outline-offset: -2px;
+                }
+
+                &.is-selected {
+                    background-color: var(--blue-600);
+                    color: var(--background-0, #fff);
+
+                    .max-listbox-item-label {
+                        color: var(--background-0, #fff);
+                    }
+
+                    .max-listbox-item-sublabel,
+                    .max-listbox-item-icon {
+                        color: var(--background-200, #eee);
+                    }
+
+                    &:hover {
+                        background-color: var(--blue-700);
+                    }
+
+                    // .is-focused sozinho usa outline azul (--blue-600), que é a mesma cor
+                    // do fundo aqui: sem isso, uma linha focada E selecionada não mostra
+                    // nenhuma indicação de foco para quem navega por teclado.
+                    &.is-focused {
+                        outline-color: var(--background-0, #fff);
+                    }
+                }
+
+                &.is-disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+
+                    &:hover {
+                        background-color: transparent;
+                    }
+                }
+
+                .max-listbox-item-icon {
+                    flex-shrink: 0;
+                }
+
+                .max-listbox-item-labels {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    min-width: 0;
+                    flex: 1;
+
+                    .max-listbox-item-label {
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    }
+
+                    .max-listbox-item-sublabel {
+                        color: var(--background-650);
+                        font-size: 0.85rem;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    }
+                }
+
+                .max-listbox-item-badge {
+                    flex-shrink: 0;
+                    margin-left: auto;
+                }
+            }
+        }
     }
 
-    .max-listbox-item-label,
-    .max-listbox-item-sublabel {
-        max-width: 100%;
+    // Layout de duas linhas: sublabel abaixo do label em vez de ao lado.
+    &.two-lines {
+        .max-listbox-item-labels {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
+
+            .max-listbox-item-label,
+            .max-listbox-item-sublabel {
+                max-width: 100%;
+            }
+        }
     }
-}
 
-.max-listbox-empty,
-.max-listbox-loader,
-.max-listbox-error {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 14px 12px;
-    color: var(--background-600);
-    font-size: 0.9rem;
-}
+    .max-listbox-empty,
+    .max-listbox-loader,
+    .max-listbox-error {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 14px 12px;
+        color: var(--background-650);
+        font-size: 0.9rem;
 
-.max-listbox-retry {
-    border: none;
-    background: none;
-    padding: 0;
-    color: var(--blue-600);
-    cursor: pointer;
-    text-decoration: underline;
-    font-size: 0.9rem;
-}
+        .max-listbox-retry {
+            border: none;
+            background: none;
+            padding: 0;
+            color: var(--blue-600);
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 0.9rem;
+        }
+    }
 
-.max-listbox-footer {
-    padding: 10px 12px;
-    border-top: 1px solid var(--background-300);
+    .max-listbox-footer {
+        padding: 10px 12px;
+        border-top: 1px solid var(--background-300);
+    }
 }
 </style>
