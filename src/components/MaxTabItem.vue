@@ -145,5 +145,6 @@
     display: grid;
     padding: 1rem;
     overflow: hidden;
+    min-height: 100%;
 }
 </style>
