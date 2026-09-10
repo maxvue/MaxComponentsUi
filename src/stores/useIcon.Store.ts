@@ -119,16 +119,26 @@ export const useIconStore = defineStore('icons', () => {
         }
     };
 
-    const syncIconToBackend = async (icon: string, svg: string): Promise<void> => {
+    const syncIconsToBackend = async (icons: Record<string, string>): Promise<void> => {
+        const entries = Object.entries(icons);
+        if (entries.length === 0) return;
+
         try {
             const syncUrl = getMaxAppConfig().routeIconsSync ?? getMaxAppConfig().routeIcons ?? 'https://engeapp.com.br/api/icons';
+
+            // Compatibilidade: se for um único ícone, inclui 'icon' e 'svg' na raiz para backends/testes que esperam essa estrutura,
+            // além de incluir o mapa completo em 'icons'.
+            const payload = entries.length === 1
+                ? { icon: entries[0][0], svg: entries[0][1], icons }
+                : { icons };
+
             await fetch(syncUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({ icon, svg })
+                body: JSON.stringify(payload)
             });
         } catch {
             // Falha na sincronização não interrompe o funcionamento no frontend
@@ -170,37 +180,51 @@ export const useIconStore = defineStore('icons', () => {
                 icons_data.value = updated_data;
                 saveCache();
 
-                if (missing_icons.length > 0) await Promise.all(missing_icons.map(async (icon_name) => {
-                    const fallbackSvg = await fetchIconFallback(icon_name);
-                    if (fallbackSvg) {
-                        icons_data.value[icon_name] = fallbackSvg;
-                        delete errors.value[icon_name];
+                if (missing_icons.length > 0) {
+                    const recoveredIcons: Record<string, string> = {};
+
+                    await Promise.all(missing_icons.map(async (icon_name) => {
+                        const fallbackSvg = await fetchIconFallback(icon_name);
+                        if (fallbackSvg) {
+                            icons_data.value[icon_name] = fallbackSvg;
+                            delete errors.value[icon_name];
+                            recoveredIcons[icon_name] = fallbackSvg;
+                            return;
+                        }
+
+                        errors.value[icon_name] = (errors.value[icon_name] ?? 0) + 1;
+                        console.error('Erro na obtenção do ícone', icon_name);
+
+                        if (errors.value[icon_name] >= MAX_ICON_RETRIES) icons_data.value[icon_name] = '';
+                    }));
+
+                    if (size(recoveredIcons) > 0) {
                         saveCache();
-                        syncIconToBackend(icon_name, fallbackSvg);
-                        return;
+                        syncIconsToBackend(recoveredIcons);
                     }
+                }
 
-                    errors.value[icon_name] = (errors.value[icon_name] ?? 0) + 1;
-                    console.error('Erro na obtenção do ícone', icon_name);
-
-                    if (errors.value[icon_name] >= MAX_ICON_RETRIES) icons_data.value[icon_name] = '';
-                }));
-
-            }).catch((error) => {
+            }).catch(async (error) => {
                 console.error('Erro na Requisição dos ícones', { 'url': requestUrl, 'error': error });
                 errors.value['fetch'] += 1;
 
                 if (errors.value['fetch'] >= MAX_FETCH_RETRIES) scheduleFetchErrorReset();
 
-                Promise.all(icons_to_fetch.map(async (icon_name) => {
+                const recoveredIcons: Record<string, string> = {};
+
+                await Promise.all(icons_to_fetch.map(async (icon_name) => {
                     const fallbackSvg = await fetchIconFallback(icon_name);
                     if (fallbackSvg) {
                         icons_data.value[icon_name] = fallbackSvg;
                         delete errors.value[icon_name];
-                        saveCache();
-                        syncIconToBackend(icon_name, fallbackSvg);
+                        recoveredIcons[icon_name] = fallbackSvg;
                     }
                 }));
+
+                if (size(recoveredIcons) > 0) {
+                    saveCache();
+                    syncIconsToBackend(recoveredIcons);
+                }
             });
         }
 
