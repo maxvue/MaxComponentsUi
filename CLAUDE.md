@@ -8,20 +8,19 @@ Este arquivo fornece orientações para o Claude Code (claude.ai/code) ao trabal
 
 Ela depende de um pacote local irmão `@maxvue/max-use` (referenciado como `file:../MaxUse`), que precisa ser clonado ao lado deste repositório, no mesmo diretório pai.
 
-## Migração em andamento: independência do PrimeVue
+## Migração do PrimeVue: status e Fase 2
 
-A partir do PrimeVue 5 a biblioteca deixará de ser open source. Existe um esforço ativo para tornar a `@maxvue/max-components-ui` **independente do PrimeVue**, reimplementando ou substituindo cada componente dependente do PrimeVue enquanto preserva a API pública, os estilos e o comportamento atuais. **O código ainda depende do PrimeVue hoje** — a migração está planejada, mas ainda não foi executada.
+A partir do PrimeVue 5 a biblioteca deixará de ser open source. Todos os **37 componentes** dependentes do PrimeVue listados em `status-primevue.migration.yaml` foram 100% migrados e estão com status `done`. Nenhum arquivo em `src/components/` importa mais nada do PrimeVue. A fase ativa atual é a **Fase 2 (Infraestrutura e Desacoplamento Total)**, que remove `app.use(PrimeVue)` de `src/index.ts`, desacopla `src/styles/style.ts` de `@primeuix/themes`, elimina o entry `./prime` e executa o sweep de nomenclatura.
 
 Arquivos de controle (todos na raiz do repositório):
 
 | Arquivo | Papel |
 |---------|-------|
 | [`migration_plan.md`](migration_plan.md) | Brief original do orquestrador — como os planos por componente foram gerados. |
-| [`status-primevue.migration.yaml`](status-primevue.migration.yaml) | Fonte de verdade do progresso: lista cada componente dependente do PrimeVue com `level` e `status` (`waiting`/`in_progress`/`done`/`blocked`). |
-| [`migration_plans/`](migration_plans/) | Um plano de migração autossuficiente por componente (`migration_plans/[NomeComponente].md`), 34 no total. |
-| [`migration_executor.md`](migration_executor.md) | Painel de controle + protocolo do **agente executor**: uma fila ordenada e a regra de que cada invocação migra exatamente **um** componente, depois para e atualiza o status. |
-
-**Se pedirem para avançar a migração**, siga o `migration_executor.md`: pegue o próximo item `waiting` de menor número, execute o plano dele, verifique, atualize o status **tanto no YAML quanto na fila do executor** e então pare. Não migre mais de um componente por invocação, não pule etapas e não reordene. Restrições de ordem principais: `InputBase` primeiro (destrava ~19 inputs); `MaxInputSelect` antes dos dropdowns que o reutilizam; o conjunto `MaxTable` → `MaxTableColumn` → `MaxTableFields` migra junto.
+| [`status-primevue.migration.yaml`](status-primevue.migration.yaml) | Fonte de verdade do progresso: lista os 37 componentes com status `done`. |
+| [`migration_plans/`](migration_plans/) | Planos de migração autossuficientes por componente (`migration_plans/[NomeComponente].md`), 37 no total. |
+| [`migration_executor.md`](migration_executor.md) | Painel de controle e registro de conclusão dos 37 componentes. |
+| [`docs/superpowers/specs/2026-08-13-primevue-infra-independencia-design.md`](docs/superpowers/specs/2026-08-13-primevue-infra-independencia-design.md) | Especificação de infraestrutura da Fase 1 e Fase 2 de independência do PrimeVue. |
 
 ## Comandos
 

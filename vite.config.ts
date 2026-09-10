@@ -32,8 +32,7 @@ export default defineConfig({
             entry: {
                 index: path.resolve(import.meta.dirname, './src/index.ts'),
                 preset: path.resolve(import.meta.dirname, './src/presetMaxUno.ts'),
-                resolver: path.resolve(import.meta.dirname, './src/helpers/MaxComponentsUiResolver.ts'),
-                prime: path.resolve(import.meta.dirname, './src/prime/index.ts')
+                resolver: path.resolve(import.meta.dirname, './src/helpers/MaxComponentsUiResolver.ts')
             },
             name: 'MaxComponentsUi',
             fileName: (format, entryName) => `${entryName}.${format === 'es' ? 'es.js' : 'js'}`,

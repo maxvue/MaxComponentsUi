@@ -146,16 +146,15 @@ Migre **de cima para baixo**, sempre o próximo `waiting`. Atualize a coluna **S
 | 32 | MaxTableColumn | muito_alta | [MaxTableColumn.md](migration_plans/MaxTableColumn.md) | MaxTable | done |
 | 33 | MaxTableFields | media | [MaxTableFields.md](migration_plans/MaxTableFields.md) | MaxTable, MaxTableColumn | done |
 | 34 | MaxUserSection | media | [MaxUserSection.md](migration_plans/MaxUserSection.md) | — | done |
-| 35 | MaxButtonConfirm | baixa | *(sem plano — só revalidar após o #19)* | MaxButton | done |
-| 36 | MaxIconConfirm | baixa | *(não precisou de plano — revalidado)* | — | done |
-| 37 | MaxTopToolbar | media | *(sem dependência — migrado diretamente)* | — | done |
+| 35 | MaxButtonConfirm | baixa | [MaxButtonConfirm.md](migration_plans/MaxButtonConfirm.md) | MaxButton | done |
+| 36 | MaxIconConfirm | baixa | [MaxIconConfirm.md](migration_plans/MaxIconConfirm.md) | — | done |
+| 37 | MaxTopToolbar | media | [MaxTopToolbar.md](migration_plans/MaxTopToolbar.md) | — | done |
 
 **Legenda de status:** `waiting` (aguardando) · `in_progress` (em execução) · `done` (concluído) ·
 `blocked` (bloqueado — ver motivo no registro).
 
-> **Item #37 não tem plano escrito.** Os 34 planos de `migration_plans/` foram gerados antes de o
-> `MaxTopToolbar` ser identificado como dependente do PrimeVue. Antes de executá-lo, escreva
-> `migration_plans/MaxTopToolbar.md`. O #35 não precisa de plano — é só revalidação após o #19.
+> **Todos os 37 componentes têm seus planos documentados em `migration_plans/` e estão concluídos (`done`).**
+> O gatilho para a **Fase 2 (Infraestrutura e Remoção Total)** está ativo.
 
 ---
 
