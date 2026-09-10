@@ -16,7 +16,7 @@
                             class="credit-card-number"
                             :textLength="numberTextLength"
                             :lengthAdjust="numberTextLength ? 'spacingAndGlyphs' : undefined"
-                        >{{ t1 }} {{ t2 }} {{ t3 }} {{ t4 }}</text>
+                        >{{ formattedNumber }}</text>
                         <text
                             ref="nameTextEl"
                             x="35"
@@ -124,13 +124,7 @@
         { number: '', cvv: '', name: '', date: '', cardType: null, side: 'front' }
     );
 
-    const code = computed(() => onlyNumbers(String(props.number ?? '')).padEnd(16, '0').slice(0, 16));
     const cvv = computed(() => onlyNumbers(String(props.cvv ?? '')).padEnd(3, '0').slice(0, 4));
-
-    const t1 = computed(() => code.value.slice(0, 4));
-    const t2 = computed(() => code.value.slice(4, 8));
-    const t3 = computed(() => code.value.slice(8, 12));
-    const t4 = computed(() => code.value.slice(12, 16));
 
     /** Deduz a bandeira pelos primeiros dígitos quando `cardType` não é informado. */
     const detected_type = computed(() => {
@@ -152,6 +146,53 @@
         const svg = CARD_TYPE_SVGS[card_type.value];
         return svg ? svgToDataUri(svg) : false;
     });
+
+    /** Identifica se o cartão é American Express (15 dígitos, 4-6-5). */
+    const isAmex = computed(() => card_type.value === 'amex' || card_type.value === 'american-express');
+
+    /** Identifica se o cartão é Diners Club de 14 dígitos (4-6-4). */
+    const isDiners = computed(() => {
+        const isDinersType = card_type.value === 'diners' || card_type.value === 'diners-club';
+        if (!isDinersType) return false;
+        const digits = onlyNumbers(String(props.number ?? ''));
+        // Se não tiver dígitos ou tiver até 14 dígitos, segue padrão Diners 14 dígitos (4-6-4)
+        return digits.length <= 14;
+    });
+
+    /** Formato do cartão com comprimento total e agrupamentos de dígitos. */
+    const cardFormat = computed<{ length: number; groups: number[] }>(() => {
+        if (isAmex.value) return { length: 15, groups: [4, 6, 5] };
+
+        if (isDiners.value) return { length: 14, groups: [4, 6, 4] };
+
+        return { length: 16, groups: [4, 4, 4, 4] };
+    });
+
+    const code = computed(() => {
+        const digits = onlyNumbers(String(props.number ?? ''));
+        return digits.padEnd(cardFormat.value.length, '0').slice(0, cardFormat.value.length);
+    });
+
+    /** Fatiamento dinâmico do número do cartão conforme os blocos da bandeira. */
+    const numberGroups = computed<string[]>(() => {
+        const val = code.value;
+        const groups: string[] = [];
+        let start = 0;
+        for (const len of cardFormat.value.groups) {
+            groups.push(val.slice(start, start + len));
+            start += len;
+        }
+        return groups;
+    });
+
+    /** Número completo formatado com espaços entre os grupos da bandeira. */
+    const formattedNumber = computed(() => numberGroups.value.join(' '));
+
+    /** Mantém t1-t4 para retrocompatibilidade com eventuais leituras internas. */
+    const t1 = computed(() => numberGroups.value[0] ?? '');
+    const t2 = computed(() => numberGroups.value[1] ?? '');
+    const t3 = computed(() => numberGroups.value[2] ?? '');
+    const t4 = computed(() => numberGroups.value[3] ?? '');
 
     const date = computed(() => {
         const digits = onlyNumbers(String(props.date ?? ''));
@@ -211,9 +252,19 @@
         updateAllTextLengths();
     });
 
-    watch([t1, t2, t3, t4, () => props.name, date, cvv], async () => {
+    watch([formattedNumber, () => props.name, date, cvv], async () => {
         await nextTick();
         updateAllTextLengths();
+    });
+
+    defineExpose({
+        code,
+        formattedNumber,
+        numberGroups,
+        t1,
+        t2,
+        t3,
+        t4
     });
 </script>
 
