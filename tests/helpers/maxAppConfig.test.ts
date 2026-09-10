@@ -68,10 +68,20 @@ describe('maxAppConfig', () => {
         expect(config.version).toBe('2.1.0');
     });
 
+    it('aceita logo e routeLogo na configuração do app shell', () => {
+        configureMaxApp({ logo: '/get_file?file=logo.svg', routeLogo: '/dashboard' });
+
+        const config = getMaxAppConfig();
+
+        expect(config.logo).toBe('/get_file?file=logo.svg');
+        expect(config.routeLogo).toBe('/dashboard');
+    });
+
     it('resetMaxAppConfig restaura os padrões', () => {
-        configureMaxApp({ routeUser: 'me' });
+        configureMaxApp({ routeUser: 'me', logo: '/logo.svg' });
         resetMaxAppConfig();
 
         expect(getMaxAppConfig().routeUser).toBe('user.data');
+        expect(getMaxAppConfig().logo).toBeUndefined();
     });
 });

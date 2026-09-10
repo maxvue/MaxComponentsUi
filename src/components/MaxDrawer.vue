@@ -219,7 +219,7 @@
     defineExpose({ open, close, toggle, is_show });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .max-drawer-mask {
         position: fixed;
         inset: 0;
@@ -231,6 +231,7 @@
 
         .max-drawer {
             background-color: var(--background-0);
+            color: var(--background-700);
             display: flex;
             flex-direction: column;
             box-shadow: 0 4px 16px rgb(0 0 0 / 20%);
@@ -275,6 +276,7 @@
 
                 .max-drawer-title {
                     font-weight: 600;
+                    color: var(--background-775);
                 }
 
                 .max-drawer-close {
@@ -282,7 +284,7 @@
                     border: none;
                     cursor: pointer;
                     display: flex;
-                    color: inherit;
+                    color: var(--background-700);
                 }
             }
 

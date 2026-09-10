@@ -297,7 +297,7 @@
     };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .max-like-button {
         display: inline-flex;
         align-items: center;
@@ -334,6 +334,16 @@
 
             &:hover {
                 background: rgb(0 118 142 / 14%);
+            }
+
+            .max-like-badge {
+                background: var(--blue-700);
+                color: #fff;
+
+                &.is-inline {
+                    background: var(--blue-700);
+                    color: #fff;
+                }
             }
         }
 
@@ -395,16 +405,6 @@
                 color: #fff;
                 border: 2px solid #fff;
                 box-shadow: 0 1px 3px rgb(0 0 0 / 15%);
-            }
-        }
-
-        &.is-liked .max-like-badge {
-            background: var(--blue-700);
-            color: #fff;
-
-            &.is-inline {
-                background: var(--blue-700);
-                color: #fff;
             }
         }
 

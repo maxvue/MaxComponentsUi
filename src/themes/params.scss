@@ -4,10 +4,10 @@
     background-color: transparent;
     border-color: transparent;
     outline-color: transparent;
-    color: var(--background-650);
+    color: var(--background-700);
 
     .icon-div {
-        color: var(--background-650);
+        color: var(--background-700);
     }
 
     &:hover {
@@ -68,10 +68,10 @@
 
 [disabled] {
     &:not([disabled='false']) {
-        color: var(--background-600) !important;
+        color: var(--background-650) !important;
 
         span {
-            color: var(--background-600) !important;
+            color: var(--background-650) !important;
         }
     }
 }

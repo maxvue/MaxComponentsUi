@@ -191,7 +191,7 @@
     });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .max-tab-list-wrapper {
         display: flex;
         align-items: center;

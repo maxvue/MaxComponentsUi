@@ -5,7 +5,7 @@
         :show-close-icon="false"
         :base-z-index="1000"
         no-padding
-        class="max-side-menu-mobile-drawer"
+        class="max-side-menu-mobile max-side-menu-mobile-drawer"
     >
         <div class="mobile-side-menu">
             <!-- Cabeçalho com dados e avatar do usuário -->
@@ -196,9 +196,9 @@
     }
 </script>
 
-<style lang="scss">
-    .max-drawer.max-side-menu-mobile-drawer,
-    .max-side-menu-mobile-drawer {
+<style lang="scss" scoped>
+    :deep(.max-drawer.max-side-menu-mobile-drawer),
+    :deep(.max-side-menu-mobile-drawer) {
         width: min(88%, 340px) !important;
         padding: 0;
         background-color: var(--background-0, #fff);
@@ -227,8 +227,8 @@
             align-items: center;
             gap: 0.75rem;
             padding: 1.25rem 1rem;
-            background-color: var(--blue-850, #0f172a);
-            color: #fff;
+            background-color: var(--layout-shell-bg, #003048);
+            color: var(--layout-shell-text, #fff);
             cursor: pointer;
             flex-shrink: 0;
 
@@ -236,7 +236,7 @@
                 width: 44px;
                 height: 44px;
                 border-radius: 50%;
-                background-color: var(--blue-700, #1e293b);
+                background-color: #005F77;
                 display: grid;
                 place-items: center;
                 overflow: hidden;
@@ -256,6 +256,7 @@
                 .mobile-profile-name {
                     font-size: 0.95rem;
                     font-weight: 600;
+                    color: var(--background-775);
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
@@ -263,7 +264,7 @@
 
                 .mobile-profile-subtext {
                     font-size: 0.75rem;
-                    color: var(--background-400, #94a3b8);
+                    color: var(--background-650);
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
@@ -273,7 +274,7 @@
             .mobile-profile-chevron {
                 background: none;
                 border: none;
-                color: var(--background-300, #cbd5e1);
+                color: var(--background-650);
                 display: grid;
                 place-items: center;
                 cursor: pointer;
@@ -304,7 +305,7 @@
                 font-weight: 700;
                 text-transform: uppercase;
                 letter-spacing: 0.08em;
-                color: var(--background-500, #64748b);
+                color: var(--background-750);
                 padding: 0.25rem 0.75rem 0.5rem;
             }
         }
@@ -317,7 +318,7 @@
             min-height: 44px;
             padding: 0 0.75rem;
             border-radius: 10px;
-            color: var(--background-750, #334155);
+            color: var(--background-700);
             cursor: pointer;
             transition: background-color 0.16s ease, color 0.16s ease;
 
@@ -369,7 +370,7 @@
                 border: 1px solid var(--background-300, #cbd5e1);
                 border-radius: 8px;
                 background-color: var(--background-0, #fff);
-                color: var(--background-700, #475569);
+                color: var(--background-750, #475569);
                 font-size: 0.82rem;
                 font-weight: 500;
                 cursor: pointer;
@@ -392,7 +393,7 @@
             .mobile-app-version {
                 text-align: center;
                 font-size: 0.7rem;
-                color: var(--background-400, #94a3b8);
+                color: var(--background-650);
             }
         }
     }

@@ -1,5 +1,5 @@
 <template>
-    <InputBase v-bind="props" :value="temp_value" :done="isDone" :error="error_msg" :caution="caution">
+    <InputBase class="max-input-number" v-bind="props" :value="temp_value" :done="isDone" :error="error_msg" :caution="caution">
         <input
             ref="inputRef"
             type="text"
@@ -160,8 +160,10 @@
     );
 </script>
 
-<style lang="scss">
-    .max-inputnumber {
-        width: 100%;
+<style lang="scss" scoped>
+    .max-input-number {
+        .max-inputnumber {
+            width: 100%;
+        }
     }
 </style>

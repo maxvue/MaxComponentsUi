@@ -1,6 +1,6 @@
 <!-- LoadingComponent.vue -->
 <template>
-    <div v-bind="attrs" v-if="attrs.show !== undefined ? attrs.show : true" class="loader-main-div-ai">
+    <div v-bind="attrs" v-if="attrs.show !== undefined ? attrs.show : true" class="max-loader-ai loader-main-div-ai">
         <div class="items">
             <DotLottieVue style="height: 400px; width: 400px;" autoplay loop src="https://lottie.host/c6ad8a06-43b7-4f0e-876e-634d1f4bb58d/o6vjcixeiy.lottie" />
             <div v-if="attrs.label" class="item-label">{{ attrs.label }}</div>
@@ -19,7 +19,7 @@
     const DotLottieVue = defineAsyncComponent(() => import('@lottiefiles/dotlottie-vue').then((m) => m.DotLottieVue));
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .loader-main-div-ai {
         height: 100%;
         width: 100%;
@@ -42,7 +42,7 @@
 
             .item-label {
                 padding-top: 20px;
-                color: var(--background-600);
+                color: var(--background-650);
             }
         }
 
@@ -60,9 +60,7 @@
         }
     }
 
-    .LoadScreen + .container {
-        #conteudo {
-            filter: blur(2px);
-        }
+    :global(.LoadScreen + .container #conteudo) {
+        filter: blur(2px);
     }
 </style>

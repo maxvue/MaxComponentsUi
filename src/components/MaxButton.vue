@@ -107,7 +107,7 @@
     };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .max-button {
         display: inline-flex;
         align-items: center;
@@ -220,88 +220,88 @@
             text-decoration: underline;
             padding: 0;
         }
+
+        &.max-button-dashed {
+            background: transparent !important;
+            border-style: dashed !important;
+            border-width: 1px;
+            color: var(--max-primary-500) !important;
+
+            &:hover,
+            &:active,
+            &:focus {
+                background: transparent !important;
+            }
+
+            &.p-button-secondary, &.max-button-secondary {
+                color: var(--background-700) !important;
+            }
+
+            &.p-button-success, &.max-button-success {
+                color: var(--success-500) !important;
+            }
+
+            &.p-button-info, &.max-button-info {
+                color: var(--info-500) !important;
+            }
+
+            &.p-button-warn,
+            &.p-button-warning,
+            &.max-button-warning {
+                color: var(--warn-500) !important;
+            }
+
+            &.p-button-help, &.max-button-help {
+                color: var(--violet-500) !important;
+            }
+
+            &.p-button-danger, &.max-button-danger {
+                color: var(--danger-500) !important;
+            }
+
+            &.p-button-contrast, &.max-button-contrast {
+                color: var(--background-775) !important;
+            }
+
+            :deep(.content-button-icon) {
+                .max-icon-div,
+                .max-icon {
+                    color: inherit !important;
+                }
+
+                svg {
+                    fill: currentcolor !important;
+                    color: inherit !important;
+                }
+            }
+        }
+
+        &.p-button-outlined,
+        &.p-button-text,
+        &.p-button-link,
+        &.max-button-outlined,
+        &.max-button-text,
+        &.max-button-link,
+        &[data-p~='outlined'],
+        &[data-p~='text'],
+        &[data-p~='link'] {
+            :deep(.content-button-icon) {
+                .max-icon-div,
+                .max-icon {
+                    color: inherit !important;
+                }
+
+                svg {
+                    fill: currentcolor !important;
+                    color: inherit !important;
+                }
+            }
+        }
     }
 
     .icon-button-b {
         /* min-width: 15px; */
 
         /* min-height: 15px; */
-    }
-
-    .max-button-dashed {
-        background: transparent !important;
-        border-style: dashed !important;
-        border-width: 1px;
-        color: var(--max-primary-500) !important;
-
-        &:hover,
-        &:active,
-        &:focus {
-            background: transparent !important;
-        }
-
-        &.p-button-secondary, &.max-button-secondary {
-            color: var(--background-500) !important;
-        }
-
-        &.p-button-success, &.max-button-success {
-            color: var(--success-500) !important;
-        }
-
-        &.p-button-info, &.max-button-info {
-            color: var(--info-500) !important;
-        }
-
-        &.p-button-warn,
-        &.p-button-warning,
-        &.max-button-warning {
-            color: var(--warn-500) !important;
-        }
-
-        &.p-button-help, &.max-button-help {
-            color: var(--violet-500) !important;
-        }
-
-        &.p-button-danger, &.max-button-danger {
-            color: var(--danger-500) !important;
-        }
-
-        &.p-button-contrast, &.max-button-contrast {
-            color: var(--background-900) !important;
-        }
-
-        .content-button-icon {
-            .max-icon-div,
-            .max-icon {
-                color: inherit !important;
-            }
-
-            svg {
-                fill: currentcolor !important;
-                color: inherit !important;
-            }
-        }
-    }
-
-    .p-button-outlined,
-    .p-button-text,
-    .p-button-link,
-    .max-button-outlined,
-    .max-button-text,
-    .max-button-link,
-    [data-p~='outlined'],
-    [data-p~='text'],
-    [data-p~='link'] {
-        .content-button-icon {
-            .max-icon-div,
-            .max-icon {
-                color: inherit !important;
-            }
-
-            svg {
-                fill: currentcolor !important;
-                color: inherit !important;
-            }
-        }
     }
 </style>

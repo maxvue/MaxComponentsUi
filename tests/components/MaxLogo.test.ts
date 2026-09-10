@@ -8,6 +8,7 @@ function mountLogo(props: Record<string, any> = {}) {
         global: {
             stubs: {
                 RouterLink: {
+                    name: 'RouterLink',
                     template: '<a class="router-link"><slot /></a>',
                     props: ['to']
                 }
@@ -35,10 +36,18 @@ describe('MaxLogo', () => {
         expect(img.attributes('src')).toBe('/assets/logo-custom.png');
     });
 
-    it('envolve a imagem com RouterLink para "/"', () => {
+    it('envolve a imagem com RouterLink para "/" por padrão', () => {
         const wrapper = mountLogo();
-        const link = wrapper.find('.router-link');
+        const link = wrapper.findComponent({ name: 'RouterLink' });
         expect(link.exists()).toBe(true);
+        expect(link.props('to')).toBe('/');
+    });
+
+    it('aceita destino to customizado', () => {
+        const wrapper = mountLogo({ to: '/dashboard' });
+        const link = wrapper.findComponent({ name: 'RouterLink' });
+        expect(link.exists()).toBe(true);
+        expect(link.props('to')).toBe('/dashboard');
     });
 
     it('aplica atributo rounded quando prop rounded=true', () => {

@@ -139,7 +139,7 @@
     }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .max-badge-button {
         display: inline-flex;
         align-items: center;

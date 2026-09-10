@@ -40,8 +40,7 @@
 </template>
 
 <script setup lang="ts">
-    import { computed, useAttrs } from 'vue';
-    import { useDark } from '@vueuse/core';
+    import { computed, ref, onMounted, onBeforeUnmount, useAttrs } from 'vue';
     import MaxIcon from './MaxIcon.vue';
     import {
         resolveBadgeColors,
@@ -90,10 +89,43 @@
         background?: string;
         /** Sobrescrita opcional legada de cor de texto */
         textColor?: string;
+        /** Força o modo escuro no badge (opcional, por padrão detecta passivamente a classe .dark) */
+        dark?: boolean;
     }
 
     const attrs = useAttrs();
-    const isDark = useDark();
+    const isHtmlDark = ref(false);
+    let htmlObserver: MutationObserver | null = null;
+
+    const checkHtmlDark = () => {
+        if (typeof document !== 'undefined') isHtmlDark.value = document.documentElement.classList.contains('dark');
+
+    };
+
+    onMounted(() => {
+        checkHtmlDark();
+        if (typeof MutationObserver !== 'undefined' && typeof document !== 'undefined') {
+            htmlObserver = new MutationObserver(() => {
+                checkHtmlDark();
+            });
+            htmlObserver.observe(document.documentElement, {
+                attributes: true,
+                attributeFilter: ['class']
+            });
+        }
+    });
+
+    onBeforeUnmount(() => {
+        if (htmlObserver) {
+            htmlObserver.disconnect();
+            htmlObserver = null;
+        }
+    });
+
+    const isDark = computed<boolean>(() => {
+        if (props.dark !== undefined) return Boolean(props.dark);
+        return isHtmlDark.value;
+    });
 
     const props = withDefaults(defineProps<MaxBadgeProps>(), {
         color: 'var(--blue-600)',
@@ -105,7 +137,8 @@
         status: undefined,
         size: undefined,
         background: undefined,
-        textColor: undefined
+        textColor: undefined,
+        dark: undefined
     });
 
     /** Detecta no-uppercase passado via prop ou atributo sem valor */
@@ -188,7 +221,7 @@
     });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .max-badge {
         display: inline-flex;
         align-items: center;

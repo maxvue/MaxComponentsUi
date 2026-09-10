@@ -15,9 +15,12 @@ vi.mock('vue-router', async (importOriginal) => ({
     useRouter: () => ({ push, hasRoute, currentRoute: { value: route } })
 }));
 
+import fs from 'node:fs';
+import path from 'node:path';
 import MaxTopMenu from '../../src/components/MaxTopMenu.vue';
 import MaxUserSection from '../../src/components/MaxUserSection.vue';
 import MaxTopToolbar from '../../src/components/MaxTopToolbar.vue';
+import MaxTopToolbarSubmenu from '../../src/components/MaxTopToolbarSubmenu.vue';
 import MaxTopMenuSearchBar from '../../src/components/MaxTopMenuSearchBar.vue';
 import { useTopToolbarStore } from '../../src/stores/useTopToolbar.Store';
 import { useSearchBarStore } from '../../src/stores/useSearchBar.Store';
@@ -365,6 +368,79 @@ describe('MaxTopToolbar', () => {
 
         wrapper.unmount();
     });
+
+    it('renderiza subitens do submenu com labels de automações corretamente', async () => {
+        const toolbar = useTopToolbarStore();
+        toolbar.show = true;
+        toolbar.items = [
+            {
+                label: 'Automações',
+                icon: 'icon-park-solid:play',
+                items: [
+                    { label: 'Submeter TRT', action: vi.fn() },
+                    { label: 'Criar Excel Energisa', action: vi.fn() }
+                ]
+            }
+        ];
+
+        const wrapper = mountWithPinia(MaxTopToolbar);
+        const rootItem = wrapper.find('.p-menubar-root-list > .p-menubar-item');
+        await rootItem.trigger('mouseenter');
+
+        const submenu = wrapper.findComponent(MaxTopToolbarSubmenu);
+        expect(submenu.exists()).toBe(true);
+
+        const subItems = submenu.findAll('.menu-item-content');
+        expect(subItems.length).toBe(2);
+        expect(subItems[0].text()).toContain('Submeter TRT');
+        expect(subItems[1].text()).toContain('Criar Excel Energisa');
+
+        wrapper.unmount();
+    });
+
+    it('botão de ícone em fallback no submenu não utiliza prop light (fundo claro)', async () => {
+        const toolbar = useTopToolbarStore();
+        toolbar.show = true;
+        toolbar.items = [
+            {
+                label: 'Ferramentas',
+                items: [
+                    { icon: 'lucide:settings', action: vi.fn() }
+                ]
+            }
+        ];
+
+        const wrapper = mountWithPinia(MaxTopToolbar);
+        await wrapper.find('.p-menubar-root-list > .p-menubar-item').trigger('mouseenter');
+
+        const submenu = wrapper.findComponent(MaxTopToolbarSubmenu);
+        expect(submenu.exists()).toBe(true);
+
+        const iconBtn = submenu.findComponent({ name: 'MaxIconButton' });
+        expect(iconBtn.exists()).toBe(true);
+        expect(iconBtn.props('light')).toBeFalsy();
+
+        wrapper.unmount();
+    });
+
+    it('garante que MaxTopToolbar restringe seletores à camada superficial direta e MaxTopToolbarSubmenu define contraste correto', () => {
+        const toolbarContent = fs.readFileSync(path.resolve(__dirname, '../../src/components/MaxTopToolbar.vue'), 'utf-8');
+        const submenuContent = fs.readFileSync(path.resolve(__dirname, '../../src/components/MaxTopToolbarSubmenu.vue'), 'utf-8');
+
+        // MaxTopToolbar deve usar seletor filho direto (> .p-menubar-item) para não vazar cores do shell
+        expect(toolbarContent).toMatch(/\.p-menubar-root-list\s*\{[\s\S]*?>\s*\.p-menubar-item/);
+        // Não deve conter seletor amplo .p-menubar-item direto sob .p-menubar-root-list sem >
+        expect(toolbarContent).not.toMatch(/\.p-menubar-root-list\s*\{[^{}]*\n\s*\.p-menubar-item\s*\{/);
+        // Não deve conter color: var(--red-600) !important
+        expect(toolbarContent).not.toContain('--red-600');
+
+        // MaxTopToolbarSubmenu deve declarar estilos semânticos com tokens de tema
+        const submenuStyle = submenuContent.split('<style')[1] ?? '';
+        expect(submenuStyle).toMatch(/color:\s*var\(--background-700,\s*#334155\)/);
+        expect(submenuStyle).toMatch(/color:\s*var\(--background-800,\s*#1e293b\)/);
+        expect(submenuStyle).toMatch(/background:\s*var\(--background-0,\s*#fff\)/);
+        expect(submenuStyle).toMatch(/background-color:\s*var\(--background-100,\s*#f1f5f9\)/);
+    });
 });
 
 describe('useTopToolbarStore', () => {
@@ -544,5 +620,30 @@ describe('MaxTopMenu Mobile (estilo AgenteDeBolso)', () => {
         });
 
         expect(wrapper.find('.top-menu-mobile-actions .bug-slot-content').exists()).toBe(false);
+    });
+
+    it('renderiza o slot notifications no desktop com suporte a tool-bar-plus', () => {
+        const wrapper = mountWithPinia(MaxTopMenu, {
+            slots: {
+                notifications: '<div class="tool-bar-plus reverb-status-anchor"><div class="bell-icon">Sino</div></div>'
+            }
+        });
+
+        const notifContainer = wrapper.find('.tool-bar-plus.reverb-status-anchor');
+        expect(notifContainer.exists()).toBe(true);
+        expect(notifContainer.find('.bell-icon').text()).toBe('Sino');
+    });
+
+    it('renderiza o slot notifications no mobile dentro de top-menu-mobile-actions', () => {
+        const wrapper = mountWithPinia(MaxTopMenu, {
+            attrs: { screen: 'mobile' },
+            slots: {
+                notifications: '<div class="tool-bar-plus reverb-status-anchor"><div class="bell-icon">Sino Mobile</div></div>'
+            }
+        });
+
+        const notifContainer = wrapper.find('.top-menu-mobile-actions .tool-bar-plus.reverb-status-anchor');
+        expect(notifContainer.exists()).toBe(true);
+        expect(notifContainer.find('.bell-icon').text()).toBe('Sino Mobile');
     });
 });

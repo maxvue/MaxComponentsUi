@@ -4,21 +4,20 @@
     </Transition>
 </template>
 
-/**
- * Componente de transição de fade.
- */
 <script setup lang="ts">
-
+    /**
+     * Componente de transição de fade.
+     */
 </script>
 
-<style>
-    .fade-enter-active,
-    .fade-leave-active {
+<style lang="scss" scoped>
+    :global(.fade-enter-active),
+    :global(.fade-leave-active) {
         transition: opacity 0.2s ease;
     }
 
-    .fade-enter-from,
-    .fade-leave-to {
+    :global(.fade-enter-from),
+    :global(.fade-leave-to) {
         opacity: 0;
         transition-delay: 0.2s;
     }

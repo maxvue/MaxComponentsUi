@@ -1,5 +1,5 @@
 <template>
-    <div class="top-menu" v-bind="attrs" :screen="isMobile ? 'mobile' : 'desktop'">
+    <div class="max-top-menu top-menu" v-bind="attrs" :screen="isMobile ? 'mobile' : 'desktop'">
         <!-- Estrutura Mobile: 3 Colunas Estritas (Hambúrguer 44px, Centro 1fr, Ações auto) estilo AgenteDeBolso -->
         <div v-if="isMobile" class="top-menu-elementos" :screen="'mobile'" v-bind="attrs">
             <div
@@ -68,7 +68,7 @@
                 <MaxPopoverMenu v-if="props.addItems?.length" icon="mdi:plus-circle" title="Adicionar Novo" light size="1.4" icon-hover-white :model="props.addItems" />
             </slot>
 
-            <div class="tool-bar-plus" style="width: 30px; height: 30px;" grid center>
+            <div class="tool-bar-plus">
                 <MaxIconButton v-tooltip.bottom="'Atualizar dados'" :i="reloading ? 'loading' : 'reload'" size="1.7" light icon-hover-white @click.stop="reloadAll" />
             </div>
 
@@ -84,7 +84,7 @@
                 <!-- O MaxUserSection é prop-driven; o shell alimenta os dados a
                      partir da store e repassa os eventos para a aplicação. -->
                 <MaxUserSection
-                    ml20
+                    class="top-menu-user-section"
                     :name="user.data?.name ?? ''"
                     :company-name="user.data?.solar_company_name ?? undefined"
                     :user-id="user.data?.id ?? undefined"
@@ -168,24 +168,26 @@
     };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .top-menu {
         position: fixed;
         top: 0;
         left: 0;
-        z-index: 20;
+        z-index: 10;
         width: 100%;
         height: 64px;
         grid-template-columns: auto 1fr;
-        color: var(--text-c, #fff);
+        background-color: var(--layout-shell-bg, #003048);
+        color: var(--layout-shell-text, #fff);
         display: grid !important;
         place-items: center end;
 
         &[screen='mobile'] {
+            z-index: 20;
             place-items: center;
             grid-template-columns: 1fr !important;
             height: var(--top-menu-height, 60px);
-            background-color: var(--blue-850, #0f172a);
+            background-color: var(--layout-shell-bg, #003048);
             padding: 0 0.75rem;
             padding-left: max(0.75rem, env(safe-area-inset-left));
             padding-right: max(0.75rem, env(safe-area-inset-right));
@@ -208,7 +210,7 @@
                 background-color: rgb(255 255 255 / 10%);
             }
 
-            .max-icon-div {
+            :deep(.max-icon-div) {
                 color: currentcolor !important;
             }
         }
@@ -224,7 +226,7 @@
             .mobile-header-title {
                 font-size: 0.95rem;
                 font-weight: 600;
-                color: var(--background-25, #fff);
+                color: var(--layout-shell-text, #fff);
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
@@ -241,6 +243,14 @@
             gap: 1.125rem;
             padding-left: 5px;
 
+            :deep(.tool-bar-plus) {
+                position: relative;
+                width: 30px;
+                height: 30px;
+                display: grid;
+                place-items: center;
+            }
+
             .mobile-user-avatar {
                 display: grid;
                 place-items: center;
@@ -251,7 +261,7 @@
                 cursor: pointer;
                 transition: opacity 0.18s ease;
 
-                .max-user-avatar {
+                :deep(.max-user-avatar) {
                     width: 34px;
                     height: 34px;
                 }
@@ -300,6 +310,19 @@
                 height: 100%;
                 padding-left: 20px;
                 place-items: center;
+            }
+
+            :deep(.tool-bar-plus),
+            .tool-bar-plus {
+                position: relative;
+                width: 30px;
+                height: 30px;
+                display: grid;
+                place-items: center;
+            }
+
+            .top-menu-user-section {
+                margin-left: 20px;
             }
         }
     }

@@ -11,9 +11,9 @@
         </div>
     </teleport>
     <teleport :to="'#max-tab-buttons-' + toValue(tabs_info?.tabs_id)" v-if="toValue(tabs_info?.tabs_id) && is_mounted && is_active && props.actionButton && (props.actionButtonLabel || props.actionButtonIcon)">
-        <div @click="props.actionButton" class="button-tab-item" h-full>
-            <max-button h-full :label="props.actionButtonLabel" :icon="props.actionButtonIcon" v-if="props.actionButtonLabel" />
-            <max-icon-button h-full :icon="props.actionButtonIcon" v-else />
+        <div @click="props.actionButton" class="button-tab-item">
+            <max-button :label="props.actionButtonLabel" :icon="props.actionButtonIcon" v-if="props.actionButtonLabel" />
+            <max-icon-button :icon="props.actionButtonIcon" v-else />
         </div>
     </teleport>
     <div class="max-tab-item-content" v-if="is_active">
@@ -69,17 +69,13 @@
 
 </script>
 
-<style lang="scss">
-.max-tab-panel {
-    width: 100%;
-}
-
+<style lang="scss" scoped>
 .max-tab-item-title {
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: 8px;
-    color: var(--background-750);
+    color: var(--background-700);
     cursor: pointer;
     padding: 10px 20px;
     position: relative;
@@ -91,7 +87,7 @@
         height: 100%;
         bottom: 0;
         position: absolute;
-        color: var(--background-800);
+        color: var(--background-775);
         background-color: rgb(0 0 0 / 10%);
         opacity: 0;
         transition: opacity 0.2s;
@@ -99,10 +95,10 @@
 
     &:hover {
         background-color: var(--background-100);
-        color: var(--background-800);
+        color: var(--background-775);
 
-        .max-icon {
-            color: var(--background-800) !important;
+        :deep(.max-icon) {
+            color: var(--background-775) !important;
         }
 
         &::before {
@@ -120,13 +116,12 @@
             height: 2px;
             bottom: 0;
             position: absolute;
-            color: var(--background-800);
-            background-color: var(--background-800);
+            color: var(--background-775);
+            background-color: var(--background-775);
         }
 
-
-        .max-icon {
-            color: var(--background-800) !important;
+        :deep(.max-icon) {
+            color: var(--background-775) !important;
         }
     }
 
@@ -136,7 +131,7 @@
 
         &:hover {
             background-color: transparent;
-            color: var(--background-750);
+            color: var(--background-650);
         }
     }
 }
@@ -150,5 +145,6 @@
     display: grid;
     padding: 1rem;
     overflow: hidden;
+    min-height: 100%;
 }
 </style>

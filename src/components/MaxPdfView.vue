@@ -1,5 +1,5 @@
 <template>
-    <div v-if="is_open">
+    <div v-if="is_open" class="max-pdf-view">
         <div
             class="viewPDF"
             ref="el"
@@ -34,9 +34,9 @@
             <div class="space" aria-hidden="true" @click="closePDF" />
 
             <div class="pdf-div-bar-tools">
-                <MaxButton icon="iconamoon:zoom-out-light" aria-label="Diminuir zoom" tabindex="0" flex text @click="Zoom('out')" />
-                <MaxButton icon="lucide:zoom-in" aria-label="Aumentar zoom" tabindex="0" flex text @click="Zoom('in')" />
-                <MaxButton icon="ic:round-close" aria-label="Fechar visualizador de PDF" tabindex="0" flex text @click="closePDF" />
+                <MaxButton icon="iconamoon:zoom-out-light" aria-label="Diminuir zoom" tabindex="0" :text="true" @click="Zoom('out')" />
+                <MaxButton icon="lucide:zoom-in" aria-label="Aumentar zoom" tabindex="0" :text="true" @click="Zoom('in')" />
+                <MaxButton icon="ic:round-close" aria-label="Fechar visualizador de PDF" tabindex="0" :text="true" @click="closePDF" />
             </div>
         </div>
     </div>
@@ -235,6 +235,10 @@
         place-items: center;
         grid-template-columns: 1fr 1fr 1fr;
         border-radius: 10px;
+
+        :deep(.max-button) {
+            display: flex;
+        }
     }
 
     .v-enter-active,

@@ -1,10 +1,10 @@
 <template>
     <div class="max-icon-div" :style="style" v-if="icon_name" ref="icon_ref" >
-        <div v-if="props.tooltip" v-tooltip="props.tooltip" flex absolute></div>
-        <div class="max-icon" v-html="svgContent" v-bind="attrs" flex :style="style" />
+        <div v-if="props.tooltip" v-tooltip="props.tooltip" class="max-icon-tooltip-anchor"></div>
+        <div class="max-icon" v-html="svgContent" v-bind="attrs" :style="style" />
         <div class="sub-icon checked" v-if="props.checked === true">
             <div class="background-icon"></div>
-            <svg full xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="m10.6 13.8l-2.15-2.15q-.275-.275-.7-.275t-.7.275t-.275.7t.275.7L9.9 15.9q.3.3.7.3t.7-.3l5.65-5.65q.275-.275.275-.7t-.275-.7t-.7-.275t-.7.275zM12 22q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="m10.6 13.8l-2.15-2.15q-.275-.275-.7-.275t-.7.275t-.275.7t.275.7L9.9 15.9q.3.3.7.3t.7-.3l5.65-5.65q.275-.275.275-.7t-.275-.7t-.7-.275t-.7.275zM12 22q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22" /></svg>
         </div>
         <div class="sub-icon plus" v-if="props.plus === true">
             <div class="background-icon"></div>
@@ -157,16 +157,22 @@
 
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .max-icon-div {
         position: relative;
+
+        .max-icon-tooltip-anchor {
+            position: absolute;
+            display: flex;
+            inset: 0;
+        }
 
         .max-icon {
             display: grid;
             place-items: center;
             width: 100%;
 
-            svg {
+            :deep(svg) {
                 min-width: 100% !important;
                 min-height: 100% !important;
                 max-width: 100% !important;

@@ -94,7 +94,7 @@ describe('MaxCreditCard', () => {
             expect(Number(textLengthAttr)).toBeLessThanOrEqual(NUMBER_MAX_WIDTH);
         });
 
-        it('cabe o número Amex de 15 dígitos (agrupamento 4-6-5 truncado para os 4 grupos fixos existentes)', async () => {
+        it('cabe o número Amex de 15 dígitos (agrupamento canônico 4-6-5)', async () => {
             const wrapper = mountCard({ number: '378282246310005' });
             await nextTick();
             await nextTick();
@@ -235,6 +235,62 @@ describe('MaxCreditCard', () => {
 
             expect(group6).toBeGreaterThan(group4);
             expect(group6 / group4).toBeCloseTo(6 / 4, 5);
+        });
+    });
+
+    describe('formatação e agrupamento do número do cartão por bandeira', () => {
+        it('renderiza cartão Amex com 15 dígitos sem zeros adicionais e no formato 4-6-5', async () => {
+            const wrapper = mountCard({ number: '378282246310005' });
+            await nextTick();
+            await nextTick();
+
+            const numberText = wrapper.find('.credit-card-number');
+            expect(numberText.text()).toBe('3782 822463 10005');
+        });
+
+        it('renderiza cartão Diners com 14 dígitos sem zeros adicionais e no formato 4-6-4', async () => {
+            const wrapper = mountCard({ number: '30569309025904' });
+            await nextTick();
+            await nextTick();
+
+            const numberText = wrapper.find('.credit-card-number');
+            expect(numberText.text()).toBe('3056 930902 5904');
+        });
+
+        it('renderiza placeholder de Amex com 15 zeros no formato 4-6-5 quando cardType é amex', async () => {
+            const wrapper = mountCard({ cardType: 'amex' });
+            await nextTick();
+            await nextTick();
+
+            const numberText = wrapper.find('.credit-card-number');
+            expect(numberText.text()).toBe('0000 000000 00000');
+        });
+
+        it('renderiza placeholder de Diners com 14 zeros no formato 4-6-4 quando cardType é diners', async () => {
+            const wrapper = mountCard({ cardType: 'diners' });
+            await nextTick();
+            await nextTick();
+
+            const numberText = wrapper.find('.credit-card-number');
+            expect(numberText.text()).toBe('0000 000000 0000');
+        });
+
+        it('renderiza cartão padrão Visa de 16 dígitos no formato 4-4-4-4', async () => {
+            const wrapper = mountCard({ number: '4111222233334444' });
+            await nextTick();
+            await nextTick();
+
+            const numberText = wrapper.find('.credit-card-number');
+            expect(numberText.text()).toBe('4111 2222 3333 4444');
+        });
+
+        it('renderiza placeholder padrão de 16 zeros no formato 4-4-4-4', async () => {
+            const wrapper = mountCard({});
+            await nextTick();
+            await nextTick();
+
+            const numberText = wrapper.find('.credit-card-number');
+            expect(numberText.text()).toBe('0000 0000 0000 0000');
         });
     });
 

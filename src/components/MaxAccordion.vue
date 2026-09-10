@@ -70,7 +70,7 @@
     defineExpose({ toggle });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .max-accordion {
         display: flex;
         flex-direction: column;
@@ -78,5 +78,6 @@
         border: 1px solid var(--background-300);
         border-radius: 0.75rem;
         overflow: hidden;
+        color: var(--background-700);
     }
 </style>

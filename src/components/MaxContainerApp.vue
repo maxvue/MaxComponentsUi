@@ -1,5 +1,5 @@
 <template>
-    <div class="container-app" v-bind="attrs">
+    <div class="max-container-app container-app" v-bind="attrs">
         <slot></slot>
     </div>
 </template>
@@ -10,7 +10,7 @@
     const attrs = useAttrs();
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .container-app {
         display: grid;
         overflow: hidden;
@@ -19,7 +19,7 @@
         height: 100dvh;
         box-sizing: border-box;
         grid-template-columns: auto 1fr;
-        background-color: var(--blue-850) !important;
+        background-color: var(--layout-shell-bg, #003048) !important;
 
         &[screen='mobile'] {
             grid-template-columns: 1fr;

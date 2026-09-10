@@ -1,5 +1,5 @@
 <template>
-    <div :class="`max-check-box ${!label ? 'no-label' : ''}`" v-bind="$attrs">
+    <div :class="`max-input-checkbox max-check-box ${!label ? 'no-label' : ''}`" v-bind="$attrs">
         <input
             :id="id"
             v-model="temp_value"
@@ -34,7 +34,7 @@
     watch(() => props.modelValue, (val) => temp_value.value = val);
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .max-check-box {
         display: grid;
         grid-template-columns: auto 1fr;

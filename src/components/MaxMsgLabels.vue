@@ -1,5 +1,5 @@
 <template>
-    <div v-if="!noErrors" :class="typeSelect" class="labels text-xs pt-1 subpixel-antialiased">
+    <div v-if="!noErrors" :class="typeSelect" class="max-msg-labels labels">
         <span v-if="obrigatorio" class="obrigatorio">*</span>
         <div v-if="msgError" class="erro">
             <div class="fill"></div>
@@ -30,8 +30,11 @@
         pointer-events: none;
         height: 100%;
         width: 100%;
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         padding: 0 !important;
+        padding-top: 0.25rem !important;
+        -webkit-font-smoothing: subpixel-antialiased;
+        -moz-osx-font-smoothing: auto;
         display: grid;
         grid-template-columns: 1fr;
         place-items: center;
@@ -115,7 +118,7 @@
 
         .div_mensagem {
             padding-left: 8px;
-            color: var(--text-c);
+            color: var(--background-700);
             width: calc(100% - 8px);
             text-align: right;
         }

@@ -1,5 +1,5 @@
 <template>
-    <InputBase v-bind="props" class="input-base-phone-mail-main-div" :label="attrs.label ?? name_method" :icon="iconLeft" :done="done ?? undefined" :caution="caution" :error="error_msg">
+    <InputBase v-bind="props" class="max-input-phone-mail input-base-phone-mail-main-div" :label="attrs.label ?? name_method" :icon="iconLeft" :done="done ?? undefined" :caution="caution" :error="error_msg">
         <input
             type="text"
             class="p-inputtext p-component"
@@ -233,10 +233,3 @@
 
     defineExpose({ unmaskedValue });
 </script>
-
-<style lang="scss" scoped>
-    input {
-        grid-column: 2;
-        position: relative;
-    }
-</style>

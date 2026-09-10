@@ -45,4 +45,13 @@ describe('MaxMsgLabels', () => {
         const wrapper = mountMsgLabels({ typeSelect: 'select' });
         expect(wrapper.find('.labels.select').exists()).toBe(true);
     });
+
+    it('não possui classes utilitárias inline no elemento raiz', () => {
+        const wrapper = mountMsgLabels({ msg: 'Info' });
+        const root = wrapper.find('.max-msg-labels');
+        expect(root.exists()).toBe(true);
+        expect(root.classes()).not.toContain('text-xs');
+        expect(root.classes()).not.toContain('pt-1');
+        expect(root.classes()).not.toContain('subpixel-antialiased');
+    });
 });

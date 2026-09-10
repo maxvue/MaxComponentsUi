@@ -1,7 +1,7 @@
 <template>
     <Teleport to="body">
         <TransitionFade>
-            <div class="background-popover-confirm" @click.stop="confirm_store.hide" v-if="confirm_store.show">
+            <div class="max-popover-confirm background-popover-confirm" @click.stop="confirm_store.hide" v-if="confirm_store.show">
                 <div
                     class="max-icon-confirm-dialog"
                     ref="el"
@@ -13,15 +13,15 @@
                     @click.stop="() => {}"
                     @keydown="trap.onKeydown"
                 >
-                    <div pw4 pt-4 full text-center color-background-750 class="popover-confirm-content">
-                        <MaxIcon :i="confirm_store.messageIcon ?? 'mingcute:question-fill'" size="1.2" color-red-600 />
+                    <div class="popover-confirm-content">
+                        <MaxIcon class="popover-confirm-icon" :i="confirm_store.messageIcon ?? 'mingcute:question-fill'" size="1.2" />
                         <div :id="msg_id">
                             {{confirm_store.message}}
                         </div>
                     </div>
-                    <MaxGrid>
-                        <MaxButton s50 :action="reject" :label="confirm_store.rejectProps.label" :icon="confirm_store.rejectProps.icon" />
-                        <MaxButton s50 :action="accept" :label="confirm_store.acceptProps.label" :icon="confirm_store.acceptProps.icon" />
+                    <MaxGrid class="popover-confirm-actions">
+                        <MaxButton class="popover-confirm-btn" :action="reject" :label="confirm_store.rejectProps.label" :icon="confirm_store.rejectProps.icon" />
+                        <MaxButton class="popover-confirm-btn" :action="accept" :label="confirm_store.acceptProps.label" :icon="confirm_store.acceptProps.icon" />
                     </MaxGrid>
                 </div>
             </div>
@@ -97,7 +97,7 @@
     const { width, height } = useElementSize(el as any);
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .background-popover-confirm {
     background-color: rgb(0 0 0 / 10%);
     height: 100vh;
@@ -106,56 +106,71 @@
     z-index: 99;
     top: 0;
     left: 0;
-}
 
-.max-icon-confirm-dialog {
-    position: fixed;
-    min-width: 300px;
-    min-height: 60px;
-    background-color: var(--background-0);
-    z-index: 2;
-    border: 1px solid var(--surface-border);
-
-    /* O drop-shadow traça o contorno real do elemento + seus ::before, criando o balão perfeito */
-    filter: drop-shadow(0 4px 8px rgb(0 0 0 / 20%));
-    border-radius: 0.75rem;
-    padding: 10px;
-
-    &::before {
-        content: '';
-        position: absolute;
-        width: 14px;
-        height: 14px;
+    .max-icon-confirm-dialog {
+        position: fixed;
+        min-width: 300px;
+        min-height: 60px;
         background-color: var(--background-0);
-        transform: rotate(45deg);
-        z-index: 1; /* Cobre a borda principal para unificar o desenho */
-    }
+        color: var(--background-700);
+        z-index: 2;
+        border: 1px solid var(--surface-border);
 
-    &.is-bottom::before {
-        top: -7px;
-        border-top: 1px solid var(--surface-border);
-        border-left: 1px solid var(--surface-border);
-    }
+        /* O drop-shadow traça o contorno real do elemento + seus ::before, criando o balão perfeito */
+        filter: drop-shadow(0 4px 8px rgb(0 0 0 / 20%));
+        border-radius: 0.75rem;
+        padding: 10px;
 
-    &.is-top::before {
-        bottom: -7px;
-        border-bottom: 1px solid var(--surface-border);
-        border-right: 1px solid var(--surface-border);
-    }
+        &::before {
+            content: '';
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background-color: var(--background-0);
+            transform: rotate(45deg);
+            z-index: 1; /* Cobre a borda principal para unificar o desenho */
+        }
 
-    &.is-left::before {
-        right: 15px;
-    }
+        &.is-bottom::before {
+            top: -7px;
+            border-top: 1px solid var(--surface-border);
+            border-left: 1px solid var(--surface-border);
+        }
 
-    &.is-right::before {
-        left: 15px;
-    }
+        &.is-top::before {
+            bottom: -7px;
+            border-bottom: 1px solid var(--surface-border);
+            border-right: 1px solid var(--surface-border);
+        }
 
-    .popover-confirm-content {
-        display: grid;
-        grid-template-columns: auto 1fr;
-        align-items: center;
-        gap: 5px;
+        &.is-left::before {
+            right: 15px;
+        }
+
+        &.is-right::before {
+            left: 15px;
+        }
+
+        .popover-confirm-content {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            align-items: center;
+            gap: 5px;
+            width: 100%;
+            padding: 1rem;
+            text-align: center;
+            color: var(--background-750);
+
+            .popover-confirm-icon {
+                color: var(--red-600);
+            }
+        }
+
+        .popover-confirm-actions {
+            .popover-confirm-btn {
+                flex: 1 0 calc(50% - 8px);
+            }
+        }
     }
 }
 </style>

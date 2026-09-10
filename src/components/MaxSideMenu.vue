@@ -1,8 +1,8 @@
 <template>
-    <div class="side-menu" v-bind="attrs">
+    <div class="max-side-menu side-menu" v-bind="attrs">
         <div class="grid-logo-and-menu">
-            <div v-if="system.type_device === 'desktop'" v-tooltip="system.version" class="space-logo" @click="clearSearch">
-                <MaxLogo v-if="logoSrc" :src="logoSrc" fill flex no-padding />
+            <div v-if="!isMobile" v-tooltip="system.version" class="space-logo" @click="onLogoClick">
+                <MaxLogo v-if="logoSrc" :src="logoSrc" :to="effectiveRouteLogo" :no-padding="true" class="side-menu-logo" />
             </div>
             <div class="menu">
                 <div v-if="items" class="grupo items">
@@ -18,12 +18,14 @@
 
 <script setup lang="ts">
     import { computed, useAttrs } from 'vue';
+    import { useRouter, useRoute } from 'vue-router';
     import { getRoute } from '@maxvue/max-use';
     import MaxLogo from './MaxLogo.vue';
     import MaxMenuVerticalItem from './MaxMenuVerticalItem.vue';
     import { useSystemStore } from '../stores/useSystem.Store';
     import { useSearchBarStore } from '../stores/useSearchBar.Store';
     import { useListMenusStore } from '../stores/useListMenus.Store';
+    import { getMaxAppConfig } from '../helpers/maxAppConfig';
     import type { SideMenuItem } from '../types/app';
 
     const props = defineProps<{
@@ -32,21 +34,43 @@
          *
          * Aceita uma URL (`/get_file?file=logo.svg`, `https://…`, `data:…`) ou o
          * nome de uma rota, resolvido pelo `getRoute` do MaxUse. Quando omitida
-         * — ou quando a rota não resolve — nenhuma logo é renderizada.
+         * — ou quando a rota não resolve — consulta `getMaxAppConfig().logo`.
          */
         logo?: string;
+        /** Rota de destino ao clicar na logo. Padrão: '/'. */
+        routeLogo?: string;
+        /** Dispositivo atual ('desktop' | 'mobile'). Quando omitido, consulta useSystemStore(). */
+        screen?: string;
+    }>();
+
+    const emit = defineEmits<{
+        logoClick: [];
     }>();
 
     const attrs = useAttrs();
+    const router = useRouter();
+    const route = useRoute();
     const menus = useListMenusStore();
     const system = useSystemStore();
+
+    /** Determina se o menu lateral está em modo mobile. */
+    const isMobile = computed<boolean>(() => {
+        const target = props.screen ?? (attrs.screen as string | undefined);
+        if (target) return target === 'mobile';
+
+        return system.type_device === 'mobile';
+    });
+
+    /** Rota efetiva de destino ao clicar na logo. */
+    const effectiveRouteLogo = computed<string>(() => props.routeLogo ?? getMaxAppConfig().routeLogo ?? '/');
 
     /** Indica que o valor já é um caminho utilizável, e não um nome de rota. */
     const isUrl = (value: string): boolean => /^(https?:\/\/|\/|data:|blob:)/.test(value);
 
-    /** Resolve a prop `logo` para a URL final da imagem. */
+    /** Resolve a logo para a URL final da imagem, com fallback para a configuração global. */
     const logoSrc = computed<string | undefined>(() => {
-        const logo = props.logo?.trim();
+        const raw = props.logo ?? getMaxAppConfig().logo;
+        const logo = raw?.trim();
 
         if (!logo) return undefined;
         if (isUrl(logo)) return logo;
@@ -80,6 +104,19 @@
     const clearSearch = (): void => {
         useSearchBarStore().input_value = '';
     };
+
+    const onLogoClick = (): void => {
+        clearSearch();
+        emit('logoClick');
+
+        const target = effectiveRouteLogo.value;
+        if (!target) return;
+
+        if (target.startsWith('/')) {
+            if (route?.path !== target) router.push(target);
+        } else if (route?.name !== target) router.push({ name: target });
+
+    };
 </script>
 
 <style scoped lang="scss">
@@ -90,7 +127,8 @@
         height: 100vh;
         height: 100dvh;
         box-sizing: border-box;
-        z-index: 3;
+        z-index: 25;
+        background-color: var(--layout-shell-bg, #003048);
 
         &[screen='mobile'] {
             position: absolute;
@@ -108,6 +146,7 @@
             .space-logo {
                 position: relative;
                 top: 10px;
+                left: 6px;
                 width: 45px;
                 height: 45px;
                 margin: 5px auto 40px;
@@ -117,6 +156,11 @@
                 justify-content: center;
                 box-sizing: border-box;
                 flex-shrink: 0;
+
+                :deep(.side-menu-logo) {
+                    display: flex;
+                    background-color: var(--layout-shell-bg, #003048);
+                }
             }
 
             .menu {

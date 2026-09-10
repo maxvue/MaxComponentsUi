@@ -7,18 +7,17 @@
                     <div
                         v-if="props.actionButton && (props.actionButtonLabel || props.actionButtonIcon)"
                         class="button-tab-item"
-                        h-full
                         @click="props.actionButton"
                     >
                         <MaxButton
                             v-if="props.actionButtonLabel"
-                            h-full
+                            class="button-tab-action"
                             :label="props.actionButtonLabel"
                             :icon="props.actionButtonIcon"
                         />
                         <MaxIconButton
                             v-else
-                            h-full
+                            class="button-tab-action"
                             :icon="props.actionButtonIcon"
                         />
                     </div>
@@ -221,7 +220,7 @@
     defineExpose({ select, navigate });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .max-tabs {
     display: flex;
     flex-direction: column;
@@ -280,6 +279,11 @@
             .button-tab-item {
                 padding: 0 8px;
                 max-height: 25px;
+                height: 100%;
+
+                .button-tab-action {
+                    height: 100%;
+                }
             }
 
         }

@@ -1,5 +1,5 @@
 <template>
-    <InputBase v-bind="props" class="input-credit-card-number-base" text-center :label="props.label" :done="done" :required="props.required" :error="error_msg">
+    <InputBase v-bind="props" class="max-input-credit-card input-credit-card-number-base" :text-center="true" :label="props.label" :done="done" :required="props.required" :error="error_msg">
         <MaxBaseInput type="text" v-bind="attrs" v-model="temp_value" v-maska:unmaskedValue.unmasked="maskValue" placeholder="0000 0000 0000 0000" @blur="checkDone()" />
     </InputBase>
 </template>
@@ -71,9 +71,9 @@
     defineExpose({ unmaskedValue });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .input-credit-card-number-base {
-    input {
+    :deep(input) {
         letter-spacing: 2px;
     }
 }

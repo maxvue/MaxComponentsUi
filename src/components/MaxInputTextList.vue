@@ -1,5 +1,5 @@
 <template>
-    <InputBase v-bind="{...props}" class="max-input-text-list-div">
+    <InputBase v-bind="{...props}" class="max-input-text-list max-input-text-list-div">
         <div class="max-code-editor">
             <div class="line-numbers" ref="lineNumbersRef">
                 <div v-for="n in lineCount" :key="n" class="line-number">{{ n }}</div>
@@ -115,7 +115,7 @@
     };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .max-input-text-list-div {
         .max-code-editor {
             display: flex;
@@ -126,39 +126,39 @@
             background: transparent;
             min-height: 150px;
             max-height: 400px;
-        }
 
-        .line-numbers {
-            padding: 10px 8px;
-            background-color: var(--background-100, rgb(0 0 0 / 2%));
-            color: var(--background-400, #9ca3af);
-            text-align: right;
-            min-width: 40px;
-            overflow-y: hidden;
-            user-select: none;
-            border-right: 1px solid var(--background-200, rgb(0 0 0 / 5%));
-            border-top-left-radius: inherit;
-            border-bottom-left-radius: inherit;
-        }
+            .line-numbers {
+                padding: 10px 8px;
+                background-color: var(--background-100, rgb(0 0 0 / 2%));
+                color: var(--background-650);
+                text-align: right;
+                min-width: 40px;
+                overflow-y: hidden;
+                user-select: none;
+                border-right: 1px solid var(--background-200, rgb(0 0 0 / 5%));
+                border-top-left-radius: inherit;
+                border-bottom-left-radius: inherit;
 
-        .line-number {
-            line-height: 1.5;
-            font-size: 14px;
-        }
+                .line-number {
+                    line-height: 1.5;
+                    font-size: 14px;
+                }
+            }
 
-        .code-textarea {
-            flex-grow: 1;
-            padding: 10px;
-            border: none !important;
-            box-shadow: none !important;
-            outline: none;
-            resize: none;
-            white-space: pre;
-            line-height: 1.5;
-            font-size: 14px;
-            background: transparent;
-            color: inherit;
-            overflow: auto;
+            .code-textarea {
+                flex-grow: 1;
+                padding: 10px;
+                border: none !important;
+                box-shadow: none !important;
+                outline: none;
+                resize: none;
+                white-space: pre;
+                line-height: 1.5;
+                font-size: 14px;
+                background: transparent;
+                color: inherit;
+                overflow: auto;
+            }
         }
     }
 </style>

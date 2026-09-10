@@ -25,7 +25,7 @@ import MaxPageLayout from '../../src/components/MaxPageLayout.vue';
 import { useUserStore } from '../../src/stores/useUser.Store';
 import { useLoginStore } from '../../src/stores/useLogin.Store';
 import { useSystemStore } from '../../src/stores/useSystem.Store';
-import { getMaxAppConfig, resetMaxAppConfig } from '../../src/helpers/maxAppConfig';
+import { configureMaxApp, getMaxAppConfig, resetMaxAppConfig } from '../../src/helpers/maxAppConfig';
 
 let pinia: Pinia;
 
@@ -300,6 +300,48 @@ describe('MaxApp', () => {
             expect(wrapper.findComponent(MaxPageLayout).props('bottomShowLabels')).toBe(true);
         });
 
+        it('repassa routeLogo ao layout com valor padrão "/"', () => {
+            loadUser();
+
+            const wrapper = mountApp();
+
+            expect(wrapper.findComponent(MaxPageLayout).props('routeLogo')).toBe('/');
+        });
+
+        it('repassa routeLogo customizada ao layout', () => {
+            loadUser();
+
+            const wrapper = mountApp({ props: { routeLogo: 'dashboard' } });
+
+            expect(wrapper.findComponent(MaxPageLayout).props('routeLogo')).toBe('dashboard');
+        });
+
+        it('repassa a logo de configureMaxApp ao layout quando a prop logo for omitida', () => {
+            loadUser();
+            configureMaxApp({ logo: '/global-logo.svg' });
+
+            const wrapper = mountApp();
+
+            expect(wrapper.findComponent(MaxPageLayout).props('logo')).toBe('/global-logo.svg');
+        });
+
+        it('repassa routeLogo de configureMaxApp ao layout quando a prop routeLogo for omitida', () => {
+            loadUser();
+            configureMaxApp({ routeLogo: 'dashboard' });
+
+            const wrapper = mountApp();
+
+            expect(wrapper.findComponent(MaxPageLayout).props('routeLogo')).toBe('dashboard');
+        });
+
+        it('repassa a prop screen ao layout', () => {
+            loadUser();
+
+            const wrapper = mountApp({ props: { screen: 'desktop' } });
+
+            expect(wrapper.findComponent(MaxPageLayout).props('screen')).toBe('desktop');
+        });
+
         it('propaga o evento fabClick do layout', async () => {
             loadUser();
 
@@ -308,6 +350,16 @@ describe('MaxApp', () => {
             await wrapper.vm.$nextTick();
 
             expect(wrapper.emitted('fabClick')).toHaveLength(1);
+        });
+
+        it('propaga o evento logoClick do layout', async () => {
+            loadUser();
+
+            const wrapper = mountApp();
+            wrapper.findComponent(MaxPageLayout).vm.$emit('logoClick');
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.emitted('logoClick')).toHaveLength(1);
         });
     });
 
@@ -322,6 +374,63 @@ describe('MaxApp', () => {
             expect(wrapper.findComponent(MaxPageLayout).exists()).toBe(true);
             expect(useLoginStore().allow_user_name).toBe(false);
             expect(getMaxAppConfig().routeProviders).toBe('social.providers');
+        });
+    });
+
+    describe('gerenciamento de dark mode', () => {
+        beforeEach(() => {
+            document.documentElement.classList.remove('dark');
+        });
+
+        afterEach(() => {
+            document.documentElement.classList.remove('dark');
+        });
+
+        it('aplica a classe .dark quando o usuário já tem darkMode: true nas configurações ao carregar', async () => {
+            loadUser({ id: 1, name: 'Maria', settings: { darkMode: true } });
+
+            mountApp();
+            await new Promise((r) => setTimeout(r, 10));
+
+            expect(document.documentElement.classList.contains('dark')).toBe(true);
+        });
+
+        it('remove a classe .dark quando o usuário tem darkMode: false nas configurações ao carregar', async () => {
+            document.documentElement.classList.add('dark');
+            loadUser({ id: 1, name: 'Maria', settings: { darkMode: false } });
+
+            mountApp();
+            await new Promise((r) => setTimeout(r, 10));
+
+            expect(document.documentElement.classList.contains('dark')).toBe(false);
+        });
+
+        it('alterna o modo escuro ao receber toggleDarkMode e persiste na store', async () => {
+            const user = loadUser({ id: 1, name: 'Maria', settings: { darkMode: false } });
+            const saveSpy = vi.fn();
+            (user as any).save = saveSpy;
+
+            const wrapper = mountApp();
+            const layout = wrapper.findComponent(MaxPageLayout);
+
+            expect(document.documentElement.classList.contains('dark')).toBe(false);
+
+            // Primeiro clique: ativa
+            layout.vm.$emit('toggleDarkMode');
+            await wrapper.vm.$nextTick();
+
+            expect(document.documentElement.classList.contains('dark')).toBe(true);
+            expect(user.data?.settings?.darkMode).toBe(true);
+            expect(saveSpy).toHaveBeenCalledTimes(1);
+            expect(wrapper.emitted('toggleDarkMode')).toBeTruthy();
+
+            // Segundo clique: desativa
+            layout.vm.$emit('toggleDarkMode');
+            await wrapper.vm.$nextTick();
+
+            expect(document.documentElement.classList.contains('dark')).toBe(false);
+            expect(user.data?.settings?.darkMode).toBe(false);
+            expect(saveSpy).toHaveBeenCalledTimes(2);
         });
     });
 });

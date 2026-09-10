@@ -74,7 +74,7 @@
     };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .p-avatar.max-user-avatar {
         display: inline-flex;
         align-items: center;
@@ -88,78 +88,78 @@
         line-height: 1;
         user-select: none;
         position: relative;
-    }
 
-    .max-user-avatar__image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-        border-radius: 50%;
-    }
+        .max-user-avatar__image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            border-radius: 50%;
+        }
 
-    .max-user-avatar__icon-wrapper {
-        width: 100%;
-        height: 100%;
-        border-radius: 50% !important;
-        overflow: hidden !important;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-color: var(--blue-750, #1e3a5f);
-        color: var(--max-user-avatar-color, #fff);
+        .max-user-avatar__icon-wrapper {
+            width: 100%;
+            height: 100%;
+            border-radius: 50% !important;
+            overflow: hidden !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #005f77;
+            color: var(--max-user-avatar-color, #fff);
 
-        .max-user-avatar__icon {
-            width: 72% !important;
-            height: 72% !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            color: #fff !important;
-
-            .max-icon {
-                width: 100% !important;
-                height: 100% !important;
+            :deep(.max-user-avatar__icon) {
+                width: 72% !important;
+                height: 72% !important;
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
                 color: #fff !important;
-            }
 
-            svg {
-                width: 100% !important;
-                height: 100% !important;
-                max-width: 100% !important;
-                max-height: 100% !important;
-                display: block;
-                transform: none;
+                .max-icon {
+                    width: 100% !important;
+                    height: 100% !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    color: #fff !important;
+                }
+
+                svg {
+                    width: 100% !important;
+                    height: 100% !important;
+                    max-width: 100% !important;
+                    max-height: 100% !important;
+                    display: block;
+                    transform: none;
+                }
             }
         }
-    }
 
-    .p-avatar.removable {
-        position: relative;
-        cursor: pointer;
+        &.removable {
+            position: relative;
+            cursor: pointer;
 
-        &::after {
-            content: '×';
-            position: absolute;
-            inset: 0;
-            display: grid;
-            place-items: center;
-            border-radius: 50%;
-            font-size: 0.9em;
-            font-weight: 700;
-            line-height: 1;
-            color: #fff;
-            background-color: rgb(220 38 38 / 45%);
-            opacity: 0;
-            transition: opacity 0.15s ease;
-            pointer-events: none;
-        }
+            &::after {
+                content: '×';
+                position: absolute;
+                inset: 0;
+                display: grid;
+                place-items: center;
+                border-radius: 50%;
+                font-size: 0.9em;
+                font-weight: 700;
+                line-height: 1;
+                color: #fff;
+                background-color: rgb(220 38 38 / 45%);
+                opacity: 0;
+                transition: opacity 0.15s ease;
+                pointer-events: none;
+            }
 
-        &:hover::after {
-            opacity: 1;
+            &:hover::after {
+                opacity: 1;
+            }
         }
     }
 </style>

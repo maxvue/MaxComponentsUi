@@ -39,16 +39,22 @@ describe('MaxInputCoordinateDecimalLat', () => {
         expect(ib.props('done')).toBe(true);
     });
 
-    it('invalida latitude fora do Brasil (positiva alta: 10.0)', () => {
+    it('invalida latitude fora do Brasil (positiva alta: 10.0) após blur', async () => {
         const wrapper = mountCoord(MaxInputCoordinateDecimalLat, { modelValue: 10.0 });
+        const input = wrapper.find('input');
+        await input.trigger('blur');
+
         const ib = wrapper.findComponent(InputBase);
-        expect(ib.props('done')).not.toBe(true);
+        expect(ib.props('done')).toBe(false);
     });
 
-    it('invalida latitude fora do Brasil (negativa extrema: -40.0)', () => {
+    it('invalida latitude fora do Brasil (negativa extrema: -40.0) após blur', async () => {
         const wrapper = mountCoord(MaxInputCoordinateDecimalLat, { modelValue: -40.0 });
+        const input = wrapper.find('input');
+        await input.trigger('blur');
+
         const ib = wrapper.findComponent(InputBase);
-        expect(ib.props('done')).not.toBe(true);
+        expect(ib.props('done')).toBe(false);
     });
 
     it('mostra erro "Campo obrigatório" quando vazio e required', () => {
@@ -83,16 +89,22 @@ describe('MaxInputCoordinateDecimalLng', () => {
         expect(ib.props('done')).toBe(true);
     });
 
-    it('invalida longitude fora do Brasil (-80.0)', () => {
+    it('invalida longitude fora do Brasil (-80.0) após blur', async () => {
         const wrapper = mountCoord(MaxInputCoordinateDecimalLng, { modelValue: -80.0 });
+        const input = wrapper.find('input');
+        await input.trigger('blur');
+
         const ib = wrapper.findComponent(InputBase);
-        expect(ib.props('done')).not.toBe(true);
+        expect(ib.props('done')).toBe(false);
     });
 
-    it('invalida longitude positiva (fora do Brasil)', () => {
+    it('invalida longitude positiva (fora do Brasil) após blur', async () => {
         const wrapper = mountCoord(MaxInputCoordinateDecimalLng, { modelValue: 10.0 });
+        const input = wrapper.find('input');
+        await input.trigger('blur');
+
         const ib = wrapper.findComponent(InputBase);
-        expect(ib.props('done')).not.toBe(true);
+        expect(ib.props('done')).toBe(false);
     });
 
     it('mostra erro "Campo obrigatório" quando vazio e required', () => {

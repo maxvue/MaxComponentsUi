@@ -1,5 +1,5 @@
 <template>
-    <div v-if="showed && hasContent(toolbar.items)" ref="element_ref" :class="`tool-bar-top-main-div ${attrs.plus === true ? 'onlyOne' : ''}`">
+    <div v-if="showed && hasContent(toolbar.items)" ref="element_ref" :class="`max-top-toolbar tool-bar-top-main-div ${attrs.plus === true ? 'onlyOne' : ''}`">
         <nav ref="menu_ref" class="menu_bar_project_top" role="menubar">
             <ul class="p-menubar-root-list">
                 <li
@@ -14,12 +14,10 @@
                         <div v-if="item.divider" class="divider-space"></div>
                         <div
                             v-else-if="hasContent(item.label)"
-                            pointer
-                            w-flex
                             class="menu-item-content root"
                             @click="handleItemClick(item)"
                         >
-                            <MaxIconButton v-if="item.icon" :icon="item.icon" :size="item.icon_size" transparent />
+                            <MaxIconButton v-if="item.icon" :icon="item.icon" :size="item.icon_size" light transparent />
                             <div class="menu-item-labels">
                                 <span class="menu-item-label">{{ item.label }}</span>
                                 <span v-if="item.subLabel" class="menu-item-sublabel">{{ item.subLabel }}</span>
@@ -105,7 +103,7 @@
     };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     .tool-bar-top-main-div {
         display: grid;
         position: relative;
@@ -117,7 +115,7 @@
             padding: 0 !important;
             border: none !important;
             border-radius: 0 !important;
-            background-color: var(--blue-850) !important;
+            background-color: transparent !important;
             z-index: 1 !important;
 
             .p-menubar-root-list {
@@ -126,8 +124,8 @@
                 margin: 0;
                 padding: 0;
 
-                // TODOS ITEMS
-                .p-menubar-item {
+                // ITENS DA BARRA RAIZ (PRIMEIRA CAMADA)
+                > .p-menubar-item {
                     position: relative;
 
                     &:has(.divider-space) {
@@ -159,8 +157,12 @@
                             align-items: center;
                             justify-content: flex-start;
                             gap: 6px;
-                            transition: transform 0.3s ease-in-out;
-                            color: var(--background-700) !important;
+                            transition: transform 0.3s ease-in-out, color 0.2s ease;
+                            color: var(--layout-shell-text-muted, rgb(255 255 255 / 80%)) !important;
+
+                            &:hover {
+                                color: var(--layout-shell-text, #fff) !important;
+                            }
 
                             .menu-item-labels {
                                 display: flex;
@@ -197,72 +199,20 @@
                         }
                     }
 
-                    .p-menubar-submenu {
-                        list-style: none;
-                        margin: 0;
-                        padding: 0;
-                        left: unset;
-                        right: 100% !important;
-                        transform: translateX(100%) translateY(10px) !important;
-                        color: var(--red-600) !important;
-                        width: max-content !important;
-                        position: absolute;
-                        z-index: 99999 !important;
-                        background: var(--background-0, #fff);
-                        box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
-                        border-radius: 4px;
-
-                        .p-menubar-item {
-                            position: relative;
-
-                            &:hover,
-                            &.is-active {
-                                background-color: var(--primary-50, rgb(0 0 0 / 4%));
-                                border-radius: 4px;
-                            }
-
-                            .p-menubar-item-content {
-                                width: auto !important;
-                                white-space: nowrap;
-                                color: var(--blue-700);
-                                opacity: 0.8;
-
-                                .icons {
-                                    color: var(--blue-700);
-                                }
-
-                                .right-icon {
-                                    padding-left: 15px;
-                                }
-                            }
-
-                            // Submenu aninhado (nível 2+)
-                            .p-menubar-submenu-nested {
-                                left: 100% !important;
-                                right: unset !important;
-                                top: 0 !important;
-                                transform: translateX(2px) !important;
-                                position: absolute;
-                                z-index: 100000 !important;
-                            }
-                        }
-                    }
-                }
-
-                // DEFINIÇÕES PARA BARRA DE MENUS (PRIMEIRA CAMADA DE ITENS)
-                > .p-menubar-item {
-                    position: relative;
-
-                    .p-menubar-item-content {
-                        color: var(--primary-500);
-                    }
-
                     &.p-menubar-item-active,
                     &:hover {
                         .p-menubar-item-content {
                             background-color: transparent;
                             opacity: 1;
                         }
+                    }
+
+                    :deep(.p-menubar-submenu) {
+                        position: absolute;
+                        left: unset;
+                        right: 100% !important;
+                        transform: translateX(100%) translateY(10px) !important;
+                        z-index: 99999 !important;
                     }
                 }
             }

@@ -1,6 +1,6 @@
 <template>
-    <div ref="btn_el" pointer :class="['max-modal-item', { 'no-button': props.noButton }, props.class]">
-        <div v-tooltip="null" @click.stop="toggle" flex v-if="! props.noButton">
+    <div ref="btn_el" :class="['max-modal-item', { 'no-button': props.noButton }, props.class]">
+        <div v-tooltip="null" @click.stop="toggle" class="max-modal-trigger" v-if="! props.noButton">
             <slot name="button" v-bind="props">
                 <MaxButton v-bind="props" :size="props.size || props.sizeIcon ? String(props.size ?? props.sizeIcon) : ''" />
             </slot>
@@ -20,11 +20,11 @@
                     :class="props.class"
                 >
                     <slot name="header" v-if="!props.noHeader">
-                        <MaxGrid s100 class="max-modal-header" pt0 mt0 mb-15 :id="title_id">
+                        <MaxGrid class="max-modal-header" :id="title_id">
                             <slot name="title" v-bind="props">
-                                <MaxTitle1 s90 :title="props.title ?? 'Titulo'" :subtitle="props.subTitle ?? 'Sub Titulo'" p0 m0 />
+                                <MaxTitle1 class="max-modal-title" :title="props.title ?? 'Titulo'" :subtitle="props.subTitle ?? 'Sub Titulo'" />
                             </slot>
-                            <div s1 w-max-23>
+                            <div class="max-modal-close-wrapper">
                                 <slot name="close" :close="close" :hide="modal_store.hide">
                                     <MaxIconButton i="iconoir:xmark" size="1.3" aria-label="Fechar" @click.stop="modal_store.hide" class="close-btn" />
                                 </slot>
@@ -323,7 +323,7 @@
 
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 
     .max-modal-item {
         &.no-button {
@@ -332,6 +332,10 @@
             height: 0 !important;
             top: 0 !important;
             left: 0 !important;
+        }
+
+        .max-modal-trigger {
+            cursor: pointer;
         }
     }
 
@@ -348,6 +352,7 @@
         .max-modal {
             position: fixed;
             background-color: var(--background-0);
+            color: var(--background-700);
             z-index: 2;
             border: 1px solid var(--surface-border);
             display: grid;
@@ -361,10 +366,47 @@
             border-radius: 0.75rem;
             padding: 20px;
             box-sizing: border-box;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+
+            &::-webkit-scrollbar {
+                width: 0;
+                height: 0;
+                display: none;
+            }
+
+            * {
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+
+                &::-webkit-scrollbar {
+                    width: 0;
+                    height: 0;
+                    display: none;
+                }
+            }
 
             @media (width <= 768px) {
                 padding: 12px;
                 max-width: calc(100vw - 50px);
+            }
+
+            .max-modal-header {
+                flex: 1 0 calc(100% - 8px);
+                padding-top: 0;
+                margin-top: 0;
+                margin-bottom: 15px;
+
+                .max-modal-title {
+                    flex: 1 0 calc(90% - 8px);
+                    padding: 0;
+                    margin: 0;
+                }
+
+                .max-modal-close-wrapper {
+                    flex: 1 0 calc(1% - 8px);
+                    max-width: 23px;
+                }
             }
 
             .max-modal-content {
