@@ -244,34 +244,15 @@
         position: absolute;
         pointer-events: none;
         line-height: 1;
-        top: calc((0.75rem / 2) * -1);
+        top: calc((0.75rem / 2) * -1 - 1px);
         left: 20px;
         padding: 0 5px !important;
         font-size: 0.75rem;
         color: var(--background-750) !important;
         height: 0.75rem;
+        background: var(--max-floatlabel-on-active-background, var(--background-0));
+        border-radius: var(--max-floatlabel-on-border-radius, 2px);
         z-index: 1;
-
-        &::before {
-            content: attr(data-content);
-            position: absolute;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            top: calc((0.75rem / 2) - 1px);
-            background-color: var(--background-0);
-            z-index: -1;
-        }
-
-        &.active {
-            top: 0;
-            transform: translateY(-50%);
-            border-radius: var(--max-floatlabel-on-border-radius, 2px);
-            background: var(--max-floatlabel-on-active-background, var(--background-0));
-            padding: 0 5px !important;
-            font-weight: var(--max-floatlabel-active-font-weight, 400);
-            inset-inline-start: 15px !important;
-        }
     }
 
     &:has(.max-input-field-div:focus-within) .max-input-label {
