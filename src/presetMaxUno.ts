@@ -78,6 +78,7 @@ export const presetMaxUno = () => {
 
             // Utilitários
             [/^elipsis$/, () => ({ 'white-space': 'nowrap', 'text-overflow': 'ellipsis', 'max-width': '100%', overflow: 'hidden' })],
+            [/^ellipsis$/, () => ({ 'white-space': 'nowrap', 'text-overflow': 'ellipsis', 'max-width': '100%', overflow: 'hidden' })],
             // Restrita ao prefixo `s-` (ex.: `s-50`, `s100`) para não colidir com `w-*`,
             // que deve ser resolvido pelo presetWind3 com a semântica padrão de `width`.
             [/^s-?(\d+)$/, ([, d]) => ({ flex: `1 0 calc(${d}% - 8px)` })],
