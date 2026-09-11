@@ -26,6 +26,7 @@ const PROVIDER_MAP: Record<string, Omit<LoginProvider, 'id'>> = {
  * Mensagens de erro devolvidas pelo redirect social via `?error=`.
  */
 const SOCIAL_ERROR_MESSAGES: Record<string, string> = {
+    email_not_allowed: 'Este endereço de e-mail não possui autorização de acesso ao sistema.',
     invalid_provider: 'Provedor de login inválido.',
     oauth_failed: 'Não foi possível autenticar com o provedor. Tente novamente.',
     no_email: 'Sua conta social não forneceu um e-mail. Use e-mail e senha.'
@@ -170,8 +171,23 @@ export const useLoginStore = defineStore('login', () => {
 
             const rawIds = Array.isArray(ids) ? ids : [];
             providers.value = rawIds
-                .filter((id: string) => PROVIDER_MAP[id])
-                .map((id: string) => ({ id, ...PROVIDER_MAP[id] }));
+                .map((item: any) => {
+                    if (typeof item === 'string') {
+                        return PROVIDER_MAP[item] ? { id: item, ...PROVIDER_MAP[item] } : null;
+                    }
+                    if (item && typeof item === 'object' && item.id) {
+                        const defaultMeta = PROVIDER_MAP[item.id];
+                        const icon = item.icon === 'google' ? 'mdi:google' : (item.icon ?? defaultMeta?.icon ?? 'mdi:account');
+                        return {
+                            id: item.id,
+                            label: item.label ?? defaultMeta?.label ?? item.id,
+                            icon,
+                            class: item.class ?? defaultMeta?.class ?? 'btn-google'
+                        };
+                    }
+                    return null;
+                })
+                .filter(Boolean) as LoginProvider[];
         } catch (_e) {
             providers.value = [];
         }

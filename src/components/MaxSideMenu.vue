@@ -189,7 +189,8 @@
                     grid-template-columns: 1fr;
                     grid-template-rows: repeat(auto-fill, minmax(2.7rem, 1fr));
                     place-items: center;
-                    &.settings{
+
+                    &.settings {
                         transform: translateY(-75px);
                     }
                 }
