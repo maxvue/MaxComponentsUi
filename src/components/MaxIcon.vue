@@ -26,8 +26,6 @@
 
     const icon_store = useIconStore();
     const icon_ref = ref<HTMLElement | null>(null);
-    const isHovered = useElementHover(icon_ref as any);
-
     const attrs: any = useAttrs();
     const props = withDefaults(defineProps<{
         /** Nome do ícone (ex: 'mdi:home') */
@@ -70,6 +68,25 @@
         hoverColor: undefined
     });
     const icon_name = computed(() => props.i ?? props.icon ?? null);
+
+    /**
+     * Avalia se o ícone possui alguma diretriz ou prop que justifique
+     * a escuta de eventos de mouse (hover).
+     */
+    const hasHoverEffect = computed<boolean>(() => {
+        if (props.hoverColor !== undefined) return true;
+        if (attrs.pointer !== undefined) return true;
+        for (const key in attrs) if (key.startsWith('hover-') || key.startsWith('color-hover-')) return true;
+
+        return false;
+    });
+
+    /**
+     * Alvo condicional: se o ícone não necessitar de hover, entrega null para
+     * que nenhum listener de mouseenter/mouseleave seja registrado no DOM.
+     */
+    const hoverTarget = computed(() => (hasHoverEffect.value ? icon_ref.value : null));
+    const isHovered = useElementHover(hoverTarget as any);
 
     const value_dark = computed(() => {
         if (isNumber(props.dark)) return props.dark;
@@ -119,6 +136,7 @@
     });
 
     const colorStyle = computed<Record<string, string>>(() => {
+        if (!hasHoverEffect.value) return { color: color.value };
         return { color: isHovered.value ? hover_color.value : color.value };
     });
 

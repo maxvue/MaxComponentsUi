@@ -63,6 +63,13 @@ export const useToastStore = defineStore('max-toast', () => {
 
     /** Inicia o timer de auto-remoção de um toast */
     const startTimer = (toast: ToastItem, delay?: number): void => {
+        // Toasts com duration 0 são persistentes (sticky)
+        if (toast.duration === 0) {
+            toast.paused = false;
+            toast.remaining = 0;
+            return;
+        }
+
         const targetDelay = delay ?? toast.remaining;
         const ms = Math.max(targetDelay, 500);
         toast.timerId = setTimeout(() => remove(toast.id), ms);
@@ -98,12 +105,12 @@ export const useToastStore = defineStore('max-toast', () => {
      */
     const pause = (id: string): void => {
         const toast = items.value.find((t) => t.id === id);
-        if (!toast || toast.paused) return;
+        if (!toast || toast.duration === 0 || toast.paused) return;
 
         if (toast.timerId) clearTimeout(toast.timerId);
 
         const elapsed = Date.now() - toast.createdAt;
-        toast.remaining = toast.duration - elapsed;
+        toast.remaining = Math.max(toast.duration - elapsed, 0);
         toast.paused = true;
         toast.timerId = null;
     };
@@ -111,10 +118,10 @@ export const useToastStore = defineStore('max-toast', () => {
     /** Retoma o timer de um toast (ao sair do hover) */
     const resume = (id: string): void => {
         const toast = items.value.find((t) => t.id === id);
-        if (!toast || !toast.paused) return;
+        if (!toast || toast.duration === 0 || !toast.paused) return;
 
         toast.createdAt = Date.now() - (toast.duration - toast.remaining);
-        startTimer(toast);
+        startTimer(toast, toast.remaining);
     };
 
     /** Limpa todos os toasts */

@@ -78,7 +78,7 @@
 
             <template v-else>
                 <div
-                    v-for="tab in props.tabs"
+                    v-for="tab in safeTabs"
                     :key="tab.name"
                     class="bottom-menu-tab"
                     :class="{ active: isActive(tab) }"
@@ -157,9 +157,12 @@
         return (props.addItems && props.addItems.length > 0) || Boolean(slots.fab);
     });
 
-    const midIndex = computed<number>(() => Math.ceil((props.tabs?.length ?? 0) / 2));
-    const leftTabs = computed<BottomTab[]>(() => props.tabs.slice(0, midIndex.value));
-    const rightTabs = computed<BottomTab[]>(() => props.tabs.slice(midIndex.value));
+    /** Lista segura de abas garantindo fallback para array vazio se a prop for nula/indefinida */
+    const safeTabs = computed<BottomTab[]>(() => props.tabs ?? []);
+
+    const midIndex = computed<number>(() => Math.ceil(safeTabs.value.length / 2));
+    const leftTabs = computed<BottomTab[]>(() => safeTabs.value.slice(0, midIndex.value));
+    const rightTabs = computed<BottomTab[]>(() => safeTabs.value.slice(midIndex.value));
 
     const gridStyle = computed(() => {
         if (hasFab.value) {
@@ -172,7 +175,7 @@
         }
 
         return {
-            gridTemplateColumns: `repeat(${props.tabs.length}, 1fr)`
+            gridTemplateColumns: `repeat(${safeTabs.value.length}, 1fr)`
         };
     });
 

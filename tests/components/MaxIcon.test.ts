@@ -127,4 +127,10 @@ describe('MaxIcon', () => {
         const style = wrapper.find('.max-icon-div')?.attributes('style') || '';
         expect(style).toContain('color');
     });
+
+    it('não aplica efeito hover para ícones puramente estáticos', () => {
+        const wrapper = mountIcon({ color: '#ff0000' });
+        const style = wrapper.find('.max-icon-div')?.attributes('style') || '';
+        expect(style).toContain('#ff0000');
+    });
 });

@@ -4,15 +4,15 @@
             <!-- Cabeçalho -->
             <thead class="max-table-fields-head">
                 <tr class="max-table-fields-head-row">
-                    <th v-for="col in columns" :key="col.field" class="max-table-fields-th" :style="getColumnStyle(col)" >
+                    <th v-for="col in safeColumns" :key="col.field" class="max-table-fields-th" :style="getColumnStyle(col)">
                         <slot :name="`header-${col.field}`" :column="col">
                             {{ col.header }}
                         </slot>
                     </th>
                     <!-- Coluna extra para botões de ação -->
-                    <th v-if="hasActionsColumn" class="max-table-fields-th max-table-fields-th-buttons" :style="buttonsColumnStyle" >
+                    <th v-if="hasActionsColumn" class="max-table-fields-th max-table-fields-th-buttons" :style="buttonsColumnStyle">
                         <slot name="buttons-header">
-                            {{props.headerButton}}
+                            {{ props.headerButton }}
                         </slot>
                     </th>
                 </tr>
@@ -20,13 +20,24 @@
 
             <!-- Corpo -->
             <tbody class="max-table-fields-body">
-                <template v-if="normalizedList.length > 0">
-                    <tr v-for="(row, index) in normalizedList" :key="rowKey(row, index)" class="max-table-fields-row" :class="{ 'max-table-fields-row-even': index % 2 === 0, 'max-table-fields-row-odd': index % 2 !== 0 }" >
+                <!-- 1. Estado de carregamento (prioridade absoluta) -->
+                <tr v-if="props.loading" class="max-table-fields-row max-table-fields-loading">
+                    <td :colspan="totalColspan" class="max-table-fields-td max-table-fields-loading-cell">
+                        <slot name="loading">
+                            <div class="max-table-loading-container">
+                                <div class="max-table-spinner" role="status" aria-label="Carregando"></div>
+                                <span class="max-table-loading-text">{{ props.loadingMessage }}</span>
+                            </div>
+                        </slot>
+                    </td>
+                </tr>
 
-
-                        <td v-for="col in columns" :key="col.field" class="max-table-fields-td" :style="getColumnStyle(col)" >
+                <!-- 2. Linhas de dados quando houver itens -->
+                <template v-else-if="hasItems">
+                    <tr v-for="(row, index) in normalizedList" :key="rowKey(row, index)" class="max-table-fields-row" :class="{ 'max-table-fields-row-even': index % 2 === 0, 'max-table-fields-row-odd': index % 2 !== 0 }">
+                        <td v-for="col in safeColumns" :key="col.field" class="max-table-fields-td" :style="getColumnStyle(col)">
                             <!-- Slot customizado tem prioridade -->
-                            <slot v-if="col.slot && !col.input" :name="col.slot ?? col.field" :data="row" :value="getFieldValue(row, col.field)" :index="index" :field="col.field" >
+                            <slot v-if="col.slot && !col.input" :name="col.slot ?? col.field" :data="row" :value="getFieldValue(row, col.field)" :index="index" :field="col.field">
                                 <div class="default-slot">
                                     {{ getFieldValue(row, col.field) }}
                                 </div>
@@ -72,19 +83,21 @@
                         </td>
 
                         <!-- Coluna de botões -->
-                        <td v-if="hasActionsColumn" class="max-table-fields-td max-table-fields-buttons" :style="buttonsColumnStyle" >
+                        <td v-if="hasActionsColumn" class="max-table-fields-td max-table-fields-buttons" :style="buttonsColumnStyle">
                             <slot name="buttons" :data="row" :index="index">
-                                <MaxIconButton v-for="btn in props.buttons" v-bind="btn" :key="btn.id" :data="btn.data ? resolveData(row, btn.data) : row" :size="btn.size ?? 1.2" class="table-icon-button"/>
+                                <MaxIconButton v-for="btn in props.buttons" v-bind="btn" :key="btn.id" :data="btn.data ? resolveData(row, btn.data) : row" :size="btn.size ?? 1.2" class="table-icon-button" />
                             </slot>
                         </td>
                     </tr>
                 </template>
 
-                <!-- Estado vazio -->
+                <!-- 3. Estado vazio (só renderiza se NÃO estiver carregando) -->
                 <tr v-else class="max-table-fields-row max-table-fields-empty">
                     <td :colspan="totalColspan" class="max-table-fields-td max-table-fields-empty-cell">
                         <slot name="empty">
-                            {{ emptyMessage }}
+                            <div class="max-table-empty-container">
+                                <span class="max-table-empty-text">{{ props.emptyMessage }}</span>
+                            </div>
                         </slot>
                     </td>
                 </tr>
@@ -113,9 +126,9 @@
     const props = withDefaults(
         defineProps<{
             /** Lista de valores para preencher a tabela */
-            list: any[] | Record<string, any>;
+            list?: any[] | Record<string, any>;
             /** Definição das colunas */
-            columns: MaxTableColumn[];
+            columns?: MaxTableColumn[];
             /** Texto do cabeçalho de ações */
             headerButton?: string;
             /** Identificador único da tabela */
@@ -124,20 +137,29 @@
             dataKey?: string;
             /** Mensagem exibida quando a lista está vazia */
             emptyMessage?: string;
+            /** Mensagem exibida durante o carregamento */
+            loadingMessage?: string;
+            /** Estado de carregamento da tabela */
+            loading?: boolean;
             /** Largura da coluna de botões (ex: '120px' ou 120) */
             buttonsWidth?: string | number;
             /** Lista de botões */
             buttons?: MaxButtonsType[];
         }>(),
         {
-            list: () => ({}),
+            list: () => [],
             columns: () => [],
-            emptyMessage: 'Nenhum registro encontrado'
+            emptyMessage: 'Nenhum registro encontrado',
+            loadingMessage: 'Carregando registros...',
+            loading: false
         }
     );
 
     const slots: Slots = useSlots();
     const tableId = computed(() => props.id ?? ulid());
+
+    /** Colunas garantidamente seguras contra valores nulos */
+    const safeColumns = computed<MaxTableColumn[]>(() => props.columns ?? []);
 
     /** Verifica se a coluna de ações deve ser exibida (via prop buttons ou slot buttons) */
     const hasActionsColumn: ComputedRef<boolean> = computed((): boolean => size(props.buttons) > 0 || !!slots['buttons']);
@@ -164,8 +186,8 @@
         return style;
     });
 
-    /** Total de colunas para o colspan do estado vazio */
-    const totalColspan: ComputedRef<number> = computed((): number => props.columns.length + (hasActionsColumn.value ? 1 : 0));
+    /** Total de colunas para o colspan do estado vazio com guarda defensiva */
+    const totalColspan: ComputedRef<number> = computed((): number => safeColumns.value.length + (hasActionsColumn.value ? 1 : 0));
 
     const emit = defineEmits<{
         /** Emitido quando o valor de um campo é alterado */
@@ -174,8 +196,9 @@
 
     /** Normaliza a lista: se for Record converte para array preservando a chave */
     const normalizedList = computed<any[]>(() => {
+        if (!props.list) return [];
         if (Array.isArray(props.list)) return props.list;
-        if (typeof props.list === 'object' && props.list !== null) return Object.entries(props.list).map(([key, val]) => {
+        if (typeof props.list === 'object') return Object.entries(props.list).map(([key, val]) => {
             if (typeof val === 'object' && val !== null && !val.id && !val.uuid && !val.ulid) return { ...val, _recordKey: key };
 
             return val;
@@ -183,6 +206,8 @@
 
         return [];
     });
+
+    const hasItems = computed<boolean>(() => normalizedList.value.length > 0);
 
     /** Deriva a chave única de uma linha */
     function rowKey(row: any, index: number): string | number {
@@ -404,12 +429,40 @@
                         padding: 0 6px;
                     }
 
-                    // Estado vazio
+                    // Estado de carregamento e estado vazio
+                    &.max-table-fields-loading-cell,
                     &.max-table-fields-empty-cell {
-                        padding: 24px;
-                        text-align: center;
-                        color: var(--background-650);
-                        font-style: italic;
+                        width: 100%;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        padding: 0;
+
+                        .max-table-loading-container,
+                        .max-table-empty-container {
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 12px;
+                            padding: 32px 16px;
+                            width: 100%;
+                            color: var(--background-650);
+
+                            .max-table-loading-text,
+                            .max-table-empty-text {
+                                font-size: 0.95rem;
+                                font-weight: 500;
+                            }
+
+                            .max-table-spinner {
+                                width: 22px;
+                                height: 22px;
+                                border: 2px solid var(--background-300);
+                                border-top-color: var(--max-primary-500);
+                                border-radius: 50%;
+                                animation: max-table-spin 0.8s linear infinite;
+                            }
+                        }
                     }
 
                     .default-slot {
@@ -427,6 +480,16 @@
                 }
             }
         }
+    }
+}
+
+@keyframes max-table-spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
     }
 }
 </style>

@@ -7,8 +7,8 @@
         class="max-chips max-chips-wrapper"
     >
         <div
-            class="max-chips-container p-inputtext p-component"
-            :class="{ 'p-disabled': props.disabled, 'p-focus': isFocused }"
+            class="max-chips-container max-input-native"
+            :class="{ 'is-disabled': props.disabled, 'is-focused': isFocused, 'p-disabled': props.disabled, 'p-focus': isFocused }"
             @click="focusInput"
         >
             <ul class="max-chips-list">
@@ -29,9 +29,11 @@
                             v-if="!props.disabled && props.removable !== false"
                             type="button"
                             class="max-chip-remove-btn"
-                            tabindex="-1"
+                            tabindex="0"
                             :aria-label="'Remover ' + resolveChipLabel(item)"
                             @click.stop="removeChip(index)"
+                            @keydown.enter.prevent="removeChip(index)"
+                            @keydown.space.prevent="removeChip(index)"
                         >
                             <slot name="removeicon">
                                 <MaxIcon icon="material-symbols:close-rounded" :size="0.85" />
@@ -437,6 +439,11 @@
 
                         &:hover {
                             color: var(--red-600);
+                        }
+
+                        &:focus-visible {
+                            outline: 2px solid var(--max-primary-500, #00768E);
+                            outline-offset: 1px;
                         }
                     }
                 }

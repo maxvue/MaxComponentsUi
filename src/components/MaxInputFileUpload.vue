@@ -17,6 +17,7 @@
                 type="button"
                 class="p-button p-fileupload-choose"
                 :disabled="attrs.disabled ?? false"
+                :aria-label="uploading ? 'Carregando arquivos' : 'Escolher arquivos para envio'"
                 @click.stop="triggerChoose"
             >
                 <div class="chose-icon-div">
@@ -30,6 +31,7 @@
                 class="p-button"
                 v-if="showUploadButton"
                 v-tooltip="'Enviar arquivo'"
+                aria-label="Enviar arquivos selecionados"
                 @click.stop="startUpload(files)"
             >
                 <div class="chose-icon-div">
@@ -75,12 +77,46 @@
 
         <div class="file-upload-content-div" :disabled="attrs.disabled ?? false">
             <div class="files-icons" v-if="modelValue.length > 0">
-                <div v-for="(file, index) in modelValue" :key="file.id || index" class="file-icon" @click="$emit('file-click', file)">
-                    <Icon icon="ph:file-pdf-light" v-if="getFileExtension(file?.file_name || '') === 'pdf'" size="1.8" />
-                    <Icon icon="ph:file-jpg-light" v-if="['jpg', 'jpeg'].includes(getFileExtension(file?.file_name || ''))" size="1.8" />
-                    <Icon icon="ph:file-png-light" v-if="getFileExtension(file?.file_name || '') === 'png'" size="1.8" />
+                <div
+                    v-for="(file, index) in modelValue"
+                    :key="file.id || index"
+                    class="file-icon"
+                    role="button"
+                    :tabindex="attrs.disabled ? -1 : 0"
+                    :aria-label="`Visualizar arquivo ${getFileName(file)}`"
+                    v-tooltip="getFileTooltip(file)"
+                    @click="$emit('file-click', file)"
+                    @keydown.enter.prevent="$emit('file-click', file)"
+                    @keydown.space.prevent="$emit('file-click', file)"
+                >
+                    <button
+                        v-if="props.removable && !attrs.disabled"
+                        type="button"
+                        class="file-remove-btn"
+                        aria-label="Remover arquivo"
+                        @click.stop="removeFile(index, file)"
+                    >
+                        <Icon icon="solar:close-circle-bold" size="0.9" />
+                    </button>
+
+                    <img
+                        :src="file?.thumbnail ? `/media/thumbnails/${file.thumbnail}` : file?.src"
+                        :alt="getFileName(file)"
+                        class="file-thumb"
+                        v-if="file?.thumbnail || (file?.src && !file.file_name)"
+                    />
+                    <Icon
+                        :icon="resolveFileIcon(getFileName(file))"
+                        size="1.8"
+                        v-else
+                    />
+
                     <Icon icon="fa:check-circle" class="file-check" size="0.7" />
-                    <img :src="file?.thumbnail ? `/media/thumbnails/${file.thumbnail}` : file?.src" alt="Image" v-show="!file.file_name" />
+
+                    <div class="file-info-label" v-if="props.showMetadata">
+                        <span class="file-name-text">{{ getFileName(file) }}</span>
+                        <span class="file-size-text" v-if="formatFileSize(file?.size)">{{ formatFileSize(file?.size) }}</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -109,8 +145,18 @@
             label?: string;
             /** Campo da resposta da API que contém os dados do arquivo (vazio para usar a resposta completa) */
             responseField?: string;
+            /** Permite remover arquivos já selecionados da lista */
+            removable?: boolean;
+            /** Exibe metadados (nome e tamanho) dos arquivos */
+            showMetadata?: boolean;
         }>(),
-        { uploadData: () => ({}), label: '', responseField: 'file' }
+        {
+            uploadData: () => ({}),
+            label: '',
+            responseField: 'file',
+            removable: true,
+            showMetadata: true
+        }
     );
 
     const modelValue = defineModel<any[]>({ default: () => [] });
@@ -119,7 +165,14 @@
     const uploading = ref(false);
     const showError = ref(false);
 
-    const emit = defineEmits(['file-click', 'upload-error', 'upload', 'select']);
+    const emit = defineEmits<{
+        'file-click': [file: any];
+        'upload-error': [error: any];
+        'upload': [event: any];
+        'select': [event: any];
+        'delete': [payload: { file: any; index: number }];
+        'remove-file': [payload: { file: any; index: number }];
+    }>();
 
     const showUploadButton = computed(() => attrs.showUploadButton !== undefined && attrs.showUploadButton !== false);
 
@@ -245,6 +298,46 @@
     };
 
     const getFileExtension = (fileName: string) => (fileName ? fileName.split('.').pop()?.toLowerCase() : '') || '';
+
+    const getFileName = (file: any): string => {
+        if (typeof file === 'string') return file;
+        return file?.name ?? file?.file_name ?? file?.fileName ?? 'Arquivo sem nome';
+    };
+
+    const formatFileSize = (bytes?: number): string => {
+        if (!bytes || bytes <= 0 || isNaN(bytes)) return '';
+        if (bytes < 1024) return `${bytes} B`;
+        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    };
+
+    const resolveFileIcon = (fileName: string): string => {
+        const ext = getFileExtension(fileName);
+        if (ext === 'pdf') return 'ph:file-pdf-light';
+        if (['jpg', 'jpeg'].includes(ext)) return 'ph:file-jpg-light';
+        if (ext === 'png') return 'ph:file-png-light';
+        if (['doc', 'docx'].includes(ext)) return 'ph:file-doc-light';
+        if (['xls', 'xlsx', 'csv'].includes(ext)) return 'ph:file-xls-light';
+        if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) return 'ph:file-zip-light';
+        if (['txt', 'md'].includes(ext)) return 'ph:file-text-light';
+        return 'ph:file-light';
+    };
+
+    const getFileTooltip = (file: any): string | null => {
+        if (!props.showMetadata) return null;
+        const name = getFileName(file);
+        const size = formatFileSize(file?.size);
+        return size ? `${name} (${size})` : name;
+    };
+
+    const removeFile = (index: number, file: any) => {
+        if (attrs.disabled) return;
+        const updated = [...modelValue.value];
+        updated.splice(index, 1);
+        modelValue.value = updated;
+        emit('delete', { file, index });
+        emit('remove-file', { file, index });
+    };
 </script>
 
 <style lang="scss" scoped>
@@ -391,46 +484,95 @@
                 top: 0;
                 height: 100%;
                 right: 0;
-                display: grid;
+                display: flex;
+                align-items: center;
                 width: auto;
                 pointer-events: none;
 
                 .files-icons {
                     display: flex;
+                    align-items: center;
                     width: auto;
-                    gap: 18px;
+                    gap: 14px;
                     padding: 0 10px;
-                    height: 30px;
+                    height: 100%;
                     pointer-events: auto;
-
-                    .icon-div {
-                        height: calc(100% - 20px);
-                        padding-top: 5px;
-                    }
 
                     .file-icon {
                         position: relative;
-                        width: 35px;
-                        height: 30px;
-                        text-align: center;
-                        display: grid;
-                        gap: 0;
-                        place-items: center;
+                        min-width: 36px;
+                        height: 32px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
                         cursor: pointer;
+                        transition: transform 0.15s ease;
+
+                        &:focus-visible {
+                            outline: 2px solid var(--max-primary-500, #00768e);
+                            outline-offset: 2px;
+                            border-radius: 4px;
+                        }
 
                         &:hover {
                             .icon-div {
-                                color: var(--blue-600) !important;
+                                color: var(--blue-600, #2563eb) !important;
                             }
+
+                            .file-remove-btn {
+                                opacity: 1;
+                                transform: scale(1);
+                            }
+                        }
+
+                        .file-thumb {
+                            max-width: 32px;
+                            max-height: 32px;
+                            object-fit: cover;
+                            border-radius: 4px;
                         }
 
                         .file-check {
                             position: absolute;
-                            color: green !important;
-                            top: 0;
+                            color: var(--max-success-500, #10b981) !important;
+                            bottom: -2px;
                             left: -2px;
-                            width: 16px;
-                            height: 16px;
+                            width: 14px;
+                            height: 14px;
+                            background: var(--background-0, #fff);
+                            border-radius: 50%;
+                        }
+
+                        .file-remove-btn {
+                            position: absolute;
+                            top: -6px;
+                            right: -6px;
+                            background: transparent;
+                            border: none;
+                            padding: 0;
+                            cursor: pointer;
+                            color: var(--max-danger-500, #ef4444);
+                            opacity: 0.8;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            z-index: 2;
+                            transition: all 0.15s ease;
+
+                            &:hover {
+                                color: var(--red-700, #b91c1c);
+                                transform: scale(1.15);
+                            }
+
+                            &:focus-visible {
+                                outline: 2px solid var(--max-primary-500, #00768e);
+                                outline-offset: 1px;
+                                border-radius: 50%;
+                            }
+                        }
+
+                        .file-info-label {
+                            display: none;
                         }
                     }
                 }

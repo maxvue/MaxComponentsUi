@@ -1,4 +1,28 @@
-export const MaxStyle = {
+export interface SemanticColorPalette {
+    50: string;
+    100: string;
+    200: string;
+    300: string;
+    400: string;
+    500: string;
+    600: string;
+    700: string;
+    800: string;
+    900: string;
+    950: string;
+}
+
+export interface MaxThemePreset {
+    semantic: {
+        primary: SemanticColorPalette;
+        success: SemanticColorPalette;
+        info: SemanticColorPalette;
+        warning: SemanticColorPalette;
+        danger: SemanticColorPalette;
+    };
+}
+
+export const MaxStyle: MaxThemePreset = {
     semantic: {
         primary: {
             50: '#67C8DB',
@@ -66,6 +90,6 @@ export const MaxStyle = {
             950: '#6C1919'
         }
     }
-} as const;
+};
 
 export default MaxStyle;

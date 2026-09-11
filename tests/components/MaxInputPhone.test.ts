@@ -262,6 +262,15 @@ describe('MaxInputPhone', () => {
         expect(labelEl.text()).toBe('Telefone');
     });
 
+    it('utiliza type="tel", inputmode="tel" e classe semântica max-input-native no campo de telefone', () => {
+        const wrapper = mountPhoneField();
+        const input = wrapper.find('input.phone-number-input');
+        expect(input.attributes('type')).toBe('tel');
+        expect(input.attributes('inputmode')).toBe('tel');
+        expect(input.classes()).toContain('max-input-native');
+        expect(input.classes()).not.toContain('p-inputtext');
+    });
+
     it('agrupa múltiplos eventos de scroll em um único requestAnimationFrame evitando layout thrashing', async () => {
         const rafSpy = vi.spyOn(window, 'requestAnimationFrame');
         const wrapper = mountPhoneField();

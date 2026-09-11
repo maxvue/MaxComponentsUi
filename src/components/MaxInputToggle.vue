@@ -1,9 +1,13 @@
 <template>
     <div :class="`max-input-toggle input-toggle-field-main-div ${attrs.label !== undefined ? 'labeled' : ''}`">
         <div :class="`input-toggle-field-label-main-div ${attrs.labelCenter !== undefined ? 'label-center' : ''}`">
-            <div class="input-toggle-field-label-div" v-if="attrs.label !== undefined">
+            <label
+                :for="toggleInputId"
+                class="input-toggle-field-label-div"
+                v-if="attrs.label !== undefined"
+            >
                 {{ attrs.label }}
-            </div>
+            </label>
         </div>
         <div :class="`input-toggle-field-input-div ${attrs.label !== undefined ? 'labeled' : ''}`">
             <div :class="`input-toggle-field ${attrs.label !== undefined ? 'labeled' : ''}`">
@@ -11,11 +15,13 @@
                     {{ falseLabel ?? '' }}
                 </div>
                 <div class="input-toggle-field-input">
-                    <label class="max-toggleswitch">
+                    <label :for="toggleInputId" class="max-toggleswitch">
                         <input
+                            :id="toggleInputId"
                             type="checkbox"
                             class="max-toggleswitch-input"
                             :checked="modelvalue === trueValue"
+                            :aria-label="attrs.label ? undefined : 'Alternar opção'"
                             @change="on_toggle(($event.target as HTMLInputElement).checked)"
                         />
                         <span class="max-toggleswitch-slider"></span>
@@ -63,7 +69,12 @@
         { modelValue: false, trueValue: true, falseValue: false }
     );
 
-    const emit = defineEmits(['update:modelValue']);
+    const emit = defineEmits<{
+        'update:modelValue': [value: any];
+    }>();
+
+    const toggleInputId = (attrs.id as string) || `max-toggle-${Math.random().toString(36).slice(2, 9)}`;
+
     const modelvalue = ref(props.modelValue);
 
     watch(modelvalue, (val) => {
@@ -94,146 +105,147 @@
 </script>
 
 <style lang="scss" scoped>
-    .input-toggle-field-main-div {
-        display: grid;
-        place-items: start center;
-        height: 36px;
-        position: relative;
-        background-color: var(--background-0);
+.input-toggle-field-main-div {
+    display: grid;
+    place-items: start center;
+    height: 36px;
+    position: relative;
+    background-color: var(--background-0);
 
-        &.labeled {
-            width: 100%;
+    &.labeled {
+        width: 100%;
+    }
+
+    &[leftalign] {
+        .input-toggle-field-input-div {
+            place-items: start;
+            padding-left: 20px;
+        }
+    }
+
+    .input-toggle-field-label-main-div {
+        position: absolute;
+        width: 100%;
+        display: grid;
+        transform: translateY(-50%);
+        place-items: start;
+        padding: 0 20px;
+
+        &.label-center {
+            place-items: center;
         }
 
-        &[leftalign] {
-            .input-toggle-field-input-div {
-                place-items: start;
-                padding-left: 20px;
+        .input-toggle-field-label-div {
+            position: relative;
+            z-index: 1;
+            font-family: Jost, sans-serif !important;
+            font-size: 0.85rem;
+            color: var(--background-750);
+            cursor: pointer;
+
+            &::after {
+                content: '';
+                position: absolute;
+                width: calc(100% + 12px);
+                left: -6px;
+                top: calc(50% + 1px);
+                transform: translateY(-50%);
+                height: 3px;
+                bottom: 4px;
+                background-color: var(--background-0);
+                z-index: -1;
             }
         }
+    }
 
-        .input-toggle-field-label-main-div {
-            position: absolute;
+    .input-toggle-field-input-div {
+        display: grid;
+        place-items: center;
+        padding-top: 3px;
+        height: 100%;
+        max-height: 36px;
+
+        &.labeled {
+            padding-top: 6px;
             width: 100%;
-            display: grid;
-            transform: translateY(-50%);
-            place-items: start;
-            padding: 0 20px;
+            border-radius: 0.5rem;
+            border: 1px solid var(--max-inputtext-border-color);
+        }
 
-            &.label-center {
+        .input-toggle-field {
+            max-height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+
+            .input-toggle-field-input {
+                padding: 0 10px;
+                height: 17px;
+                display: grid;
                 place-items: center;
             }
 
-            .input-toggle-field-label-div {
-                position: relative;
-                z-index: 1;
-                font-family: Jost, sans-serif !important;
-                font-size: 0.85rem;
-                color: var(--background-750);
+            .input-toggle-field-label {
+                color: var(--background-700);
+                font-weight: 400;
 
-                &::after {
-                    content: '';
-                    position: absolute;
-                    width: calc(100% + 12px);
-                    left: -6px;
-                    top: calc(50% + 1px);
-                    transform: translateY(-50%);
-                    height: 3px;
-                    bottom: 4px;
-                    background-color: var(--background-0);
-                    z-index: -1;
+                &.active {
+                    color: var(--blue-800);
                 }
             }
         }
 
-        .input-toggle-field-input-div {
-            display: grid;
-            place-items: center;
-            padding-top: 3px;
-            height: 100%;
-            max-height: 36px;
+        .max-toggleswitch {
+            position: relative;
+            display: inline-block;
+            width: 34px;
+            height: 18px;
+            cursor: pointer;
 
-            &.labeled {
-                padding-top: 6px;
+            .max-toggleswitch-input {
+                position: absolute;
+                opacity: 0;
                 width: 100%;
-                border-radius: 0.5rem;
-                border: 1px solid var(--max-inputtext-border-color);
-            }
-
-            .input-toggle-field {
-                max-height: 26px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 8px;
-
-                .input-toggle-field-input {
-                    padding: 0 10px;
-                    height: 17px;
-                    display: grid;
-                    place-items: center;
-                }
-
-                .input-toggle-field-label {
-                    color: var(--background-700);
-                    font-weight: 400;
-
-                    &.active {
-                        color: var(--blue-800);
-                    }
-                }
-            }
-
-            .max-toggleswitch {
-                position: relative;
-                display: inline-block;
-                width: 34px;
-                height: 18px;
+                height: 100%;
+                margin: 0;
                 cursor: pointer;
+                z-index: 1;
 
-                .max-toggleswitch-input {
+                &:focus-visible + .max-toggleswitch-slider {
+                    outline: 2px solid var(--max-primary-500, var(--blue-600, #00768e));
+                    outline-offset: 2px;
+                }
+            }
+
+            .max-toggleswitch-slider {
+                position: absolute;
+                inset: 0;
+                border-radius: 999px;
+                background-color: var(--background-300);
+                transition: background-color 0.2s ease;
+
+                &::before {
+                    content: '';
                     position: absolute;
-                    opacity: 0;
-                    width: 100%;
-                    height: 100%;
-                    margin: 0;
-                    cursor: pointer;
-                    z-index: 1;
+                    width: 12px;
+                    height: 12px;
+                    top: 3px;
+                    left: 4px;
+                    border-radius: 50%;
+                    background-color: var(--background-0);
+                    transition: left 0.2s ease;
                 }
+            }
 
-                .max-toggleswitch-slider {
-                    position: absolute;
-                    inset: 0;
-                    border-radius: 999px;
-                    background-color: var(--background-300);
-                    transition: background-color 0.2s ease;
+            .max-toggleswitch-input:checked + .max-toggleswitch-slider {
+                background-color: var(--blue-600);
 
-                    &::before {
-                        content: '';
-                        position: absolute;
-                        width: 12px;
-                        height: 12px;
-                        top: 3px;
-                        left: 4px;
-                        border-radius: 50%;
-                        background-color: var(--background-0);
-                        transition: left 0.2s ease;
-                    }
-                }
-
-                .max-toggleswitch-input:checked + .max-toggleswitch-slider {
-                    background-color: var(--blue-600);
-
-                    &::before {
-                        left: calc(100% - 16px);
-                    }
-                }
-
-                .max-toggleswitch-input:focus-visible + .max-toggleswitch-slider {
-                    outline: 2px solid var(--blue-600);
-                    outline-offset: 1px;
+                &::before {
+                    left: calc(100% - 16px);
                 }
             }
         }
     }
+}
 </style>

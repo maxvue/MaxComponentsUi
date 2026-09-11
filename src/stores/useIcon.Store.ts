@@ -95,10 +95,28 @@ export const useIconStore = defineStore('icons', () => {
         }, FETCH_RETRY_RESET_DELAY);
     };
 
+    let saveCacheTimer: ReturnType<typeof setTimeout> | null = null;
+
+    /**
+     * Executa o salvamento em disco com debounce de 150ms para consolidar
+     * mutações rápidas em uma única transação de gravação no IndexedDB.
+     */
+    const debouncedSaveCache = (delay = 150) => {
+        if (saveCacheTimer !== null) clearTimeout(saveCacheTimer);
+        saveCacheTimer = setTimeout(() => {
+            saveCacheTimer = null;
+            saveCache();
+        }, delay);
+    };
+
     onScopeDispose(() => {
         if (fetchResetTimer !== null) {
             clearTimeout(fetchResetTimer);
             fetchResetTimer = null;
+        }
+        if (saveCacheTimer !== null) {
+            clearTimeout(saveCacheTimer);
+            saveCacheTimer = null;
         }
     });
 
@@ -182,6 +200,7 @@ export const useIconStore = defineStore('icons', () => {
 
                 if (missing_icons.length > 0) {
                     const recoveredIcons: Record<string, string> = {};
+                    let hasNewFallback = false;
 
                     await Promise.all(missing_icons.map(async (icon_name) => {
                         const fallbackSvg = await fetchIconFallback(icon_name);
@@ -189,6 +208,7 @@ export const useIconStore = defineStore('icons', () => {
                             icons_data.value[icon_name] = fallbackSvg;
                             delete errors.value[icon_name];
                             recoveredIcons[icon_name] = fallbackSvg;
+                            hasNewFallback = true;
                             return;
                         }
 
@@ -198,13 +218,13 @@ export const useIconStore = defineStore('icons', () => {
                         if (errors.value[icon_name] >= MAX_ICON_RETRIES) icons_data.value[icon_name] = '';
                     }));
 
-                    if (size(recoveredIcons) > 0) {
-                        saveCache();
-                        syncIconsToBackend(recoveredIcons);
-                    }
+                    if (hasNewFallback) saveCache();
+
+                    if (size(recoveredIcons) > 0) syncIconsToBackend(recoveredIcons);
+
                 }
 
-            }).catch(async (error) => {
+            }).catch((error) => {
                 console.error('Erro na Requisição dos ícones', { 'url': requestUrl, 'error': error });
                 errors.value['fetch'] += 1;
 
@@ -212,19 +232,21 @@ export const useIconStore = defineStore('icons', () => {
 
                 const recoveredIcons: Record<string, string> = {};
 
-                await Promise.all(icons_to_fetch.map(async (icon_name) => {
+                Promise.all(icons_to_fetch.map(async (icon_name) => {
                     const fallbackSvg = await fetchIconFallback(icon_name);
                     if (fallbackSvg) {
                         icons_data.value[icon_name] = fallbackSvg;
                         delete errors.value[icon_name];
                         recoveredIcons[icon_name] = fallbackSvg;
+                        return true;
                     }
-                }));
+                    return false;
+                })).then((results) => {
+                    if (results.some(Boolean)) saveCache();
 
-                if (size(recoveredIcons) > 0) {
-                    saveCache();
-                    syncIconsToBackend(recoveredIcons);
-                }
+                    if (size(recoveredIcons) > 0) syncIconsToBackend(recoveredIcons);
+
+                });
             });
         }
 
@@ -242,5 +264,5 @@ export const useIconStore = defineStore('icons', () => {
         }
     };
 
-    return { getIcon, list_icons_waiting_request, icons_data, saveCache };
+    return { getIcon, list_icons_waiting_request, icons_data, saveCache, debouncedSaveCache };
 });

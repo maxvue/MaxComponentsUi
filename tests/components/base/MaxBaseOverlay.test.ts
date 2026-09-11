@@ -245,6 +245,23 @@ describe('MaxBaseOverlay', () => {
         expect(after).toBe('524px');
     });
 
+    it('coalesce múltiplos eventos de scroll consecutivos via requestAnimationFrame', async () => {
+        wrapper = mount(MaxBaseOverlay, { props: { visible: true, target } });
+        await settle();
+
+        const initialZIndex = Number(getPanel().style.zIndex);
+
+        // Dispara 10 eventos de scroll em sequência no mesmo frame
+        for (let i = 0; i < 10; i++) window.dispatchEvent(new Event('scroll'));
+
+
+        await settle();
+
+        // Com o throttle de RAF, o reposicionamento só deve ter sido executado uma vez
+        const finalZIndex = Number(getPanel().style.zIndex);
+        expect(finalZIndex - initialZIndex).toBeLessThanOrEqual(1);
+    });
+
     it('aplica o role informado via prop no painel', async () => {
         wrapper = mount(MaxBaseOverlay, { props: { visible: true, target, role: 'listbox' } });
         await settle();

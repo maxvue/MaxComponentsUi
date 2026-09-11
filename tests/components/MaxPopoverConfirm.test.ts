@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { mount } from '@vue/test-utils';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { config, mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxPopoverConfirm from '../../src/components/MaxPopoverConfirm.vue';
 import { useConfirmStore } from '../../src/stores/useConfirm.Store';
@@ -14,14 +14,16 @@ vi.mock('@maxvue/max-use', async (importOriginal) => {
     };
 });
 
+let pinia: ReturnType<typeof createPinia>;
+
 function mountPopoverConfirm() {
     return mount(MaxPopoverConfirm, {
         global: {
             stubs: {
                 MaxButton: {
                     name: 'MaxButton',
-                    props: ['action', 'label', 'icon'],
-                    template: '<button class="max-button-stub" @click="action && action()">{{ label }}</button>'
+                    props: ['action', 'label', 'icon', 'severity', 'variant'],
+                    template: '<button class="max-button-stub" :data-severity="severity" :data-variant="variant" @click="action && action()">{{ label }}</button>'
                 },
                 MaxIcon: {
                     template: '<span class="max-icon"></span>',
@@ -39,7 +41,9 @@ function mountPopoverConfirm() {
 
 describe('MaxPopoverConfirm', () => {
     beforeEach(() => {
-        setActivePinia(createPinia());
+        pinia = createPinia();
+        setActivePinia(pinia);
+        config.global.plugins = [pinia];
     });
 
     it('renderiza corretamente', () => {
@@ -210,6 +214,97 @@ describe('MaxPopoverConfirm', () => {
 
             expect(document.activeElement).toBe(botaoOrigem);
             document.body.removeChild(botaoOrigem);
+        });
+    });
+
+    describe('Hierarquia visual e severidade dos botões e ícone (Etapa 09)', () => {
+        it('renderiza o botão reject com severity secondary e variant outlined por padrão', async () => {
+            const wrapper = mountPopoverConfirm();
+            const store = useConfirmStore();
+            store.show = true;
+            await wrapper.vm.$nextTick();
+
+            const buttons = wrapper.findAll('.max-button-stub');
+            expect(buttons[0].attributes('data-severity')).toBe('secondary');
+            expect(buttons[0].attributes('data-variant')).toBe('outlined');
+        });
+
+        it('renderiza o botão accept com severity danger por padrão', async () => {
+            const wrapper = mountPopoverConfirm();
+            const store = useConfirmStore();
+            store.show = true;
+            await wrapper.vm.$nextTick();
+
+            const buttons = wrapper.findAll('.max-button-stub');
+            expect(buttons[1].attributes('data-severity')).toBe('danger');
+        });
+
+        it('botão accept herda severity configurada na store quando confirm_store.severity é definida', async () => {
+            const wrapper = mountPopoverConfirm();
+            const store = useConfirmStore();
+            store.confirm({
+                message: 'Aviso importante',
+                severity: 'warning',
+                rejectProps: { label: 'Não' },
+                acceptProps: { label: 'Sim' },
+                x: 0,
+                y: 0,
+                width: 100,
+                height: 40
+            });
+            await wrapper.vm.$nextTick();
+
+            const buttons = wrapper.findAll('.max-button-stub');
+            expect(buttons[1].attributes('data-severity')).toBe('warning');
+        });
+
+        it('botão accept aceita override via acceptProps.severity e acceptProps.variant', async () => {
+            const wrapper = mountPopoverConfirm();
+            const store = useConfirmStore();
+            store.confirm({
+                message: 'Confirmação',
+                severity: 'warning',
+                rejectProps: { label: 'Não' },
+                acceptProps: { label: 'Sim', severity: 'success', variant: 'text' },
+                x: 0,
+                y: 0,
+                width: 100,
+                height: 40
+            });
+            await wrapper.vm.$nextTick();
+
+            const buttons = wrapper.findAll('.max-button-stub');
+            expect(buttons[1].attributes('data-severity')).toBe('success');
+            expect(buttons[1].attributes('data-variant')).toBe('text');
+        });
+
+        it('aplica classes de severidade dinâmica no ícone de confirmação', async () => {
+            const wrapper = mountPopoverConfirm();
+            const store = useConfirmStore();
+
+            // Padrão: severity-danger
+            store.show = true;
+            await wrapper.vm.$nextTick();
+            let icon = wrapper.find('.popover-confirm-icon');
+            expect(icon.classes()).toContain('severity-danger');
+
+            // Warning
+            store.severity = 'warning';
+            await wrapper.vm.$nextTick();
+            icon = wrapper.find('.popover-confirm-icon');
+            expect(icon.classes()).toContain('severity-warning');
+
+            // Info
+            store.severity = 'info';
+            await wrapper.vm.$nextTick();
+            icon = wrapper.find('.popover-confirm-icon');
+            expect(icon.classes()).toContain('severity-info');
+
+            // Success
+            store.severity = 'success';
+            await wrapper.vm.$nextTick();
+            icon = wrapper.find('.popover-confirm-icon');
+            expect(icon.classes()).toContain('severity-success');
         });
     });
 });

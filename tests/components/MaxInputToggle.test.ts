@@ -108,4 +108,47 @@ describe('MaxInputToggle', () => {
         await input.setValue(false);
         expect(wrapper.emitted('update:modelValue')?.[0][0]).toBe('N');
     });
+
+    describe('Associação Acessível de Rótulo e Input (id e for)', () => {
+        it('associa formalmente o rótulo ao checkbox via atributos id e for', () => {
+            const wrapper = mount(MaxInputToggle, {
+                props: { modelValue: false },
+                attrs: { label: 'Receber novidades' }
+            });
+
+            const label = wrapper.find('label.input-toggle-field-label-div');
+            expect(label.exists()).toBe(true);
+            const forAttr = label.attributes('for');
+            expect(forAttr).toBeTruthy();
+
+            const input = wrapper.find<HTMLInputElement>('input[type="checkbox"]');
+            expect(input.attributes('id')).toBe(forAttr);
+
+            const toggleLabel = wrapper.find('label.max-toggleswitch');
+            expect(toggleLabel.attributes('for')).toBe(forAttr);
+            expect(input.attributes('aria-label')).toBeUndefined();
+        });
+
+        it('fornece aria-label padrão quando não houver rótulo explícito', () => {
+            const wrapper = mount(MaxInputToggle, {
+                props: { modelValue: false }
+            });
+
+            const input = wrapper.find<HTMLInputElement>('input[type="checkbox"]');
+            expect(input.attributes('aria-label')).toBe('Alternar opção');
+        });
+
+        it('respeita id customizado repassado via attrs para associação', () => {
+            const wrapper = mount(MaxInputToggle, {
+                props: { modelValue: false },
+                attrs: { id: 'meu-toggle-customizado', label: 'Opção customizada' }
+            });
+
+            const label = wrapper.find('label.input-toggle-field-label-div');
+            const input = wrapper.find<HTMLInputElement>('input[type="checkbox"]');
+
+            expect(label.attributes('for')).toBe('meu-toggle-customizado');
+            expect(input.attributes('id')).toBe('meu-toggle-customizado');
+        });
+    });
 });

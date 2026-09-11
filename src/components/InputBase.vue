@@ -1,5 +1,30 @@
 <template>
-    <div class="max-input-base max-input-main-div" :class="`${props.float !== undefined ? 'float' : ''} ${done ? 'done' : ''} ${!noStatus && caution ? 'caution' : ''} ${textCenter ? 'text-center' : ''} ${textRight ? 'text-right' : ''} ${props.class ? props.class : ''} ${!noStatus &&  isError ? 'error' : ''} ${inLine ? 'in-line' : ''}`">
+    <div
+        :class="[
+            'max-input-base',
+            'max-input-main-div',
+            {
+                'float': props.float !== undefined,
+                'is-float': props.float !== undefined,
+                'is-floating': props.float !== undefined,
+                'done': Boolean(props.done),
+                'is-done': Boolean(props.done),
+                'caution': !props.noStatus && Boolean(props.caution),
+                'is-caution': !props.noStatus && Boolean(props.caution),
+                'error': !props.noStatus && isError,
+                'is-error': !props.noStatus && isError,
+                'text-center': props.textCenter,
+                'is-text-center': props.textCenter,
+                'text-right': props.textRight,
+                'is-text-right': props.textRight,
+                'in-line': props.inLine,
+                'is-inline': props.inLine,
+                'no-status': props.noStatus,
+                'no-message': props.noMessage
+            },
+            props.class
+        ]"
+    >
         <!-- INPUT LABEL -->
         <!--
             `for` aponta para `input_id`, o id exposto via slot prop `inputId`.
@@ -50,19 +75,31 @@
         </div>
 
         <!-- INPUT MESSAGE -->
-        <div class="input-message" :id="message_id" aria-live="polite" :role="isError ? 'alert' : undefined">
-            <MaxIcon :icon="iconMessage" v-if="iconMessage && displayMessage" :size="0.9" :light="light" :dark="dark" />
-            <span class="message-text">{{ displayMessage }}</span>
+        <div
+            class="input-message"
+            :id="message_id"
+            aria-live="polite"
+            :role="isError ? 'alert' : undefined"
+            v-if="!props.noStatus"
+        >
+            <MaxIcon
+                :icon="props.iconMessage"
+                v-if="props.iconMessage && displayMessage"
+                :size="0.85"
+                :light="light"
+                :dark="dark"
+                class="message-icon"
+            />
+            <span class="message-text" v-if="displayMessage">{{ displayMessage }}</span>
         </div>
     </div>
-
 </template>
 
 <script setup lang="ts">
     import { hasContent } from '@maxvue/max-use';
     import { computed, useId } from 'vue';
     import MaxIcon from './MaxIcon.vue';
-    import { SelectGroupOptions } from '../types';
+    import type { InputValue, SelectOptionsList, SelectGroupOptions } from '../types';
 
     /**
      * Propriedades base para componentes de entrada (inputs).
@@ -70,9 +107,9 @@
      */
     interface Props {
         /** Valor do input (suporta v-model) */
-        value?: any;
+        value?: InputValue;
         /** Valor do input para v-model no Vue 3 */
-        modelValue?: any;
+        modelValue?: InputValue;
         /** Lista de opções simples [{ name, value, icon, sub_label }] */
         class?: string;
         /** Ícone principal (ex: 'mdi:user') */
@@ -110,7 +147,7 @@
         /** Default Value */
         default?: string | number | boolean | null | undefined;
         /** Lista de opções simples [{ name, value, icon, sub_label }] */
-        options?: any[];
+        options?: SelectOptionsList;
         /** Lista de opções agrupadas [{ label, items: [] }] */
         groupOptions?: SelectGroupOptions;
         /** Ícone posicionado à esquerda */
@@ -141,6 +178,8 @@
         noError?: boolean;
         /** Flag que força ocultar os icones done, caution e error */
         noStatus?: boolean;
+        /** Flag que força ocultar a mensagem de feedback e remove a reserva vertical */
+        noMessage?: boolean;
         /** Flag que força ocultar o icone */
         noIcon?: boolean;
     }
@@ -154,7 +193,9 @@
         error: undefined,
         light: false,
         iconPos: 'left',
-        inLine: false
+        inLine: false,
+        noStatus: false,
+        noMessage: false
     });
 
     /**
@@ -234,7 +275,7 @@
     }
 
     &:has(.max-input-field-div:focus-within) .max-input-label {
-        color: var(--blue-700) !important;
+        color: var(--max-primary-500, #00768E) !important;
     }
 
     .max-input-field-div {
@@ -248,7 +289,8 @@
         position: relative;
 
         &:focus-within {
-            outline: 1px solid var(--blue-700) !important;
+            outline: 2px solid var(--max-primary-500, #00768E) !important;
+            outline-offset: 1px;
         }
 
         .input-icon-left {
@@ -268,6 +310,9 @@
         :deep(input),
         :deep(textarea),
         :deep(label),
+        :deep(.max-input-native),
+        :deep(.max-select),
+        :deep(.max-select-label),
         :deep(.p-select),
         :deep(.p-select-label) {
             &:not(.max-input-otp-cell) {
@@ -312,78 +357,131 @@
         }
     }
 
-    &.text-center {
-        :deep(input) {
+    .input-message {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 0 4px;
+        padding-top: 2px;
+        color: var(--max-surface-400);
+        height: 16px;
+        width: 100%;
+        gap: 4px;
+        overflow: hidden;
+
+        .message-icon {
+            flex-shrink: 0;
+        }
+
+        .message-text {
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    }
+
+    &.text-center,
+    &.is-text-center {
+        :deep(input),
+        :deep(.max-input-native),
+        :deep(.p-inputtext) {
             text-align: center !important;
         }
     }
 
-    &.text-right {
-        :deep(input) {
+    &.text-right,
+    &.is-text-right {
+        :deep(input),
+        :deep(.max-input-native),
+        :deep(.p-inputtext) {
             text-align: right !important;
         }
     }
 
-    &.caution {
+    &.caution,
+    &.is-caution {
         label,
         .max-input-label {
-            color: var(--orange-600);
+            color: var(--max-warning-600, var(--orange-600));
         }
 
         .max-input-field-div {
-            outline: 1px solid var(--orange-b-500) !important;
+            outline: 1px solid var(--max-warning-500, #F59E0B) !important;
 
             &:focus-within {
-                outline: 1px solid var(--blue-700) !important;
+                outline: 2px solid var(--max-warning-500, #F59E0B) !important;
+                outline-offset: 1px;
             }
         }
 
+        :deep(.max-select),
         :deep(.p-select) {
-            border-color: var(--orange-600);
+            border-color: var(--max-warning-600, var(--orange-600));
         }
 
         .input-message {
-            color: var(--max-orange-500);
+            color: var(--max-warning-600, var(--orange-600));
 
             .message-text {
-                color: var(--orange-600);
+                color: var(--max-warning-600, var(--orange-600));
             }
         }
     }
 
-    &.error {
+    &.error,
+    &.is-error {
         label,
         .max-input-label {
-            color: var(--max-red-600);
+            color: var(--max-danger-600, var(--max-red-600));
         }
 
         .max-input-field-div {
-            outline: 1px solid var(--red-b-650) !important;
+            outline: 1px solid var(--max-danger-500, #EF4444) !important;
 
             &:focus-within {
-                outline: 1px solid var(--blue-700) !important;
+                outline: 2px solid var(--max-danger-500, #EF4444) !important;
+                outline-offset: 1px;
             }
         }
 
-        :deep(input) {
-            border-color: var(--max-red-600);
+        :deep(input),
+        :deep(.max-input-native),
+        :deep(.p-inputtext) {
+            border-color: var(--max-danger-600, var(--max-red-600));
         }
 
+        :deep(.max-select),
         :deep(.p-select) {
-            border-color: var(--max-red-600);
+            border-color: var(--max-danger-600, var(--max-red-600));
         }
 
         .input-message {
-            color: var(--max-red-600);
+            color: var(--max-danger-600, var(--max-red-600));
 
             .message-text {
-                color: var(--max-red-600);
+                color: var(--max-danger-600, var(--max-red-600));
             }
         }
     }
+
+    &.no-status,
+    &.no-message,
+    &[no-message],
+    &[no-messages] {
+        grid-template-rows: 36px !important;
+
+        .input-message {
+            display: none !important;
+        }
+    }
+
 
     &[input-click] {
         &:not([input-click='false']) {
+            :deep(.max-select-label),
             :deep(.p-select-label) {
                 min-height: 10px !important;
                 max-height: 10px !important;
@@ -392,6 +490,8 @@
             :deep(span),
             :deep(input),
             :deep(select),
+            :deep(.max-input-native),
+            :deep(.max-select),
             :deep(.p-select),
             :deep(.p-inputnumber) {
                 width: calc(100% - 4px) !important;
@@ -410,10 +510,12 @@
 
     &[input-click-auto] {
         &:not([input-click='false']) {
+            :deep(.max-select),
             :deep(.p-select) {
                 padding: 0 !important;
             }
 
+            :deep(.max-select-label),
             :deep(.p-select-label) {
                 padding: 0 !important;
             }
@@ -421,6 +523,8 @@
             :deep(span),
             :deep(input),
             :deep(select),
+            :deep(.max-input-native),
+            :deep(.max-select),
             :deep(.p-select),
             :deep(.p-inputnumber) {
                 &:not(.max-input-otp-cell) {
@@ -490,6 +594,9 @@
         :deep(input),
         :deep(textarea),
         :deep(select),
+        :deep(.max-select),
+        :deep(.max-select-label),
+        :deep(.max-input-native),
         :deep(.p-select),
         :deep(.p-select-label),
         :deep(.p-inputtext),
@@ -503,21 +610,16 @@
         }
     }
 
-    &[no-message],
-    &[no-messages] {
-        grid-template-rows: 1fr;
-
-        .message-spacer {
-            display: none !important;
-        }
-    }
-
+    &.is-full,
+    &.is-flex,
     &[full],
     &[flex] {
         width: 100% !important;
         height: 100% !important;
 
-        :deep(input) {
+        :deep(input),
+        :deep(.max-input-native),
+        :deep(.p-inputtext) {
             width: 100% !important;
             height: 100% !important;
             max-width: 100% !important;
@@ -526,6 +628,7 @@
         }
     }
 
+    &.is-slim,
     &[slim],
     &[input-click] {
         grid-template-rows: 20px;
@@ -535,6 +638,8 @@
         :deep(span),
         :deep(input),
         :deep(select),
+        :deep(.max-select),
+        :deep(.max-input-native),
         :deep(.p-select),
         :deep(.value-div),
         :deep(.value-text) {
@@ -553,7 +658,8 @@
         }
     }
 
-    &.in-line {
+    &.in-line,
+    &.is-inline {
         grid-template-columns: auto 1fr !important;
         grid-template-rows: 1fr !important;
         place-items: center start;
@@ -568,6 +674,8 @@
         :deep(span),
         :deep(input),
         :deep(select),
+        :deep(.max-select-label),
+        :deep(.max-input-native),
         :deep(.p-select-label),
         :deep(.p-inputtext),
         :deep(.p-inputnumber),
@@ -585,6 +693,8 @@
         :deep(textarea),
         :deep(span),
         :deep(select),
+        :deep(.max-select-label),
+        :deep(.max-input-native),
         :deep(.p-select-label),
         :deep(.p-inputtext),
         :deep(.value-div),
@@ -592,7 +702,9 @@
             color: var(--background-700) !important;
         }
 
+        :deep(.max-select),
         :deep(.p-select) {
+            .max-select-label,
             .p-select-label,
             .value-div,
             .value-text,
@@ -612,21 +724,8 @@
         }
     }
 
-    .input-message {
-        display: none;
-        align-items: center;
-        justify-content: flex-end;
-        padding: 0 6px;
-        padding-top: 4px;
-        color: var(--max-surface-400);
-        height: 16px;
-        width: 100%;
-
-        .message-text {
-            font-size: 10px !important;
-        }
-    }
-
+    :deep(.max-input-native),
+    :deep(input),
     :deep(.p-inputtext),
     :deep(.p-datepicker),
     :deep(.p-autocomplete) {
@@ -635,42 +734,52 @@
 
     &.no-dropdown,
     &[no-dropdown] {
+        :deep(.max-select-dropdown),
         :deep(.p-select-dropdown) {
             display: none !important;
         }
 
-        &.text-center {
+        &.text-center,
+        &.is-text-center {
             :deep(.value-div),
+            :deep(.max-select-label),
             :deep(.p-select-label) {
                 padding: 0 !important;
             }
         }
     }
 
-    &.text-center {
+    &.text-center,
+    &.is-text-center {
         :deep(.value-div),
+        :deep(.max-select-label),
         :deep(.p-select-label) {
             width: 100%;
         }
 
         :deep(.value-text),
+        :deep(.max-select-label),
         :deep(.p-select-label) {
             padding-left: 2.5rem;
         }
 
         &.no-dropdown {
             :deep(.value-div),
+            :deep(.max-select-label),
             :deep(.p-select-label) {
                 padding-left: 0 !important;
             }
         }
 
         :deep(input),
+        :deep(.max-input-native),
+        :deep(.max-select-label),
         :deep(.p-select-label) {
             text-align: center !important;
         }
     }
 
+    :deep(.max-input-native),
     :deep(.p-inputtext) {
         height: 36px;
 
@@ -689,19 +798,27 @@
         :deep(input),
         :deep(textarea),
         :deep(span),
+        :deep(.max-input-native),
+        :deep(.max-select-label),
         :deep(.p-floatlabel .p-select-label),
         :deep(.p-inputtext) {
             color: var(--background-650) !important;
         }
     }
 
-    :deep(.p-disabled) {
+    :deep(.is-disabled),
+    :deep(.p-disabled),
+    :deep(input:disabled) {
         background-color: unset !important;
+        opacity: 0.6 !important;
+        cursor: not-allowed !important;
 
         input,
         textarea,
         span,
+        .max-select-label,
         .p-floatlabel .p-select-label,
+        .max-input-native,
         .p-inputtext {
             color: var(--background-650) !important;
         }

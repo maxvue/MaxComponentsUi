@@ -262,6 +262,215 @@ describe('MaxInputSelect', () => {
         expect(vm.filteredOptions[0].items).toHaveLength(1);
         expect(vm.filteredOptions[0].items[0].label).toBe('Brasília');
     });
+
+    describe('Prop clearable e showClear', () => {
+        it('exibe o botão de limpar seleção quando clearable=true e há valor selecionado', async () => {
+            const options = [{ value: 'sp', name: 'São Paulo' }];
+            const wrapper = mountSelect({ options, modelValue: 'sp', clearable: true });
+            await wrapper.vm.$nextTick();
+
+            const clearBtn = wrapper.find('.max-select-clear-btn');
+            expect(clearBtn.exists()).toBe(true);
+            expect(clearBtn.attributes('aria-label')).toBe('Limpar seleção');
+        });
+
+        it('exibe o botão de limpar seleção quando showClear=true (alias)', async () => {
+            const options = [{ value: 'sp', name: 'São Paulo' }];
+            const wrapper = mountSelect({ options, modelValue: 'sp', showClear: true });
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.find('.max-select-clear-btn').exists()).toBe(true);
+        });
+
+        it('não exibe botão de limpar quando não há valor selecionado', async () => {
+            const options = [{ value: 'sp', name: 'São Paulo' }];
+            const wrapper = mountSelect({ options, modelValue: null, clearable: true });
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.find('.max-select-clear-btn').exists()).toBe(false);
+        });
+
+        it('não exibe botão de limpar quando disabled=true mesmo com valor e clearable', async () => {
+            const options = [{ value: 'sp', name: 'São Paulo' }];
+            const wrapper = mountSelect({ options, modelValue: 'sp', clearable: true, disabled: true });
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.find('.max-select-clear-btn').exists()).toBe(false);
+        });
+
+        it('ao clicar no botão limpar, reseta para null e emite update:modelValue, change e clear', async () => {
+            const options = [{ value: 'sp', name: 'São Paulo' }];
+            const wrapper = mountSelect({ options, modelValue: 'sp', clearable: true });
+            await wrapper.vm.$nextTick();
+
+            const clearBtn = wrapper.find('.max-select-clear-btn');
+            await clearBtn.trigger('click');
+            await wrapper.vm.$nextTick();
+
+            expect((wrapper.vm as any).temp_value).toBeNull();
+            expect(wrapper.emitted('update:modelValue')?.[0]).toEqual([null]);
+            expect(wrapper.emitted('change')?.[0]).toEqual([null]);
+            expect(wrapper.emitted('clear')).toHaveLength(1);
+        });
+    });
+
+    describe('Navegação por Teclado e WAI-ARIA Combobox', () => {
+        it('gatilho possui atributos semânticos combobox WAI-ARIA', async () => {
+            const wrapper = mountSelect();
+            const trigger = wrapper.find('.max-select');
+
+            expect(trigger.attributes('role')).toBe('combobox');
+            expect(trigger.attributes('aria-haspopup')).toBe('listbox');
+            expect(trigger.attributes('aria-expanded')).toBe('false');
+            expect(trigger.attributes('tabindex')).toBe('0');
+        });
+
+        it('ArrowDown com menu fechado abre o menu', async () => {
+            const options = [{ value: '1', name: 'Item 1' }];
+            const wrapper = mountSelect({ options });
+            const trigger = wrapper.find('.max-select');
+
+            await trigger.trigger('keydown', { key: 'ArrowDown' });
+            await wrapper.vm.$nextTick();
+
+            expect((wrapper.vm as any).isOpen).toBe(true);
+            expect(trigger.attributes('aria-expanded')).toBe('true');
+        });
+
+        it('ArrowDown e ArrowUp com menu aberto navegam circularmente sem fechar o dropdown', async () => {
+            const options = [
+                { value: '1', name: 'Item 1' },
+                { value: '2', name: 'Item 2' },
+                { value: '3', name: 'Item 3' }
+            ];
+            const wrapper = mountSelect({ options });
+            const trigger = wrapper.find('.max-select');
+
+            // Abre o dropdown
+            await trigger.trigger('click');
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).isOpen).toBe(true);
+            expect((wrapper.vm as any).highlightedIndex).toBe(0);
+
+            // ArrowDown move para 1
+            await trigger.trigger('keydown', { key: 'ArrowDown' });
+            expect((wrapper.vm as any).isOpen).toBe(true);
+            expect((wrapper.vm as any).highlightedIndex).toBe(1);
+
+            // ArrowDown move para 2
+            await trigger.trigger('keydown', { key: 'ArrowDown' });
+            expect((wrapper.vm as any).highlightedIndex).toBe(2);
+
+            // ArrowDown circular volta para 0
+            await trigger.trigger('keydown', { key: 'ArrowDown' });
+            expect((wrapper.vm as any).highlightedIndex).toBe(0);
+
+            // ArrowUp circular vai para o último (2)
+            await trigger.trigger('keydown', { key: 'ArrowUp' });
+            expect((wrapper.vm as any).highlightedIndex).toBe(2);
+        });
+
+        it('Enter seleciona a opção destacada e fecha o dropdown', async () => {
+            const options = [
+                { value: '1', name: 'Item 1' },
+                { value: '2', name: 'Item 2' }
+            ];
+            const wrapper = mountSelect({ options });
+            const trigger = wrapper.find('.max-select');
+
+            await trigger.trigger('click');
+            await wrapper.vm.$nextTick();
+
+            // Destaca o segundo item
+            await trigger.trigger('keydown', { key: 'ArrowDown' });
+            expect((wrapper.vm as any).highlightedIndex).toBe(1);
+
+            // Confirma com Enter
+            await trigger.trigger('keydown', { key: 'Enter' });
+            await wrapper.vm.$nextTick();
+
+            expect((wrapper.vm as any).isOpen).toBe(false);
+            expect((wrapper.vm as any).temp_value).toBe('2');
+            expect(wrapper.emitted('change')?.[0]).toEqual(['2']);
+        });
+
+        it('Escape fecha o dropdown e retorna o foco ao gatilho', async () => {
+            const options = [{ value: '1', name: 'Item 1' }];
+            const wrapper = mountSelect({ options });
+            const trigger = wrapper.find('.max-select');
+
+            await trigger.trigger('click');
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).isOpen).toBe(true);
+
+            await trigger.trigger('keydown', { key: 'Escape' });
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).isOpen).toBe(false);
+        });
+
+        it('captura ArrowDown, ArrowUp, Enter e Escape no input de filtro', async () => {
+            const options = [
+                { value: '1', label: 'Item 1' },
+                { value: '2', label: 'Item 2' }
+            ];
+            const wrapper = mountSelect({ options, filter: true });
+            const trigger = wrapper.find('.max-select');
+
+            await trigger.trigger('click');
+            await wrapper.vm.$nextTick();
+
+            const filterInput = document.body.querySelector('.max-select-filter') as HTMLInputElement;
+            expect(filterInput).not.toBeNull();
+
+            // Simula ArrowDown no filtro
+            filterInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).highlightedIndex).toBe(1);
+
+            // Simula Enter no filtro
+            filterInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).isOpen).toBe(false);
+            expect((wrapper.vm as any).temp_value).toBe('2');
+        });
+    });
+
+    describe('Eliminação do Listener Global Permanente', () => {
+        it('registra o listener de keydown somente quando aberto e remove ao fechar', async () => {
+            const addSpy = vi.spyOn(window, 'addEventListener');
+            const removeSpy = vi.spyOn(window, 'removeEventListener');
+
+            const wrapper = mountSelect();
+            // Ao montar fechado, NÃO deve adicionar keydown no window
+            expect(addSpy).not.toHaveBeenCalledWith('keydown', expect.any(Function));
+
+            // Abre o select
+            await wrapper.find('.max-select').trigger('click');
+            await wrapper.vm.$nextTick();
+            expect(addSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+
+            // Fecha o select
+            await wrapper.find('.max-select').trigger('click');
+            await wrapper.vm.$nextTick();
+            expect(removeSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+
+            addSpy.mockRestore();
+            removeSpy.mockRestore();
+        });
+
+        it('remove o listener de keydown ao desmontar se estava aberto', async () => {
+            const removeSpy = vi.spyOn(window, 'removeEventListener');
+            const wrapper = mountSelect();
+
+            await wrapper.find('.max-select').trigger('click');
+            await wrapper.vm.$nextTick();
+
+            wrapper.unmount();
+            expect(removeSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+
+            removeSpy.mockRestore();
+        });
+    });
 });
 
 

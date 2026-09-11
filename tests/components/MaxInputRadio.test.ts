@@ -75,4 +75,56 @@ describe('MaxInputRadio', () => {
         });
         expect(wrapper.text()).toContain('Minha Opção');
     });
+
+    describe('Estado Desabilitado (Affordance e Bloqueio)', () => {
+        it('aplica disabled no input nativo e classe is-disabled no container quando disabled=true', () => {
+            const wrapper = mount(MaxInputRadio, {
+                props: { modelValue: null, value: 'opcao1', disabled: true }
+            });
+            const input = wrapper.find<HTMLInputElement>('input[type="radio"]');
+            expect(input.element.disabled).toBe(true);
+            expect(wrapper.find('.radio-button-input-main-div').classes()).toContain('is-disabled');
+        });
+
+        it('bloqueia alteração ao clicar no container quando disabled=true', async () => {
+            const wrapper = mount(MaxInputRadio, {
+                props: { modelValue: null, value: 'opcao1', disabled: true }
+            });
+            const div = wrapper.find('.radio-button-input-main-div');
+            await div.trigger('click');
+            expect(wrapper.emitted('update:modelValue')).toBeFalsy();
+        });
+
+        it('bloqueia alteração ao clicar no label quando disabled=true', async () => {
+            const wrapper = mount(MaxInputRadio, {
+                props: { modelValue: null, value: 'opcao1', disabled: true },
+                attrs: { label: 'Opção Desabilitada' }
+            });
+            const label = wrapper.find('label');
+            await label.trigger('click');
+            expect(wrapper.emitted('update:modelValue')).toBeFalsy();
+        });
+
+        it('bloqueia alteração via evento change nativo quando disabled=true', async () => {
+            const wrapper = mount(MaxInputRadio, {
+                props: { modelValue: null, value: 'opcao1', disabled: true }
+            });
+            const input = wrapper.find('input[type="radio"]');
+            await input.trigger('change');
+            expect(wrapper.emitted('update:modelValue')).toBeFalsy();
+        });
+
+        it('respeita disabled repassado via attrs', async () => {
+            const wrapper = mount(MaxInputRadio, {
+                props: { modelValue: null, value: 'opcao1' },
+                attrs: { disabled: true }
+            });
+            const input = wrapper.find<HTMLInputElement>('input[type="radio"]');
+            expect(input.element.disabled).toBe(true);
+            expect(wrapper.find('.radio-button-input-main-div').classes()).toContain('is-disabled');
+
+            await wrapper.find('.radio-button-input-main-div').trigger('click');
+            expect(wrapper.emitted('update:modelValue')).toBeFalsy();
+        });
+    });
 });

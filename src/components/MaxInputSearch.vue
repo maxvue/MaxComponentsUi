@@ -1,25 +1,60 @@
 <template>
-    <InputBase class="max-input-search input-search-main-div" :iconRight="isLoading === true ? 'line-md:loading-twotone-loop' :  'material-symbols:search-rounded'">
-        <input type="text" class="p-inputtext" v-bind="attrs" :value="temp_value" @input="onInput" />
+    <InputBase
+        class="max-input-search input-search-main-div"
+        :iconRight="isLoading === true ? 'line-md:loading-twotone-loop' : 'material-symbols:search-rounded'"
+    >
+        <input
+            :type="props.type"
+            class="max-input-native"
+            v-bind="attrs"
+            :value="temp_value"
+            :placeholder="props.placeholder || 'Pesquisar...'"
+            :aria-label="ariaLabelComputed"
+            :aria-busy="isLoading ? 'true' : undefined"
+            @input="onInput"
+        />
+        <span class="sr-only" aria-live="polite" aria-atomic="true">
+            {{ isLoading ? 'Buscando resultados...' : '' }}
+        </span>
     </InputBase>
 </template>
 
 <script setup lang="ts">
-    import { ref, watch, useAttrs, onUnmounted } from 'vue';
+    import { ref, computed, watch, useAttrs, onUnmounted } from 'vue';
     import InputBase from './InputBase.vue';
 
     const attrs = useAttrs();
 
+    interface Props {
+        modelValue: string;
+        isLoading?: boolean;
+        type?: string;
+        placeholder?: string;
+        ariaLabel?: string;
+    }
+
     const props = withDefaults(
-        defineProps<{
-            modelValue: string;
-            isLoading?: boolean;
-        }>(),
-        { modelValue: '', isLoading: false }
+        defineProps<Props>(),
+        {
+            modelValue: '',
+            isLoading: false,
+            type: 'search',
+            placeholder: 'Pesquisar...',
+            ariaLabel: undefined
+        }
     );
 
-    const emit = defineEmits(['update:modelValue', 'search']);
+    const emit = defineEmits<{
+        'update:modelValue': [value: string];
+        'search': [query: string];
+    }>();
     const temp_value = ref(props.modelValue);
+
+    const ariaLabelComputed = computed(() => {
+        if (props.ariaLabel) return props.ariaLabel;
+        if (attrs['aria-label']) return attrs['aria-label'] as string;
+        return props.placeholder || 'Pesquisar';
+    });
 
     watch(temp_value, (val) => emit('update:modelValue', val));
     watch(() => props.modelValue, (val) => temp_value.value = val);
@@ -50,25 +85,18 @@
 </script>
 
 <style lang="scss" scoped>
-    :deep(.p-autocomplete-option) {
-        padding: 0 !important;
-    }
-
-    :deep(.p-autocomplete-list) {
-        gap: 5px !important;
-    }
-
-    :deep(.p-autocomplete-overlay) {
-        z-index: 99999 !important;
-    }
-
-    .tst1 {
-        padding-left: 20px;
-        font-weight: 300;
-        color: var(--background-650);
-    }
-
-    .tst2 {
-        font-weight: 600;
+    .max-input-search {
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip-path: inset(50%);
+            white-space: nowrap;
+            border: 0;
+        }
     }
 </style>
+

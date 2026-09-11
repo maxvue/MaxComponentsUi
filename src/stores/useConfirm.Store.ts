@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia';
 import type { Ref } from 'vue';
 import { ref } from 'vue';
+import type { ButtonSeverity, ConfirmActionProps } from '../types';
 
-type ConfirmActionProps = { label: string; icon?: string; action?: (event?: any) => void };
-
-type ConfirmPayload = {
+export type ConfirmPayload = {
     message: string;
     messageIcon?: string | null;
+    severity?: ButtonSeverity;
     rejectProps: ConfirmActionProps;
     acceptProps: ConfirmActionProps;
     x: number;
@@ -19,14 +19,18 @@ export const useConfirmStore = defineStore('confirm.popover', () => {
 
     const message: Ref<string> = ref('Deseja continuar?');
     const messageIcon: Ref<string | null> = ref(null);
+    const severity: Ref<ButtonSeverity | undefined> = ref(undefined);
     const rejectProps: Ref<ConfirmActionProps> = ref({
         label: 'Não',
         icon: undefined,
+        severity: 'secondary',
+        variant: 'outlined',
         action: () => {}
     });
     const acceptProps: Ref<ConfirmActionProps> = ref({
         label: 'Sim',
         icon: undefined,
+        severity: 'danger',
         action: () => {}
     });
 
@@ -50,8 +54,21 @@ export const useConfirmStore = defineStore('confirm.popover', () => {
     const confirm = (payload: ConfirmPayload) => {
         message.value = payload.message;
         messageIcon.value = payload.messageIcon ?? null;
-        rejectProps.value = payload.rejectProps;
-        acceptProps.value = payload.acceptProps;
+        severity.value = payload.severity;
+        rejectProps.value = {
+            label: payload.rejectProps?.label ?? 'Não',
+            icon: payload.rejectProps?.icon,
+            severity: payload.rejectProps?.severity ?? 'secondary',
+            variant: payload.rejectProps?.variant ?? 'outlined',
+            action: payload.rejectProps?.action
+        };
+        acceptProps.value = {
+            label: payload.acceptProps?.label ?? 'Sim',
+            icon: payload.acceptProps?.icon,
+            severity: payload.acceptProps?.severity ?? (payload.severity ?? 'danger'),
+            variant: payload.acceptProps?.variant,
+            action: payload.acceptProps?.action
+        };
         x.value = payload.x;
         y.value = payload.y;
         width.value = payload.width;
@@ -59,5 +76,5 @@ export const useConfirmStore = defineStore('confirm.popover', () => {
         show.value = true;
     };
 
-    return { message, messageIcon, rejectProps, acceptProps, show, x, y, width, height, hide, confirm };
+    return { message, messageIcon, severity, rejectProps, acceptProps, show, x, y, width, height, hide, confirm };
 });

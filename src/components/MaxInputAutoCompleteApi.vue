@@ -161,7 +161,11 @@
         return;
     }, { deep: true, immediate: true });
 
-    const emit = defineEmits(['update:modelValue', 'complete', 'blur']);
+    const emit = defineEmits<{
+        'update:modelValue': [value: any];
+        'complete': [event?: any];
+        'blur': [event?: any];
+    }>();
 
     const temp_value_string = computed(() => {
         if (temp_value.value && typeof temp_value.value === 'string') return temp_value.value;
@@ -248,11 +252,14 @@
 
     const onGlobalKeydown = (event: KeyboardEvent) => {
         if (event.key === 'Escape' && isOpen.value) hide();
-
     };
 
-    if (typeof window !== 'undefined') window.addEventListener('keydown', onGlobalKeydown);
+    watch(isOpen, (open) => {
+        if (typeof window === 'undefined') return;
+        if (open) window.addEventListener('keydown', onGlobalKeydown);
+        else window.removeEventListener('keydown', onGlobalKeydown);
 
+    });
 
     onBeforeUnmount(() => {
         if (typeof window !== 'undefined') window.removeEventListener('keydown', onGlobalKeydown);

@@ -212,11 +212,44 @@ describe('MaxDrawer', () => {
         expect(document.querySelector('.max-drawer-right')).not.toBeNull();
     });
 
-    it('aplica role complementary e aria-modal', () => {
+    it('aplica role dialog e aria-modal quando modal', () => {
         mountDrawer();
         const drawer = document.querySelector('.max-drawer');
-        expect(drawer?.getAttribute('role')).toBe('complementary');
+        expect(drawer?.getAttribute('role')).toBe('dialog');
         expect(drawer?.getAttribute('aria-modal')).toBe('true');
+    });
+
+    it('aplica role complementary quando modal é false', () => {
+        mountDrawer({ modal: false });
+        const drawer = document.querySelector('.max-drawer');
+        expect(drawer?.getAttribute('role')).toBe('complementary');
+        expect(drawer?.getAttribute('aria-modal')).toBeNull();
+    });
+
+    it('vincula aria-labelledby ao título do header', () => {
+        mountDrawer({ header: 'Minha Gaveta' });
+        const drawer = document.querySelector('.max-drawer');
+        const labelledBy = drawer?.getAttribute('aria-labelledby');
+        expect(labelledBy).toBeTruthy();
+        expect(document.getElementById(labelledBy!)?.textContent).toContain('Minha Gaveta');
+    });
+
+    it('aplica aria-label quando não houver header e a prop ariaLabel for passada', () => {
+        mountDrawer({ ariaLabel: 'Gaveta descritiva' });
+        const drawer = document.querySelector('.max-drawer');
+        expect(drawer?.getAttribute('aria-label')).toBe('Gaveta descritiva');
+    });
+
+    it('transfere o foco para o contêiner com tabindex -1 quando não há elementos focáveis internos', async () => {
+        mount(MaxDrawer, {
+            props: { visible: true, showCloseIcon: false },
+            slots: { default: '<div>Apenas texto estático</div>' },
+            attachTo: document.body
+        });
+        await nextTick();
+        await nextTick();
+        const drawer = document.querySelector<HTMLElement>('.max-drawer');
+        expect(document.activeElement).toBe(drawer);
     });
 
     it('aplica a classe max-drawer-no-padding quando noPadding é true', () => {

@@ -13,13 +13,16 @@
                         ref="panel_el"
                         class="max-drawer"
                         :class="[`max-drawer-${props.position}`, { 'max-drawer-no-padding': props.noPadding }, $attrs.class]"
-                        role="complementary"
-                        aria-modal="true"
+                        :role="props.modal ? 'dialog' : 'complementary'"
+                        :aria-modal="props.modal ? 'true' : undefined"
+                        :aria-labelledby="hasHeader ? headerId : undefined"
+                        :aria-label="!hasHeader && props.ariaLabel ? props.ariaLabel : undefined"
+                        tabindex="-1"
                         @keydown="trap.onKeydown"
                     >
-                        <div v-if="props.header || $slots.header || props.showCloseIcon" class="max-drawer-header">
+                        <div v-if="hasHeader || props.showCloseIcon" class="max-drawer-header">
                             <slot name="header">
-                                <span class="max-drawer-title">{{ props.header }}</span>
+                                <span :id="headerId" class="max-drawer-title">{{ props.header }}</span>
                             </slot>
                             <!--
                                 `v-bind="close_button_attrs"` fica depois de `type`/`aria-label` para que o
@@ -58,7 +61,7 @@
 <script setup lang="ts">
     import { useFocusTrap } from '../helpers/useFocusTrap';
     import { useScrollLock } from '../helpers/useScrollLock';
-    import { computed, watch, onBeforeUnmount, useTemplateRef } from 'vue';
+    import { computed, watch, onBeforeUnmount, useTemplateRef, useId, useSlots } from 'vue';
     import MaxIcon from './MaxIcon.vue';
 
     defineOptions({
@@ -92,6 +95,8 @@
         autoZIndex?: boolean;
         /** Desativa o padding padrão (1rem) de .max-drawer-content. */
         noPadding?: boolean;
+        /** Rótulo acessível WAI-ARIA quando não houver header. */
+        ariaLabel?: string;
     }>(), {
         visible: false,
         position: 'left',
@@ -114,6 +119,11 @@
         'hide': [];
         'after-hide': [];
     }>();
+
+    const slots = useSlots();
+    const id = useId();
+    const headerId = `max-drawer-header-${id}`;
+    const hasHeader = computed(() => Boolean(props.header || slots.header));
 
     const panel_el = useTemplateRef<HTMLElement>('panel_el');
 
@@ -230,6 +240,7 @@
         }
 
         .max-drawer {
+            outline: none;
             background-color: var(--background-0);
             color: var(--background-700);
             display: flex;

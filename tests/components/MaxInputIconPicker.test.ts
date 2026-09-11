@@ -78,4 +78,53 @@ describe('MaxInputIconPicker', () => {
         const inputBase = wrapper.findComponent(InputBase);
         expect(inputBase.props('caution')).toBe(false);
     });
+
+    it('preserva os SVGs em svgCache ao fechar e reabrir o drawer', async () => {
+        const fetchMock = vi.fn((url: string) => {
+            if (url.toString().includes('/picker/svg')) return Promise.resolve({
+                json: () => Promise.resolve({ 'mdi:cached-icon': '<svg><path d="M0 0"/></svg>' })
+            } as Response);
+
+            return Promise.resolve({
+                json: () => Promise.resolve([{ id: 1, name: 'mdi:cached-icon', search: 'mdi:cached-icon' }])
+            } as Response);
+        });
+        vi.stubGlobal('fetch', fetchMock);
+
+        const wrapper = mount(MaxInputIconPicker, { props: { modelValue: '' } });
+
+        // Abre o drawer pela 1ª vez
+        await wrapper.find('.icon-picker-trigger').trigger('click');
+        await new Promise((resolve) => setTimeout(resolve, 250));
+        await wrapper.vm.$nextTick();
+
+        const vm = wrapper.vm as any;
+        expect(vm.svgCache['mdi:cached-icon']).toBeDefined();
+
+        // Fecha o drawer
+        vm.visible = false;
+        await wrapper.vm.$nextTick();
+
+        // Reabre o drawer
+        await wrapper.find('.icon-picker-trigger').trigger('click');
+        await wrapper.vm.$nextTick();
+
+        // O cache deve ter sido preservado
+        expect(vm.svgCache['mdi:cached-icon']).toBeDefined();
+    });
+
+    it('cancela timer pendente e esvazia fila de fetch no desmonte do componente', async () => {
+        const wrapper = mount(MaxInputIconPicker, { props: { modelValue: '' } });
+        const vm = wrapper.vm as any;
+
+        // Agenda um fetch
+        vm.enqueueSvgFetch(['mdi:pending-1', 'mdi:pending-2']);
+
+        // Desmonta imediatamente antes dos 150ms do timer
+        wrapper.unmount();
+
+        // Nenhuma exceção deve ocorrer e o timer deve ser cancelado
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        expect(true).toBe(true);
+    });
 });

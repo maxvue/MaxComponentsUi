@@ -57,8 +57,8 @@
         loading: false,
         message: 'Deseja continuar?',
         messageIcon: null,
-        rejectProps: () => ({ label: 'Não', icon: undefined, action: () => {} }),
-        acceptProps: () => ({ label: 'Sim', icon: undefined, action: () => {} })
+        rejectProps: () => ({ label: 'Não', icon: undefined, severity: 'secondary', variant: 'outlined', action: () => {} }),
+        acceptProps: () => ({ label: 'Sim', icon: undefined, severity: 'danger', action: () => {} })
     });
 
 
@@ -70,6 +70,7 @@
         confirm_store.confirm({
             message: props.message,
             messageIcon: props.messageIcon,
+            severity: props.severity,
             rejectProps: props.rejectProps,
             acceptProps: props.acceptProps,
             x: x.value,

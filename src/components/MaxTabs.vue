@@ -2,7 +2,13 @@
     <div class="max-tabs" :class="{ 'max-tabs-scrollable': props.scrollable }">
         <div class="max-tabs-content">
             <div :class="`max-tabs-title ${spread ? 'spread' : ''}`">
-                <div class="max-tabs-title-items" :id="'max-tab-' + tabs_id"></div>
+                <div
+                    class="max-tabs-title-items"
+                    :id="'max-tab-' + tabs_id"
+                    role="tablist"
+                    aria-orientation="horizontal"
+                    @keydown="onTablistKeydown"
+                ></div>
                 <div class="max-tabs-title-buttons" :id="'max-tab-buttons-' + tabs_id">
                     <div
                         v-if="props.actionButton && (props.actionButtonLabel || props.actionButtonIcon)"
@@ -98,6 +104,45 @@
     function selectTab(id: string | number) {
         active_tab.value = id;
     }
+
+    const onTablistKeydown = (event: KeyboardEvent) => {
+        const container = (event.currentTarget as HTMLElement) ?? document.getElementById('max-tab-' + tabs_id.value);
+        if (!container) return;
+
+        const tabs = Array.from(container.querySelectorAll<HTMLElement>('[role="tab"]:not([disabled])'));
+        if (tabs.length === 0) return;
+
+        const currentIndex = tabs.findIndex((tab) => tab === document.activeElement || tab === event.target);
+        if (currentIndex === -1) return;
+
+        let nextIndex = currentIndex;
+
+        switch (event.key) {
+            case 'ArrowRight':
+                event.preventDefault();
+                nextIndex = (currentIndex + 1) % tabs.length;
+                break;
+            case 'ArrowLeft':
+                event.preventDefault();
+                nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+                break;
+            case 'Home':
+                event.preventDefault();
+                nextIndex = 0;
+                break;
+            case 'End':
+                event.preventDefault();
+                nextIndex = tabs.length - 1;
+                break;
+            default:
+                return;
+        }
+
+        const nextTab = tabs[nextIndex];
+        nextTab?.focus();
+        if (props.selectOnFocus) nextTab?.click();
+
+    };
 
     const count_tabs = ref(0);
 

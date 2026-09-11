@@ -4,7 +4,7 @@
             ref="inputRef"
             type="text"
             inputmode="decimal"
-            class="max-inputnumber p-inputtext p-component"
+            class="max-input-native max-inputnumber"
             :value="displayValue"
             :placeholder="props.placeholder"
             :disabled="props.disabled"
@@ -15,11 +15,11 @@
     </InputBase>
 </template>
 
-/**
- * Componente de entrada de texto padrão para números.
- * Oferece suporte a formatação numérica pt-BR, prefixos, sufixos, validação e comparação de valores.
- */
 <script setup lang="ts">
+    /**
+     * Componente de entrada de texto padrão para números.
+     * Oferece suporte a formatação numérica pt-BR, prefixos, sufixos, validação e comparação de valores.
+     */
     import { toSearchableString, hasContent } from '@maxvue/max-use';
     import type { Ref } from 'vue';
     import { ref, computed, watch, useAttrs } from 'vue';
@@ -126,7 +126,7 @@
         return attrs_error_message ?? 'Valor inválido';
     });
 
-    const emit = defineEmits(['update:modelValue']);
+    const emit = defineEmits<{ 'update:modelValue': [value: number | null | undefined] }>();
 
     const onInput = (event: Event) => {
         const raw = (event.target as HTMLInputElement).value;

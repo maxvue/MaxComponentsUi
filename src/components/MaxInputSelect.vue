@@ -6,18 +6,18 @@
 
         <div
             ref="triggerEl"
-            class="p-select"
-            :class="{ 'p-disabled': props.disabled, 'p-focus': isOpen }"
+            class="max-select p-select"
+            :class="{ 'is-disabled': props.disabled, 'p-disabled': props.disabled, 'is-focused': isOpen, 'p-focus': isOpen }"
             tabindex="0"
             role="combobox"
+            aria-haspopup="listbox"
             :aria-expanded="isOpen"
+            :aria-controls="listboxId"
+            :aria-activedescendant="activeDescendantId"
             @click.stop="toggle"
-            @keydown.enter.prevent="toggle"
-            @keydown.space.prevent="toggle"
-            @keydown.down.prevent="toggle"
-            @keydown.up.prevent="toggle"
+            @keydown="onTriggerKeydown"
         >
-            <div class="p-select-label">
+            <div class="max-select-label p-select-label">
                 <slot name="value" :value="temp_value">
                     <div
                         class="value-div"
@@ -34,7 +34,17 @@
                 </slot>
             </div>
 
-            <div class="p-select-dropdown" aria-hidden="true">
+            <button
+                v-if="isClearable && hasSelectedOption && !props.disabled"
+                type="button"
+                class="max-select-clear-btn p-select-clear-btn"
+                aria-label="Limpar seleção"
+                @click.stop="clearSelection"
+            >
+                <MaxIcon icon="lucide:x" size="0.85" />
+            </button>
+
+            <div class="max-select-dropdown p-select-dropdown" aria-hidden="true">
                 <MaxIcon icon="lucide:chevron-down" size="1" />
             </div>
         </div>
@@ -43,34 +53,41 @@
             <div class="max-select-backdrop" @click="hide">
                 <div
                     ref="overlayEl"
-                    class="p-select-overlay"
+                    :id="listboxId"
+                    class="max-select-overlay p-select-overlay"
                     role="listbox"
+                    tabindex="-1"
                     :style="{ top: position.top + 'px', left: position.left + 'px', width: position.width }"
                     @click.stop
                 >
-                    <div v-if="props.filter" class="p-select-header">
-                        <div class="p-select-filter-container">
+                    <div v-if="props.filter" class="max-select-header p-select-header">
+                        <div class="max-select-filter-container p-select-filter-container">
                             <input
                                 ref="filterInputEl"
                                 type="text"
-                                class="p-select-filter"
+                                class="max-select-filter p-select-filter"
                                 v-model="searchQuery"
                                 placeholder="Pesquisar..."
+                                role="searchbox"
+                                aria-autocomplete="list"
+                                :aria-controls="listboxId"
+                                :aria-activedescendant="activeDescendantId"
                                 autofocus
+                                @keydown="onFilterKeydown"
                                 @click.stop
                             />
                         </div>
                     </div>
 
-                    <div class="p-select-list-container">
-                        <div v-if="loading" class="p-select-empty-message">
+                    <div class="max-select-list-container p-select-list-container">
+                        <div v-if="loading" class="max-select-empty-message p-select-empty-message">
                             Carregando...
                         </div>
                         <template v-else-if="props.groupOptions !== undefined">
                             <template v-if="hasOptions">
-                                <div v-for="(group, gIdx) in (filteredOptions as any[])" :key="gIdx" class="p-select-option-group-wrapper">
+                                <div v-for="(group, gIdx) in (filteredOptions as any[])" :key="gIdx" class="max-select-option-group-wrapper p-select-option-group-wrapper">
                                     <slot name="optiongroup" :option="group">
-                                        <div class="label_div p-select-option-group">
+                                        <div class="label_div max-select-option-group p-select-option-group">
                                             <div class="labelz">
                                                 <div>{{ group.label }}</div>
                                             </div>
@@ -79,14 +96,20 @@
                                     <div
                                         v-for="(option, oIdx) in group.items"
                                         :key="oIdx"
-                                        class="p-select-option"
-                                        :class="{ 'p-select-option-selected': option[props.optionValue] === temp_value }"
+                                        :id="`${listboxId}-opt-${getOptionIndex(option)}`"
+                                        :ref="(el) => setOptionRef(el, getOptionIndex(option))"
+                                        class="max-select-option p-select-option"
+                                        :class="{
+                                            'max-select-option-selected p-select-option-selected is-selected': isOptionSelected(option),
+                                            'max-select-option-highlighted p-select-option-highlighted is-focused': highlightedIndex === getOptionIndex(option)
+                                        }"
                                         :style="{ height: itemHeight }"
                                         role="option"
-                                        :aria-selected="option[props.optionValue] === temp_value"
+                                        :aria-selected="isOptionSelected(option)"
                                         @click.stop="selectOption(option)"
+                                        @mouseenter="highlightedIndex = getOptionIndex(option)"
                                     >
-                                        <slot name="option" :option="option" :selected="option[props.optionValue] === temp_value" :index="oIdx">
+                                        <slot name="option" :option="option" :selected="isOptionSelected(option)" :index="oIdx">
                                             <div class="label_div">
                                                 <MaxIcon :icon="option['icon']" v-if="option['icon']" :size="option['iconSize'] ?? '1'" :style="{ width: '30px' }" />
                                                 <div class="labelz">
@@ -98,7 +121,7 @@
                                     </div>
                                 </div>
                             </template>
-                            <div v-else class="p-select-empty-message">
+                            <div v-else class="max-select-empty-message p-select-empty-message">
                                 {{ attrs.emptyMessage ?? 'Nenhum registro encontrado' }}
                             </div>
                         </template>
@@ -107,14 +130,20 @@
                                 <div
                                     v-for="(option, index) in (filteredOptions as any[])"
                                     :key="index"
-                                    class="p-select-option"
-                                    :class="{ 'p-select-option-selected': option[props.optionValue] === temp_value }"
+                                    :id="`${listboxId}-opt-${index}`"
+                                    :ref="(el) => setOptionRef(el, index)"
+                                    class="max-select-option p-select-option"
+                                    :class="{
+                                        'max-select-option-selected p-select-option-selected is-selected': isOptionSelected(option),
+                                        'max-select-option-highlighted p-select-option-highlighted is-focused': highlightedIndex === index
+                                    }"
                                     :style="{ height: itemHeight }"
                                     role="option"
-                                    :aria-selected="option[props.optionValue] === temp_value"
+                                    :aria-selected="isOptionSelected(option)"
                                     @click.stop="selectOption(option)"
+                                    @mouseenter="highlightedIndex = index"
                                 >
-                                    <slot name="option" :option="option" :selected="option[props.optionValue] === temp_value" :index="index">
+                                    <slot name="option" :option="option" :selected="isOptionSelected(option)" :index="index">
                                         <div :class="`category ${option.category}`" v-if="attrs.category === true">
                                             {{ option.category === 'UTILITY' ? 'A' : '' }}{{ option.category === 'MARKETING' ? 'B' : '' }}
                                         </div>
@@ -129,7 +158,7 @@
                                     </slot>
                                 </div>
                             </template>
-                            <div v-else class="p-select-empty-message">
+                            <div v-else class="max-select-empty-message p-select-empty-message">
                                 {{ attrs.emptyMessage ?? 'Nenhum registro encontrado' }}
                             </div>
                         </template>
@@ -145,7 +174,7 @@
      * Componente de seleção (dropdown).
      * Suporta opções simples, agrupadas e carregamento dinâmico via callback.
      */
-    import { ref, computed, watch, useAttrs, onBeforeUnmount, nextTick, Ref } from 'vue';
+    import { ref, computed, watch, useAttrs, onBeforeUnmount, nextTick, type Ref } from 'vue';
     import InputBase from './InputBase.vue';
     import MaxIcon from './MaxIcon.vue';
     import { SelectGroupOptions } from '../types';
@@ -197,6 +226,10 @@
             disabled?: boolean | undefined;
             filter?: boolean | undefined;
             placeholder?: string | undefined;
+            /** Permite limpar a opção selecionada exibindo um botão de limpeza */
+            clearable?: boolean | undefined;
+            /** Alias para clearable */
+            showClear?: boolean | undefined;
             /** Altura dos itens da lista (em px ou com unidade CSS). Padrão: 27 */
             listHeight?: number | string | undefined;
         }>(),
@@ -213,12 +246,32 @@
             default: undefined,
             disabled: false,
             placeholder: undefined,
+            clearable: false,
+            showClear: false,
             listHeight: 27
         }
     );
 
-    const emit = defineEmits(['update:modelValue', 'before-show']);
+    const emit = defineEmits<{
+        'update:modelValue': [value: any];
+        'change': [value: any];
+        'clear': [];
+        'before-show': [event?: Event];
+    }>();
+
     const temp_value = ref<any>(props.modelValue);
+    let skipNextUpdateModelValue = false;
+
+    const listboxId = `max-select-listbox-${Math.random().toString(36).slice(2, 9)}`;
+    const highlightedIndex = ref<number>(-1);
+    const optionRefs = ref<(HTMLElement | null)[]>([]);
+
+    const setOptionRef = (el: any, index: number) => {
+        if (el) optionRefs.value[index] = el as HTMLElement;
+
+    };
+
+    const isClearable = computed(() => Boolean(props.clearable || props.showClear));
 
     const modelPropKeys = [
         'modelValue',
@@ -231,6 +284,9 @@
         'default',
         'filter',
         'disabled',
+        'clearable',
+        'showClear',
+        'show-clear',
         'listHeight',
         'list-height'
     ];
@@ -251,8 +307,23 @@
         return str;
     });
 
-    watch(temp_value, (val) => emit('update:modelValue', val));
-    watch(() => props.modelValue, (val) => (temp_value.value = val));
+    watch(temp_value, (val) => {
+        if (skipNextUpdateModelValue) {
+            skipNextUpdateModelValue = false;
+            return;
+        }
+        emit('update:modelValue', val);
+    });
+
+    watch(
+        () => props.modelValue,
+        (val) => {
+            temp_value.value = val;
+            if (isBlank(val) && props.default !== undefined) temp_value.value = props.default;
+
+        },
+        { deep: true }
+    );
 
     const isOpen = ref(false);
     const loading = ref(false);
@@ -358,6 +429,60 @@
         return filteredOptions.value.length > 0;
     });
 
+    const flatSelectableOptions = computed<any[]>(() => {
+        const raw = filteredOptions.value;
+        if (props.groupOptions !== undefined) {
+            const flat: any[] = [];
+            for (const grp of raw as any[]) if (grp?.items && Array.isArray(grp.items)) flat.push(...grp.items);
+
+
+            return flat;
+        }
+        return (raw as any[]) || [];
+    });
+
+    const getOptionIndex = (option: any) => {
+        return flatSelectableOptions.value.indexOf(option);
+    };
+
+    const activeDescendantId = computed(() => {
+        if (!isOpen.value || highlightedIndex.value < 0) return undefined;
+        return `${listboxId}-opt-${highlightedIndex.value}`;
+    });
+
+    const isOptionSelected = (opt: any): boolean => {
+        if (!opt || temp_value.value === undefined) return false;
+        return opt[props.optionValue] === temp_value.value;
+    };
+
+    const scrollHighlightedIntoView = () => {
+        nextTick(() => {
+            const el = optionRefs.value[highlightedIndex.value];
+            if (el && typeof el.scrollIntoView === 'function') el.scrollIntoView({ block: 'nearest' });
+
+        });
+    };
+
+    const navigateOptions = (step: number) => {
+        const total = flatSelectableOptions.value.length;
+        if (total === 0) return;
+
+        let next = highlightedIndex.value + step;
+        if (next < 0) next = total - 1;
+        if (next >= total) next = 0;
+
+        highlightedIndex.value = next;
+        scrollHighlightedIntoView();
+    };
+
+    const clearSelection = () => {
+        skipNextUpdateModelValue = true;
+        temp_value.value = null;
+        emit('update:modelValue', null);
+        emit('change', null);
+        emit('clear');
+    };
+
     async function before_show(event: any) {
         emit('before-show', event);
         if (props.loadOptions) {
@@ -376,10 +501,6 @@
             await before_show(event);
             searchQuery.value = '';
             isOpen.value = true;
-            if (props.filter) {
-                await nextTick();
-                filterInputEl.value?.focus();
-            }
         } else hide();
 
     };
@@ -391,36 +512,120 @@
     const selectOption = (opt: any) => {
         const val = opt?.[props.optionValue] ?? opt;
         temp_value.value = val;
+        emit('change', val);
         hide();
     };
 
-    const onKeydown = (event: KeyboardEvent) => {
-        if (event.key === 'Escape' && isOpen.value) hide();
+    const onTriggerKeydown = (event: KeyboardEvent) => {
+        if (props.disabled) return;
 
+        switch (event.key) {
+            case 'ArrowDown':
+                event.preventDefault();
+                if (!isOpen.value) toggle();
+                else navigateOptions(1);
+
+                break;
+            case 'ArrowUp':
+                event.preventDefault();
+                if (!isOpen.value) toggle();
+                else navigateOptions(-1);
+
+                break;
+            case 'Enter':
+            case ' ':
+                event.preventDefault();
+                if (!isOpen.value) toggle();
+                else if (highlightedIndex.value >= 0 && flatSelectableOptions.value[highlightedIndex.value]) selectOption(flatSelectableOptions.value[highlightedIndex.value]);
+
+                break;
+            case 'Home':
+                if (isOpen.value && flatSelectableOptions.value.length > 0) {
+                    event.preventDefault();
+                    highlightedIndex.value = 0;
+                    scrollHighlightedIntoView();
+                }
+                break;
+            case 'End':
+                if (isOpen.value && flatSelectableOptions.value.length > 0) {
+                    event.preventDefault();
+                    highlightedIndex.value = flatSelectableOptions.value.length - 1;
+                    scrollHighlightedIntoView();
+                }
+                break;
+            case 'Escape':
+                if (isOpen.value) {
+                    event.preventDefault();
+                    hide();
+                    triggerEl.value?.focus();
+                }
+                break;
+        }
     };
 
-    if (typeof window !== 'undefined') window.addEventListener('keydown', onKeydown);
+    const onFilterKeydown = (event: KeyboardEvent) => {
+        switch (event.key) {
+            case 'ArrowDown':
+                event.preventDefault();
+                navigateOptions(1);
+                break;
+            case 'ArrowUp':
+                event.preventDefault();
+                navigateOptions(-1);
+                break;
+            case 'Enter':
+                event.preventDefault();
+                if (highlightedIndex.value >= 0 && flatSelectableOptions.value[highlightedIndex.value]) {
+                    selectOption(flatSelectableOptions.value[highlightedIndex.value]);
+                    triggerEl.value?.focus();
+                }
+                break;
+            case 'Escape':
+                event.preventDefault();
+                hide();
+                triggerEl.value?.focus();
+                break;
+        }
+    };
 
+    const onKeydown = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') {
+            hide();
+            triggerEl.value?.focus();
+        }
+    };
+
+    watch(isOpen, async (open) => {
+        if (typeof window !== 'undefined') if (open) window.addEventListener('keydown', onKeydown);
+        else window.removeEventListener('keydown', onKeydown);
+
+
+        if (open) {
+            optionRefs.value = [];
+            const items = flatSelectableOptions.value;
+            const selectedIdx = items.findIndex((opt: any) => isOptionSelected(opt));
+            highlightedIndex.value = selectedIdx >= 0 ? selectedIdx : (items.length > 0 ? 0 : -1);
+            scrollHighlightedIntoView();
+
+            if (props.filter) {
+                await nextTick();
+                filterInputEl.value?.focus();
+            }
+        } else highlightedIndex.value = -1;
+
+    });
+
+    watch(searchQuery, () => {
+        if (isOpen.value) {
+            highlightedIndex.value = flatSelectableOptions.value.length > 0 ? 0 : -1;
+            scrollHighlightedIntoView();
+        }
+    });
 
     onBeforeUnmount(() => {
         if (typeof window !== 'undefined') window.removeEventListener('keydown', onKeydown);
 
     });
-
-    watch(isOpen, async (open) => {
-        if (open && props.filter) {
-            await nextTick();
-            filterInputEl.value?.focus();
-        }
-    });
-
-    watch(
-        () => props.modelValue,
-        () => {
-            if (isBlank(props.modelValue) && props.default !== undefined) temp_value.value = props.default;
-        },
-        { deep: true }
-    );
 </script>
 
 <style lang="scss" scoped>
@@ -428,6 +633,7 @@
     &[small] {
         padding: 0 !important;
 
+        .max-select,
         .p-select {
             padding: 0 5px 0 0 !important;
 
@@ -444,6 +650,7 @@
         font-size: 0.9rem;
     }
 
+    .max-select,
     .p-select {
         width: 100%;
         height: 36px !important;
@@ -453,6 +660,7 @@
         cursor: pointer;
         outline: none;
 
+        .max-select-label,
         .p-select-label {
             border: none !important;
             padding: 0 10px !important;
@@ -484,6 +692,26 @@
             }
         }
 
+        .max-select-clear-btn,
+        .p-select-clear-btn {
+            background: transparent;
+            border: none;
+            padding: 0 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--background-500);
+            transition: color 0.15s ease, transform 0.15s ease;
+            z-index: 1;
+
+            &:hover {
+                color: var(--max-danger-500, #ef4444);
+                transform: scale(1.1);
+            }
+        }
+
+        .max-select-dropdown,
         .p-select-dropdown {
             padding-right: 8px;
             display: flex;
@@ -494,7 +722,9 @@
 
     &.in-line,
     &[input-click]:not([input-click='false']) {
+        .max-select,
         .p-select,
+        .max-select-label,
         .p-select-label {
             height: 20px !important;
             min-height: 20px !important;
@@ -503,6 +733,7 @@
 
     &[transparent] {
         :deep(.p-floatlabel),
+        .max-select,
         .p-select {
             background-color: transparent !important;
         }
@@ -515,6 +746,7 @@
     z-index: 1100;
     background: transparent;
 
+    .max-select-overlay,
     .p-select-overlay {
         position: fixed;
         z-index: 1101;
@@ -527,15 +759,18 @@
         flex-direction: column;
         overflow: hidden;
 
+        .max-select-header,
         .p-select-header {
             padding: 6px;
             border-bottom: 1px solid var(--surface-border, #e2e8f0);
             background: var(--background-0, #fff);
             box-shadow: none !important;
 
+            .max-select-filter-container,
             .p-select-filter-container {
                 width: 100%;
 
+                .max-select-filter,
                 .p-select-filter {
                     width: 100%;
                     padding: 4px 8px;
@@ -552,6 +787,7 @@
             }
         }
 
+        .max-select-list-container,
         .p-select-list-container {
             overflow-y: auto;
             max-height: 240px;
@@ -562,12 +798,14 @@
                 height: 3px;
             }
 
+            .max-select-empty-message,
             .p-select-empty-message {
                 padding: 8px 12px;
                 color: var(--background-650);
                 font-size: 0.85rem;
             }
 
+            .max-select-option-group,
             .p-select-option-group {
                 font-weight: 600;
                 padding: 6px 10px;
@@ -576,20 +814,28 @@
                 background: var(--background-50, #f8fafc);
             }
 
+            .max-select-option,
             .p-select-option {
                 display: flex;
                 align-items: center;
                 padding: 0 10px;
-                min-height: 27px;
+                min-height: 36px;
                 box-sizing: border-box;
                 cursor: pointer;
                 font-size: 0.85rem;
                 color: var(--background-700);
+                transition: background-color 0.15s ease;
 
+                &.max-select-option-highlighted,
+                &.p-select-option-highlighted,
+                &.is-focused,
                 &:hover {
                     background-color: var(--background-100, #f1f5f9) !important;
+                    color: var(--blue-700, #005F77);
 
-                    &.p-select-option-selected {
+                    &.max-select-option-selected,
+                    &.p-select-option-selected,
+                    &.is-selected {
                         background-color: var(--blue-700, #1d4ed8) !important;
                         color: var(--background-0, #fff) !important;
 
@@ -604,7 +850,9 @@
                     }
                 }
 
-                &.p-select-option-selected {
+                &.max-select-option-selected,
+                &.p-select-option-selected,
+                &.is-selected {
                     background-color: var(--blue-600, #2563eb) !important;
                     color: var(--background-0, #fff) !important;
 

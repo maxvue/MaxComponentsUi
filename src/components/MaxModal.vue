@@ -6,7 +6,13 @@
             </slot>
         </div>
         <teleport to="body">
-            <div class="background-modal" @click.stop="modal_store.hide" v-if="modal_store.show_id === id" :style="{opacity: style?.opacity}" :data-html2canvas-ignore="props.ignoreCanvas">
+            <div
+                class="background-modal"
+                @click.stop="onBackdropClick"
+                v-if="modal_store.show_id === id"
+                :style="{ opacity: style?.opacity }"
+                :data-html2canvas-ignore="props.ignoreCanvas"
+            >
                 <div
                     class="max-modal"
                     ref="el"
@@ -14,10 +20,10 @@
                     aria-modal="true"
                     :aria-labelledby="title_id"
                     :aria-label="!title_id ? (props.title ?? undefined) : undefined"
-                    :style="{top: style.top + 'px', left: style.left + 'px', padding: modal_padding}"
+                    :style="{ top: style.top + 'px', left: style.left + 'px', padding: modal_padding }"
                     @click.stop="() => {}"
                     @keydown="trap.onKeydown"
-                    :class="props.class"
+                    :class="[{ 'is-shaking': isShaking }, props.class]"
                 >
                     <slot name="header" v-if="!props.noHeader">
                         <MaxGrid class="max-modal-header" :id="title_id">
@@ -25,8 +31,8 @@
                                 <MaxTitle1 class="max-modal-title" :title="props.title ?? 'Titulo'" :subtitle="props.subTitle ?? 'Sub Titulo'" />
                             </slot>
                             <div class="max-modal-close-wrapper">
-                                <slot name="close" :close="close" :hide="modal_store.hide">
-                                    <MaxIconButton i="iconoir:xmark" size="1.3" aria-label="Fechar" @click.stop="modal_store.hide" class="close-btn" />
+                                <slot name="close" :close="handleClose" :hide="handleClose">
+                                    <MaxIconButton i="iconoir:xmark" size="1.3" aria-label="Fechar" @click.stop="handleClose" class="close-btn" />
                                 </slot>
                             </div>
                         </MaxGrid>
@@ -104,6 +110,10 @@
         blockScroll?: boolean;
         /** Permite fechar com a tecla Escape. Default true. */
         closeOnEscape?: boolean;
+        /** Permite fechar ao clicar no backdrop/máscara. Default true. */
+        dismissable?: boolean;
+        /** Hook chamado antes de fechar o modal, permitindo cancelar ou confirmar o descarte */
+        beforeClose?: (done: () => void) => void;
     }>(), {
         dark: 0.4,
         light: undefined,
@@ -111,9 +121,40 @@
         ignoreCanvas: false,
         noButton: false,
         noHeader: false,
-        blockScroll: false,
+        dismissable: true,
+        blockScroll: true,
         closeOnEscape: true
     });
+
+    const emit = defineEmits<{
+        'before-close': [done: () => void];
+    }>();
+
+    const isShaking = ref(false);
+
+    const triggerShake = () => {
+        isShaking.value = true;
+        setTimeout(() => {
+            isShaking.value = false;
+        }, 400);
+    };
+
+    const handleClose = () => {
+        if (props.beforeClose) {
+            props.beforeClose(() => close());
+            return;
+        }
+        emit('before-close', () => close());
+        close();
+    };
+
+    const onBackdropClick = () => {
+        if (!props.dismissable) {
+            triggerShake();
+            return;
+        }
+        handleClose();
+    };
 
     const is_show = computed(() => modal_store.show_id === id.value);
 
@@ -158,7 +199,8 @@
     };
 
     const onEscape = (event: KeyboardEvent) => {
-        if (event.key === 'Escape' && props.closeOnEscape) close();
+        if (event.key === 'Escape' && props.closeOnEscape) handleClose();
+
     };
 
     watch(is_show, (value) => {
@@ -414,6 +456,27 @@
                 position: relative;
             }
 
+            &.is-shaking {
+                animation: max-modal-shake 0.4s ease-in-out;
+            }
+
+        }
+    }
+
+    @keyframes max-modal-shake {
+        0%,
+        100% {
+            transform: translate(-50%, -50%) translateX(0);
+        }
+
+        20%,
+        60% {
+            transform: translate(-50%, -50%) translateX(-8px);
+        }
+
+        40%,
+        80% {
+            transform: translate(-50%, -50%) translateX(8px);
         }
     }
 </style>

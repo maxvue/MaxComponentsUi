@@ -11,7 +11,12 @@
         :caution="props.caution"
         :no-status="props.noStatus"
     >
-        <div class="max-input-otp-container" :class="{ 'is-disabled': props.disabled }">
+        <div
+            class="max-input-otp-container"
+            :class="{ 'is-disabled': props.disabled }"
+            role="group"
+            :aria-label="props.label || ('Código de verificação de ' + effectiveLength + ' dígitos')"
+        >
             <template v-for="(group, gIdx) in groupedInputs" :key="gIdx">
                 <div v-if="gIdx > 0" class="max-input-otp-separator" aria-hidden="true">
                     <slot name="separator">
@@ -35,6 +40,7 @@
                         :disabled="props.disabled"
                         :placeholder="props.placeholder || ''"
                         :value="values[item.index]"
+                        :aria-label="'Dígito ' + (item.index + 1) + ' de ' + effectiveLength"
                         :autocomplete="item.index === 0 ? 'one-time-code' : 'off'"
                         @input="onInput($event, item.index)"
                         @keydown="onKeyDown($event, item.index)"
@@ -129,6 +135,7 @@
     }>();
 
     const totalLength = computed(() => Math.max(1, props.len ?? props.length ?? 6));
+    const effectiveLength = totalLength;
 
     const effectiveGroupLength = computed(() => {
         if (props.groupLength && props.groupLength > 0) return props.groupLength;
@@ -446,6 +453,12 @@
                     border-color: var(--max-primary-500) !important;
                     box-shadow: 0 0 0 2px var(--max-primary-200) !important;
                     background-color: var(--background-0);
+                }
+
+                &:focus-visible {
+                    outline: 2px solid var(--max-primary-500, #00768E) !important;
+                    outline-offset: 1px;
+                    z-index: 1;
                 }
 
                 &.has-value {

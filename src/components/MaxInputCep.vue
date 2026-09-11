@@ -1,14 +1,14 @@
 <template>
-    <InputBase v-bind="props" class="max-input-cep input-base-cep-main-div" :value="temp_value" :done="done ?? undefined" :caution="caution" :error="error_msg ?? undefined" :icon-right="loading ? 'loading' : undefined">
-        <input type="text" class="p-inputtext p-component" v-model="temp_value" v-maska="maskValue" placeholder="00000-000" />
+    <InputBase v-bind="props" class="max-input-cep input-base-cep-main-div" :value="temp_value" :done="done ?? undefined" :caution="caution" :error="error_msg ?? undefined" :icon-right="loading ? 'line-md:loading-loop' : undefined">
+        <input type="text" inputmode="numeric" class="max-input-native" v-model="temp_value" v-maska="maskValue" placeholder="00000-000" />
     </InputBase>
 </template>
 
-/**
- * Componente de entrada para CEP (Código de Endereçamento Postal).
- * Possui máscara automática (00000-000) e validação integrada.
- */
 <script setup lang="ts">
+    /**
+     * Componente de entrada para CEP (Código de Endereçamento Postal).
+     * Possui máscara automática (00000-000) e validação integrada.
+     */
     import { formatCep, onlyNumbers, cepIsValid } from '@maxvue/max-use';
     import { computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
@@ -28,7 +28,10 @@
         { modelValue: '', loading: false, done: undefined, required: false, caution: undefined }
     );
 
-    const emit = defineEmits(['update:modelValue', 'complete']);
+    const emit = defineEmits<{
+        'update:modelValue': [value: string];
+        'complete': [value: string];
+    }>();
 
     // temp_value guarda o valor FORMATADO (ex.: '01001-000'), enquanto
     // props.modelValue e o emitido/recebido em formato cru (so digitos).

@@ -7,7 +7,7 @@
     import { useTemplateRef } from 'vue';
     import { useElementBounding } from '@maxvue/max-use';
     import { useConfirmStore } from '../stores/useConfirm.Store';
-    import type { ConfirmProps } from '../types';
+    import type { ButtonSeverity, ButtonVariant, ConfirmProps } from '../types';
 
     const confirm_store = useConfirmStore();
 
@@ -35,9 +35,9 @@
         /** Alias para o tamanho */
         scale?: string | number;
         /** Estilo de severidade do botão */
-        severity?: 'secondary' | 'success' | 'info' | 'whatsapp' | 'warning' | 'help' | 'danger' | 'contrast';
+        severity?: ButtonSeverity;
         /** Variante visual do botão */
-        variant?: 'outlined' | 'text' | 'link';
+        variant?: ButtonVariant;
         loading?: boolean;
         /** Largura específica */
         width?: string | number;
@@ -53,8 +53,8 @@
         loading: false,
         message: 'Deseja continuar?',
         messageIcon: null,
-        rejectProps: () => ({ label: 'Não', icon: undefined, action: () => {} }),
-        acceptProps: () => ({ label: 'Sim', icon: undefined, action: () => {} })
+        rejectProps: () => ({ label: 'Não', icon: undefined, severity: 'secondary', variant: 'outlined', action: () => {} }),
+        acceptProps: () => ({ label: 'Sim', icon: undefined, severity: 'danger', action: () => {} })
     });
 
 
@@ -66,6 +66,7 @@
         confirm_store.confirm({
             message: props.message,
             messageIcon: props.messageIcon,
+            severity: props.severity,
             rejectProps: props.rejectProps,
             acceptProps: props.acceptProps,
             x: x.value,

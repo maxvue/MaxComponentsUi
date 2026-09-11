@@ -581,7 +581,7 @@ describe('MaxTopMenu Mobile (estilo AgenteDeBolso)', () => {
         await wrapper.find('.mobile-user-avatar').trigger('click');
 
         expect(document.querySelector('.max-user-section-overlay')).not.toBeNull();
-        expect(document.querySelector('#overlay_tmenu')).not.toBeNull();
+        expect(document.querySelector('.max-user-section-overlay[role="menu"]')).not.toBeNull();
 
         wrapper.unmount();
     });

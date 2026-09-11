@@ -27,7 +27,7 @@
             :color="iconColor"
         />
     </button>
-    <MaxIconButton v-bind="props" v-else class="icon-button-b" />
+    <MaxIconButton v-bind="props" v-else />
 </template>
 
 <script setup lang="ts">
@@ -124,13 +124,19 @@
         // themes/tokens.scss). NÃO usar a rampa --primary-* de colors.scss:
         // aquela é uma escala de cinza e deixa todos os botões acinzentados.
         background: var(--max-primary-500);
-        color: #fff;
+        color: var(--background-0);
         border-color: var(--max-primary-500);
         transition: background 0.2s, color 0.2s, border-color 0.2s;
 
         &:hover {
             background: var(--max-primary-600);
             border-color: var(--max-primary-600);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--max-focus-ring-color, #00768e);
+            outline-offset: 2px;
+            box-shadow: 0 0 0 2px var(--max-focus-ring-offset-color, #fff);
         }
 
         &:disabled {
@@ -142,78 +148,141 @@
             text-transform: uppercase;
         }
 
-        &.max-button-secondary, &.p-button-secondary {
+        &.max-button-secondary,
+        &.p-button-secondary {
             background: var(--background-500);
             border-color: var(--background-500);
-            color: #fff;
-            &:hover { background: var(--background-600); border-color: var(--background-600); }
+            color: var(--background-0);
+
+            &:hover {
+                background: var(--background-600);
+                border-color: var(--background-600);
+            }
         }
 
-        &.max-button-success, &.p-button-success {
-            background: var(--success-500);
-            border-color: var(--success-500);
-            color: #fff;
-            &:hover { background: var(--success-600); border-color: var(--success-600); }
+        &.max-button-success,
+        &.p-button-success {
+            background: var(--max-success-500, var(--success-500));
+            border-color: var(--max-success-500, var(--success-500));
+            color: var(--background-0);
+
+            &:hover {
+                background: var(--max-success-600, var(--success-600));
+                border-color: var(--max-success-600, var(--success-600));
+            }
         }
 
-        &.max-button-info, &.p-button-info {
-            background: var(--info-500);
-            border-color: var(--info-500);
-            color: #fff;
-            &:hover { background: var(--info-600); border-color: var(--info-600); }
+        &.max-button-info,
+        &.p-button-info {
+            background: var(--max-info-500, var(--info-500));
+            border-color: var(--max-info-500, var(--info-500));
+            color: var(--background-0);
+
+            &:hover {
+                background: var(--max-info-600, var(--info-600));
+                border-color: var(--max-info-600, var(--info-600));
+            }
         }
 
-        &.max-button-warning, &.p-button-warning, &.p-button-warn {
-            background: var(--warn-500);
-            border-color: var(--warn-500);
-            color: #fff;
-            &:hover { background: var(--warn-600); border-color: var(--warn-600); }
+        &.max-button-warning,
+        &.p-button-warning,
+        &.p-button-warn {
+            background: var(--max-warning-500, var(--warn-500));
+            border-color: var(--max-warning-500, var(--warn-500));
+            color: var(--background-0);
+
+            &:hover {
+                background: var(--max-warning-600, var(--warn-600));
+                border-color: var(--max-warning-600, var(--warn-600));
+            }
         }
 
-        &.max-button-danger, &.p-button-danger {
-            background: var(--danger-500);
-            border-color: var(--danger-500);
-            color: #fff;
-            &:hover { background: var(--danger-600); border-color: var(--danger-600); }
+        &.max-button-danger,
+        &.p-button-danger {
+            background: var(--max-danger-500, var(--danger-500));
+            border-color: var(--max-danger-500, var(--danger-500));
+            color: var(--background-0);
+
+            &:hover {
+                background: var(--max-danger-600, var(--danger-600));
+                border-color: var(--max-danger-600, var(--danger-600));
+            }
         }
 
         &.max-button-whatsapp {
-            background: #25d366;
-            border-color: #25d366;
-            color: #fff;
-            &:hover { background: #1da851; border-color: #1da851; }
+            background: var(--max-whatsapp-500, #25d366);
+            border-color: var(--max-whatsapp-500, #25d366);
+            color: var(--background-0);
+
+            &:hover {
+                background: var(--max-whatsapp-600, #1da851);
+                border-color: var(--max-whatsapp-600, #1da851);
+            }
         }
 
-        &.max-button-help, &.p-button-help {
+        &.max-button-help,
+        &.p-button-help {
             background: var(--violet-500);
             border-color: var(--violet-500);
-            color: #fff;
-            &:hover { background: var(--violet-600); border-color: var(--violet-600); }
+            color: var(--background-0);
+
+            &:hover {
+                background: var(--violet-600);
+                border-color: var(--violet-600);
+            }
         }
 
         // O tema não define --background-950; a rampa termina em 900.
-        &.max-button-contrast, &.p-button-contrast {
-            background: var(--background-900);
-            border-color: var(--background-900);
-            color: #fff;
-            &:hover { background: var(--background-800); border-color: var(--background-800); }
+        &.max-button-contrast,
+        &.p-button-contrast {
+            background: var(--max-button-contrast-border-color, var(--background-900));
+            border-color: var(--max-button-contrast-border-color, var(--background-900));
+            color: var(--background-0);
+
+            &:hover {
+                background: var(--background-750);
+                border-color: var(--background-750);
+            }
         }
 
-        &.max-button-outlined, &.p-button-outlined {
+        :global(.dark) &.max-button-contrast,
+        :global(.dark) &.p-button-contrast,
+        :global([data-theme='dark']) &.max-button-contrast,
+        :global([data-theme='dark']) &.p-button-contrast {
+            background: var(--max-button-contrast-border-color, #fff);
+            border-color: var(--max-button-contrast-border-color, #fff);
+            color: var(--background-900, #09090b);
+
+            &:hover {
+                background: var(--background-200, #e4e4e7);
+                border-color: var(--background-200, #e4e4e7);
+            }
+        }
+
+        &.max-button-outlined,
+        &.p-button-outlined {
             background: transparent;
             border-color: currentcolor;
             color: var(--max-primary-500);
-            &:hover { background: color-mix(in srgb, currentcolor 10%, transparent); }
+
+            &:hover {
+                background: color-mix(in srgb, currentcolor 10%, transparent);
+            }
         }
 
-        &.max-button-text, &.p-button-text {
+        &.max-button-text,
+        &.p-button-text {
             background: transparent;
             border-color: transparent;
             color: var(--max-primary-500);
-            &:hover { background: color-mix(in srgb, currentcolor 10%, transparent); }
+
+            &:hover {
+                background: color-mix(in srgb, currentcolor 10%, transparent);
+            }
         }
 
-        &.max-button-link, &.p-button-link {
+        &.max-button-link,
+        &.p-button-link {
             background: transparent;
             border-color: transparent;
             color: var(--max-primary-500);
@@ -228,38 +297,48 @@
             color: var(--max-primary-500) !important;
 
             &:hover,
-            &:active,
-            &:focus {
+            &:active {
                 background: transparent !important;
             }
 
-            &.p-button-secondary, &.max-button-secondary {
+            &:focus-visible {
+                outline: 2px solid var(--max-focus-ring-color, #00768e);
+                outline-offset: 2px;
+            }
+
+            &.p-button-secondary,
+            &.max-button-secondary {
                 color: var(--background-700) !important;
             }
 
-            &.p-button-success, &.max-button-success {
-                color: var(--success-500) !important;
+            &.p-button-success,
+            &.max-button-success {
+                color: var(--max-success-500, var(--success-500)) !important;
             }
 
-            &.p-button-info, &.max-button-info {
-                color: var(--info-500) !important;
+            &.p-button-info,
+            &.max-button-info {
+                color: var(--max-info-500, var(--info-500)) !important;
             }
 
             &.p-button-warn,
             &.p-button-warning,
             &.max-button-warning {
-                color: var(--warn-500) !important;
+                color: var(--max-warning-500, var(--warn-500)) !important;
             }
 
-            &.p-button-help, &.max-button-help {
+            &.p-button-help,
+            &.max-button-help {
                 color: var(--violet-500) !important;
             }
 
-            &.p-button-danger, &.max-button-danger {
-                color: var(--danger-500) !important;
+            &.p-button-danger,
+            &.max-button-danger {
+                color: var(--max-danger-500, var(--danger-500)) !important;
             }
 
-            &.p-button-contrast, &.max-button-contrast {
+            &.p-button-contrast,
+            &.max-button-contrast {
                 color: var(--background-775) !important;
             }
 
@@ -297,11 +376,5 @@
                 }
             }
         }
-    }
-
-    .icon-button-b {
-        /* min-width: 15px; */
-
-        /* min-height: 15px; */
     }
 </style>

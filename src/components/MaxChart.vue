@@ -87,10 +87,28 @@
         emit('loaded', chart.value);
     };
 
-    // `deep` porque mutar um dataset no lugar (padrão comum) não troca a referência.
-    watch(() => props.data, () => void initChart(), { deep: true });
+    const updateChartData = () => {
+        if (!props.data) {
+            destroyChart();
+            return;
+        }
+
+        if (!chart.value) {
+            void initChart();
+            return;
+        }
+
+        // Atualização eficiente in-place compatível com Chart.js
+        chart.value.data = props.data;
+        if (props.options) chart.value.options = { ...baseOptions(), ...props.options };
+
+        chart.value.update();
+    };
+
+    // Observadores reativos otimizados
+    watch(() => props.data, updateChartData, { deep: true });
+    watch(() => props.options, updateChartData, { deep: true });
     watch(() => props.type, () => void initChart());
-    watch(() => props.options, () => void initChart(), { deep: true });
 
     onMounted(() => {
         is_mounted.value = true;

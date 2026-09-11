@@ -6,7 +6,7 @@
             `layout-${currentLayout}`
         ]"
     >
-        <template v-for="(item, index) in props.items" :key="index">
+        <template v-for="(item, index) in safeItems" :key="index">
             <!-- Modo Desktop: Cards Completos -->
             <div
                 v-if="currentLayout === 'cards'"
@@ -116,6 +116,9 @@
     const breakpoints = useBreakpoints({ sm: 640, md: 768, lg: 1024, xl: 1280 });
     const isMobile = breakpoints.smaller('md');
 
+    /** Lista segura de itens garantindo fallback para array vazio se a prop for nula/indefinida */
+    const safeItems = computed<MaxStatsItem[]>(() => props.items ?? []);
+
     /** Define se a quebra de linha está habilitada (suporta camelCase e kebab-case) */
     const canWrap = computed(() => {
         if (props.allowLineBreak) return true;
@@ -132,7 +135,7 @@
 
     /** Retorna a paleta de cores calculada por luminância WCAG */
     const getItemColors = (item: MaxStatsItem): StatItemColors => {
-        return resolveStatItemColors(item.color);
+        return resolveStatItemColors(item?.color);
     };
 
     /** Retorna as propriedades CSS personalizadas injetadas no estilo do elemento */
@@ -148,7 +151,8 @@
 
     /** Tooltip de acessibilidade exibido no modo pílula */
     const getPillTooltip = (item: MaxStatsItem): string => {
-        return item.sublabel ? `${item.label} — ${item.sublabel}` : item.label;
+        if (!item) return '';
+        return item.sublabel ? `${item.label} — ${item.sublabel}` : (item.label ?? '');
     };
 </script>
 

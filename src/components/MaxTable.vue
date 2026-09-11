@@ -11,14 +11,35 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <slot />
-                            <tr v-if="slots.buttons" class="p-column max-table-column-buttons" :style="`width: ${width}px; max-width: ${width}px;`">
-                                <td class="p-datatable-cell">
-                                    <div class="max-table-buttons" ref="el">
-                                        <slot name="buttons" v-bind="{ data: {}, index: 0 }" />
-                                    </div>
+                            <tr v-if="props.loading" class="max-table-row-state max-table-loading-row">
+                                <td class="p-datatable-cell state-cell">
+                                    <slot name="loading">
+                                        <div class="max-table-feedback-box">
+                                            <div class="max-table-spinner" role="status" aria-label="Carregando"></div>
+                                            <span>{{ props.loadingMessage }}</span>
+                                        </div>
+                                    </slot>
                                 </td>
                             </tr>
+                            <tr v-else-if="props.empty" class="max-table-row-state max-table-empty-row">
+                                <td class="p-datatable-cell state-cell">
+                                    <slot name="empty">
+                                        <div class="max-table-feedback-box">
+                                            <span>{{ props.emptyMessage }}</span>
+                                        </div>
+                                    </slot>
+                                </td>
+                            </tr>
+                            <template v-else>
+                                <slot />
+                                <tr v-if="slots.buttons" class="p-column max-table-column-buttons" :style="`width: ${width}px; max-width: ${width}px;`">
+                                    <td class="p-datatable-cell">
+                                        <div class="max-table-buttons" ref="el">
+                                            <slot name="buttons" v-bind="{ data: {}, index: 0 }" />
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
                         </tbody>
                         <tfoot v-if="slots.footer">
                             <tr>
@@ -74,7 +95,20 @@
                         </thead>
 
                         <tbody>
-                            <template v-if="displayData.length > 0">
+                            <!-- 1. Loading (prioridade absoluta) -->
+                            <tr v-if="props.loading" class="max-table-row-state max-table-loading-row">
+                                <td :colspan="resolvedColumns.length + (slots.buttons ? 1 : 0)" class="p-datatable-cell state-cell">
+                                    <slot name="loading">
+                                        <div class="max-table-feedback-box">
+                                            <div class="max-table-spinner" role="status" aria-label="Carregando"></div>
+                                            <span>{{ props.loadingMessage }}</span>
+                                        </div>
+                                    </slot>
+                                </td>
+                            </tr>
+
+                            <!-- 2. Linhas de dados se houver registros e não for empty explícito -->
+                            <template v-else-if="!props.empty && displayData.length > 0">
                                 <tr
                                     v-for="(row, index) in displayData"
                                     :key="getRowKey(row, index)"
@@ -112,10 +146,11 @@
                                 </tr>
                             </template>
 
-                            <tr v-else class="max-table-empty-row">
-                                <td :colspan="resolvedColumns.length + (slots.buttons ? 1 : 0)" class="max-table-empty-cell p-datatable-cell">
+                            <!-- 3. Empty state quando empty===true ou displayData estiver vazio -->
+                            <tr v-else class="max-table-row-state max-table-empty-row">
+                                <td :colspan="resolvedColumns.length + (slots.buttons ? 1 : 0)" class="max-table-empty-cell p-datatable-cell state-cell">
                                     <slot name="empty">
-                                        <div class="empty-state-box">
+                                        <div class="empty-state-box max-table-feedback-box">
                                             <span>{{ props.emptyMessage || 'Nenhum registro encontrado' }}</span>
                                         </div>
                                     </slot>
@@ -220,8 +255,10 @@
         selection?: any;
         dataKey?: string;
         loading?: boolean;
+        empty?: boolean;
         responsiveLayout?: 'scroll' | 'stack';
         emptyMessage?: string;
+        loadingMessage?: string;
         headerButton?: string;
         id?: string;
         sortField?: string;
@@ -259,8 +296,11 @@
         totalRecords: 0,
         lazy: false,
         dataKey: 'id',
+        loading: false,
+        empty: false,
         responsiveLayout: 'scroll',
-        emptyMessage: 'Nenhum registro encontrado'
+        emptyMessage: 'Nenhum registro encontrado',
+        loadingMessage: 'Carregando dados...'
     });
 
     const emit = defineEmits<{
@@ -674,6 +714,35 @@
                             background-color: var(--primary-200) !important;
                         }
 
+                        &.max-table-row-state {
+                            .state-cell {
+                                width: 100%;
+                                padding: 24px 0 !important;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+
+                                .max-table-feedback-box {
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    gap: 12px;
+                                    color: var(--background-650);
+                                    font-size: 0.95rem;
+                                    font-weight: 500;
+
+                                    .max-table-spinner {
+                                        width: 20px;
+                                        height: 20px;
+                                        border: 2px solid var(--background-300);
+                                        border-top-color: var(--max-primary-500);
+                                        border-radius: 50%;
+                                        animation: max-table-spin 0.8s linear infinite;
+                                    }
+                                }
+                            }
+                        }
+
                         &.max-table-empty-row {
                             .max-table-empty-cell {
                                 width: 100%;
@@ -766,6 +835,16 @@
                 }
             }
         }
+    }
+}
+
+@keyframes max-table-spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
     }
 }
 </style>

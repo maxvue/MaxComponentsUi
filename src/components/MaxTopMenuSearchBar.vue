@@ -190,28 +190,7 @@
                     width: 10px;
                     height: 10px;
                 }
-
-                .p-checkbox-checked {
-                    .p-checkbox-box {
-                        border: 1px solid rgb(255 255 255 / 20%) !important;
-                        background-color: rgb(0 0 0 / 20%) !important;
-                    }
-                }
             }
-        }
-
-        :deep(.p-checkbox-box) {
-            border: 1px solid rgb(255 255 255 / 10%) !important;
-            background-color: rgb(255 255 255 / 10%) !important;
-            min-width: 16px !important;
-            width: 16px !important;
-            min-height: 16px !important;
-            height: 16px !important;
-            transform: translateX(-45px) !important;
-        }
-
-        :deep(.p-checkbox-input) {
-            padding: 0 !important;
         }
     }
 
@@ -225,6 +204,16 @@
         inset: 0;
         z-index: 940;
         background-color: rgb(0 0 0 / 50%);
+
+        &.search-fade-enter-active,
+        &.search-fade-leave-active {
+            transition: opacity 0.2s ease;
+        }
+
+        &.search-fade-enter-from,
+        &.search-fade-leave-to {
+            opacity: 0;
+        }
     }
 
     .mobile-search-panel {
@@ -237,6 +226,17 @@
         padding: 0.6rem 0.75rem;
         background-color: var(--layout-shell-bg, #003048);
         box-shadow: 0 8px 24px rgb(0 0 0 / 35%);
+
+        &.search-slide-down-enter-active,
+        &.search-slide-down-leave-active {
+            transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+        }
+
+        &.search-slide-down-enter-from,
+        &.search-slide-down-leave-to {
+            transform: translateY(-12px);
+            opacity: 0;
+        }
 
         .mobile-search-content {
             display: flex;
@@ -254,26 +254,5 @@
                 flex-shrink: 0;
             }
         }
-    }
-
-    .search-fade-enter-active,
-    .search-fade-leave-active {
-        transition: opacity 0.2s ease;
-    }
-
-    .search-fade-enter-from,
-    .search-fade-leave-to {
-        opacity: 0;
-    }
-
-    .search-slide-down-enter-active,
-    .search-slide-down-leave-active {
-        transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
-    }
-
-    .search-slide-down-enter-from,
-    .search-slide-down-leave-to {
-        transform: translateY(-12px);
-        opacity: 0;
     }
 </style>

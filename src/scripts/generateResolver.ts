@@ -74,8 +74,7 @@ componentNames.forEach((name: string) => {
 
 const manifest = {
     components: componentNames,
-    aliases: aliases,
-    primeExports: []
+    aliases: aliases
 };
 
-fs.writeFileSync(outputFile, JSON.stringify(manifest, null, 2));
+fs.writeFileSync(outputFile, JSON.stringify(manifest, null, 2) + '\n');

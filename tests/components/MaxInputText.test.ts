@@ -21,6 +21,14 @@ describe('MaxInputText', () => {
         expect(wrapper.exists()).toBe(true);
     });
 
+    it('utiliza classe max-input-native e não inclui classes legadas do PrimeVue', () => {
+        const wrapper = mountInputText();
+        const input = wrapper.find('input');
+        expect(input.classes()).toContain('max-input-native');
+        expect(input.classes()).not.toContain('p-inputtext');
+        expect(input.classes()).not.toContain('p-component');
+    });
+
     it('emite update:modelValue ao alterar o valor do input', async () => {
         const wrapper = mountInputText();
         const input = wrapper.find('input');

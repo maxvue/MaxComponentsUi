@@ -308,6 +308,9 @@
         return false;
     };
 
+    let isLocalChange = false;
+    let lastEmittedValue = props.modelValue ?? '';
+
     const editor = useEditor({
         content: '',
         editable: !props.disabled,
@@ -345,7 +348,7 @@
                 if (target.tagName === 'IMG') {
                     const src = target.getAttribute('src');
                     const alt = target.getAttribute('alt') || '';
-                    if (src) {
+                    if (src && isSafeUrl(src)) {
                         openImage(src, alt);
                         event.preventDefault();
                         return true;
@@ -370,20 +373,33 @@
             handleDrop: (view, event, slice, moved) => handleDrop(view, event, slice, moved)
         },
         onUpdate: ({ editor: e }) => {
-            emit('update:modelValue', (e.storage as Record<string, any>).markdown.getMarkdown());
+            isLocalChange = true;
+            const md = (e.storage as Record<string, any>).markdown.getMarkdown();
+            lastEmittedValue = md;
+            emit('update:modelValue', md);
+            nextTick(() => {
+                isLocalChange = false;
+            });
         }
     });
 
     onMounted(() => {
-        if (props.modelValue) editor.value?.commands.setContent(props.modelValue);
+        if (props.modelValue) {
+            lastEmittedValue = props.modelValue;
+            editor.value?.commands.setContent(props.modelValue);
+        }
     });
 
     watch(
         () => props.modelValue,
         (val) => {
-            if (!editor.value) return;
+            if (isLocalChange || val === lastEmittedValue || !editor.value) return;
+
             const current = (editor.value.storage as Record<string, any>).markdown.getMarkdown();
-            if (val !== current) editor.value.commands.setContent(val ?? '');
+            if (val !== current) {
+                lastEmittedValue = val ?? '';
+                editor.value.commands.setContent(val ?? '');
+            }
         }
     );
 

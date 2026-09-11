@@ -14,14 +14,33 @@
                     @keydown="trap.onKeydown"
                 >
                     <div class="popover-confirm-content">
-                        <MaxIcon class="popover-confirm-icon" :i="confirm_store.messageIcon ?? 'mingcute:question-fill'" size="1.2" />
-                        <div :id="msg_id">
-                            {{confirm_store.message}}
+                        <MaxIcon
+                            class="popover-confirm-icon"
+                            :class="`severity-${confirm_store.severity ?? 'danger'}`"
+                            :i="confirm_store.messageIcon ?? (confirm_store.severity === 'warning' ? 'solar:danger-triangle-bold' : confirm_store.severity === 'info' ? 'solar:info-circle-bold' : confirm_store.severity === 'success' ? 'solar:check-circle-bold' : 'mingcute:question-fill')"
+                            size="1.2"
+                        />
+                        <div :id="msg_id" class="popover-confirm-text">
+                            {{ confirm_store.message }}
                         </div>
                     </div>
                     <MaxGrid class="popover-confirm-actions">
-                        <MaxButton class="popover-confirm-btn" :action="reject" :label="confirm_store.rejectProps.label" :icon="confirm_store.rejectProps.icon" />
-                        <MaxButton class="popover-confirm-btn" :action="accept" :label="confirm_store.acceptProps.label" :icon="confirm_store.acceptProps.icon" />
+                        <MaxButton
+                            class="popover-confirm-btn"
+                            :action="reject"
+                            :label="confirm_store.rejectProps.label"
+                            :icon="confirm_store.rejectProps.icon"
+                            :severity="confirm_store.rejectProps.severity ?? 'secondary'"
+                            :variant="confirm_store.rejectProps.variant ?? 'outlined'"
+                        />
+                        <MaxButton
+                            class="popover-confirm-btn"
+                            :action="accept"
+                            :label="confirm_store.acceptProps.label"
+                            :icon="confirm_store.acceptProps.icon"
+                            :severity="confirm_store.acceptProps.severity ?? (confirm_store.severity ?? 'danger')"
+                            :variant="confirm_store.acceptProps.variant"
+                        />
                     </MaxGrid>
                 </div>
             </div>
@@ -155,14 +174,35 @@
             display: grid;
             grid-template-columns: auto 1fr;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
             width: 100%;
-            padding: 1rem;
-            text-align: center;
+            padding: 0.75rem 1rem;
+            text-align: left;
             color: var(--background-750);
 
             .popover-confirm-icon {
-                color: var(--red-600);
+                &.severity-danger {
+                    color: var(--red-600);
+                }
+
+                &.severity-warning {
+                    color: var(--yellow-600);
+                }
+
+                &.severity-info,
+                &.severity-secondary {
+                    color: var(--blue-600);
+                }
+
+                &.severity-success {
+                    color: var(--green-600);
+                }
+            }
+
+            .popover-confirm-text {
+                font-size: 0.9rem;
+                font-weight: 500;
+                line-height: 1.3;
             }
         }
 

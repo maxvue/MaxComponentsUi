@@ -2,7 +2,7 @@
     <InputBase v-bind="props" class="max-input-phone-mail input-base-phone-mail-main-div" :label="attrs.label ?? name_method" :icon="iconLeft" :done="done ?? undefined" :caution="caution" :error="error_msg">
         <input
             type="text"
-            class="p-inputtext p-component"
+            class="max-input-native"
             v-bind="attrs"
             v-model="temp_value"
             v-maska:unmaskedValue.unmasked="maskValue"
@@ -42,7 +42,7 @@
         { modelValue: '', done: undefined, required: false, caution: undefined }
     );
 
-    const emit = defineEmits(['update:modelValue']);
+    const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
 
     const method = ref();
     const name_method = ref('Email ou Whatsapp');

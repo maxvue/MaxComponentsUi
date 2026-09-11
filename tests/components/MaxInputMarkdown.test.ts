@@ -392,4 +392,34 @@ describe('MaxInputMarkdown', () => {
             expect(wrapper.emitted('paste-file')?.[0]).toEqual([file]);
         });
     });
+
+    it('não reexecuta setContent no watcher quando o update origina-se do próprio editor', async () => {
+        const wrapper = mountMarkdown({ modelValue: '# Inicial' });
+        await wrapper.vm.$nextTick();
+
+        mockEditor.commands.setContent.mockClear();
+
+        // Simula evento de digitação local do Tiptap emitindo o novo valor
+        mockEditor.storage.markdown.getMarkdown.mockReturnValue('# Alterado pelo usuário');
+        latestEditorOptions.onUpdate({ editor: mockEditor });
+        await wrapper.setProps({ modelValue: '# Alterado pelo usuário' });
+        await wrapper.vm.$nextTick();
+
+        // O setContent NÃO deve ser invocado novamente
+        expect(mockEditor.commands.setContent).not.toHaveBeenCalled();
+    });
+
+    it('executa setContent no watcher quando a alteração provém externamente', async () => {
+        const wrapper = mountMarkdown({ modelValue: '# Inicial' });
+        await wrapper.vm.$nextTick();
+
+        mockEditor.commands.setContent.mockClear();
+        mockEditor.storage.markdown.getMarkdown.mockReturnValue('# Inicial');
+
+        // Alteração externa (sem onUpdate prévio)
+        await wrapper.setProps({ modelValue: '# Novo Conteúdo Externo' });
+        await wrapper.vm.$nextTick();
+
+        expect(mockEditor.commands.setContent).toHaveBeenCalledWith('# Novo Conteúdo Externo');
+    });
 });

@@ -3,7 +3,7 @@
         <!-- Sem `pr-8` aqui: o MaxIcon replica os attrs no div interno (v-bind="attrs"), e o
              padding duplicado esmagava o svg. O espaçamento fica no column-gap do wrapper. -->
         <MaxIcon :i="resolvedIcon" v-if="resolvedIcon" :size="resolvedIconSize" class="title-icon" />
-        <div>
+        <div class="title-text-group">
             <div v-if="resolvedTitle" class="t1-main-text">{{ resolvedTitle }}</div>
             <div v-if="resolvedSubtitle" class="t2-main-text" v-html="resolvedSubtitle"></div>
         </div>
@@ -46,28 +46,33 @@
         width: 100%;
         color: var(--background-700);
 
+        &.center {
+            display: grid;
+            place-items: center;
+        }
+
         .title-icon {
             margin-bottom: 0.5rem;
         }
 
-        .t1-main-text {
-            font-weight: 500;
-            font-size: 1.125rem;
-            text-transform: uppercase;
-            padding: 0 !important;
-            color: var(--background-775);
-        }
+        .title-text-group {
+            display: flex;
+            flex-direction: column;
 
-        .t2-main-text {
-            font-size: 0.875rem;
-            font-weight: 400;
-            padding: 0 !important;
-            color: var(--background-750) !important;
-        }
+            .t1-main-text {
+                font-weight: 500;
+                font-size: 1.125rem;
+                text-transform: uppercase;
+                padding: 0 !important;
+                color: var(--background-775);
+            }
 
-        &.center {
-            display: grid;
-            place-items: center;
+            .t2-main-text {
+                font-size: 0.875rem;
+                font-weight: 400;
+                padding: 0 !important;
+                color: var(--background-750) !important;
+            }
         }
     }
 </style>

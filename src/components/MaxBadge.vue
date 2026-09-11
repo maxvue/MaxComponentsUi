@@ -40,8 +40,9 @@
 </template>
 
 <script setup lang="ts">
-    import { computed, ref, onMounted, onBeforeUnmount, useAttrs } from 'vue';
+    import { computed, useAttrs } from 'vue';
     import MaxIcon from './MaxIcon.vue';
+    import { useHtmlDark } from '../helpers/useHtmlDark';
     import {
         resolveBadgeColors,
         BADGE_STATUS_COLORS
@@ -94,33 +95,7 @@
     }
 
     const attrs = useAttrs();
-    const isHtmlDark = ref(false);
-    let htmlObserver: MutationObserver | null = null;
-
-    const checkHtmlDark = () => {
-        if (typeof document !== 'undefined') isHtmlDark.value = document.documentElement.classList.contains('dark');
-
-    };
-
-    onMounted(() => {
-        checkHtmlDark();
-        if (typeof MutationObserver !== 'undefined' && typeof document !== 'undefined') {
-            htmlObserver = new MutationObserver(() => {
-                checkHtmlDark();
-            });
-            htmlObserver.observe(document.documentElement, {
-                attributes: true,
-                attributeFilter: ['class']
-            });
-        }
-    });
-
-    onBeforeUnmount(() => {
-        if (htmlObserver) {
-            htmlObserver.disconnect();
-            htmlObserver = null;
-        }
-    });
+    const isHtmlDark = useHtmlDark();
 
     const isDark = computed<boolean>(() => {
         if (props.dark !== undefined) return Boolean(props.dark);

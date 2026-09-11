@@ -2,7 +2,7 @@
     <InputBase class="max-input-coordinate-decimal-lat" v-bind="props" :error="error" :caution="caution" :done="isDone">
         <input
             type="text"
-            class="p-inputtext p-component"
+            class="max-input-native"
             v-model="temp_value"
             v-maska="maskValue"
             @blur="checkDone()"
@@ -39,7 +39,10 @@
         { modelValue: '', done: undefined, required: false, caution: undefined }
     );
 
-    const emit = defineEmits(['update:modelValue', 'complete']);
+    const emit = defineEmits<{
+        'update:modelValue': [value: number | string];
+        'complete': [value: number | string];
+    }>();
 
     const temp_value: Ref = ref(toNumber(props.modelValue) !== 0 ? toNumber(props.modelValue) : '');
 

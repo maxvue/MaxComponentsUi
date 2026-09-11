@@ -150,4 +150,22 @@ describe('MaxStats Component', () => {
             expect(style).toContain('--stat-accent');
         });
     });
+
+    describe('Resiliência a Props Nulas/Indefinidas', () => {
+        it('não quebra se items for undefined', () => {
+            expect(() => {
+                const wrapper = mountStats({ items: undefined });
+                expect(wrapper.find('.max-stats-container').exists()).toBe(true);
+                expect(wrapper.findAll('.max-stat-item')).toHaveLength(0);
+            }).not.toThrow();
+        });
+
+        it('não quebra se items for null', () => {
+            expect(() => {
+                const wrapper = mountStats({ items: null as any });
+                expect(wrapper.find('.max-stats-container').exists()).toBe(true);
+                expect(wrapper.findAll('.max-stat-item')).toHaveLength(0);
+            }).not.toThrow();
+        });
+    });
 });

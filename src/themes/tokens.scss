@@ -17,22 +17,32 @@
     --max-orange-500: #f97316;
     --max-red-600: #dc2626;
 
+    // Tokens semânticos de severidade
+    --max-success-500: #10B981;
+    --max-success-600: #059669;
+    --max-danger-500: #EF4444;
+    --max-danger-600: #dc2626;
+    --max-warning-500: #F59E0B;
+    --max-warning-600: #d97706;
+    --max-info-500: #0EA5E9;
+    --max-info-600: #0284c7;
+    --max-whatsapp-500: #25d366;
+    --max-whatsapp-600: #1da851;
+
+    // Tokens canônicos de foco acessível (WCAG 2.4.7 / WCAG 2.4.11)
+    --max-focus-ring-color: var(--max-primary-500, #00768E);
+    --max-focus-ring-offset-color: var(--background-0, #ffffff);
+    --max-focus-ring: 0 0 0 2px var(--background-0, #ffffff), 0 0 0 4px var(--max-primary-500, #00768E);
+    --max-focus-outline: 2px solid var(--max-primary-500, #00768E);
+
     // FloatLabel — literais do Aura
     --max-floatlabel-active-font-weight: 400;
     --max-floatlabel-on-border-radius: 2px;
 
     // Esquema claro — surface deriva da rampa slate
     --max-inputtext-border-color: #cbd5e1;
-
-    // NOTA: sobrescrito por src/themes/params.scss:158-159 com !important (valor `red`),
-    // já que all.scss faz @use de params antes de tokens. O valor abaixo é letra morta
-    // hoje (claro e escuro) — decidir numa fase futura se o override some ou se este
-    // token passa a refletir o valor real usado em produção.
     --max-inputtext-disabled-background: #e2e8f0;
     --max-inputtext-focus-border-color: #00768E;
-
-    // NOTA: sobrescrito por src/themes/params.scss:158-159 com !important (valor `red`),
-    // pelo mesmo motivo do --max-inputtext-disabled-background acima.
     --max-form-field-disabled-background: #e2e8f0;
     --max-floatlabel-on-active-background: #ffffff;
     --max-surface-400: #94a3b8;
@@ -48,15 +58,14 @@
 
 // Esquema escuro — surface deriva da rampa zinc (o Aura troca de rampa no dark)
 .dark {
+    // Tokens canônicos de foco acessível - modo escuro
+    --max-focus-ring-color: var(--max-primary-400, #178DA5);
+    --max-focus-ring-offset-color: var(--background-900, #18181b);
+    --max-focus-ring: 0 0 0 2px var(--max-focus-ring-offset-color), 0 0 0 4px var(--max-focus-ring-color);
+    --max-focus-outline: 2px solid var(--max-focus-ring-color);
     --max-inputtext-border-color: #52525b;
-
-    // NOTA: também sobrescrito por src/themes/params.scss:158-159 (!important, valor
-    // `red`, declarado em :root sem escopo de .dark) — esta variante nunca chega a
-    // aplicar. Ver nota equivalente na declaração de :root acima.
     --max-inputtext-disabled-background: #3f3f46;
     --max-inputtext-focus-border-color: #178DA5;
-
-    // NOTA: mesmo caso do --max-inputtext-disabled-background acima.
     --max-form-field-disabled-background: #3f3f46;
     --max-floatlabel-on-active-background: #09090b;
     --max-surface-400: #a1a1aa;

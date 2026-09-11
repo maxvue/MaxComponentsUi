@@ -125,6 +125,7 @@ describe('MaxInputCpfCnpj', () => {
     it('error returns default cnpj invalid msg', async () => {
         const wrapper = mountCpfCnpj();
         (wrapper.vm as any).temp_value = '123456789012'; // invalid
+        await wrapper.find('input').trigger('blur');
         await wrapper.vm.$nextTick();
         const inputBase = wrapper.findComponent(InputBase);
         expect(inputBase.props('error')).toBe('CNPJ inválido');
@@ -199,10 +200,36 @@ describe('MaxInputCpfCnpj', () => {
         expect(wrapper.find('input').element.value).toBe('529.982.247-25');
     });
 
-    it('preserva as classes visuais p-inputtext/p-component no <input> nativo', () => {
+    it('utiliza a classe semântica max-input-native e max-cpf-cnpj-input no <input> nativo', () => {
         const input = mountCpfCnpj().find('input');
-        expect(input.classes()).toContain('p-inputtext');
-        expect(input.classes()).toContain('p-component');
+        expect(input.classes()).toContain('max-input-native');
+        expect(input.classes()).toContain('max-cpf-cnpj-input');
+        expect(input.classes()).not.toContain('p-inputtext');
+        expect(input.classes()).not.toContain('p-component');
+    });
+
+    it('não exibe caution para documento incompleto durante a digitação antes do blur', async () => {
+        const wrapper = mountCpfCnpj();
+        (wrapper.vm as any).temp_value = '1';
+        await wrapper.vm.$nextTick();
+        expect((wrapper.vm as any).caution).toBe(false);
+
+        await wrapper.find('input').trigger('blur');
+        await wrapper.vm.$nextTick();
+        expect((wrapper.vm as any).caution).toBe(true);
+    });
+
+    it('ativa caution imediatamente para documento completo inválido sem precisar de blur', async () => {
+        const wrapper = mountCpfCnpj();
+        (wrapper.vm as any).temp_value = '11111111111';
+        await wrapper.vm.$nextTick();
+        expect((wrapper.vm as any).caution).toBe(true);
+    });
+
+    it('possui inputmode numeric e não utiliza estilo inline para letter-spacing', () => {
+        const input = mountCpfCnpj().find('input');
+        expect(input.attributes('inputmode')).toBe('numeric');
+        expect(input.attributes('style')).toBeUndefined();
     });
 
     it('campo vazio não-obrigatório permanece com done=null e sem caution', () => {

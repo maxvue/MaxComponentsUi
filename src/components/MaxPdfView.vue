@@ -42,11 +42,11 @@
     </div>
 </template>
 
-/**
- * Componente visualizador de PDF.
- * Exibe um modal em tela cheia com ferramentas de zoom e paginação.
- */
 <script setup lang="ts">
+    /**
+     * Componente visualizador de PDF.
+     * Exibe um modal em tela cheia com ferramentas de zoom e paginação.
+     */
     import { useWindowSize } from '@maxvue/max-use';
     import { defineAsyncComponent, ref, watch, useTemplateRef, onBeforeUnmount } from 'vue';
     import { useFocusTrap } from '../helpers/useFocusTrap';
@@ -156,7 +156,7 @@
     }, { immediate: true });
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
     .viewPDF {
         opacity: 0;
         position: fixed;

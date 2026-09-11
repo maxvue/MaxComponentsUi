@@ -256,5 +256,153 @@ describe('MaxTagSelect', () => {
         expect(wrapper.find('.max-icon-button-stub').exists()).toBe(true);
         expect(wrapper.find('.value-tag-div').exists()).toBe(false);
     });
+
+    describe('Navegação por Teclado e WAI-ARIA Combobox', () => {
+        it('gatilho possui atributos semânticos combobox WAI-ARIA', async () => {
+            const wrapper = mountTagSelect();
+            const trigger = wrapper.find('.max-select');
+
+            expect(trigger.attributes('role')).toBe('combobox');
+            expect(trigger.attributes('aria-haspopup')).toBe('listbox');
+            expect(trigger.attributes('aria-expanded')).toBe('false');
+            expect(trigger.attributes('tabindex')).toBe('0');
+        });
+
+        it('ArrowDown com menu fechado abre o dropdown', async () => {
+            const options = [{ value: 'a', name: 'Tag A' }];
+            const wrapper = mountTagSelect({ options });
+            const trigger = wrapper.find('.max-select');
+
+            await trigger.trigger('keydown', { key: 'ArrowDown' });
+            await wrapper.vm.$nextTick();
+
+            expect((wrapper.vm as any).isOpen).toBe(true);
+            expect(trigger.attributes('aria-expanded')).toBe('true');
+        });
+
+        it('ArrowDown e ArrowUp com menu aberto navegam circularmente', async () => {
+            const options = [
+                { value: '1', name: 'Tag 1' },
+                { value: '2', name: 'Tag 2' },
+                { value: '3', name: 'Tag 3' }
+            ];
+            const wrapper = mountTagSelect({ options });
+            const trigger = wrapper.find('.max-select');
+
+            await trigger.trigger('click');
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).isOpen).toBe(true);
+            expect((wrapper.vm as any).highlightedIndex).toBe(0);
+
+            await trigger.trigger('keydown', { key: 'ArrowDown' });
+            expect((wrapper.vm as any).highlightedIndex).toBe(1);
+
+            await trigger.trigger('keydown', { key: 'ArrowDown' });
+            expect((wrapper.vm as any).highlightedIndex).toBe(2);
+
+            // Circular para o início
+            await trigger.trigger('keydown', { key: 'ArrowDown' });
+            expect((wrapper.vm as any).highlightedIndex).toBe(0);
+
+            // Circular para o fim com ArrowUp
+            await trigger.trigger('keydown', { key: 'ArrowUp' });
+            expect((wrapper.vm as any).highlightedIndex).toBe(2);
+        });
+
+        it('Enter seleciona a opção destacada e fecha o dropdown', async () => {
+            const options = [
+                { value: '1', name: 'Tag 1' },
+                { value: '2', name: 'Tag 2' }
+            ];
+            const wrapper = mountTagSelect({ options });
+            const trigger = wrapper.find('.max-select');
+
+            await trigger.trigger('click');
+            await wrapper.vm.$nextTick();
+
+            await trigger.trigger('keydown', { key: 'ArrowDown' });
+            expect((wrapper.vm as any).highlightedIndex).toBe(1);
+
+            await trigger.trigger('keydown', { key: 'Enter' });
+            await wrapper.vm.$nextTick();
+
+            expect((wrapper.vm as any).isOpen).toBe(false);
+            expect((wrapper.vm as any).temp_value).toBe('2');
+            expect(wrapper.emitted('update:modelValue')?.pop()).toEqual(['2']);
+        });
+
+        it('Escape fecha o dropdown', async () => {
+            const options = [{ value: '1', name: 'Tag 1' }];
+            const wrapper = mountTagSelect({ options });
+            const trigger = wrapper.find('.max-select');
+
+            await trigger.trigger('click');
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).isOpen).toBe(true);
+
+            await trigger.trigger('keydown', { key: 'Escape' });
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).isOpen).toBe(false);
+        });
+
+        it('captura ArrowDown, ArrowUp, Enter e Escape no input de filtro', async () => {
+            const options = [
+                { value: '1', name: 'Tag 1' },
+                { value: '2', name: 'Tag 2' }
+            ];
+            const wrapper = mountTagSelect({ options, filter: true });
+            const trigger = wrapper.find('.max-select');
+
+            await trigger.trigger('click');
+            await wrapper.vm.$nextTick();
+
+            const filterInput = document.body.querySelector('.max-select-filter') as HTMLInputElement;
+            expect(filterInput).not.toBeNull();
+
+            filterInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).highlightedIndex).toBe(1);
+
+            filterInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).isOpen).toBe(false);
+            expect((wrapper.vm as any).temp_value).toBe('2');
+        });
+    });
+
+    describe('Eliminação do Listener Global Permanente', () => {
+        it('registra o listener de keydown somente quando aberto e remove ao fechar', async () => {
+            const addSpy = vi.spyOn(window, 'addEventListener');
+            const removeSpy = vi.spyOn(window, 'removeEventListener');
+
+            const wrapper = mountTagSelect();
+            expect(addSpy).not.toHaveBeenCalledWith('keydown', expect.any(Function));
+
+            await wrapper.find('.max-select').trigger('click');
+            await wrapper.vm.$nextTick();
+            expect(addSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+
+            await wrapper.find('.max-select').trigger('click');
+            await wrapper.vm.$nextTick();
+            expect(removeSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+
+            addSpy.mockRestore();
+            removeSpy.mockRestore();
+        });
+
+        it('remove o listener de keydown ao desmontar se estava aberto', async () => {
+            const removeSpy = vi.spyOn(window, 'removeEventListener');
+            const wrapper = mountTagSelect();
+
+            await wrapper.find('.max-select').trigger('click');
+            await wrapper.vm.$nextTick();
+
+            wrapper.unmount();
+            expect(removeSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+
+            removeSpy.mockRestore();
+        });
+    });
 });
+
 

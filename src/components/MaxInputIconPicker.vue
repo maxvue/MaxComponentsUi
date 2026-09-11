@@ -7,7 +7,17 @@
         class="max-input-icon-picker"
         @click.stop="openDrawer"
     >
-        <div class="icon-picker-trigger p-inputtext" :class="{ 'is-disabled': props.disabled }">
+        <div
+            class="icon-picker-trigger p-inputtext"
+            :class="{ 'is-disabled': props.disabled }"
+            role="button"
+            :tabindex="props.disabled ? -1 : 0"
+            aria-haspopup="dialog"
+            :aria-expanded="visible"
+            :aria-label="modelValue ? `Ícone selecionado: ${modelValue}. Clique para alterar` : 'Escolha um ícone'"
+            @keydown.enter.prevent="openDrawer"
+            @keydown.space.prevent="openDrawer"
+        >
             <MaxIcon
                 :i="modelValue || 'tabler:icons-filled'"
                 size="1.2"
@@ -24,7 +34,12 @@
             <div class="max-icon-picker-drawer p-drawer-bottom" @click.stop>
                 <div class="p-drawer-header">
                     <span class="p-drawer-title">Escolha um ícone</span>
-                    <button type="button" class="p-drawer-close-button" @click="visible = false">
+                    <button
+                        type="button"
+                        class="p-drawer-close-button"
+                        aria-label="Fechar seletor de ícones"
+                        @click="visible = false"
+                    >
                         <MaxIcon i="mdi:close" size="1.2" />
                     </button>
                 </div>
@@ -63,14 +78,15 @@
                             class="icon-row"
                             :data-row-index="rIndex"
                         >
-                            <div
+                            <button
                                 v-for="icon in row"
                                 :key="icon.name"
+                                type="button"
                                 class="icon-cell"
                                 :class="{ selected: modelValue === icon.name }"
-                                @click.stop="selectIcon(icon.name)"
+                                :aria-label="`Selecionar ícone ${icon.name}`"
                                 :title="icon.name"
-                                pointer
+                                @click.stop="selectIcon(icon.name)"
                             >
                                 <div
                                     v-if="svgCache[icon.name]"
@@ -78,7 +94,7 @@
                                     v-html="svgCache[icon.name]"
                                 />
                                 <div v-else class="picker-icon-placeholder" />
-                            </div>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -89,7 +105,7 @@
 
 <script setup lang="ts">
     import { hasContent, watchDebounced } from '@maxvue/max-use';
-    import { ref, computed, watch, useAttrs, nextTick } from 'vue';
+    import { ref, computed, watch, useAttrs, nextTick, onBeforeUnmount } from 'vue';
     import type { Ref } from 'vue';
     import InputBase from './InputBase.vue';
     import MaxIcon from './MaxIcon.vue';
@@ -286,7 +302,7 @@
         if (props.disabled) return;
         search.value = '';
         curatedIcons.value = [];
-        svgCache.value = {};
+        // svgCache é preservado entre aberturas da gaveta para evitar re-downloads
         svgFetchQueue = [];
         if (svgFetchTimer !== null) {
             clearTimeout(svgFetchTimer);
@@ -318,6 +334,14 @@
         isDone.value = testIsDone();
     });
 
+    onBeforeUnmount(() => {
+        if (svgFetchTimer !== null) {
+            clearTimeout(svgFetchTimer);
+            svgFetchTimer = null;
+        }
+        svgFetchQueue = [];
+    });
+
     defineEmits<{
         'update:modelValue': [value: string];
     }>();
@@ -332,6 +356,11 @@
         height: 36px;
         width: 100%;
         cursor: pointer;
+
+        &:focus-visible {
+            outline: 2px solid var(--max-primary-500, #00768e);
+            outline-offset: 1px;
+        }
 
         &.is-disabled {
             cursor: not-allowed;
@@ -450,7 +479,17 @@
                         place-items: center;
                         height: 40px;
                         border-radius: 6px;
+                        background: none;
+                        border: none;
+                        padding: 0;
+                        cursor: pointer;
                         transition: background-color 0.15s ease;
+
+                        &:focus-visible {
+                            outline: 2px solid var(--max-primary-500, #00768e);
+                            outline-offset: 1px;
+                            border-radius: 4px;
+                        }
 
                         &:hover {
                             background-color: var(--background-100);

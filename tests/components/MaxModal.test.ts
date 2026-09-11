@@ -132,6 +132,7 @@ describe('MaxModal', () => {
     });
 
     it('renderiza o conteúdo do modal quando aberto', async () => {
+        vi.useFakeTimers();
         const wrapper = mountModal({
             title: 'Test Title',
             subTitle: 'Test Subtitle'
@@ -153,7 +154,9 @@ describe('MaxModal', () => {
 
         // Testa fechamento via botão X e background
         await bg.trigger('click');
+        vi.advanceTimersByTime(350);
         expect(store.show_id).toBe(null);
+        vi.useRealTimers();
     });
 
     it('show() (sem argumento) abre o modal chamando open() internamente', () => {
@@ -305,6 +308,10 @@ describe('MaxModal', () => {
 
     describe('Acessibilidade (Etapa 5.1)', () => {
         afterEach(() => {
+            while (mountedWrappers.length > 0) {
+                const w = mountedWrappers.pop();
+                try { w.unmount(); } catch {}
+            }
             const store = useModalStore();
             store.hide();
             document.body.innerHTML = '';
@@ -337,12 +344,7 @@ describe('MaxModal', () => {
         });
 
         it('aplica aria-label="Fechar" no botão de fechar', async () => {
-            const wrapper = mount(MaxModal, {
-                props: { icon: 'mdi:cog' },
-                global: {
-                    stubs: { Teleport: true }
-                }
-            });
+            const wrapper = mountModal({ icon: 'mdi:cog' });
             const vm = wrapper.vm as any;
             vm.open();
             await wrapper.vm.$nextTick();
@@ -424,13 +426,11 @@ describe('MaxModal', () => {
             document.body.appendChild(botaoOrigem);
             botaoOrigem.focus();
 
-            const wrapper = mount(MaxModal, {
-                props: { icon: 'mdi:cog' },
-                slots: {
-                    content: '<button id="interno">Interno</button>'
-                },
-                attachTo: document.body
-            });
+            const wrapper = mountModal(
+                { icon: 'mdi:cog', noHeader: true },
+                { content: '<button id="interno">Interno</button>' },
+                { attachTo: document.body }
+            );
             const vm = wrapper.vm as any;
             const store = useModalStore();
 
@@ -497,6 +497,117 @@ describe('MaxModal', () => {
             expect(compiledCss).toMatch(/\.max-modal\s+\*\s*\{[^}]*-ms-overflow-style:\s*none/);
             expect(compiledCss).toMatch(/\.max-modal\s+\*::-webkit-scrollbar\s*\{[^}]*width:\s*0/);
             expect(compiledCss).toMatch(/\.max-modal\s+\*::-webkit-scrollbar\s*\{[^}]*height:\s*0/);
+        });
+    });
+
+    describe('Proteção contra fechamento acidental e retenção (Etapa 09)', () => {
+        it('com dismissable: false, clicar no backdrop não fecha o modal e aciona a classe is-shaking por 400ms', async () => {
+            vi.useFakeTimers();
+            const wrapper = mountModal({ dismissable: false });
+            const vm = wrapper.vm as any;
+            const store = useModalStore();
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+            expect(store.show_id).toBe(vm.id);
+
+            const bg = wrapper.find('.background-modal');
+            await bg.trigger('click');
+
+            // Não deve fechar o modal
+            expect(store.show_id).toBe(vm.id);
+            expect(wrapper.find('.max-modal').classes()).toContain('is-shaking');
+
+            // Após 400ms a classe is-shaking é removida
+            vi.advanceTimersByTime(400);
+            await wrapper.vm.$nextTick();
+            expect(wrapper.find('.max-modal').classes()).not.toContain('is-shaking');
+            expect(store.show_id).toBe(vm.id);
+
+            vi.useRealTimers();
+        });
+
+        it('com dismissable: true (padrão), clicar no backdrop fecha o modal', async () => {
+            vi.useFakeTimers();
+            const wrapper = mountModal();
+            const vm = wrapper.vm as any;
+            const store = useModalStore();
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+            expect(store.show_id).toBe(vm.id);
+
+            const bg = wrapper.find('.background-modal');
+            await bg.trigger('click');
+            vi.advanceTimersByTime(350);
+
+            expect(store.show_id).toBe(null);
+            vi.useRealTimers();
+        });
+
+        it('intercepta fechamento preventivo via prop beforeClose', async () => {
+            vi.useFakeTimers();
+            let doneCallback: (() => void) | null = null;
+            const beforeClose = vi.fn((done: () => void) => {
+                doneCallback = done;
+            });
+
+            const wrapper = mountModal({ beforeClose });
+            const vm = wrapper.vm as any;
+            const store = useModalStore();
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+            expect(store.show_id).toBe(vm.id);
+
+            // Clica no backdrop
+            const bg = wrapper.find('.background-modal');
+            await bg.trigger('click');
+
+            expect(beforeClose).toHaveBeenCalledTimes(1);
+            expect(doneCallback).toBeTruthy();
+            // Modal continua aberto aguardando confirmação
+            expect(store.show_id).toBe(vm.id);
+
+            // Invoca done() para confirmar o encerramento
+            doneCallback!();
+            vi.advanceTimersByTime(350);
+            expect(store.show_id).toBe(null);
+
+            vi.useRealTimers();
+        });
+
+        it('emite evento before-close ao fechar quando beforeClose não é fornecido', async () => {
+            vi.useFakeTimers();
+            const wrapper = mountModal();
+            const vm = wrapper.vm as any;
+            const store = useModalStore();
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+            expect(store.show_id).toBe(vm.id);
+
+            const bg = wrapper.find('.background-modal');
+            await bg.trigger('click');
+
+            expect(wrapper.emitted('before-close')).toBeTruthy();
+            vi.advanceTimersByTime(350);
+            expect(store.show_id).toBe(null);
+
+            vi.useRealTimers();
+        });
+
+        it('bloqueia rolagem do body por padrão (blockScroll: true)', async () => {
+            document.body.style.overflow = '';
+            const wrapper = mountModal();
+            const vm = wrapper.vm as any;
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+            expect(document.body.style.overflow).toBe('hidden');
+
+            wrapper.unmount();
+            expect(document.body.style.overflow).toBe('');
         });
     });
 });

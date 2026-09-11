@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { useIconStore } from '../../src/stores/useIcon.Store';
+import * as iconIdb from '../../src/helpers/iconIdb';
 
 describe('useIconStore', () => {
     beforeEach(() => {
@@ -74,5 +75,24 @@ describe('useIconStore', () => {
         expect(store.getIcon('http://malicioso.com')).toBeNull();
         expect(store.getIcon('<script>alert(1)</script>')).toBeNull();
         expect(store.list_icons_waiting_request).toHaveLength(0);
+    });
+
+    it('debouncedSaveCache consolida múltiplas mutações em uma única gravação no IndexedDB', async () => {
+        vi.useFakeTimers();
+        const saveSpy = vi.spyOn(iconIdb, 'saveIconsToIDB');
+        const store = useIconStore();
+
+        store.icons_data['mdi:test-debounce'] = '<svg>debounce</svg>';
+        store.debouncedSaveCache(100);
+        store.debouncedSaveCache(100);
+        store.debouncedSaveCache(100);
+
+        expect(saveSpy).not.toHaveBeenCalled();
+
+        await vi.advanceTimersByTimeAsync(150);
+
+        expect(saveSpy).toHaveBeenCalledTimes(1);
+
+        vi.useRealTimers();
     });
 });

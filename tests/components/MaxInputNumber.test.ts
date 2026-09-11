@@ -21,6 +21,14 @@ describe('MaxInputNumber', () => {
         expect(wrapper.exists()).toBe(true);
     });
 
+    it('utiliza classe max-input-native e não inclui classes legadas do PrimeVue', () => {
+        const wrapper = mountInputNumber();
+        const input = wrapper.find('input');
+        expect(input.classes()).toContain('max-input-native');
+        expect(input.classes()).not.toContain('p-inputtext');
+        expect(input.classes()).not.toContain('p-component');
+    });
+
     it('renderiza com label', () => {
         const wrapper = mountInputNumber({ label: 'Quantidade' });
         expect(wrapper.exists()).toBe(true);

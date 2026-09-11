@@ -9,12 +9,17 @@
                     role="none"
                     @mouseenter="openSubmenu(index)"
                     @mouseleave="scheduleCloseSubmenu"
+                    @keydown="onMenubarItemKeydown($event, index, item)"
                 >
                     <div class="p-menubar-item-content">
                         <div v-if="item.divider" class="divider-space"></div>
                         <div
                             v-else-if="hasContent(item.label)"
                             class="menu-item-content root"
+                            role="menuitem"
+                            tabindex="0"
+                            :aria-haspopup="item.items && item.items.length ? 'true' : undefined"
+                            :aria-expanded="item.items && item.items.length ? activeSubmenu === index : undefined"
                             @click="handleItemClick(item)"
                         >
                             <MaxIconButton v-if="item.icon" :icon="item.icon" :size="item.icon_size" light transparent />
@@ -93,6 +98,42 @@
     onBeforeUnmount(clearCloseTimer);
 
     /**
+     * Tratamento de teclado na barra de menu superior:
+     * - ArrowDown ou Enter/Espaço: abre o submenu do item
+     * - Escape: fecha o submenu ativo
+     */
+    const onMenubarItemKeydown = (event: KeyboardEvent, index: number, item: any): void => {
+        switch (event.key) {
+            case 'ArrowDown':
+            case 'Enter':
+                if (item.items && item.items.length) {
+                    event.preventDefault();
+                    openSubmenu(index);
+                } else if (event.key === 'Enter') {
+                    event.preventDefault();
+                    handleItemClick(item);
+                }
+                break;
+            case ' ':
+                if (item.items && item.items.length) {
+                    event.preventDefault();
+                    openSubmenu(index);
+                } else {
+                    event.preventDefault();
+                    handleItemClick(item);
+                }
+                break;
+            case 'Escape':
+                if (activeSubmenu.value !== null) {
+                    event.preventDefault();
+                    activeSubmenu.value = null;
+                    clearCloseTimer();
+                }
+                break;
+        }
+    };
+
+    /**
      * Executa a ação do item: função própria (`action`), callback do PrimeVue
      * (`command`) ou navegação por rota.
      */
@@ -101,6 +142,13 @@
         else if (typeof item?.command === 'function') item.command({ item });
         else if (item?.route || item?.data) toolbar.route(item.data ?? item.props ?? item.query, item.route);
     };
+
+    defineExpose({
+        activeSubmenu,
+        openSubmenu,
+        scheduleCloseSubmenu,
+        clearCloseTimer
+    });
 </script>
 
 <style lang="scss" scoped>
@@ -159,8 +207,16 @@
                             gap: 6px;
                             transition: transform 0.3s ease-in-out, color 0.2s ease;
                             color: var(--layout-shell-text-muted, rgb(255 255 255 / 80%)) !important;
+                            outline: none;
 
                             &:hover {
+                                color: var(--layout-shell-text, #fff) !important;
+                            }
+
+                            &:focus-visible {
+                                outline: 2px solid var(--max-primary-500, #00768E);
+                                outline-offset: 2px;
+                                border-radius: 4px;
                                 color: var(--layout-shell-text, #fff) !important;
                             }
 

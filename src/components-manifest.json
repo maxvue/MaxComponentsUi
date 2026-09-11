@@ -795,6 +795,5 @@
     "TransitionFade": "TransitionFade",
     "transition_fade": "TransitionFade",
     "transition-fade": "TransitionFade"
-  },
-  "primeExports": []
+  }
 }

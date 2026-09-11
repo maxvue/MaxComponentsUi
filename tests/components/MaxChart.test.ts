@@ -67,15 +67,42 @@ describe('MaxChart', () => {
         expect(chart.config.options.plugins.legend.display).toBe(false);
     });
 
-    it('recria a instância (destroy + novo Chart) quando os dados mudam', async () => {
+    it('atualiza os dados in-place via update() sem destruir a instância quando os dados mudam', async () => {
         const wrapper = mountChart();
         await flushPromises();
+
+        expect(destroyMock).not.toHaveBeenCalled();
 
         await wrapper.setProps({ data: { labels: ['x'], datasets: [{ data: [9] }] } });
         await flushPromises();
 
-        expect(destroyMock).toHaveBeenCalled();
+        expect(updateMock).toHaveBeenCalled();
+        expect(destroyMock).not.toHaveBeenCalled();
         expect(wrapper.vm.getChart()).toBeInstanceOf(FakeChart);
+    });
+
+    it('destrói e recria a instância quando o type muda', async () => {
+        const wrapper = mountChart();
+        await flushPromises();
+
+        destroyMock.mockClear();
+        await wrapper.setProps({ type: 'bar' });
+        await flushPromises();
+
+        expect(destroyMock).toHaveBeenCalledTimes(1);
+        expect(wrapper.vm.getChart()).toBeInstanceOf(FakeChart);
+    });
+
+    it('destrói a instância quando data se torna null', async () => {
+        const wrapper = mountChart();
+        await flushPromises();
+
+        destroyMock.mockClear();
+        await wrapper.setProps({ data: null });
+        await flushPromises();
+
+        expect(destroyMock).toHaveBeenCalled();
+        expect(wrapper.vm.getChart()).toBeNull();
     });
 
     it('destrói a instância ao desmontar', async () => {

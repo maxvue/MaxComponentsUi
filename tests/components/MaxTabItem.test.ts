@@ -168,7 +168,7 @@ describe('MaxTabItem — actionButton', () => {
         const buttonsContainer = wrapper.find('.max-tabs-title-buttons');
         expect(buttonsContainer.text()).toContain('Global');
         expect(buttonsContainer.text()).toContain('Item A');
-        const buttons = buttonsContainer.findAll('.button-tab-item');
+        expect(buttonsContainer.findAll('.button-tab-item')).toHaveLength(2);
         wrapper.unmount();
     });
 });

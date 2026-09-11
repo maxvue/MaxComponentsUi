@@ -2,12 +2,13 @@
     <InputBase class="max-input-cpf-cnpj" v-bind="props" :error="error_msg ?? undefined" :caution="caution" :done="done ?? undefined">
         <input
             type="text"
-            class="p-inputtext p-component"
+            inputmode="numeric"
+            class="max-input-native max-cpf-cnpj-input"
             :value="masked_value"
             v-maska="maskValue"
             :disabled="props.disabled"
             @input="onUserInput"
-            :style="`letter-spacing: 2.5px;`"
+            @blur="onBlur"
         />
     </InputBase>
 </template>
@@ -18,7 +19,7 @@
      * Detecta automaticamente o tipo de documento pelo tamanho ou pode ser fixado via props.
      * Possui máscara dinâmica e validação de dígito verificador.
      */
-    import { cnpjIsValid, cpfCnpjIsValid, cpfIsValid, onlyNumbers } from '@maxvue/max-use';
+    import { cnpjIsValid, cpfIsValid, onlyNumbers } from '@maxvue/max-use';
     import { ref, computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
     import { vMaska } from 'maska/vue';
@@ -39,7 +40,16 @@
         { modelValue: '', done: undefined, required: false, caution: undefined }
     );
 
-    const emit = defineEmits(['update:modelValue', 'complete']);
+    const emit = defineEmits<{
+        'update:modelValue': [value: string];
+        'complete': [value: string];
+    }>();
+
+    const hasBeenTouched = ref(false);
+
+    const onBlur = () => {
+        hasBeenTouched.value = true;
+    };
 
     // O modelValue e sempre normalizado para "so digitos" antes de emitir e
     // ao receber um valor externo, entao a igualdade estrita (default) ja
@@ -117,16 +127,28 @@
         if (props.done !== undefined) return props.done ?? null;
         const only_numbers = onlyNumbers(temp_value.value ?? '');
         if (only_numbers.length === 0) return null;
-        if (props.cpf) return cpfIsValid(only_numbers);
-        if (props.cnpj) return cnpjIsValid(only_numbers);
-        return cpfCnpjIsValid(only_numbers);
+        if (props.cpf) return only_numbers.length === 11 ? cpfIsValid(only_numbers) : null;
+        if (props.cnpj) return only_numbers.length === 14 ? cnpjIsValid(only_numbers) : null;
+        if (only_numbers.length === 11) return cpfIsValid(only_numbers);
+        if (only_numbers.length === 14) return cnpjIsValid(only_numbers);
+        return null;
     });
 
     const caution = computed(() => {
         if (props.caution !== undefined) return props.caution;
         const only_numbers = onlyNumbers(temp_value.value ?? '');
         if (only_numbers.length === 0) return false;
-        return done.value === false;
+
+        const isComplete = (type_mask.value === 'cpf' && only_numbers.length === 11)
+            || (type_mask.value === 'cnpj' && only_numbers.length === 14);
+
+        if (isComplete) return done.value === false;
+
+
+        if (hasBeenTouched.value) return true;
+
+
+        return false;
     });
 
     const error_msg = computed<string | null>(() => {
@@ -161,3 +183,11 @@
         if ((only_numbers.length === 11 || only_numbers.length === 14) && done.value) emit('complete', only_numbers);
     }, { immediate: true });
 </script>
+
+<style lang="scss" scoped>
+.max-input-cpf-cnpj {
+    :deep(.max-cpf-cnpj-input) {
+        letter-spacing: 2.5px;
+    }
+}
+</style>

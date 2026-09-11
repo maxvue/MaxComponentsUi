@@ -57,10 +57,21 @@ export interface MaxButtonBaseProps extends ButtonHTMLAttributes {
     class?: string;
 }
 
+export type ButtonSeverity = 'secondary' | 'success' | 'info' | 'whatsapp' | 'warning' | 'help' | 'danger' | 'contrast';
+export type ButtonVariant = 'outlined' | 'text' | 'link';
+
 /**
  * Propriedades específicas para o componente de botão.
  */
 export interface MaxButtonsType extends /* @vue-ignore */ MaxButtonBaseProps {
+    /** Rótulo acessível WAI-ARIA */
+    'aria-label'?: string;
+    /** Alias camelCase para o rótulo acessível WAI-ARIA */
+    ariaLabel?: string;
+    /** Desabilita o botão */
+    disabled?: boolean;
+    /** Título ou tooltip acessível */
+    title?: string;
     /** Texto de exibição do botão */
     label?: string;
     /** Ícone a ser exibido no botão */
@@ -71,7 +82,7 @@ export interface MaxButtonsType extends /* @vue-ignore */ MaxButtonBaseProps {
     /** Posição do ícone no botão */
     iconPos?: 'left' | 'right';
     /** Estilo de severidade do botão */
-    severity?: 'secondary' | 'success' | 'info' | 'whatsapp' | 'warning' | 'help' | 'danger' | 'contrast';
+    severity?: ButtonSeverity;
     /** Tamanho do botão */
     size?: string | undefined | number | null;
     /** Tamanho do ícone do botão */
@@ -81,7 +92,7 @@ export interface MaxButtonsType extends /* @vue-ignore */ MaxButtonBaseProps {
     /** Escala de Ampliação ao passar o mouse */
     hoverScale?: number | null | undefined;
     /** Variante visual do botão */
-    variant?: 'outlined' | 'text' | 'link';
+    variant?: ButtonVariant;
     /** Alias para o nome do ícone */
     i?: string;
     /** link para abrir em nova aba */
@@ -181,6 +192,14 @@ export interface MaxLikeButtonProps {
     class?: string;
 }
 
+export interface ConfirmActionProps {
+    label: string;
+    icon?: string;
+    severity?: ButtonSeverity;
+    variant?: ButtonVariant;
+    action?: ((event?: any) => void) | undefined;
+}
+
 /**
  * Propriedades compartilhadas pelos componentes de confirmação
  * (`MaxButtonConfirm`, `MaxIconConfirm`, `MaxTogglePopover`).
@@ -194,18 +213,12 @@ export interface ConfirmProps {
     message?: string;
     /** Icone de mensagem de confirmação */
     messageIcon?: string | null;
-    /** Label do botão de não */
-    rejectProps?: {
-        label: string;
-        icon?: string;
-        action?: ((event?: any) => void) | undefined;
-    };
-    /** Label do botão de sim */
-    acceptProps?: {
-        label: string;
-        icon?: string;
-        action?: ((event?: any) => void) | undefined;
-    };
+    /** Severidade visual geral do diálogo (afeta ícone e ação padrão de confirmação) */
+    severity?: ButtonSeverity;
+    /** Configurações do botão de rejeição/cancelamento */
+    rejectProps?: ConfirmActionProps;
+    /** Configurações do botão de aceitação/confirmação */
+    acceptProps?: ConfirmActionProps;
 }
 
 /**
@@ -316,6 +329,24 @@ export interface SelectGroupOptionsElement {
 export interface SelectGroupOptions extends Array<SelectGroupOptionsElement> {}
 
 export interface SelectOptions extends Array<SelectItem> {}
+
+/** Valores aceitos como estado de entrada em inputs */
+export type InputValue = string | number | boolean | null | undefined | Record<string, unknown> | unknown[];
+
+/** Item padronizado de seleção */
+export interface SelectOptionItem<T = unknown> {
+    label?: string;
+    value?: T;
+    name?: string;
+    icon?: string;
+    sub_label?: string;
+    disabled?: boolean;
+    badge?: string | number;
+    badgeColor?: string;
+    [key: string]: unknown;
+}
+
+export type SelectOptionsList<T = unknown> = Array<SelectOptionItem<T> | Record<string, unknown>>;
 
 /**
  * Definição de uma coluna para o componente MaxTableFields.

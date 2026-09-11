@@ -11,7 +11,7 @@
             <input
                 ref="inputElement"
                 type="text"
-                class="p-inputtext max-datepicker-input"
+                class="max-datepicker-input"
                 :value="displayValue"
                 v-maska="maskValue"
                 :placeholder="props.placeholder ?? 'dd/mm/aaaa'"
@@ -28,44 +28,129 @@
             <div class="max-datepicker-backdrop" @click="hide">
                 <div
                     ref="overlayEl"
-                    class="p-datepicker-panel max-datepicker-panel"
+                    class="max-datepicker-panel"
                     :style="{ top: position.top + 'px', left: position.left + 'px' }"
                     @click.stop
                 >
                     <div class="max-datepicker-header">
-                        <button type="button" class="max-datepicker-nav-btn" @click.stop="prevMonth">
+                        <button
+                            type="button"
+                            class="max-datepicker-nav-btn"
+                            :aria-label="prevNavAriaLabel"
+                            @click.stop="prevHeader"
+                        >
                             <MaxIcon icon="lucide:chevron-left" size="1.1" />
                         </button>
-                        <div class="max-datepicker-title">
-                            {{ monthNames[currentMonth] }} {{ currentYear }}
-                        </div>
-                        <button type="button" class="max-datepicker-nav-btn" @click.stop="nextMonth">
+
+                        <button
+                            type="button"
+                            class="max-datepicker-title max-datepicker-title-btn"
+                            @click.stop="toggleView"
+                        >
+                            <span v-if="currentView === 'date'">{{ monthNames[currentMonth] }} {{ currentYear }}</span>
+                            <span v-else-if="currentView === 'month'">{{ currentYear }}</span>
+                            <span v-else>{{ yearRangeStart }} - {{ yearRangeStart + 9 }}</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            class="max-datepicker-nav-btn"
+                            :aria-label="nextNavAriaLabel"
+                            @click.stop="nextHeader"
+                        >
                             <MaxIcon icon="lucide:chevron-right" size="1.1" />
                         </button>
                     </div>
 
-                    <div class="max-datepicker-grid">
-                        <div class="max-datepicker-weekdays">
-                            <span v-for="(wd, idx) in weekDays" :key="idx" class="max-datepicker-weekday">
+                    <div
+                        v-if="currentView === 'date'"
+                        class="max-datepicker-grid"
+                        role="grid"
+                        :aria-label="`${monthNames[currentMonth]} de ${currentYear}`"
+                        @keydown="onGridKeydown"
+                    >
+                        <div class="max-datepicker-weekdays" role="row">
+                            <span
+                                v-for="(wd, idx) in weekDays"
+                                :key="idx"
+                                class="max-datepicker-weekday"
+                                role="columnheader"
+                                :aria-label="fullWeekDayNames[idx]"
+                            >
                                 {{ wd }}
                             </span>
                         </div>
-                        <div class="max-datepicker-days">
+                        <div class="max-datepicker-days" role="rowgroup">
                             <button
                                 v-for="(cell, cIdx) in calendarDays"
                                 :key="cIdx"
+                                :ref="(el) => setDayButtonRef(el, cIdx)"
                                 type="button"
                                 class="max-datepicker-day"
                                 :class="{
                                     'is-other-month': !cell.isCurrentMonth,
                                     'is-selected': isSelectedDate(cell.date),
-                                    'is-today': isToday(cell.date)
+                                    'is-today': isToday(cell.date),
+                                    'is-disabled': isDateDisabled(cell.date)
                                 }"
-                                @click.stop="selectDate(cell)"
+                                role="gridcell"
+                                :aria-selected="isSelectedDate(cell.date) ? 'true' : 'false'"
+                                :aria-current="isToday(cell.date) ? 'date' : undefined"
+                                :aria-label="formatDateAria(cell.date)"
+                                :tabindex="focusedCellIndex === cIdx ? 0 : -1"
+                                :disabled="isDateDisabled(cell.date)"
+                                @focus="focusedCellIndex = cIdx"
+                                @click.stop="!isDateDisabled(cell.date) && selectDate(cell)"
                             >
                                 {{ cell.day }}
                             </button>
                         </div>
+                    </div>
+
+                    <div v-else-if="currentView === 'month'" class="max-datepicker-months">
+                        <button
+                            v-for="(mName, mIdx) in monthNames"
+                            :key="mIdx"
+                            type="button"
+                            class="max-datepicker-month-btn"
+                            :class="{ 'is-selected': mIdx === currentMonth }"
+                            @click.stop="selectMonth(mIdx)"
+                        >
+                            {{ mName.slice(0, 3) }}
+                        </button>
+                    </div>
+
+                    <div v-else class="max-datepicker-years">
+                        <button
+                            v-for="yr in yearsList"
+                            :key="yr"
+                            type="button"
+                            class="max-datepicker-year-btn"
+                            :class="{
+                                'is-selected': yr === currentYear,
+                                'is-out-of-range': yr < yearRangeStart || yr > yearRangeStart + 9
+                            }"
+                            @click.stop="selectYear(yr)"
+                        >
+                            {{ yr }}
+                        </button>
+                    </div>
+
+                    <div v-if="props.showButtonBar" class="max-datepicker-footer">
+                        <button
+                            type="button"
+                            class="max-datepicker-action-btn today"
+                            @click.stop="selectToday"
+                        >
+                            Hoje
+                        </button>
+                        <button
+                            type="button"
+                            class="max-datepicker-action-btn clear"
+                            @click.stop="clearValue"
+                        >
+                            Limpar
+                        </button>
                     </div>
                 </div>
             </div>
@@ -74,7 +159,7 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, computed, watch, onBeforeUnmount } from 'vue';
+    import { ref, computed, watch, nextTick, onBeforeUnmount } from 'vue';
     import InputBase from './InputBase.vue';
     import MaxIcon from './MaxIcon.vue';
     import { useDateFormat, useElementBounding, useElementSize, useWindowSize } from '@maxvue/max-use';
@@ -173,6 +258,12 @@
         dateFormat?: string;
         /** Placeholder Text */
         placeholder?: string;
+        /** Data mínima permitida para seleção (Date, string ISO ou DD/MM/AAAA) */
+        minDate?: Date | string | null;
+        /** Data máxima permitida para seleção (Date, string ISO ou DD/MM/AAAA) */
+        maxDate?: Date | string | null;
+        /** Exibe rodapé com botões de ação rápida 'Hoje' e 'Limpar' */
+        showButtonBar?: boolean;
     }
 
     const props = withDefaults(defineProps<Props>(), {
@@ -184,13 +275,20 @@
         error: undefined,
         light: false,
         iconPos: 'left',
-        inLine: false
+        inLine: false,
+        minDate: null,
+        maxDate: null,
+        showButtonBar: true
     });
 
     const triggerEl = ref<HTMLElement | null>(null);
     const overlayEl = ref<HTMLElement | null>(null);
     const inputElement = ref<HTMLInputElement | null>(null);
     const isOpen = ref(false);
+
+    type CalendarView = 'date' | 'month' | 'year';
+    const currentView = ref<CalendarView>('date');
+    const yearRangeStart = ref(Math.floor(new Date().getFullYear() / 10) * 10);
 
     const currentMonth = ref(new Date().getMonth());
     const currentYear = ref(new Date().getFullYear());
@@ -285,6 +383,31 @@
 
         const fallback = new Date(trimmed);
         return isNaN(fallback.getTime()) ? null : fallback;
+    };
+
+    const parsedMinDate = computed(() => (props.minDate ? parseDateValue(props.minDate) : null));
+    const parsedMaxDate = computed(() => (props.maxDate ? parseDateValue(props.maxDate) : null));
+
+    const isDateDisabled = (date: Date): boolean => {
+        if (!date) return false;
+        const time = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+        if (parsedMinDate.value) {
+            const min = new Date(
+                parsedMinDate.value.getFullYear(),
+                parsedMinDate.value.getMonth(),
+                parsedMinDate.value.getDate()
+            ).getTime();
+            if (time < min) return true;
+        }
+        if (parsedMaxDate.value) {
+            const max = new Date(
+                parsedMaxDate.value.getFullYear(),
+                parsedMaxDate.value.getMonth(),
+                parsedMaxDate.value.getDate()
+            ).getTime();
+            if (time > max) return true;
+        }
+        return false;
     };
 
     // Sincroniza modelValue -> internalDate e displayValue
@@ -389,12 +512,38 @@
         return days;
     });
 
+    const yearsList = computed(() => {
+        const list: number[] = [];
+        const start = yearRangeStart.value - 1;
+        for (let i = 0; i < 12; i++) list.push(start + i);
+
+        return list;
+    });
+
+    const toggleView = () => {
+        if (currentView.value === 'date') currentView.value = 'month';
+        else if (currentView.value === 'month') {
+            yearRangeStart.value = Math.floor(currentYear.value / 10) * 10;
+            currentView.value = 'year';
+        } else currentView.value = 'date';
+
+    };
+
+    const selectMonth = (monthIndex: number) => {
+        currentMonth.value = monthIndex;
+        currentView.value = 'date';
+    };
+
+    const selectYear = (year: number) => {
+        currentYear.value = year;
+        currentView.value = 'month';
+    };
+
     const prevMonth = () => {
         if (currentMonth.value === 0) {
             currentMonth.value = 11;
             currentYear.value--;
         } else currentMonth.value--;
-
     };
 
     const nextMonth = () => {
@@ -402,12 +551,121 @@
             currentMonth.value = 0;
             currentYear.value++;
         } else currentMonth.value++;
+    };
 
+    const prevHeader = () => {
+        if (currentView.value === 'date') prevMonth();
+        else if (currentView.value === 'month') currentYear.value--;
+        else yearRangeStart.value -= 10;
+    };
+
+    const nextHeader = () => {
+        if (currentView.value === 'date') nextMonth();
+        else if (currentView.value === 'month') currentYear.value++;
+        else yearRangeStart.value += 10;
+    };
+
+    const prevNavAriaLabel = computed(() => {
+        if (currentView.value === 'date') return 'Mês anterior';
+        if (currentView.value === 'month') return 'Ano anterior';
+        return 'Década anterior';
+    });
+
+    const nextNavAriaLabel = computed(() => {
+        if (currentView.value === 'date') return 'Próximo mês';
+        if (currentView.value === 'month') return 'Próximo ano';
+        return 'Próxima década';
+    });
+
+    const selectToday = () => {
+        const today = new Date();
+        if (isDateDisabled(today)) return;
+        internalDate.value = today;
+        currentMonth.value = today.getMonth();
+        currentYear.value = today.getFullYear();
+        currentView.value = 'date';
+        hide();
+    };
+
+    const clearValue = () => {
+        internalDate.value = null;
+        displayValue.value = '';
+        modelValue.value = '';
+        hide();
+    };
+
+    const fullWeekDayNames = [
+        'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira',
+        'Quinta-feira', 'Sexta-feira', 'Sábado'
+    ];
+
+    const focusedCellIndex = ref(0);
+    const dayButtonRefs = ref<(HTMLButtonElement | null)[]>([]);
+
+    const setDayButtonRef = (el: unknown, index: number) => {
+        dayButtonRefs.value[index] = el as HTMLButtonElement | null;
+    };
+
+    const formatDateAria = (date: Date): string => {
+        const day = date.getDate();
+        const month = monthNames[date.getMonth()];
+        const year = date.getFullYear();
+        const isCurMonth = date.getMonth() === currentMonth.value && date.getFullYear() === currentYear.value;
+        return `${day} de ${month} de ${year}${!isCurMonth ? ' (outro mês)' : ''}`;
     };
 
     const selectDate = (cell: { date: Date }) => {
+        if (isDateDisabled(cell.date)) return;
         internalDate.value = cell.date;
         hide();
+    };
+
+    const onGridKeydown = (event: KeyboardEvent) => {
+        const total = calendarDays.value.length;
+        let nextIndex = focusedCellIndex.value;
+
+        switch (event.key) {
+            case 'ArrowRight':
+                event.preventDefault();
+                nextIndex = (nextIndex + 1) % total;
+                break;
+            case 'ArrowLeft':
+                event.preventDefault();
+                nextIndex = (nextIndex - 1 + total) % total;
+                break;
+            case 'ArrowDown':
+                event.preventDefault();
+                if (nextIndex + 7 < total) nextIndex += 7;
+                break;
+            case 'ArrowUp':
+                event.preventDefault();
+                if (nextIndex - 7 >= 0) nextIndex -= 7;
+                break;
+            case 'Home':
+                event.preventDefault();
+                nextIndex = 0;
+                break;
+            case 'End':
+                event.preventDefault();
+                nextIndex = total - 1;
+                break;
+            case 'Enter':
+            case ' ':
+                event.preventDefault();
+                if (calendarDays.value[nextIndex] && !isDateDisabled(calendarDays.value[nextIndex].date)) selectDate(calendarDays.value[nextIndex]);
+
+                return;
+            case 'Escape':
+                event.preventDefault();
+                hide();
+                inputElement.value?.focus();
+                return;
+            default:
+                return;
+        }
+
+        focusedCellIndex.value = nextIndex;
+        dayButtonRefs.value[nextIndex]?.focus();
     };
 
     const isSelectedDate = (cellDate: Date) => {
@@ -460,12 +718,13 @@
 
                 if (month >= 0 && month <= 11 && year >= 1000 && year <= 9999) {
                     const date = new Date(year, month, day);
-                    if (date.getFullYear() === year && date.getMonth() === month && date.getDate() === day) {
+                    if (date.getFullYear() === year && date.getMonth() === month && date.getDate() === day) if (!isDateDisabled(date)) {
                         internalDate.value = date;
                         currentMonth.value = month;
                         currentYear.value = year;
                         return;
                     }
+
                 }
             }
             if (internalDate.value !== null) internalDate.value = null;
@@ -507,11 +766,26 @@
 
     const onGlobalKeydown = (event: KeyboardEvent) => {
         if (event.key === 'Escape' && isOpen.value) hide();
-
     };
 
-    if (typeof window !== 'undefined') window.addEventListener('keydown', onGlobalKeydown);
+    watch(isOpen, (open) => {
+        if (typeof window !== 'undefined') if (open) window.addEventListener('keydown', onGlobalKeydown);
+        else window.removeEventListener('keydown', onGlobalKeydown);
 
+
+        if (open) {
+            currentView.value = 'date';
+            dayButtonRefs.value = [];
+            nextTick(() => {
+                const selectedIdx = calendarDays.value.findIndex((c) => isSelectedDate(c.date));
+                if (selectedIdx >= 0) focusedCellIndex.value = selectedIdx;
+                else {
+                    const firstDayIdx = calendarDays.value.findIndex((c) => c.isCurrentMonth && c.day === 1);
+                    focusedCellIndex.value = firstDayIdx >= 0 ? firstDayIdx : 0;
+                }
+            });
+        }
+    });
 
     onBeforeUnmount(() => {
         if (typeof window !== 'undefined') window.removeEventListener('keydown', onGlobalKeydown);
@@ -524,7 +798,16 @@
         formattedDisplay,
         validate,
         open,
-        hide
+        hide,
+        currentView,
+        currentMonth,
+        currentYear,
+        isDateDisabled,
+        selectToday,
+        clearValue,
+        toggleView,
+        selectMonth,
+        selectYear
     });
 </script>
 
@@ -563,7 +846,7 @@
             border-radius: 8px;
             box-shadow: 0 4px 16px rgb(0 0 0 / 15%);
             padding: 12px;
-            width: 280px;
+            width: 290px;
             user-select: none;
 
             .max-datepicker-header {
@@ -576,6 +859,25 @@
                     font-weight: 600;
                     font-size: 0.95rem;
                     color: var(--background-775);
+                }
+
+                .max-datepicker-title-btn {
+                    background: transparent;
+                    border: none;
+                    cursor: pointer;
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    transition: background-color 0.15s ease;
+
+                    &:hover {
+                        background: var(--background-100, #f1f5f9);
+                        color: var(--max-primary-500, #00768e);
+                    }
+
+                    &:focus-visible {
+                        outline: 2px solid var(--blue-600, #2563eb);
+                        outline-offset: 2px;
+                    }
                 }
 
                 .max-datepicker-nav-btn {
@@ -591,7 +893,13 @@
 
                     &:hover {
                         background: var(--background-100, #f1f5f9);
-                        color: var(--primary-500, #3b82f6);
+                        color: var(--max-primary-500, #00768e);
+                    }
+
+                    &:focus-visible {
+                        outline: 2px solid var(--blue-600, #2563eb);
+                        outline-offset: 2px;
+                        border-radius: 4px;
                     }
                 }
             }
@@ -625,8 +933,14 @@
                         justify-content: center;
                         padding: 0;
 
-                        &:hover {
+                        &:hover:not(:disabled) {
                             background: var(--background-100, #f1f5f9);
+                        }
+
+                        &:focus-visible {
+                            outline: 2px solid var(--blue-600, #2563eb);
+                            outline-offset: 1px;
+                            z-index: 1;
                         }
 
                         &.is-other-month {
@@ -634,14 +948,92 @@
                         }
 
                         &.is-today {
-                            border: 1px solid var(--primary-400, #60a5fa);
+                            border: 1px solid var(--max-primary-400, #178da5);
                         }
 
                         &.is-selected {
-                            background: var(--max-primary-500, #00768E) !important;
+                            background: var(--max-primary-500, #00768e) !important;
                             color: #fff !important;
                             font-weight: 600;
                         }
+
+                        &.is-disabled,
+                        &:disabled {
+                            opacity: 0.25 !important;
+                            cursor: not-allowed !important;
+                            pointer-events: none;
+                        }
+                    }
+                }
+            }
+
+            .max-datepicker-months,
+            .max-datepicker-years {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+                padding: 8px 0;
+
+                .max-datepicker-month-btn,
+                .max-datepicker-year-btn {
+                    height: 40px;
+                    border: none;
+                    background: transparent;
+                    border-radius: 6px;
+                    font-size: 0.85rem;
+                    color: var(--background-700);
+                    cursor: pointer;
+                    transition: all 0.15s ease;
+
+                    &:hover {
+                        background: var(--background-100, #f1f5f9);
+                    }
+
+                    &:focus-visible {
+                        outline: 2px solid var(--blue-600, #2563eb);
+                        outline-offset: 1px;
+                    }
+
+                    &.is-selected {
+                        background: var(--max-primary-500, #00768e);
+                        color: #fff;
+                        font-weight: 600;
+                    }
+
+                    &.is-out-of-range {
+                        opacity: 0.4;
+                    }
+                }
+            }
+
+            .max-datepicker-footer {
+                display: flex;
+                justify-content: space-between;
+                border-top: 1px solid var(--surface-border, #e2e8f0);
+                margin-top: 10px;
+                padding-top: 8px;
+
+                .max-datepicker-action-btn {
+                    background: transparent;
+                    border: none;
+                    font-size: 0.8rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    color: var(--blue-600, #2563eb);
+
+                    &:hover {
+                        background: var(--background-100, #f1f5f9);
+                    }
+
+                    &:focus-visible {
+                        outline: 2px solid var(--blue-600, #2563eb);
+                        outline-offset: 1px;
+                    }
+
+                    &.clear {
+                        color: var(--red-700, #b91c1c);
                     }
                 }
             }

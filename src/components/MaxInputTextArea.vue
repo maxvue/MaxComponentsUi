@@ -62,7 +62,7 @@
         isDone.value = props.done ?? null;
     };
 
-    const emit = defineEmits(['update:modelValue']);
+    const emit = defineEmits<{ 'update:modelValue': [value: string | undefined] }>();
     const temp_value = ref(props.modelValue);
 
     const textAreaEl = ref<HTMLTextAreaElement | null>(null);

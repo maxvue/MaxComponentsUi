@@ -11,7 +11,7 @@
         <div
             v-for="toast in toastStore.items"
             :key="toast.id"
-            :class="['max-toast-item', `severity-${toast.severity}`]"
+            :class="['max-toast-item', `severity-${toast.severity}`, { 'is-persistent': toast.duration === 0 }]"
             :role="toast.severity === 'error' ? 'alert' : 'status'"
             @mouseenter="toastStore.pause(toast.id)"
             @mouseleave="toastStore.resume(toast.id)"
@@ -25,26 +25,49 @@
 
             <!-- Conteúdo -->
             <div class="max-toast-content">
-                <div class="max-toast-title">{{ toast.title }}</div>
-                <div class="max-toast-message" v-if="toast.message">{{ toast.message }}</div>
+                <div class="max-toast-title" :title="toast.title">{{ toast.title }}</div>
+                <div
+                    v-if="toast.message"
+                    class="max-toast-message"
+                    :class="{ 'is-expanded': expandedToasts[toast.id] }"
+                >
+                    {{ toast.message }}
+                </div>
+
+                <div
+                    v-if="toast.message && (toast.message.length > 80 || toast.severity === 'error')"
+                    class="max-toast-actions"
+                >
+                    <button
+                        v-if="toast.message.length > 80"
+                        type="button"
+                        class="toast-text-action action-expand"
+                        @click.stop="toggleExpand(toast.id)"
+                    >
+                        {{ expandedToasts[toast.id] ? 'Ver menos' : 'Ver mais' }}
+                    </button>
+                    <button
+                        type="button"
+                        class="toast-text-action action-copy"
+                        @click.stop="copyToastContent(toast)"
+                    >
+                        {{ copiedToastId === toast.id ? 'Copiado!' : 'Copiar' }}
+                    </button>
+                </div>
             </div>
 
             <!-- Botão fechar -->
-            <button class="max-toast-close" @click="toastStore.remove(toast.id)" :aria-label="'Fechar notificação: ' + toast.title">
+            <button
+                type="button"
+                class="max-toast-close"
+                @click="toastStore.remove(toast.id)"
+                :aria-label="'Fechar notificação: ' + toast.title"
+            >
                 <MaxIcon i="mdi:close" size="1.1" color="inherit" />
             </button>
 
-            <!--
-                Barra de progresso.
-                LIMITAÇÃO CONHECIDA: `animationDuration` usa sempre `toast.duration` (a duração
-                original do toast), não o `remaining` atual. Após um pause()/resume() (hover),
-                `remaining` é recalculado e clampado em no mínimo 500ms (ver useToast.Store.ts,
-                função `pause`), mas a animação CSS reinicia com a duração total original — a
-                barra visual passa a dessincronizar do tempo real restante até a remoção do toast.
-                Corrigir plenamente exigiria derivar `animationDuration` de `toast.remaining` e
-                reiniciar a animação a cada resume(); fora do escopo desta correção pontual.
-            -->
-            <div class="max-toast-progress">
+            <!-- Barra de progresso (somente para toasts com duration > 0) -->
+            <div v-if="toast.duration > 0" class="max-toast-progress">
                 <div
                     :class="['max-toast-progress-bar', { paused: toast.paused }]"
                     :style="{ animationDuration: `${toast.remaining ?? toast.duration}ms` }"
@@ -55,16 +78,35 @@
 </template>
 
 <script setup lang="ts">
-    import { onBeforeUnmount } from 'vue';
+    import { ref } from 'vue';
     import { useToastStore } from '../stores/useToast.Store';
     import type { ToastItem } from '../stores/useToast.Store';
     import MaxIcon from './MaxIcon.vue';
 
     const toastStore = useToastStore();
 
-    onBeforeUnmount(() => {
-        toastStore.clear();
-    });
+    // NOTA: onBeforeUnmount removido para não apagar toasts globais durante navegação de rotas
+
+    const expandedToasts = ref<Record<string, boolean>>({});
+    const copiedToastId = ref<string | null>(null);
+
+    const toggleExpand = (id: string) => {
+        expandedToasts.value[id] = !expandedToasts.value[id];
+    };
+
+    const copyToastContent = async (toast: ToastItem) => {
+        const text = `${toast.title}\n${toast.message ?? ''}`.trim();
+        if (typeof navigator !== 'undefined' && navigator.clipboard) try {
+            await navigator.clipboard.writeText(text);
+            copiedToastId.value = toast.id;
+            setTimeout(() => {
+                if (copiedToastId.value === toast.id) copiedToastId.value = null;
+            }, 2000);
+        } catch {
+            // Fallback silencioso se clipboard API falhar
+        }
+
+    };
 
     /** Mapa de ícones padrão por severidade */
     const severityIconMap: Record<string, string> = {
@@ -118,21 +160,25 @@
                 0 1px 4px rgb(0 0 0 / 15%);
             transition: box-shadow 0.2s ease;
 
+            &.is-persistent {
+                padding-bottom: 14px;
+            }
+
             /* ── Cores por severidade ── */
             &.severity-success {
-                background: var(--success-650, #0f766e);
+                background: var(--max-success-600, #059669);
             }
 
             &.severity-info {
-                background: var(--info-600, #2563eb);
+                background: var(--max-info-600, #0284c7);
             }
 
             &.severity-warning {
-                background: var(--warn-600, #b45309);
+                background: var(--max-warning-600, #d97706);
             }
 
             &.severity-error {
-                background: var(--danger-600, #dc2626);
+                background: var(--max-danger-600, #dc2626);
             }
 
             &.severity-whatsapp {
@@ -159,9 +205,7 @@
                     font-weight: 600;
                     color: inherit;
                     line-height: 1.3;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
+                    overflow-wrap: break-word;
                 }
 
                 .max-toast-message {
@@ -173,6 +217,42 @@
                     -webkit-line-clamp: 2;
                     -webkit-box-orient: vertical;
                     overflow: hidden;
+                    overflow-wrap: break-word;
+
+                    &.is-expanded {
+                        display: block;
+                        -webkit-line-clamp: unset;
+                        overflow: visible;
+                        max-height: 200px;
+                        overflow-y: auto;
+                    }
+                }
+
+                .max-toast-actions {
+                    display: flex;
+                    gap: 10px;
+                    margin-top: 4px;
+
+                    .toast-text-action {
+                        background: transparent;
+                        border: none;
+                        padding: 0;
+                        font-size: 0.75rem;
+                        font-weight: 600;
+                        color: rgb(255 255 255 / 90%);
+                        text-decoration: underline;
+                        cursor: pointer;
+
+                        &:hover {
+                            color: #fff;
+                        }
+
+                        &:focus-visible {
+                            outline: 2px solid #fff;
+                            outline-offset: 2px;
+                            border-radius: 2px;
+                        }
+                    }
                 }
             }
 
@@ -193,6 +273,11 @@
                 &:hover {
                     background-color: rgb(255 255 255 / 15%);
                     color: #fff;
+                }
+
+                &:focus-visible {
+                    outline: 2px solid #fff;
+                    outline-offset: 2px;
                 }
             }
 

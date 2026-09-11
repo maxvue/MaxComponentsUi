@@ -4,7 +4,7 @@
              padding duplicado esmagava o svg (19,5px − 8 − 8 = 3,5px). O espaçamento entre
              ícone e texto é o column-gap do .max-title-2. -->
         <MaxIcon :i="resolvedIcon" v-if="resolvedIcon" :size="resolvedIconSize" class="title-icon" />
-        <div>
+        <div class="title-text-group">
             <div v-if="resolvedTitle" class="text-h1">{{ resolvedTitle }}</div>
             <div v-if="resolvedSubtitle" class="text-h2" v-html="resolvedSubtitle"></div>
         </div>
@@ -49,17 +49,22 @@
             margin-bottom: 0.5rem;
         }
 
-        .text-h1 {
-            font-weight: 500;
-            text-transform: uppercase;
-            font-size: 0.9rem;
-            color: var(--background-775);
-        }
+        .title-text-group {
+            display: flex;
+            flex-direction: column;
 
-        .text-h2 {
-            font-weight: 300;
-            font-size: 0.85rem;
-            color: var(--background-750);
+            .text-h1 {
+                font-weight: 500;
+                text-transform: uppercase;
+                font-size: 0.9rem;
+                color: var(--background-775);
+            }
+
+            .text-h2 {
+                font-weight: 300;
+                font-size: 0.85rem;
+                color: var(--background-750);
+            }
         }
     }
 </style>

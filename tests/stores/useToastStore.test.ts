@@ -181,4 +181,40 @@ describe('useToastStore', () => {
 
         expect(store.items).toHaveLength(0);
     });
+
+    describe('Toasts Persistentes (duration: 0)', () => {
+        it('add() com duration: 0 não cria timer e não auto-remove o toast', () => {
+            const store = useToastStore();
+            const id = store.add({ title: 'Erro Crítico', duration: 0 });
+
+            expect(store.items).toHaveLength(1);
+            expect(store.items[0].duration).toBe(0);
+            expect(store.items[0].timerId).toBeNull();
+
+            // Avança muito tempo no relógio
+            vi.advanceTimersByTime(60000);
+            expect(store.items).toHaveLength(1);
+
+            // Permite remoção manual explícita
+            store.remove(id);
+            expect(store.items).toHaveLength(0);
+        });
+
+        it('pause() e resume() ignoram toasts com duration: 0 sem agendar timer', () => {
+            const store = useToastStore();
+            const id = store.add({ title: 'Sticky', duration: 0 });
+
+            store.pause(id);
+            expect(store.items[0].paused).toBe(false);
+            expect(store.items[0].timerId).toBeNull();
+
+            store.resume(id);
+            expect(store.items[0].paused).toBe(false);
+            expect(store.items[0].timerId).toBeNull();
+
+            vi.advanceTimersByTime(10000);
+            expect(store.items).toHaveLength(1);
+        });
+    });
 });
+

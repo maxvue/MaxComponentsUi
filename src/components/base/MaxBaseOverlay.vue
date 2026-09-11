@@ -103,7 +103,18 @@
         if (event.key === 'Escape') close();
     };
 
-    const onReposition = () => position();
+    let rafId: number | null = null;
+
+    const onReposition = () => {
+        if (rafId !== null) return;
+
+        if (typeof requestAnimationFrame !== 'undefined') rafId = requestAnimationFrame(() => {
+            rafId = null;
+            position();
+        });
+        else position();
+
+    };
 
     const attachListeners = () => {
         document.addEventListener('click', onClickOutside);
@@ -113,6 +124,11 @@
     };
 
     const detachListeners = () => {
+        if (rafId !== null) {
+            if (typeof cancelAnimationFrame !== 'undefined') cancelAnimationFrame(rafId);
+
+            rafId = null;
+        }
         document.removeEventListener('click', onClickOutside);
         document.removeEventListener('keydown', onKeydown);
         window.removeEventListener('scroll', onReposition, true);

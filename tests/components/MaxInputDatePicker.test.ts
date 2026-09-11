@@ -239,4 +239,65 @@ describe('MaxInputDatePicker', () => {
         expect((wrapper.vm as any).internalDate.getDate()).toBe(20);
         expect(wrapper.find('input').element.value).toBe('20/11/2025');
     });
+
+    it('permite alternar entre vistas date, month e year', async () => {
+        const wrapper = mount(MaxInputDatePicker, {
+            props: { modelValue: '2024-06-15' },
+            attachTo: document.body
+        });
+        await wrapper.find('input').trigger('click');
+        await wrapper.vm.$nextTick();
+
+        expect((wrapper.vm as any).currentView).toBe('date');
+        expect(document.body.querySelector('.max-datepicker-grid')).toBeTruthy();
+
+        const titleBtn = document.body.querySelector('.max-datepicker-title-btn') as HTMLButtonElement;
+        titleBtn.click();
+        await wrapper.vm.$nextTick();
+
+        expect((wrapper.vm as any).currentView).toBe('month');
+        expect(document.body.querySelectorAll('.max-datepicker-month-btn').length).toBe(12);
+
+        titleBtn.click();
+        await wrapper.vm.$nextTick();
+
+        expect((wrapper.vm as any).currentView).toBe('year');
+        expect(document.body.querySelectorAll('.max-datepicker-year-btn').length).toBe(12);
+    });
+
+    it('respeita restrições de minDate e maxDate', async () => {
+        const wrapper = mount(MaxInputDatePicker, {
+            props: {
+                modelValue: '2024-06-15',
+                minDate: '2024-06-10',
+                maxDate: '2024-06-20'
+            },
+            attachTo: document.body
+        });
+        await wrapper.find('input').trigger('click');
+        await wrapper.vm.$nextTick();
+
+        expect((wrapper.vm as any).isDateDisabled(new Date(2024, 5, 5))).toBe(true);
+        expect((wrapper.vm as any).isDateDisabled(new Date(2024, 5, 15))).toBe(false);
+        expect((wrapper.vm as any).isDateDisabled(new Date(2024, 5, 25))).toBe(true);
+    });
+
+    it('renderiza rodapé com Hoje e Limpar quando showButtonBar=true', async () => {
+        const wrapper = mount(MaxInputDatePicker, {
+            props: { modelValue: '2024-06-15', showButtonBar: true },
+            attachTo: document.body
+        });
+        await wrapper.find('input').trigger('click');
+        await wrapper.vm.$nextTick();
+
+        const footer = document.body.querySelector('.max-datepicker-footer');
+        expect(footer).toBeTruthy();
+
+        const clearBtn = footer?.querySelector('.clear') as HTMLButtonElement;
+        clearBtn.click();
+        await wrapper.vm.$nextTick();
+
+        expect((wrapper.vm as any).internalDate).toBeNull();
+        expect((wrapper.vm as any).isOpen).toBe(false);
+    });
 });

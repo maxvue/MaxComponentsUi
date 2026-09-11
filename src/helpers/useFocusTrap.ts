@@ -49,7 +49,12 @@ export const useFocusTrap = (el: Ref<HTMLElement | null>): FocusTrap => {
         previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
         nextTick(() => {
             const items = focusable();
-            items[0]?.focus();
+            if (items.length > 0) items[0]?.focus();
+            else if (el.value) {
+                if (!el.value.hasAttribute('tabindex')) el.value.setAttribute('tabindex', '-1');
+
+                el.value.focus();
+            }
         });
     };
 

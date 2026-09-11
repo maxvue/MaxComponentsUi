@@ -9,7 +9,7 @@
             conscientemente (ver achado 38 / CLAUDE.md).
         -->
         <input
-            class="p-inputtext p-component"
+            class="max-input-native"
             :type="props.type"
             :placeholder="props.placeholder"
             :disabled="props.disabled"
@@ -100,7 +100,7 @@
         return attrs_error_message ?? 'Valor inválido';
     });
 
-    const emit = defineEmits(['update:modelValue']);
+    const emit = defineEmits<{ 'update:modelValue': [value: string | number | undefined] }>();
     watch(temp_value, () => {
         isDone.value = testIsDone();
         emit('update:modelValue', temp_value.value);

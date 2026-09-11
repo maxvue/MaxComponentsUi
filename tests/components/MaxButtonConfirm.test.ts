@@ -53,8 +53,8 @@ describe('MaxButtonConfirm', () => {
         expect(store.show).toBe(true);
         expect(store.message).toBe('Excluir item?');
         expect(store.messageIcon).toBe('mdi:alert');
-        expect(store.acceptProps).toEqual(acceptProps);
-        expect(store.rejectProps).toEqual(rejectProps);
+        expect(store.acceptProps).toEqual(expect.objectContaining(acceptProps));
+        expect(store.rejectProps).toEqual(expect.objectContaining(rejectProps));
     });
 
     it('usa mensagem padrão "Deseja continuar?" quando nenhuma mensagem é informada', async () => {

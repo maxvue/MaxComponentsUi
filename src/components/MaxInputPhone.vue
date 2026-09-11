@@ -22,7 +22,7 @@
                     </div>
                 </div>
             </div>
-            <input type="text" slot-b v-model="phone" v-maska:unmaskedValue.unmasked="maskValue" :placeholder="country.value === 55 ? '(99) 9 9999 - 9999' : ''" class="p-inputtext phone-number-input" @focus="onFocus = true" @blur="onFocus = false" />
+            <input type="tel" inputmode="tel" slot-b v-model="phone" v-maska:unmaskedValue.unmasked="maskValue" :placeholder="country.value === 55 ? '(99) 9 9999 - 9999' : ''" class="max-input-native phone-number-input" @focus="onFocus = true" @blur="onFocus = false" />
         </div>
 
         <Teleport to="body" v-if="isOpen">
@@ -38,7 +38,7 @@
                         ref="filter_el"
                         type="text"
                         v-model="filter_text"
-                        class="p-inputtext"
+                        class="max-input-native max-phone-filter-input"
                         :placeholder="'Buscar país ou código'"
                         aria-label="Buscar país ou código"
                         @keydown="onFilterKeydown"
@@ -397,6 +397,7 @@
         grid-column: 2 !important;
     }
 
+    :deep(.max-input-native),
     :deep(.p-inputtext) {
         padding: 0 2px !important;
     }

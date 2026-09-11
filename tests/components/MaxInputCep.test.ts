@@ -115,12 +115,18 @@ describe('MaxInputCep', () => {
         expect(input.element.value).toBe('01001-000');
     });
 
-    // A classe visual é o principal risco de regressão da migração: sem ela o campo perde
-    // altura (36px), largura 100% e estilos de estado, todos definidos no InputBase.
-    it('preserva as classes visuais p-inputtext/p-component no <input> nativo', () => {
+    it('utiliza a classe semântica max-input-native, define inputmode numeric e remove classes legadas', () => {
         const wrapper = mountCep({ modelValue: '01001000' });
         const input = wrapper.find('input');
-        expect(input.classes()).toContain('p-inputtext');
-        expect(input.classes()).toContain('p-component');
+        expect(input.classes()).toContain('max-input-native');
+        expect(input.classes()).not.toContain('p-inputtext');
+        expect(input.classes()).not.toContain('p-component');
+        expect(input.attributes('inputmode')).toBe('numeric');
+    });
+
+    it('exibe o ícone line-md:loading-loop quando loading=true', () => {
+        const wrapper = mountCep({ loading: true });
+        const inputBase = wrapper.findComponent(InputBase);
+        expect(inputBase.props('iconRight')).toBe('line-md:loading-loop');
     });
 });

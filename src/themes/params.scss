@@ -55,6 +55,7 @@
     }
 }
 
+.max-button,
 .p-button {
     [disabled] {
         cursor: not-allowed !important;
@@ -152,11 +153,6 @@
     input {
         text-transform: lowercase !important;
     }
-}
-
-:root {
-    --max-form-field-disabled-background: red !important;
-    --max-inputtext-disabled-background: red !important;
 }
 
 .max-tooltip {

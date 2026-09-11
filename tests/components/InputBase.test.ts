@@ -80,7 +80,8 @@ describe('InputBase.vue', () => {
             props: { label: 'Only label' }
         });
         expect(wrapper.find('.input-message').exists()).toBe(true);
-        expect(wrapper.find('.input-message .message-text').text()).toBe('');
+        expect(wrapper.find('.input-message').text()).toBe('');
+        expect(wrapper.find('.input-message .message-text').exists()).toBe(false);
     });
 
     it('renders both left and right icons with the slot between them', () => {
@@ -203,5 +204,83 @@ describe('InputBase.vue', () => {
         const statusIcon = wrapper.find('.input-status-icon');
         expect(statusIcon.exists()).toBe(true);
         expect(statusIcon.classes()).toContain('with-icon-right');
+    });
+
+    it('exibe mensagem de erro quando informada como string', () => {
+        const wrapper = mount(InputBase, {
+            props: { error: 'Campo obrigatório' }
+        });
+        expect(wrapper.find('.input-message').exists()).toBe(true);
+        const textSpan = wrapper.find('.input-message .message-text');
+        expect(textSpan.exists()).toBe(true);
+        expect(textSpan.text()).toBe('Campo obrigatório');
+        expect(wrapper.find('.max-input-main-div').classes()).toContain('error');
+        expect(wrapper.find('.max-input-main-div').classes()).toContain('is-error');
+        expect(wrapper.find('.input-message').attributes('role')).toBe('alert');
+    });
+
+    it('exibe mensagem de aviso (caution) quando informada como string', () => {
+        const wrapper = mount(InputBase, {
+            props: { caution: 'Atenção ao preenchimento' }
+        });
+        expect(wrapper.find('.input-message').exists()).toBe(true);
+        const textSpan = wrapper.find('.input-message .message-text');
+        expect(textSpan.exists()).toBe(true);
+        expect(textSpan.text()).toBe('Atenção ao preenchimento');
+        expect(wrapper.find('.max-input-main-div').classes()).toContain('caution');
+        expect(wrapper.find('.max-input-main-div').classes()).toContain('is-caution');
+    });
+
+    it('exibe mensagem neutra/informativa quando informada via message ou msg', () => {
+        const wrapper = mount(InputBase, {
+            props: { message: 'Informe seu nome completo' }
+        });
+        expect(wrapper.find('.input-message').exists()).toBe(true);
+        const textSpan = wrapper.find('.input-message .message-text');
+        expect(textSpan.exists()).toBe(true);
+        expect(textSpan.text()).toBe('Informe seu nome completo');
+        expect(wrapper.find('.input-message').attributes('role')).toBeUndefined();
+    });
+
+    it('aplica classes semânticas BEM correspondentes às variantes', () => {
+        const wrapper = mount(InputBase, {
+            props: {
+                float: true,
+                done: true,
+                textCenter: true,
+                textRight: true,
+                inLine: true
+            }
+        });
+        const root = wrapper.find('.max-input-main-div');
+        expect(root.classes()).toContain('float');
+        expect(root.classes()).toContain('is-float');
+        expect(root.classes()).toContain('done');
+        expect(root.classes()).toContain('is-done');
+        expect(root.classes()).toContain('text-center');
+        expect(root.classes()).toContain('is-text-center');
+        expect(root.classes()).toContain('text-right');
+        expect(root.classes()).toContain('is-text-right');
+        expect(root.classes()).toContain('in-line');
+        expect(root.classes()).toContain('is-inline');
+    });
+
+    it('oculta .input-message quando noStatus é true', () => {
+        const wrapper = mount(InputBase, {
+            props: { error: 'Erro crítico', noStatus: true }
+        });
+        expect(wrapper.find('.input-message').exists()).toBe(false);
+        const root = wrapper.find('.max-input-main-div');
+        expect(root.classes()).toContain('no-status');
+        expect(root.classes()).not.toContain('error');
+        expect(root.classes()).not.toContain('is-error');
+    });
+
+    it('aplica classe no-message quando noMessage é true', () => {
+        const wrapper = mount(InputBase, {
+            props: { message: 'Mensagem oculta', noMessage: true }
+        });
+        const root = wrapper.find('.max-input-main-div');
+        expect(root.classes()).toContain('no-message');
     });
 });

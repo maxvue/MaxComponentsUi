@@ -175,6 +175,25 @@ describe('MaxBottomMenu', () => {
         expect(wrapperCurvo.classes()).toContain('is-curved');
         expect(wrapperCurvo.find('.img-background').exists()).toBe(true);
     });
+
+    it('deve renderizar graciosamente sem erros quando tabs for undefined', () => {
+        expect(() => {
+            const wrapper = mount(MaxBottomMenu, {
+                props: { tabs: undefined }
+            });
+            expect(wrapper.find('.max-bottom-menu').exists()).toBe(true);
+        }).not.toThrow();
+    });
+
+    it('deve renderizar graciosamente sem erros quando tabs for nulo (null as any)', () => {
+        expect(() => {
+            const wrapper = mount(MaxBottomMenu, {
+                props: { tabs: null as any }
+            });
+            expect(wrapper.find('.max-bottom-menu').exists()).toBe(true);
+            expect(wrapper.findAll('.bottom-menu-tab')).toHaveLength(0);
+        }).not.toThrow();
+    });
 });
 
 describe('MaxContainerApp', () => {

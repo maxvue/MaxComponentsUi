@@ -2,27 +2,44 @@
     <teleport :to="'#max-tab-' + toValue(tabs_info?.tabs_id)" v-if="toValue(tabs_info?.tabs_id) && is_mounted">
         <div
             class="max-tab-item-title"
+            :class="{ 'max-tab-active': is_active, 'max-tab-disabled': props.disabled }"
             :active="is_active"
             :disabled="props.disabled || undefined"
+            role="tab"
+            :id="`tab-${uniqueTabId}`"
+            :aria-controls="`tabpanel-${uniqueTabId}`"
+            :aria-selected="is_active ? 'true' : 'false'"
+            :tabindex="is_active ? 0 : -1"
             @click="onTitleClick"
+            @keydown.enter.prevent="onTitleClick"
+            @keydown.space.prevent="onTitleClick"
         >
-            <max-icon :icon="props.icon ?? props.i" v-if="props.icon || props.i" size="1.2" />
+            <MaxIcon :icon="props.icon ?? props.i" v-if="props.icon || props.i" size="1.2" />
             <slot name="title">{{ props.title }}</slot>
         </div>
     </teleport>
     <teleport :to="'#max-tab-buttons-' + toValue(tabs_info?.tabs_id)" v-if="toValue(tabs_info?.tabs_id) && is_mounted && is_active && props.actionButton && (props.actionButtonLabel || props.actionButtonIcon)">
         <div @click="props.actionButton" class="button-tab-item">
-            <max-button :label="props.actionButtonLabel" :icon="props.actionButtonIcon" v-if="props.actionButtonLabel" />
-            <max-icon-button :icon="props.actionButtonIcon" v-else />
+            <MaxButton :label="props.actionButtonLabel" :icon="props.actionButtonIcon" v-if="props.actionButtonLabel" />
+            <MaxIconButton :icon="props.actionButtonIcon" v-else />
         </div>
     </teleport>
-    <div class="max-tab-item-content" v-if="is_active">
+    <div
+        class="max-tab-item-content"
+        v-if="is_active"
+        role="tabpanel"
+        :id="`tabpanel-${uniqueTabId}`"
+        :aria-labelledby="`tab-${uniqueTabId}`"
+        tabindex="0"
+    >
         <slot></slot>
     </div>
 </template>
 
 <script setup lang="ts">
     import { inject, ref, onMounted, toValue, computed } from 'vue';
+    import { Random } from '@maxvue/max-use';
+    import MaxIcon from './MaxIcon.vue';
     import MaxButton from './MaxButton.vue';
     import MaxIconButton from './MaxIconButton.vue';
 
@@ -37,13 +54,18 @@
         disabled?: boolean;
     };
 
-    const props = withDefaults( defineProps<Props>(), { });
+    const props = withDefaults(defineProps<Props>(), {});
 
     const tab_id = ref(null);
 
     const tabs_info: any = inject('tabs_info');
 
     const is_mounted = ref(false);
+
+    const fallbackId = Random();
+    const uniqueTabId = computed(() => {
+        return String(props.value ?? tab_id.value ?? fallbackId);
+    });
 
     // Aba desabilitada não seleciona — o atributo [disabled] cuida do visual.
     function onTitleClick() {
@@ -59,14 +81,12 @@
         setTimeout(() => {
             // Usa o `value` informado como identificador da aba; sem ele, mantém a
             // numeração automática por ordem de montagem (compatibilidade).
-            if (! tab_id.value) tab_id.value = props.value ?? tabs_info.add_count_tabs();
+            if (!tab_id.value) tab_id.value = props.value ?? tabs_info.add_count_tabs();
         }, 0);
         setTimeout(() => {
             if (toValue(tabs_info?.active_tab) == 0 || toValue(tabs_info?.active_tab) === '' || toValue(tabs_info?.active_tab) === undefined) tabs_info?.selectTab(tab_id.value);
         }, 10);
-
     });
-
 </script>
 
 <style lang="scss" scoped>
@@ -79,6 +99,14 @@
     cursor: pointer;
     padding: 10px 20px;
     position: relative;
+    user-select: none;
+    transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+
+    &:focus-visible {
+        outline: 2px solid var(--max-primary-500, #00768E);
+        outline-offset: -2px;
+        border-radius: 4px;
+    }
 
     &::before {
         content: '';
@@ -146,5 +174,11 @@
     padding: 1rem;
     overflow: hidden;
     min-height: 100%;
+
+    &:focus-visible {
+        outline: 2px solid var(--max-primary-500, #00768E);
+        outline-offset: -2px;
+        border-radius: 4px;
+    }
 }
 </style>

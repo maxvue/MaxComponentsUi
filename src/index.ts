@@ -2,8 +2,8 @@
 // estes estilos na tag <head> em tempo de import no runtime do consumidor. NÃO REMOVER.
 import 'virtual:uno.css';
 
-import { defineAsyncComponent } from 'vue';
-export { MaxStyle } from './styles/style';
+import { defineAsyncComponent, type App, type Plugin } from 'vue';
+export { MaxStyle, type MaxThemePreset, type SemanticColorPalette } from './styles/style';
 export { default as ptBR } from './locales/pt-br';
 
 // NÃO REMOVER O INPUTBASE DO INDEX.TS
@@ -225,13 +225,16 @@ export { clearMaxCache, registerMaxCacheKey, isMaxCacheKey, ICON_CACHE_KEY } fro
 
 import Tooltip from './directives/tooltip';
 
+export interface MaxPluginOptions {
+    theme?: Record<string, unknown>;
+    prefix?: string;
+    ripple?: boolean;
+    [key: string]: unknown;
+}
 
-/**
- * @param {import('vue').App} app
- * @param {any} [_options]
- */
-export const install = (app: any, _options: any = {}) => {
+export const install: Plugin['install'] = (app: App, options: MaxPluginOptions = {}) => {
     app.directive('tooltip', Tooltip);
+    app.provide?.('maxComponentsOptions', options);
 };
 
 export default {

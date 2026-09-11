@@ -379,4 +379,125 @@ describe('MaxTableFields.vue', () => {
         expect(thButtons.attributes('style')).toContain('width: 160px');
         expect(tdButtons.attributes('style')).toContain('width: 160px');
     });
+
+    describe('Loading, Empty State e Resiliência (Etapa 11)', () => {
+        it('deve renderizar a linha de loading com spinner e mensagem correta quando loading: true', () => {
+            const wrapper = mount(MaxTableFields, {
+                props: {
+                    columns: [{ field: 'name', header: 'Nome' }],
+                    list: [],
+                    loading: true,
+                    loadingMessage: 'Carregando registros de teste...'
+                }
+            });
+
+            expect(wrapper.find('.max-table-fields-loading').exists()).toBe(true);
+            expect(wrapper.find('.max-table-spinner').exists()).toBe(true);
+            expect(wrapper.find('.max-table-loading-text').text()).toBe('Carregando registros de teste...');
+        });
+
+        it('NÃO deve renderizar o empty state quando loading: true mesmo se a lista for vazia', () => {
+            const wrapper = mount(MaxTableFields, {
+                props: {
+                    columns: [{ field: 'name', header: 'Nome' }],
+                    list: [],
+                    loading: true
+                }
+            });
+
+            expect(wrapper.find('.max-table-fields-loading').exists()).toBe(true);
+            expect(wrapper.find('.max-table-fields-empty').exists()).toBe(false);
+            expect(wrapper.text()).not.toContain('Nenhum registro encontrado');
+        });
+
+        it('deve renderizar o empty state quando loading: false e a lista for vazia', () => {
+            const wrapper = mount(MaxTableFields, {
+                props: {
+                    columns: [{ field: 'name', header: 'Nome' }],
+                    list: [],
+                    loading: false,
+                    emptyMessage: 'Nenhum dado disponível'
+                }
+            });
+
+            expect(wrapper.find('.max-table-fields-loading').exists()).toBe(false);
+            expect(wrapper.find('.max-table-fields-empty').exists()).toBe(true);
+            expect(wrapper.find('.max-table-empty-text').text()).toBe('Nenhum dado disponível');
+        });
+
+        it('deve permitir customização via slot #loading', () => {
+            const wrapper = mount(MaxTableFields, {
+                props: {
+                    columns: [{ field: 'name', header: 'Nome' }],
+                    list: [],
+                    loading: true
+                },
+                slots: {
+                    loading: '<div class="custom-loading-slot">Aguarde, carregando...</div>'
+                }
+            });
+
+            expect(wrapper.find('.custom-loading-slot').exists()).toBe(true);
+            expect(wrapper.text()).toContain('Aguarde, carregando...');
+        });
+
+        it('deve permitir customização via slot #empty', () => {
+            const wrapper = mount(MaxTableFields, {
+                props: {
+                    columns: [{ field: 'name', header: 'Nome' }],
+                    list: [],
+                    loading: false
+                },
+                slots: {
+                    empty: '<div class="custom-empty-slot">Vazio por aqui</div>'
+                }
+            });
+
+            expect(wrapper.find('.custom-empty-slot').exists()).toBe(true);
+            expect(wrapper.text()).toContain('Vazio por aqui');
+        });
+
+        it('deve renderizar graciosamente sem quebrar quando columns for undefined', () => {
+            expect(() => {
+                const wrapper = mount(MaxTableFields, {
+                    props: { columns: undefined, list: [] }
+                });
+                expect(wrapper.find('.max-table-fields').exists()).toBe(true);
+            }).not.toThrow();
+        });
+
+        it('deve renderizar graciosamente sem quebrar quando list for undefined ou null', () => {
+            expect(() => {
+                const wrapper = mount(MaxTableFields, {
+                    props: { columns: [{ field: 'id', header: 'ID' }], list: undefined }
+                });
+                expect(wrapper.find('.max-table-fields-body').exists()).toBe(true);
+                expect(wrapper.text()).toContain('Nenhum registro encontrado');
+            }).not.toThrow();
+
+            expect(() => {
+                const wrapper = mount(MaxTableFields, {
+                    props: { columns: [{ field: 'id', header: 'ID' }], list: null as any }
+                });
+                expect(wrapper.find('.max-table-fields-body').exists()).toBe(true);
+                expect(wrapper.text()).toContain('Nenhum registro encontrado');
+            }).not.toThrow();
+        });
+
+        it('deve renderizar sem quebrar quando columns e list forem ambos undefined ou null', () => {
+            expect(() => {
+                const wrapper = mount(MaxTableFields, {
+                    props: { columns: undefined, list: undefined }
+                });
+                expect(wrapper.find('.max-table-fields').exists()).toBe(true);
+            }).not.toThrow();
+
+            expect(() => {
+                const wrapper = mount(MaxTableFields, {
+                    props: { columns: null as any, list: null as any }
+                });
+                expect(wrapper.find('.max-table-fields').exists()).toBe(true);
+            }).not.toThrow();
+        });
+    });
 });

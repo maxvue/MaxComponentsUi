@@ -344,4 +344,108 @@ describe('MaxTable', () => {
             expect(buttons[2].text()).toBe('Ação 3');
         });
     });
+
+    describe('Loading e Empty State (Etapa 11)', () => {
+        it('renderiza o estado de loading no Modo Template-Driven', () => {
+            const wrapper = mount(MaxTable, {
+                props: {
+                    loading: true,
+                    loadingMessage: 'Aguarde, carregando...'
+                },
+                slots: {
+                    default: '<tr><td>Linha</td></tr>'
+                }
+            });
+
+            expect(wrapper.find('.max-table-loading-row').exists()).toBe(true);
+            expect(wrapper.find('.max-table-spinner').exists()).toBe(true);
+            expect(wrapper.text()).toContain('Aguarde, carregando...');
+            expect(wrapper.text()).not.toContain('Linha');
+        });
+
+        it('renderiza o estado de loading no Modo Data-Driven e oculta registros', () => {
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: [{ id: 1, name: 'Carlos' }],
+                    loading: true
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome' })
+                    ]
+                }
+            });
+
+            expect(wrapper.find('.max-table-loading-row').exists()).toBe(true);
+            expect(wrapper.find('.max-table-spinner').exists()).toBe(true);
+            expect(wrapper.text()).not.toContain('Carlos');
+        });
+
+        it('NÃO renderiza o empty state quando loading: true no Modo Data-Driven', () => {
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: [],
+                    loading: true
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome' })
+                    ]
+                }
+            });
+
+            expect(wrapper.find('.max-table-loading-row').exists()).toBe(true);
+            expect(wrapper.find('.max-table-empty-row').exists()).toBe(false);
+            expect(wrapper.text()).not.toContain('Nenhum registro encontrado');
+        });
+
+        it('renderiza o empty state quando empty: true mesmo havendo registros no Modo Data-Driven', () => {
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: [{ id: 1, name: 'Carlos' }],
+                    empty: true,
+                    emptyMessage: 'Forçado vazio'
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome' })
+                    ]
+                }
+            });
+
+            expect(wrapper.find('.max-table-empty-row').exists()).toBe(true);
+            expect(wrapper.text()).toContain('Forçado vazio');
+            expect(wrapper.text()).not.toContain('Carlos');
+        });
+
+        it('permite customizar o estado de loading via slot #loading', () => {
+            const wrapper = mount(MaxTable, {
+                props: {
+                    loading: true
+                },
+                slots: {
+                    loading: '<div class="custom-loader">Carregando dados custom...</div>'
+                }
+            });
+
+            expect(wrapper.find('.custom-loader').exists()).toBe(true);
+            expect(wrapper.text()).toContain('Carregando dados custom...');
+        });
+
+        it('renderiza empty state no Modo Template-Driven quando empty: true', () => {
+            const wrapper = mount(MaxTable, {
+                props: {
+                    empty: true,
+                    emptyMessage: 'Sem linhas'
+                },
+                slots: {
+                    default: '<tr><td>Linha</td></tr>'
+                }
+            });
+
+            expect(wrapper.find('.max-table-empty-row').exists()).toBe(true);
+            expect(wrapper.text()).toContain('Sem linhas');
+            expect(wrapper.text()).not.toContain('Linha');
+        });
+    });
 });

@@ -1,5 +1,15 @@
 <template>
-    <div ref="drop_zone_ref" :class="`max-input-file-upload-big input-upload-file-big-main-div ${isOverDropZone ? 'in-drop' : 'not-in-drop'}`" @click="onAreaClick" >
+    <div
+        ref="drop_zone_ref"
+        :class="`max-input-file-upload-big input-upload-file-big-main-div ${isOverDropZone ? 'in-drop' : 'not-in-drop'} ${props.disabled ? 'is-disabled' : ''}`"
+        role="button"
+        :tabindex="props.disabled ? -1 : 0"
+        :aria-label="ariaLabelComputed"
+        :aria-disabled="props.disabled ? 'true' : undefined"
+        @click="onAreaClick"
+        @keydown.enter.prevent="onAreaClick"
+        @keydown.space.prevent="onAreaClick"
+    >
         <!-- Área principal clicável -->
         <div class="upload-area" v-if="!uploading && !showError">
             <slot>
@@ -31,7 +41,7 @@
     </div>
 </template>
 <script setup lang="ts">
-    import { defineAsyncComponent, ref, watch } from 'vue';
+    import { defineAsyncComponent, ref, computed, watch } from 'vue';
     import { useFileDialog, useDropZone } from '@maxvue/max-use';
     import MaxIcon from './MaxIcon.vue';
 
@@ -63,6 +73,12 @@
 
     const showError = ref(false);
     const drop_zone_ref = ref<HTMLElement | null>(null);
+
+    const ariaLabelComputed = computed(() => {
+        if (props.label && props.label.trim()) return `${props.label}. Pressione Enter ou Espaço para escolher arquivos`;
+
+        return 'Área de envio de arquivos. Pressione Enter ou Espaço para escolher arquivos para upload';
+    });
 
     watch(showError, (val) => {
         if (val) setTimeout(() => { showError.value = false; }, 3000);
@@ -122,6 +138,16 @@
         display: grid;
         place-items: center;
         transition: outline-color 0.2s, background-color 0.2s;
+
+        &:focus-visible {
+            outline: 2px solid var(--max-primary-500, #00768e);
+            outline-offset: 2px;
+        }
+
+        &.is-disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
 
         &.not-in-drop {
             &:hover {

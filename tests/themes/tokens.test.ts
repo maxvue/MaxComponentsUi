@@ -30,11 +30,37 @@ const SCHEME_INDEPENDENT: Record<string, string> = {
     '--max-primary-600': '#005F77',
     '--max-orange-500': '#f97316',
     '--max-red-600': '#dc2626',
+    '--max-success-500': '#10B981',
+    '--max-success-600': '#059669',
+    '--max-danger-500': '#EF4444',
+    '--max-danger-600': '#dc2626',
+    '--max-warning-500': '#F59E0B',
+    '--max-warning-600': '#d97706',
+    '--max-info-500': '#0EA5E9',
+    '--max-info-600': '#0284c7',
+    '--max-whatsapp-500': '#25d366',
+    '--max-whatsapp-600': '#1da851',
     '--max-floatlabel-active-font-weight': '400',
     '--max-floatlabel-on-border-radius': '2px'
 };
 
 const SCHEME_DEPENDENT: Record<string, { light: string; dark: string }> = {
+    '--max-focus-ring-color': {
+        light: 'var(--max-primary-500, #00768E)',
+        dark: 'var(--max-primary-400, #178DA5)'
+    },
+    '--max-focus-ring-offset-color': {
+        light: 'var(--background-0, #ffffff)',
+        dark: 'var(--background-900, #18181b)'
+    },
+    '--max-focus-ring': {
+        light: '0 0 0 2px var(--background-0, #ffffff), 0 0 0 4px var(--max-primary-500, #00768E)',
+        dark: '0 0 0 2px var(--max-focus-ring-offset-color), 0 0 0 4px var(--max-focus-ring-color)'
+    },
+    '--max-focus-outline': {
+        light: '2px solid var(--max-primary-500, #00768E)',
+        dark: '2px solid var(--max-focus-ring-color)'
+    },
     '--max-inputtext-border-color': { light: '#cbd5e1', dark: '#52525b' },
     '--max-inputtext-disabled-background': { light: '#e2e8f0', dark: '#3f3f46' },
     '--max-inputtext-focus-border-color': { light: '#00768E', dark: '#178DA5' },
@@ -52,7 +78,7 @@ const SCHEME_DEPENDENT: Record<string, { light: string; dark: string }> = {
 };
 
 describe('themes/tokens.scss', () => {
-    it('declara os 23 tokens em :root', () => {
+    it('declara os 37 tokens em :root', () => {
         const total = Object.keys(SCHEME_INDEPENDENT).length + Object.keys(SCHEME_DEPENDENT).length;
         expect(Object.keys(ROOT)).toHaveLength(total);
     });

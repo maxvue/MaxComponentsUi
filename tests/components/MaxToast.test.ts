@@ -144,7 +144,7 @@ describe('MaxToast', () => {
         expect(store.items[0].paused).toBe(false);
     });
 
-    it('desmontar MaxToast executa toastStore.clear() limpando items e timers da store', async () => {
+    it('não limpa a store ao desmontar o componente (preserva toasts entre rotas)', async () => {
         const pinia = createPinia();
         setActivePinia(pinia);
         const store = useToastStore(pinia);
@@ -166,7 +166,69 @@ describe('MaxToast', () => {
 
         wrapper.unmount();
 
-        expect(store.items.length).toBe(0);
+        expect(store.items.length).toBe(2);
+    });
+
+    describe('Toasts Persistentes e Ações de Mensagem', () => {
+        it('toast persistente (duration: 0) possui classe is-persistent e não renderiza barra de progresso', async () => {
+            const wrapper = mountToast((store) => {
+                store.add({ title: 'Erro Crítico', duration: 0, severity: 'error' });
+            });
+            await flushPromises();
+
+            const item = wrapper.find('.max-toast-item');
+            expect(item.classes()).toContain('is-persistent');
+            expect(wrapper.find('.max-toast-progress').exists()).toBe(false);
+        });
+
+        it('exibe botão "Ver mais" / "Ver menos" para mensagens longas (> 80 caracteres) e alterna expansão', async () => {
+            const longMessage = 'Esta é uma mensagem de erro extremamente longa e detalhada que ultrapassa oitenta caracteres facilmente.';
+            const wrapper = mountToast((store) => {
+                store.add({ title: 'Erro Longo', message: longMessage, severity: 'error' });
+            });
+            await flushPromises();
+
+            const expandBtn = wrapper.find('.action-expand');
+            expect(expandBtn.exists()).toBe(true);
+            expect(expandBtn.text()).toBe('Ver mais');
+
+            const messageEl = wrapper.find('.max-toast-message');
+            expect(messageEl.classes()).not.toContain('is-expanded');
+
+            await expandBtn.trigger('click');
+            expect(expandBtn.text()).toBe('Ver menos');
+            expect(messageEl.classes()).toContain('is-expanded');
+
+            await expandBtn.trigger('click');
+            expect(expandBtn.text()).toBe('Ver mais');
+            expect(messageEl.classes()).not.toContain('is-expanded');
+        });
+
+        it('botão "Copiar" copia o conteúdo do toast para a área de transferência', async () => {
+            const writeTextMock = vi.fn().mockResolvedValue(undefined);
+            Object.defineProperty(navigator, 'clipboard', {
+                value: {
+                    writeText: writeTextMock
+                },
+                configurable: true,
+                writable: true
+            });
+
+            const wrapper = mountToast((store) => {
+                store.add({ title: 'Erro de Conexão', message: 'Falha 500 no endpoint', severity: 'error' });
+            });
+            await flushPromises();
+
+            const copyBtn = wrapper.find('.action-copy');
+            expect(copyBtn.exists()).toBe(true);
+            expect(copyBtn.text()).toBe('Copiar');
+
+            await copyBtn.trigger('click');
+            await flushPromises();
+
+            expect(writeTextMock).toHaveBeenCalledWith('Erro de Conexão\nFalha 500 no endpoint');
+            expect(copyBtn.text()).toBe('Copiado!');
+        });
     });
 
     describe('Acessibilidade (Etapa 5.1)', () => {

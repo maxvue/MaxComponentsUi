@@ -4,7 +4,17 @@
         :class="{ 'only-avatar': isCompact }"
         :screen="props.screen"
         ref="root_el"
+        role="button"
+        tabindex="0"
+        aria-haspopup="menu"
+        :aria-expanded="isOpen"
+        :aria-controls="userMenuId"
+        aria-label="Perfil do usuário"
         @click.stop="toggle"
+        @keydown.enter.prevent="toggle"
+        @keydown.space.prevent="toggle"
+        @keydown.down.prevent="openAndFocusFirst"
+        @keydown.up.prevent="openAndFocusLast"
         pointer
     >
         <div v-if="!isCompact" class="user-text-div">
@@ -39,19 +49,23 @@
             <div class="max-user-section-backdrop" @click="hide">
                 <div
                     ref="menuEl"
-                    id="overlay_tmenu"
+                    :id="userMenuId"
                     class="max-user-section-overlay"
                     role="menu"
                     :style="{ top: position.top + 'px', left: position.left + 'px' }"
+                    @keydown="onUserMenuKeydown"
                     @click.stop
                 >
                     <template v-for="(item, index) in menuItems" :key="index">
-                        <hr v-if="item.separator" class="max-user-section-separator" />
+                        <hr v-if="item.separator" class="max-user-section-separator" role="separator" />
                         <div
                             v-else-if="item.label"
                             class="main-item-menu-div"
                             role="menuitem"
+                            :tabindex="focusedUserMenuIdx === index ? 0 : -1"
+                            :ref="(el) => setUserMenuItemRef(el, index)"
                             @click="handleItemClick(item)"
+                            @mouseenter="focusedUserMenuIdx = index"
                         >
                             <MaxIcon v-if="item.icon" :icon="item.icon" />
                             <div>
@@ -72,7 +86,7 @@
  * navegação, chamadas de API e estado (ex: dark mode).
  */
 <script setup lang="ts">
-    import { computed, ref, onBeforeUnmount } from 'vue';
+    import { computed, ref, nextTick, watch, onBeforeUnmount } from 'vue';
     import MaxIcon from './MaxIcon.vue';
     import MaxUserAvatar from './MaxUserAvatar.vue';
     import { useElementBounding, useElementSize, useWindowSize } from '@maxvue/max-use';
@@ -131,6 +145,14 @@
         endImpersonate: [];
     }>();
 
+    const userMenuId = `max-user-menu-${Math.random().toString(36).slice(2, 9)}`;
+    const focusedUserMenuIdx = ref(0);
+    const menuItemRefs = ref<(HTMLElement | null)[]>([]);
+
+    const setUserMenuItemRef = (el: any, index: number) => {
+        menuItemRefs.value[index] = el as HTMLElement | null;
+    };
+
     const root_el = ref<HTMLElement | null>(null);
     const menuEl = ref<HTMLElement | null>(null);
     const anchorEl = ref<HTMLElement | null>(null);
@@ -150,7 +172,6 @@
         let left = targetX + targetW - (width_el.value || 180);
 
         if (top + (height_el.value || 200) > window_height.value && targetY - (height_el.value || 200) > 0) top = targetY - (height_el.value || 200) - 4;
-
 
         if (left < 10) left = 10;
         if (window_width.value && left + (width_el.value || 180) > window_width.value - 10) left = Math.max(10, window_width.value - (width_el.value || 180) - 10);
@@ -197,11 +218,26 @@
 
     const menuItems = computed(() => props.items ?? defaultItems.value);
 
-    const toggle = (event?: any) => {
+    const getNavigableIndices = (): number[] => {
+        const indices: number[] = [];
+        menuItems.value.forEach((it, idx) => {
+            if (it.label && !it.separator) indices.push(idx);
+        });
+        return indices;
+    };
+
+    const setAnchor = (event?: any) => {
         if (event?.currentTarget) anchorEl.value = event.currentTarget as HTMLElement;
         else if (root_el.value) anchorEl.value = root_el.value;
+    };
 
+    const toggle = (event?: any) => {
+        setAnchor(event);
         isOpen.value = !isOpen.value;
+        if (isOpen.value) {
+            const nav = getNavigableIndices();
+            focusedUserMenuIdx.value = nav[0] ?? 0;
+        }
     };
 
     const hide = () => {
@@ -209,38 +245,122 @@
     };
 
     const show = (event?: any) => {
-        if (event?.currentTarget) anchorEl.value = event.currentTarget as HTMLElement;
-        else if (root_el.value) anchorEl.value = root_el.value;
-
+        setAnchor(event);
         isOpen.value = true;
+        const nav = getNavigableIndices();
+        focusedUserMenuIdx.value = nav[0] ?? 0;
+    };
+
+    const openAndFocusFirst = (event?: any) => {
+        setAnchor(event);
+        if (!isOpen.value) isOpen.value = true;
+        nextTick(() => {
+            const nav = getNavigableIndices();
+            focusedUserMenuIdx.value = nav[0] ?? 0;
+            menuItemRefs.value[focusedUserMenuIdx.value]?.focus();
+        });
+    };
+
+    const openAndFocusLast = (event?: any) => {
+        setAnchor(event);
+        if (!isOpen.value) isOpen.value = true;
+        nextTick(() => {
+            const nav = getNavigableIndices();
+            focusedUserMenuIdx.value = nav[nav.length - 1] ?? 0;
+            menuItemRefs.value[focusedUserMenuIdx.value]?.focus();
+        });
     };
 
     const handleItemClick = (item: any) => {
         if (item.exec) item.exec();
         hide();
+        root_el.value?.focus();
     };
 
     const onEndImpersonate = () => {
         emit('endImpersonate');
     };
 
-    const onKeydown = (event: KeyboardEvent) => {
-        if (event.key === 'Escape' && isOpen.value) hide();
+    const onUserMenuKeydown = (event: KeyboardEvent) => {
+        const navIndices = getNavigableIndices();
+        if (navIndices.length === 0) return;
 
+        const currentNavPos = navIndices.indexOf(focusedUserMenuIdx.value);
+
+        switch (event.key) {
+            case 'ArrowDown': {
+                event.preventDefault();
+                const nextNavPos = (currentNavPos + 1) % navIndices.length;
+                focusedUserMenuIdx.value = navIndices[nextNavPos];
+                menuItemRefs.value[focusedUserMenuIdx.value]?.focus();
+                break;
+            }
+            case 'ArrowUp': {
+                event.preventDefault();
+                const prevNavPos = (currentNavPos - 1 + navIndices.length) % navIndices.length;
+                focusedUserMenuIdx.value = navIndices[prevNavPos];
+                menuItemRefs.value[focusedUserMenuIdx.value]?.focus();
+                break;
+            }
+            case 'Home': {
+                event.preventDefault();
+                focusedUserMenuIdx.value = navIndices[0];
+                menuItemRefs.value[focusedUserMenuIdx.value]?.focus();
+                break;
+            }
+            case 'End': {
+                event.preventDefault();
+                focusedUserMenuIdx.value = navIndices[navIndices.length - 1];
+                menuItemRefs.value[focusedUserMenuIdx.value]?.focus();
+                break;
+            }
+            case 'Enter':
+            case ' ': {
+                event.preventDefault();
+                const item = menuItems.value[focusedUserMenuIdx.value];
+                if (item) handleItemClick(item);
+
+                break;
+            }
+            case 'Escape': {
+                event.preventDefault();
+                hide();
+                root_el.value?.focus();
+                break;
+            }
+        }
     };
 
-    if (typeof window !== 'undefined') window.addEventListener('keydown', onKeydown);
+    const onGlobalKeydown = (event: KeyboardEvent) => {
+        if (event.key === 'Escape' && isOpen.value) {
+            hide();
+            root_el.value?.focus();
+        }
+    };
 
+    watch(isOpen, (open) => {
+        if (typeof window === 'undefined') return;
+        if (open) {
+            menuItemRefs.value = [];
+            window.addEventListener('keydown', onGlobalKeydown);
+        } else window.removeEventListener('keydown', onGlobalKeydown);
+
+    });
 
     onBeforeUnmount(() => {
-        if (typeof window !== 'undefined') window.removeEventListener('keydown', onKeydown);
+        if (typeof window !== 'undefined') window.removeEventListener('keydown', onGlobalKeydown);
 
     });
 
     defineExpose({
         toggle,
         show,
-        hide
+        hide,
+        openAndFocusFirst,
+        openAndFocusLast,
+        isOpen,
+        userMenuId,
+        focusedUserMenuIdx
     });
 </script>
 
@@ -251,6 +371,13 @@
         grid-auto-columns: auto 50px;
         gap: 1rem;
         position: relative;
+        outline: none;
+
+        &:focus-visible {
+            outline: 2px solid var(--max-primary-500, #00768E);
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
 
         &.only-avatar,
         &[screen='mobile'] {
@@ -411,9 +538,17 @@
                 background-color: var(--background-0);
                 border-radius: 0.5rem;
                 grid-template-columns: auto 1fr;
+                outline: none;
 
                 :deep(.max-icon-div) {
                     color: currentcolor !important;
+                }
+
+                &:focus-visible {
+                    outline: 2px solid var(--max-primary-500, #00768E);
+                    outline-offset: -2px;
+                    background-color: var(--background-100, #f1f5f9);
+                    color: var(--background-775);
                 }
 
                 &:hover {
