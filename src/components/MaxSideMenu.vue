@@ -173,6 +173,7 @@
                 padding: 25px 0 2rem;
                 grid-template-rows: 1fr auto;
 
+
                 &::-webkit-scrollbar {
                     display: none;
                     width: 0;

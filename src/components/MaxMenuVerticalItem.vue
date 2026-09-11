@@ -114,7 +114,7 @@
             place-items: center;
 
             &:hover {
-                color: var(--blue-525);
+                color: var(--blue-100);
             }
 
             .item-text {
@@ -126,6 +126,7 @@
             display: none;
         }
 
+
         &.active {
             position: relative;
 
@@ -135,15 +136,15 @@
                 color: var(--blue-750) !important;
 
                 svg {
-                    color: var(--blue-750) !important;
+                    color: var(--blue-200) !important;
                     fill: currentcolor;
                 }
 
                 &:hover {
-                    color: var(--blue-650) !important;
+                    color: var(--blue-0) !important;
 
                     svg {
-                        color: var(--blue-650) !important;
+                        color: var(--blue-0) !important;
                     }
                 }
             }
@@ -151,20 +152,20 @@
             .curva {
                 display: block;
                 position: absolute;
-                fill: var(--background-50);
+                fill: var(--blue-800);
 
                 &.cima {
                     top: -20px;
                     right: 0;
                     transform: rotate(180deg);
-                    fill: var(--background-50);
+                    fill: var(--blue-800);
                 }
 
                 &.baixo {
                     right: 0;
                     bottom: -20px;
                     transform: rotate(90deg);
-                    fill: var(--background-50);
+                    fill: var(--blue-800);
                 }
 
                 &.baixo2 {
@@ -180,8 +181,22 @@
                 width: calc(100% - 5px);
                 height: 100%;
                 border-radius: 10px 0 0 10px;
-                background-color: var(--background-50);
+                background-color: var(--blue-800);
                 z-index: 0;
+            }
+        }
+        &:not(.active) {
+            position: relative;
+
+            :deep(.max-icon-div),
+            :deep(.max-icon) {
+                z-index: 1;
+                color: var(--blue-200) !important;
+                opacity: 0.7;
+                transition: opacity 0.3s ease;
+                &:hover {
+                    opacity: 1;
+                }
             }
         }
     }
