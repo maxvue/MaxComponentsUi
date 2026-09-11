@@ -26,68 +26,83 @@ Arquivos de controle (todos na raiz do repositório):
 
 ## PADRÕES DE IDENTIDADE VISUAL DO DESIGN SYSTEM
 
-A identidade visual da biblioteca segue uma linguagem moderna, limpa e funcional, focada em produtividade operacional.
+A identidade visual da biblioteca segue uma linguagem moderna, limpa e funcional, focada em alta densidade e produtividade operacional para sistemas web empresariais.
 
 ### 1. Sistema de Cores e Superfícies
 
-Todas as cores devem ser consumidas obrigatoriamente através das variáveis CSS do design system declaradas em `src/themes/`:
+Todas as cores devem ser consumidas **obrigatoriamente** através das variáveis CSS do design system declaradas em `src/themes/` (`colors.scss` e `tokens.scss`) e sincronizadas com `src/styles/style.ts`. **É terminantemente proibido o uso de valores hexadecimais, RGB ou HSL literais hardcoded nos arquivos Vue.**
 
 #### A. Superfícies e Backgrounds (Modo Claro e Modo Escuro)
-- `--background-0`: Superfície base mais clara / fundo de cards e inputs no modo claro (`#ffffff`).
-- `--background-75`: Fundo neutro suave / estado desabilitado de inputs (`#f8fafc`).
-- `--background-100` a `--background-200`: Fundos de áreas secundárias, bordas sutis e divisórias.
-- `--background-300` a `--background-400`: Bordas neutras e estados inativos.
-- `--background-600` a `--background-650`: Textos secundários, placeholders e ícones desabilitados.
-- `--background-700` a `--background-775`: Textos principais, rótulos e títulos no modo claro.
-- `--background-800` a `--background-900`: Superfície escura, tooltips e fundos de overlays.
+As superfícies operam através da escala neutra `--background-*` com suporte nativo a inversão automática no modo escuro via classe `.dark`:
+- `--background-0`: Superfície base primária / fundo de cartões, modais, painéis e inputs no modo claro (`#ffffff`). No modo escuro inverte para a base mais profunda.
+- `--background-25` a `--background-75`: Fundo neutro suave para áreas de fundo geral da aplicação (`#f8fafc` / `#f2f4f7`) e estado desabilitado de inputs e botões.
+- `--background-100` a `--background-200`: Fundos de áreas secundárias, toolbars, divisórias, bordas sutis (`--surface-border`) e hover neutro.
+- `--background-300` a `--background-400`: Bordas neutras de cartões, divisórias de maior contraste e estados inativos de controles.
+- `--background-500` a `--background-650`: Textos secundários, legendas, placeholders e ícones desabilitados.
+- `--background-700` a `--background-775`: Textos principais, rótulos de campos de formulário, títulos de seções e ícones ativos no modo claro.
+- `--background-800` a `--background-900`: Superfície de alto contraste, tooltips flutuantes (`.max-tooltip`) e fundos de backdrops / overlays modais.
 
-#### B. Rampa Primária Institucional (Teal)
-A rampa primária expressa a identidade Max:
-- `--max-primary-50`: `#f0fdfa` (tint suave)
-- `--max-primary-100`: `#56C2D7`
-- `--max-primary-200`: `#46BCD4`
-- `--max-primary-400`: `#178DA5`
-- `--max-primary-500`: `#00768E` (cor primária canônica para ações de destaque e foco)
-- `--max-primary-600`: `#005F77` (hover primário e ênfase)
-- `--max-primary-700` a `--max-primary-900`: Variações profundas de contraste
+#### B. Rampa Primária Institucional (Teal Max)
+A rampa primária expressa a identidade institucional corporativa da Max / Engeapp:
+- `--max-primary-50`: `#f0fdfa` (tint suave para seleções e badges leves)
+- `--max-primary-100`: `#56C2D7` (realces secundários)
+- `--max-primary-200`: `#46BCD4` (bordas de foco suaves)
+- `--max-primary-400`: `#178DA5` (cor primária para foco e links em modo escuro)
+- `--max-primary-500`: `#00768E` (cor primária canônica para ações principais, botões padrão e foco ativo)
+- `--max-primary-600`: `#005F77` (hover primário e ênfase de interação)
+- `--max-primary-700` a `--max-primary-950`: Variações profundas de contraste e modo escuro
 
 #### C. Cores Semânticas de Estado
 - **Sucesso / Done / Confirm**:
-  - `--max-success-500`: `#10B981` (verde esmeralda canônico)
-  - `--emerald-700`: `#047857` (botões de confirmação)
+  - `--max-success-500`: `#10B981` (verde esmeralda canônico para badges, validações positivas e ícones de confirmação)
+  - `--max-success-600` / `--emerald-700`: `#059669` / `#047857` (botões de confirmação e ações seguras)
 - **Atenção / Alerta / Caution**:
-  - `--max-warning-500`: `#F59E0B`
-  - `--max-orange-500`: `#f97316` (bordas e ícones de aviso)
+  - `--max-warning-500`: `#F59E0B` (âmbar canônico para alertas e estados pendentes)
+  - `--max-warning-600` / `--max-orange-500`: `#d97706` / `#f97316` (bordas, badges de caution e avisos críticos)
 - **Erro / Danger / Exclusão**:
-  - `--max-danger-500`: `#EF4444` (vermelho erro)
-  - `--red-700`: `#b91c1c` (botões e ações destrutivas)
+  - `--max-danger-500`: `#EF4444` (vermelho erro canônico para mensagens de erro, bordas de validação e alertas)
+  - `--max-danger-600` / `--red-700`: `#dc2626` / `#b91c1c` (botões e ações destrutivas / deleção)
 - **Informativo**:
-  - `--max-info-500`: `#0EA5E9`
-  - `--blue-600`: `#2563eb` (destaque informativo e links)
+  - `--max-info-500`: `#0EA5E9` (sky blue canônico para banners contextuais e dicas informativas)
+  - `--max-info-600` / `--blue-600`: `#0284c7` / `#2563eb` (destaque informativo, badges e links)
+- **Canais Especiais**:
+  - `--max-whatsapp-500`: `#25d366` / `--max-whatsapp-600`: `#1da851` (interações oficiais do canal WhatsApp)
 
-#### D. Estados Interativos e Acessibilidade
-- **Hover**: Transição suave de cor/superfície (ex.: `var(--max-primary-600)`, `var(--background-725)`).
-- **Focus Visible**: Borda e anel de foco identificável via `var(--max-primary-500)` ou `--max-inputtext-focus-border-color`.
-- **Disabled**: Background em `var(--background-75)`, tipografia e ícones em `var(--background-650)`, cursor `not-allowed`.
+#### D. Estados Interativos e Acessibilidade (WCAG 2.4.7 / 2.4.11)
+- **Hover**: Transição suave de cor/superfície (`transition: all 0.2s ease-in-out`), escurecendo botões para o shade 600 ou elevando o background para `var(--background-100)`.
+- **Focus Visible**: Todo elemento interativo (inputs, botões, checkboxes, radios, abas) DEVE possuir foco visível estrito:
+  - Modo Claro: `box-shadow: var(--max-focus-ring)` (`0 0 0 2px var(--background-0), 0 0 0 4px var(--max-primary-500)`).
+  - Modo Escuro: `box-shadow: var(--max-focus-ring)` (`0 0 0 2px var(--background-900), 0 0 0 4px var(--max-primary-400)`).
+  - Borda ativa de inputs: `var(--max-inputtext-focus-border-color)`.
+- **Disabled**: Background em `var(--background-75)`, tipografia e ícones em `var(--background-650)`, borda em `var(--background-200)`, cursor `not-allowed`, `pointer-events: none` em gatilhos não-nativos.
 
 ---
 
-### 2. Tipografia e Escala Visual
+### 2. Tipografia, Elevação e Escala Visual
 
 - **Família Tipográfica**: `Quicksand, 'Instrument Sans', ui-sans-serif, sans-serif`.
 - **Escala de Tamanhos**:
   - Rótulos de inputs e textos de formulário: `12px` (`0.75rem` / `$font-label-inputs` / `$size-text-input`).
   - Textos secundários, feedbacks de validação e tooltips: `10px` a `13px` (`0.8125rem`).
   - Títulos e Cabeçalhos:
-    - H1: `21px` (`$size-h1`)
-    - H2: `18px` (`$size-h2`)
-    - H3: `16px` (`$size-h3`)
-    - H4: `14px` (`$size-h4`)
-- **Altura Padrão de Inputs e Botões**: `36px` (tamanho touch/desktop otimizado para densidade de dashboards operacionais).
+    - H1: `21px` (`$size-h1`, font-weight 700)
+    - H2: `18px` (`$size-h2`, font-weight 600)
+    - H3: `16px` (`$size-h3`, font-weight 600)
+    - H4: `14px` (`$size-h4`, font-weight 600)
+- **Altura Padrão de Inputs e Botões**: `36px` (tamanho otimizado para alta densidade em dashboards operacionais).
 - **Border Radius**:
-  - Padrão para inputs, campos e botões: `4px`.
-  - Padrão para cards, popovers e modais: `6px` a `8px`.
-  - Padrão para badges e float labels: `2px`.
+  - Inputs, campos de formulário e botões: `4px`.
+  - Cards, popovers, dropdowns e modais: `6px` a `8px`.
+  - Badges e float labels: `2px`.
+- **Elevação e Sombras**:
+  - Nível 1 (Dropdowns, Menus, Popovers): `box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)`.
+  - Nível 2 (Modais, Drawers flutuantes): `box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04)`.
+  - Nível 3 (Tooltips): `box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2)`.
+- **Camadas de Z-Index**:
+  - Tooltips: `99999`
+  - Modais e Dialogs: `1100`
+  - Overlays e Popovers / Dropdowns: `1000`
+  - Fixed Headers e Menus: `100`
 
 ---
 
