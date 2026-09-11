@@ -1,11 +1,10 @@
 <template>
-    <MaxIconButton class="max-icon-confirm" :icon="props.icon" :i="props.i" :blank="props.blank" :route="props.route" :data="props.data" :params="props.params" :rotate="props.rotate" :flip="props.flip" :size="props.size" :scale="props.scale" :loading="props.loading" :width="props.width" :height="props.height" :dark="props.dark" :light="props.light" :checked="props.checked" :plus="props.plus" v-tooltip="null" pointer :action="onClickToggle" ref="btn_el" />
+    <MaxIconButton class="max-icon-confirm" :icon="props.icon" :i="props.i" :blank="props.blank" :route="props.route" :data="props.data" :params="props.params" :rotate="props.rotate" :flip="props.flip" :size="props.size" :scale="props.scale" :loading="props.loading" :width="props.width" :height="props.height" :dark="props.dark" :light="props.light" :checked="props.checked" :plus="props.plus" v-tooltip="null" :action="onClickToggle" ref="btn_el" />
 </template>
 
 <script setup lang="ts">
     import MaxIconButton from './MaxIconButton.vue';
     import { useTemplateRef } from 'vue';
-    import { useElementBounding } from '@maxvue/max-use';
     import { useConfirmStore } from '../stores/useConfirm.Store';
     import type { ConfirmProps } from '../types';
 
@@ -64,19 +63,22 @@
 
     const btn_el = useTemplateRef('btn_el');
 
-    const { x, y, height, width } = useElementBounding(btn_el as any);
-
     const onClickToggle = () => {
+        const rawEl = btn_el.value as any;
+        const domEl: HTMLElement | null = rawEl?.$el ?? rawEl;
+        const rect = domEl?.getBoundingClientRect?.() ?? { x: 0, y: 0, left: 0, top: 0, width: 0, height: 0 };
+
         confirm_store.confirm({
             message: props.message,
             messageIcon: props.messageIcon,
             severity: props.severity,
             rejectProps: props.rejectProps,
             acceptProps: props.acceptProps,
-            x: x.value,
-            y: y.value,
-            width: width.value,
-            height: height.value
+            x: rect.x ?? rect.left ?? 0,
+            y: rect.y ?? rect.top ?? 0,
+            width: rect.width ?? 0,
+            height: rect.height ?? 0,
+            target: domEl
         });
     };
 

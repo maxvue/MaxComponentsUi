@@ -191,4 +191,21 @@ describe('MaxUserSection - WAI-ARIA e Teclado (Etapa 10)', () => {
         wrapper.unmount();
         expect(removeSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
     });
+
+    it('fecha o menu ao clicar fora do componente no documento', async () => {
+        const wrapper = mountSection();
+        await wrapper.find('.user-section').trigger('click');
+        await wrapper.vm.$nextTick();
+        expect(document.querySelector('.max-user-section-overlay')).not.toBeNull();
+
+        const outside = document.createElement('div');
+        document.body.appendChild(outside);
+
+        outside.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+        outside.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        await wrapper.vm.$nextTick();
+
+        expect(document.querySelector('.max-user-section-overlay')).toBeNull();
+        outside.remove();
+    });
 });

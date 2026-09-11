@@ -229,7 +229,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            fill: var(--background-25, #fff);
+            fill: var(--background-0);
             filter: drop-shadow(0 -6px 16px rgb(0 32 58 / 20%)) drop-shadow(0 -2px 4px rgb(0 32 58 / 12%));
         }
 
@@ -239,8 +239,8 @@
             display: grid;
             width: 100%;
             height: var(--bottom-menu-height, 58px);
-            background-color: var(--background-25, #fff);
-            border-top: 1px solid var(--background-100, #e2e8f0);
+            background-color: var(--background-0);
+            border-top: 1px solid var(--surface-border);
             color: var(--background-700);
             place-items: center;
         }
@@ -255,7 +255,7 @@
             height: 100%;
             min-height: 44px;
             cursor: pointer;
-            color: var(--background-700);
+            color: var(--background-650);
             transition: color 0.18s ease;
 
             .max-icon-div {
@@ -263,13 +263,13 @@
             }
 
             &:focus-visible {
-                outline: 2px solid var(--blue-500, #3b82f6);
+                outline: 2px solid var(--max-primary-500);
                 outline-offset: -2px;
                 border-radius: 10px;
             }
 
             &.active {
-                color: var(--blue-700, #0284c7);
+                color: var(--max-primary-500);
             }
 
             &:not(.active):hover {
@@ -302,14 +302,15 @@
             padding: 0;
             appearance: none;
             border-radius: 999px;
-            background: var(--blue-700, #0284c7);
-            color: #fff;
+            background: var(--max-primary-500);
+            color: var(--background-0);
             cursor: pointer;
             box-shadow: 0 6px 16px rgb(0 32 58 / 28%);
-            transition: transform 0.18s ease, box-shadow 0.18s ease;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
 
             &:hover {
                 transform: translateY(-2px);
+                background: var(--max-primary-600);
                 box-shadow: 0 10px 22px rgb(0 32 58 / 34%);
             }
 
@@ -318,7 +319,7 @@
             }
 
             &:focus-visible {
-                outline: 2px solid var(--blue-500, #38bdf8);
+                outline: 2px solid var(--max-primary-400);
                 outline-offset: 3px;
             }
         }

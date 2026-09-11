@@ -6,65 +6,75 @@
         :caution="caution"
         class="max-chips max-chips-wrapper"
     >
-        <div
-            class="max-chips-container max-input-native"
-            :class="{ 'is-disabled': props.disabled, 'is-focused': isFocused, 'p-disabled': props.disabled, 'p-focus': isFocused }"
-            @click="focusInput"
-        >
-            <ul class="max-chips-list">
-                <li
-                    v-for="(item, index) in itemsList"
-                    :key="getItemKey(item, index)"
-                    class="max-chip-token"
-                >
-                    <slot
-                        name="chip"
-                        :item="item"
-                        :label="resolveChipLabel(item)"
-                        :index="index"
-                        :remove="() => removeChip(index)"
+        <template #default="{ inputId, messageId, isError, isRequired }">
+            <div
+                ref="containerRef"
+                class="max-chips-container max-input-native"
+                :class="{ 'is-disabled': props.disabled, 'is-focused': isFocused }"
+                @click="focusInput"
+            >
+                <ul class="max-chips-list">
+                    <li
+                        v-for="(item, index) in itemsList"
+                        :key="getItemKey(item, index)"
+                        class="max-chip-token"
+                        :tabindex="props.removable === false && !props.disabled ? 0 : undefined"
+                        @keydown="props.removable === false ? onChipKeyDown($event, index) : undefined"
                     >
-                        <span class="max-chip-label">{{ resolveChipLabel(item) }}</span>
-                        <button
-                            v-if="!props.disabled && props.removable !== false"
-                            type="button"
-                            class="max-chip-remove-btn"
-                            tabindex="0"
-                            :aria-label="'Remover ' + resolveChipLabel(item)"
-                            @click.stop="removeChip(index)"
-                            @keydown.enter.prevent="removeChip(index)"
-                            @keydown.space.prevent="removeChip(index)"
+                        <slot
+                            name="chip"
+                            :item="item"
+                            :label="resolveChipLabel(item)"
+                            :index="index"
+                            :remove="() => removeChip(index)"
                         >
-                            <slot name="removeicon">
-                                <MaxIcon icon="material-symbols:close-rounded" :size="0.85" />
-                            </slot>
-                        </button>
-                    </slot>
-                </li>
-                <li class="max-chips-input-token">
-                    <input
-                        ref="inputRef"
-                        type="text"
-                        class="max-chips-input"
-                        :placeholder="itemsList.length === 0 ? (props.placeholder ?? '') : ''"
-                        :disabled="props.disabled || isMaxReached"
-                        :value="inputValue"
-                        autocomplete="off"
-                        @input="onInput"
-                        @keydown="onKeyDown"
-                        @paste="onPaste"
-                        @focus="onFocus"
-                        @blur="onBlur"
-                    />
-                </li>
-            </ul>
-        </div>
-        <slot></slot>
+                            <span class="max-chip-label">{{ resolveChipLabel(item) }}</span>
+                            <button
+                                v-if="!props.disabled && props.removable !== false"
+                                type="button"
+                                class="max-chip-remove-btn"
+                                tabindex="0"
+                                :aria-label="'Remover ' + resolveChipLabel(item)"
+                                @click.stop="removeChip(index)"
+                                @keydown="onChipKeyDown($event, index)"
+                                @keydown.enter.prevent="removeChipAndFocusAdjacent(index)"
+                                @keydown.space.prevent="removeChipAndFocusAdjacent(index)"
+                            >
+                                <slot name="removeicon">
+                                    <MaxIcon icon="material-symbols:close-rounded" :size="0.85" />
+                                </slot>
+                            </button>
+                        </slot>
+                    </li>
+                    <li class="max-chips-input-token">
+                        <input
+                            ref="inputRef"
+                            type="text"
+                            class="max-chips-input"
+                            :id="inputId"
+                            :placeholder="itemsList.length === 0 ? (props.placeholder ?? '') : ''"
+                            :disabled="props.disabled || isMaxReached"
+                            :value="inputValue"
+                            :aria-describedby="messageId"
+                            :aria-invalid="isError"
+                            :aria-required="isRequired"
+                            autocomplete="off"
+                            @input="onInput"
+                            @keydown="onKeyDown"
+                            @paste="onPaste"
+                            @focus="onFocus"
+                            @blur="onBlur"
+                        />
+                    </li>
+                </ul>
+            </div>
+            <slot></slot>
+        </template>
     </InputBase>
 </template>
 
 <script setup lang="ts">
-    import { ref, computed, useAttrs } from 'vue';
+    import { ref, computed, useAttrs, nextTick } from 'vue';
     import InputBase from './InputBase.vue';
     import MaxIcon from './MaxIcon.vue';
     import type { ChipItem, ChipObjectItem } from '../types';
@@ -146,6 +156,7 @@
     }>();
 
     const inputRef = ref<HTMLInputElement | null>(null);
+    const containerRef = ref<HTMLElement | null>(null);
     const inputValue = ref<string>('');
     const isFocused = ref<boolean>(false);
     const isDone = ref<boolean | null>(props.done ?? null);
@@ -211,7 +222,8 @@
 
     function addChip(rawText?: string) {
         const textToProcess = rawText !== undefined ? rawText : (inputValue.value || inputRef.value?.value || '');
-        const text = textToProcess.trim();
+        if (typeof textToProcess !== 'string' && typeof textToProcess !== 'number') return;
+        const text = String(textToProcess).trim();
 
         if (!text) {
             inputValue.value = '';
@@ -254,11 +266,13 @@
     }
 
     function addMultipleChips(texts: string[]) {
-        let currentList = [...itemsList.value];
+        if (!Array.isArray(texts)) return;
+        let currentList = Array.isArray(itemsList.value) ? [...itemsList.value] : [];
         const isObjectArray = currentList.length > 0 && typeof currentList[0] === 'object';
 
         for (const raw of texts) {
-            const text = raw.trim();
+            if (typeof raw !== 'string' && typeof raw !== 'number') continue;
+            const text = String(raw).trim();
             if (!text) continue;
 
             if (typeof props.max === 'number' && props.max > 0 && currentList.length >= props.max) break;
@@ -287,7 +301,7 @@
 
     function removeChip(index: number) {
         if (props.disabled || props.removable === false) return;
-        if (index < 0 || index >= itemsList.value.length) return;
+        if (!Array.isArray(itemsList.value) || index < 0 || index >= itemsList.value.length) return;
 
         const removedItem = itemsList.value[index];
         const updated = itemsList.value.filter((_, i) => i !== index);
@@ -318,6 +332,55 @@
 
     }
 
+    function getFocusableChipElements(): HTMLElement[] {
+        if (!containerRef.value) return [];
+        if (props.removable !== false) {
+            const btns = Array.from(containerRef.value.querySelectorAll<HTMLElement>('.max-chip-remove-btn'));
+            if (btns.length > 0) return btns;
+        }
+        return Array.from(containerRef.value.querySelectorAll<HTMLElement>('.max-chip-token'));
+    }
+
+    function focusChip(index: number) {
+        const elements = getFocusableChipElements();
+        if (elements.length === 0) {
+            focusInput();
+            return;
+        }
+        const targetIndex = Math.max(0, Math.min(index, elements.length - 1));
+        elements[targetIndex]?.focus();
+    }
+
+    async function removeChipAndFocusAdjacent(index: number) {
+        if (props.disabled || props.removable === false) return;
+        const currentLength = itemsList.value.length;
+        removeChip(index);
+        await nextTick();
+        const remainingCount = currentLength - 1;
+        if (remainingCount <= 0) focusInput();
+        else {
+            const nextIndex = Math.min(index, remainingCount - 1);
+            focusChip(nextIndex);
+        }
+    }
+
+    function onChipKeyDown(event: KeyboardEvent, index: number) {
+        const key = event.key;
+        if (key === 'ArrowLeft') {
+            event.preventDefault();
+            if (index > 0) focusChip(index - 1);
+
+        } else if (key === 'ArrowRight') {
+            event.preventDefault();
+            if (index < itemsList.value.length - 1) focusChip(index + 1);
+            else focusInput();
+
+        } else if (key === 'Backspace' || key === 'Delete') {
+            event.preventDefault();
+            removeChipAndFocusAdjacent(index);
+        }
+    }
+
     function onKeyDown(event: KeyboardEvent) {
         const key = event.key;
         const keyCode = event.keyCode || event.which;
@@ -328,7 +391,14 @@
         } else if (key === 'Backspace' || keyCode === 8) {
             const currentVal = inputValue.value || (event.target as HTMLInputElement)?.value || '';
             if (currentVal === '' && itemsList.value.length > 0) removeChip(itemsList.value.length - 1);
-
+        } else if (key === 'ArrowLeft') {
+            const input = inputRef.value;
+            const currentVal = inputValue.value || input?.value || '';
+            const isAtStart = input ? (input.selectionStart === 0 && input.selectionEnd === 0) : !currentVal;
+            if (isAtStart && itemsList.value.length > 0) {
+                event.preventDefault();
+                focusChip(itemsList.value.length - 1);
+            }
         } else if (typeof props.separator === 'string' && key === props.separator) {
             event.preventDefault();
             addChip(inputValue.value || (event.target as HTMLInputElement)?.value);
@@ -419,6 +489,15 @@
                     overflow-wrap: break-word;
                     transition: background-color 0.15s ease;
 
+                    &:focus:not(:focus-visible) {
+                        outline: none;
+                    }
+
+                    &:focus-visible {
+                        outline: var(--max-focus-outline);
+                        outline-offset: 1px;
+                    }
+
                     .max-chip-label {
                         display: inline-block;
                     }
@@ -441,8 +520,12 @@
                             color: var(--red-600);
                         }
 
+                        &:focus:not(:focus-visible) {
+                            outline: none;
+                        }
+
                         &:focus-visible {
-                            outline: 2px solid var(--max-primary-500, #00768E);
+                            outline: var(--max-focus-outline);
                             outline-offset: 1px;
                         }
                     }

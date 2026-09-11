@@ -55,6 +55,15 @@ describe('MaxPopover', () => {
         setActivePinia(createPinia());
     });
 
+    afterEach(() => {
+        while (mountedWrappers.length > 0) {
+            const w = mountedWrappers.pop();
+            try { w?.unmount(); } catch {}
+        }
+        document.body.innerHTML = '';
+        vi.useRealTimers();
+    });
+
     it('renderiza o botão trigger', () => {
         const wrapper = mountPopover();
         expect(wrapper.exists()).toBe(true);
@@ -137,8 +146,6 @@ describe('MaxPopover', () => {
         const vm = wrapper.vm as any;
 
         vm.show();
-        vi.advanceTimersByTime(10); // resolve setTimeout
-
         expect(vm.position.isTop).toBe(true);
         expect(vm.position.isLeft).toBe(true);
 
@@ -147,7 +154,7 @@ describe('MaxPopover', () => {
         vi.useRealTimers();
     });
 
-    it('renderiza e pode ser fechado via click no background', async () => {
+    it('renderiza e pode ser fechado via click outside', async () => {
         const wrapper = mountPopover({ title: 'Test', subTitle: 'Sub' });
         const vm = wrapper.vm as any;
 
@@ -155,11 +162,12 @@ describe('MaxPopover', () => {
         await wrapper.vm.$nextTick();
 
         expect(vm.isOpen).toBe(true);
-        const bg = wrapper.find('.background-popover');
-        expect(bg.exists()).toBe(true);
+        const dialog = wrapper.find('.max-popover-dialog');
+        expect(dialog.exists()).toBe(true);
 
-        // Testa fechamento
-        await bg.trigger('click');
+        // Testa fechamento via click outside
+        document.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true }));
+        document.dispatchEvent(new MouseEvent('click', { bubbles: true }));
         expect(vm.isOpen).toBe(false);
     });
 

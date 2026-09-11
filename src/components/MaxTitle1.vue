@@ -1,5 +1,5 @@
 <template>
-    <div class="max-title-1 max-title-2" :class="{ center: center }">
+    <div class="max-title-1 max-title-2" :class="{ 'is-centered': center, center: center }">
         <!-- Sem `pr-8` aqui: o MaxIcon replica os attrs no div interno (v-bind="attrs"), e o
              padding duplicado esmagava o svg. O espaçamento fica no column-gap do wrapper. -->
         <MaxIcon :i="resolvedIcon" v-if="resolvedIcon" :size="resolvedIconSize" class="title-icon" />
@@ -46,6 +46,7 @@
         width: 100%;
         color: var(--background-700);
 
+        &.is-centered,
         &.center {
             display: grid;
             place-items: center;

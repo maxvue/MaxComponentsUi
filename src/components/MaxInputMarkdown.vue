@@ -1,64 +1,73 @@
 <template>
     <InputBase v-bind="inputBaseProps" class="max-input-markdown">
-        <div class="max-input-markdown__editor-wrap" :class="{ 'max-input-markdown__editor-wrap--disabled': props.disabled }">
-            <MaxInputMarkdownToolbar :editor="editor ?? null" />
-            <EditorContent
-                class="max-input-markdown__content"
-                :style="{ minHeight: props.minHeight, maxHeight: props.maxHeight }"
-                :editor="editor"
-            />
-        </div>
+        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+            <div
+                :id="inputId"
+                class="max-input-markdown__editor-wrap"
+                :class="{ 'max-input-markdown__editor-wrap--disabled': props.disabled }"
+                :aria-describedby="hasMessage ? messageId : undefined"
+                :aria-invalid="slotError || Boolean(props.error)"
+                :aria-required="isRequired || props.required"
+            >
+                <MaxInputMarkdownToolbar :editor="editor ?? null" />
+                <EditorContent
+                    class="max-input-markdown__content"
+                    :style="{ minHeight: props.minHeight, maxHeight: props.maxHeight }"
+                    :editor="editor"
+                />
+            </div>
 
-        <!-- Visualizador Modal de Imagem (Lightbox) -->
-        <Teleport to="body">
-            <Transition name="max-fade">
-                <div
-                    v-if="isImageModalOpen"
-                    class="max-image-preview-modal"
-                    role="dialog"
-                    aria-modal="true"
-                    aria-label="Visualizador de Imagem"
-                    tabindex="-1"
-                    @click.self="closeImage"
-                >
-                    <div class="max-image-preview-modal__toolbar">
-                        <button type="button" class="max-image-preview-modal__btn" title="Diminuir Zoom" @click="zoomOutImage">
-                            <MaxIcon icon="iconamoon:zoom-out-light" :size="1.2" color="currentColor" />
-                        </button>
-                        <button type="button" class="max-image-preview-modal__btn" title="Resetar Zoom" @click="resetImageZoom">
-                            <span>{{ Math.round(imageZoom * 100) }}%</span>
-                        </button>
-                        <button type="button" class="max-image-preview-modal__btn" title="Aumentar Zoom" @click="zoomInImage">
-                            <MaxIcon icon="lucide:zoom-in" :size="1.2" color="currentColor" />
-                        </button>
-                        <a
-                            v-if="activeImageSrc && isSafeUrl(activeImageSrc)"
-                            :href="activeImageSrc"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="max-image-preview-modal__btn"
-                            title="Abrir original em nova aba"
-                        >
-                            <MaxIcon icon="mdi:open-in-new" :size="1.2" color="currentColor" />
-                        </a>
-                        <button type="button" class="max-image-preview-modal__btn max-image-preview-modal__btn--close" title="Fechar (Esc)" @click="closeImage">
-                            <MaxIcon icon="ic:round-close" :size="1.3" color="currentColor" />
-                        </button>
+            <!-- Visualizador Modal de Imagem (Lightbox) -->
+            <Teleport to="body">
+                <Transition name="max-fade">
+                    <div
+                        v-if="isImageModalOpen"
+                        class="max-image-preview-modal"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Visualizador de Imagem"
+                        tabindex="-1"
+                        @click.self="closeImage"
+                    >
+                        <div class="max-image-preview-modal__toolbar">
+                            <button type="button" class="max-image-preview-modal__btn" title="Diminuir Zoom" @click="zoomOutImage">
+                                <MaxIcon icon="iconamoon:zoom-out-light" :size="1.2" color="currentColor" />
+                            </button>
+                            <button type="button" class="max-image-preview-modal__btn" title="Resetar Zoom" @click="resetImageZoom">
+                                <span>{{ Math.round(imageZoom * 100) }}%</span>
+                            </button>
+                            <button type="button" class="max-image-preview-modal__btn" title="Aumentar Zoom" @click="zoomInImage">
+                                <MaxIcon icon="lucide:zoom-in" :size="1.2" color="currentColor" />
+                            </button>
+                            <a
+                                v-if="activeImageSrc && isSafeUrl(activeImageSrc)"
+                                :href="activeImageSrc"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="max-image-preview-modal__btn"
+                                title="Abrir original em nova aba"
+                            >
+                                <MaxIcon icon="mdi:open-in-new" :size="1.2" color="currentColor" />
+                            </a>
+                            <button type="button" class="max-image-preview-modal__btn max-image-preview-modal__btn--close" title="Fechar (Esc)" @click="closeImage">
+                                <MaxIcon icon="ic:round-close" :size="1.3" color="currentColor" />
+                            </button>
+                        </div>
+                        <div class="max-image-preview-modal__content" @click.self="closeImage">
+                            <img
+                                :src="activeImageSrc"
+                                :alt="activeImageAlt"
+                                class="max-image-preview-modal__img"
+                                :style="{ transform: `scale(${imageZoom})` }"
+                            />
+                        </div>
                     </div>
-                    <div class="max-image-preview-modal__content" @click.self="closeImage">
-                        <img
-                            :src="activeImageSrc"
-                            :alt="activeImageAlt"
-                            class="max-image-preview-modal__img"
-                            :style="{ transform: `scale(${imageZoom})` }"
-                        />
-                    </div>
-                </div>
-            </Transition>
-        </Teleport>
+                </Transition>
+            </Teleport>
 
-        <!-- Visualizador Modal de PDF -->
-        <MaxPdfView :file="activePdfUrl" />
+            <!-- Visualizador Modal de PDF -->
+            <MaxPdfView :file="activePdfUrl" />
+        </template>
     </InputBase>
 </template>
 
@@ -451,7 +460,7 @@
             transition: outline 0.15s ease-in-out;
 
             &:focus-within {
-                outline: 1px solid var(--blue-700, #2563eb) !important;
+                outline: 1px solid var(--max-primary-500, #00768E) !important;
             }
 
             .input-slot-div {
@@ -570,7 +579,7 @@
                 // Inline code
                 code {
                     background: var(--background-100, #f3f4f6);
-                    color: var(--max-primary-700, #1d4ed8);
+                    color: var(--max-primary-700, #004860);
                     border: 1px solid var(--background-200, #e5e7eb);
                     border-radius: 4px;
                     padding: 2px 6px;
@@ -601,7 +610,7 @@
 
                 // Blockquote
                 blockquote {
-                    border-left: 4px solid var(--max-primary-500, #3b82f6);
+                    border-left: 4px solid var(--max-primary-500, #00768E);
                     padding: 4px 12px 4px 16px;
                     margin: 0.75rem 0;
                     color: var(--background-650, #4b5563);
@@ -616,13 +625,13 @@
 
                 // Links (Padrão e PDF)
                 a {
-                    color: var(--max-primary-600, #2563eb);
+                    color: var(--max-primary-600, #005F77);
                     text-decoration: underline;
                     text-underline-offset: 2px;
                     cursor: pointer;
 
                     &:hover {
-                        color: var(--max-primary-700, #1d4ed8);
+                        color: var(--max-primary-700, #004860);
                     }
 
                     // Estilização diferenciada para links de PDF (card/chip com ícone de documento)
@@ -710,7 +719,7 @@
                     &:hover {
                         transform: scale(1.02);
                         box-shadow: 0 4px 12px rgb(0 0 0 / 12%);
-                        border-color: var(--max-primary-500, #3b82f6);
+                        border-color: var(--max-primary-500, #00768E);
                     }
                 }
 

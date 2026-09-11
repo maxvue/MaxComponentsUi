@@ -1,6 +1,19 @@
 <template>
     <InputBase v-bind="props" class="max-input-credit-card-cvv input-credit-card-cvv-base" :text-center="true" :label="props.label" :done="done" :required="props.required" :error="error_msg">
-        <MaxBaseInput type="text" v-bind="attrs" v-model="temp_value" v-maska:unmaskedValue.unmasked="maskValue" placeholder="000" @blur="checkDone()" />
+        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+            <MaxBaseInput
+                :id="inputId"
+                type="text"
+                v-bind="attrs"
+                v-model="temp_value"
+                v-maska:unmaskedValue.unmasked="maskValue"
+                placeholder="000"
+                :aria-describedby="hasMessage ? messageId : undefined"
+                :aria-invalid="slotError ? 'true' : undefined"
+                :aria-required="isRequired ? 'true' : undefined"
+                @blur="checkDone()"
+            />
+        </template>
     </InputBase>
 </template>
 

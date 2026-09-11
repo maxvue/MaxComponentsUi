@@ -2,6 +2,7 @@
     <div class="max-accordion-item" :class="{ 'max-accordion-item-disabled': props.disabled }">
         <div class="max-accordion-item-header-wrapper" role="heading" :aria-level="props.headerAriaLevel">
             <div
+                ref="headerRef"
                 class="max-accordion-item-header"
                 :class="{
                     'max-accordion-item-header-active': is_open,
@@ -16,6 +17,10 @@
                 @click="onClick"
                 @keydown.enter.prevent="onClick"
                 @keydown.space.prevent="onClick"
+                @keydown.down.prevent="context.navigate?.(item_value, 'next')"
+                @keydown.up.prevent="context.navigate?.(item_value, 'prev')"
+                @keydown.home.prevent="context.navigate?.(item_value, 'first')"
+                @keydown.end.prevent="context.navigate?.(item_value, 'last')"
             >
                 <span class="max-accordion-item-header-text">
                     <slot name="header">{{ props.title }}</slot>
@@ -42,7 +47,7 @@
 
 <script setup lang="ts">
     import { injectAccordionContext } from '../helpers/accordionContext';
-    import { computed, ref, watch } from 'vue';
+    import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue';
     import MaxIcon from './MaxIcon.vue';
 
     const props = withDefaults(defineProps<{
@@ -94,6 +99,16 @@
 
     const should_render = computed(() => ! context.lazy.value || was_open.value);
 
+    const headerRef = ref<HTMLElement | null>(null);
+
+    onMounted(() => {
+        if (headerRef.value) context.registerHeader?.(item_value, headerRef.value);
+    });
+
+    onBeforeUnmount(() => {
+        context.unregisterHeader?.(item_value);
+    });
+
     defineExpose({ value: item_value });
 </script>
 
@@ -125,6 +140,17 @@
                 text-align: left;
                 color: var(--background-775);
                 transition: background-color 0.2s ease;
+                outline: none;
+
+                &:focus:not(:focus-visible) {
+                    outline: none;
+                }
+
+                &:focus-visible {
+                    outline: var(--max-focus-outline);
+                    outline-offset: -2px;
+                    border-radius: 4px;
+                }
 
                 &:hover:not(.max-accordion-item-header-disabled) {
                     background-color: var(--background-300);

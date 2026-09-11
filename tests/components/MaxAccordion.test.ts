@@ -182,4 +182,31 @@ describe('MaxAccordionItem', () => {
         expect(icons[0].props('i')).toBe('i:up');
         expect(icons[2].props('i')).toBe('i:down');
     });
+
+    it('navega entre os headers com ArrowDown, ArrowUp, Home e End, pulando desabilitados', async () => {
+        const wrapper = mountFull({ attachTo: document.body });
+        const headers = wrapper.findAll('.max-accordion-item-header');
+
+        const focusSpy0 = vi.spyOn(headers[0].element as HTMLElement, 'focus');
+        const focusSpy2 = vi.spyOn(headers[2].element as HTMLElement, 'focus');
+
+        // headers[1] (item b) is disabled in mountFull
+        // ArrowDown on header[0] should navigate to header[2]
+        await headers[0].trigger('keydown', { key: 'ArrowDown' });
+        expect(focusSpy2).toHaveBeenCalled();
+
+        // ArrowUp on header[2] should navigate back to header[0]
+        await headers[2].trigger('keydown', { key: 'ArrowUp' });
+        expect(focusSpy0).toHaveBeenCalled();
+
+        // End on header[0] should navigate to header[2]
+        await headers[0].trigger('keydown', { key: 'End' });
+        expect(focusSpy2).toHaveBeenCalled();
+
+        // Home on header[2] should navigate to header[0]
+        await headers[2].trigger('keydown', { key: 'Home' });
+        expect(focusSpy0).toHaveBeenCalled();
+
+        wrapper.unmount();
+    });
 });

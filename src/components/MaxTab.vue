@@ -70,6 +70,17 @@
         color: var(--background-700);
         white-space: nowrap;
         transition: color 0.2s ease, border-color 0.2s ease;
+        outline: none;
+
+        &:focus:not(:focus-visible) {
+            outline: none;
+        }
+
+        &:focus-visible {
+            outline: var(--max-focus-outline);
+            outline-offset: -2px;
+            border-radius: 4px 4px 0 0;
+        }
 
         &.max-tab-active {
             border-bottom-color: var(--max-primary-500);

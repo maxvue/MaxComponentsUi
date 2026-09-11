@@ -1,29 +1,51 @@
 <template>
-    <div class="max-empty-div">
+    <div
+        class="max-empty-div"
+        :class="{ 'is-transparent': props.transparent, 'is-nospace': props.nospace }"
+        :transparent="props.transparent ? '' : undefined"
+        :nospace="props.nospace ? '' : undefined"
+    >
         <div class="inner">
             <slot>
                 <slot name="icon">
-                    <MaxIcon :icon="String(attrs.icon ?? attrs.i ?? 'ph:empty')" :size="Number(attrs.iconSize ?? 2)" />
+                    <MaxIcon :icon="String(props.icon ?? props.i ?? 'ph:empty')" :size="Number(props.iconSize ?? 2)" />
                 </slot>
                 <slot name="label">
                     <div v-html="sanitizedLabel" class="label" />
                 </slot>
             </slot>
-
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-    import { computed, useAttrs } from 'vue';
+    import { computed } from 'vue';
     import MaxIcon from './MaxIcon.vue';
     import { sanitizeHtml } from '../helpers/sanitizeHtml';
 
-    const attrs = useAttrs();
-    const sanitizedLabel = computed(() => {
-        const raw = attrs.label ?? 'Sem Registros';
-        return sanitizeHtml(String(raw));
+    export interface MaxEmptyDivProps {
+        /** Mensagem textual ou HTML sanitizado exibido como rótulo */
+        label?: string;
+        /** Identificador do ícone (Iconify) */
+        icon?: string;
+        /** Alias para icon */
+        i?: string;
+        /** Tamanho do ícone */
+        iconSize?: number | string;
+        /** Renderiza fundo transparente e sem borda */
+        transparent?: boolean;
+        /** Posiciona o container com posicionamento absoluto no topo */
+        nospace?: boolean;
+    }
+
+    const props = withDefaults(defineProps<MaxEmptyDivProps>(), {
+        label: 'Sem Registros',
+        iconSize: 2,
+        transparent: false,
+        nospace: false
     });
+
+    const sanitizedLabel = computed(() => sanitizeHtml(String(props.label ?? 'Sem Registros')));
 </script>
 
 <style scoped lang="scss">
@@ -37,12 +59,14 @@
         color: var(--background-650);
         border: 1px solid var(--background-200);
 
-        &[transparent] {
+        &[transparent],
+        &.is-transparent {
             background-color: transparent !important;
             border: none !important;
         }
 
-        &[nospace] {
+        &[nospace],
+        &.is-nospace {
             position: absolute;
             top: 0;
             left: 0;

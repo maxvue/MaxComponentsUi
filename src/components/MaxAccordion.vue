@@ -57,6 +57,31 @@
         return `item-${auto_count}`;
     };
 
+    const headers = new Map<string, HTMLElement>();
+
+    const registerHeader = (item_value: string, el: HTMLElement) => {
+        headers.set(item_value, el);
+    };
+
+    const unregisterHeader = (item_value: string) => {
+        headers.delete(item_value);
+    };
+
+    const navigate = (fromValue: string, direction: 'next' | 'prev' | 'first' | 'last') => {
+        const entries = Array.from(headers.entries()).filter(([_, el]) => !el.classList.contains('max-accordion-item-header-disabled'));
+        if (entries.length === 0) return;
+
+        const currentIndex = entries.findIndex(([val]) => val === fromValue);
+        let targetIndex = 0;
+
+        if (direction === 'first') targetIndex = 0;
+        else if (direction === 'last') targetIndex = entries.length - 1;
+        else if (direction === 'next') targetIndex = currentIndex >= 0 ? (currentIndex + 1) % entries.length : 0;
+        else if (direction === 'prev') targetIndex = currentIndex >= 0 ? (currentIndex - 1 + entries.length) % entries.length : entries.length - 1;
+
+        entries[targetIndex]?.[1]?.focus();
+    };
+
     provide(ACCORDION_INJECTION_KEY, {
         open_values,
         toggle,
@@ -64,7 +89,10 @@
         expand_icon: toRef(props, 'expandIcon'),
         collapse_icon: toRef(props, 'collapseIcon'),
         id_prefix,
-        nextAutoValue
+        nextAutoValue,
+        registerHeader,
+        unregisterHeader,
+        navigate
     });
 
     defineExpose({ toggle });

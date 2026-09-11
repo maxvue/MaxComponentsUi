@@ -116,8 +116,16 @@ describe('MaxInputCpfCnpj', () => {
         expect(inputBase.props('error')).toBe('Custom error');
     });
 
-    it('exibe erro de Campo obrigatório quando required=true e o campo está vazio (sem caution manual)', () => {
+    it('não exibe erro de obrigatoriedade na montagem inicial', () => {
         const wrapper = mountCpfCnpj({ required: true });
+        const inputBase = wrapper.findComponent(InputBase);
+        expect(inputBase.props('error')).toBeUndefined();
+    });
+
+    it('exibe erro de Campo obrigatório quando required=true e o campo está vazio após blur', async () => {
+        const wrapper = mountCpfCnpj({ required: true });
+        await wrapper.find('input').trigger('blur');
+        await wrapper.vm.$nextTick();
         const inputBase = wrapper.findComponent(InputBase);
         expect(inputBase.props('error')).toBe('Campo obrigatório');
     });

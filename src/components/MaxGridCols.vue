@@ -1,13 +1,10 @@
 <template>
-    <div class="max-grid-cols" v-bind="attrs">
+    <div class="max-grid-cols">
         <slot></slot>
     </div>
 </template>
 
 <script setup lang="ts">
-    import { useAttrs } from 'vue';
-
-    const attrs: any = useAttrs();
 </script>
 
 <style lang="scss" scoped>

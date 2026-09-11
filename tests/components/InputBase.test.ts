@@ -282,5 +282,36 @@ describe('InputBase.vue', () => {
         });
         const root = wrapper.find('.max-input-main-div');
         expect(root.classes()).toContain('no-message');
+        expect(wrapper.find('.input-message').exists()).toBe(false);
+    });
+
+    it('renderiza mensagem de erro sem truncamento por padrao', () => {
+        const longMessage = 'Esta é uma mensagem de validação propositalmente longa para testar a flexibilização do layout sem truncamento forçado.';
+        const wrapper = mount(InputBase, {
+            props: { error: longMessage }
+        });
+        const messageEl = wrapper.find('.input-message');
+        expect(messageEl.exists()).toBe(true);
+        expect(messageEl.classes()).not.toContain('is-truncated');
+        expect(messageEl.text()).toContain(longMessage);
+    });
+
+    it('exibe mensagem fallback quando done=false e nenhuma mensagem for fornecida', () => {
+        const wrapper = mount(InputBase, {
+            props: { done: false }
+        });
+        const textSpan = wrapper.find('.input-message .message-text');
+        expect(textSpan.exists()).toBe(true);
+        expect(textSpan.text()).toBe('Valor inválido');
+    });
+
+    it('aplica truncamento somente se truncateMessage=true', () => {
+        const wrapper = mount(InputBase, {
+            props: { error: 'Mensagem truncada', truncateMessage: true }
+        });
+        const messageEl = wrapper.find('.input-message');
+        expect(messageEl.classes()).toContain('is-truncated');
+        const textSpan = messageEl.find('.message-text');
+        expect(textSpan.attributes('title')).toBe('Mensagem truncada');
     });
 });

@@ -22,7 +22,7 @@
                             :aria-expanded="item.items && item.items.length ? activeSubmenu === index : undefined"
                             @click="handleItemClick(item)"
                         >
-                            <MaxIconButton v-if="item.icon" :icon="item.icon" :size="item.icon_size" light transparent />
+                            <MaxIconButton v-if="item.icon" :icon="item.icon" :size="item.icon_size" light :transparent="true" />
                             <div class="menu-item-labels">
                                 <span class="menu-item-label">{{ item.label }}</span>
                                 <span v-if="item.subLabel" class="menu-item-sublabel">{{ item.subLabel }}</span>
@@ -33,7 +33,7 @@
                             v-tooltip.bottom="item.tooltip ?? false"
                             :icon="item.icon"
                             light
-                            transparent
+                            :transparent="true"
                             :route="item.route ?? null"
                             :action="item.action"
                             :data="item.data ?? item.props ?? item.query"
@@ -269,7 +269,7 @@
                         left: unset;
                         right: 100% !important;
                         transform: translateX(100%) translateY(10px) !important;
-                        z-index: 99999 !important;
+                        z-index: var(--z-dropdown, 1000) !important;
                     }
                 }
             }

@@ -11,7 +11,7 @@
     import { useElementSize } from '@maxvue/max-use';
     import { useSystemStore } from '../stores/useSystem.Store';
 
-    const system: any = useSystemStore();
+    const system = useSystemStore();
 
     const main_board_ref = ref<HTMLElement>();
     const { width, height } = useElementSize(() => main_board_ref.value);

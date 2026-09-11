@@ -18,29 +18,27 @@
         <Teleport to="body" v-if="isOpen">
             <div v-tooltip="null" class="popover-item">
                 <MaxAnimateFade :show="isOpen" :duration="0.3">
-                    <div class="background-popover" @click.stop="hide" v-if="isOpen" :style="{opacity: position.opacity}">
-                        <div
-                            class="max-popover-dialog"
-                            ref="el"
-                            role="dialog"
-                            :id="dialog_id"
-                            :aria-labelledby="title_id"
-                            :aria-label="!title_id ? (props.title ?? undefined) : undefined"
-                            :style="{top: position.top + 'px', left: position.left + 'px'}"
-                            :class="[position.isTop ? 'is-top' : 'is-bottom', position.isLeft ? 'is-left' : 'is-right', props.noPicker ? 'no-picker' : '', props.class]"
-                            @click.stop="() => {}"
-                            @keydown="trap.onKeydown"
-                        >
-                            <slot name="header">
-                                <MaxGrid class="max-popover-header" :id="title_id">
-                                    <MaxTitle1 class="max-popover-title" :title="props.title ?? 'Titulo'" :subtitle="props.subTitle ?? 'Sub Titulo'" />
-                                    <MaxIconButton class="max-popover-close" i="iconoir:xmark" size="1.3" aria-label="Fechar" @click.stop="hide" />
-                                </MaxGrid>
-                            </slot>
-                            <div class="max-popover-content">
-                                <slot name="content"></slot>
-                                <slot></slot>
-                            </div>
+                    <div
+                        class="max-popover-dialog"
+                        ref="el"
+                        role="dialog"
+                        :id="dialog_id"
+                        :aria-labelledby="title_id"
+                        :aria-label="!title_id ? (props.title ?? undefined) : undefined"
+                        :style="{top: position.top + 'px', left: position.left + 'px', opacity: position.opacity}"
+                        :class="[position.isTop ? 'is-top' : 'is-bottom', position.isLeft ? 'is-left' : 'is-right', props.noPicker ? 'no-picker' : '', props.class]"
+                        @click.stop="() => {}"
+                        @keydown="trap.onKeydown"
+                    >
+                        <slot name="header">
+                            <MaxGrid class="max-popover-header" :id="title_id">
+                                <MaxTitle1 class="max-popover-title" :title="props.title ?? 'Titulo'" :subtitle="props.subTitle ?? 'Sub Titulo'" />
+                                <MaxIconButton class="max-popover-close" i="iconoir:xmark" size="1.3" aria-label="Fechar" @click.stop="hide" />
+                            </MaxGrid>
+                        </slot>
+                        <div class="max-popover-content">
+                            <slot name="content"></slot>
+                            <slot></slot>
                         </div>
                     </div>
                 </MaxAnimateFade>
@@ -50,7 +48,8 @@
 </template>
 
 <script setup lang="ts">
-    import { useElementSize, useWindowSize, useElementBounding, useDefaultReset } from '@maxvue/max-use';
+    import { useElementSize, useWindowSize, useDefaultReset } from '@maxvue/max-use';
+    import { useActiveElementBounding } from '../composables/useActiveElementBounding';
     import { useTemplateRef, ref, computed, useId, watch, onBeforeUnmount } from 'vue';
     import { usePopoverStore } from '../stores/usePopover.Store';
     import { useFocusTrap } from '../helpers/useFocusTrap';
@@ -132,7 +131,7 @@
 
     const trap = useFocusTrap(el);
 
-    const { x, y, width: width_btn, height: height_btn } = useElementBounding(btn_el as any);
+    const { x, y, width: width_btn, height: height_btn } = useActiveElementBounding(btn_el, isOpen);
     const { width: width_el, height: height_el } = useElementSize(el as any);
     const { width: window_width, height: window_height } = useWindowSize();
 
@@ -176,13 +175,32 @@
         }
     };
 
+    let outsidePointerDown = false;
+    const onDocPointerDown = (e: MouseEvent | TouchEvent | PointerEvent) => {
+        const target = e.target as Node | null;
+        if (el.value && !el.value.contains(target) && btn_el.value && !btn_el.value.contains(target)) outsidePointerDown = true;
+        else outsidePointerDown = false;
+
+    };
+
+    const onDocClick = (e: MouseEvent) => {
+        const target = e.target as Node | null;
+        if (outsidePointerDown && el.value && !el.value.contains(target) && btn_el.value && !btn_el.value.contains(target)) hide();
+
+        outsidePointerDown = false;
+    };
+
     watch(isOpen, (value) => {
         if (value) {
             trap.activate();
             document.addEventListener('keydown', onEscape);
+            document.addEventListener('pointerdown', onDocPointerDown, true);
+            document.addEventListener('click', onDocClick, true);
         } else {
             trap.deactivate();
             document.removeEventListener('keydown', onEscape);
+            document.removeEventListener('pointerdown', onDocPointerDown, true);
+            document.removeEventListener('click', onDocClick, true);
         }
     });
 
@@ -194,6 +212,8 @@
         }
         trap.deactivate();
         document.removeEventListener('keydown', onEscape);
+        document.removeEventListener('pointerdown', onDocPointerDown, true);
+        document.removeEventListener('click', onDocClick, true);
         if (popover_store.show_id === id.value) popover_store.hide();
     });
 
@@ -242,82 +262,72 @@
 
 .popover-item {
     position: fixed;
-    z-index: 99;
+    z-index: var(--z-popover, 1300);
 
-    .background-popover {
-        background-color: rgb(0 0 0 / 10%);
-        height: 100vh;
-        width: 100vw;
+    .max-popover-dialog {
         position: fixed;
-        z-index: 99 !important;
-        top: 0;
-        left: 0;
+        min-width: 300px;
+        min-height: 60px;
+        background-color: var(--background-0);
+        color: var(--background-700);
+        z-index: var(--z-popover, 1300);
+        border: 1px solid var(--surface-border);
+        display: grid;
+        grid-template-rows: auto 1fr;
         transition: opacity 0.3s ease;
 
-        .max-popover-dialog {
-            position: fixed;
-            min-width: 300px;
-            min-height: 60px;
-            background-color: var(--background-0);
-            color: var(--background-700);
-            z-index: 2;
-            border: 1px solid var(--surface-border);
-            display: grid;
-            grid-template-rows: auto 1fr;
+        /* O drop-shadow traça o contorno real do elemento + seus ::before, criando o balão perfeito */
+        filter: drop-shadow(0 4px 8px rgb(0 0 0 / 20%));
+        border-radius: 0.75rem;
+        padding: 10px;
 
-            /* O drop-shadow traça o contorno real do elemento + seus ::before, criando o balão perfeito */
-            filter: drop-shadow(0 4px 8px rgb(0 0 0 / 20%));
-            border-radius: 0.75rem;
-            padding: 10px;
-
-            &:not(.no-picker) {
-                &::before {
-                    content: '';
-                    position: absolute;
-                    width: 14px;
-                    height: 14px;
-                    background-color: var(--background-0);
-                    transform: rotate(45deg);
-                    z-index: 1; /* Cobre a borda principal para unificar o desenho */
-                }
-
-                &.is-bottom::before {
-                    top: -7px;
-                    border-top: 1px solid var(--surface-border);
-                    border-left: 1px solid var(--surface-border);
-                }
-
-                &.is-top::before {
-                    bottom: -7px;
-                    border-bottom: 1px solid var(--surface-border);
-                    border-right: 1px solid var(--surface-border);
-                }
-
-                &.is-left::before {
-                    right: 15px;
-                }
-
-                &.is-right::before {
-                    left: 15px;
-                }
+        &:not(.no-picker) {
+            &::before {
+                content: '';
+                position: absolute;
+                width: 14px;
+                height: 14px;
+                background-color: var(--background-0);
+                transform: rotate(45deg);
+                z-index: 1; /* Cobre a borda principal para unificar o desenho */
             }
 
-            .max-popover-header {
-                width: 100%;
-                flex: 1 0 calc(100% - 8px);
-                padding-top: 0;
-                margin-top: 0;
-                margin-bottom: 15px;
+            &.is-bottom::before {
+                top: -7px;
+                border-top: 1px solid var(--surface-border);
+                border-left: 1px solid var(--surface-border);
+            }
 
-                .max-popover-title {
-                    flex: 1 0 calc(90% - 8px);
-                    padding: 0;
-                    margin: 0;
-                }
+            &.is-top::before {
+                bottom: -7px;
+                border-bottom: 1px solid var(--surface-border);
+                border-right: 1px solid var(--surface-border);
+            }
 
-                .max-popover-close {
-                    flex: 1 0 calc(10% - 8px);
-                }
+            &.is-left::before {
+                right: 15px;
+            }
+
+            &.is-right::before {
+                left: 15px;
+            }
+        }
+
+        .max-popover-header {
+            width: 100%;
+            flex: 1 0 calc(100% - 8px);
+            padding-top: 0;
+            margin-top: 0;
+            margin-bottom: 15px;
+
+            .max-popover-title {
+                flex: 1 0 calc(90% - 8px);
+                padding: 0;
+                margin: 0;
+            }
+
+            .max-popover-close {
+                flex: 1 0 calc(10% - 8px);
             }
         }
     }

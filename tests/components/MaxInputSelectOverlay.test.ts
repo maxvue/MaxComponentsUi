@@ -12,16 +12,24 @@ vi.mock('@maxvue/max-use', async (importOriginal) => {
     const actual = await importOriginal();
     return {
         ...(actual as object),
-        useElementBounding: () => ({
-            x: ref(0),
-            y: ref(100),
-            width: triggerWidth,
-            height: ref(36)
-        }),
         useElementSize: () => ({ width: ref(0), height: ref(0) }),
         useWindowSize: () => ({ width: windowWidth, height: ref(800) })
     };
 });
+
+vi.mock('../../src/composables/useActiveElementBounding', () => ({
+    useActiveElementBounding: () => ({
+        x: ref(0),
+        y: ref(100),
+        top: ref(100),
+        bottom: ref(136),
+        left: ref(0),
+        right: triggerWidth,
+        width: triggerWidth,
+        height: ref(36),
+        update: () => {}
+    })
+}));
 
 import MaxInputSelect from '../../src/components/MaxInputSelect.vue';
 

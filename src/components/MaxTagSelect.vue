@@ -1,68 +1,72 @@
 <template>
     <InputBase v-bind="{ ...props, ...attrs }" class="max-tag-select max-select-tag" input-click-auto no-dropdown>
-        <div v-if="showPlaceholder" class="tab-placeholder-select">
-            {{ placeholderText }}
-        </div>
-
-        <div
-            ref="triggerEl"
-            class="max-select p-select"
-            :class="{ 'is-disabled': props.disabled, 'p-disabled': props.disabled, 'is-focused': isOpen, 'p-focus': isOpen }"
-            tabindex="0"
-            role="combobox"
-            aria-haspopup="listbox"
-            :aria-expanded="isOpen"
-            :aria-controls="listboxId"
-            :aria-activedescendant="activeDescendantId"
-            @click.stop="toggle"
-            @keydown="onTriggerKeydown"
-        >
-            <div class="max-select-label p-select-label">
-                <slot name="value">
-                    <div
-                        class="value-tag-div"
-                        :style="getStyleColor(option_selected, false, true)"
-                        :color-string="getColorString(option_selected)"
-                        v-if="!isButton && hasSelected"
-                    >
-                        <MaxIcon
-                            :icon="option_selected?.icon ?? null"
-                            :size="option_selected?.icon_size ?? 1.4"
-                            v-if="option_selected.icon"
-                            :color="getStyleColor(option_selected, false, true).color"
-                        />
-                        <div
-                            class="tag-value-text"
-                            :style="{ color: getStyleColor(option_selected, false, true).color }"
-                        >
-                            {{ option_selected?.[props.optionName] ?? option_selected?.name ?? option_selected?.label }}
-                        </div>
-                        <slot name="btn-right"></slot>
-                    </div>
-                    <div v-else-if="isButton">
-                        <MaxIconButton :icon="props.i ?? props.icon ?? props.iconLeft" :size="option_selected?.icon_size ?? 1.8" />
-                    </div>
-                </slot>
+        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+            <div v-if="showPlaceholder" class="tab-placeholder-select">
+                {{ placeholderText }}
             </div>
-        </div>
 
-        <Teleport to="body" v-if="isOpen">
-            <div class="max-select-tag-backdrop" @click="hide">
+            <div
+                :id="inputId"
+                ref="triggerEl"
+                class="max-select"
+                :class="{ 'is-disabled': props.disabled, 'is-focused': isOpen }"
+                tabindex="0"
+                role="combobox"
+                aria-haspopup="listbox"
+                :aria-expanded="isOpen"
+                :aria-controls="listboxId"
+                :aria-activedescendant="activeDescendantId"
+                :aria-describedby="hasMessage ? messageId : undefined"
+                :aria-invalid="slotError ? 'true' : undefined"
+                :aria-required="isRequired ? 'true' : undefined"
+                @click.stop="toggle"
+                @keydown="onTriggerKeydown"
+            >
+                <div class="max-select-label">
+                    <slot name="value">
+                        <div
+                            class="value-tag-div"
+                            :style="getStyleColor(option_selected, false, true)"
+                            :color-string="getColorString(option_selected)"
+                            v-if="!isButton && hasSelected"
+                        >
+                            <MaxIcon
+                                :icon="option_selected?.icon ?? null"
+                                :size="option_selected?.icon_size ?? 1.4"
+                                v-if="option_selected.icon"
+                                :color="getStyleColor(option_selected, false, true).color"
+                            />
+                            <div
+                                class="tag-value-text"
+                                :style="{ color: getStyleColor(option_selected, false, true).color }"
+                            >
+                                {{ option_selected?.[props.optionName] ?? option_selected?.name ?? option_selected?.label }}
+                            </div>
+                            <slot name="btn-right"></slot>
+                        </div>
+                        <div v-else-if="isButton">
+                            <MaxIconButton :icon="props.i ?? props.icon ?? props.iconLeft" :size="option_selected?.icon_size ?? 1.8" />
+                        </div>
+                    </slot>
+                </div>
+            </div>
+
+            <Teleport to="body" v-if="isOpen">
                 <div
                     ref="overlayEl"
                     :id="listboxId"
-                    class="max-select-overlay p-select-overlay"
+                    class="max-select-overlay"
                     role="listbox"
                     tabindex="-1"
-                    :style="{ top: position.top + 'px', left: position.left + 'px' }"
+                    :style="{ top: position.top + 'px', left: position.left + 'px', width: position.width }"
                     @click.stop
                 >
-                    <div v-if="props.filter" class="max-select-header p-select-header">
-                        <div class="max-select-filter-container p-select-filter-container">
+                    <div v-if="props.filter" class="max-select-header">
+                        <div class="max-select-filter-container">
                             <input
                                 ref="filterInputEl"
                                 type="text"
-                                class="max-select-filter p-select-filter"
+                                class="max-select-filter"
                                 v-model="searchQuery"
                                 placeholder="Pesquisar..."
                                 role="searchbox"
@@ -76,21 +80,20 @@
                         </div>
                     </div>
 
-                    <div class="max-select-list-container p-select-list-container">
-                        <div v-if="loading" class="max-select-empty-message p-select-empty-message">
+                    <div ref="listContainerEl" class="max-select-list-container">
+                        <div v-if="loading" class="max-select-empty-message">
                             Carregando...
                         </div>
                         <template v-else-if="filteredOptions.length > 0">
-                            <div class="max-select-list p-select-list">
+                            <div class="max-select-list">
                                 <div
                                     v-for="(option, index) in (filteredOptions as any[])"
                                     :key="index"
                                     :id="`${listboxId}-opt-${index}`"
-                                    :ref="(el) => setOptionRef(el, index)"
-                                    class="max-select-option p-select-option"
+                                    class="max-select-option"
                                     :class="{
-                                        'max-select-option-selected p-select-option-selected is-selected': isOptionSelected(option),
-                                        'max-select-option-highlighted p-select-option-highlighted is-focused': highlightedIndex === index
+                                        'max-select-option-selected is-selected': isOptionSelected(option),
+                                        'max-select-option-highlighted is-focused': highlightedIndex === index
                                     }"
                                     role="option"
                                     :aria-selected="isOptionSelected(option)"
@@ -121,13 +124,13 @@
                                 </div>
                             </div>
                         </template>
-                        <div v-else class="max-select-empty-message p-select-empty-message">
+                        <div v-else class="max-select-empty-message">
                             {{ attrs.emptyMessage ?? 'Nenhum registro encontrado' }}
                         </div>
                     </div>
                 </div>
-            </div>
-        </Teleport>
+            </Teleport>
+        </template>
     </InputBase>
 </template>
 
@@ -139,7 +142,8 @@
     import { ref, computed, watch, useAttrs, onBeforeUnmount, nextTick, type Ref } from 'vue';
     import InputBase from './InputBase.vue';
     import { SelectGroupOptions } from '../types';
-    import { getColorFromVar, contrastColor, isBlank, watchDebounced, useElementBounding, useElementSize, useWindowSize } from '@maxvue/max-use';
+    import { getColorFromVar, contrastColor, isBlank, watchDebounced, useElementSize, useWindowSize } from '@maxvue/max-use';
+    import { useActiveElementBounding } from '../composables/useActiveElementBounding';
     import { getOverlayWidth, getOverlayLeft } from '../helpers/useOverlayWidth';
     import MaxIcon from './MaxIcon.vue';
     import MaxIconButton from './MaxIconButton.vue';
@@ -252,12 +256,7 @@
 
     const listboxId = `max-tag-select-listbox-${Math.random().toString(36).slice(2, 9)}`;
     const highlightedIndex = ref<number>(-1);
-    const optionRefs = ref<(HTMLElement | null)[]>([]);
-
-    const setOptionRef = (el: any, index: number) => {
-        if (el) optionRefs.value[index] = el as HTMLElement;
-
-    };
+    const listContainerEl = ref<HTMLElement | null>(null);
 
     watch(temp_value, (val) => {
         if (skipNextUpdateModelValue) {
@@ -277,7 +276,7 @@
     const overlayEl = ref<HTMLElement | null>(null);
     const filterInputEl = ref<HTMLInputElement | null>(null);
 
-    const { x, y, width: width_btn, height: height_btn } = useElementBounding(triggerEl as any);
+    const { x, y, width: width_btn, height: height_btn } = useActiveElementBounding(triggerEl, isOpen);
     const { height: height_el } = useElementSize(overlayEl as any);
     const { width: window_width, height: window_height } = useWindowSize();
 
@@ -368,8 +367,15 @@
 
     const scrollHighlightedIntoView = () => {
         nextTick(() => {
-            const el = optionRefs.value[highlightedIndex.value];
-            if (el && typeof el.scrollIntoView === 'function') el.scrollIntoView({ block: 'nearest' });
+            const container = listContainerEl.value;
+            if (!container || highlightedIndex.value < 0) return;
+
+            const h = 36;
+            const targetTop = highlightedIndex.value * h;
+            const targetBottom = targetTop + h;
+
+            if (targetTop < container.scrollTop) container.scrollTop = targetTop;
+            else if (targetBottom > container.scrollTop + container.clientHeight) container.scrollTop = targetBottom - container.clientHeight;
 
         });
     };
@@ -498,13 +504,34 @@
         }
     };
 
+    let outsidePointerDown = false;
+    const onDocPointerDown = (e: MouseEvent | TouchEvent | PointerEvent) => {
+        const target = e.target as Node | null;
+        if (overlayEl.value && !overlayEl.value.contains(target) && triggerEl.value && !triggerEl.value.contains(target)) outsidePointerDown = true;
+        else outsidePointerDown = false;
+
+    };
+
+    const onDocClick = (e: MouseEvent) => {
+        const target = e.target as Node | null;
+        if (outsidePointerDown && overlayEl.value && !overlayEl.value.contains(target) && triggerEl.value && !triggerEl.value.contains(target)) hide();
+
+        outsidePointerDown = false;
+    };
+
     watch(isOpen, async (open) => {
-        if (typeof window !== 'undefined') if (open) window.addEventListener('keydown', onKeydown);
-        else window.removeEventListener('keydown', onKeydown);
+        if (typeof window !== 'undefined') if (open) {
+            window.addEventListener('keydown', onKeydown);
+            document.addEventListener('pointerdown', onDocPointerDown, true);
+            document.addEventListener('click', onDocClick, true);
+        } else {
+            window.removeEventListener('keydown', onKeydown);
+            document.removeEventListener('pointerdown', onDocPointerDown, true);
+            document.removeEventListener('click', onDocClick, true);
+        }
 
 
         if (open) {
-            optionRefs.value = [];
             const items = flatSelectableOptions.value;
             const selectedIdx = items.findIndex((opt: any) => isOptionSelected(opt));
             highlightedIndex.value = selectedIdx >= 0 ? selectedIdx : (items.length > 0 ? 0 : -1);
@@ -526,8 +553,11 @@
     });
 
     onBeforeUnmount(() => {
-        if (typeof window !== 'undefined') window.removeEventListener('keydown', onKeydown);
-
+        if (typeof window !== 'undefined') {
+            window.removeEventListener('keydown', onKeydown);
+            document.removeEventListener('pointerdown', onDocPointerDown, true);
+            document.removeEventListener('click', onDocClick, true);
+        }
     });
 
     watchDebounced(
@@ -577,8 +607,7 @@
             pointer-events: none;
         }
 
-        .max-select,
-        .p-select {
+        .max-select {
             width: 100% !important;
             height: 36px !important;
             cursor: pointer;
@@ -586,8 +615,7 @@
             align-items: center;
             outline: none;
 
-            .max-select-label,
-            .p-select-label {
+            .max-select-label {
                 border: none !important;
                 padding: 0 10px !important;
                 display: grid;
@@ -637,8 +665,7 @@
         &[small] {
             padding: 0 !important;
 
-            .max-select,
-            .p-select {
+            .max-select {
                 padding: 0 5px 0 0 !important;
 
                 span {
@@ -649,180 +676,144 @@
 
         &[flex], &[full] {
             .max-select,
-            .p-select,
             .max-select .max-select-label,
-            .p-select .p-select-label,
             .max-select .max-select-label .value-tag-div,
-            .p-select .p-select-label .value-tag-div,
-            .max-select .max-select-label .value-tag-div .tag-value-text,
-            .p-select .p-select-label .value-tag-div .tag-value-text {
+            .max-select .max-select-label .value-tag-div .tag-value-text {
                 height: 100% !important;
                 max-height: 100% !important;
                 display: grid;
             }
 
-            .max-select .max-select-label .value-tag-div .tag-value-text,
-            .p-select .p-select-label .value-tag-div .tag-value-text {
+            .max-select .max-select-label .value-tag-div .tag-value-text {
                 display: grid;
                 place-items: center start;
             }
         }
     }
 
-    .max-select-tag-backdrop {
-        top: 0;
-        left: 0;
+    .max-select-overlay {
         position: fixed;
-        width: 100vw;
-        height: 100vh;
-        z-index: 9999 !important;
+        z-index: var(--z-dropdown, 1000);
+        background: var(--background-0, #fff);
+        border: 1px solid var(--surface-border);
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        transform: translateY(-10px);
 
-        .max-select-overlay,
-        .p-select-overlay {
-            position: fixed;
-            z-index: 1101;
-            background: var(--background-0, #fff);
-            border: 1px solid var(--surface-border, #e2e8f0);
-            border-radius: 6px;
-            box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            transform: translateY(-10px);
+        .max-select-header {
+            padding: 6px !important;
+            z-index: 1 !important;
 
-            .max-select-header,
-            .p-select-header {
-                padding: 6px !important;
-                z-index: 1 !important;
+            .max-select-filter-container {
+                width: 100%;
 
-                .max-select-filter-container,
-                .p-select-filter-container {
+                .max-select-filter {
                     width: 100%;
-
-                    .max-select-filter,
-                    .p-select-filter {
-                        width: 100%;
-                        padding: 4px 8px;
-                        border: 1px solid var(--surface-border, #e2e8f0);
-                        border-radius: 4px;
-                        outline: none;
-                        font-size: 0.85rem;
-                    }
+                    padding: 4px 8px;
+                    border: 1px solid var(--surface-border);
+                    border-radius: 4px;
+                    outline: none;
+                    font-size: 0.85rem;
                 }
             }
+        }
 
-            .max-select-list-container,
-            .p-select-list-container {
-                padding: 10px;
-                scrollbar-width: thin;
-                overflow-y: auto;
+        .max-select-list-container {
+            padding: 10px;
+            scrollbar-width: thin;
+            overflow-y: auto;
 
-                ::-webkit-scrollbar {
-                    width: 3px;
-                    height: 3px;
-                }
+            ::-webkit-scrollbar {
+                width: 3px;
+                height: 3px;
+            }
 
-                .p-virtualscroller {
-                    max-height: 250px !important;
-                    overflow: hidden !important;
-                    overflow-y: auto !important;
-                }
+            .max-select-list {
+                .max-select-option {
+                    cursor: pointer;
+                    padding: 2px 4px;
+                    min-height: 36px;
+                    display: flex;
+                    align-items: center;
+                    box-sizing: border-box;
+                    transition: background-color 0.15s ease;
 
-                .max-select-list,
-                .p-select-list {
-                    .max-select-option,
-                    .p-select-option {
-                        cursor: pointer;
-                        padding: 2px 4px;
-                        min-height: 36px;
-                        display: flex;
-                        align-items: center;
-                        box-sizing: border-box;
-                        transition: background-color 0.15s ease;
+                    &.max-select-option-highlighted,
+                    &.is-focused,
+                    &:hover {
+                        background-color: var(--background-100, #f1f5f9) !important;
+                    }
 
-                        &.max-select-option-highlighted,
-                        &.p-select-option-highlighted,
-                        &.is-focused,
-                        &:hover {
-                            background-color: var(--background-100, #f1f5f9) !important;
-                        }
+                    &.max-select-option-selected {
+                        background-color: unset !important;
+                    }
 
-                        &.max-select-option-selected,
-                        &.p-select-option-selected {
-                            background-color: unset !important;
-                        }
+                    .category {
+                        width: 20px;
+                        margin-right: 10px;
+                        display: grid;
+                        place-items: center;
+                        border-radius: 5px;
+                    }
 
-                        .category {
-                            width: 20px;
-                            margin-right: 10px;
-                            display: grid;
+                    .label-tag-div {
+                        display: grid;
+                        grid-template-columns: auto 1fr auto;
+                        width: 100% !important;
+                        place-items: center start;
+                        gap: 10px;
+                        height: 30px;
+                        background-color: none !important;
+
+                        .label-tag {
                             place-items: center;
-                            border-radius: 5px;
+                            display: flex;
+                            flex-flow: row nowrap;
                         }
 
-                        .label-tag-div {
-                            display: grid;
-                            grid-template-columns: auto 1fr auto;
-                            width: 100% !important;
-                            place-items: center start;
-                            gap: 10px;
-                            height: 30px;
-                            background-color: none !important;
+                        .sub-label-tag {
+                            padding-left: 1rem;
+                            text-align: right;
+                            width: 100%;
+                            font-size: 0.85rem;
+                        }
 
-                            .label-tag {
-                                place-items: center;
-                                display: flex;
-                                flex-flow: row nowrap;
-                            }
-
-                            .sub-label-tag {
-                                padding-left: 1rem;
-                                text-align: right;
-                                width: 100%;
-                                font-size: 0.85rem;
-                            }
-
-                            img {
-                                max-height: 20px;
-                            }
+                        img {
+                            max-height: 20px;
                         }
                     }
                 }
             }
+        }
 
-            &:has(.label-tag-div) {
-                .max-select-list-container,
-                .p-select-list-container {
-                    max-height: 635px !important;
+        &:has(.label-tag-div) {
+            .max-select-list-container {
+                max-height: 635px !important;
 
-                    .max-select-list,
-                    .p-select-list {
-                        gap: 5px !important;
-                        display: flex;
-                        flex-direction: column;
+                .max-select-list {
+                    gap: 5px !important;
+                    display: flex;
+                    flex-direction: column;
 
-                        .max-select-option,
-                        .p-select-option {
-                            padding: 0 !important;
-                        }
+                    .max-select-option {
+                        padding: 0 !important;
                     }
                 }
+            }
 
-                &:has(.max-select-header),
-                &:has(.p-select-header) {
-                    .max-select-list-container,
-                    .p-select-list-container {
-                        padding-top: 14px !important;
-                    }
+            &:has(.max-select-header) {
+                .max-select-list-container {
+                    padding-top: 14px !important;
                 }
             }
         }
     }
 
     [transparent] {
-        :deep(.p-floatlabel),
-        .max-select,
-        .p-select {
+        .max-select {
             background-color: transparent !important;
         }
     }

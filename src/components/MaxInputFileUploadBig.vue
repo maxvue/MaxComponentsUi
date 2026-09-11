@@ -1,7 +1,11 @@
 <template>
     <div
         ref="drop_zone_ref"
-        :class="`max-input-file-upload-big input-upload-file-big-main-div ${isOverDropZone ? 'in-drop' : 'not-in-drop'} ${props.disabled ? 'is-disabled' : ''}`"
+        class="max-input-file-upload-big input-upload-file-big-main-div"
+        :class="[
+            isOverDropZone ? 'in-drop' : 'not-in-drop',
+            props.disabled ? 'is-disabled' : ''
+        ]"
         role="button"
         :tabindex="props.disabled ? -1 : 0"
         :aria-label="ariaLabelComputed"
@@ -19,34 +23,38 @@
         </div>
 
         <!-- Estado de upload em progresso -->
-        <div v-else-if="uploading" class="upload-state">
+        <div v-else-if="uploading" class="upload-state upload-loading-state">
             <slot name="uploading">
                 <div class="screen-animation">
-                    <DotLottieVue style="height: 300px; width: 300px;" background="red" autoplay loop src="https://lottie.host/1c897063-7dec-4b92-b8db-ecd2cd67f48e/ofrND79jXr.lottie" />
+                    <MaxIcon icon="eos-icons:bubble-loading" size="4" class="upload-spinner" />
+                    <div class="screen-animation-label">Enviando arquivos...</div>
                 </div>
             </slot>
         </div>
 
         <!-- Estado de erro -->
-        <div v-else-if="showError" class="upload-state">
+        <div v-else-if="showError" class="upload-state upload-error-state" role="alert" @click.stop>
             <slot name="error">
                 <div class="screen-animation">
-                    <DotLottieVue style="height: 300px; width: 300px;" background="red" autoplay src="https://lottie.host/b1aebee5-5e8b-4008-acd5-fc651795bbf6/ghW5oHG5ml.lottie" />
+                    <MaxIcon icon="solar:danger-triangle-bold" size="3.5" class="error-icon" />
                     <div class="screen-animation-label">
-                        Erro ao enviar o arquivo.
+                        {{ errorMessage || 'Erro ao enviar o arquivo.' }}
+                    </div>
+                    <div class="screen-animation-actions">
+                        <MaxButton label="Tentar novamente" size="small" variant="outlined" @click.stop="retryUpload" />
+                        <MaxButton label="Descartar" size="small" text @click.stop="dismissError" />
                     </div>
                 </div>
             </slot>
         </div>
     </div>
 </template>
+
 <script setup lang="ts">
-    import { defineAsyncComponent, ref, computed, watch } from 'vue';
+    import { ref, computed } from 'vue';
     import { useFileDialog, useDropZone } from '@maxvue/max-use';
     import MaxIcon from './MaxIcon.vue';
-
-    // Async: dotlottie (player WASM ~1,2 MB) — só carrega quando a animação de upload aparece
-    const DotLottieVue = defineAsyncComponent(() => import('@lottiefiles/dotlottie-vue').then((m) => m.DotLottieVue));
+    import MaxButton from './MaxButton.vue';
 
     const props = withDefaults(defineProps<{
         /** Tipos de arquivo aceitos (ex: '.pdf, .jpg, .png') */
@@ -63,15 +71,24 @@
         onUpload?: () => void;
         /** Indicar externamente que está em upload */
         uploading?: boolean;
+        /** Mensagem descritiva de erro */
+        errorMessage?: string;
     }>(), {
         accept: '.pdf, .jpg, .jpeg, .png, .doc, .docx',
         multiple: true,
         disabled: false,
         label: '',
-        uploading: false
+        uploading: false,
+        errorMessage: ''
     });
 
+    const emit = defineEmits<{
+        'retry': [];
+        'dismiss-error': [];
+    }>();
+
     const showError = ref(false);
+    const lastFiles = ref<File[]>([]);
     const drop_zone_ref = ref<HTMLElement | null>(null);
 
     const ariaLabelComputed = computed(() => {
@@ -80,10 +97,17 @@
         return 'Área de envio de arquivos. Pressione Enter ou Espaço para escolher arquivos para upload';
     });
 
-    watch(showError, (val) => {
-        if (val) setTimeout(() => { showError.value = false; }, 3000);
+    const retryUpload = () => {
+        showError.value = false;
+        emit('retry');
+        if (lastFiles.value.length > 0 && props.onSelect) props.onSelect({ files: lastFiles.value });
 
-    });
+    };
+
+    const dismissError = () => {
+        showError.value = false;
+        emit('dismiss-error');
+    };
 
     // Configura o drop zone para arrastar e soltar arquivos
     const { isOverDropZone } = useDropZone(drop_zone_ref as any, {
@@ -110,8 +134,8 @@
 
     /** Processa os arquivos selecionados ou arrastados */
     function handleFiles(files: File[]) {
+        lastFiles.value = files;
         if (props.onSelect) props.onSelect({ files });
-
     }
 
     /** Callback quando arquivos são soltos na drop zone */
@@ -123,9 +147,15 @@
     /** Abre o file dialog ao clicar na área */
     function onAreaClick() {
         if (!props.disabled) open();
-
     }
+
+    defineExpose({
+        showError,
+        retryUpload,
+        dismissError
+    });
 </script>
+
 <style lang="scss" scoped>
     .input-upload-file-big-main-div {
         height: 100%;
@@ -151,18 +181,19 @@
 
         &.not-in-drop {
             &:hover {
-                outline: 2px dashed var(--blue-700);
+                outline: 2px dashed var(--max-primary-500, #00768e);
 
                 .upload-area {
-                    .max-icon, .label-file-upload {
-                        color: var(--blue-700) !important;
+                    :deep(.max-icon),
+                    .label-file-upload {
+                        color: var(--max-primary-500, #00768e) !important;
                     }
                 }
             }
         }
 
         &.in-drop {
-            outline: 3px dashed var(--blue-700);
+            outline: 3px dashed var(--max-primary-500, #00768e);
             background-color: var(--background-100);
         }
 
@@ -184,16 +215,43 @@
             place-items: center;
             width: 100%;
             height: 100%;
-        }
+            padding: 1.5rem;
 
-        .screen-animation {
-            display: grid;
-            place-items: center;
+            .screen-animation {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 12px;
 
-            .screen-animation-label {
-                font-size: 1.2rem;
-                font-weight: 500;
-                color: var(--red-600);
+                :deep(.upload-spinner) {
+                    color: var(--max-primary-500, #00768e);
+                }
+
+                :deep(.error-icon) {
+                    color: var(--max-danger-500, #ef4444);
+                }
+
+                .screen-animation-label {
+                    font-size: 1rem;
+                    font-weight: 500;
+                    color: var(--background-700);
+                    text-align: center;
+                }
+
+                .screen-animation-actions {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    margin-top: 4px;
+                }
+            }
+
+            &.upload-error-state {
+                .screen-animation {
+                    .screen-animation-label {
+                        color: var(--max-danger-500, #ef4444);
+                    }
+                }
             }
         }
     }

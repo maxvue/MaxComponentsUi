@@ -1,6 +1,9 @@
 @use 'sass:string';
 
-[transparent] {
+// DEPRECATED: Seletores de atributo globais como [transparent] estão descontinuados.
+// Use classes semânticas BEM nos componentes do Max Design System.
+[transparent],
+.u-transparent {
     background-color: transparent;
     border-color: transparent;
     outline-color: transparent;
@@ -11,10 +14,10 @@
     }
 
     &:hover {
-        color: var(--blue-600);
+        color: var(--max-primary-600);
 
         .icon-div {
-            color: var(--blue-600);
+            color: var(--max-primary-600);
         }
     }
 }
@@ -80,17 +83,23 @@
 
 [noborder] {
     border: none !important;
-    outline: none !important;
+
+    &:focus:not(:focus-visible) {
+        outline: none !important;
+    }
+
+    &:focus-visible {
+        outline: var(--max-focus-outline) !important;
+        outline-offset: 2px !important;
+    }
 }
 
 [white] {color: var(--primary-0) !important;
     i {color: var(--primary-0) !important;}
 }
 
-[no-padding] {padding: 0 !important;}
-[no-gap] {gap: 0 !important;}
-[no-row-gap] {row-gap: 0 !important;}
-[no-column-gap] {column-gap: 0 !important;}
+// DEPRECATED: Seletores de atributo globais estão descontinuados.
+.u-no-padding { padding: 0 !important; }
 
 
 [grid-center] { display: grid; place-items: center;}
@@ -100,17 +109,18 @@
 [right] {place-items: center end;}
 [center-start] {place-items: center start;}
 [center-end] {place-items: center end;}
-[center], [center-center] {place-items: center center;}
+[center], [center-center], .u-center {place-items: center center;}
 [start-center] {place-items: start center;}
 [end-center] {place-items: end center;}
 [start] {place-items: start start;}
 [end] {place-items: end end;}
 
 // GRID SIZE
-[full],[flex] {width: 100% !important;height: 100% !important;}
+[full], [flex], .u-flex {width: 100% !important;height: 100% !important;}
 
 // CURSORS
-[pointer] {cursor: pointer !important;}
+// DEPRECATED: [pointer] foi descontinuado; elementos interativos devem possuir cursor pointer nativo
+.u-pointer {cursor: pointer !important;}
 [denied] {cursor: not-allowed !important;}
 [not-allowed] {cursor: no-drop !important;}
 
@@ -157,7 +167,7 @@
 
 .max-tooltip {
     position: absolute;
-    z-index: 99999 !important;
+    z-index: var(--z-tooltip, 1400) !important;
     max-width: 260px;
     padding: 0.35rem 0.65rem;
     border-radius: 6px;

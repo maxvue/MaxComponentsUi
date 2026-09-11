@@ -3,13 +3,13 @@
         <li
             v-for="(item, index) in props.items"
             :key="index"
-            class="p-menubar-item"
+            class="submenu-item p-menubar-item"
             :class="{ 'has-nested': hasChildren(item), 'is-active': activeSubmenu === index }"
             role="none"
             @mouseenter="onItemEnter(index, item)"
             @mouseleave="emit('schedule-close')"
         >
-            <div class="p-menubar-item-content">
+            <div class="submenu-item-content p-menubar-item-content">
                 <div v-if="item.divider" class="divider-space"></div>
                 <div
                     v-else-if="hasContent(item.label)"
@@ -17,7 +17,7 @@
                     :class="{ 'has-children': hasChildren(item) }"
                     @click="onItemClick(item)"
                 >
-                    <MaxIconButton v-if="item.icon" :icon="item.icon" :size="item.icon_size" transparent />
+                    <MaxIconButton v-if="item.icon" :icon="item.icon" :size="item.icon_size" :transparent="true" />
                     <div class="menu-item-labels">
                         <span class="menu-item-label">{{ item.label }}</span>
                         <span v-if="item.subLabel" class="menu-item-sublabel">{{ item.subLabel }}</span>
@@ -28,7 +28,7 @@
                     v-else
                     v-tooltip.bottom="item.tooltip ?? false"
                     :icon="item.icon"
-                    transparent
+                    :transparent="true"
                     :route="item.route ?? null"
                     :action="item.action"
                     :data="item.data ?? item.props ?? item.query"
@@ -39,8 +39,8 @@
             <!-- Submenu recursivo aninhado -->
             <MaxTopToolbarSubmenu
                 v-if="hasChildren(item) && activeSubmenu === index"
-                :items="item.items"
-                class="p-menubar-submenu-nested"
+                :items="item.items ?? []"
+                class="max-top-toolbar-submenu-nested p-menubar-submenu-nested"
                 @keep-open="emit('keep-open')"
                 @schedule-close="emit('schedule-close')"
                 @item-click="emit('item-click', $event)"
@@ -59,28 +59,43 @@
         name: 'MaxTopToolbarSubmenu'
     });
 
+    export interface MaxTopToolbarSubmenuItem {
+        label?: string;
+        subLabel?: string;
+        icon?: string;
+        icon_size?: number | string;
+        divider?: boolean;
+        disabled?: boolean;
+        tooltip?: string | boolean;
+        route?: string | null;
+        action?: ((...args: any[]) => void);
+        data?: any;
+        props?: any;
+        query?: any;
+        items?: MaxTopToolbarSubmenuItem[];
+    }
+
     const props = defineProps<{
-        items: any[];
+        items: MaxTopToolbarSubmenuItem[];
     }>();
 
     const emit = defineEmits<{
-        (e: 'keep-open'): void;
-        (e: 'schedule-close'): void;
-        (e: 'item-click', item: any): void;
+        'keep-open': [];
+        'schedule-close': [];
+        'item-click': [item: MaxTopToolbarSubmenuItem];
     }>();
 
     const activeSubmenu = ref<number | null>(null);
 
-    const hasChildren = (item: any): boolean => Array.isArray(item?.items) && item.items.length > 0;
+    const hasChildren = (item: MaxTopToolbarSubmenuItem): boolean => Array.isArray(item?.items) && item.items.length > 0;
 
-    const onItemEnter = (index: number, item: any): void => {
+    const onItemEnter = (index: number, item: MaxTopToolbarSubmenuItem): void => {
         emit('keep-open');
         if (hasChildren(item)) activeSubmenu.value = index;
         else activeSubmenu.value = null;
-
     };
 
-    const onItemClick = (item: any): void => {
+    const onItemClick = (item: MaxTopToolbarSubmenuItem): void => {
         emit('item-click', item);
     };
 </script>
@@ -93,14 +108,14 @@
     min-width: 180px;
     width: max-content;
     background: var(--background-0, #fff);
-    border: 1px solid var(--surface-border, #e2e8f0);
+    border: 1px solid var(--surface-border);
     border-radius: 6px;
-    box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 10%), 0 2px 4px -1px rgb(0 0 0 / 6%);
     display: flex;
     flex-direction: column;
     gap: 2px;
 
-    .p-menubar-item {
+    .submenu-item {
         position: relative;
         border-radius: 4px;
 
@@ -108,17 +123,17 @@
         &.is-active {
             background-color: var(--background-100, #f1f5f9);
 
-            .p-menubar-item-content .menu-item-content {
+            .submenu-item-content .menu-item-content {
                 color: var(--background-800, #1e293b);
             }
         }
 
-        .p-menubar-item-content {
+        .submenu-item-content {
             width: 100%;
 
             .divider-space {
                 height: 1px;
-                background-color: var(--surface-border, #e2e8f0);
+                background-color: var(--surface-border);
                 margin: 4px 0;
             }
 
@@ -171,7 +186,7 @@
             }
         }
 
-        .p-menubar-submenu-nested {
+        .max-top-toolbar-submenu-nested {
             position: absolute;
             left: 100% !important;
             right: unset !important;

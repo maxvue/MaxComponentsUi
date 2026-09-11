@@ -17,7 +17,9 @@
     );
 
     const inputValue = ref(props.modelValue);
-    const emit = defineEmits(['update:modelValue']);
+    const emit = defineEmits<{
+        'update:modelValue': [value: string];
+    }>();
     const street = computed(() => attrs.street ?? props.street);
 
     const listTypeAddress = [
@@ -36,13 +38,13 @@
     ];
 
     const toSearchable = (str: string) => {
-        if (!str) return '';
+        if (typeof str !== 'string' || !str) return '';
         return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
     };
 
     watch(street, () => {
-        if (street.value) {
-            const first_word = toSearchable(street.value.split(' ')[0]);
+        if (typeof street.value === 'string' && street.value.trim().length > 0) {
+            const first_word = toSearchable(street.value.trim().split(/\s+/)[0]);
             for (let item of listTypeAddress) if (item.values.includes(first_word)) {
                 if (inputValue.value !== item.value) {
                     inputValue.value = item.value;

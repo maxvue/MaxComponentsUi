@@ -232,8 +232,8 @@
         'is-only-icon': props.onlyIcon,
         'has-badge': !props.noNumber,
         'is-loading': props.loading,
-        'p-button-sm': props.size === 'small' || props.size === 'sm',
-        'p-button-lg': props.size === 'large' || props.size === 'lg',
+        'max-button-sm': props.size === 'small' || props.size === 'sm',
+        'max-button-lg': props.size === 'large' || props.size === 'lg',
         ...(props.class ? { [props.class]: true } : {})
     }));
 
@@ -347,13 +347,13 @@
             }
         }
 
-        &.p-button-sm {
+        &.max-button-sm {
             padding: 0.3rem 0.65rem;
             font-size: 0.8rem;
             gap: 0.35rem;
         }
 
-        &.p-button-lg {
+        &.max-button-lg {
             padding: 0.6rem 1.15rem;
             font-size: 1.05rem;
             gap: 0.65rem;
@@ -414,13 +414,13 @@
             width: 2.4rem;
             height: 2.4rem;
 
-            &.p-button-sm {
+            &.max-button-sm {
                 width: 1.9rem;
                 height: 1.9rem;
                 padding: 0.35rem;
             }
 
-            &.p-button-lg {
+            &.max-button-lg {
                 width: 3rem;
                 height: 3rem;
                 padding: 0.65rem;

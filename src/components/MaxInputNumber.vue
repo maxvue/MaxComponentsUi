@@ -1,17 +1,23 @@
 <template>
-    <InputBase class="max-input-number" v-bind="props" :value="temp_value" :done="isDone" :error="error_msg" :caution="caution">
-        <input
-            ref="inputRef"
-            type="text"
-            inputmode="decimal"
-            class="max-input-native max-inputnumber"
-            :value="displayValue"
-            :placeholder="props.placeholder"
-            :disabled="props.disabled"
-            @input="onInput"
-            @focus="onFocus"
-            @blur="onBlur"
-        />
+    <InputBase class="max-input-number" v-bind="props" :value="temp_value" :done="props.done ?? isDone" :error="props.error ?? error_msg" :caution="caution">
+        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+            <input
+                :id="inputId"
+                ref="inputRef"
+                type="text"
+                inputmode="decimal"
+                class="max-input-native max-inputnumber"
+                :value="displayValue"
+                :placeholder="props.placeholder"
+                :disabled="props.disabled"
+                :aria-describedby="hasMessage ? messageId : undefined"
+                :aria-invalid="slotError ? 'true' : undefined"
+                :aria-required="isRequired ? 'true' : undefined"
+                @input="onInput"
+                @focus="onFocus"
+                @blur="onBlur"
+            />
+        </template>
     </InputBase>
 </template>
 
@@ -68,7 +74,7 @@
             /** Máximo de casas decimais */
             maxFractionDigits?: number | undefined;
         }>(),
-        { modelValue: '', done: undefined, required: false, caution: undefined, prefix: undefined, suffix: undefined, placeholder: undefined, minFractionDigits: 0, maxFractionDigits: 2 }
+        { modelValue: '', done: undefined, required: false, caution: undefined, error: undefined, prefix: undefined, suffix: undefined, placeholder: undefined, minFractionDigits: 0, maxFractionDigits: 2 }
     );
 
     const inputRef = ref<HTMLInputElement | null>(null);

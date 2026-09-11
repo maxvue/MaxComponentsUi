@@ -4,7 +4,7 @@
         position="left"
         :show-close-icon="false"
         :base-z-index="1000"
-        no-padding
+        :no-padding="true"
         class="max-side-menu-mobile max-side-menu-mobile-drawer"
     >
         <div class="mobile-side-menu">
@@ -349,7 +349,7 @@
         .mobile-menu-footer {
             flex-shrink: 0;
             padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
-            border-top: 1px solid var(--background-200, #e2e8f0);
+            border-top: 1px solid var(--surface-border);
             background-color: var(--background-50, #f8fafc);
             display: flex;
             flex-direction: column;

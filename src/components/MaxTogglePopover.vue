@@ -1,10 +1,10 @@
 <template>
     <MaxPopover class="max-toggle-popover">
         <slot name="button" v-if="! props.label">
-            <MaxIconButton :icon="props.i ?? props.icon" pointer @click.stop="onClickToggle" ref="btn_el" />
+            <MaxIconButton :icon="props.i ?? props.icon" @click.stop="onClickToggle" ref="btn_el" />
         </slot>
         <slot name="button" v-else>
-            <MaxButton :label="props.label" :icon="props.i ?? props.icon" v-tooltip="null" pointer @click.stop="onClickToggle" ref="btn_el" />
+            <MaxButton :label="props.label" :icon="props.i ?? props.icon" v-tooltip="null" @click.stop="onClickToggle" ref="btn_el" />
         </slot>
     </MaxPopover>
 </template>
@@ -14,7 +14,6 @@
     import MaxPopover from './MaxPopover.vue';
     import MaxButton from './MaxButton.vue';
     import { useTemplateRef } from 'vue';
-    import { useElementBounding } from '@maxvue/max-use';
     import { useConfirmStore } from '../stores/useConfirm.Store';
 
     const confirm_store = useConfirmStore();
@@ -88,18 +87,21 @@
 
     const btn_el = useTemplateRef('btn_el');
 
-    const { x, y, height, width } = useElementBounding(btn_el as any);
-
     const onClickToggle = () => {
+        const rawEl = btn_el.value as any;
+        const domEl: HTMLElement | null = rawEl?.$el ?? rawEl;
+        const rect = domEl?.getBoundingClientRect?.() ?? { x: 0, y: 0, left: 0, top: 0, width: 0, height: 0 };
+
         confirm_store.confirm({
             message: props.message,
             messageIcon: props.messageIcon,
             rejectProps: props.rejectProps,
             acceptProps: props.acceptProps,
-            x: x.value,
-            y: y.value,
-            width: width.value,
-            height: height.value
+            x: rect.x ?? rect.left ?? 0,
+            y: rect.y ?? rect.top ?? 0,
+            width: rect.width ?? 0,
+            height: rect.height ?? 0,
+            target: domEl
         });
     };
 

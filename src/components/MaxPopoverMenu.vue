@@ -16,39 +16,36 @@
             @keydown.down.prevent="openAndFocusFirst"
             @keydown.up.prevent="openAndFocusLast"
         >
-            <slot name="button">
-                <MaxButton v-bind="props" :size="props.size ?? props.sizeIcon" class="max-popover-menu-btn" />
+            <slot name="button" :toggle="toggle" :is-open="isOpen" :menu-id="menuId">
+                <MaxButton v-bind="props" tabindex="-1" aria-hidden="true" :size="props.size ?? props.sizeIcon" class="max-popover-menu-btn" />
             </slot>
         </div>
 
         <Teleport to="body" v-if="isOpen">
-            <div class="max-popover-menu-backdrop" @click="hide">
+            <div
+                ref="menuEl"
+                :id="menuId"
+                class="max-popover-menu-overlay"
+                role="menu"
+                :style="{ top: position.top + 'px', left: position.left + 'px' }"
+                @keydown="onMenuKeydown"
+            >
                 <div
-                    ref="menuEl"
-                    :id="menuId"
-                    class="max-popover-menu-overlay"
-                    role="menu"
-                    :style="{ top: position.top + 'px', left: position.left + 'px' }"
-                    @keydown="onMenuKeydown"
-                    @click.stop
+                    v-for="(item, idx) in resolvedItems"
+                    :key="idx"
+                    :ref="(el) => setItemRef(el, idx)"
+                    role="menuitem"
+                    class="max-popover-menu-item-wrapper"
+                    :tabindex="focusedItemIndex === idx ? 0 : -1"
+                    @click.stop="executeItem(item, $event)"
+                    @mouseenter="focusedItemIndex = idx"
                 >
-                    <div
-                        v-for="(item, idx) in resolvedItems"
-                        :key="idx"
-                        :ref="(el) => setItemRef(el, idx)"
-                        role="menuitem"
-                        class="max-popover-menu-item-wrapper"
-                        :tabindex="focusedItemIndex === idx ? 0 : -1"
-                        @click.stop="executeItem(item, $event)"
-                        @mouseenter="focusedItemIndex = idx"
-                    >
-                        <slot name="item" :data="item">
-                            <div class="max-popover-menu-item">
-                                <MaxIcon :icon="item.icon ?? item.i" v-if="item.icon || item.i" size="1.1" />
-                                <div class="max-popover-menu-label">{{ item.label }}</div>
-                            </div>
-                        </slot>
-                    </div>
+                    <slot name="item" :data="item">
+                        <div class="max-popover-menu-item">
+                            <MaxIcon :icon="item.icon ?? item.i" v-if="item.icon || item.i" size="1.1" />
+                            <div class="max-popover-menu-label">{{ item.label }}</div>
+                        </div>
+                    </slot>
                 </div>
             </div>
         </Teleport>
@@ -59,7 +56,8 @@
     import { computed, ref, nextTick, watch, onBeforeUnmount } from 'vue';
     import MaxButton from './MaxButton.vue';
     import MaxIcon from './MaxIcon.vue';
-    import { goToRoute, useDefaultReset, useElementBounding, useElementSize, useWindowSize } from '@maxvue/max-use';
+    import { goToRoute, useDefaultReset, useElementSize, useWindowSize } from '@maxvue/max-use';
+    import { useActiveElementBounding } from '../composables/useActiveElementBounding';
     import { getCssSize } from '../helpers/getCssSize';
 
     const props = withDefaults(defineProps<{
@@ -130,7 +128,8 @@
     const anchorEl = ref<HTMLElement | null>(null);
     const isOpen = ref(false);
 
-    const { x, y, width: width_btn, height: height_btn } = useElementBounding(anchorEl as any);
+    const boundingTarget = computed(() => anchorEl.value ?? triggerButtonRef.value ?? btn_el.value);
+    const { x, y, width: width_btn, height: height_btn } = useActiveElementBounding(boundingTarget, isOpen);
     const { width: width_el, height: height_el } = useElementSize(menuEl as any);
     const { width: window_width, height: window_height } = useWindowSize();
 
@@ -259,6 +258,28 @@
         }
     };
 
+    const onDocPointerDown = (e: PointerEvent) => {
+        if (!isOpen.value) return;
+        const target = e.target as Node | null;
+        if (!target) return;
+        if (menuEl.value?.contains(target)) return;
+        if (triggerButtonRef.value?.contains(target)) return;
+        if (btn_el.value?.contains(target)) return;
+        if (anchorEl.value?.contains(target)) return;
+        hide();
+    };
+
+    const onDocClick = (e: MouseEvent) => {
+        if (!isOpen.value) return;
+        const target = e.target as Node | null;
+        if (!target) return;
+        if (menuEl.value?.contains(target)) return;
+        if (triggerButtonRef.value?.contains(target)) return;
+        if (btn_el.value?.contains(target)) return;
+        if (anchorEl.value?.contains(target)) return;
+        hide();
+    };
+
     const onGlobalKeydown = (event: KeyboardEvent) => {
         if (event.key === 'Escape' && isOpen.value) {
             hide();
@@ -271,13 +292,21 @@
         if (open) {
             itemRefs.value = [];
             window.addEventListener('keydown', onGlobalKeydown);
-        } else window.removeEventListener('keydown', onGlobalKeydown);
-
+            document.addEventListener('pointerdown', onDocPointerDown, true);
+            document.addEventListener('click', onDocClick, true);
+        } else {
+            window.removeEventListener('keydown', onGlobalKeydown);
+            document.removeEventListener('pointerdown', onDocPointerDown, true);
+            document.removeEventListener('click', onDocClick, true);
+        }
     });
 
     onBeforeUnmount(() => {
-        if (typeof window !== 'undefined') window.removeEventListener('keydown', onGlobalKeydown);
-
+        if (typeof window !== 'undefined') {
+            window.removeEventListener('keydown', onGlobalKeydown);
+            document.removeEventListener('pointerdown', onDocPointerDown, true);
+            document.removeEventListener('click', onDocClick, true);
+        }
     });
 
     defineExpose({
@@ -319,46 +348,39 @@
     }
 }
 
-.max-popover-menu-backdrop {
+.max-popover-menu-overlay {
     position: fixed;
-    inset: 0;
-    z-index: 1100;
-    background: transparent;
+    z-index: var(--z-dropdown, 1000);
+    background: var(--background-0, #fff);
+    border: 1px solid var(--surface-border);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+    min-width: 150px;
+    padding: 4px 0;
+    display: flex;
+    flex-direction: column;
 
-    .max-popover-menu-overlay {
-        position: fixed;
-        z-index: 1101;
-        background: var(--background-0, #fff);
-        border: 1px solid var(--surface-border, #e2e8f0);
-        border-radius: 6px;
-        box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
-        min-width: 150px;
-        padding: 4px 0;
-        display: flex;
-        flex-direction: column;
+    .max-popover-menu-item-wrapper {
+        outline: none;
+        cursor: pointer;
 
-        .max-popover-menu-item-wrapper {
-            outline: none;
+        &:focus-visible {
+            outline: 2px solid var(--max-primary-500, #00768E);
+            outline-offset: -2px;
+            background-color: var(--background-100, #f1f5f9);
+        }
+
+        .max-popover-menu-item {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            place-items: center start;
+            gap: 8px;
+            height: 2rem;
             cursor: pointer;
+            padding: 0 8px;
 
-            &:focus-visible {
-                outline: 2px solid var(--max-primary-500, #00768E);
-                outline-offset: -2px;
-                background-color: var(--background-100, #f1f5f9);
-            }
-
-            .max-popover-menu-item {
-                display: grid;
-                grid-template-columns: auto 1fr;
-                place-items: center start;
-                gap: 8px;
-                height: 2rem;
-                cursor: pointer;
-                padding: 0 8px;
-
-                &:hover {
-                    background: var(--background-100, #f1f5f9);
-                }
+            &:hover {
+                background: var(--background-100, #f1f5f9);
             }
         }
     }

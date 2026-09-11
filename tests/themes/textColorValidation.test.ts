@@ -142,11 +142,11 @@ describe('Matriz Semântica de 4 Níveis de Cor de Texto (background-650/700/750
             const acStyle = AUTOCOMPLETE.split('<style')[1] ?? '';
             const apiStyle = AUTOCOMPLETE_API.split('<style')[1] ?? '';
 
-            expect(acStyle).toMatch(/\.p-autocomplete-input\s*\{[^}]*color:\s*var\(--background-700\)/);
+            expect(acStyle).toMatch(/\.max-autocomplete-input\s*\{[^}]*color:\s*var\(--background-700\)/);
             expect(acStyle).toMatch(/\.autocomplete-item-select-label\s*\{[^}]*color:\s*var\(--background-700\)/);
             expect(acStyle).toMatch(/\.autocomplete-item-select-sub-label\s*\{[^}]*color:\s*var\(--background-650\)/);
 
-            expect(apiStyle).toMatch(/\.p-autocomplete-input\s*\{[^}]*color:\s*var\(--background-700\)/);
+            expect(apiStyle).toMatch(/\.max-autocomplete-input\s*\{[^}]*color:\s*var\(--background-700\)/);
             expect(apiStyle).toMatch(/\.autocomplete-item-select-label\s*\{[^}]*color:\s*var\(--background-700\)/);
             expect(apiStyle).toMatch(/\.autocomplete-item-select-sub-label\s*\{[^}]*color:\s*var\(--background-650\)/);
         });

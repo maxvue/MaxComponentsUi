@@ -1,20 +1,27 @@
 <template>
     <InputBase v-bind="{...props}" class="max-input-text-list max-input-text-list-div">
-        <div class="max-code-editor">
-            <div class="line-numbers" ref="lineNumbersRef">
-                <div v-for="n in lineCount" :key="n" class="line-number">{{ n }}</div>
+        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+            <div class="max-code-editor">
+                <div class="line-numbers" ref="lineNumbersRef">
+                    <div v-for="n in lineCount" :key="n" class="line-number">{{ n }}</div>
+                </div>
+                <textarea
+                    :id="inputId"
+                    ref="textareaRef"
+                    v-model="temp_value"
+                    v-bind="attrs"
+                    class="code-textarea"
+                    wrap="off"
+                    spellcheck="false"
+                    :disabled="props.disabled"
+                    :aria-describedby="hasMessage ? messageId : undefined"
+                    :aria-invalid="slotError || Boolean(props.error)"
+                    :aria-required="isRequired || props.required"
+                    @scroll="syncScroll"
+                    @keydown="handleKeydown"
+                ></textarea>
             </div>
-            <textarea
-                ref="textareaRef"
-                v-model="temp_value"
-                v-bind="attrs"
-                class="code-textarea"
-                wrap="off"
-                spellcheck="false"
-                @scroll="syncScroll"
-                @keydown="handleKeydown"
-            ></textarea>
-        </div>
+        </template>
     </InputBase>
 </template>
 

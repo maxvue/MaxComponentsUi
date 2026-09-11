@@ -79,7 +79,7 @@ describe('MaxInputSelect', () => {
         const loadOptions = vi.fn().mockReturnValue(loadPromise);
         const wrapper = mountSelect({ loadOptions });
 
-        await wrapper.find('.p-select').trigger('click');
+        await wrapper.find('.max-select').trigger('click');
 
         expect(loadOptions).toHaveBeenCalled();
         expect((wrapper.vm as any).loading).toBe(true);
@@ -115,7 +115,7 @@ describe('MaxInputSelect', () => {
         const loadOptions = vi.fn().mockReturnValue(loadPromise);
         const wrapper = mountSelect({ modelValue: 'flat', groupOptions, loadOptions });
 
-        await wrapper.find('.p-select').trigger('click');
+        await wrapper.find('.max-select').trigger('click');
 
         resolveLoad([{ value: 'flat', name: 'Flat Option' }]);
         await loadPromise;
@@ -182,10 +182,10 @@ describe('MaxInputSelect', () => {
             { value: '2', name: 'Opção 2' }
         ];
         const wrapper = mountSelect({ options }, {}, true);
-        await wrapper.find('.p-select').trigger('click');
+        await wrapper.find('.max-select').trigger('click');
         await wrapper.vm.$nextTick();
 
-        const item = document.body.querySelector('.p-select-option') as HTMLElement;
+        const item = document.body.querySelector('.max-select-option') as HTMLElement;
         expect(item).not.toBeNull();
         expect(item.style.height).toBe('27px');
     });
@@ -193,10 +193,10 @@ describe('MaxInputSelect', () => {
     it('aplica height customizado quando listHeight é informado como número ou string', async () => {
         const options = [{ value: '1', name: 'Opção 1' }];
         const wrapper = mountSelect({ options, listHeight: 40 }, {}, true);
-        await wrapper.find('.p-select').trigger('click');
+        await wrapper.find('.max-select').trigger('click');
         await wrapper.vm.$nextTick();
 
-        const item = document.body.querySelector('.p-select-option') as HTMLElement;
+        const item = document.body.querySelector('.max-select-option') as HTMLElement;
         expect(item).not.toBeNull();
         expect(item.style.height).toBe('40px');
     });
@@ -204,10 +204,10 @@ describe('MaxInputSelect', () => {
     it('aplica height customizado quando listHeight é informado com unidade CSS', async () => {
         const options = [{ value: '1', name: 'Opção 1' }];
         const wrapper = mountSelect({ options, listHeight: '2.5rem' }, {}, true);
-        await wrapper.find('.p-select').trigger('click');
+        await wrapper.find('.max-select').trigger('click');
         await wrapper.vm.$nextTick();
 
-        const item = document.body.querySelector('.p-select-option') as HTMLElement;
+        const item = document.body.querySelector('.max-select-option') as HTMLElement;
         expect(item).not.toBeNull();
         expect(item.style.height).toBe('2.5rem');
     });
@@ -217,7 +217,7 @@ describe('MaxInputSelect', () => {
         const focusSpy = vi.spyOn(HTMLInputElement.prototype, 'focus');
         const wrapper = mountSelect({ options, filter: true }, {}, true);
 
-        await wrapper.find('.p-select').trigger('click');
+        await wrapper.find('.max-select').trigger('click');
         await wrapper.vm.$nextTick();
 
         expect(focusSpy).toHaveBeenCalled();

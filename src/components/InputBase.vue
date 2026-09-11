@@ -49,7 +49,14 @@
             <MaxIcon :icon="props.iconLeft ?? props.icon ?? props.i" :size="1.2" :light="light" :dark="dark" v-if="hasContent(props.iconLeft ?? props.icon ?? props.i) && !props.noIcon && (props.iconLeft || props.iconPos === 'left')" class="input-icon-left" />
             <div v-else></div>
             <div class="input-slot-div">
-                <slot :input-id="input_id" :message-id="message_id"></slot>
+                <slot
+                    :input-id="input_id"
+                    :message-id="message_id"
+                    :is-error="isError"
+                    :is-required="Boolean(props.required)"
+                    :has-message="Boolean(displayMessage)"
+                    :display-message="displayMessage"
+                ></slot>
             </div>
             <MaxIcon :icon="props.iconRight ?? props.icon ?? props.i" :size="1.2" :light="light" :dark="dark" v-if="hasContent(props.iconRight ?? props.icon ?? props.i) && !props.noIcon && (props.iconRight || props.iconPos === 'right')" class="input-icon-right" />
             <div v-else></div>
@@ -77,10 +84,11 @@
         <!-- INPUT MESSAGE -->
         <div
             class="input-message"
+            :class="{ 'is-truncated': props.truncateMessage }"
             :id="message_id"
             aria-live="polite"
             :role="isError ? 'alert' : undefined"
-            v-if="!props.noStatus"
+            v-if="!props.noStatus && !props.noMessage"
         >
             <MaxIcon
                 :icon="props.iconMessage"
@@ -90,7 +98,11 @@
                 :dark="dark"
                 class="message-icon"
             />
-            <span class="message-text" v-if="displayMessage">{{ displayMessage }}</span>
+            <span
+                class="message-text"
+                :title="props.truncateMessage && displayMessage ? displayMessage : undefined"
+                v-if="displayMessage"
+            >{{ displayMessage }}</span>
         </div>
     </div>
 </template>
@@ -100,12 +112,15 @@
     import { computed, useId } from 'vue';
     import MaxIcon from './MaxIcon.vue';
     import type { InputValue, SelectOptionsList, SelectGroupOptions } from '../types';
+    import { provideInputBaseContext } from './base/inputBaseContext';
 
     /**
      * Propriedades base para componentes de entrada (inputs).
      * Este componente serve como wrapper para padronizar o layout, ícones e mensagens.
      */
     interface Props {
+        /** ID customizado do campo (se omitido, useId é gerado automaticamente) */
+        id?: string;
         /** Valor do input (suporta v-model) */
         value?: InputValue;
         /** Valor do input para v-model no Vue 3 */
@@ -182,6 +197,8 @@
         noMessage?: boolean;
         /** Flag que força ocultar o icone */
         noIcon?: boolean;
+        /** Se verdadeiro, força a mensagem a permanecer em uma linha única com reticências (...) */
+        truncateMessage?: boolean;
     }
 
     const props = withDefaults(defineProps<Props>(), {
@@ -195,18 +212,18 @@
         iconPos: 'left',
         inLine: false,
         noStatus: false,
-        noMessage: false
+        noMessage: false,
+        truncateMessage: false
     });
 
     /**
-     * Id unico por instancia, gerado com `useId()` (Vue 3.5+). Usado para associar
-     * o `<label>` (via `for`) e a mensagem de feedback (via `aria-describedby`) ao
-     * elemento real de input, que vive dentro do `<slot>` (fora do controle direto
-     * do InputBase). Exposto via slot prop `inputId` para adocao futura pelos
-     * componentes filhos.
+     * Id unico por instancia, gerado com `useId()` (Vue 3.5+) ou customizado via `props.id`.
+     * Usado para associar o `<label>` (via `for`) e a mensagem de feedback (via `aria-describedby`)
+     * ao elemento real de input no slot.
      */
-    const input_id = useId();
-    const message_id = computed(() => `${input_id}-message`);
+    const generated_id = useId();
+    const input_id = computed(() => props.id || generated_id);
+    const message_id = computed(() => `${input_id.value}-message`);
 
     const isError = computed(() => (!props.noStatus && typeof props.error === 'string' && hasContent(props.error)) || props.error === true || props.done === false);
 
@@ -215,20 +232,30 @@
         if (typeof props.caution === 'string' && hasContent(props.caution)) return props.caution;
         const mainMsg = props.message ?? props.msg;
         if (hasContent(mainMsg)) return mainMsg;
-        // String vazia (e nao `false`) para manter a linha de mensagem reservando
-        // o espaco sem interpolar o literal "false" no template.
+        if (isError.value) return 'Valor inválido';
         return '';
     });
 
     const hasIconRight = computed(() => hasContent(props.iconRight ?? props.icon ?? props.i) && !props.noIcon && Boolean(props.iconRight || props.iconPos === 'right'));
+
+    provideInputBaseContext({
+        inputId: input_id,
+        messageId: message_id,
+        hasMessage: computed(() => Boolean(displayMessage.value)),
+        isError,
+        isRequired: computed(() => Boolean(props.required)),
+        displayMessage
+    });
 </script>
 
 <style lang="scss" scoped>
 .max-input-main-div {
     display: grid !important;
-    grid-template-rows: 36px 19px;
+    grid-template-rows: 36px minmax(19px, auto);
     position: relative;
     place-items: center;
+    min-height: 55px;
+    height: auto;
 
     :deep() {
         input, textarea {
@@ -242,7 +269,8 @@
 
     .max-input-label {
         position: absolute;
-        pointer-events: none;
+        pointer-events: auto;
+        cursor: pointer;
         line-height: 1;
         top: calc((0.75rem / 2) * -1 - 1px);
         left: 20px;
@@ -293,9 +321,7 @@
         :deep(label),
         :deep(.max-input-native),
         :deep(.max-select),
-        :deep(.max-select-label),
-        :deep(.p-select),
-        :deep(.p-select-label) {
+        :deep(.max-select-label) {
             &:not(.max-input-otp-cell) {
                 outline: none !important;
                 background-color: transparent !important;
@@ -340,35 +366,44 @@
 
     .input-message {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: flex-start;
-        padding: 0 4px;
-        padding-top: 2px;
+        padding: 2px 4px 0;
         color: var(--max-surface-400);
-        height: 16px;
+        min-height: 16px;
+        height: auto;
         width: 100%;
         gap: 4px;
-        overflow: hidden;
+        overflow: visible;
 
         .message-icon {
             flex-shrink: 0;
+            margin-top: 1px;
         }
 
         .message-text {
             font-size: 12px;
             font-weight: 400;
-            line-height: 1.2;
-            white-space: nowrap;
+            line-height: 1.25;
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        &.is-truncated {
             overflow: hidden;
-            text-overflow: ellipsis;
+
+            .message-text {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
         }
     }
 
     &.text-center,
     &.is-text-center {
         :deep(input),
-        :deep(.max-input-native),
-        :deep(.p-inputtext) {
+        :deep(.max-input-native) {
             text-align: center !important;
         }
     }
@@ -376,8 +411,7 @@
     &.text-right,
     &.is-text-right {
         :deep(input),
-        :deep(.max-input-native),
-        :deep(.p-inputtext) {
+        :deep(.max-input-native) {
             text-align: right !important;
         }
     }
@@ -398,8 +432,7 @@
             }
         }
 
-        :deep(.max-select),
-        :deep(.p-select) {
+        :deep(.max-select) {
             border-color: var(--max-warning-600, var(--orange-600));
         }
 
@@ -429,13 +462,11 @@
         }
 
         :deep(input),
-        :deep(.max-input-native),
-        :deep(.p-inputtext) {
+        :deep(.max-input-native) {
             border-color: var(--max-danger-600, var(--max-red-600));
         }
 
-        :deep(.max-select),
-        :deep(.p-select) {
+        :deep(.max-select) {
             border-color: var(--max-danger-600, var(--max-red-600));
         }
 
@@ -459,11 +490,9 @@
         }
     }
 
-
     &[input-click] {
         &:not([input-click='false']) {
-            :deep(.max-select-label),
-            :deep(.p-select-label) {
+            :deep(.max-select-label) {
                 min-height: 10px !important;
                 max-height: 10px !important;
             }
@@ -473,8 +502,7 @@
             :deep(select),
             :deep(.max-input-native),
             :deep(.max-select),
-            :deep(.p-select),
-            :deep(.p-inputnumber) {
+            :deep(.max-input-number) {
                 width: calc(100% - 4px) !important;
                 border: none !important;
                 border-color: transparent !important;
@@ -491,13 +519,11 @@
 
     &[input-click-auto] {
         &:not([input-click='false']) {
-            :deep(.max-select),
-            :deep(.p-select) {
+            :deep(.max-select) {
                 padding: 0 !important;
             }
 
-            :deep(.max-select-label),
-            :deep(.p-select-label) {
+            :deep(.max-select-label) {
                 padding: 0 !important;
             }
 
@@ -506,8 +532,7 @@
             :deep(select),
             :deep(.max-input-native),
             :deep(.max-select),
-            :deep(.p-select),
-            :deep(.p-inputnumber) {
+            :deep(.max-input-number) {
                 &:not(.max-input-otp-cell) {
                     width: 100% !important;
                     border: none !important;
@@ -578,10 +603,7 @@
         :deep(.max-select),
         :deep(.max-select-label),
         :deep(.max-input-native),
-        :deep(.p-select),
-        :deep(.p-select-label),
-        :deep(.p-inputtext),
-        :deep(.p-inputnumber),
+        :deep(.max-input-number),
         :deep(.value-div) {
             &:not(.max-input-otp-cell) {
                 outline: none !important;
@@ -599,8 +621,7 @@
         height: 100% !important;
 
         :deep(input),
-        :deep(.max-input-native),
-        :deep(.p-inputtext) {
+        :deep(.max-input-native) {
             width: 100% !important;
             height: 100% !important;
             max-width: 100% !important;
@@ -621,7 +642,6 @@
         :deep(select),
         :deep(.max-select),
         :deep(.max-input-native),
-        :deep(.p-select),
         :deep(.value-div),
         :deep(.value-text) {
             height: 20px !important;
@@ -657,10 +677,7 @@
         :deep(select),
         :deep(.max-select-label),
         :deep(.max-input-native),
-        :deep(.p-select-label),
-        :deep(.p-inputtext),
-        :deep(.p-inputnumber),
-        :deep(.p-component),
+        :deep(.max-input-number),
         :deep(.value-div) {
             height: 100% !important;
 
@@ -676,17 +693,13 @@
         :deep(select),
         :deep(.max-select-label),
         :deep(.max-input-native),
-        :deep(.p-select-label),
-        :deep(.p-inputtext),
         :deep(.value-div),
         :deep(.value-text) {
             color: var(--background-700) !important;
         }
 
-        :deep(.max-select),
-        :deep(.p-select) {
+        :deep(.max-select) {
             .max-select-label,
-            .p-select-label,
             .value-div,
             .value-text,
             span {
@@ -702,29 +715,27 @@
             text-align: left !important;
             width: fit-content !important;
             padding: 0 !important;
+            cursor: pointer;
         }
     }
 
     :deep(.max-input-native),
     :deep(input),
-    :deep(.p-inputtext),
-    :deep(.p-datepicker),
-    :deep(.p-autocomplete) {
+    :deep(.max-datepicker-input),
+    :deep(.max-autocomplete) {
         width: 100% !important;
     }
 
     &.no-dropdown,
     &[no-dropdown] {
-        :deep(.max-select-dropdown),
-        :deep(.p-select-dropdown) {
+        :deep(.max-select-dropdown) {
             display: none !important;
         }
 
         &.text-center,
         &.is-text-center {
             :deep(.value-div),
-            :deep(.max-select-label),
-            :deep(.p-select-label) {
+            :deep(.max-select-label) {
                 padding: 0 !important;
             }
         }
@@ -733,35 +744,30 @@
     &.text-center,
     &.is-text-center {
         :deep(.value-div),
-        :deep(.max-select-label),
-        :deep(.p-select-label) {
+        :deep(.max-select-label) {
             width: 100%;
         }
 
         :deep(.value-text),
-        :deep(.max-select-label),
-        :deep(.p-select-label) {
+        :deep(.max-select-label) {
             padding-left: 2.5rem;
         }
 
         &.no-dropdown {
             :deep(.value-div),
-            :deep(.max-select-label),
-            :deep(.p-select-label) {
+            :deep(.max-select-label) {
                 padding-left: 0 !important;
             }
         }
 
         :deep(input),
         :deep(.max-input-native),
-        :deep(.max-select-label),
-        :deep(.p-select-label) {
+        :deep(.max-select-label) {
             text-align: center !important;
         }
     }
 
-    :deep(.max-input-native),
-    :deep(.p-inputtext) {
+    :deep(.max-input-native) {
         height: 36px;
 
         &[disabled] {
@@ -780,15 +786,12 @@
         :deep(textarea),
         :deep(span),
         :deep(.max-input-native),
-        :deep(.max-select-label),
-        :deep(.p-floatlabel .p-select-label),
-        :deep(.p-inputtext) {
+        :deep(.max-select-label) {
             color: var(--background-650) !important;
         }
     }
 
     :deep(.is-disabled),
-    :deep(.p-disabled),
     :deep(input:disabled) {
         background-color: unset !important;
         opacity: 0.6 !important;
@@ -798,9 +801,7 @@
         textarea,
         span,
         .max-select-label,
-        .p-floatlabel .p-select-label,
-        .max-input-native,
-        .p-inputtext {
+        .max-input-native {
             color: var(--background-650) !important;
         }
     }

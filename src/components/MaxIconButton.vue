@@ -2,7 +2,7 @@
     <button
         type="button"
         ref="icon_ref"
-        :class="`max-icon-button icon-div ico-btn ${hover ? 'hover' : ''} ${isDisabled ? 'is-disabled' : ''}`"
+        :class="`max-icon-button icon-div ico-btn ${hover ? 'hover' : ''} ${isDisabled ? 'is-disabled' : ''} ${props.transparent ? 'is-transparent' : ''}`"
         :style="{
             width: size,
             height: size,
@@ -17,7 +17,12 @@
     >
         <slot>
             <MaxIcon
-                pointer
+                v-if="props.loading"
+                icon="eos-icons:loading"
+                :size="size"
+            />
+            <MaxIcon
+                v-else
                 :icon="props.icon"
                 :i="props.i"
                 :dark="props.dark"
@@ -44,7 +49,7 @@
 
     const props = withDefaults(defineProps<MaxButtonsType>(), { data: {}, params: {}, query: {}, hoverScale: 1.2 });
 
-    const isDisabled = computed(() => Boolean(props.disabled || (attrs.disabled !== undefined && attrs.disabled !== false)));
+    const isDisabled = computed(() => Boolean(props.disabled || props.loading || (attrs.disabled !== undefined && attrs.disabled !== false)));
 
     const data = computed(() => ({ ...(props.data ?? {}), ...(props.query ?? {}), ...(props.params ?? {}) }));
 
@@ -135,9 +140,20 @@
         }
 
         &:focus-visible {
-            outline: 2px solid var(--max-focus-ring-color, #00768e);
+            outline: 2px solid var(--max-focus-ring-color, #00768E);
             outline-offset: 2px;
             border-radius: 4px;
+        }
+
+        &.is-transparent {
+            background-color: transparent;
+            border-color: transparent;
+            outline-color: transparent;
+            color: var(--background-700);
+
+            &:hover {
+                color: var(--max-primary-600);
+            }
         }
 
         &.is-disabled {

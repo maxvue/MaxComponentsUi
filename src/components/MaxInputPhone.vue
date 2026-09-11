@@ -1,79 +1,96 @@
 <template>
     <InputBase class="max-input-phone input-phone" v-bind="props" :value="temp_value" :done="done" :error="error" :caution="caution" :label="props.noLabel ? undefined : (props.label ?? 'Telefone')" :icon-right="props.noIcon ? undefined : 'ic:baseline-whatsapp'">
-        <div class="inputs-div">
-            <div
-                ref="select_el"
-                class="max-phone-select"
-                role="combobox"
-                tabindex="0"
-                :aria-expanded="isOpen"
-                :aria-controls="listbox_id"
-                aria-haspopup="listbox"
-                :aria-label="'Código do país: +' + country.value"
-                @click.stop="toggle"
-                @keydown="onTriggerKeydown"
-            >
-                <div class="max-phone-select-label">
-                    <div class="item-selected">
-                        <div class="item-flag">
-                            <img :src="'https://flagcdn.com/w40/' + country.sigla.toLowerCase() + '.png'" alt="bandeira" />
-                        </div>
-                        <div class="label-flag">+ {{ country.value }}</div>
-                    </div>
-                </div>
-            </div>
-            <input type="tel" inputmode="tel" slot-b v-model="phone" v-maska:unmaskedValue.unmasked="maskValue" :placeholder="country.value === 55 ? '(99) 9 9999 - 9999' : ''" class="max-input-native phone-number-input" @focus="onFocus = true" @blur="onFocus = false" />
-        </div>
-
-        <Teleport to="body" v-if="isOpen">
-            <div class="max-phone-overlay-mask" @click.stop="close"></div>
-            <div
-                ref="overlay_el"
-                class="max-phone-select-overlay"
-                :style="{ top: position.top + 'px', left: position.left + 'px', width: position.width + 'px' }"
-                @click.stop="() => {}"
-            >
-                <div class="max-phone-select-filter">
-                    <input
-                        ref="filter_el"
-                        type="text"
-                        v-model="filter_text"
-                        class="max-input-native max-phone-filter-input"
-                        :placeholder="'Buscar país ou código'"
-                        aria-label="Buscar país ou código"
-                        @keydown="onFilterKeydown"
-                    />
-                </div>
-                <div class="max-phone-select-list" role="listbox" :id="listbox_id" ref="list_el">
-                    <div
-                        v-for="(option, index) in filtered_options"
-                        :key="option.sigla"
-                        class="max-phone-select-option"
-                        role="option"
-                        :aria-selected="option.sigla === country.sigla"
-                        :class="{ 'is-focused': index === focused_index, 'is-selected': option.sigla === country.sigla }"
-                        @click.stop="selectOption(option)"
-                        @mousemove="focused_index = index"
-                    >
-                        <slot name="option" :option="option" :selected="option.sigla === country.sigla" :index="index">
-                            <div class="input-phone-label-div">
-                                <img :src="'https://flagcdn.com/w40/' + option.sigla.toLowerCase() + '.png'" alt="flag" />
-                                <div class="labelz">
-                                    <div class="phone-option-label">{{ option.label }}</div>
-                                </div>
-                                <div class="subLabel">( +{{ option?.value }} )</div>
+        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+            <div class="inputs-div">
+                <div
+                    ref="select_el"
+                    class="max-phone-select"
+                    role="combobox"
+                    tabindex="0"
+                    :aria-expanded="isOpen"
+                    :aria-controls="listbox_id"
+                    aria-haspopup="listbox"
+                    :aria-label="'Código do país: +' + country.value"
+                    @click.stop="toggle"
+                    @keydown="onTriggerKeydown"
+                >
+                    <div class="max-phone-select-label">
+                        <div class="item-selected">
+                            <div class="item-flag">
+                                <img :src="'https://flagcdn.com/w40/' + country.sigla.toLowerCase() + '.png'" alt="bandeira" loading="lazy" />
                             </div>
-                        </slot>
+                            <div class="label-flag">+ {{ country.value }}</div>
+                        </div>
                     </div>
                 </div>
+                <input
+                    :id="inputId"
+                    type="tel"
+                    inputmode="tel"
+                    slot-b
+                    v-model="phone"
+                    v-maska:unmaskedValue.unmasked="maskValue"
+                    :placeholder="country.value === 55 ? '(99) 9 9999 - 9999' : ''"
+                    class="max-input-native phone-number-input"
+                    :disabled="props.disabled"
+                    :aria-describedby="hasMessage ? messageId : undefined"
+                    :aria-invalid="slotError || Boolean(props.error)"
+                    :aria-required="isRequired || props.required"
+                    @focus="onFocus = true"
+                    @blur="onFocus = false"
+                    @paste="handlePaste"
+                />
             </div>
-        </Teleport>
+
+            <Teleport to="body" v-if="isOpen">
+                <div class="max-phone-overlay-mask" @click.stop="close"></div>
+                <div
+                    ref="overlay_el"
+                    class="max-phone-select-overlay"
+                    :style="{ top: position.top + 'px', left: position.left + 'px', width: position.width + 'px' }"
+                    @click.stop="() => {}"
+                >
+                    <div class="max-phone-select-filter">
+                        <input
+                            ref="filter_el"
+                            type="text"
+                            v-model="filter_text"
+                            class="max-input-native max-phone-filter-input"
+                            :placeholder="'Buscar país ou código'"
+                            aria-label="Buscar país ou código"
+                            @keydown="onFilterKeydown"
+                        />
+                    </div>
+                    <div class="max-phone-select-list" role="listbox" :id="listbox_id" ref="list_el">
+                        <div
+                            v-for="(option, index) in filtered_options"
+                            :key="option.sigla"
+                            class="max-phone-select-option"
+                            role="option"
+                            :aria-selected="option.sigla === country.sigla"
+                            :class="{ 'is-focused': index === focused_index, 'is-selected': option.sigla === country.sigla }"
+                            @click.stop="selectOption(option)"
+                            @mouseenter="focused_index = index"
+                        >
+                            <slot name="option" :option="option" :selected="option.sigla === country.sigla" :index="index">
+                                <div class="input-phone-label-div">
+                                    <img :src="'https://flagcdn.com/w40/' + option.sigla.toLowerCase() + '.png'" alt="flag" loading="lazy" />
+                                    <div class="labelz">
+                                        <div class="phone-option-label">{{ option.label }}</div>
+                                    </div>
+                                    <div class="subLabel">( +{{ option?.value }} )</div>
+                                </div>
+                            </slot>
+                        </div>
+                    </div>
+                </div>
+            </Teleport>
+        </template>
     </InputBase>
 </template>
 
 <script setup lang="ts">
     import { watchDebounced, refAutoReset } from '@maxvue/max-use';
-    import { useMagicKeys } from '@maxvue/max-use';
     import { ref, computed, watch, nextTick, useId, onBeforeUnmount } from 'vue';
     import InputBase from './InputBase.vue';
     import { vMaska } from 'maska/vue';
@@ -113,8 +130,9 @@
         if (phone.value.startsWith('0')) phone.value = phone.value.substring(1);
     });
 
-    const { ctrl, v } = useMagicKeys();
-    watch(() => [ctrl.value, v.value], () => noMask.value = ctrl.value && v.value && onFocus.value);
+    function handlePaste() {
+        noMask.value = true;
+    }
 
     watch(modelValue, (newVal) => {
         if (!newVal) {
@@ -304,6 +322,14 @@
     // Se o filtro encurta a lista, o índice focado pode ficar fora do intervalo.
     watch(filtered_options, () => { focused_index.value = 0; });
 
+    const unmaskedValue = ref('');
+
+    defineExpose({
+        unmaskedValue,
+        noMask,
+        handlePaste
+    });
+
     onBeforeUnmount(close);
 </script>
 
@@ -385,7 +411,8 @@
         }
     }
 
-    :deep(.p-inputicon) {
+    :deep(.max-input-icon),
+    :deep(.icon-right) {
         transform: translateY(-2px) !important;
     }
 
@@ -397,8 +424,7 @@
         grid-column: 2 !important;
     }
 
-    :deep(.max-input-native),
-    :deep(.p-inputtext) {
+    :deep(.max-input-native) {
         padding: 0 2px !important;
     }
 }

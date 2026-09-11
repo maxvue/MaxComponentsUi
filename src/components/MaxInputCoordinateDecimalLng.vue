@@ -1,14 +1,20 @@
 <template>
     <InputBase class="max-input-coordinate-decimal-lng" v-bind="props" :error="error" :caution="caution" :done="isDone">
-        <input
-            type="text"
-            class="max-input-native"
-            v-model="temp_value"
-            v-maska="maskValue"
-            @blur="checkDone()"
-            placeholder="00,000000"
-            :disabled="props.disabled"
-        />
+        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+            <input
+                :id="inputId"
+                type="text"
+                class="max-input-native"
+                v-model="temp_value"
+                v-maska="maskValue"
+                @blur="checkDone()"
+                placeholder="00,000000"
+                :disabled="props.disabled"
+                :aria-describedby="hasMessage ? messageId : undefined"
+                :aria-invalid="slotError || Boolean(error)"
+                :aria-required="isRequired || props.required"
+            />
+        </template>
     </InputBase>
 </template>
 

@@ -103,12 +103,20 @@ describe('MaxInputPhone', () => {
     it('testa noMask quando ctrl+v é acionado', async () => {
         const wrapper = mountPhoneField();
         (wrapper.vm as any).onFocus = true;
-        // mock magic keys logic manually by setting ref
         (wrapper.vm as any).noMask = true;
         await wrapper.vm.$nextTick();
 
         const mask = (wrapper.vm as any).maskValue.mask;
         expect(mask).toBe('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$');
+    });
+
+    it('ativa noMask ao disparar evento de paste no input', async () => {
+        const wrapper = mountPhoneField();
+        const input = wrapper.find('input[type="tel"]');
+        expect((wrapper.vm as any).noMask).toBe(false);
+
+        await input.trigger('paste');
+        expect((wrapper.vm as any).noMask).toBe(true);
     });
 
     it('não depende mais do PrimeVue (nenhum componente Select montado)', () => {

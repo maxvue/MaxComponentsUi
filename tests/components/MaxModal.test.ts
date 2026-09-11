@@ -95,8 +95,7 @@ describe('MaxModal', () => {
         expect(wrapper.find('.custom-btn').exists()).toBe(true);
     });
 
-    it('abre o modal chamando toggle() e aciona timers', async () => {
-        vi.useFakeTimers();
+    it('abre e fecha o modal chamando toggle() sem trava artificial de 400ms', async () => {
         const wrapper = mountModal();
         const vm = wrapper.vm as any;
         const store = useModalStore();
@@ -106,29 +105,12 @@ describe('MaxModal', () => {
         // Chamada de toggle para ABRIR o modal
         vm.toggle();
         expect(store.show_id).toBe(vm.id);
+        expect(vm.is_show).toBe(true);
 
-        // Avança o timer do setTimeout(..., 1)
-        vi.advanceTimersByTime(2);
-
-        // Tentar chamar de novo logo em seguida não deve fazer nada devido ao is_changing
+        // Chamada de toggle imediata para FECHAR o modal responde fluentemente
         vm.toggle();
-        expect(store.show_id).toBe(vm.id); // ainda o mesmo
-
-        // Avança 500ms para passar com folga do refAutoReset(400) do is_changing
-        vi.advanceTimersByTime(500);
-        vm.is_changing = false; // Força para false caso refAutoReset não tenha disparado no fake timer
-
-        // Agora chama toggle para FECHAR o modal
-        vm.toggle();
-
-        // Timeout 1
-        vi.advanceTimersByTime(10);
-        // Timeout 2 (300ms)
-        vi.advanceTimersByTime(350);
-
-        expect(store.show_id).toBe(null); // deve ter removido da store
-
-        vi.useRealTimers();
+        expect(store.show_id).toBe(null);
+        expect(vm.is_show).toBe(false);
     });
 
     it('renderiza o conteúdo do modal quando aberto', async () => {
@@ -212,8 +194,7 @@ describe('MaxModal', () => {
         expect(store.show_id).toBe(vm.id);
     });
 
-    it('close() fecha preservando a animação de saída (opacity -> 0, depois remove após 300ms)', () => {
-        vi.useFakeTimers();
+    it('close() fecha imediatamente atualizando a store e é idempotente', () => {
         const wrapper = mountModal();
         const vm = wrapper.vm as any;
         const store = useModalStore();
@@ -222,24 +203,12 @@ describe('MaxModal', () => {
         expect(store.show_id).toBe(vm.id);
 
         vm.close();
-
-        // Ainda não removido: aguardando a animação de saída
-        expect(store.show_id).toBe(vm.id);
-
-        // Timeout 1 (1ms) zera opacity
-        vi.advanceTimersByTime(2);
-        expect(vm.style.opacity).toBe(0);
-        expect(store.show_id).toBe(vm.id); // ainda presente durante a transição CSS
-
-        // Timeout 2 (300ms) remove de fato
-        vi.advanceTimersByTime(350);
         expect(store.show_id).toBe(null);
+        expect(vm.is_show).toBe(false);
 
         // Idempotente: chamar close() de novo não faz nada
         vm.close();
         expect(store.show_id).toBe(null);
-
-        vi.useRealTimers();
     });
 
     it('open() -> close() -> open() em sequência rápida NÃO é descartado pelo guard de 400ms', () => {
@@ -608,6 +577,105 @@ describe('MaxModal', () => {
 
             wrapper.unmount();
             expect(document.body.style.overflow).toBe('');
+        });
+    });
+
+    describe('Modal Stack e v-model:visible (Etapa 12)', () => {
+        it('opera em modo controlado com v-model:visible', async () => {
+            const wrapper = mountModal({ visible: false });
+            const vm = wrapper.vm as any;
+            const store = useModalStore();
+
+            expect(vm.is_show).toBe(false);
+            expect(wrapper.find('.background-modal').exists()).toBe(false);
+
+            await wrapper.setProps({ visible: true });
+            await wrapper.vm.$nextTick();
+            expect(vm.is_show).toBe(true);
+            expect(wrapper.find('.background-modal').exists()).toBe(true);
+            expect(store.isOpen(vm.id)).toBe(true);
+
+            // Ao chamar close() no componente, emite update:visible = false
+            vm.close();
+            await wrapper.vm.$nextTick();
+            expect(wrapper.emitted('update:visible')).toBeTruthy();
+            expect(wrapper.emitted('update:visible')![0]).toEqual([false]);
+        });
+
+        it('mantém múltiplos modais montados simultaneamente quando empilhados', async () => {
+            const wrapper1 = mountModal({ id: 'modal-1', title: 'Modal 1' });
+            const wrapper2 = mountModal({ id: 'modal-2', title: 'Modal 2' });
+            const vm1 = wrapper1.vm as any;
+            const vm2 = wrapper2.vm as any;
+            const store = useModalStore();
+
+            vm1.open();
+            await wrapper1.vm.$nextTick();
+            expect(store.stack).toEqual(['modal-1']);
+            expect(vm1.is_show).toBe(true);
+
+            vm2.open();
+            await wrapper2.vm.$nextTick();
+            expect(store.stack).toEqual(['modal-1', 'modal-2']);
+            expect(vm1.is_show).toBe(true);
+            expect(vm2.is_show).toBe(true);
+
+            // O modal 1 continua montado no DOM
+            expect(wrapper1.find('.background-modal').exists()).toBe(true);
+            expect(wrapper2.find('.background-modal').exists()).toBe(true);
+
+            // Fechar modal 2 mantém modal 1 aberto
+            vm2.close();
+            await wrapper2.vm.$nextTick();
+            expect(store.stack).toEqual(['modal-1']);
+            expect(vm1.is_show).toBe(true);
+            expect(wrapper1.find('.background-modal').exists()).toBe(true);
+        });
+
+        it('fecha somente o modal do topo ao pressionar Escape', async () => {
+            const wrapper1 = mountModal({ id: 'modal-1', title: 'Modal 1' }, {}, { attachTo: document.body });
+            const wrapper2 = mountModal({ id: 'modal-2', title: 'Modal 2' }, {}, { attachTo: document.body });
+            const vm1 = wrapper1.vm as any;
+            const vm2 = wrapper2.vm as any;
+            const store = useModalStore();
+
+            vm1.open();
+            await wrapper1.vm.$nextTick();
+
+            vm2.open();
+            await wrapper2.vm.$nextTick();
+
+            expect(store.stack).toEqual(['modal-1', 'modal-2']);
+            expect(store.isTop('modal-2')).toBe(true);
+            expect(store.isTop('modal-1')).toBe(false);
+
+            // Pressiona Escape: apenas modal 2 deve fechar
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+            await wrapper2.vm.$nextTick();
+
+            expect(store.stack).toEqual(['modal-1']);
+            expect(vm1.is_show).toBe(true);
+            expect(vm2.is_show).toBe(false);
+        });
+
+        it('calcula z-index progressivo para modais aninhados', async () => {
+            const wrapper1 = mountModal({ id: 'modal-1', title: 'Modal 1' });
+            const wrapper2 = mountModal({ id: 'modal-2', title: 'Modal 2' });
+            const vm1 = wrapper1.vm as any;
+            const vm2 = wrapper2.vm as any;
+
+            vm1.open();
+            await wrapper1.vm.$nextTick();
+
+            vm2.open();
+            await wrapper2.vm.$nextTick();
+
+            const bg1 = wrapper1.find('.background-modal');
+            const bg2 = wrapper2.find('.background-modal');
+
+            // z-index: 1200 + depth * 20
+            expect(bg1.attributes('style')).toContain('z-index: 1200');
+            expect(bg2.attributes('style')).toContain('z-index: 1220');
         });
     });
 });

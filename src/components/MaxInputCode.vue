@@ -38,7 +38,7 @@
                 role="status"
                 aria-label="Carregando editor de código"
             >
-                <MaxIcon icon="eos-icons:loading" :size="1.8" color="var(--max-primary-500, #3b82f6)" />
+                <MaxIcon icon="eos-icons:loading" :size="1.8" color="var(--max-primary-500, #00768E)" />
                 <span class="max-input-code__loading-text">Carregando editor...</span>
             </div>
             <div
@@ -396,7 +396,7 @@
         transition: border-color 0.15s ease-in-out;
 
         &:focus-within {
-            border-color: var(--max-primary-500, #3b82f6);
+            border-color: var(--max-primary-500, #00768E);
         }
 
         &--dark {
@@ -404,7 +404,7 @@
             background-color: #1e1e1e;
 
             &:focus-within {
-                border-color: var(--max-primary-500, #3b82f6);
+                border-color: var(--max-primary-500, #00768E);
             }
         }
 

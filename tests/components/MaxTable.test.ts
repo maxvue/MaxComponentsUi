@@ -210,6 +210,35 @@ describe('MaxTable', () => {
             expect(rows[2].text()).toContain('Ana');
         });
 
+        it('cabeçalho sortable possui tabindex="0", aria-sort e responde a Enter e Espaço', async () => {
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: [...sampleData]
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome', sortable: true })
+                    ]
+                }
+            });
+
+            const header = wrapper.find('thead th.max-table-th-sortable');
+            expect(header.attributes('tabindex')).toBe('0');
+            expect(header.attributes('aria-sort')).toBe('none');
+
+            // Enter: Ascending
+            await header.trigger('keydown', { key: 'Enter' });
+            expect(header.attributes('aria-sort')).toBe('ascending');
+            let rows = wrapper.findAll('tbody tr.max-table-row');
+            expect(rows[0].text()).toContain('Ana');
+
+            // Space: Descending
+            await header.trigger('keydown', { key: ' ' });
+            expect(header.attributes('aria-sort')).toBe('descending');
+            rows = wrapper.findAll('tbody tr.max-table-row');
+            expect(rows[0].text()).toContain('Carlos');
+        });
+
         it('emite evento @sort em modo lazy sem ordenar localmente', async () => {
             const wrapper = mount(MaxTable, {
                 props: {

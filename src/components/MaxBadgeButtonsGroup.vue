@@ -6,7 +6,7 @@
         role="group"
     >
         <MaxBadgeButton
-            v-for="item in props.items"
+            v-for="item in safeItems"
             :key="item.value ?? item.label"
             :label="item.label"
             :icon="item.icon"
@@ -90,6 +90,7 @@
 
     const attrs = useAttrs();
     const internalValue = ref<any[]>([]);
+    const safeItems = computed<MaxBadgeButtonsGroupItem[]>(() => (Array.isArray(props.items) ? props.items : []));
 
     const isOnlyOne = computed<boolean>(() => {
         if (attrs['only-one'] !== undefined) return attrs['only-one'] === true || attrs['only-one'] === '' || attrs['only-one'] === 'true';
@@ -179,7 +180,7 @@
         if (props.disabled || item.disabled) return;
 
         const currentlySelected = isItemSelected(item);
-        const currentItems = props.items.filter((it) => isItemSelected(it));
+        const currentItems = safeItems.value.filter((it) => isItemSelected(it));
 
         if (currentlySelected && !isAllowEmpty.value && currentItems.length === 1) {
             emit('click', item, event);
@@ -210,10 +211,10 @@
     }
 
     onMounted(() => {
-        if ((props.modelValue === undefined || props.modelValue.length === 0) && props.default !== undefined) {
+        if ((props.modelValue === undefined || (Array.isArray(props.modelValue) && props.modelValue.length === 0)) && props.default !== undefined) {
             const defaults = Array.isArray(props.default) ? props.default : [props.default];
 
-            const initialItems = props.items.filter((it) => {
+            const initialItems = safeItems.value.filter((it) => {
                 const itemVal = getItemValue(it);
 
                 return defaults.some((d) => (typeof d === 'object' && d !== null ? (d.value ?? d) === it.value : d === itemVal || d === it.value));

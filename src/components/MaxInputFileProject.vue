@@ -40,7 +40,11 @@
     import axios from 'axios';
     import MaxIconButton from './MaxIconButton.vue';
 
-    const props = withDefaults(defineProps<{ files: DBFile[]; uploadData?: any; auto?: boolean; url?: string; route?:string; ready?: boolean; uploadRoute?: string; buttons?: MaxButtonsType[] }>(), { files: () => [], buttons: () => [], auto: true });
+    const props = withDefaults(defineProps<{ files: DBFile[]; uploadData?: any; auto?: boolean; url?: string; route?:string; ready?: boolean; uploadRoute?: string; buttons?: MaxButtonsType[]; disabled?: boolean }>(), { files: () => [], buttons: () => [], auto: true, disabled: false });
+
+    const emit = defineEmits<{
+        'files-selected': [files: File[]];
+    }>();
 
     const temp_files = ref<DBFile[]>(props.files);
     const created_urls = new Set<string>();
@@ -190,8 +194,11 @@
         created_urls.clear();
     });
 
-    function onDrop(_files: File[] | null) {
-        // if (files) emit('files-selected', files);
+    function onDrop(files: File[] | null) {
+        if (props.disabled || !files || files.length === 0) return;
+
+        temp_files.value = [...temp_files.value, ...(files as any)];
+        emit('files-selected', files);
     }
 </script>
 

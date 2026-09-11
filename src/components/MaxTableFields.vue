@@ -159,7 +159,7 @@
     const tableId = computed(() => props.id ?? ulid());
 
     /** Colunas garantidamente seguras contra valores nulos */
-    const safeColumns = computed<MaxTableColumn[]>(() => props.columns ?? []);
+    const safeColumns = computed<MaxTableColumn[]>(() => Array.isArray(props.columns) ? props.columns : []);
 
     /** Verifica se a coluna de ações deve ser exibida (via prop buttons ou slot buttons) */
     const hasActionsColumn: ComputedRef<boolean> = computed((): boolean => size(props.buttons) > 0 || !!slots['buttons']);
@@ -385,6 +385,15 @@
                     outline: none;
                     border: none;
                     border-radius: 0;
+
+                    &:focus:not(:focus-visible) {
+                        outline: none;
+                    }
+
+                    &:focus-visible {
+                        outline: var(--max-focus-outline);
+                        outline-offset: -1px;
+                    }
 
                     .table-field-control {
                         width: 100%;

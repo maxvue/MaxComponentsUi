@@ -111,11 +111,13 @@
     });
 
     const userInitials = computed(() => {
-        if (!props.name?.trim()) return '';
+        if (typeof props.name !== 'string' || props.name.trim().length === 0) return '';
         const parts = props.name.trim().split(/\s+/);
         if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
 
-        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+        const firstChar = parts[0]?.[0] ?? '';
+        const lastChar = parts[parts.length - 1]?.[0] ?? '';
+        return (firstChar + lastChar).toUpperCase();
     });
 
     const resolvedSize = computed(() => {

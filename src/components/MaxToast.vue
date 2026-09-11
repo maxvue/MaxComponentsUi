@@ -78,17 +78,16 @@
 </template>
 
 <script setup lang="ts">
-    import { ref } from 'vue';
+    import { ref, onBeforeUnmount } from 'vue';
     import { useToastStore } from '../stores/useToast.Store';
     import type { ToastItem } from '../stores/useToast.Store';
     import MaxIcon from './MaxIcon.vue';
 
     const toastStore = useToastStore();
 
-    // NOTA: onBeforeUnmount removido para não apagar toasts globais durante navegação de rotas
-
     const expandedToasts = ref<Record<string, boolean>>({});
     const copiedToastId = ref<string | null>(null);
+    let copyResetTimer: ReturnType<typeof setTimeout> | null = null;
 
     const toggleExpand = (id: string) => {
         expandedToasts.value[id] = !expandedToasts.value[id];
@@ -99,14 +98,23 @@
         if (typeof navigator !== 'undefined' && navigator.clipboard) try {
             await navigator.clipboard.writeText(text);
             copiedToastId.value = toast.id;
-            setTimeout(() => {
+            if (copyResetTimer) clearTimeout(copyResetTimer);
+            copyResetTimer = setTimeout(() => {
                 if (copiedToastId.value === toast.id) copiedToastId.value = null;
+                copyResetTimer = null;
             }, 2000);
         } catch {
             // Fallback silencioso se clipboard API falhar
         }
 
     };
+
+    onBeforeUnmount(() => {
+        if (copyResetTimer) {
+            clearTimeout(copyResetTimer);
+            copyResetTimer = null;
+        }
+    });
 
     /** Mapa de ícones padrão por severidade */
     const severityIconMap: Record<string, string> = {
@@ -155,10 +163,17 @@
             position: relative;
             overflow: hidden;
             color: #fff;
+            border: 1px solid rgb(255 255 255 / 15%);
             box-shadow:
                 0 4px 16px rgb(0 0 0 / 25%),
                 0 1px 4px rgb(0 0 0 / 15%);
             transition: box-shadow 0.2s ease;
+
+            &:not([class*='severity-']) {
+                background: var(--background-0);
+                color: var(--background-775);
+                border: 1px solid var(--surface-border);
+            }
 
             &.is-persistent {
                 padding-bottom: 14px;
@@ -166,23 +181,23 @@
 
             /* ── Cores por severidade ── */
             &.severity-success {
-                background: var(--max-success-600, #059669);
+                background: var(--max-success-600);
             }
 
             &.severity-info {
-                background: var(--max-info-600, #0284c7);
+                background: var(--max-info-600);
             }
 
             &.severity-warning {
-                background: var(--max-warning-600, #d97706);
+                background: var(--max-warning-600);
             }
 
             &.severity-error {
-                background: var(--max-danger-600, #dc2626);
+                background: var(--max-danger-600);
             }
 
             &.severity-whatsapp {
-                background: #128c7e;
+                background: var(--max-whatsapp-600, #128c7e);
             }
 
             /* ─── Ícone ─── */

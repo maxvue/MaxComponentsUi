@@ -21,7 +21,9 @@
 
     const attrs = useAttrs();
 
-    const emit = defineEmits(['upload']);
+    const emit = defineEmits<{
+        'upload': [files: File[] | any];
+    }>();
 
     const onUpload = (files: any) => {
         emit('upload', files);

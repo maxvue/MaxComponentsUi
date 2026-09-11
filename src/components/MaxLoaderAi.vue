@@ -56,7 +56,7 @@
         }
 
         .icon-div {
-            color: white !important;
+            color: var(--background-775);
         }
     }
 

@@ -74,9 +74,11 @@
         const vh = window.innerHeight;
         const vw = window.innerWidth;
 
+        const pHeight = p.height || panelRef.value.offsetHeight || 200;
         const spaceBelow = vh - t.bottom;
-        const openUp = spaceBelow < p.height && t.top > spaceBelow;
-        const top = openUp ? t.top - p.height - props.offset : t.bottom + props.offset;
+        const spaceAbove = t.top;
+        const openUp = spaceBelow < pHeight && spaceAbove > spaceBelow;
+        const top = openUp ? t.top - pHeight - props.offset : t.bottom + props.offset;
 
         let left = props.align === 'right' ? t.right - p.width : t.left;
         left = Math.max(8, Math.min(left, vw - p.width - 8));
@@ -90,7 +92,7 @@
         };
     };
 
-    const onClickOutside = (event: MouseEvent) => {
+    const onDocumentPointerDown = (event: PointerEvent | MouseEvent) => {
         if (!props.dismissable) return;
         const el = event.target as Node;
         if (panelRef.value?.contains(el)) return;
@@ -117,7 +119,8 @@
     };
 
     const attachListeners = () => {
-        document.addEventListener('click', onClickOutside);
+        document.addEventListener('pointerdown', onDocumentPointerDown);
+        document.addEventListener('click', onDocumentPointerDown);
         document.addEventListener('keydown', onKeydown);
         window.addEventListener('scroll', onReposition, true);
         window.addEventListener('resize', onReposition);
@@ -129,7 +132,8 @@
 
             rafId = null;
         }
-        document.removeEventListener('click', onClickOutside);
+        document.removeEventListener('pointerdown', onDocumentPointerDown);
+        document.removeEventListener('click', onDocumentPointerDown);
         document.removeEventListener('keydown', onKeydown);
         window.removeEventListener('scroll', onReposition, true);
         window.removeEventListener('resize', onReposition);
@@ -140,6 +144,12 @@
     };
 
     const openOverlay = async () => {
+        panelStyle.value = {
+            position: 'fixed',
+            visibility: 'hidden',
+            opacity: '0',
+            zIndex: String(nextZIndex())
+        };
         await nextTick();
         position();
         panelRef.value?.focus();

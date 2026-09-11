@@ -38,7 +38,6 @@ describe('MaxDarkModeContrast (Dark Mode & Conformidade de Contraste)', () => {
         it('renderiza variante contrast com classes semânticas', () => {
             const wrapper = mountButton({ severity: 'contrast' });
             expect(wrapper.classes()).toContain('max-button-contrast');
-            expect(wrapper.classes()).toContain('p-button-contrast');
         });
 
         it('MaxButton.vue não possui literais de cor branca fixa "#fff"', () => {

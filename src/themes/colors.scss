@@ -2028,4 +2028,17 @@
     --layout-shell-border: rgb(255 255 255 / 10%);
     --table-header-bg: #1E344B;
     --table-header-text: #DDF2F7;
+
+    // Aliases semânticos espelhados para Modo Escuro:
+    --surface-border: var(--background-300);
+    --text-b: var(--background-775);
+    --text-c: var(--background-775);
+    --text-d: var(--background-750);
+    --text-color: var(--background-700);
+    --primary-a: var(--max-primary-600);
+    --primary-c: var(--max-primary-500);
+    --primary-mouse: var(--max-primary-600);
+    --icon-mouse: var(--max-primary-600);
+    --alerta-b: var(--warn-600);
+    --alerta-c: var(--warn-500);
 }

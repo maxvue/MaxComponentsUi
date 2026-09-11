@@ -44,10 +44,10 @@ describe('MaxTagSelect', () => {
         const options = [{ value: 'a', name: 'Tag A' }];
         const wrapper = mountTagSelect({ options });
 
-        await wrapper.find('.p-select').trigger('click');
+        await wrapper.find('.max-select').trigger('click');
         await wrapper.vm.$nextTick();
 
-        const optionEl = document.body.querySelector('.p-select-option') as HTMLElement;
+        const optionEl = document.body.querySelector('.max-select-option') as HTMLElement;
         expect(optionEl).toBeTruthy();
         optionEl.click();
         await wrapper.vm.$nextTick();

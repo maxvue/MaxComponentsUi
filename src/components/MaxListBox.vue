@@ -682,6 +682,16 @@
         scrollbar-width: none;
         -ms-overflow-style: none;
 
+        &:focus:not(:focus-visible) {
+            outline: none;
+        }
+
+        &:focus-visible {
+            outline: var(--max-focus-outline);
+            outline-offset: -2px;
+            border-radius: 4px;
+        }
+
         &::-webkit-scrollbar {
             display: none;
             width: 0;

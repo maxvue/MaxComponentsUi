@@ -1,6 +1,6 @@
 <template>
     <button
-        v-if="props.label"
+        v-if="props.label || Boolean($slots.default)"
         type="button"
         class="max-button"
         :class="buttonClasses"
@@ -9,17 +9,17 @@
     >
         <MaxIcon
             v-if="showIcon && iconPos === 'left'"
-            :icon="loading ? 'loading' : (props.icon ?? props.i)"
+            :icon="loading ? 'eos-icons:loading' : (props.icon ?? props.i)"
             :size="resolvedIconSize"
             class="content-button-icon"
             :dark="props.dark"
             :light="light"
             :color="iconColor"
         />
-        <span class="max-button-label"><slot></slot>{{ props.label && !$slots.default ? props.label : '' }}</span>
+        <span class="max-button-label"><slot>{{ props.label }}</slot></span>
         <MaxIcon
             v-if="showIcon && iconPos === 'right'"
-            :icon="loading ? 'loading' : (props.icon ?? props.i)"
+            :icon="loading ? 'eos-icons:loading' : (props.icon ?? props.i)"
             :size="resolvedIconSize"
             class="content-button-icon"
             :dark="props.dark"
@@ -75,15 +75,13 @@
     });
 
     const buttonClasses = computed(() => ({
-        [`p-button-${props.severity}`]: Boolean(props.severity),
         [`max-button-${props.severity}`]: Boolean(props.severity),
-        [`p-button-${props.variant}`]: Boolean(props.variant),
         [`max-button-${props.variant}`]: Boolean(props.variant),
         'max-button-dashed': props.dashed,
         'max-button-uppercase': props.uppercase,
         'max-button-loading': props.loading,
-        'p-button-sm': props.size === 'small' || props.size === 'sm',
-        'p-button-lg': props.size === 'large' || props.size === 'lg'
+        'max-button-sm': props.size === 'small' || props.size === 'sm',
+        'max-button-lg': props.size === 'large' || props.size === 'lg'
     }));
 
     const data = computed(() => ({ ...(props.data ?? {}), ...(props.query ?? {}), ...(props.params ?? {}) }));
@@ -148,8 +146,7 @@
             text-transform: uppercase;
         }
 
-        &.max-button-secondary,
-        &.p-button-secondary {
+        &.max-button-secondary {
             background: var(--background-500);
             border-color: var(--background-500);
             color: var(--background-0);
@@ -160,8 +157,7 @@
             }
         }
 
-        &.max-button-success,
-        &.p-button-success {
+        &.max-button-success {
             background: var(--max-success-500, var(--success-500));
             border-color: var(--max-success-500, var(--success-500));
             color: var(--background-0);
@@ -172,8 +168,7 @@
             }
         }
 
-        &.max-button-info,
-        &.p-button-info {
+        &.max-button-info {
             background: var(--max-info-500, var(--info-500));
             border-color: var(--max-info-500, var(--info-500));
             color: var(--background-0);
@@ -184,9 +179,7 @@
             }
         }
 
-        &.max-button-warning,
-        &.p-button-warning,
-        &.p-button-warn {
+        &.max-button-warning {
             background: var(--max-warning-500, var(--warn-500));
             border-color: var(--max-warning-500, var(--warn-500));
             color: var(--background-0);
@@ -197,8 +190,7 @@
             }
         }
 
-        &.max-button-danger,
-        &.p-button-danger {
+        &.max-button-danger {
             background: var(--max-danger-500, var(--danger-500));
             border-color: var(--max-danger-500, var(--danger-500));
             color: var(--background-0);
@@ -220,8 +212,7 @@
             }
         }
 
-        &.max-button-help,
-        &.p-button-help {
+        &.max-button-help {
             background: var(--violet-500);
             border-color: var(--violet-500);
             color: var(--background-0);
@@ -233,8 +224,7 @@
         }
 
         // O tema não define --background-950; a rampa termina em 900.
-        &.max-button-contrast,
-        &.p-button-contrast {
+        &.max-button-contrast {
             background: var(--max-button-contrast-border-color, var(--background-900));
             border-color: var(--max-button-contrast-border-color, var(--background-900));
             color: var(--background-0);
@@ -246,9 +236,7 @@
         }
 
         :global(.dark) &.max-button-contrast,
-        :global(.dark) &.p-button-contrast,
-        :global([data-theme='dark']) &.max-button-contrast,
-        :global([data-theme='dark']) &.p-button-contrast {
+        :global([data-theme='dark']) &.max-button-contrast {
             background: var(--max-button-contrast-border-color, #fff);
             border-color: var(--max-button-contrast-border-color, #fff);
             color: var(--background-900, #09090b);
@@ -259,8 +247,7 @@
             }
         }
 
-        &.max-button-outlined,
-        &.p-button-outlined {
+        &.max-button-outlined {
             background: transparent;
             border-color: currentcolor;
             color: var(--max-primary-500);
@@ -270,8 +257,7 @@
             }
         }
 
-        &.max-button-text,
-        &.p-button-text {
+        &.max-button-text {
             background: transparent;
             border-color: transparent;
             color: var(--max-primary-500);
@@ -281,13 +267,22 @@
             }
         }
 
-        &.max-button-link,
-        &.p-button-link {
+        &.max-button-link {
             background: transparent;
             border-color: transparent;
             color: var(--max-primary-500);
             text-decoration: underline;
             padding: 0;
+        }
+
+        &.max-button-sm {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        &.max-button-lg {
+            padding: 0.65rem 1.25rem;
+            font-size: 1.05rem;
         }
 
         &.max-button-dashed {
@@ -306,38 +301,30 @@
                 outline-offset: 2px;
             }
 
-            &.p-button-secondary,
             &.max-button-secondary {
                 color: var(--background-700) !important;
             }
 
-            &.p-button-success,
             &.max-button-success {
                 color: var(--max-success-500, var(--success-500)) !important;
             }
 
-            &.p-button-info,
             &.max-button-info {
                 color: var(--max-info-500, var(--info-500)) !important;
             }
 
-            &.p-button-warn,
-            &.p-button-warning,
             &.max-button-warning {
                 color: var(--max-warning-500, var(--warn-500)) !important;
             }
 
-            &.p-button-help,
             &.max-button-help {
                 color: var(--violet-500) !important;
             }
 
-            &.p-button-danger,
             &.max-button-danger {
                 color: var(--max-danger-500, var(--danger-500)) !important;
             }
 
-            &.p-button-contrast,
             &.max-button-contrast {
                 color: var(--background-775) !important;
             }
@@ -355,15 +342,9 @@
             }
         }
 
-        &.p-button-outlined,
-        &.p-button-text,
-        &.p-button-link,
         &.max-button-outlined,
         &.max-button-text,
-        &.max-button-link,
-        &[data-p~='outlined'],
-        &[data-p~='text'],
-        &[data-p~='link'] {
+        &.max-button-link {
             :deep(.content-button-icon) {
                 .max-icon-div,
                 .max-icon {

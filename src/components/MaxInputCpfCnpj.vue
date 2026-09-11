@@ -1,15 +1,21 @@
 <template>
-    <InputBase class="max-input-cpf-cnpj" v-bind="props" :error="error_msg ?? undefined" :caution="caution" :done="done ?? undefined">
-        <input
-            type="text"
-            inputmode="numeric"
-            class="max-input-native max-cpf-cnpj-input"
-            :value="masked_value"
-            v-maska="maskValue"
-            :disabled="props.disabled"
-            @input="onUserInput"
-            @blur="onBlur"
-        />
+    <InputBase class="max-input-cpf-cnpj" v-bind="props" :error="error_msg ?? (props.error === true ? true : undefined)" :caution="caution" :done="done ?? undefined">
+        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+            <input
+                :id="inputId"
+                type="text"
+                inputmode="numeric"
+                class="max-input-native max-cpf-cnpj-input"
+                :value="masked_value"
+                v-maska="maskValue"
+                :disabled="props.disabled"
+                :aria-describedby="hasMessage ? messageId : undefined"
+                :aria-invalid="slotError ? 'true' : undefined"
+                :aria-required="isRequired ? 'true' : undefined"
+                @input="onUserInput"
+                @blur="onBlur"
+            />
+        </template>
     </InputBase>
 </template>
 
@@ -37,7 +43,7 @@
             /** Força a máscara e validação de CNPJ */
             cnpj?: boolean;
         }>(),
-        { modelValue: '', done: undefined, required: false, caution: undefined }
+        { modelValue: '', done: undefined, required: false, caution: undefined, error: undefined }
     );
 
     const emit = defineEmits<{
@@ -162,7 +168,12 @@
             ?? null;
         const only_numbers = onlyNumbers(temp_value.value ?? '');
 
-        if (only_numbers.length === 0) return props.required ? (attrs_error_message ?? 'Campo obrigatório') : null;
+        if (only_numbers.length === 0) {
+            if (props.required && hasBeenTouched.value) return attrs_error_message ?? 'Campo obrigatório';
+            if (typeof props.error === 'string') return props.error;
+
+            return null;
+        }
 
 
         if (caution.value) {

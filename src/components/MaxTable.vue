@@ -62,7 +62,11 @@
                                         { 'max-table-th-sortable': col.sortable }
                                     ]"
                                     :style="getColumnStyle(col)"
+                                    :tabindex="col.sortable ? 0 : undefined"
+                                    :aria-sort="getAriaSort(col)"
                                     @click="onHeaderClick(col)"
+                                    @keydown.enter="col.sortable && onHeaderClick(col)"
+                                    @keydown.space.prevent="col.sortable && onHeaderClick(col)"
                                 >
                                     <div class="p-datatable-column-header-content">
                                         <div class="p-datatable-column-title">
@@ -384,6 +388,7 @@
 
     /** Normaliza nós filhos de slots lidando com Fragments e Comentários */
     function flattenVNodes(vnodes: VNode[]): VNode[] {
+        if (!Array.isArray(vnodes)) return [];
         const result: VNode[] = [];
         for (const vnode of vnodes) {
             if (!vnode || vnode.type === Comment) continue;
@@ -408,6 +413,7 @@
 
     /** Extrai definições de colunas dos VNodes filhos declarados no default slot */
     function extractColumnsFromVNodes(vnodes: VNode[]): ResolvedColumn[] {
+        if (!Array.isArray(vnodes)) return [];
         const columns: ResolvedColumn[] = [];
         const flattened = flattenVNodes(vnodes);
 
@@ -448,7 +454,7 @@
 
     /** Colunas resolvidas a partir de props ou do default slot */
     const resolvedColumns = computed<ResolvedColumn[]>(() => {
-        if (props.columns && props.columns.length > 0) return props.columns.map((col) => ({
+        if (Array.isArray(props.columns) && props.columns.length > 0) return props.columns.map((col) => ({
             ...col,
             sortable: col.sortable !== undefined && col.sortable !== false,
             bodySlot: (slots as any)[col.slot ?? col.field ?? '']
@@ -461,7 +467,8 @@
     /** Detecta se o componente está operando em Modo Template-Driven */
     const isTemplateDriven = computed<boolean>(() => {
         if (slots.header) return true;
-        if (resolvedColumns.value.length === 0 && (!props.columns || props.columns.length === 0)) return true;
+        const hasColumnsProp = Array.isArray(props.columns) && props.columns.length > 0;
+        if (resolvedColumns.value.length === 0 && !hasColumnsProp) return true;
         return false;
     });
 
@@ -519,9 +526,18 @@
         });
     }
 
+    const getAriaSort = (col: ResolvedColumn): 'ascending' | 'descending' | 'none' | undefined => {
+        if (!col.sortable) return undefined;
+        if (sortField.value === col.field) {
+            if (sortOrder.value === 1) return 'ascending';
+            if (sortOrder.value === -1) return 'descending';
+        }
+        return 'none';
+    };
+
     /** Dados ordenados */
     const sortedData = computed<any[]>(() => {
-        const list = [...rawData.value];
+        const list = Array.isArray(rawData.value) ? [...rawData.value] : [];
         if (props.lazy || !sortField.value) return list;
 
         const field = sortField.value;
@@ -779,6 +795,16 @@
                             &.max-table-th-sortable {
                                 cursor: pointer;
                                 user-select: none;
+                                outline: none;
+
+                                &:focus:not(:focus-visible) {
+                                    outline: none;
+                                }
+
+                                &:focus-visible {
+                                    outline: var(--max-focus-outline);
+                                    outline-offset: -2px;
+                                }
                             }
 
                             .p-datatable-column-header-content {
@@ -908,7 +934,6 @@
                             padding: 0 !important;
                             display: grid;
                             place-items: center;
-                            outline: none !important;
                             border: none !important;
                             border-radius: 0 !important;
 

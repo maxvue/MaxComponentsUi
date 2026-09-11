@@ -4,11 +4,11 @@ import { setActivePinia, createPinia } from 'pinia';
 import MaxChips from '../../src/components/MaxChips.vue';
 import InputBase from '../../src/components/InputBase.vue';
 
-function mountChips(props: Record<string, any> = {}, slots: Record<string, any> = {}, attrs: Record<string, any> = {}) {
+function mountChips(props: Record<string, any> = {}, slots: Record<string, any> = {}, options: Record<string, any> = {}) {
     return mount(MaxChips, {
         props: { modelValue: [], ...props },
         slots,
-        attrs
+        ...options
     });
 }
 
@@ -337,6 +337,97 @@ describe('MaxChips', () => {
             const inputBase = wrapper.findComponent(InputBase);
 
             expect(inputBase.props('caution')).toBe(false);
+        });
+    });
+
+    describe('Navegação e Acessibilidade por Teclado', () => {
+        it('move o foco para o botão de remover do último chip ao pressionar ArrowLeft no input vazio', async () => {
+            const wrapper = mountChips(
+                { modelValue: ['Tag 1', 'Tag 2'] },
+                {},
+                { attachTo: document.body }
+            );
+            const input = wrapper.find('input.max-chips-input');
+            const removeButtons = wrapper.findAll('.max-chip-remove-btn');
+
+            await input.trigger('keydown', { key: 'ArrowLeft' });
+            await wrapper.vm.$nextTick();
+
+            expect(document.activeElement).toBe(removeButtons[1].element);
+            wrapper.unmount();
+        });
+
+        it('navega entre chips usando ArrowLeft e ArrowRight', async () => {
+            const wrapper = mountChips(
+                { modelValue: ['Tag 1', 'Tag 2', 'Tag 3'] },
+                {},
+                { attachTo: document.body }
+            );
+            const removeButtons = wrapper.findAll('.max-chip-remove-btn');
+
+            // Foca o último botão e pressiona ArrowLeft
+            (removeButtons[2].element as HTMLElement).focus();
+            await removeButtons[2].trigger('keydown', { key: 'ArrowLeft' });
+            await wrapper.vm.$nextTick();
+            expect(document.activeElement).toBe(removeButtons[1].element);
+
+            // Do botão 1 pressiona ArrowLeft para ir ao botão 0
+            await removeButtons[1].trigger('keydown', { key: 'ArrowLeft' });
+            await wrapper.vm.$nextTick();
+            expect(document.activeElement).toBe(removeButtons[0].element);
+
+            // Do botão 0 pressiona ArrowRight para voltar ao botão 1
+            await removeButtons[0].trigger('keydown', { key: 'ArrowRight' });
+            await wrapper.vm.$nextTick();
+            expect(document.activeElement).toBe(removeButtons[1].element);
+
+            wrapper.unmount();
+        });
+
+        it('retorna o foco para o input ao pressionar ArrowRight no último chip', async () => {
+            const wrapper = mountChips(
+                { modelValue: ['Tag 1', 'Tag 2'] },
+                {},
+                { attachTo: document.body }
+            );
+            const input = wrapper.find('input.max-chips-input');
+            const removeButtons = wrapper.findAll('.max-chip-remove-btn');
+
+            (removeButtons[1].element as HTMLElement).focus();
+            await removeButtons[1].trigger('keydown', { key: 'ArrowRight' });
+            await wrapper.vm.$nextTick();
+
+            expect(document.activeElement).toBe(input.element);
+            wrapper.unmount();
+        });
+
+        it('remove o chip e foca o chip adjacente ao pressionar Backspace ou Delete no botão', async () => {
+            const wrapper = mountChips(
+                { modelValue: ['Tag 1', 'Tag 2', 'Tag 3'] },
+                {},
+                { attachTo: document.body }
+            );
+            const removeButtons = wrapper.findAll('.max-chip-remove-btn');
+
+            (removeButtons[1].element as HTMLElement).focus();
+            await removeButtons[1].trigger('keydown', { key: 'Backspace' });
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.emitted('remove')).toBeTruthy();
+            expect(wrapper.emitted('remove')![0][0]).toEqual({ value: 'Tag 2', index: 1 });
+            wrapper.unmount();
+        });
+
+        it('remove o chip ao pressionar Enter ou Space no botão de remover', async () => {
+            const wrapper = mountChips({ modelValue: ['Tag 1', 'Tag 2'] });
+            const removeButtons = wrapper.findAll('.max-chip-remove-btn');
+
+            await removeButtons[0].trigger('keydown', { key: 'Enter' });
+            expect(wrapper.emitted('remove')).toBeTruthy();
+            expect(wrapper.emitted('remove')![0][0]).toEqual({ value: 'Tag 1', index: 0 });
+
+            await removeButtons[1].trigger('keydown', { key: ' ' });
+            expect(wrapper.emitted('remove')!.length).toBe(2);
         });
     });
 });

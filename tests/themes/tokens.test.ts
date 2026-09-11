@@ -41,7 +41,14 @@ const SCHEME_INDEPENDENT: Record<string, string> = {
     '--max-whatsapp-500': '#25d366',
     '--max-whatsapp-600': '#1da851',
     '--max-floatlabel-active-font-weight': '400',
-    '--max-floatlabel-on-border-radius': '2px'
+    '--max-floatlabel-on-border-radius': '2px',
+    '--z-dropdown': '1000',
+    '--z-sticky': '1100',
+    '--z-modal-backdrop': '1200',
+    '--z-modal': '1210',
+    '--z-popover': '1300',
+    '--z-tooltip': '1400',
+    '--z-toast': '1500'
 };
 
 const SCHEME_DEPENDENT: Record<string, { light: string; dark: string }> = {
@@ -78,7 +85,7 @@ const SCHEME_DEPENDENT: Record<string, { light: string; dark: string }> = {
 };
 
 describe('themes/tokens.scss', () => {
-    it('declara os 37 tokens em :root', () => {
+    it('declara os tokens em :root', () => {
         const total = Object.keys(SCHEME_INDEPENDENT).length + Object.keys(SCHEME_DEPENDENT).length;
         expect(Object.keys(ROOT)).toHaveLength(total);
     });

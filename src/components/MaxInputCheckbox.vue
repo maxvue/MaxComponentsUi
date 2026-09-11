@@ -49,7 +49,9 @@
     });
 
     const temp_value = ref(props.modelValue);
-    const emit = defineEmits(['update:modelValue']);
+    const emit = defineEmits<{
+        'update:modelValue': [value: any];
+    }>();
 
     watch(temp_value, (val) => {
         if (isDisabled.value) {

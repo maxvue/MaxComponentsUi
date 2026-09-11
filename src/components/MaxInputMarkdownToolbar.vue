@@ -1,5 +1,12 @@
 <template>
-    <div class="max-input-markdown-toolbar md-toolbar" :class="{ 'md-toolbar--disabled': !editor || editor.isEditable === false }">
+    <div
+        ref="toolbarRef"
+        class="max-input-markdown-toolbar md-toolbar"
+        :class="{ 'md-toolbar--disabled': !editor || editor.isEditable === false }"
+        role="toolbar"
+        aria-label="Barra de ferramentas de formatação markdown"
+        @keydown="onToolbarKeydown"
+    >
         <span v-if="props.label" class="md-toolbar__label">{{ props.label }}</span>
         <span v-if="props.label" class="md-toolbar__divider" />
 
@@ -9,6 +16,7 @@
                 type="button"
                 class="md-toolbar__btn"
                 :class="{ active: editor?.isActive('bold') }"
+                :aria-pressed="Boolean(editor?.isActive('bold'))"
                 title="Negrito (Ctrl+B)"
                 :disabled="!editor || editor.isEditable === false"
                 @click="editor?.chain().focus().toggleBold().run()"
@@ -19,6 +27,7 @@
                 type="button"
                 class="md-toolbar__btn"
                 :class="{ active: editor?.isActive('italic') }"
+                :aria-pressed="Boolean(editor?.isActive('italic'))"
                 title="Itálico (Ctrl+I)"
                 :disabled="!editor || editor.isEditable === false"
                 @click="editor?.chain().focus().toggleItalic().run()"
@@ -29,6 +38,7 @@
                 type="button"
                 class="md-toolbar__btn"
                 :class="{ active: editor?.isActive('underline') }"
+                :aria-pressed="Boolean(editor?.isActive('underline'))"
                 title="Sublinhado (Ctrl+U)"
                 :disabled="!editor || editor.isEditable === false"
                 @click="editor?.chain().focus().toggleUnderline().run()"
@@ -39,6 +49,7 @@
                 type="button"
                 class="md-toolbar__btn"
                 :class="{ active: editor?.isActive('strike') }"
+                :aria-pressed="Boolean(editor?.isActive('strike'))"
                 title="Tachado"
                 :disabled="!editor || editor.isEditable === false"
                 @click="editor?.chain().focus().toggleStrike().run()"
@@ -55,6 +66,7 @@
                 type="button"
                 class="md-toolbar__btn"
                 :class="{ active: editor?.isActive('heading', { level: 1 }) }"
+                :aria-pressed="Boolean(editor?.isActive('heading', { level: 1 }))"
                 title="Título 1"
                 :disabled="!editor || editor.isEditable === false"
                 @click="editor?.chain().focus().toggleHeading({ level: 1 }).run()"
@@ -65,6 +77,7 @@
                 type="button"
                 class="md-toolbar__btn"
                 :class="{ active: editor?.isActive('heading', { level: 2 }) }"
+                :aria-pressed="Boolean(editor?.isActive('heading', { level: 2 }))"
                 title="Título 2"
                 :disabled="!editor || editor.isEditable === false"
                 @click="editor?.chain().focus().toggleHeading({ level: 2 }).run()"
@@ -75,6 +88,7 @@
                 type="button"
                 class="md-toolbar__btn"
                 :class="{ active: editor?.isActive('heading', { level: 3 }) }"
+                :aria-pressed="Boolean(editor?.isActive('heading', { level: 3 }))"
                 title="Título 3"
                 :disabled="!editor || editor.isEditable === false"
                 @click="editor?.chain().focus().toggleHeading({ level: 3 }).run()"
@@ -91,6 +105,7 @@
                 type="button"
                 class="md-toolbar__btn"
                 :class="{ active: editor?.isActive('bulletList') }"
+                :aria-pressed="Boolean(editor?.isActive('bulletList'))"
                 title="Lista com marcadores"
                 :disabled="!editor || editor.isEditable === false"
                 @click="editor?.chain().focus().toggleBulletList().run()"
@@ -101,6 +116,7 @@
                 type="button"
                 class="md-toolbar__btn"
                 :class="{ active: editor?.isActive('orderedList') }"
+                :aria-pressed="Boolean(editor?.isActive('orderedList'))"
                 title="Lista numerada"
                 :disabled="!editor || editor.isEditable === false"
                 @click="editor?.chain().focus().toggleOrderedList().run()"
@@ -117,6 +133,7 @@
                 type="button"
                 class="md-toolbar__btn"
                 :class="{ active: editor?.isActive('blockquote') }"
+                :aria-pressed="Boolean(editor?.isActive('blockquote'))"
                 title="Citação"
                 :disabled="!editor || editor.isEditable === false"
                 @click="editor?.chain().focus().toggleBlockquote().run()"
@@ -127,6 +144,7 @@
                 type="button"
                 class="md-toolbar__btn"
                 :class="{ active: editor?.isActive('codeBlock') }"
+                :aria-pressed="Boolean(editor?.isActive('codeBlock'))"
                 title="Bloco de código"
                 :disabled="!editor || editor.isEditable === false"
                 @click="editor?.chain().focus().toggleCodeBlock().run()"
@@ -244,7 +262,7 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, nextTick } from 'vue';
+    import { ref, nextTick, onMounted } from 'vue';
     import { onClickOutside } from '@vueuse/core';
     import type { Editor } from '@tiptap/core';
     import MaxIcon from './MaxIcon.vue';
@@ -254,6 +272,65 @@
         editor: Editor | null;
         label?: string;
     }>();
+
+    const toolbarRef = ref<HTMLElement | null>(null);
+
+    const getFocusableItems = (): HTMLElement[] => {
+        if (!toolbarRef.value) return [];
+        return Array.from(toolbarRef.value.querySelectorAll<HTMLElement>('.md-toolbar__btn:not(:disabled)'));
+    };
+
+    const onToolbarKeydown = (event: KeyboardEvent) => {
+        const items = getFocusableItems();
+        if (items.length === 0) return;
+
+        const activeEl = document.activeElement as HTMLElement | null;
+        const currentIndex = activeEl ? items.indexOf(activeEl) : -1;
+
+        let targetIndex = -1;
+
+        switch (event.key) {
+            case 'ArrowRight':
+            case 'ArrowDown': {
+                event.preventDefault();
+                targetIndex = currentIndex >= 0 ? (currentIndex + 1) % items.length : 0;
+                break;
+            }
+            case 'ArrowLeft':
+            case 'ArrowUp': {
+                event.preventDefault();
+                targetIndex = currentIndex >= 0 ? (currentIndex - 1 + items.length) % items.length : items.length - 1;
+                break;
+            }
+            case 'Home': {
+                event.preventDefault();
+                targetIndex = 0;
+                break;
+            }
+            case 'End': {
+                event.preventDefault();
+                targetIndex = items.length - 1;
+                break;
+            }
+        }
+
+        if (targetIndex >= 0 && items[targetIndex]) {
+            items.forEach((item, idx) => {
+                item.setAttribute('tabindex', idx === targetIndex ? '0' : '-1');
+            });
+            items[targetIndex].focus();
+        }
+    };
+
+    onMounted(() => {
+        const items = getFocusableItems();
+        items.forEach((item, idx) => {
+            item.setAttribute('tabindex', idx === 0 ? '0' : '-1');
+            item.addEventListener('focus', () => {
+                items.forEach((other) => other.setAttribute('tabindex', other === item ? '0' : '-1'));
+            });
+        });
+    });
 
     const linkPopoverRef = ref<HTMLElement | null>(null);
     const showLinkPopover = ref(false);
@@ -371,6 +448,16 @@
             color: var(--background-700);
             transition: all 0.15s ease;
             box-sizing: border-box;
+            outline: none;
+
+            &:focus:not(:focus-visible) {
+                outline: none;
+            }
+
+            &:focus-visible {
+                outline: var(--max-focus-outline);
+                outline-offset: 1px;
+            }
 
             &:hover:not(:disabled) {
                 background: var(--background-150, #e5e7eb);
@@ -378,9 +465,9 @@
             }
 
             &.active {
-                background: var(--max-primary-100, #dbeafe);
-                color: var(--max-primary-600, #2563eb);
-                border-color: var(--max-primary-200, #bfdbfe);
+                background: var(--max-primary-50);
+                color: var(--max-primary-600, #005F77);
+                border-color: var(--max-primary-200);
             }
 
             &:disabled {
@@ -427,7 +514,7 @@
             box-sizing: border-box;
 
             &:focus {
-                border-color: var(--max-primary-500, #3b82f6);
+                border-color: var(--max-primary-500, #00768E);
             }
         }
 
@@ -450,13 +537,13 @@
             }
 
             &--primary {
-                background: var(--max-primary-500, #3b82f6);
-                border-color: var(--max-primary-500, #3b82f6);
-                color: #fff;
+                background: var(--max-primary-500, #00768E);
+                border-color: var(--max-primary-500, #00768E);
+                color: var(--background-0);
 
                 &:hover {
-                    background: var(--max-primary-600, #2563eb);
-                    border-color: var(--max-primary-600, #2563eb);
+                    background: var(--max-primary-600, #005F77);
+                    border-color: var(--max-primary-600, #005F77);
                 }
             }
         }

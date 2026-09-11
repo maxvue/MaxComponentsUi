@@ -223,4 +223,24 @@ describe('MaxPopoverMenu - WAI-ARIA e Teclado (Etapa 10)', () => {
         wrapper.unmount();
         expect(removeListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
     });
+
+    it('fecha o menu ao clicar fora do componente no documento', async () => {
+        const wrapper = mountMenu();
+        const trigger = wrapper.find('.botao');
+
+        await trigger.trigger('click');
+        await wrapper.vm.$nextTick();
+        expect(document.body.querySelector('.max-popover-menu-overlay')).not.toBeNull();
+
+        const outsideElement = document.createElement('div');
+        document.body.appendChild(outsideElement);
+
+        outsideElement.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+        outsideElement.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        await wrapper.vm.$nextTick();
+
+        expect(document.body.querySelector('.max-popover-menu-overlay')).toBeNull();
+        outsideElement.remove();
+    });
 });
+

@@ -1,19 +1,25 @@
 <template>
     <InputBase v-bind="{...props}" class="max-input-text-area input-text-area-main-div">
-        <textarea
-            ref="textAreaEl"
-            class="max-textarea"
-            :value="temp_value"
-            :rows="lines"
-            :disabled="props.disabled"
-            :autofocus="props.autofocus"
-            :wrap="props.wrap"
-            :spellcheck="props.spellcheck"
-            :auto-resize="props.autoResize ? '' : undefined"
-            v-bind="attrs"
-            @input="onInput"
-            @blur="checkDone()"
-        ></textarea>
+        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+            <textarea
+                :id="inputId"
+                ref="textAreaEl"
+                class="max-textarea"
+                :value="temp_value"
+                :rows="lines"
+                :disabled="props.disabled"
+                :autofocus="props.autofocus"
+                :wrap="props.wrap"
+                :spellcheck="props.spellcheck"
+                :auto-resize="props.autoResize ? '' : undefined"
+                :aria-describedby="hasMessage ? messageId : undefined"
+                :aria-invalid="slotError ? 'true' : undefined"
+                :aria-required="isRequired ? 'true' : undefined"
+                v-bind="attrs"
+                @input="onInput"
+                @blur="checkDone()"
+            ></textarea>
+        </template>
     </InputBase>
 </template>
 

@@ -1,71 +1,75 @@
 <template>
     <InputBase v-bind="{ ...props, ...attrsWithoutModelProps }" class="max-input-select select_input_div">
-        <div v-if="showPlaceholder" class="placeholder-select">
-            {{ placeholderText }}
-        </div>
-
-        <div
-            ref="triggerEl"
-            class="max-select p-select"
-            :class="{ 'is-disabled': props.disabled, 'p-disabled': props.disabled, 'is-focused': isOpen, 'p-focus': isOpen }"
-            tabindex="0"
-            role="combobox"
-            aria-haspopup="listbox"
-            :aria-expanded="isOpen"
-            :aria-controls="listboxId"
-            :aria-activedescendant="activeDescendantId"
-            @click.stop="toggle"
-            @keydown="onTriggerKeydown"
-        >
-            <div class="max-select-label p-select-label">
-                <slot name="value" :value="temp_value">
-                    <div
-                        class="value-div"
-                        v-if="hasSelectedOption"
-                        :style="{ color: option_selected.color }"
-                    >
-                        <MaxIcon
-                            :icon="option_selected.icon ?? null"
-                            :size="option_selected.icon_size ?? undefined"
-                            :style="{ paddingRight: option_selected.icon ? '10px' : '0' }"
-                        />
-                        <span class="value-text">{{ option_selected[props.optionName] ?? option_selected.name ?? option_selected.label }}</span>
-                    </div>
-                </slot>
+        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+            <div v-if="showPlaceholder" class="placeholder-select">
+                {{ placeholderText }}
             </div>
 
-            <button
-                v-if="isClearable && hasSelectedOption && !props.disabled"
-                type="button"
-                class="max-select-clear-btn p-select-clear-btn"
-                aria-label="Limpar seleção"
-                @click.stop="clearSelection"
+            <div
+                :id="inputId"
+                ref="triggerEl"
+                class="max-select"
+                :class="{ 'is-disabled': props.disabled, 'is-focused': isOpen }"
+                tabindex="0"
+                role="combobox"
+                aria-haspopup="listbox"
+                :aria-expanded="isOpen"
+                :aria-controls="listboxId"
+                :aria-activedescendant="activeDescendantId"
+                :aria-describedby="hasMessage ? messageId : undefined"
+                :aria-invalid="slotError ? 'true' : undefined"
+                :aria-required="isRequired ? 'true' : undefined"
+                @click.stop="toggle"
+                @keydown="onTriggerKeydown"
             >
-                <MaxIcon icon="lucide:x" size="0.85" />
-            </button>
+                <div class="max-select-label">
+                    <slot name="value" :value="temp_value">
+                        <div
+                            class="value-div"
+                            v-if="hasSelectedOption"
+                            :style="{ color: option_selected.color }"
+                        >
+                            <MaxIcon
+                                :icon="option_selected.icon ?? null"
+                                :size="option_selected.icon_size ?? undefined"
+                                :style="{ paddingRight: option_selected.icon ? '10px' : '0' }"
+                            />
+                            <span class="value-text">{{ option_selected[props.optionName] ?? option_selected.name ?? option_selected.label }}</span>
+                        </div>
+                    </slot>
+                </div>
 
-            <div class="max-select-dropdown p-select-dropdown" aria-hidden="true">
-                <MaxIcon icon="lucide:chevron-down" size="1" />
+                <button
+                    v-if="isClearable && hasSelectedOption && !props.disabled"
+                    type="button"
+                    class="max-select-clear-btn"
+                    aria-label="Limpar seleção"
+                    @click.stop="clearSelection"
+                >
+                    <MaxIcon icon="lucide:x" size="0.85" />
+                </button>
+
+                <div class="max-select-dropdown" aria-hidden="true">
+                    <MaxIcon icon="lucide:chevron-down" size="1" />
+                </div>
             </div>
-        </div>
 
-        <Teleport to="body" v-if="isOpen">
-            <div class="max-select-backdrop" @click="hide">
+            <Teleport to="body" v-if="isOpen">
                 <div
                     ref="overlayEl"
                     :id="listboxId"
-                    class="max-select-overlay p-select-overlay"
+                    class="max-select-overlay"
                     role="listbox"
                     tabindex="-1"
                     :style="{ top: position.top + 'px', left: position.left + 'px', width: position.width }"
                     @click.stop
                 >
-                    <div v-if="props.filter" class="max-select-header p-select-header">
-                        <div class="max-select-filter-container p-select-filter-container">
+                    <div v-if="props.filter" class="max-select-header">
+                        <div class="max-select-filter-container">
                             <input
                                 ref="filterInputEl"
                                 type="text"
-                                class="max-select-filter p-select-filter"
+                                class="max-select-filter"
                                 v-model="searchQuery"
                                 placeholder="Pesquisar..."
                                 role="searchbox"
@@ -79,15 +83,15 @@
                         </div>
                     </div>
 
-                    <div class="max-select-list-container p-select-list-container">
-                        <div v-if="loading" class="max-select-empty-message p-select-empty-message">
+                    <div ref="listContainerEl" class="max-select-list-container">
+                        <div v-if="loading" class="max-select-empty-message">
                             Carregando...
                         </div>
                         <template v-else-if="props.groupOptions !== undefined">
                             <template v-if="hasOptions">
-                                <div v-for="(group, gIdx) in (filteredOptions as any[])" :key="gIdx" class="max-select-option-group-wrapper p-select-option-group-wrapper">
+                                <div v-for="(group, gIdx) in (filteredOptions as any[])" :key="gIdx" class="max-select-option-group-wrapper">
                                     <slot name="optiongroup" :option="group">
-                                        <div class="label_div max-select-option-group p-select-option-group">
+                                        <div class="label_div max-select-option-group">
                                             <div class="labelz">
                                                 <div>{{ group.label }}</div>
                                             </div>
@@ -97,11 +101,10 @@
                                         v-for="(option, oIdx) in group.items"
                                         :key="oIdx"
                                         :id="`${listboxId}-opt-${getOptionIndex(option)}`"
-                                        :ref="(el) => setOptionRef(el, getOptionIndex(option))"
-                                        class="max-select-option p-select-option"
+                                        class="max-select-option"
                                         :class="{
-                                            'max-select-option-selected p-select-option-selected is-selected': isOptionSelected(option),
-                                            'max-select-option-highlighted p-select-option-highlighted is-focused': highlightedIndex === getOptionIndex(option)
+                                            'max-select-option-selected is-selected': isOptionSelected(option),
+                                            'max-select-option-highlighted is-focused': highlightedIndex === getOptionIndex(option)
                                         }"
                                         :style="{ height: itemHeight }"
                                         role="option"
@@ -121,7 +124,7 @@
                                     </div>
                                 </div>
                             </template>
-                            <div v-else class="max-select-empty-message p-select-empty-message">
+                            <div v-else class="max-select-empty-message">
                                 {{ attrs.emptyMessage ?? 'Nenhum registro encontrado' }}
                             </div>
                         </template>
@@ -131,11 +134,10 @@
                                     v-for="(option, index) in (filteredOptions as any[])"
                                     :key="index"
                                     :id="`${listboxId}-opt-${index}`"
-                                    :ref="(el) => setOptionRef(el, index)"
-                                    class="max-select-option p-select-option"
+                                    class="max-select-option"
                                     :class="{
-                                        'max-select-option-selected p-select-option-selected is-selected': isOptionSelected(option),
-                                        'max-select-option-highlighted p-select-option-highlighted is-focused': highlightedIndex === index
+                                        'max-select-option-selected is-selected': isOptionSelected(option),
+                                        'max-select-option-highlighted is-focused': highlightedIndex === index
                                     }"
                                     :style="{ height: itemHeight }"
                                     role="option"
@@ -158,14 +160,14 @@
                                     </slot>
                                 </div>
                             </template>
-                            <div v-else class="max-select-empty-message p-select-empty-message">
+                            <div v-else class="max-select-empty-message">
                                 {{ attrs.emptyMessage ?? 'Nenhum registro encontrado' }}
                             </div>
                         </template>
                     </div>
                 </div>
-            </div>
-        </Teleport>
+            </Teleport>
+        </template>
     </InputBase>
 </template>
 
@@ -178,7 +180,8 @@
     import InputBase from './InputBase.vue';
     import MaxIcon from './MaxIcon.vue';
     import { SelectGroupOptions } from '../types';
-    import { isBlank, useElementBounding, useElementSize, useWindowSize } from '@maxvue/max-use';
+    import { isBlank, useElementSize, useWindowSize } from '@maxvue/max-use';
+    import { useActiveElementBounding } from '../composables/useActiveElementBounding';
     import { getOverlayWidth, getOverlayLeft } from '../helpers/useOverlayWidth';
 
     const attrs: any = useAttrs();
@@ -264,12 +267,16 @@
 
     const listboxId = `max-select-listbox-${Math.random().toString(36).slice(2, 9)}`;
     const highlightedIndex = ref<number>(-1);
-    const optionRefs = ref<(HTMLElement | null)[]>([]);
+    const listContainerEl = ref<HTMLElement | null>(null);
 
-    const setOptionRef = (el: any, index: number) => {
-        if (el) optionRefs.value[index] = el as HTMLElement;
-
-    };
+    const numericItemHeight = computed(() => {
+        if (typeof props.listHeight === 'number') return props.listHeight;
+        if (typeof props.listHeight === 'string') {
+            const parsed = parseFloat(props.listHeight);
+            return isNaN(parsed) ? 27 : parsed;
+        }
+        return 27;
+    });
 
     const isClearable = computed(() => Boolean(props.clearable || props.showClear));
 
@@ -334,7 +341,7 @@
     const overlayEl = ref<HTMLElement | null>(null);
     const filterInputEl = ref<HTMLInputElement | null>(null);
 
-    const { x, y, width: width_btn, height: height_btn } = useElementBounding(triggerEl as any);
+    const { x, y, width: width_btn, height: height_btn } = useActiveElementBounding(triggerEl, isOpen);
     const { height: height_el } = useElementSize(overlayEl as any);
     const { width: window_width, height: window_height } = useWindowSize();
 
@@ -457,8 +464,15 @@
 
     const scrollHighlightedIntoView = () => {
         nextTick(() => {
-            const el = optionRefs.value[highlightedIndex.value];
-            if (el && typeof el.scrollIntoView === 'function') el.scrollIntoView({ block: 'nearest' });
+            const container = listContainerEl.value;
+            if (!container || highlightedIndex.value < 0) return;
+
+            const h = numericItemHeight.value;
+            const targetTop = highlightedIndex.value * h;
+            const targetBottom = targetTop + h;
+
+            if (targetTop < container.scrollTop) container.scrollTop = targetTop;
+            else if (targetBottom > container.scrollTop + container.clientHeight) container.scrollTop = targetBottom - container.clientHeight;
 
         });
     };
@@ -595,13 +609,25 @@
         }
     };
 
+    const onDocumentPointerDown = (event: PointerEvent | MouseEvent) => {
+        const target = event.target as Node;
+        if (overlayEl.value?.contains(target) || triggerEl.value?.contains(target)) return;
+        hide();
+    };
+
     watch(isOpen, async (open) => {
-        if (typeof window !== 'undefined') if (open) window.addEventListener('keydown', onKeydown);
-        else window.removeEventListener('keydown', onKeydown);
+        if (typeof window !== 'undefined') if (open) {
+            window.addEventListener('keydown', onKeydown);
+            document.addEventListener('pointerdown', onDocumentPointerDown);
+            document.addEventListener('click', onDocumentPointerDown);
+        } else {
+            window.removeEventListener('keydown', onKeydown);
+            document.removeEventListener('pointerdown', onDocumentPointerDown);
+            document.removeEventListener('click', onDocumentPointerDown);
+        }
 
 
         if (open) {
-            optionRefs.value = [];
             const items = flatSelectableOptions.value;
             const selectedIdx = items.findIndex((opt: any) => isOptionSelected(opt));
             highlightedIndex.value = selectedIdx >= 0 ? selectedIdx : (items.length > 0 ? 0 : -1);
@@ -623,8 +649,11 @@
     });
 
     onBeforeUnmount(() => {
-        if (typeof window !== 'undefined') window.removeEventListener('keydown', onKeydown);
-
+        if (typeof window !== 'undefined') {
+            window.removeEventListener('keydown', onKeydown);
+            document.removeEventListener('pointerdown', onDocumentPointerDown);
+            document.removeEventListener('click', onDocumentPointerDown);
+        }
     });
 </script>
 
@@ -633,8 +662,7 @@
     &[small] {
         padding: 0 !important;
 
-        .max-select,
-        .p-select {
+        .max-select {
             padding: 0 5px 0 0 !important;
 
             span {
@@ -650,8 +678,7 @@
         font-size: 0.9rem;
     }
 
-    .max-select,
-    .p-select {
+    .max-select {
         width: 100%;
         height: 36px !important;
         display: flex;
@@ -660,8 +687,7 @@
         cursor: pointer;
         outline: none;
 
-        .max-select-label,
-        .p-select-label {
+        .max-select-label {
             border: none !important;
             padding: 0 10px !important;
             display: grid;
@@ -692,8 +718,7 @@
             }
         }
 
-        .max-select-clear-btn,
-        .p-select-clear-btn {
+        .max-select-clear-btn {
             background: transparent;
             border: none;
             padding: 0 4px;
@@ -711,8 +736,7 @@
             }
         }
 
-        .max-select-dropdown,
-        .p-select-dropdown {
+        .max-select-dropdown {
             padding-right: 13px;
             display: flex;
             align-items: center;
@@ -723,142 +747,101 @@
     &.in-line,
     &[input-click]:not([input-click='false']) {
         .max-select,
-        .p-select,
-        .max-select-label,
-        .p-select-label {
+        .max-select-label {
             height: 20px !important;
             min-height: 20px !important;
         }
     }
 
     &[transparent] {
-        :deep(.p-floatlabel),
-        .max-select,
-        .p-select {
+        .max-select {
             background-color: transparent !important;
         }
     }
 }
 
-.max-select-backdrop {
+.max-select-overlay {
     position: fixed;
-    inset: 0;
-    z-index: 1100;
-    background: transparent;
+    z-index: var(--z-dropdown, 1000);
+    background: var(--background-0, #fff);
+    border: 1px solid var(--surface-border);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+    max-height: 280px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 
-    .max-select-overlay,
-    .p-select-overlay {
-        position: fixed;
-        z-index: 1101;
+    .max-select-header {
+        padding: 6px;
+        border-bottom: 1px solid var(--surface-border);
         background: var(--background-0, #fff);
-        border: 1px solid var(--surface-border, #e2e8f0);
-        border-radius: 6px;
-        box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
-        max-height: 280px;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
+        box-shadow: none !important;
 
-        .max-select-header,
-        .p-select-header {
-            padding: 6px;
-            border-bottom: 1px solid var(--surface-border, #e2e8f0);
-            background: var(--background-0, #fff);
-            box-shadow: none !important;
+        .max-select-filter-container {
+            width: 100%;
 
-            .max-select-filter-container,
-            .p-select-filter-container {
+            .max-select-filter {
                 width: 100%;
+                padding: 4px 8px;
+                border: 1px solid var(--surface-border);
+                border-radius: 4px;
+                outline: none;
+                font-size: 0.85rem;
+                background: var(--background-50, #f8fafc);
 
-                .max-select-filter,
-                .p-select-filter {
-                    width: 100%;
-                    padding: 4px 8px;
-                    border: 1px solid var(--surface-border, #e2e8f0);
-                    border-radius: 4px;
-                    outline: none;
-                    font-size: 0.85rem;
-                    background: var(--background-50, #f8fafc);
-
-                    &:focus {
-                        border-color: var(--primary-500, #3b82f6);
-                    }
+                &:focus {
+                    border-color: var(--max-primary-500, #00768E);
                 }
             }
         }
+    }
 
-        .max-select-list-container,
-        .p-select-list-container {
-            overflow-y: auto;
-            max-height: 240px;
-            scrollbar-width: thin;
+    .max-select-list-container {
+        overflow-y: auto;
+        max-height: 240px;
+        scrollbar-width: thin;
 
-            ::-webkit-scrollbar {
-                width: 3px;
-                height: 3px;
-            }
+        ::-webkit-scrollbar {
+            width: 3px;
+            height: 3px;
+        }
 
-            .max-select-empty-message,
-            .p-select-empty-message {
-                padding: 8px 12px;
-                color: var(--background-650);
-                font-size: 0.85rem;
-            }
+        .max-select-empty-message {
+            padding: 8px 12px;
+            color: var(--background-650);
+            font-size: 0.85rem;
+        }
 
-            .max-select-option-group,
-            .p-select-option-group {
-                font-weight: 600;
-                padding: 6px 10px;
-                font-size: 0.8rem;
-                color: var(--background-750);
-                background: var(--background-50, #f8fafc);
-            }
+        .max-select-option-group {
+            font-weight: 600;
+            padding: 6px 10px;
+            font-size: 0.8rem;
+            color: var(--background-750);
+            background: var(--background-50, #f8fafc);
+        }
 
-            .max-select-option,
-            .p-select-option {
-                display: flex;
-                align-items: center;
-                padding: 0 10px;
-                min-height: 36px;
-                box-sizing: border-box;
-                cursor: pointer;
-                font-size: 0.85rem;
-                color: var(--background-700);
-                transition: background-color 0.15s ease;
+        .max-select-option {
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            min-height: 36px;
+            box-sizing: border-box;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--background-700);
+            transition: background-color 0.15s ease;
 
-                &.max-select-option-highlighted,
-                &.p-select-option-highlighted,
-                &.is-focused,
-                &:hover {
-                    background-color: var(--background-100, #f1f5f9) !important;
-                    color: var(--blue-700, #005F77);
-
-                    &.max-select-option-selected,
-                    &.p-select-option-selected,
-                    &.is-selected {
-                        background-color: var(--blue-700, #1d4ed8) !important;
-                        color: var(--background-0, #fff) !important;
-
-                        .icon-div {
-                            color: var(--background-200) !important;
-                        }
-
-                        .labelz,
-                        .subLabel {
-                            color: var(--background-0, #fff);
-                        }
-                    }
-                }
+            &.max-select-option-highlighted,
+            &.is-focused,
+            &:hover {
+                background-color: var(--background-100, #f1f5f9) !important;
+                color: var(--max-primary-600, #005F77);
 
                 &.max-select-option-selected,
-                &.p-select-option-selected,
                 &.is-selected {
-                    background-color: var(--blue-600, #2563eb) !important;
-                    color: var(--background-0, #fff) !important;
-
-                    &:hover {
-                        background-color: var(--blue-700, #1d4ed8) !important;
-                    }
+                    background-color: var(--max-primary-700, #004860) !important;
+                    color: var(--background-0) !important;
 
                     .icon-div {
                         color: var(--background-200) !important;
@@ -866,68 +849,87 @@
 
                     .labelz,
                     .subLabel {
-                        color: var(--background-0, #fff);
-                    }
-                }
-
-                .labelz,
-                .subLabel {
-                    color: var(--background-700);
-                }
-
-                .category {
-                    width: 20px;
-                    margin-right: 10px;
-                    display: grid;
-                    place-items: center;
-                    border-radius: 5px;
-
-                    &.UTILITY {
-                        background-color: var(--blue-200);
-                        color: var(--blue-600);
-                    }
-
-                    &.MARKETING {
-                        background-color: var(--orange-200);
-                        color: var(--red-b-500);
+                        color: var(--background-0);
                     }
                 }
             }
 
-            .label_div {
-                display: grid;
-                grid-template-columns: auto 1fr auto;
-                width: 100% !important;
-                place-items: center start;
-                gap: 10px;
+            &.max-select-option-selected,
+            &.is-selected {
+                background-color: var(--max-primary-600, #005F77) !important;
+                color: var(--background-0) !important;
 
+                &:hover {
+                    background-color: var(--max-primary-700, #004860) !important;
+                }
+
+                .icon-div {
+                    color: var(--background-200) !important;
+                }
+
+                .labelz,
+                .subLabel {
+                    color: var(--background-0);
+                }
+            }
+
+            .labelz,
+            .subLabel {
+                color: var(--background-700);
+            }
+
+            .category {
+                width: 20px;
+                margin-right: 10px;
+                display: grid;
+                place-items: center;
+                border-radius: 5px;
+
+                &.UTILITY {
+                    background-color: var(--blue-200);
+                    color: var(--blue-600);
+                }
+
+                &.MARKETING {
+                    background-color: var(--orange-200);
+                    color: var(--red-b-500);
+                }
+            }
+        }
+
+        .label_div {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            width: 100% !important;
+            place-items: center start;
+            gap: 10px;
+
+            .icon-div {
+                color: var(--background-700) !important;
+            }
+
+            &:hover {
                 .icon-div {
                     color: var(--background-700) !important;
                 }
+            }
 
-                &:hover {
-                    .icon-div {
-                        color: var(--background-700) !important;
-                    }
-                }
+            .subLabel {
+                color: var(--background-650);
+                padding-left: 1rem;
+                text-align: right;
+                width: 100%;
+                font-size: 0.85rem;
+            }
 
-                .subLabel {
-                    color: var(--background-650);
-                    padding-left: 1rem;
-                    text-align: right;
-                    width: 100%;
-                    font-size: 0.85rem;
-                }
+            .labelz {
+                display: grid;
+                place-items: center;
+                color: var(--background-775);
+            }
 
-                .labelz {
-                    display: grid;
-                    place-items: center;
-                    color: var(--background-775);
-                }
-
-                img {
-                    max-height: 20px;
-                }
+            img {
+                max-height: 20px;
             }
         }
     }

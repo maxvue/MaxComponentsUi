@@ -25,7 +25,7 @@
             content: '';
             width: 15px;
             height: 15px;
-            background-color: white;
+            background-color: var(--background-0);
             border-radius: 50%;
             box-shadow: 0 0 10px 5px rgb(0 0 0 / 15%);
         }

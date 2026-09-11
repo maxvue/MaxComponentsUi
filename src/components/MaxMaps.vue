@@ -7,7 +7,7 @@
         </div>
         <div class="no-map" v-else>
             <div class="content">
-                <i class="pi pi-map-marker"></i>
+                <MaxIcon icon="lucide:map-pin-off" size="3" />
                 <div class="t1">Mapa Indisponível</div>
                 <div class="t2">A chave da API do Google Maps não foi configurada.</div>
             </div>
@@ -18,8 +18,9 @@
 <script setup lang="ts">
     import { toNumber } from '@maxvue/max-use';
     import type { Ref } from 'vue';
-    import { ref, computed, watch, onMounted } from 'vue';
+    import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
     import { GoogleMap, AdvancedMarker } from 'vue3-google-map';
+    import MaxIcon from './MaxIcon.vue';
     import { getMaxAppConfig } from '../helpers/maxAppConfig';
 
     const props = withDefaults(defineProps<{
@@ -39,7 +40,9 @@
 
     const coordinates = ref({ latitude: Number(props.modelValue?.latitude ?? 0), longitude: Number(props.modelValue?.longitude ?? 0) });
 
-    const emit = defineEmits(['update:modelValue']);
+    const emit = defineEmits<{
+        'update:modelValue': [coordinates: { latitude: number; longitude: number }];
+    }>();
 
 
     watch(() => [coordinates.value.latitude, coordinates.value.longitude], () => emit('update:modelValue', coordinates.value));
@@ -88,10 +91,20 @@
     },{ immediate: true });
 
     const isMounted = ref<boolean>(false);
+    let mountTimer: ReturnType<typeof setTimeout> | null = null;
+
     onMounted(() => {
-        setTimeout(() => {
+        mountTimer = setTimeout(() => {
             isMounted.value = true;
+            mountTimer = null;
         }, 50);
+    });
+
+    onBeforeUnmount(() => {
+        if (mountTimer !== null) {
+            clearTimeout(mountTimer);
+            mountTimer = null;
+        }
     });
 </script>
 

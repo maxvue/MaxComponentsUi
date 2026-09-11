@@ -1,17 +1,22 @@
 <template>
     <InputBase v-bind="props" :done="props.done ?? isDone" :error="props.error ?? error_msg" :caution="caution" class="max-color-picker max-input-color">
-        <div class="item-color" :style="{ backgroundColor: nativeColor }">
-            <input
-                type="color"
-                class="max-colorpicker-native"
-                :value="nativeColor"
-                :disabled="props.disabled"
-                :id="props.inputId"
-                :aria-label="props.ariaLabel"
-                :aria-labelledby="props.ariaLabelledby"
-                @input="onColorInput"
-            />
-        </div>
+        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+            <div class="item-color" :style="{ backgroundColor: nativeColor }">
+                <input
+                    type="color"
+                    class="max-colorpicker-native"
+                    :value="nativeColor"
+                    :disabled="props.disabled"
+                    :id="props.inputId || inputId"
+                    :aria-label="props.ariaLabel"
+                    :aria-labelledby="props.ariaLabelledby"
+                    :aria-describedby="hasMessage ? messageId : undefined"
+                    :aria-invalid="slotError || Boolean(props.error) || Boolean(error_msg)"
+                    :aria-required="isRequired || props.required"
+                    @input="onColorInput"
+                />
+            </div>
+        </template>
     </InputBase>
 </template>
 

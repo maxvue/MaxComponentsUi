@@ -1,16 +1,28 @@
 <template>
-    <div class="input-file-main-div" v-bind="attrs" @click="triggerChoose">
+    <div
+        class="input-file-main-div"
+        tabindex="0"
+        role="region"
+        aria-label="Área de envio de arquivos"
+        v-bind="attrs"
+        @click="triggerChoose"
+        @keydown.enter.prevent="triggerChoose"
+        @keydown.space.prevent="triggerChoose"
+        @paste="handlePaste"
+    >
         <input
             ref="nativeInputRef"
             type="file"
             class="max-input-file-hidden"
-            style="display: none;"
             multiple
+            tabindex="-1"
+            aria-hidden="true"
             @click.stop
             @change="onNativeInputChange"
+            @paste="handlePaste"
         />
 
-        <slot name="button" flex>
+        <slot name="button">
             <div class="input-file-content" v-if="!isOverDropZone">
                 <div class="input-file-content-icon-label">
                     <MaxIcon icon="lets-icons:upload-light" size="3" />
@@ -28,7 +40,7 @@
             </div>
         </slot>
 
-        <slot name="filesPreview" flex>
+        <slot name="filesPreview">
             <template v-if="isVisibleFiles && temp_value.length > 0">
                 <div class="files-list-mini" v-if="sizePreview === 'mini'">
                     <div v-for="(file, index) in temp_value" :key="`preview-mini-${index}`">
@@ -57,11 +69,9 @@
                         </div>
                         <div
                             class="trash-icon-remove-clipboard"
-                            pr4
-                            pt4
                             @click.stop="deleteItem(index)"
                         >
-                            <MaxIcon icon="tabler:trash" size="1.3" hover-blue-icon />
+                            <MaxIcon icon="tabler:trash" size="1.3" />
                         </div>
                     </div>
                 </div>
@@ -72,7 +82,7 @@
 
 <script setup lang="ts">
     import { ref, computed, watch, useAttrs, onBeforeUnmount } from 'vue';
-    import { useDropZone, useEventListener } from '@maxvue/max-use';
+    import { useDropZone } from '@maxvue/max-use';
     import MaxIcon from './MaxIcon.vue';
     import { sanitizeHtml } from '../helpers/sanitizeHtml';
 
@@ -173,7 +183,7 @@
         updateFiles(updated);
     };
 
-    const triggerChoose = (event?: MouseEvent) => {
+    const triggerChoose = (event?: Event) => {
         if (event?.target === nativeInputRef.value) return;
         nativeInputRef.value?.click();
     };
@@ -212,8 +222,6 @@
         }
     };
 
-    useEventListener(window, 'paste', handlePaste);
-
     const { isOverDropZone } = useDropZone(dropZoneRef, {
         onDrop: (files: File[] | null) => {
             if (files && files.length > 0) addFiles(files);
@@ -224,6 +232,10 @@
 </script>
 
 <style lang="scss" scoped>
+    .max-input-file-hidden {
+        display: none !important;
+    }
+
     .input-file-main-div {
         display: grid;
         place-items: center;
@@ -232,6 +244,12 @@
         width: 100%;
         height: 100%;
         cursor: pointer;
+
+        &:focus-visible {
+            outline: none;
+            box-shadow: var(--max-focus-ring);
+            border-radius: 1rem;
+        }
 
         .input-file-content {
             position: absolute;
@@ -296,6 +314,8 @@
                     position: absolute;
                     top: 3px;
                     right: 3px;
+                    padding-top: 4px;
+                    padding-right: 4px;
                     cursor: pointer;
                 }
 

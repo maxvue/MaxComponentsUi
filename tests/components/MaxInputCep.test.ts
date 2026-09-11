@@ -86,12 +86,27 @@ describe('MaxInputCep', () => {
         expect(ib.props('error')).toBe('Erro Customizado');
     });
 
-    it('displays error_msg when required and empty', () => {
-        const wrapper = mountCep({ modelValue: '', required: true, done: false });
-        const _ib = wrapper.findComponent(InputBase);
-        // Note: done=false and value='' might not trigger caution from computed unless we explicitly trigger blur maybe?
-        // Wait, caution is done.value === false && temp_value_numbers.value.length > 0
-        // Oh, if value is empty caution is false unless explicitly passed.
+    it('displays error_msg when required and empty', async () => {
+        const wrapper = mountCep({ modelValue: '', required: true });
+        const ib = wrapper.findComponent(InputBase);
+        expect(ib.props('error')).toBeUndefined();
+        await wrapper.find('input').trigger('blur');
+        await wrapper.vm.$nextTick();
+        expect(ib.props('error')).toBe('Campo obrigatório');
+    });
+
+    it('exibe Campo obrigatorio apos interacao e saida de campo vazio', async () => {
+        const wrapper = mountCep({ modelValue: '', required: true });
+        await wrapper.find('input').trigger('blur');
+        await wrapper.vm.$nextTick();
+        const ib = wrapper.findComponent(InputBase);
+        expect(ib.props('error')).toBe('Campo obrigatório');
+    });
+
+    it('exibe CEP invalido quando preenchido parcialmente', () => {
+        const wrapper = mountCep({ modelValue: '010' });
+        const ib = wrapper.findComponent(InputBase);
+        expect(ib.props('error')).toBe('CEP inválido');
     });
 
     it('updates internal temp_value when modelValue prop changes', async () => {

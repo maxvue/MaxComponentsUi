@@ -13,6 +13,7 @@ export type ConfirmPayload = {
     y: number;
     width: number;
     height: number;
+    target?: HTMLElement | null;
 };
 
 export const useConfirmStore = defineStore('confirm.popover', () => {
@@ -40,9 +41,11 @@ export const useConfirmStore = defineStore('confirm.popover', () => {
     const y: Ref<number> = ref(0);
     const width: Ref<number> = ref(0);
     const height: Ref<number> = ref(0);
+    const targetElement: Ref<HTMLElement | null> = ref(null);
 
     const hide = () => {
         show.value = false;
+        targetElement.value = null;
     };
 
     /**
@@ -73,8 +76,9 @@ export const useConfirmStore = defineStore('confirm.popover', () => {
         y.value = payload.y;
         width.value = payload.width;
         height.value = payload.height;
+        targetElement.value = payload.target ?? null;
         show.value = true;
     };
 
-    return { message, messageIcon, severity, rejectProps, acceptProps, show, x, y, width, height, hide, confirm };
+    return { message, messageIcon, severity, rejectProps, acceptProps, show, x, y, width, height, targetElement, hide, confirm };
 });

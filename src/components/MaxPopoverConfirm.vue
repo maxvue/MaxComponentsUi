@@ -80,19 +80,53 @@
         if (event.key === 'Escape' && confirm_store.show) confirm_store.hide();
     };
 
+    const updateTargetPosition = () => {
+        if (!confirm_store.targetElement) return;
+        const rect = confirm_store.targetElement.getBoundingClientRect?.();
+        if (!rect) return;
+        if (rect.bottom < 0 || rect.top > window_height.value) {
+            confirm_store.hide();
+            return;
+        }
+        confirm_store.x = rect.x ?? rect.left ?? 0;
+        confirm_store.y = rect.y ?? rect.top ?? 0;
+        confirm_store.width = rect.width ?? 0;
+        confirm_store.height = rect.height ?? 0;
+    };
+
+    const attachScrollListeners = () => {
+        if (typeof window !== 'undefined') {
+            window.addEventListener('scroll', updateTargetPosition, { capture: true, passive: true });
+            window.addEventListener('resize', updateTargetPosition, { passive: true });
+        }
+    };
+
+    const detachScrollListeners = () => {
+        if (typeof window !== 'undefined') {
+            window.removeEventListener('scroll', updateTargetPosition, { capture: true });
+            window.removeEventListener('resize', updateTargetPosition);
+        }
+    };
+
     watch(() => confirm_store.show, (value) => {
         if (value) {
             trap.activate();
             document.addEventListener('keydown', onEscape);
+            if (confirm_store.targetElement) {
+                updateTargetPosition();
+                attachScrollListeners();
+            }
         } else {
             trap.deactivate();
             document.removeEventListener('keydown', onEscape);
+            detachScrollListeners();
         }
     }, { immediate: true });
 
     onBeforeUnmount(() => {
         trap.deactivate();
         document.removeEventListener('keydown', onEscape);
+        detachScrollListeners();
     });
 
     const position = computed(() => {
@@ -122,7 +156,7 @@
     height: 100vh;
     width: 100vw;
     position: fixed;
-    z-index: 99;
+    z-index: var(--z-popover, 1300);
     top: 0;
     left: 0;
 

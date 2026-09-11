@@ -8,12 +8,16 @@ vi.mock('axios', () => ({
 }));
 
 let onChangeCallback: ((files: any) => void) | undefined;
+let onDropCallback: ((files: any) => void) | undefined;
 const openMock = vi.fn();
 const resetMock = vi.fn();
 
 vi.mock('@maxvue/max-use', () => ({
     getRoute: vi.fn(),
-    useDropZone: () => ({ isOverDropZone: { value: false } }),
+    useDropZone: (_target: any, opts: any) => {
+        onDropCallback = opts?.onDrop;
+        return { isOverDropZone: { value: false } };
+    },
     useFileDialog: () => ({
         open: openMock,
         reset: resetMock,
@@ -28,6 +32,7 @@ describe('MaxInputFileProject', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         onChangeCallback = undefined;
+        onDropCallback = undefined;
     });
 
     it('deve renderizar o componente e exibir as instruções de upload', async () => {
@@ -209,5 +214,21 @@ describe('MaxInputFileProject', () => {
 
         createSpy.mockRestore();
         revokeSpy.mockRestore();
+    });
+
+    it('anexa arquivos a temp_files e emite files-selected ao soltar arquivos via useDropZone onDrop', async () => {
+        const wrapper = mount(MaxInputFileProject, {
+            props: { files: [], auto: false },
+            global: { stubs: ['MaxIconButton', 'MaxIcon', 'MaxLoaderIcon', 'MaxButton'] }
+        });
+
+        expect(onDropCallback).toBeDefined();
+        const droppedFile = new File(['test'], 'projeto.pdf', { type: 'application/pdf' });
+        onDropCallback!([droppedFile]);
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.emitted('files-selected')).toBeTruthy();
+        expect(wrapper.emitted('files-selected')![0][0]).toEqual([droppedFile]);
+        expect(wrapper.vm.temp_files).toHaveLength(1);
     });
 });

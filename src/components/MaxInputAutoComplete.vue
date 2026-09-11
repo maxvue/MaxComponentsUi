@@ -1,43 +1,55 @@
 <template>
     <InputBase v-bind="props" class="max-input-auto-complete if" :value="temp_value" :done="isDone" :error="props.error" :caution="caution">
-        <div ref="ac" class="p-autocomplete" :class="{ 'p-disabled': props.disabled }">
-            <input
-                ref="inputEl"
-                type="text"
-                class="p-inputtext p-autocomplete-input"
-                :value="displayedText"
-                :placeholder="props.placeholder ?? 'SELECIONE'"
-                :disabled="props.disabled"
-                :spellcheck="props.spellcheck"
-                autocomplete="off"
-                @input="onInput"
-                @change="onChange"
-                @focus="onFocus"
-                @blur="onBlur"
-                @keydown.down.prevent="onArrowDown"
-                @keydown.up.prevent="onArrowUp"
-                @keydown.enter.prevent="onEnter"
-                @keydown.esc.prevent="hide"
-            />
-        </div>
+        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+            <div ref="ac" class="max-autocomplete" :class="{ 'is-disabled': props.disabled }">
+                <input
+                    :id="inputId"
+                    ref="inputEl"
+                    type="text"
+                    class="max-input-native max-autocomplete-input"
+                    :value="displayedText"
+                    :placeholder="props.placeholder ?? 'SELECIONE'"
+                    :disabled="props.disabled"
+                    :spellcheck="props.spellcheck"
+                    autocomplete="off"
+                    role="combobox"
+                    aria-autocomplete="list"
+                    :aria-expanded="isOpen && filtered_values.length > 0"
+                    :aria-controls="listboxId"
+                    :aria-activedescendant="activeIndex >= 0 ? `${listboxId}-opt-${activeIndex}` : undefined"
+                    :aria-describedby="hasMessage ? messageId : undefined"
+                    :aria-invalid="slotError || Boolean(props.error)"
+                    :aria-required="isRequired || props.required"
+                    @input="onInput"
+                    @change="onChange"
+                    @focus="onFocus"
+                    @blur="onBlur"
+                    @keydown.down.prevent="onArrowDown"
+                    @keydown.up.prevent="onArrowUp"
+                    @keydown.enter.prevent="onEnter"
+                    @keydown.esc.prevent="hide"
+                />
+            </div>
 
-        <Teleport to="body" v-if="isOpen && filtered_values.length > 0">
-            <div class="max-autocomplete-backdrop" @click="hide">
+            <Teleport to="body" v-if="isOpen && filtered_values.length > 0">
                 <div
                     ref="overlayEl"
-                    class="p-autocomplete-overlay"
+                    :id="listboxId"
+                    class="max-autocomplete-overlay"
                     role="listbox"
                     :style="{ top: position.top + 'px', left: position.left + 'px', width: position.width }"
                     @click.stop
                 >
-                    <div class="p-autocomplete-list-container">
-                        <ul class="p-autocomplete-list">
+                    <div class="max-autocomplete-list-container">
+                        <ul class="max-autocomplete-list">
                             <li
                                 v-for="(option, index) in filtered_values"
                                 :key="index"
-                                class="p-autocomplete-item"
-                                :class="{ 'p-autocomplete-item-active': activeIndex === index }"
+                                :id="`${listboxId}-opt-${index}`"
+                                class="max-autocomplete-item"
+                                :class="{ 'max-autocomplete-item-active': activeIndex === index }"
                                 role="option"
+                                :aria-selected="activeIndex === index"
                                 @click.stop="selectOption(option)"
                                 @mouseenter="activeIndex = index"
                             >
@@ -55,16 +67,17 @@
                         </ul>
                     </div>
                 </div>
-            </div>
-        </Teleport>
+            </Teleport>
+        </template>
     </InputBase>
 </template>
 
 <script setup lang="ts">
-    import { hasContent, toSearchableString, useElementBounding, useElementSize, useWindowSize } from '@maxvue/max-use';
+    import { hasContent, toSearchableString, useElementSize, useWindowSize } from '@maxvue/max-use';
+    import { useActiveElementBounding } from '../composables/useActiveElementBounding';
     import { getOverlayWidth, getOverlayLeft } from '../helpers/useOverlayWidth';
     import type { Ref } from 'vue';
-    import { ref, computed, watch, nextTick, onBeforeUnmount } from 'vue';
+    import { ref, computed, watch, nextTick, onBeforeUnmount, useId } from 'vue';
     import InputBase from './InputBase.vue';
 
     const props = withDefaults(
@@ -104,6 +117,7 @@
         }
     );
 
+    const listboxId = useId();
     const list = computed(() => props.options ?? []);
     const temp_value = ref<any>(props.modelValue);
     const filtered_values = ref<any[]>([]);
@@ -116,7 +130,8 @@
     const isOpen = ref(false);
     const activeIndex = ref<number>(-1);
 
-    const { x, y, width: width_btn, height: height_btn } = useElementBounding(ac as any);
+    const isOverlayActive = computed(() => isOpen.value && filtered_values.value.length > 0);
+    const { x, y, width: width_btn, height: height_btn } = useActiveElementBounding(ac, isOverlayActive);
     const { height: height_el } = useElementSize(overlayEl as any);
     const { width: window_width, height: window_height } = useWindowSize();
 
@@ -315,28 +330,52 @@
         if (event.key === 'Escape' && isOpen.value) hide();
     };
 
+    let outsidePointerDown = false;
+    const onDocPointerDown = (e: MouseEvent | TouchEvent | PointerEvent) => {
+        const target = e.target as Node | null;
+        if (overlayEl.value && !overlayEl.value.contains(target) && ac.value && !ac.value.contains(target)) outsidePointerDown = true;
+        else outsidePointerDown = false;
+
+    };
+
+    const onDocClick = (e: MouseEvent) => {
+        const target = e.target as Node | null;
+        if (outsidePointerDown && overlayEl.value && !overlayEl.value.contains(target) && ac.value && !ac.value.contains(target)) hide();
+
+        outsidePointerDown = false;
+    };
+
     watch(isOpen, (open) => {
         if (typeof window === 'undefined') return;
-        if (open) window.addEventListener('keydown', onGlobalKeydown);
-        else window.removeEventListener('keydown', onGlobalKeydown);
-
+        if (open) {
+            window.addEventListener('keydown', onGlobalKeydown);
+            document.addEventListener('pointerdown', onDocPointerDown, true);
+            document.addEventListener('click', onDocClick, true);
+        } else {
+            window.removeEventListener('keydown', onGlobalKeydown);
+            document.removeEventListener('pointerdown', onDocPointerDown, true);
+            document.removeEventListener('click', onDocClick, true);
+        }
     });
 
     onBeforeUnmount(() => {
-        if (typeof window !== 'undefined') window.removeEventListener('keydown', onGlobalKeydown);
-
+        if (typeof window !== 'undefined') {
+            window.removeEventListener('keydown', onGlobalKeydown);
+            document.removeEventListener('pointerdown', onDocPointerDown, true);
+            document.removeEventListener('click', onDocClick, true);
+        }
     });
 </script>
 
 <style lang="scss" scoped>
 .max-input-auto-complete {
-    .p-autocomplete {
+    .max-autocomplete {
         width: 100%;
         position: relative;
         display: flex;
         align-items: center;
 
-        .p-autocomplete-input {
+        .max-autocomplete-input {
             width: 100%;
             height: 36px;
             border: none;
@@ -355,62 +394,55 @@
     }
 }
 
-.max-autocomplete-backdrop {
+.max-autocomplete-overlay {
     position: fixed;
-    inset: 0;
-    z-index: 1100;
-    background: transparent;
+    z-index: var(--z-dropdown, 1000);
+    background: var(--background-0, #fff);
+    border: 1px solid var(--surface-border);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+    max-height: 240px;
+    overflow-y: auto;
+    scrollbar-width: thin;
 
-    .p-autocomplete-overlay {
-        position: fixed;
-        z-index: 1101;
-        background: var(--background-0, #fff);
-        border: 1px solid var(--surface-border, #e2e8f0);
-        border-radius: 6px;
-        box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
-        max-height: 240px;
-        overflow-y: auto;
-        scrollbar-width: thin;
+    .max-autocomplete-list {
+        list-style: none;
+        margin: 0;
+        padding: 4px 0;
 
-        .p-autocomplete-list {
-            list-style: none;
-            margin: 0;
-            padding: 4px 0;
+        .max-autocomplete-item {
+            cursor: pointer;
 
-            .p-autocomplete-item {
-                cursor: pointer;
+            &:hover,
+            &.max-autocomplete-item-active {
+                background-color: var(--background-100, #f1f5f9);
+            }
 
-                &:hover,
-                &.p-autocomplete-item-active {
-                    background-color: var(--background-100, #f1f5f9);
+            .autocomplete-item-select {
+                height: 40px;
+                padding: 10px;
+                position: relative;
+                display: grid;
+                place-items: center start;
+                grid-template-columns: 1fr auto;
+                gap: 25px;
+                width: 100%;
+
+                .autocomplete-item-select-label {
+                    font-size: 0.9rem;
+                    max-width: 100%;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    color: var(--background-700);
                 }
 
-                .autocomplete-item-select {
-                    height: 40px;
-                    padding: 10px;
-                    position: relative;
+                .autocomplete-item-select-sub-label {
                     display: grid;
-                    place-items: center start;
-                    grid-template-columns: 1fr auto;
-                    gap: 25px;
-                    width: 100%;
-
-                    .autocomplete-item-select-label {
-                        font-size: 0.9rem;
-                        max-width: 100%;
-                        white-space: nowrap;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                        color: var(--background-700);
-                    }
-
-                    .autocomplete-item-select-sub-label {
-                        display: grid;
-                        place-items: center;
-                        font-size: 0.8rem;
-                        min-width: 15px;
-                        color: var(--background-650);
-                    }
+                    place-items: center;
+                    font-size: 0.8rem;
+                    min-width: 15px;
+                    color: var(--background-650);
                 }
             }
         }

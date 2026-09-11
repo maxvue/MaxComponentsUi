@@ -172,9 +172,8 @@ export const useLoginStore = defineStore('login', () => {
             const rawIds = Array.isArray(ids) ? ids : [];
             providers.value = rawIds
                 .map((item: any) => {
-                    if (typeof item === 'string') {
-                        return PROVIDER_MAP[item] ? { id: item, ...PROVIDER_MAP[item] } : null;
-                    }
+                    if (typeof item === 'string') return PROVIDER_MAP[item] ? { id: item, ...PROVIDER_MAP[item] } : null;
+
                     if (item && typeof item === 'object' && item.id) {
                         const defaultMeta = PROVIDER_MAP[item.id];
                         const icon = item.icon === 'google' ? 'mdi:google' : (item.icon ?? defaultMeta?.icon ?? 'mdi:account');

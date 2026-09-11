@@ -4,7 +4,6 @@
             ref="nativeInputRef"
             type="file"
             class="max-file-native-input"
-            style="display: none;"
             :name="(attrs.name as string) ?? 'file'"
             :accept="(attrs.accept as string) ?? '.pdf, .jpg, .jpeg, .png, .doc, .docx'"
             :multiple="(attrs.multiple as boolean) ?? true"
@@ -49,15 +48,31 @@
                         <span class="text">{{ displayLabel }}</span>
                     </slot>
                 </div>
-                <div v-else-if="uploading || attrs.uploading">
-                    <div class="upload-loading-state">
-                        <div class="max-spinner" role="status" aria-label="Loading"></div>
-                        <div class="upload-loading-text">Carregando arquivos</div>
+                <div v-else-if="uploading || attrs.uploading" class="upload-loading-state">
+                    <div class="upload-progress-container">
+                        <div class="progress-bar-track">
+                            <div
+                                class="progress-bar-fill"
+                                role="progressbar"
+                                :aria-valuenow="uploadProgress"
+                                aria-valuemin="0"
+                                aria-valuemax="100"
+                                :style="{ width: `${uploadProgress}%` }"
+                            />
+                        </div>
+                        <span class="upload-progress-text">Enviando... {{ uploadProgress }}%</span>
                     </div>
                 </div>
-                <div v-else-if="showError">
+                <div v-else-if="showError" class="upload-error-state" role="alert">
                     <slot name="error">
-                        Ocorreu um erro ao fazer o upload.
+                        <div class="upload-error-content">
+                            <MaxIcon icon="material-symbols:error-outline-rounded" size="1.2" class="error-icon" />
+                            <span class="error-text">{{ errorMessage || 'Ocorreu um erro ao fazer o upload.' }}</span>
+                        </div>
+                        <div class="upload-error-actions">
+                            <MaxButton label="Tentar novamente" size="small" variant="outlined" @click.stop="retryUpload" />
+                            <MaxIconButton icon="material-symbols:close-rounded" size="1" @click.stop="dismissError" aria-label="Descartar erro" />
+                        </div>
                     </slot>
                 </div>
                 <div
@@ -67,9 +82,6 @@
                 >
                     <slot>
                         <span class="text">{{ displayLabel }}</span>
-                    </slot>
-                    <slot name="error" v-if="showError">
-                        Ocorreu um erro ao fazer o upload.
                     </slot>
                 </div>
             </div>
@@ -124,8 +136,11 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, computed, watch, useAttrs, onBeforeUnmount } from 'vue';
+    import { ref, computed, useAttrs, onBeforeUnmount } from 'vue';
     import { useDropZone } from '@maxvue/max-use';
+    import MaxIcon from './MaxIcon.vue';
+    import MaxButton from './MaxButton.vue';
+    import MaxIconButton from './MaxIconButton.vue';
 
     /**
      * Componente avançado para upload de arquivos.
@@ -164,6 +179,8 @@
     const files = ref<any[]>([]);
     const uploading = ref(false);
     const showError = ref(false);
+    const uploadProgress = ref(0);
+    const errorMessage = ref<string | null>(null);
 
     const emit = defineEmits<{
         'file-click': [file: any];
@@ -172,6 +189,7 @@
         'select': [event: any];
         'delete': [payload: { file: any; index: number }];
         'remove-file': [payload: { file: any; index: number }];
+        'progress': [payload: { originalEvent: ProgressEvent; progress: number; loaded: number; total: number }];
     }>();
 
     const showUploadButton = computed(() => attrs.showUploadButton !== undefined && attrs.showUploadButton !== false);
@@ -182,12 +200,15 @@
         return props.label;
     });
 
-    watch(showError, (val) => {
-        if (val) setTimeout(() => {
-            showError.value = false;
-            files.value = [];
-        }, 3000);
-    });
+    const retryUpload = () => {
+        if (files.value.length > 0) startUpload(files.value);
+
+    };
+
+    const dismissError = () => {
+        showError.value = false;
+        errorMessage.value = null;
+    };
 
     const triggerChoose = () => {
         if (attrs.disabled) return;
@@ -228,14 +249,25 @@
         const url = (attrs.url as string) ?? '';
         if (!url) return;
 
+        uploadProgress.value = 0;
+        showError.value = false;
+        errorMessage.value = null;
+
         const xhr = new XMLHttpRequest();
         currentXhr = xhr;
+
+        xhr.upload.onprogress = (event: ProgressEvent) => {
+            if (event.lengthComputable) {
+                const percent = Math.round((event.loaded / event.total) * 100);
+                uploadProgress.value = percent;
+                emit('progress', { originalEvent: event, progress: percent, loaded: event.loaded, total: event.total });
+            }
+        };
 
         const formData = new FormData();
         const fieldName = (attrs.name as string) ?? 'file';
         if (attrs.multiple ?? true) toSend.forEach((f) => formData.append(fieldName, f, f.name));
         else formData.append(fieldName, toSend[0], toSend[0].name);
-
 
         xhr.withCredentials = true;
         xhr.open('POST', url, true);
@@ -243,8 +275,11 @@
         onBeforeUpload({ xhr, formData });
 
         xhr.onload = () => {
-            if (xhr.status >= 200 && xhr.status < 300) onUploadHandler({ xhr });
-            else onError({ xhr });
+            if (xhr.status >= 200 && xhr.status < 300) {
+                uploadProgress.value = 100;
+                onUploadHandler({ xhr });
+            } else onError({ xhr });
+
 
             currentXhr = null;
         };
@@ -280,7 +315,21 @@
     const onError = (event: any) => {
         showError.value = true;
         uploading.value = false;
-        emit('upload-error', event);
+        uploadProgress.value = 0;
+
+        let extractedMsg = 'Ocorreu um erro ao fazer o upload.';
+        try {
+            if (event?.xhr?.responseText) {
+                const parsed = JSON.parse(event.xhr.responseText);
+                extractedMsg = parsed.message || parsed.error || extractedMsg;
+            } else if (event?.xhr?.status === 413) extractedMsg = 'Arquivo excede o tamanho máximo permitido pelo servidor.';
+
+        } catch {
+            if (event?.xhr?.statusText) extractedMsg = `Erro ${event.xhr.status}: ${event.xhr.statusText}`;
+        }
+
+        errorMessage.value = extractedMsg;
+        emit('upload-error', { ...event, message: extractedMsg });
         if (attrs.onError) attrs.onError(event);
     };
 
@@ -342,6 +391,10 @@
 
 <style lang="scss" scoped>
     .input-upload-file-main-div {
+        .max-file-native-input {
+            display: none !important;
+        }
+
         &:not(.no-style) {
             height: 100%;
             width: 100%;
@@ -349,22 +402,12 @@
             padding-left: 0;
             position: relative;
 
-            .upload-loading-state {
-                display: flex;
-                align-items: center;
-                gap: 30px;
-
-                .upload-loading-text {
-                    font-size: 0.9rem;
-                    color: var(--background-750);
-                }
-            }
 
             .max-spinner {
                 width: 20px;
                 height: 20px;
-                border: 2px solid var(--background-300, #e2e8f0);
-                border-top-color: var(--primary-500, #3b82f6);
+                border: 2px solid var(--background-300);
+                border-top-color: var(--max-primary-500, #00768E);
                 border-radius: 50%;
                 display: inline-block;
                 animation: max-spinner-rotate 1s linear infinite;
@@ -387,7 +430,7 @@
                     padding: 0;
                     height: 30px;
                     width: 30px;
-                    background-color: var(--primary-c, #3b82f6) !important;
+                    background-color: var(--max-primary-500, #00768E) !important;
                     border: none;
                     opacity: 1;
                     color: var(--text-b, #fff);
@@ -399,7 +442,7 @@
                     }
 
                     &:hover {
-                        background-color: var(--primary-mouse, #2563eb) !important;
+                        background-color: var(--max-primary-600, #005F77) !important;
                         border: none;
                         color: var(--icon-mouse, #fff);
                     }
@@ -447,6 +490,78 @@
                 border: none !important;
                 position: absolute;
                 border-radius: calc(1rem - 5px);
+
+                .upload-loading-state {
+                    display: flex;
+                    align-items: center;
+                    width: calc(100% - 70px);
+                    cursor: default;
+
+                    .upload-progress-container {
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        width: 100%;
+
+                        .progress-bar-track {
+                            flex: 1;
+                            height: 6px;
+                            background-color: var(--background-200);
+                            border-radius: 3px;
+                            overflow: hidden;
+
+                            .progress-bar-fill {
+                                height: 100%;
+                                background-color: var(--max-primary-500, #00768E);
+                                border-radius: 3px;
+                                transition: width 0.2s ease-in-out;
+                            }
+                        }
+
+                        .upload-progress-text {
+                            font-size: 0.75rem;
+                            font-weight: 500;
+                            color: var(--background-700);
+                            white-space: nowrap;
+                        }
+                    }
+                }
+
+                .upload-error-state {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    width: calc(100% - 70px);
+                    gap: 10px;
+                    cursor: default;
+
+                    .upload-error-content {
+                        display: flex;
+                        align-items: center;
+                        gap: 6px;
+                        min-width: 0;
+
+                        :deep(.error-icon) {
+                            color: var(--max-danger-500, #EF4444);
+                            flex-shrink: 0;
+                        }
+
+                        .error-text {
+                            font-size: 0.8125rem;
+                            color: var(--max-danger-500, #EF4444);
+                            white-space: nowrap;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                        }
+                    }
+
+                    .upload-error-actions {
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
+                        flex-shrink: 0;
+                    }
+                }
             }
 
             .p-button {
@@ -509,14 +624,14 @@
                         transition: transform 0.15s ease;
 
                         &:focus-visible {
-                            outline: 2px solid var(--max-primary-500, #00768e);
+                            outline: 2px solid var(--max-primary-500, #00768E);
                             outline-offset: 2px;
                             border-radius: 4px;
                         }
 
                         &:hover {
                             .icon-div {
-                                color: var(--blue-600, #2563eb) !important;
+                                color: var(--max-primary-600, #005F77) !important;
                             }
 
                             .file-remove-btn {

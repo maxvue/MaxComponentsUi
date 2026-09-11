@@ -207,4 +207,47 @@ describe('MaxInputFileUploadBig', () => {
         await wrapper.find('.input-upload-file-big-main-div').trigger('click');
         expect(openMock).not.toHaveBeenCalled();
     });
+
+    it('mantém exibição de erro persistente e suporta ações de retry e descartar', async () => {
+        const onSelect = vi.fn();
+        const wrapper = mount(MaxInputFileUploadBig, {
+            props: { onSelect },
+            global: {
+                stubs: { Icon: true, MaxIcon: true, MaxButton: false }
+            }
+        });
+
+        (wrapper.vm as any).showError = true;
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find('.upload-error-state').exists()).toBe(true);
+        expect(wrapper.find('.screen-animation-label').text()).toBe('Erro ao enviar o arquivo.');
+
+        // Testar dismiss
+        (wrapper.vm as any).dismissError();
+        await wrapper.vm.$nextTick();
+        expect((wrapper.vm as any).showError).toBe(false);
+        expect(wrapper.emitted('dismiss-error')).toBeTruthy();
+
+        // Testar retry
+        (wrapper.vm as any).showError = true;
+        (wrapper.vm as any).lastFiles = [new File(['foo'], 'foo.pdf')];
+        (wrapper.vm as any).retryUpload();
+        await wrapper.vm.$nextTick();
+        expect((wrapper.vm as any).showError).toBe(false);
+        expect(wrapper.emitted('retry')).toBeTruthy();
+        expect(onSelect).toHaveBeenCalledWith({ files: (wrapper.vm as any).lastFiles });
+    });
+
+    it('renderiza ícone de loading nativo no estado de upload', () => {
+        const wrapper = mount(MaxInputFileUploadBig, {
+            props: { uploading: true },
+            global: {
+                stubs: { MaxIcon: true }
+            }
+        });
+
+        expect(wrapper.find('.upload-loading-state').exists()).toBe(true);
+        expect(wrapper.find('.upload-spinner').exists()).toBe(true);
+    });
 });

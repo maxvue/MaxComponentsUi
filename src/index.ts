@@ -8,6 +8,7 @@ export { default as ptBR } from './locales/pt-br';
 
 // NÃO REMOVER O INPUTBASE DO INDEX.TS
 export { default as InputBase } from './components/InputBase.vue';
+export { INPUT_BASE_CONTEXT_KEY, provideInputBaseContext, useInputBaseContext, type InputBaseContext } from './components/base/inputBaseContext';
 
 export { default as MaxIcon } from './components/MaxIcon.vue';
 export { default as MaxAiIcon } from './components/MaxAiIcon.vue';
@@ -147,6 +148,7 @@ export { default as MaxTopMenu } from './components/MaxTopMenu.vue';
 export { default as MaxTopMenuSearchBar } from './components/MaxTopMenuSearchBar.vue';
 export { default as MaxTopToolbar } from './components/MaxTopToolbar.vue';
 export { default as MaxTopToolbarSubmenu } from './components/MaxTopToolbarSubmenu.vue';
+export type { MaxTopToolbarSubmenuItem } from './components/MaxTopToolbarSubmenu.vue';
 // O MaxUserSection é exportado mais abaixo, junto do seu alias UserSection.
 export { default as MaxPageContent } from './components/MaxPageContent.vue';
 export { default as MaxPageLayout } from './components/MaxPageLayout.vue';
@@ -221,6 +223,8 @@ export type { StatItemColors, BadgeColors } from './helpers/colorLuminance';
 // Configuração do app shell (MaxApp) — deve ser chamada no boot da aplicação.
 export { configureMaxApp, getMaxAppConfig, resetMaxAppConfig } from './helpers/maxAppConfig';
 export { clearMaxCache, registerMaxCacheKey, isMaxCacheKey, ICON_CACHE_KEY } from './helpers/maxCacheKeys';
+export { useScrollLock, forceReset } from './helpers/useScrollLock';
+export type { ScrollLock } from './helpers/useScrollLock';
 
 
 import Tooltip from './directives/tooltip';

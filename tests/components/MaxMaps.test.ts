@@ -2,9 +2,13 @@ import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import MaxMaps from '../../src/components/MaxMaps.vue';
 
-vi.mock('@maxvue/max-use', () => ({
-    toNumber: (val: any) => Number(val)
-}));
+vi.mock('@maxvue/max-use', async (importOriginal) => {
+    const actual = await importOriginal<Record<string, any>>();
+    return {
+        ...actual,
+        toNumber: (val: any) => Number(val)
+    };
+});
 
 vi.mock('vue3-google-map', () => ({
     GoogleMap: { name: 'GoogleMap', props: ['apiKey', 'mapId', 'mapTypeId'], template: '<div><slot /></div>' },

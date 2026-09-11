@@ -8,7 +8,12 @@
             :icon="search_bar.is_filtering ? 'eos-icons:loading' : 'material-symbols:search-rounded'"
             no-message
         >
-            <slot></slot>
+            <template #default>
+                <kbd v-if="props.showShortcutBadge && props.shortcut !== false" class="search-shortcut-badge">
+                    {{ shortcutLabel }}
+                </kbd>
+                <slot></slot>
+            </template>
         </MaxInputText>
     </div>
 
@@ -58,7 +63,6 @@
 <script setup lang="ts">
     import type { Ref } from 'vue';
     import { ref, computed, nextTick, onMounted, onUnmounted, useAttrs } from 'vue';
-    import { useMagicKeys, whenever } from '@maxvue/max-use';
     import MaxInputText from './MaxInputText.vue';
     import MaxIconButton from './MaxIconButton.vue';
     import { useSearchBarStore } from '../stores/useSearchBar.Store';
@@ -72,8 +76,14 @@
         placeholder?: string;
         /** Dispositivo atual ('desktop' | 'mobile'). Quando omitido, consulta useSystemStore(). */
         screen?: string;
+        /** Atalho de teclado para focar na pesquisa (default: 'mod+k'). Passe false para desabilitar. */
+        shortcut?: boolean | string;
+        /** Exibir o badge visual do atalho no campo de busca. */
+        showShortcutBadge?: boolean;
     }>(), {
-        placeholder: 'Pesquisar'
+        placeholder: 'Pesquisar',
+        shortcut: 'mod+k',
+        showShortcutBadge: true
     });
 
     const attrs = useAttrs();
@@ -87,6 +97,13 @@
         const target = props.screen ?? (attrs.screen as string | undefined);
         if (target) return target === 'mobile';
         return system.type_device === 'mobile';
+    });
+
+    const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/i.test(navigator.platform || navigator.userAgent);
+    const shortcutLabel = computed(() => {
+        if (typeof props.shortcut === 'string' && props.shortcut.toLowerCase() !== 'mod+k') return props.shortcut.toUpperCase();
+
+        return isMac ? '⌘K' : 'Ctrl+K';
     });
 
     const openSearch = (): void => {
@@ -105,23 +122,25 @@
         else openSearch();
     };
 
-    const keys = useMagicKeys();
-    const isCtrlF = keys['Control+F'];
-    const isEscape = keys['Escape'];
-
-    whenever(isCtrlF, () => {
-        if (isMobile.value) openSearch();
-        else input_search_ref.value?.setFocus?.();
-    });
-
-    whenever(isEscape, () => {
-        if (is_open.value) closeSearch();
-    });
-
-    /** Impede o Ctrl+F nativo do navegador enquanto a barra existe. */
     const handleSearchKeydown = (event: KeyboardEvent): void => {
-        if ((event.ctrlKey || event.metaKey) && event.key === 'f') event.preventDefault();
-        if (event.key === 'Escape' && is_open.value) closeSearch();
+        if (event.key === 'Escape' && is_open.value) {
+            closeSearch();
+            return;
+        }
+
+        if (props.shortcut === false) return;
+
+        const isMod = isMac ? event.metaKey : event.ctrlKey;
+        const key = event.key.toLowerCase();
+
+        const matchesDefault = (props.shortcut === 'mod+k' || props.shortcut === true) && isMod && key === 'k';
+        const matchesCustom = typeof props.shortcut === 'string' && props.shortcut.toLowerCase() !== 'mod+k' && isMod && key === props.shortcut.split('+').pop()?.toLowerCase();
+
+        if (matchesDefault || matchesCustom) {
+            event.preventDefault();
+            if (isMobile.value) openSearch();
+            else input_search_ref.value?.setFocus?.();
+        }
     };
 
     onMounted(() => document.addEventListener('keydown', handleSearchKeydown));
@@ -162,11 +181,29 @@
             display: flex;
             align-items: center;
 
+            .search-shortcut-badge {
+                position: absolute;
+                right: 12px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0.125rem 0.375rem;
+                font-family: inherit;
+                font-size: 0.6875rem;
+                font-weight: 600;
+                color: var(--background-600);
+                background: var(--background-100);
+                border: 1px solid var(--background-300);
+                border-radius: 4px;
+                pointer-events: none;
+                user-select: none;
+            }
+
             :deep(input) {
                 border-color: rgb(255 255 255 / 7%);
                 background-color: rgb(255 255 255 / 7%);
                 color: rgb(255 255 255 / 70%);
-                padding: 0 12px 0 38px !important;
+                padding: 0 48px 0 38px !important;
                 height: 100% !important;
                 font-size: 0.9rem;
             }

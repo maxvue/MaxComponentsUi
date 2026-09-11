@@ -57,6 +57,15 @@ describe('MaxIconButton', () => {
         expect(wrapper.emitted('action')![0]).toEqual([true]);
     });
 
+    it('desabilita botao quando loading=true e renderiza icone de carregamento', async () => {
+        const wrapper = mountIconButton({ loading: true });
+        expect(wrapper.find('button').attributes('disabled')).toBeDefined();
+        expect(wrapper.find('button').classes()).toContain('is-disabled');
+        expect(wrapper.find('.max-icon').exists()).toBe(true);
+        await wrapper.trigger('click');
+        expect(wrapper.emitted('action')).toBeFalsy();
+    });
+
     it('proteção contra clique duplo concorrente durante ação pendente', async () => {
         let resolvePromise: any;
         const pendingAction = vi.fn(() => new Promise((res) => { resolvePromise = res; }));

@@ -1,6 +1,6 @@
 <template>
     <div
-        class="max-user-section user-section"
+        class="max-user-section user-section user-profile-trigger"
         :class="{ 'only-avatar': isCompact }"
         :screen="props.screen"
         ref="root_el"
@@ -15,7 +15,6 @@
         @keydown.space.prevent="toggle"
         @keydown.down.prevent="openAndFocusFirst"
         @keydown.up.prevent="openAndFocusLast"
-        pointer
     >
         <div v-if="!isCompact" class="user-text-div">
             <div v-if="props.companyName" class="solar-company-text">
@@ -46,50 +45,42 @@
         </div>
 
         <Teleport to="body" v-if="isOpen">
-            <div class="max-user-section-backdrop" @click="hide">
-                <div
-                    ref="menuEl"
-                    :id="userMenuId"
-                    class="max-user-section-overlay"
-                    role="menu"
-                    :style="{ top: position.top + 'px', left: position.left + 'px' }"
-                    @keydown="onUserMenuKeydown"
-                    @click.stop
-                >
-                    <template v-for="(item, index) in menuItems" :key="index">
-                        <hr v-if="item.separator" class="max-user-section-separator" role="separator" />
-                        <div
-                            v-else-if="item.label"
-                            class="main-item-menu-div"
-                            role="menuitem"
-                            :tabindex="focusedUserMenuIdx === index ? 0 : -1"
-                            :ref="(el) => setUserMenuItemRef(el, index)"
-                            @click="handleItemClick(item)"
-                            @mouseenter="focusedUserMenuIdx = index"
-                        >
-                            <MaxIcon v-if="item.icon" :icon="item.icon" />
-                            <div>
-                                {{ item.label }}
-                            </div>
+            <div
+                ref="menuEl"
+                :id="userMenuId"
+                class="max-user-section-overlay"
+                role="menu"
+                :style="{ top: position.top + 'px', left: position.left + 'px' }"
+                @keydown="onUserMenuKeydown"
+            >
+                <template v-for="(item, index) in menuItems" :key="index">
+                    <hr v-if="item.separator" class="max-user-section-separator" role="separator" />
+                    <div
+                        v-else-if="item.label"
+                        class="main-item-menu-div"
+                        role="menuitem"
+                        :tabindex="focusedUserMenuIdx === index ? 0 : -1"
+                        :ref="(el) => setUserMenuItemRef(el, index)"
+                        @click="handleItemClick(item)"
+                        @mouseenter="focusedUserMenuIdx = index"
+                    >
+                        <MaxIcon v-if="item.icon" :icon="item.icon" />
+                        <div>
+                            {{ item.label }}
                         </div>
-                    </template>
-                </div>
+                    </div>
+                </template>
             </div>
         </Teleport>
     </div>
 </template>
 
-/**
- * Seção de usuário para o cabeçalho.
- * Exibe nome, empresa (opcional) e avatar, com um menu dropdown.
- * Totalmente prop-driven: emite eventos para que o app consumidor decida
- * navegação, chamadas de API e estado (ex: dark mode).
- */
 <script setup lang="ts">
     import { computed, ref, nextTick, watch, onBeforeUnmount } from 'vue';
     import MaxIcon from './MaxIcon.vue';
     import MaxUserAvatar from './MaxUserAvatar.vue';
-    import { useElementBounding, useElementSize, useWindowSize } from '@maxvue/max-use';
+    import { useElementSize, useWindowSize } from '@maxvue/max-use';
+    import { useActiveElementBounding } from '../composables/useActiveElementBounding';
 
     const props = withDefaults(defineProps<{
         /** Nome do usuário */
@@ -158,7 +149,8 @@
     const anchorEl = ref<HTMLElement | null>(null);
     const isOpen = ref(false);
 
-    const { x, y, width: width_btn, height: height_btn } = useElementBounding(anchorEl as any);
+    const boundingTarget = computed(() => anchorEl.value ?? root_el.value);
+    const { x, y, width: width_btn, height: height_btn } = useActiveElementBounding(boundingTarget, isOpen);
     const { width: width_el, height: height_el } = useElementSize(menuEl as any);
     const { width: window_width, height: window_height } = useWindowSize();
 
@@ -331,6 +323,26 @@
         }
     };
 
+    const onDocPointerDown = (e: PointerEvent) => {
+        if (!isOpen.value) return;
+        const target = e.target as Node | null;
+        if (!target) return;
+        if (menuEl.value?.contains(target)) return;
+        if (root_el.value?.contains(target)) return;
+        if (anchorEl.value?.contains(target)) return;
+        hide();
+    };
+
+    const onDocClick = (e: MouseEvent) => {
+        if (!isOpen.value) return;
+        const target = e.target as Node | null;
+        if (!target) return;
+        if (menuEl.value?.contains(target)) return;
+        if (root_el.value?.contains(target)) return;
+        if (anchorEl.value?.contains(target)) return;
+        hide();
+    };
+
     const onGlobalKeydown = (event: KeyboardEvent) => {
         if (event.key === 'Escape' && isOpen.value) {
             hide();
@@ -343,13 +355,21 @@
         if (open) {
             menuItemRefs.value = [];
             window.addEventListener('keydown', onGlobalKeydown);
-        } else window.removeEventListener('keydown', onGlobalKeydown);
-
+            document.addEventListener('pointerdown', onDocPointerDown, true);
+            document.addEventListener('click', onDocClick, true);
+        } else {
+            window.removeEventListener('keydown', onGlobalKeydown);
+            document.removeEventListener('pointerdown', onDocPointerDown, true);
+            document.removeEventListener('click', onDocClick, true);
+        }
     });
 
     onBeforeUnmount(() => {
-        if (typeof window !== 'undefined') window.removeEventListener('keydown', onGlobalKeydown);
-
+        if (typeof window !== 'undefined') {
+            window.removeEventListener('keydown', onGlobalKeydown);
+            document.removeEventListener('pointerdown', onDocPointerDown, true);
+            document.removeEventListener('click', onDocClick, true);
+        }
     });
 
     defineExpose({
@@ -372,6 +392,11 @@
         gap: 1rem;
         position: relative;
         outline: none;
+        cursor: pointer;
+
+        &.user-profile-trigger {
+            cursor: pointer;
+        }
 
         &:focus-visible {
             outline: 2px solid var(--max-primary-500, #00768E);
@@ -408,7 +433,7 @@
                 }
 
                 &:focus-visible {
-                    outline: 2px solid var(--blue-500, #38bdf8);
+                    outline: 2px solid var(--max-primary-500, #00768E);
                     outline-offset: 2px;
                 }
             }
@@ -501,61 +526,54 @@
         }
     }
 
-    .max-user-section-backdrop {
+    .max-user-section-overlay {
         position: fixed;
-        inset: 0;
-        z-index: 1100;
-        background: transparent;
+        z-index: var(--z-dropdown, 1000);
+        background: var(--background-0, #fff);
+        border: 1px solid var(--surface-border);
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+        min-width: 180px;
+        padding: 4px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
 
-        .max-user-section-overlay {
-            position: fixed;
-            z-index: 1101;
-            background: var(--background-0, #fff);
-            border: 1px solid var(--surface-border, #e2e8f0);
+        .max-user-section-separator {
+            border: none;
+            border-top: 1px solid var(--surface-border);
+            margin: 4px 0;
+        }
+
+        .main-item-menu-div {
+            display: grid;
+            place-items: center start;
+            gap: 10px;
+            width: 100%;
+            height: 100%;
+            padding: 8px;
+            font-size: 0.9rem;
+            color: var(--background-700);
+            background-color: var(--background-0);
             border-radius: 0.5rem;
-            box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
-            min-width: 180px;
-            padding: 4px;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
+            grid-template-columns: auto 1fr;
+            outline: none;
 
-            .max-user-section-separator {
-                border: none;
-                border-top: 1px solid var(--surface-border, #e2e8f0);
-                margin: 4px 0;
+            :deep(.max-icon-div) {
+                color: currentcolor !important;
             }
 
-            .main-item-menu-div {
-                display: grid;
-                place-items: center start;
-                gap: 10px;
-                width: 100%;
-                height: 100%;
-                padding: 8px;
-                font-size: 0.9rem;
-                color: var(--background-700);
-                background-color: var(--background-0);
-                border-radius: 0.5rem;
-                grid-template-columns: auto 1fr;
-                outline: none;
+            &:focus-visible {
+                outline: 2px solid var(--max-primary-500, #00768E);
+                outline-offset: -2px;
+                background-color: var(--background-100, #f1f5f9);
+                color: var(--background-775);
+            }
 
-                :deep(.max-icon-div) {
-                    color: currentcolor !important;
-                }
-
-                &:focus-visible {
-                    outline: 2px solid var(--max-primary-500, #00768E);
-                    outline-offset: -2px;
-                    background-color: var(--background-100, #f1f5f9);
-                    color: var(--background-775);
-                }
-
-                &:hover {
-                    background-color: var(--background-100, #f1f5f9);
-                    color: var(--background-775);
-                    cursor: pointer;
-                }
+            &:hover {
+                background-color: var(--background-100, #f1f5f9);
+                color: var(--background-775);
+                cursor: pointer;
             }
         }
     }

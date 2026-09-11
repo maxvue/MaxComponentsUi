@@ -11,47 +11,57 @@
         :caution="props.caution"
         :no-status="props.noStatus"
     >
-        <div
-            class="max-input-otp-container"
-            :class="{ 'is-disabled': props.disabled }"
-            role="group"
-            :aria-label="props.label || ('Código de verificação de ' + effectiveLength + ' dígitos')"
-        >
-            <template v-for="(group, gIdx) in groupedInputs" :key="gIdx">
-                <div v-if="gIdx > 0" class="max-input-otp-separator" aria-hidden="true">
-                    <slot name="separator">
-                        <span>{{ effectiveSeparatorChar }}</span>
-                    </slot>
-                </div>
-                <div class="max-input-otp-group">
-                    <input
-                        v-for="item in group"
-                        :key="item.index"
-                        :ref="(el) => setInputRef(el, item.index)"
-                        class="max-input-otp-cell"
-                        :class="{
-                            'has-value': !!values[item.index],
-                            'is-focused': focusedIndex === item.index
-                        }"
-                        :type="props.mask ? 'password' : 'text'"
-                        :inputmode="props.integerOnly ? 'numeric' : 'text'"
-                        :pattern="props.integerOnly ? '[0-9]*' : undefined"
-                        :maxlength="1"
-                        :disabled="props.disabled"
-                        :placeholder="props.placeholder || ''"
-                        :value="values[item.index]"
-                        :aria-label="'Dígito ' + (item.index + 1) + ' de ' + effectiveLength"
-                        :autocomplete="item.index === 0 ? 'one-time-code' : 'off'"
-                        @input="onInput($event, item.index)"
-                        @keydown="onKeyDown($event, item.index)"
-                        @focus="onFocus(item.index)"
-                        @blur="onBlur(item.index)"
-                        @paste="onPaste($event)"
-                    />
-                </div>
-            </template>
-        </div>
-        <slot></slot>
+        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+            <div
+                :id="inputId"
+                class="max-input-otp-container"
+                :class="{ 'is-disabled': props.disabled }"
+                role="group"
+                :aria-label="props.label || ('Código de verificação de ' + effectiveLength + ' dígitos')"
+                :aria-describedby="hasMessage ? messageId : undefined"
+                :aria-invalid="slotError || Boolean(props.error) || Boolean(error_msg)"
+                :aria-required="isRequired || props.required"
+            >
+                <template v-for="(group, gIdx) in groupedInputs" :key="gIdx">
+                    <div v-if="gIdx > 0" class="max-input-otp-separator" aria-hidden="true">
+                        <slot name="separator">
+                            <span>{{ effectiveSeparatorChar }}</span>
+                        </slot>
+                    </div>
+                    <div class="max-input-otp-group">
+                        <input
+                            v-for="item in group"
+                            :key="item.index"
+                            :id="`${inputId}-${item.index}`"
+                            :ref="(el) => setInputRef(el, item.index)"
+                            class="max-input-otp-cell"
+                            :class="{
+                                'has-value': !!values[item.index],
+                                'is-focused': focusedIndex === item.index
+                            }"
+                            :type="props.mask ? 'password' : 'text'"
+                            :inputmode="props.integerOnly ? 'numeric' : 'text'"
+                            :pattern="props.integerOnly ? '[0-9]*' : undefined"
+                            :maxlength="1"
+                            :disabled="props.disabled"
+                            :placeholder="props.placeholder || ''"
+                            :value="values[item.index]"
+                            :aria-label="'Dígito ' + (item.index + 1) + ' de ' + effectiveLength"
+                            :aria-describedby="hasMessage ? messageId : undefined"
+                            :aria-invalid="slotError || Boolean(props.error) || Boolean(error_msg)"
+                            :aria-required="isRequired || props.required"
+                            :autocomplete="item.index === 0 ? 'one-time-code' : 'off'"
+                            @input="onInput($event, item.index)"
+                            @keydown="onKeyDown($event, item.index)"
+                            @focus="onFocus(item.index)"
+                            @blur="onBlur(item.index)"
+                            @paste="onPaste($event)"
+                        />
+                    </div>
+                </template>
+            </div>
+            <slot></slot>
+        </template>
     </InputBase>
 </template>
 

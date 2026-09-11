@@ -445,6 +445,41 @@ describe('MaxCreditCard', () => {
             expect(decoded).not.toContain('<?xml');
             expect(decoded).not.toContain('<!DOCTYPE');
         });
+
+        it('renderiza aliases de bandeiras (american-express, diners-club, hiper) com o mesmo SVG canônico', () => {
+            const wrapperAmex = mountCard({ cardType: 'amex' });
+            const wrapperAmexAlias = mountCard({ cardType: 'american-express' });
+            const amexHref = wrapperAmex.findAll('.flip-card-front svg image')[1].attributes('href');
+            const amexAliasHref = wrapperAmexAlias.findAll('.flip-card-front svg image')[1].attributes('href');
+            expect(amexHref).toBe(amexAliasHref);
+
+            const wrapperDiners = mountCard({ cardType: 'diners' });
+            const wrapperDinersAlias = mountCard({ cardType: 'diners-club' });
+            const dinersHref = wrapperDiners.findAll('.flip-card-front svg image')[1].attributes('href');
+            const dinersAliasHref = wrapperDinersAlias.findAll('.flip-card-front svg image')[1].attributes('href');
+            expect(dinersHref).toBe(dinersAliasHref);
+
+            const wrapperHiper = mountCard({ cardType: 'hipercard' });
+            const wrapperHiperAlias = mountCard({ cardType: 'hiper' });
+            const hiperHref = wrapperHiper.findAll('.flip-card-front svg image')[1].attributes('href');
+            const hiperAliasHref = wrapperHiperAlias.findAll('.flip-card-front svg image')[1].attributes('href');
+            expect(hiperHref).toBe(hiperAliasHref);
+        });
+
+        it('renderiza bandeira JCB como SVG vetorial puro sem imagens raster embutidas', () => {
+            const wrapperJcb = mountCard({ cardType: 'jcb' });
+            const jcbImage = wrapperJcb.findAll('.flip-card-front svg image')[1];
+            expect(jcbImage.exists()).toBe(true);
+
+            const href = jcbImage.attributes('href');
+            expect(href).toMatch(/^data:image\/svg\+xml;base64,/);
+
+            const base64Data = href!.replace('data:image/svg+xml;base64,', '');
+            const decoded = Buffer.from(base64Data, 'base64').toString('utf-8');
+            expect(decoded).toContain('viewBox="0 0 1100 800"');
+            expect(decoded).not.toContain('<image');
+            expect(decoded).not.toContain('data:image/png');
+        });
     });
 });
 

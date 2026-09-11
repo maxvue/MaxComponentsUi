@@ -96,44 +96,63 @@ describe('MaxInputFileUpload', () => {
         expect(onErrorMock).toHaveBeenCalled();
     });
 
-    it('covers showError true branches and timeout', async () => {
-        vi.useFakeTimers();
+    it('mantém exibição de erro persistente sem auto-destruição e permite descartar ou tentar novamente', async () => {
         const wrapper = mount(MaxInputFileUpload, {
             props: { modelValue: [] },
+            attrs: { url: '/api/upload' },
             global: {
-                stubs: { Icon: true },
+                stubs: { Icon: true, MaxIcon: true, MaxButton: true, MaxIconButton: true },
                 directives: { tooltip: () => {} }
             }
         });
 
         wrapper.vm.showError = true;
+        wrapper.vm.errorMessage = 'Falha no upload';
         wrapper.vm.uploading = false;
 
         await wrapper.vm.$nextTick();
 
-        // Run the timer to cover the setTimeout inside watch(showError)
-        vi.runAllTimers();
-        expect(wrapper.vm.showError).toBe(false);
+        // Garante que o erro persiste sem desaparecer por timer
+        expect(wrapper.vm.showError).toBe(true);
+        expect(wrapper.find('.upload-error-state').exists()).toBe(true);
+        expect(wrapper.find('.error-text').text()).toBe('Falha no upload');
 
-        vi.useRealTimers();
+        // Testar dismissError
+        wrapper.vm.dismissError();
+        expect(wrapper.vm.showError).toBe(false);
+        expect(wrapper.vm.errorMessage).toBeNull();
+
+        // Testar retryUpload
+        const xhrOpenSpy = vi.spyOn(XMLHttpRequest.prototype, 'open').mockImplementation(() => {});
+        const xhrSendSpy = vi.spyOn(XMLHttpRequest.prototype, 'send').mockImplementation(() => {});
+        wrapper.vm.showError = true;
+        wrapper.vm.files = [new File(['hello'], 'test.pdf', { type: 'application/pdf' })];
+        wrapper.vm.retryUpload();
+        expect(xhrOpenSpy).toHaveBeenCalledWith('POST', '/api/upload', true);
+        expect(wrapper.vm.showError).toBe(false);
+        xhrOpenSpy.mockRestore();
+        xhrSendSpy.mockRestore();
     });
 
-    it('renderiza indicador de carregamento com classe semântica upload-loading-state', async () => {
+    it('renderiza indicador de carregamento com classe semântica upload-loading-state e barra de progresso', async () => {
         const wrapper = mount(MaxInputFileUpload, {
             props: { modelValue: [] },
             global: {
-                stubs: { Icon: true },
+                stubs: { Icon: true, MaxIcon: true, MaxButton: true, MaxIconButton: true },
                 directives: { tooltip: () => {} }
             }
         });
 
         wrapper.vm.uploading = true;
+        wrapper.vm.uploadProgress = 45;
         await wrapper.vm.$nextTick();
 
         const loadingDiv = wrapper.find('.upload-loading-state');
         expect(loadingDiv.exists()).toBe(true);
         expect(loadingDiv.classes()).not.toContain('flex');
-        expect(loadingDiv.find('.upload-loading-text').text()).toBe('Carregando arquivos');
+        expect(loadingDiv.find('.upload-progress-text').text()).toBe('Enviando... 45%');
+        const progressBar = loadingDiv.find('.progress-bar-fill');
+        expect(progressBar.attributes('aria-valuenow')).toBe('45');
     });
 
     it('remove arquivo ao clicar no botão de remoção e emite eventos delete e remove-file', async () => {

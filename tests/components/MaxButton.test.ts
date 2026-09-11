@@ -48,6 +48,16 @@ describe('MaxButton', () => {
         expect(wrapper.exists()).toBe(true);
     });
 
+    it('renderiza botao normal quando conteudo for passado apenas via slot default', () => {
+        const wrapper = mount(MaxButton, {
+            slots: {
+                default: 'Salvar Alterações'
+            }
+        });
+        expect(wrapper.find('button.max-button').exists()).toBe(true);
+        expect(wrapper.text()).toContain('Salvar Alterações');
+    });
+
     it('aplica severity passada via props', () => {
         const wrapper = mountButton({ label: 'Excluir', severity: 'danger' });
         expect(wrapper.exists()).toBe(true);
@@ -99,7 +109,7 @@ describe('MaxButton', () => {
 
             // 'small' é tamanho de BOTÃO: não pode vazar como tamanho do ícone.
             expect(wrapper.find('.max-icon-stub').attributes('data-size')).toBe('1.4');
-            expect(wrapper.find('button').classes()).toContain('p-button-sm');
+            expect(wrapper.find('button').classes()).toContain('max-button-sm');
         });
 
         // params.scss:109 tem `[full],[flex] { width:100% !important }`, e o

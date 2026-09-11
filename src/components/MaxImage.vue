@@ -677,7 +677,7 @@
             .max-image-crop-box {
                 position: absolute;
                 box-sizing: border-box;
-                border: 2px solid #fff;
+                border: 2px solid var(--max-primary-500);
                 box-shadow: 0 0 0 9999px rgb(0 0 0 / 60%), 0 0 8px rgb(0 0 0 / 50%);
                 cursor: move;
                 touch-action: none;
@@ -702,8 +702,8 @@
                     position: absolute;
                     width: 14px;
                     height: 14px;
-                    background-color: #fff;
-                    border: 1px solid rgb(0 0 0 / 30%);
+                    background-color: var(--background-0);
+                    border: 1px solid var(--background-800);
                     border-radius: 2px;
                     box-shadow: 0 1px 4px rgb(0 0 0 / 40%);
                     touch-action: none;

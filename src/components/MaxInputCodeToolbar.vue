@@ -1,5 +1,12 @@
 <template>
-    <div class="max-input-code-toolbar" :class="{ 'max-input-code-toolbar--disabled': props.disabled }">
+    <div
+        ref="toolbarRef"
+        class="max-input-code-toolbar"
+        :class="{ 'max-input-code-toolbar--disabled': props.disabled }"
+        role="toolbar"
+        aria-label="Barra de ferramentas de código"
+        @keydown="onToolbarKeydown"
+    >
         <!-- Seletor de Linguagem -->
         <div class="max-input-code-toolbar__group">
             <select
@@ -154,7 +161,7 @@
 </template>
 
 <script setup lang="ts">
-    import { computed, onBeforeUnmount, ref } from 'vue';
+    import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
     import MaxIcon from './MaxIcon.vue';
 
     export interface CodeLanguageOption {
@@ -237,6 +244,65 @@
         }, 1800);
     };
 
+    const toolbarRef = ref<HTMLElement | null>(null);
+
+    const getFocusableItems = (): HTMLElement[] => {
+        if (!toolbarRef.value) return [];
+        return Array.from(toolbarRef.value.querySelectorAll<HTMLElement>('.max-input-code-toolbar__select, .max-input-code-toolbar__btn:not(:disabled)'));
+    };
+
+    const onToolbarKeydown = (event: KeyboardEvent) => {
+        const items = getFocusableItems();
+        if (items.length === 0) return;
+
+        const activeEl = document.activeElement as HTMLElement | null;
+        const currentIndex = activeEl ? items.indexOf(activeEl) : -1;
+
+        let targetIndex = -1;
+
+        switch (event.key) {
+            case 'ArrowRight':
+            case 'ArrowDown': {
+                event.preventDefault();
+                targetIndex = currentIndex >= 0 ? (currentIndex + 1) % items.length : 0;
+                break;
+            }
+            case 'ArrowLeft':
+            case 'ArrowUp': {
+                event.preventDefault();
+                targetIndex = currentIndex >= 0 ? (currentIndex - 1 + items.length) % items.length : items.length - 1;
+                break;
+            }
+            case 'Home': {
+                event.preventDefault();
+                targetIndex = 0;
+                break;
+            }
+            case 'End': {
+                event.preventDefault();
+                targetIndex = items.length - 1;
+                break;
+            }
+        }
+
+        if (targetIndex >= 0 && items[targetIndex]) {
+            items.forEach((item, idx) => {
+                item.setAttribute('tabindex', idx === targetIndex ? '0' : '-1');
+            });
+            items[targetIndex].focus();
+        }
+    };
+
+    onMounted(() => {
+        const items = getFocusableItems();
+        items.forEach((item, idx) => {
+            item.setAttribute('tabindex', idx === 0 ? '0' : '-1');
+            item.addEventListener('focus', () => {
+                items.forEach((other) => other.setAttribute('tabindex', other === item ? '0' : '-1'));
+            });
+        });
+    });
+
     onBeforeUnmount(() => {
         if (copyTimeout) {
             clearTimeout(copyTimeout);
@@ -293,9 +359,14 @@
             cursor: pointer;
             transition: border-color 0.15s ease, box-shadow 0.15s ease;
 
-            &:focus {
-                border-color: var(--max-primary-500, #3b82f6);
-                box-shadow: 0 0 0 2px rgb(59 130 246 / 15%);
+            &:focus:not(:focus-visible) {
+                outline: none;
+            }
+
+            &:focus-visible {
+                outline: var(--max-focus-outline);
+                outline-offset: 1px;
+                border-color: var(--max-primary-500, #00768E);
             }
 
             &:disabled {
@@ -317,6 +388,16 @@
             color: var(--background-650, #475569);
             cursor: pointer;
             transition: background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+            outline: none;
+
+            &:focus:not(:focus-visible) {
+                outline: none;
+            }
+
+            &:focus-visible {
+                outline: var(--max-focus-outline);
+                outline-offset: 1px;
+            }
 
             &:hover:not(:disabled) {
                 background-color: var(--background-150, #e2e8f0);
@@ -325,7 +406,7 @@
 
             &.active {
                 background-color: var(--background-200, #cbd5e1);
-                color: var(--max-primary-500, #3b82f6);
+                color: var(--max-primary-500, #00768E);
                 border-color: var(--background-300, #94a3b8);
             }
 

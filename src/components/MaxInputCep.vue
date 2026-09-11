@@ -1,6 +1,21 @@
 <template>
     <InputBase v-bind="props" class="max-input-cep input-base-cep-main-div" :value="temp_value" :done="done ?? undefined" :caution="caution" :error="error_msg ?? undefined" :icon-right="loading ? 'line-md:loading-loop' : undefined">
-        <input type="text" inputmode="numeric" class="max-input-native" v-model="temp_value" v-maska="maskValue" placeholder="00000-000" />
+        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+            <input
+                :id="inputId"
+                type="text"
+                inputmode="numeric"
+                class="max-input-native"
+                v-model="temp_value"
+                v-maska="maskValue"
+                placeholder="00000-000"
+                :disabled="props.disabled"
+                :aria-describedby="hasMessage ? messageId : undefined"
+                :aria-invalid="slotError ? 'true' : undefined"
+                :aria-required="isRequired ? 'true' : undefined"
+                @blur="onBlur"
+            />
+        </template>
     </InputBase>
 </template>
 
@@ -10,7 +25,7 @@
      * Possui máscara automática (00000-000) e validação integrada.
      */
     import { formatCep, onlyNumbers, cepIsValid } from '@maxvue/max-use';
-    import { computed, watch, useAttrs } from 'vue';
+    import { ref, computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
     import { vMaska } from 'maska/vue';
     import { useMirroredModel } from '../helpers/useMirroredModel';
@@ -51,6 +66,12 @@
     const temp_value_numbers = computed(() => onlyNumbers(temp_value.value ?? ''));
     const maskValue = computed(() => ({ tokens: { '#': { pattern: /[0-9]/ } }, mask: '#####-###' }));
 
+    const hasBeenTouched = ref(false);
+
+    const onBlur = () => {
+        hasBeenTouched.value = true;
+    };
+
     const isValidCep = computed(() => cepIsValid(temp_value_numbers.value));
 
     const done = computed(() => {
@@ -61,14 +82,17 @@
 
     const caution = computed(() => {
         if (props.caution !== undefined) return props.caution;
-        return done.value === false && temp_value_numbers.value.length > 0;
+        if (temp_value_numbers.value.length === 0) return Boolean(props.required && hasBeenTouched.value);
+
+        return done.value === false;
     });
 
     const error_msg = computed(() => {
         if (!caution.value) return null;
         const attrs_error_message = attrs.errMsg ?? attrs.error_message ?? attrs.error_msg ?? null;
         if (temp_value_numbers.value.length === 0 && props.required) return attrs_error_message ?? 'Campo obrigatório';
-        return attrs_error_message ?? 'CEP inválido';
+        if (temp_value_numbers.value.length > 0 && !isValidCep.value) return attrs_error_message ?? 'CEP inválido';
+        return attrs_error_message;
     });
 
     // Emite 'complete' quando o CEP se torna valido. A emissao de

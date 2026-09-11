@@ -7,25 +7,30 @@
         :done="isDone"
         :icon="props.icon ?? 'solar:calendar-line-duotone'"
     >
-        <div ref="triggerEl" class="max-datepicker-wrapper">
-            <input
-                ref="inputElement"
-                type="text"
-                class="max-datepicker-input"
-                :value="displayValue"
-                v-maska="maskValue"
-                :placeholder="props.placeholder ?? 'dd/mm/aaaa'"
-                :disabled="props.disabled"
-                @focus="open"
-                @click="open"
-                @blur="onBlur"
-                @input="onInput"
-                @change="onInputChange"
-            />
-        </div>
+        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+            <div ref="triggerEl" class="max-datepicker-wrapper">
+                <input
+                    :id="inputId"
+                    ref="inputElement"
+                    type="text"
+                    class="max-datepicker-input"
+                    :value="displayValue"
+                    v-maska="maskValue"
+                    :placeholder="props.placeholder ?? 'dd/mm/aaaa'"
+                    :disabled="props.disabled"
+                    :aria-describedby="hasMessage ? messageId : undefined"
+                    :aria-invalid="slotError ? 'true' : undefined"
+                    :aria-required="isRequired ? 'true' : undefined"
+                    @focus="open"
+                    @click="open"
+                    @blur="onBlur"
+                    @input="onInput"
+                    @change="onInputChange"
+                    @keydown="onInputKeydown"
+                />
+            </div>
 
-        <Teleport to="body" v-if="isOpen">
-            <div class="max-datepicker-backdrop" @click="hide">
+            <Teleport to="body" v-if="isOpen">
                 <div
                     ref="overlayEl"
                     class="max-datepicker-panel"
@@ -153,8 +158,8 @@
                         </button>
                     </div>
                 </div>
-            </div>
-        </Teleport>
+            </Teleport>
+        </template>
     </InputBase>
 </template>
 
@@ -162,7 +167,8 @@
     import { ref, computed, watch, nextTick, onBeforeUnmount } from 'vue';
     import InputBase from './InputBase.vue';
     import MaxIcon from './MaxIcon.vue';
-    import { useDateFormat, useElementBounding, useElementSize, useWindowSize } from '@maxvue/max-use';
+    import { useDateFormat, useElementSize, useWindowSize } from '@maxvue/max-use';
+    import { useActiveElementBounding } from '../composables/useActiveElementBounding';
     import { vMaska } from 'maska/vue';
     import { SelectGroupOptions } from '../types';
 
@@ -299,7 +305,7 @@
     ];
     const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
-    const { x, y, height: height_btn } = useElementBounding(triggerEl as any);
+    const { x, y, height: height_btn } = useActiveElementBounding(triggerEl, isOpen);
     const { width: width_el, height: height_el } = useElementSize(overlayEl as any);
     const { width: window_width, height: window_height } = useWindowSize();
 
@@ -657,6 +663,7 @@
                 return;
             case 'Escape':
                 event.preventDefault();
+                skipFocusOpen = true;
                 hide();
                 inputElement.value?.focus();
                 return;
@@ -686,8 +693,14 @@
         );
     };
 
+    let skipFocusOpen = false;
+
     const open = () => {
         if (props.disabled) return;
+        if (skipFocusOpen) {
+            skipFocusOpen = false;
+            return;
+        }
         isOpen.value = true;
     };
 
@@ -764,13 +777,53 @@
         return null;
     });
 
+    const onInputKeydown = (event: KeyboardEvent) => {
+        if (event.key === 'ArrowDown' || (event.altKey && event.key === 'ArrowDown')) {
+            event.preventDefault();
+            if (!isOpen.value) open();
+
+            nextTick(() => {
+                dayButtonRefs.value[focusedCellIndex.value]?.focus();
+            });
+        } else if (event.key === 'Escape' && isOpen.value) {
+            event.preventDefault();
+            skipFocusOpen = true;
+            hide();
+        }
+    };
+
     const onGlobalKeydown = (event: KeyboardEvent) => {
-        if (event.key === 'Escape' && isOpen.value) hide();
+        if (event.key === 'Escape' && isOpen.value) {
+            skipFocusOpen = true;
+            hide();
+        }
+    };
+
+    let outsidePointerDown = false;
+    const onDocPointerDown = (e: MouseEvent | TouchEvent | PointerEvent) => {
+        const target = e.target as Node | null;
+        if (overlayEl.value && !overlayEl.value.contains(target) && triggerEl.value && !triggerEl.value.contains(target)) outsidePointerDown = true;
+        else outsidePointerDown = false;
+
+    };
+
+    const onDocClick = (e: MouseEvent) => {
+        const target = e.target as Node | null;
+        if (outsidePointerDown && overlayEl.value && !overlayEl.value.contains(target) && triggerEl.value && !triggerEl.value.contains(target)) hide();
+
+        outsidePointerDown = false;
     };
 
     watch(isOpen, (open) => {
-        if (typeof window !== 'undefined') if (open) window.addEventListener('keydown', onGlobalKeydown);
-        else window.removeEventListener('keydown', onGlobalKeydown);
+        if (typeof window !== 'undefined') if (open) {
+            window.addEventListener('keydown', onGlobalKeydown);
+            document.addEventListener('pointerdown', onDocPointerDown, true);
+            document.addEventListener('click', onDocClick, true);
+        } else {
+            window.removeEventListener('keydown', onGlobalKeydown);
+            document.removeEventListener('pointerdown', onDocPointerDown, true);
+            document.removeEventListener('click', onDocClick, true);
+        }
 
 
         if (open) {
@@ -788,8 +841,11 @@
     });
 
     onBeforeUnmount(() => {
-        if (typeof window !== 'undefined') window.removeEventListener('keydown', onGlobalKeydown);
-
+        if (typeof window !== 'undefined') {
+            window.removeEventListener('keydown', onGlobalKeydown);
+            document.removeEventListener('pointerdown', onDocPointerDown, true);
+            document.removeEventListener('click', onDocClick, true);
+        }
     });
 
     defineExpose({
@@ -832,209 +888,202 @@
         }
     }
 
-    .max-datepicker-backdrop {
+    .max-datepicker-panel {
         position: fixed;
-        inset: 0;
-        z-index: 1100;
-        background: transparent;
+        z-index: var(--z-dropdown, 1000);
+        background: var(--background-0, #fff);
+        border: 1px solid var(--surface-border);
+        border-radius: 8px;
+        box-shadow: 0 4px 16px rgb(0 0 0 / 15%);
+        padding: 12px;
+        width: 290px;
+        user-select: none;
 
-        .max-datepicker-panel {
-            position: fixed;
-            z-index: 1101;
-            background: var(--background-0, #fff);
-            border: 1px solid var(--surface-border, #e2e8f0);
-            border-radius: 8px;
-            box-shadow: 0 4px 16px rgb(0 0 0 / 15%);
-            padding: 12px;
-            width: 290px;
-            user-select: none;
+        .max-datepicker-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
 
-            .max-datepicker-header {
+            .max-datepicker-title {
+                font-weight: 600;
+                font-size: 0.95rem;
+                color: var(--background-775);
+            }
+
+            .max-datepicker-title-btn {
+                background: transparent;
+                border: none;
+                cursor: pointer;
+                padding: 4px 8px;
+                border-radius: 4px;
+                transition: background-color 0.15s ease;
+
+                &:hover {
+                    background: var(--background-100, #f1f5f9);
+                    color: var(--max-primary-500, #00768E);
+                }
+
+                &:focus-visible {
+                    outline: 2px solid var(--max-primary-500, #00768E);
+                    outline-offset: 2px;
+                }
+            }
+
+            .max-datepicker-nav-btn {
+                background: transparent;
+                border: none;
+                cursor: pointer;
+                padding: 4px;
+                border-radius: 4px;
                 display: flex;
                 align-items: center;
-                justify-content: space-between;
-                margin-bottom: 10px;
+                justify-content: center;
+                color: var(--background-700);
 
-                .max-datepicker-title {
-                    font-weight: 600;
-                    font-size: 0.95rem;
-                    color: var(--background-775);
+                &:hover {
+                    background: var(--background-100, #f1f5f9);
+                    color: var(--max-primary-500, #00768E);
                 }
 
-                .max-datepicker-title-btn {
-                    background: transparent;
-                    border: none;
-                    cursor: pointer;
-                    padding: 4px 8px;
+                &:focus-visible {
+                    outline: 2px solid var(--max-primary-500, #00768E);
+                    outline-offset: 2px;
                     border-radius: 4px;
-                    transition: background-color 0.15s ease;
-
-                    &:hover {
-                        background: var(--background-100, #f1f5f9);
-                        color: var(--max-primary-500, #00768e);
-                    }
-
-                    &:focus-visible {
-                        outline: 2px solid var(--blue-600, #2563eb);
-                        outline-offset: 2px;
-                    }
                 }
+            }
+        }
 
-                .max-datepicker-nav-btn {
+        .max-datepicker-grid {
+            .max-datepicker-weekdays {
+                display: grid;
+                grid-template-columns: repeat(7, 1fr);
+                text-align: center;
+                font-size: 0.75rem;
+                font-weight: 600;
+                color: var(--background-650);
+                margin-bottom: 6px;
+            }
+
+            .max-datepicker-days {
+                display: grid;
+                grid-template-columns: repeat(7, 1fr);
+                gap: 2px;
+
+                .max-datepicker-day {
+                    aspect-ratio: 1;
                     background: transparent;
                     border: none;
+                    border-radius: 50%;
                     cursor: pointer;
-                    padding: 4px;
-                    border-radius: 4px;
+                    font-size: 0.85rem;
+                    color: var(--background-700);
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    color: var(--background-700);
+                    padding: 0;
 
-                    &:hover {
-                        background: var(--background-100, #f1f5f9);
-                        color: var(--max-primary-500, #00768e);
-                    }
-
-                    &:focus-visible {
-                        outline: 2px solid var(--blue-600, #2563eb);
-                        outline-offset: 2px;
-                        border-radius: 4px;
-                    }
-                }
-            }
-
-            .max-datepicker-grid {
-                .max-datepicker-weekdays {
-                    display: grid;
-                    grid-template-columns: repeat(7, 1fr);
-                    text-align: center;
-                    font-size: 0.75rem;
-                    font-weight: 600;
-                    color: var(--background-650);
-                    margin-bottom: 6px;
-                }
-
-                .max-datepicker-days {
-                    display: grid;
-                    grid-template-columns: repeat(7, 1fr);
-                    gap: 2px;
-
-                    .max-datepicker-day {
-                        aspect-ratio: 1;
-                        background: transparent;
-                        border: none;
-                        border-radius: 50%;
-                        cursor: pointer;
-                        font-size: 0.85rem;
-                        color: var(--background-700);
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        padding: 0;
-
-                        &:hover:not(:disabled) {
-                            background: var(--background-100, #f1f5f9);
-                        }
-
-                        &:focus-visible {
-                            outline: 2px solid var(--blue-600, #2563eb);
-                            outline-offset: 1px;
-                            z-index: 1;
-                        }
-
-                        &.is-other-month {
-                            opacity: 0.35;
-                        }
-
-                        &.is-today {
-                            border: 1px solid var(--max-primary-400, #178da5);
-                        }
-
-                        &.is-selected {
-                            background: var(--max-primary-500, #00768e) !important;
-                            color: #fff !important;
-                            font-weight: 600;
-                        }
-
-                        &.is-disabled,
-                        &:disabled {
-                            opacity: 0.25 !important;
-                            cursor: not-allowed !important;
-                            pointer-events: none;
-                        }
-                    }
-                }
-            }
-
-            .max-datepicker-months,
-            .max-datepicker-years {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 8px;
-                padding: 8px 0;
-
-                .max-datepicker-month-btn,
-                .max-datepicker-year-btn {
-                    height: 40px;
-                    border: none;
-                    background: transparent;
-                    border-radius: 6px;
-                    font-size: 0.85rem;
-                    color: var(--background-700);
-                    cursor: pointer;
-                    transition: all 0.15s ease;
-
-                    &:hover {
+                    &:hover:not(:disabled) {
                         background: var(--background-100, #f1f5f9);
                     }
 
                     &:focus-visible {
-                        outline: 2px solid var(--blue-600, #2563eb);
+                        outline: 2px solid var(--max-primary-500, #00768E);
                         outline-offset: 1px;
+                        z-index: 1;
+                    }
+
+                    &.is-other-month {
+                        opacity: 0.35;
+                    }
+
+                    &.is-today {
+                        border: 1px solid var(--max-primary-400, #178da5);
                     }
 
                     &.is-selected {
-                        background: var(--max-primary-500, #00768e);
-                        color: #fff;
+                        background: var(--max-primary-500, #00768e) !important;
+                        color: #fff !important;
                         font-weight: 600;
                     }
 
-                    &.is-out-of-range {
-                        opacity: 0.4;
+                    &.is-disabled,
+                    &:disabled {
+                        opacity: 0.25 !important;
+                        cursor: not-allowed !important;
+                        pointer-events: none;
                     }
                 }
             }
+        }
 
-            .max-datepicker-footer {
-                display: flex;
-                justify-content: space-between;
-                border-top: 1px solid var(--surface-border, #e2e8f0);
-                margin-top: 10px;
-                padding-top: 8px;
+        .max-datepicker-months,
+        .max-datepicker-years {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            padding: 8px 0;
 
-                .max-datepicker-action-btn {
-                    background: transparent;
-                    border: none;
-                    font-size: 0.8rem;
+            .max-datepicker-month-btn,
+            .max-datepicker-year-btn {
+                height: 40px;
+                border: none;
+                background: transparent;
+                border-radius: 6px;
+                font-size: 0.85rem;
+                color: var(--background-700);
+                cursor: pointer;
+                transition: all 0.15s ease;
+
+                &:hover {
+                    background: var(--background-100, #f1f5f9);
+                }
+
+                &:focus-visible {
+                    outline: 2px solid var(--max-primary-500, #00768E);
+                    outline-offset: 1px;
+                }
+
+                &.is-selected {
+                    background: var(--max-primary-500, #00768E);
+                    color: #fff;
                     font-weight: 600;
-                    cursor: pointer;
-                    padding: 4px 8px;
-                    border-radius: 4px;
-                    color: var(--blue-600, #2563eb);
+                }
 
-                    &:hover {
-                        background: var(--background-100, #f1f5f9);
-                    }
+                &.is-out-of-range {
+                    opacity: 0.4;
+                }
+            }
+        }
 
-                    &:focus-visible {
-                        outline: 2px solid var(--blue-600, #2563eb);
-                        outline-offset: 1px;
-                    }
+        .max-datepicker-footer {
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid var(--surface-border);
+            margin-top: 10px;
+            padding-top: 8px;
 
-                    &.clear {
-                        color: var(--red-700, #b91c1c);
-                    }
+            .max-datepicker-action-btn {
+                background: transparent;
+                border: none;
+                font-size: 0.8rem;
+                font-weight: 600;
+                cursor: pointer;
+                padding: 4px 8px;
+                border-radius: 4px;
+                color: var(--max-primary-500, #00768E);
+
+                &:hover {
+                    background: var(--background-100, #f1f5f9);
+                }
+
+                &:focus-visible {
+                    outline: 2px solid var(--max-primary-500, #00768E);
+                    outline-offset: 1px;
+                }
+
+                &.clear {
+                    color: var(--red-700, #b91c1c);
                 }
             }
         }

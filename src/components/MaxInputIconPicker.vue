@@ -8,7 +8,8 @@
         @click.stop="openDrawer"
     >
         <div
-            class="icon-picker-trigger p-inputtext"
+            ref="triggerRef"
+            class="icon-picker-trigger"
             :class="{ 'is-disabled': props.disabled }"
             role="button"
             :tabindex="props.disabled ? -1 : 0"
@@ -30,15 +31,22 @@
     </InputBase>
 
     <Teleport to="body" v-if="visible">
-        <div class="max-icon-picker-drawer-backdrop" @click="visible = false">
-            <div class="max-icon-picker-drawer p-drawer-bottom" @click.stop>
+        <div class="max-icon-picker-drawer-backdrop" @click="closeDrawer" @keydown.esc="closeDrawer">
+            <div
+                ref="drawerEl"
+                class="max-icon-picker-drawer p-drawer-bottom"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Escolha um ícone"
+                @click.stop
+            >
                 <div class="p-drawer-header">
                     <span class="p-drawer-title">Escolha um ícone</span>
                     <button
                         type="button"
                         class="p-drawer-close-button"
                         aria-label="Fechar seletor de ícones"
-                        @click="visible = false"
+                        @click="closeDrawer"
                     >
                         <MaxIcon i="mdi:close" size="1.2" />
                     </button>
@@ -47,8 +55,9 @@
                 <div class="p-drawer-content">
                     <div class="picker-search-area">
                         <input
+                            ref="searchInputRef"
                             type="text"
-                            class="p-inputtext picker-search-input"
+                            class="picker-search-input"
                             v-model="search"
                             placeholder="Pesquisar ícones..."
                         />
@@ -68,33 +77,43 @@
 
                     <div
                         v-else
+                        ref="scrollerEl"
                         class="icon-virtual-list"
-                        :style="{ height: 'calc(90dvh - 140px)', overflowY: 'auto' }"
                         @scroll="onScrollerScroll"
                     >
                         <div
-                            v-for="(row, rIndex) in rows"
-                            :key="rIndex"
-                            class="icon-row"
-                            :data-row-index="rIndex"
+                            class="icon-virtual-spacer"
+                            :style="{ height: `${totalHeight}px` }"
+                            aria-hidden="true"
+                        />
+                        <div
+                            class="icon-virtual-window"
+                            :style="{ transform: `translateY(${offsetY}px)` }"
                         >
-                            <button
-                                v-for="icon in row"
-                                :key="icon.name"
-                                type="button"
-                                class="icon-cell"
-                                :class="{ selected: modelValue === icon.name }"
-                                :aria-label="`Selecionar ícone ${icon.name}`"
-                                :title="icon.name"
-                                @click.stop="selectIcon(icon.name)"
+                            <div
+                                v-for="entry in visibleItems"
+                                :key="entry.index"
+                                class="icon-row"
+                                :data-row-index="entry.index"
                             >
-                                <div
-                                    v-if="svgCache[icon.name]"
-                                    class="picker-icon-svg"
-                                    v-html="svgCache[icon.name]"
-                                />
-                                <div v-else class="picker-icon-placeholder" />
-                            </button>
+                                <button
+                                    v-for="icon in entry.item"
+                                    :key="icon.name"
+                                    type="button"
+                                    class="icon-cell"
+                                    :class="{ selected: modelValue === icon.name }"
+                                    :aria-label="`Selecionar ícone ${icon.name}`"
+                                    :title="icon.name"
+                                    @click.stop="selectIcon(icon.name)"
+                                >
+                                    <div
+                                        v-if="svgCache[icon.name]"
+                                        class="picker-icon-svg"
+                                        v-html="svgCache[icon.name]"
+                                    />
+                                    <div v-else class="picker-icon-placeholder" />
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -110,8 +129,11 @@
     import InputBase from './InputBase.vue';
     import MaxIcon from './MaxIcon.vue';
     import { sanitizeSvg } from '../helpers/sanitizeSvg';
+    import { useVirtualList } from '../composables/useVirtualList';
 
     const COLS = 8;
+    const ROW_HEIGHT = 40;
+    const OVERSCAN_ROWS = 4;
 
     interface IconEntry {
         id: number;
@@ -166,6 +188,9 @@
     );
 
     const visible = ref(false);
+    const triggerRef = ref<HTMLElement | null>(null);
+    const searchInputRef = ref<HTMLInputElement | null>(null);
+    const drawerEl = ref<HTMLElement | null>(null);
     const search = ref('');
     const curatedIcons = ref<IconEntry[]>([]);
     const isLoading = ref(false);
@@ -210,6 +235,15 @@
 
     const rows = computed<IconEntry[][]>(() => toRows(flatIcons.value));
 
+    const scrollerEl = ref<HTMLElement | null>(null);
+    const isVirtualActive = computed(() => rows.value.length > 0);
+
+    const { visibleItems, offsetY, totalHeight, setViewport } = useVirtualList(rows, {
+        itemHeight: computed(() => ROW_HEIGHT),
+        enabled: isVirtualActive,
+        overscan: OVERSCAN_ROWS
+    });
+
     /**
      * Enfileira nomes de ícones para fetch de SVG com debounce de 150ms.
      * Respeita o limite de 200 por request.
@@ -250,28 +284,23 @@
     const onScrollerScroll = (event: Event) => {
         const el = event.target as HTMLElement;
         if (!el) return;
-        const scrollTop = el.scrollTop;
-        const clientHeight = el.clientHeight;
-        const itemSize = 40;
 
-        const firstRow = Math.floor(scrollTop / itemSize);
-        const visibleRows = Math.ceil(clientHeight / itemSize) + 2;
-        const lastRow = firstRow + visibleRows;
+        setViewport(el.scrollTop, el.clientHeight || 400);
 
-        const visibleIcons: string[] = [];
-        for (let r = firstRow; r <= lastRow && r < rows.value.length; r++) for (const icon of rows.value[r]) visibleIcons.push(icon.name);
+        const iconsToFetch: string[] = [];
+        for (const entry of visibleItems.value) for (const icon of entry.item) iconsToFetch.push(icon.name);
 
 
-        enqueueSvgFetch(visibleIcons);
+        enqueueSvgFetch(iconsToFetch);
     };
 
     /**
      * Pré-carrega SVGs das primeiras linhas visíveis ao montar a lista.
      */
     const preloadInitialSvgs = () => {
-        const initialRows = Math.ceil(600 / 40) + 2;
+        setViewport(0, scrollerEl.value?.clientHeight || 400);
         const names: string[] = [];
-        for (let r = 0; r < initialRows && r < rows.value.length; r++) for (const icon of rows.value[r]) names.push(icon.name);
+        for (const entry of visibleItems.value) for (const icon of entry.item) names.push(icon.name);
 
 
         enqueueSvgFetch(names);
@@ -312,15 +341,42 @@
         fetchCuratedIcons();
     };
 
+    const closeDrawer = () => {
+        visible.value = false;
+        nextTick(() => {
+            triggerRef.value?.focus();
+        });
+    };
+
     const selectIcon = (iconName: string) => {
         modelValue.value = iconName;
         isDone.value = testIsDone();
-        visible.value = false;
+        closeDrawer();
     };
+
+    const onGlobalKeydown = (event: KeyboardEvent) => {
+        if (event.key === 'Escape' && visible.value) closeDrawer();
+
+    };
+
+    watch(visible, async (val) => {
+        if (val) {
+            if (typeof window !== 'undefined') window.addEventListener('keydown', onGlobalKeydown);
+            await nextTick();
+            searchInputRef.value?.focus();
+        } else {
+            if (typeof window !== 'undefined') window.removeEventListener('keydown', onGlobalKeydown);
+            nextTick(() => {
+                triggerRef.value?.focus();
+            });
+        }
+    });
 
     watchDebounced(
         () => search.value,
         async (val: string) => {
+            if (scrollerEl.value) scrollerEl.value.scrollTop = 0;
+            setViewport(0, scrollerEl.value?.clientHeight || 400);
             if (val.length < 2) {
                 await fetchCuratedIcons();
                 return;
@@ -335,6 +391,7 @@
     });
 
     onBeforeUnmount(() => {
+        if (typeof window !== 'undefined') window.removeEventListener('keydown', onGlobalKeydown);
         if (svgFetchTimer !== null) {
             clearTimeout(svgFetchTimer);
             svgFetchTimer = null;
@@ -402,7 +459,7 @@
             align-items: center;
             justify-content: space-between;
             padding: 16px 20px;
-            border-bottom: 1px solid var(--surface-border, #e2e8f0);
+            border-bottom: 1px solid var(--surface-border);
 
             .p-drawer-title {
                 font-weight: 600;
@@ -442,7 +499,7 @@
                     width: 100%;
                     height: 38px;
                     padding: 0 12px;
-                    border: 1px solid var(--surface-border, #e2e8f0);
+                    border: 1px solid var(--surface-border);
                     border-radius: 8px;
                     outline: none;
                     font-size: 0.9rem;
@@ -465,64 +522,81 @@
             }
 
             .icon-virtual-list {
+                position: relative;
                 width: 100%;
+                height: calc(90dvh - 140px);
+                overflow-y: auto;
                 scrollbar-width: thin;
 
-                .icon-row {
-                    display: grid;
-                    grid-template-columns: repeat(8, 1fr);
-                    height: 40px;
-                    align-items: center;
+                .icon-virtual-spacer {
+                    width: 100%;
+                    pointer-events: none;
+                }
 
-                    .icon-cell {
+                .icon-virtual-window {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    display: flex;
+                    flex-direction: column;
+
+                    .icon-row {
                         display: grid;
-                        place-items: center;
+                        grid-template-columns: repeat(8, 1fr);
                         height: 40px;
-                        border-radius: 6px;
-                        background: none;
-                        border: none;
-                        padding: 0;
-                        cursor: pointer;
-                        transition: background-color 0.15s ease;
+                        align-items: center;
 
-                        &:focus-visible {
-                            outline: 2px solid var(--max-primary-500, #00768e);
-                            outline-offset: 1px;
-                            border-radius: 4px;
-                        }
-
-                        &:hover {
-                            background-color: var(--background-100);
-                        }
-
-                        &.selected {
-                            background-color: var(--max-primary-100, #dbeafe);
-
-                            .picker-icon-svg {
-                                color: var(--max-primary-600, #2563eb);
-                            }
-                        }
-
-                        .picker-icon-svg {
+                        .icon-cell {
                             display: grid;
                             place-items: center;
-                            width: 1.5rem;
-                            height: 1.5rem;
-                            color: var(--background-700, rgb(0 0 0 / 50%));
+                            height: 40px;
+                            border-radius: 6px;
+                            background: none;
+                            border: none;
+                            padding: 0;
+                            cursor: pointer;
+                            transition: background-color 0.15s ease;
 
-                            svg {
-                                min-width: 100% !important;
-                                min-height: 100% !important;
-                                max-width: 100% !important;
-                                max-height: 100% !important;
+                            &:focus-visible {
+                                outline: 2px solid var(--max-primary-500, #00768E);
+                                outline-offset: 1px;
+                                border-radius: 4px;
                             }
-                        }
 
-                        .picker-icon-placeholder {
-                            width: 1.5rem;
-                            height: 1.5rem;
-                            border-radius: 4px;
-                            background-color: var(--background-100);
+                            &:hover {
+                                background-color: var(--background-100);
+                            }
+
+                            &.selected {
+                                background-color: var(--max-primary-50);
+
+                                .picker-icon-svg {
+                                    color: var(--max-primary-600, #005F77);
+                                }
+                            }
+
+                            .picker-icon-svg {
+                                display: grid;
+                                place-items: center;
+                                width: 1.5rem;
+                                height: 1.5rem;
+                                color: var(--background-700, rgb(0 0 0 / 50%));
+
+                                svg {
+                                    min-width: 100% !important;
+                                    min-height: 100% !important;
+                                    max-width: 100% !important;
+                                    max-height: 100% !important;
+                                }
+                            }
+
+                            .picker-icon-placeholder {
+                                width: 1.5rem;
+                                height: 1.5rem;
+                                border-radius: 4px;
+                                background-color: var(--background-100);
+                            }
                         }
                     }
                 }
@@ -530,6 +604,7 @@
         }
     }
 }
+
 
 @keyframes drawer-slide-up {
     from {

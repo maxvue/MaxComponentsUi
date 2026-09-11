@@ -1,55 +1,56 @@
 <template>
     <div ref="btn_el" :class="['max-modal-item', { 'no-button': props.noButton }, props.class]">
-        <div v-tooltip="null" @click.stop="toggle" class="max-modal-trigger" v-if="! props.noButton">
+        <div v-tooltip="null" @click.stop="toggle" class="max-modal-trigger" v-if="!props.noButton">
             <slot name="button" v-bind="props">
                 <MaxButton v-bind="props" :size="props.size || props.sizeIcon ? String(props.size ?? props.sizeIcon) : ''" />
             </slot>
         </div>
         <teleport to="body">
-            <div
-                class="background-modal"
-                @click.stop="onBackdropClick"
-                v-if="modal_store.show_id === id"
-                :style="{ opacity: style?.opacity }"
-                :data-html2canvas-ignore="props.ignoreCanvas"
-            >
+            <Transition name="max-modal-fade" @after-leave="emit('after-hide')">
                 <div
-                    class="max-modal"
-                    ref="el"
-                    role="dialog"
-                    aria-modal="true"
-                    :aria-labelledby="title_id"
-                    :aria-label="!title_id ? (props.title ?? undefined) : undefined"
-                    :style="{ top: style.top + 'px', left: style.left + 'px', padding: modal_padding, width: modal_width, height: modal_height }"
-                    @click.stop="() => {}"
-                    @keydown="trap.onKeydown"
-                    :class="[{ 'is-shaking': isShaking }, props.class]"
+                    class="background-modal"
+                    @click.stop="onBackdropClick"
+                    v-if="is_show"
+                    :style="{ zIndex: backdropZIndex }"
+                    :data-html2canvas-ignore="props.ignoreCanvas"
                 >
-                    <slot name="header" v-if="!props.noHeader">
-                        <MaxGrid class="max-modal-header" :id="title_id">
-                            <slot name="title" v-bind="props">
-                                <MaxTitle1 class="max-modal-title" :title="props.title ?? 'Titulo'" :subtitle="props.subTitle ?? 'Sub Titulo'" />
-                            </slot>
-                            <div class="max-modal-close-wrapper">
-                                <slot name="close" :close="handleClose" :hide="handleClose">
-                                    <MaxIconButton i="iconoir:xmark" size="1.3" aria-label="Fechar" @click.stop="handleClose" class="close-btn" />
+                    <div
+                        class="max-modal"
+                        ref="el"
+                        role="dialog"
+                        aria-modal="true"
+                        :aria-labelledby="title_id"
+                        :aria-label="!title_id ? (props.title ?? undefined) : undefined"
+                        :style="{ zIndex: dialogZIndex, padding: modal_padding, width: modal_width, height: modal_height }"
+                        @click.stop="() => {}"
+                        @keydown="trap.onKeydown"
+                        :class="[{ 'is-shaking': isShaking }, props.class]"
+                    >
+                        <slot name="header" v-if="!props.noHeader">
+                            <MaxGrid class="max-modal-header" :id="title_id">
+                                <slot name="title" v-bind="props">
+                                    <MaxTitle1 class="max-modal-title" :title="props.title ?? 'Titulo'" :subtitle="props.subTitle ?? 'Sub Titulo'" />
                                 </slot>
-                            </div>
-                        </MaxGrid>
-                    </slot>
-                    <div class="max-modal-content">
-                        <slot name="content"></slot>
-                        <slot></slot>
+                                <div class="max-modal-close-wrapper">
+                                    <slot name="close" :close="handleClose" :hide="handleClose">
+                                        <MaxIconButton i="iconoir:xmark" size="1.3" aria-label="Fechar" @click.stop="handleClose" class="close-btn" />
+                                    </slot>
+                                </div>
+                            </MaxGrid>
+                        </slot>
+                        <div class="max-modal-content">
+                            <slot name="content"></slot>
+                            <slot></slot>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </Transition>
         </teleport>
     </div>
 </template>
 
 <script setup lang="ts">
     import { useModalStore } from '../stores/useModal.Store';
-    import { useDefaultReset, refAutoReset } from '@maxvue/max-use';
     import { useTemplateRef, computed, ref, watch, useId, onBeforeUnmount } from 'vue';
     import { useFocusTrap } from '../helpers/useFocusTrap';
     import { useScrollLock } from '../helpers/useScrollLock';
@@ -58,8 +59,11 @@
     import MaxTitle1 from './MaxTitle1.vue';
     import MaxGrid from './MaxGrid.vue';
 
-
     const props = withDefaults(defineProps<{
+        /** ID único do modal (se omitido, gerado automaticamente via useId()) */
+        id?: string;
+        /** Controla visibilidade declarativa (suporte a v-model:visible) */
+        visible?: boolean;
         class?: string;
         /** Nome do ícone (ex: 'mdi:home') */
         icon?: string;
@@ -115,6 +119,7 @@
         /** Hook chamado antes de fechar o modal, permitindo cancelar ou confirmar o descarte */
         beforeClose?: (done: () => void) => void;
     }>(), {
+        visible: undefined,
         dark: 0.4,
         light: undefined,
         loading: false,
@@ -127,7 +132,11 @@
     });
 
     const emit = defineEmits<{
+        'update:visible': [value: boolean];
         'before-close': [done: () => void];
+        'after-hide': [];
+        'show': [];
+        'hide': [];
     }>();
 
     const isShaking = ref(false);
@@ -156,7 +165,23 @@
         handleClose();
     };
 
-    const is_show = computed(() => modal_store.show_id === id.value);
+    const modal_store = useModalStore();
+    const generatedId = useId();
+    const id = computed(() => props.id ?? generatedId);
+
+    const isControlled = computed(() => props.visible !== undefined);
+    const is_show = computed(() => {
+        if (isControlled.value) return Boolean(props.visible);
+        return modal_store.isOpen(id.value);
+    });
+
+    const modalDepth = computed(() => {
+        const idx = modal_store.getIndex(id.value);
+        return idx >= 0 ? idx : 0;
+    });
+
+    const backdropZIndex = computed(() => 1200 + modalDepth.value * 20);
+    const dialogZIndex = computed(() => backdropZIndex.value + 10);
 
     const modal_padding = computed(() => {
         if (props.padding === undefined) return undefined;
@@ -173,194 +198,82 @@
         return typeof props.height === 'number' ? `${props.height}px` : props.height;
     });
 
-    const modal_store = useModalStore();
-
-    const id = ref(useId());
-
     const el = useTemplateRef<HTMLElement>('el');
     const trap = useFocusTrap(el);
     const scroll_lock = useScrollLock();
 
-    const title_id = computed(() => (! props.noHeader ? 'max-modal-title-' + id.value : undefined));
+    const title_id = computed(() => (!props.noHeader ? 'max-modal-title-' + id.value : undefined));
 
-    const style: any = useDefaultReset({
-        isTop: false,
-        isLeft: false,
-        opacity: 0
+    const style = ref({
+        opacity: 1
     });
 
-    const is_changing = refAutoReset(false, 400);
-
-    let is_unmounted = false;
+    const is_changing = ref(false);
     let has_scroll_lock = false;
 
-    /**
-     * Timers de transição (abertura/fechamento) atualmente agendados.
-     * Guardado para que uma chamada mais recente (toggle/open/close) possa
-     * cancelar uma transição anterior ainda em voo, evitando que um
-     * `hide()`/`toggle()` tardio (do fechamento anterior) desfaça uma
-     * reabertura programática que já aconteceu.
-     */
-    let pending_timers: ReturnType<typeof setTimeout>[] = [];
-
-    const clearPendingTimers = () => {
-        pending_timers.forEach((timer) => clearTimeout(timer));
-        pending_timers = [];
-    };
-
     const onEscape = (event: KeyboardEvent) => {
-        if (event.key === 'Escape' && props.closeOnEscape) handleClose();
+        if (event.key === 'Escape' && props.closeOnEscape && modal_store.isTop(id.value)) handleClose();
 
     };
 
-    watch(is_show, (value) => {
-        if (value) {
-            trap.activate();
-            document.addEventListener('keydown', onEscape);
-            if (props.blockScroll) {
-                scroll_lock.lock();
-                has_scroll_lock = true;
+    watch(
+        () => props.visible,
+        (val) => {
+            if (val === true) modal_store.push(id.value);
+            else if (val === false) modal_store.pop(id.value);
+
+        },
+        { immediate: true }
+    );
+
+    watch(
+        is_show,
+        (value) => {
+            if (value) {
+                trap.activate();
+                document.addEventListener('keydown', onEscape);
+                if (props.blockScroll && !has_scroll_lock) {
+                    scroll_lock.lock();
+                    has_scroll_lock = true;
+                }
+            } else {
+                trap.deactivate();
+                document.removeEventListener('keydown', onEscape);
+                if (has_scroll_lock) {
+                    scroll_lock.unlock();
+                    has_scroll_lock = false;
+                }
             }
-        } else {
-            trap.deactivate();
-            document.removeEventListener('keydown', onEscape);
-            if (has_scroll_lock) {
-                scroll_lock.unlock();
-                has_scroll_lock = false;
-            }
-        }
-    }, { immediate: true });
+        },
+        { immediate: true }
+    );
 
     onBeforeUnmount(() => {
-        is_unmounted = true;
-        clearPendingTimers();
         trap.deactivate();
         document.removeEventListener('keydown', onEscape);
         if (has_scroll_lock) {
             scroll_lock.unlock();
             has_scroll_lock = false;
         }
-        if (modal_store.show_id === id.value) modal_store.hide();
+        if (modal_store.isOpen(id.value)) modal_store.pop(id.value);
+
     });
-
-    /**
-     * Última intenção determinística expressa via open()/close().
-     * Necessário porque `modal_store.show_id` continua igual ao `id` deste
-     * modal durante toda a animação de saída (opacity indo a 0 até o
-     * `hide()` disparar aos 300ms) — usá-lo sozinho para checar
-     * idempotência faria `open()` concluir, erradamente, que o modal já
-     * está aberto enquanto na verdade ele está no meio do fechamento.
-     */
-    let intent: 'open' | 'closed' = 'closed';
-
-    /**
-     * Se este modal for fechado por uma via que não passa por close()
-     * (clique no fundo/botão X, que chamam `modal_store.hide` diretamente,
-     * ou outro modal assumindo o `show_id` global), sincroniza `intent` de
-     * volta para 'closed' para que um open() futuro não seja descartado
-     * por acreditar, erroneamente, que o modal já está "abrindo".
-     */
-    watch(() => modal_store.show_id, (value) => {
-        if (value !== id.value) intent = 'closed';
-    });
-
-    const toggle = () => {
-
-        if (is_changing.value) return;
-
-        is_changing.value = true;
-
-        clearPendingTimers();
-
-        if (style.value.opacity !== 0) style.reset();
-
-        // ADICIONA MODAL
-        if (modal_store.show_id !== id.value) {
-
-            intent = 'open';
-
-            modal_store.toggle(id.value);
-            pending_timers.push(setTimeout(() => {
-                if (is_unmounted) return;
-                const data = {
-                    isTop: false,
-                    isLeft: false,
-                    opacity: 0
-                };
-
-                style.value = data;
-                style.value.opacity = 1;
-            }, 1));
-
-            return;
-        }
-
-        // REMOVE MODAL
-        else if (modal_store.show_id === id.value) {
-
-            intent = 'closed';
-
-            pending_timers.push(setTimeout(() => {
-                if (is_unmounted) return;
-                style.value.opacity = 0;
-                pending_timers.push(setTimeout(() => {
-                    if (is_unmounted) return;
-                    modal_store.toggle(id.value);
-                }, 300));
-            }, 1));
-
-        }
-
-
-    };
 
     const open = () => {
-
-        // Idempotente: já aberto (ou abrindo), não faz nada.
-        if (intent === 'open') return;
-
-        intent = 'open';
-
-        // Cancela qualquer fechamento (via toggle/close) ainda em andamento,
-        // para que ele não desfaça esta reabertura mais tarde.
-        clearPendingTimers();
-
-        if (style.value.opacity !== 0) style.reset();
-
-        modal_store.show(id.value);
-        pending_timers.push(setTimeout(() => {
-            if (is_unmounted) return;
-            const data = {
-                isTop: false,
-                isLeft: false,
-                opacity: 0
-            };
-
-            style.value = data;
-            style.value.opacity = 1;
-        }, 1));
-
+        emit('update:visible', true);
+        modal_store.push(id.value);
+        emit('show');
     };
 
     const close = () => {
+        emit('update:visible', false);
+        modal_store.pop(id.value);
+        emit('hide');
+    };
 
-        // Idempotente: já fechado (ou fechando), não faz nada.
-        if (intent === 'closed') return;
-
-        intent = 'closed';
-
-        // Cancela qualquer abertura (via toggle/open) ainda em andamento,
-        // para que ela não sobreponha este fechamento mais tarde.
-        clearPendingTimers();
-
-        pending_timers.push(setTimeout(() => {
-            if (is_unmounted) return;
-            style.value.opacity = 0;
-            pending_timers.push(setTimeout(() => {
-                if (is_unmounted) return;
-                modal_store.hide();
-            }, 300));
-        }, 1));
+    const toggle = () => {
+        if (is_show.value) close();
+        else open();
 
     };
 
@@ -370,12 +283,31 @@
         show: open,
         hide: close,
         open,
-        close
+        close,
+        id,
+        style,
+        is_changing
     });
-
 </script>
 
 <style lang="scss" scoped>
+    .max-modal-fade-enter-active,
+    .max-modal-fade-leave-active {
+        transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+        .max-modal {
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+    }
+
+    .max-modal-fade-enter-from,
+    .max-modal-fade-leave-to {
+        opacity: 0;
+
+        .max-modal {
+            transform: translate(-50%, -50%) scale(0.96) translateY(-8px);
+        }
+    }
 
     .max-modal-item {
         &.no-button {
@@ -396,16 +328,13 @@
         height: 100vh;
         width: 100vw;
         position: fixed;
-        z-index: 59;
         top: 0;
         left: 0;
-        transition: opacity 0.3s ease;
 
         .max-modal {
             position: fixed;
             background-color: var(--background-0);
             color: var(--background-700);
-            z-index: 2;
             border: 1px solid var(--surface-border);
             display: grid;
             grid-template-rows: auto 1fr;
@@ -477,7 +406,6 @@
             &.is-shaking {
                 animation: max-modal-shake 0.4s ease-in-out;
             }
-
         }
     }
 

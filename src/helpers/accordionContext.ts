@@ -19,6 +19,12 @@ export interface AccordionContext {
      * ordem de montagem — como o MaxTabItem faz com add_count_tabs.
      */
     nextAutoValue: () => string;
+    /** Registra o elemento DOM do cabeçalho de um item para navegação por teclado. */
+    registerHeader?: (value: string, el: HTMLElement) => void;
+    /** Remove o registro do cabeçalho quando o item é desmontado. */
+    unregisterHeader?: (value: string) => void;
+    /** Navega o foco do teclado entre os cabeçalhos do accordion. */
+    navigate?: (fromValue: string, direction: 'next' | 'prev' | 'first' | 'last') => void;
 }
 
 export const ACCORDION_INJECTION_KEY: InjectionKey<AccordionContext> = Symbol('max-accordion');

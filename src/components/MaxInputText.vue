@@ -1,24 +1,22 @@
 <template>
     <InputBase v-bind="props" class="max-input-text" :done="props.done ?? isDone" :error="props.error ?? error_msg" :caution="caution">
-        <!--
-            Decisão deliberada: `v-bind="props"` fica no InputBase (elemento raiz),
-            não no <input> interno. Attrs extras não declarados em `props` (ex.:
-            `maxlength`, `autocomplete`) caem no root do InputBase, não no <input>.
-            Não é fallthrough "quebrado" — é o mesmo padrão usado por
-            MaxInputTextArea. Não "corrigir" isso sem entender que foi escolhido
-            conscientemente (ver achado 38 / CLAUDE.md).
-        -->
-        <input
-            class="max-input-native"
-            :type="props.type"
-            :placeholder="props.placeholder"
-            :disabled="props.disabled"
-            :spellcheck="resolvedSpellcheck"
-            :value="temp_value"
-            @input="temp_value = ($event.target as HTMLInputElement).value"
-            @blur="isDone = testIsDone()"
-        />
-        <slot></slot>
+        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+            <input
+                :id="inputId"
+                class="max-input-native"
+                :type="props.type"
+                :placeholder="props.placeholder"
+                :disabled="props.disabled"
+                :spellcheck="resolvedSpellcheck"
+                :value="temp_value"
+                :aria-describedby="hasMessage ? messageId : undefined"
+                :aria-invalid="slotError ? 'true' : undefined"
+                :aria-required="isRequired ? 'true' : undefined"
+                @input="temp_value = ($event.target as HTMLInputElement).value"
+                @blur="isDone = testIsDone()"
+            />
+            <slot></slot>
+        </template>
     </InputBase>
 </template>
 

@@ -71,13 +71,10 @@
     import creditCardFrontSvg from '../assets/credit-card/credit-card.svg?raw';
     import creditCardRearSvg from '../assets/credit-card/credit-card-rear.svg?raw';
     import cardAmexSvg from '../assets/credit-card/card-amex.svg?raw';
-    import cardAmericanExpressSvg from '../assets/credit-card/card-american-express.svg?raw';
     import cardDinersSvg from '../assets/credit-card/card-diners.svg?raw';
-    import cardDinersClubSvg from '../assets/credit-card/card-diners-club.svg?raw';
     import cardDiscoverySvg from '../assets/credit-card/card-discovery.svg?raw';
     import cardEloSvg from '../assets/credit-card/card-elo.svg?raw';
     import cardHipercardSvg from '../assets/credit-card/card-hipercard.svg?raw';
-    import cardHiperSvg from '../assets/credit-card/card-hiper.svg?raw';
     import cardJcbSvg from '../assets/credit-card/card-jcb.svg?raw';
     import cardMaestroSvg from '../assets/credit-card/card-maestro.svg?raw';
     import cardMastercardSvg from '../assets/credit-card/card-mastercard.svg?raw';
@@ -86,22 +83,32 @@
     /** SVGs das bandeiras embutidos no bundle, indexados pelos mesmos nomes usados anteriormente em `card-${cardType}.svg`. */
     const CARD_TYPE_SVGS: Record<string, string> = {
         amex: cardAmexSvg,
-        'american-express': cardAmericanExpressSvg,
+        'american-express': cardAmexSvg,
         diners: cardDinersSvg,
-        'diners-club': cardDinersClubSvg,
+        'diners-club': cardDinersSvg,
         discover: cardDiscoverySvg,
         discovery: cardDiscoverySvg,
         elo: cardEloSvg,
         hipercard: cardHipercardSvg,
-        hiper: cardHiperSvg,
+        hiper: cardHipercardSvg,
         jcb: cardJcbSvg,
         maestro: cardMaestroSvg,
         mastercard: cardMastercardSvg,
         visa: cardVisaSvg
     };
 
-    const creditCardFrontUri = svgToDataUri(creditCardFrontSvg);
-    const creditCardRearUri = svgToDataUri(creditCardRearSvg);
+    let _frontUri: string | null = null;
+    let _rearUri: string | null = null;
+
+    const creditCardFrontUri = computed(() => {
+        if (!_frontUri) _frontUri = svgToDataUri(creditCardFrontSvg);
+        return _frontUri;
+    });
+
+    const creditCardRearUri = computed(() => {
+        if (!_rearUri) _rearUri = svgToDataUri(creditCardRearSvg);
+        return _rearUri;
+    });
 
     /**
      * Representação visual de um cartão de crédito, com frente e verso.

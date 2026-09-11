@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxTopMenuSearchBar from '../../src/components/MaxTopMenuSearchBar.vue';
@@ -6,16 +6,35 @@ import { useSearchBarStore } from '../../src/stores/useSearchBar.Store';
 
 describe('MaxTopMenuSearchBar', () => {
     let pinia: ReturnType<typeof createPinia>;
+    const mountedWrappers: any[] = [];
 
     beforeEach(() => {
         pinia = createPinia();
         setActivePinia(pinia);
     });
 
-    it('renderiza o campo desktop com placeholder customizado', () => {
+    afterEach(() => {
+        while (mountedWrappers.length > 0) {
+            const w = mountedWrappers.pop();
+            try { w.unmount(); } catch {}
+        }
+    });
+
+    function mountSearchBar(options: any = {}) {
         const wrapper = mount(MaxTopMenuSearchBar, {
-            props: { placeholder: 'Buscar clientes...', screen: 'desktop' },
-            global: { plugins: [pinia] }
+            ...options,
+            global: {
+                plugins: [pinia],
+                ...(options.global || {})
+            }
+        });
+        mountedWrappers.push(wrapper);
+        return wrapper;
+    }
+
+    it('renderiza o campo desktop com placeholder customizado', () => {
+        const wrapper = mountSearchBar({
+            props: { placeholder: 'Buscar clientes...', screen: 'desktop' }
         });
 
         expect(wrapper.find('.max-top-menu-search-bar').exists()).toBe(true);
@@ -24,9 +43,8 @@ describe('MaxTopMenuSearchBar', () => {
     });
 
     it('sincroniza o valor digitado com a useSearchBarStore', async () => {
-        const wrapper = mount(MaxTopMenuSearchBar, {
-            props: { screen: 'desktop' },
-            global: { plugins: [pinia] }
+        const wrapper = mountSearchBar({
+            props: { screen: 'desktop' }
         });
         const store = useSearchBarStore();
 
@@ -37,10 +55,9 @@ describe('MaxTopMenuSearchBar', () => {
     });
 
     it('renderiza botão mobile quando screen="mobile"', () => {
-        const wrapper = mount(MaxTopMenuSearchBar, {
+        const wrapper = mountSearchBar({
             props: { screen: 'mobile' },
             global: {
-                plugins: [pinia],
                 stubs: {
                     Teleport: true
                 }
@@ -52,10 +69,9 @@ describe('MaxTopMenuSearchBar', () => {
     });
 
     it('abre e fecha o painel de busca no modo mobile', async () => {
-        const wrapper = mount(MaxTopMenuSearchBar, {
+        const wrapper = mountSearchBar({
             props: { screen: 'mobile' },
             global: {
-                plugins: [pinia],
                 stubs: {
                     Teleport: true
                 }
@@ -73,5 +89,51 @@ describe('MaxTopMenuSearchBar', () => {
             await closeBtn.trigger('click');
             expect(wrapper.find('.mobile-search-panel').exists()).toBe(false);
         }
+    });
+
+    it('exibe o badge de atalho kbd por padrão no modo desktop', () => {
+        const wrapper = mountSearchBar({
+            props: { screen: 'desktop' }
+        });
+
+        const badge = wrapper.find('.search-shortcut-badge');
+        expect(badge.exists()).toBe(true);
+        expect(['⌘K', 'Ctrl+K']).toContain(badge.text());
+    });
+
+    it('não exibe o badge quando showShortcutBadge=false ou shortcut=false', () => {
+        const wrapper1 = mountSearchBar({
+            props: { screen: 'desktop', showShortcutBadge: false }
+        });
+        expect(wrapper1.find('.search-shortcut-badge').exists()).toBe(false);
+
+        const wrapper2 = mountSearchBar({
+            props: { screen: 'desktop', shortcut: false }
+        });
+        expect(wrapper2.find('.search-shortcut-badge').exists()).toBe(false);
+    });
+
+    it('NÃO sequestra nem previne o comportamento nativo de Ctrl+F / Meta+F', () => {
+        const _wrapper = mountSearchBar({
+            props: { screen: 'desktop' }
+        });
+
+        const ctrlFEvent = new KeyboardEvent('keydown', { key: 'f', ctrlKey: true, cancelable: true });
+        const preventSpy = vi.spyOn(ctrlFEvent, 'preventDefault');
+
+        document.dispatchEvent(ctrlFEvent);
+        expect(preventSpy).not.toHaveBeenCalled();
+    });
+
+    it('intercepta o atalho mod+k prevenindo o comportamento padrão', () => {
+        const _wrapper = mountSearchBar({
+            props: { screen: 'desktop' }
+        });
+
+        const modKEvent = new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, cancelable: true });
+        const preventSpy = vi.spyOn(modKEvent, 'preventDefault');
+
+        document.dispatchEvent(modKEvent);
+        expect(preventSpy).toHaveBeenCalledTimes(1);
     });
 });

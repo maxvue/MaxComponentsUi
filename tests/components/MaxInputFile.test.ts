@@ -24,7 +24,7 @@ describe('MaxInputFile', () => {
         expect(hiddenInput.exists()).toBe(true);
         expect(hiddenInput.attributes('type')).toBe('file');
         expect(hiddenInput.attributes('multiple')).toBeDefined();
-        expect(hiddenInput.element.style.display).toBe('none');
+        expect(hiddenInput.classes()).toContain('max-input-file-hidden');
 
         const labelEl = wrapper.find('.input-file-content-label');
         expect(labelEl.exists()).toBe(true);
@@ -111,7 +111,7 @@ describe('MaxInputFile', () => {
         expect(emitted![0][0]).toEqual([droppedFile]);
     });
 
-    it('captura arquivos colados via Ctrl+V no window', async () => {
+    it('captura arquivos colados via paste no container e não sequestra o evento global no window', async () => {
         const wrapper = mount(MaxInputFile);
         const pastedImage = new File(['img-data'], 'captura.png', { type: 'image/png' });
 
@@ -128,7 +128,13 @@ describe('MaxInputFile', () => {
             }
         });
 
+        // Disparo global no window não deve capturar arquivos
         window.dispatchEvent(pasteEvent);
+        await wrapper.vm.$nextTick();
+        expect(wrapper.emitted('update:modelValue')).toBeFalsy();
+
+        // Disparo no elemento container do componente captura os arquivos
+        wrapper.find('.input-file-main-div').element.dispatchEvent(pasteEvent);
         await wrapper.vm.$nextTick();
 
         const emitted = wrapper.emitted('update:modelValue');

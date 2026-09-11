@@ -1,50 +1,76 @@
+import { getCurrentScope, onScopeDispose } from 'vue';
+
 export interface ScrollLock {
     lock: () => void;
     unlock: () => void;
 }
 
 /**
- * Contador de locks de scroll compartilhado entre TODAS as instancias que
- * consumirem este helper (por isso vive no escopo do modulo, fora de
- * qualquer funcao — modulos ES sao avaliados uma unica vez e cacheados pelo
- * runtime, ao contrario do corpo de um `<script setup>`, que roda de novo a
- * cada instancia de componente).
- *
- * Sem esse compartilhamento, dois overlays (ex.: dois MaxDrawer) com
- * `blockScroll` abertos ao mesmo tempo brigariam pelo
- * `document.body.style.overflow`: fechar um restauraria o scroll da pagina
- * mesmo com o outro ainda aberto e visivel. So restauramos o valor original
- * quando o ultimo lock e liberado (contador chega a 0).
+ * Conjunto de tokens proprietários de lock de scroll compartilhado entre TODAS as instâncias.
+ * Operar com Set previne que a mesma instância incremente contadores duplicados
+ * e permite rastrear posse individual com auto-limpeza em onScopeDispose.
  */
-let lock_count = 0;
+const activeLockOwners = new Set<symbol | object | string>();
 
-/** Valor de `overflow` salvo antes do primeiro lock, para restaurar (nao forcar ''). */
+/** Valor de `overflow` salvo antes do primeiro lock, para restaurar. */
 let previous_overflow = '';
 
 /**
- * Trava o scroll do `body` de forma cumulativa: cada chamada a `lock()`
- * precisa de uma chamada correspondente a `unlock()` para ser desfeita.
+ * Força a liberação de todos os locks de scroll e restaura o overflow do body.
+ * Útil para tear-down de testes e recuperação emergencial.
  */
-export const useScrollLock = (): ScrollLock => {
+export const forceReset = (): void => {
+    activeLockOwners.clear();
+    if (typeof document !== 'undefined') {
+        document.body.style.overflow = previous_overflow || '';
+        document.documentElement.classList.remove('max-scroll-locked');
+    }
+    previous_overflow = '';
+};
+
+/**
+ * Retorna a contagem atual de locks ativos (útil para inspeção e testes).
+ */
+export const getActiveLockCount = (): number => activeLockOwners.size;
+
+/**
+ * Trava o scroll do `body` de forma cumulativa e resiliente:
+ * Cada lock é associado a um token único ou ao `owner` fornecido.
+ * Múltiplas chamadas a `lock()` na mesma instância são idempotentes.
+ * Se executado dentro de um efeito/escopo Vue ativo, registra `onScopeDispose`
+ * para garantir destravamento mesmo se o componente for desmontado sem chamar `unlock()`.
+ */
+export const useScrollLock = (owner?: object | string | symbol): ScrollLock => {
+    const instanceToken = owner ?? Symbol('scroll-lock-instance');
+    let isInstanceLocked = false;
 
     const lock = () => {
         if (typeof document === 'undefined') return;
-        if (lock_count === 0) {
+        if (isInstanceLocked) return;
+        if (activeLockOwners.size === 0) {
             previous_overflow = document.body.style.overflow;
             document.documentElement.classList.add('max-scroll-locked');
         }
-        lock_count += 1;
+        activeLockOwners.add(instanceToken);
+        isInstanceLocked = true;
         document.body.style.overflow = 'hidden';
     };
 
     const unlock = () => {
-        if (typeof document === 'undefined' || lock_count === 0) return;
-        lock_count -= 1;
-        if (lock_count === 0) {
+        if (typeof document === 'undefined' || !isInstanceLocked) return;
+        activeLockOwners.delete(instanceToken);
+        isInstanceLocked = false;
+        if (activeLockOwners.size === 0) {
             document.body.style.overflow = previous_overflow;
             document.documentElement.classList.remove('max-scroll-locked');
+            previous_overflow = '';
         }
     };
+
+    if (getCurrentScope()) onScopeDispose(() => {
+        if (isInstanceLocked) unlock();
+    });
+
 
     return { lock, unlock };
 };

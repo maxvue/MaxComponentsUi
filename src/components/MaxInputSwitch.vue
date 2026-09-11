@@ -1,43 +1,49 @@
 <template>
     <InputBase v-bind="props" :class="`max-input-switch max-switch ${props.disabled ? 'is-disabled' : ''}`">
-        <div :class="`max-switch-input ${temp_value === props.trueValue ? 'active' : ''} ${props.disabled ? 'is-disabled' : ''}`">
-            <div
-                class="max-switch-label left"
-                v-if="has_left_label"
-                :id="leftLabelId"
-                @click="() => setValue(props.falseValue)"
-            >
-                {{ resolvedFalseLabel }}
-            </div>
-            <div
-                class="max-switch-toggle"
-                :class="{
-                    'active': temp_value === props.trueValue,
-                    'is-disabled': props.disabled
-                }"
-                role="switch"
-                :tabindex="props.disabled ? -1 : 0"
-                :aria-checked="temp_value === props.trueValue"
-                :aria-disabled="props.disabled ? 'true' : undefined"
-                :aria-label="switchAriaLabel"
-                :aria-labelledby="switchAriaLabelledby"
-                @click="toggleValue"
-                @keydown.space.prevent="toggleValue"
-                @keydown.enter.prevent="toggleValue"
-            >
-                <div class="max-switch-background">
-                    <div class="max-switch-button"></div>
+        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+            <div :class="`max-switch-input ${temp_value === props.trueValue ? 'active' : ''} ${props.disabled ? 'is-disabled' : ''}`">
+                <div
+                    class="max-switch-label left"
+                    v-if="has_left_label"
+                    :id="leftLabelId"
+                    @click="() => setValue(props.falseValue)"
+                >
+                    {{ resolvedFalseLabel }}
+                </div>
+                <div
+                    :id="inputId"
+                    class="max-switch-toggle"
+                    :class="{
+                        'active': temp_value === props.trueValue,
+                        'is-disabled': props.disabled
+                    }"
+                    role="switch"
+                    :tabindex="props.disabled ? -1 : 0"
+                    :aria-checked="temp_value === props.trueValue"
+                    :aria-disabled="props.disabled ? 'true' : undefined"
+                    :aria-label="switchAriaLabel"
+                    :aria-labelledby="switchAriaLabelledby"
+                    :aria-describedby="hasMessage ? messageId : undefined"
+                    :aria-invalid="slotError || Boolean(props.error)"
+                    :aria-required="isRequired || props.required"
+                    @click="toggleValue"
+                    @keydown.space.prevent="toggleValue"
+                    @keydown.enter.prevent="toggleValue"
+                >
+                    <div class="max-switch-background">
+                        <div class="max-switch-button"></div>
+                    </div>
+                </div>
+                <div
+                    class="max-switch-label right"
+                    v-if="has_right_label"
+                    :id="rightLabelId"
+                    @click="() => setValue(props.trueValue)"
+                >
+                    {{ resolvedTrueLabel }}
                 </div>
             </div>
-            <div
-                class="max-switch-label right"
-                v-if="has_right_label"
-                :id="rightLabelId"
-                @click="() => setValue(props.trueValue)"
-            >
-                {{ resolvedTrueLabel }}
-            </div>
-        </div>
+        </template>
     </InputBase>
 </template>
 
