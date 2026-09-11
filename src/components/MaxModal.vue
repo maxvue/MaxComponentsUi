@@ -20,7 +20,7 @@
                     aria-modal="true"
                     :aria-labelledby="title_id"
                     :aria-label="!title_id ? (props.title ?? undefined) : undefined"
-                    :style="{ top: style.top + 'px', left: style.left + 'px', padding: modal_padding }"
+                    :style="{ top: style.top + 'px', left: style.left + 'px', padding: modal_padding, width: modal_width, height: modal_height }"
                     @click.stop="() => {}"
                     @keydown="trap.onKeydown"
                     :class="[{ 'is-shaking': isShaking }, props.class]"
@@ -161,6 +161,16 @@
     const modal_padding = computed(() => {
         if (props.padding === undefined) return undefined;
         return typeof props.padding === 'number' ? `${props.padding}px` : props.padding;
+    });
+
+    const modal_width = computed(() => {
+        if (props.width === undefined) return undefined;
+        return typeof props.width === 'number' ? `${props.width}px` : props.width;
+    });
+
+    const modal_height = computed(() => {
+        if (props.height === undefined) return undefined;
+        return typeof props.height === 'number' ? `${props.height}px` : props.height;
     });
 
     const modal_store = useModalStore();
@@ -408,6 +418,9 @@
             border-radius: 0.75rem;
             padding: 20px;
             box-sizing: border-box;
+            max-width: calc(100vw - 40px);
+            max-height: calc(100vh - 40px);
+            overflow: hidden;
             scrollbar-width: none;
             -ms-overflow-style: none;
 
@@ -454,6 +467,11 @@
             .max-modal-content {
                 width: auto;
                 position: relative;
+                flex: 1 1 0;
+                min-height: 0;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
             }
 
             &.is-shaking {

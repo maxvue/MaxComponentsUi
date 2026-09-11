@@ -273,6 +273,7 @@
     max-width: 100%;
     width: 100%;
     overflow: hidden;
+    box-sizing: border-box;
 
     .max-tabs-content {
         display: flex;
@@ -282,6 +283,7 @@
         height: 100%;
         border-radius: 1rem;
         overflow: hidden;
+        box-sizing: border-box;
 
         .max-tabs-title {
             display: grid;
@@ -336,9 +338,11 @@
         .max-tab-content {
             overflow: auto;
             width: 100%;
-            height: 100%;
+            flex: 1 1 0;
+            min-height: 0;
             display: flex;
             flex-direction: column;
+            box-sizing: border-box;
         }
     }
 }

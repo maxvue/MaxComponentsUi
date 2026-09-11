@@ -104,6 +104,9 @@
 .max-tag-list {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
+    max-width: 100%;
+    min-width: 0;
     gap: 6px;
 
     .tag-item-wrapper {
