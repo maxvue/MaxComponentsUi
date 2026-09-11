@@ -1,24 +1,8 @@
 <template>
-    <div
-        class="p-avatar p-avatar-circle max-user-avatar"
-        :class="{ removable: remove, 'has-fallback-icon': !props.imageUrl || has_image_error }"
-        @click="onAvatarClick"
-        v-tooltip.top="showTooltip ? (remove ? (labelRemove ?? name) : name) : null"
-    >
-        <img
-            v-if="props.imageUrl && !has_image_error"
-            class="max-user-avatar__image"
-            :src="props.imageUrl"
-            :alt="name ?? ''"
-            @error="has_image_error = true"
-        />
+    <div class="p-avatar p-avatar-circle max-user-avatar" :class="{ removable: remove, 'has-fallback-icon': !props.imageUrl || has_image_error }" @click="onAvatarClick" v-tooltip.top="showTooltip ? (remove ? (labelRemove ?? name) : name) : null" >
+        <img v-if="props.imageUrl && !has_image_error" class="max-user-avatar__image" :src="props.imageUrl" :alt="name ?? ''" @error="has_image_error = true" />
         <div v-else class="max-user-avatar__icon-wrapper">
-            <MaxIcon
-                icon="clarity:avatar-solid"
-                class="max-user-avatar__icon"
-                size="72%"
-                color="#fff"
-            />
+            <MaxIcon icon="clarity:avatar-solid" class="max-user-avatar__icon" size="72%" color="#fff" />
         </div>
     </div>
 </template>
