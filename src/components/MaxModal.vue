@@ -23,7 +23,7 @@
                     :style="{ top: style.top + 'px', left: style.left + 'px', padding: modal_padding, width: modal_width, height: modal_height }"
                     @click.stop="() => {}"
                     @keydown="trap.onKeydown"
-                    :class="[{ 'is-shaking': isShaking }, props.class]"
+                    :class="[{ 'is-shaking': isShaking, 'no-header': props.noHeader }, props.class]"
                 >
                     <slot name="header" v-if="!props.noHeader">
                         <MaxGrid class="max-modal-header" :id="title_id">
@@ -60,6 +60,8 @@
 
 
     const props = withDefaults(defineProps<{
+        /** Controle bidirecional de visibilidade (v-model) */
+        modelValue?: boolean;
         class?: string;
         /** Nome do ícone (ex: 'mdi:home') */
         icon?: string;
@@ -115,6 +117,7 @@
         /** Hook chamado antes de fechar o modal, permitindo cancelar ou confirmar o descarte */
         beforeClose?: (done: () => void) => void;
     }>(), {
+        modelValue: undefined,
         dark: 0.4,
         light: undefined,
         loading: false,
@@ -128,6 +131,9 @@
 
     const emit = defineEmits<{
         'before-close': [done: () => void];
+        'update:modelValue': [value: boolean];
+        'opened': [];
+        'closed': [];
     }>();
 
     const isShaking = ref(false);
@@ -213,8 +219,23 @@
 
     };
 
+    let previousActiveElement: HTMLElement | null = null;
+
+    const restoreCallerFocus = () => {
+        if (previousActiveElement && typeof previousActiveElement.focus === 'function') {
+            const elToFocus = previousActiveElement;
+            previousActiveElement = null;
+            setTimeout(() => {
+                elToFocus.focus();
+            }, 50);
+        }
+    };
+
     watch(is_show, (value) => {
+        if (props.modelValue !== undefined && props.modelValue !== value) emit('update:modelValue', value);
+
         if (value) {
+            emit('opened');
             trap.activate();
             document.addEventListener('keydown', onEscape);
             if (props.blockScroll) {
@@ -228,8 +249,17 @@
                 scroll_lock.unlock();
                 has_scroll_lock = false;
             }
+            restoreCallerFocus();
+            emit('closed');
         }
     }, { immediate: true });
+
+    watch(() => props.modelValue, (novoValor) => {
+        if (novoValor === undefined) return;
+        if (novoValor && !is_show.value) open();
+        else if (!novoValor && is_show.value) close();
+
+    });
 
     onBeforeUnmount(() => {
         is_unmounted = true;
@@ -277,6 +307,9 @@
         // ADICIONA MODAL
         if (modal_store.show_id !== id.value) {
 
+            if (typeof document !== 'undefined') previousActiveElement = document.activeElement as HTMLElement | null;
+
+
             intent = 'open';
 
             modal_store.toggle(id.value);
@@ -318,6 +351,9 @@
 
         // Idempotente: já aberto (ou abrindo), não faz nada.
         if (intent === 'open') return;
+
+        if (typeof document !== 'undefined') previousActiveElement = document.activeElement as HTMLElement | null;
+
 
         intent = 'open';
 
@@ -464,8 +500,21 @@
                 }
             }
 
+            &.no-header {
+                grid-template-rows: 1fr;
+
+                .max-modal-content {
+                    grid-row: 1 / -1;
+                    width: 100%;
+                    height: 100%;
+                    min-height: 0;
+                    display: flex;
+                    flex-direction: column;
+                }
+            }
+
             .max-modal-content {
-                width: auto;
+                width: 100%;
                 position: relative;
                 flex: 1 1 0;
                 min-height: 0;

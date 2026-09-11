@@ -171,9 +171,14 @@
 
 .max-tab-item-content {
     display: grid;
+    grid-template-rows: 1fr;
+    grid-template-columns: 1fr;
+    height: 100%;
+    min-height: 0;
+    flex: 1 1 0;
+    box-sizing: border-box;
     padding: 1rem;
     overflow: hidden;
-    min-height: 100%;
 
     &:focus-visible {
         outline: 2px solid var(--max-primary-500, #00768E);
