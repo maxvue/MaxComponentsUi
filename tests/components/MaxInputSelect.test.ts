@@ -30,6 +30,15 @@ describe('MaxInputSelect', () => {
         expect(wrapper.exists()).toBe(true);
     });
 
+    it('renderiza o ícone de dropdown com acessibilidade aria-hidden', () => {
+        const wrapper = mountSelect();
+        const dropdown = wrapper.find('.max-select-dropdown');
+        expect(dropdown.exists()).toBe(true);
+        expect(dropdown.attributes('aria-hidden')).toBe('true');
+        expect(dropdown.find('max-icon-stub').exists()).toBe(true);
+        expect(dropdown.find('max-icon-stub').attributes('icon')).toBe('lucide:chevron-down');
+    });
+
     it('exibe placeholder se sem valor', () => {
         const wrapper = mountSelect({ modelValue: '' }, { placeholder: 'Selecione' });
         expect(wrapper.find('.placeholder-select').exists()).toBe(true);
