@@ -96,4 +96,39 @@ describe('MaxTopToolbar', () => {
 
         expect(wrapper.find('.custom-plus').text()).toBe('Ação Extra');
     });
+
+    it('renderiza o submenu com a classe raiz p-menubar-submenu-root e chevron quando houver itens filhos', async () => {
+        const store = useTopToolbarStore();
+        store.show = true;
+        store.items = [
+            {
+                label: 'Menu Principal',
+                items: [
+                    {
+                        label: 'Atendimento',
+                        items: [{ label: 'Canal 1' }]
+                    }
+                ]
+            }
+        ];
+
+        const wrapper = mount(MaxTopToolbar, {
+            global: {
+                plugins: [pinia],
+                stubs: {
+                    MaxIconButton: true,
+                    MaxIcon: true
+                }
+            }
+        });
+
+        const rootItem = wrapper.find('.p-menubar-root-list > .p-menubar-item');
+        await rootItem.trigger('mouseenter');
+
+        const submenuRoot = wrapper.find('.p-menubar-submenu-root');
+        expect(submenuRoot.exists()).toBe(true);
+
+        const chevron = wrapper.find('.menu-item-chevron');
+        expect(chevron.exists()).toBe(true);
+    });
 });

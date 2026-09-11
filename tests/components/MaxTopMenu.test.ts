@@ -440,6 +440,9 @@ describe('MaxTopToolbar', () => {
         expect(submenuStyle).toMatch(/color:\s*var\(--background-800,\s*#1e293b\)/);
         expect(submenuStyle).toMatch(/background:\s*var\(--background-0,\s*#fff\)/);
         expect(submenuStyle).toMatch(/background-color:\s*var\(--background-100,\s*#f1f5f9\)/);
+        expect(submenuStyle).toContain('margin-right: 10px');
+        expect(submenuStyle).toContain('transform: translateX(8px) !important');
+        expect(toolbarContent).toContain(':deep(.p-menubar-submenu-root)');
     });
 });
 

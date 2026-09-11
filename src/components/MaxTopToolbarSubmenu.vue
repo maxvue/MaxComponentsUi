@@ -162,6 +162,7 @@
 
                 .menu-item-chevron {
                     margin-left: auto;
+                    margin-right: 10px;
                     opacity: 0.6;
                     font-size: 0.875rem;
                     padding-left: 8px;
@@ -175,7 +176,7 @@
             left: 100% !important;
             right: unset !important;
             top: 0 !important;
-            transform: translateX(2px) !important;
+            transform: translateX(8px) !important;
             z-index: 100000 !important;
         }
     }

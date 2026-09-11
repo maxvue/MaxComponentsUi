@@ -713,7 +713,7 @@
 
         .max-select-dropdown,
         .p-select-dropdown {
-            padding-right: 8px;
+            padding-right: 13px;
             display: flex;
             align-items: center;
             color: var(--background-600, #94a3b8);
