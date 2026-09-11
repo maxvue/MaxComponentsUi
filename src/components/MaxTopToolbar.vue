@@ -45,6 +45,7 @@
                     <!-- Submenu se houver item.items -->
                     <MaxTopToolbarSubmenu
                         v-if="item.items && item.items.length && activeSubmenu === index"
+                        class="p-menubar-submenu-root"
                         :items="item.items"
                         @keep-open="clearCloseTimer"
                         @schedule-close="scheduleCloseSubmenu"
@@ -263,7 +264,7 @@
                         }
                     }
 
-                    :deep(.p-menubar-submenu) {
+                    :deep(.p-menubar-submenu-root) {
                         position: absolute;
                         left: unset;
                         right: 100% !important;

@@ -185,6 +185,7 @@
                 z-index: 0;
             }
         }
+
         &:not(.active) {
             position: relative;
 
@@ -194,6 +195,7 @@
                 color: var(--blue-200) !important;
                 opacity: 0.7;
                 transition: opacity 0.3s ease;
+
                 &:hover {
                     opacity: 1;
                 }
