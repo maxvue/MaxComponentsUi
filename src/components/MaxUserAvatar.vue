@@ -133,7 +133,10 @@
     });
 
     const avatarStyle = computed(() => {
-        const style: Record<string, string> = {};
+        const style: Record<string, string> = {
+            width: '40px',
+            height: '40px'
+        };
 
         if (resolvedMaxSize.value) {
             style.maxWidth = resolvedMaxSize.value;
@@ -185,6 +188,7 @@
         height: 40px;
         border-radius: 50% !important;
         overflow: hidden !important;
+        clip-path: circle(50% at 50% 50%);
         aspect-ratio: 1 / 1;
         font-size: 0.875rem;
         line-height: 1;
@@ -198,11 +202,13 @@
         }
 
         .max-user-avatar__image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-            border-radius: 50%;
+            width: 100% !important;
+            height: 100% !important;
+            aspect-ratio: 1 / 1 !important;
+            object-fit: cover !important;
+            display: block !important;
+            border-radius: 50% !important;
+            clip-path: circle(50% at 50% 50%);
         }
 
         .max-user-avatar__initials {
@@ -211,7 +217,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 50%;
+            border-radius: 50% !important;
+            clip-path: circle(50% at 50% 50%);
             background-color: var(--max-primary-50, #f0fdfa);
             color: var(--max-primary-600, #005f77);
             font-weight: 700;
@@ -226,6 +233,7 @@
             height: 100%;
             border-radius: 50% !important;
             overflow: hidden !important;
+            clip-path: circle(50% at 50% 50%);
             display: flex;
             align-items: center;
             justify-content: center;

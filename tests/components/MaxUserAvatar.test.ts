@@ -20,12 +20,14 @@ describe('MaxUserAvatar', () => {
         config.global.plugins = [pinia];
     });
 
-    it('renderiza corretamente sem classes residuais do PrimeVue', () => {
+    it('renderiza corretamente sem classes residuais do PrimeVue e com tamanho padrão de 40px', () => {
         const wrapper = mountAvatar();
         expect(wrapper.exists()).toBe(true);
         expect(wrapper.classes()).toContain('max-user-avatar');
         expect(wrapper.classes()).not.toContain('p-avatar');
         expect(wrapper.classes()).not.toContain('p-avatar-circle');
+        expect(wrapper.attributes('style')).toContain('width: 40px');
+        expect(wrapper.attributes('style')).toContain('height: 40px');
     });
 
     it('exibe imagem quando imageUrl é fornecido', () => {
