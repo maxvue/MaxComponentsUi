@@ -64,6 +64,8 @@
         id?: string;
         /** Controla visibilidade declarativa (suporte a v-model:visible) */
         visible?: boolean;
+        /** Controle bidirecional de visibilidade (v-model) */
+        modelValue?: boolean;
         class?: string;
         /** Nome do ícone (ex: 'mdi:home') */
         icon?: string;
@@ -120,6 +122,7 @@
         beforeClose?: (done: () => void) => void;
     }>(), {
         visible: undefined,
+        modelValue: undefined,
         dark: 0.4,
         light: undefined,
         loading: false,
@@ -133,10 +136,13 @@
 
     const emit = defineEmits<{
         'update:visible': [value: boolean];
+        'update:modelValue': [value: boolean];
         'before-close': [done: () => void];
         'after-hide': [];
         'show': [];
         'hide': [];
+        'opened': [];
+        'closed': [];
     }>();
 
     const isShaking = ref(false);
@@ -169,9 +175,9 @@
     const generatedId = useId();
     const id = computed(() => props.id ?? generatedId);
 
-    const isControlled = computed(() => props.visible !== undefined);
     const is_show = computed(() => {
-        if (isControlled.value) return Boolean(props.visible);
+        if (props.visible !== undefined) return Boolean(props.visible);
+        if (props.modelValue !== undefined) return Boolean(props.modelValue);
         return modal_store.isOpen(id.value);
     });
 
@@ -216,12 +222,32 @@
 
     };
 
+    let previousActiveElement: HTMLElement | null = null;
+
+    const restoreCallerFocus = () => {
+        if (previousActiveElement && typeof previousActiveElement.focus === 'function') {
+            const elToFocus = previousActiveElement;
+            previousActiveElement = null;
+            setTimeout(() => {
+                elToFocus.focus();
+            }, 50);
+        }
+    };
+
     watch(
         () => props.visible,
         (val) => {
             if (val === true) modal_store.push(id.value);
             else if (val === false) modal_store.pop(id.value);
+        },
+        { immediate: true }
+    );
 
+    watch(
+        () => props.modelValue,
+        (val) => {
+            if (val === true) modal_store.push(id.value);
+            else if (val === false) modal_store.pop(id.value);
         },
         { immediate: true }
     );
@@ -229,7 +255,11 @@
     watch(
         is_show,
         (value) => {
+            if (props.modelValue !== undefined && props.modelValue !== value) emit('update:modelValue', value);
+            if (props.visible !== undefined && props.visible !== value) emit('update:visible', value);
+
             if (value) {
+                emit('opened');
                 trap.activate();
                 document.addEventListener('keydown', onEscape);
                 if (props.blockScroll && !has_scroll_lock) {
@@ -243,6 +273,8 @@
                     scroll_lock.unlock();
                     has_scroll_lock = false;
                 }
+                restoreCallerFocus();
+                emit('closed');
             }
         },
         { immediate: true }
@@ -260,13 +292,16 @@
     });
 
     const open = () => {
+        if (typeof document !== 'undefined') previousActiveElement = document.activeElement as HTMLElement | null;
         emit('update:visible', true);
+        emit('update:modelValue', true);
         modal_store.push(id.value);
         emit('show');
     };
 
     const close = () => {
         emit('update:visible', false);
+        emit('update:modelValue', false);
         modal_store.pop(id.value);
         emit('hide');
     };
@@ -393,8 +428,21 @@
                 }
             }
 
+            &.no-header {
+                grid-template-rows: 1fr;
+
+                .max-modal-content {
+                    grid-row: 1 / -1;
+                    width: 100%;
+                    height: 100%;
+                    min-height: 0;
+                    display: flex;
+                    flex-direction: column;
+                }
+            }
+
             .max-modal-content {
-                width: auto;
+                width: 100%;
                 position: relative;
                 flex: 1 1 0;
                 min-height: 0;

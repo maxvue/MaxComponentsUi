@@ -1,5 +1,13 @@
 <template>
-    <InputBase v-bind="{ ...props, ...attrs }" class="max-tag-select max-select-tag" input-click-auto no-dropdown>
+    <InputBase
+        v-bind="{ ...props, ...attrs }"
+        class="max-tag-select max-select-tag"
+        :class="{ 'is-button-mode': props.isButton }"
+        input-click-auto
+        no-dropdown
+        :no-icon="props.isButton || (attrs as any)?.noIcon"
+        :no-status="props.isButton || (attrs as any)?.noStatus"
+    >
         <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
             <div v-if="showPlaceholder" class="tab-placeholder-select">
                 {{ placeholderText }}
@@ -585,7 +593,8 @@
 
                 .value-tag-div {
                     grid-template-columns: auto 1fr auto;
-                    width: 100% !important;
+                    width: auto !important;
+                    max-width: 100%;
                     padding: 0 !important;
                 }
             }
@@ -658,6 +667,46 @@
                         text-overflow: ellipsis;
                         white-space: nowrap;
                     }
+                }
+            }
+        }
+
+        &.is-button-mode {
+            width: auto !important;
+            min-width: unset !important;
+            border: none !important;
+            background: transparent !important;
+            padding: 0 !important;
+
+            :deep(.max-input-field-div) {
+                border: none !important;
+                background: transparent !important;
+                padding: 0 !important;
+                min-height: unset !important;
+                height: auto !important;
+                box-shadow: none !important;
+
+                .input-slot-div {
+                    padding: 0 !important;
+                    margin: 0 !important;
+                    width: auto !important;
+                }
+            }
+
+            .max-select,
+            .p-select {
+                width: auto !important;
+                height: auto !important;
+                padding: 0 !important;
+                border: none !important;
+                background: transparent !important;
+
+                .max-select-label,
+                .p-select-label {
+                    padding: 0 !important;
+                    height: auto !important;
+                    border: none !important;
+                    background: transparent !important;
                 }
             }
         }

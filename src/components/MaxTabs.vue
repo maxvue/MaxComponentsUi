@@ -269,6 +269,8 @@
 .max-tabs {
     display: flex;
     flex-direction: column;
+    height: 100%;
+    min-height: 0;
     max-height: 100%;
     max-width: 100%;
     width: 100%;
@@ -281,6 +283,8 @@
         width: 100%;
         border: 1px solid var(--background-300);
         height: 100%;
+        flex: 1 1 0;
+        min-height: 0;
         border-radius: 1rem;
         overflow: hidden;
         box-sizing: border-box;

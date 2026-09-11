@@ -110,6 +110,10 @@
     gap: 6px;
 
     .tag-item-wrapper {
+        display: inline-flex;
+        align-items: center;
+        flex-shrink: 0;
+
         .tag-select-item {
             display: flex;
             text-transform: uppercase;
@@ -135,8 +139,12 @@
     }
 
     .tag-add-wrapper {
-        display: flex;
+        display: inline-flex;
         align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        flex-shrink: 0;
     }
 }
 </style>
