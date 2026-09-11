@@ -149,7 +149,7 @@
                 left: 6px;
                 width: 45px;
                 height: 45px;
-                margin: 5px auto 40px;
+                margin: 5px auto 25px;
                 padding: 0;
                 display: flex;
                 align-items: center;
@@ -170,7 +170,7 @@
                 min-height: 0;
                 overflow: hidden auto;
                 scrollbar-width: none;
-                padding-bottom: 2rem;
+                padding: 25px 0 2rem;
                 grid-template-rows: 1fr auto;
 
                 &::-webkit-scrollbar {

@@ -373,4 +373,21 @@ describe('MaxMenuVerticalItem', () => {
 
         expect(mockGoToRoute).toHaveBeenCalledWith('solar_company_projects');
     });
+
+    it('renderiza as curvas de acabamento (.curva.cima e .curva.baixo) quando o item está ativo', () => {
+        route.name = 'projects';
+
+        const wrapper = mountWithPinia(MaxMenuVerticalItem, {
+            props: { items: [item({ icon: 'mdi:home', page_component: 'projects' })] }
+        });
+
+        const activeItem = wrapper.find('.item_menu.active');
+        expect(activeItem.exists()).toBe(true);
+
+        const curvaCima = activeItem.find('svg.curva.cima');
+        const curvaBaixo = activeItem.find('svg.curva.baixo');
+
+        expect(curvaCima.exists()).toBe(true);
+        expect(curvaBaixo.exists()).toBe(true);
+    });
 });
