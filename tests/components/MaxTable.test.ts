@@ -3,7 +3,7 @@ import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxTable from '../../src/components/MaxTable.vue';
 import MaxTableColumn from '../../src/components/MaxTableColumn.vue';
-import { ref, h } from 'vue';
+import { ref, h, nextTick } from 'vue';
 
 const mockWidth = ref(0);
 vi.mock('@maxvue/max-use', async (importOriginal) => {
@@ -446,6 +446,196 @@ describe('MaxTable', () => {
             expect(wrapper.find('.max-table-empty-row').exists()).toBe(true);
             expect(wrapper.text()).toContain('Sem linhas');
             expect(wrapper.text()).not.toContain('Linha');
+        });
+    });
+
+    describe('Virtual Scroll (@tanstack/vue-virtual)', () => {
+        function makeDataset(count: number) {
+            return Array.from({ length: count }, (_, i) => ({
+                id: i + 1,
+                name: `Item ${i + 1}`,
+                value: `Val ${i + 1}`
+            }));
+        }
+
+        function stubViewport(el: HTMLElement, height: number) {
+            Object.defineProperty(el, 'clientHeight', { value: height, configurable: true });
+            Object.defineProperty(el, 'offsetHeight', { value: height, configurable: true });
+            el.getBoundingClientRect = () => ({
+                top: 0,
+                left: 0,
+                right: 600,
+                bottom: height,
+                width: 600,
+                height,
+                x: 0,
+                y: 0,
+                toJSON: () => ({})
+            } as DOMRect);
+        }
+
+        async function settle() {
+            await new Promise((r) => setTimeout(r, 0));
+            await nextTick();
+            await nextTick();
+        }
+
+        it('com 1000 itens e virtualScroll: true, renderiza apenas subconjunto visível no DOM', async () => {
+            const data = makeDataset(1000);
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: data,
+                    virtualScroll: true,
+                    itemHeight: 40
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome' })
+                    ]
+                }
+            });
+
+            const tbody = wrapper.find('tbody').element as HTMLElement;
+            stubViewport(tbody, 400);
+            await settle();
+
+            const renderedRows = wrapper.findAll('tbody tr.max-table-row');
+            expect(renderedRows.length).toBeGreaterThan(0);
+            expect(renderedRows.length).toBeLessThan(50);
+        });
+
+        it('adota altura fixa e atribui itemHeight quando fornecido', async () => {
+            const data = makeDataset(50);
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: data,
+                    virtualScroll: true,
+                    itemHeight: 50
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome' })
+                    ]
+                }
+            });
+
+            const tbody = wrapper.find('tbody').element as HTMLElement;
+            stubViewport(tbody, 500);
+            await settle();
+
+            const firstRow = wrapper.find('tbody tr.max-table-row');
+            expect(firstRow.attributes('style')).toContain('height: 50px');
+        });
+
+        it('adota sistema de medição dinâmica com data-index quando itemHeight não é fornecido', async () => {
+            const data = makeDataset(20);
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: data,
+                    virtualScroll: true
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome' })
+                    ]
+                }
+            });
+
+            const tbody = wrapper.find('tbody').element as HTMLElement;
+            stubViewport(tbody, 400);
+            await settle();
+
+            const firstRow = wrapper.find('tbody tr.max-table-row');
+            expect(firstRow.attributes('data-index')).toBe('0');
+        });
+
+        it('expõe métodos scrollToIndex e scrollToOffset via defineExpose', async () => {
+            const data = makeDataset(100);
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: data,
+                    virtualScroll: true,
+                    itemHeight: 40
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome' })
+                    ]
+                }
+            });
+
+            const vm = wrapper.vm as any;
+            expect(typeof vm.scrollToIndex).toBe('function');
+            expect(typeof vm.scrollToOffset).toBe('function');
+            expect(vm.totalVirtualHeight).toBeGreaterThan(0);
+
+            expect(() => vm.scrollToIndex(20)).not.toThrow();
+            expect(() => vm.scrollToOffset(400)).not.toThrow();
+        });
+
+        it('mantém seleção de linha e evento @row-click em modo virtualScroll', async () => {
+            const data = makeDataset(20);
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: data,
+                    virtualScroll: true,
+                    itemHeight: 40,
+                    selectionMode: 'single'
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome' })
+                    ]
+                }
+            });
+
+            const tbody = wrapper.find('tbody').element as HTMLElement;
+            stubViewport(tbody, 400);
+            await settle();
+
+            const firstRow = wrapper.find('tbody tr.max-table-row');
+            await firstRow.trigger('click');
+
+            expect(wrapper.emitted('row-click')).toBeTruthy();
+            expect(wrapper.emitted('update:selection')?.[0]?.[0]).toEqual(data[0]);
+        });
+
+        it('recalcula dimensões quando ResizeObserver ou getBoundingClientRect reporta alturas dinâmicas diferentes', async () => {
+            const data = makeDataset(10);
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: data,
+                    virtualScroll: true
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome' })
+                    ]
+                }
+            });
+
+            const tbody = wrapper.find('tbody').element as HTMLElement;
+            stubViewport(tbody, 400);
+            await settle();
+
+            // Simula uma linha com altura maior (65px)
+            const firstTr = wrapper.find('tbody tr.max-table-row').element as HTMLElement;
+            firstTr.getBoundingClientRect = () => ({
+                top: 0,
+                left: 0,
+                right: 600,
+                bottom: 65,
+                width: 600,
+                height: 65,
+                x: 0,
+                y: 0,
+                toJSON: () => ({})
+            } as DOMRect);
+
+            (wrapper.vm as any).rowVirtualizer.measureElement(firstTr);
+            await settle();
+
+            expect((wrapper.vm as any).rowVirtualizer.getTotalSize()).toBeGreaterThanOrEqual(400);
         });
     });
 });

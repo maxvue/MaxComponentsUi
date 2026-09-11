@@ -94,7 +94,7 @@
                             </tr>
                         </thead>
 
-                        <tbody>
+                        <tbody ref="tbodyRef">
                             <!-- 1. Loading (prioridade absoluta) -->
                             <tr v-if="props.loading" class="max-table-row-state max-table-loading-row">
                                 <td :colspan="resolvedColumns.length + (slots.buttons ? 1 : 0)" class="p-datatable-cell state-cell">
@@ -109,41 +109,99 @@
 
                             <!-- 2. Linhas de dados se houver registros e não for empty explícito -->
                             <template v-else-if="!props.empty && displayData.length > 0">
-                                <tr
-                                    v-for="(row, index) in displayData"
-                                    :key="getRowKey(row, index)"
-                                    :class="[
-                                        'max-table-row',
-                                        props.stripedRows !== false ? (index % 2 === 0 ? 'p-row-even max-table-row-even' : 'p-row-odd max-table-row-odd') : '',
-                                        { 'max-table-row-selected': isRowSelected(row) }
-                                    ]"
-                                    @click="handleRowClick(row, index, $event)"
-                                >
-                                    <td
-                                        v-for="col in resolvedColumns"
-                                        :key="col.field || col.header || 'td'"
-                                        :class="['max-table-td', 'p-datatable-cell', col.class]"
-                                        :style="getColumnStyle(col)"
+                                <!-- Modo Virtual Scroll -->
+                                <template v-if="props.virtualScroll">
+                                    <tr
+                                        v-if="paddingTop > 0"
+                                        class="max-table-virtual-spacer"
+                                        aria-hidden="true"
+                                        :style="{ height: `${paddingTop}px`, minHeight: `${paddingTop}px`, flexShrink: 0 }"
+                                    />
+                                    <tr
+                                        v-for="virtualRow in virtualRows"
+                                        :key="getRowKey(displayData[virtualRow.index], virtualRow.index)"
+                                        :ref="isDynamicHeight ? (el) => measureRow(el as Element) : undefined"
+                                        :data-index="virtualRow.index"
+                                        :class="[
+                                            'max-table-row',
+                                            'max-table-virtual-row',
+                                            props.stripedRows !== false ? (virtualRow.index % 2 === 0 ? 'p-row-even max-table-row-even' : 'p-row-odd max-table-row-odd') : '',
+                                            { 'max-table-row-selected': isRowSelected(displayData[virtualRow.index]) }
+                                        ]"
+                                        :style="virtualRowStyle"
+                                        @click="handleRowClick(displayData[virtualRow.index], virtualRow.index, $event)"
                                     >
-                                        <component
-                                            v-if="col.bodySlot"
-                                            :is="col.bodySlot"
-                                            :data="row"
-                                            :index="index"
-                                            :field="col.field"
-                                            :value="getFieldValue(row, col.field)"
-                                        />
-                                        <template v-else>
-                                            {{ getFieldValue(row, col.field) }}
-                                        </template>
-                                    </td>
+                                        <td
+                                            v-for="col in resolvedColumns"
+                                            :key="col.field || col.header || 'td'"
+                                            :class="['max-table-td', 'p-datatable-cell', col.class]"
+                                            :style="getColumnStyle(col)"
+                                        >
+                                            <component
+                                                v-if="col.bodySlot"
+                                                :is="col.bodySlot"
+                                                :data="displayData[virtualRow.index]"
+                                                :index="virtualRow.index"
+                                                :field="col.field"
+                                                :value="getFieldValue(displayData[virtualRow.index], col.field)"
+                                            />
+                                            <template v-else>
+                                                {{ getFieldValue(displayData[virtualRow.index], col.field) }}
+                                            </template>
+                                        </td>
 
-                                    <td v-if="slots.buttons" class="max-table-td max-table-td-buttons p-datatable-cell" :style="buttonsColumnStyle">
-                                        <div class="max-table-buttons" ref="el">
-                                            <slot name="buttons" :data="row" :index="index" />
-                                        </div>
-                                    </td>
-                                </tr>
+                                        <td v-if="slots.buttons" class="max-table-td max-table-td-buttons p-datatable-cell" :style="buttonsColumnStyle">
+                                            <div class="max-table-buttons" ref="el">
+                                                <slot name="buttons" :data="displayData[virtualRow.index]" :index="virtualRow.index" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr
+                                        v-if="paddingBottom > 0"
+                                        class="max-table-virtual-spacer"
+                                        aria-hidden="true"
+                                        :style="{ height: `${paddingBottom}px`, minHeight: `${paddingBottom}px`, flexShrink: 0 }"
+                                    />
+                                </template>
+
+                                <!-- Modo Normal (sem virtual scroll) -->
+                                <template v-else>
+                                    <tr
+                                        v-for="(row, index) in displayData"
+                                        :key="getRowKey(row, index)"
+                                        :class="[
+                                            'max-table-row',
+                                            props.stripedRows !== false ? (index % 2 === 0 ? 'p-row-even max-table-row-even' : 'p-row-odd max-table-row-odd') : '',
+                                            { 'max-table-row-selected': isRowSelected(row) }
+                                        ]"
+                                        @click="handleRowClick(row, index, $event)"
+                                    >
+                                        <td
+                                            v-for="col in resolvedColumns"
+                                            :key="col.field || col.header || 'td'"
+                                            :class="['max-table-td', 'p-datatable-cell', col.class]"
+                                            :style="getColumnStyle(col)"
+                                        >
+                                            <component
+                                                v-if="col.bodySlot"
+                                                :is="col.bodySlot"
+                                                :data="row"
+                                                :index="index"
+                                                :field="col.field"
+                                                :value="getFieldValue(row, col.field)"
+                                            />
+                                            <template v-else>
+                                                {{ getFieldValue(row, col.field) }}
+                                            </template>
+                                        </td>
+
+                                        <td v-if="slots.buttons" class="max-table-td max-table-td-buttons p-datatable-cell" :style="buttonsColumnStyle">
+                                            <div class="max-table-buttons" ref="el">
+                                                <slot name="buttons" :data="row" :index="index" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
                             </template>
 
                             <!-- 3. Empty state quando empty===true ou displayData estiver vazio -->
@@ -235,6 +293,7 @@
         Fragment,
         Comment
     } from 'vue';
+    import { useVirtualizer } from '@tanstack/vue-virtual';
     import { useElementSize } from '@maxvue/max-use';
     import { getCssSize } from '../helpers/getCssSize';
 
@@ -263,6 +322,11 @@
         id?: string;
         sortField?: string;
         sortOrder?: number;
+        virtualScroll?: boolean;
+        itemHeight?: number;
+        virtualScrollOptions?: {
+            overscan?: number;
+        };
     }
 
     interface ResolvedColumn {
@@ -300,7 +364,9 @@
         empty: false,
         responsiveLayout: 'scroll',
         emptyMessage: 'Nenhum registro encontrado',
-        loadingMessage: 'Carregando dados...'
+        loadingMessage: 'Carregando dados...',
+        virtualScroll: false,
+        itemHeight: undefined
     });
 
     const emit = defineEmits<{
@@ -575,13 +641,82 @@
 
     }
 
+    /** Referência do elemento tbody para controle de scroll do virtualizador */
+    const tbodyRef = ref<HTMLElement | null>(null);
+
+    /** Indica se o virtualizador deve operar com mensuração dinâmica de altura */
+    const isDynamicHeight = computed<boolean>(() => Boolean(props.virtualScroll && !props.itemHeight));
+
+    /** Instância do virtualizador de linhas */
+    const rowVirtualizer = useVirtualizer(
+        computed(() => ({
+            count: props.virtualScroll ? displayData.value.length : 0,
+            getScrollElement: () => tbodyRef.value,
+            estimateSize: () => props.itemHeight ?? 40,
+            overscan: props.virtualScrollOptions?.overscan ?? 5,
+            enabled: props.virtualScroll,
+            measureElement: (element: HTMLElement) => {
+                const height = Math.round(element.getBoundingClientRect().height);
+                return height > 0 ? height : (props.itemHeight ?? 40);
+            }
+        }))
+    );
+
+    const virtualRows = computed(() => {
+        if (!props.virtualScroll) return [];
+        return rowVirtualizer.value.getVirtualItems();
+    });
+
+    const totalVirtualHeight = computed<number>(() => {
+        if (!props.virtualScroll) return 0;
+        return rowVirtualizer.value.getTotalSize();
+    });
+
+    const paddingTop = computed<number>(() => {
+        if (!props.virtualScroll || virtualRows.value.length === 0) return 0;
+        return virtualRows.value[0].start;
+    });
+
+    const paddingBottom = computed<number>(() => {
+        if (!props.virtualScroll || virtualRows.value.length === 0) return 0;
+        return totalVirtualHeight.value - virtualRows.value[virtualRows.value.length - 1].end;
+    });
+
+    const virtualRowStyle = computed(() => {
+        if (props.itemHeight) return {
+            height: `${props.itemHeight}px`,
+            minHeight: `${props.itemHeight}px`,
+            flexShrink: 0
+        };
+
+        return { flexShrink: 0 };
+    });
+
+    function measureRow(el: Element | null) {
+        if (isDynamicHeight.value && el) rowVirtualizer.value.measureElement(el as HTMLElement);
+
+    }
+
+    function scrollToIndex(index: number, options?: { align?: 'start' | 'center' | 'end' | 'auto'; behavior?: 'auto' | 'smooth' }) {
+        rowVirtualizer.value.scrollToIndex(index, options);
+    }
+
+    function scrollToOffset(offset: number, options?: { align?: 'start' | 'center' | 'end' | 'auto'; behavior?: 'auto' | 'smooth' }) {
+        rowVirtualizer.value.scrollToOffset(offset, options);
+    }
+
     defineExpose({
         width,
         first,
         rows,
         pageCount,
         currentPage,
-        displayData
+        displayData,
+        rowVirtualizer,
+        virtualRows,
+        totalVirtualHeight,
+        scrollToIndex,
+        scrollToOffset
     });
 </script>
 
@@ -691,6 +826,15 @@
                         height: auto !important;
                         gap: 0 6px;
                         padding: 3px 6px !important;
+
+                        &.max-table-virtual-spacer {
+                            padding: 0 !important;
+                            margin: 0 !important;
+                            border: none !important;
+                            pointer-events: none;
+                            background: transparent !important;
+                            min-height: 0 !important;
+                        }
 
                         &:first-of-type {
                             padding-top: 6px !important;
