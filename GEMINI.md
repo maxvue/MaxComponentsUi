@@ -26,167 +26,109 @@ Arquivos de controle (todos na raiz do repositório):
 
 ## PADRÕES DE IDENTIDADE VISUAL DO DESIGN SYSTEM
 
-A identidade visual da biblioteca segue uma linguagem moderna, limpa e funcional, focada em alta densidade e produtividade operacional para sistemas web empresariais.
+Esta seção registra a identidade **observada no código**, não uma proposta estética nova. Em caso de divergência, confronte `src/styles/style.ts` (paletas semânticas tipadas), `src/themes/tokens.scss` (variáveis de componente e foco efetivamente materializadas), `src/themes/colors.scss` (rampas amplas e tema escuro), `src/themes/font.scss`/`app.scss` (tipografia) e o componente em questão. Essas fontes ainda possuem diferenças entre si; nenhuma deve ser presumida “sincronizada” sem verificação. O playground é apenas uma vitrine parcial de integração: atualmente aplica gradiente roxo e fonte de sistema próprios, cobre uma fração dos componentes e não possui cenário escuro, portanto não é referência visual canônica.
 
-### 1. Sistema de Cores e Superfícies
+### 1. Direção visual real
 
-Todas as cores devem ser consumidas **obrigatoriamente** através das variáveis CSS do design system declaradas em `src/themes/` (`colors.scss` e `tokens.scss`) e sincronizadas com `src/styles/style.ts`. **É terminantemente proibido o uso de valores hexadecimais, RGB ou HSL literais hardcoded nos arquivos Vue.**
+A assinatura da Max Components UI é **operacional, compacta e azul-petróleo**: controles de baixa altura, superfícies claras azuladas, texto em azul-acinzentado e teal profundo nas ações. A biblioteca prioriza leitura rápida em formulários, tabelas, menus e dashboards; ornamento é secundário à hierarquia e ao estado do controle.
 
-#### A. Superfícies e Backgrounds (Modo Claro e Modo Escuro)
-As superfícies operam através da escala neutra `--background-*` com suporte nativo a inversão automática no modo escuro via classe `.dark`:
-- `--background-0`: Superfície base primária / fundo de cartões, modais, painéis e inputs no modo claro (`#ffffff`). No modo escuro inverte para a base mais profunda.
-- `--background-25` a `--background-75`: Fundo neutro suave para áreas de fundo geral da aplicação (`#f8fafc` / `#f2f4f7`) e estado desabilitado de inputs e botões.
-- `--background-100` a `--background-200`: Fundos de áreas secundárias, toolbars, divisórias, bordas sutis (`--surface-border`) e hover neutro.
-- `--background-300` a `--background-400`: Bordas neutras de cartões, divisórias de maior contraste e estados inativos de controles.
-- `--background-500` a `--background-650`: Textos secundários, legendas, placeholders e ícones desabilitados.
-- `--background-700` a `--background-775`: Textos principais, rótulos de campos de formulário, títulos de seções e ícones ativos no modo claro.
-- `--background-800` a `--background-900`: Superfície de alto contraste, tooltips flutuantes (`.max-tooltip`) e fundos de backdrops / overlays modais.
+- A cor de marca é `--max-primary-500: #00768E`; hover/ênfase usa `--max-primary-600: #005F77` e o modo escuro usa com frequência `--max-primary-400: #178DA5` (`src/styles/style.ts`).
+- O shell escuro usa `--layout-shell-bg: #003048`; cabeçalhos de tabela usam `#003B53` com texto `#8AD6E8` (`src/themes/colors.scss`). Esse contraste azul-petróleo/ciano é mais característico da biblioteca do que a rampa genérica chamada `--primary-*`, que é neutra e **não** deve substituir `--max-primary-*` em ações da marca.
+- A densidade é parte da identidade: `InputBase` usa campo de `36px`, label de `12px` e mensagem de `12px`; existem variantes compactas de `20px` para edição inline (`src/components/InputBase.vue`). Não existe, porém, uma altura universal de `36px` para todos os botões e controles.
+- Cantos discretamente arredondados predominam: `4px`, `6px` e `8px` são os valores recorrentes. O campo padrão de `InputBase` usa `8px`, `MaxButton` usa `6px` e o float label usa `2px`. Formas circulares/pílulas são reservadas a avatares, ícones, badges e seleções equivalentes.
 
-#### B. Rampa Primária Institucional (Teal Max)
-A rampa primária expressa a identidade institucional corporativa da Max / Engeapp:
-- `--max-primary-50`: `#f0fdfa` (tint suave para seleções e badges leves)
-- `--max-primary-100`: `#56C2D7` (realces secundários)
-- `--max-primary-200`: `#46BCD4` (bordas de foco suaves)
-- `--max-primary-400`: `#178DA5` (cor primária para foco e links em modo escuro)
-- `--max-primary-500`: `#00768E` (cor primária canônica para ações principais, botões padrão e foco ativo)
-- `--max-primary-600`: `#005F77` (hover primário e ênfase de interação)
-- `--max-primary-700` a `--max-primary-950`: Variações profundas de contraste e modo escuro
+### 2. Cores e superfícies
 
-#### C. Cores Semânticas de Estado
-- **Sucesso / Done / Confirm**:
-  - `--max-success-500`: `#10B981` (verde esmeralda canônico para badges, validações positivas e ícones de confirmação)
-  - `--max-success-600` / `--emerald-700`: `#059669` / `#047857` (botões de confirmação e ações seguras)
-- **Atenção / Alerta / Caution**:
-  - `--max-warning-500`: `#F59E0B` (âmbar canônico para alertas e estados pendentes)
-  - `--max-warning-600` / `--max-orange-500`: `#d97706` / `#f97316` (bordas, badges de caution e avisos críticos)
-- **Erro / Danger / Exclusão**:
-  - `--max-danger-500`: `#EF4444` (vermelho erro canônico para mensagens de erro, bordas de validação e alertas)
-  - `--max-danger-600` / `--red-700`: `#dc2626` / `#b91c1c` (botões e ações destrutivas / deleção)
-- **Informativo**:
-  - `--max-info-500`: `#0EA5E9` (sky blue canônico para banners contextuais e dicas informativas)
-  - `--max-info-600` / `--blue-600`: `#0284c7` / `#2563eb` (destaque informativo, badges e links)
-- **Canais Especiais**:
-  - `--max-whatsapp-500`: `#25d366` / `--max-whatsapp-600`: `#1da851` (interações oficiais do canal WhatsApp)
+#### Paleta de marca e semântica
 
-#### D. Estados Interativos e Acessibilidade (WCAG 2.4.7 / 2.4.11)
-- **Hover**: Transição suave de cor/superfície (`transition: all 0.2s ease-in-out`), escurecendo botões para o shade 600 ou elevando o background para `var(--background-100)`.
-- **Focus Visible**: Todo elemento interativo (inputs, botões, checkboxes, radios, abas) DEVE possuir foco visível estrito:
-  - Modo Claro: `box-shadow: var(--max-focus-ring)` (`0 0 0 2px var(--background-0), 0 0 0 4px var(--max-primary-500)`).
-  - Modo Escuro: `box-shadow: var(--max-focus-ring)` (`0 0 0 2px var(--background-900), 0 0 0 4px var(--max-primary-400)`).
-  - Borda ativa de inputs: `var(--max-inputtext-focus-border-color)`.
-- **Disabled**: Background em `var(--background-75)`, tipografia e ícones em `var(--background-650)`, borda em `var(--background-200)`, cursor `not-allowed`, `pointer-events: none` em gatilhos não-nativos.
+As rampas semânticas completas estão tipadas em `MaxStyle`, em `src/styles/style.ts`. `src/themes/tokens.scss` materializa em CSS apenas parte delas; antes de consumir um shade, confirme que a variável existe ou forneça um fallback compatível:
 
----
+| Papel | Token central | Valor | Uso predominante |
+|---|---|---:|---|
+| Marca/ação | `--max-primary-500` | `#00768E` | ação primária, seleção e foco |
+| Sucesso | `--max-success-500` | `#10B981` | conclusão e confirmação |
+| Informação | `--max-info-500` | `#0EA5E9` | informação contextual |
+| Atenção | `--max-warning-500` | `#F59E0B` | cautela e pendência |
+| Perigo | `--max-danger-500` | `#EF4444` | erro e ação destrutiva |
+| WhatsApp | `--max-whatsapp-500` | `#25D366` | ação específica do canal |
 
-### 2. Tipografia, Elevação e Escala Visual
+Para hover, prefira o shade `600` da mesma família. Os estados não devem depender apenas de cor: texto, ícone, rótulo ARIA ou outra indicação perceptível deve acompanhar a diferença semântica.
 
-- **Família Tipográfica**: `Quicksand, 'Instrument Sans', ui-sans-serif, sans-serif`.
-- **Escala de Tamanhos**:
-  - Rótulos de inputs e textos de formulário: `12px` (`0.75rem` / `$font-label-inputs` / `$size-text-input`).
-  - Textos secundários, feedbacks de validação e tooltips: `10px` a `13px` (`0.8125rem`).
-  - Títulos e Cabeçalhos:
-    - H1: `21px` (`$size-h1`, font-weight 700)
-    - H2: `18px` (`$size-h2`, font-weight 600)
-    - H3: `16px` (`$size-h3`, font-weight 600)
-    - H4: `14px` (`$size-h4`, font-weight 600)
-- **Altura Padrão de Inputs e Botões**: `36px` (tamanho otimizado para alta densidade em dashboards operacionais).
-- **Border Radius**:
-  - Inputs, campos de formulário e botões: `4px`.
-  - Cards, popovers, dropdowns e modais: `6px` a `8px`.
-  - Badges e float labels: `2px`.
-- **Elevação e Sombras**:
-  - Nível 1 (Dropdowns, Menus, Popovers): `box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)`.
-  - Nível 2 (Modais, Drawers flutuantes): `box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04)`.
-  - Nível 3 (Tooltips): `box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2)`.
-- **Camadas de Z-Index**:
-  - Tooltips: `99999`
-  - Modais e Dialogs: `1100`
-  - Overlays e Popovers / Dropdowns: `1000`
-  - Fixed Headers e Menus: `100`
+#### Neutros e modo escuro
 
----
+`src/themes/colors.scss` define a rampa azul-acinzentada `--background-0` a `--background-900`. No tema claro, `--background-0` é branco e `--background-900` é azul quase preto; sob `:root.dark`/`.dark`, os níveis `0–850` são remapeados em ordem inversa. Os níveis `875` e `900` não são redeclarados no bloco escuro e continuam herdados da raiz; não presuma uma inversão integral. Na prática:
 
-### 3. Padrão Arquitetural de Componentes de Formulário
+- `0–100`: superfícies principais, repouso e hover suave;
+- `200–400`: bordas, divisores e controles inativos;
+- `500–650`: conteúdo secundário e placeholder;
+- `700–775`: texto e ícones principais;
+- `800–900`: alto contraste, shell e tooltip.
 
-- **`InputBase` (`src/components/InputBase.vue`) é o wrapper universal obrigatório** para todos os inputs de dados (texto, números, datas, CEP, CPF, telefones, markdown, seletores).
-- Ele encapsula de forma padronizada:
-  - Posicionamento de rótulos (modo padrão ou flutuante `float`).
-  - Área para ícones laterais (`iconLeft`, `iconRight`, `iconPos`).
-  - Indicadores visuais de estado semântico no canto do campo: `done` (check verde), `caution` (exclamação laranja), `error` (exclamação vermelha), `required` (asterisco).
-  - Linha inferior de feedback (`input-message`) acessível via `aria-live="polite"`.
-- **Exceções Legítimas**:
-  - `MaxInputCheckbox`, `MaxInputRadio` e `MaxInputToggle` não usam `InputBase` por possuírem anatomia de controle binário/múltipla escolha (renderizados diretamente com raiz semântica própria).
+Essas faixas descrevem o uso predominante, não uma equivalência rígida. Valide contraste no contexto, especialmente no modo escuro.
+
+Há três namespaces cromáticos históricos: `--max-primary-*` é a marca teal; `--blue-*` contém a mesma família com numeração deslocada (`--blue-700` equivale a `--max-primary-500`); e `--primary-*` é uma rampa neutra cinza. Em código novo, use `--max-primary-*` para a marca e trate os outros dois como compatibilidade, não como sinônimos.
+
+#### Regra de consumo e exceções existentes
+
+Em código novo, cores de interface devem partir de variáveis CSS semânticas. Literais são aceitáveis somente como fallback do próprio token (`var(--token, #valor)`), conteúdo intrínseco de assets/SVG, valor manipulado por um seletor de cor ou caso documentado que ainda não possua token. O repositório contém literais e fallbacks legados; portanto, a antiga afirmação de proibição absoluta não descrevia o estado real. Não replique esses casos sem necessidade.
+
+### 3. Tipografia e hierarquia
+
+- A família efetivamente aplicada globalmente é `Quicksand, sans-serif` (`src/themes/font.scss`). `src/themes/app.scss` também expõe `--font-sans` com fallback para `'Instrument Sans'`, fontes de sistema e emojis; isso é fallback/configuração, não evidência de uma segunda fonte carregada. `MaxTable` e `MaxInputToggle` ainda declaram `Jost` localmente e devem ser tratados como exceções legadas, não como uma terceira fonte canônica.
+- A escala SCSS histórica registra `21/18/16/14px` para H1–H4 e `12px` para labels/inputs, mas os componentes de título possuem sua própria escala compacta: `MaxTitle1` usa `1.125rem`/`0.875rem` e `MaxTitle2` usa `0.9rem`/`0.85rem`, com títulos em caixa alta e pesos entre 300 e 500.
+- Preserve a hierarquia compacta e o contraste entre título, subtítulo, label e mensagem. Não trate as variáveis `$size-h*` como garantia de que todo componente já as consome.
+- Texto de interface deve ser direto, em português do Brasil e coerente entre ação e feedback. Caixa alta é um recurso de títulos/ênfase existente, não um padrão obrigatório para toda ação.
+
+### 4. Anatomia e estados de componentes
+
+`InputBase` é a principal anatomia compartilhada dos inputs de dados: organiza label, ícones laterais, slot do controle, indicadores `done`/`caution`/`error`/`required` e mensagem com `aria-live="polite"`. Ele é amplamente utilizado, mas **não é universal**: controles binários, componentes de arquivo/código e outras anatomias especializadas podem implementar estrutura própria.
+
+O padrão desejável ao criar ou revisar controles é:
+
+- manter label, controle, ajuda e erro visualmente próximos e programaticamente associados;
+- usar estado neutro, hover/active, `:focus-visible`, disabled, loading, erro e sucesso de forma previsível;
+- preservar a reserva de espaço de mensagens apenas quando isso fizer sentido para o layout; não truncar informação necessária sem alternativa acessível;
+- usar elemento HTML nativo sempre que ele oferecer a semântica necessária; overlays devem controlar foco, Escape, retorno do foco e scroll, como já ocorre em `MaxModal`.
+
+O `InputBase` ainda não garante sozinho a associação acessível completa: o próprio componente registra que o `for` do label só funciona quando o filho aplica o `inputId`, e hoje `aria-invalid` fica no wrapper. Cada input concreto deve conectar `id`, `aria-describedby`, `aria-invalid` e `aria-required` ao controle nativo quando aplicáveis.
+
+### 5. Foco, movimento, elevação e camadas
+
+- Os tokens canônicos de foco são `--max-focus-ring`, `--max-focus-outline`, `--max-focus-ring-color` e `--max-focus-ring-offset-color`, com valores próprios para `.dark` (`src/themes/tokens.scss`). Componentes existentes ainda variam entre outline e box-shadow; código novo deve consumir esses tokens e nunca remover o foco sem substituição visível.
+- A linguagem de movimento é curta e funcional: transições de cor/borda/fundo em torno de `0.15s–0.2s`; animações mais longas pertencem a abertura/fechamento ou feedback explícito. Prefira propriedades específicas a `transition: all` e implemente `prefers-reduced-motion` quando houver movimento não essencial. Hoje essa proteção aparece em poucos componentes e deve ser validada, não presumida.
+- Não há uma escala única e canônica de sombras. Overlays e popovers usam predominantemente sombras compactas próximas de `0 4px 12px rgb(0 0 0 / 15%)`; modais, imagens, drawers e tooltips variam conforme o contexto. Reutilize o padrão do componente-base mais próximo antes de criar uma nova elevação.
+- O único z-index global explicitamente estável na camada de tema é o tooltip `.max-tooltip` em `99999` (`src/themes/params.scss`). Os demais valores estão distribuídos entre componentes; não assuma a antiga escala `100/1000/1100` como contrato global.
+
+### 6. Compatibilidade e dívida visual em transição
+
+A biblioteca não importa atualmente pacotes PrimeVue nos componentes, mas ainda preserva muitas classes `.p-*`, seletores de compatibilidade e nomes de tokens herdados para não quebrar consumidores. Logo, “zero referências PrimeVue” ainda não é uma descrição verdadeira. Em trabalho novo, use nomes semânticos `.max-*`; remova aliases legados somente com análise de compatibilidade e testes.
+
+O preset UnoCSS e o modo Attributify também fazem parte da API distribuída (`src/presetMaxUno.ts`, `uno.config.ts`). Dentro dos SFCs da biblioteca, o padrão predominante é estilo semântico local em `<style lang="scss" scoped>`; utilitários públicos continuam válidos para consumidores e não devem ser declarados inexistentes. Diferencie API pública, compatibilidade legada e convenção interna antes de classificar uma ocorrência como inconsistência.
+
+A biblioteca também não embute uma marca gráfica Max canônica: `MaxLogo` renderiza uma origem fornecida pela aplicação consumidora. Os SVGs em `src/assets/credit-card/` são recursos funcionais de bandeiras, não elementos da identidade institucional.
 
 ---
 
-### 4. Independência Total do PrimeVue (Zero Dependências Externas)
+## DIRETRIZES DE ESTILIZAÇÃO FRONT-END
 
-A biblioteca é **100% autônoma e independente do PrimeVue**:
-- Nenhum componente do design system deve importar ou referenciar pacotes do ecossistema PrimeVue (`primevue/*`, `@primevue/*`, `@primeuix/*`).
-- A estilização não deve fazer uso de classes utilitárias ou internas do PrimeVue (ex.: `.p-inputtext`, `.p-select`, `.p-floatlabel`).
-- Todo componente deve possuir marcação HTML semântica própria e estilização isolada.
-- Quaisquer imports residuais do PrimeVue encontrados no projeto devem ser tratados como inconformidade técnica e eliminados.
+### 1. Convenção interna e API pública
 
----
+- Nos componentes da biblioteca, prefira classes semânticas (`.max-*`, nomes de parte/estado) e estilos locais a sequências de utilitários no template. Isso torna a anatomia inspecionável e desacopla o componente da configuração UnoCSS do consumidor.
+- UnoCSS, `presetMaxUno` e Attributify são APIs públicas mantidas para aplicações consumidoras. Sua presença não é uma inconsistência por si só.
+- Use `:style` apenas para valores realmente dinâmicos calculados em runtime, como posição, dimensão configurável, progresso ou cor escolhida pelo usuário. Regras estáticas pertencem ao bloco de estilo.
 
-## REGRAS ESTRITAS DE ESTILIZAÇÃO FRONT-END
+### 2. Escopo dos estilos
 
-### 1. Proibição Absoluta de Classes Utilitárias e Atributos de Estilo no Template
-- **É ESTRITAMENTE PROIBIDO** utilizar classes utilitárias de estilo inline dentro dos atributos `class` ou `:class` nos templates dos componentes Vue (ex.: `class="flex p-30"`, `class="text-xs pt-1"`, `class="mb-2"`, `class="w-full flex"` são terminantemente proibidas).
-- **É ESTRITAMENTE PROIBIDO** utilizar atributos de utilitários no modo UnoCSS Attributify diretamente nas tags do template (ex.: `<div flex>`, `<div s100>`, `<div w-full>`, `<div gap-4>`, `<div pb-15>`, `<MaxIcon ml-5 />` são terminantemente proibidos).
-- Nenhum elemento deve carregar utilitários de margem, padding, tipografia, dimensionamento, posicionamento, alinhamento ou flexbox/grid através de classes utilitárias ou atributos no template. Todo o estilo deve ser semântico.
+- Para novos SFCs, siga o padrão predominante `<style lang="scss" scoped>`.
+- Use `:deep(...)` somente quando for necessário alcançar a anatomia de um componente filho e `:global(...)` para elementos fora da raiz/teleport ou estado global documentado.
+- Estilos globais, tokens e preflights pertencem a `src/themes/`, ao preset ou a outro ponto de entrada explicitamente global, não a um SFC arbitrário.
 
-### 2. O Único Meio Permitido: Seção `<style lang="scss" scoped>`
-- O único meio autorizado para aplicar estilização aos componentes Vue é através da tag de estilo do componente:
-  ```html
-  <style lang="scss" scoped>
-  /* Regras SCSS aqui */
-  </style>
-  ```
-- O bloco de estilo DEVE obrigatoriamente utilizar `lang="scss"` e conter o modificador `scoped` para garantir isolamento e encapsulamento dos estilos do componente.
-- Para estilizar nós ou elementos de subcomponentes filhos quando indispensável, utilize a pseudo-classe `:deep(...)` dentro do bloco com escopo.
-- Para estilizar elementos fora da raiz do componente montados no documento/body (como transições de `<slot>` ou travas de scroll em `html`), utilize `:global(...)` dentro do bloco com escopo.
+### 3. Seletores e estrutura
 
-### 3. Aninhamento Obrigatório Conforme a Hierarquia do Template
-- Toda estilização na seção `<style lang="scss" scoped>` deve ser estruturada com seletores semânticos descritivos (ex.: `.title-icon`, `.upload-loading-state`, `.t1-main-text`).
-- Os blocos e regras no SCSS DEVEM obrigatoriamente ser **aninhados espelhando a árvore DOM e a hierarquia do template**:
-  ```html
-  <!-- Exemplo no Template -->
-  <template>
-      <div class="max-card">
-          <div class="card-header">
-              <span class="card-title">{{ title }}</span>
-          </div>
-          <div class="card-content">
-              ...
-          </div>
-      </div>
-  </template>
-
-  <!-- Exemplo Correto no SCSS Aninhado -->
-  <style lang="scss" scoped>
-  .max-card {
-      display: flex;
-      flex-direction: column;
-
-      .card-header {
-          display: flex;
-          align-items: center;
-          margin-bottom: 0.5rem;
-
-          .card-title {
-              font-size: 1.125rem;
-              font-weight: 500;
-              color: var(--background-775);
-          }
-      }
-
-      .card-content {
-          padding: 1rem 0;
-      }
-  }
-  </style>
-  ```
+- Nomeie classes pelo papel do elemento, não pela aparência momentânea. Estados devem usar convenções consistentes como `is-*`, atributos semânticos ou pseudo-classes.
+- Aninhe SCSS apenas até o ponto em que a relação estrutural fique clara; não espelhe obrigatoriamente toda a árvore DOM, pois isso aumenta especificidade e acoplamento.
+- Evite `!important` em código novo. Quando compatibilidade legada exigir seu uso, mantenha o seletor restrito e documente a razão.
+- Não remova classes `.p-*`, aliases ou seletores legados apenas por estética: confirme o contrato público e cubra a migração com testes.
 
 ---
 
