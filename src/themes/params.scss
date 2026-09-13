@@ -167,7 +167,7 @@
 
 .max-tooltip {
     position: absolute;
-    z-index: var(--z-tooltip, 1400) !important;
+    z-index: var(--max-layer-tooltip, 1600) !important;
     max-width: 260px;
     padding: 0.35rem 0.65rem;
     border-radius: 6px;

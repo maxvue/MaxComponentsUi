@@ -2,7 +2,7 @@
 // estes estilos na tag <head> em tempo de import no runtime do consumidor. NÃO REMOVER.
 import 'virtual:uno.css';
 
-import { defineAsyncComponent, type App, type Plugin } from 'vue';
+import { defineAsyncComponent, type App } from 'vue';
 export { MaxStyle, type MaxThemePreset, type SemanticColorPalette } from './styles/style';
 export { default as ptBR } from './locales/pt-br';
 
@@ -236,7 +236,7 @@ export interface MaxPluginOptions {
     [key: string]: unknown;
 }
 
-export const install: Plugin['install'] = (app: App, options: MaxPluginOptions = {}) => {
+export const install = (app: App, options: MaxPluginOptions = {}): void => {
     app.directive('tooltip', Tooltip);
     app.provide?.('maxComponentsOptions', options);
 };

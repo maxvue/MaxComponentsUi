@@ -1,5 +1,5 @@
 <template>
-    <div v-if="isVisible" class="max-loader-main-div">
+    <div v-if="isVisible" class="max-loader-main-div" v-bind="$attrs">
         <div class="items">
             <MaxLoaderIcon />
             <div v-if="props.label" class="item-label">{{ props.label }}</div>
@@ -10,6 +10,10 @@
 <script setup lang="ts">
     import { computed } from 'vue';
     import MaxLoaderIcon from './MaxLoaderIcon.vue';
+
+    defineOptions({
+        inheritAttrs: false
+    });
 
     export interface MaxLoaderProps {
         /** Controla a visibilidade do loader */

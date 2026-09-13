@@ -78,7 +78,7 @@
         height: 100%;
         backdrop-filter: blur(4px);
         place-items: center;
-        z-index: 999999 !important;
+        z-index: var(--max-layer-screen-block, 10000) !important;
 
         &::after {
             content: '';
@@ -88,7 +88,7 @@
             width: 100vw;
             height: 100vh;
             background-color: rgb(0 0 0 / 10%);
-            z-index: 2 !important;
+            z-index: 1 !important;
         }
 
         .load-screen-messages {
@@ -100,7 +100,7 @@
             border: 2px solid rgb(0 0 0 / 10%);
             border-radius: 1rem;
             background-color: rgb(255 255 255 / 65%);
-            z-index: 10000 !important;
+            z-index: 2 !important;
 
             @media (width <= 768px) {
                 min-width: auto;

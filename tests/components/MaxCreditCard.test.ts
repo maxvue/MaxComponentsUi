@@ -349,7 +349,7 @@ describe('MaxCreditCard', () => {
 
         it('valida CVV com comprimento exigido pela prop len', async () => {
             const wrapper = mount(MaxInputCreditCardCvv, {
-                props: { len: 3 },
+                props: { modelValue: '', len: 3 },
                 global: {
                     directives: { maska: vMaska }
                 }

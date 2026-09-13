@@ -78,4 +78,41 @@ describe('MaxLoader', () => {
         await wrapper.setProps({ show: true });
         expect(wrapper.find('.max-loader-main-div').exists()).toBe(true);
     });
+
+    it('não vaza props operacionais (show, label) para o DOM mas repassa attrs legítimos', () => {
+        const wrapper = mount(MaxLoader, {
+            props: {
+                show: true,
+                label: 'Aguarde'
+            },
+            attrs: {
+                id: 'custom-loader-id',
+                'data-testid': 'app-loader',
+                'aria-busy': 'true'
+            }
+        });
+
+        const rootEl = wrapper.find('.max-loader-main-div');
+        expect(rootEl.exists()).toBe(true);
+        expect(rootEl.attributes('show')).toBeUndefined();
+        expect(rootEl.attributes('label')).toBeUndefined();
+        expect(rootEl.attributes('id')).toBe('custom-loader-id');
+        expect(rootEl.attributes('data-testid')).toBe('app-loader');
+        expect(rootEl.attributes('aria-busy')).toBe('true');
+    });
+
+    it('renderiza corretamente em ambiente SSR via createSSRApp', async () => {
+        const { createSSRApp } = await import('vue');
+        const { renderToString } = await import('vue/server-renderer');
+
+        const app = createSSRApp(MaxLoader, {
+            show: true,
+            label: 'Carregando SSR...'
+        });
+
+        const html = await renderToString(app);
+        expect(html).toContain('max-loader-main-div');
+        expect(html).toContain('Carregando SSR...');
+        expect(html).not.toContain('show="true"');
+    });
 });

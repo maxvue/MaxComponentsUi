@@ -31,9 +31,15 @@
         "build": "vue-tsc && vite build",
         "preview": "vite preview",
         "type-check": "vue-tsc --noEmit",
-        "lint": "eslint . --fix && stylelint \"src/**/*.{scss,vue}\" --fix",
+        "type-check:test": "vue-tsc -p tsconfig.test.json --noEmit",
+        "check:filenames": "node scripts/check-tracked-filenames.mjs",
+        "check:lockfile": "node scripts/check-lockfile.mjs",
+        "lint": "npm run lint:check",
+        "lint:check": "eslint . && stylelint \"src/**/*.{scss,vue}\"",
+        "lint:fix": "eslint . --fix && stylelint \"src/**/*.{scss,vue}\" --fix",
+        "verify": "npm run check:filenames && npm run check:lockfile && npm run type-check && npm run type-check:test && npm run lint:check && npm run test && npm run build",
         "prerelease": "node -e \"const b=require('node:child_process').execSync('git branch --show-current').toString().trim(); if(b!=='main'){console.error(`Release só é permitido a partir da branch main (branch atual: ${b}).`); process.exit(1);}\"",
-        "release": "npm run type-check && npm run build && npm run test && npm version patch -m 'Upgrade to %s' && git push origin main --follow-tags && npm publish --access public",
+        "release": "npm run verify && npm version patch -m 'Upgrade to %s' && git push origin main --follow-tags && npm publish --access public",
         "typecheck:tsgo": "tsgo --noEmit",
         "test": "vitest run",
         "test:watch": "vitest",
@@ -46,7 +52,6 @@
     ],
     "dependencies": {
         "@lottiefiles/dotlottie-vue": "^0.11.24",
-        "@maxvue/max-pinia": "file:../MaxPinia",
         "@maxvue/max-use": "file:../MaxUse",
         "@monaco-editor/loader": "^1.7.0",
         "@tanstack/vue-virtual": "^3.13.34",
@@ -58,22 +63,13 @@
         "@tiptap/extension-table-header": "^3.29.2",
         "@tiptap/extension-table-row": "^3.29.2",
         "@tiptap/extension-underline": "^3.29.2",
-        "@tiptap/pm": "^3.30.3",
         "@tiptap/starter-kit": "^3.29.2",
         "@tiptap/vue-3": "^3.29.2",
-        "@vue/compiler-core": "^3.6.0-rc.5",
-        "@vue/compiler-dom": "^3.6.0-rc.5",
-        "@vue/compiler-sfc": "^3.6.0-rc.5",
-        "@vue/reactivity": "^3.6.0-rc.5",
-        "@vue/runtime-core": "^3.6.0-rc.5",
-        "@vue/runtime-dom": "^3.6.0-rc.5",
         "axios": "^1.19.0",
         "chart.js": "^4.5.1",
         "dompurify": "^3.4.13",
         "libphonenumber-js": "^1.13.10",
         "maska": "^3.2.0",
-        "oxc-parser": "^0.147.0",
-        "quill": "^2.0.3",
         "sass": "^1.102.0",
         "tiptap-markdown": "^0.9.0",
         "vue-pdf-embed": "^2.1.5",
@@ -96,6 +92,7 @@
         "ajv": "^8.20.0",
         "eslint": "^10.8.0",
         "eslint-plugin-vue": "^10.10.0",
+        "fake-indexeddb": "^6.2.5",
         "happy-dom": "^20.11.1",
         "jsdom": "^30.0.1",
         "monaco-editor": "^0.56.0",
@@ -133,8 +130,18 @@
         "url": "https://github.com/maxvue/MaxComponentsUi.git"
     },
     "peerDependencies": {
+        "@maxvue/max-pinia": "^0.2.0",
         "pinia": "^4.0.0",
+        "unocss": "^66.0.0",
         "vue": "^3.6.0 || ^3.6.0-rc.5",
         "vue-router": "^5.2.0"
+    },
+    "peerDependenciesMeta": {
+        "@maxvue/max-pinia": {
+            "optional": true
+        },
+        "unocss": {
+            "optional": true
+        }
     }
 }

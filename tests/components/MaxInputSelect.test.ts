@@ -3,8 +3,9 @@ import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxInputSelect from '../../src/components/MaxInputSelect.vue';
 
-function mountSelect(props: Record<string, any> = {}, attrs: Record<string, any> = {}) {
+function mountSelect(props: Record<string, any> = {}, attrs: Record<string, any> = {}, attachToBody = false) {
     return mount(MaxInputSelect, {
+        attachTo: attachToBody ? document.body : undefined,
         props: { modelValue: null, ...props },
         attrs,
         global: {

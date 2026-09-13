@@ -81,7 +81,7 @@
             left: 0;
             width: 40px;
             height: 40px;
-            z-index: 999999;
+            z-index: 2;
         }
 
         .erro {

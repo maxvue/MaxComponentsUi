@@ -50,7 +50,12 @@ function createFakeEditor(overrides: Record<string, any> = {}) {
 }
 
 function mountToolbar(props: Record<string, any> = {}) {
-    return mount(MaxInputMarkdownToolbar, { props });
+    return mount(MaxInputMarkdownToolbar, {
+        props: {
+            editor: null,
+            ...props
+        }
+    });
 }
 
 describe('MaxInputMarkdownToolbar', () => {

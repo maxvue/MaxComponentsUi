@@ -98,6 +98,28 @@ const renderText = (tooltipEl: HTMLElement, options: TooltipOptions) => {
     else textEl.textContent = value;
 };
 
+const addDescribedByToken = (el: HTMLElement, id: string) => {
+    const current = el.getAttribute('aria-describedby');
+    if (!current) {
+        el.setAttribute('aria-describedby', id);
+        return;
+    }
+    const tokens = current.trim().split(/\s+/).filter(Boolean);
+    if (!tokens.includes(id)) {
+        tokens.push(id);
+        el.setAttribute('aria-describedby', tokens.join(' '));
+    }
+};
+
+const removeDescribedByToken = (el: HTMLElement, id: string) => {
+    const current = el.getAttribute('aria-describedby');
+    if (!current) return;
+    const tokens = current.trim().split(/\s+/).filter((token) => token !== id && Boolean(token));
+    if (tokens.length > 0) el.setAttribute('aria-describedby', tokens.join(' '));
+    else el.removeAttribute('aria-describedby');
+
+};
+
 const createTooltip = (el: HTMLElement, state: TooltipState) => {
     if (!el.isConnected) return;
     if (state.tooltipEl) return;
@@ -121,7 +143,7 @@ const createTooltip = (el: HTMLElement, state: TooltipState) => {
 
     document.body.appendChild(tooltipEl);
     state.tooltipEl = tooltipEl;
-    el.setAttribute('aria-describedby', state.tooltipId);
+    addDescribedByToken(el, state.tooltipId);
 
     renderText(tooltipEl, state.options);
     position(el, tooltipEl, state.position);
@@ -144,10 +166,11 @@ const destroyTooltip = (el: HTMLElement, state: TooltipState) => {
 
         state.scrollListeners = [];
     }
-    if (!state.tooltipEl) return;
-    state.tooltipEl.remove();
-    state.tooltipEl = null;
-    el.removeAttribute('aria-describedby');
+    if (state.tooltipEl) {
+        state.tooltipEl.remove();
+        state.tooltipEl = null;
+    }
+    removeDescribedByToken(el, state.tooltipId);
 };
 
 const clearTimers = (state: TooltipState) => {
@@ -234,6 +257,9 @@ export const Tooltip: Directive<HTMLElement, string | TooltipOptions> = {
         detachListeners(el, state);
         destroyTooltip(el, state);
         states.delete(el);
+    },
+    getSSRProps() {
+        return {};
     }
 };
 

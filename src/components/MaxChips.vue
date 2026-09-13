@@ -1,12 +1,12 @@
 <template>
     <InputBase
         v-bind="props"
-        :done="props.done ?? isDone"
-        :error="props.error ?? error_msg"
-        :caution="caution"
+        :done="props.done ?? validation.done.value"
+        :error="props.error ?? (typeof props.caution === 'string' ? null : validation.error.value)"
+        :caution="props.caution ?? validation.caution.value"
         class="max-chips max-chips-wrapper"
     >
-        <template #default="{ inputId, messageId, isError, isRequired }">
+        <template #default="{ inputAttrs }">
             <div
                 ref="containerRef"
                 class="max-chips-container max-input-native"
@@ -48,16 +48,13 @@
                     </li>
                     <li class="max-chips-input-token">
                         <input
+                            v-bind="inputAttrs"
                             ref="inputRef"
                             type="text"
                             class="max-chips-input"
-                            :id="inputId"
                             :placeholder="itemsList.length === 0 ? (props.placeholder ?? '') : ''"
                             :disabled="props.disabled || isMaxReached"
                             :value="inputValue"
-                            :aria-describedby="messageId"
-                            :aria-invalid="isError"
-                            :aria-required="isRequired"
                             autocomplete="off"
                             @input="onInput"
                             @keydown="onKeyDown"
@@ -77,7 +74,8 @@
     import { ref, computed, useAttrs, nextTick } from 'vue';
     import InputBase from './InputBase.vue';
     import MaxIcon from './MaxIcon.vue';
-    import type { ChipItem, ChipObjectItem } from '../types';
+    import { useInputValidation } from '../helpers/useInputValidation';
+    import type { ChipItem } from '../types';
 
     const attrs: any = useAttrs();
 
@@ -98,34 +96,18 @@
             /** Força novos itens inseridos como objetos { label, value } mesmo com lista vazia */
             asObject?: boolean;
             /** Função customizada para instanciar novos objetos a partir do texto digitado */
-            createItem?: (text: string) => ChipObjectItem;
+            createItem?: (text: string) => ChipItem;
             /** Permite remover chips individualmente (padrão: true) */
             removable?: boolean;
-            /** Ícone opcional */
-            icon?: string;
-            /** Alias para o ícone */
-            i?: string;
-            /** Desabilita o campo */
+            /** Desabilita o componente */
             disabled?: boolean;
-            /** Ativa estilo FloatLabel */
-            float?: boolean;
-            /** Mensagem de feedback (alias) */
-            msg?: string;
-            /** Mensagem de feedback */
-            message?: string;
-            /** Ícone da mensagem de feedback */
-            iconMessage?: string;
-            /** Rótulo do campo */
-            label?: string;
-            /** Estado de conclusão/validação manual */
+            /** Estado de sucesso controlado externamente */
             done?: boolean;
-            /** Mensagem ou estado de erro */
+            /** Mensagem ou estado de erro controlado externamente */
             error?: string | boolean;
-            /** Valor para comparação */
-            targetValue?: string;
-            /** Mensagem ou estado de atenção */
+            /** Mensagem ou estado de alerta controlado externamente */
             caution?: string | boolean;
-            /** Define se o campo é obrigatório */
+            /** Se o preenchimento do campo é obrigatório */
             required?: boolean;
         }>(),
         {
@@ -159,7 +141,6 @@
     const containerRef = ref<HTMLElement | null>(null);
     const inputValue = ref<string>('');
     const isFocused = ref<boolean>(false);
-    const isDone = ref<boolean | null>(props.done ?? null);
 
     const itemsList = computed<ChipItem[]>(() => {
         if (!props.modelValue || !Array.isArray(props.modelValue)) return [];
@@ -172,26 +153,16 @@
         return false;
     });
 
-    const isRequiredDone = computed(() => {
-        return props.required ? itemsList.value.length > 0 : null;
-    });
+    const customErrorMessage = computed(() => attrs.errMsg ?? attrs.error_message ?? attrs.error_msg);
 
-    const testIsDone = () => {
-        if (props.done !== undefined) return props.done;
-        if (isRequiredDone.value !== null) return isRequiredDone.value;
-        if (props.caution !== undefined) return !props.caution;
-        return null;
-    };
-
-    const caution = computed(() => {
-        return props.caution !== undefined ? props.caution : isDone.value === false;
-    });
-
-    const error_msg = computed(() => {
-        if (isDone.value !== false) return null;
-        const attrs_error_message = attrs.errMsg ?? attrs.error_message ?? attrs.error_msg ?? null;
-        if (isRequiredDone.value === false) return attrs_error_message ?? 'Campo obrigatório';
-        return attrs_error_message ?? 'Valor inválido';
+    const validation = useInputValidation({
+        value: itemsList,
+        required: computed(() => props.required),
+        caution: computed(() => props.caution),
+        done: computed(() => props.done),
+        validator: (val) => Array.isArray(val) && val.length > 0,
+        invalidMessage: customErrorMessage.value ?? 'Valor inválido',
+        requiredMessage: customErrorMessage.value ?? 'Campo obrigatório'
     });
 
     function resolveChipLabel(item: any): string {
@@ -427,7 +398,7 @@
         isFocused.value = false;
         if (props.addOnBlur && inputValue.value.trim()) addChip(inputValue.value);
 
-        isDone.value = testIsDone();
+        validation.onBlur();
         emit('blur', event);
     }
 

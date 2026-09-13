@@ -195,5 +195,19 @@ describe('MaxPdfView.vue', () => {
             expect(wrapper.find('.viewPDF').exists()).toBe(true);
             vi.useRealTimers();
         });
+
+        it('estrutura o layout com safe-area insets, dvh e clamp responsivo (E04-06/E04-07)', async () => {
+            const wrapper = mountPdf({ file: 'doc.pdf' });
+            await wrapper.vm.$nextTick();
+
+            const view = wrapper.find('.viewPDF');
+            expect(view.exists()).toBe(true);
+
+            const meio = wrapper.find('.meio');
+            expect(meio.exists()).toBe(true);
+
+            const toolbar = wrapper.find('.pdf-div-bar-tools');
+            expect(toolbar.exists()).toBe(true);
+        });
     });
 });

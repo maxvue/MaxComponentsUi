@@ -24,7 +24,7 @@
                 </Transition>
 
                 <div class="pdfDiv">
-                    <VuePdfEmbed :annotation-layer="false" :textLayer="false" :source="props.file" :width="size.width" :height="size.height" @rendered="rendered" @loaded="loaded" @progress="progressPdf">
+                    <VuePdfEmbed v-if="is_mounted" :annotation-layer="false" :textLayer="false" :source="props.file" :width="size.width" :height="size.height" @rendered="rendered" @loaded="loaded" @progress="progressPdf">
                         <template #before-page="slotProps">
                             <div class="header-page">Página {{ slotProps.page }} de {{ total }}</div>
                         </template>
@@ -48,13 +48,17 @@
      * Exibe um modal em tela cheia com ferramentas de zoom e paginação.
      */
     import { useWindowSize } from '@maxvue/max-use';
-    import { defineAsyncComponent, ref, watch, useTemplateRef, onBeforeUnmount } from 'vue';
+    import { defineAsyncComponent, ref, watch, useTemplateRef, onBeforeUnmount, onMounted } from 'vue';
     import { useFocusTrap } from '../helpers/useFocusTrap';
     import { useScrollLock } from '../helpers/useScrollLock';
+    import { useBrowserEventListener } from '../composables/useBrowserEventListener';
     import MaxButton from './MaxButton.vue';
 
-    // Async: vue-pdf-embed pesa ~2,6 MB (814 KB gzip) — só carrega quando um PDF é exibido
-    const VuePdfEmbed = defineAsyncComponent(() => import('vue-pdf-embed'));
+    // Async: vue-pdf-embed pesa ~2,6 MB (814 KB gzip) — só carrega quando um PDF é exibido no cliente
+    const VuePdfEmbed = defineAsyncComponent((): Promise<any> => {
+        if (typeof window === 'undefined') return Promise.resolve({ render: () => null });
+        return import('vue-pdf-embed');
+    });
 
     const { width: screen_width, height: screen_height } = useWindowSize();
 
@@ -82,22 +86,35 @@
 
     let close_timer: ReturnType<typeof setTimeout> | null = null;
     let has_scroll_lock = false;
+    const is_mounted = ref(false);
 
     const onEscape = (event: KeyboardEvent) => {
         if (event.key === 'Escape' && is_open.value) closePDF();
     };
 
+    useBrowserEventListener('keydown', onEscape, is_open);
+
+    onMounted(() => {
+        is_mounted.value = true;
+        if (is_open.value) {
+            trap.activate();
+            if (!has_scroll_lock) {
+                scroll_lock.lock();
+                has_scroll_lock = true;
+            }
+        }
+    });
+
     watch(is_open, (value) => {
+        if (!is_mounted.value) return;
         if (value) {
             trap.activate();
-            document.addEventListener('keydown', onEscape);
             if (!has_scroll_lock) {
                 scroll_lock.lock();
                 has_scroll_lock = true;
             }
         } else {
             trap.deactivate();
-            document.removeEventListener('keydown', onEscape);
             if (has_scroll_lock) {
                 scroll_lock.unlock();
                 has_scroll_lock = false;
@@ -111,7 +128,6 @@
             close_timer = null;
         }
         trap.deactivate();
-        document.removeEventListener('keydown', onEscape);
         if (has_scroll_lock) {
             scroll_lock.unlock();
             has_scroll_lock = false;
@@ -164,23 +180,35 @@
         left: 0;
         width: 100vw;
         height: 100vh;
+        height: 100dvh;
+        z-index: var(--max-layer-fullscreen, 1400);
+        box-sizing: border-box;
         background-color: rgb(0 0 0 / 90%);
         transition: opacity 0.6s ease;
         overflow: auto;
         display: grid;
-        grid-template-columns: 1fr calc(0.6 * 100vw) 1fr;
+        grid-template-columns: minmax(0, 1fr) min(1200px, calc(100vw - 32px)) minmax(0, 1fr);
         place-items: start center;
         backdrop-filter: blur(10px);
+        padding: max(8px, env(safe-area-inset-top, 0px)) max(8px, env(safe-area-inset-right, 0px)) max(8px, env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px));
 
         .space {
             width: 100%;
             height: 100%;
         }
 
+        .meio {
+            width: 100%;
+            max-width: min(1200px, calc(100vw - 32px));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
         .loading {
             display: grid;
             place-items: center;
-            height: 100vh;
+            min-height: 60vh;
             width: 100%;
 
             .texto {
@@ -211,7 +239,9 @@
         }
 
         .pdfDiv {
-            padding: calc(100vh * 0.05);
+            padding: clamp(12px, 3vh, 32px) 0;
+            width: 100%;
+            box-sizing: border-box;
 
             .header-page {
                 width: 100%;
@@ -225,19 +255,24 @@
     .pdf-div-bar-tools {
         background-color: var(--background-750);
         width: auto;
-        height: 60px;
-        padding: 0 10px;
-        gap: 10px;
+        min-height: 44px;
+        padding: 6px 10px;
+        gap: 8px;
         position: fixed;
-        top: 30px;
-        left: 30px;
-        display: grid;
-        place-items: center;
-        grid-template-columns: 1fr 1fr 1fr;
+        top: max(16px, env(safe-area-inset-top, 0px));
+        left: max(16px, env(safe-area-inset-left, 0px));
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
         border-radius: 10px;
+        z-index: calc(var(--max-layer-fullscreen, 1400) + 1);
+        box-shadow: 0 4px 12px rgb(0 0 0 / 25%);
 
         :deep(.max-button) {
             display: flex;
+            min-width: 36px;
+            min-height: 36px;
         }
     }
 

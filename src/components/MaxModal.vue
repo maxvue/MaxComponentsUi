@@ -1,6 +1,6 @@
 <template>
     <div ref="btn_el" :class="['max-modal-item', { 'no-button': props.noButton }, props.class]">
-        <div v-tooltip="null" @click.stop="toggle" class="max-modal-trigger" v-if="!props.noButton">
+        <div @click.stop="toggle" class="max-modal-trigger" v-if="!props.noButton">
             <slot name="button" v-bind="props">
                 <MaxButton v-bind="props" :size="props.size || props.sizeIcon ? String(props.size ?? props.sizeIcon) : ''" />
             </slot>
@@ -18,15 +18,17 @@
                         class="max-modal"
                         ref="el"
                         role="dialog"
-                        aria-modal="true"
-                        :aria-labelledby="title_id"
-                        :aria-label="!title_id ? (props.title ?? undefined) : undefined"
+                        :aria-modal="isTopModal ? 'true' : undefined"
+                        :aria-hidden="!isTopModal ? 'true' : undefined"
+                        :inert="!isTopModal ? true : undefined"
+                        :aria-labelledby="computedAriaLabelledby"
+                        :aria-label="computedAriaLabel"
                         :style="{ zIndex: dialogZIndex, padding: modal_padding, width: modal_width, height: modal_height }"
                         @click.stop="() => {}"
-                        @keydown="trap.onKeydown"
+                        @keydown="isTopModal ? trap.onKeydown($event) : undefined"
                         :class="[{ 'is-shaking': isShaking }, props.class]"
                     >
-                        <slot name="header" v-if="!props.noHeader">
+                        <slot name="header" v-if="!props.noHeader" :title-id="title_id">
                             <MaxGrid class="max-modal-header" :id="title_id">
                                 <slot name="title" v-bind="props">
                                     <MaxTitle1 class="max-modal-title" :title="props.title ?? 'Titulo'" :subtitle="props.subTitle ?? 'Sub Titulo'" />
@@ -51,9 +53,10 @@
 
 <script setup lang="ts">
     import { useModalStore } from '../stores/useModal.Store';
-    import { useTemplateRef, computed, ref, watch, useId, onBeforeUnmount } from 'vue';
+    import { useTemplateRef, computed, ref, watch, useId, onBeforeUnmount, onMounted } from 'vue';
     import { useFocusTrap } from '../helpers/useFocusTrap';
     import { useScrollLock } from '../helpers/useScrollLock';
+    import { useBrowserEventListener } from '../composables/useBrowserEventListener';
     import MaxIconButton from './MaxIconButton.vue';
     import MaxButton from './MaxButton.vue';
     import MaxTitle1 from './MaxTitle1.vue';
@@ -120,6 +123,10 @@
         dismissable?: boolean;
         /** Hook chamado antes de fechar o modal, permitindo cancelar ou confirmar o descarte */
         beforeClose?: (done: () => void) => void;
+        /** Nome acessível explícito para o diálogo */
+        ariaLabel?: string;
+        /** ID do elemento que rotula o diálogo */
+        ariaLabelledby?: string;
     }>(), {
         visible: undefined,
         modelValue: undefined,
@@ -154,7 +161,9 @@
         }, 400);
     };
 
-    const handleClose = () => {
+    export type ModalCloseReason = 'button' | 'escape' | 'backdrop' | 'model' | 'api';
+
+    const requestClose = (_reason: ModalCloseReason = 'api') => {
         if (props.beforeClose) {
             props.beforeClose(() => close());
             return;
@@ -163,17 +172,24 @@
         close();
     };
 
+    const handleClose = () => {
+        requestClose('button');
+    };
+
     const onBackdropClick = () => {
+        if (!isTopModal.value) return;
         if (!props.dismissable) {
             triggerShake();
             return;
         }
-        handleClose();
+        requestClose('backdrop');
     };
 
     const modal_store = useModalStore();
     const generatedId = useId();
     const id = computed(() => props.id ?? generatedId);
+
+    const isTopModal = computed(() => modal_store.isTop(id.value));
 
     const is_show = computed(() => {
         if (props.visible !== undefined) return Boolean(props.visible);
@@ -210,6 +226,17 @@
 
     const title_id = computed(() => (!props.noHeader ? 'max-modal-title-' + id.value : undefined));
 
+    const computedAriaLabelledby = computed(() => {
+        if (props.ariaLabelledby) return props.ariaLabelledby;
+        if (!props.noHeader && (props.title || props.subTitle)) return title_id.value;
+        return undefined;
+    });
+
+    const computedAriaLabel = computed(() => {
+        if (computedAriaLabelledby.value) return undefined;
+        return props.ariaLabel ?? (props.title || 'Diálogo');
+    });
+
     const style = ref({
         opacity: 1
     });
@@ -218,7 +245,7 @@
     let has_scroll_lock = false;
 
     const onEscape = (event: KeyboardEvent) => {
-        if (event.key === 'Escape' && props.closeOnEscape && modal_store.isTop(id.value)) handleClose();
+        if (event.key === 'Escape' && props.closeOnEscape && isTopModal.value) requestClose('escape');
 
     };
 
@@ -252,6 +279,21 @@
         { immediate: true }
     );
 
+    const is_mounted = ref(false);
+
+    useBrowserEventListener('keydown', onEscape, is_show);
+
+    onMounted(() => {
+        is_mounted.value = true;
+        if (is_show.value) {
+            trap.activate();
+            if (props.blockScroll && !has_scroll_lock) {
+                scroll_lock.lock();
+                has_scroll_lock = true;
+            }
+        }
+    });
+
     watch(
         is_show,
         (value) => {
@@ -260,20 +302,22 @@
 
             if (value) {
                 emit('opened');
-                trap.activate();
-                document.addEventListener('keydown', onEscape);
-                if (props.blockScroll && !has_scroll_lock) {
-                    scroll_lock.lock();
-                    has_scroll_lock = true;
+                if (is_mounted.value) {
+                    trap.activate();
+                    if (props.blockScroll && !has_scroll_lock) {
+                        scroll_lock.lock();
+                        has_scroll_lock = true;
+                    }
                 }
             } else {
-                trap.deactivate();
-                document.removeEventListener('keydown', onEscape);
-                if (has_scroll_lock) {
-                    scroll_lock.unlock();
-                    has_scroll_lock = false;
+                if (is_mounted.value) {
+                    trap.deactivate();
+                    if (has_scroll_lock) {
+                        scroll_lock.unlock();
+                        has_scroll_lock = false;
+                    }
+                    restoreCallerFocus();
                 }
-                restoreCallerFocus();
                 emit('closed');
             }
         },
@@ -282,13 +326,11 @@
 
     onBeforeUnmount(() => {
         trap.deactivate();
-        document.removeEventListener('keydown', onEscape);
         if (has_scroll_lock) {
             scroll_lock.unlock();
             has_scroll_lock = false;
         }
         if (modal_store.isOpen(id.value)) modal_store.pop(id.value);
-
     });
 
     const open = () => {
@@ -319,6 +361,7 @@
         hide: close,
         open,
         close,
+        requestClose,
         id,
         style,
         is_changing

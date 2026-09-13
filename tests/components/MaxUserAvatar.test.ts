@@ -142,7 +142,7 @@ describe('MaxUserAvatar', () => {
         expect(confirmStore.show).toBe(true);
         expect(confirmStore.message).toBe('Excluir usuário?');
 
-        confirmStore.acceptProps.action();
+        confirmStore.acceptProps.action?.();
         expect(wrapper.emitted('remove')).toBeTruthy();
     });
 

@@ -1,10 +1,10 @@
 <template>
     <InputBase v-bind="{...props}" class="max-input-text-area input-text-area-main-div">
-        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+        <template #default="{ inputAttrs }">
             <textarea
-                :id="inputId"
                 ref="textAreaEl"
                 class="max-textarea"
+                v-bind="{ ...inputAttrs, ...attrs }"
                 :value="temp_value"
                 :rows="lines"
                 :disabled="props.disabled"
@@ -12,10 +12,6 @@
                 :wrap="props.wrap"
                 :spellcheck="props.spellcheck"
                 :auto-resize="props.autoResize ? '' : undefined"
-                :aria-describedby="hasMessage ? messageId : undefined"
-                :aria-invalid="slotError ? 'true' : undefined"
-                :aria-required="isRequired ? 'true' : undefined"
-                v-bind="attrs"
                 @input="onInput"
                 @blur="checkDone()"
             ></textarea>

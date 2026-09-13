@@ -15,6 +15,8 @@ const popoverStub = {
     }
 };
 
+const mockTooltip = () => {};
+
 describe('MaxTogglePopover.vue', () => {
     beforeEach(() => {
         setActivePinia(createPinia());
@@ -23,7 +25,7 @@ describe('MaxTogglePopover.vue', () => {
     it('renderiza corretamente sem label (usa MaxIconButton)', () => {
         const wrapper = mount(MaxTogglePopover, {
             global: {
-                directives: { tooltip: vi.fn() },
+                directives: { tooltip: mockTooltip },
                 stubs: {
                     MaxPopover: {
                         template: '<div class="max-popover"><slot /></div>'
@@ -51,7 +53,7 @@ describe('MaxTogglePopover.vue', () => {
     it('renderiza corretamente com label (usa MaxButton)', () => {
         const wrapper = mount(MaxTogglePopover, {
             global: {
-                directives: { tooltip: vi.fn() },
+                directives: { tooltip: mockTooltip },
                 stubs: {
                     MaxPopover: {
                         template: '<div class="max-popover"><slot /></div>'
@@ -74,7 +76,7 @@ describe('MaxTogglePopover.vue', () => {
     it('onClickToggle atualiza confirm_store', async () => {
         const wrapper = mount(MaxTogglePopover, {
             global: {
-                directives: { tooltip: vi.fn() },
+                directives: { tooltip: mockTooltip },
                 stubs: {
                     MaxPopover: {
                         template: '<div class="max-popover"><slot /></div>'
@@ -98,11 +100,11 @@ describe('MaxTogglePopover.vue', () => {
 
     it('abrir o confirm do botão A com o confirm do botão B já aberto reabre em A (não fecha)', async () => {
         const wrapperA = mount(MaxTogglePopover, {
-            global: { directives: { tooltip: vi.fn() }, stubs: popoverStub },
+            global: { directives: { tooltip: mockTooltip }, stubs: popoverStub },
             props: { message: 'Confirma A?' }
         });
         const wrapperB = mount(MaxTogglePopover, {
-            global: { directives: { tooltip: vi.fn() }, stubs: popoverStub },
+            global: { directives: { tooltip: mockTooltip }, stubs: popoverStub },
             props: { message: 'Confirma B?' }
         });
 
@@ -123,7 +125,7 @@ describe('MaxTogglePopover.vue', () => {
     it('abrir via MaxTogglePopover depois de um confirm com messageIcon nao vaza o icone anterior', async () => {
         const wrapperConfirmComIcone = mount(MaxButtonConfirm, {
             global: {
-                directives: { tooltip: vi.fn() },
+                directives: { tooltip: mockTooltip },
                 stubs: {
                     MaxButton: {
                         name: 'MaxButton',
@@ -141,7 +143,7 @@ describe('MaxTogglePopover.vue', () => {
         expect(store.messageIcon).toBe('mdi:alert');
 
         const wrapperToggle = mount(MaxTogglePopover, {
-            global: { directives: { tooltip: vi.fn() }, stubs: popoverStub },
+            global: { directives: { tooltip: mockTooltip }, stubs: popoverStub },
             props: { message: 'Sem icone' }
         });
 

@@ -1,4 +1,4 @@
-import { sanitizeSvg } from './sanitizeSvg';
+import { sanitizeSvg, type SanitizedSvg } from './sanitizeSvg';
 
 /** Nome do banco IndexedDB exclusivo para o cache de ícones */
 const DB_NAME = 'max_icons_db';
@@ -65,9 +65,9 @@ export function openIconsDB(): Promise<IDBDatabase | null> {
 }
 
 /**
- * Carrega todos os ícones persistidos no IndexedDB.
+ * Carrega todos os ícones persistidos no IndexedDB validando cada registro com o sanitizador.
  */
-export async function loadAllIconsFromIDB(): Promise<Record<string, string>> {
+export async function loadAllIconsFromIDB(): Promise<Record<string, SanitizedSvg>> {
     try {
         const db = await openIconsDB();
         if (!db) return {};
@@ -80,10 +80,12 @@ export async function loadAllIconsFromIDB(): Promise<Record<string, string>> {
 
                 request.onsuccess = () => {
                     const records: IconRecord[] = request.result ?? [];
-                    const result: Record<string, string> = {};
-                    for (const record of records) if (record?.name && record?.svg) {
-                        const clean = sanitizeSvg(record.svg);
-                        if (clean) result[record.name] = clean;
+                    const result: Record<string, SanitizedSvg> = {};
+                    for (const record of records) {
+                        if (record?.name && record?.svg) {
+                            const clean = sanitizeSvg(record.svg);
+                            if (clean) result[record.name] = clean;
+                        }
                     }
                     resolve(result);
                 };
@@ -101,11 +103,12 @@ export async function loadAllIconsFromIDB(): Promise<Record<string, string>> {
 }
 
 /**
- * Salva múltiplos ícones no IndexedDB de forma não-bloqueante.
+ * Salva múltiplos ícones já sanitizados no IndexedDB em uma única transação atômica.
+ * Evita repetição do custo do DOMPurify/DOMParser para novos lotes (O(k)).
  */
-export async function saveIconsToIDB(icons: Record<string, string>): Promise<void> {
+export async function saveSanitizedIconsToIDB(icons: Record<string, SanitizedSvg>): Promise<void> {
     try {
-        const entries = Object.entries(icons).filter(([k, v]) => k && v && v !== 'waiting');
+        const entries = Object.entries(icons).filter(([k, v]) => Boolean(k && v));
         if (entries.length === 0) return;
 
         const db = await openIconsDB();
@@ -117,8 +120,7 @@ export async function saveIconsToIDB(icons: Record<string, string>): Promise<voi
                 const store = tx.objectStore(STORE_NAME);
 
                 for (const [name, svg] of entries) {
-                    const clean = sanitizeSvg(svg);
-                    if (clean) store.put({ name, svg: clean });
+                    store.put({ name, svg });
                 }
 
                 tx.oncomplete = () => resolve();
@@ -131,6 +133,20 @@ export async function saveIconsToIDB(icons: Record<string, string>): Promise<voi
     } catch {
         // Ignora silenciosamente falhas de storage
     }
+}
+
+/**
+ * Salva múltiplos ícones no IndexedDB a partir de strings não confiáveis.
+ * Sanitiza cada valor uma única vez e delega a escrita atômica para saveSanitizedIconsToIDB.
+ */
+export async function saveIconsToIDB(icons: Record<string, string>): Promise<void> {
+    const sanitized: Record<string, SanitizedSvg> = {};
+    for (const [k, v] of Object.entries(icons)) {
+        if (!k || !v || v === 'waiting') continue;
+        const clean = sanitizeSvg(v);
+        if (clean) sanitized[k] = clean;
+    }
+    await saveSanitizedIconsToIDB(sanitized);
 }
 
 /**

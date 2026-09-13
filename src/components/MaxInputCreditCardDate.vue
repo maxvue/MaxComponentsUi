@@ -1,16 +1,12 @@
 <template>
     <InputBase v-bind="props" class="max-input-credit-card-date input-credit-card-date-base" :text-center="true" :label="props.label" :done="done" :required="props.required" :error="error_msg">
-        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+        <template #default="{ inputAttrs }">
             <MaxBaseInput
-                :id="inputId"
+                v-bind="{ ...inputAttrs, ...attrs }"
                 type="text"
-                v-bind="attrs"
                 v-model="temp_value"
                 v-maska:unmaskedValue.unmasked="maskValue"
                 placeholder="MM/AA"
-                :aria-describedby="hasMessage ? messageId : undefined"
-                :aria-invalid="slotError ? 'true' : undefined"
-                :aria-required="isRequired ? 'true' : undefined"
                 @blur="checkDone()"
             />
         </template>

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { nextTick } from 'vue';
+import { nextTick, defineComponent } from 'vue';
 import { mount } from '@vue/test-utils';
 import MaxTabs from '../../src/components/MaxTabs.vue';
 import MaxTabList from '../../src/components/MaxTabList.vue';
@@ -170,7 +170,7 @@ describe('MaxTab', () => {
         // Componente hospedeiro com estado reativo proprio, controlando quais
         // tabs existem — simula uma lista dinamica onde o tab ativo e removido
         // em runtime, deixando o value do MaxTabs orfao sem o pai muda-lo.
-        const Host = {
+        const Host = defineComponent({
             components: { MaxTabs, MaxTabList, MaxTab },
             data: () => ({ show_middle: true }),
             template: `
@@ -182,7 +182,7 @@ describe('MaxTab', () => {
                     </MaxTabList>
                 </MaxTabs>
             `
-        };
+        });
         const wrapper = mount(Host);
         await nextTick();
         // Antes da remocao, o tab '1' (ativo) e o unico alcancavel.
@@ -486,5 +486,29 @@ describe('MaxTabs — actionButton', () => {
             }
         });
         expect(wrapper.find('.max-tabs-title-buttons .button-tab-item').exists()).toBe(false);
+    });
+
+    it('desmontar MaxTabItem antes do nextTick não seleciona nem deixa timers pendentes', async () => {
+        vi.useFakeTimers();
+        const selectTabMock = vi.fn();
+        const TestWrapper = {
+            components: { MaxTabItem: (await import('../../src/components/MaxTabItem.vue')).default },
+            provide: {
+                tabs_info: {
+                    active_tab: 0,
+                    tabs_id: 'test-tabs',
+                    selectTab: selectTabMock,
+                    add_count_tabs: () => 1
+                }
+            },
+            template: '<MaxTabItem title="Aba Teste" />'
+        };
+
+        const wrapper = mount(TestWrapper);
+        wrapper.unmount();
+        vi.runAllTimers();
+
+        expect(selectTabMock).not.toHaveBeenCalled();
+        vi.useRealTimers();
     });
 });

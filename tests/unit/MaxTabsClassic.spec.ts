@@ -131,7 +131,7 @@ describe('MaxTabs e MaxTabItem — WAI-ARIA Classic Tabs Pattern', () => {
         const tabs = wrapper.findAll('[role="tab"]');
 
         // Foca primeira aba
-        tabs[0].element.focus();
+        (tabs[0].element as HTMLElement).focus();
 
         // Seta Direita -> foca aba 2
         await tablist.trigger('keydown', { key: 'ArrowRight' });
@@ -176,7 +176,7 @@ describe('MaxTabs e MaxTabItem — WAI-ARIA Classic Tabs Pattern', () => {
         const tablist = wrapper.find('[role="tablist"]');
         const tabs = wrapper.findAll('[role="tab"]');
 
-        tabs[0].element.focus();
+        (tabs[0].element as HTMLElement).focus();
 
         // ArrowRight deve focar e também clicar/ativar aba 2
         await tablist.trigger('keydown', { key: 'ArrowRight' });

@@ -23,14 +23,14 @@
                         ref="el"
                         role="dialog"
                         :id="dialog_id"
-                        :aria-labelledby="title_id"
-                        :aria-label="!title_id ? (props.title ?? undefined) : undefined"
-                        :style="{top: position.top + 'px', left: position.left + 'px', opacity: position.opacity}"
+                        :aria-labelledby="computedAriaLabelledby"
+                        :aria-label="computedAriaLabel"
+                        :style="{top: position.top + 'px', left: position.left + 'px', opacity: isPositioned ? 1 : 0}"
                         :class="[position.isTop ? 'is-top' : 'is-bottom', position.isLeft ? 'is-left' : 'is-right', props.noPicker ? 'no-picker' : '', props.class]"
                         @click.stop="() => {}"
                         @keydown="trap.onKeydown"
                     >
-                        <slot name="header">
+                        <slot name="header" :title-id="title_id">
                             <MaxGrid class="max-popover-header" :id="title_id">
                                 <MaxTitle1 class="max-popover-title" :title="props.title ?? 'Titulo'" :subtitle="props.subTitle ?? 'Sub Titulo'" />
                                 <MaxIconButton class="max-popover-close" i="iconoir:xmark" size="1.3" aria-label="Fechar" @click.stop="hide" />
@@ -48,11 +48,10 @@
 </template>
 
 <script setup lang="ts">
-    import { useElementSize, useWindowSize, useDefaultReset } from '@maxvue/max-use';
-    import { useActiveElementBounding } from '../composables/useActiveElementBounding';
     import { useTemplateRef, ref, computed, useId, watch, onBeforeUnmount } from 'vue';
     import { usePopoverStore } from '../stores/usePopover.Store';
     import { useFocusTrap } from '../helpers/useFocusTrap';
+    import { useActiveOverlayPosition } from '../composables/useActiveOverlayPosition';
     import MaxIconButton from './MaxIconButton.vue';
     import MaxButton from './MaxButton.vue';
     import MaxTitle1 from './MaxTitle1.vue';
@@ -103,6 +102,10 @@
         plus?: boolean | string | number | undefined;
         /** Oculta o triangulo de ligação com o botão */
         noPicker?: boolean;
+        /** Nome acessível explícito para o diálogo */
+        ariaLabel?: string;
+        /** ID do elemento que rotula o diálogo */
+        ariaLabelledby?: string;
     }>(), {
         dark: 0.4,
         light: undefined,
@@ -126,43 +129,63 @@
     const dialog_id = computed(() => 'max-popover-dialog-' + id.value);
     const title_id = computed(() => (props.title || props.subTitle ? 'max-popover-title-' + id.value : undefined));
 
+    const computedAriaLabelledby = computed(() => {
+        if (props.ariaLabelledby) return props.ariaLabelledby;
+        if (props.title || props.subTitle) return title_id.value;
+        return undefined;
+    });
+
+    const computedAriaLabel = computed(() => {
+        if (computedAriaLabelledby.value) return undefined;
+        return props.ariaLabel ?? (props.title || 'Informações adicionais');
+    });
+
     const el = useTemplateRef<HTMLElement>('el');
     const btn_el = useTemplateRef('btn_el');
 
     const trap = useFocusTrap(el);
 
-    const { x, y, width: width_btn, height: height_btn } = useActiveElementBounding(btn_el, isOpen);
-    const { width: width_el, height: height_el } = useElementSize(el as any);
-    const { width: window_width, height: window_height } = useWindowSize();
+    const { position, isPositioned } = useActiveOverlayPosition<{
+        top: number;
+        left: number;
+        isTop: boolean;
+        isLeft: boolean;
+    }>({
+        target: btn_el,
+        overlay: el,
+        active: isOpen,
+        compute: ({ targetRect, overlayRect, viewportWidth, viewportHeight }) => {
+            const width_btn = targetRect.width;
+            const height_btn = targetRect.height;
+            const width_el = overlayRect.width || 300;
+            const height_el = overlayRect.height || 60;
 
-    const style: any = useDefaultReset({
-        opacity: 0
+            let top = targetRect.top + height_btn + 15;
+            let left = targetRect.left + (width_btn / 2) - (width_el / 2);
+            let isTop = false;
+            let isLeft = false;
+
+            if (top + height_el + 15 > viewportHeight) {
+                top = targetRect.top - height_btn - height_el;
+                isTop = true;
+            }
+
+            if (left + width_el + 15 > viewportWidth) {
+                left = targetRect.left + width_btn - width_el + 10;
+                isLeft = true;
+            }
+
+            left = Math.max(8, Math.min(left, viewportWidth - width_el - 8));
+
+            return {
+                top,
+                left,
+                isTop,
+                isLeft
+            };
+        }
     });
 
-    const position = computed(() => {
-        const data = {
-            top: y.value + height_btn.value + 15,
-            left: x.value + (width_btn.value / 2) - (width_el.value / 2),
-            isTop: false,
-            isLeft: false,
-            opacity: style.value.opacity
-        };
-
-        if (data.top + height_el.value + 15 > window_height.value) {
-            data.top = y.value - height_btn.value - height_el.value;
-            data.isTop = true;
-        }
-
-        if (data.left + width_el.value + 15 > window_width.value) {
-            data.left = x.value + (width_btn.value) - (width_el.value) + 10;
-            data.isLeft = true;
-        }
-
-        return data;
-    });
-
-    let is_unmounted = false;
-    let pending_timer: ReturnType<typeof setTimeout> | null = null;
 
     const onEscape = (event: KeyboardEvent) => {
         if (event.key === 'Escape' && isOpen.value) hide();
@@ -205,11 +228,6 @@
     });
 
     onBeforeUnmount(() => {
-        is_unmounted = true;
-        if (pending_timer !== null) {
-            clearTimeout(pending_timer);
-            pending_timer = null;
-        }
         trap.deactivate();
         document.removeEventListener('keydown', onEscape);
         document.removeEventListener('pointerdown', onDocPointerDown, true);
@@ -218,29 +236,27 @@
     });
 
     const toggle = () => {
-        if (style.value.opacity !== 0) style.reset();
-
         popover_store.toggle(id.value);
-
-        if (pending_timer !== null) clearTimeout(pending_timer);
-        pending_timer = setTimeout(() => {
-            if (is_unmounted) return;
-            style.value.opacity = 1;
-        }, 1);
     };
 
     const hide = () => {
-        style.reset();
         popover_store.hide();
     };
 
-    const show = toggle;
+    const show = () => {
+        popover_store.show(id.value);
+    };
 
+
+    const style = computed(() => ({
+        opacity: isPositioned.value ? 1 : 0
+    }));
 
     defineExpose({
         hide,
         show,
-        toggle
+        toggle,
+        style
     });
 
 
@@ -266,8 +282,12 @@
 
     .max-popover-dialog {
         position: fixed;
-        min-width: 300px;
+        width: min(300px, calc(100vw - 16px));
+        max-width: calc(100vw - 16px);
+        box-sizing: border-box;
         min-height: 60px;
+        max-height: calc(100dvh - 32px);
+        overflow-y: auto;
         background-color: var(--background-0);
         color: var(--background-700);
         z-index: var(--z-popover, 1300);

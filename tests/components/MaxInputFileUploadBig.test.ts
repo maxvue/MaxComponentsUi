@@ -33,12 +33,12 @@ vi.mock('@maxvue/max-use', async (importOriginal) => {
 
 function makeFileList(files: File[]): FileList {
     return {
+        ...files,
         length: files.length,
         item: (i: number) => files[i] ?? null,
         [Symbol.iterator]: function* () {
             for (const f of files) yield f;
-        },
-        ...files
+        }
     } as unknown as FileList;
 }
 

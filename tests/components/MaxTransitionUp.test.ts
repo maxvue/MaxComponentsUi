@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
-import { ref, nextTick } from 'vue';
+import { ref, nextTick, defineComponent } from 'vue';
 import MaxTransitionUp from '../../src/components/MaxTransitionUp.vue';
 
 describe('MaxTransitionUp', () => {
@@ -16,7 +16,7 @@ describe('MaxTransitionUp', () => {
     });
 
     it('alterna o nó renderizado quando condicionado reativamente', async () => {
-        const HostComponent = {
+        const HostComponent = defineComponent({
             components: { MaxTransitionUp },
             setup() {
                 const isShown = ref(true);
@@ -27,7 +27,7 @@ describe('MaxTransitionUp', () => {
                     <div v-if="isShown" class="panel">Painel Elevado</div>
                 </MaxTransitionUp>
             `
-        };
+        });
 
         const wrapper = mount(HostComponent);
         expect(wrapper.find('.panel').exists()).toBe(true);

@@ -353,7 +353,7 @@ export type SelectOptionsList<T = unknown> = Array<SelectOptionItem<T> | Record<
  */
 export interface MaxTableColumn {
     /** Texto do cabeçalho da coluna */
-    header: string;
+    header?: string;
     /** Campo do objeto a ser exibido na célula */
     field: string;
     /** Nome do slot customizado para renderizar o conteúdo da célula */
@@ -369,7 +369,7 @@ export interface MaxTableColumn {
     /** Alinhamento do conteúdo da célula */
     align?: 'left' | 'center' | 'right';
     /** Tipo de input a ser renderizado na célula */
-    input?: 'text' | 'input' | 'checkbox' | 'select' | 'date' | 'number' | 'increment' | 'textarea' | 'phone-number' | 'auto-complete' | 'auto-complete-api';
+    input?: 'text' | 'input' | 'checkbox' | 'select' | 'date' | 'number' | 'increment' | 'textarea' | 'phone-number' | 'auto-complete' | 'auto-complete-api' | (string & {});
     /** Lista de opções para o select */
     options?: any[];
     /** Rota para navegação ao clicar */
@@ -389,7 +389,7 @@ export interface MaxTableColumn {
     /** Tooltip a ser exibido ao passar o mouse */
     tooltip?: boolean;
     /** Função a ser executada quando o valor do campo mudar */
-    action?: (data: { row: any; field: string; value: any }) => void;
+    action?: ((data: { row: any; field: string; value: any }) => void) | ((...args: any[]) => any);
 };
 
 export type DBFile = {

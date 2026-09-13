@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxToast from '../../src/components/MaxToast.vue';
@@ -228,6 +228,75 @@ describe('MaxToast', () => {
 
             expect(writeTextMock).toHaveBeenCalledWith('Erro de Conexão\nFalha 500 no endpoint');
             expect(copyBtn.text()).toBe('Copiado!');
+        });
+
+        it('renova timer em cópias consecutivas e reseta estado após 2000ms', async () => {
+            vi.useFakeTimers();
+            const writeTextMock = vi.fn().mockResolvedValue(undefined);
+            Object.defineProperty(navigator, 'clipboard', {
+                value: { writeText: writeTextMock },
+                configurable: true,
+                writable: true
+            });
+
+            const wrapper = mountToast((store) => {
+                store.add({ title: 'T1', message: 'Erro 1', severity: 'error' });
+                store.add({ title: 'T2', message: 'Erro 2', severity: 'error' });
+            });
+            await flushPromises();
+
+            const copyBtns = wrapper.findAll('.action-copy');
+            await copyBtns[0].trigger('click');
+            await flushPromises();
+
+            expect(copyBtns[0].text()).toBe('Copiado!');
+
+            // Avança 1500ms
+            vi.advanceTimersByTime(1500);
+            await wrapper.vm.$nextTick();
+
+            // Clica na segunda cópia (renova janela)
+            await copyBtns[1].trigger('click');
+            await flushPromises();
+
+            expect(copyBtns[1].text()).toBe('Copiado!');
+
+            // Avança mais 1000ms (2500ms desde o primeiro, 1000ms desde o segundo)
+            vi.advanceTimersByTime(1000);
+            await wrapper.vm.$nextTick();
+            expect(copyBtns[1].text()).toBe('Copiado!');
+
+            // Avança os 1000ms restantes do segundo
+            vi.advanceTimersByTime(1000);
+            await wrapper.vm.$nextTick();
+            expect(copyBtns[1].text()).toBe('Copiar');
+
+            vi.useRealTimers();
+        });
+
+        it('desmontagem antes de 2000ms cancela timer sem erros pendentes', async () => {
+            vi.useFakeTimers();
+            const writeTextMock = vi.fn().mockResolvedValue(undefined);
+            Object.defineProperty(navigator, 'clipboard', {
+                value: { writeText: writeTextMock },
+                configurable: true,
+                writable: true
+            });
+
+            const wrapper = mountToast((store) => {
+                store.add({ title: 'Unmount Me', message: 'Erro fatal', severity: 'error' });
+            });
+            await flushPromises();
+
+            const copyBtn = wrapper.find('.action-copy');
+            await copyBtn.trigger('click');
+            await flushPromises();
+
+            wrapper.unmount();
+            vi.runAllTimers();
+
+            // Zero efeitos e zero erros
+            vi.useRealTimers();
         });
     });
 

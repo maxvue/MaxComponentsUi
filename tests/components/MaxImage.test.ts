@@ -301,4 +301,16 @@ describe('MaxImage', () => {
 
         removeEventListenerSpy.mockRestore();
     });
+
+    it('aplica atributos de acessibilidade e papel dialog ao abrir o preview', async () => {
+        const wrapper = mountImage({ preview: true, alt: 'Foto da paisagem' });
+        await wrapper.find('.max-image__preview-trigger').trigger('click');
+
+        const modal = wrapper.find('.max-image-modal');
+        expect(modal.exists()).toBe(true);
+        expect(modal.attributes('role')).toBe('dialog');
+        expect(modal.attributes('aria-modal')).toBe('true');
+        expect(modal.attributes('aria-label')).toBe('Foto da paisagem');
+        expect(modal.attributes('tabindex')).toBe('-1');
+    });
 });

@@ -25,29 +25,39 @@ export const useFocusTrap = (el: Ref<HTMLElement | null>): FocusTrap => {
 
     /** Elemento que tinha o foco antes de o trap ser ativado. */
     let previous: HTMLElement | null = null;
+    let isActive = false;
+
+    const isBrowser = (): boolean => typeof window !== 'undefined' && typeof document !== 'undefined';
 
     /**
-     * Verifica se o elemento esta visivel. `offsetParent` e
-     * `getBoundingClientRect` nao funcionam de forma confiavel no happy-dom
-     * (ambiente de teste), entao a checagem se restringe a atributos e
-     * estilos inline que sao verificaveis tanto no browser quanto nos testes.
+     * Verifica se o elemento e todos os seus ancestrais ate o container estao visiveis.
      */
     const isVisible = (element: HTMLElement): boolean => {
-        if (element.hidden) return false;
-        if (element.style.display === 'none') return false;
-        if (element.style.visibility === 'hidden') return false;
-        if (element.getAttribute('aria-hidden') === 'true') return false;
+        if (typeof HTMLElement !== 'undefined' && !(element instanceof HTMLElement)) return false;
+        let curr: HTMLElement | null = element;
+        while (curr && curr !== el.value) {
+            if (curr.hidden) return false;
+            if (curr.style?.display === 'none') return false;
+            if (curr.style?.visibility === 'hidden') return false;
+            if (curr.getAttribute?.('aria-hidden') === 'true') return false;
+            curr = curr.parentElement;
+        }
         return true;
     };
 
     const focusable = (): HTMLElement[] => {
-        if (! el.value) return [];
+        if (!isBrowser() || !el.value) return [];
         return Array.from(el.value.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(isVisible);
     };
 
     const activate = () => {
-        previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        if (!isBrowser() || isActive) return;
+        isActive = true;
+        previous = (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement)
+            ? document.activeElement
+            : null;
         nextTick(() => {
+            if (!isBrowser() || !isActive) return;
             const items = focusable();
             if (items.length > 0) items[0]?.focus();
             else if (el.value) {
@@ -59,26 +69,34 @@ export const useFocusTrap = (el: Ref<HTMLElement | null>): FocusTrap => {
     };
 
     const deactivate = () => {
-        // Se o elemento de origem foi removido do DOM enquanto o trap estava
-        // ativo, `focus()` seria um no-op silencioso. Nesse caso, optamos por
-        // nao devolver o foco a lugar nenhum, em vez de tentar um fallback.
+        if (!isBrowser() || !isActive) {
+            previous = null;
+            return;
+        }
+        isActive = false;
         if (previous?.isConnected) previous.focus();
 
         previous = null;
     };
 
     const onKeydown = (event: KeyboardEvent) => {
-
-        if (event.key !== 'Tab') return;
+        if (!isBrowser() || event.key !== 'Tab') return;
 
         const items = focusable();
-        if (! items.length) return;
+        if (!items.length) {
+            event.preventDefault();
+            if (el.value) {
+                if (!el.value.hasAttribute('tabindex')) el.value.setAttribute('tabindex', '-1');
+                el.value.focus();
+            }
+            return;
+        }
 
         const first = items[0];
         const last = items[items.length - 1];
         const target = event.target as HTMLElement | null;
 
-        if (! target || ! items.includes(target)) {
+        if (!target || !items.includes(target)) {
             event.preventDefault();
             (event.shiftKey ? last : first).focus();
             return;
@@ -90,7 +108,7 @@ export const useFocusTrap = (el: Ref<HTMLElement | null>): FocusTrap => {
             return;
         }
 
-        if (! event.shiftKey && target === last) {
+        if (!event.shiftKey && target === last) {
             event.preventDefault();
             first.focus();
         }

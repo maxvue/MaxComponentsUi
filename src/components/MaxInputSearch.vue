@@ -3,19 +3,15 @@
         class="max-input-search input-search-main-div"
         :iconRight="isLoading === true ? 'line-md:loading-twotone-loop' : 'material-symbols:search-rounded'"
     >
-        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+        <template #default="{ inputAttrs }">
             <input
-                :id="inputId"
                 :type="props.type"
                 class="max-input-native"
-                v-bind="attrs"
+                v-bind="{ ...inputAttrs, ...attrs }"
                 :value="temp_value"
                 :placeholder="props.placeholder || 'Pesquisar...'"
                 :aria-label="ariaLabelComputed"
                 :aria-busy="isLoading ? 'true' : undefined"
-                :aria-describedby="hasMessage ? messageId : undefined"
-                :aria-invalid="slotError ? 'true' : undefined"
-                :aria-required="isRequired ? 'true' : undefined"
                 @input="onInput"
             />
             <span class="sr-only" aria-live="polite" aria-atomic="true">

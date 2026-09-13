@@ -33,11 +33,31 @@ vi.mock('../../src/composables/useActiveElementBounding', () => ({
 
 import MaxInputSelect from '../../src/components/MaxInputSelect.vue';
 
-function mountSelect() {
-    return mount(MaxInputSelect, {
+function mountSelect(customTriggerLeft = 0) {
+    Object.defineProperty(window, 'innerWidth', { value: windowWidth.value, configurable: true });
+    Object.defineProperty(window, 'innerHeight', { value: 800, configurable: true });
+    const wrapper = mount(MaxInputSelect, {
         props: { modelValue: null, options: [{ value: 'a', label: 'A' }] },
         global: { stubs: { Icon: true, MaxIcon: true } }
     });
+    const trigger = (wrapper.vm as any).triggerEl as HTMLElement | null;
+    if (!trigger) return wrapper;
+
+    trigger.getBoundingClientRect = () => ({
+        top: 100,
+        left: customTriggerLeft,
+        right: customTriggerLeft + triggerWidth.value,
+        bottom: 136,
+        width: triggerWidth.value,
+        height: 36,
+        x: customTriggerLeft,
+        y: 100,
+        toJSON: () => ({})
+    } as DOMRect);
+
+    (wrapper.vm as any).isOpen = true;
+    (wrapper.vm as any).updatePosition?.();
+    return wrapper;
 }
 
 describe('MaxInputSelect — largura do overlay', () => {
@@ -84,10 +104,9 @@ describe('MaxInputSelect — largura do overlay', () => {
     it('reposiciona à esquerda quando o campo está perto da borda direita', () => {
         triggerWidth.value = 300;
         windowWidth.value = 400;
-        const wrapper = mountSelect();
+        const wrapper = mountSelect(350);
 
-        // Campo em x=0 com 300px cabe; força o cenário de estouro medindo a
-        // largura contra uma viewport menor que campo + posição.
+        // Campo em x=350 com 300px não cabe; força o cenário de reposicionamento
         const { width, left } = (wrapper.vm as any).position;
         expect(left + parseInt(width, 10)).toBeLessThanOrEqual(400);
     });

@@ -1,8 +1,15 @@
 <template>
-    <InputBase class="max-input-number" v-bind="props" :value="temp_value" :done="props.done ?? isDone" :error="props.error ?? error_msg" :caution="caution">
-        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+    <InputBase
+        class="max-input-number"
+        v-bind="props"
+        :value="temp_value"
+        :done="props.done ?? validation.done.value"
+        :error="props.error ?? (typeof props.caution === 'string' ? null : validation.error.value)"
+        :caution="props.caution ?? validation.caution.value"
+    >
+        <template #default="{ inputAttrs }">
             <input
-                :id="inputId"
+                v-bind="inputAttrs"
                 ref="inputRef"
                 type="text"
                 inputmode="decimal"
@@ -10,9 +17,6 @@
                 :value="displayValue"
                 :placeholder="props.placeholder"
                 :disabled="props.disabled"
-                :aria-describedby="hasMessage ? messageId : undefined"
-                :aria-invalid="slotError ? 'true' : undefined"
-                :aria-required="isRequired ? 'true' : undefined"
                 @input="onInput"
                 @focus="onFocus"
                 @blur="onBlur"
@@ -27,9 +31,9 @@
      * Oferece suporte a formatação numérica pt-BR, prefixos, sufixos, validação e comparação de valores.
      */
     import { toSearchableString, hasContent } from '@maxvue/max-use';
-    import type { Ref } from 'vue';
     import { ref, computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
+    import { useInputValidation } from '../helpers/useInputValidation';
 
     const attrs: any = useAttrs();
 
@@ -108,28 +112,23 @@
     const temp_value = ref(props.modelValue);
     const displayValue = ref(formatDisplay(props.modelValue));
 
-    const isDone: Ref = ref(props.done ?? null);
+    const customErrorMessage = computed(() => attrs.errMsg ?? attrs.error_message ?? attrs.error_msg);
 
-    const isEqual = computed(() => typeof props.targetValue === 'string' && hasContent(props.targetValue) ? toSearchableString(props.targetValue) === toSearchableString(temp_value.value) : null);
+    const validation = useInputValidation({
+        value: temp_value,
+        required: computed(() => props.required),
+        targetValue: computed(() => props.targetValue),
+        caution: computed(() => props.caution),
+        done: computed(() => props.done),
+        validator: (val) => {
+            if (typeof props.targetValue === 'string' && hasContent(props.targetValue)) return toSearchableString(props.targetValue) === toSearchableString(val);
 
-    const isRequiredDone = computed(() => (props.required ? hasContent(temp_value.value) : null));
-
-    const testIsDone = () => {
-        if (props.done !== undefined) return props.done;
-        if (isEqual.value !== null) return isEqual.value;
-        if (isRequiredDone.value !== null) return isRequiredDone.value;
-        if (props.caution !== undefined) return !props.caution;
-        return null;
-    };
-
-    const caution = computed(() => (props.caution !== undefined ? props.caution : isDone.value === false));
-
-    const error_msg = computed(() => {
-        if (isDone.value !== false) return null;
-        const attrs_error_message = attrs.errMsg ?? attrs.error_message ?? attrs.error_msg ?? null;
-        if (isEqual.value === false) return attrs_error_message ?? 'Valor esperado: ' + (attrs.target_value ?? attrs.targetValue ?? attrs['target-value']);
-        if (isRequiredDone.value === false) return attrs_error_message ?? 'Campo obrigatório';
-        return attrs_error_message ?? 'Valor inválido';
+            return hasContent(val);
+        },
+        invalidMessage: customErrorMessage.value ?? (typeof props.targetValue === 'string' && hasContent(props.targetValue)
+            ? 'Valor esperado: ' + (attrs.target_value ?? attrs.targetValue ?? attrs['target-value'] ?? props.targetValue)
+            : 'Valor inválido'),
+        requiredMessage: customErrorMessage.value ?? 'Campo obrigatório'
     });
 
     const emit = defineEmits<{ 'update:modelValue': [value: number | null | undefined] }>();
@@ -139,6 +138,7 @@
         displayValue.value = raw;
         const parsed = parseLocaleNumber(raw);
         temp_value.value = parsed;
+        validation.onInput();
     };
 
     const onFocus = () => {
@@ -148,11 +148,10 @@
     const onBlur = () => {
         isFocused.value = false;
         displayValue.value = formatDisplay(temp_value.value);
-        isDone.value = testIsDone();
+        validation.onBlur();
     };
 
     watch(temp_value, () => {
-        isDone.value = testIsDone();
         emit('update:modelValue', temp_value.value);
     });
 

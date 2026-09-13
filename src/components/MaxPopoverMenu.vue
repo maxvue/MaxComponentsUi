@@ -56,8 +56,8 @@
     import { computed, ref, nextTick, watch, onBeforeUnmount } from 'vue';
     import MaxButton from './MaxButton.vue';
     import MaxIcon from './MaxIcon.vue';
-    import { goToRoute, useDefaultReset, useElementSize, useWindowSize } from '@maxvue/max-use';
-    import { useActiveElementBounding } from '../composables/useActiveElementBounding';
+    import { goToRoute, useDefaultReset } from '@maxvue/max-use';
+    import { useActiveOverlayPosition } from '../composables/useActiveOverlayPosition';
     import { getCssSize } from '../helpers/getCssSize';
 
     const props = withDefaults(defineProps<{
@@ -129,24 +129,31 @@
     const isOpen = ref(false);
 
     const boundingTarget = computed(() => anchorEl.value ?? triggerButtonRef.value ?? btn_el.value);
-    const { x, y, width: width_btn, height: height_btn } = useActiveElementBounding(boundingTarget, isOpen);
-    const { width: width_el, height: height_el } = useElementSize(menuEl as any);
-    const { width: window_width, height: window_height } = useWindowSize();
 
-    const position = computed(() => {
-        const targetX = x.value;
-        const targetY = y.value;
-        const _targetW = width_btn.value;
-        const targetH = height_btn.value;
+    const { position } = useActiveOverlayPosition<{ top: number; left: number }>({
+        target: boundingTarget,
+        overlay: menuEl,
+        active: isOpen,
+        compute: ({ targetRect, overlayRect, viewportWidth, viewportHeight }) => {
+            const targetX = targetRect.left;
+            const targetY = targetRect.top;
+            const targetH = targetRect.height;
+            const width_el = overlayRect.width || 150;
+            const height_el = overlayRect.height || 100;
 
-        let top = targetY + targetH + 4;
-        let left = targetX;
+            let top = targetY + targetH + 4;
+            let left = targetX;
 
-        if (top + (height_el.value || 100) > window_height.value && targetY - (height_el.value || 100) > 0) top = targetY - (height_el.value || 100) - 4;
+            if (top + height_el > viewportHeight && targetY - height_el > 0) top = targetY - height_el - 4;
 
-        if (left + (width_el.value || 150) > window_width.value) left = Math.max(10, window_width.value - (width_el.value || 150) - 10);
 
-        return { top, left };
+            if (left + width_el > viewportWidth) left = Math.max(10, viewportWidth - width_el - 10);
+
+
+            left = Math.max(8, Math.min(left, viewportWidth - width_el - 8));
+
+            return { top, left };
+        }
     });
 
     const setAnchor = (event?: any) => {
@@ -356,6 +363,10 @@
     border-radius: 6px;
     box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
     min-width: 150px;
+    max-width: calc(100vw - 16px);
+    box-sizing: border-box;
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
     padding: 4px 0;
     display: flex;
     flex-direction: column;

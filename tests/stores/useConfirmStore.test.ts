@@ -65,7 +65,7 @@ describe('useConfirmStore', () => {
             icon: 'mdi:check',
             action: () => { chamada = true; }
         };
-        store.acceptProps.action();
+        store.acceptProps.action?.();
         expect(chamada).toBe(true);
         expect(store.acceptProps.label).toBe('Confirmar');
         expect(store.acceptProps.icon).toBe('mdi:check');

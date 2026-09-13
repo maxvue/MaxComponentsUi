@@ -42,13 +42,23 @@ const SCHEME_INDEPENDENT: Record<string, string> = {
     '--max-whatsapp-600': '#1da851',
     '--max-floatlabel-active-font-weight': '400',
     '--max-floatlabel-on-border-radius': '2px',
-    '--z-dropdown': '1000',
-    '--z-sticky': '1100',
-    '--z-modal-backdrop': '1200',
-    '--z-modal': '1210',
-    '--z-popover': '1300',
-    '--z-tooltip': '1400',
-    '--z-toast': '1500'
+    '--max-layer-sticky': '100',
+    '--max-layer-navigation': '500',
+    '--max-layer-dropdown': '1000',
+    '--max-layer-popover': '1200',
+    '--max-layer-modal-backdrop': '1300',
+    '--max-layer-modal': '1310',
+    '--max-layer-fullscreen': '1400',
+    '--max-layer-toast': '1500',
+    '--max-layer-tooltip': '1600',
+    '--max-layer-screen-block': '10000',
+    '--z-dropdown': 'var(--max-layer-dropdown, 1000)',
+    '--z-sticky': 'var(--max-layer-sticky, 100)',
+    '--z-modal-backdrop': 'var(--max-layer-modal-backdrop, 1300)',
+    '--z-modal': 'var(--max-layer-modal, 1310)',
+    '--z-popover': 'var(--max-layer-popover, 1200)',
+    '--z-toast': 'var(--max-layer-toast, 1500)',
+    '--z-tooltip': 'var(--max-layer-tooltip, 1600)'
 };
 
 const SCHEME_DEPENDENT: Record<string, { light: string; dark: string }> = {

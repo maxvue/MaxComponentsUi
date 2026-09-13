@@ -2,10 +2,10 @@ import { watchDebounced, size } from '@maxvue/max-use';
 import { defineStore } from 'pinia';
 import type { Ref } from 'vue';
 import { ref, computed, onScopeDispose } from 'vue';
-import { sanitizeSvg } from '../helpers/sanitizeSvg';
+import { sanitizeSvg, type SanitizedSvg } from '../helpers/sanitizeSvg';
 import { getMaxAppConfig } from '../helpers/maxAppConfig';
 import { ICON_CACHE_KEY } from '../helpers/maxCacheKeys';
-import { loadAllIconsFromIDB, saveIconsToIDB } from '../helpers/iconIdb';
+import { loadAllIconsFromIDB, saveIconsToIDB, saveSanitizedIconsToIDB } from '../helpers/iconIdb';
 
 // Chave do cache legado no localStorage para migração automática para IndexedDB
 const CACHE_KEY = ICON_CACHE_KEY;
@@ -34,16 +34,23 @@ export const useIconStore = defineStore('icons', () => {
             if (data) {
                 const parsed = JSON.parse(data);
                 if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-                    const sanitized: Record<string, string> = {};
+                    const memoryState: Record<string, string> = {};
+                    const persistDelta: Record<string, SanitizedSvg> = {};
                     for (const [icon_name, value] of Object.entries(parsed)) {
                         if (typeof value !== 'string') continue;
-                        sanitized[icon_name] = (value === 'waiting' || value === '') ? value : sanitizeSvg(value);
+                        if (value === 'waiting' || value === '') {
+                            memoryState[icon_name] = value;
+                        } else {
+                            const clean = sanitizeSvg(value);
+                            if (clean) {
+                                memoryState[icon_name] = clean;
+                                persistDelta[icon_name] = clean;
+                            }
+                        }
                     }
 
-                    if (size(sanitized) > 0) {
-                        icons_data.value = { ...icons_data.value, ...sanitized };
-                        saveIconsToIDB(sanitized);
-                    }
+                    if (size(memoryState) > 0) icons_data.value = { ...icons_data.value, ...memoryState };
+                    if (size(persistDelta) > 0) saveSanitizedIconsToIDB(persistDelta);
                 }
                 localStorage.removeItem(CACHE_KEY);
             }
@@ -53,14 +60,10 @@ export const useIconStore = defineStore('icons', () => {
             } catch {}
         }
 
-        // 2. Carregamento assíncrono do IndexedDB
+        // 2. Carregamento assíncrono do IndexedDB (já sanitizado por loadAllIconsFromIDB)
         loadAllIconsFromIDB().then((idbIcons) => {
             if (idbIcons && size(idbIcons) > 0) {
-                const sanitized: Record<string, string> = {};
-                for (const [icon_name, value] of Object.entries(idbIcons)) if (value && value !== 'waiting') sanitized[icon_name] = sanitizeSvg(value);
-
-
-                icons_data.value = { ...sanitized, ...icons_data.value };
+                icons_data.value = { ...idbIcons, ...icons_data.value };
             }
         }).catch(() => {});
     };
@@ -120,7 +123,7 @@ export const useIconStore = defineStore('icons', () => {
         }
     });
 
-    const fetchIconFallback = async (iconName: string): Promise<string | null> => {
+    const fetchIconFallback = async (iconName: string): Promise<SanitizedSvg | null> => {
         try {
             const fallbackBase = getMaxAppConfig().routeIconsFallback ?? 'https://api.iconify.design';
             const cleanBase = fallbackBase.replace(/\/$/, '');
@@ -131,7 +134,8 @@ export const useIconStore = defineStore('icons', () => {
             });
             if (!res.ok) return null;
             const svg = await res.text();
-            return sanitizeSvg(svg);
+            const clean = sanitizeSvg(svg);
+            return clean || null;
         } catch {
             return null;
         }
@@ -183,11 +187,16 @@ export const useIconStore = defineStore('icons', () => {
                 return res.json();
             }).then(async (data) => {
                 const updated_data = { ...icons_data.value };
+                const deltaToPersist: Record<string, SanitizedSvg> = {};
                 const missing_icons: string[] = [];
 
                 for (const icon_name of icons_to_fetch) {
-                    if (data && data[icon_name]) {
-                        updated_data[icon_name] = sanitizeSvg(data[icon_name]);
+                    if (data && data[icon_name] && typeof data[icon_name] === 'string') {
+                        const clean = sanitizeSvg(data[icon_name]);
+                        if (clean) {
+                            updated_data[icon_name] = clean;
+                            deltaToPersist[icon_name] = clean;
+                        }
                         delete errors.value[icon_name];
                         continue;
                     }
@@ -196,11 +205,10 @@ export const useIconStore = defineStore('icons', () => {
 
                 errors.value['fetch'] = 0;
                 icons_data.value = updated_data;
-                saveCache();
+                if (size(deltaToPersist) > 0) saveSanitizedIconsToIDB(deltaToPersist);
 
                 if (missing_icons.length > 0) {
-                    const recoveredIcons: Record<string, string> = {};
-                    let hasNewFallback = false;
+                    const recoveredIcons: Record<string, SanitizedSvg> = {};
 
                     await Promise.all(missing_icons.map(async (icon_name) => {
                         const fallbackSvg = await fetchIconFallback(icon_name);
@@ -208,7 +216,6 @@ export const useIconStore = defineStore('icons', () => {
                             icons_data.value[icon_name] = fallbackSvg;
                             delete errors.value[icon_name];
                             recoveredIcons[icon_name] = fallbackSvg;
-                            hasNewFallback = true;
                             return;
                         }
 
@@ -218,10 +225,10 @@ export const useIconStore = defineStore('icons', () => {
                         if (errors.value[icon_name] >= MAX_ICON_RETRIES) icons_data.value[icon_name] = '';
                     }));
 
-                    if (hasNewFallback) saveCache();
-
-                    if (size(recoveredIcons) > 0) syncIconsToBackend(recoveredIcons);
-
+                    if (size(recoveredIcons) > 0) {
+                        saveSanitizedIconsToIDB(recoveredIcons);
+                        syncIconsToBackend(recoveredIcons);
+                    }
                 }
 
             }).catch((error) => {
@@ -230,7 +237,7 @@ export const useIconStore = defineStore('icons', () => {
 
                 if (errors.value['fetch'] >= MAX_FETCH_RETRIES) scheduleFetchErrorReset();
 
-                const recoveredIcons: Record<string, string> = {};
+                const recoveredIcons: Record<string, SanitizedSvg> = {};
 
                 Promise.all(icons_to_fetch.map(async (icon_name) => {
                     const fallbackSvg = await fetchIconFallback(icon_name);
@@ -241,11 +248,11 @@ export const useIconStore = defineStore('icons', () => {
                         return true;
                     }
                     return false;
-                })).then((results) => {
-                    if (results.some(Boolean)) saveCache();
-
-                    if (size(recoveredIcons) > 0) syncIconsToBackend(recoveredIcons);
-
+                })).then(() => {
+                    if (size(recoveredIcons) > 0) {
+                        saveSanitizedIconsToIDB(recoveredIcons);
+                        syncIconsToBackend(recoveredIcons);
+                    }
                 });
             });
         }

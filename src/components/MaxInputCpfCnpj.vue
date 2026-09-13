@@ -1,17 +1,14 @@
 <template>
     <InputBase class="max-input-cpf-cnpj" v-bind="props" :error="error_msg ?? (props.error === true ? true : undefined)" :caution="caution" :done="done ?? undefined">
-        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+        <template #default="{ inputAttrs }">
             <input
-                :id="inputId"
+                v-bind="inputAttrs"
                 type="text"
                 inputmode="numeric"
                 class="max-input-native max-cpf-cnpj-input"
                 :value="masked_value"
                 v-maska="maskValue"
                 :disabled="props.disabled"
-                :aria-describedby="hasMessage ? messageId : undefined"
-                :aria-invalid="slotError ? 'true' : undefined"
-                :aria-required="isRequired ? 'true' : undefined"
                 @input="onUserInput"
                 @blur="onBlur"
             />

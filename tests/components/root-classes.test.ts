@@ -172,7 +172,7 @@ describe('Root Component Identifier Classes', () => {
     });
 
     it('MaxTagsList possui classe max-tags-list', () => {
-        const wrapper = mount(MaxTagsList, { props: { tags: [] }, global: defaultGlobal });
+        const wrapper = mount(MaxTagsList, { props: { options: [], tags: [] as any }, global: defaultGlobal });
         expect(wrapper.classes()).toContain('max-tags-list');
     });
 
@@ -227,7 +227,7 @@ describe('Root Component Identifier Classes', () => {
     });
 
     it('MaxInputFileProject possui classe max-input-file-project', () => {
-        const wrapper = mount(MaxInputFileProject, { props: { label: 'Projeto', route: 'test' }, global: defaultGlobal });
+        const wrapper = mount(MaxInputFileProject, { props: { files: [], label: 'Projeto', route: 'test' }, global: defaultGlobal });
         expect(wrapper.classes()).toContain('max-input-file-project');
     });
 

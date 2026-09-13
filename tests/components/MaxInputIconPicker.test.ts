@@ -127,4 +127,34 @@ describe('MaxInputIconPicker', () => {
         await new Promise((resolve) => setTimeout(resolve, 200));
         expect(true).toBe(true);
     });
+
+    it('aplica semântica de diálogo modal, foco inicial e atributos de acessibilidade ao abrir o drawer', async () => {
+        const wrapper = mount(MaxInputIconPicker, {
+            props: { modelValue: '' },
+            attachTo: document.body
+        });
+
+        const trigger = wrapper.find('.icon-picker-trigger');
+        expect(trigger.attributes('aria-haspopup')).toBe('dialog');
+        expect(trigger.attributes('aria-expanded')).toBe('false');
+
+        await trigger.trigger('click');
+        await wrapper.vm.$nextTick();
+
+        expect(trigger.attributes('aria-expanded')).toBe('true');
+        const drawer = document.querySelector('.max-icon-picker-drawer');
+        expect(drawer).toBeTruthy();
+        expect(drawer?.getAttribute('role')).toBe('dialog');
+        expect(drawer?.getAttribute('aria-modal')).toBe('true');
+        expect(drawer?.getAttribute('aria-label')).toBe('Escolha um ícone');
+        expect(drawer?.getAttribute('tabindex')).toBe('-1');
+
+        // Pressionar Escape fecha o diálogo
+        const event = new KeyboardEvent('keydown', { key: 'Escape' });
+        window.dispatchEvent(event);
+        await wrapper.vm.$nextTick();
+
+        expect((wrapper.vm as any).visible).toBe(false);
+        wrapper.unmount();
+    });
 });

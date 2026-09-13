@@ -5,7 +5,10 @@ import MaxInputSwitch from '../../src/components/MaxInputSwitch.vue';
 
 function mountSwitch(props: Record<string, any> = {}, attrs: Record<string, any> = {}) {
     return mount(MaxInputSwitch, {
-        props,
+        props: {
+            modelValue: false,
+            ...props
+        },
         attrs
     });
 }

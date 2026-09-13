@@ -1,18 +1,22 @@
 <template>
-    <InputBase v-bind="props" :done="props.done ?? isDone" :error="props.error ?? error_msg" :caution="caution" class="max-color-picker max-input-color">
-        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+    <InputBase
+        v-bind="props"
+        :done="props.done ?? validation.done.value"
+        :error="props.error ?? (typeof props.caution === 'string' ? null : validation.error.value)"
+        :caution="props.caution ?? validation.caution.value"
+        class="max-color-picker max-input-color"
+    >
+        <template #default="{ inputAttrs }">
             <div class="item-color" :style="{ backgroundColor: nativeColor }">
                 <input
+                    v-bind="inputAttrs"
                     type="color"
                     class="max-colorpicker-native"
                     :value="nativeColor"
                     :disabled="props.disabled"
-                    :id="props.inputId || inputId"
+                    :id="props.inputId || inputAttrs.id"
                     :aria-label="props.ariaLabel"
                     :aria-labelledby="props.ariaLabelledby"
-                    :aria-describedby="hasMessage ? messageId : undefined"
-                    :aria-invalid="slotError || Boolean(props.error) || Boolean(error_msg)"
-                    :aria-required="isRequired || props.required"
                     @input="onColorInput"
                 />
             </div>
@@ -26,9 +30,9 @@
      * Oferece preview com seletor de cores nativo e campo de texto sincronizado.
      */
     import { toSearchableString, hasContent } from '@maxvue/max-use';
-    import type { Ref } from 'vue';
-    import { ref, computed, watch, useAttrs } from 'vue';
+    import { computed, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
+    import { useInputValidation } from '../helpers/useInputValidation';
 
     const modelValue = defineModel<any>({ default: '' });
     const attrs: any = useAttrs();
@@ -122,33 +126,25 @@
         modelValue.value = val;
     };
 
-    const isDone: Ref = ref(props.done ?? null);
+    const customErrorMessage = computed(() => attrs.errMsg ?? attrs.error_message ?? attrs.error_msg);
 
-    const isEqual = computed(() => typeof props.targetValue === 'string' && hasContent(props.targetValue) ? toSearchableString(props.targetValue) === toSearchableString(modelValue.value) : null);
+    const validation = useInputValidation({
+        value: modelValue,
+        required: computed(() => props.required),
+        targetValue: computed(() => props.targetValue),
+        caution: computed(() => props.caution),
+        done: computed(() => props.done),
+        immediate: true,
+        validator: (val) => {
+            if (typeof props.targetValue === 'string' && hasContent(props.targetValue)) return toSearchableString(props.targetValue) === toSearchableString(val);
 
-    const isRequiredDone = computed(() => (props.required ? hasContent(modelValue.value) : null));
-
-    const testIsDone = () => {
-        if (props.done !== undefined) return props.done;
-        if (isEqual.value !== null) return isEqual.value;
-        if (isRequiredDone.value !== null) return isRequiredDone.value;
-        if (props.caution !== undefined) return !props.caution;
-        return null;
-    };
-
-    const caution = computed(() => (props.caution !== undefined ? props.caution : isDone.value === false));
-
-    const error_msg = computed(() => {
-        if (isDone.value !== false) return null;
-        const attrs_error_message = attrs.errMsg ?? attrs.error_message ?? attrs.error_msg ?? null;
-        if (isEqual.value === false) return attrs_error_message ?? 'Valor esperado: ' + (attrs.target_value ?? attrs.targetValue ?? attrs['target-value']);
-        if (isRequiredDone.value === false) return attrs_error_message ?? 'Campo obrigatório';
-        return attrs_error_message ?? 'Valor inválido';
+            return hasContent(val);
+        },
+        invalidMessage: customErrorMessage.value ?? (typeof props.targetValue === 'string' && hasContent(props.targetValue)
+            ? 'Valor esperado: ' + (attrs.target_value ?? attrs.targetValue ?? attrs['target-value'] ?? props.targetValue)
+            : 'Valor inválido'),
+        requiredMessage: customErrorMessage.value ?? 'Campo obrigatório'
     });
-
-    watch(modelValue, () => {
-        isDone.value = testIsDone();
-    }, { immediate: true });
 </script>
 
 <style lang="scss" scoped>

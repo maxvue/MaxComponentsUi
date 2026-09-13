@@ -1,13 +1,10 @@
 <template>
     <InputBase v-bind="inputBaseProps" class="max-input-markdown">
-        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+        <template #default="{ inputAttrs }">
             <div
-                :id="inputId"
+                v-bind="inputAttrs"
                 class="max-input-markdown__editor-wrap"
                 :class="{ 'max-input-markdown__editor-wrap--disabled': props.disabled }"
-                :aria-describedby="hasMessage ? messageId : undefined"
-                :aria-invalid="slotError || Boolean(props.error)"
-                :aria-required="isRequired || props.required"
             >
                 <MaxInputMarkdownToolbar :editor="editor ?? null" />
                 <EditorContent
@@ -22,12 +19,14 @@
                 <Transition name="max-fade">
                     <div
                         v-if="isImageModalOpen"
+                        ref="imageModalRef"
                         class="max-image-preview-modal"
                         role="dialog"
                         aria-modal="true"
                         aria-label="Visualizador de Imagem"
                         tabindex="-1"
                         @click.self="closeImage"
+                        @keydown="imageTrap.onKeydown"
                     >
                         <div class="max-image-preview-modal__toolbar">
                             <button type="button" class="max-image-preview-modal__btn" title="Diminuir Zoom" @click="zoomOutImage">
@@ -89,6 +88,7 @@
     import InputBase from './InputBase.vue';
     import { isSafeUrl } from '../helpers/isSafeUrl';
     import { useScrollLock } from '../helpers/useScrollLock';
+    import { useFocusTrap } from '../helpers/useFocusTrap';
 
     const props = withDefaults(
         defineProps<{
@@ -152,6 +152,8 @@
     const activeImageSrc = ref('');
     const activeImageAlt = ref('');
     const imageZoom = ref(1);
+    const imageModalRef = ref<HTMLElement | null>(null);
+    const imageTrap = useFocusTrap(imageModalRef);
 
     const activePdfUrl = ref('');
 
@@ -167,6 +169,7 @@
         imageZoom.value = 1;
         isImageModalOpen.value = true;
         scrollLock.lock();
+        imageTrap.activate();
         document.addEventListener('keydown', onImageModalEscape);
     };
 
@@ -174,6 +177,7 @@
         isImageModalOpen.value = false;
         activeImageSrc.value = '';
         activeImageAlt.value = '';
+        imageTrap.deactivate();
         scrollLock.unlock();
         document.removeEventListener('keydown', onImageModalEscape);
     };
@@ -419,7 +423,10 @@
 
     onBeforeUnmount(() => {
         document.removeEventListener('keydown', onImageModalEscape);
-        if (isImageModalOpen.value) scrollLock.unlock();
+        if (isImageModalOpen.value) {
+            imageTrap.deactivate();
+            scrollLock.unlock();
+        }
         editor.value?.destroy();
     });
 
@@ -770,7 +777,7 @@
 .max-image-preview-modal {
     position: fixed;
     inset: 0;
-    z-index: 9999;
+    z-index: var(--max-layer-fullscreen, 1400);
     background-color: rgb(0 0 0 / 85%);
     backdrop-filter: blur(8px);
     display: flex;

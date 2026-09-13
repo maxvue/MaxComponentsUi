@@ -51,15 +51,15 @@
 <script setup lang="ts">
     import { useConfirmStore } from '../stores/useConfirm.Store';
     import { useFocusTrap } from '../helpers/useFocusTrap';
+    import { useActiveOverlayPosition } from '../composables/useActiveOverlayPosition';
     import MaxGrid from './MaxGrid.vue';
     import MaxButton from './MaxButton.vue';
     import MaxIcon from './MaxIcon.vue';
-    import { useElementSize, useWindowSize } from '@maxvue/max-use';
-    import { useTemplateRef, computed, watch, onBeforeUnmount, useId } from 'vue';
+    import { useTemplateRef, computed, watch, onBeforeUnmount, onMounted, useId, ref } from 'vue';
+    import { useBrowserEventListener } from '../composables/useBrowserEventListener';
     import TransitionFade from './TransitionFade.vue';
 
     const confirm_store = useConfirmStore();
-    const { width: window_width, height: window_height } = useWindowSize();
 
     const id = useId();
     const msg_id = computed(() => 'max-popover-confirm-msg-' + id);
@@ -80,74 +80,86 @@
         if (event.key === 'Escape' && confirm_store.show) confirm_store.hide();
     };
 
-    const updateTargetPosition = () => {
-        if (!confirm_store.targetElement) return;
-        const rect = confirm_store.targetElement.getBoundingClientRect?.();
-        if (!rect) return;
-        if (rect.bottom < 0 || rect.top > window_height.value) {
-            confirm_store.hide();
-            return;
-        }
-        confirm_store.x = rect.x ?? rect.left ?? 0;
-        confirm_store.y = rect.y ?? rect.top ?? 0;
-        confirm_store.width = rect.width ?? 0;
-        confirm_store.height = rect.height ?? 0;
-    };
+    const is_mounted = ref(false);
 
-    const attachScrollListeners = () => {
-        if (typeof window !== 'undefined') {
-            window.addEventListener('scroll', updateTargetPosition, { capture: true, passive: true });
-            window.addEventListener('resize', updateTargetPosition, { passive: true });
-        }
-    };
+    useBrowserEventListener('keydown', onEscape, () => confirm_store.show);
 
-    const detachScrollListeners = () => {
-        if (typeof window !== 'undefined') {
-            window.removeEventListener('scroll', updateTargetPosition, { capture: true });
-            window.removeEventListener('resize', updateTargetPosition);
+    const activeTarget = computed(() => {
+        if (confirm_store.targetElement && typeof confirm_store.targetElement.getBoundingClientRect === 'function') return confirm_store.targetElement;
+
+        return {
+            getBoundingClientRect: () => ({
+                x: confirm_store.x,
+                y: confirm_store.y,
+                left: confirm_store.x,
+                top: confirm_store.y,
+                width: confirm_store.width,
+                height: confirm_store.height,
+                right: confirm_store.x + confirm_store.width,
+                bottom: confirm_store.y + confirm_store.height,
+                toJSON: () => {}
+            } as DOMRect)
+        } as unknown as HTMLElement;
+    });
+
+    const { position } = useActiveOverlayPosition<{
+        top: number;
+        left: number;
+        isTop: boolean;
+        isLeft: boolean;
+    }>({
+        target: activeTarget,
+        overlay: el,
+        active: () => confirm_store.show,
+        compute: ({ targetRect, overlayRect, viewportWidth, viewportHeight }) => {
+            const targetX = targetRect.left;
+            const targetY = targetRect.top;
+            const targetH = targetRect.height;
+            const width_el = overlayRect.width || 300;
+            const height_el = overlayRect.height || 60;
+
+            let top = targetY + targetH + 15;
+            let left = targetX;
+            let isTop = false;
+            let isLeft = false;
+
+            if (top + height_el + 15 > viewportHeight) {
+                top = targetY - height_el - 30;
+                isTop = true;
+            }
+
+            if (left + width_el + 15 > viewportWidth) {
+                left = targetX - width_el + 20;
+                isLeft = true;
+            }
+
+            left = Math.max(8, Math.min(left, viewportWidth - width_el - 8));
+            top = Math.max(8, Math.min(top, viewportHeight - height_el - 8));
+
+            return {
+                top,
+                left,
+                isTop,
+                isLeft
+            };
         }
-    };
+    });
+
+    onMounted(() => {
+        is_mounted.value = true;
+        if (confirm_store.show) trap.activate();
+
+    });
 
     watch(() => confirm_store.show, (value) => {
-        if (value) {
-            trap.activate();
-            document.addEventListener('keydown', onEscape);
-            if (confirm_store.targetElement) {
-                updateTargetPosition();
-                attachScrollListeners();
-            }
-        } else {
-            trap.deactivate();
-            document.removeEventListener('keydown', onEscape);
-            detachScrollListeners();
-        }
+        if (!is_mounted.value) return;
+        if (value) trap.activate();
+        else trap.deactivate();
     }, { immediate: true });
 
     onBeforeUnmount(() => {
         trap.deactivate();
-        document.removeEventListener('keydown', onEscape);
-        detachScrollListeners();
     });
-
-    const position = computed(() => {
-        const data ={
-            top: confirm_store.y + confirm_store.height + 15,
-            left: confirm_store.x,
-            isTop: false,
-            isLeft: false
-        };
-        if (data.top + height.value + 15 > window_height.value) {
-            data.top = confirm_store.y - height.value - 30;
-            data.isTop = true;
-        }
-        if (data.left + width.value + 15 > window_width.value) {
-            data.left = confirm_store.x - width.value + 20;
-            data.isLeft = true;
-        }
-        return data;
-    });
-
-    const { width, height } = useElementSize(el as any);
 </script>
 
 <style lang="scss" scoped>
@@ -162,8 +174,12 @@
 
     .max-icon-confirm-dialog {
         position: fixed;
-        min-width: 300px;
+        width: min(300px, calc(100vw - 16px));
+        max-width: calc(100vw - 16px);
+        box-sizing: border-box;
         min-height: 60px;
+        max-height: calc(100dvh - 32px);
+        overflow-y: auto;
         background-color: var(--background-0);
         color: var(--background-700);
         z-index: 2;

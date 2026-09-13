@@ -81,13 +81,15 @@
     import { ref, onBeforeUnmount } from 'vue';
     import { useToastStore } from '../stores/useToast.Store';
     import type { ToastItem } from '../stores/useToast.Store';
+    import { useResettableTimeout } from '../composables/useResettableTimeout';
     import MaxIcon from './MaxIcon.vue';
 
     const toastStore = useToastStore();
 
     const expandedToasts = ref<Record<string, boolean>>({});
     const copiedToastId = ref<string | null>(null);
-    let copyResetTimer: ReturnType<typeof setTimeout> | null = null;
+    let isMounted = true;
+    const copyTimeout = useResettableTimeout(2000);
 
     const toggleExpand = (id: string) => {
         expandedToasts.value[id] = !expandedToasts.value[id];
@@ -97,23 +99,18 @@
         const text = `${toast.title}\n${toast.message ?? ''}`.trim();
         if (typeof navigator !== 'undefined' && navigator.clipboard) try {
             await navigator.clipboard.writeText(text);
+            if (!isMounted) return;
             copiedToastId.value = toast.id;
-            if (copyResetTimer) clearTimeout(copyResetTimer);
-            copyResetTimer = setTimeout(() => {
+            copyTimeout.start(() => {
                 if (copiedToastId.value === toast.id) copiedToastId.value = null;
-                copyResetTimer = null;
-            }, 2000);
+            });
         } catch {
             // Fallback silencioso se clipboard API falhar
         }
-
     };
 
     onBeforeUnmount(() => {
-        if (copyResetTimer) {
-            clearTimeout(copyResetTimer);
-            copyResetTimer = null;
-        }
+        isMounted = false;
     });
 
     /** Mapa de ícones padrão por severidade */
@@ -137,7 +134,7 @@
         position: fixed;
         top: 74px;
         right: 16px;
-        z-index: 9999;
+        z-index: var(--max-layer-toast, 1500);
         display: flex;
         flex-direction: column;
         align-items: flex-end;

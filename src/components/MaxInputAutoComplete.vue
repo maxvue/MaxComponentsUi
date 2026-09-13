@@ -1,12 +1,12 @@
 <template>
     <InputBase v-bind="props" class="max-input-auto-complete if" :value="temp_value" :done="isDone" :error="props.error" :caution="caution">
-        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+        <template #default="{ inputAttrs }">
             <div ref="ac" class="max-autocomplete" :class="{ 'is-disabled': props.disabled }">
                 <input
-                    :id="inputId"
                     ref="inputEl"
                     type="text"
                     class="max-input-native max-autocomplete-input"
+                    v-bind="inputAttrs"
                     :value="displayedText"
                     :placeholder="props.placeholder ?? 'SELECIONE'"
                     :disabled="props.disabled"
@@ -17,9 +17,6 @@
                     :aria-expanded="isOpen && filtered_values.length > 0"
                     :aria-controls="listboxId"
                     :aria-activedescendant="activeIndex >= 0 ? `${listboxId}-opt-${activeIndex}` : undefined"
-                    :aria-describedby="hasMessage ? messageId : undefined"
-                    :aria-invalid="slotError || Boolean(props.error)"
-                    :aria-required="isRequired || props.required"
                     @input="onInput"
                     @change="onChange"
                     @focus="onFocus"
@@ -73,8 +70,8 @@
 </template>
 
 <script setup lang="ts">
-    import { hasContent, toSearchableString, useElementSize, useWindowSize } from '@maxvue/max-use';
-    import { useActiveElementBounding } from '../composables/useActiveElementBounding';
+    import { hasContent, toSearchableString } from '@maxvue/max-use';
+    import { useActiveOverlayPosition } from '../composables/useActiveOverlayPosition';
     import { getOverlayWidth, getOverlayLeft } from '../helpers/useOverlayWidth';
     import type { Ref } from 'vue';
     import { ref, computed, watch, nextTick, onBeforeUnmount, useId } from 'vue';
@@ -131,27 +128,29 @@
     const activeIndex = ref<number>(-1);
 
     const isOverlayActive = computed(() => isOpen.value && filtered_values.value.length > 0);
-    const { x, y, width: width_btn, height: height_btn } = useActiveElementBounding(ac, isOverlayActive);
-    const { height: height_el } = useElementSize(overlayEl as any);
-    const { width: window_width, height: window_height } = useWindowSize();
+    const { position } = useActiveOverlayPosition({
+        target: ac,
+        overlay: overlayEl,
+        active: isOverlayActive,
+        compute: (ctx) => {
+            const { targetRect, overlayRect, viewportWidth, viewportHeight } = ctx;
+            const targetX = targetRect.left;
+            const targetY = targetRect.top;
+            const targetH = targetRect.height;
+            const overlayH = overlayRect.height || 200;
 
-    const position = computed(() => {
-        const targetX = x.value;
-        const targetY = y.value;
-        const targetH = height_btn.value;
+            const width = getOverlayWidth({ triggerWidth: targetRect.width, windowWidth: viewportWidth });
+            let top = targetY + targetH + 2;
 
-        const width = getOverlayWidth({ triggerWidth: width_btn.value, windowWidth: window_width.value });
-
-        let top = targetY + targetH + 2;
-
-        if (top + (height_el.value || 200) > window_height.value && targetY - (height_el.value || 200) > 0) top = targetY - (height_el.value || 200) - 2;
+            if (top + overlayH > viewportHeight && targetY - overlayH > 0) top = targetY - overlayH - 2;
 
 
-        return {
-            top,
-            left: getOverlayLeft(targetX, width, window_width.value),
-            width: width + 'px'
-        };
+            return {
+                top,
+                left: getOverlayLeft(targetX, width, viewportWidth),
+                width: width + 'px'
+            };
+        }
     });
 
     const displayedText = computed(() => {

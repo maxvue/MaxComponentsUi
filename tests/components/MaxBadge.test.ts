@@ -6,7 +6,10 @@ import { BADGE_STATUS_COLORS } from '../../src/helpers/colorLuminance';
 
 function mountBadge(props: Record<string, any> = {}, attrs: Record<string, any> = {}) {
     return mount(MaxBadge, {
-        props,
+        props: {
+            label: '',
+            ...props
+        },
         attrs,
         global: {
             stubs: {

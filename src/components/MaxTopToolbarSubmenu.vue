@@ -192,7 +192,7 @@
             right: unset !important;
             top: 0 !important;
             transform: translateX(8px) !important;
-            z-index: 100000 !important;
+            z-index: var(--max-layer-dropdown, 1000) !important;
         }
     }
 }

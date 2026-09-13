@@ -108,7 +108,7 @@ describe('MaxInputDatePicker', () => {
     it('aceita prop modelValue como Date', async () => {
         const d = new Date('2024-01-01T12:00:00');
         const wrapper = mountDatePicker({ modelValue: d });
-        expect(wrapper.vm.internalDate.getTime()).toBe(d.getTime());
+        expect(wrapper.vm.internalDate?.getTime()).toBe(d.getTime());
     });
 
     it('limpa modelValue quando empty string', async () => {
@@ -299,5 +299,38 @@ describe('MaxInputDatePicker', () => {
 
         expect((wrapper.vm as any).internalDate).toBeNull();
         expect((wrapper.vm as any).isOpen).toBe(false);
+    });
+
+    it('expõe atributos de acessibilidade modeless conectando o input ao painel', async () => {
+        const wrapper = mount(MaxInputDatePicker, {
+            props: { modelValue: '2024-06-15' },
+            attachTo: document.body
+        });
+
+        const input = wrapper.find('input');
+        expect(input.attributes('aria-haspopup')).toBe('dialog');
+        expect(input.attributes('aria-expanded')).toBe('false');
+
+        const controlsId = input.attributes('aria-controls');
+        expect(controlsId).toBeTruthy();
+
+        // Abre o popup
+        await input.trigger('click');
+        await wrapper.vm.$nextTick();
+
+        expect(input.attributes('aria-expanded')).toBe('true');
+        const panel = document.getElementById(controlsId!);
+        expect(panel).toBeTruthy();
+        expect(panel?.getAttribute('role')).toBe('dialog');
+        expect(panel?.getAttribute('aria-label')).toBe('Calendário');
+        // Não é modal, portanto não deve conter aria-modal=true
+        expect(panel?.getAttribute('aria-modal')).toBeNull();
+
+        // Tecla Escape no input fecha o painel
+        await input.trigger('keydown', { key: 'Escape' });
+        await wrapper.vm.$nextTick();
+        expect((wrapper.vm as any).isOpen).toBe(false);
+
+        wrapper.unmount();
     });
 });

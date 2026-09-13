@@ -5,7 +5,10 @@ import MaxBadgeButton from '../../src/components/MaxBadgeButton.vue';
 
 function mountBadgeButton(props: Record<string, any> = {}) {
     return mount(MaxBadgeButton, {
-        props,
+        props: {
+            label: '',
+            ...props
+        },
         global: {
             stubs: {
                 MaxIcon: {

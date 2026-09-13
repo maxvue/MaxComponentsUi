@@ -15,13 +15,13 @@
                         :class="[`max-drawer-${props.position}`, { 'max-drawer-no-padding': props.noPadding }, $attrs.class]"
                         :role="props.modal ? 'dialog' : 'complementary'"
                         :aria-modal="props.modal ? 'true' : undefined"
-                        :aria-labelledby="hasHeader ? headerId : undefined"
-                        :aria-label="!hasHeader && props.ariaLabel ? props.ariaLabel : undefined"
+                        :aria-labelledby="effectiveAriaLabelledby"
+                        :aria-label="effectiveAriaLabel"
                         tabindex="-1"
                         @keydown="trap.onKeydown"
                     >
                         <div v-if="hasHeader || props.showCloseIcon" class="max-drawer-header">
-                            <slot name="header">
+                            <slot name="header" :header-id="headerId">
                                 <span :id="headerId" class="max-drawer-title">{{ props.header }}</span>
                             </slot>
                             <!--
@@ -61,7 +61,8 @@
 <script setup lang="ts">
     import { useFocusTrap } from '../helpers/useFocusTrap';
     import { useScrollLock } from '../helpers/useScrollLock';
-    import { computed, watch, onBeforeUnmount, useTemplateRef, useId, useSlots } from 'vue';
+    import { useBrowserEventListener } from '../composables/useBrowserEventListener';
+    import { computed, watch, onBeforeUnmount, onMounted, useTemplateRef, useId, useSlots, ref } from 'vue';
     import MaxIcon from './MaxIcon.vue';
 
     defineOptions({
@@ -97,6 +98,8 @@
         noPadding?: boolean;
         /** Rótulo acessível WAI-ARIA quando não houver header. */
         ariaLabel?: string;
+        /** ID do elemento que rotula o diálogo. */
+        ariaLabelledby?: string;
     }>(), {
         visible: false,
         position: 'left',
@@ -110,7 +113,9 @@
         closeButtonProps: () => ({ severity: 'secondary', text: true, rounded: true }),
         baseZIndex: 0,
         autoZIndex: true,
-        noPadding: false
+        noPadding: false,
+        ariaLabel: undefined,
+        ariaLabelledby: undefined
     });
 
     const emit = defineEmits<{
@@ -124,6 +129,24 @@
     const id = useId();
     const headerId = `max-drawer-header-${id}`;
     const hasHeader = computed(() => Boolean(props.header || slots.header));
+
+    const effectiveAriaLabelledby = computed(() => {
+        if (props.ariaLabelledby) return props.ariaLabelledby;
+        if (props.header && !slots.header) return headerId;
+        return undefined;
+    });
+
+    const effectiveAriaLabel = computed(() => {
+        if (effectiveAriaLabelledby.value) return undefined;
+        if (props.ariaLabel) return props.ariaLabel;
+        if (props.header) return props.header;
+        return props.modal ? 'Gaveta' : undefined;
+    });
+
+    watch(() => props.visible, (val) => {
+        if (val && props.modal && !effectiveAriaLabelledby.value && !effectiveAriaLabel.value && process.env.NODE_ENV !== 'production') console.warn('[MaxDrawer] Diálogo modal aberto sem nome acessível configurado (ariaLabel ou header).');
+
+    });
 
     const panel_el = useTemplateRef<HTMLElement>('panel_el');
 
@@ -179,17 +202,21 @@
      * esperado no mount).
      */
     let is_first_run = true;
-
-    /**
-     * Rastreia se ESTA instancia foi quem aplicou o lock de scroll, em vez
-     * de reconsultar `props.blockScroll` no fechamento. Isso evita destravar
-     * o scroll para sempre quando o consumidor alterna `blockScroll` para
-     * false enquanto o drawer segue aberto: sem essa flag, o guard
-     * `if (props.blockScroll)` no fechamento veria `false` e nunca chamaria
-     * `scroll_lock.unlock()`, deixando o contador compartilhado positivo
-     * indefinidamente.
-     */
     let has_scroll_lock = false;
+    const is_mounted = ref(false);
+
+    useBrowserEventListener('keydown', onEscape, () => props.visible);
+
+    onMounted(() => {
+        is_mounted.value = true;
+        if (props.visible) {
+            trap.activate();
+            if (props.blockScroll && !has_scroll_lock) {
+                scroll_lock.lock();
+                has_scroll_lock = true;
+            }
+        }
+    });
 
     watch(() => props.visible, (value) => {
 
@@ -198,28 +225,29 @@
 
         if (value) {
             emit('show');
-            trap.activate();
-            document.addEventListener('keydown', onEscape);
-            if (props.blockScroll) {
-                scroll_lock.lock();
-                has_scroll_lock = true;
+            if (is_mounted.value) {
+                trap.activate();
+                if (props.blockScroll && !has_scroll_lock) {
+                    scroll_lock.lock();
+                    has_scroll_lock = true;
+                }
             }
             return;
         }
 
         if (! first_run) emit('hide');
-        trap.deactivate();
-        document.removeEventListener('keydown', onEscape);
-        if (has_scroll_lock) {
-            scroll_lock.unlock();
-            has_scroll_lock = false;
+        if (is_mounted.value) {
+            trap.deactivate();
+            if (has_scroll_lock) {
+                scroll_lock.unlock();
+                has_scroll_lock = false;
+            }
         }
 
     }, { immediate: true });
 
     onBeforeUnmount(() => {
         trap.deactivate();
-        document.removeEventListener('keydown', onEscape);
         if (has_scroll_lock) {
             scroll_lock.unlock();
             has_scroll_lock = false;

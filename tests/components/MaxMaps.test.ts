@@ -75,14 +75,17 @@ describe('MaxMaps.vue', () => {
         expect(wrapper.vm.coordinates.longitude).toBe(20.1234568);
     });
 
-    it('testa setTimeout no onMounted', async () => {
+    it('ativa isMounted após nextTick no onMounted e não deixa timers pendentes', async () => {
         vi.useFakeTimers();
         const wrapper = mount(MaxMaps, {
             props: { modelValue: { latitude: -23.5, longitude: -46.6 } }
         });
         expect(wrapper.vm.isMounted).toBe(false);
-        vi.runAllTimers();
+        await wrapper.vm.$nextTick();
         expect(wrapper.vm.isMounted).toBe(true);
+
+        wrapper.unmount();
+        vi.runAllTimers();
         vi.useRealTimers();
     });
 
@@ -92,7 +95,7 @@ describe('MaxMaps.vue', () => {
         });
         // cover is_valid = false
         await wrapper.setProps({ modelValue: null });
-        await wrapper.setProps({ modelValue: { latitude: null, longitude: null } });
+        await wrapper.setProps({ modelValue: { latitude: null, longitude: null } as any });
         // cover is_different = false
         await wrapper.setProps({ modelValue: { latitude: -23.5, longitude: -46.6 } });
         // cover is_valid && is_different
@@ -129,6 +132,7 @@ describe('MaxMaps.vue', () => {
             }
         });
         vi.runAllTimers();
+        await wrapper.vm.$nextTick();
         await wrapper.vm.$nextTick();
 
         const googleMap = wrapper.findComponent({ name: 'GoogleMap' });

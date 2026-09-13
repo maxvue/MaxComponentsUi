@@ -7,6 +7,8 @@
                 class="max-base-overlay"
                 :role="role"
                 tabindex="-1"
+                :aria-label="ariaLabelledby ? undefined : ariaLabel"
+                :aria-labelledby="ariaLabelledby"
                 :style="panelStyle"
             >
                 <slot></slot>
@@ -16,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-    import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+    import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
     const props = withDefaults(
         defineProps<{
@@ -38,6 +40,14 @@
             offset?: number;
             /** role ARIA do painel */
             role?: string;
+            /** rótulo acessível direto */
+            ariaLabel?: string;
+            /** id do elemento que rotula o painel */
+            ariaLabelledby?: string;
+            /** papel semântico de camada ('dropdown' | 'popover' | 'modal' | 'fullscreen' | 'tooltip') */
+            layer?: 'dropdown' | 'popover' | 'modal' | 'fullscreen' | 'tooltip';
+            /** offset adicional sobre o z-index da camada */
+            layerOffset?: number;
         }>(),
         {
             visible: false,
@@ -48,7 +58,11 @@
             dismissable: true,
             closeOnEscape: true,
             offset: 4,
-            role: 'dialog'
+            role: 'dialog',
+            ariaLabel: undefined,
+            ariaLabelledby: undefined,
+            layer: 'dropdown',
+            layerOffset: 0
         }
     );
 
@@ -63,8 +77,31 @@
     const panelRef = ref<HTMLElement | null>(null);
     const panelStyle = ref<Record<string, string | undefined>>({});
 
-    let zIndexCounter = 1000;
-    const nextZIndex = () => ++zIndexCounter;
+    const computeZIndex = (): number => {
+        const isInModal = Boolean(props.target?.closest?.('.max-modal, .max-drawer, [role="dialog"]'));
+        let base = 1000;
+        switch (props.layer) {
+            case 'popover':
+                base = 1200;
+                break;
+            case 'modal':
+                base = 1310;
+                break;
+            case 'fullscreen':
+                base = 1400;
+                break;
+            case 'tooltip':
+                base = 1600;
+                break;
+            case 'dropdown':
+            default:
+                base = isInModal ? 1320 : 1000;
+                break;
+        }
+        return base + (props.layerOffset ?? 0);
+    };
+
+    const zIndex = computed(() => String(computeZIndex()));
 
     const position = () => {
         if (!props.target || !panelRef.value) return;
@@ -88,7 +125,7 @@
             top: `${top}px`,
             left: `${left}px`,
             minWidth: props.matchTargetWidth ? `${t.width}px` : undefined,
-            zIndex: String(nextZIndex())
+            zIndex: zIndex.value
         };
     };
 
@@ -148,7 +185,7 @@
             position: 'fixed',
             visibility: 'hidden',
             opacity: '0',
-            zIndex: String(nextZIndex())
+            zIndex: zIndex.value
         };
         await nextTick();
         position();

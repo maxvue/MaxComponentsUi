@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
-import type { Ref } from 'vue';
-import { ref } from 'vue';
+import type { Ref, ShallowRef } from 'vue';
+import { ref, shallowRef, markRaw } from 'vue';
 import type { ButtonSeverity, ConfirmActionProps } from '../types';
 
 export type ConfirmPayload = {
@@ -41,7 +41,7 @@ export const useConfirmStore = defineStore('confirm.popover', () => {
     const y: Ref<number> = ref(0);
     const width: Ref<number> = ref(0);
     const height: Ref<number> = ref(0);
-    const targetElement: Ref<HTMLElement | null> = ref(null);
+    const targetElement: ShallowRef<HTMLElement | null> = shallowRef(null);
 
     const hide = () => {
         show.value = false;
@@ -76,7 +76,7 @@ export const useConfirmStore = defineStore('confirm.popover', () => {
         y.value = payload.y;
         width.value = payload.width;
         height.value = payload.height;
-        targetElement.value = payload.target ?? null;
+        targetElement.value = payload.target ? markRaw(payload.target) : null;
         show.value = true;
     };
 

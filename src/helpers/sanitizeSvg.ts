@@ -1,5 +1,13 @@
 import DOMPurify from 'dompurify';
 
+declare const __sanitizedSvgBrand: unique symbol;
+
+/**
+ * Tipo nominal seguro representando um SVG que atravessou com sucesso
+ * a verificação do DOMPurify, DOMParser e inspeção de scripts/handlers.
+ */
+export type SanitizedSvg = string & { readonly [__sanitizedSvgBrand]: true };
+
 /**
  * Sanitiza um SVG recebido de fonte externa (API, MITM, cache local) antes de ser
  * armazenado em memória, persistido em cache ou injetado via v-html.
@@ -8,7 +16,7 @@ import DOMPurify from 'dompurify';
  * - o conteúdo não começa (após trim) com `<svg` (case-insensitive);
  * - após a sanitização pelo DOMPurify, ainda restarem elementos <script> ou atributos de evento inline on*.
  */
-export function sanitizeSvg(raw: string | null | undefined): string {
+export function sanitizeSvg(raw: string | null | undefined): SanitizedSvg | '' {
     if (!raw) return '';
 
     const trimmed = raw.trim();
@@ -49,5 +57,5 @@ export function sanitizeSvg(raw: string | null | undefined): string {
         if (/<script/i.test(sanitized)) return '';
     }
 
-    return sanitized;
+    return sanitized as SanitizedSvg;
 }

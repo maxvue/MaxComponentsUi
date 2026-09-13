@@ -24,6 +24,7 @@
                     :aria-label="props.alt || 'Visualizador de Imagem'"
                     tabindex="-1"
                     @click.self="onBackdropClick"
+                    @keydown="trap.onKeydown"
                     @keydown.esc="closePreview"
                 >
                     <div class="max-image-modal__viewport" @click.self="onBackdropClick">
@@ -165,6 +166,7 @@
     import { ref, computed, watch, onBeforeUnmount, nextTick, type StyleValue } from 'vue';
     import MaxIconButton from './MaxIconButton.vue';
     import { useScrollLock } from '../helpers/useScrollLock';
+    import { useFocusTrap } from '../helpers/useFocusTrap';
 
     export interface MaxImageEditPayload {
         /** Data URL em base64 da imagem resultante */
@@ -236,6 +238,7 @@
     const cropImgRef = ref<HTMLImageElement | null>(null);
     const cropStageRef = ref<HTMLElement | null>(null);
     const modalRef = ref<HTMLElement | null>(null);
+    const trap = useFocusTrap(modalRef);
 
     // Estado da caixa de recorte
     const cropBox = ref({
@@ -278,6 +281,7 @@
         isCropping.value = false;
         scrollLock.lock();
         emit('show');
+        trap.activate();
         nextTick(() => {
             modalRef.value?.focus();
         });
@@ -289,6 +293,7 @@
         isOpen.value = false;
         isCropping.value = false;
         zoomScale.value = 1;
+        trap.deactivate();
         scrollLock.unlock();
         emit('hide');
     };
@@ -531,6 +536,7 @@
         cleanupPointerListeners();
         if (isOpen.value) {
             window.removeEventListener('keydown', onKeydown);
+            trap.deactivate();
             scrollLock.unlock();
         }
     });
@@ -572,7 +578,7 @@
     .max-image-modal {
         position: fixed;
         inset: 0;
-        z-index: 9999;
+        z-index: var(--max-layer-fullscreen, 1400);
         background-color: rgb(0 0 0 / 50%);
         display: flex;
         align-items: center;

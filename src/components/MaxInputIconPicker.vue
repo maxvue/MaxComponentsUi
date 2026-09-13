@@ -7,27 +7,30 @@
         class="max-input-icon-picker"
         @click.stop="openDrawer"
     >
-        <div
-            ref="triggerRef"
-            class="icon-picker-trigger"
-            :class="{ 'is-disabled': props.disabled }"
-            role="button"
-            :tabindex="props.disabled ? -1 : 0"
-            aria-haspopup="dialog"
-            :aria-expanded="visible"
-            :aria-label="modelValue ? `Ícone selecionado: ${modelValue}. Clique para alterar` : 'Escolha um ícone'"
-            @keydown.enter.prevent="openDrawer"
-            @keydown.space.prevent="openDrawer"
-        >
-            <MaxIcon
-                :i="modelValue || 'tabler:icons-filled'"
-                size="1.2"
-                :color="modelValue && props.color ? props.color : undefined"
-                :dark="!modelValue ? 0.3 : 0.5"
-            />
-            <span class="trigger-label">{{ modelValue || props.placeholder || 'Escolha um ícone' }}</span>
-            <MaxIcon i="mdi:chevron-down" size="0.9" :dark="0.4" />
-        </div>
+        <template #default="{ inputAttrs }">
+            <div
+                ref="triggerRef"
+                v-bind="inputAttrs"
+                class="icon-picker-trigger"
+                :class="{ 'is-disabled': props.disabled }"
+                role="button"
+                :tabindex="props.disabled ? -1 : 0"
+                aria-haspopup="dialog"
+                :aria-expanded="visible"
+                :aria-label="modelValue ? `Ícone selecionado: ${modelValue}. Clique para alterar` : 'Escolha um ícone'"
+                @keydown.enter.prevent="openDrawer"
+                @keydown.space.prevent="openDrawer"
+            >
+                <MaxIcon
+                    :i="modelValue || 'tabler:icons-filled'"
+                    size="1.2"
+                    :color="modelValue && props.color ? props.color : undefined"
+                    :dark="!modelValue ? 0.3 : 0.5"
+                />
+                <span class="trigger-label">{{ modelValue || props.placeholder || 'Escolha um ícone' }}</span>
+                <MaxIcon i="mdi:chevron-down" size="0.9" :dark="0.4" />
+            </div>
+        </template>
     </InputBase>
 
     <Teleport to="body" v-if="visible">
@@ -38,7 +41,9 @@
                 role="dialog"
                 aria-modal="true"
                 aria-label="Escolha um ícone"
+                tabindex="-1"
                 @click.stop
+                @keydown="trap.onKeydown"
             >
                 <div class="p-drawer-header">
                     <span class="p-drawer-title">Escolha um ícone</span>
@@ -130,6 +135,7 @@
     import MaxIcon from './MaxIcon.vue';
     import { sanitizeSvg } from '../helpers/sanitizeSvg';
     import { useVirtualList } from '../composables/useVirtualList';
+    import { useFocusTrap } from '../helpers/useFocusTrap';
 
     const COLS = 8;
     const ROW_HEIGHT = 40;
@@ -191,6 +197,7 @@
     const triggerRef = ref<HTMLElement | null>(null);
     const searchInputRef = ref<HTMLInputElement | null>(null);
     const drawerEl = ref<HTMLElement | null>(null);
+    const trap = useFocusTrap(drawerEl);
     const search = ref('');
     const curatedIcons = ref<IconEntry[]>([]);
     const isLoading = ref(false);
@@ -338,11 +345,13 @@
             svgFetchTimer = null;
         }
         visible.value = true;
+        trap.activate();
         fetchCuratedIcons();
     };
 
     const closeDrawer = () => {
         visible.value = false;
+        trap.deactivate();
         nextTick(() => {
             triggerRef.value?.focus();
         });
@@ -356,16 +365,17 @@
 
     const onGlobalKeydown = (event: KeyboardEvent) => {
         if (event.key === 'Escape' && visible.value) closeDrawer();
-
     };
 
     watch(visible, async (val) => {
         if (val) {
             if (typeof window !== 'undefined') window.addEventListener('keydown', onGlobalKeydown);
+            trap.activate();
             await nextTick();
             searchInputRef.value?.focus();
         } else {
             if (typeof window !== 'undefined') window.removeEventListener('keydown', onGlobalKeydown);
+            trap.deactivate();
             nextTick(() => {
                 triggerRef.value?.focus();
             });
@@ -391,6 +401,7 @@
     });
 
     onBeforeUnmount(() => {
+        trap.deactivate();
         if (typeof window !== 'undefined') window.removeEventListener('keydown', onGlobalKeydown);
         if (svgFetchTimer !== null) {
             clearTimeout(svgFetchTimer);
@@ -437,7 +448,7 @@
 .max-icon-picker-drawer-backdrop {
     position: fixed;
     inset: 0;
-    z-index: 1200;
+    z-index: var(--max-layer-modal, 1310);
     background: rgb(0 0 0 / 40%);
     display: flex;
     align-items: flex-end;

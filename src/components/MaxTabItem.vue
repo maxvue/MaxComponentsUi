@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-    import { inject, ref, onMounted, onBeforeUnmount, toValue, computed } from 'vue';
+    import { inject, ref, onMounted, onBeforeUnmount, toValue, computed, nextTick } from 'vue';
     import { Random } from '@maxvue/max-use';
     import MaxIcon from './MaxIcon.vue';
     import MaxButton from './MaxButton.vue';
@@ -75,34 +75,23 @@
 
     const is_active = computed(() => String(toValue(tabs_info?.active_tab)) === String(toValue(tab_id)));
 
-    let mountTimer1: ReturnType<typeof setTimeout> | null = null;
-    let mountTimer2: ReturnType<typeof setTimeout> | null = null;
-
-    onMounted(() => {
+    onMounted(async () => {
         is_mounted.value = true;
 
-        mountTimer1 = setTimeout(() => {
-            // Usa o `value` informado como identificador da aba; sem ele, mantém a
-            // numeração automática por ordem de montagem (compatibilidade).
-            if (!tab_id.value) tab_id.value = props.value ?? tabs_info?.add_count_tabs?.();
-            mountTimer1 = null;
-        }, 0);
-        mountTimer2 = setTimeout(() => {
-            if (toValue(tabs_info?.active_tab) == 0 || toValue(tabs_info?.active_tab) === '' || toValue(tabs_info?.active_tab) === undefined) tabs_info?.selectTab?.(tab_id.value);
+        // Usa o `value` informado como identificador da aba; sem ele, mantém a
+        // numeração automática por ordem de montagem (compatibilidade).
+        if (!tab_id.value) tab_id.value = props.value ?? tabs_info?.add_count_tabs?.();
 
-            mountTimer2 = null;
-        }, 10);
+        await nextTick();
+        if (!is_mounted.value) return;
+
+        const current_active = toValue(tabs_info?.active_tab);
+        if (current_active == 0 || current_active === '' || current_active === undefined) tabs_info?.selectTab?.(tab_id.value);
+
     });
 
     onBeforeUnmount(() => {
-        if (mountTimer1 !== null) {
-            clearTimeout(mountTimer1);
-            mountTimer1 = null;
-        }
-        if (mountTimer2 !== null) {
-            clearTimeout(mountTimer2);
-            mountTimer2 = null;
-        }
+        is_mounted.value = false;
     });
 </script>
 

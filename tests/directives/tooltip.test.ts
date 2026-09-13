@@ -26,8 +26,8 @@ function mountWithTooltip(bindingExpr: string, modifiers: string[] = [], extra: 
     return mount(Comp, { attachTo: document.body });
 }
 
-function getTooltipNode() {
-    return document.body.querySelector('.max-tooltip');
+function getTooltipNode(): HTMLElement | null {
+    return document.body.querySelector<HTMLElement>('.max-tooltip');
 }
 
 describe('v-tooltip directive', () => {
@@ -347,5 +347,125 @@ describe('v-tooltip directive', () => {
 
         vi.advanceTimersByTime(500);
         expect(getTooltipNode()).toBeNull();
+    });
+
+    it('preserva aria-describedby preexistente ao exibir e ao ocultar', async () => {
+        const Comp = defineComponent({
+            directives: { tooltip: Tooltip },
+            template: '<button aria-describedby="field-help" v-tooltip="\'Texto\'">trigger</button>',
+            mounted() {
+                mockCenteredRect(this.$el as HTMLElement);
+            }
+        });
+        wrapper = mount(Comp, { attachTo: document.body });
+        const button = wrapper.find('button').element as HTMLElement;
+
+        expect(button.getAttribute('aria-describedby')).toBe('field-help');
+
+        await wrapper.find('button').trigger('mouseenter');
+        vi.runAllTimers();
+
+        const tooltipEl = getTooltipNode();
+        expect(tooltipEl).not.toBeNull();
+        const describedBy = button.getAttribute('aria-describedby')?.split(/\s+/) ?? [];
+        expect(describedBy).toContain('field-help');
+        expect(describedBy).toContain(tooltipEl?.id);
+        expect(describedBy.length).toBe(2);
+
+        await wrapper.find('button').trigger('mouseleave');
+        vi.runAllTimers();
+
+        expect(button.getAttribute('aria-describedby')).toBe('field-help');
+    });
+
+    it('preserva multiplos tokens preexistentes em aria-describedby', async () => {
+        const Comp = defineComponent({
+            directives: { tooltip: Tooltip },
+            template: '<button aria-describedby="error-msg   help-hint" v-tooltip="\'Ajuda\'">trigger</button>',
+            mounted() {
+                mockCenteredRect(this.$el as HTMLElement);
+            }
+        });
+        wrapper = mount(Comp, { attachTo: document.body });
+        const button = wrapper.find('button').element as HTMLElement;
+
+        await wrapper.find('button').trigger('mouseenter');
+        vi.runAllTimers();
+
+        const tooltipEl = getTooltipNode();
+        expect(tooltipEl).not.toBeNull();
+        const tokens = button.getAttribute('aria-describedby')?.split(/\s+/) ?? [];
+        expect(tokens).toEqual(['error-msg', 'help-hint', tooltipEl?.id]);
+
+        await wrapper.find('button').trigger('mouseleave');
+        vi.runAllTimers();
+
+        expect(button.getAttribute('aria-describedby')).toBe('error-msg help-hint');
+    });
+
+    it('preserva tokens adicionados externamente enquanto tooltip esta visivel', async () => {
+        const Comp = defineComponent({
+            directives: { tooltip: Tooltip },
+            template: '<button aria-describedby="initial-desc" v-tooltip="\'Texto\'">trigger</button>',
+            mounted() {
+                mockCenteredRect(this.$el as HTMLElement);
+            }
+        });
+        wrapper = mount(Comp, { attachTo: document.body });
+        const button = wrapper.find('button').element as HTMLElement;
+
+        await wrapper.find('button').trigger('mouseenter');
+        vi.runAllTimers();
+
+        const tooltipEl = getTooltipNode();
+        // Simula script externo adicionando mais um id
+        button.setAttribute('aria-describedby', `${button.getAttribute('aria-describedby')} dynamic-token`);
+
+        await wrapper.find('button').trigger('mouseleave');
+        vi.runAllTimers();
+
+        const tokensAfter = button.getAttribute('aria-describedby')?.split(/\s+/) ?? [];
+        expect(tokensAfter).toContain('initial-desc');
+        expect(tokensAfter).toContain('dynamic-token');
+        expect(tokensAfter).not.toContain(tooltipEl?.id);
+    });
+
+    it('remove completamente o atributo aria-describedby se o tooltip era o unico token', async () => {
+        wrapper = mountWithTooltip('\'Texto\'');
+        const button = wrapper.find('button').element as HTMLElement;
+        expect(button.hasAttribute('aria-describedby')).toBe(false);
+
+        await wrapper.find('button').trigger('mouseenter');
+        vi.runAllTimers();
+
+        expect(button.hasAttribute('aria-describedby')).toBe(true);
+
+        await wrapper.find('button').trigger('mouseleave');
+        vi.runAllTimers();
+
+        expect(button.hasAttribute('aria-describedby')).toBe(false);
+    });
+
+    it('unmounted remove somente o token do tooltip preservando outros tokens no elemento', async () => {
+        const Comp = defineComponent({
+            directives: { tooltip: Tooltip },
+            template: '<button aria-describedby="persistent-id" v-tooltip="\'Texto\'">trigger</button>',
+            mounted() {
+                mockCenteredRect(this.$el as HTMLElement);
+            }
+        });
+        wrapper = mount(Comp, { attachTo: document.body });
+        const button = wrapper.find('button').element as HTMLElement;
+
+        await wrapper.find('button').trigger('mouseenter');
+        vi.runAllTimers();
+
+        const tooltipEl = getTooltipNode();
+        expect(button.getAttribute('aria-describedby')).toBe(`persistent-id ${tooltipEl?.id}`);
+
+        wrapper.unmount();
+        wrapper = null;
+
+        expect(button.getAttribute('aria-describedby')).toBe('persistent-id');
     });
 });

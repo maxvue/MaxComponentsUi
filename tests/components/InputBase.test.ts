@@ -314,4 +314,79 @@ describe('InputBase.vue', () => {
         const textSpan = messageEl.find('.message-text');
         expect(textSpan.attributes('title')).toBe('Mensagem truncada');
     });
+
+    it('exposes inputAttrs, ariaDescribedby, ariaInvalid, and ariaRequired via slot props', () => {
+        let capturedProps: any;
+        mount(InputBase, {
+            props: { label: 'Campo', error: 'Incorreto', required: true },
+            slots: {
+                default: (slotProps: any) => {
+                    capturedProps = slotProps;
+                    return [];
+                }
+            }
+        });
+
+        expect(capturedProps.inputId).toBeTruthy();
+        expect(capturedProps.ariaInvalid).toBe('true');
+        expect(capturedProps.ariaRequired).toBe('true');
+        expect(capturedProps.ariaDescribedby).toBe(capturedProps.messageId);
+        expect(capturedProps.inputAttrs).toEqual({
+            id: capturedProps.inputId,
+            'aria-invalid': 'true',
+            'aria-required': 'true',
+            'aria-describedby': capturedProps.messageId
+        });
+    });
+
+    it('inputAttrs does not include aria-describedby when there is no feedback message', () => {
+        let capturedProps: any;
+        mount(InputBase, {
+            props: { label: 'Campo' },
+            slots: {
+                default: (slotProps: any) => {
+                    capturedProps = slotProps;
+                    return [];
+                }
+            }
+        });
+
+        expect(capturedProps.ariaDescribedby).toBeUndefined();
+        expect(capturedProps.inputAttrs['aria-describedby']).toBeUndefined();
+        expect(capturedProps.inputAttrs['aria-invalid']).toBeUndefined();
+        expect(capturedProps.inputAttrs['aria-required']).toBeUndefined();
+    });
+
+    it('composes external ariaDescribedby with messageId without duplicates', () => {
+        let capturedProps: any;
+        mount(InputBase, {
+            props: { label: 'Campo', message: 'Ajuda', ariaDescribedby: 'external-hint' },
+            slots: {
+                default: (slotProps: any) => {
+                    capturedProps = slotProps;
+                    return [];
+                }
+            }
+        });
+
+        expect(capturedProps.ariaDescribedby).toBe(`external-hint ${capturedProps.messageId}`);
+        expect(capturedProps.inputAttrs['aria-describedby']).toBe(`external-hint ${capturedProps.messageId}`);
+    });
+
+    it('permite customizar a mensagem de fallback via prop errorMessageFallback', () => {
+        const wrapper = mount(InputBase, {
+            props: { error: true, errorMessageFallback: 'Preenchimento incorreto' }
+        });
+        const textSpan = wrapper.find('.input-message .message-text');
+        expect(textSpan.exists()).toBe(true);
+        expect(textSpan.text()).toBe('Preenchimento incorreto');
+    });
+
+    it('marca o container .input-status-icon como aria-hidden="true"', () => {
+        const wrapper = mount(InputBase, {
+            props: { done: true }
+        });
+        const container = wrapper.find('.input-status-icon');
+        expect(container.attributes('aria-hidden')).toBe('true');
+    });
 });

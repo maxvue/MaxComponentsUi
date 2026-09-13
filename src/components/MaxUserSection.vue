@@ -79,8 +79,7 @@
     import { computed, ref, nextTick, watch, onBeforeUnmount } from 'vue';
     import MaxIcon from './MaxIcon.vue';
     import MaxUserAvatar from './MaxUserAvatar.vue';
-    import { useElementSize, useWindowSize } from '@maxvue/max-use';
-    import { useActiveElementBounding } from '../composables/useActiveElementBounding';
+    import { useActiveOverlayPosition } from '../composables/useActiveOverlayPosition';
 
     const props = withDefaults(defineProps<{
         /** Nome do usuário */
@@ -150,25 +149,33 @@
     const isOpen = ref(false);
 
     const boundingTarget = computed(() => anchorEl.value ?? root_el.value);
-    const { x, y, width: width_btn, height: height_btn } = useActiveElementBounding(boundingTarget, isOpen);
-    const { width: width_el, height: height_el } = useElementSize(menuEl as any);
-    const { width: window_width, height: window_height } = useWindowSize();
 
-    const position = computed(() => {
-        const targetX = x.value;
-        const targetY = y.value;
-        const targetW = width_btn.value;
-        const targetH = height_btn.value;
+    const { position } = useActiveOverlayPosition<{ top: number; left: number }>({
+        target: boundingTarget,
+        overlay: menuEl,
+        active: isOpen,
+        compute: ({ targetRect, overlayRect, viewportWidth, viewportHeight }) => {
+            const targetX = targetRect.left;
+            const targetY = targetRect.top;
+            const targetW = targetRect.width;
+            const targetH = targetRect.height;
+            const width_el = overlayRect.width || 180;
+            const height_el = overlayRect.height || 200;
 
-        let top = targetY + targetH + 4;
-        let left = targetX + targetW - (width_el.value || 180);
+            let top = targetY + targetH + 4;
+            let left = targetX + targetW - width_el;
 
-        if (top + (height_el.value || 200) > window_height.value && targetY - (height_el.value || 200) > 0) top = targetY - (height_el.value || 200) - 4;
+            if (top + height_el > viewportHeight && targetY - height_el > 0) top = targetY - height_el - 4;
 
-        if (left < 10) left = 10;
-        if (window_width.value && left + (width_el.value || 180) > window_width.value - 10) left = Math.max(10, window_width.value - (width_el.value || 180) - 10);
 
-        return { top, left };
+            if (left < 10) left = 10;
+            if (viewportWidth && left + width_el > viewportWidth - 10) left = Math.max(10, viewportWidth - width_el - 10);
+
+
+            left = Math.max(8, Math.min(left, viewportWidth - width_el - 8));
+
+            return { top, left };
+        }
     });
 
     const defaultItems = computed(() => {
@@ -534,6 +541,10 @@
         border-radius: 0.5rem;
         box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
         min-width: 180px;
+        max-width: calc(100vw - 16px);
+        box-sizing: border-box;
+        max-height: calc(100dvh - 32px);
+        overflow-y: auto;
         padding: 4px;
         display: flex;
         flex-direction: column;

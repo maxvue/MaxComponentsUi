@@ -219,7 +219,7 @@ describe('MaxBaseOverlay', () => {
         t.remove();
     });
 
-    it('z-index cresce a cada reposicionamento/abertura', async () => {
+    it('z-index é determinístico e estável através de reposicionamento/resize', async () => {
         wrapper = mount(MaxBaseOverlay, { props: { visible: true, target } });
         await settle();
         const firstZ = Number(getPanel().style.zIndex);
@@ -228,7 +228,8 @@ describe('MaxBaseOverlay', () => {
         await settle();
         const secondZ = Number(getPanel().style.zIndex);
 
-        expect(secondZ).toBeGreaterThan(firstZ);
+        expect(firstZ).toBe(1000);
+        expect(secondZ).toBe(firstZ);
     });
 
     it('reposiciona ao redimensionar a janela (listener de resize ativo)', async () => {

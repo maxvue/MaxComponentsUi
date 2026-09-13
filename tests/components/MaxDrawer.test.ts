@@ -512,4 +512,74 @@ describe('MaxDrawer', () => {
 
         expect(() => wrapper.unmount()).not.toThrow();
     });
+
+    describe('acessibilidade e nome acessível', () => {
+        it('usa aria-labelledby quando header textual padrão é fornecido', async () => {
+            const wrapper = mount(MaxDrawer, {
+                props: { visible: true, header: 'Título da Gaveta' },
+                attachTo: document.body
+            });
+
+            const panel = document.querySelector('.max-drawer');
+            expect(panel?.getAttribute('role')).toBe('dialog');
+            expect(panel?.getAttribute('aria-modal')).toBe('true');
+            const labelledby = panel?.getAttribute('aria-labelledby');
+            expect(labelledby).toBeTruthy();
+            const headerEl = document.getElementById(labelledby!);
+            expect(headerEl?.textContent).toBe('Título da Gaveta');
+            expect(panel?.getAttribute('aria-label')).toBeNull();
+            wrapper.unmount();
+        });
+
+        it('usa aria-label quando especificado diretamente', async () => {
+            const wrapper = mount(MaxDrawer, {
+                props: { visible: true, ariaLabel: 'Gaveta de Filtros' },
+                attachTo: document.body
+            });
+
+            const panel = document.querySelector('.max-drawer');
+            expect(panel?.getAttribute('aria-label')).toBe('Gaveta de Filtros');
+            expect(panel?.getAttribute('aria-labelledby')).toBeNull();
+            wrapper.unmount();
+        });
+
+        it('não emite aria-labelledby apontando para ID inexistente quando header slot customizado é usado', async () => {
+            const wrapper = mount(MaxDrawer, {
+                props: { visible: true, header: 'Antigo' },
+                slots: {
+                    header: '<h3 class="custom-header">Cabeçalho Customizado</h3>'
+                },
+                attachTo: document.body
+            });
+
+            const panel = document.querySelector('.max-drawer');
+            // Como o slot customizado substituiu o span com id, aria-labelledby não pode apontar para id ausente
+            expect(panel?.getAttribute('aria-labelledby')).toBeNull();
+            expect(panel?.getAttribute('aria-label')).toBe('Antigo');
+            wrapper.unmount();
+        });
+
+        it('respeita ariaLabelledby explícito quando informado', async () => {
+            const wrapper = mount(MaxDrawer, {
+                props: { visible: true, ariaLabelledby: 'external-title-id' },
+                attachTo: document.body
+            });
+
+            const panel = document.querySelector('.max-drawer');
+            expect(panel?.getAttribute('aria-labelledby')).toBe('external-title-id');
+            expect(panel?.getAttribute('aria-label')).toBeNull();
+            wrapper.unmount();
+        });
+
+        it('fornece fallback não vazio "Gaveta" para diálogo modal sem header ou ariaLabel', async () => {
+            const wrapper = mount(MaxDrawer, {
+                props: { visible: true },
+                attachTo: document.body
+            });
+
+            const panel = document.querySelector('.max-drawer');
+            expect(panel?.getAttribute('aria-label')).toBe('Gaveta');
+            wrapper.unmount();
+        });
+    });
 });

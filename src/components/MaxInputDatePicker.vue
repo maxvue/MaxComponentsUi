@@ -7,20 +7,20 @@
         :done="isDone"
         :icon="props.icon ?? 'solar:calendar-line-duotone'"
     >
-        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+        <template #default="{ inputAttrs }">
             <div ref="triggerEl" class="max-datepicker-wrapper">
                 <input
-                    :id="inputId"
                     ref="inputElement"
                     type="text"
                     class="max-datepicker-input"
+                    v-bind="inputAttrs"
                     :value="displayValue"
                     v-maska="maskValue"
                     :placeholder="props.placeholder ?? 'dd/mm/aaaa'"
                     :disabled="props.disabled"
-                    :aria-describedby="hasMessage ? messageId : undefined"
-                    :aria-invalid="slotError ? 'true' : undefined"
-                    :aria-required="isRequired ? 'true' : undefined"
+                    aria-haspopup="dialog"
+                    :aria-expanded="isOpen"
+                    :aria-controls="panelId"
                     @focus="open"
                     @click="open"
                     @blur="onBlur"
@@ -32,8 +32,11 @@
 
             <Teleport to="body" v-if="isOpen">
                 <div
+                    :id="panelId"
                     ref="overlayEl"
                     class="max-datepicker-panel"
+                    role="dialog"
+                    aria-label="Calendário"
                     :style="{ top: position.top + 'px', left: position.left + 'px' }"
                     @click.stop
                 >
@@ -164,14 +167,16 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, computed, watch, nextTick, onBeforeUnmount } from 'vue';
+    import { ref, computed, watch, nextTick, onBeforeUnmount, useId } from 'vue';
     import InputBase from './InputBase.vue';
     import MaxIcon from './MaxIcon.vue';
-    import { useDateFormat, useElementSize, useWindowSize } from '@maxvue/max-use';
-    import { useActiveElementBounding } from '../composables/useActiveElementBounding';
+    import { useDateFormat } from '@maxvue/max-use';
+    import { useActiveOverlayPosition } from '../composables/useActiveOverlayPosition';
     import { vMaska } from 'maska/vue';
     import { SelectGroupOptions } from '../types';
 
+    const id = useId();
+    const panelId = computed(() => 'max-datepicker-panel-' + id);
     const modelValue = defineModel<any>({ default: '' });
     const internalDate = ref<Date | null>(null);
     const hasBeenTouched = ref(false);
@@ -305,25 +310,27 @@
     ];
     const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
-    const { x, y, height: height_btn } = useActiveElementBounding(triggerEl, isOpen);
-    const { width: width_el, height: height_el } = useElementSize(overlayEl as any);
-    const { width: window_width, height: window_height } = useWindowSize();
+    const { position } = useActiveOverlayPosition({
+        target: triggerEl,
+        overlay: overlayEl,
+        active: isOpen,
+        compute: (ctx) => {
+            const { targetRect, overlayRect, viewportWidth, viewportHeight } = ctx;
+            const targetX = targetRect.left;
+            const targetY = targetRect.top;
+            const targetH = targetRect.height;
+            const overlayH = overlayRect.height || 280;
+            const overlayW = overlayRect.width || 280;
 
-    const position = computed(() => {
-        const targetX = x.value;
-        const targetY = y.value;
-        const targetH = height_btn.value;
+            let top = targetY + targetH + 4;
+            let left = targetX;
 
-        let top = targetY + targetH + 4;
-        let left = targetX;
+            if (top + overlayH > viewportHeight && targetY - overlayH > 0) top = targetY - overlayH - 4;
 
-        if (top + (height_el.value || 280) > window_height.value && targetY - (height_el.value || 280) > 0) top = targetY - (height_el.value || 280) - 4;
+            if (left + overlayW > viewportWidth) left = Math.max(10, viewportWidth - overlayW - 10);
 
-
-        if (left + (width_el.value || 280) > window_width.value) left = Math.max(10, window_width.value - (width_el.value || 280) - 10);
-
-
-        return { top, left };
+            return { top, left };
+        }
     });
 
     const parseDateValue = (val: unknown): Date | null => {

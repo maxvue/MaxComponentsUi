@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
-import { ref, nextTick } from 'vue';
+import { ref, nextTick, defineComponent } from 'vue';
 import TransitionFade from '../../src/components/TransitionFade.vue';
 
 describe('TransitionFade', () => {
@@ -16,7 +16,7 @@ describe('TransitionFade', () => {
     });
 
     it('alterna o nó renderizado quando condicionado reativamente', async () => {
-        const HostComponent = {
+        const HostComponent = defineComponent({
             components: { TransitionFade },
             setup() {
                 const isShown = ref(true);
@@ -27,7 +27,7 @@ describe('TransitionFade', () => {
                     <div v-if="isShown" class="box-fade">Caixa Fade</div>
                 </TransitionFade>
             `
-        };
+        });
 
         const wrapper = mount(HostComponent);
         expect(wrapper.find('.box-fade').exists()).toBe(true);

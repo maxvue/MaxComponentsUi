@@ -1,15 +1,14 @@
 import type { ComputedRef, Ref } from 'vue';
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 export interface UseInputValidationOptions {
     /** Se o campo e obrigatorio (usado para a mensagem de erro de campo vazio). */
     required?: Ref<boolean | undefined> | boolean;
-    /** Valor para comparacao opcional, exposto para uso futuro por quem consome o composable. */
-    targetValue?: Ref<string | undefined>;
+    /** Valor para comparacao opcional, exposto para confirmacao de senha ou equivalentes. */
+    targetValue?: Ref<any>;
     /**
      * Override explicito de caution vindo do pai. Quando definido, e retornado
-     * DIRETO, sem AND com nenhum estado interno de validacao — ver correcao
-     * do achado 22 abaixo.
+     * DIRETO, sem AND com nenhum estado interno de validacao.
      */
     caution?: Ref<string | boolean | undefined>;
     /** Override explicito de done vindo do pai. Quando definido, e retornado direto. */
@@ -22,59 +21,144 @@ export interface UseInputValidationOptions {
     invalidMessage?: string;
     /** Mensagem de erro a usar quando o campo e obrigatorio e esta vazio. Default: 'Campo obrigatório'. */
     requiredMessage?: string;
+    /** Modo de validação: 'lazy' (padrão: valida após blur/submit) ou 'eager' (imediato no mount). */
+    mode?: 'lazy' | 'eager';
+    /** Alias para mode === 'eager' */
+    immediate?: boolean;
 }
 
 export interface UseInputValidationResult {
     done: ComputedRef<boolean | null>;
     error: ComputedRef<string | boolean | null>;
     caution: ComputedRef<boolean>;
+    touched: Ref<boolean>;
+    dirty: Ref<boolean>;
+    submitted: Ref<boolean>;
+    isValid: ComputedRef<boolean>;
     onBlur: () => void;
+    onInput: (val?: any) => void;
+    submit: () => boolean;
+    reset: () => void;
 }
 
+const isEmpty = (val: any): boolean => {
+    if (val === null || val === undefined) return true;
+    if (typeof val === 'string') return val.trim().length === 0;
+    if (Array.isArray(val)) return val.length === 0;
+    return false;
+};
+
 /**
- * Encapsula a logica done/error/caution comum aos inputs desta lib, hoje
- * reimplementada (com pequenas divergencias) em varios componentes.
+ * Encapsula a politica touched/dirty/submitted e a logica done/error/caution
+ * compartilhada pelos componentes de formulario da biblioteca.
  *
- * Corrige o bug do achado 22: a implementacao antiga fazia
- * `caution = props.caution !== undefined ? props.caution && isDone.value === false : ...`,
- * o que suprimia uma caution explicita do pai ate haver blur invalido
- * (por causa do AND com `isDone.value === false`), invertendo a intencao do
- * override. Aqui, quando `options.caution` esta definido, ele e devolvido
- * diretamente, sem nenhum AND com estado interno.
- *
- * `onBlur` e exposto para quem quiser acionar a validacao apenas apos o
- * usuario sair do campo; a integracao fina com o ciclo de vida do
- * componente (quando chamar `onBlur`, se o componente usa esse gate ou nao)
- * continua sendo responsabilidade de quem consome o composable.
+ * Politica de feedback:
+ * - Campos obrigatorios vazios nao exibem erro no mount (estado neutro: done=null, sem erro).
+ * - A validacao e ativada apos blur (onBlur) ou submissao do formulario (submit).
+ * - Uma vez em erro, a correcao valida remove o erro imediatamente na proxima digitacao (onInput).
+ * - Campos opcionais vazios permanecem em estado neutro (done=null, sem caution).
+ * - Overrides explicitos de done e caution pelo pai continuam tendo prioridade absoluta.
  */
 export function useInputValidation(options: UseInputValidationOptions): UseInputValidationResult {
+    const isEager = Boolean(options.immediate || options.mode === 'eager');
+    const touched = ref(isEager);
+    const dirty = ref(isEager);
+    const submitted = ref(false);
+    const hadError = ref(false);
+
     const isRequired = () => (typeof options.required === 'boolean' ? options.required : options.required?.value) ?? false;
 
-    const isValid = computed(() => options.validator(options.value.value));
+    const isValid = computed(() => {
+        if (options.done?.value !== undefined) return options.done.value;
+        const val = options.value.value;
+        const empty = isEmpty(val);
+        if (empty) return !isRequired();
+
+        if (options.targetValue && options.targetValue.value !== undefined) if (val !== options.targetValue.value) return false;
+
+        return options.validator(val);
+    });
+
+    const shouldShowError = computed(() => {
+        if (options.caution?.value !== undefined) return Boolean(options.caution.value);
+        if (options.done?.value !== undefined) return options.done.value === false;
+        if (isValid.value) return false;
+
+        const empty = isEmpty(options.value.value);
+        if (empty) return isRequired() && (touched.value || submitted.value);
+
+
+        return touched.value || submitted.value || hadError.value || dirty.value;
+    });
 
     const done = computed<boolean | null>(() => {
         if (options.done?.value !== undefined) return options.done.value;
-        return isValid.value;
+
+        const empty = isEmpty(options.value.value);
+        if (empty) {
+            if (!isRequired()) return null;
+            return touched.value || submitted.value ? false : null;
+        }
+
+        if (isValid.value) return true;
+        return false;
     });
 
     const caution = computed(() => {
-        if (options.caution?.value !== undefined) return !! options.caution.value;
-        return done.value === false;
+        if (options.caution?.value !== undefined) return Boolean(options.caution.value);
+        return shouldShowError.value;
     });
 
     const error = computed<string | boolean | null>(() => {
-        if (! caution.value) return null;
-        if (typeof options.caution?.value === 'string') return options.caution.value;
-        if (isRequired() && ! options.value.value) return options.requiredMessage ?? 'Campo obrigatório';
+        if (options.caution?.value !== undefined && typeof options.caution.value === 'string') return options.caution.value;
+
+        if (!caution.value || isValid.value) return null;
+        const empty = isEmpty(options.value.value);
+        if (empty && isRequired()) return options.requiredMessage ?? 'Campo obrigatório';
+
         return options.invalidMessage ?? 'Valor inválido';
     });
 
     const onBlur = () => {
-        // Ponto de extensao: hoje a validacao e sempre reativa (computed),
-        // entao nao ha estado a atualizar aqui. Exposto para que
-        // componentes que queiram um gate de "so valida apos blur"
-        // possam evoluir esse comportamento sem mudar o contrato publico.
+        touched.value = true;
+        if (!isValid.value) hadError.value = true;
     };
 
-    return { done, error, caution, onBlur };
+    const onInput = (_val?: any) => {
+        dirty.value = true;
+        if (isValid.value) hadError.value = false;
+    };
+
+    const submit = (): boolean => {
+        submitted.value = true;
+        touched.value = true;
+        if (!isValid.value) hadError.value = true;
+        return isValid.value;
+    };
+
+    const reset = () => {
+        touched.value = false;
+        dirty.value = false;
+        submitted.value = false;
+        hadError.value = false;
+    };
+
+    watch(() => options.value.value, () => {
+        dirty.value = true;
+        if (isValid.value) hadError.value = false;
+    });
+
+    return {
+        done,
+        error,
+        caution,
+        touched,
+        dirty,
+        submitted,
+        isValid,
+        onBlur,
+        onInput,
+        submit,
+        reset
+    };
 }

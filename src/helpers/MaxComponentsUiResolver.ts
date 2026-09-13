@@ -1,4 +1,4 @@
-import type { ComponentResolver } from 'unplugin-vue-components/types';
+import type { ComponentResolverObject } from 'unplugin-vue-components/types';
 import manifest from '../components-manifest.json';
 
 const aliases = manifest.aliases as Record<string, string>;
@@ -8,7 +8,7 @@ const componentNames = new Set(manifest.components as string[]);
  * Resolver unplugin-vue-components para @maxvue/max-components-ui.
  * Resolve componentes nativos iniciados com Max e seus aliases canônicos.
  */
-export function MaxComponentsUiResolver(): ComponentResolver {
+export function MaxComponentsUiResolver(): ComponentResolverObject {
     return {
         type: 'component',
         resolve: (name: string) => {

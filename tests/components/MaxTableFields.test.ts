@@ -1,7 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import MaxTableFields from '../../src/components/MaxTableFields.vue';
-import { _ulid } from '@maxvue/max-use';
 
 vi.mock('@maxvue/max-use', async (importOriginal) => {
     const actual = await importOriginal<typeof import('@maxvue/max-use')>();
@@ -48,7 +47,7 @@ describe('MaxTableFields.vue', () => {
             }
         });
 
-        (wrapper.vm as any).setFieldValue(wrapper.props('list')[0], 'name', 'Novo Teste', columns[0] as any);
+        (wrapper.vm as any).setFieldValue((wrapper.props('list') as any[])[0], 'name', 'Novo Teste', columns[0] as any);
         expect(wrapper.emitted('update:field')).toBeTruthy();
         expect(wrapper.emitted('update:field')?.[0][0]).toEqual({ row: { name: 'Novo Teste' }, field: 'name', value: 'Novo Teste' });
     });

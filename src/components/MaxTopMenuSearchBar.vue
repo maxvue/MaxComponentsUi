@@ -33,7 +33,16 @@
             </Transition>
 
             <Transition name="search-slide-down">
-                <div v-if="is_open" class="mobile-search-panel" role="dialog" aria-modal="true" aria-label="Pesquisa">
+                <div
+                    v-if="is_open"
+                    ref="mobilePanelRef"
+                    class="mobile-search-panel"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Pesquisa"
+                    tabindex="-1"
+                    @keydown="trap.onKeydown"
+                >
                     <div class="mobile-search-content">
                         <MaxInputText
                             ref="input_search_mobile_ref"
@@ -67,6 +76,7 @@
     import MaxIconButton from './MaxIconButton.vue';
     import { useSearchBarStore } from '../stores/useSearchBar.Store';
     import { useSystemStore } from '../stores/useSystem.Store';
+    import { useFocusTrap } from '../helpers/useFocusTrap';
 
     const props = withDefaults(defineProps<{
         /**
@@ -91,6 +101,8 @@
     const search_bar = useSearchBarStore();
     const input_search_ref: Ref<any> = ref();
     const input_search_mobile_ref: Ref<any> = ref();
+    const mobilePanelRef = ref<HTMLElement | null>(null);
+    const trap = useFocusTrap(mobilePanelRef);
     const is_open = ref(false);
 
     const isMobile = computed<boolean>(() => {
@@ -108,6 +120,7 @@
 
     const openSearch = (): void => {
         is_open.value = true;
+        trap.activate();
         nextTick(() => {
             input_search_mobile_ref.value?.setFocus?.();
         });
@@ -115,6 +128,7 @@
 
     const closeSearch = (): void => {
         is_open.value = false;
+        trap.deactivate();
     };
 
     const toggleMobileSearch = (): void => {
@@ -144,7 +158,10 @@
     };
 
     onMounted(() => document.addEventListener('keydown', handleSearchKeydown));
-    onUnmounted(() => document.removeEventListener('keydown', handleSearchKeydown));
+    onUnmounted(() => {
+        trap.deactivate();
+        document.removeEventListener('keydown', handleSearchKeydown);
+    });
 </script>
 
 <style lang="scss" scoped>
@@ -239,7 +256,7 @@
     .mobile-search-overlay {
         position: fixed;
         inset: 0;
-        z-index: 940;
+        z-index: var(--max-layer-modal-backdrop, 1300);
         background-color: rgb(0 0 0 / 50%);
 
         &.search-fade-enter-active,
@@ -258,7 +275,7 @@
         top: var(--top-menu-height, 60px);
         left: 0;
         width: 100%;
-        z-index: 950;
+        z-index: var(--max-layer-modal, 1310);
         box-sizing: border-box;
         padding: 0.6rem 0.75rem;
         background-color: var(--layout-shell-bg, #003048);

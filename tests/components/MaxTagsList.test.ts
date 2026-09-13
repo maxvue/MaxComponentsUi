@@ -30,7 +30,10 @@ const TagSelectStub = {
 
 function mountTagsList(props: Record<string, any> = {}) {
     return mount(MaxTagsList, {
-        props,
+        props: {
+            options: [],
+            ...props
+        },
         global: {
             stubs: {
                 MaxTagSelect: TagSelectStub,

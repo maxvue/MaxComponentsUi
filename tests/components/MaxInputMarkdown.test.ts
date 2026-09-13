@@ -328,6 +328,21 @@ describe('MaxInputMarkdown', () => {
             await wrapper.vm.$nextTick();
             expect(wrapper.find('.max-image-preview-modal').exists()).toBe(false);
         });
+
+        it('aplica atributos de acessibilidade e papel dialog ao modal de imagem', async () => {
+            const wrapper = mountMarkdown();
+            const vm = wrapper.vm as any;
+
+            vm.openImage('https://example.com/foto.jpg');
+            await wrapper.vm.$nextTick();
+
+            const modal = wrapper.find('.max-image-preview-modal');
+            expect(modal.exists()).toBe(true);
+            expect(modal.attributes('role')).toBe('dialog');
+            expect(modal.attributes('aria-modal')).toBe('true');
+            expect(modal.attributes('aria-label')).toBe('Visualizador de Imagem');
+            expect(modal.attributes('tabindex')).toBe('-1');
+        });
     });
 
     describe('Visualizador Modal de PDF', () => {

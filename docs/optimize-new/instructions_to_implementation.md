@@ -60,11 +60,11 @@ Cada checkbox é uma unidade de ownership e aparece uma única vez.
 
 Ordem: inventário seguro; contratos Vue/pacotes irmãos; classificação do manifesto; lock reproduzível; gates imutáveis. Um único integrador altera manifesto/lock.
 
-- [ ] E01-01 — `docs/optimize-new/testes_estabilidade/artefatos_corrompidos_e_poluicao_repositorio/plan.md`
-- [ ] E01-02 — `docs/optimize-new/performance/dependencias-runtime-sem-uso-direto/plan.md`
-- [ ] E01-03 — `docs/optimize-new/testes_estabilidade/lockfile_irreproduzivel_e_audit_indisponivel/plan.md`
-- [ ] E01-04 — `docs/optimize-new/testes_estabilidade/gates_qualidade_fragmentados_e_lint_mutante/plan.md`
-- [ ] E01-05 — `docs/optimize-new/testes_estabilidade/violacao_contratos_typescript_emits_e_attrs/plan.md`
+- [x] E01-01 — `docs/optimize-new/testes_estabilidade/artefatos_corrompidos_e_poluicao_repositorio/plan.md`
+- [x] E01-02 — `docs/optimize-new/performance/dependencias-runtime-sem-uso-direto/plan.md`
+- [x] E01-03 — `docs/optimize-new/testes_estabilidade/lockfile_irreproduzivel_e_audit_indisponivel/plan.md`
+- [x] E01-04 — `docs/optimize-new/testes_estabilidade/gates_qualidade_fragmentados_e_lint_mutante/plan.md`
+- [x] E01-05 — `docs/optimize-new/testes_estabilidade/violacao_contratos_typescript_emits_e_attrs/plan.md`
 
 Gates: G0; instalação limpa com `npm ci`/`npm ls`; auditoria tratada ou documentada; GF arquitetural; GT; GL; GU; GB; tarball consumidor; GR. Guarde baselines de bundle, cobertura, warnings e dependências.
 
@@ -72,11 +72,11 @@ Gates: G0; instalação limpa com `npm ci`/`npm ls`; auditoria tratada ou docume
 
 Estabilize helpers/contratos antes de consumidores: defensividade específica, modelo canônico, browser/SSR seguro, cleanup idempotente e saneamento restrito de atributos utilitários.
 
-- [ ] E02-01 — `docs/optimize-new/testes_estabilidade/fragilidade_props_falta_defensividade/plan.md`
-- [ ] E02-02 — `docs/optimize-new/performance/modelo-espelhado-emissao-duplicada/plan.md`
-- [ ] E02-03 — `docs/optimize-new/testes_estabilidade/renderizacao_ssr_quebrada_em_overlays/plan.md`
-- [ ] E02-04 — `docs/optimize-new/testes_estabilidade/vazamento_recursos_timers_e_listeners_globais/plan.md`
-- [ ] E02-05 — `docs/optimize-new/ui_design/achado_04_atributos_utilitarios_unocss_params_scss_templates/plan.md`
+- [x] E02-01 — `docs/optimize-new/testes_estabilidade/fragilidade_props_falta_defensividade/plan.md`
+- [x] E02-02 — `docs/optimize-new/performance/modelo-espelhado-emissao-duplicada/plan.md`
+- [x] E02-03 — `docs/optimize-new/testes_estabilidade/renderizacao_ssr_quebrada_em_overlays/plan.md`
+- [x] E02-04 — `docs/optimize-new/testes_estabilidade/vazamento_recursos_timers_e_listeners_globais/plan.md`
+- [x] E02-05 — `docs/optimize-new/ui_design/achado_04_atributos_utilitarios_unocss_params_scss_templates/plan.md`
 
 Gates: GF de helpers, SSR/hidratação e mount/unmount repetido; GT; GL; GU; GB; listeners/timers zerados após unmount; GR.
 
@@ -84,11 +84,11 @@ Gates: GF de helpers, SSR/hidratação e mount/unmount repetido; GT; GL; GU; GB;
 
 Um único integrador estabiliza `InputBase`, IDs, mensagens, slot/attrs e validação; depois migra consumidores. Preserve compatibilidade `.p-*` legítima.
 
-- [ ] E03-01 — `docs/optimize-new/ui_design/achado_01_acoplamento_residual_classes_primevue_inputbase/plan.md`
-- [ ] E03-02 — `docs/optimize-new/usabilidade/desconexao-rotulos-mensagens-inputbase/plan.md`
-- [ ] E03-03 — `docs/optimize-new/usabilidade/validacao-fragmentada-nao-integrada/plan.md`
-- [ ] E03-04 — `docs/optimize-new/ux/truncamento-mensagens-validacao-inconsistente-formularios/plan.md`
-- [ ] E03-05 — `docs/optimize-new/usabilidade/tooltip-sobrescreve-aria-describedby/plan.md`
+- [x] E03-01 — `docs/optimize-new/ui_design/achado_01_acoplamento_residual_classes_primevue_inputbase/plan.md`
+- [x] E03-02 — `docs/optimize-new/usabilidade/desconexao-rotulos-mensagens-inputbase/plan.md`
+- [x] E03-03 — `docs/optimize-new/usabilidade/validacao-fragmentada-nao-integrada/plan.md`
+- [x] E03-04 — `docs/optimize-new/ux/truncamento-mensagens-validacao-inconsistente-formularios/plan.md`
+- [x] E03-05 — `docs/optimize-new/usabilidade/tooltip-sobrescreve-aria-describedby/plan.md`
 
 Gates: GF de base/helper/tooltip e consumidores; GT; GL; GU; GA para label, describedby composto, required/invalid/live; mensagens longas e matriz touched/dirty/submitted; GR.
 
@@ -96,13 +96,13 @@ Gates: GF de base/helper/tooltip e consumidores; GT; GL; GU; GA para label, desc
 
 Ordem: base DOM-safe e teardown; posicionamento/stack/outside pointer; modais e consumidores; clamp; nome/foco. Não crie primitiva paralela.
 
-- [ ] E04-01 — `docs/optimize-new/performance/reatividade-posicionamento-desnecessario-overlays-inativos/plan.md`
-- [ ] E04-02 — `docs/optimize-new/ux/dead-clicks-flickering-posicionamento-overlays/plan.md`
-- [ ] E04-03 — `docs/optimize-new/ux/destruicao-contexto-singleton-global-modais/plan.md`
-- [ ] E04-04 — `docs/optimize-new/usabilidade/ausencia-focus-trap-overlays-flutuantes/plan.md`
-- [ ] E04-05 — `docs/optimize-new/usabilidade/dialogs-sem-nome-acessivel/plan.md`
-- [ ] E04-06 — `docs/optimize-new/ui_design/escala-z-index-sem-contrato/plan.md`
-- [ ] E04-07 — `docs/optimize-new/ui_design/popovers-e-pdf-sem-clamp-mobile/plan.md`
+- [x] E04-01 — `docs/optimize-new/performance/reatividade-posicionamento-desnecessario-overlays-inativos/plan.md`
+- [x] E04-02 — `docs/optimize-new/ux/dead-clicks-flickering-posicionamento-overlays/plan.md`
+- [x] E04-03 — `docs/optimize-new/ux/destruicao-contexto-singleton-global-modais/plan.md`
+- [x] E04-04 — `docs/optimize-new/usabilidade/ausencia-focus-trap-overlays-flutuantes/plan.md`
+- [x] E04-05 — `docs/optimize-new/usabilidade/dialogs-sem-nome-acessivel/plan.md`
+- [x] E04-06 — `docs/optimize-new/ui_design/escala-z-index-sem-contrato/plan.md`
+- [x] E04-07 — `docs/optimize-new/ui_design/popovers-e-pdf-sem-clamp-mobile/plan.md`
 
 Gates: GF por consumidor; GT; GL; GU; GB; SSR/hidratação; GA para Tab/Escape/retorno/nome/stack; GP provando zero listener/medida fechado; browser em 280 px, zoom 200%, scroll e landscape; GR.
 

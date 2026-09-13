@@ -4,7 +4,10 @@ import MaxInputToggle from '../../src/components/MaxInputToggle.vue';
 
 function mountToggle(props: Record<string, any> = {}, attrs: Record<string, any> = {}) {
     return mount(MaxInputToggle, {
-        props,
+        props: {
+            modelValue: false,
+            ...props
+        },
         attrs
     });
 }

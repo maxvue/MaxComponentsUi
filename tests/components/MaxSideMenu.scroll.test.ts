@@ -20,7 +20,6 @@ vi.mock('@maxvue/max-use', async (importOriginal) => ({
 }));
 
 import MaxSideMenu from '../../src/components/MaxSideMenu.vue';
-import { useSystemStore } from '../../src/stores/useSystem.Store';
 
 let pinia: Pinia;
 
@@ -28,7 +27,6 @@ describe('MaxSideMenu - Rolagem e Renderização', () => {
     beforeEach(() => {
         pinia = createPinia();
         setActivePinia(pinia);
-        useSystemStore().type_device = 'desktop';
     });
 
     it('renderiza os itens de navegação e configurações no menu lateral', () => {

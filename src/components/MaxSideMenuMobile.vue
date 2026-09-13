@@ -5,6 +5,7 @@
         :show-close-icon="false"
         :base-z-index="1000"
         :no-padding="true"
+        aria-label="Menu principal"
         class="max-side-menu-mobile max-side-menu-mobile-drawer"
     >
         <div class="mobile-side-menu">

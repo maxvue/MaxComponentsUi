@@ -1,13 +1,13 @@
 <template>
     <InputBase v-bind="{ ...props, ...attrsWithoutModelProps }" class="max-input-select select_input_div">
-        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+        <template #default="{ inputAttrs }">
             <div v-if="showPlaceholder" class="placeholder-select">
                 {{ placeholderText }}
             </div>
 
             <div
-                :id="inputId"
                 ref="triggerEl"
+                v-bind="inputAttrs"
                 class="max-select"
                 :class="{ 'is-disabled': props.disabled, 'is-focused': isOpen }"
                 tabindex="0"
@@ -16,9 +16,6 @@
                 :aria-expanded="isOpen"
                 :aria-controls="listboxId"
                 :aria-activedescendant="activeDescendantId"
-                :aria-describedby="hasMessage ? messageId : undefined"
-                :aria-invalid="slotError ? 'true' : undefined"
-                :aria-required="isRequired ? 'true' : undefined"
                 @click.stop="toggle"
                 @keydown="onTriggerKeydown"
             >
@@ -180,8 +177,8 @@
     import InputBase from './InputBase.vue';
     import MaxIcon from './MaxIcon.vue';
     import { SelectGroupOptions } from '../types';
-    import { isBlank, useElementSize, useWindowSize } from '@maxvue/max-use';
-    import { useActiveElementBounding } from '../composables/useActiveElementBounding';
+    import { isBlank } from '@maxvue/max-use';
+    import { useActiveOverlayPosition } from '../composables/useActiveOverlayPosition';
     import { getOverlayWidth, getOverlayLeft } from '../helpers/useOverlayWidth';
 
     const attrs: any = useAttrs();
@@ -341,27 +338,29 @@
     const overlayEl = ref<HTMLElement | null>(null);
     const filterInputEl = ref<HTMLInputElement | null>(null);
 
-    const { x, y, width: width_btn, height: height_btn } = useActiveElementBounding(triggerEl, isOpen);
-    const { height: height_el } = useElementSize(overlayEl as any);
-    const { width: window_width, height: window_height } = useWindowSize();
+    const { position, updatePosition } = useActiveOverlayPosition({
+        target: triggerEl,
+        overlay: overlayEl,
+        active: isOpen,
+        compute: (ctx) => {
+            const { targetRect, overlayRect, viewportWidth, viewportHeight } = ctx;
+            const targetX = targetRect.left;
+            const targetY = targetRect.top;
+            const targetH = targetRect.height;
+            const overlayH = overlayRect.height || 200;
 
-    const position = computed(() => {
-        const targetX = x.value;
-        const targetY = y.value;
-        const targetH = height_btn.value;
+            const width = getOverlayWidth({ triggerWidth: targetRect.width, windowWidth: viewportWidth });
+            let top = targetY + targetH + 2;
 
-        const width = getOverlayWidth({ triggerWidth: width_btn.value, windowWidth: window_width.value });
-
-        let top = targetY + targetH + 2;
-
-        if (top + (height_el.value || 200) > window_height.value && targetY - (height_el.value || 200) > 0) top = targetY - (height_el.value || 200) - 2;
+            if (top + overlayH > viewportHeight && targetY - overlayH > 0) top = targetY - overlayH - 2;
 
 
-        return {
-            top,
-            left: getOverlayLeft(targetX, width, window_width.value),
-            width: width + 'px'
-        };
+            return {
+                top,
+                left: getOverlayLeft(targetX, width, viewportWidth),
+                width: width + 'px'
+            };
+        }
     });
 
     const options = computed(() => {
@@ -654,6 +653,13 @@
             document.removeEventListener('pointerdown', onDocumentPointerDown);
             document.removeEventListener('click', onDocumentPointerDown);
         }
+    });
+
+    defineExpose({
+        isOpen,
+        toggle,
+        position,
+        updatePosition
     });
 </script>
 

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
-import { ref, nextTick } from 'vue';
+import { ref, nextTick, defineComponent } from 'vue';
 import MaxTransitionFadeLight from '../../src/components/MaxTransitionFadeLight.vue';
 
 describe('MaxTransitionFadeLight', () => {
@@ -16,7 +16,7 @@ describe('MaxTransitionFadeLight', () => {
     });
 
     it('alterna o nó renderizado quando condicionado reativamente', async () => {
-        const HostComponent = {
+        const HostComponent = defineComponent({
             components: { MaxTransitionFadeLight },
             setup() {
                 const isShown = ref(true);
@@ -27,7 +27,7 @@ describe('MaxTransitionFadeLight', () => {
                     <div v-if="isShown" class="box">Conteúdo da Caixa</div>
                 </MaxTransitionFadeLight>
             `
-        };
+        });
 
         const wrapper = mount(HostComponent);
         expect(wrapper.find('.box').exists()).toBe(true);

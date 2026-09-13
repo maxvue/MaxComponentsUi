@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { effectScope, nextTick, reactive } from 'vue';
-import { useMirroredModel } from '../../src/helpers/useMirroredModel';
+import { useMirroredModel, type UseMirroredModelOptions } from '../../src/helpers/useMirroredModel';
 
-function setup<T>(initial: T, options?: Parameters<typeof useMirroredModel>[2]) {
+function setup<T>(initial: T, options?: UseMirroredModelOptions<T>) {
     const props = reactive({ modelValue: initial }) as { modelValue: T };
     const emit = vi.fn();
     const scope = effectScope();
@@ -51,7 +51,7 @@ describe('useMirroredModel', () => {
 
     it('nao reatribui o ref local quando compare considera os valores equivalentes (evita eco)', async () => {
         const compare = vi.fn((a: string, b: string) => a.replace(/\D/g, '') === b.replace(/\D/g, ''));
-        const { props, value } = setup('123', { compare });
+        const { props, value } = setup<string>('123', { compare });
 
         value.value = '123-456';
         await nextTick();
@@ -84,5 +84,109 @@ describe('useMirroredModel', () => {
         value.value = 5;
         await nextTick();
         expect(emit).toHaveBeenCalledWith('update:modelValue', 10);
+    });
+
+    it('round-trip com transform uppercase emite exatamente uma vez (elimina eco)', async () => {
+        const props = reactive({ modelValue: '' });
+        const emit = vi.fn((event: string, val: string) => {
+            if (event === 'update:modelValue') props.modelValue = val;
+        });
+        const scope = effectScope();
+        const value = scope.run(() => useMirroredModel(props, emit, {
+            transform: (v: string) => v.toUpperCase()
+        }))!;
+
+        value.value = 'abc';
+        await nextTick();
+        await nextTick();
+
+        expect(emit).toHaveBeenCalledTimes(1);
+        expect(emit).toHaveBeenCalledWith('update:modelValue', 'ABC');
+        expect(props.modelValue).toBe('ABC');
+        expect(value.value).toBe('abc');
+        scope.stop();
+    });
+
+    it('mudança externa com prop já canônica atualiza o ref local sem reemissão espúria', async () => {
+        const props = reactive({ modelValue: 'OLD' });
+        const emit = vi.fn();
+        const scope = effectScope();
+        const value = scope.run(() => useMirroredModel(props, emit, {
+            transform: (v: string) => v.toUpperCase()
+        }))!;
+
+        props.modelValue = 'NEW';
+        await nextTick();
+
+        expect(value.value).toBe('NEW');
+        expect(emit).not.toHaveBeenCalled();
+        scope.stop();
+    });
+
+    it('mudança externa com prop não-canônica produz no máximo uma emissão derivada normalizada', async () => {
+        const props = reactive({ modelValue: 'OLD' });
+        const emit = vi.fn((event: string, val: string) => {
+            if (event === 'update:modelValue') props.modelValue = val;
+        });
+        const scope = effectScope();
+        const value = scope.run(() => useMirroredModel(props, emit, {
+            transform: (v: string) => v.toUpperCase()
+        }))!;
+
+        props.modelValue = 'raw-change';
+        await nextTick();
+        await nextTick();
+
+        expect(value.value).toBe('raw-change');
+        expect(emit).toHaveBeenCalledTimes(1);
+        expect(emit).toHaveBeenCalledWith('update:modelValue', 'RAW-CHANGE');
+        expect(props.modelValue).toBe('RAW-CHANGE');
+        scope.stop();
+    });
+
+    it('sequência de digitações locais com round-trip mantém sincronização correta', async () => {
+        const props = reactive({ modelValue: '' });
+        const emit = vi.fn((event: string, val: string) => {
+            if (event === 'update:modelValue') props.modelValue = val;
+        });
+        const scope = effectScope();
+        const value = scope.run(() => useMirroredModel(props, emit, {
+            transform: (v: string) => v.toUpperCase()
+        }))!;
+
+        value.value = 'a';
+        await nextTick();
+        expect(emit).toHaveBeenLastCalledWith('update:modelValue', 'A');
+
+        value.value = 'ab';
+        await nextTick();
+        expect(emit).toHaveBeenLastCalledWith('update:modelValue', 'AB');
+
+        value.value = 'abc';
+        await nextTick();
+        expect(emit).toHaveBeenLastCalledWith('update:modelValue', 'ABC');
+
+        expect(emit).toHaveBeenCalledTimes(3);
+        scope.stop();
+    });
+
+    it('immediate: true inicializa guard e suprime eco no round-trip inicial', async () => {
+        const props = reactive({ modelValue: 'initial' });
+        const emit = vi.fn((event: string, val: string) => {
+            if (event === 'update:modelValue') props.modelValue = val;
+        });
+        const scope = effectScope();
+        scope.run(() => useMirroredModel(props, emit, {
+            immediate: true,
+            transform: (v: string) => v.toUpperCase()
+        }))!;
+
+        await nextTick();
+        await nextTick();
+
+        expect(emit).toHaveBeenCalledTimes(1);
+        expect(emit).toHaveBeenCalledWith('update:modelValue', 'INITIAL');
+        expect(props.modelValue).toBe('INITIAL');
+        scope.stop();
     });
 });

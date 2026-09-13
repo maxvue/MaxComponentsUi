@@ -60,29 +60,8 @@ globalThis.fetch = vi.fn(() =>
     } as Response)
 );
 
-// Mock mínimo do indexedDB para componentes que usam cache via IDB (getCachedApiIDB).
-// LIMITAÇÃO CONHECIDA: este mock nunca dispara onsuccess/onerror/onupgradeneeded — qualquer
-// código que aguarde um desses callbacks para resolver fica pendurado indefinidamente, e
-// nenhum teste vai perceber isso automaticamente (a promise/callback nunca é chamada, então
-// o teste que depende dela para completar simplesmente não avança). Testes que precisam
-// validar de verdade o caminho de sucesso/erro do IndexedDB devem criar um mock local mais
-// completo naquele arquivo de teste (ex.: disparando request.onsuccess manualmente via
-// setTimeout/queueMicrotask, ou usando fake timers) — não depender deste mock global para isso.
-if (typeof globalThis.indexedDB === 'undefined') {
-    const request: any = {
-        result: null,
-        onsuccess: null,
-        onerror: null,
-        onupgradeneeded: null
-    };
-    Object.defineProperty(globalThis, 'indexedDB', {
-        configurable: true,
-        value: {
-            open: vi.fn(() => request),
-            deleteDatabase: vi.fn(() => request)
-        }
-    });
-}
+// Inicialização determinística do IndexedDB em memória para testes via fake-indexeddb.
+import 'fake-indexeddb/auto';
 
 // Mock do módulo virtual:uno.css (importado no index.ts)
 vi.mock('virtual:uno.css', () => ({}));

@@ -139,8 +139,9 @@ describe('MaxInputFile', () => {
 
         const emitted = wrapper.emitted('update:modelValue');
         expect(emitted).toBeTruthy();
-        expect(emitted![0][0].length).toBe(1);
-        expect(emitted![0][0][0].type).toBe('image/png');
+        const files = (emitted?.[0]?.[0] ?? []) as File[];
+        expect(files.length).toBe(1);
+        expect(files[0]?.type).toBe('image/png');
 
         wrapper.unmount();
     });

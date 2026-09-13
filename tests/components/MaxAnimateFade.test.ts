@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
-import { nextTick, ref } from 'vue';
+import { nextTick, ref, defineComponent } from 'vue';
 import MaxAnimateFade from '../../src/components/MaxAnimateFade.vue';
 
 describe('MaxAnimateFade', () => {
@@ -80,7 +80,7 @@ describe('MaxAnimateFade', () => {
     });
 
     it('funciona com slot interno controlado por v-if quando show é undefined', async () => {
-        const TestWrapper = {
+        const TestWrapper = defineComponent({
             components: { MaxAnimateFade },
             setup() {
                 const isVisible = ref(true);
@@ -91,7 +91,7 @@ describe('MaxAnimateFade', () => {
                     <div v-if="isVisible" class="inner-box">Caixa</div>
                 </MaxAnimateFade>
             `
-        };
+        });
 
         const wrapper = mount(TestWrapper);
         expect(wrapper.find('.inner-box').exists()).toBe(true);

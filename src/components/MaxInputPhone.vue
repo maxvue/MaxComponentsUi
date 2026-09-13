@@ -1,6 +1,6 @@
 <template>
     <InputBase class="max-input-phone input-phone" v-bind="props" :value="temp_value" :done="done" :error="error" :caution="caution" :label="props.noLabel ? undefined : (props.label ?? 'Telefone')" :icon-right="props.noIcon ? undefined : 'ic:baseline-whatsapp'">
-        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+        <template #default="{ inputAttrs }">
             <div class="inputs-div">
                 <div
                     ref="select_el"
@@ -24,18 +24,15 @@
                     </div>
                 </div>
                 <input
-                    :id="inputId"
                     type="tel"
                     inputmode="tel"
                     slot-b
+                    v-bind="inputAttrs"
                     v-model="phone"
                     v-maska:unmaskedValue.unmasked="maskValue"
                     :placeholder="country.value === 55 ? '(99) 9 9999 - 9999' : ''"
                     class="max-input-native phone-number-input"
                     :disabled="props.disabled"
-                    :aria-describedby="hasMessage ? messageId : undefined"
-                    :aria-invalid="slotError || Boolean(props.error)"
-                    :aria-required="isRequired || props.required"
                     @focus="onFocus = true"
                     @blur="onFocus = false"
                     @paste="handlePaste"
@@ -432,12 +429,12 @@
 .max-phone-overlay-mask {
     position: fixed;
     inset: 0;
-    z-index: 1100;
+    z-index: var(--max-layer-dropdown, 1000);
 }
 
 .max-phone-select-overlay {
     position: fixed;
-    z-index: 1101;
+    z-index: calc(var(--max-layer-dropdown, 1000) + 1);
     display: grid;
     grid-template-rows: auto 1fr;
     overflow: hidden;

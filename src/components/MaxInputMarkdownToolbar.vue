@@ -263,7 +263,7 @@
 
 <script setup lang="ts">
     import { ref, nextTick, onMounted } from 'vue';
-    import { onClickOutside } from '@vueuse/core';
+    import { onClickOutside } from '@maxvue/max-use';
     import type { Editor } from '@tiptap/core';
     import MaxIcon from './MaxIcon.vue';
     import { isSafeUrl } from '../helpers/isSafeUrl';

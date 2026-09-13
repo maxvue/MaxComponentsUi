@@ -131,8 +131,8 @@ describe('MaxBaseVirtualScroller', () => {
         stubViewport(wrapper.element as HTMLElement, 400);
         await settle();
 
-        expect(typeof wrapper.vm.scrollToIndex).toBe('function');
-        expect(() => wrapper.vm.scrollToIndex(50)).not.toThrow();
+        expect(typeof wrapper!.vm.scrollToIndex).toBe('function');
+        expect(() => wrapper!.vm.scrollToIndex(50)).not.toThrow();
     });
 
     it('aplica role="listbox" no container e role="option" com aria-setsize/aria-posinset em cada item', async () => {

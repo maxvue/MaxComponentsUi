@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
+import { defineComponent } from 'vue';
 import MaxDividers from '../../src/components/MaxDividers.vue';
 import { MaxDividers as MaxDividersIndex, MaxDivider as MaxDividerIndex } from '../../src/index';
 
@@ -188,7 +189,7 @@ describe('MaxDividers', () => {
             props: { mobile: false },
             slots: {
                 first: '<div class="districts">Distritos</div>',
-                second: {
+                second: defineComponent({
                     components: { MaxDividers },
                     template: `
                         <MaxDividers :mobile="false">
@@ -196,7 +197,7 @@ describe('MaxDividers', () => {
                             <template #second><div class="details">Detalhes</div></template>
                         </MaxDividers>
                     `
-                }
+                })
             }
         });
 
@@ -337,7 +338,7 @@ describe('MaxDividers', () => {
             },
             slots: {
                 first: '<div class="districts-list">Lista de Distritos</div>',
-                second: {
+                second: defineComponent({
                     components: { MaxDividers },
                     template: `
                         <MaxDividers :mobile="true" :active="1" class="nested-dividers">
@@ -345,7 +346,7 @@ describe('MaxDividers', () => {
                             <template #second><div class="church-details">Detalhes da Igreja</div></template>
                         </MaxDividers>
                     `
-                }
+                })
             }
         });
 

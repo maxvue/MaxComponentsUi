@@ -1,8 +1,8 @@
 <template>
     <InputBase v-bind="props" class="max-input-cep input-base-cep-main-div" :value="temp_value" :done="done ?? undefined" :caution="caution" :error="error_msg ?? undefined" :icon-right="loading ? 'line-md:loading-loop' : undefined">
-        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+        <template #default="{ inputAttrs }">
             <input
-                :id="inputId"
+                v-bind="inputAttrs"
                 type="text"
                 inputmode="numeric"
                 class="max-input-native"
@@ -10,9 +10,6 @@
                 v-maska="maskValue"
                 placeholder="00000-000"
                 :disabled="props.disabled"
-                :aria-describedby="hasMessage ? messageId : undefined"
-                :aria-invalid="slotError ? 'true' : undefined"
-                :aria-required="isRequired ? 'true' : undefined"
                 @blur="onBlur"
             />
         </template>

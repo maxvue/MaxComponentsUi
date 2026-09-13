@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import MaxInputFileProject from '../../src/components/MaxInputFileProject.vue';
+import type { DBFile } from '../../src/types';
 import axios from 'axios';
 
 vi.mock('axios', () => ({
@@ -56,8 +57,8 @@ describe('MaxInputFileProject', () => {
 
         // Add files to trigger getFileType and fileIcon edge cases
         await wrapper.setProps({ files: [
-            { id: '1', name: 'teste.pdf', file_name: 'teste.pdf' },
-            { id: '2', name: 'unknown.xyz', file_name: 'unknown.xyz' } // to cover getFileType = null and fileIcon = mdi:file
+            { id: '1', name: 'teste.pdf', file_name: 'teste.pdf' } as unknown as DBFile,
+            { id: '2', name: 'unknown.xyz', file_name: 'unknown.xyz' } as unknown as DBFile // to cover getFileType = null and fileIcon = mdi:file
         ] });
         expect(wrapper.vm.temp_files.length).toBe(2);
     });

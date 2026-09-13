@@ -170,12 +170,13 @@ describe('MaxSideMenuMobile', () => {
         expect(wrapper.text()).toContain('Trocar Perfil');
     });
 
-    it('configura o MaxDrawer com noPadding e baseZIndex 1000', () => {
+    it('configura o MaxDrawer com noPadding, baseZIndex 1000 e aria-label "Menu principal"', () => {
         const wrapper = mountWithPinia(MaxSideMenuMobile);
         const drawer = wrapper.findComponent({ name: 'MaxDrawer' });
 
         expect(drawer.exists()).toBe(true);
         expect(drawer.props('noPadding')).toBe(true);
         expect(drawer.props('baseZIndex')).toBe(1000);
+        expect(drawer.props('ariaLabel')).toBe('Menu principal');
     });
 });

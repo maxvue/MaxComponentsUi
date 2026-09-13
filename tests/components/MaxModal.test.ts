@@ -677,5 +677,71 @@ describe('MaxModal', () => {
             expect(bg1.attributes('style')).toContain('z-index: 1200');
             expect(bg2.attributes('style')).toContain('z-index: 1220');
         });
+
+        it('marca camadas inferiores com aria-hidden e inert mantendo apenas o topo acessível', async () => {
+            const wrapper1 = mountModal({ id: 'modal-1', title: 'Modal 1' });
+            const wrapper2 = mountModal({ id: 'modal-2', title: 'Modal 2' });
+            const vm1 = wrapper1.vm as any;
+            const vm2 = wrapper2.vm as any;
+
+            vm1.open();
+            await wrapper1.vm.$nextTick();
+
+            const modal1 = wrapper1.find('.max-modal');
+            expect(modal1.attributes('aria-modal')).toBe('true');
+            expect(modal1.attributes('aria-hidden')).toBeUndefined();
+            expect(modal1.attributes('inert')).toBeUndefined();
+
+            vm2.open();
+            await wrapper2.vm.$nextTick();
+
+            const modal2 = wrapper2.find('.max-modal');
+            expect(modal2.attributes('aria-modal')).toBe('true');
+            expect(modal2.attributes('aria-hidden')).toBeUndefined();
+
+            // Modal 1 agora é camada inferior
+            expect(modal1.attributes('aria-hidden')).toBe('true');
+            expect(modal1.attributes('inert')).toBeDefined();
+
+            // Ao fechar modal 2, modal 1 volta a ser o topo
+            vm2.close();
+            await wrapper1.vm.$nextTick();
+
+            expect(modal1.attributes('aria-modal')).toBe('true');
+            expect(modal1.attributes('aria-hidden')).toBeUndefined();
+            expect(modal1.attributes('inert')).toBeUndefined();
+        });
+
+        it('fornece nome acessível padrão quando noHeader é true ou via ariaLabel', async () => {
+            const wrapperNoHeader = mountModal({ noHeader: true });
+            const vmNoHeader = wrapperNoHeader.vm as any;
+            vmNoHeader.open();
+            await wrapperNoHeader.vm.$nextTick();
+
+            const modalNoHeader = wrapperNoHeader.find('.max-modal');
+            expect(modalNoHeader.attributes('aria-label')).toBe('Diálogo');
+
+            const wrapperCustomAria = mountModal({ noHeader: true, ariaLabel: 'Detalhes da Fatura' });
+            const vmCustomAria = wrapperCustomAria.vm as any;
+            vmCustomAria.open();
+            await wrapperCustomAria.vm.$nextTick();
+
+            const modalCustomAria = wrapperCustomAria.find('.max-modal');
+            expect(modalCustomAria.attributes('aria-label')).toBe('Detalhes da Fatura');
+        });
+
+        it('unifica encerramento via método exposto requestClose', async () => {
+            const wrapper = mountModal();
+            const vm = wrapper.vm as any;
+            const store = useModalStore();
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+            expect(store.show_id).toBe(vm.id);
+
+            vm.requestClose('api');
+            await wrapper.vm.$nextTick();
+            expect(store.show_id).toBeNull();
+        });
     });
 });

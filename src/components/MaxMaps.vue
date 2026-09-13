@@ -18,7 +18,7 @@
 <script setup lang="ts">
     import { toNumber } from '@maxvue/max-use';
     import type { Ref } from 'vue';
-    import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
+    import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
     import { GoogleMap, AdvancedMarker } from 'vue3-google-map';
     import MaxIcon from './MaxIcon.vue';
     import { getMaxAppConfig } from '../helpers/maxAppConfig';
@@ -91,20 +91,16 @@
     },{ immediate: true });
 
     const isMounted = ref<boolean>(false);
-    let mountTimer: ReturnType<typeof setTimeout> | null = null;
+    let is_active_mount = true;
 
-    onMounted(() => {
-        mountTimer = setTimeout(() => {
-            isMounted.value = true;
-            mountTimer = null;
-        }, 50);
+    onMounted(async () => {
+        is_active_mount = true;
+        await nextTick();
+        if (is_active_mount) isMounted.value = true;
     });
 
     onBeforeUnmount(() => {
-        if (mountTimer !== null) {
-            clearTimeout(mountTimer);
-            mountTimer = null;
-        }
+        is_active_mount = false;
     });
 </script>
 

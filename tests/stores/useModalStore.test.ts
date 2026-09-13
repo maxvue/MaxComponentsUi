@@ -88,4 +88,23 @@ describe('useModalStore', () => {
         expect(store.stack).toEqual([]);
         expect(store.show_id).toBeNull();
     });
+
+    it('expõe top, contains e remove na store de pilha', () => {
+        const store = useModalStore();
+        expect(store.top).toBeNull();
+        expect(store.contains('modal-1')).toBe(false);
+
+        store.push('modal-1');
+        store.push('modal-2');
+
+        expect(store.top).toBe('modal-2');
+        expect(store.contains('modal-1')).toBe(true);
+        expect(store.contains('modal-2')).toBe(true);
+        expect(store.contains('modal-3')).toBe(false);
+
+        store.remove('modal-1');
+        expect(store.stack).toEqual(['modal-2']);
+        expect(store.top).toBe('modal-2');
+        expect(store.contains('modal-1')).toBe(false);
+    });
 });

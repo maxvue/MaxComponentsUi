@@ -80,10 +80,10 @@ describe('MaxPopoverConfirm', () => {
         store.rejectProps = { label: 'Não', action: () => { rejeitado = true; } };
 
         // Simula as ações que o componente faria
-        store.acceptProps.action();
+        store.acceptProps.action?.();
         expect(aceito).toBe(true);
 
-        store.rejectProps.action();
+        store.rejectProps.action?.();
         expect(rejeitado).toBe(true);
     });
 

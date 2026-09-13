@@ -1,6 +1,6 @@
 <template>
     <InputBase v-bind="props" :class="`max-input-switch max-switch ${props.disabled ? 'is-disabled' : ''}`">
-        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+        <template #default="{ inputAttrs }">
             <div :class="`max-switch-input ${temp_value === props.trueValue ? 'active' : ''} ${props.disabled ? 'is-disabled' : ''}`">
                 <div
                     class="max-switch-label left"
@@ -11,7 +11,7 @@
                     {{ resolvedFalseLabel }}
                 </div>
                 <div
-                    :id="inputId"
+                    v-bind="inputAttrs"
                     class="max-switch-toggle"
                     :class="{
                         'active': temp_value === props.trueValue,
@@ -23,9 +23,6 @@
                     :aria-disabled="props.disabled ? 'true' : undefined"
                     :aria-label="switchAriaLabel"
                     :aria-labelledby="switchAriaLabelledby"
-                    :aria-describedby="hasMessage ? messageId : undefined"
-                    :aria-invalid="slotError || Boolean(props.error)"
-                    :aria-required="isRequired || props.required"
                     @click="toggleValue"
                     @keydown.space.prevent="toggleValue"
                     @keydown.enter.prevent="toggleValue"

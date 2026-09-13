@@ -136,4 +136,25 @@ describe('MaxTopMenuSearchBar', () => {
         document.dispatchEvent(modKEvent);
         expect(preventSpy).toHaveBeenCalledTimes(1);
     });
+
+    it('aplica semântica de diálogo modal e nome acessível ao painel mobile aberto', async () => {
+        const wrapper = mountSearchBar({
+            props: { screen: 'mobile' },
+            global: {
+                stubs: {
+                    Teleport: true
+                }
+            }
+        });
+
+        const btn = wrapper.find('.search-top-bar-mobile .max-icon-button');
+        await btn.trigger('click');
+
+        const panel = wrapper.find('.mobile-search-panel');
+        expect(panel.exists()).toBe(true);
+        expect(panel.attributes('role')).toBe('dialog');
+        expect(panel.attributes('aria-modal')).toBe('true');
+        expect(panel.attributes('aria-label')).toBe('Pesquisa');
+        expect(panel.attributes('tabindex')).toBe('-1');
+    });
 });

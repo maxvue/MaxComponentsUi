@@ -50,19 +50,23 @@
             <div v-else></div>
             <div class="input-slot-div">
                 <slot
-                    :input-id="input_id"
-                    :message-id="message_id"
-                    :is-error="isError"
-                    :is-required="Boolean(props.required)"
-                    :has-message="Boolean(displayMessage)"
-                    :display-message="displayMessage"
+                    :inputId="input_id"
+                    :messageId="message_id"
+                    :ariaDescribedby="ariaDescribedby"
+                    :ariaInvalid="isError ? 'true' : undefined"
+                    :ariaRequired="Boolean(props.required) ? 'true' : undefined"
+                    :inputAttrs="inputAttrs"
+                    :isError="isError"
+                    :isRequired="Boolean(props.required)"
+                    :hasMessage="Boolean(displayMessage)"
+                    :displayMessage="displayMessage"
                 ></slot>
             </div>
             <MaxIcon :icon="props.iconRight ?? props.icon ?? props.i" :size="1.2" :light="light" :dark="dark" v-if="hasContent(props.iconRight ?? props.icon ?? props.i) && !props.noIcon && (props.iconRight || props.iconPos === 'right')" class="input-icon-right" />
             <div v-else></div>
 
             <!-- INPUT STATUS ICON -->
-            <div class="input-status-icon" :class="{ 'with-icon-right': hasIconRight }">
+            <div class="input-status-icon" :class="{ 'with-icon-right': hasIconRight }" aria-hidden="true">
                 <div class="is-done" v-if="done && !noDone && !noStatus">
                     <MaxIcon icon="lets-icons:check-fill" :size="0.8" :light="light" :dark="dark" />
                 </div>
@@ -109,7 +113,7 @@
 
 <script setup lang="ts">
     import { hasContent } from '@maxvue/max-use';
-    import { computed, useId } from 'vue';
+    import { computed, useAttrs, useId } from 'vue';
     import MaxIcon from './MaxIcon.vue';
     import type { InputValue, SelectOptionsList, SelectGroupOptions } from '../types';
     import { provideInputBaseContext } from './base/inputBaseContext';
@@ -199,6 +203,10 @@
         noIcon?: boolean;
         /** Se verdadeiro, força a mensagem a permanecer em uma linha única com reticências (...) */
         truncateMessage?: boolean;
+        /** ID(s) de elementos que descrevem este campo para compor com o message_id */
+        ariaDescribedby?: string;
+        /** Mensagem de erro fallback quando o campo está inválido sem mensagem específica */
+        errorMessageFallback?: string;
     }
 
     const props = withDefaults(defineProps<Props>(), {
@@ -213,7 +221,8 @@
         inLine: false,
         noStatus: false,
         noMessage: false,
-        truncateMessage: false
+        truncateMessage: false,
+        errorMessageFallback: 'Valor inválido'
     });
 
     /**
@@ -221,6 +230,7 @@
      * Usado para associar o `<label>` (via `for`) e a mensagem de feedback (via `aria-describedby`)
      * ao elemento real de input no slot.
      */
+    const attrs = useAttrs();
     const generated_id = useId();
     const input_id = computed(() => props.id || generated_id);
     const message_id = computed(() => `${input_id.value}-message`);
@@ -232,9 +242,27 @@
         if (typeof props.caution === 'string' && hasContent(props.caution)) return props.caution;
         const mainMsg = props.message ?? props.msg;
         if (hasContent(mainMsg)) return mainMsg;
-        if (isError.value) return 'Valor inválido';
+        if (isError.value) return props.errorMessageFallback || 'Valor inválido';
         return '';
     });
+
+    const ariaDescribedby = computed(() => {
+        const tokens: string[] = [];
+        const external = (props.ariaDescribedby ?? attrs['aria-describedby']) as string | undefined;
+        if (external && typeof external === 'string') for (const t of external.trim().split(/\s+/)) if (t && !tokens.includes(t)) tokens.push(t);
+
+
+        if (!props.noStatus && !props.noMessage && displayMessage.value) if (!tokens.includes(message_id.value)) tokens.push(message_id.value);
+
+        return tokens.length > 0 ? tokens.join(' ') : undefined;
+    });
+
+    const inputAttrs = computed(() => ({
+        id: input_id.value,
+        'aria-invalid': isError.value ? ('true' as const) : undefined,
+        'aria-required': props.required ? ('true' as const) : undefined,
+        'aria-describedby': ariaDescribedby.value
+    }));
 
     const hasIconRight = computed(() => hasContent(props.iconRight ?? props.icon ?? props.i) && !props.noIcon && Boolean(props.iconRight || props.iconPos === 'right'));
 
@@ -244,7 +272,9 @@
         hasMessage: computed(() => Boolean(displayMessage.value)),
         isError,
         isRequired: computed(() => Boolean(props.required)),
-        displayMessage
+        displayMessage,
+        ariaDescribedby,
+        inputAttrs
     });
 </script>
 
@@ -370,7 +400,7 @@
         justify-content: flex-start;
         padding: 2px 4px 0;
         color: var(--max-surface-400);
-        min-height: 16px;
+        min-height: 19px;
         height: auto;
         width: 100%;
         gap: 4px;
@@ -386,7 +416,7 @@
             font-weight: 400;
             line-height: 1.25;
             white-space: normal;
-            overflow-wrap: break-word;
+            overflow-wrap: anywhere;
         }
 
         &.is-truncated {

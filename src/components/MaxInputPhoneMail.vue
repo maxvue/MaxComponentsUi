@@ -1,18 +1,14 @@
 <template>
     <InputBase v-bind="props" class="max-input-phone-mail input-base-phone-mail-main-div" :label="attrs.label ?? name_method" :icon="iconLeft" :done="done ?? undefined" :caution="caution" :error="error_msg">
-        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+        <template #default="{ inputAttrs }">
             <input
-                :id="inputId"
                 type="text"
                 class="max-input-native"
-                v-bind="attrs"
+                v-bind="{ ...inputAttrs, ...attrs }"
                 v-model="temp_value"
                 v-maska:unmaskedValue.unmasked="maskValue"
                 @blur="checkDone()"
                 :placeholder="attrs.email !== undefined || attrs.mail !== undefined ? 'usuario@email.com' : '(99) 9 9999 - 9999'"
-                :aria-describedby="hasMessage ? messageId : undefined"
-                :aria-invalid="slotError || Boolean(error_msg)"
-                :aria-required="isRequired || props.required"
             />
         </template>
     </InputBase>

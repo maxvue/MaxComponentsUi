@@ -11,16 +11,13 @@
         :caution="props.caution"
         :no-status="props.noStatus"
     >
-        <template #default="{ inputId, messageId, hasMessage, isError: slotError, isRequired }">
+        <template #default="{ inputAttrs, inputId, messageId, hasMessage, isError: slotError, isRequired }">
             <div
-                :id="inputId"
+                v-bind="inputAttrs"
                 class="max-input-otp-container"
                 :class="{ 'is-disabled': props.disabled }"
                 role="group"
                 :aria-label="props.label || ('Código de verificação de ' + effectiveLength + ' dígitos')"
-                :aria-describedby="hasMessage ? messageId : undefined"
-                :aria-invalid="slotError || Boolean(props.error) || Boolean(error_msg)"
-                :aria-required="isRequired || props.required"
             >
                 <template v-for="(group, gIdx) in groupedInputs" :key="gIdx">
                     <div v-if="gIdx > 0" class="max-input-otp-separator" aria-hidden="true">

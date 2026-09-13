@@ -133,4 +133,21 @@ describe('MaxInputText', () => {
 
         expect(inputBase.props('caution')).toBe(false);
     });
+
+    it('conecta label for ao id do input nativo e propaga aria-required e aria-describedby', async () => {
+        const wrapper = mountInputText({
+            label: 'Nome Completo',
+            required: true,
+            error: 'Campo obrigatório'
+        });
+        const input = wrapper.find('input');
+        const label = wrapper.find('label');
+
+        expect(label.exists()).toBe(true);
+        expect(input.attributes('id')).toBeTruthy();
+        expect(label.attributes('for')).toBe(input.attributes('id'));
+        expect(input.attributes('aria-required')).toBe('true');
+        expect(input.attributes('aria-invalid')).toBe('true');
+        expect(input.attributes('aria-describedby')).toBe(`${input.attributes('id')}-message`);
+    });
 });
