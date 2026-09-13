@@ -57,6 +57,11 @@
     });
 
 
+    const emit = defineEmits<{
+        (e: 'confirm'): void;
+        (e: 'cancel'): void;
+    }>();
+
     const btn_el = useTemplateRef('btn_el');
 
     const onClickToggle = () => {
@@ -64,12 +69,34 @@
         const domEl: HTMLElement | null = rawEl?.$el ?? rawEl;
         const rect = domEl?.getBoundingClientRect?.() ?? { x: 0, y: 0, left: 0, top: 0, width: 0, height: 0 };
 
+        const originalAcceptAction = props.acceptProps?.action;
+        const wrappedAcceptProps = {
+            ...props.acceptProps,
+            action: () => {
+                if (typeof originalAcceptAction === 'function') {
+                    originalAcceptAction();
+                }
+                emit('confirm');
+            }
+        };
+
+        const originalRejectAction = props.rejectProps?.action;
+        const wrappedRejectProps = {
+            ...props.rejectProps,
+            action: () => {
+                if (typeof originalRejectAction === 'function') {
+                    originalRejectAction();
+                }
+                emit('cancel');
+            }
+        };
+
         confirm_store.confirm({
             message: props.message,
             messageIcon: props.messageIcon,
             severity: props.severity,
-            rejectProps: props.rejectProps,
-            acceptProps: props.acceptProps,
+            rejectProps: wrappedRejectProps,
+            acceptProps: wrappedAcceptProps,
             x: rect.x ?? rect.left ?? 0,
             y: rect.y ?? rect.top ?? 0,
             width: rect.width ?? 0,
