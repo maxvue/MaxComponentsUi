@@ -1,33 +1,15 @@
 <template>
     <InputBase v-bind="inputBaseProps" class="max-input-markdown">
         <template #default="{ inputAttrs }">
-            <div
-                v-bind="inputAttrs"
-                class="max-input-markdown__editor-wrap"
-                :class="{ 'max-input-markdown__editor-wrap--disabled': props.disabled }"
-            >
+            <div v-bind="inputAttrs" class="max-input-markdown__editor-wrap" :class="{ 'max-input-markdown__editor-wrap--disabled': props.disabled }" >
                 <MaxInputMarkdownToolbar :editor="editor ?? null" />
-                <EditorContent
-                    class="max-input-markdown__content"
-                    :style="{ minHeight: props.minHeight, maxHeight: props.maxHeight }"
-                    :editor="editor"
-                />
+                <EditorContent class="max-input-markdown__content" :style="{ minHeight: props.minHeight, maxHeight: props.maxHeight }" :editor="editor" />
             </div>
 
             <!-- Visualizador Modal de Imagem (Lightbox) -->
             <Teleport to="body">
                 <Transition name="max-fade">
-                    <div
-                        v-if="isImageModalOpen"
-                        ref="imageModalRef"
-                        class="max-image-preview-modal"
-                        role="dialog"
-                        aria-modal="true"
-                        aria-label="Visualizador de Imagem"
-                        tabindex="-1"
-                        @click.self="closeImage"
-                        @keydown="imageTrap.onKeydown"
-                    >
+                    <div v-if="isImageModalOpen" ref="imageModalRef" class="max-image-preview-modal" role="dialog" aria-modal="true" aria-label="Visualizador de Imagem" tabindex="-1" @click.self="closeImage" @keydown="imageTrap.onKeydown" >
                         <div class="max-image-preview-modal__toolbar">
                             <button type="button" class="max-image-preview-modal__btn" title="Diminuir Zoom" @click="zoomOutImage">
                                 <MaxIcon icon="iconamoon:zoom-out-light" :size="1.2" color="currentColor" />
