@@ -13,13 +13,14 @@ vi.mock('@maxvue/max-use', async (importOriginal) => {
 
 import MaxTagSelect from '../../src/components/MaxTagSelect.vue';
 
-function mountTagSelect(props: Record<string, any> = {}, attrs: Record<string, any> = {}) {
+function mountTagSelect(props: Record<string, any> = {}, attrs: Record<string, any> = {}, attachTo?: Element) {
     return mount(MaxTagSelect, {
         props: {
             modelValue: null,
             ...props
         },
         attrs,
+        attachTo,
         global: {
             stubs: {
                 MaxIcon: {
@@ -97,6 +98,22 @@ describe('MaxTagSelect (Unit / WAI-ARIA & Keyboard Navigation)', () => {
 
             expect(optUrgente?.getAttribute('aria-selected')).toBe('false');
             expect(optNormal?.getAttribute('aria-selected')).toBe('true');
+        });
+
+        it('posiciona o popup acima do modal que contém o gatilho', async () => {
+            const dialog = document.createElement('div');
+            dialog.className = 'max-modal';
+            document.body.appendChild(dialog);
+
+            const wrapper = mountTagSelect({ options: [{ value: '1', name: 'Tag 1' }] }, {}, dialog);
+            await wrapper.find('.max-select').trigger('click');
+            await wrapper.vm.$nextTick();
+
+            const overlay = document.body.querySelector('.max-select-overlay') as HTMLElement;
+            expect(overlay.style.zIndex).toBe('calc(var(--max-layer-modal, 1310) + 10)');
+
+            wrapper.unmount();
+            dialog.remove();
         });
     });
 

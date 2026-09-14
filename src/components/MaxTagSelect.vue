@@ -39,7 +39,7 @@
                             >
                                 <MaxIcon
                                     :icon="option_selected?.icon ?? null"
-                                    :size="option_selected?.icon_size ?? 1.4"
+                                    :size="option_selected?.icon_size ?? 1"
                                     v-if="option_selected.icon"
                                     :color="getStyleColor(option_selected, false, true).color"
                                 />
@@ -79,7 +79,7 @@
                     class="max-select-overlay"
                     role="listbox"
                     tabindex="-1"
-                    :style="{ top: position.top + 'px', left: position.left + 'px', width: position.width }"
+                    :style="{ top: position.top + 'px', left: position.left + 'px', width: position.width, zIndex: overlayZIndex }"
                     @click.stop
                 >
                     <div v-if="props.filter" class="max-select-header">
@@ -344,6 +344,10 @@
     const triggerEl = ref<HTMLElement | null>(null);
     const overlayEl = ref<HTMLElement | null>(null);
     const filterInputEl = ref<HTMLInputElement | null>(null);
+    const overlayZIndex = computed(() => {
+        const isInModal = Boolean(triggerEl.value?.closest('.max-modal, .max-drawer, [role="dialog"]'));
+        return isInModal ? 'calc(var(--max-layer-modal, 1310) + 10)' : 'var(--max-layer-dropdown, 1000)';
+    });
 
     const { position } = useActiveOverlayPosition({
         target: triggerEl,
@@ -831,7 +835,6 @@
 
             .max-select-label {
                 border: none !important;
-                padding: 0 10px !important;
                 display: grid;
                 place-items: center start;
                 outline: none !important;
@@ -858,7 +861,6 @@
 
                     :deep(> .max-icon-div) {
                         width: auto !important;
-                        padding: 3px 10px 3px 3px !important;
 
                         .max-icon {
                             padding: 0 !important;
