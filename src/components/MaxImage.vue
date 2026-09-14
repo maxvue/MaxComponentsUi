@@ -1,6 +1,17 @@
 <template>
-    <div class="max-image" :style="containerStyle">
-        <slot name="image">
+    <div
+        class="max-image"
+        :class="{ 'max-image--pointer': props.preview }"
+        :style="containerStyle"
+        :role="props.preview && hasSlot('image') ? 'button' : undefined"
+        :tabindex="props.preview && hasSlot('image') ? 0 : undefined"
+        :aria-haspopup="props.preview && hasSlot('image') ? 'dialog' : undefined"
+        :aria-label="props.preview && hasSlot('image') ? (props.alt ? `Visualizar imagem: ${props.alt}` : 'Visualizar imagem ampliada') : undefined"
+        @click="onContainerClick"
+        @keydown.enter="onContainerKeydown"
+        @keydown.space.prevent="onContainerKeydown"
+    >
+        <slot name="image" :open="openPreview" :preview="openPreview" :src="currentSrc" :alt="props.alt">
             <img
                 ref="imgRef"
                 :src="currentSrc"
@@ -41,7 +52,7 @@
                             @click.self="onBackdropClick"
                         >
                             <img
-                                :src="currentSrc"
+                                :src="previewEffectiveSrc"
                                 :alt="props.alt"
                                 class="max-image-modal__img"
                                 :style="{ transform: `scale(${zoomScale})` }"
@@ -56,7 +67,7 @@
                         >
                             <img
                                 ref="cropImgRef"
-                                :src="currentSrc"
+                                :src="previewEffectiveSrc"
                                 :alt="props.alt"
                                 class="max-image-crop-stage__img"
                                 @load="onCropImgLoaded"
@@ -173,7 +184,7 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, computed, watch, onBeforeUnmount, nextTick } from 'vue';
+    import { ref, computed, watch, onBeforeUnmount, nextTick, useSlots } from 'vue';
     import MaxIconButton from './MaxIconButton.vue';
     import { useScrollLock } from '../helpers/useScrollLock';
     import { useFocusTrap } from '../helpers/useFocusTrap';
@@ -184,6 +195,7 @@
 
     const props = withDefaults(defineProps<MaxImageProps>(), {
         src: '',
+        previewSrc: undefined,
         alt: '',
         preview: true,
         allowEdit: false,
@@ -194,6 +206,9 @@
         cropQuality: 0.92,
         includeDataUrl: true
     });
+
+    const slots = useSlots();
+    const hasSlot = (name: string) => Boolean(slots[name]);
 
     const emit = defineEmits<{
         'update:src': [src: string];
@@ -218,6 +233,8 @@
         revokeActiveObjectUrl();
         currentSrc.value = newVal || '';
     });
+
+    const previewEffectiveSrc = computed(() => props.previewSrc || currentSrc.value);
 
     const isOpen = ref(false);
     const zoomScale = ref(1);
@@ -262,6 +279,23 @@
 
     const onImageClick = () => {
         if (!props.preview) return;
+        openPreview();
+    };
+
+    const onContainerClick = (event: MouseEvent) => {
+        if (!props.preview) return;
+        if (isOpen.value) return;
+        // Se o clique se originou do img padrão de fallback (que já tem seu próprio listener), não reexecuta
+        if (event.target === imgRef.value) return;
+        if ((event.target as HTMLElement | null)?.closest?.('.max-image-modal')) return;
+        openPreview();
+    };
+
+    const onContainerKeydown = (event: KeyboardEvent) => {
+        if (!props.preview) return;
+        if (isOpen.value) return;
+        if (event.target === imgRef.value) return;
+        if ((event.target as HTMLElement | null)?.closest?.('.max-image-modal')) return;
         openPreview();
     };
 
@@ -489,7 +523,7 @@
 
         const isJpeg = props.cropMimeType
             ? props.cropMimeType === 'image/jpeg'
-            : currentSrc.value.includes('image/jpeg') || /\.jpe?g$/i.test(currentSrc.value);
+            : (previewEffectiveSrc.value || currentSrc.value || '').includes('image/jpeg') || /\.jpe?g$/i.test(previewEffectiveSrc.value || currentSrc.value || '');
         const mimeType = props.cropMimeType || (isJpeg ? 'image/jpeg' : 'image/png');
         const quality = props.cropQuality ?? 0.92;
 

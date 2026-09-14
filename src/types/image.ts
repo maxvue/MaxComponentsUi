@@ -18,6 +18,8 @@ export interface MaxImageEditPayload {
 export interface MaxImageProps {
     /** URL ou Data URI da imagem */
     src?: string;
+    /** URL opcional em alta resolução para exibição no modal de visualização ampliada (se omitido, utiliza src) */
+    previewSrc?: string;
     /** Texto alternativo da imagem */
     alt?: string;
     /** Largura da imagem inline */
