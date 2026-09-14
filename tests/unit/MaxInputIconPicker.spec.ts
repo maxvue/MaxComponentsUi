@@ -3,6 +3,34 @@ import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxInputIconPicker from '../../src/components/MaxInputIconPicker.vue';
 
+const dummySvg = '<svg viewBox="0 0 24 24"><path d="M0 0h24v24H0z"/></svg>';
+
+function createSmartFetchMock(customHandler?: (url: string, init?: any) => any) {
+    return vi.fn((input: any, init?: any) => {
+        const urlStr = String(input);
+        if (urlStr.includes('iconify.design') || (urlStr.includes('api/icons') && !urlStr.includes('/picker'))) {
+            const result: Record<string, string> = {};
+            try {
+                const parsed = new URL(urlStr, 'http://localhost');
+                for (const icon of parsed.searchParams.getAll('icons[]')) result[icon] = dummySvg;
+            } catch {}
+            return Promise.resolve({
+                ok: true,
+                status: 200,
+                json: () => Promise.resolve(result),
+                text: () => Promise.resolve(dummySvg)
+            } as Response);
+        }
+        if (customHandler) return customHandler(urlStr, init);
+        return Promise.resolve({
+            ok: true,
+            status: 200,
+            json: () => Promise.resolve([]),
+            text: () => Promise.resolve(dummySvg)
+        } as Response);
+    });
+}
+
 describe('MaxInputIconPicker (A11y, Cache & Lifecycle)', () => {
     beforeEach(() => {
         setActivePinia(createPinia());
@@ -37,10 +65,7 @@ describe('MaxInputIconPicker (A11y, Cache & Lifecycle)', () => {
     });
 
     it('abre gaveta ao pressionar Enter ou Espaço no gatilho', async () => {
-        const fetchMock = vi.fn().mockResolvedValue({
-            json: () => Promise.resolve([])
-        });
-        vi.stubGlobal('fetch', fetchMock);
+        vi.stubGlobal('fetch', createSmartFetchMock());
 
         const wrapper = mount(MaxInputIconPicker, {
             props: { modelValue: '' }
@@ -58,13 +83,15 @@ describe('MaxInputIconPicker (A11y, Cache & Lifecycle)', () => {
     });
 
     it('renderiza células como botões acessíveis e botão de fechar com aria-label', async () => {
-        const fetchMock = vi.fn().mockResolvedValue({
+        vi.stubGlobal('fetch', createSmartFetchMock(() => Promise.resolve({
+            ok: true,
+            status: 200,
             json: () => Promise.resolve([
                 { id: 1, name: 'mdi:star', search: 'mdi:star' },
                 { id: 2, name: 'mdi:heart', search: 'mdi:heart' }
-            ])
-        });
-        vi.stubGlobal('fetch', fetchMock);
+            ]),
+            text: () => Promise.resolve(dummySvg)
+        } as Response)));
 
         const wrapper = mount(MaxInputIconPicker, {
             props: { modelValue: '' }
@@ -86,16 +113,21 @@ describe('MaxInputIconPicker (A11y, Cache & Lifecycle)', () => {
     });
 
     it('preserva svgCache entre ciclos de abertura do drawer', async () => {
-        const fetchMock = vi.fn((url: string) => {
+        vi.stubGlobal('fetch', createSmartFetchMock((url: string) => {
             if (url.toString().includes('/picker/svg')) return Promise.resolve({
-                json: () => Promise.resolve({ 'mdi:heart': '<svg><path d="M0 0"/></svg>' })
+                ok: true,
+                status: 200,
+                json: () => Promise.resolve({ 'mdi:heart': '<svg><path d="M0 0"/></svg>' }),
+                text: () => Promise.resolve(dummySvg)
             } as Response);
 
             return Promise.resolve({
-                json: () => Promise.resolve([{ id: 1, name: 'mdi:heart', search: 'mdi:heart' }])
+                ok: true,
+                status: 200,
+                json: () => Promise.resolve([{ id: 1, name: 'mdi:heart', search: 'mdi:heart' }]),
+                text: () => Promise.resolve(dummySvg)
             } as Response);
-        });
-        vi.stubGlobal('fetch', fetchMock);
+        }));
 
         const wrapper = mount(MaxInputIconPicker, {
             props: { modelValue: '' }

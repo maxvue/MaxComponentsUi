@@ -1,0 +1,42 @@
+// Mixins canônicos de foco visível acessível (WCAG 2.4.7 / WCAG 2.4.11)
+// Utilizam os tokens canônicos declarados em tokens.scss
+
+@mixin max-focus-visible($offset: 2px, $radius: null) {
+    &:focus:not(:focus-visible) {
+        outline: none;
+    }
+
+    &:focus-visible {
+        outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
+        outline-offset: $offset;
+        box-shadow: var(--max-focus-ring);
+
+        @if $radius {
+            border-radius: $radius;
+        }
+    }
+}
+
+@mixin focus-ring($offset: 2px, $radius: null) {
+    @include max-focus-visible($offset, $radius);
+}
+
+@mixin focus-ring-inset($offset: -2px, $radius: 4px) {
+    &:focus:not(:focus-visible) {
+        outline: none;
+    }
+
+    &:focus-visible {
+        outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
+        outline-offset: $offset;
+
+        @if $radius {
+            border-radius: $radius;
+        }
+    }
+}
+
+@mixin focus-field() {
+    outline: 2px solid var(--max-focus-ring-color, #00768e) !important;
+    outline-offset: 1px;
+}

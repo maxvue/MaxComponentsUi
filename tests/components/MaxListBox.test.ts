@@ -11,7 +11,7 @@ const OPTIONS = [
 
 function mountListBox(props: Record<string, any> = {}) {
     return mount(MaxListBox, {
-        props: { modelValue: null, options: OPTIONS, ...props }
+        props: { modelValue: null, options: OPTIONS, ariaLabel: 'Lista de opções', ...props }
     });
 }
 
@@ -96,7 +96,7 @@ describe('MaxListBox - renderizacao e selecao', () => {
 
     it('renderiza o slot option customizado', () => {
         const wrapper = mount(MaxListBox, {
-            props: { modelValue: null, options: OPTIONS },
+            props: { modelValue: null, options: OPTIONS, ariaLabel: 'Lista de opções' },
             slots: { option: '<template #option="{ option }"><b class="custom">{{ option.label }}</b></template>' }
         });
         expect(wrapper.findAll('.custom')).toHaveLength(3);
@@ -810,13 +810,14 @@ describe('MaxListBox - teclado', () => {
 
         // aria-activedescendant nao pode apontar para um id que nao existe mais.
         const active = list.attributes('aria-activedescendant');
-        if (active !== undefined) expect(wrapper.findAll('.max-listbox-item').some((item) => item.attributes('id') === active)).toBe(true);
-
+        expect(active).toBeDefined();
+        expect(wrapper.findAll('.max-listbox-item').some((item) => item.attributes('id') === active)).toBe(true);
 
         await list.trigger('keydown', { key: 'Enter' });
 
         const emitted = wrapper.emitted('update:modelValue');
-        if (emitted) expect(emitted[0]).not.toEqual([undefined]);
+        expect(emitted).toBeDefined();
+        expect(emitted![0]).not.toEqual([undefined]);
     });
 
     it('nao emite update:modelValue com undefined quando Enter e pressionado apos a lista esvaziar por completo', async () => {
@@ -991,6 +992,88 @@ describe('MaxListBox - suporte a opcoes primitivas', () => {
         const items = wrapper.findAll('.max-listbox-item');
         expect(items).toHaveLength(1);
         expect(items[0].text()).toContain('Goiás');
+    });
+});
+
+describe('MaxListBox - acessibilidade, nomes e live regions (E06-04 / E06-05)', () => {
+    beforeEach(() => {
+        setActivePinia(createPinia());
+    });
+
+    it('conecta aria-labelledby ao título do cabeçalho', () => {
+        const wrapper = mountListBox({
+            options: ['Item 1', 'Item 2'],
+            title: 'Cidades Brasileiras'
+        });
+
+        const listbox = wrapper.find('.max-listbox-list');
+        const header = wrapper.find('.max-listbox-header');
+        const headerId = header.attributes('id');
+
+        expect(headerId).toBeTruthy();
+        expect(listbox.attributes('aria-labelledby')).toBe(headerId);
+        expect(listbox.attributes('aria-label')).toBeUndefined();
+    });
+
+    it('utiliza ariaLabel como fallback quando não há título nem slot de cabeçalho', () => {
+        const wrapper = mountListBox({
+            options: ['Opção A', 'Opção B'],
+            ariaLabel: 'Lista de seleção de perfis'
+        });
+
+        const listbox = wrapper.find('.max-listbox-list');
+        expect(listbox.attributes('aria-label')).toBe('Lista de seleção de perfis');
+        expect(listbox.attributes('aria-labelledby')).toBeUndefined();
+    });
+
+    it('nomeia o filtro dinamicamente a partir do título ou filterLabel', async () => {
+        const wrapperWithTitle = mountListBox({
+            options: ['A', 'B'],
+            filter: true,
+            title: 'Contatos'
+        });
+        const filterInput = wrapperWithTitle.find('.max-listbox-filter-input');
+        expect(filterInput.attributes('aria-label')).toBe('Filtrar Contatos');
+
+        const wrapperCustom = mountListBox({
+            options: ['A', 'B'],
+            filter: true,
+            filterLabel: 'Pesquisar pelo nome'
+        });
+        const customFilter = wrapperCustom.find('.max-listbox-filter-input');
+        expect(customFilter.attributes('aria-label')).toBe('Pesquisar pelo nome');
+
+        const wrapperFallback = mountListBox({
+            options: ['A', 'B'],
+            filter: true
+        });
+        const fallbackFilter = wrapperFallback.find('.max-listbox-filter-input');
+        expect(fallbackFilter.attributes('aria-label')).toBe('Filtrar opções');
+    });
+
+    it('expõe carregamento e vazio em role="status" com aria-live="polite"', () => {
+        const wrapperEmpty = mountListBox({
+            options: [],
+            emptyMessage: 'Nenhum resultado disponível'
+        });
+
+        const emptyEl = wrapperEmpty.find('.max-listbox-empty');
+        expect(emptyEl.exists()).toBe(true);
+        expect(emptyEl.attributes('role')).toBe('status');
+        expect(emptyEl.attributes('aria-live')).toBe('polite');
+    });
+
+    it('avisa no console em desenvolvimento quando o listbox está sem nome', () => {
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+        mountListBox({
+            ariaLabel: undefined,
+            options: ['Item 1']
+        });
+
+        expect(warnSpy).toHaveBeenCalledWith(
+            expect.stringContaining('[MaxListBox] Widget sem nome acessível')
+        );
+        warnSpy.mockRestore();
     });
 });
 

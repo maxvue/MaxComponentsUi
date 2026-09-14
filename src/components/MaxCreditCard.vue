@@ -65,50 +65,41 @@
 </template>
 
 <script setup lang="ts">
-    import { computed, ref, nextTick, watch, onMounted } from 'vue';
+    import { computed, ref, nextTick, watch, onMounted, onUnmounted } from 'vue';
     import { onlyNumbers } from '@maxvue/max-use';
-    import { svgToDataUri } from '../helpers/svgToDataUri';
-    import creditCardFrontSvg from '../assets/credit-card/credit-card.svg?raw';
-    import creditCardRearSvg from '../assets/credit-card/credit-card-rear.svg?raw';
-    import cardAmexSvg from '../assets/credit-card/card-amex.svg?raw';
-    import cardDinersSvg from '../assets/credit-card/card-diners.svg?raw';
-    import cardDiscoverySvg from '../assets/credit-card/card-discovery.svg?raw';
-    import cardEloSvg from '../assets/credit-card/card-elo.svg?raw';
-    import cardHipercardSvg from '../assets/credit-card/card-hipercard.svg?raw';
-    import cardJcbSvg from '../assets/credit-card/card-jcb.svg?raw';
-    import cardMaestroSvg from '../assets/credit-card/card-maestro.svg?raw';
-    import cardMastercardSvg from '../assets/credit-card/card-mastercard.svg?raw';
-    import cardVisaSvg from '../assets/credit-card/card-visa.svg?raw';
+    import {
+        resolveCanonicalCardBrand,
+        loadCardBrandUri,
+        loadCardBackgroundUri
+    } from '../helpers/creditCardAssets';
 
-    /** SVGs das bandeiras embutidos no bundle, indexados pelos mesmos nomes usados anteriormente em `card-${cardType}.svg`. */
-    const CARD_TYPE_SVGS: Record<string, string> = {
-        amex: cardAmexSvg,
-        'american-express': cardAmexSvg,
-        diners: cardDinersSvg,
-        'diners-club': cardDinersSvg,
-        discover: cardDiscoverySvg,
-        discovery: cardDiscoverySvg,
-        elo: cardEloSvg,
-        hipercard: cardHipercardSvg,
-        hiper: cardHipercardSvg,
-        jcb: cardJcbSvg,
-        maestro: cardMaestroSvg,
-        mastercard: cardMastercardSvg,
-        visa: cardVisaSvg
-    };
+    /** URIs em base64 carregadas sob demanda para evitar inlining eager no bundle da lib. */
+    const creditCardFrontUri = ref<string>('');
+    const creditCardRearUri = ref<string>('');
+    const card_type_image = ref<string | null>(null);
 
-    let _frontUri: string | null = null;
-    let _rearUri: string | null = null;
+    let activeBrandRequestId = 0;
+    let isMounted = false;
 
-    const creditCardFrontUri = computed(() => {
-        if (!_frontUri) _frontUri = svgToDataUri(creditCardFrontSvg);
-        return _frontUri;
-    });
+    async function loadBrand(type: string | null | undefined): Promise<void> {
+        const requestId = ++activeBrandRequestId;
+        if (!type) {
+            card_type_image.value = null;
+            return;
+        }
 
-    const creditCardRearUri = computed(() => {
-        if (!_rearUri) _rearUri = svgToDataUri(creditCardRearSvg);
-        return _rearUri;
-    });
+        const uri = await loadCardBrandUri(type);
+        if (isMounted && requestId === activeBrandRequestId) card_type_image.value = uri;
+    }
+
+    function loadBackgrounds(): void {
+        loadCardBackgroundUri('front').then((front) => {
+            if (isMounted) creditCardFrontUri.value = front ?? '';
+        });
+        loadCardBackgroundUri('rear').then((rear) => {
+            if (isMounted) creditCardRearUri.value = rear ?? '';
+        });
+    }
 
     /**
      * Representação visual de um cartão de crédito, com frente e verso.
@@ -148,19 +139,14 @@
     });
 
     const card_type = computed(() => props.cardType ?? detected_type.value);
-    const card_type_image = computed(() => {
-        if (!card_type.value) return false;
-        const svg = CARD_TYPE_SVGS[card_type.value];
-        return svg ? svgToDataUri(svg) : false;
-    });
+    const canonical_brand = computed(() => resolveCanonicalCardBrand(card_type.value));
 
     /** Identifica se o cartão é American Express (15 dígitos, 4-6-5). */
-    const isAmex = computed(() => card_type.value === 'amex' || card_type.value === 'american-express');
+    const isAmex = computed(() => canonical_brand.value === 'amex');
 
     /** Identifica se o cartão é Diners Club de 14 dígitos (4-6-4). */
     const isDiners = computed(() => {
-        const isDinersType = card_type.value === 'diners' || card_type.value === 'diners-club';
-        if (!isDinersType) return false;
+        if (canonical_brand.value !== 'diners') return false;
         const digits = onlyNumbers(String(props.number ?? ''));
         // Se não tiver dígitos ou tiver até 14 dígitos, segue padrão Diners 14 dígitos (4-6-4)
         return digits.length <= 14;
@@ -255,8 +241,20 @@
     }
 
     onMounted(async () => {
+        isMounted = true;
+        loadBackgrounds();
+        loadBrand(card_type.value);
         await nextTick();
         updateAllTextLengths();
+    });
+
+    onUnmounted(() => {
+        isMounted = false;
+        activeBrandRequestId++;
+    });
+
+    watch(card_type, (newType) => {
+        if (isMounted) loadBrand(newType);
     });
 
     watch([formattedNumber, () => props.name, date, cvv], async () => {
@@ -271,7 +269,12 @@
         t1,
         t2,
         t3,
-        t4
+        t4,
+        creditCardFrontUri,
+        creditCardRearUri,
+        card_type_image,
+        detected_type,
+        card_type
     });
 </script>
 
@@ -357,6 +360,18 @@
 
         &.flip {
             transform: rotateY(180deg);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        perspective: none;
+
+        .flip-card {
+            transition: none !important;
+
+            .flip-card-inner {
+                transition: none !important;
+            }
         }
     }
 }

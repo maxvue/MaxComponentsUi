@@ -12,9 +12,11 @@ vi.mock('@maxvue/max-use', async (importOriginal) => {
     };
 });
 
-function mountIconButton(props: Record<string, any> = {}) {
+function mountIconButton(props: Record<string, any> = {}, autoAriaLabel = true) {
+    const finalProps = { ...props };
+    if (autoAriaLabel && !finalProps.ariaLabel && !finalProps['aria-label'] && !finalProps.label && !finalProps.title && !finalProps.tooltip) finalProps.ariaLabel = 'Botão de ação';
     return mount(MaxIconButton, {
-        props,
+        props: finalProps,
         global: {
             stubs: {
                 MaxIcon: {
@@ -98,6 +100,60 @@ describe('MaxIconButton (Acessibilidade e Semântica WAI-ARIA)', () => {
             expect(wrapper.attributes('aria-label')).toBe('Notificações do sistema');
         });
 
+        it('utiliza prop tooltip como fallback de aria-label', () => {
+            const wrapper = mountIconButton({
+                icon: 'mdi:download',
+                tooltip: 'Baixar relatório'
+            });
+            expect(wrapper.attributes('aria-label')).toBe('Baixar relatório');
+        });
+
+        it('respeita a ordem de prioridade: ariaLabel > label > title > tooltip', () => {
+            const wrapper1 = mountIconButton({
+                icon: 'mdi:star',
+                ariaLabel: 'Prioridade 1',
+                label: 'Prioridade 2',
+                title: 'Prioridade 3',
+                tooltip: 'Prioridade 4'
+            });
+            expect(wrapper1.attributes('aria-label')).toBe('Prioridade 1');
+
+            const wrapper2 = mountIconButton({
+                icon: 'mdi:star',
+                label: 'Prioridade 2',
+                title: 'Prioridade 3',
+                tooltip: 'Prioridade 4'
+            });
+            expect(wrapper2.attributes('aria-label')).toBe('Prioridade 2');
+
+            const wrapper3 = mountIconButton({
+                icon: 'mdi:star',
+                title: 'Prioridade 3',
+                tooltip: 'Prioridade 4'
+            });
+            expect(wrapper3.attributes('aria-label')).toBe('Prioridade 3');
+        });
+
+        it('emite warning no console em desenvolvimento quando nenhum nome acessível é fornecido', () => {
+            const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+            mountIconButton({ icon: 'mdi:help-circle' }, false);
+            expect(warnSpy).toHaveBeenCalledWith(
+                expect.stringContaining('[MaxIconButton] Botão de ícone renderizado sem nome acessível')
+            );
+        });
+
+        it('NÃO emite warning quando nome acessível é fornecido via ariaLabel/label/title/tooltip', () => {
+            const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+            mountIconButton({ icon: 'mdi:help-circle', tooltip: 'Ajuda' });
+            expect(warnSpy).not.toHaveBeenCalled();
+        });
+
+        it('garante que ícones visuais internos tenham aria-hidden="true"', () => {
+            const wrapper = mountIconButton({ icon: 'mdi:pencil', ariaLabel: 'Editar' });
+            const iconStub = wrapper.find('.max-icon-stub');
+            expect(iconStub.attributes('aria-hidden')).toBe('true');
+        });
+
         it.each([
             ['mdi:close', 'Fechar'],
             ['heroicons:xmark', 'Fechar'],
@@ -113,8 +169,10 @@ describe('MaxIconButton (Acessibilidade e Semântica WAI-ARIA)', () => {
             ['tabler:add', 'Adicionar'],
             ['mdi:unknown-icon', 'Botão de ação']
         ])('calcula o nome acessível contextual para o ícone %s como "%s"', (icon, expectedLabel) => {
-            const wrapper = mountIconButton({ icon });
+            const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+            const wrapper = mountIconButton({ icon }, false);
             expect(wrapper.attributes('aria-label')).toBe(expectedLabel);
+            expect(warnSpy).toHaveBeenCalled();
         });
     });
 

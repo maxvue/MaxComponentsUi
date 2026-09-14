@@ -1,5 +1,8 @@
 @use './app.scss' as app;
 @use './colors.scss' as colors;
+@forward './focus';
+@forward './table-anatomy';
 @use './font.scss' as font;
+@use './motion.scss' as motion;
 @use './params.scss' as params;
 @use './tokens.scss' as tokens;

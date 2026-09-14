@@ -1,0 +1,23 @@
+// Sistema canônico de movimento e acessibilidade vestibular (WCAG 2.3.3)
+
+@mixin reduced-motion {
+    @media (prefers-reduced-motion: reduce) {
+        @content;
+    }
+}
+
+:root {
+    --max-motion-duration-fast: 0.15s;
+    --max-motion-duration-normal: 0.2s;
+    --max-motion-duration-slow: 0.35s;
+    --max-motion-duration-reduced: 0.01ms;
+    --max-motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --max-motion-duration-fast: 0.01ms;
+        --max-motion-duration-normal: 0.01ms;
+        --max-motion-duration-slow: 0.01ms;
+    }
+}

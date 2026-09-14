@@ -1,0 +1,117 @@
+@use '../../src/themes/all';
+
+// Tema canônico e layout base do Playground Max
+:root {
+    color-scheme: light;
+}
+
+:root.dark {
+    color-scheme: dark;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-sans, 'Quicksand', sans-serif);
+    background-color: var(--background-50, #f8fafc);
+    color: var(--background-775, #1e293b);
+    -webkit-font-smoothing: antialiased;
+}
+
+.dark body {
+    background-color: var(--background-900, #09090b);
+    color: var(--background-100, #f1f5f9);
+}
+
+.playground-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: var(--background-50, #f8fafc);
+    color: var(--background-775, #1e293b);
+
+    &.dark,
+    .dark & {
+        background-color: var(--background-900, #09090b);
+        color: var(--background-100, #f1f5f9);
+    }
+
+    &__header {
+        background-color: var(--background-0, #fff);
+        border-bottom: 1px solid var(--background-200, #e2e8f0);
+        padding: 1.25rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.5rem;
+        position: sticky;
+        top: 0;
+        z-index: var(--max-layer-sticky, 100);
+
+        .dark & {
+            background-color: var(--background-850, #18181b);
+            border-bottom-color: var(--background-700, #27272a);
+        }
+
+        .header-title-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+
+            h1 {
+                margin: 0;
+                font-size: 1.25rem;
+                font-weight: 700;
+                color: var(--max-primary-500, #00768e);
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            p {
+                margin: 0;
+                font-size: 0.85rem;
+                color: var(--max-content-secondary, #64748b);
+            }
+        }
+    }
+
+    &__body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+        padding: 1.5rem;
+        box-sizing: border-box;
+        overflow-x: hidden;
+    }
+
+    &__viewport-container {
+        width: 100%;
+        transition: max-width 0.2s ease;
+        margin: 0 auto;
+        box-sizing: border-box;
+
+        &--desktop {
+            max-width: 1400px;
+        }
+
+        &--tablet {
+            max-width: 768px;
+            box-shadow: 0 4px 20px rgb(0 0 0 / 8%);
+            border-radius: 8px;
+        }
+
+        &--mobile {
+            max-width: 320px;
+            box-shadow: 0 4px 20px rgb(0 0 0 / 10%);
+            border-radius: 8px;
+        }
+
+        &--narrow {
+            max-width: 240px;
+            box-shadow: 0 4px 20px rgb(0 0 0 / 12%);
+            border-radius: 8px;
+        }
+    }
+}

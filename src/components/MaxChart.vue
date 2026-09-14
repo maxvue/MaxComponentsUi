@@ -1,11 +1,41 @@
 <template>
     <div class="max-chart-main-div">
-        <canvas ref="canvas_ref" :aria-label="ariaLabel || undefined" :role="ariaLabel ? 'img' : undefined"></canvas>
+        <canvas ref="canvas_ref" :aria-label="effectiveAriaLabel" :role="effectiveAriaLabel ? 'img' : undefined"></canvas>
+
+        <!-- Tabela acessível alternativa para navegação por teclado e tecnologias assistivas -->
+        <div v-if="accessibleRows.length > 0" class="max-chart-accessible-table sr-only">
+            <table :aria-label="effectiveAriaLabel || 'Tabela de dados do gráfico'">
+                <caption>{{ effectiveAriaLabel || 'Dados do gráfico' }}</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Item</th>
+                        <th v-for="(dataset, dIdx) in (props.data?.datasets ?? [])" :key="dIdx" scope="col">
+                            {{ dataset.label || `Série ${dIdx + 1}` }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(row, rIdx) in accessibleRows" :key="rIdx">
+                        <th scope="row">{{ row.label }}</th>
+                        <td v-for="(val, dIdx) in row.values" :key="dIdx">
+                            <button
+                                type="button"
+                                class="max-chart-cell-btn"
+                                :aria-label="`Selecionar ${row.label}, série ${(props.data?.datasets?.[dIdx]?.label) || (dIdx + 1)}: ${val}`"
+                                @click="onAccessibleSelect($event, rIdx, dIdx)"
+                            >
+                                {{ val }}
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </template>
 
 <script setup lang="ts">
-    import { onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue';
+    import { computed, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue';
     import type { MaxChartData, MaxChartInstance, MaxChartOptions, MaxChartPlugin, MaxChartType } from '../types/chart';
 
     const props = withDefaults(defineProps<{
@@ -30,9 +60,32 @@
     const emit = defineEmits<{
         /** Emitido quando a instância do chart.js termina de montar. */
         loaded: [chart: MaxChartInstance];
-        /** Emitido ao clicar sobre um ponto/fatia/barra do gráfico. */
-        select: [payload: { originalEvent: MouseEvent; index: number; datasetIndex: number }];
+        /** Emitido ao clicar sobre um ponto/fatia/barra do gráfico ou selecionar via tabela acessível. */
+        select: [payload: { originalEvent: MouseEvent | UIEvent; index: number; datasetIndex: number }];
     }>();
+
+    const effectiveAriaLabel = computed(() => {
+        if (props.ariaLabel) return props.ariaLabel;
+        if (props.data?.datasets?.[0]?.label) return `Gráfico: ${props.data.datasets[0].label}`;
+        return 'Gráfico de dados';
+    });
+
+    const accessibleRows = computed(() => {
+        if (!props.data || !props.data.labels || !props.data.datasets) return [];
+        const labels = props.data.labels;
+        const datasets = props.data.datasets;
+        return labels.map((label: any, rIdx: number) => ({
+            label: String(label),
+            values: datasets.map((ds: any) => {
+                const val = ds.data?.[rIdx];
+                return val !== undefined && val !== null ? String(val) : '';
+            })
+        }));
+    });
+
+    const onAccessibleSelect = (event: MouseEvent | UIEvent, index: number, datasetIndex: number) => {
+        emit('select', { originalEvent: event, index, datasetIndex });
+    };
 
     const canvas_ref = useTemplateRef<HTMLCanvasElement>('canvas_ref');
     // shallowRef: a instância do chart.js é um objeto grande e mutável por fora;
@@ -149,6 +202,18 @@
             display: block;
             width: 100%;
             height: 100%;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip-path: inset(50%);
+            white-space: nowrap;
+            border: 0;
         }
     }
 </style>

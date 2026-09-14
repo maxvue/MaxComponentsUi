@@ -1,10 +1,15 @@
 <template>
     <div
+        ref="mainDivRef"
         class="input-file-main-div"
-        tabindex="0"
+        :class="{ 'is-disabled': props.disabled }"
+        :tabindex="props.disabled ? -1 : 0"
         role="region"
         aria-label="Área de envio de arquivos"
+        :aria-disabled="props.disabled ? 'true' : undefined"
         v-bind="attrs"
+        @focus="isFocused = true"
+        @blur="isFocused = false"
         @click="triggerChoose"
         @keydown.enter.prevent="triggerChoose"
         @keydown.space.prevent="triggerChoose"
@@ -17,10 +22,15 @@
             multiple
             tabindex="-1"
             aria-hidden="true"
+            :disabled="props.disabled"
             @click.stop
             @change="onNativeInputChange"
             @paste="handlePaste"
         />
+
+        <div class="sr-only" role="status" aria-live="polite">
+            {{ statusAnnouncement }}
+        </div>
 
         <slot name="button">
             <div class="input-file-content" v-if="!isOverDropZone">
@@ -67,12 +77,17 @@
                                 <strong>Tamanho:</strong> {{ (file.size / 1024).toFixed(2) }} KB
                             </div>
                         </div>
-                        <div
+                        <button
+                            type="button"
                             class="trash-icon-remove-clipboard"
+                            :aria-label="`Remover ${file.name}`"
+                            :disabled="props.disabled"
                             @click.stop="deleteItem(index)"
+                            @keydown.enter.stop.prevent="deleteItem(index)"
+                            @keydown.space.stop.prevent="deleteItem(index)"
                         >
                             <MaxIcon icon="tabler:trash" size="1.3" />
-                        </div>
+                        </button>
                     </div>
                 </div>
             </template>
@@ -97,9 +112,12 @@
             modelValue?: File[];
             /** Texto descritivo na zona de drop */
             label?: string;
+            /** Estado desabilitado */
+            disabled?: boolean;
         }>(),
         {
-            modelValue: () => []
+            modelValue: () => [],
+            disabled: false
         }
     );
 
@@ -107,9 +125,12 @@
         (e: 'update:modelValue', value: File[]): void;
     }>();
 
+    const mainDivRef = ref<HTMLDivElement | null>(null);
+    const isFocused = ref(false);
     const nativeInputRef = ref<HTMLInputElement | null>(null);
     const dropZoneRef = ref<HTMLDivElement | null>(null);
     const temp_value = ref<File[]>([...props.modelValue]);
+    const statusAnnouncement = ref('');
 
     // Mapa de Object URLs geradas para pré-visualização de imagens, garantindo cleanup em onBeforeUnmount
     const previewUrlMap = new Map<File, string>();
@@ -161,13 +182,22 @@
     watch(
         () => props.modelValue,
         (val) => {
-            temp_value.value = val ? [...val] : [];
+            const nextFiles = val ? [...val] : [];
+            const nextSet = new Set(nextFiles);
+            for (const [file, url] of previewUrlMap.entries()) if (!nextSet.has(file)) {
+                URL.revokeObjectURL(url);
+                previewUrlMap.delete(file);
+            }
+
+            temp_value.value = nextFiles;
+            statusAnnouncement.value = `${nextFiles.length} arquivo${nextFiles.length === 1 ? '' : 's'} selecionado${nextFiles.length === 1 ? '' : 's'}`;
         },
         { deep: true }
     );
 
     const updateFiles = (newFiles: File[]) => {
         temp_value.value = newFiles;
+        statusAnnouncement.value = `${newFiles.length} arquivo${newFiles.length === 1 ? '' : 's'} selecionado${newFiles.length === 1 ? '' : 's'}`;
         emit('update:modelValue', newFiles);
     };
 
@@ -177,6 +207,7 @@
     };
 
     const deleteItem = (indexRemove: number) => {
+        if (props.disabled) return;
         const removedFile = temp_value.value[indexRemove];
         if (removedFile) cleanupFileUrl(removedFile);
         const updated = temp_value.value.filter((_, index) => index !== indexRemove);
@@ -184,17 +215,20 @@
     };
 
     const triggerChoose = (event?: Event) => {
+        if (props.disabled) return;
         if (event?.target === nativeInputRef.value) return;
         nativeInputRef.value?.click();
     };
 
     const onNativeInputChange = (event: Event) => {
+        if (props.disabled) return;
         const target = event.target as HTMLInputElement;
         if (target.files && target.files.length > 0) addFiles(Array.from(target.files));
         target.value = '';
     };
 
     const handlePaste = (event: ClipboardEvent) => {
+        if (props.disabled) return;
         if (!event.clipboardData) return;
         const filesFound: File[] = [];
         const items = event.clipboardData.items;
@@ -224,6 +258,7 @@
 
     const { isOverDropZone } = useDropZone(dropZoneRef, {
         onDrop: (files: File[] | null) => {
+            if (props.disabled) return;
             if (files && files.length > 0) addFiles(files);
         },
         multiple: true,
@@ -314,9 +349,26 @@
                     position: absolute;
                     top: 3px;
                     right: 3px;
-                    padding-top: 4px;
-                    padding-right: 4px;
+                    padding: 4px;
                     cursor: pointer;
+                    background: transparent;
+                    border: none;
+                    color: inherit;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    &:focus-visible {
+                        outline: none;
+                        box-shadow: var(--max-focus-ring);
+                        border-radius: 4px;
+                    }
+
+                    &:disabled {
+                        cursor: not-allowed;
+                        opacity: 0.5;
+                        pointer-events: none;
+                    }
                 }
 
             }
@@ -345,5 +397,17 @@
                 color: var(--background-700);
             }
         }
+    }
+
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+        border: 0;
     }
 </style>

@@ -26,7 +26,7 @@
 
     const props = withDefaults(
         defineProps<{
-            modelValue: string;
+            modelValue?: string | number | null;
             icon?: string | undefined;
             i?: string | undefined;
             disabled?: boolean | undefined;

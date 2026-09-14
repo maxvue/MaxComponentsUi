@@ -38,9 +38,8 @@ export const useIconStore = defineStore('icons', () => {
                     const persistDelta: Record<string, SanitizedSvg> = {};
                     for (const [icon_name, value] of Object.entries(parsed)) {
                         if (typeof value !== 'string') continue;
-                        if (value === 'waiting' || value === '') {
-                            memoryState[icon_name] = value;
-                        } else {
+                        if (value === 'waiting' || value === '') memoryState[icon_name] = value;
+                        else {
                             const clean = sanitizeSvg(value);
                             if (clean) {
                                 memoryState[icon_name] = clean;
@@ -62,9 +61,8 @@ export const useIconStore = defineStore('icons', () => {
 
         // 2. Carregamento assíncrono do IndexedDB (já sanitizado por loadAllIconsFromIDB)
         loadAllIconsFromIDB().then((idbIcons) => {
-            if (idbIcons && size(idbIcons) > 0) {
-                icons_data.value = { ...idbIcons, ...icons_data.value };
-            }
+            if (idbIcons && size(idbIcons) > 0) icons_data.value = { ...idbIcons, ...icons_data.value };
+
         }).catch(() => {});
     };
 

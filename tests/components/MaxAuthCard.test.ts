@@ -79,10 +79,58 @@ describe('MaxAuthCard', () => {
             expect(wrapper.emitted('submit')).toBeFalsy();
         });
 
-        it('exibe a mensagem de erro quando a prop error é informada', () => {
+        it('exibe a mensagem de erro quando a prop error é informada e associa via aria-describedby', () => {
             const wrapper = mountAuthCard({ error: 'Credenciais inválidas' });
 
-            expect(wrapper.text()).toContain('Credenciais inválidas');
+            const errorEl = wrapper.find('#max-auth-card-error');
+            expect(errorEl.exists()).toBe(true);
+            expect(errorEl.attributes('role')).toBe('alert');
+            expect(errorEl.attributes('aria-live')).toBe('assertive');
+            expect(errorEl.attributes('aria-atomic')).toBe('true');
+            expect(errorEl.text()).toContain('Credenciais inválidas');
+
+            const textInputs = wrapper.findAllComponents({ name: 'MaxInputText' });
+            textInputs.forEach((input) => {
+                expect(input.attributes('aria-describedby') || input.find('input').attributes('aria-describedby')).toContain('max-auth-card-error');
+            });
+        });
+
+        it('associa o container de grade ao erro via aria-describedby', () => {
+            const wrapper = mountAuthCard({ error: 'Erro geral' });
+            const grid = wrapper.find('.auth-card-grid');
+            expect(grid.attributes('aria-describedby')).toBe('max-auth-card-error');
+        });
+
+        it('não duplica regiões alert simultâneas no card', () => {
+            const wrapper = mountAuthCard({ error: 'Erro de autenticação' });
+            const alertEls = wrapper.findAll('[role="alert"]');
+            expect(alertEls).toHaveLength(1);
+            expect(alertEls[0].attributes('id')).toBe('max-auth-card-error');
+            expect(alertEls[0].attributes('aria-atomic')).toBe('true');
+        });
+
+        it('não move foco passivamente no mount com erro, mas move após submissão inválida', async () => {
+            const wrapper = mount(MaxAuthCard, {
+                attachTo: document.body,
+                props: { error: 'Credenciais inválidas', email: '', password: '' },
+                global: {
+                    stubs: {
+                        'router-link': { template: '<a><slot /></a>' }
+                    }
+                }
+            });
+
+            const emailInput = wrapper.findAll('input').find((i) => i.attributes('type') === 'email');
+            expect(emailInput).toBeTruthy();
+            expect(document.activeElement).not.toBe(emailInput!.element);
+
+            // Submissão inválida move o foco para o primeiro campo inválido
+            const button = wrapper.findComponent({ name: 'MaxButton' });
+            await (button.props('action') as any)?.();
+            await wrapper.vm.$nextTick();
+
+            expect(document.activeElement).toBe(emailInput!.element);
+            wrapper.unmount();
         });
 
         it('renderiza os botões de provedores sociais e emite o evento social ao clicar', async () => {
@@ -146,13 +194,26 @@ describe('MaxAuthCard', () => {
             expect(wrapper.findComponent({ name: 'MaxInputOTP' }).exists()).toBe(true);
         });
 
-        it('ao pressionar ENTER com telefone vazio: não envia código', async () => {
-            const wrapper = mountAuthCard({ mode: 'phone-otp', phone: '' });
+        it('ao pressionar ENTER com telefone vazio: move foco para o telefone e não envia código', async () => {
+            const wrapper = mount(MaxAuthCard, {
+                attachTo: document.body,
+                props: { mode: 'phone-otp', phone: '' },
+                global: {
+                    stubs: {
+                        'router-link': { template: '<a><slot /></a>' }
+                    }
+                }
+            });
 
             await wrapper.find('.max-auth-page').trigger('keyup.enter');
+            await wrapper.vm.$nextTick();
 
             expect(wrapper.emitted('send-code')).toBeFalsy();
             expect(wrapper.findComponent({ name: 'MaxInputOTP' }).exists()).toBe(false);
+
+            const phoneInputEl = wrapper.find('.phone-number-input').element;
+            expect(document.activeElement).toBe(phoneInputEl);
+            wrapper.unmount();
         });
 
         it('dispara send-code com 1º endpoint prioritário ao clicar no botão de envio e passa a exibir MaxInputOTP', async () => {
@@ -270,7 +331,7 @@ describe('MaxAuthCard', () => {
             expect(submitPayload.remember).toBe(true);
         });
 
-        it('comportamento dinâmico do botão durante o cooldown com código incompleto (no-op e sem disabled)', async () => {
+        it('comportamento dinâmico do botão durante o cooldown com código incompleto (com disabled e role=status)', async () => {
             const wrapper = mountAuthCard({
                 mode: 'phone-otp',
                 phone: '62999999999',
@@ -281,9 +342,14 @@ describe('MaxAuthCard', () => {
             await (button.props('action') as any)?.();
             await wrapper.vm.$nextTick();
 
-            // Botão deve mostrar "Solicitar novamente (60s)"
+            // Botão deve mostrar "Solicitar novamente (60s)", estar disabled e associado a role="status"
             expect(button.props('label')).toBe('Solicitar novamente (60s)');
-            expect(button.attributes('disabled')).toBeUndefined();
+            expect(button.props('disabled')).toBe(true);
+            const statusEl = wrapper.find('#otp-cooldown-status');
+            expect(statusEl.exists()).toBe(true);
+            expect(statusEl.attributes('role')).toBe('status');
+            expect(statusEl.text()).toContain('Aguarde 60s');
+            expect(button.attributes('aria-describedby')).toBe('otp-cooldown-status');
 
             // Clica no botão durante o cooldown com código incompleto
             await (button.props('action') as any)?.();
@@ -292,11 +358,23 @@ describe('MaxAuthCard', () => {
             expect(wrapper.emitted('resend-code')).toBeFalsy();
             expect(wrapper.emitted('submit')).toBeFalsy();
 
+            // Pressiona Enter durante cooldown com código incompleto: não contorna cooldown
+            await wrapper.find('.max-auth-page').trigger('keyup.enter');
+            expect(wrapper.emitted('submit')).toBeFalsy();
+
             // Avança 30 segundos
             vi.advanceTimersByTime(30000);
             await wrapper.vm.$nextTick();
             expect(button.props('label')).toBe('Solicitar novamente (30s)');
-            expect(button.attributes('disabled')).toBeUndefined();
+            expect(button.props('disabled')).toBe(true);
+            expect(wrapper.find('#otp-cooldown-status').text()).toContain('Aguarde 30s');
+
+            // Avança até o final do cooldown (mais 30 segundos)
+            vi.advanceTimersByTime(30000);
+            await wrapper.vm.$nextTick();
+            expect(button.props('label')).toBe('Solicitar código novamente');
+            expect(button.props('disabled')).toBe(false);
+            expect(wrapper.find('#otp-cooldown-status').exists()).toBe(false);
         });
 
         it('botão dinâmico muda para "Entrar" quando todos os 6 dígitos forem preenchidos', async () => {
@@ -440,5 +518,3 @@ describe('MaxAuthCard', () => {
         });
     });
 });
-
-

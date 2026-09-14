@@ -257,7 +257,7 @@
                 .mobile-profile-name {
                     font-size: 0.95rem;
                     font-weight: 600;
-                    color: var(--background-775);
+                    color: var(--layout-shell-text, #fff);
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
@@ -265,7 +265,7 @@
 
                 .mobile-profile-subtext {
                     font-size: 0.75rem;
-                    color: var(--background-650);
+                    color: var(--layout-shell-text-muted, rgb(255 255 255 / 70%));
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
@@ -275,7 +275,7 @@
             .mobile-profile-chevron {
                 background: none;
                 border: none;
-                color: var(--background-650);
+                color: var(--layout-shell-text-muted, rgb(255 255 255 / 70%));
                 display: grid;
                 place-items: center;
                 cursor: pointer;

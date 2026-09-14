@@ -13,46 +13,62 @@
                 {{ placeholderText }}
             </div>
 
-            <div
-                ref="triggerEl"
-                v-bind="inputAttrs"
-                class="max-select"
-                :class="{ 'is-disabled': props.disabled, 'is-focused': isOpen }"
-                tabindex="0"
-                role="combobox"
-                aria-haspopup="listbox"
-                :aria-expanded="isOpen"
-                :aria-controls="listboxId"
-                :aria-activedescendant="activeDescendantId"
-                @click.stop="toggle"
-                @keydown="onTriggerKeydown"
-            >
-                <div class="max-select-label">
-                    <slot name="value">
-                        <div
-                            class="value-tag-div"
-                            :style="getStyleColor(option_selected, false, true)"
-                            :color-string="getColorString(option_selected)"
-                            v-if="!isButton && hasSelected"
-                        >
-                            <MaxIcon
-                                :icon="option_selected?.icon ?? null"
-                                :size="option_selected?.icon_size ?? 1.4"
-                                v-if="option_selected.icon"
-                                :color="getStyleColor(option_selected, false, true).color"
-                            />
+            <div class="max-select-wrapper">
+                <div
+                    ref="triggerEl"
+                    v-bind="inputAttrs"
+                    class="max-select"
+                    :class="{ 'is-disabled': props.disabled, 'is-focused': isOpen }"
+                    :tabindex="props.disabled || props.isButton ? -1 : 0"
+                    :role="props.isButton ? undefined : 'combobox'"
+                    :aria-haspopup="props.isButton ? undefined : 'listbox'"
+                    :aria-expanded="props.isButton ? undefined : isOpen"
+                    :aria-controls="props.isButton ? undefined : (isOpen ? listboxId : undefined)"
+                    :aria-activedescendant="props.isButton ? undefined : activeDescendantId"
+                    :aria-disabled="props.disabled ? 'true' : undefined"
+                    @click.stop="toggle"
+                    @keydown="onTriggerKeydown"
+                >
+                    <div class="max-select-label">
+                        <slot name="value">
                             <div
-                                class="tag-value-text"
-                                :style="{ color: getStyleColor(option_selected, false, true).color }"
+                                class="value-tag-div"
+                                :style="getStyleColor(option_selected, false, true)"
+                                :color-string="getColorString(option_selected)"
+                                v-if="!isButton && hasSelected"
                             >
-                                {{ option_selected?.[props.optionName] ?? option_selected?.name ?? option_selected?.label }}
+                                <MaxIcon
+                                    :icon="option_selected?.icon ?? null"
+                                    :size="option_selected?.icon_size ?? 1.4"
+                                    v-if="option_selected.icon"
+                                    :color="getStyleColor(option_selected, false, true).color"
+                                />
+                                <div
+                                    class="tag-value-text"
+                                    :style="{ color: getStyleColor(option_selected, false, true).color }"
+                                >
+                                    {{ option_selected?.[props.optionName] ?? option_selected?.name ?? option_selected?.label }}
+                                </div>
                             </div>
-                            <slot name="btn-right"></slot>
-                        </div>
-                        <div v-else-if="isButton">
-                            <MaxIconButton :icon="props.i ?? props.icon ?? props.iconLeft" :size="option_selected?.icon_size ?? 1.8" />
-                        </div>
-                    </slot>
+                            <div v-else-if="isButton">
+                                <MaxIconButton :icon="props.i ?? props.icon ?? props.iconLeft" :size="option_selected?.icon_size ?? 1.8" />
+                            </div>
+                        </slot>
+                    </div>
+                </div>
+
+                <button
+                    v-if="hasClear && hasSelected && !props.disabled"
+                    type="button"
+                    class="max-select-clear-btn"
+                    aria-label="Limpar seleção"
+                    @click.stop="clearSelection"
+                >
+                    <MaxIcon icon="lucide:x" size="0.85" />
+                </button>
+
+                <div v-if="$slots['btn-right']" class="max-tag-select-btn-right">
+                    <slot name="btn-right"></slot>
                 </div>
             </div>
 
@@ -85,48 +101,62 @@
                         </div>
                     </div>
 
-                    <div ref="listContainerEl" class="max-select-list-container">
+                    <div ref="listContainerEl" class="max-select-list-container" @scroll="onContainerScroll">
                         <div v-if="loading" class="max-select-empty-message">
                             Carregando...
                         </div>
-                        <template v-else-if="filteredOptions.length > 0">
-                            <div class="max-select-list">
-                                <div
-                                    v-for="(option, index) in (filteredOptions as any[])"
-                                    :key="index"
-                                    :id="`${listboxId}-opt-${index}`"
-                                    class="max-select-option"
-                                    :class="{
-                                        'max-select-option-selected is-selected': isOptionSelected(option),
-                                        'max-select-option-highlighted is-focused': highlightedIndex === index
-                                    }"
-                                    role="option"
-                                    :aria-selected="isOptionSelected(option)"
-                                    @click.stop="selectOption(option)"
-                                    @mouseenter="highlightedIndex = index"
-                                >
-                                    <slot name="option" :option="option" :selected="isOptionSelected(option)" :index="index">
-                                        <div
-                                            class="label-tag-div"
-                                            :style="getStyleColor(option, option['hover'] ?? false, false)"
-                                            @mouseenter="option['hover'] = true"
-                                            @mouseleave="option['hover'] = false"
-                                        >
-                                            <MaxIcon
-                                                :icon="option['icon']"
-                                                v-if="option['icon']"
-                                                :size="option?.['iconSize'] ?? '1'"
-                                                :style="{ width: '30px' }"
-                                                :color="getStyleColor(option, false, false).color"
-                                            />
-                                            <div class="label-tag">
-                                                <div style="display: grid; white-space: nowrap;" v-text="option[props.optionLabel] ?? option.label" :style="{ color: attrs.color }"></div>
+                        <template v-else-if="hasOptions">
+                            <div v-if="isVirtual" class="max-select-spacer" :style="{ height: `${totalHeight}px` }" aria-hidden="true" />
+                            <div
+                                class="max-select-list"
+                                :class="{ 'is-virtual': isVirtual }"
+                                :style="isVirtual ? { transform: `translateY(${offsetY}px)` } : undefined"
+                            >
+                                <template v-for="entry in visibleItems" :key="entry.item.key">
+                                    <div v-if="entry.item.type === 'group'" class="max-select-option-group-wrapper">
+                                        <slot name="optiongroup" :option="entry.item.group">
+                                            <div class="label_div max-select-option-group">
+                                                <div class="labelz">
+                                                    <div>{{ entry.item.label }}</div>
+                                                </div>
                                             </div>
-                                            <div class="sub-label-tag" v-text="option?.sub_label ?? option?.sub ?? option?.subLabel"></div>
-                                            <img v-if="option['img']" :src="`/media/images/${option['img']}`" alt="Image" class="img-label" />
-                                        </div>
-                                    </slot>
-                                </div>
+                                        </slot>
+                                    </div>
+                                    <div
+                                        v-else
+                                        :id="`${listboxId}-opt-${entry.item.selectableIndex}`"
+                                        class="max-select-option"
+                                        :class="{
+                                            'max-select-option-selected is-selected': isOptionSelected(entry.item.option),
+                                            'max-select-option-highlighted is-focused': highlightedIndex === entry.item.selectableIndex
+                                        }"
+                                        :style="{ height: `${numericItemHeight}px` }"
+                                        role="option"
+                                        :aria-selected="isOptionSelected(entry.item.option)"
+                                        @click.stop="selectOption(entry.item.option)"
+                                        @mouseenter="highlightedIndex = entry.item.selectableIndex"
+                                    >
+                                        <slot name="option" :option="entry.item.option" :selected="isOptionSelected(entry.item.option)" :index="entry.item.optionIndex">
+                                            <div
+                                                class="label-tag-div"
+                                                :style="getStyleColor(entry.item.option, highlightedIndex === entry.item.selectableIndex, false)"
+                                            >
+                                                <MaxIcon
+                                                    :icon="entry.item.option['icon']"
+                                                    v-if="entry.item.option['icon']"
+                                                    :size="entry.item.option?.['iconSize'] ?? '1'"
+                                                    :style="{ width: '30px' }"
+                                                    :color="getStyleColor(entry.item.option, false, false).color"
+                                                />
+                                                <div class="label-tag">
+                                                    <div style="display: grid; white-space: nowrap;" v-text="entry.item.option[props.optionLabel] ?? entry.item.option.label" :style="{ color: attrs.color }"></div>
+                                                </div>
+                                                <div class="sub-label-tag" v-text="entry.item.option?.sub_label ?? entry.item.option?.sub ?? entry.item.option?.subLabel"></div>
+                                                <img v-if="entry.item.option['img']" :src="`/media/images/${entry.item.option['img']}`" alt="Image" class="img-label" />
+                                            </div>
+                                        </slot>
+                                    </div>
+                                </template>
                             </div>
                         </template>
                         <div v-else class="max-select-empty-message">
@@ -150,6 +180,7 @@
     import { getColorFromVar, contrastColor, isBlank, watchDebounced } from '@maxvue/max-use';
     import { useActiveOverlayPosition } from '../composables/useActiveOverlayPosition';
     import { getOverlayWidth, getOverlayLeft } from '../helpers/useOverlayWidth';
+    import { useVirtualList } from '../composables/useVirtualList';
     import MaxIcon from './MaxIcon.vue';
     import MaxIconButton from './MaxIconButton.vue';
 
@@ -202,6 +233,14 @@
             hasRemove?: boolean | undefined;
             isButton?: boolean | undefined;
             backgroundColor?: string;
+            /** Altura dos itens da lista em px (padrão: 36) */
+            itemHeight?: number | string | undefined;
+            /** Força ou desativa a virtualização da lista */
+            virtualScroll?: boolean | undefined;
+            /** Limiar para ativação automática do virtual scroll (padrão: 500) */
+            virtualScrollThreshold?: number | undefined;
+            /** Tolerância de itens renderizados fora da viewport (overscan) */
+            numToleratedItems?: number | undefined;
         }>(),
         {
             modelValue: null,
@@ -217,7 +256,11 @@
             default: undefined,
             disabled: false,
             isButton: false,
-            backgroundColor: 'var(--background-500)'
+            backgroundColor: 'var(--background-500)',
+            itemHeight: 36,
+            virtualScroll: undefined,
+            virtualScrollThreshold: 500,
+            numToleratedItems: 5
         }
     );
 
@@ -226,8 +269,13 @@
         return item.background_color ?? item.backgroundColor ?? item.tag_color ?? item.tagColor ?? item['tag-color'] ?? item['background-color'] ?? 'unset';
     };
 
+    const styleColorCache = new Map<string, any>();
+
     const getStyleColor = (item: any, hover: boolean = false, is_value: boolean = false) => {
         const color_string = getColorString(item);
+        const cacheKey = `${color_string}_${hover}_${is_value}_${props.backgroundColor}`;
+        const cached = styleColorCache.get(cacheKey);
+        if (cached) return cached;
 
         const default_color = is_value ? props.backgroundColor : 'var(--background-500)';
 
@@ -240,13 +288,15 @@
             text = hover ? 'var(--background-775)' : 'var(--background-700)';
         }
 
-        return {
+        const style = {
             backgroundColor: background,
             color: text,
             borderRadius: '6px',
             padding: is_value ? '0 8px 0 6px !important' : '0 10px 0 6px !important',
             gap: is_value ? '4px' : 0
         };
+        styleColorCache.set(cacheKey, style);
+        return style;
     };
 
     const emit = defineEmits<{
@@ -263,6 +313,15 @@
     const highlightedIndex = ref<number>(-1);
     const listContainerEl = ref<HTMLElement | null>(null);
 
+    const hasClear = computed(() => Boolean((attrs as any)?.clearable || (attrs as any)?.isClearable || (attrs as any)?.showClear || props.hasRemove));
+
+    const clearSelection = () => {
+        temp_value.value = null;
+        emit('update:modelValue', null);
+        emit('change', null);
+        emit('clear');
+    };
+
     watch(temp_value, (val) => {
         if (skipNextUpdateModelValue) {
             skipNextUpdateModelValue = false;
@@ -271,6 +330,9 @@
         emit('update:modelValue', val);
     });
     watch(() => props.modelValue, (val) => (temp_value.value = val));
+    watch(() => props.disabled, (disabled) => {
+        if (disabled) hide();
+    });
 
     const isOpen = ref(false);
     const loading = ref(false);
@@ -342,6 +404,18 @@
         const q = searchQuery.value.toLowerCase().trim();
         const labelKey = props.optionLabel;
 
+        if (props.groupOptions !== undefined) return (raw as any[])
+            .map((group) => {
+                if (!group || !Array.isArray(group.items)) return group;
+                const items = group.items.filter((item: any) => {
+                    const txt = String(item[labelKey] ?? item.label ?? item.name ?? '').toLowerCase();
+                    const sub = String(item.sub_label ?? item.sub ?? item.subLabel ?? '').toLowerCase();
+                    return txt.includes(q) || sub.includes(q);
+                });
+                return items.length > 0 ? { ...group, items } : null;
+            })
+            .filter(Boolean);
+
         return (raw as any[]).filter((opt: any) => {
             const txt = String(opt[labelKey] ?? opt.label ?? opt.name ?? '').toLowerCase();
             const sub = String(opt.sub_label ?? opt.sub ?? opt.subLabel ?? '').toLowerCase();
@@ -349,18 +423,94 @@
         });
     });
 
-    const flatSelectableOptions = computed<any[]>(() => {
+    type FlatTagEntry =
+        | { type: 'group'; label: string; group: any; key: string }
+        | { type: 'option'; option: any; selectableIndex: number; key: string; groupIndex: number; optionIndex: number };
+
+    const flattenedItems = computed<FlatTagEntry[]>(() => {
         const raw = filteredOptions.value;
-        if (props.groupOptions !== undefined && Array.isArray(raw)) {
-            const flat: any[] = [];
-            for (const grp of raw as any[]) if (grp?.items && Array.isArray(grp.items)) flat.push(...grp.items);
-            else flat.push(grp);
-
-
-            return flat;
+        if (props.groupOptions !== undefined) {
+            const result: FlatTagEntry[] = [];
+            let selectableCount = 0;
+            const groups = (raw as any[]) || [];
+            for (let gIdx = 0; gIdx < groups.length; gIdx++) {
+                const grp = groups[gIdx];
+                result.push({
+                    type: 'group',
+                    label: grp?.label ?? '',
+                    group: grp,
+                    key: `g-${gIdx}-${grp?.label ?? ''}`
+                });
+                const items = grp?.items && Array.isArray(grp.items) ? grp.items : [];
+                for (let oIdx = 0; oIdx < items.length; oIdx++) {
+                    const opt = items[oIdx];
+                    result.push({
+                        type: 'option',
+                        option: opt,
+                        selectableIndex: selectableCount++,
+                        key: `tag-opt-${gIdx}-${oIdx}-${opt?.[props.optionValue] ?? oIdx}`,
+                        groupIndex: gIdx,
+                        optionIndex: oIdx
+                    });
+                }
+            }
+            return result;
         }
-        return (raw as any[]) || [];
+
+        const options = (raw as any[]) || [];
+        return options.map((opt, idx) => ({
+            type: 'option' as const,
+            option: opt,
+            selectableIndex: idx,
+            key: `tag-opt-${idx}-${opt?.[props.optionValue] ?? idx}`,
+            groupIndex: 0,
+            optionIndex: idx
+        }));
     });
+
+    const flatSelectableOptions = computed<any[]>(() => {
+        if (props.groupOptions !== undefined) return flattenedItems.value
+            .filter((e): e is Extract<FlatTagEntry, { type: 'option' }> => e.type === 'option')
+            .map((e) => e.option);
+
+        return (filteredOptions.value as any[]) || [];
+    });
+
+    const hasOptions = computed(() => {
+        if (props.groupOptions !== undefined) return filteredOptions.value.some((g: any) => g?.items?.length > 0);
+        return filteredOptions.value.length > 0;
+    });
+
+    const numericItemHeight = computed(() => {
+        if (typeof props.itemHeight === 'number') return props.itemHeight;
+        if (typeof props.itemHeight === 'string') {
+            const p = parseFloat(props.itemHeight);
+            return isNaN(p) ? 36 : p;
+        }
+        return 36;
+    });
+
+    const isVirtual = computed(() => {
+        if (props.virtualScroll !== undefined) return Boolean(props.virtualScroll);
+        return flattenedItems.value.length > (props.virtualScrollThreshold ?? 500);
+    });
+
+    const {
+        visibleItems,
+        offsetY,
+        totalHeight,
+        setViewport,
+        scrollToIndex
+    } = useVirtualList(flattenedItems, {
+        itemHeight: numericItemHeight,
+        enabled: isVirtual,
+        overscan: props.numToleratedItems ?? 5
+    });
+
+    const onContainerScroll = (e: Event) => {
+        const el = e.target as HTMLElement;
+        if (el) setViewport(el.scrollTop, el.clientHeight);
+    };
 
     const activeDescendantId = computed(() => {
         if (!isOpen.value || highlightedIndex.value < 0) return undefined;
@@ -377,13 +527,17 @@
             const container = listContainerEl.value;
             if (!container || highlightedIndex.value < 0) return;
 
-            const h = 36;
-            const targetTop = highlightedIndex.value * h;
-            const targetBottom = targetTop + h;
+            if (isVirtual.value) {
+                const targetScroll = scrollToIndex(highlightedIndex.value, 'auto');
+                container.scrollTop = targetScroll;
+            } else {
+                const h = numericItemHeight.value;
+                const targetTop = highlightedIndex.value * h;
+                const targetBottom = targetTop + h;
 
-            if (targetTop < container.scrollTop) container.scrollTop = targetTop;
-            else if (targetBottom > container.scrollTop + container.clientHeight) container.scrollTop = targetBottom - container.clientHeight;
-
+                if (targetTop < container.scrollTop) container.scrollTop = targetTop;
+                else if (targetBottom > container.scrollTop + container.clientHeight) container.scrollTop = targetBottom - container.clientHeight;
+            }
         });
     };
 
@@ -615,6 +769,33 @@
             pointer-events: none;
         }
 
+        .max-select-wrapper {
+            position: relative;
+            width: 100%;
+            display: flex;
+            align-items: center;
+
+            .max-select-clear-btn {
+                position: absolute;
+                right: 8px;
+                background: transparent;
+                border: none;
+                padding: 0 4px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: var(--background-500);
+                transition: color 0.15s ease, transform 0.15s ease;
+                z-index: 2;
+
+                &:hover {
+                    color: var(--max-danger-500, #ef4444);
+                    transform: scale(1.1);
+                }
+            }
+        }
+
         .max-select {
             width: 100% !important;
             height: 36px !important;
@@ -770,16 +951,33 @@
         }
 
         .max-select-list-container {
+            position: relative;
             padding: 10px;
             scrollbar-width: thin;
             overflow-y: auto;
 
-            ::-webkit-scrollbar {
-                width: 3px;
-                height: 3px;
+            .max-select-spacer {
+                width: 100%;
             }
 
             .max-select-list {
+                &.is-virtual {
+                    position: absolute;
+                    top: 10px;
+                    left: 10px;
+                    right: 10px;
+                }
+
+                .max-select-option-group-wrapper {
+                    padding: 4px 8px;
+                    font-weight: 600;
+                    font-size: 0.8rem;
+                    color: var(--background-500, #94a3b8);
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                    user-select: none;
+                }
+
                 .max-select-option {
                     cursor: pointer;
                     padding: 2px 4px;

@@ -6,6 +6,7 @@ import { watch } from 'vue';
 
 
 const activeDebounceTimers = new Set<any>();
+const activeUnwatchers = new Set<() => void>();
 
 vi.mock('@maxvue/max-use', async (importOriginal) => {
     const actual = await importOriginal() as any;
@@ -25,13 +26,16 @@ vi.mock('@maxvue/max-use', async (importOriginal) => {
                 activeDebounceTimers.add(timer);
             }, { deep: options?.deep ?? true });
 
-            return () => {
+            const cleanup = () => {
                 if (timer) {
                     clearTimeout(timer);
                     activeDebounceTimers.delete(timer);
                 }
                 unwatch();
             };
+
+            activeUnwatchers.add(cleanup);
+            return cleanup;
         })
     };
 });
@@ -42,13 +46,26 @@ describe('useIconStore', () => {
     beforeEach(() => {
         pinia = createPinia();
         setActivePinia(pinia);
-        vi.stubGlobal('fetch', vi.fn().mockReturnValue(Promise.resolve({
-            json: () => Promise.resolve({})
-        })));
+        vi.stubGlobal('fetch', vi.fn((input: any) => {
+            const urlStr = String(input);
+            const result: Record<string, string> = {};
+            try {
+                const parsed = new URL(urlStr, 'http://localhost');
+                for (const icon of parsed.searchParams.getAll('icons[]')) result[icon] = '<svg></svg>';
+            } catch {}
+            return Promise.resolve({
+                ok: true,
+                status: 200,
+                json: () => Promise.resolve(result),
+                text: () => Promise.resolve('<svg></svg>')
+            });
+        }));
         localStorage.clear();
     });
 
     afterEach(() => {
+        for (const cleanup of activeUnwatchers) cleanup();
+        activeUnwatchers.clear();
         for (const t of activeDebounceTimers) clearTimeout(t);
         activeDebounceTimers.clear();
         if (pinia) pinia._e.stop();
@@ -80,12 +97,13 @@ describe('useIconStore', () => {
         expect(store.list_icons_waiting_request).not.toContain('icon-x');
     });
 
-    it('getIcon deve colocar em waiting e retornar null se nao tiver no cache', () => {
+    it('getIcon deve colocar em waiting e retornar null se nao tiver no cache', async () => {
         const store = useIconStore();
         const res = store.getIcon('icon-b');
         expect(res).toBeNull();
         expect(store.icons_data['icon-b']).toBe('waiting');
         expect(store.list_icons_waiting_request).toContain('icon-b');
+        await new Promise((r) => setTimeout(r, 60));
     });
 
     it('deve acionar o fetch quando novos icones sao requisitados', async () => {
@@ -303,7 +321,7 @@ describe('useIconStore', () => {
         }));
 
         const store = useIconStore();
-        store.getIcon('icon-other');
+        store.getIcon('icon-legacy');
 
         expect(store.icons_data['icon-legacy']).toContain('<path');
         // Deve ter apagado o localStorage para liberar os 5MB da aplicação

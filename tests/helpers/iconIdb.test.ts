@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
     openIconsDB,
@@ -77,12 +79,16 @@ describe('iconIdb helper com IndexedDB real', () => {
         const db = await withTimeout(openIconsDB());
         expect(db).not.toBeNull();
 
-        // Injeta diretamente registro malicioso contendo script no store
+        // Injeta diretamente registro malicioso contendo script e registro não-SVG no store
         await new Promise<void>((resolve) => {
             const tx = db!.transaction('icons', 'readwrite');
             const store = tx.objectStore('icons');
             store.put({
                 name: 'xss-icon',
+                svg: '<script>alert(1)</script>'
+            });
+            store.put({
+                name: 'sanitized-icon',
                 svg: '<svg><script>alert(1)</script><circle cx="1" cy="1" r="1"/></svg>'
             });
             tx.oncomplete = () => resolve();
@@ -90,6 +96,9 @@ describe('iconIdb helper com IndexedDB real', () => {
 
         const loaded = await withTimeout(loadAllIconsFromIDB());
         expect(loaded['xss-icon']).toBeUndefined();
+        expect(loaded['sanitized-icon']).toBeDefined();
+        expect(loaded['sanitized-icon']).not.toContain('<script');
+        expect(loaded['sanitized-icon']).toContain('<circle');
     });
 
     it('limpa todos os ícones via clearIconsIDB', async () => {
@@ -168,5 +177,73 @@ describe('iconIdb helper com IndexedDB real', () => {
             globalThis.indexedDB = originalIDB;
             resetIconsIDBConnection();
         }
+    });
+
+    it('trata request.onerror e request.onblocked na abertura', async () => {
+        const originalIDB = globalThis.indexedDB;
+        try {
+            // Simula onerror
+            globalThis.indexedDB = {
+                open: () => {
+                    const req: any = {};
+                    setTimeout(() => {
+                        if (req.onerror) req.onerror(new Event('error'));
+                    }, 0);
+                    return req;
+                }
+            } as any;
+
+            resetIconsIDBConnection();
+            let db = await withTimeout(openIconsDB());
+            expect(db).toBeNull();
+
+            // Simula onblocked
+            globalThis.indexedDB = {
+                open: () => {
+                    const req: any = {};
+                    setTimeout(() => {
+                        if (req.onblocked) req.onblocked(new Event('blocked'));
+                    }, 0);
+                    return req;
+                }
+            } as any;
+
+            resetIconsIDBConnection();
+            db = await withTimeout(openIconsDB());
+            expect(db).toBeNull();
+        } finally {
+            globalThis.indexedDB = originalIDB;
+            resetIconsIDBConnection();
+        }
+    });
+
+    it('trata falha de transação em saveSanitizedIconsToIDB e clearIconsIDB', async () => {
+        const cleanSvg = sanitizeSvg('<svg><circle/></svg>') as SanitizedSvg;
+        const db = await withTimeout(openIconsDB());
+        expect(db).not.toBeNull();
+
+        const origTx = db!.transaction.bind(db);
+        // Simula transação que aborta
+        vi.spyOn(db!, 'transaction').mockImplementation((...args: any[]) => {
+            const tx = origTx(...args);
+            setTimeout(() => {
+                if (tx.onerror) tx.onerror(new Event('error'));
+                if (tx.onabort) tx.onabort(new Event('abort'));
+            }, 0);
+            return tx;
+        });
+
+        await expect(withTimeout(saveSanitizedIconsToIDB({ 'icon-fail': cleanSvg }))).resolves.toBeUndefined();
+        await expect(withTimeout(clearIconsIDB())).resolves.toBeUndefined();
+    });
+
+    it('trata dbInstance.onerror e reseta dbInstance', async () => {
+        const db = await withTimeout(openIconsDB());
+        expect(db).not.toBeNull();
+        if (db && (db as any).onerror) (db as any).onerror(new Event('error'));
+
+        // Próxima chamada abre novamente
+        const db2 = await withTimeout(openIconsDB());
+        expect(db2).not.toBeNull();
     });
 });

@@ -5,35 +5,44 @@
                 {{ placeholderText }}
             </div>
 
-            <div
-                ref="triggerEl"
-                v-bind="inputAttrs"
-                class="max-select"
-                :class="{ 'is-disabled': props.disabled, 'is-focused': isOpen }"
-                tabindex="0"
-                role="combobox"
-                aria-haspopup="listbox"
-                :aria-expanded="isOpen"
-                :aria-controls="listboxId"
-                :aria-activedescendant="activeDescendantId"
-                @click.stop="toggle"
-                @keydown="onTriggerKeydown"
-            >
-                <div class="max-select-label">
-                    <slot name="value" :value="temp_value">
-                        <div
-                            class="value-div"
-                            v-if="hasSelectedOption"
-                            :style="{ color: option_selected.color }"
-                        >
-                            <MaxIcon
-                                :icon="option_selected.icon ?? null"
-                                :size="option_selected.icon_size ?? undefined"
-                                :style="{ paddingRight: option_selected.icon ? '10px' : '0' }"
-                            />
-                            <span class="value-text">{{ option_selected[props.optionName] ?? option_selected.name ?? option_selected.label }}</span>
-                        </div>
-                    </slot>
+            <div class="max-select-wrapper">
+                <div
+                    ref="triggerEl"
+                    v-bind="inputAttrs"
+                    class="max-select"
+                    :class="{ 'is-disabled': props.disabled, 'is-focused': isOpen }"
+                    :tabindex="props.disabled ? -1 : 0"
+                    role="combobox"
+                    aria-haspopup="listbox"
+                    :aria-expanded="isOpen"
+                    :aria-controls="isOpen ? listboxId : undefined"
+                    :aria-activedescendant="activeDescendantId"
+                    :aria-disabled="props.disabled ? 'true' : undefined"
+                    :aria-busy="loading ? 'true' : undefined"
+                    @click.stop="toggle"
+                    @keydown="onTriggerKeydown"
+                >
+                    <div class="max-select-label">
+                        <slot name="value" :value="temp_value">
+                            <div
+                                class="value-div"
+                                v-if="hasSelectedOption"
+                                :style="{ color: option_selected.color }"
+                            >
+                                <MaxIcon
+                                    :icon="option_selected.icon ?? null"
+                                    :size="option_selected.icon_size ?? undefined"
+                                    :style="{ paddingRight: option_selected.icon ? '10px' : '0' }"
+                                />
+                                <span class="value-text">{{ option_selected[props.optionName] ?? option_selected.name ?? option_selected.label }}</span>
+                            </div>
+                        </slot>
+                    </div>
+
+                    <div class="max-select-dropdown" aria-hidden="true">
+                        <MaxIcon :icon="loading ? 'svg-spinners:ring-resize' : 'lucide:chevron-down'" size="1" />
+                    </div>
+
                 </div>
 
                 <button
@@ -45,10 +54,6 @@
                 >
                     <MaxIcon icon="lucide:x" size="0.85" />
                 </button>
-
-                <div class="max-select-dropdown" aria-hidden="true">
-                    <MaxIcon icon="lucide:chevron-down" size="1" />
-                </div>
             </div>
 
             <Teleport to="body" v-if="isOpen">
@@ -80,87 +85,70 @@
                         </div>
                     </div>
 
-                    <div ref="listContainerEl" class="max-select-list-container">
-                        <div v-if="loading" class="max-select-empty-message">
+                    <div ref="listContainerEl" class="max-select-list-container" @scroll="onContainerScroll">
+                        <div v-if="loading" class="max-select-empty-message" role="status" aria-live="polite">
                             Carregando...
                         </div>
-                        <template v-else-if="props.groupOptions !== undefined">
-                            <template v-if="hasOptions">
-                                <div v-for="(group, gIdx) in (filteredOptions as any[])" :key="gIdx" class="max-select-option-group-wrapper">
-                                    <slot name="optiongroup" :option="group">
-                                        <div class="label_div max-select-option-group">
-                                            <div class="labelz">
-                                                <div>{{ group.label }}</div>
-                                            </div>
-                                        </div>
-                                    </slot>
-                                    <div
-                                        v-for="(option, oIdx) in group.items"
-                                        :key="oIdx"
-                                        :id="`${listboxId}-opt-${getOptionIndex(option)}`"
-                                        class="max-select-option"
-                                        :class="{
-                                            'max-select-option-selected is-selected': isOptionSelected(option),
-                                            'max-select-option-highlighted is-focused': highlightedIndex === getOptionIndex(option)
-                                        }"
-                                        :style="{ height: itemHeight }"
-                                        role="option"
-                                        :aria-selected="isOptionSelected(option)"
-                                        @click.stop="selectOption(option)"
-                                        @mouseenter="highlightedIndex = getOptionIndex(option)"
-                                    >
-                                        <slot name="option" :option="option" :selected="isOptionSelected(option)" :index="oIdx">
-                                            <div class="label_div">
-                                                <MaxIcon :icon="option['icon']" v-if="option['icon']" :size="option['iconSize'] ?? '1'" :style="{ width: '30px' }" />
+                        <div v-else-if="loadError" class="max-select-empty-message is-error" role="alert">
+                            <div>Não foi possível carregar as opções.</div>
+                            <button type="button" class="max-select-retry-btn" @click.stop="retryLoad">Tentar novamente</button>
+                        </div>
+                        <template v-else-if="hasOptions">
+                            <div v-if="isVirtual" class="max-select-spacer" :style="{ height: `${totalHeight}px` }" aria-hidden="true" />
+                            <div
+                                class="max-select-window"
+                                :class="{ 'is-virtual': isVirtual }"
+                                :style="isVirtual ? { transform: `translateY(${offsetY}px)` } : undefined"
+                            >
+                                <template v-for="entry in visibleItems" :key="entry.item.key">
+                                    <div v-if="entry.item.type === 'group'" class="max-select-option-group-wrapper">
+                                        <slot name="optiongroup" :option="entry.item.group">
+                                            <div class="label_div max-select-option-group">
                                                 <div class="labelz">
-                                                    <div v-text="option[props.optionLabel] ?? option.label ?? option.name" :style="{ color: attrs.color }"></div>
+                                                    <div>{{ entry.item.label }}</div>
                                                 </div>
-                                                <div class="subLabel" v-text="option?.sub_label ?? option?.sub ?? option?.subLabel"></div>
                                             </div>
                                         </slot>
                                     </div>
-                                </div>
-                            </template>
-                            <div v-else class="max-select-empty-message">
-                                {{ attrs.emptyMessage ?? 'Nenhum registro encontrado' }}
-                            </div>
-                        </template>
-                        <template v-else>
-                            <template v-if="hasOptions">
-                                <div
-                                    v-for="(option, index) in (filteredOptions as any[])"
-                                    :key="index"
-                                    :id="`${listboxId}-opt-${index}`"
-                                    class="max-select-option"
-                                    :class="{
-                                        'max-select-option-selected is-selected': isOptionSelected(option),
-                                        'max-select-option-highlighted is-focused': highlightedIndex === index
-                                    }"
-                                    :style="{ height: itemHeight }"
-                                    role="option"
-                                    :aria-selected="isOptionSelected(option)"
-                                    @click.stop="selectOption(option)"
-                                    @mouseenter="highlightedIndex = index"
-                                >
-                                    <slot name="option" :option="option" :selected="isOptionSelected(option)" :index="index">
-                                        <div :class="`category ${option.category}`" v-if="attrs.category === true">
-                                            {{ option.category === 'UTILITY' ? 'A' : '' }}{{ option.category === 'MARKETING' ? 'B' : '' }}
-                                        </div>
-                                        <div class="label_div">
-                                            <MaxIcon :icon="option['icon']" v-if="option['icon']" :size="option?.['iconSize'] ?? '1'" :style="{ width: '30px' }" />
-                                            <div class="labelz">
-                                                <div v-text="option[props.optionLabel] ?? option.label ?? option.name" :style="{ color: attrs.color }"></div>
+                                    <div
+                                        v-else
+                                        :id="`${listboxId}-opt-${entry.item.selectableIndex}`"
+                                        class="max-select-option"
+                                        :class="{
+                                            'max-select-option-selected is-selected': isOptionSelected(entry.item.option),
+                                            'max-select-option-highlighted is-focused': highlightedIndex === entry.item.selectableIndex
+                                        }"
+                                        :style="{ height: itemHeight }"
+                                        role="option"
+                                        :aria-selected="isOptionSelected(entry.item.option)"
+                                        @click.stop="selectOption(entry.item.option)"
+                                        @mouseenter="highlightedIndex = entry.item.selectableIndex"
+                                    >
+                                        <slot
+                                            name="option"
+                                            :option="entry.item.option"
+                                            :selected="isOptionSelected(entry.item.option)"
+                                            :index="entry.item.optionIndex"
+                                        >
+                                            <div :class="`category ${entry.item.option.category}`" v-if="attrs.category === true">
+                                                {{ entry.item.option.category === 'UTILITY' ? 'A' : '' }}{{ entry.item.option.category === 'MARKETING' ? 'B' : '' }}
                                             </div>
-                                            <div class="subLabel" v-text="option?.sub_label ?? option?.sub ?? option?.subLabel"></div>
-                                            <img v-if="option['img']" :src="`/media/images/${option['img']}`" alt="Image" class="img-label" />
-                                        </div>
-                                    </slot>
-                                </div>
-                            </template>
-                            <div v-else class="max-select-empty-message">
-                                {{ attrs.emptyMessage ?? 'Nenhum registro encontrado' }}
+                                            <div class="label_div">
+                                                <MaxIcon :icon="entry.item.option['icon']" v-if="entry.item.option['icon']" :size="entry.item.option?.['iconSize'] ?? '1'" :style="{ width: '30px' }" />
+                                                <div class="labelz">
+                                                    <div v-text="entry.item.option[props.optionLabel] ?? entry.item.option.label ?? entry.item.option.name" :style="{ color: attrs.color }"></div>
+                                                </div>
+                                                <div class="subLabel" v-text="entry.item.option?.sub_label ?? entry.item.option?.sub ?? entry.item.option?.subLabel"></div>
+                                                <img v-if="entry.item.option['img']" :src="`/media/images/${entry.item.option['img']}`" alt="Image" class="img-label" />
+                                            </div>
+                                        </slot>
+                                    </div>
+                                </template>
                             </div>
                         </template>
+                        <div v-else class="max-select-empty-message">
+                            {{ attrs.emptyMessage ?? 'Nenhum registro encontrado' }}
+                        </div>
                     </div>
                 </div>
             </Teleport>
@@ -180,6 +168,7 @@
     import { isBlank } from '@maxvue/max-use';
     import { useActiveOverlayPosition } from '../composables/useActiveOverlayPosition';
     import { getOverlayWidth, getOverlayLeft } from '../helpers/useOverlayWidth';
+    import { useVirtualList } from '../composables/useVirtualList';
 
     const attrs: any = useAttrs();
 
@@ -188,8 +177,9 @@
             /** Valor selecionado */
             modelValue: any;
             /** Função assíncrona para carregar opções ao abrir o select */
-            loadOptions?: () => Promise<any[]>;
+            loadOptions?: (context?: { signal: AbortSignal }) => Promise<any[]>;
             /** Ícone principal (ex: 'mdi:user') */
+
             icon?: string | undefined;
             /** Flag que informa o campo do valor */
             optionValue?: string;
@@ -232,6 +222,12 @@
             showClear?: boolean | undefined;
             /** Altura dos itens da lista (em px ou com unidade CSS). Padrão: 27 */
             listHeight?: number | string | undefined;
+            /** Força ou desativa a virtualização da lista */
+            virtualScroll?: boolean | undefined;
+            /** Limiar para ativação automática do virtual scroll (padrão: 500) */
+            virtualScrollThreshold?: number | undefined;
+            /** Tolerância de itens renderizados fora da viewport (overscan) */
+            numToleratedItems?: number | undefined;
         }>(),
         {
             modelValue: null,
@@ -248,7 +244,10 @@
             placeholder: undefined,
             clearable: false,
             showClear: false,
-            listHeight: 27
+            listHeight: 27,
+            virtualScroll: undefined,
+            virtualScrollThreshold: 500,
+            numToleratedItems: 5
         }
     );
 
@@ -435,20 +434,79 @@
         return filteredOptions.value.length > 0;
     });
 
-    const flatSelectableOptions = computed<any[]>(() => {
+    type FlatSelectEntry =
+        | { type: 'group'; label: string; group: any; key: string }
+        | { type: 'option'; option: any; selectableIndex: number; key: string; groupIndex: number; optionIndex: number };
+
+    const flattenedItems = computed<FlatSelectEntry[]>(() => {
         const raw = filteredOptions.value;
         if (props.groupOptions !== undefined) {
-            const flat: any[] = [];
-            for (const grp of raw as any[]) if (grp?.items && Array.isArray(grp.items)) flat.push(...grp.items);
-
-
-            return flat;
+            const result: FlatSelectEntry[] = [];
+            let selectableCount = 0;
+            const groups = (raw as any[]) || [];
+            for (let gIdx = 0; gIdx < groups.length; gIdx++) {
+                const grp = groups[gIdx];
+                result.push({
+                    type: 'group',
+                    label: grp?.label ?? '',
+                    group: grp,
+                    key: `g-${gIdx}-${grp?.label ?? ''}`
+                });
+                const items = grp?.items && Array.isArray(grp.items) ? grp.items : [];
+                for (let oIdx = 0; oIdx < items.length; oIdx++) {
+                    const opt = items[oIdx];
+                    result.push({
+                        type: 'option',
+                        option: opt,
+                        selectableIndex: selectableCount++,
+                        key: `opt-${gIdx}-${oIdx}-${opt?.[props.optionValue] ?? oIdx}`,
+                        groupIndex: gIdx,
+                        optionIndex: oIdx
+                    });
+                }
+            }
+            return result;
         }
-        return (raw as any[]) || [];
+
+        const options = (raw as any[]) || [];
+        return options.map((opt, idx) => ({
+            type: 'option' as const,
+            option: opt,
+            selectableIndex: idx,
+            key: `opt-${idx}-${opt?.[props.optionValue] ?? idx}`,
+            groupIndex: 0,
+            optionIndex: idx
+        }));
     });
 
-    const getOptionIndex = (option: any) => {
-        return flatSelectableOptions.value.indexOf(option);
+    const flatSelectableOptions = computed<any[]>(() => {
+        if (props.groupOptions !== undefined) return flattenedItems.value
+            .filter((e): e is Extract<FlatSelectEntry, { type: 'option' }> => e.type === 'option')
+            .map((e) => e.option);
+
+        return (filteredOptions.value as any[]) || [];
+    });
+
+    const isVirtual = computed(() => {
+        if (props.virtualScroll !== undefined) return Boolean(props.virtualScroll);
+        return flattenedItems.value.length > (props.virtualScrollThreshold ?? 500);
+    });
+
+    const {
+        visibleItems,
+        offsetY,
+        totalHeight,
+        setViewport,
+        scrollToIndex
+    } = useVirtualList(flattenedItems, {
+        itemHeight: numericItemHeight,
+        enabled: isVirtual,
+        overscan: props.numToleratedItems ?? 5
+    });
+
+    const onContainerScroll = (e: Event) => {
+        const el = e.target as HTMLElement;
+        if (el) setViewport(el.scrollTop, el.clientHeight);
     };
 
     const activeDescendantId = computed(() => {
@@ -466,13 +524,22 @@
             const container = listContainerEl.value;
             if (!container || highlightedIndex.value < 0) return;
 
-            const h = numericItemHeight.value;
-            const targetTop = highlightedIndex.value * h;
-            const targetBottom = targetTop + h;
+            if (isVirtual.value) {
+                const flatIdx = flattenedItems.value.findIndex(
+                    (e) => e.type === 'option' && e.selectableIndex === highlightedIndex.value
+                );
+                if (flatIdx >= 0) {
+                    const targetScroll = scrollToIndex(flatIdx, 'auto');
+                    container.scrollTop = targetScroll;
+                }
+            } else {
+                const h = numericItemHeight.value;
+                const targetTop = highlightedIndex.value * h;
+                const targetBottom = targetTop + h;
 
-            if (targetTop < container.scrollTop) container.scrollTop = targetTop;
-            else if (targetBottom > container.scrollTop + container.clientHeight) container.scrollTop = targetBottom - container.clientHeight;
-
+                if (targetTop < container.scrollTop) container.scrollTop = targetTop;
+                else if (targetBottom > container.scrollTop + container.clientHeight) container.scrollTop = targetBottom - container.clientHeight;
+            }
         });
     };
 
@@ -496,31 +563,96 @@
         emit('clear');
     };
 
-    async function before_show(event: any) {
-        emit('before-show', event);
-        if (props.loadOptions) {
-            loading.value = true;
-            try {
-                optionsField.value = await props.loadOptions();
-            } finally {
-                loading.value = false;
-            }
+    let loadGeneration = 0;
+    let loadAbortController: AbortController | null = null;
+    let inFlightLoadPromise: Promise<boolean> | null = null;
+    let wantsOpen = false;
+    const loadError = ref(false);
+
+    watch(() => props.disabled, (disabled) => {
+        if (disabled) hide();
+    });
+
+    const retryLoad = (event?: any) => {
+        loadError.value = false;
+        before_show(event);
+    };
+
+    async function before_show(event: any): Promise<boolean> {
+        if (!props.loadOptions) {
+            emit('before-show', event);
+            return true;
         }
+
+        if (inFlightLoadPromise && loading.value) return inFlightLoadPromise;
+
+
+        emit('before-show', event);
+        const generation = ++loadGeneration;
+        if (loadAbortController) {
+            loadAbortController.abort();
+            loadAbortController = null;
+        }
+        const controller = new AbortController();
+        loadAbortController = controller;
+        loading.value = true;
+        loadError.value = false;
+        wantsOpen = true;
+
+        inFlightLoadPromise = (async () => {
+            try {
+                const res = await props.loadOptions!({ signal: controller.signal });
+                if (generation === loadGeneration && wantsOpen && !controller.signal.aborted) {
+                    optionsField.value = Array.isArray(res) ? res : [];
+                    return true;
+                }
+                return false;
+            } catch (err: any) {
+                if (err?.name === 'AbortError') return false;
+                if (generation === loadGeneration) loadError.value = true;
+
+                return false;
+            } finally {
+                if (generation === loadGeneration) {
+                    loading.value = false;
+                    inFlightLoadPromise = null;
+                    if (loadAbortController === controller) loadAbortController = null;
+                }
+            }
+        })();
+
+        return inFlightLoadPromise;
     }
 
     const toggle = async (event?: any) => {
         if (props.disabled) return;
         if (!isOpen.value) {
-            await before_show(event);
-            searchQuery.value = '';
-            isOpen.value = true;
+            if (loading.value) {
+                hide();
+                return;
+            }
+            wantsOpen = true;
+            loadError.value = false;
+            const shouldOpen = await before_show(event);
+            if (shouldOpen && wantsOpen && !props.disabled) {
+                searchQuery.value = '';
+                isOpen.value = true;
+            }
         } else hide();
-
     };
 
     const hide = () => {
+        wantsOpen = false;
+        if (loadAbortController) {
+            loadAbortController.abort();
+            loadAbortController = null;
+        }
+        loadGeneration++;
+        loading.value = false;
+        loadError.value = false;
         isOpen.value = false;
     };
+
 
     const selectOption = (opt: any) => {
         const val = opt?.[props.optionValue] ?? opt;
@@ -648,6 +780,7 @@
     });
 
     onBeforeUnmount(() => {
+        hide();
         if (typeof window !== 'undefined') {
             window.removeEventListener('keydown', onKeydown);
             document.removeEventListener('pointerdown', onDocumentPointerDown);
@@ -655,11 +788,16 @@
         }
     });
 
+
     defineExpose({
         isOpen,
         toggle,
         position,
-        updatePosition
+        updatePosition,
+        loading,
+        loadError,
+        optionsField,
+        retryLoad
     });
 </script>
 
@@ -682,6 +820,33 @@
         padding-left: 7px !important;
         color: var(--background-650);
         font-size: 0.9rem;
+    }
+
+    .max-select-wrapper {
+        position: relative;
+        width: 100%;
+        display: flex;
+        align-items: center;
+
+        .max-select-clear-btn {
+            position: absolute;
+            right: 32px;
+            background: transparent;
+            border: none;
+            padding: 0 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--background-500);
+            transition: color 0.15s ease, transform 0.15s ease;
+            z-index: 2;
+
+            &:hover {
+                color: var(--max-danger-500, #ef4444);
+                transform: scale(1.1);
+            }
+        }
     }
 
     .max-select {
@@ -804,9 +969,23 @@
     }
 
     .max-select-list-container {
+        position: relative;
         overflow-y: auto;
         max-height: 240px;
         scrollbar-width: thin;
+
+        .max-select-spacer {
+            width: 100%;
+        }
+
+        .max-select-window {
+            &.is-virtual {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+            }
+        }
 
         ::-webkit-scrollbar {
             width: 3px;
@@ -817,7 +996,28 @@
             padding: 8px 12px;
             color: var(--background-650);
             font-size: 0.85rem;
+
+            &.is-error {
+                color: var(--max-danger-500, #ef4444);
+            }
+
+            .max-select-retry-btn {
+                margin-top: 0.4rem;
+                display: inline-block;
+                padding: 0.25rem 0.6rem;
+                border-radius: 4px;
+                background: var(--max-primary-500, #00768e);
+                color: #fff;
+                border: none;
+                cursor: pointer;
+                font-size: 0.8rem;
+
+                &:hover {
+                    background: var(--max-primary-600, #005f77);
+                }
+            }
         }
+
 
         .max-select-option-group {
             font-weight: 600;
@@ -846,36 +1046,38 @@
 
                 &.max-select-option-selected,
                 &.is-selected {
-                    background-color: var(--max-primary-700, #004860) !important;
-                    color: var(--background-0) !important;
+                    background-color: var(--max-selection-hover-background, var(--max-primary-700, #004860)) !important;
+                    color: var(--max-selection-hover-content, var(--background-0)) !important;
 
                     .icon-div {
-                        color: var(--background-200) !important;
+                        color: var(--max-selection-hover-content, var(--background-200)) !important;
                     }
 
                     .labelz,
                     .subLabel {
-                        color: var(--background-0);
+                        color: var(--max-selection-hover-content, var(--background-0));
                     }
                 }
             }
 
             &.max-select-option-selected,
             &.is-selected {
-                background-color: var(--max-primary-600, #005F77) !important;
-                color: var(--background-0) !important;
+                background-color: var(--max-selection-background, var(--max-primary-600, #005F77)) !important;
+                color: var(--max-selection-content, var(--background-0)) !important;
+                font-weight: 500;
 
                 &:hover {
-                    background-color: var(--max-primary-700, #004860) !important;
+                    background-color: var(--max-selection-hover-background, var(--max-primary-700, #004860)) !important;
+                    color: var(--max-selection-hover-content, var(--background-0)) !important;
                 }
 
                 .icon-div {
-                    color: var(--background-200) !important;
+                    color: var(--max-selection-content, var(--background-200)) !important;
                 }
 
                 .labelz,
                 .subLabel {
-                    color: var(--background-0);
+                    color: var(--max-selection-content, var(--background-0));
                 }
             }
 

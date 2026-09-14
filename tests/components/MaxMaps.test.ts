@@ -142,5 +142,43 @@ describe('MaxMaps.vue', () => {
         vi.useRealTimers();
     });
 
+    it('renderiza controles acessíveis de coordenadas e permite ajuste por inputs e botões de passo', async () => {
+        const wrapper = mount(MaxMaps, {
+            props: {
+                modelValue: { latitude: -15.7801, longitude: -47.9292 }
+            }
+        });
+
+        const controls = wrapper.find('.map-accessible-controls');
+        expect(controls.exists()).toBe(true);
+        expect(controls.attributes('role')).toBe('region');
+        expect(controls.attributes('aria-label')).toBe('Controles acessíveis de coordenadas do mapa');
+
+        // Inputs de latitude e longitude
+        const latInput = wrapper.find('input[aria-label="Latitude do marcador"]');
+        const lngInput = wrapper.find('input[aria-label="Longitude do marcador"]');
+        expect(latInput.exists()).toBe(true);
+        expect(lngInput.exists()).toBe(true);
+
+        // Alterando latitude via input
+        (latInput.element as HTMLInputElement).value = '-16.0000';
+        await latInput.trigger('change');
+        expect(wrapper.vm.coordinates.latitude).toBe(-16);
+        expect(wrapper.emitted('update:modelValue')).toBeTruthy();
+
+        // Botões de passo direcional
+        const northBtn = wrapper.find('button[aria-label="Mover marcador para o Norte"]');
+        const eastBtn = wrapper.find('button[aria-label="Mover marcador para o Leste"]');
+        expect(northBtn.exists()).toBe(true);
+        expect(eastBtn.exists()).toBe(true);
+
+        const currentLat = wrapper.vm.coordinates.latitude;
+        await northBtn.trigger('click');
+        expect(wrapper.vm.coordinates.latitude).toBeCloseTo(currentLat + 0.0005, 5);
+
+        const currentLng = wrapper.vm.coordinates.longitude;
+        await eastBtn.trigger('click');
+        expect(wrapper.vm.coordinates.longitude).toBeCloseTo(currentLng + 0.0005, 5);
+    });
 });
 

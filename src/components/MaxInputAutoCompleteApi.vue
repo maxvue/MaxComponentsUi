@@ -13,9 +13,10 @@
                     autocomplete="off"
                     role="combobox"
                     aria-autocomplete="list"
-                    :aria-expanded="isOpen && filtered_values.length > 0"
-                    :aria-controls="listboxId"
-                    :aria-activedescendant="activeIndex >= 0 ? `${listboxId}-opt-${activeIndex}` : undefined"
+                    :aria-expanded="isOverlayActive"
+                    :aria-controls="isOverlayActive ? listboxId : undefined"
+                    :aria-activedescendant="isOverlayActive && activeIndex >= 0 && activeIndex < filtered_values.length ? `${listboxId}-opt-${activeIndex}` : undefined"
+                    :aria-busy="isLoading"
                     @input="onInput"
                     @focus="onFocus"
                     @blur="onBlur"
@@ -26,32 +27,58 @@
                 />
             </div>
 
-            <Teleport to="body" v-if="isOpen && filtered_values.length > 0">
+            <Teleport to="body" v-if="isOverlayActive">
                 <div
                     ref="overlayEl"
                     :id="listboxId"
                     class="max-autocomplete-overlay"
                     role="listbox"
+                    :aria-label="props.label || props.placeholder || 'Sugestões'"
                     :style="{ top: position.top + 'px', left: position.left + 'px', width: position.width }"
                     @click.stop
+                    @scroll="onOverlayScroll"
                 >
-                    <div class="max-autocomplete-list-container">
-                        <ul class="max-autocomplete-list">
+                    <div v-if="isLoading" class="max-autocomplete-status max-autocomplete-loading" role="status" aria-live="polite">
+                        <slot name="loading">
+                            <i class="max-icon-spinner animate-spin" />
+                            <span>Buscando sugestões...</span>
+                        </slot>
+                    </div>
+                    <div v-else-if="hasError" class="max-autocomplete-status max-autocomplete-error" role="alert">
+                        <slot name="error" :retry="fetchData">
+                            <span class="max-autocomplete-error-msg">{{ errorMessage || 'Falha ao buscar sugestões.' }}</span>
+                            <button type="button" class="max-autocomplete-retry-btn" @click.stop="fetchData">
+                                Tentar novamente
+                            </button>
+                        </slot>
+                    </div>
+                    <div v-else-if="filtered_values.length === 0" class="max-autocomplete-status max-autocomplete-empty" role="status">
+                        <slot name="empty">
+                            <span>Nenhum resultado encontrado.</span>
+                        </slot>
+                    </div>
+                    <div v-else class="max-autocomplete-list-container">
+                        <div v-if="isVirtual" class="max-autocomplete-spacer" :style="{ height: `${totalHeight}px` }" aria-hidden="true" />
+                        <ul
+                            class="max-autocomplete-list"
+                            :class="{ 'is-virtual': isVirtual }"
+                            :style="isVirtual ? { transform: `translateY(${offsetY}px)` } : undefined"
+                        >
                             <li
-                                v-for="(option, index) in filtered_values"
-                                :key="index"
-                                :id="`${listboxId}-opt-${index}`"
+                                v-for="entry in visibleItems"
+                                :key="entry.index"
+                                :id="`${listboxId}-opt-${entry.index}`"
                                 class="max-autocomplete-item"
-                                :class="{ 'max-autocomplete-item-active': activeIndex === index }"
+                                :class="{ 'max-autocomplete-item-active': activeIndex === entry.index }"
                                 role="option"
-                                :aria-selected="activeIndex === index"
-                                @click.stop="selectOption(option)"
-                                @mouseenter="activeIndex = index"
+                                :aria-selected="activeIndex === entry.index ? 'true' : (isOptionSelected(entry.item) ? 'true' : 'false')"
+                                @click.stop="selectOption(entry.item)"
+                                @mouseenter="activeIndex = entry.index"
                             >
-                                <slot name="option" :option="option" :index="index">
+                                <slot name="option" :option="entry.item" :index="entry.index">
                                     <div class="autocomplete-item-select">
-                                        <div class="autocomplete-item-select-label">{{ option.model ?? option.label ?? option[props.optionLabel ?? 'label'] }}</div>
-                                        <div class="autocomplete-item-select-sub-label">{{ option.sub_label ?? option.subLabel ?? option['sub-label'] }}</div>
+                                        <div class="autocomplete-item-select-label">{{ entry.item.model ?? entry.item.label ?? entry.item[props.optionLabel ?? 'label'] }}</div>
+                                        <div class="autocomplete-item-select-sub-label">{{ entry.item.sub_label ?? entry.item.subLabel ?? entry.item['sub-label'] }}</div>
                                     </div>
                                 </slot>
                             </li>
@@ -71,8 +98,9 @@
     import { hasContent, toSearchableString, getCachedApiIDB, isBlank, size, isEqual } from '@maxvue/max-use';
     import { useActiveOverlayPosition } from '../composables/useActiveOverlayPosition';
     import { getOverlayWidth, getOverlayLeft } from '../helpers/useOverlayWidth';
+    import { useVirtualList } from '../composables/useVirtualList';
     import type { Ref } from 'vue';
-    import { ref, computed, watch, onBeforeUnmount, useId } from 'vue';
+    import { ref, computed, watch, nextTick, onBeforeUnmount, useId } from 'vue';
     import InputBase from './InputBase.vue';
 
     interface Props {
@@ -99,6 +127,14 @@
         minLength?: number;
         delay?: number;
         forceSelection?: boolean;
+        /** Altura de cada linha em px (padrão: 40) */
+        itemHeight?: number | string | undefined;
+        /** Força ou desativa a virtualização da lista */
+        virtualScroll?: boolean | undefined;
+        /** Limiar para ativação automática do virtual scroll (padrão: 500) */
+        virtualScrollThreshold?: number | undefined;
+        /** Tolerância de itens renderizados fora da viewport (overscan) */
+        numToleratedItems?: number | undefined;
     }
 
     const props = withDefaults(defineProps<Props>(), {
@@ -113,7 +149,11 @@
         variant: null,
         minLength: 1,
         delay: 300,
-        forceSelection: false
+        forceSelection: false,
+        itemHeight: 40,
+        virtualScroll: undefined,
+        virtualScrollThreshold: 500,
+        numToleratedItems: 5
     });
 
     const listboxId = useId();
@@ -123,11 +163,45 @@
     const isOpen = ref(false);
     const activeIndex = ref<number>(-1);
 
+    const numericItemHeight = computed(() => {
+        if (typeof props.itemHeight === 'number') return props.itemHeight;
+        if (typeof props.itemHeight === 'string') {
+            const p = parseFloat(props.itemHeight);
+            return isNaN(p) ? 40 : p;
+        }
+        return 40;
+    });
+
+    const isVirtual = computed(() => {
+        if (props.virtualScroll !== undefined) return Boolean(props.virtualScroll);
+        return filtered_values.value.length > (props.virtualScrollThreshold ?? 500);
+    });
+
+    const {
+        visibleItems,
+        offsetY,
+        totalHeight,
+        setViewport,
+        scrollToIndex
+    } = useVirtualList(filtered_values, {
+        itemHeight: numericItemHeight,
+        enabled: isVirtual,
+        overscan: props.numToleratedItems ?? 5
+    });
+
+    const onOverlayScroll = (e: Event) => {
+        const el = e.target as HTMLElement;
+        if (el) setViewport(el.scrollTop, el.clientHeight);
+    };
+
     const ac = ref<HTMLElement | null>(null);
     const inputEl = ref<HTMLInputElement | null>(null);
     const overlayEl = ref<HTMLElement | null>(null);
 
-    const isOverlayActive = computed(() => isOpen.value && filtered_values.value.length > 0);
+    const isOverlayActive = computed(() => {
+        if (!isOpen.value) return false;
+        return isLoading.value || hasError.value || filtered_values.value.length > 0 || hasSearched.value;
+    });
     const { position } = useActiveOverlayPosition({
         target: ac,
         overlay: overlayEl,
@@ -160,20 +234,83 @@
         return opt.model ?? opt.label ?? opt[props.optionLabel ?? 'label'] ?? opt.name ?? opt.value ?? '';
     });
 
-    watch(() => props.data, (newValue, oldValue) => {
-        if (isBlank(props.data) && isBlank(newValue) || isEqual(newValue, oldValue)) return;
+    const isOptionSelected = (option: any): boolean => {
+        if (!temp_value.value) return false;
+        if (typeof temp_value.value === 'string') {
+            const valKey = props.optionValue ?? 'value';
+            return option[valKey] === temp_value.value || option.id === temp_value.value || option.value === temp_value.value || option.model === temp_value.value;
+        }
+        return option === temp_value.value;
+    };
+
+    let requestGeneration = 0;
+    let currentAbortController: AbortController | null = null;
+    const isLoading = ref(false);
+    const hasError = ref(false);
+    const errorMessage = ref<string | null>(null);
+    const hasSearched = ref(false);
+
+    const fetchData = () => {
+        if (isBlank(props.route)) return;
+        if (isBlank(props.data)) return;
+
+        if (currentAbortController) {
+            currentAbortController.abort();
+            currentAbortController = null;
+        }
+        const generation = ++requestGeneration;
+
+        const controller = new AbortController();
+        currentAbortController = controller;
+
+        isLoading.value = true;
+        hasError.value = false;
+        errorMessage.value = null;
 
         const input_value = typeof temp_value.value === 'string' ? temp_value.value : '';
+        const requestParams = { ...(props.data ?? {}), input_value };
 
-        const applyList = (res: any) => {
-            if (isBlank(res) || size(res) === 0) return;
+        const applyIfCurrent = (res: any) => {
+            if (generation !== requestGeneration || controller.signal.aborted) return;
+            isLoading.value = false;
+            hasSearched.value = true;
+            if (isBlank(res) || size(res) === 0) {
+                list.value = [];
+                search();
+                return;
+            }
+            if (isEqual(list.value, res)) return;
             list.value = res;
             search();
         };
 
-        getCachedApiIDB(props.route, { ...(props.data ?? {}), input_value }, null, undefined, applyList).then(applyList);
-        return;
-    }, { deep: true, immediate: true });
+        getCachedApiIDB(
+            props.route,
+            requestParams,
+            null,
+            undefined,
+            applyIfCurrent,
+            { signal: controller.signal }
+        ).then(applyIfCurrent).catch((err: any) => {
+            if (err?.name === 'AbortError') return;
+            if (generation === requestGeneration) {
+                isLoading.value = false;
+                hasError.value = true;
+                errorMessage.value = err?.message || 'Falha ao buscar sugestões.';
+            }
+        });
+    };
+
+    watch(
+        [() => props.route, () => props.data],
+        ([newRoute, newData], [oldRoute, oldData] = ['', {}]) => {
+            if (isBlank(newRoute)) return;
+            if (isBlank(newData)) return;
+            if (isEqual(newData, oldData) && newRoute === oldRoute) return;
+            fetchData();
+        },
+        { deep: true, immediate: true }
+    );
 
     const emit = defineEmits<{
         'update:modelValue': [value: any];
@@ -202,6 +339,7 @@
             const searchStr = (item.value ?? '') + (item.label ?? '') + (item.sub_label ?? '') + (item.name ?? '') + (item[props.optionValue ?? 'value'] ?? '');
             return toSearchableString(searchStr).toLowerCase().includes(toSearchableString(temp_value_string.value));
         });
+        else filtered_values.value = [];
 
         emit('complete');
     };
@@ -214,14 +352,13 @@
     const onInput = (event: Event) => {
         const val = (event.target as HTMLInputElement).value;
         temp_value.value = val;
-        search();
-        isOpen.value = filtered_values.value.length > 0;
+        isOpen.value = temp_value_string.value.length >= props.minLength;
     };
 
     const onFocus = () => {
-        if (typeof temp_value.value === 'string' && temp_value.value) {
+        if (typeof temp_value.value === 'string' && temp_value.value.length >= props.minLength) {
             search();
-            isOpen.value = filtered_values.value.length > 0;
+            isOpen.value = true;
         }
     };
 
@@ -241,28 +378,45 @@
     const onArrowDown = () => {
         if (!isOpen.value) {
             search();
-            isOpen.value = filtered_values.value.length > 0;
+            isOpen.value = true;
             return;
         }
-        if (activeIndex.value < filtered_values.value.length - 1) activeIndex.value++;
-
+        if (activeIndex.value < filtered_values.value.length - 1) {
+            activeIndex.value++;
+            if (isVirtual.value) {
+                const targetScroll = scrollToIndex(activeIndex.value, 'auto');
+                if (overlayEl.value) overlayEl.value.scrollTop = targetScroll;
+            }
+        }
     };
 
     const onArrowUp = () => {
-        if (activeIndex.value > 0) activeIndex.value--;
-
+        if (activeIndex.value > 0) {
+            activeIndex.value--;
+            if (isVirtual.value) {
+                const targetScroll = scrollToIndex(activeIndex.value, 'auto');
+                if (overlayEl.value) overlayEl.value.scrollTop = targetScroll;
+            }
+        }
     };
 
     const onEnter = () => {
         if (isOpen.value && activeIndex.value >= 0 && activeIndex.value < filtered_values.value.length) selectOption(filtered_values.value[activeIndex.value]);
-
     };
+
+    watch(isOpen, (open) => {
+        if (open) nextTick(() => {
+            const el = overlayEl.value;
+            if (el) setViewport(el.scrollTop, el.clientHeight);
+        });
+
+    });
 
     watch(temp_value, () => {
         search();
         isDone.value = testIsDone();
         if (temp_value.value && typeof temp_value.value !== 'string') emit('update:modelValue', temp_value.value);
-    });
+    }, { flush: 'sync' });
 
     const onGlobalKeydown = (event: KeyboardEvent) => {
         if (event.key === 'Escape' && isOpen.value) hide();
@@ -273,7 +427,6 @@
         const target = e.target as Node | null;
         if (overlayEl.value && !overlayEl.value.contains(target) && ac.value && !ac.value.contains(target)) outsidePointerDown = true;
         else outsidePointerDown = false;
-
     };
 
     const onDocClick = (e: MouseEvent) => {
@@ -297,11 +450,32 @@
     });
 
     onBeforeUnmount(() => {
+        if (currentAbortController) {
+            currentAbortController.abort();
+            currentAbortController = null;
+        }
+        requestGeneration++;
+
         if (typeof window !== 'undefined') {
             window.removeEventListener('keydown', onGlobalKeydown);
             document.removeEventListener('pointerdown', onDocPointerDown, true);
             document.removeEventListener('click', onDocClick, true);
         }
+    });
+
+    defineExpose({
+        temp_value,
+        temp_value_string,
+        list,
+        filtered_values,
+        isOpen,
+        testIsDone,
+        isDone,
+        search,
+        isLoading,
+        hasError,
+        errorMessage,
+        fetchData
     });
 </script>
 
@@ -337,11 +511,84 @@
     overflow-y: auto;
     scrollbar-width: thin;
 
+    .max-autocomplete-status {
+        padding: 12px 16px;
+        font-size: 0.875rem;
+        color: var(--background-650, #64748b);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        text-align: center;
+
+        &.max-autocomplete-loading {
+            color: var(--max-primary-500, #00768e);
+
+            .animate-spin {
+                animation: spin 1s linear infinite;
+            }
+        }
+
+        &.max-autocomplete-error {
+            color: var(--max-danger-500, #ef4444);
+            flex-direction: column;
+            gap: 6px;
+
+            .max-autocomplete-error-msg {
+                max-width: 100%;
+                overflow-wrap: break-word;
+            }
+
+            .max-autocomplete-retry-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 4px 10px;
+                font-size: 0.8rem;
+                font-family: inherit;
+                color: var(--max-primary-500, #00768e);
+                background: transparent;
+                border: 1px solid var(--max-primary-500, #00768e);
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background-color 0.15s ease, color 0.15s ease;
+
+                &:hover {
+                    background: var(--max-primary-50, #67C8DB);
+                    color: var(--max-primary-600, #005f77);
+                }
+
+                &:focus-visible {
+                    outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
+                    outline-offset: 1px;
+                }
+            }
+        }
+
+        &.max-autocomplete-empty {
+            color: var(--background-500, #94a3b8);
+            font-style: italic;
+        }
+    }
+
     .max-autocomplete-list-container {
+        position: relative;
+
+        .max-autocomplete-spacer {
+            width: 100%;
+        }
+
         .max-autocomplete-list {
             list-style: none;
             margin: 0;
             padding: 4px 0;
+
+            &.is-virtual {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+            }
 
             .max-autocomplete-item {
                 cursor: pointer;
@@ -380,6 +627,16 @@
                 }
             }
         }
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
     }
 }
 </style>

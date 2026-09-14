@@ -1,6 +1,6 @@
 <template>
     <div class="max-list-box max-listbox" :class="{ 'is-disabled': props.disabled, 'two-lines': props.twoLines }" :style="rootStyle">
-        <div v-if="$slots.header || props.title" class="max-listbox-header">
+        <div v-if="hasHeader" :id="headerId" class="max-listbox-header">
             <slot name="header">
                 <span class="max-listbox-title">{{ props.title }}</span>
             </slot>
@@ -12,6 +12,7 @@
                 type="text"
                 class="max-listbox-filter-input"
                 :placeholder="props.filterPlaceholder"
+                :aria-label="effectiveFilterLabel"
                 :disabled="props.disabled"
                 @input="onFilterInput"
                 @keydown="onFilterKeydown"
@@ -23,7 +24,9 @@
             class="max-listbox-list"
             role="listbox"
             :tabindex="props.disabled ? -1 : 0"
-            :aria-disabled="props.disabled"
+            :aria-disabled="props.disabled ? 'true' : undefined"
+            :aria-labelledby="hasHeader ? headerId : undefined"
+            :aria-label="!hasHeader ? (props.ariaLabel || undefined) : undefined"
             :aria-activedescendant="focusedItemId"
             @scroll="onListScroll"
             @keydown="onKeydown"
@@ -69,16 +72,16 @@
                  uma <li> ali dentro pintaria logo após o último item da janela atual — no meio
                  do viewport, não no fim real da lista. Como siblings da window (e do spacer),
                  eles ficam em fluxo normal no fim de .max-listbox-list em ambos os modos. -->
-            <div v-if="isLoading || (isApiMode && hasMore && visibleOptions.length > 0)" class="max-listbox-loader" role="presentation">
+            <div v-if="isLoading || (isApiMode && hasMore && visibleOptions.length > 0)" class="max-listbox-loader" role="status" aria-live="polite">
                 <slot name="loader">Carregando...</slot>
             </div>
 
-            <div v-if="loadError" class="max-listbox-error">
+            <div v-if="loadError" class="max-listbox-error" role="alert">
                 <span>Erro ao carregar</span>
-                <button type="button" class="max-listbox-retry" @click="retry">Tentar novamente</button>
+                <button type="button" class="max-listbox-retry" aria-label="Tentar novamente" @click="retry">Tentar novamente</button>
             </div>
 
-            <div v-if="visibleOptions.length === 0 && !isInitialLoading && !loadError" class="max-listbox-empty" role="presentation">
+            <div v-if="visibleOptions.length === 0 && !isInitialLoading && !loadError" class="max-listbox-empty" role="status" aria-live="polite">
                 <slot name="empty">{{ props.emptyMessage }}</slot>
             </div>
         </div>
@@ -95,7 +98,7 @@
  * automática e carregamento paginado por scroll infinito.
  */
 <script setup lang="ts">
-    import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
+    import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick, useId, useSlots } from 'vue';
     import MaxIcon from './MaxIcon.vue';
     import MaxBadgeComponent from './MaxBadgeComponent.vue';
     import { useVirtualList } from '../composables/useVirtualList';
@@ -145,6 +148,10 @@
             filter?: boolean;
             /** Placeholder do campo de busca */
             filterPlaceholder?: string;
+            /** Rótulo acessível do filtro via aria-label */
+            filterLabel?: string;
+            /** Rótulo acessível da lista quando não há título/cabeçalho */
+            ariaLabel?: string;
             /** Campos usados no filtro local; padrão: optionLabel + optionSubLabel */
             filterFields?: string[];
             /** Força a virtualização; undefined = automático acima do threshold */
@@ -178,6 +185,8 @@
             height: undefined,
             filter: false,
             filterPlaceholder: 'Buscar...',
+            filterLabel: undefined,
+            ariaLabel: undefined,
             filterFields: undefined,
             virtualScroll: undefined,
             virtualScrollThreshold: 500,
@@ -194,6 +203,14 @@
         (e: 'filter', term: string): void;
         (e: 'load-error', error: unknown): void;
     }>();
+
+    const headerId = useId();
+    const slots = useSlots();
+    const hasHeader = computed(() => Boolean(slots.header || props.title));
+    const effectiveFilterLabel = computed(() => props.filterLabel || (props.title ? `Filtrar ${props.title}` : 'Filtrar opções'));
+
+    if (process.env.NODE_ENV !== 'production') if (!hasHeader.value && !props.ariaLabel) console.warn('[MaxListBox] Widget sem nome acessível: forneça title, slot #header ou prop ariaLabel.');
+
 
     const listElem = ref<HTMLElement | null>(null);
 
@@ -667,7 +684,13 @@
             }
 
             &:focus {
-                border-color: var(--blue-600);
+                border-color: var(--max-primary-500, #00768e);
+            }
+
+            &:focus-visible {
+                outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
+                outline-offset: 1px;
+                border-color: var(--max-primary-500, #00768e);
             }
         }
     }
@@ -687,7 +710,7 @@
         }
 
         &:focus-visible {
-            outline: var(--max-focus-outline);
+            outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
             outline-offset: -2px;
             border-radius: 4px;
         }
@@ -739,32 +762,37 @@
                 }
 
                 &.is-focused {
-                    outline: 2px solid var(--blue-600);
+                    outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
                     outline-offset: -2px;
                 }
 
                 &.is-selected {
-                    background-color: var(--blue-600);
-                    color: var(--background-0, #fff);
+                    background-color: var(--max-selection-background, var(--max-primary-500, #00768e));
+                    color: var(--max-selection-content, var(--background-0, #fff));
+                    font-weight: 500;
 
                     .max-listbox-item-label {
-                        color: var(--background-0, #fff);
+                        color: var(--max-selection-content, var(--background-0, #fff));
+                        font-weight: 600;
                     }
 
                     .max-listbox-item-sublabel,
                     .max-listbox-item-icon {
-                        color: var(--background-200, #eee);
+                        color: var(--max-selection-content, var(--background-200, #eee));
+                        opacity: 0.9;
                     }
 
                     &:hover {
-                        background-color: var(--blue-700);
+                        background-color: var(--max-selection-hover-background, var(--max-primary-600, #005f77));
+                        color: var(--max-selection-hover-content, #fff);
                     }
 
                     // .is-focused sozinho usa outline azul (--blue-600), que é a mesma cor
                     // do fundo aqui: sem isso, uma linha focada E selecionada não mostra
                     // nenhuma indicação de foco para quem navega por teclado.
                     &.is-focused {
-                        outline-color: var(--background-0, #fff);
+                        outline: 2px solid var(--max-selection-content, #fff);
+                        outline-offset: -2px;
                     }
                 }
 
@@ -840,7 +868,7 @@
             border: none;
             background: none;
             padding: 0;
-            color: var(--blue-600);
+            color: var(--max-primary-500, #00768e);
             cursor: pointer;
             text-decoration: underline;
             font-size: 0.9rem;

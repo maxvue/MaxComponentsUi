@@ -63,7 +63,7 @@
                             <MaxInputDatePicker v-else-if="col.input === 'date'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :placeholder="col.placeholder" :required="col.required" />
 
                             <!-- Checkbox -->
-                            <MaxInputCheckbox v-else-if="col.input === 'checkbox'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" />
+                            <MaxInputCheckbox v-else-if="col.input === 'checkbox'" :modelValue="Boolean(getFieldValue(row, col.field))" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" />
 
                             <!-- Textarea -->
                             <MaxInputTextArea v-else-if="col.input === 'textarea'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :placeholder="col.placeholder" :required="col.required" />
@@ -293,14 +293,14 @@
 
 
 <style lang="scss" scoped>
+@use '../themes/table-anatomy' as table;
+
 .max-table-fields-wrapper {
+    @include table.table-container;
+
     border-radius: 1rem;
-    overflow: hidden;
     max-height: 100%;
-    width: 100%;
-    height: 100%;
-    border: 1px solid var(--background-300);
-    position: relative;
+    border: 1px solid var(--max-table-border-color, var(--background-300));
     display: grid;
     grid-template-rows: 1fr;
 
@@ -319,21 +319,14 @@
             z-index: 1;
 
             .max-table-fields-head-row {
-                display: flex;
-                height: 40px;
-                padding: 0 6px;
-                gap: 6px;
-                background-color: var(--table-header-bg, var(--blue-800));
+                @include table.table-header-row;
+
+                background-color: var(--max-table-header-bg, var(--table-header-bg, #003B53));
 
                 .max-table-fields-th {
-                    padding: 0;
-                    background-color: transparent;
-                    color: var(--table-header-text, var(--blue-200));
-                    font-family: Jost, sans-serif;
-                    font-weight: 400;
-                    flex-grow: 1;
-                    border: none;
-                    height: 100%;
+                    @include table.table-header-cell;
+
+                    color: var(--max-table-header-text, var(--table-header-text, #8AD6E8));
                     display: grid;
                     place-items: center;
                     text-align: center;
@@ -351,40 +344,16 @@
             display: grid;
             align-content: start;
             overflow-y: auto;
-            font-family: Jost, sans-serif;
 
             .max-table-fields-row {
-                display: flex;
-                width: 100%;
-                height: auto;
-                gap: 0 6px;
-                padding: 3px 6px;
-
-                &:first-of-type {
-                    padding-top: 6px;
-                }
-
-                &:last-of-type {
-                    padding-bottom: 6px;
-                }
-
-                // Linhas listradas
-                &.max-table-fields-row-even {
-                    background-color: var(--primary-25);
-                }
-
-                &.max-table-fields-row-odd {
-                    background-color: var(--primary-100);
-                }
+                @include table.table-body-row;
+                @include table.table-row-zebra;
 
                 .max-table-fields-td {
-                    flex-grow: 1;
-                    padding: 0;
-                    display: grid;
+                    @include table.table-cell-base;
+
                     place-items: center start;
                     outline: none;
-                    border: none;
-                    border-radius: 0;
 
                     &:focus:not(:focus-visible) {
                         outline: none;
@@ -400,13 +369,8 @@
                     }
 
                     // Quando inputs estão dentro da célula
-                    :deep(.max-input-main-div) {
-                        grid-template-rows: 1fr;
-
-                        .message-spacer,
-                        .input-message {
-                            display: none;
-                        }
+                    :deep() {
+                        @include table.table-cell-input-feedback;
                     }
 
                     // Input de incremento (+/-)
@@ -499,6 +463,12 @@
 
     to {
         transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .max-table-wrapper .max-table-container table tbody tr.max-table-loading-row .max-table-spinner {
+        animation-duration: 4s;
     }
 }
 </style>

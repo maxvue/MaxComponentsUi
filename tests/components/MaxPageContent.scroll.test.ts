@@ -25,11 +25,19 @@ describe('MaxPageContent - Scroll e Layout do Conteúdo', () => {
     });
 
     it('atualiza o content_page_size na store useSystemStore', () => {
-        const system = useSystemStore();
         mount(MaxPageContent, {
             global: { plugins: [pinia] }
         });
+        const system = useSystemStore();
 
         expect(system.content_page_size).toBeDefined();
+    });
+
+    it('mantém a moldura estrutural vinculada a --layout-content-frame-bg (E10-06)', async () => {
+        const fs = await import('node:fs');
+        const path = await import('node:path');
+        const sfc = fs.readFileSync(path.resolve(__dirname, '../../src/components/MaxPageContent.vue'), 'utf-8');
+
+        expect(sfc).toMatch(/\.board_page_content_main_div\s*\{[^}]*background-color:\s*var\(--layout-content-frame-bg/);
     });
 });

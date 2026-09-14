@@ -108,4 +108,189 @@ describe('MaxInputTextList', () => {
         expect(inputBase.props('error')).toBe('Erro aqui');
         expect(inputBase.props('required')).toBe(true);
     });
+
+    describe('Ciclo de Teclado e Foco (E08-08)', () => {
+        it('exibe instrução acessível e associa ao textarea via aria-describedby quando indentWithTab é true (default)', () => {
+            const wrapper = mountTextList();
+            const textarea = wrapper.find('textarea');
+            const instruction = wrapper.find('.text-list-keyboard-instruction');
+
+            expect(instruction.exists()).toBe(true);
+            expect(instruction.text()).toBe('Pressione Escape e depois Tab para sair do editor');
+
+            const describedBy = textarea.attributes('aria-describedby');
+            expect(describedBy).toBeDefined();
+            expect(describedBy).toContain(instruction.attributes('id'));
+        });
+
+        it('quando indentWithTab é false, não exibe instrução e Tab/Shift+Tab navegam sem modificar o texto', async () => {
+            const wrapper = mountTextList({ indentWithTab: false, modelValue: 'meu código' });
+            const textarea = wrapper.find('textarea');
+
+            expect(wrapper.find('.text-list-keyboard-instruction').exists()).toBe(false);
+
+            const tabEvent = new KeyboardEvent('keydown', { key: 'Tab', cancelable: true });
+            textarea.element.dispatchEvent(tabEvent);
+            expect(tabEvent.defaultPrevented).toBe(false);
+
+            const shiftTabEvent = new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, cancelable: true });
+            textarea.element.dispatchEvent(shiftTabEvent);
+            expect(shiftTabEvent.defaultPrevented).toBe(false);
+
+            // O conteúdo não foi alterado
+            expect((textarea.element as HTMLTextAreaElement).value).toBe('meu código');
+        });
+
+        it('quando indentWithTab é true, Escape arma o modo de saída e o próximo Tab não indenta', async () => {
+            const wrapper = mountTextList({ indentWithTab: true, modelValue: 'codigo' });
+            const textarea = wrapper.find('textarea');
+
+            // Inicialmente o status de escape armado não existe
+            expect(wrapper.find('.escape-armed-status').exists()).toBe(false);
+
+            // Pressiona Escape para armar a saída
+            await textarea.trigger('keydown', { key: 'Escape' });
+            expect(wrapper.find('.escape-armed-status').exists()).toBe(true);
+            expect(wrapper.find('.escape-armed-status').text()).toContain('Modo de saída do editor ativado');
+
+            // Pressiona Tab enquanto armado: não previne default e não insere espaços
+            const tabEvent = new KeyboardEvent('keydown', { key: 'Tab', cancelable: true, bubbles: true });
+            textarea.element.dispatchEvent(tabEvent);
+            await wrapper.vm.$nextTick();
+
+            expect(tabEvent.defaultPrevented).toBe(false);
+            expect((textarea.element as HTMLTextAreaElement).value).toBe('codigo');
+            // Modo é desarmado após o Tab
+            expect(wrapper.find('.escape-armed-status').exists()).toBe(false);
+        });
+
+        it('qualquer outra tecla após Escape desarma o modo de saída', async () => {
+            const wrapper = mountTextList({ indentWithTab: true, modelValue: 'linha' });
+            const textarea = wrapper.find('textarea');
+
+            // Arma
+            await textarea.trigger('keydown', { key: 'Escape' });
+            expect(wrapper.find('.escape-armed-status').exists()).toBe(true);
+
+            // Pressiona seta para baixo ou outra tecla
+            await textarea.trigger('keydown', { key: 'ArrowDown' });
+            expect(wrapper.find('.escape-armed-status').exists()).toBe(false);
+
+            // Próximo Tab agora deve indentar normalmente
+            const el = textarea.element as HTMLTextAreaElement;
+            el.selectionStart = 5;
+            el.selectionEnd = 5;
+            await textarea.trigger('keydown', { key: 'Tab' });
+
+            const emitted = wrapper.emitted('update:modelValue')!;
+            expect(emitted[emitted.length - 1][0]).toBe('linha    ');
+        });
+
+        it('perda de foco (blur) desarma o modo de saída', async () => {
+            const wrapper = mountTextList({ indentWithTab: true });
+            const textarea = wrapper.find('textarea');
+
+            await textarea.trigger('keydown', { key: 'Escape' });
+            expect(wrapper.find('.escape-armed-status').exists()).toBe(true);
+
+            await textarea.trigger('blur');
+            expect(wrapper.find('.escape-armed-status').exists()).toBe(false);
+        });
+    });
+
+    describe('Calha Virtual e Performance em Textos Longos (E11-01)', () => {
+        it('define aria-hidden="true" na calha de números de linha', () => {
+            const wrapper = mountTextList({ modelValue: 'linha 1\nlinha 2' });
+            const lineNumbers = wrapper.find('.line-numbers');
+            expect(lineNumbers.attributes('aria-hidden')).toBe('true');
+        });
+
+        it('com 10.000 linhas, renderiza nós DOM limitados à viewport + overscan (<= 50 nós)', async () => {
+            const tenThousandLines = Array.from({ length: 10000 }, (_, i) => `Linha ${i + 1}`).join('\n');
+            const wrapper = mountTextList({ modelValue: tenThousandLines });
+            await wrapper.vm.$nextTick();
+
+            const renderedNodes = wrapper.findAll('.line-number');
+            // Não deve renderizar 10.000 nós! Deve ficar limitado à janela virtual
+            expect(renderedNodes.length).toBeLessThanOrEqual(50);
+            expect(renderedNodes.length).toBeGreaterThan(0);
+
+            // Primeira linha renderizada no topo deve ser 1
+            expect(renderedNodes[0].text()).toBe('1');
+        });
+
+        it('atualiza a janela visível ao rolar o textarea com 10.000 linhas', async () => {
+            const tenThousandLines = Array.from({ length: 10000 }, (_, i) => `Linha ${i + 1}`).join('\n');
+            const wrapper = mountTextList({ modelValue: tenThousandLines });
+            const textarea = wrapper.find('textarea');
+            const el = textarea.element as HTMLTextAreaElement;
+
+            // Rola para a linha 100 (100 * 21px = 2100px)
+            Object.defineProperty(el, 'scrollTop', { value: 2100, writable: true });
+            Object.defineProperty(el, 'clientHeight', { value: 400, writable: true });
+            await textarea.trigger('scroll');
+            await wrapper.vm.$nextTick();
+
+            const renderedNodes = wrapper.findAll('.line-number');
+            expect(renderedNodes.length).toBeLessThanOrEqual(50);
+
+            // Os números visíveis agora devem conter linhas próximas de 100
+            const numbers = renderedNodes.map((n) => Number(n.text()));
+            expect(numbers.some((num) => num >= 95 && num <= 105)).toBe(true);
+        });
+
+        it('diminui o número total de linhas corretamente quando o texto encolhe', async () => {
+            const thousandLines = Array.from({ length: 1000 }, (_, i) => `L ${i}`).join('\n');
+            const wrapper = mountTextList({ modelValue: thousandLines });
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.findAll('.line-number').length).toBeLessThanOrEqual(50);
+
+            // Reduz para 5 linhas
+            await wrapper.setProps({ modelValue: '1\n2\n3\n4\n5' });
+            await wrapper.vm.$nextTick();
+
+            // Para <= 50 linhas, volta ao modo direto renderizando exatamente 5 nós
+            expect(wrapper.findAll('.line-number')).toHaveLength(5);
+        });
+
+        it('spacer possui altura total proporcional ao número de linhas', () => {
+            const wrapper = mountTextList({ modelValue: 'l1\nl2\nl3\nl4\nl5' });
+            const spacer = wrapper.find('.line-numbers-spacer');
+            expect(spacer.exists()).toBe(true);
+            // 5 linhas * 21px = 105px
+            expect(spacer.attributes('style')).toContain('height: 105px');
+        });
+
+        it('ao rolar até o fim de 10.000 linhas, a última linha visível inclui a linha 10.000', async () => {
+            const tenThousandLines = Array.from({ length: 10000 }, (_, i) => `Linha ${i + 1}`).join('\n');
+            const wrapper = mountTextList({ modelValue: tenThousandLines });
+            const textarea = wrapper.find('textarea');
+            const el = textarea.element as HTMLTextAreaElement;
+
+            // Rola até o final
+            Object.defineProperty(el, 'scrollTop', { value: 10000 * 21 - 400, writable: true });
+            Object.defineProperty(el, 'clientHeight', { value: 400, writable: true });
+            await textarea.trigger('scroll');
+            await wrapper.vm.$nextTick();
+
+            const renderedNodes = wrapper.findAll('.line-number');
+            expect(renderedNodes.length).toBeLessThanOrEqual(50);
+            const lastNumber = Number(renderedNodes[renderedNodes.length - 1].text());
+            expect(lastNumber).toBe(10000);
+        });
+
+        it('digitação em texto longo atualiza o valor sem exceder limite de nós da janela virtual', async () => {
+            const thousandLines = Array.from({ length: 1000 }, (_, i) => `Linha ${i + 1}`).join('\n');
+            const wrapper = mountTextList({ modelValue: thousandLines });
+            const textarea = wrapper.find('textarea');
+
+            await textarea.setValue(`${thousandLines}\nLinha 1001`);
+            await wrapper.vm.$nextTick();
+
+            const renderedNodes = wrapper.findAll('.line-number');
+            expect(renderedNodes.length).toBeLessThanOrEqual(50);
+            expect(wrapper.emitted('update:modelValue')).toBeTruthy();
+        });
+    });
 });

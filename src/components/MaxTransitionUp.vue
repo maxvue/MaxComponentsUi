@@ -44,4 +44,41 @@
             transform: translateY(150px); /* Desce para desaparecer */
         }
     }
+
+    @media (prefers-reduced-motion: reduce) {
+        :global(.slide-vertical-animation-enter-active) {
+            animation: slide-up-in-reduced 0.01ms linear forwards !important;
+            animation-delay: 0s !important;
+            opacity: 1 !important;
+        }
+
+        :global(.slide-vertical-animation-leave-active) {
+            animation: slide-down-out-reduced 0.01ms linear forwards !important;
+            animation-delay: 0s !important;
+        }
+    }
+
+    @keyframes slide-up-in-reduced {
+        from {
+            opacity: 1;
+            transform: none;
+        }
+
+        to {
+            opacity: 1;
+            transform: none;
+        }
+    }
+
+    @keyframes slide-down-out-reduced {
+        from {
+            opacity: 1;
+            transform: none;
+        }
+
+        to {
+            opacity: 0;
+            transform: none;
+        }
+    }
 </style>

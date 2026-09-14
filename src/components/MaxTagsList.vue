@@ -1,13 +1,22 @@
 <template>
     <div class="max-tags-list max-tag-list" v-bind="attrs">
         <div v-for="item in items_array" :key="item.value ?? item.id ?? item.name" class="tag-item-wrapper">
-            <MaxTagSelect class="tag-select-item" :modelValue="item.value" :options="options_array" no-dropdown @update:modelValue="(val: any) => replaceItem(item, val)">
-                <template #btn-right>
-                    <div class="max-tag-remove-action" v-tooltip="'Remover'" @click.stop="removeItem(item)">
-                        <MaxIconButton i="material-symbols:close-rounded" size="1.2" :color="getStyleColor(item, false, true).color" />
-                    </div>
-                </template>
-            </MaxTagSelect>
+            <MaxTagSelect
+                class="tag-select-item"
+                :modelValue="item.value"
+                :options="options_array"
+                no-dropdown
+                @update:modelValue="(val: any) => replaceItem(item, val)"
+            />
+            <MaxIconButton
+                class="max-tag-remove-action"
+                v-tooltip="'Remover'"
+                i="material-symbols:close-rounded"
+                size="1.2"
+                :color="getStyleColor(item, false, true).color"
+                :aria-label="`Remover tag ${item.name || item.label || item.value || ''}`"
+                @click.stop="removeItem(item)"
+            />
         </div>
         <div class="tag-add-wrapper">
             <MaxTagSelect v-model="add_tag" :options="options_array" is-button icon="fluent:tag-add-20-regular" icon-size="2" />
@@ -123,6 +132,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            background: transparent;
+            border: none;
+            outline: none;
+            font: inherit;
             cursor: pointer;
             opacity: 0.9;
             margin-left: 4px;

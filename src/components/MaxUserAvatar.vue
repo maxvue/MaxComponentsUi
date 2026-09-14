@@ -1,5 +1,7 @@
 <template>
-    <div
+    <component
+        :is="isInteractiveButton ? 'button' : 'div'"
+        :type="isInteractiveButton ? 'button' : undefined"
         class="max-user-avatar"
         :class="{
             removable: remove && !noClick,
@@ -7,7 +9,10 @@
             'has-fallback-icon': !resolvedImageUrl || has_image_error
         }"
         :style="avatarStyle"
+        :aria-label="isInteractiveButton ? accessibleLabel : undefined"
         @click="onAvatarClick"
+        @keydown.enter.prevent="onKeydownAction"
+        @keydown.space.prevent="onKeydownAction"
         v-tooltip.top="showTooltip ? (remove && !noClick ? (labelRemove ?? name) : name) : null"
     >
         <img
@@ -31,7 +36,7 @@
                 color="#fff"
             />
         </div>
-    </div>
+    </component>
 </template>
 
 <script setup lang="ts">
@@ -158,16 +163,16 @@
         return style;
     });
 
-    const onAvatarClick = (event: MouseEvent) => {
-        if (props.noClick) {
-            event?.stopImmediatePropagation?.();
-            event?.preventDefault?.();
-            return;
-        }
+    const isInteractiveButton = computed(() => Boolean(props.remove && !props.noClick));
 
-        if (!props.remove) return;
+    const accessibleLabel = computed(() => {
+        if (props.labelRemove && props.labelRemove.trim()) return props.labelRemove.trim();
+        if (props.name && props.name.trim()) return `Remover ${props.name.trim()}`;
+        return 'Remover responsável';
+    });
 
-        const target = (event?.currentTarget || event?.target) as HTMLElement | undefined;
+    const triggerConfirm = (target?: HTMLElement) => {
+        if (props.noClick || !props.remove) return;
         const rect = target?.getBoundingClientRect ? target.getBoundingClientRect() : { x: 0, y: 0, height: 0, width: 0 };
         confirm_store.x = rect?.x ?? 0;
         confirm_store.y = rect?.y ?? 0;
@@ -179,6 +184,20 @@
         confirm_store.acceptProps = { label: 'Remover', icon: 'trash', action: () => emit('remove') };
         confirm_store.show = true;
     };
+
+    const onAvatarClick = (event: MouseEvent) => {
+        if (props.noClick) {
+            event?.stopImmediatePropagation?.();
+            event?.preventDefault?.();
+            return;
+        }
+        triggerConfirm((event?.currentTarget || event?.target) as HTMLElement | undefined);
+    };
+
+    const onKeydownAction = (event: KeyboardEvent) => {
+        if (!isInteractiveButton.value) return;
+        triggerConfirm((event?.currentTarget || event?.target) as HTMLElement | undefined);
+    };
 </script>
 
 <style lang="scss" scoped>
@@ -188,6 +207,8 @@
         justify-content: center;
         width: 40px;
         height: 40px;
+        min-width: 24px;
+        min-height: 24px;
         border-radius: 50% !important;
         overflow: hidden !important;
         clip-path: circle(50% at 50% 50%);
@@ -198,6 +219,22 @@
         position: relative;
         flex-shrink: 0;
         container-type: inline-size;
+        background: transparent;
+        border: none;
+        padding: 0;
+        margin: 0;
+        font-family: inherit;
+        color: inherit;
+
+        &[type='button'] {
+            cursor: pointer;
+
+            &:focus-visible {
+                outline: var(--max-focus-outline, 2px solid var(--max-primary-500, #00768e));
+                outline-offset: 2px;
+                box-shadow: var(--max-focus-ring, 0 0 0 2px var(--background-0, #fff), 0 0 0 4px var(--max-primary-500, #00768e));
+            }
+        }
 
         &.no-click {
             cursor: default !important;
@@ -221,7 +258,7 @@
             justify-content: center;
             border-radius: 50% !important;
             clip-path: circle(50% at 50% 50%);
-            background-color: var(--max-primary-50, #f0fdfa);
+            background-color: var(--max-primary-50, #67C8DB);
             color: var(--max-primary-600, #005f77);
             font-weight: 700;
             font-size: 0.875rem;

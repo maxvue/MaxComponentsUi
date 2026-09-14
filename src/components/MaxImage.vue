@@ -8,7 +8,13 @@
                 class="max-image__preview-trigger"
                 :class="[props.imageClass, { 'max-image--pointer': props.preview }]"
                 :style="imageStyleComputed"
+                :role="props.preview ? 'button' : undefined"
+                :tabindex="props.preview ? 0 : undefined"
+                :aria-haspopup="props.preview ? 'dialog' : undefined"
+                :aria-label="props.preview ? (props.alt ? `Visualizar imagem: ${props.alt}` : 'Visualizar imagem ampliada') : props.alt"
                 @click="onImageClick"
+                @keydown.enter="onImageClick"
+                @keydown.space.prevent="onImageClick"
             />
         </slot>
 
@@ -63,6 +69,10 @@
                                 <div
                                     class="max-image-crop-box"
                                     :style="cropBoxStyle"
+                                    tabindex="0"
+                                    role="region"
+                                    aria-label="Área de recorte da imagem. Use setas para mover e Shift com setas para redimensionar"
+                                    @keydown="onCropBoxKeydown"
                                     @pointerdown.stop="onCropBoxPointerDown"
                                 >
                                     <div class="max-image-crop-grid">
@@ -163,55 +173,26 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, computed, watch, onBeforeUnmount, nextTick, type StyleValue } from 'vue';
+    import { ref, computed, watch, onBeforeUnmount, nextTick } from 'vue';
     import MaxIconButton from './MaxIconButton.vue';
     import { useScrollLock } from '../helpers/useScrollLock';
     import { useFocusTrap } from '../helpers/useFocusTrap';
+    import { calculateTargetCropDimensions } from '../helpers/imageCrop';
+    import type { MaxImageEditPayload, MaxImageProps } from '../types/image.js';
 
-    export interface MaxImageEditPayload {
-        /** Data URL em base64 da imagem resultante */
-        dataUrl: string;
-        /** Objeto Blob pronto para envio via FormData/API */
-        blob: Blob | null;
-        /** Objeto File gerado pronto para envio multipart/form-data */
-        file: File | null;
-        /** Largura da imagem recortada */
-        width: number;
-        /** Altura da imagem recortada */
-        height: number;
-        /** Tipo MIME (ex: 'image/png' ou 'image/jpeg') */
-        mimeType: string;
-    }
-
-    export interface MaxImageProps {
-        /** URL ou Data URI da imagem */
-        src?: string;
-        /** Texto alternativo da imagem */
-        alt?: string;
-        /** Largura da imagem inline */
-        width?: string | number;
-        /** Altura da imagem inline */
-        height?: string | number;
-        /** Ajuste da imagem no contêiner */
-        fit?: 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
-        /** Se permite abrir visualização ampliada em tela cheia ao clicar */
-        preview?: boolean;
-        /** Se permite edição/recorte da imagem na barra de ferramentas */
-        allowEdit?: boolean;
-        /** Classes CSS adicionais para a tag img */
-        imageClass?: string | string[] | Record<string, boolean>;
-        /** Estilos inline para a tag img */
-        imageStyle?: StyleValue;
-        /** Função assíncrona ou síncrona executada ao salvar a edição para envio ao backend */
-        onEdit?: (payload: MaxImageEditPayload) => void | Promise<void>;
-    }
+    export type { MaxImageEditPayload, MaxImageProps };
 
     const props = withDefaults(defineProps<MaxImageProps>(), {
         src: '',
         alt: '',
         preview: true,
         allowEdit: false,
-        fit: 'cover'
+        fit: 'cover',
+        maxCropWidth: 4096,
+        maxCropHeight: 4096,
+        maxCropPixels: 16777216,
+        cropQuality: 0.92,
+        includeDataUrl: true
     });
 
     const emit = defineEmits<{
@@ -225,7 +206,16 @@
     const scrollLock = useScrollLock();
     const currentSrc = ref(props.src);
 
+    let activeObjectUrl: string | null = null;
+    const revokeActiveObjectUrl = () => {
+        if (activeObjectUrl) {
+            URL.revokeObjectURL(activeObjectUrl);
+            activeObjectUrl = null;
+        }
+    };
+
     watch(() => props.src, (newVal) => {
+        revokeActiveObjectUrl();
         currentSrc.value = newVal || '';
     });
 
@@ -462,8 +452,14 @@
     };
 
     const applyCropPayload = async (payload: MaxImageEditPayload) => {
-        currentSrc.value = payload.dataUrl;
-        emit('update:src', payload.dataUrl);
+        revokeActiveObjectUrl();
+        if (payload.blob) {
+            activeObjectUrl = URL.createObjectURL(payload.blob);
+            currentSrc.value = activeObjectUrl;
+        } else if (payload.dataUrl) currentSrc.value = payload.dataUrl;
+
+
+        emit('update:src', payload.dataUrl || currentSrc.value);
         emit('edit', payload);
         emit('crop', payload);
 
@@ -491,28 +487,63 @@
         const sWidth = cropBox.value.width * scaleX;
         const sHeight = cropBox.value.height * scaleY;
 
+        const isJpeg = props.cropMimeType
+            ? props.cropMimeType === 'image/jpeg'
+            : currentSrc.value.includes('image/jpeg') || /\.jpe?g$/i.test(currentSrc.value);
+        const mimeType = props.cropMimeType || (isJpeg ? 'image/jpeg' : 'image/png');
+        const quality = props.cropQuality ?? 0.92;
+
+        const targetDims = calculateTargetCropDimensions(
+            sWidth,
+            sHeight,
+            props.maxCropWidth,
+            props.maxCropHeight,
+            props.maxCropPixels
+        );
+
         const canvas = document.createElement('canvas');
-        canvas.width = Math.round(sWidth);
-        canvas.height = Math.round(sHeight);
+        canvas.width = targetDims.width;
+        canvas.height = targetDims.height;
         const ctx = canvas.getContext('2d');
 
         if (!ctx) return;
 
         ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, canvas.width, canvas.height);
 
-        const isJpeg = currentSrc.value.includes('image/jpeg') || /\.jpe?g$/i.test(currentSrc.value);
-        const mimeType = isJpeg ? 'image/jpeg' : 'image/png';
-        const dataUrl = canvas.toDataURL(mimeType);
-
+        // Single compression via canvas.toBlob
         const blob: Blob | null = await new Promise((resolve) => {
-            canvas.toBlob((b) => resolve(b), mimeType);
+            if (typeof canvas.toBlob === 'function') canvas.toBlob((b) => resolve(b), mimeType, quality);
+            else try {
+                const data = canvas.toDataURL(mimeType, quality);
+                const base64 = data.split(',')[1] || '';
+                const bin = atob(base64);
+                const arr = new Uint8Array(bin.length);
+                for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+                resolve(new Blob([arr], { type: mimeType }));
+            } catch {
+                resolve(null);
+            }
+
         });
+
+        let dataUrl: string | undefined = undefined;
+        if (props.includeDataUrl) {
+            if (blob && typeof FileReader !== 'undefined') dataUrl = await new Promise<string>((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve((reader.result as string) || '');
+                reader.onerror = () => resolve('');
+                reader.readAsDataURL(blob);
+            });
+
+            if (!dataUrl && typeof canvas.toDataURL === 'function') dataUrl = canvas.toDataURL(mimeType, quality);
+
+        }
 
         const extension = mimeType === 'image/jpeg' ? 'jpg' : 'png';
         const file = blob ? new File([blob], `cropped.${extension}`, { type: mimeType }) : null;
 
         const payload: MaxImageEditPayload = {
-            dataUrl,
+            dataUrl: dataUrl || '',
             blob,
             file,
             width: canvas.width,
@@ -521,6 +552,51 @@
         };
 
         await applyCropPayload(payload);
+    };
+
+    const onCropBoxKeydown = (event: KeyboardEvent) => {
+        if (!cropImgRef.value) return;
+        const imgW = cropImgRef.value.clientWidth;
+        const imgH = cropImgRef.value.clientHeight;
+        const step = event.shiftKey ? 10 : 5;
+        let handled = false;
+
+        const current = { ...cropBox.value };
+
+        if (event.shiftKey) {
+            if (event.key === 'ArrowRight') {
+                current.width = Math.min(imgW - current.x, current.width + step);
+                handled = true;
+            } else if (event.key === 'ArrowLeft') {
+                current.width = Math.max(40, current.width - step);
+                handled = true;
+            } else if (event.key === 'ArrowDown') {
+                current.height = Math.min(imgH - current.y, current.height + step);
+                handled = true;
+            } else if (event.key === 'ArrowUp') {
+                current.height = Math.max(40, current.height - step);
+                handled = true;
+            }
+        } else
+            if (event.key === 'ArrowRight') {
+                current.x = Math.min(imgW - current.width, current.x + step);
+                handled = true;
+            } else if (event.key === 'ArrowLeft') {
+                current.x = Math.max(0, current.x - step);
+                handled = true;
+            } else if (event.key === 'ArrowDown') {
+                current.y = Math.min(imgH - current.height, current.y + step);
+                handled = true;
+            } else if (event.key === 'ArrowUp') {
+                current.y = Math.max(0, current.y - step);
+                handled = true;
+            }
+
+
+        if (handled) {
+            event.preventDefault();
+            cropBox.value = current;
+        }
     };
 
     const onKeydown = (e: KeyboardEvent) => {
@@ -533,6 +609,7 @@
     });
 
     onBeforeUnmount(() => {
+        revokeActiveObjectUrl();
         cleanupPointerListeners();
         if (isOpen.value) {
             window.removeEventListener('keydown', onKeydown);
@@ -548,6 +625,9 @@
         confirmCrop,
         cancelCrop,
         applyCropPayload,
+        onCropBoxKeydown,
+        calculateTargetCropDimensions,
+        cropBox,
         isCropping,
         isOpen,
         zoomScale

@@ -282,5 +282,85 @@ describe('MaxInputCodeToolbar', () => {
             expect(options[0].text()).toBe('Rust Custom');
             expect(options[1].text()).toBe('Go Custom');
         });
+
+        it('expõe role="toolbar" e nome acessível padrão e customizado', () => {
+            const wDefault = mount(MaxInputCodeToolbar, {
+                global: { stubs: { MaxIcon: true } }
+            });
+            expect(wDefault.attributes('role')).toBe('toolbar');
+            expect(wDefault.attributes('aria-label')).toBe('Editor de código');
+
+            const wCustom = mount(MaxInputCodeToolbar, {
+                props: { ariaLabel: 'Barra de código' },
+                global: { stubs: { MaxIcon: true } }
+            });
+            expect(wCustom.attributes('aria-label')).toBe('Barra de código');
+        });
+
+        it('aplica aria-pressed apenas em toggles persistentes e omite em ações momentâneas', () => {
+            const wrapper = mount(MaxInputCodeToolbar, {
+                props: {
+                    wordWrap: true,
+                    minimap: false,
+                    isFullscreen: true
+                },
+                global: { stubs: { MaxIcon: true } }
+            });
+
+            // Toggles persistentes
+            expect(wrapper.find('button[title="Alternar Quebra Automática de Linha"]').attributes('aria-pressed')).toBe('true');
+            expect(wrapper.find('button[title="Alternar Mini-mapa Lateral"]').attributes('aria-pressed')).toBe('false');
+            expect(wrapper.find('button[title="Sair da Tela Cheia (Esc)"]').attributes('aria-pressed')).toBe('true');
+
+            // Ações momentâneas
+            expect(wrapper.find('button[title="Formatar Código (Shift+Alt+F)"]').attributes('aria-pressed')).toBeUndefined();
+            expect(wrapper.find('button[title="Comentar Linhas (Ctrl+/)"]').attributes('aria-pressed')).toBeUndefined();
+            expect(wrapper.find('button[title="Desfazer (Ctrl+Z)"]').attributes('aria-pressed')).toBeUndefined();
+            expect(wrapper.find('button[title="Copiar Código"]').attributes('aria-pressed')).toBeUndefined();
+        });
+
+        it('mantém o select como parada nativa e aplica roving tabindex apenas entre os botões', () => {
+            const wrapper = mount(MaxInputCodeToolbar, {
+                global: { stubs: { MaxIcon: true } }
+            });
+
+            const select = wrapper.find('select');
+            expect(select.attributes('tabindex')).not.toBe('-1');
+
+            const buttons = wrapper.findAll('button');
+            const tabZeroButtons = buttons.filter((b) => b.attributes('tabindex') === '0');
+            const tabMinusOneButtons = buttons.filter((b) => b.attributes('tabindex') === '-1');
+
+            expect(tabZeroButtons).toHaveLength(1);
+            expect(tabMinusOneButtons).toHaveLength(buttons.length - 1);
+        });
+
+        it('navega entre botões habilitados com setas e Home/End atualizando tabindex', async () => {
+            const wrapper = mount(MaxInputCodeToolbar, {
+                attachTo: document.body,
+                global: { stubs: { MaxIcon: true } }
+            });
+
+            const buttons = wrapper.findAll<HTMLButtonElement>('.max-input-code-toolbar__btn');
+            expect(buttons.length).toBeGreaterThan(1);
+
+            expect(buttons[0].attributes('tabindex')).toBe('0');
+            expect(buttons[1].attributes('tabindex')).toBe('-1');
+
+            buttons[0].element.focus();
+
+            await wrapper.trigger('keydown', { key: 'ArrowRight' });
+            expect(buttons[1].attributes('tabindex')).toBe('0');
+            expect(buttons[0].attributes('tabindex')).toBe('-1');
+
+            await wrapper.trigger('keydown', { key: 'End' });
+            const lastIndex = buttons.length - 1;
+            expect(buttons[lastIndex].attributes('tabindex')).toBe('0');
+
+            await wrapper.trigger('keydown', { key: 'Home' });
+            expect(buttons[0].attributes('tabindex')).toBe('0');
+
+            wrapper.unmount();
+        });
     });
 });

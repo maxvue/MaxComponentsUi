@@ -5,8 +5,14 @@
  * Aqui são exportados explicitamente, já que a biblioteca não usa auto-import.
  */
 
+/** Estado pendente de um item de carregamento. */
+export type PendingStatus = 'loading' | 'waiting';
+
+/** Estado terminal de um item de carregamento. */
+export type TerminalStatus = 'done' | 'error';
+
 /** Estado de um item de carregamento. */
-export type ItemStatus = 'loading' | 'done' | 'error' | 'waiting';
+export type ItemStatus = PendingStatus | TerminalStatus;
 
 /** Um item individual da fila de carregamento. */
 export interface LoadingItem {
@@ -32,10 +38,20 @@ export interface LoadingItem {
     icon_done?: string | null;
     /** Ícone do estado `waiting`. */
     icon_waiting?: string | null;
+    /** Ícone do estado `error`. */
+    icon_error?: string | null;
     /** Animação Lottie. */
     lottie_icon?: string | null;
     /** Permite desabilitar o item sem removê-lo. */
     enabled?: boolean;
+    /** Duração em ms para exibição do estado 'done' antes de limpar. Padrão: 500ms. Se 0, descarta imediatamente. */
+    done_duration?: number;
+    /** Se true, o erro persiste até dismiss/retry explícito. Padrão: true. */
+    persistent_error?: boolean;
+    /** Callback opcional de retry para recuperação */
+    retry?: () => void | Promise<void>;
+    /** Detalhes do erro ou exceção associada para diagnóstico e recuperação. */
+    error?: any;
 }
 
 /** Mapa de itens de carregamento, indexado pela chave interna. */
@@ -45,6 +61,8 @@ export type LoadingItems = Record<string, LoadingItem>;
 export interface LoadingTarget {
     target: string;
     items: LoadingItems;
+    /** Diagnóstico observável do estado do alvo no DOM. */
+    status?: 'valid' | 'invalid' | 'global' | 'local';
 }
 
 /**

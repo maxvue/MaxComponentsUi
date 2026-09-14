@@ -19,14 +19,26 @@ vi.mock('@maxvue/max-use', async (importOriginal) => {
     };
 });
 
+const dummySvg = '<svg viewBox="0 0 24 24"><path d="M0 0h24v24H0z"/></svg>';
 const CACHE_KEY = 'all_icons_v2';
 
 describe('useIconStore — sanitização do cache do localStorage', () => {
     beforeEach(() => {
         setActivePinia(createPinia());
-        vi.stubGlobal('fetch', vi.fn().mockReturnValue(Promise.resolve({
-            json: () => Promise.resolve({})
-        })));
+        vi.stubGlobal('fetch', vi.fn((input: any) => {
+            const urlStr = String(input);
+            const result: Record<string, string> = {};
+            try {
+                const parsed = new URL(urlStr, 'http://localhost');
+                for (const icon of parsed.searchParams.getAll('icons[]')) result[icon] = dummySvg;
+            } catch {}
+            return Promise.resolve({
+                ok: true,
+                status: 200,
+                json: () => Promise.resolve(result),
+                text: () => Promise.resolve(dummySvg)
+            } as Response);
+        }));
         localStorage.clear();
     });
 

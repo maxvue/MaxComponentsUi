@@ -119,6 +119,70 @@ describe('MaxInputPhone', () => {
         expect((wrapper.vm as any).noMask).toBe(true);
     });
 
+    it('normaliza texto com DDI (+55 11 98888-7777) colado via evento paste no input', async () => {
+        const wrapper = mountPhoneField();
+        const input = wrapper.find('input[type="tel"]');
+
+        const pasteEvent = new Event('paste', { bubbles: true, cancelable: true }) as any;
+        pasteEvent.clipboardData = {
+            getData: (format: string) => (format === 'text' ? '+55 (11) 98888-7777' : '')
+        };
+
+        input.element.dispatchEvent(pasteEvent);
+        await wrapper.vm.$nextTick();
+
+        expect((wrapper.vm as any).country.ddi).toBe(55);
+        expect((wrapper.vm as any).phone).toBe('(11) 9 8888 - 7777');
+    });
+
+    it('normaliza texto sem DDI (11988887777) colado via evento paste mantendo país atual', async () => {
+        const wrapper = mountPhoneField();
+        const input = wrapper.find('input[type="tel"]');
+
+        const pasteEvent = new Event('paste', { bubbles: true, cancelable: true }) as any;
+        pasteEvent.clipboardData = {
+            getData: (format: string) => (format === 'text' ? '(11) 98888-7777' : '')
+        };
+
+        input.element.dispatchEvent(pasteEvent);
+        await wrapper.vm.$nextTick();
+
+        expect((wrapper.vm as any).country.ddi).toBe(55);
+        expect((wrapper.vm as any).phone).toBe('(11) 9 8888 - 7777');
+    });
+
+    it('identifica e troca país ao colar número internacional de outro país (+1 800 555 1234)', async () => {
+        const wrapper = mountPhoneField();
+        const input = wrapper.find('input[type="tel"]');
+
+        const pasteEvent = new Event('paste', { bubbles: true, cancelable: true }) as any;
+        pasteEvent.clipboardData = {
+            getData: (format: string) => (format === 'text' ? '+1 (800) 555-1234' : '')
+        };
+
+        input.element.dispatchEvent(pasteEvent);
+        await wrapper.vm.$nextTick();
+
+        expect((wrapper.vm as any).country.ddi).toBe(1);
+        expect((wrapper.vm as any).phone).toBe('8005551234');
+    });
+
+    it('não quebra nem altera dados ao colar texto vazio ou não numérico', async () => {
+        const wrapper = mountPhoneField({ modelValue: '5511999999999' });
+        const input = wrapper.find('input[type="tel"]');
+
+        const pasteEvent = new Event('paste', { bubbles: true, cancelable: true }) as any;
+        pasteEvent.clipboardData = {
+            getData: () => 'texto sem dígitos'
+        };
+
+        input.element.dispatchEvent(pasteEvent);
+        await wrapper.vm.$nextTick();
+
+        expect((wrapper.vm as any).country.ddi).toBe(55);
+        expect((wrapper.vm as any).phone).toBe('(11) 9 9999 - 9999');
+    });
+
     it('não depende mais do PrimeVue (nenhum componente Select montado)', () => {
         const wrapper = mountPhoneField();
         expect(wrapper.findComponent({ name: 'Select' }).exists()).toBe(false);
@@ -328,6 +392,52 @@ describe('MaxInputPhone', () => {
         expect(ExportedMaxPhoneField).toBe(MaxInputPhone);
         expect(PhoneField).toBe(MaxInputPhone);
         expect(InputPhone).toBe(MaxInputPhone);
+    });
+
+    describe('Virtualização e Coleções Grandes (E06-06)', () => {
+        it('virtualiza as opções de países automaticamente quando acima do threshold', async () => {
+            const wrapper = mountPhoneField();
+
+            await wrapper.find('.max-phone-select').trigger('click');
+            await wrapper.vm.$nextTick();
+
+            const spacer = document.body.querySelector('.max-phone-select-spacer');
+            expect(spacer).toBeTruthy();
+
+            const renderedOptions = document.body.querySelectorAll('.max-phone-select-option');
+            expect(renderedOptions.length).toBeLessThan(237);
+
+            wrapper.unmount();
+        });
+
+        it('respeita virtualScroll=false desativando a virtualização e montando todos os países', async () => {
+            const wrapper = mountPhoneField({ virtualScroll: false });
+
+            await wrapper.find('.max-phone-select').trigger('click');
+            await wrapper.vm.$nextTick();
+
+            const spacer = document.body.querySelector('.max-phone-select-spacer');
+            expect(spacer).toBeNull();
+
+            const renderedOptions = document.body.querySelectorAll('.max-phone-select-option');
+            expect(renderedOptions.length).toBe(236);
+
+            wrapper.unmount();
+        });
+
+        it('utiliza loading="lazy" em todas as bandeiras montadas', async () => {
+            const wrapper = mountPhoneField();
+
+            await wrapper.find('.max-phone-select').trigger('click');
+            await wrapper.vm.$nextTick();
+
+            const flagImgs = document.body.querySelectorAll('.input-phone-label-div img');
+            expect(flagImgs.length).toBeGreaterThan(0);
+            for (const img of flagImgs) expect(img.getAttribute('loading')).toBe('lazy');
+
+
+            wrapper.unmount();
+        });
     });
 });
 

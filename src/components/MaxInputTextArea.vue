@@ -19,12 +19,12 @@
     </InputBase>
 </template>
 
-/**
- * Componente de área de texto multi-linha.
- * Suporta redimensionamento automático e integração com InputBase.
- */
 <script setup lang="ts">
-    import { ref, computed, watch, useAttrs, onMounted, nextTick } from 'vue';
+    /**
+     * Componente de área de texto multi-linha.
+     * Suporta redimensionamento automático e integração com InputBase.
+     */
+    import { ref, computed, watch, useAttrs, onMounted, onUnmounted, nextTick } from 'vue';
     import InputBase from './InputBase.vue';
 
     const attrs = useAttrs();
@@ -79,8 +79,11 @@
         return Number.isNaN(value) || value <= 0 ? undefined : value;
     });
 
+    let isUnmounted = false;
+    let resizePending = false;
+
     const resize = () => {
-        if (!textAreaEl.value) return;
+        if (isUnmounted || !textAreaEl.value) return;
 
         const el = textAreaEl.value;
 
@@ -93,9 +96,13 @@
         // Reseta altura para auto antes de medir scrollHeight
         el.style.setProperty('height', 'auto', 'important');
 
-        // Em ambientes de teste sem renderização de layout (ex: happy-dom), scrollHeight é 0
-        if (el.scrollHeight === 0) return;
+        // Lê scrollHeight UMA ÚNICA VEZ por ciclo
+        const scrollHeight = el.scrollHeight;
 
+        // Em ambientes de teste sem renderização de layout (ex: happy-dom), scrollHeight é 0
+        if (scrollHeight === 0) return;
+
+        // Obtém getComputedStyle UMA ÚNICA VEZ por ciclo
         const computedStyle = window.getComputedStyle(el);
         const lh = parseFloat(computedStyle.lineHeight);
         const fs = parseFloat(computedStyle.fontSize);
@@ -113,8 +120,6 @@
         const minHeight = minRows * lineHeight + verticalPadding;
         const maxHeight = maxRows !== undefined ? maxRows * lineHeight + verticalPadding : Infinity;
 
-        const scrollHeight = el.scrollHeight;
-
         if (scrollHeight > maxHeight) {
             el.style.setProperty('height', `${maxHeight}px`, 'important');
             el.style.overflowY = 'auto';
@@ -125,26 +130,57 @@
         }
     };
 
-    const onInput = (event: Event) => {
-        temp_value.value = (event.target as HTMLTextAreaElement).value;
-        resize();
+    const scheduleResize = () => {
+        if (isUnmounted || resizePending) return;
+        resizePending = true;
+        nextTick(() => {
+            resizePending = false;
+            if (isUnmounted) return;
+            resize();
+        });
     };
 
-    onMounted(() => nextTick(resize));
+    const onInput = (event: Event) => {
+        temp_value.value = (event.target as HTMLTextAreaElement).value;
+    };
+
+    onMounted(() => {
+        scheduleResize();
+    });
+
+    onUnmounted(() => {
+        isUnmounted = true;
+    });
 
     const computedLines = computed(() => (temp_value.value ?? '').split(/\r\n|\r|\n/).length);
 
     const lines = computed(() => props.rows ?? (computedLines.value > minLinesNormalized.value ? computedLines.value : minLinesNormalized.value));
 
-    // Consolidado em um único watch: emite o v-model e reajusta a altura sempre que
-    // temp_value mudar. immediate: true preservado do watch original de emissão —
-    // sem ele o primeiro resize/emit no mount seria perdido (regressão já vista na Etapa 7b).
-    watch(temp_value, () => {
-        emit('update:modelValue', temp_value.value);
-        nextTick(resize);
+    // Emissão de update:modelValue isolada de efeitos de layout
+    // immediate: true preservado do contrato original (emissão inicial no mount)
+    watch(temp_value, (val) => {
+        emit('update:modelValue', val);
     }, { immediate: true });
 
     watch(() => props.modelValue, (val) => temp_value.value = val ?? '');
+
+    // Centraliza o auto-resize pós-render (flush: 'post') para temp_value e props de dimensionamento
+    watch(
+        [
+            temp_value,
+            () => props.autoResize,
+            () => props.rows,
+            () => props.minRows,
+            () => props.minLines,
+            () => props.maxRows
+        ],
+        () => {
+            scheduleResize();
+        },
+        { flush: 'post' }
+    );
+
+    defineExpose({ resize, scheduleResize });
 </script>
 
 <style lang="scss" scoped>

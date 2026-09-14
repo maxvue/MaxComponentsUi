@@ -46,7 +46,7 @@ describe('MaxInputFileUploadBig', () => {
     it('deve renderizar o componente de upload grande corretamente', () => {
         const wrapper = mount(MaxInputFileUploadBig, {
             global: {
-                stubs: { Icon: true, DotLottieVue: true }
+                stubs: { Icon: true }
             }
         });
 
@@ -61,7 +61,7 @@ describe('MaxInputFileUploadBig', () => {
                 label: '<img src="x" onerror="alert(1)"><b>Upload</b>'
             },
             global: {
-                stubs: { Icon: true, DotLottieVue: true }
+                stubs: { Icon: true }
             }
         });
 
@@ -77,7 +77,7 @@ describe('MaxInputFileUploadBig', () => {
                 default: '<div class="custom-default-slot">Arraste aqui</div>'
             },
             global: {
-                stubs: { Icon: true, DotLottieVue: true }
+                stubs: { Icon: true }
             }
         });
 
@@ -92,7 +92,7 @@ describe('MaxInputFileUploadBig', () => {
                 uploading: '<div class="custom-uploading-slot">Enviando...</div>'
             },
             global: {
-                stubs: { Icon: true, DotLottieVue: true }
+                stubs: { Icon: true }
             }
         });
 
@@ -107,7 +107,7 @@ describe('MaxInputFileUploadBig', () => {
                 error: '<div class="custom-error-slot">Falhou</div>'
             },
             global: {
-                stubs: { Icon: true, DotLottieVue: true }
+                stubs: { Icon: true }
             }
         });
 
@@ -123,7 +123,7 @@ describe('MaxInputFileUploadBig', () => {
         mount(MaxInputFileUploadBig, {
             props: { onSelect },
             global: {
-                stubs: { Icon: true, DotLottieVue: true }
+                stubs: { Icon: true }
             }
         });
 
@@ -142,7 +142,7 @@ describe('MaxInputFileUploadBig', () => {
         mount(MaxInputFileUploadBig, {
             props: { onSelect },
             global: {
-                stubs: { Icon: true, DotLottieVue: true }
+                stubs: { Icon: true }
             }
         });
 
@@ -155,7 +155,7 @@ describe('MaxInputFileUploadBig', () => {
         mount(MaxInputFileUploadBig, {
             props: { onSelect },
             global: {
-                stubs: { Icon: true, DotLottieVue: true }
+                stubs: { Icon: true }
             }
         });
 
@@ -172,7 +172,7 @@ describe('MaxInputFileUploadBig', () => {
         mount(MaxInputFileUploadBig, {
             props: { disabled: true, onSelect },
             global: {
-                stubs: { Icon: true, DotLottieVue: true }
+                stubs: { Icon: true }
             }
         });
 
@@ -187,7 +187,7 @@ describe('MaxInputFileUploadBig', () => {
         const wrapper = mount(MaxInputFileUploadBig, {
             props: { disabled: false },
             global: {
-                stubs: { Icon: true, DotLottieVue: true }
+                stubs: { Icon: true }
             }
         });
 
@@ -200,7 +200,7 @@ describe('MaxInputFileUploadBig', () => {
         const wrapper = mount(MaxInputFileUploadBig, {
             props: { disabled: true },
             global: {
-                stubs: { Icon: true, DotLottieVue: true }
+                stubs: { Icon: true }
             }
         });
 
@@ -249,5 +249,19 @@ describe('MaxInputFileUploadBig', () => {
 
         expect(wrapper.find('.upload-loading-state').exists()).toBe(true);
         expect(wrapper.find('.upload-spinner').exists()).toBe(true);
+    });
+
+    it('não possui referências a lottie.host nem background vermelho e comporta-se responsivamente', () => {
+        const wrapper = mount(MaxInputFileUploadBig, {
+            props: { uploading: true },
+            global: { stubs: { MaxIcon: true } }
+        });
+
+        expect(wrapper.html()).not.toContain('lottie.host');
+        expect(wrapper.html()).not.toContain('background: red');
+        expect(wrapper.html()).not.toContain('background-color: red');
+
+        const rootEl = wrapper.find('.input-upload-file-big-main-div');
+        expect(rootEl.exists()).toBe(true);
     });
 });

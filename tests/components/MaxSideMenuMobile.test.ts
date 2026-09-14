@@ -179,4 +179,46 @@ describe('MaxSideMenuMobile', () => {
         expect(drawer.props('baseZIndex')).toBe(1000);
         expect(drawer.props('ariaLabel')).toBe('Menu principal');
     });
+
+    it('utiliza tokens de shell no cabeçalho com contraste adequado (E10-05)', async () => {
+        const fs = await import('node:fs');
+        const path = await import('node:path');
+        const sfc = fs.readFileSync(path.resolve(__dirname, '../../src/components/MaxSideMenuMobile.vue'), 'utf-8');
+
+        // Garante que usa tokens de shell e não background-*
+        expect(sfc).toContain('color: var(--layout-shell-text, #fff);');
+        expect(sfc).toContain('color: var(--layout-shell-text-muted, rgb(255 255 255 / 70%));');
+        expect(sfc).not.toMatch(/\.mobile-profile-name\s*\{[^}]*color:\s*var\(--background-775\)/);
+        expect(sfc).not.toMatch(/\.mobile-profile-subtext\s*\{[^}]*color:\s*var\(--background-650\)/);
+    });
+
+    it('garante contraste mínimo de acessibilidade sobre --layout-shell-bg nos dois temas (E10-05)', () => {
+        const getLuminance = (r: number, g: number, b: number) => {
+            const [rs, gs, bs] = [r, g, b].map((c) => {
+                const s = c / 255;
+                return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+            });
+            return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+        };
+
+        const getContrast = (l1: number, l2: number) => {
+            const lighter = Math.max(l1, l2);
+            const darker = Math.min(l1, l2);
+            return (lighter + 0.05) / (darker + 0.05);
+        };
+
+        // Fundo institucional: #003048 (R:0, G:48, B:72)
+        const bgLum = getLuminance(0, 48, 72);
+
+        // Texto principal: #fff
+        const textLum = getLuminance(255, 255, 255);
+        const textContrast = getContrast(textLum, bgLum);
+        expect(textContrast).toBeGreaterThanOrEqual(4.5);
+
+        // Texto muted e chevron: rgb(255 255 255 / 70%) sobre #003048
+        const mutedLum = getLuminance(178.5, 192.9, 200.1);
+        const mutedContrast = getContrast(mutedLum, bgLum);
+        expect(mutedContrast).toBeGreaterThanOrEqual(4.5);
+        expect(mutedContrast).toBeGreaterThanOrEqual(3.0);
+    });
 });

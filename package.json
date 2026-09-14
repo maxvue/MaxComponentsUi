@@ -1,7 +1,7 @@
 {
     "name": "@maxvue/max-components-ui",
     "version": "1.1.2",
-    "description": "Biblioteca de componentes Vue baseada em PrimeVue",
+    "description": "Biblioteca de componentes e design system Vue 3 para o ecossistema Max",
     "module": "./dist/index.es.js",
     "types": "./dist/index.d.ts",
     "type": "module",
@@ -10,6 +10,10 @@
             "types": "./dist/index.d.ts",
             "import": "./dist/index.es.js"
         },
+        "./stores": {
+            "types": "./dist/stores/index.d.ts",
+            "import": "./dist/stores.es.js"
+        },
         "./preset": {
             "types": "./dist/presetMaxUno.d.ts",
             "import": "./dist/preset.es.js"
@@ -17,7 +21,14 @@
         "./resolver": {
             "types": "./dist/helpers/MaxComponentsUiResolver.d.ts",
             "import": "./dist/resolver.es.js"
-        }
+        },
+        "./styles": {
+            "types": "./dist/styles.d.ts",
+            "import": "./dist/styles.es.js"
+        },
+        "./style.css": "./dist/style.css",
+        "./styles.css": "./dist/style.css",
+        "./themes/*": "./dist/themes/*"
     },
     "files": [
         "dist"

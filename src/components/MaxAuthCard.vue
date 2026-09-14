@@ -10,12 +10,38 @@
                 />
             </slot>
 
-            <MaxGrid class="auth-card-grid">
+            <MaxGrid class="auth-card-grid" :aria-describedby="error ? 'max-auth-card-error' : undefined">
                 <!-- Modo Tradicional (E-mail / Senha) -->
                 <template v-if="mode === 'password'">
-                    <MaxInputPhoneMail class="auth-card-field" v-if="identifier === 'email-phone'" v-model="email" @keyup.enter="onEnter" />
-                    <MaxInputText class="auth-card-field" v-else :label="t.email" type="email" v-model="email" icon="mdi:email-outline" @keyup.enter="onEnter" />
-                    <MaxInputText class="auth-card-field" :label="t.password" type="password" v-model="password" icon="mdi:lock-outline" @keyup.enter="onEnter" />
+                    <MaxInputPhoneMail
+                        v-if="identifier === 'email-phone'"
+                        ref="emailInputRef"
+                        class="auth-card-field"
+                        v-model="email"
+                        :aria-describedby="error ? 'max-auth-card-error' : undefined"
+                        @keyup.enter="onEnter"
+                    />
+                    <MaxInputText
+                        v-else
+                        ref="emailInputRef"
+                        class="auth-card-field"
+                        :label="t.email"
+                        type="email"
+                        v-model="email"
+                        icon="mdi:email-outline"
+                        :aria-describedby="error ? 'max-auth-card-error' : undefined"
+                        @keyup.enter="onEnter"
+                    />
+                    <MaxInputText
+                        ref="passwordInputRef"
+                        class="auth-card-field"
+                        :label="t.password"
+                        type="password"
+                        v-model="password"
+                        icon="mdi:lock-outline"
+                        :aria-describedby="error ? 'max-auth-card-error' : undefined"
+                        @keyup.enter="onEnter"
+                    />
 
                     <div class="max-auth-options" v-if="showRemember || forgotTo">
                         <label class="max-auth-remember" v-if="showRemember">
@@ -27,7 +53,14 @@
 
                     <slot name="extra"></slot>
 
-                    <span class="max-auth-error" v-if="error">{{ error }}</span>
+                    <span
+                        v-if="error"
+                        id="max-auth-card-error"
+                        class="max-auth-error"
+                        role="alert"
+                        aria-live="assertive"
+                        aria-atomic="true"
+                    >{{ error }}</span>
 
                     <MaxButton class="auth-card-field" :label="t.submit" icon="mdi:login" :loading="loading" :action="onSubmit" />
                 </template>
@@ -35,18 +68,27 @@
                 <!-- Modo Phone OTP (Telefone + MaxInputOTP + Botão Dinâmico) -->
                 <template v-else-if="mode === 'phone-otp'">
                     <slot name="phone-input">
-                        <MaxInputPhone class="auth-card-field" v-model="phone" :label="t.phone" @keyup.enter="onEnter" />
+                        <MaxInputPhone
+                            ref="phoneInputRef"
+                            class="auth-card-field"
+                            v-model="phone"
+                            :label="t.phone"
+                            :aria-describedby="error ? 'max-auth-card-error' : undefined"
+                            @keyup.enter="onEnter"
+                        />
                     </slot>
 
                     <!-- Campo de Código de 6 Dígitos (exibido apenas após o envio) -->
 
                     <slot name="code-input" v-if="codeSent">
                         <MaxInputOTP
+                            ref="codeInputRef"
                             class="auth-card-field"
                             v-model="code"
                             :length="codeLength"
                             :integer-only="true"
                             :autofocus="true"
+                            :aria-describedby="error ? 'max-auth-card-error' : undefined"
                             @complete="onEnter"
                         />
                     </slot>
@@ -57,16 +99,35 @@
 
                     <slot name="extra"></slot>
 
-                    <span class="max-auth-error" v-if="error">{{ error }}</span>
+                    <span
+                        v-if="error"
+                        id="max-auth-card-error"
+                        class="max-auth-error"
+                        role="alert"
+                        aria-live="assertive"
+                        aria-atomic="true"
+                    >{{ error }}</span>
 
-                    <!-- Botão Dinâmico de Ação Única (sem disabled) -->
+                    <!-- Botão Dinâmico de Ação Única com suporte a cooldown e acessibilidade -->
                     <MaxButton
                         class="auth-card-field"
                         :label="dynamicButtonLabel"
                         :icon="dynamicButtonIcon"
                         :loading="loading"
+                        :disabled="isDynamicButtonDisabled"
+                        :aria-describedby="isCooldownActive ? 'otp-cooldown-status' : undefined"
                         :action="handleDynamicSubmit"
                     />
+
+                    <span
+                        v-if="isCooldownActive"
+                        id="otp-cooldown-status"
+                        class="max-auth-cooldown-status"
+                        role="status"
+                        aria-live="polite"
+                    >
+                        Aguarde {{ remainingCooldown }}s para solicitar novamente
+                    </span>
                 </template>
 
                 <!-- Provedores Sociais -->
@@ -108,7 +169,7 @@
  * Emite os eventos `submit`, `send-code`, `resend-code` e `social` para o projeto consumidor tratar a lógica.
  */
 <script setup lang="ts">
-    import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
+    import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
     import type { RouteLocationRaw } from 'vue-router';
     import MaxTitle2 from './MaxTitle2.vue';
     import MaxGrid from './MaxGrid.vue';
@@ -263,6 +324,12 @@
     const phone = defineModel<string>('phone', { default: '' });
     const code = defineModel<string>('code', { default: '' });
 
+    const emailInputRef = ref<any>(null);
+    const passwordInputRef = ref<any>(null);
+    const phoneInputRef = ref<any>(null);
+    const codeInputRef = ref<any>(null);
+    const hasSubmitted = ref(false);
+
     const codeSent = ref(false);
     const currentEndpointIndex = ref(0);
     const remainingCooldown = ref(0);
@@ -393,13 +460,24 @@
 
     initSession();
 
+    const isCodeComplete = computed(() => Boolean(code.value && String(code.value).length >= props.codeLength));
+
+    const isCooldownActive = computed(() => Boolean(codeSent.value && !isCodeComplete.value && remainingCooldown.value > 0));
+
+    const isDynamicButtonDisabled = computed<boolean>(() => {
+        if (props.loading) return true;
+        if (props.mode === 'password') return false;
+        if (isCodeComplete.value) return false;
+        if (isCooldownActive.value) return true;
+        return false;
+    });
+
     const dynamicButtonLabel = computed<string>(() => {
         if (props.mode === 'password') return t.value.submit;
 
         if (!codeSent.value) return firstEndpoint.value.label || t.value.sendCode;
 
-        const isComplete = code.value && String(code.value).length >= props.codeLength;
-        if (isComplete) return t.value.submit;
+        if (isCodeComplete.value) return t.value.submit;
 
         if (remainingCooldown.value <= 0) return t.value.resendCode;
 
@@ -411,8 +489,7 @@
 
         if (!codeSent.value) return firstEndpoint.value.icon || 'mdi:arrow-right';
 
-        const isComplete = code.value && String(code.value).length >= props.codeLength;
-        if (isComplete) return 'mdi:login';
+        if (isCodeComplete.value) return 'mdi:login';
 
         if (remainingCooldown.value <= 0) return nextEndpoint.value.icon || 'mdi:refresh';
 
@@ -474,10 +551,63 @@
         });
     };
 
+    const focusElementOrComponent = (target: any): void => {
+        if (!target) return;
+        if (typeof target.focus === 'function') {
+            target.focus();
+            return;
+        }
+        if (typeof target.setFocus === 'function') {
+            target.setFocus();
+            return;
+        }
+        const el = target.$el ?? target;
+        if (el && typeof el.querySelector === 'function') {
+            const input = el.querySelector('input:not([type="hidden"]), textarea, select');
+            if (input && typeof input.focus === 'function') {
+                input.focus();
+                return;
+            }
+        }
+        if (el && typeof el.focus === 'function') el.focus();
+    };
+
+    const focusFirstInvalidField = (): void => {
+        if (props.mode === 'password') {
+            if (!email.value && emailInputRef.value) {
+                focusElementOrComponent(emailInputRef.value);
+                return;
+            }
+            if (!password.value && passwordInputRef.value) {
+                focusElementOrComponent(passwordInputRef.value);
+                return;
+            }
+            if (passwordInputRef.value && email.value) {
+                focusElementOrComponent(passwordInputRef.value);
+                return;
+            }
+            focusElementOrComponent(emailInputRef.value);
+            return;
+        }
+
+        if (props.mode === 'phone-otp') {
+            if (codeSent.value && codeInputRef.value) {
+                focusElementOrComponent(codeInputRef.value);
+                return;
+            }
+            focusElementOrComponent(phoneInputRef.value);
+        }
+    };
+
     const handleDynamicSubmit = (): void => {
-        if (props.loading) return;
+        if (props.loading || isDynamicButtonDisabled.value) return;
+        hasSubmitted.value = true;
 
         if (props.mode === 'password') {
+            if (props.error) nextTick(() => {
+                focusFirstInvalidField();
+                hasSubmitted.value = false;
+            });
             emit('submit', {
                 email: email.value,
                 password: password.value,
@@ -492,8 +622,7 @@
             return;
         }
 
-        const isComplete = code.value && String(code.value).length >= props.codeLength;
-        if (isComplete) {
+        if (isCodeComplete.value) {
             onVerifyCode();
             return;
         }
@@ -502,14 +631,17 @@
             onResendCode();
             return;
         }
-
-        // Durante cooldown ativo com código incompleto: não faz nada
     };
 
     const onEnter = (): void => {
         if (props.loading) return;
+        hasSubmitted.value = true;
 
         if (props.mode === 'password') {
+            if (props.error) nextTick(() => {
+                focusFirstInvalidField();
+                hasSubmitted.value = false;
+            });
             emit('submit', {
                 email: email.value,
                 password: password.value,
@@ -519,23 +651,36 @@
             return;
         }
 
+        if (isDynamicButtonDisabled.value) return;
+
         // Modo phone-otp:
         // 1. Se ainda não tiver sido enviado código: Envia o código
         if (!codeSent.value) {
+            if (!phone.value) {
+                focusFirstInvalidField();
+                hasSubmitted.value = false;
+                return;
+            }
             onSendCode();
             return;
         }
 
         // 2. Se já tiver sido enviado e os dígitos estiverem completos: Tenta fazer login
-        if (code.value && String(code.value).length >= props.codeLength) onVerifyCode();
+        if (isCodeComplete.value) onVerifyCode();
     };
 
     const onSubmit = (): void => {
         if (props.loading) return;
+        hasSubmitted.value = true;
         if (props.mode === 'phone-otp') {
             handleDynamicSubmit();
             return;
         }
+
+        if (props.error) nextTick(() => {
+            focusFirstInvalidField();
+            hasSubmitted.value = false;
+        });
 
         emit('submit', {
             email: email.value,
@@ -545,9 +690,20 @@
         });
     };
 
+    watch(
+        () => props.error,
+        (newError) => {
+            if (newError && hasSubmitted.value) nextTick(() => {
+                focusFirstInvalidField();
+                hasSubmitted.value = false;
+            });
+        }
+    );
+
     defineExpose({
         clearCache,
-        resetSession: clearCache
+        resetSession: clearCache,
+        focusFirstInvalidField
     });
 
     watch(
@@ -739,6 +895,14 @@
                 .max-auth-social-btn {
                     flex: 1;
                 }
+            }
+
+            .max-auth-cooldown-status {
+                display: block;
+                text-align: center;
+                font-size: 0.8rem;
+                color: var(--background-500, #6b7280);
+                margin-top: 4px;
             }
         }
     }

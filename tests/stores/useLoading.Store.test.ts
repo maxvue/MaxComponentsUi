@@ -133,7 +133,7 @@ describe('useLoadingStore', () => {
         vi.useRealTimers();
     });
 
-    it('mantém o target enquanto houver item carregando', async () => {
+    it('mantém o target enquanto houver item carregando e limpa item finalizado de forma independente', async () => {
         vi.useFakeTimers();
         const store = useLoadingStore();
 
@@ -141,10 +141,49 @@ describe('useLoadingStore', () => {
         store.start({ key: 'b' });
         store.end('a');
 
+        // Imediatamente após end('a'), o item 'a' está 'done' e 'b' está 'loading'
+        expect(Object.keys(store.targets['body'].items)).toHaveLength(2);
+
+        // Após a duração terminal de 'a' (500ms), 'a' é limpo de forma independente, mantendo 'b' ativo
         await vi.advanceTimersByTimeAsync(600);
 
-        expect(Object.keys(store.targets['body'].items)).toHaveLength(2);
+        expect(Object.keys(store.targets['body'].items)).toHaveLength(1);
+        expect(store.targets['body'].items[store.keys['b']].status).toBe('loading');
         vi.useRealTimers();
+    });
+
+    it('erro persiste indefinidamente até dismiss() explícito', async () => {
+        vi.useFakeTimers();
+        const store = useLoadingStore();
+
+        store.start({ key: 'err' });
+        store.error('err', 'Falha crítica');
+
+        // Avança tempo arbitrário
+        await vi.advanceTimersByTimeAsync(5000);
+
+        const internal_key = Object.keys(store.targets['body'].items)[0];
+        expect(store.targets['body'].items[internal_key].status).toBe('error');
+        expect(store.targets['body'].items[internal_key].message).toBe('Falha crítica');
+
+        // Descarte explícito
+        store.dismiss(internal_key);
+        expect(store.targets['body'].items).toEqual({});
+        vi.useRealTimers();
+    });
+
+    it('permite reexecução via retry()', async () => {
+        const retryFn = vi.fn();
+        const store = useLoadingStore();
+
+        store.start({ key: 'req', retry: retryFn });
+        store.error('req');
+
+        const internal_key = Object.keys(store.targets['body'].items)[0];
+        await store.retry(internal_key);
+
+        expect(retryFn).toHaveBeenCalledTimes(1);
+        expect(store.targets['body'].items[internal_key].status).toBe('loading');
     });
 
     it('não acumula chaves em keys_target ao finalizar loadings com end()', async () => {
@@ -160,6 +199,96 @@ describe('useLoadingStore', () => {
         await vi.advanceTimersByTimeAsync(600);
 
         expect(Object.keys(store.keys_target)).toHaveLength(0);
+        vi.useRealTimers();
+    });
+
+    it('dismiss() sem parâmetros limpa todas as filas e timers de todos os targets', () => {
+        const store = useLoadingStore();
+        store.start({ key: 'a', target: 'body' });
+        store.start({ key: 'b', target: '#painel' });
+
+        expect(Object.keys(store.targets)).toHaveLength(2);
+        expect(store.items).toHaveLength(2);
+
+        store.dismiss();
+
+        expect(store.targets).toEqual({});
+        expect(store.items).toHaveLength(0);
+        expect(store.keys).toEqual({});
+        expect(store.keys_target).toEqual({});
+    });
+
+    it('diferencia itens pendentes de itens terminais via pendingItems e terminalItems', () => {
+        const store = useLoadingStore();
+        store.start({ key: 'a' });
+        store.start({ key: 'b', status: 'waiting' });
+        store.start({ key: 'c' });
+        store.end('c');
+        store.start({ key: 'd' });
+        store.error('d', 'Erro teste');
+
+        expect(store.pendingItems).toHaveLength(2);
+        expect(store.pendingItems.map((i) => i.key)).toContain(store.keys['a']);
+        expect(store.pendingItems.map((i) => i.key)).toContain(store.keys['b']);
+
+        expect(store.terminalItems).toHaveLength(2);
+        expect(store.terminalItems.some((i) => i.status === 'done')).toBe(true);
+        expect(store.terminalItems.some((i) => i.status === 'error')).toBe(true);
+    });
+
+    it('isPending indica se há itens pendentes globalmente ou por target específico', () => {
+        const store = useLoadingStore();
+        expect(store.isPending()).toBe(false);
+
+        store.start({ key: 'a', target: '#painel' });
+        expect(store.isPending()).toBe(true);
+        expect(store.isPending('#painel')).toBe(true);
+        expect(store.isPending('body')).toBe(false);
+
+        store.end('a');
+        expect(store.isPending('#painel')).toBe(false);
+        expect(store.isPending()).toBe(false);
+    });
+
+    it('error aceita objeto com mensagem, metadados de erro e callback de retry', async () => {
+        const store = useLoadingStore();
+        const customRetry = vi.fn();
+        const customError = new Error('Falha de conexão');
+
+        store.start({ key: 'sync' });
+        store.error('sync', {
+            message: 'Erro ao sincronizar',
+            error: customError,
+            retry: customRetry
+        });
+
+        const internal_key = Object.keys(store.targets['body'].items)[0];
+        const item = store.targets['body'].items[internal_key];
+
+        expect(item.status).toBe('error');
+        expect(item.message).toBe('Erro ao sincronizar');
+        expect(item.error).toBe(customError);
+
+        await store.retry(internal_key);
+        expect(customRetry).toHaveBeenCalledTimes(1);
+    });
+
+    it('end aceita duração de done configurável por chamada', async () => {
+        vi.useFakeTimers();
+        const store = useLoadingStore();
+
+        store.start({ key: 'custom_done' });
+        store.end('custom_done', { done_duration: 1200 });
+
+        const internal_key = Object.keys(store.targets['body'].items)[0];
+        expect(store.targets['body'].items[internal_key].status).toBe('done');
+
+        await vi.advanceTimersByTimeAsync(800);
+        expect(store.targets['body'].items[internal_key]).toBeDefined();
+
+        await vi.advanceTimersByTimeAsync(500);
+        expect(store.targets['body']?.items[internal_key]).toBeUndefined();
+
         vi.useRealTimers();
     });
 });

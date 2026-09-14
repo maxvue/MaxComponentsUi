@@ -5,35 +5,56 @@
             ref="el"
             role="dialog"
             aria-modal="true"
-            aria-label="Visualizador de PDF"
+            :aria-label="props.title || 'Visualizador de PDF'"
             :style="{opacity: opacity}"
             @keydown="trap.onKeydown"
         >
             <div class="space" aria-hidden="true" @click="closePDF" />
             <div class="meio">
                 <Transition>
-                    <div class="loading" v-if="isLoading" @click="closePDF">
+                    <div class="loading" v-if="isLoading && !hasError" @click="closePDF">
                         <div class="conjunto">
-                            <div class="texto">Loading</div>
+                            <div class="texto">Carregando documento...</div>
                             <div class="circle">
-                                <div class="max-spinner" role="status" aria-label="Custom ProgressSpinner"></div>
+                                <div class="max-spinner" role="status" aria-label="Carregando PDF"></div>
                             </div>
                             <div class="percent">{{ percent }}%</div>
                         </div>
                     </div>
                 </Transition>
 
-                <div class="pdfDiv">
-                    <VuePdfEmbed v-if="is_mounted" :annotation-layer="false" :textLayer="false" :source="props.file" :width="size.width" :height="size.height" @rendered="rendered" @loaded="loaded" @progress="progressPdf">
+                <div v-if="hasError" class="pdf-error-state" role="alert">
+                    <div class="pdf-error-message">Não foi possível carregar o documento PDF.</div>
+                    <div class="pdf-error-actions">
+                        <MaxButton class="pdf-retry-btn" label="Tentar novamente" icon="mdi:reload" @click="retryLoadPdf" />
+                        <MaxButton v-if="typeof props.file === 'string'" class="pdf-open-link" label="Abrir arquivo" icon="mdi:open-in-new" :text="true" @click="openPdfExternally" />
+                    </div>
+                </div>
+
+                <div v-show="!hasError" class="pdfDiv">
+                    <VuePdfEmbed v-if="is_mounted" :key="pdfKey" :annotation-layer="props.annotationLayer" :textLayer="props.textLayer" :source="props.file" :width="size.width" :height="size.height" @rendered="rendered" @loaded="loaded" @progress="progressPdf" @loading-failed="onLoadingFailed">
                         <template #before-page="slotProps">
-                            <div class="header-page">Página {{ slotProps.page }} de {{ total }}</div>
+                            <div class="header-page" role="heading" :aria-label="`Página ${slotProps.page} de ${total}`">Página {{ slotProps.page }} de {{ total }}</div>
                         </template>
                     </VuePdfEmbed>
+                    <div class="pdf-fallback-link sr-only" v-if="typeof props.file === 'string' && props.file">
+                        <a :href="props.file" target="_blank" rel="noopener noreferrer">Baixar ou abrir documento PDF externamente</a>
+                    </div>
                 </div>
             </div>
+
             <div class="space" aria-hidden="true" @click="closePDF" />
 
             <div class="pdf-div-bar-tools">
+                <MaxButton
+                    v-if="props.showDownloadButton && typeof props.file === 'string' && props.file"
+                    icon="mdi:download"
+                    aria-label="Baixar documento PDF"
+                    title="Baixar documento PDF"
+                    tabindex="0"
+                    :text="true"
+                    @click="downloadPdf"
+                />
                 <MaxButton icon="iconamoon:zoom-out-light" aria-label="Diminuir zoom" tabindex="0" :text="true" @click="Zoom('out')" />
                 <MaxButton icon="lucide:zoom-in" aria-label="Aumentar zoom" tabindex="0" :text="true" @click="Zoom('in')" />
                 <MaxButton icon="ic:round-close" aria-label="Fechar visualizador de PDF" tabindex="0" :text="true" @click="closePDF" />
@@ -62,10 +83,36 @@
 
     const { width: screen_width, height: screen_height } = useWindowSize();
 
-    const props = defineProps({
+    const props = withDefaults(defineProps<{
         /** URL ou fonte do arquivo PDF */
-        file: { default: '' }
+        file?: any;
+        /** Se deve habilitar a camada de texto para seleção e leitura acessível */
+        textLayer?: boolean;
+        /** Se deve habilitar a camada de anotações */
+        annotationLayer?: boolean;
+        /** Título acessível do documento */
+        title?: string;
+        /** Se deve exibir o botão de download na barra de ferramentas */
+        showDownloadButton?: boolean;
+    }>(), {
+        file: '',
+        textLayer: true,
+        annotationLayer: true,
+        title: 'Visualizador de PDF',
+        showDownloadButton: false
     });
+
+    const downloadPdf = () => {
+        if (typeof props.file !== 'string' || !props.file) return;
+        const link = document.createElement('a');
+        link.href = props.file;
+        link.download = props.file.split('/').pop() || 'documento.pdf';
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
 
     const el = useTemplateRef<HTMLElement>('el');
     const trap = useFocusTrap(el);
@@ -134,8 +181,12 @@
         }
     });
 
+    const hasError = ref(false);
+    const pdfKey = ref(0);
+
     function rendered() {
         isLoading.value = false;
+        hasError.value = false;
         opacity.value = 0.9;
     }
 
@@ -149,6 +200,24 @@
         if (percent.value > 99) percent.value = 98;
     }
 
+    function onLoadingFailed(err: any) {
+        isLoading.value = false;
+        hasError.value = true;
+        console.error('[MaxPdfView] Falha ao carregar documento PDF:', err);
+    }
+
+    function retryLoadPdf() {
+        hasError.value = false;
+        isLoading.value = true;
+        percent.value = 0;
+        pdfKey.value++;
+    }
+
+    function openPdfExternally() {
+        if (typeof props.file === 'string' && typeof window !== 'undefined') window.open(props.file, '_blank', 'noopener,noreferrer');
+
+    }
+
     function closePDF() {
         opacity.value = 0;
         if (close_timer !== null) clearTimeout(close_timer);
@@ -157,6 +226,7 @@
             close_timer = null;
         }, 500);
     }
+
 
     watch(() => props.file, (newFile) => {
         if (!newFile) return;
@@ -170,6 +240,16 @@
         total.value = 0;
         is_open.value = true;
     }, { immediate: true });
+
+    defineExpose({
+        hasError,
+        isLoading,
+        retryLoadPdf,
+        openPdfExternally,
+        closePDF,
+        Zoom,
+        onLoadingFailed
+    });
 </script>
 
 <style lang="scss" scoped>
@@ -235,6 +315,31 @@
                 color: rgb(255 255 255 / 50%);
                 transform: translateY(-39px) translateX(-2px);
                 font-size: 0.8rem;
+            }
+        }
+
+        .pdf-error-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.25rem;
+            padding: 3rem 1.5rem;
+            color: var(--background-0, #fff);
+            text-align: center;
+            z-index: 10;
+
+            .pdf-error-message {
+                font-size: 1.1rem;
+                font-weight: 500;
+            }
+
+            .pdf-error-actions {
+                display: flex;
+                gap: 0.75rem;
+                align-items: center;
+                flex-wrap: wrap;
+                justify-content: center;
             }
         }
 

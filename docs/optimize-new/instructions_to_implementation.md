@@ -110,13 +110,13 @@ Gates: GF por consumidor; GT; GL; GU; GB; SSR/hidratação; GA para Tab/Escape/r
 
 Faça IndexedDB real antes do cache; proteção de geração/cancelamento antes de deduplicar busca; estados UX depois da correção funcional.
 
-- [ ] E05-01 — `docs/optimize-new/testes_estabilidade/indexeddb_sem_teste_de_fluxo_real/plan.md`
-- [ ] E05-02 — `docs/optimize-new/performance/cache-icones-reprocessa-colecao-inteira/plan.md`
-- [ ] E05-03 — `docs/optimize-new/testes_estabilidade/max_input_icon_picker_fila_e_respostas_obsoletas/plan.md`
-- [ ] E05-04 — `docs/optimize-new/testes_estabilidade/autocomplete_api_resposta_obsoleta/plan.md`
-- [ ] E05-05 — `docs/optimize-new/performance/autocomplete-api-busca-duplicada/plan.md`
-- [ ] E05-06 — `docs/optimize-new/performance/select-load-options-reentrante/plan.md`
-- [ ] E05-07 — `docs/optimize-new/ux/estados-assincronos-indistinguiveis-sem-recuperacao/plan.md`
+- [x] E05-01 — `docs/optimize-new/testes_estabilidade/indexeddb_sem_teste_de_fluxo_real/plan.md`
+- [x] E05-02 — `docs/optimize-new/performance/cache-icones-reprocessa-colecao-inteira/plan.md`
+- [x] E05-03 — `docs/optimize-new/testes_estabilidade/max_input_icon_picker_fila_e_respostas_obsoletas/plan.md`
+- [x] E05-04 — `docs/optimize-new/testes_estabilidade/autocomplete_api_resposta_obsoleta/plan.md`
+- [x] E05-05 — `docs/optimize-new/performance/autocomplete-api-busca-duplicada/plan.md`
+- [x] E05-06 — `docs/optimize-new/performance/select-load-options-reentrante/plan.md`
+- [x] E05-07 — `docs/optimize-new/ux/estados-assincronos-indistinguiveis-sem-recuperacao/plan.md`
 
 Gates: GF com promises controladas e IndexedDB funcional; GT; GL; GU; GA para loading/empty/error/retry; GP para delta de cache, uma busca por interação e zero stale update; GR.
 
@@ -124,12 +124,12 @@ Gates: GF com promises controladas e IndexedDB funcional; GT; GL; GU; GA para lo
 
 Defina semântica neutra/opt-in da base virtual e estados de seleção antes de virtualizar. Preserve foco lógico, IDs ARIA, slots e navegação com itens desmontados.
 
-- [ ] E06-01 — `docs/optimize-new/usabilidade/virtual-scroller-semantica-selection-incondicional/plan.md`
-- [ ] E06-02 — `docs/optimize-new/usabilidade/autocompletes-sem-contrato-combobox/plan.md`
-- [ ] E06-03 — `docs/optimize-new/usabilidade/estado-disabled-incompleto-em-selects/plan.md`
-- [ ] E06-04 — `docs/optimize-new/usabilidade/listbox-nome-foco-feedback/plan.md`
-- [ ] E06-05 — `docs/optimize-new/ui_design/selecao-blue-600-sem-contraste/plan.md`
-- [ ] E06-06 — `docs/optimize-new/performance/falta-virtualizacao-colecoes-grandes/plan.md`
+- [x] E06-01 — `docs/optimize-new/usabilidade/virtual-scroller-semantica-selection-incondicional/plan.md`
+- [x] E06-02 — `docs/optimize-new/usabilidade/autocompletes-sem-contrato-combobox/plan.md`
+- [x] E06-03 — `docs/optimize-new/usabilidade/estado-disabled-incompleto-em-selects/plan.md`
+- [x] E06-04 — `docs/optimize-new/usabilidade/listbox-nome-foco-feedback/plan.md`
+- [x] E06-05 — `docs/optimize-new/ui_design/selecao-blue-600-sem-contraste/plan.md`
+- [x] E06-06 — `docs/optimize-new/performance/falta-virtualizacao-colecoes-grandes/plan.md`
 
 Gates: GF local/API/virtualizado; GT; GL; GU; GA de combobox/listbox/disabled/activedescendant; contraste; GP para DOM O(viewport + overscan) e datasets do plano; GR.
 
@@ -137,14 +137,14 @@ Gates: GF local/API/virtualizado; GT; GL; GU; GA de combobox/listbox/disabled/ac
 
 Ordem: lifecycle/URLs e máquina de upload; progresso/retry/cancel; teclado; mídia/crop; apresentação. Um owner por SFC compartilhado.
 
-- [ ] E07-01 — `docs/optimize-new/testes_estabilidade/max_input_file_efeitos_globais_e_urls/plan.md`
-- [ ] E07-02 — `docs/optimize-new/testes_estabilidade/max_input_file_project_sem_maquina_de_upload/plan.md`
-- [ ] E07-03 — `docs/optimize-new/ux/ausencia-feedback-progresso-e-degradacao-erros-upload/plan.md`
-- [ ] E07-04 — `docs/optimize-new/usabilidade/uploads-com-acoes-exclusivas-de-ponteiro/plan.md`
-- [ ] E07-05 — `docs/optimize-new/usabilidade/interfaces-graficas-sem-alternativa-operavel/plan.md`
-- [ ] E07-06 — `docs/optimize-new/performance/recorte-imagem-codificacao-duplicada-sem-limite/plan.md`
-- [ ] E07-07 — `docs/optimize-new/ui_design/upload-grande-default-vermelho-nao-responsivo/plan.md`
-- [ ] E07-08 — `docs/optimize-new/ui_design/upload-usa-rampa-primaria-neutra/plan.md`
+- [x] E07-01 — `docs/optimize-new/testes_estabilidade/max_input_file_efeitos_globais_e_urls/plan.md`
+- [x] E07-02 — `docs/optimize-new/testes_estabilidade/max_input_file_project_sem_maquina_de_upload/plan.md`
+- [x] E07-03 — `docs/optimize-new/ux/ausencia-feedback-progresso-e-degradacao-erros-upload/plan.md`
+- [x] E07-04 — `docs/optimize-new/usabilidade/uploads-com-acoes-exclusivas-de-ponteiro/plan.md`
+- [x] E07-05 — `docs/optimize-new/usabilidade/interfaces-graficas-sem-alternativa-operavel/plan.md`
+- [x] E07-06 — `docs/optimize-new/performance/recorte-imagem-codificacao-duplicada-sem-limite/plan.md`
+- [x] E07-07 — `docs/optimize-new/ui_design/upload-grande-default-vermelho-nao-responsivo/plan.md`
+- [x] E07-08 — `docs/optimize-new/ui_design/upload-usa-rampa-primaria-neutra/plan.md`
 
 Gates: GF para input/drop/paste, concorrência, retry/cancel, URLs e unmount; GT; GL; GU; GB; GA para teclado/anúncios/alternativas; GP/browser para crop; claro/escuro, mobile e reduced motion; GR.
 
@@ -152,15 +152,15 @@ Gates: GF para input/drop/paste, concorrência, retry/cancel, URLs e unmount; GT
 
 Aplique o padrão WAI-ARIA correto por widget. Compartilhe roving apenas entre padrões equivalentes; elimine nested controls sem duplicar emissões.
 
-- [ ] E08-01 — `docs/optimize-new/usabilidade/acoes-avatar-personificacao-sem-teclado/plan.md`
-- [ ] E08-02 — `docs/optimize-new/usabilidade/ausencia-roving-tabindex-toolbars-acordeoes/plan.md`
-- [ ] E08-03 — `docs/optimize-new/usabilidade/controles-interativos-aninhados-semantica-aria/plan.md`
-- [ ] E08-04 — `docs/optimize-new/usabilidade/nomes-genericos-em-botoes-de-icone/plan.md`
-- [ ] E08-05 — `docs/optimize-new/usabilidade/tabelas-sem-operacao-por-teclado/plan.md`
-- [ ] E08-06 — `docs/optimize-new/usabilidade/top-toolbar-sem-navegacao-menubar/plan.md`
-- [ ] E08-07 — `docs/optimize-new/ux/acoes-disponiveis-sem-efeito-ou-explicacao/plan.md`
-- [ ] E08-08 — `docs/optimize-new/ux/ciclo-teclado-foco-incompleto-e-aprisionamento/plan.md`
-- [ ] E08-09 — `docs/optimize-new/ux/sequestro-atalhos-nativos-e-eventos-globais/plan.md`
+- [x] E08-01 — `docs/optimize-new/usabilidade/acoes-avatar-personificacao-sem-teclado/plan.md`
+- [x] E08-02 — `docs/optimize-new/usabilidade/ausencia-roving-tabindex-toolbars-acordeoes/plan.md`
+- [x] E08-03 — `docs/optimize-new/usabilidade/controles-interativos-aninhados-semantica-aria/plan.md`
+- [x] E08-04 — `docs/optimize-new/usabilidade/nomes-genericos-em-botoes-de-icone/plan.md`
+- [x] E08-05 — `docs/optimize-new/usabilidade/tabelas-sem-operacao-por-teclado/plan.md`
+- [x] E08-06 — `docs/optimize-new/usabilidade/top-toolbar-sem-navegacao-menubar/plan.md`
+- [x] E08-07 — `docs/optimize-new/ux/acoes-disponiveis-sem-efeito-ou-explicacao/plan.md`
+- [x] E08-08 — `docs/optimize-new/ux/ciclo-teclado-foco-incompleto-e-aprisionamento/plan.md`
+- [x] E08-09 — `docs/optimize-new/ux/sequestro-atalhos-nativos-e-eventos-globais/plan.md`
 
 Gates: GF por widget; GT; GL; GU; GA com Tab/Setas/Home/End/Escape, nomes, pressed/sort, zero nested interactive, uma emissão e preservação de atalhos nativos; GR.
 
@@ -168,9 +168,9 @@ Gates: GF por widget; GT; GL; GU; GA com Tab/Setas/Home/End/Escape, nomes, press
 
 Torne sucesso/falha/cópia/cooldown/loading distinguíveis, persistentes e recuperáveis sem bloquear interações não relacionadas.
 
-- [ ] E09-01 — `docs/optimize-new/usabilidade/feedback-de-erro-nao-anunciado/plan.md`
-- [ ] E09-02 — `docs/optimize-new/ux/feedback-terminal-efemero-e-bloqueio-global-loading/plan.md`
-- [ ] E09-03 — `docs/optimize-new/ui_design/toast-whatsapp-fora-dos-tokens/plan.md`
+- [x] E09-01 — `docs/optimize-new/usabilidade/feedback-de-erro-nao-anunciado/plan.md`
+- [x] E09-02 — `docs/optimize-new/ux/feedback-terminal-efemero-e-bloqueio-global-loading/plan.md`
+- [x] E09-03 — `docs/optimize-new/ui_design/toast-whatsapp-fora-dos-tokens/plan.md`
 
 Gates: GF com timers controlados e concorrência; GT; GL; GU; GA para live regions, foco, busy/inert e contraste; claro/escuro; GR.
 
@@ -178,16 +178,16 @@ Gates: GF com timers controlados e concorrência; GT; GL; GU; GA para live regio
 
 Um owner define tokens/mixins; consumidores migram depois. Playground é o último item, após tokens, tipografia, camadas, movimento e responsividade.
 
-- [ ] E10-01 — `docs/optimize-new/ui_design/rampa-max-primary-incompleta/plan.md`
-- [ ] E10-02 — `docs/optimize-new/ui_design/contraste-semanticamente-instavel-em-acoes/plan.md`
-- [ ] E10-03 — `docs/optimize-new/ui_design/texto-secundario-claro-abaixo-de-contraste/plan.md`
-- [ ] E10-04 — `docs/optimize-new/ui_design/foco-visual-fragmentado/plan.md`
-- [ ] E10-05 — `docs/optimize-new/ui_design/cabecalho-menu-mobile-sem-contraste/plan.md`
-- [ ] E10-06 — `docs/optimize-new/ui_design/moldura-page-content-inverte-no-dark/plan.md`
-- [ ] E10-07 — `docs/optimize-new/ui_design/tipografia-legada-jost-nao-carregada/plan.md`
-- [ ] E10-08 — `docs/optimize-new/ui_design/tabelas-anatomia-visual-duplicada/plan.md`
-- [ ] E10-09 — `docs/optimize-new/ui_design/movimento-sem-reducao-sistemica/plan.md`
-- [ ] E10-10 — `docs/optimize-new/ui_design/playground-nao-representa-tema-canonico/plan.md`
+- [x] E10-01 — `docs/optimize-new/ui_design/rampa-max-primary-incompleta/plan.md`
+- [x] E10-02 — `docs/optimize-new/ui_design/contraste-semanticamente-instavel-em-acoes/plan.md`
+- [x] E10-03 — `docs/optimize-new/ui_design/texto-secundario-claro-abaixo-de-contraste/plan.md`
+- [x] E10-04 — `docs/optimize-new/ui_design/foco-visual-fragmentado/plan.md`
+- [x] E10-05 — `docs/optimize-new/ui_design/cabecalho-menu-mobile-sem-contraste/plan.md`
+- [x] E10-06 — `docs/optimize-new/ui_design/moldura-page-content-inverte-no-dark/plan.md`
+- [x] E10-07 — `docs/optimize-new/ui_design/tipografia-legada-jost-nao-carregada/plan.md`
+- [x] E10-08 — `docs/optimize-new/ui_design/tabelas-anatomia-visual-duplicada/plan.md`
+- [x] E10-09 — `docs/optimize-new/ui_design/movimento-sem-reducao-sistemica/plan.md`
+- [x] E10-10 — `docs/optimize-new/ui_design/playground-nao-representa-tema-canonico/plan.md`
 
 Gates: GF de tokens/componentes; GT; GL; GU; GB; GA com contraste mensurável, foco, claro/escuro, reduced motion, zoom/viewports; regressão visual e cobertura do manifesto no playground; GR.
 
@@ -195,11 +195,11 @@ Gates: GF de tokens/componentes; GT; GL; GU; GB; GA com contraste mensurável, f
 
 Janela final serializada de build/exports/manifesto/lockfile. Modularize após estabilizar contratos e tema; preserve aliases e compatibilidade de consumo.
 
-- [ ] E11-01 — `docs/optimize-new/performance/text-list-numera-todas-linhas/plan.md`
-- [ ] E11-02 — `docs/optimize-new/performance/textarea-redimensionamento-duplicado/plan.md`
-- [ ] E11-03 — `docs/optimize-new/performance/inchaco-bundle-payload-svg-duplicado/plan.md`
-- [ ] E11-04 — `docs/optimize-new/performance/css-monolitico-entry-raiz/plan.md`
-- [ ] E11-05 — `docs/optimize-new/testes_estabilidade/contrato_publico_documentado_nao_exportado/plan.md`
+- [x] E11-01 — `docs/optimize-new/performance/text-list-numera-todas-linhas/plan.md`
+- [x] E11-02 — `docs/optimize-new/performance/textarea-redimensionamento-duplicado/plan.md`
+- [x] E11-03 — `docs/optimize-new/performance/inchaco-bundle-payload-svg-duplicado/plan.md`
+- [x] E11-04 — `docs/optimize-new/performance/css-monolitico-entry-raiz/plan.md`
+- [x] E11-05 — `docs/optimize-new/testes_estabilidade/contrato_publico_documentado_nao_exportado/plan.md`
 
 Gates: GF de componentes/entries/resolver/exports; GT; GL; GU; GB; GP para linhas, resize, SVG e chunks; sourcemaps/side effects; instalação limpa e tarball consumidor de todos os subpaths; lock determinístico final; GR.
 
@@ -207,8 +207,8 @@ Gates: GF de componentes/entries/resolver/exports; GT; GL; GU; GB; GP para linha
 
 Remova testes que passam sem exercer comportamento, feche lacunas e faça warnings/coverage integrarem o gate. Não mude produção para satisfazer teste incorreto sem evidência.
 
-- [ ] E12-01 — `docs/optimize-new/testes_estabilidade/testes_com_assercao_condicional/plan.md`
-- [ ] E12-02 — `docs/optimize-new/testes_estabilidade/lacunas_cobertura_testes_e_suites_rasas/plan.md`
+- [x] E12-01 — `docs/optimize-new/testes_estabilidade/testes_com_assercao_condicional/plan.md`
+- [x] E12-02 — `docs/optimize-new/testes_estabilidade/lacunas_cobertura_testes_e_suites_rasas/plan.md`
 
 Gates: GF; GT; GL; GU repetido em instalação limpa; GC; GB/tarball; GA integrada; GP consolidado; GR.
 

@@ -543,7 +543,7 @@
                     > p:first-child:empty::before,
                     &:has(> p:only-child > br:only-child)::before {
                         content: attr(data-placeholder);
-                        color: var(--background-650);
+                        color: var(--max-content-placeholder, var(--background-650));
                         pointer-events: none;
                         position: absolute;
                         float: left;
@@ -620,7 +620,7 @@
                     border-left: 4px solid var(--max-primary-500, #00768E);
                     padding: 4px 12px 4px 16px;
                     margin: 0.75rem 0;
-                    color: var(--background-650, #4b5563);
+                    color: var(--max-content-secondary, var(--background-650, #4b5563));
                     font-style: italic;
                     background: var(--background-50, #f9fafb);
                     border-radius: 0 6px 6px 0;

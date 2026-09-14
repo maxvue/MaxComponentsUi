@@ -1,7 +1,13 @@
 <template>
     <div class="max-load-screen">
         <div v-if="size(loading.items) > 0">
-            <div v-for="(target, key) in loading.targets" :key="key" class="load-screen-target-item" :target="key">
+            <div
+                v-for="(target, key) in loading.targets"
+                :key="key"
+                class="load-screen-target-item"
+                :class="{ 'is-global': target.target === 'body', 'is-local': target.target !== 'body' }"
+                :target="key"
+            >
                 <MaxLoadScreenTarget :target="target" />
             </div>
         </div>
@@ -18,12 +24,10 @@
 
 <style lang="scss" scoped>
     .max-load-screen {
+        pointer-events: none;
+
         .load-screen-target-item {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw !important;
-            height: 100vh !important;
+            display: contents;
         }
     }
 </style>

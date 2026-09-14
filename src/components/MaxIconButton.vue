@@ -11,15 +11,17 @@
         :disabled="isDisabled"
         :aria-label="ariaLabelComputed"
         :aria-disabled="isDisabled ? 'true' : undefined"
+        :aria-busy="isBusy ? 'true' : 'false'"
         @click="onClick"
         @mouseenter="!isDisabled && (hover = true)"
         @mouseleave="hover = false"
     >
         <slot>
             <MaxIcon
-                v-if="props.loading"
+                v-if="isBusy"
                 icon="eos-icons:loading"
                 :size="size"
+                aria-hidden="true"
             />
             <MaxIcon
                 v-else
@@ -33,6 +35,7 @@
                 :flip="props.flip"
                 :size="size"
                 :color="props.color ?? props.iconColor"
+                aria-hidden="true"
             />
         </slot>
     </button>
@@ -46,10 +49,13 @@
 
     const attrs = useAttrs();
     const hover = ref(false);
+    const warned = ref(false);
 
     const props = withDefaults(defineProps<MaxButtonsType>(), { data: {}, params: {}, query: {}, hoverScale: 1.2 });
 
-    const isDisabled = computed(() => Boolean(props.disabled || props.loading || (attrs.disabled !== undefined && attrs.disabled !== false)));
+    const executing = ref(false);
+    const isBusy = computed(() => Boolean(props.loading || executing.value));
+    const isDisabled = computed(() => Boolean(props.disabled || isBusy.value || (attrs.disabled !== undefined && attrs.disabled !== false)));
 
     const data = computed(() => ({ ...(props.data ?? {}), ...(props.query ?? {}), ...(props.params ?? {}) }));
 
@@ -63,11 +69,19 @@
     });
 
     const ariaLabelComputed = computed(() => {
-        const rawAria = props['aria-label'] || props.ariaLabel || (attrs['aria-label'] as string | undefined) || (attrs.ariaLabel as string | undefined);
+        const rawAria = props.ariaLabel || props['aria-label'] || (attrs.ariaLabel as string | undefined) || (attrs['aria-label'] as string | undefined);
         if (rawAria && typeof rawAria === 'string' && rawAria.trim()) return rawAria.trim();
         if (props.label && typeof props.label === 'string' && props.label.trim()) return props.label.trim();
         const rawTitle = props.title || (attrs.title as string | undefined);
         if (rawTitle && typeof rawTitle === 'string' && rawTitle.trim()) return rawTitle.trim();
+        const rawTooltip = props.tooltip || (attrs.tooltip as string | undefined);
+        if (rawTooltip && typeof rawTooltip === 'string' && rawTooltip.trim()) return rawTooltip.trim();
+
+        if (process.env.NODE_ENV !== 'production' && !warned.value) {
+            warned.value = true;
+            console.warn('[MaxIconButton] Botão de ícone renderizado sem nome acessível (ariaLabel, label, title ou tooltip). Um fallback temporário foi aplicado.');
+        }
+
         // Fallbacks contextuais baseados no nome do ícone
         const iconName = props.icon || props.i || '';
         if (iconName.includes('close') || iconName.includes('xmark')) return 'Fechar';
@@ -84,10 +98,12 @@
         action: [value: boolean];
     }>();
 
-    const executing = ref(false);
-
     const onClick = async (event: MouseEvent) => {
-        if (isDisabled.value || executing.value) return;
+        if (isDisabled.value) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            return;
+        }
         executing.value = true;
         try {
             if (props.route) {
@@ -105,6 +121,7 @@
             executing.value = false;
         }
     };
+
 
     defineExpose({
         onClick,

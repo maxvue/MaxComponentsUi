@@ -150,4 +150,26 @@ describe('MaxInputText', () => {
         expect(input.attributes('aria-invalid')).toBe('true');
         expect(input.attributes('aria-describedby')).toBe(`${input.attributes('id')}-message`);
     });
+
+    it('expõe métodos de foco tipados focus e setFocus que focam o input real', () => {
+        const wrapper = mount(MaxInputText, {
+            props: { modelValue: '' },
+            attachTo: document.body
+        });
+
+        const input = wrapper.find('input').element as HTMLInputElement;
+
+        // Testa setFocus()
+        expect(document.activeElement).not.toBe(input);
+        wrapper.vm.setFocus();
+        expect(document.activeElement).toBe(input);
+
+        // Remove o foco e testa focus() com opções
+        input.blur();
+        expect(document.activeElement).not.toBe(input);
+        wrapper.vm.focus({ preventScroll: true });
+        expect(document.activeElement).toBe(input);
+
+        wrapper.unmount();
+    });
 });

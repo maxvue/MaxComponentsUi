@@ -1,19 +1,46 @@
 <!-- LoadingComponent.vue -->
 <template>
-    <div v-bind="attrs" v-if="attrs.show !== undefined ? attrs.show : true" class="max-loader-ai loader-main-div-ai">
+    <div
+        v-if="isVisible"
+        class="max-loader-ai loader-main-div-ai"
+        v-bind="resolvedAttrs"
+    >
         <div class="items">
             <DotLottieVue style="height: 400px; width: 400px;" autoplay loop src="https://lottie.host/c6ad8a06-43b7-4f0e-876e-634d1f4bb58d/o6vjcixeiy.lottie" />
             <div v-if="attrs.label" class="item-label">{{ attrs.label }}</div>
-
         </div>
         <div class="background-ai"></div>
     </div>
 </template>
 
 <script setup lang="ts">
-    import { defineAsyncComponent, useAttrs } from 'vue';
+    import { computed, defineAsyncComponent, useAttrs } from 'vue';
+
+    defineOptions({
+        inheritAttrs: false
+    });
 
     const attrs = useAttrs();
+
+    const isVisible = computed(() => {
+        if (attrs.show === false || attrs.show === 'false') return false;
+        return true;
+    });
+
+    const resolvedAttrs = computed(() => {
+        const { show: _show, ...rest } = attrs;
+        const defaults: Record<string, any> = {
+            'role': 'status',
+            'aria-live': 'polite',
+            'aria-busy': 'true'
+        };
+        if (attrs.label && !attrs['aria-label']) defaults['aria-label'] = String(attrs.label);
+
+        return {
+            ...defaults,
+            ...rest
+        };
+    });
 
     // Async: dotlottie (player WASM ~1,2 MB) — só carrega quando o loader de IA aparece
     const DotLottieVue = defineAsyncComponent(() => import('@lottiefiles/dotlottie-vue').then((m) => m.DotLottieVue));

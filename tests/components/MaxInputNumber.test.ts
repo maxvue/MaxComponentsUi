@@ -76,21 +76,19 @@ describe('MaxInputNumber', () => {
     it('valida done=true após blur quando required e preenchido', async () => {
         const wrapper = mountInputNumber({ required: true, modelValue: 42 });
         const inputs = wrapper.findAll('input');
-        if (inputs.length > 0) {
-            await inputs[0].trigger('blur');
-            const ib = wrapper.findComponent(InputBase);
-            expect(ib.props('done')).toBe(true);
-        }
+        expect(inputs.length).toBeGreaterThan(0);
+        await inputs[0].trigger('blur');
+        const ib = wrapper.findComponent(InputBase);
+        expect(ib.props('done')).toBe(true);
     });
 
     it('valida erro de campo obrigatório quando vazio', async () => {
         const wrapper = mountInputNumber({ required: true, modelValue: null });
         const inputs = wrapper.findAll('input');
-        if (inputs.length > 0) {
-            await inputs[0].trigger('blur');
-            const ib = wrapper.findComponent(InputBase);
-            expect(ib.props('error')).toBe('Campo obrigatório');
-        }
+        expect(inputs.length).toBeGreaterThan(0);
+        await inputs[0].trigger('blur');
+        const ib = wrapper.findComponent(InputBase);
+        expect(ib.props('error')).toBe('Campo obrigatório');
     });
 
     it('aceita prefix e suffix', () => {
@@ -105,32 +103,29 @@ describe('MaxInputNumber', () => {
     it('valida erro por targetValue diferente', async () => {
         const wrapper = mountInputNumber({ targetValue: '100', modelValue: 50 }, { error_msg: 'Erro customizado' });
         const inputs = wrapper.findAll('input');
-        if (inputs.length > 0) {
-            await inputs[0].trigger('blur');
-            const ib = wrapper.findComponent(InputBase);
-            expect(ib.props('error')).toBe('Erro customizado');
-        }
+        expect(inputs.length).toBeGreaterThan(0);
+        await inputs[0].trigger('blur');
+        const ib = wrapper.findComponent(InputBase);
+        expect(ib.props('error')).toBe('Erro customizado');
     });
 
     it('valida erro genérico (Valor inválido) quando done=false explícito', async () => {
         const wrapper = mountInputNumber({ done: false, modelValue: 10 });
         const inputs = wrapper.findAll('input');
-        if (inputs.length > 0) {
-            await inputs[0].trigger('blur');
-            const ib = wrapper.findComponent(InputBase);
-            expect(ib.props('error')).toBe('Valor inválido');
-        }
+        expect(inputs.length).toBeGreaterThan(0);
+        await inputs[0].trigger('blur');
+        const ib = wrapper.findComponent(InputBase);
+        expect(ib.props('error')).toBe('Valor inválido');
     });
 
     it('mantém caution=true quando prop caution=true é passada mesmo com required e valor preenchido (isDone=true)', async () => {
         const wrapper = mountInputNumber({ required: true, modelValue: 42, caution: true });
         const inputs = wrapper.findAll('input');
-        if (inputs.length > 0) {
-            await inputs[0].trigger('blur');
-            const ib = wrapper.findComponent(InputBase);
-            expect(ib.props('caution')).toBe(true);
-            expect(ib.props('error')).toBeNull();
-        }
+        expect(inputs.length).toBeGreaterThan(0);
+        await inputs[0].trigger('blur');
+        const ib = wrapper.findComponent(InputBase);
+        expect(ib.props('caution')).toBe(true);
+        expect(ib.props('error')).toBeNull();
     });
 
     it('mantém caution string quando informada e não polui error com Valor inválido', () => {

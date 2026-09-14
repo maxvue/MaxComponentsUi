@@ -6,6 +6,8 @@ import dts from 'vite-plugin-dts';
 import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
 import fs from 'node:fs';
 
+let extractedCss = '';
+
 export default defineConfig({
     plugins: [
         vue(),
@@ -14,8 +16,21 @@ export default defineConfig({
         cssInjectedByJsPlugin({
             jsAssetsFilterFunction: (outputChunk) => {
                 return outputChunk.fileName === 'index.es.js';
+            },
+            preRenderCSSCode: (cssCode) => {
+                extractedCss = cssCode;
+                return cssCode;
             }
         }),
+        {
+            name: 'save-standalone-css',
+            closeBundle() {
+                if (extractedCss) {
+                    const distStyle = path.resolve(import.meta.dirname, 'dist/style.css');
+                    fs.writeFileSync(distStyle, extractedCss, 'utf-8');
+                }
+            }
+        },
         {
             name: 'copy-themes',
             closeBundle() {
@@ -32,7 +47,9 @@ export default defineConfig({
             entry: {
                 index: path.resolve(import.meta.dirname, './src/index.ts'),
                 preset: path.resolve(import.meta.dirname, './src/presetMaxUno.ts'),
-                resolver: path.resolve(import.meta.dirname, './src/helpers/MaxComponentsUiResolver.ts')
+                resolver: path.resolve(import.meta.dirname, './src/helpers/MaxComponentsUiResolver.ts'),
+                stores: path.resolve(import.meta.dirname, './src/stores/index.ts'),
+                styles: path.resolve(import.meta.dirname, './src/styles.ts')
             },
             name: 'MaxComponentsUi',
             fileName: (format, entryName) => `${entryName}.${format === 'es' ? 'es.js' : 'js'}`,

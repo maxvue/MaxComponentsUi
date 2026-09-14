@@ -233,10 +233,9 @@ describe('MaxInputPhoneMail', () => {
         expect((wrapper.vm as any).temp_value).not.toContain('$');
 
         const emitted = wrapper.emitted('update:modelValue');
-        if (emitted) {
-            const lastValue = emitted[emitted.length - 1][0];
-            expect(lastValue).not.toContain('$');
-        }
+        expect(emitted).toBeDefined();
+        const lastValue = emitted![emitted!.length - 1][0];
+        expect(lastValue).not.toContain('$');
     });
 
     it('não aceita espaços dentro de um e-mail digitado', async () => {

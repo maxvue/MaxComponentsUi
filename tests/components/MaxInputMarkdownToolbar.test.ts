@@ -49,12 +49,13 @@ function createFakeEditor(overrides: Record<string, any> = {}) {
     };
 }
 
-function mountToolbar(props: Record<string, any> = {}) {
+function mountToolbar(props: Record<string, any> = {}, options: Record<string, any> = {}) {
     return mount(MaxInputMarkdownToolbar, {
         props: {
             editor: null,
             ...props
-        }
+        },
+        ...options
     });
 }
 
@@ -171,5 +172,104 @@ describe('MaxInputMarkdownToolbar', () => {
         await tableButton.trigger('click');
 
         expect(editor._commands.insertTable).toHaveBeenCalledWith({ rows: 3, cols: 3, withHeaderRow: true });
+    });
+
+    it('expõe role="toolbar" e nome acessível padrão e configurável', () => {
+        const wDefault = mountToolbar();
+        expect(wDefault.attributes('role')).toBe('toolbar');
+        expect(wDefault.attributes('aria-label')).toBe('Editor de Markdown');
+
+        const wCustom = mountToolbar({ ariaLabel: 'Barra de formatação' });
+        expect(wCustom.attributes('aria-label')).toBe('Barra de formatação');
+    });
+
+    it('aplica aria-pressed apenas em toggles persistentes e omite em ações momentâneas', () => {
+        const editor = createFakeEditor({
+            isActive: vi.fn((name: string) => name === 'bold' || name === 'link')
+        });
+        const wrapper = mountToolbar({ editor });
+
+        // Toggles persistentes
+        expect(wrapper.find('button[title="Negrito (Ctrl+B)"]').attributes('aria-pressed')).toBe('true');
+        expect(wrapper.find('button[title="Itálico (Ctrl+I)"]').attributes('aria-pressed')).toBe('false');
+        expect(wrapper.find('button[title="Link"]').attributes('aria-pressed')).toBe('true');
+
+        // Ações momentâneas NÃO devem ter aria-pressed
+        expect(wrapper.find('button[title="Separador horizontal"]').attributes('aria-pressed')).toBeUndefined();
+        expect(wrapper.find('button[title="Imagem"]').attributes('aria-pressed')).toBeUndefined();
+        expect(wrapper.find('button[title="Desfazer (Ctrl+Z)"]').attributes('aria-pressed')).toBeUndefined();
+        expect(wrapper.find('button[title="Refazer (Ctrl+Y)"]').attributes('aria-pressed')).toBeUndefined();
+        expect(wrapper.find('button[title="Limpar formatação"]').attributes('aria-pressed')).toBeUndefined();
+    });
+
+    it('mantém popover aberto, preserva valor digitado e exibe role="alert" ao tentar inserir link ou imagem com URL inválida', async () => {
+        const editor = createFakeEditor();
+        const wrapper = mountToolbar({ editor });
+
+        // Link com URL insegura
+        await wrapper.find('button[title="Link"]').trigger('click');
+        const linkInput = wrapper.find('.md-popover__input');
+        await linkInput.setValue('javascript:alert(1)');
+        await wrapper.find('.md-popover__btn--primary').trigger('click');
+
+        expect(wrapper.find('.md-popover').exists()).toBe(true);
+        expect((wrapper.find('.md-popover__input').element as HTMLInputElement).value).toBe('javascript:alert(1)');
+        expect(wrapper.find('.md-popover__input').attributes('aria-invalid')).toBe('true');
+        const alertEl = wrapper.find('[role="alert"]');
+        expect(alertEl.exists()).toBe(true);
+        expect(alertEl.text()).toContain('URL inválida ou insegura');
+
+        // Fecha via Escape e restaura foco
+        await linkInput.trigger('keydown', { key: 'Escape' });
+        expect(wrapper.find('.md-popover').exists()).toBe(false);
+    });
+
+    it('mantém popover de imagem aberto com aria-invalid e role="alert" ao tentar URL inválida', async () => {
+        const editor = createFakeEditor();
+        const wrapper = mountToolbar({ editor });
+
+        await wrapper.find('button[title="Imagem"]').trigger('click');
+        expect(wrapper.find('.md-popover').exists()).toBe(true);
+
+        const imgInput = wrapper.find('.md-popover__input');
+        await imgInput.setValue('javascript:alert(1)');
+        await wrapper.find('.md-popover__btn--primary').trigger('click');
+
+        expect(wrapper.find('.md-popover').exists()).toBe(true);
+        expect((wrapper.find('.md-popover__input').element as HTMLInputElement).value).toBe('javascript:alert(1)');
+        expect(wrapper.find('.md-popover__input').attributes('aria-invalid')).toBe('true');
+        const alertEl = wrapper.find('[role="alert"]');
+        expect(alertEl.exists()).toBe(true);
+        expect(alertEl.text()).toContain('URL inválida ou insegura');
+
+        // Fecha via Escape
+        await imgInput.trigger('keydown', { key: 'Escape' });
+        expect(wrapper.find('.md-popover').exists()).toBe(false);
+    });
+
+    it('navega entre botões habilitados com setas e Home/End via roving tabindex', async () => {
+        const editor = createFakeEditor();
+        const wrapper = mountToolbar({ editor }, { attachTo: document.body });
+
+        const buttons = wrapper.findAll<HTMLButtonElement>('.md-toolbar__btn');
+        expect(buttons.length).toBeGreaterThan(1);
+
+        expect(buttons[0].attributes('tabindex')).toBe('0');
+        expect(buttons[1].attributes('tabindex')).toBe('-1');
+
+        buttons[0].element.focus();
+
+        await wrapper.trigger('keydown', { key: 'ArrowRight' });
+        expect(buttons[1].attributes('tabindex')).toBe('0');
+        expect(buttons[0].attributes('tabindex')).toBe('-1');
+
+        await wrapper.trigger('keydown', { key: 'End' });
+        const lastIndex = buttons.length - 1;
+        expect(buttons[lastIndex].attributes('tabindex')).toBe('0');
+
+        await wrapper.trigger('keydown', { key: 'Home' });
+        expect(buttons[0].attributes('tabindex')).toBe('0');
+
+        wrapper.unmount();
     });
 });

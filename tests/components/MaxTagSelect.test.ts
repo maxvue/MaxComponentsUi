@@ -403,6 +403,136 @@ describe('MaxTagSelect', () => {
             removeSpy.mockRestore();
         });
     });
+
+    describe('Estado Disabled Completo (E06-03)', () => {
+        it('define tabindex=-1 e aria-disabled=true quando desabilitado e bloqueia interações', async () => {
+            const wrapper = mountTagSelect({
+                disabled: true,
+                options: [{ value: 'a', name: 'Tag A' }]
+            });
+
+            const trigger = wrapper.find('.max-select');
+            expect(trigger.attributes('tabindex')).toBe('-1');
+            expect(trigger.attributes('aria-disabled')).toBe('true');
+            expect(trigger.attributes('aria-controls')).toBeUndefined();
+
+            // Tentativa de abertura via clique
+            await trigger.trigger('click');
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).isOpen).toBe(false);
+
+            // Tentativa de abertura via teclado
+            await trigger.trigger('keydown', { key: 'ArrowDown' });
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).isOpen).toBe(false);
+
+            await trigger.trigger('keydown', { key: 'Enter' });
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).isOpen).toBe(false);
+
+            await trigger.trigger('keydown', { key: ' ' });
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).isOpen).toBe(false);
+
+            // Reabilita dinamicamente
+            await wrapper.setProps({ disabled: false });
+            await wrapper.vm.$nextTick();
+
+            expect(trigger.attributes('tabindex')).toBe('0');
+            expect(trigger.attributes('aria-disabled')).toBeUndefined();
+
+            await trigger.trigger('click');
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).isOpen).toBe(true);
+
+            // Desabilita enquanto aberto: deve fechar imediatamente
+            await wrapper.setProps({ disabled: true });
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).isOpen).toBe(false);
+            expect(trigger.attributes('tabindex')).toBe('-1');
+            expect(trigger.attributes('aria-disabled')).toBe('true');
+
+            wrapper.unmount();
+        });
+    });
+
+    describe('Virtualização e Coleções Grandes (E06-06)', () => {
+        it('virtualiza automaticamente coleções acima de 500 itens', async () => {
+            const items = Array.from({ length: 600 }, (_, i) => ({ value: `tag_${i}`, name: `Tag ${i}`, label: `Tag ${i}` }));
+            const wrapper = mountTagSelect({
+                options: items
+            });
+
+            await wrapper.find('.max-select').trigger('click');
+            await wrapper.vm.$nextTick();
+
+            const spacer = document.body.querySelector('.max-select-spacer');
+            expect(spacer).toBeTruthy();
+
+            const renderedOptions = document.body.querySelectorAll('.max-select-option');
+            expect(renderedOptions.length).toBeLessThan(600);
+
+            wrapper.unmount();
+        });
+
+        it('achata groupOptions em O(N) e preserva seleção e render de grupos', async () => {
+            const groupOptions = [
+                {
+                    label: 'Grupo A',
+                    items: [
+                        { value: 'a1', name: 'Item A1', label: 'Item A1' },
+                        { value: 'a2', name: 'Item A2', label: 'Item A2' }
+                    ]
+                },
+                {
+                    label: 'Grupo B',
+                    items: [
+                        { value: 'b1', name: 'Item B1', label: 'Item B1' }
+                    ]
+                }
+            ];
+            const wrapper = mountTagSelect({
+                groupOptions
+            });
+
+            await wrapper.find('.max-select').trigger('click');
+            await wrapper.vm.$nextTick();
+
+            const groupHeaders = document.body.querySelectorAll('.max-select-option-group-wrapper');
+            expect(groupHeaders.length).toBe(2);
+            expect(groupHeaders[0].textContent).toContain('Grupo A');
+            expect(groupHeaders[1].textContent).toContain('Grupo B');
+
+            const options = document.body.querySelectorAll('.max-select-option');
+            expect(options.length).toBe(3);
+
+            (options[0] as HTMLElement).click();
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.emitted('update:modelValue')?.pop()).toEqual(['a1']);
+
+            wrapper.unmount();
+        });
+
+        it('respeita virtualScroll=false desativando virtualização', async () => {
+            const items = Array.from({ length: 550 }, (_, i) => ({ value: `tag_${i}`, name: `Tag ${i}`, label: `Tag ${i}` }));
+            const wrapper = mountTagSelect({
+                options: items,
+                virtualScroll: false
+            });
+
+            await wrapper.find('.max-select').trigger('click');
+            await wrapper.vm.$nextTick();
+
+            const spacer = document.body.querySelector('.max-select-spacer');
+            expect(spacer).toBeNull();
+
+            const renderedOptions = document.body.querySelectorAll('.max-select-option');
+            expect(renderedOptions.length).toBe(550);
+
+            wrapper.unmount();
+        });
+    });
 });
 
 

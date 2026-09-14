@@ -73,9 +73,8 @@
         const wrappedAcceptProps = {
             ...props.acceptProps,
             action: () => {
-                if (typeof originalAcceptAction === 'function') {
-                    originalAcceptAction();
-                }
+                if (typeof originalAcceptAction === 'function') originalAcceptAction();
+
                 emit('confirm');
             }
         };
@@ -84,9 +83,8 @@
         const wrappedRejectProps = {
             ...props.rejectProps,
             action: () => {
-                if (typeof originalRejectAction === 'function') {
-                    originalRejectAction();
-                }
+                if (typeof originalRejectAction === 'function') originalRejectAction();
+
                 emit('cancel');
             }
         };

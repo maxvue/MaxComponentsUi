@@ -15,8 +15,8 @@
                     role="combobox"
                     aria-autocomplete="list"
                     :aria-expanded="isOpen && filtered_values.length > 0"
-                    :aria-controls="listboxId"
-                    :aria-activedescendant="activeIndex >= 0 ? `${listboxId}-opt-${activeIndex}` : undefined"
+                    :aria-controls="isOpen && filtered_values.length > 0 ? listboxId : undefined"
+                    :aria-activedescendant="isOpen && activeIndex >= 0 && activeIndex < filtered_values.length ? `${listboxId}-opt-${activeIndex}` : undefined"
                     @input="onInput"
                     @change="onChange"
                     @focus="onFocus"
@@ -34,29 +34,36 @@
                     :id="listboxId"
                     class="max-autocomplete-overlay"
                     role="listbox"
+                    :aria-label="props.label || props.placeholder || 'Sugestões'"
                     :style="{ top: position.top + 'px', left: position.left + 'px', width: position.width }"
                     @click.stop
+                    @scroll="onOverlayScroll"
                 >
                     <div class="max-autocomplete-list-container">
-                        <ul class="max-autocomplete-list">
+                        <div v-if="isVirtual" class="max-autocomplete-spacer" :style="{ height: `${totalHeight}px` }" aria-hidden="true" />
+                        <ul
+                            class="max-autocomplete-list"
+                            :class="{ 'is-virtual': isVirtual }"
+                            :style="isVirtual ? { transform: `translateY(${offsetY}px)` } : undefined"
+                        >
                             <li
-                                v-for="(option, index) in filtered_values"
-                                :key="index"
-                                :id="`${listboxId}-opt-${index}`"
+                                v-for="entry in visibleItems"
+                                :key="entry.index"
+                                :id="`${listboxId}-opt-${entry.index}`"
                                 class="max-autocomplete-item"
-                                :class="{ 'max-autocomplete-item-active': activeIndex === index }"
+                                :class="{ 'max-autocomplete-item-active': activeIndex === entry.index }"
                                 role="option"
-                                :aria-selected="activeIndex === index"
-                                @click.stop="selectOption(option)"
-                                @mouseenter="activeIndex = index"
+                                :aria-selected="activeIndex === entry.index ? 'true' : (isOptionSelected(entry.item) ? 'true' : 'false')"
+                                @click.stop="selectOption(entry.item)"
+                                @mouseenter="activeIndex = entry.index"
                             >
-                                <slot name="option" :option="option" :index="index">
+                                <slot name="option" :option="entry.item" :index="entry.index">
                                     <div class="autocomplete-item-select">
                                         <div class="autocomplete-item-select-label">
-                                            {{ option[props.optionLabel ?? 'label'] ?? option.label ?? option.name }}
+                                            {{ entry.item[props.optionLabel ?? 'label'] ?? entry.item.label ?? entry.item.name }}
                                         </div>
                                         <div class="autocomplete-item-select-sub-label">
-                                            {{ option.subLabel ?? option.sublabel ?? option['sub-label'] }}
+                                            {{ entry.item.subLabel ?? entry.item.sublabel ?? entry.item['sub-label'] }}
                                         </div>
                                     </div>
                                 </slot>
@@ -73,6 +80,7 @@
     import { hasContent, toSearchableString } from '@maxvue/max-use';
     import { useActiveOverlayPosition } from '../composables/useActiveOverlayPosition';
     import { getOverlayWidth, getOverlayLeft } from '../helpers/useOverlayWidth';
+    import { useVirtualList } from '../composables/useVirtualList';
     import type { Ref } from 'vue';
     import { ref, computed, watch, nextTick, onBeforeUnmount, useId } from 'vue';
     import InputBase from './InputBase.vue';
@@ -100,6 +108,14 @@
             forceSelection?: boolean;
             restoreOnInvalid?: boolean;
             spellcheck?: boolean | undefined;
+            /** Altura de cada linha em px (padrão: 40) */
+            itemHeight?: number | string | undefined;
+            /** Força ou desativa a virtualização da lista */
+            virtualScroll?: boolean | undefined;
+            /** Limiar para ativação automática do virtual scroll (padrão: 500) */
+            virtualScrollThreshold?: number | undefined;
+            /** Tolerância de itens renderizados fora da viewport (overscan) */
+            numToleratedItems?: number | undefined;
         }>(),
         {
             modelValue: '',
@@ -110,7 +126,11 @@
             caution: undefined,
             optionLabel: 'name',
             forceSelection: true,
-            restoreOnInvalid: true
+            restoreOnInvalid: true,
+            itemHeight: 40,
+            virtualScroll: undefined,
+            virtualScrollThreshold: 500,
+            numToleratedItems: 5
         }
     );
 
@@ -120,6 +140,37 @@
     const filtered_values = ref<any[]>([]);
     const input_text = ref<string>('');
     const last_valid = ref<any>(props.modelValue && typeof props.modelValue !== 'string' ? props.modelValue : null);
+
+    const numericItemHeight = computed(() => {
+        if (typeof props.itemHeight === 'number') return props.itemHeight;
+        if (typeof props.itemHeight === 'string') {
+            const p = parseFloat(props.itemHeight);
+            return isNaN(p) ? 40 : p;
+        }
+        return 40;
+    });
+
+    const isVirtual = computed(() => {
+        if (props.virtualScroll !== undefined) return Boolean(props.virtualScroll);
+        return filtered_values.value.length > (props.virtualScrollThreshold ?? 500);
+    });
+
+    const {
+        visibleItems,
+        offsetY,
+        totalHeight,
+        setViewport,
+        scrollToIndex
+    } = useVirtualList(filtered_values, {
+        itemHeight: numericItemHeight,
+        enabled: isVirtual,
+        overscan: props.numToleratedItems ?? 5
+    });
+
+    const onOverlayScroll = (e: Event) => {
+        const el = e.target as HTMLElement;
+        if (el) setViewport(el.scrollTop, el.clientHeight);
+    };
 
     const ac = ref<HTMLElement | null>(null);
     const inputEl = ref<HTMLInputElement | null>(null);
@@ -233,23 +284,31 @@
         }, 150);
     };
 
-    const onChange = () => {
-        if (props.forceSelection) if (typeof temp_value.value === 'string') if (input_text.value && props.restoreOnInvalid && last_valid.value) {
-            temp_value.value = last_valid.value;
-            input_text.value = '';
-        } else {
-            input_text.value = '';
-            last_valid.value = null;
-            temp_value.value = null;
-            emit('update:modelValue', null);
+    const isOptionSelected = (option: any): boolean => {
+        const target = (temp_value.value && typeof temp_value.value !== 'string')
+            ? temp_value.value
+            : (last_valid.value ?? props.modelValue);
+        if (!target) return false;
+        if (typeof target === 'string') {
+            const valKey = props.optionValue ?? 'value';
+            return option[valKey] === target || option.id === target || option.value === target;
         }
-        else {
-            last_valid.value = null;
-            temp_value.value = null;
-            emit('update:modelValue', null);
-        }
-        else emit('update:modelValue', temp_value.value);
+        return option === target;
+    };
 
+    const onChange = () => {
+        if (props.forceSelection) {
+            if (typeof temp_value.value === 'string') if (input_text.value && props.restoreOnInvalid && last_valid.value) {
+                temp_value.value = last_valid.value;
+                input_text.value = '';
+            } else {
+                input_text.value = '';
+                last_valid.value = null;
+                temp_value.value = null;
+                emit('update:modelValue', null);
+            }
+
+        } else emit('update:modelValue', temp_value.value);
     };
 
     const selectOption = (item: any) => {
@@ -265,11 +324,23 @@
             isOpen.value = filtered_values.value.length > 0;
             return;
         }
-        if (activeIndex.value < filtered_values.value.length - 1) activeIndex.value++;
+        if (activeIndex.value < filtered_values.value.length - 1) {
+            activeIndex.value++;
+            if (isVirtual.value) {
+                const targetScroll = scrollToIndex(activeIndex.value, 'auto');
+                if (overlayEl.value) overlayEl.value.scrollTop = targetScroll;
+            }
+        }
     };
 
     const onArrowUp = () => {
-        if (activeIndex.value > 0) activeIndex.value--;
+        if (activeIndex.value > 0) {
+            activeIndex.value--;
+            if (isVirtual.value) {
+                const targetScroll = scrollToIndex(activeIndex.value, 'auto');
+                if (overlayEl.value) overlayEl.value.scrollTop = targetScroll;
+            }
+        }
     };
 
     const onEnter = () => {
@@ -279,6 +350,14 @@
             emit('update:modelValue', temp_value.value);
         }
     };
+
+    watch(isOpen, (open) => {
+        if (open) nextTick(() => {
+            const el = overlayEl.value;
+            if (el) setViewport(el.scrollTop, el.clientHeight);
+        });
+
+    });
 
     watch(temp_value, (novo: any, antigo: any) => {
         isDone.value = testIsDone();
@@ -404,10 +483,25 @@
     overflow-y: auto;
     scrollbar-width: thin;
 
+    .max-autocomplete-list-container {
+        position: relative;
+    }
+
+    .max-autocomplete-spacer {
+        width: 100%;
+    }
+
     .max-autocomplete-list {
         list-style: none;
         margin: 0;
         padding: 4px 0;
+
+        &.is-virtual {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+        }
 
         .max-autocomplete-item {
             cursor: pointer;

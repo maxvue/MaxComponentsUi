@@ -1,5 +1,5 @@
 <template>
-    <div v-if="isVisible" class="max-loader-main-div" v-bind="$attrs">
+    <div v-if="isVisible" class="max-loader-main-div" v-bind="resolvedAttrs">
         <div class="items">
             <MaxLoaderIcon />
             <div v-if="props.label" class="item-label">{{ props.label }}</div>
@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-    import { computed } from 'vue';
+    import { computed, useAttrs } from 'vue';
     import MaxLoaderIcon from './MaxLoaderIcon.vue';
 
     defineOptions({
@@ -27,9 +27,25 @@
         label: undefined
     });
 
+    const attrs = useAttrs();
+
     const isVisible = computed(() => {
         if (props.show === false || props.show === 'false') return false;
         return Boolean(props.show);
+    });
+
+    const resolvedAttrs = computed(() => {
+        const defaults: Record<string, any> = {
+            'role': 'status',
+            'aria-live': 'polite',
+            'aria-busy': 'true'
+        };
+        if (props.label && !attrs['aria-label']) defaults['aria-label'] = props.label;
+
+        return {
+            ...defaults,
+            ...attrs
+        };
     });
 </script>
 

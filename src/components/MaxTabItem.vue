@@ -21,7 +21,7 @@
     <teleport :to="'#max-tab-buttons-' + toValue(tabs_info?.tabs_id)" v-if="toValue(tabs_info?.tabs_id) && is_mounted && is_active && props.actionButton && (props.actionButtonLabel || props.actionButtonIcon)">
         <div @click="props.actionButton" class="button-tab-item">
             <MaxButton :label="props.actionButtonLabel" :icon="props.actionButtonIcon" v-if="props.actionButtonLabel" />
-            <MaxIconButton :icon="props.actionButtonIcon" v-else />
+            <MaxIconButton :icon="props.actionButtonIcon" :aria-label="props.title || 'Ação'" v-else />
         </div>
     </teleport>
     <div

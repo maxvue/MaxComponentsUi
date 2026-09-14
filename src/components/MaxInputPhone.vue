@@ -58,26 +58,34 @@
                             @keydown="onFilterKeydown"
                         />
                     </div>
-                    <div class="max-phone-select-list" role="listbox" :id="listbox_id" ref="list_el">
+                    <div class="max-phone-select-list" role="listbox" :id="listbox_id" ref="list_el" @scroll="onListScroll">
+                        <div v-if="isVirtual" class="max-phone-select-spacer" :style="{ height: `${totalHeight}px` }" aria-hidden="true" />
                         <div
-                            v-for="(option, index) in filtered_options"
-                            :key="option.sigla"
-                            class="max-phone-select-option"
-                            role="option"
-                            :aria-selected="option.sigla === country.sigla"
-                            :class="{ 'is-focused': index === focused_index, 'is-selected': option.sigla === country.sigla }"
-                            @click.stop="selectOption(option)"
-                            @mouseenter="focused_index = index"
+                            class="max-phone-select-window"
+                            :class="{ 'is-virtual': isVirtual }"
+                            :style="isVirtual ? { transform: `translateY(${offsetY}px)` } : undefined"
                         >
-                            <slot name="option" :option="option" :selected="option.sigla === country.sigla" :index="index">
-                                <div class="input-phone-label-div">
-                                    <img :src="'https://flagcdn.com/w40/' + option.sigla.toLowerCase() + '.png'" alt="flag" loading="lazy" />
-                                    <div class="labelz">
-                                        <div class="phone-option-label">{{ option.label }}</div>
+                            <div
+                                v-for="entry in visibleItems"
+                                :key="entry.item.sigla"
+                                class="max-phone-select-option"
+                                role="option"
+                                :aria-selected="entry.item.sigla === country.sigla"
+                                :class="{ 'is-focused': entry.index === focused_index, 'is-selected': entry.item.sigla === country.sigla }"
+                                :style="isVirtual ? { height: `${numericItemHeight}px` } : undefined"
+                                @click.stop="selectOption(entry.item)"
+                                @mouseenter="focused_index = entry.index"
+                            >
+                                <slot name="option" :option="entry.item" :selected="entry.item.sigla === country.sigla" :index="entry.index">
+                                    <div class="input-phone-label-div">
+                                        <img :src="'https://flagcdn.com/w40/' + entry.item.sigla.toLowerCase() + '.png'" alt="flag" loading="lazy" />
+                                        <div class="labelz">
+                                            <div class="phone-option-label">{{ entry.item.label }}</div>
+                                        </div>
+                                        <div class="subLabel">( +{{ entry.item?.value }} )</div>
                                     </div>
-                                    <div class="subLabel">( +{{ option?.value }} )</div>
-                                </div>
-                            </slot>
+                                </slot>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -92,6 +100,7 @@
     import InputBase from './InputBase.vue';
     import { vMaska } from 'maska/vue';
     import { country_ddi_flags, type DDIFlag } from '../constants/ddiFlags';
+    import { useVirtualList } from '../composables/useVirtualList';
 
     const props = withDefaults(
         defineProps<{
@@ -110,8 +119,26 @@
             required?: boolean;
             noLabel?: boolean;
             noIcon?: boolean;
+            /** Altura de cada linha em px (padrão: 36) */
+            itemHeight?: number | string | undefined;
+            /** Força ou desativa a virtualização da lista */
+            virtualScroll?: boolean | undefined;
+            /** Limiar para ativação automática do virtual scroll (padrão: 200) */
+            virtualScrollThreshold?: number | undefined;
+            /** Tolerância de itens renderizados fora da viewport (overscan) */
+            numToleratedItems?: number | undefined;
         }>(),
-        { done: undefined, required: false, caution: undefined, noLabel: false, noIcon: false }
+        {
+            done: undefined,
+            required: false,
+            caution: undefined,
+            noLabel: false,
+            noIcon: false,
+            itemHeight: 36,
+            virtualScroll: undefined,
+            virtualScrollThreshold: 200,
+            numToleratedItems: 5
+        }
     );
 
     const temp_value = computed(() => country.value.value + phone.value.replace(/\D/g, ''));
@@ -127,7 +154,56 @@
         if (phone.value.startsWith('0')) phone.value = phone.value.substring(1);
     });
 
-    function handlePaste() {
+    function formatBrPhone(digits: string): string {
+        const d = digits.replace(/\D/g, '');
+        if (d.length === 11) return `(${d.slice(0, 2)}) ${d.slice(2, 3)} ${d.slice(3, 7)} - ${d.slice(7, 11)}`;
+        if (d.length === 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)} - ${d.slice(6, 10)}`;
+        return d;
+    }
+
+    function applyPastedPhone(rawText: string): boolean {
+        const trimmed = rawText.trim();
+        const digits = trimmed.replace(/\D/g, '');
+        if (!digits) return false;
+
+        let matchedCountry: DDIFlag | undefined;
+        let phoneNumber = digits;
+
+        if (trimmed.startsWith('+')) for (let i = 3; i >= 1; i--) {
+            if (digits.length > i) {
+                const ddi = parseInt(digits.substring(0, i));
+                const found = country_ddi_flags.find((f) => f.ddi === ddi);
+                if (found) {
+                    matchedCountry = found;
+                    phoneNumber = digits.substring(i);
+                    break;
+                }
+            }
+        }
+        else if (digits.length > 11) for (let i = 3; i >= 1; i--) {
+            const ddi = parseInt(digits.substring(0, i));
+            const found = country_ddi_flags.find((f) => f.ddi === ddi);
+            if (found) {
+                matchedCountry = found;
+                phoneNumber = digits.substring(i);
+                break;
+            }
+        }
+
+
+        if (matchedCountry) country.value = matchedCountry;
+        if (phoneNumber.startsWith('0')) phoneNumber = phoneNumber.substring(1);
+
+        phone.value = country.value.value === 55 ? formatBrPhone(phoneNumber) : phoneNumber;
+        return true;
+    }
+
+    function handlePaste(event?: ClipboardEvent) {
+        const pastedText = event?.clipboardData?.getData?.('text');
+        if (pastedText !== undefined && pastedText !== '') {
+            if (applyPastedPhone(pastedText)) event?.preventDefault?.();
+            return;
+        }
         noMask.value = true;
     }
 
@@ -214,6 +290,37 @@
         );
     });
 
+    const numericItemHeight = computed(() => {
+        if (typeof props.itemHeight === 'number') return props.itemHeight;
+        if (typeof props.itemHeight === 'string') {
+            const p = parseFloat(props.itemHeight);
+            return isNaN(p) ? 36 : p;
+        }
+        return 36;
+    });
+
+    const isVirtual = computed(() => {
+        if (props.virtualScroll !== undefined) return Boolean(props.virtualScroll);
+        return filtered_options.value.length > (props.virtualScrollThreshold ?? 200);
+    });
+
+    const {
+        visibleItems,
+        offsetY,
+        totalHeight,
+        setViewport,
+        scrollToIndex
+    } = useVirtualList(filtered_options, {
+        itemHeight: numericItemHeight,
+        enabled: isVirtual,
+        overscan: props.numToleratedItems ?? 5
+    });
+
+    function onListScroll(event: Event) {
+        const el = event.target as HTMLElement;
+        if (el) setViewport(el.scrollTop, el.clientHeight || 300);
+    }
+
     let rafId: number | null = null;
 
     function updatePosition() {
@@ -241,7 +348,13 @@
 
     function scrollFocusedIntoView() {
         const container = list_el.value;
-        if (!container) return;
+        if (!container || focused_index.value < 0) return;
+
+        if (isVirtual.value) {
+            const targetScroll = scrollToIndex(focused_index.value, 'auto');
+            container.scrollTop = targetScroll;
+            return;
+        }
 
         const option = container.children[focused_index.value] as HTMLElement | undefined;
         option?.scrollIntoView({ block: 'nearest' });
@@ -463,7 +576,21 @@
     }
 
     .max-phone-select-list {
+        position: relative;
         overflow-y: auto;
+
+        .max-phone-select-spacer {
+            width: 100%;
+        }
+
+        .max-phone-select-window {
+            &.is-virtual {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+            }
+        }
 
         .max-phone-select-option {
             display: grid !important;

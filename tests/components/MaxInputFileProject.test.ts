@@ -13,6 +13,8 @@ let onDropCallback: ((files: any) => void) | undefined;
 const openMock = vi.fn();
 const resetMock = vi.fn();
 
+let ulidCounter = 0;
+
 vi.mock('@maxvue/max-use', () => ({
     getRoute: vi.fn(),
     useDropZone: (_target: any, opts: any) => {
@@ -24,7 +26,7 @@ vi.mock('@maxvue/max-use', () => ({
         reset: resetMock,
         onChange: vi.fn((cb) => { onChangeCallback = cb; })
     }),
-    ulid: vi.fn(() => '12345'),
+    ulid: vi.fn(() => (ulidCounter === 0 ? (++ulidCounter, '12345') : `id_${++ulidCounter}`)),
     size: vi.fn((arr) => arr?.length || 0),
     isBlank: vi.fn((val) => !val)
 }));
@@ -32,8 +34,13 @@ vi.mock('@maxvue/max-use', () => ({
 describe('MaxInputFileProject', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        ulidCounter = 0;
         onChangeCallback = undefined;
         onDropCallback = undefined;
+        // @ts-ignore
+        axios.post.mockReset();
+        // @ts-ignore
+        axios.post.mockResolvedValue({ data: { success: true } });
     });
 
     it('deve renderizar o componente e exibir as instruções de upload', async () => {
@@ -168,8 +175,7 @@ describe('MaxInputFileProject', () => {
         });
 
         const file = new File(['teste'], 'falha.png', { type: 'image/png' });
-        wrapper.vm.sendFile([file]);
-        await new Promise((r) => setTimeout(r, 10));
+        await expect(wrapper.vm.sendFile([file])).rejects.toThrow('Falha de conexão');
 
         expect(consoleSpy).toHaveBeenCalledWith('Erro ao enviar arquivo. ', networkError);
         consoleSpy.mockRestore();
@@ -231,5 +237,157 @@ describe('MaxInputFileProject', () => {
         expect(wrapper.emitted('files-selected')).toBeTruthy();
         expect(wrapper.emitted('files-selected')![0][0]).toEqual([droppedFile]);
         expect(wrapper.vm.temp_files).toHaveLength(1);
+    });
+
+    it('permite reexecutar uploads com falha via retry()', async () => {
+        const wrapper = mount(MaxInputFileProject, {
+            props: { files: [], url: '/api/upload', auto: false },
+            global: { stubs: ['MaxIconButton', 'MaxIcon', 'MaxLoaderIcon', 'MaxButton'] }
+        });
+
+        const file = new File(['teste'], 'falha.png', { type: 'image/png' });
+        // Ingest file through drop
+        onDropCallback!([file]);
+        await wrapper.vm.$nextTick();
+
+        const fileId = wrapper.vm.temp_files[0].id;
+        expect(wrapper.vm.fileStatusMap.get(fileId)).toBe('queued');
+
+        // First call fails
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        // @ts-ignore
+        axios.post.mockRejectedValueOnce(new Error('Network error'));
+        await expect(wrapper.vm.sendFile()).rejects.toThrow('Network error');
+        expect(wrapper.vm.fileStatusMap.get(fileId)).toBe('failed');
+        expect(consoleSpy).toHaveBeenCalled();
+
+        // Retry succeeds
+        // @ts-ignore
+        axios.post.mockResolvedValueOnce({ data: { ok: true } });
+        await wrapper.vm.retry([fileId]);
+        expect(wrapper.vm.fileStatusMap.get(fileId)).toBe('succeeded');
+    });
+
+    it('aborta requisições ativas ao desmontar o componente', async () => {
+        let capturedSignal: AbortSignal | undefined;
+        // @ts-ignore
+        axios.post.mockImplementation((_url: string, _data: any, config: any) => {
+            capturedSignal = config.signal;
+            return new Promise(() => {}); // never resolves
+        });
+
+        const wrapper = mount(MaxInputFileProject, {
+            props: { files: [], url: '/api/upload', auto: false },
+            global: { stubs: ['MaxIconButton', 'MaxIcon', 'MaxLoaderIcon', 'MaxButton'] }
+        });
+
+        const file = new File(['teste'], 'upload.png', { type: 'image/png' });
+        wrapper.vm.sendFile([file]);
+        await wrapper.vm.$nextTick();
+
+        expect(capturedSignal).toBeDefined();
+        expect(capturedSignal?.aborted).toBe(false);
+
+        wrapper.unmount();
+        expect(capturedSignal?.aborted).toBe(true);
+    });
+
+    it('não muta diretamente o arquivo original ao normalizar arquivos', async () => {
+        const originalFile: any = new File(['dados'], 'contrato.pdf', { type: 'application/pdf' });
+        Object.freeze(originalFile);
+
+        const wrapper = mount(MaxInputFileProject, {
+            props: { files: [originalFile], auto: false },
+            global: { stubs: ['MaxIconButton', 'MaxIcon', 'MaxLoaderIcon', 'MaxButton'] }
+        });
+
+        expect(wrapper.vm.temp_files).toHaveLength(1);
+        expect(wrapper.vm.temp_files[0].name).toBe('contrato.pdf');
+        expect(wrapper.vm.temp_files[0]).not.toBe(originalFile);
+    });
+
+    it('ao adicionar A e em seguida B antes de A resolver, envia requisições distintas e não duplica A no POST de B', async () => {
+        let resolveA: (val: any) => void;
+        const promiseA = new Promise((resolve) => { resolveA = resolve; });
+        // @ts-ignore
+        axios.post.mockImplementationOnce(() => promiseA);
+        // @ts-ignore
+        axios.post.mockResolvedValueOnce({ data: { success: true } });
+
+        const wrapper = mount(MaxInputFileProject, {
+            props: { files: [], url: '/api/upload', auto: true },
+            global: { stubs: ['MaxIconButton', 'MaxIcon', 'MaxLoaderIcon', 'MaxButton'] }
+        });
+
+        // Adiciona arquivo A
+        const fileA = new File(['conteudo A'], 'docA.pdf', { type: 'application/pdf' });
+        onDropCallback!([fileA]);
+        await wrapper.vm.$nextTick();
+
+        expect(axios.post).toHaveBeenCalledTimes(1);
+        const formA = (axios.post as any).mock.calls[0][1] as FormData;
+        expect(formA.get('files[0]')).toBeDefined();
+
+        // Adiciona arquivo B enquanto A ainda está pendente
+        const fileB = new File(['conteudo B'], 'docB.pdf', { type: 'application/pdf' });
+        onDropCallback!([fileB]);
+        await wrapper.vm.$nextTick();
+
+        expect(axios.post).toHaveBeenCalledTimes(2);
+        const formB = (axios.post as any).mock.calls[1][1] as FormData;
+        // O segundo envio deve conter apenas B
+        expect(formB.get('files[0]')).toBeDefined();
+        // Não deve haver files[1] em formB
+        expect(formB.get('files[1]')).toBeNull();
+
+        // Resolve A
+        resolveA!({ data: { success: true } });
+        await wrapper.vm.$nextTick();
+    });
+
+    it('não tenta enviar upload se endpoint não estiver configurado', async () => {
+        const wrapper = mount(MaxInputFileProject, {
+            props: { files: [], auto: true },
+            global: { stubs: ['MaxIconButton', 'MaxIcon', 'MaxLoaderIcon', 'MaxButton'] }
+        });
+
+        const file = new File(['conteudo'], 'doc.pdf', { type: 'application/pdf' });
+        onDropCallback!([file]);
+        await wrapper.vm.$nextTick();
+
+        expect(axios.post).not.toHaveBeenCalled();
+        const res = await wrapper.vm.sendFile();
+        expect(res).toBeUndefined();
+    });
+
+    it('desmontar com requisição pendente cancela e não emite upload-success nem upload-error tardios', async () => {
+        let resolveRequest: (val: any) => void;
+        let _rejectRequest: (err: any) => void;
+        // @ts-ignore
+        axios.post.mockImplementationOnce(() => new Promise((resolve, reject) => {
+            resolveRequest = resolve;
+            _rejectRequest = reject;
+        }));
+
+        const wrapper = mount(MaxInputFileProject, {
+            props: { files: [], url: '/api/upload', auto: false },
+            global: { stubs: ['MaxIconButton', 'MaxIcon', 'MaxLoaderIcon', 'MaxButton'] }
+        });
+
+        const file = new File(['conteudo'], 'doc.pdf', { type: 'application/pdf' });
+        onDropCallback!([file]);
+        await wrapper.vm.$nextTick();
+
+        wrapper.vm.sendFile();
+        await wrapper.vm.$nextTick();
+
+        wrapper.unmount();
+
+        // Tenta resolver após unmount
+        resolveRequest!({ data: { ok: true } });
+        await new Promise((r) => setTimeout(r, 10));
+
+        expect(wrapper.emitted('upload-success')).toBeUndefined();
+        expect(wrapper.emitted('upload-error')).toBeUndefined();
     });
 });

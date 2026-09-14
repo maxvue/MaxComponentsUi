@@ -127,6 +127,7 @@ export { default as MaxInputMarkdownToolbar } from './components/MaxInputMarkdow
 // Async: o MaxInputCode carrega o Monaco Editor sob demanda via @monaco-editor/loader
 export const MaxInputCode = defineAsyncComponent(() => import('./components/MaxInputCode.vue'));
 export { default as MaxInputCodeToolbar } from './components/MaxInputCodeToolbar.vue';
+export { useToolbarNavigation, type UseToolbarNavigationOptions } from './helpers/useToolbarNavigation';
 export { default as MaxInputToggle } from './components/MaxInputToggle.vue';
 export { default as MaxInputTypeAddress } from './components/MaxInputTypeAddress.vue';
 export { default as MaxGridCols } from './components/MaxGridCols.vue';
@@ -225,6 +226,7 @@ export { configureMaxApp, getMaxAppConfig, resetMaxAppConfig } from './helpers/m
 export { clearMaxCache, registerMaxCacheKey, isMaxCacheKey, ICON_CACHE_KEY } from './helpers/maxCacheKeys';
 export { useScrollLock, forceReset } from './helpers/useScrollLock';
 export type { ScrollLock } from './helpers/useScrollLock';
+export { useAsyncState } from './composables/useAsyncState';
 
 
 import Tooltip from './directives/tooltip';

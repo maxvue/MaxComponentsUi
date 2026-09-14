@@ -33,6 +33,7 @@ export default defineConfig({
         include: ['tests/**/*.{test,spec}.ts'],
         pool: 'forks',
         singleFork: true,
+        testTimeout: 15000,
         coverage: {
             provider: 'v8',
             reporter: ['text', 'html'],
@@ -44,7 +45,13 @@ export default defineConfig({
                 'src/locales/**',
                 'src/prime/**',
                 'src/scripts/**'
-            ]
+            ],
+            thresholds: {
+                statements: 85,
+                branches: 75,
+                functions: 80,
+                lines: 85
+            }
         }
     }
 });

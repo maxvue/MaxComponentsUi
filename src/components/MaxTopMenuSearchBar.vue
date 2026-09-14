@@ -6,6 +6,7 @@
             :placeholder="props.placeholder"
             class="search-top-bar-input"
             :icon="search_bar.is_filtering ? 'eos-icons:loading' : 'material-symbols:search-rounded'"
+            :aria-keyshortcuts="computedAriaKeyshortcuts"
             no-message
         >
             <template #default>
@@ -50,6 +51,7 @@
                             :placeholder="props.placeholder"
                             class="search-top-bar-input mobile-input"
                             :icon="search_bar.is_filtering ? 'eos-icons:loading' : 'material-symbols:search-rounded'"
+                            :aria-keyshortcuts="computedAriaKeyshortcuts"
                             no-message
                         >
                             <slot></slot>
@@ -86,13 +88,13 @@
         placeholder?: string;
         /** Dispositivo atual ('desktop' | 'mobile'). Quando omitido, consulta useSystemStore(). */
         screen?: string;
-        /** Atalho de teclado para focar na pesquisa (default: 'mod+k'). Passe false para desabilitar. */
+        /** Atalho de teclado para focar na pesquisa (default: 'ctrl+k'). Passe false para desabilitar. */
         shortcut?: boolean | string;
         /** Exibir o badge visual do atalho no campo de busca. */
         showShortcutBadge?: boolean;
     }>(), {
         placeholder: 'Pesquisar',
-        shortcut: 'mod+k',
+        shortcut: 'ctrl+k',
         showShortcutBadge: true
     });
 
@@ -112,16 +114,33 @@
     });
 
     const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/i.test(navigator.platform || navigator.userAgent);
-    const shortcutLabel = computed(() => {
-        if (typeof props.shortcut === 'string' && props.shortcut.toLowerCase() !== 'mod+k') return props.shortcut.toUpperCase();
 
-        return isMac ? '⌘K' : 'Ctrl+K';
+    const parsedShortcutKey = computed<string>(() => {
+        if (props.shortcut === false) return '';
+        if (typeof props.shortcut === 'string') {
+            const parts = props.shortcut.toLowerCase().split('+');
+            return parts[parts.length - 1] || 'k';
+        }
+        return 'k';
+    });
+
+    const shortcutLabel = computed(() => {
+        if (props.shortcut === false) return '';
+        const key = parsedShortcutKey.value.toUpperCase();
+        return isMac ? `⌘${key}` : `Ctrl+${key}`;
+    });
+
+    const computedAriaKeyshortcuts = computed<string | undefined>(() => {
+        if (props.shortcut === false) return undefined;
+        const key = parsedShortcutKey.value.toUpperCase();
+        return isMac ? `Meta+${key}` : `Control+${key}`;
     });
 
     const openSearch = (): void => {
         is_open.value = true;
         trap.activate();
         nextTick(() => {
+            input_search_mobile_ref.value?.focus?.();
             input_search_mobile_ref.value?.setFocus?.();
         });
     };
@@ -144,16 +163,32 @@
 
         if (props.shortcut === false) return;
 
-        const isMod = isMac ? event.metaKey : event.ctrlKey;
+        // Ignora quando o foco ativo for outro input/textarea editável externo à busca
+        const target = (event.target as HTMLElement | null) || (document.activeElement as HTMLElement | null);
+        if (target) {
+            const selfInput = isMobile.value
+                ? (input_search_mobile_ref.value?.input?.value || input_search_mobile_ref.value?.$el?.querySelector?.('input'))
+                : (input_search_ref.value?.input?.value || input_search_ref.value?.$el?.querySelector?.('input'));
+            const selfRoot = isMobile.value ? mobilePanelRef.value : input_search_ref.value?.$el;
+            const isSelf = target === selfInput || Boolean(selfRoot && selfRoot.contains(target));
+            if (!isSelf) {
+                const tagName = target.tagName?.toLowerCase();
+                const isEditable = target.isContentEditable || tagName === 'input' || tagName === 'textarea' || tagName === 'select';
+                if (isEditable) return;
+            }
+        }
+
+        const isMod = isMac ? (event.metaKey || event.ctrlKey) : event.ctrlKey;
         const key = event.key.toLowerCase();
+        const expectedKey = parsedShortcutKey.value.toLowerCase();
 
-        const matchesDefault = (props.shortcut === 'mod+k' || props.shortcut === true) && isMod && key === 'k';
-        const matchesCustom = typeof props.shortcut === 'string' && props.shortcut.toLowerCase() !== 'mod+k' && isMod && key === props.shortcut.split('+').pop()?.toLowerCase();
-
-        if (matchesDefault || matchesCustom) {
+        if (isMod && key === expectedKey) {
             event.preventDefault();
             if (isMobile.value) openSearch();
-            else input_search_ref.value?.setFocus?.();
+            else {
+                input_search_ref.value?.focus?.();
+                input_search_ref.value?.setFocus?.();
+            }
         }
     };
 

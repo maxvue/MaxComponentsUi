@@ -359,5 +359,150 @@ describe('MaxToast', () => {
             expect(closeBtn.exists()).toBe(true);
             expect(closeBtn.attributes('aria-label')).toBe('Fechar notificação: Falha no download');
         });
+
+        it('exibe status acessível ao copiar com sucesso e fallback com retry em caso de falha', async () => {
+            // Caso 1: Sucesso
+            const writeTextMock = vi.fn().mockResolvedValue(undefined);
+            Object.defineProperty(navigator, 'clipboard', {
+                value: { writeText: writeTextMock },
+                configurable: true,
+                writable: true
+            });
+
+            const pinia = createPinia();
+            setActivePinia(pinia);
+            const store = useToastStore(pinia);
+            store.add({ title: 'Sucesso', message: 'Conteúdo copiado', severity: 'error' });
+
+            const wrapper = mount(MaxToast, {
+                global: {
+                    plugins: [pinia],
+                    stubs: {
+                        MaxIcon: true,
+                        TransitionGroup: { template: '<div class="max-toast-container"><slot /></div>' }
+                    }
+                }
+            });
+            await flushPromises();
+
+            const copyBtn = wrapper.find('.action-copy');
+            await copyBtn.trigger('click');
+            await flushPromises();
+
+            const statusEl = wrapper.find('.toast-copy-status');
+            expect(statusEl.exists()).toBe(true);
+            expect(statusEl.attributes('role')).toBe('status');
+            expect(statusEl.text()).toContain('Copiado para a área de transferência!');
+
+            // Caso 2: Falha no clipboard
+            writeTextMock.mockRejectedValueOnce(new Error('Clipboard blocked'));
+            await copyBtn.trigger('click');
+            await flushPromises();
+
+            expect(store.items[0].paused).toBe(true);
+            const fallbackEl = wrapper.find('.toast-copy-fallback');
+            expect(fallbackEl.exists()).toBe(true);
+            expect(fallbackEl.attributes('role')).toBe('alert');
+
+            const manualInput = wrapper.find('.toast-copy-manual-input');
+            expect(manualInput.exists()).toBe(true);
+            expect((manualInput.element as HTMLTextAreaElement).value).toBe('Sucesso\nConteúdo copiado');
+
+            const retryBtn = wrapper.find('.action-retry');
+            expect(retryBtn.exists()).toBe(true);
+
+            // Retry com sucesso restaura
+            writeTextMock.mockResolvedValueOnce(undefined);
+            await retryBtn.trigger('click');
+            await flushPromises();
+            expect(wrapper.find('.toast-copy-fallback').exists()).toBe(false);
+        });
+
+        it('toast WhatsApp não contém literal legado #128c7e', () => {
+            const fs = require('node:fs');
+            const path = require('node:path');
+            const sfcContent = fs.readFileSync(path.resolve(__dirname, '../../src/components/MaxToast.vue'), 'utf-8');
+            expect(sfcContent).not.toContain('#128c7e');
+            expect(sfcContent).toContain('var(--max-whatsapp-surface');
+            expect(sfcContent).toContain('var(--max-whatsapp-content');
+        });
+
+        it('gerencia estado de cópia de forma independente por item', async () => {
+            const writeTextMock = vi.fn().mockResolvedValue(undefined);
+            Object.defineProperty(navigator, 'clipboard', {
+                value: { writeText: writeTextMock },
+                configurable: true,
+                writable: true
+            });
+
+            const pinia = createPinia();
+            setActivePinia(pinia);
+            const store = useToastStore(pinia);
+            store.add({ title: 'T1', message: 'Primeiro erro', severity: 'error' });
+            store.add({ title: 'T2', message: 'Segundo erro', severity: 'error' });
+
+            const wrapper = mount(MaxToast, {
+                global: {
+                    plugins: [pinia],
+                    stubs: {
+                        MaxIcon: true,
+                        TransitionGroup: { template: '<div class="max-toast-container"><slot /></div>' }
+                    }
+                }
+            });
+            await flushPromises();
+
+            const copyBtns = wrapper.findAll('.action-copy');
+            expect(copyBtns).toHaveLength(2);
+
+            // Copia o primeiro item com sucesso
+            await copyBtns[0].trigger('click');
+            await flushPromises();
+
+            expect(copyBtns[0].text()).toBe('Copiado!');
+            expect(copyBtns[1].text()).toBe('Copiar');
+
+            // Primeiro item possui role="status" discreto de sucesso
+            const statusEls = wrapper.findAll('.toast-copy-status');
+            expect(statusEls).toHaveLength(1);
+            expect(statusEls[0].attributes('role')).toBe('status');
+
+            // Falha no segundo item ao tentar copiar
+            writeTextMock.mockRejectedValueOnce(new Error('Falha no clipboard'));
+            await copyBtns[1].trigger('click');
+            await flushPromises();
+
+            // Item 1 permanece sem fallback de erro e item 2 entra em erro com fallback e retry
+            const fallbacks = wrapper.findAll('.toast-copy-fallback');
+            expect(fallbacks).toHaveLength(1);
+            expect(fallbacks[0].attributes('role')).toBe('alert');
+            expect(store.items[1].paused).toBe(true);
+            expect(store.items[0].paused).toBe(false);
+
+            // Fechar o item com erro limpa o toast
+            const closeBtns = wrapper.findAll('.max-toast-close');
+            await closeBtns[1].trigger('click');
+            await flushPromises();
+
+            expect(wrapper.findAll('.toast-copy-fallback')).toHaveLength(0);
+            expect(store.items).toHaveLength(1);
+        });
+
+        it('contraste da combinação de tokens WhatsApp atinge >= 4.5:1', () => {
+            const hexToLuminance = (hex: string): number => {
+                const clean = hex.replace('#', '');
+                const r = parseInt(clean.substring(0, 2), 16) / 255;
+                const g = parseInt(clean.substring(2, 4), 16) / 255;
+                const b = parseInt(clean.substring(4, 6), 16) / 255;
+                const a = [r, g, b].map((v) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)));
+                return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
+            };
+
+            const l1 = hexToLuminance('#ffffff');
+            const l2 = hexToLuminance('#075e54');
+            const contrast = (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+
+            expect(contrast).toBeGreaterThanOrEqual(4.5);
+        });
     });
 });

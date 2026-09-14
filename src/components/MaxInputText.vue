@@ -9,11 +9,13 @@
         <template #default="{ inputAttrs }">
             <input
                 v-bind="inputAttrs"
+                ref="input_ref"
                 class="max-input-native"
                 :type="props.type"
                 :placeholder="props.placeholder"
                 :disabled="props.disabled"
                 :spellcheck="resolvedSpellcheck"
+                :aria-keyshortcuts="attrs['aria-keyshortcuts']"
                 :value="temp_value"
                 @input="onInput"
                 @blur="validation.onBlur"
@@ -109,4 +111,20 @@
         () => props.modelValue,
         () => (temp_value.value = props.modelValue)
     );
+
+    const input_ref = ref<HTMLInputElement | null>(null);
+
+    const focus = (options?: FocusOptions): void => {
+        input_ref.value?.focus(options);
+    };
+
+    const setFocus = (): void => {
+        input_ref.value?.focus();
+    };
+
+    defineExpose({
+        input: input_ref,
+        focus,
+        setFocus
+    });
 </script>

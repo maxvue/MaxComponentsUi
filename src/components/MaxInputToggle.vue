@@ -138,7 +138,6 @@
         .input-toggle-field-label-div {
             position: relative;
             z-index: 1;
-            font-family: Jost, sans-serif !important;
             font-size: 0.85rem;
             color: var(--background-750);
             cursor: pointer;

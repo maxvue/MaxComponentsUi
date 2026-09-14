@@ -62,29 +62,43 @@
                                         { 'max-table-th-sortable': col.sortable }
                                     ]"
                                     :style="getColumnStyle(col)"
-                                    :tabindex="col.sortable ? 0 : undefined"
                                     :aria-sort="getAriaSort(col)"
-                                    @click="onHeaderClick(col)"
-                                    @keydown.enter="col.sortable && onHeaderClick(col)"
-                                    @keydown.space.prevent="col.sortable && onHeaderClick(col)"
+                                    @click="onThClick(col, $event)"
                                 >
-                                    <div class="p-datatable-column-header-content">
+                                    <button
+                                        v-if="col.sortable"
+                                        type="button"
+                                        class="max-table-header-button"
+                                        @click="onHeaderClick(col)"
+                                        @keydown.enter="onHeaderClick(col)"
+                                        @keydown.space.prevent="onHeaderClick(col)"
+                                    >
+                                        <div class="p-datatable-column-header-content">
+                                            <div class="p-datatable-column-title">
+                                                <component v-if="col.headerSlot" :is="col.headerSlot" :column="col" />
+                                                <template v-else>
+                                                    <span>{{ col.header }}</span>
+                                                </template>
+                                                <span class="sort-icon-box" aria-hidden="true">
+                                                    <svg v-if="sortField === col.field && sortOrder === 1" class="sort-icon-svg" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" aria-hidden="true">
+                                                        <path d="m18 15-6-6-6 6" />
+                                                    </svg>
+                                                    <svg v-else-if="sortField === col.field && sortOrder === -1" class="sort-icon-svg" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" aria-hidden="true">
+                                                        <path d="m6 9 6 6 6-6" />
+                                                    </svg>
+                                                    <svg v-else class="sort-icon-svg sort-icon-neutral" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" aria-hidden="true">
+                                                        <path d="m7 15 5 5 5-5M7 9l5-5 5 5" />
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </button>
+                                    <div v-else class="p-datatable-column-header-content">
                                         <div class="p-datatable-column-title">
                                             <component v-if="col.headerSlot" :is="col.headerSlot" :column="col" />
                                             <template v-else>
                                                 <span>{{ col.header }}</span>
                                             </template>
-                                            <span v-if="col.sortable" class="sort-icon-box">
-                                                <svg v-if="sortField === col.field && sortOrder === 1" class="sort-icon-svg" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
-                                                    <path d="m18 15-6-6-6 6" />
-                                                </svg>
-                                                <svg v-else-if="sortField === col.field && sortOrder === -1" class="sort-icon-svg" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
-                                                    <path d="m6 9 6 6 6-6" />
-                                                </svg>
-                                                <svg v-else class="sort-icon-svg sort-icon-neutral" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
-                                                    <path d="m7 15 5 5 5-5M7 9l5-5 5 5" />
-                                                </svg>
-                                            </span>
                                         </div>
                                     </div>
                                 </th>
@@ -130,10 +144,16 @@
                                             'max-table-row',
                                             'max-table-virtual-row',
                                             props.stripedRows !== false ? (virtualRow.index % 2 === 0 ? 'p-row-even max-table-row-even' : 'p-row-odd max-table-row-odd') : '',
-                                            { 'max-table-row-selected': isRowSelected(displayData[virtualRow.index]) }
+                                            {
+                                                'max-table-row-selected': isRowSelected(displayData[virtualRow.index]),
+                                                'max-table-row-interactive': isRowInteractive
+                                            }
                                         ]"
                                         :style="virtualRowStyle"
+                                        :tabindex="isRowInteractive ? 0 : undefined"
+                                        :aria-selected="props.selectionMode ? (isRowSelected(displayData[virtualRow.index]) ? 'true' : 'false') : undefined"
                                         @click="handleRowClick(displayData[virtualRow.index], virtualRow.index, $event)"
+                                        @keydown="handleRowKeydown(displayData[virtualRow.index], virtualRow.index, $event)"
                                     >
                                         <td
                                             v-for="col in resolvedColumns"
@@ -176,9 +196,15 @@
                                         :class="[
                                             'max-table-row',
                                             props.stripedRows !== false ? (index % 2 === 0 ? 'p-row-even max-table-row-even' : 'p-row-odd max-table-row-odd') : '',
-                                            { 'max-table-row-selected': isRowSelected(row) }
+                                            {
+                                                'max-table-row-selected': isRowSelected(row),
+                                                'max-table-row-interactive': isRowInteractive
+                                            }
                                         ]"
+                                        :tabindex="isRowInteractive ? 0 : undefined"
+                                        :aria-selected="props.selectionMode ? (isRowSelected(row) ? 'true' : 'false') : undefined"
                                         @click="handleRowClick(row, index, $event)"
+                                        @keydown="handleRowKeydown(row, index, $event)"
                                     >
                                         <td
                                             v-for="col in resolvedColumns"
@@ -293,6 +319,7 @@
         ref,
         watch,
         useTemplateRef,
+        getCurrentInstance,
         type VNode,
         Fragment,
         Comment
@@ -331,6 +358,7 @@
         virtualScrollOptions?: {
             overscan?: number;
         };
+        onRowClick?: any;
     }
 
     interface ResolvedColumn {
@@ -385,6 +413,27 @@
 
     const attrs = useAttrs();
     const slots = useSlots() as Record<string, any>;
+    const instance = getCurrentInstance();
+
+    const hasRowClickListener = computed(() => {
+        const vnodeProps = instance?.vnode?.props;
+        return Boolean(
+            props.onRowClick
+                || vnodeProps?.['onRow-click']
+                || vnodeProps?.['onRowClick']
+                || attrs['onRow-click']
+                || attrs['onRowClick']
+        );
+    });
+
+    const isRowInteractive = computed(() => {
+        return Boolean(props.selectionMode || hasRowClickListener.value);
+    });
+
+    function onThClick(col: ResolvedColumn, event: MouseEvent) {
+        if ((event.target as HTMLElement)?.closest?.('.max-table-header-button')) return;
+        onHeaderClick(col);
+    }
 
     /** Normaliza nós filhos de slots lidando com Fragments e Comentários */
     function flattenVNodes(vnodes: VNode[]): VNode[] {
@@ -647,14 +696,63 @@
         return false;
     }
 
+    function isInteractiveElement(target: HTMLElement | null, currentTarget: HTMLElement | null): boolean {
+        if (!target || !currentTarget || target === currentTarget) return false;
+        let el: HTMLElement | null = target;
+        while (el && el !== currentTarget) {
+            const tag = el.tagName?.toUpperCase();
+            if (tag === 'BUTTON' || tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || tag === 'A') return true;
+            const role = el.getAttribute('role');
+            if (role === 'button' || role === 'link' || role === 'checkbox' || role === 'switch') return true;
+            el = el.parentElement;
+        }
+        return false;
+    }
+
+    function toggleRowSelection(row: any) {
+        if (!props.selectionMode) return;
+        if (props.selectionMode === 'single') {
+            const isSelected = isRowSelected(row);
+            emit('update:selection', isSelected ? null : row);
+        } else if (props.selectionMode === 'multiple') {
+            const currentSelection = Array.isArray(props.selection) ? [...props.selection] : [];
+            const isSelected = isRowSelected(row);
+            let newSelection: any[];
+            if (isSelected) newSelection = currentSelection.filter((item: any) => {
+                if (props.dataKey && row?.[props.dataKey] !== undefined) return item?.[props.dataKey] !== row[props.dataKey];
+                return item !== row && item?.id !== row?.id;
+            });
+            else newSelection = [...currentSelection, row];
+
+            emit('update:selection', newSelection);
+        }
+    }
+
     function handleRowClick(row: any, index: number, event: MouseEvent) {
+        if (isInteractiveElement(event.target as HTMLElement, event.currentTarget as HTMLElement)) return;
         emit('row-click', {
             originalEvent: event,
             data: row,
             index
         });
         if (props.selectionMode === 'single') emit('update:selection', row);
+        else if (props.selectionMode === 'multiple') toggleRowSelection(row);
+    }
 
+    function handleRowKeydown(row: any, index: number, event: KeyboardEvent) {
+        if (isInteractiveElement(event.target as HTMLElement, event.currentTarget as HTMLElement)) return;
+
+        if (event.key === 'Enter' && hasRowClickListener.value) {
+            event.preventDefault();
+            emit('row-click', {
+                originalEvent: event as any,
+                data: row,
+                index
+            });
+        } else if (event.key === ' ' && props.selectionMode) {
+            event.preventDefault();
+            toggleRowSelection(row);
+        }
     }
 
     /** Referência do elemento tbody para controle de scroll do virtualizador */
@@ -737,13 +835,17 @@
 </script>
 
 <style lang="scss" scoped>
+@use '../themes/table-anatomy' as table;
+
 .max-table-main-div {
+    @include table.table-container;
+
     border-radius: 1rem;
     overflow: hidden !important;
     max-height: 100%;
     width: 100%;
     height: 100%;
-    border: 1px solid var(--background-300) !important;
+    border: 1px solid var(--max-table-border-color, var(--background-300)) !important;
     position: relative;
 
     :deep(.p-datatable) {
@@ -769,23 +871,26 @@
                     height: 100% !important;
                     width: 100% !important;
                     z-index: 1 !important;
-                    font-family: Jost, sans-serif;
                     display: grid;
                     background-color: transparent !important;
 
                     tr {
+                        @include table.table-header-row;
+
                         position: sticky !important;
-                        height: 40px !important;
+                        height: var(--max-table-header-height, 40px) !important;
                         min-width: 100% !important;
                         display: flex;
-                        padding: 0 6px !important;
-                        gap: 6px;
-                        background-color: var(--table-header-bg, var(--blue-800)) !important;
+                        padding: var(--max-table-header-padding, 0 6px) !important;
+                        gap: var(--max-table-header-gap, 6px);
+                        background-color: var(--max-table-header-bg, var(--table-header-bg, #003B53)) !important;
 
                         th {
+                            @include table.table-header-cell;
+
                             padding: 0;
                             background-color: transparent !important;
-                            color: var(--table-header-text, var(--blue-200)) !important;
+                            color: var(--max-table-header-text, var(--table-header-text, #8AD6E8)) !important;
                             position: relative;
                             font-weight: 400 !important;
                             flex-grow: 1;
@@ -796,13 +901,29 @@
                                 cursor: pointer;
                                 user-select: none;
                                 outline: none;
+                            }
+
+                            .max-table-header-button {
+                                width: 100%;
+                                height: 100%;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                background: transparent;
+                                border: none;
+                                padding: 0;
+                                margin: 0;
+                                color: inherit;
+                                font: inherit;
+                                cursor: pointer;
+                                outline: none;
 
                                 &:focus:not(:focus-visible) {
                                     outline: none;
                                 }
 
                                 &:focus-visible {
-                                    outline: var(--max-focus-outline);
+                                    outline: var(--max-focus-outline, 2px solid var(--max-primary-500, #00768e));
                                     outline-offset: -2px;
                                 }
                             }
@@ -841,17 +962,18 @@
                 tbody {
                     width: 100% !important;
                     z-index: 1 !important;
-                    font-family: Jost, sans-serif;
                     display: flex !important;
                     flex-direction: column;
                     overflow-y: auto;
 
                     tr {
+                        @include table.table-body-row;
+
                         width: 100% !important;
-                        display: flex;
+                        display: flex !important;
                         height: auto !important;
-                        gap: 0 6px;
-                        padding: 3px 6px !important;
+                        gap: 0 var(--max-table-row-gap, 6px);
+                        padding: var(--max-table-row-padding, 3px 6px) !important;
 
                         &.max-table-virtual-spacer {
                             padding: 0 !important;
@@ -870,18 +992,19 @@
                             padding-bottom: 6px !important;
                         }
 
-                        &.p-row-even,
-                        &.max-table-row-even {
-                            background-color: var(--primary-25) !important;
-                        }
+                        @include table.table-row-zebra;
 
-                        &.p-row-odd,
-                        &.max-table-row-odd {
-                            background-color: var(--primary-100) !important;
-                        }
+                        &.max-table-row-interactive {
+                            cursor: pointer;
 
-                        &.max-table-row-selected {
-                            background-color: var(--primary-200) !important;
+                            &:focus:not(:focus-visible) {
+                                outline: none;
+                            }
+
+                            &:focus-visible {
+                                outline: var(--max-focus-outline, 2px solid var(--max-primary-500, #00768e));
+                                outline-offset: -2px;
+                            }
                         }
 
                         &.max-table-row-state {
@@ -930,6 +1053,8 @@
                         }
 
                         td {
+                            @include table.table-cell-base;
+
                             flex-grow: 1;
                             padding: 0 !important;
                             display: grid;
@@ -937,14 +1062,7 @@
                             border: none !important;
                             border-radius: 0 !important;
 
-                            .max-input-main-div {
-                                grid-template-rows: 1fr !important;
-
-                                .message-spacer,
-                                .input-message {
-                                    display: none !important;
-                                }
-                            }
+                            @include table.table-cell-input-feedback;
                         }
 
                         .max-table-buttons {
@@ -1014,6 +1132,12 @@
 
     to {
         transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .max-table-wrapper .max-table-container table tbody tr.max-table-loading-row .max-table-spinner {
+        animation-duration: 4s;
     }
 }
 </style>

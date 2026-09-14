@@ -33,4 +33,17 @@ describe('cor primária do MaxButton', () => {
         const style = BUTTON.split('<style')[1] ?? '';
         expect(style).toMatch(/var\(--max-primary-600/);
     });
+
+    it('o botão usa tokens explícitos de conteúdo com contraste >= 4.5:1', () => {
+        const style = BUTTON.split('<style')[1] ?? '';
+        expect(style).toContain('color: var(--max-primary-content, #fff);');
+        expect(style).toContain('color: var(--max-secondary-content, #00152A);');
+        expect(style).toContain('color: var(--max-help-content, #fff);');
+    });
+
+    it('ícones e labels herdam currentColor no botão', () => {
+        const style = BUTTON.split('<style')[1] ?? '';
+        expect(style).toContain('fill: currentcolor !important');
+        expect(style).toContain('.max-button-label');
+    });
 });

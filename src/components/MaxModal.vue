@@ -516,4 +516,26 @@
             transform: translate(-50%, -50%) translateX(8px);
         }
     }
+
+    @media (prefers-reduced-motion: reduce) {
+        .max-modal-fade-enter-active,
+        .max-modal-fade-leave-active {
+            transition-duration: 0.01ms !important;
+
+            .max-modal {
+                transition: none !important;
+            }
+        }
+
+        .max-modal-fade-enter-from,
+        .max-modal-fade-leave-to {
+            .max-modal {
+                transform: translate(-50%, -50%) !important;
+            }
+        }
+
+        .background-modal .max-modal.is-shaking {
+            animation: none !important;
+        }
+    }
 </style>

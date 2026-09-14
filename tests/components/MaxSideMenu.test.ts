@@ -29,7 +29,7 @@ vi.mock('@maxvue/max-use', async (importOriginal) => ({
 
 import MaxSideMenu from '../../src/components/MaxSideMenu.vue';
 import MaxMenuVerticalItem from '../../src/components/MaxMenuVerticalItem.vue';
-import MaxIconButton from '../../src/components/MaxIconButton.vue';
+import MaxIcon from '../../src/components/MaxIcon.vue';
 import { useSearchBarStore } from '../../src/stores/useSearchBar.Store';
 import { useSystemStore } from '../../src/stores/useSystem.Store';
 import { configureMaxApp, resetMaxAppConfig } from '../../src/helpers/maxAppConfig';
@@ -49,7 +49,7 @@ const mountWithPinia = (component: any, options: Record<string, any> = {}) => mo
         // possam inspecionar os valores que chegam ao MaxLogo.
         stubs: {
             MaxLogo: { name: 'MaxLogo', props: ['src', 'to'], template: '<div class="max-logo-stub" />' },
-            MaxIcon: { template: '<span class="max-icon-stub" />' },
+            MaxIcon: { name: 'MaxIcon', props: ['light', 'color', 'icon', 'i', 'size'], template: '<span class="max-icon-stub" />' },
             ...(options.global?.stubs ?? {})
         }
     }
@@ -320,26 +320,26 @@ describe('MaxMenuVerticalItem', () => {
         expect(system.page).toBe('projects');
     });
 
-    it('passa light=false e color="var(--blue-750)" para o MaxIconButton quando o item está ativo', () => {
+    it('passa light=false e color="var(--blue-750)" para o MaxIcon quando o item está ativo', () => {
         const wrapper = mountWithPinia(MaxMenuVerticalItem, {
             props: { items: [item({ icon: 'mdi:home', page_component: 'Projects' })] }
         });
 
-        const iconButton = wrapper.findComponent(MaxIconButton);
-        expect(iconButton.exists()).toBe(true);
-        expect(iconButton.props('light')).toBe(false);
-        expect(iconButton.props('color')).toBe('var(--blue-750)');
+        const icon = wrapper.findComponent(MaxIcon);
+        expect(icon.exists()).toBe(true);
+        expect(icon.props('light')).toBe(false);
+        expect(icon.props('color')).toBe('var(--blue-750)');
     });
 
-    it('passa light=true e color=undefined para o MaxIconButton quando o item está inativo', () => {
+    it('passa light=true e color=undefined para o MaxIcon quando o item está inativo', () => {
         const wrapper = mountWithPinia(MaxMenuVerticalItem, {
             props: { items: [item({ icon: 'mdi:cog', page_component: 'Settings' })] }
         });
 
-        const iconButton = wrapper.findComponent(MaxIconButton);
-        expect(iconButton.exists()).toBe(true);
-        expect(iconButton.props('light')).toBe(true);
-        expect(iconButton.props('color')).toBeUndefined();
+        const icon = wrapper.findComponent(MaxIcon);
+        expect(icon.exists()).toBe(true);
+        expect(icon.props('light')).toBe(true);
+        expect(icon.props('color')).toBeUndefined();
     });
 
     it('mantém item ativo quando a rota atual é uma subpágina mapeada (ex: commercial_proposal_detail para commercial_proposals)', () => {

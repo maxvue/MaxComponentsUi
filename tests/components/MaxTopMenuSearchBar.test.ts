@@ -85,10 +85,9 @@ describe('MaxTopMenuSearchBar', () => {
         expect(wrapper.find('.mobile-search-panel').exists()).toBe(true);
 
         const closeBtn = wrapper.find('.btn-close-search');
-        if (closeBtn.exists()) {
-            await closeBtn.trigger('click');
-            expect(wrapper.find('.mobile-search-panel').exists()).toBe(false);
-        }
+        expect(closeBtn.exists()).toBe(true);
+        await closeBtn.trigger('click');
+        expect(wrapper.find('.mobile-search-panel').exists()).toBe(false);
     });
 
     it('exibe o badge de atalho kbd por padrão no modo desktop', () => {
@@ -156,5 +155,65 @@ describe('MaxTopMenuSearchBar', () => {
         expect(panel.attributes('aria-modal')).toBe('true');
         expect(panel.attributes('aria-label')).toBe('Pesquisa');
         expect(panel.attributes('tabindex')).toBe('-1');
+    });
+
+    it('exponha aria-keyshortcuts no input de busca e omite quando shortcut=false', () => {
+        const wrapperActive = mountSearchBar({
+            props: { screen: 'desktop' }
+        });
+        const inputActive = wrapperActive.find('input');
+        expect(['Control+K', 'Meta+K']).toContain(inputActive.attributes('aria-keyshortcuts'));
+
+        const wrapperDisabled = mountSearchBar({
+            props: { screen: 'desktop', shortcut: false }
+        });
+        const inputDisabled = wrapperDisabled.find('input');
+        expect(inputDisabled.attributes('aria-keyshortcuts')).toBeUndefined();
+    });
+
+    it('ignora o atalho quando o foco ativo estiver em outro input editável externo', () => {
+        const externalInput = document.createElement('input');
+        document.body.appendChild(externalInput);
+        externalInput.focus();
+
+        mountSearchBar({
+            props: { screen: 'desktop' }
+        });
+
+        const modKEvent = new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, cancelable: true });
+        const preventSpy = vi.spyOn(modKEvent, 'preventDefault');
+
+        externalInput.dispatchEvent(modKEvent);
+        expect(preventSpy).not.toHaveBeenCalled();
+
+        document.body.removeChild(externalInput);
+    });
+
+    it('foca o input nativo de busca ao pressionar o atalho configurado', () => {
+        const wrapper = mountSearchBar({
+            props: { screen: 'desktop' },
+            attachTo: document.body
+        });
+
+        const input = wrapper.find('input').element as HTMLInputElement;
+        expect(document.activeElement).not.toBe(input);
+
+        const modKEvent = new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, cancelable: true });
+        document.dispatchEvent(modKEvent);
+
+        expect(document.activeElement).toBe(input);
+    });
+
+    it('remove listener no unmount garantindo cleanup sem vazamento', () => {
+        const wrapper = mountSearchBar({
+            props: { screen: 'desktop' }
+        });
+        wrapper.unmount();
+
+        const modKEvent = new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, cancelable: true });
+        const preventSpy = vi.spyOn(modKEvent, 'preventDefault');
+
+        document.dispatchEvent(modKEvent);
+        expect(preventSpy).not.toHaveBeenCalled();
     });
 });

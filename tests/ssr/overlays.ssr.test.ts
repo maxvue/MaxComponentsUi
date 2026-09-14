@@ -39,7 +39,7 @@ describe('Overlays SSR - Renderização Server-side pura (Node.js)', () => {
 
     describe('MaxModal', () => {
         it('renderiza fechado em SSR sem lançar exceção', async () => {
-            const app = createSSRApp(MaxModal, { visible: false });
+            const app = createSSRApp(MaxModal, { visible: false, ariaLabel: 'Fechar' });
             app.use(createPinia());
             app.directive('tooltip', Tooltip);
             app.component('MaxIcon', MaxIcon);
@@ -48,7 +48,7 @@ describe('Overlays SSR - Renderização Server-side pura (Node.js)', () => {
         });
 
         it('renderiza aberto em SSR sem lançar exceção', async () => {
-            const app = createSSRApp(MaxModal, { visible: true, title: 'Modal SSR' });
+            const app = createSSRApp(MaxModal, { visible: true, title: 'Modal SSR', ariaLabel: 'Fechar' });
             app.use(createPinia());
             app.directive('tooltip', Tooltip);
             app.component('MaxIcon', MaxIcon);

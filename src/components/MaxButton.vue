@@ -49,9 +49,9 @@
         uppercase: false
     });
 
-    const isTransparentVariant = computed(() => props.variant === 'outlined' || props.variant === 'text' || props.variant === 'link' || props.dashed === true);
-    const light = computed(() => props.dark || isTransparentVariant.value ? undefined : 0.7);
-    const iconColor = computed(() => isTransparentVariant.value ? 'currentColor' : undefined);
+    const _isTransparentVariant = computed(() => props.variant === 'outlined' || props.variant === 'text' || props.variant === 'link' || props.dashed === true);
+    const light = computed(() => undefined);
+    const iconColor = computed(() => 'currentColor');
 
     const iconPos = computed<'left' | 'right'>(() => {
         if (props.iconRight) return 'right';
@@ -122,13 +122,14 @@
         // themes/tokens.scss). NÃO usar a rampa --primary-* de colors.scss:
         // aquela é uma escala de cinza e deixa todos os botões acinzentados.
         background: var(--max-primary-500);
-        color: var(--background-0);
+        color: var(--max-primary-content, #fff);
         border-color: var(--max-primary-500);
         transition: background 0.2s, color 0.2s, border-color 0.2s;
 
         &:hover {
             background: var(--max-primary-600);
             border-color: var(--max-primary-600);
+            color: var(--max-primary-content, #fff);
         }
 
         &:focus-visible {
@@ -142,6 +143,22 @@
             cursor: not-allowed;
         }
 
+        :deep(.content-button-icon) {
+            .max-icon-div,
+            .max-icon {
+                color: inherit !important;
+            }
+
+            svg {
+                fill: currentcolor !important;
+                color: inherit !important;
+            }
+        }
+
+        .max-button-label {
+            color: inherit;
+        }
+
         &.max-button-uppercase {
             text-transform: uppercase;
         }
@@ -149,77 +166,84 @@
         &.max-button-secondary {
             background: var(--background-500);
             border-color: var(--background-500);
-            color: var(--background-0);
+            color: var(--max-secondary-content, #00152A);
 
             &:hover {
                 background: var(--background-600);
                 border-color: var(--background-600);
+                color: var(--max-secondary-content, #00152A);
             }
         }
 
         &.max-button-success {
             background: var(--max-success-500, var(--success-500));
             border-color: var(--max-success-500, var(--success-500));
-            color: var(--background-0);
+            color: var(--max-success-content, #00152A);
 
             &:hover {
                 background: var(--max-success-600, var(--success-600));
                 border-color: var(--max-success-600, var(--success-600));
+                color: var(--max-success-content, #00152A);
             }
         }
 
         &.max-button-info {
             background: var(--max-info-500, var(--info-500));
             border-color: var(--max-info-500, var(--info-500));
-            color: var(--background-0);
+            color: var(--max-info-content, #00152A);
 
             &:hover {
                 background: var(--max-info-600, var(--info-600));
                 border-color: var(--max-info-600, var(--info-600));
+                color: var(--max-info-content, #00152A);
             }
         }
 
         &.max-button-warning {
             background: var(--max-warning-500, var(--warn-500));
             border-color: var(--max-warning-500, var(--warn-500));
-            color: var(--background-0);
+            color: var(--max-warning-content, #00152A);
 
             &:hover {
                 background: var(--max-warning-600, var(--warn-600));
                 border-color: var(--max-warning-600, var(--warn-600));
+                color: var(--max-warning-content, #00152A);
             }
         }
 
         &.max-button-danger {
-            background: var(--max-danger-500, var(--danger-500));
-            border-color: var(--max-danger-500, var(--danger-500));
-            color: var(--background-0);
+            background: var(--max-danger-surface, var(--max-danger-600, #dc2626));
+            border-color: var(--max-danger-surface, var(--max-danger-600, #dc2626));
+            color: var(--max-danger-content, #fff);
 
             &:hover {
-                background: var(--max-danger-600, var(--danger-600));
-                border-color: var(--max-danger-600, var(--danger-600));
+                background: var(--max-danger-700, #b91c1c);
+                border-color: var(--max-danger-700, #b91c1c);
+                color: var(--max-danger-content, #fff);
             }
         }
 
         &.max-button-whatsapp {
-            background: var(--max-whatsapp-500, #25d366);
-            border-color: var(--max-whatsapp-500, #25d366);
-            color: var(--background-0);
+            background: var(--max-whatsapp-surface, var(--max-whatsapp-700, #075e54));
+            border-color: var(--max-whatsapp-surface, var(--max-whatsapp-700, #075e54));
+            color: var(--max-whatsapp-content, #fff);
 
             &:hover {
-                background: var(--max-whatsapp-600, #1da851);
-                border-color: var(--max-whatsapp-600, #1da851);
+                background: #054a42;
+                border-color: #054a42;
+                color: var(--max-whatsapp-content, #fff);
             }
         }
 
         &.max-button-help {
-            background: var(--violet-500);
-            border-color: var(--violet-500);
-            color: var(--background-0);
+            background: var(--max-help-surface, var(--max-help-500, #7c3aed));
+            border-color: var(--max-help-surface, var(--max-help-500, #7c3aed));
+            color: var(--max-help-content, #fff);
 
             &:hover {
-                background: var(--violet-600);
-                border-color: var(--violet-600);
+                background: var(--max-help-600, #6d28d9);
+                border-color: var(--max-help-600, #6d28d9);
+                color: var(--max-help-content, #fff);
             }
         }
 
@@ -227,11 +251,12 @@
         &.max-button-contrast {
             background: var(--max-button-contrast-border-color, var(--background-900));
             border-color: var(--max-button-contrast-border-color, var(--background-900));
-            color: var(--background-0);
+            color: var(--max-contrast-content, #fff);
 
             &:hover {
                 background: var(--background-750);
                 border-color: var(--background-750);
+                color: var(--max-contrast-content, #fff);
             }
         }
 
@@ -239,11 +264,12 @@
         :global([data-theme='dark']) &.max-button-contrast {
             background: var(--max-button-contrast-border-color, #fff);
             border-color: var(--max-button-contrast-border-color, #fff);
-            color: var(--background-900, #09090b);
+            color: var(--max-contrast-content, var(--background-900, #09090b));
 
             &:hover {
                 background: var(--background-200, #e4e4e7);
                 border-color: var(--background-200, #e4e4e7);
+                color: var(--max-contrast-content, var(--background-900, #09090b));
             }
         }
 

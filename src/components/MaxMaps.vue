@@ -12,6 +12,38 @@
                 <div class="t2">A chave da API do Google Maps não foi configurada.</div>
             </div>
         </div>
+
+        <!-- Controles acessíveis de coordenadas para teclado e tecnologias assistivas -->
+        <div class="map-accessible-controls sr-only" role="region" aria-label="Controles acessíveis de coordenadas do mapa">
+            <label>
+                <span>Latitude:</span>
+                <input
+                    type="number"
+                    step="0.0001"
+                    min="-90"
+                    max="90"
+                    :value="coordinates.latitude"
+                    aria-label="Latitude do marcador"
+                    @change="onLatitudeChange"
+                />
+            </label>
+            <label>
+                <span>Longitude:</span>
+                <input
+                    type="number"
+                    step="0.0001"
+                    min="-180"
+                    max="180"
+                    :value="coordinates.longitude"
+                    aria-label="Longitude do marcador"
+                    @change="onLongitudeChange"
+                />
+            </label>
+            <button type="button" aria-label="Mover marcador para o Norte" @click="stepCoordinate(0.0005, 0)">Norte</button>
+            <button type="button" aria-label="Mover marcador para o Sul" @click="stepCoordinate(-0.0005, 0)">Sul</button>
+            <button type="button" aria-label="Mover marcador para o Oeste" @click="stepCoordinate(0, -0.0005)">Oeste</button>
+            <button type="button" aria-label="Mover marcador para o Leste" @click="stepCoordinate(0, 0.0005)">Leste</button>
+        </div>
     </div>
 </template>
 
@@ -99,8 +131,36 @@
         if (is_active_mount) isMounted.value = true;
     });
 
+    const onLatitudeChange = (event: Event) => {
+        const val = Number((event.target as HTMLInputElement).value);
+        if (!isNaN(val) && val >= -90 && val <= 90) coordinates.value.latitude = Number(val.toFixed(7));
+
+    };
+
+    const onLongitudeChange = (event: Event) => {
+        const val = Number((event.target as HTMLInputElement).value);
+        if (!isNaN(val) && val >= -180 && val <= 180) coordinates.value.longitude = Number(val.toFixed(7));
+
+    };
+
+    const stepCoordinate = (deltaLat: number, deltaLng: number) => {
+        const newLat = Math.min(90, Math.max(-90, coordinates.value.latitude + deltaLat));
+        const newLng = Math.min(180, Math.max(-180, coordinates.value.longitude + deltaLng));
+        coordinates.value = {
+            latitude: Number(newLat.toFixed(7)),
+            longitude: Number(newLng.toFixed(7))
+        };
+    };
+
     onBeforeUnmount(() => {
         is_active_mount = false;
+    });
+
+    defineExpose({
+        coordinates,
+        stepCoordinate,
+        onLatitudeChange,
+        onLongitudeChange
     });
 </script>
 
@@ -174,6 +234,18 @@
             border-radius: 0.6rem;
             display: grid;
             grid-template-rows: 1fr 1fr 1fr;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip-path: inset(50%);
+            white-space: nowrap;
+            border: 0;
         }
     }
 </style>

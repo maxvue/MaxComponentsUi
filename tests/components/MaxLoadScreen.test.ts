@@ -44,6 +44,10 @@ describe('MaxLoadScreen', () => {
     });
 
     it('renderiza um item por target distinto', async () => {
+        const el = document.createElement('div');
+        el.id = 'painel';
+        document.body.appendChild(el);
+
         const loading = useLoadingStore();
         loading.start({ key: 'a', target: 'body' });
         loading.start({ key: 'b', target: '#painel' });
@@ -52,6 +56,7 @@ describe('MaxLoadScreen', () => {
         await wrapper.vm.$nextTick();
 
         expect(wrapper.findAll('.load-screen-target-item')).toHaveLength(2);
+        el.remove();
     });
 
     it('passa o target adiante para o componente filho', async () => {

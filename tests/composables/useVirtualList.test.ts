@@ -107,4 +107,41 @@ describe('useVirtualList', () => {
         const last = vl.visibleItems.value[vl.visibleItems.value.length - 1];
         expect(last.index).toBe(19);
     });
+
+    it('expõe endIndex e atualiza conforme o scroll', () => {
+        const items = ref(makeItems(100));
+        const vl = useVirtualList(items, { itemHeight: 40, enabled: true, overscan: 2 });
+
+        vl.setViewport(0, 400); // 10 visiveis + 2 overscan
+        expect(vl.startIndex.value).toBe(0);
+        expect(vl.endIndex.value).toBe(12);
+
+        vl.setViewport(800, 400); // offset 20 itens
+        expect(vl.startIndex.value).toBe(18); // 20 - 2
+        expect(vl.endIndex.value).toBe(32); // 20 + 10 + 2
+    });
+
+    it('rola deterministicamente com scrollToIndex', () => {
+        const items = ref(makeItems(100));
+        const vl = useVirtualList(items, { itemHeight: 50, enabled: true, overscan: 0 });
+
+        vl.setViewport(0, 500); // 10 itens visiveis (0 a 9)
+
+        // Item 25 esta abaixo da janela: deve rolar ate coloca-lo visivel no fim da viewport
+        const targetScrollEnd = vl.scrollToIndex(25, 'end');
+        expect(targetScrollEnd).toBe(26 * 50 - 500); // 1300 - 500 = 800
+
+        // Com align 'start', coloca no topo
+        const targetScrollStart = vl.scrollToIndex(25, 'start');
+        expect(targetScrollStart).toBe(25 * 50); // 1250
+
+        // Com align 'auto', rolando para um item que ja esta visivel nao altera o scroll
+        vl.setViewport(1250, 500);
+        const unchangedScroll = vl.scrollToIndex(25, 'auto');
+        expect(unchangedScroll).toBe(1250);
+
+        // Clampa ao limite da lista
+        const clampedScroll = vl.scrollToIndex(200);
+        expect(clampedScroll).toBeLessThanOrEqual(vl.totalHeight.value);
+    });
 });

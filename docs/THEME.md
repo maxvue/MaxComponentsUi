@@ -162,6 +162,20 @@ O preset compila automaticamente os arquivos SCSS da pasta `themes/` e injeta co
 
 ---
 
+## Tipografia
+
+A biblioteca padroniza a tipografia através da variável CSS `--font-sans`:
+
+```css
+--font-sans: Quicksand, 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+```
+
+- **Responsabilidade do Host:** A biblioteca não embute arquivos de fontes binárias nem realiza requisições remotas a CDNs. A aplicação consumidora é responsável por carregar a webfont `Quicksand` (via Google Fonts ou asset local), se desejar a renderização com a fonte da marca.
+- **Fallback de Sistema:** Se `Quicksand` não estiver carregada, os fallbacks nativos (`Instrument Sans`, `ui-sans-serif`, `system-ui`, `sans-serif`) são acionados de maneira consistente e segura.
+- **Customização:** Para substituir a fonte em toda a biblioteca, basta definir `--font-sans` na raiz da sua aplicação.
+
+---
+
 ## Variáveis CSS Disponíveis
 
 As variáveis CSS mais comuns geradas pelo tema:

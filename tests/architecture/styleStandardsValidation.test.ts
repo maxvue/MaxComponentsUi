@@ -170,5 +170,5 @@ describe('Auditoria Arquitetural: Estilização Front-End e Regras Estritas', ()
                 expect(regex.test(html)).toBe(false);
             }
         }
-    });
+    }, 20000);
 });

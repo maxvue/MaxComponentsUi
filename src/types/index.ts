@@ -72,6 +72,8 @@ export interface MaxButtonsType extends /* @vue-ignore */ MaxButtonBaseProps {
     disabled?: boolean;
     /** Título ou tooltip acessível */
     title?: string;
+    /** Tooltip de texto acessível */
+    tooltip?: string;
     /** Texto de exibição do botão */
     label?: string;
     /** Ícone a ser exibido no botão */
@@ -416,6 +418,9 @@ export type DBFile = {
     in_server: boolean | null;
 };
 
+export type UploadFileStatus = 'queued' | 'uploading' | 'succeeded' | 'failed';
+export type UploadState = 'idle' | 'selected' | 'uploading' | 'success' | 'error';
+
 export type MenuItem = {
     label?: string;
     items?: MenuItem[];
@@ -434,3 +439,21 @@ export type * from './app';
 
 // Tipos do MaxListBox.
 export type * from './listbox';
+
+// Tipos de estado assíncrono padronizado (E05-07).
+export type * from './asyncState';
+
+/**
+ * Estado assíncrono padronizado para feedback e recuperação de falhas (E05-07).
+ */
+export type AsyncStatus = 'idle' | 'loading' | 'success' | 'empty' | 'error';
+
+export interface AsyncState<T = any> {
+    status: AsyncStatus;
+    data: T | null;
+    error: Error | string | null;
+    attempt: number;
+}
+
+// Tipos do MaxImage (recorte e props).
+export type * from './image';

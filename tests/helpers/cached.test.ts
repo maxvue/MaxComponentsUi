@@ -50,9 +50,11 @@ describe('getCached e setCached', () => {
     });
 
     it('retorna null quando o localStorage contém JSON inválido', async () => {
+        const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
         localStorage.setItem('invalido', 'isso não é json');
         const resultado = await getCached('invalido');
         expect(resultado).toBeNull();
+        expect(errorSpy).toHaveBeenCalled();
     });
 
     it('sobrescreve valor existente com setCached', async () => {

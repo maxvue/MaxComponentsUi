@@ -1,6 +1,6 @@
 # @maxvue/max-components-ui
 
-Biblioteca de componentes Vue 3 baseada em **PrimeVue 4**, construída com **TypeScript** e **Vite 8**.
+Biblioteca de componentes e design system Vue 3 para o ecossistema Max, desenvolvida em **TypeScript** e **Vite 8**.
 Oferece componentes prontos para formulários, tabelas editáveis, overlays, ícones, layout e validação — tudo com estilização padronizada para o ecossistema Max.
 
 ---
@@ -17,7 +17,7 @@ npm install @maxvue/max-components-ui
 npm install vue@^3.5.33 vue-router@^5.0.6
 ```
 
-> O PrimeVue 4 é gerenciado internamente pela biblioteca. Não é necessário instalá-lo separadamente.
+> Componentes PrimeVue que não possuem equivalente na biblioteca podem ser instalados e importados diretamente a partir do pacote oficial `primevue/*`.
 
 ---
 
@@ -31,7 +31,7 @@ import MaxComponentsUi from "@maxvue/max-components-ui";
 
 const app = createApp(App);
 
-// Registra o PrimeVue com o tema Max + locale pt-BR automaticamente
+// Registra as diretivas globais (ex: tooltip) e configurações da biblioteca
 app.use(MaxComponentsUi);
 ```
 
@@ -120,21 +120,17 @@ A biblioteca expõe múltiplos entry points via `package.json` exports:
 | Import path                          | Descrição                                              | Documentação                               |
 | ------------------------------------ | ------------------------------------------------------ | ------------------------------------------ |
 | `@maxvue/max-components-ui`          | Componentes Max + função `install` + tipos             | [COMPONENTS.md](COMPONENTS.md)             |
+| `@maxvue/max-components-ui/stores`   | Stores Pinia (`useIconStore`, `usePopoverStore`, etc.) | [docs/STORES.md](docs/STORES.md)           |
 | `@maxvue/max-components-ui/resolver` | `MaxComponentsUiResolver` para auto-import             | [docs/AUTO-IMPORT.md](docs/AUTO-IMPORT.md) |
 | `@maxvue/max-components-ui/preset`   | `presetMaxUno` — preset UnoCSS com classes utilitárias | [docs/THEME.md](docs/THEME.md)             |
-| `@maxvue/max-components-ui/prime`    | Re-exportação de componentes PrimeVue puros            | [docs/PRIME.md](docs/PRIME.md)             |
-| `@maxvue/max-components-ui/stores`   | Stores Pinia (`useIconStore`, `usePopoverStore`)       | [docs/STORES.md](docs/STORES.md)           |
+| `@maxvue/max-components-ui/styles`   | Presets de tema e paletas semânticas (`MaxStyle`)      | [docs/THEME.md](docs/THEME.md)             |
+| `@maxvue/max-components-ui/style.css`| CSS compilado da biblioteca (estilos e utilitários)    | [docs/THEME.md](docs/THEME.md)             |
 
-### Depreciado: `@maxvue/max-components-ui/prime`
+### Descontinuação do subpath `./prime`
 
-O entry point `./prime` reexporta componentes crus do PrimeVue que não têm
-equivalente Max. Ele está **depreciado** e será removido na próxima major,
-junto com a saída definitiva do PrimeVue.
+O antigo entry point `./prime` foi definitivamente descontinuado e removido. Todos os componentes da biblioteca Max Components UI são nativos e independentes.
 
-Se a sua aplicação usa qualquer um desses componentes — inclusive via
-auto-import, sem `import` explícito no arquivo — passe a importá-los
-diretamente de `primevue/*`, declarando o `primevue` como dependência da
-própria aplicação, ou substitua-os por componentes Max equivalentes.
+Caso a aplicação consumidora necessite de componentes puros do PrimeVue (como `DataTable`, `Dialog`, `Card` etc.) que não possuem correspondente Max nativo, instale `primevue` diretamente no projeto consumidor (`npm install primevue`) e importe-os diretamente dos subpaths oficiais (ex: `import DataTable from 'primevue/datatable'`).
 
 ---
 
@@ -169,6 +165,7 @@ A biblioteca fornece:
 
 - **MaxStyle** — Preset PrimeVue baseado no tema Aura com paleta de cores personalizada (primary, success, info, warning, danger)
 - **presetMaxUno** — Preset UnoCSS com shortcuts e rules customizados para padding, margin, grid, cores, hover e mais
+- **Tipografia Canônica** — Stack baseada em `--font-sans` (`Quicksand` com fallback para fontes do sistema operacional). A biblioteca não embute arquivos binários de fontes; o carregamento de `Quicksand` é responsabilidade da aplicação consumidora.
 
 ```typescript
 // uno.config.ts

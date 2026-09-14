@@ -11,7 +11,7 @@
         <div
             v-for="toast in toastStore.items"
             :key="toast.id"
-            :class="['max-toast-item', `severity-${toast.severity}`, { 'is-persistent': toast.duration === 0 }]"
+            :class="['max-toast-item', `severity-${toast.severity}`, { 'is-persistent': toast.duration === 0 || copyStatus[toast.id] === 'error' }]"
             :role="toast.severity === 'error' ? 'alert' : 'status'"
             @mouseenter="toastStore.pause(toast.id)"
             @mouseleave="toastStore.resume(toast.id)"
@@ -51,8 +51,44 @@
                         class="toast-text-action action-copy"
                         @click.stop="copyToastContent(toast)"
                     >
-                        {{ copiedToastId === toast.id ? 'Copiado!' : 'Copiar' }}
+                        {{ copyStatus[toast.id] === 'success' ? 'Copiado!' : 'Copiar' }}
                     </button>
+                    <button
+                        v-if="copyStatus[toast.id] === 'error'"
+                        type="button"
+                        class="toast-text-action action-retry"
+                        @click.stop="copyToastContent(toast)"
+                    >
+                        Tentar novamente
+                    </button>
+                </div>
+
+                <!-- Anúncio de status sutil ao copiar -->
+                <span
+                    v-if="copyStatus[toast.id] === 'success'"
+                    class="toast-copy-status sr-only"
+                    role="status"
+                    aria-live="polite"
+                >
+                    Copiado para a área de transferência!
+                </span>
+
+                <!-- Feedback persistente e fallback manual caso a cópia falhe -->
+                <div
+                    v-if="copyStatus[toast.id] === 'error'"
+                    class="toast-copy-fallback"
+                    role="alert"
+                    aria-live="assertive"
+                >
+                    <span class="toast-copy-error-msg">Não foi possível copiar automaticamente. Copie manualmente abaixo:</span>
+                    <textarea
+                        readonly
+                        rows="2"
+                        class="toast-copy-manual-input"
+                        :value="getToastFullText(toast)"
+                        @focus="($event.target as HTMLTextAreaElement).select()"
+                        aria-label="Texto da notificação para cópia manual"
+                    />
                 </div>
             </div>
 
@@ -60,14 +96,14 @@
             <button
                 type="button"
                 class="max-toast-close"
-                @click="toastStore.remove(toast.id)"
+                @click="dismissToast(toast.id)"
                 :aria-label="'Fechar notificação: ' + toast.title"
             >
                 <MaxIcon i="mdi:close" size="1.1" color="inherit" />
             </button>
 
-            <!-- Barra de progresso (somente para toasts com duration > 0) -->
-            <div v-if="toast.duration > 0" class="max-toast-progress">
+            <!-- Barra de progresso (somente para toasts com duration > 0 e sem erro de cópia ativo) -->
+            <div v-if="toast.duration > 0 && copyStatus[toast.id] !== 'error'" class="max-toast-progress">
                 <div
                     :class="['max-toast-progress-bar', { paused: toast.paused }]"
                     :style="{ animationDuration: `${toast.remaining ?? toast.duration}ms` }"
@@ -81,36 +117,72 @@
     import { ref, onBeforeUnmount } from 'vue';
     import { useToastStore } from '../stores/useToast.Store';
     import type { ToastItem } from '../stores/useToast.Store';
-    import { useResettableTimeout } from '../composables/useResettableTimeout';
     import MaxIcon from './MaxIcon.vue';
 
     const toastStore = useToastStore();
 
     const expandedToasts = ref<Record<string, boolean>>({});
     const copiedToastId = ref<string | null>(null);
+    const copyStatus = ref<Record<string, 'idle' | 'success' | 'error'>>({});
     let isMounted = true;
-    const copyTimeout = useResettableTimeout(2000);
+    const copyTimeouts: Record<string, ReturnType<typeof setTimeout>> = {};
+
+    const clearCopyTimeout = (id: string) => {
+        if (copyTimeouts[id]) {
+            clearTimeout(copyTimeouts[id]);
+            delete copyTimeouts[id];
+        }
+    };
 
     const toggleExpand = (id: string) => {
         expandedToasts.value[id] = !expandedToasts.value[id];
     };
 
+    const getToastFullText = (toast: ToastItem): string => {
+        return `${toast.title}\n${toast.message ?? ''}`.trim();
+    };
+
     const copyToastContent = async (toast: ToastItem) => {
-        const text = `${toast.title}\n${toast.message ?? ''}`.trim();
-        if (typeof navigator !== 'undefined' && navigator.clipboard) try {
+        const text = getToastFullText(toast);
+        if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) try {
             await navigator.clipboard.writeText(text);
             if (!isMounted) return;
+            const wasInError = copyStatus.value[toast.id] === 'error';
+            copyStatus.value[toast.id] = 'success';
             copiedToastId.value = toast.id;
-            copyTimeout.start(() => {
+            if (wasInError && toast.duration > 0) toastStore.resume(toast.id);
+
+            clearCopyTimeout(toast.id);
+            copyTimeouts[toast.id] = setTimeout(() => {
+                if (!isMounted) return;
+                if (copyStatus.value[toast.id] === 'success') copyStatus.value[toast.id] = 'idle';
                 if (copiedToastId.value === toast.id) copiedToastId.value = null;
-            });
+                delete copyTimeouts[toast.id];
+            }, 2000);
+            return;
         } catch {
-            // Fallback silencioso se clipboard API falhar
+            // Cai no fallback de erro abaixo
         }
+
+        // Clipboard API falhou ou não existe
+        if (!isMounted) return;
+        clearCopyTimeout(toast.id);
+        copyStatus.value[toast.id] = 'error';
+        if (copiedToastId.value === toast.id) copiedToastId.value = null;
+        toastStore.pause(toast.id);
+    };
+
+    const dismissToast = (id: string) => {
+        clearCopyTimeout(id);
+        delete copyStatus.value[id];
+        delete expandedToasts.value[id];
+        if (copiedToastId.value === id) copiedToastId.value = null;
+        toastStore.remove(id);
     };
 
     onBeforeUnmount(() => {
         isMounted = false;
+        Object.keys(copyTimeouts).forEach((id) => clearCopyTimeout(id));
     });
 
     /** Mapa de ícones padrão por severidade */
@@ -194,7 +266,8 @@
             }
 
             &.severity-whatsapp {
-                background: var(--max-whatsapp-600, #128c7e);
+                background: var(--max-whatsapp-surface, var(--max-whatsapp-700, #075e54));
+                color: var(--max-whatsapp-content, #fff);
             }
 
             /* ─── Ícone ─── */
@@ -263,6 +336,39 @@
                             outline: 2px solid #fff;
                             outline-offset: 2px;
                             border-radius: 2px;
+                        }
+                    }
+                }
+
+                .toast-copy-fallback {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+                    margin-top: 6px;
+                    padding: 6px 8px;
+                    background: rgb(0 0 0 / 25%);
+                    border-radius: 6px;
+
+                    .toast-copy-error-msg {
+                        font-size: 0.72rem;
+                        color: rgb(255 255 255 / 90%);
+                        line-height: 1.25;
+                    }
+
+                    .toast-copy-manual-input {
+                        width: 100%;
+                        box-sizing: border-box;
+                        font-size: 0.75rem;
+                        padding: 4px 6px;
+                        border-radius: 4px;
+                        border: 1px solid rgb(255 255 255 / 30%);
+                        background: rgb(0 0 0 / 40%);
+                        color: #fff;
+                        user-select: all;
+
+                        &:focus-visible {
+                            outline: 2px solid #fff;
+                            outline-offset: 1px;
                         }
                     }
                 }
@@ -343,5 +449,37 @@
 
     .max-toast-move {
         transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .max-toast-container .max-toast-wrapper .max-toast-card .max-toast-progress .max-toast-progress-bar {
+            animation: none !important;
+        }
+
+        .max-toast-enter-active,
+        .max-toast-leave-active {
+            transition-duration: 0.01ms !important;
+        }
+
+        .max-toast-enter-from,
+        .max-toast-leave-to {
+            transform: none !important;
+        }
+
+        .max-toast-move {
+            transition: none !important;
+        }
     }
 </style>

@@ -649,4 +649,28 @@ describe('MaxTopMenu Mobile (estilo AgenteDeBolso)', () => {
         expect(notifContainer.exists()).toBe(true);
         expect(notifContainer.find('.bell-icon').text()).toBe('Sino Mobile');
     });
+
+    it('executa reloadAll com proteção contra reentrada e atualiza estado de loading', async () => {
+        const system = useSystemStore();
+        let resolveReload: () => void = () => {};
+        const reloadPromise = new Promise<void>((resolve) => {
+            resolveReload = resolve;
+        });
+        const reloadSpy = vi.fn().mockImplementation(() => reloadPromise);
+        system.reloadAll = reloadSpy;
+
+        const wrapper = mountWithPinia(MaxTopMenu);
+        const reloadBtn = wrapper.find('.tool-bar-plus button');
+        expect(reloadBtn.exists()).toBe(true);
+
+        await reloadBtn.trigger('click');
+        expect(reloadSpy).toHaveBeenCalledTimes(1);
+
+        // Segundo clique durante a requisição não deve disparar novamente
+        await reloadBtn.trigger('click');
+        expect(reloadSpy).toHaveBeenCalledTimes(1);
+
+        resolveReload();
+        await wrapper.vm.$nextTick();
+    });
 });

@@ -135,7 +135,7 @@ describe('MaxBaseVirtualScroller', () => {
         expect(() => wrapper!.vm.scrollToIndex(50)).not.toThrow();
     });
 
-    it('aplica role="listbox" no container e role="option" com aria-setsize/aria-posinset em cada item', async () => {
+    it('permanece semanticamente neutro por padrão sem roles ou atributos posicionais (E06-01)', async () => {
         wrapper = mount(MaxBaseVirtualScroller, {
             props: { items: makeItems(5), itemSize: 40, style: { height: '400px' } },
             slots: { item: '<div class="row-item" />' }
@@ -143,12 +143,58 @@ describe('MaxBaseVirtualScroller', () => {
         stubViewport(wrapper.element as HTMLElement, 400);
         await settle();
 
+        expect(wrapper.find('.max-base-virtual-scroller').attributes('role')).toBeUndefined();
+        expect(wrapper.findAll('[role="option"]')).toHaveLength(0);
+
+        const rows = wrapper.findAll('.row-item');
+        expect(rows.length).toBeGreaterThan(0);
+        expect(rows[0].element.parentElement?.getAttribute('aria-setsize')).toBeNull();
+        expect(rows[0].element.parentElement?.getAttribute('aria-posinset')).toBeNull();
+    });
+
+    it('aplica role="listbox" e role="option" com aria-setsize/aria-posinset quando explicitamente configurado (E06-01)', async () => {
+        wrapper = mount(MaxBaseVirtualScroller, {
+            props: {
+                items: makeItems(5),
+                itemSize: 40,
+                style: { height: '400px' },
+                role: 'listbox',
+                itemRole: 'option',
+                ariaLabel: 'Opções disponíveis'
+            },
+            slots: { item: '<div class="row-item" />' }
+        });
+        stubViewport(wrapper.element as HTMLElement, 400);
+        await settle();
+
         expect(wrapper.find('.max-base-virtual-scroller').attributes('role')).toBe('listbox');
+        expect(wrapper.find('.max-base-virtual-scroller').attributes('aria-label')).toBe('Opções disponíveis');
 
         const options = wrapper.findAll('[role="option"]');
         expect(options.length).toBeGreaterThan(0);
         expect(options[0].attributes('aria-setsize')).toBe('5');
         expect(options[0].attributes('aria-posinset')).toBe('1');
+    });
+
+    it('aplica role="list" e role="listitem" para listas informativas (E06-01)', async () => {
+        wrapper = mount(MaxBaseVirtualScroller, {
+            props: {
+                items: makeItems(5),
+                itemSize: 40,
+                style: { height: '400px' },
+                role: 'list',
+                itemRole: 'listitem'
+            },
+            slots: { item: '<div class="row-item" />' }
+        });
+        stubViewport(wrapper.element as HTMLElement, 400);
+        await settle();
+
+        expect(wrapper.find('.max-base-virtual-scroller').attributes('role')).toBe('list');
+        const items = wrapper.findAll('[role="listitem"]');
+        expect(items.length).toBeGreaterThan(0);
+        expect(items[0].attributes('aria-setsize')).toBe('5');
+        expect(items[0].attributes('aria-posinset')).toBe('1');
     });
 
     it('emite scroll ao rolar o container', async () => {

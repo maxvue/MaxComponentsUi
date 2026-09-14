@@ -1,7 +1,7 @@
 body,
 html,
 #app {
-    font-family: Quicksand, sans-serif;
+    font-family: var(--font-sans, (Quicksand, sans-serif));
 }
 
 $font-label-inputs: 12px;

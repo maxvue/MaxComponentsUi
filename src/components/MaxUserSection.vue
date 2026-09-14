@@ -1,39 +1,55 @@
 <template>
     <div
-        class="max-user-section user-section user-profile-trigger"
+        class="max-user-section"
         :class="{ 'only-avatar': isCompact }"
         :screen="props.screen"
-        ref="root_el"
-        role="button"
-        tabindex="0"
-        aria-haspopup="menu"
-        :aria-expanded="isOpen"
-        :aria-controls="userMenuId"
-        aria-label="Perfil do usuário"
-        @click.stop="toggle"
-        @keydown.enter.prevent="toggle"
-        @keydown.space.prevent="toggle"
-        @keydown.down.prevent="openAndFocusFirst"
-        @keydown.up.prevent="openAndFocusLast"
     >
-        <div v-if="!isCompact" class="user-text-div">
-            <div v-if="props.companyName" class="solar-company-text">
-                {{ props.companyName }}
+        <button
+            type="button"
+            class="user-section user-profile-trigger"
+            :class="{ 'only-avatar': isCompact }"
+            :screen="props.screen"
+            ref="root_el"
+            role="button"
+            tabindex="0"
+            aria-haspopup="menu"
+            :aria-expanded="isOpen"
+            :aria-controls="userMenuId"
+            aria-label="Perfil do usuário"
+            @click.stop="toggle"
+            @keydown.enter.prevent="toggle"
+            @keydown.space.prevent="toggle"
+            @keydown.down.prevent="openAndFocusFirst"
+            @keydown.up.prevent="openAndFocusLast"
+        >
+            <div v-if="!isCompact" class="user-text-div">
+                <div v-if="props.companyName" class="solar-company-text">
+                    {{ props.companyName }}
+                </div>
+                <div class="user-name-text">
+                    {{ props.name }}
+                </div>
             </div>
-            <div class="user-name-text">
-                {{ props.name }}
+            <div class="button-avatar" :class="{ 'mobile-user-avatar': isCompact }">
+                <MaxUserAvatar
+                    v-if="props.userId || props.avatarUrl"
+                    :image-url="props.avatarUrl"
+                    :name="props.name"
+                    :show-tooltip="false"
+                />
+                <MaxIcon v-else icon="clarity:avatar-solid" size="1.2" light />
             </div>
-        </div>
-        <div class="button-avatar" :class="{ 'mobile-user-avatar': isCompact }">
-            <MaxUserAvatar
-                v-if="props.userId || props.avatarUrl"
-                :image-url="props.avatarUrl"
-                :name="props.name"
-                :show-tooltip="false"
-            />
-            <MaxIcon v-else icon="clarity:avatar-solid" size="1.2" light />
-        </div>
-        <div v-if="props.isImpersonated && !isCompact" class="impersonated-btn" @click.stop="onEndImpersonate">
+        </button>
+
+        <button
+            v-if="props.isImpersonated && !isCompact"
+            type="button"
+            class="impersonated-btn"
+            :aria-label="impersonateAriaLabel"
+            @click.stop="onEndImpersonate"
+            @keydown.enter.stop.prevent="onEndImpersonate"
+            @keydown.space.stop.prevent="onEndImpersonate"
+        >
             <div class="impersonated-btn-grid">
                 <MaxIcon i="ci:user-close" icon-blue size="1.3" />
 
@@ -42,7 +58,7 @@
                     <div class="b">{{ props.labelEndImpersonateSub }}</div>
                 </div>
             </div>
-        </div>
+        </button>
 
         <Teleport to="body" v-if="isOpen">
             <div
@@ -276,7 +292,14 @@
         root_el.value?.focus();
     };
 
-    const onEndImpersonate = () => {
+    const impersonateAriaLabel = computed(() => {
+        const main = props.labelEndImpersonate || 'Encerrar personificação';
+        const sub = props.labelEndImpersonateSub ? ` ${props.labelEndImpersonateSub}` : '';
+        return `${main}${sub}`.trim();
+    });
+
+    const onEndImpersonate = (event?: Event) => {
+        event?.stopPropagation?.();
         emit('endImpersonate');
     };
 
@@ -392,92 +415,106 @@
 </script>
 
 <style lang="scss" scoped>
-    .user-section {
-        display: grid;
-        place-items: center end;
-        grid-auto-columns: auto 50px;
-        gap: 1rem;
+    .max-user-section {
         position: relative;
-        outline: none;
-        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
 
-        &.user-profile-trigger {
-            cursor: pointer;
-        }
-
-        &:focus-visible {
-            outline: 2px solid var(--max-primary-500, #00768E);
-            outline-offset: 2px;
-            border-radius: 4px;
-        }
-
-        &.only-avatar,
-        &[screen='mobile'] {
-            display: flex;
-            place-items: center;
-            justify-content: center;
-            width: auto;
-            height: auto;
-            gap: 0;
-
-            .button-avatar {
-                grid-column: 1;
-                width: 34px;
-                height: 34px;
-                border-radius: 50%;
-                overflow: hidden;
-                cursor: pointer;
-                transition: opacity 0.18s ease;
-
-                :deep(.p-avatar),
-                :deep(.max-user-avatar) {
-                    width: 34px;
-                    height: 34px;
-                }
-
-                &:hover {
-                    opacity: 0.85;
-                }
-
-                &:focus-visible {
-                    outline: 2px solid var(--max-primary-500, #00768E);
-                    outline-offset: 2px;
-                }
-            }
-        }
-
-        .user-text-div {
-            grid-column: 1;
-            width: auto;
+        .user-section {
             display: grid;
             place-items: center end;
-            grid-template-rows: 1fr 1fr;
-            color: var(--layout-shell-text, #fff);
-
-            .solar-company-text {
-                font-size: 0.9rem;
-            }
-
-            .user-name-text {
-                font-size: 0.8rem;
-                font-weight: 200;
-                color: var(--layout-shell-text-muted, rgb(255 255 255 / 70%));
-            }
-        }
-
-        .button-avatar {
+            grid-auto-columns: auto 50px;
+            gap: 1rem;
             position: relative;
-            width: 100%;
-            height: 100%;
-            display: grid;
-            place-items: center;
-            grid-column: 2;
+            outline: none;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            padding: 0;
+            margin: 0;
+            font: inherit;
+            color: inherit;
+            text-align: inherit;
 
-            :deep(.p-avatar) {
+            &.user-profile-trigger {
+                cursor: pointer;
+            }
+
+            &:focus-visible {
+                outline: var(--max-focus-outline, 2px solid var(--max-primary-500, #00768e));
+                outline-offset: 2px;
+                box-shadow: var(--max-focus-ring, 0 0 0 2px var(--background-0, #fff), 0 0 0 4px var(--max-primary-500, #00768e));
+                border-radius: 4px;
+            }
+
+            &.only-avatar,
+            &[screen='mobile'] {
+                display: flex;
+                place-items: center;
+                justify-content: center;
+                width: auto;
+                height: auto;
+                gap: 0;
+
+                .button-avatar {
+                    grid-column: 1;
+                    width: 34px;
+                    height: 34px;
+                    border-radius: 50%;
+                    overflow: hidden;
+                    cursor: pointer;
+                    transition: opacity 0.18s ease;
+
+                    :deep(.p-avatar),
+                    :deep(.max-user-avatar) {
+                        width: 34px;
+                        height: 34px;
+                    }
+
+                    &:hover {
+                        opacity: 0.85;
+                    }
+
+                    &:focus-visible {
+                        outline: 2px solid var(--max-primary-500, #00768e);
+                        outline-offset: 2px;
+                    }
+                }
+            }
+
+            .user-text-div {
+                grid-column: 1;
+                width: auto;
+                display: grid;
+                place-items: center end;
+                grid-template-rows: 1fr 1fr;
+                color: var(--layout-shell-text, #fff);
+
+                .solar-company-text {
+                    font-size: 0.9rem;
+                }
+
+                .user-name-text {
+                    font-size: 0.8rem;
+                    font-weight: 200;
+                    color: var(--layout-shell-text-muted, rgb(255 255 255 / 70%));
+                }
+            }
+
+            .button-avatar {
                 position: relative;
-                margin: 0 !important;
-                width: 40px;
-                height: 40px;
+                width: 100%;
+                height: 100%;
+                display: grid;
+                place-items: center;
+                grid-column: 2;
+
+                :deep(.p-avatar) {
+                    position: relative;
+                    margin: 0 !important;
+                    width: 40px;
+                    height: 40px;
+                }
             }
         }
 
@@ -495,9 +532,21 @@
             display: grid;
             place-items: center;
             background-color: var(--background-0);
+            border: none;
+            cursor: pointer;
+            color: inherit;
+            font-family: inherit;
+            margin: 0;
 
-            &:hover {
+            &:hover,
+            &:focus-visible {
                 opacity: 1;
+            }
+
+            &:focus-visible {
+                outline: var(--max-focus-outline, 2px solid var(--max-primary-500, #00768e));
+                outline-offset: 2px;
+                box-shadow: var(--max-focus-ring, 0 0 0 2px var(--background-0, #fff), 0 0 0 4px var(--max-primary-500, #00768e));
             }
 
             .impersonated-btn-grid {

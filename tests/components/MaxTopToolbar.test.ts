@@ -131,4 +131,151 @@ describe('MaxTopToolbar', () => {
         const chevron = wrapper.find('.menu-item-chevron');
         expect(chevron.exists()).toBe(true);
     });
+
+    describe('Navegação Menubar WAI-ARIA (E08-06)', () => {
+        it('apenas o primeiro item navegável possui tabindex="0" e os demais possuem tabindex="-1"', () => {
+            const store = useTopToolbarStore();
+            store.show = true;
+            store.items = [
+                { label: 'Item 1' },
+                { divider: true },
+                { label: 'Item 2', disabled: true },
+                { label: 'Item 3' }
+            ];
+
+            const wrapper = mount(MaxTopToolbar, {
+                global: {
+                    plugins: [pinia],
+                    stubs: { MaxIcon: true }
+                }
+            });
+
+            const items = wrapper.findAll('[role="menuitem"]');
+            expect(items).toHaveLength(3);
+            expect(items[0].attributes('tabindex')).toBe('0');
+            expect(items[1].attributes('tabindex')).toBe('-1');
+            expect(items[2].attributes('tabindex')).toBe('-1');
+        });
+
+        it('ArrowRight e ArrowLeft navegam circularmente pulando divisores e itens desabilitados', async () => {
+            const store = useTopToolbarStore();
+            store.show = true;
+            store.items = [
+                { label: 'Item 1' },
+                { divider: true },
+                { label: 'Item 2', disabled: true },
+                { label: 'Item 3' }
+            ];
+
+            const wrapper = mount(MaxTopToolbar, {
+                attachTo: document.body,
+                global: {
+                    plugins: [pinia],
+                    stubs: { MaxIcon: true }
+                }
+            });
+
+            const items = wrapper.findAll('[role="menuitem"]');
+            await items[0].trigger('keydown', { key: 'ArrowRight' });
+            await wrapper.vm.$nextTick();
+
+            expect((wrapper.vm as any).focusedIndex).toBe(3);
+            expect(items[2].attributes('tabindex')).toBe('0');
+            expect(items[0].attributes('tabindex')).toBe('-1');
+
+            await items[2].trigger('keydown', { key: 'ArrowLeft' });
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).focusedIndex).toBe(0);
+            expect(items[0].attributes('tabindex')).toBe('0');
+
+            wrapper.unmount();
+        });
+
+        it('Home e End movem para o primeiro e último item navegável', async () => {
+            const store = useTopToolbarStore();
+            store.show = true;
+            store.items = [
+                { label: 'Primeiro' },
+                { label: 'Meio' },
+                { label: 'Último' }
+            ];
+
+            const wrapper = mount(MaxTopToolbar, {
+                global: {
+                    plugins: [pinia],
+                    stubs: { MaxIcon: true }
+                }
+            });
+
+            const items = wrapper.findAll('[role="menuitem"]');
+            await items[0].trigger('keydown', { key: 'End' });
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).focusedIndex).toBe(2);
+
+            await items[2].trigger('keydown', { key: 'Home' });
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).focusedIndex).toBe(0);
+        });
+
+        it('ArrowDown ou Enter abre o submenu e foca o primeiro item', async () => {
+            const store = useTopToolbarStore();
+            store.show = true;
+            store.items = [
+                {
+                    label: 'Menu',
+                    items: [
+                        { label: 'Subitem 1' },
+                        { label: 'Subitem 2' }
+                    ]
+                }
+            ];
+
+            const wrapper = mount(MaxTopToolbar, {
+                global: {
+                    plugins: [pinia],
+                    stubs: { MaxIcon: true }
+                }
+            });
+
+            const rootItem = wrapper.find('[role="menuitem"]');
+            expect(rootItem.attributes('aria-haspopup')).toBe('menu');
+            expect(rootItem.attributes('aria-expanded')).toBe('false');
+
+            await rootItem.trigger('keydown', { key: 'ArrowDown' });
+            await wrapper.vm.$nextTick();
+
+            expect((wrapper.vm as any).activeSubmenu).toBe(0);
+            expect(rootItem.attributes('aria-expanded')).toBe('true');
+
+            const submenu = wrapper.find('.p-menubar-submenu-root');
+            expect(submenu.exists()).toBe(true);
+        });
+
+        it('Escape fecha o submenu ativo e devolve o foco ao item raiz', async () => {
+            const store = useTopToolbarStore();
+            store.show = true;
+            store.items = [
+                {
+                    label: 'Menu',
+                    items: [{ label: 'Subitem 1' }]
+                }
+            ];
+
+            const wrapper = mount(MaxTopToolbar, {
+                global: {
+                    plugins: [pinia],
+                    stubs: { MaxIcon: true }
+                }
+            });
+
+            const rootItem = wrapper.find('[role="menuitem"]');
+            await rootItem.trigger('keydown', { key: 'ArrowDown' });
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).activeSubmenu).toBe(0);
+
+            await rootItem.trigger('keydown', { key: 'Escape' });
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).activeSubmenu).toBe(null);
+        });
+    });
 });

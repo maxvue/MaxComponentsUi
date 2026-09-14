@@ -2,7 +2,9 @@
     <div
         ref="parentRef"
         class="max-base-virtual-scroller"
-        role="listbox"
+        :role="props.role || undefined"
+        :aria-label="props.ariaLabel || undefined"
+        :aria-labelledby="props.ariaLabelledby || undefined"
         :style="style"
         @scroll="onScroll"
     >
@@ -10,9 +12,9 @@
             <div
                 v-for="virtualRow in virtualizer.getVirtualItems()"
                 :key="String(virtualRow.key)"
-                role="option"
-                :aria-setsize="items.length"
-                :aria-posinset="virtualRow.index + 1"
+                :role="itemRole || undefined"
+                :aria-setsize="isPositionalRole ? items.length : undefined"
+                :aria-posinset="isPositionalRole ? virtualRow.index + 1 : undefined"
                 :style="{
                     position: 'absolute',
                     top: 0,
@@ -32,6 +34,11 @@
                         last: virtualRow.index === items.length - 1,
                         even: virtualRow.index % 2 === 0,
                         odd: virtualRow.index % 2 !== 0
+                    }"
+                    :aria-props="{
+                        role: itemRole || undefined,
+                        'aria-setsize': isPositionalRole ? items.length : undefined,
+                        'aria-posinset': isPositionalRole ? virtualRow.index + 1 : undefined
                     }"
                 />
             </div>
@@ -53,8 +60,25 @@
             style?: Record<string, string> | string;
             /** itens extras renderizados fora da viewport */
             numToleratedItems?: number;
+            /** papel ARIA do container com scroll (opcional; padrão neutro sem role) */
+            role?: string;
+            /** papel ARIA atribuído a cada linha/item (opcional; ex: 'option', 'listitem') */
+            itemRole?: string;
+            /** rótulo acessível via aria-label */
+            ariaLabel?: string;
+            /** ID do elemento que rotula este container via aria-labelledby */
+            ariaLabelledby?: string;
         }>(),
-        { items: () => [], itemSize: 40, style: undefined, numToleratedItems: 5 }
+        {
+            items: () => [],
+            itemSize: 40,
+            style: undefined,
+            numToleratedItems: 5,
+            role: undefined,
+            itemRole: undefined,
+            ariaLabel: undefined,
+            ariaLabelledby: undefined
+        }
     );
 
     const emit = defineEmits<{
@@ -63,6 +87,8 @@
     }>();
 
     const parentRef = ref<HTMLElement | null>(null);
+
+    const isPositionalRole = computed(() => props.itemRole === 'option' || props.itemRole === 'listitem');
 
     const virtualizer = useVirtualizer(
         computed(() => ({

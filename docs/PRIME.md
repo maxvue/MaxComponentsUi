@@ -1,15 +1,45 @@
-# Componentes PrimeVue — Referência
+# Guia de Migração: Componentes PrimeVue
 
-Referência dos **83 componentes PrimeVue 4** re-exportados pela biblioteca `@maxvue/max-components-ui/prime`.
+> [!WARNING]
+> **Descontinuação e Remoção de `@maxvue/max-components-ui/prime`**
+> O subpath `@maxvue/max-components-ui/prime` foi definitivamente descontinuado e removido na Fase 2 de independência.
+> A biblioteca `@maxvue/max-components-ui` agora é 100% nativa e independente do PrimeVue.
+> Componentes PrimeVue devem ser importados diretamente do pacote oficial `primevue/*`.
 
-**Versão:** PrimeVue 4.5.5+
+## Como Migrar
 
-```typescript
-import { DataTable, Column, Card, Dialog } from '@maxvue/max-components-ui/prime'
+### 1. Componentes com equivalente nativo Max
+
+Substitua imports legados pelos componentes nativos da biblioteca:
+
+| Legado (PrimeVue) | Equivalente Max Recomendado | Import |
+| ----------------- | --------------------------- | ------ |
+| `Button` | `MaxButton` | `@maxvue/max-components-ui` |
+| `InputText` | `MaxInputText` | `@maxvue/max-components-ui` |
+| `DataTable` | `MaxTable` | `@maxvue/max-components-ui` |
+| `Column` | `MaxTableColumn` | `@maxvue/max-components-ui` |
+| `Dialog` | `MaxModal` | `@maxvue/max-components-ui` |
+| `Drawer` | `MaxDrawer` | `@maxvue/max-components-ui` |
+| `Tabs` | `MaxTabs` | `@maxvue/max-components-ui` |
+| `Accordion` | `MaxAccordion` | `@maxvue/max-components-ui` |
+
+### 2. Componentes PrimeVue puros
+
+Para componentes sem equivalente Max (ex: `AutoComplete`, `CascadeSelect`, etc.), instale o `primevue` na aplicação consumidora:
+
+```bash
+npm install primevue
 ```
 
-> **Nota:** Estes são componentes PrimeVue puros, sem customizações adicionais.
-> Para componentes Max com estilo personalizado, use `@maxvue/max-components-ui`.
+E importe diretamente do subpath oficial do PrimeVue:
+
+```typescript
+// Antes (descontinuado):
+// import { AutoComplete } from '@maxvue/max-components-ui/prime';
+
+// Agora:
+import AutoComplete from 'primevue/autocomplete';
+```
 
 ---
 
@@ -1577,15 +1607,12 @@ Emulador de terminal com comandos personalizáveis.
 
 ---
 
-## Por que Re-exportar?
+## Histórico da Descontinuação
 
-A re-exportação resolve dois problemas:
-
-1. **Centralização** — O projeto consumidor não precisa instalar o PrimeVue como dependência direta
-2. **Compatibilidade com auto-import** — O `MaxComponentsUiResolver` resolve automaticamente esses componentes via `@maxvue/max-components-ui/prime`, evitando conflitos de importação
+Anteriormente a biblioteca re-exportava componentes do PrimeVue sob o subpath `./prime`. Na Fase 2 de desvinculação arquitetural, todos os componentes prioritários foram migrados para implementações nativas Max com zero dependência de runtime do PrimeVue. O subpath `./prime` foi removido em definitivo.
 
 ---
 
-## Referência Completa
+## Referência Oficial do PrimeVue
 
-Para a API completa de cada componente (todas as props, eventos e slots), consulte a [documentação oficial do PrimeVue 4](https://primevue.org/).
+Para consultar a documentação completa dos componentes nativos do PrimeVue, consulte o [site oficial do PrimeVue](https://primevue.org/).

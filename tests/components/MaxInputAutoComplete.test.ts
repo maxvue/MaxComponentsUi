@@ -277,4 +277,96 @@ describe('MaxInputAutoComplete.vue — forceSelection', () => {
 
         wrapper.unmount();
     });
+
+    describe('Contrato WAI-ARIA Combobox (E06-02)', () => {
+        it('expõe atributos semânticos combobox no input e sincroniza com o listbox', async () => {
+            const wrapper = mountAutoComplete({
+                options: [
+                    { label: 'Opção Alpha', value: 'alpha' },
+                    { label: 'Opção Beta', value: 'beta' }
+                ],
+                modelValue: 'alpha'
+            });
+
+            const input = wrapper.find('input');
+            expect(input.attributes('role')).toBe('combobox');
+            expect(input.attributes('aria-autocomplete')).toBe('list');
+            expect(input.attributes('aria-expanded')).toBe('false');
+            expect(input.attributes('aria-controls')).toBeUndefined();
+            expect(input.attributes('aria-activedescendant')).toBeUndefined();
+
+            // Abre o dropdown
+            await input.setValue('Opção');
+            await input.trigger('input');
+            await wrapper.vm.$nextTick();
+
+            expect(input.attributes('aria-expanded')).toBe('true');
+            const listboxId = input.attributes('aria-controls');
+            expect(listboxId).toBeTruthy();
+
+            const listbox = document.getElementById(listboxId!);
+            expect(listbox).not.toBeNull();
+            expect(listbox?.getAttribute('role')).toBe('listbox');
+
+            // Navegação por seta atualiza aria-activedescendant
+            await input.trigger('keydown.down');
+            await wrapper.vm.$nextTick();
+
+            const activeDescId = input.attributes('aria-activedescendant');
+            expect(activeDescId).toBe(`${listboxId}-opt-0`);
+
+            // Opções possuem role=option e aria-selected correto
+            const optionEls = listbox?.querySelectorAll('[role="option"]');
+            expect(optionEls?.length).toBe(2);
+            expect(optionEls?.[0].getAttribute('aria-selected')).toBe('true');
+            expect(optionEls?.[1].getAttribute('aria-selected')).toBe('false');
+
+            wrapper.unmount();
+        });
+    });
+
+    describe('Virtualização e Coleções Grandes (E06-06)', () => {
+        it('virtualiza automaticamente listas de sugestões acima do threshold (500 itens)', async () => {
+            const largeOptions = Array.from({ length: 600 }, (_, i) => ({ id: i, name: `Opção ${i}`, value: i }));
+            const wrapper = mountReal({
+                options: largeOptions,
+                modelValue: null
+            });
+
+            const input = wrapper.find('input');
+            await input.setValue('Opção');
+            await input.trigger('input');
+            await wrapper.vm.$nextTick();
+
+            const spacer = document.body.querySelector('.max-autocomplete-spacer');
+            expect(spacer).toBeTruthy();
+
+            const renderedOptions = document.body.querySelectorAll('.max-autocomplete-item');
+            expect(renderedOptions.length).toBeLessThan(600);
+
+            wrapper.unmount();
+        });
+
+        it('respeita virtualScroll=false desativando virtualização', async () => {
+            const largeOptions = Array.from({ length: 550 }, (_, i) => ({ id: i, name: `Opção ${i}`, value: i }));
+            const wrapper = mountReal({
+                options: largeOptions,
+                modelValue: null,
+                virtualScroll: false
+            });
+
+            const input = wrapper.find('input');
+            await input.setValue('Opção');
+            await input.trigger('input');
+            await wrapper.vm.$nextTick();
+
+            const spacer = document.body.querySelector('.max-autocomplete-spacer');
+            expect(spacer).toBeNull();
+
+            const renderedOptions = document.body.querySelectorAll('.max-autocomplete-item');
+            expect(renderedOptions.length).toBe(550);
+
+            wrapper.unmount();
+        });
+    });
 });

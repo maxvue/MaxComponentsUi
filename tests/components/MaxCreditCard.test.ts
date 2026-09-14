@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { mount } from '@vue/test-utils';
+import { mount, flushPromises } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import { nextTick } from 'vue';
 import { vMaska } from 'maska/vue';
@@ -8,6 +8,12 @@ import MaxInputCreditCard from '../../src/components/MaxInputCreditCard.vue';
 import MaxInputCreditCardCvv from '../../src/components/MaxInputCreditCardCvv.vue';
 import MaxInputCreditCardDate from '../../src/components/MaxInputCreditCardDate.vue';
 import InputBase from '../../src/components/InputBase.vue';
+import {
+    clearCardAssetsCache,
+    isCardBrandCached,
+    isCardBackgroundCached,
+    _setBrandLoaderForTest
+} from '../../src/helpers/creditCardAssets';
 
 /**
  * `happy-dom`/`jsdom` não implementam `SVGTextElement.getComputedTextLength()`. Para validar
@@ -54,8 +60,15 @@ function mountCard(props: Record<string, any> = {}) {
     return mount(MaxCreditCard, { props });
 }
 
+async function flushAsync(): Promise<void> {
+    await flushPromises();
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    await flushPromises();
+}
+
 describe('MaxCreditCard', () => {
     beforeEach(() => {
+        clearCardAssetsCache();
         setActivePinia(createPinia());
     });
 
@@ -184,13 +197,11 @@ describe('MaxCreditCard', () => {
             const naturalWidth = backText.getComputedTextLength();
             const textLengthAttr = backText.getAttribute('textLength');
 
-            if (naturalWidth > CVV_MAX_WIDTH) expect(textLengthAttr).not.toBeNull();
-
+            expect(naturalWidth).toBeLessThanOrEqual(CVV_MAX_WIDTH);
+            expect(textLengthAttr).toBeNull();
 
             const effectiveWidth = textLengthAttr !== null ? Number(textLengthAttr) : naturalWidth;
-            expect(effectiveWidth).toBeLessThanOrEqual(Math.max(effectiveWidth, CVV_MAX_WIDTH));
-            if (textLengthAttr !== null) expect(Number(textLengthAttr)).toBeLessThanOrEqual(CVV_MAX_WIDTH);
-
+            expect(effectiveWidth).toBeLessThanOrEqual(CVV_MAX_WIDTH);
         });
 
         it('CVV de 4 dígitos com fonte muito larga é clampado à caixa reservada', async () => {
@@ -313,21 +324,27 @@ describe('MaxCreditCard', () => {
 
     describe('Trio de inputs de cartão de crédito (MaxInputCreditCard*)', () => {
         it('preserva InputBase como wrapper e remove PrimeVue do MaxInputCreditCard', () => {
-            const wrapper = mount(MaxInputCreditCard);
+            const wrapper = mount(MaxInputCreditCard, {
+                props: { modelValue: '' }
+            });
             expect(wrapper.findComponent(InputBase).exists()).toBe(true);
             expect(wrapper.element.classList).toContain('max-input-main-div');
             expect(wrapper.html()).not.toContain('data-pc-name');
         });
 
         it('preserva InputBase como wrapper e remove PrimeVue do MaxInputCreditCardCvv', () => {
-            const wrapper = mount(MaxInputCreditCardCvv);
+            const wrapper = mount(MaxInputCreditCardCvv, {
+                props: { modelValue: '' }
+            });
             expect(wrapper.findComponent(InputBase).exists()).toBe(true);
             expect(wrapper.element.classList).toContain('max-input-main-div');
             expect(wrapper.html()).not.toContain('data-pc-name');
         });
 
         it('preserva InputBase como wrapper e remove PrimeVue do MaxInputCreditCardDate', () => {
-            const wrapper = mount(MaxInputCreditCardDate);
+            const wrapper = mount(MaxInputCreditCardDate, {
+                props: { modelValue: '' }
+            });
             expect(wrapper.findComponent(InputBase).exists()).toBe(true);
             expect(wrapper.element.classList).toContain('max-input-main-div');
             expect(wrapper.html()).not.toContain('data-pc-name');
@@ -335,6 +352,7 @@ describe('MaxCreditCard', () => {
 
         it('valida rejeição de mês inválido (13) em MaxInputCreditCardDate', async () => {
             const wrapper = mount(MaxInputCreditCardDate, {
+                props: { modelValue: '' },
                 global: {
                     directives: { maska: vMaska }
                 }
@@ -400,8 +418,9 @@ describe('MaxCreditCard', () => {
     });
 
     describe('Renderização de imagens de fundo e bandeiras (Data URI)', () => {
-        it('renderiza a imagem de fundo frontal com href válido em Data URI', () => {
+        it('renderiza a imagem de fundo frontal com href válido em Data URI', async () => {
             const wrapper = mountCard({});
+            await flushAsync();
             const frontImage = wrapper.find('.flip-card-front svg image');
             expect(frontImage.exists()).toBe(true);
 
@@ -415,8 +434,9 @@ describe('MaxCreditCard', () => {
             expect(decoded).not.toContain('<!DOCTYPE');
         });
 
-        it('renderiza a imagem de fundo traseira com href válido em Data URI', () => {
+        it('renderiza a imagem de fundo traseira com href válido em Data URI', async () => {
             const wrapper = mountCard({ side: 'back' });
+            await flushAsync();
             const rearImage = wrapper.find('.flip-card-back svg image');
             expect(rearImage.exists()).toBe(true);
 
@@ -430,8 +450,9 @@ describe('MaxCreditCard', () => {
             expect(decoded).not.toContain('<!DOCTYPE');
         });
 
-        it('renderiza o logo da bandeira quando informada ou deduzida', () => {
+        it('renderiza o logo da bandeira quando informada ou deduzida', async () => {
             const wrapper = mountCard({ cardType: 'visa' });
+            await flushAsync();
             const brandImages = wrapper.findAll('.flip-card-front svg image');
             // Primeiro image é o background, segundo é a bandeira
             expect(brandImages.length).toBe(2);
@@ -446,29 +467,35 @@ describe('MaxCreditCard', () => {
             expect(decoded).not.toContain('<!DOCTYPE');
         });
 
-        it('renderiza aliases de bandeiras (american-express, diners-club, hiper) com o mesmo SVG canônico', () => {
+        it('renderiza aliases de bandeiras (american-express, diners-club, hiper) com o mesmo SVG canônico', async () => {
             const wrapperAmex = mountCard({ cardType: 'amex' });
             const wrapperAmexAlias = mountCard({ cardType: 'american-express' });
+            await flushAsync();
             const amexHref = wrapperAmex.findAll('.flip-card-front svg image')[1].attributes('href');
             const amexAliasHref = wrapperAmexAlias.findAll('.flip-card-front svg image')[1].attributes('href');
             expect(amexHref).toBe(amexAliasHref);
 
             const wrapperDiners = mountCard({ cardType: 'diners' });
             const wrapperDinersAlias = mountCard({ cardType: 'diners-club' });
+            await flushAsync();
             const dinersHref = wrapperDiners.findAll('.flip-card-front svg image')[1].attributes('href');
             const dinersAliasHref = wrapperDinersAlias.findAll('.flip-card-front svg image')[1].attributes('href');
             expect(dinersHref).toBe(dinersAliasHref);
 
             const wrapperHiper = mountCard({ cardType: 'hipercard' });
             const wrapperHiperAlias = mountCard({ cardType: 'hiper' });
+            await flushAsync();
             const hiperHref = wrapperHiper.findAll('.flip-card-front svg image')[1].attributes('href');
             const hiperAliasHref = wrapperHiperAlias.findAll('.flip-card-front svg image')[1].attributes('href');
             expect(hiperHref).toBe(hiperAliasHref);
         });
 
-        it('renderiza bandeira JCB como SVG vetorial puro sem imagens raster embutidas', () => {
+        it('renderiza bandeira JCB como SVG vetorial puro sem imagens raster embutidas', async () => {
             const wrapperJcb = mountCard({ cardType: 'jcb' });
-            const jcbImage = wrapperJcb.findAll('.flip-card-front svg image')[1];
+            await flushAsync();
+            const images = wrapperJcb.findAll('.flip-card-front svg image');
+            expect(images.length).toBe(2);
+            const jcbImage = images[1];
             expect(jcbImage.exists()).toBe(true);
 
             const href = jcbImage.attributes('href');
@@ -479,6 +506,100 @@ describe('MaxCreditCard', () => {
             expect(decoded).toContain('viewBox="0 0 1100 800"');
             expect(decoded).not.toContain('<image');
             expect(decoded).not.toContain('data:image/png');
+        });
+
+        it('não carrega qualquer loader de bandeira quando o cartão é montado sem bandeira', async () => {
+            const wrapper = mountCard({});
+            await flushAsync();
+
+            expect(isCardBackgroundCached('front')).toBe(true);
+            expect(isCardBackgroundCached('rear')).toBe(true);
+            expect(isCardBrandCached('visa')).toBe(false);
+            expect(isCardBrandCached('mastercard')).toBe(false);
+            expect(isCardBrandCached('amex')).toBe(false);
+            expect(wrapper.findAll('.flip-card-front svg image').length).toBe(1);
+        });
+
+        it('carrega apenas o loader canônico da bandeira selecionada e reutiliza o cache', async () => {
+            expect(isCardBrandCached('visa')).toBe(false);
+
+            const wrapper = mountCard({ cardType: 'visa' });
+            await flushAsync();
+
+            expect(isCardBrandCached('visa')).toBe(true);
+            expect(isCardBrandCached('mastercard')).toBe(false);
+            expect(isCardBrandCached('jcb')).toBe(false);
+            const brandImage1 = wrapper.findAll('.flip-card-front svg image')[1];
+            expect(brandImage1.attributes('href')).toMatch(/^data:image\/svg\+xml;base64,/);
+
+            // Segunda montagem reutiliza cache
+            const wrapper2 = mountCard({ cardType: 'visa' });
+            await flushAsync();
+            const brandImage2 = wrapper2.findAll('.flip-card-front svg image')[1];
+            expect(brandImage2.attributes('href')).toBe(brandImage1.attributes('href'));
+        });
+
+        it('protege contra race condition quando cardType muda rapidamente (JCB -> Visa fora de ordem)', async () => {
+            let resolveJcb!: (val: { default: string }) => void;
+            let resolveVisa!: (val: { default: string }) => void;
+
+            const jcbPromise = new Promise<{ default: string }>((res) => {
+                resolveJcb = res;
+            });
+            const visaPromise = new Promise<{ default: string }>((res) => {
+                resolveVisa = res;
+            });
+
+            _setBrandLoaderForTest('jcb', () => jcbPromise);
+            _setBrandLoaderForTest('visa', () => visaPromise);
+
+            const wrapper = mountCard({ cardType: 'jcb' });
+            // Antes do JCB resolver, troca imediatamente para Visa
+            await wrapper.setProps({ cardType: 'visa' });
+
+            // Simula resolução fora de ordem: Visa resolve PRIMEIRO, depois JCB resolve
+            resolveVisa({ default: '<svg viewBox="0 0 100 100"><g id="visa"/></svg>' });
+            await flushPromises();
+
+            const brandImageAfterVisa = wrapper.findAll('.flip-card-front svg image')[1];
+            expect(brandImageAfterVisa.exists()).toBe(true);
+            const visaHref = brandImageAfterVisa.attributes('href');
+
+            // Agora o JCB atrasado resolve
+            resolveJcb({ default: '<svg viewBox="0 0 100 100"><g id="jcb"/></svg>' });
+            await flushPromises();
+
+            // A imagem exibida DEVE continuar sendo Visa, descartando a resposta obsoleta do JCB
+            const finalImage = wrapper.findAll('.flip-card-front svg image')[1];
+            expect(finalImage.attributes('href')).toBe(visaHref);
+        });
+
+        it('trata falha de carregamento do chunk graciosamente sem lançar erro', async () => {
+            _setBrandLoaderForTest('elo', () => Promise.reject(new Error('Chunk loading failed')));
+
+            const wrapper = mountCard({ cardType: 'elo' });
+            await flushPromises();
+
+            // Frente tem apenas o fundo, sem a bandeira quebrada
+            const images = wrapper.findAll('.flip-card-front svg image');
+            expect(images.length).toBe(1);
+        });
+
+        it('não executa atualização tardia após o componente ser desmontado', async () => {
+            let resolveVisa!: (val: { default: string }) => void;
+            const visaPromise = new Promise<{ default: string }>((res) => {
+                resolveVisa = res;
+            });
+            _setBrandLoaderForTest('visa', () => visaPromise);
+
+            const wrapper = mountCard({ cardType: 'visa' });
+            wrapper.unmount();
+
+            // Resolve promise depois da desmontagem
+            resolveVisa({ default: '<svg viewBox="0 0 100 100"><g id="visa"/></svg>' });
+            await flushPromises();
+
+            expect(wrapper.vm.card_type_image).toBeNull();
         });
     });
 });

@@ -104,10 +104,10 @@ describe('Matriz Semântica de 4 Níveis de Cor de Texto (background-650/700/750
     });
 
     describe('6. Formulários e Inputs', () => {
-        it('InputBase deve unificar desabilitados em Texto Fraco (650) e placeholder em 650', () => {
+        it('InputBase deve unificar desabilitados em token disabled e placeholder em token próprio', () => {
             const style = INPUT_BASE.split('<style')[1] ?? '';
-            expect(style).toMatch(/placeholder\s*\{[^}]*color:\s*var\(--background-650\)/);
-            expect(style).toMatch(/\[disabled\][^}]*color:\s*var\(--background-650\)\s*!important/);
+            expect(style).toMatch(/placeholder\s*\{[^}]*color:\s*var\(--max-content-placeholder/);
+            expect(style).toMatch(/\[disabled\][^}]*color:\s*var\(--max-content-disabled/);
         });
 
         it('MaxInputToggle deve ter label superior em Texto Levemente Destacado (750) e label inline em Texto Normal (700)', () => {
@@ -158,10 +158,10 @@ describe('Matriz Semântica de 4 Níveis de Cor de Texto (background-650/700/750
             expect(style).toMatch(/\.max-datepicker-day\s*\{[^}]*color:\s*var\(--background-700\)/);
         });
 
-        it('MaxInputMarkdown deve usar 700 para texto normal, 650 para placeholder, 775 para headings e 750 para th', () => {
+        it('MaxInputMarkdown deve usar 700 para texto normal, placeholder com token próprio, 775 para headings e 750 para th', () => {
             const style = MARKDOWN.split('<style')[1] ?? '';
             expect(style).toMatch(/\.max-input-markdown__prosemirror\s*\{[^}]*color:\s*var\(--background-700\)/);
-            expect(style).toMatch(/color:\s*var\(--background-650\)/);
+            expect(style).toMatch(/color:\s*var\(--max-content-placeholder/);
             expect(style).toMatch(/h1,\s*h2,\s*h3,\s*h4,\s*h5,\s*h6\s*\{[^}]*color:\s*var\(--background-775\)/);
             expect(style).toMatch(/th\s*\{[^}]*color:\s*var\(--background-750\)/);
         });
@@ -197,12 +197,58 @@ describe('Matriz Semântica de 4 Níveis de Cor de Texto (background-650/700/750
             expect(style).toMatch(/\.icon-div\s*\{[^}]*color:\s*var\(--background-650\)/);
         });
 
-        it('MaxSideMenuMobile deve usar Texto Normal (700) no item, 750 no título do grupo, 775 no nome e 650 na versão', () => {
+        it('MaxSideMenuMobile deve usar Texto Normal (700) no item, 750 no título do grupo, layout-shell-text no nome e 650 na versão', () => {
             const style = SIDE_MENU_MOBILE.split('<style')[1] ?? '';
-            expect(style).toMatch(/\.mobile-profile-name\s*\{[^}]*color:\s*var\(--background-775\)/);
+            expect(style).toMatch(/\.mobile-profile-name\s*\{[^}]*color:\s*var\(--layout-shell-text/);
             expect(style).toMatch(/\.mobile-group-title\s*\{[^}]*color:\s*var\(--background-750\)/);
             expect(style).toMatch(/\.mobile-menu-item\s*\{[^}]*color:\s*var\(--background-700\)/);
             expect(style).toMatch(/\.mobile-app-version\s*\{[^}]*color:\s*var\(--background-650\)/);
+        });
+    });
+
+    describe('8. Separação de Conteúdo Secundário e Disabled com Contraste >= 4.5:1 (E10-03)', () => {
+        const getLuminance = (hex: string): number => {
+            const clean = hex.replace('#', '');
+            const r = parseInt(clean.substring(0, 2), 16) / 255;
+            const g = parseInt(clean.substring(2, 4), 16) / 255;
+            const b = parseInt(clean.substring(4, 6), 16) / 255;
+            const a = [r, g, b].map((v) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)));
+            return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+        };
+
+        const getContrast = (bg: string, fg: string): number => {
+            const l1 = getLuminance(bg);
+            const l2 = getLuminance(fg);
+            return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+        };
+
+        it('tokens dedicados de texto secundário, placeholder e ajuda atingem contraste >= 4.5:1 no tema claro', () => {
+            const lightBg = '#ffffff';
+            const secondaryLight = '#334155';
+            const placeholderLight = '#475569';
+            const helpLight = '#475569';
+
+            expect(getContrast(lightBg, secondaryLight)).toBeGreaterThanOrEqual(4.5);
+            expect(getContrast(lightBg, placeholderLight)).toBeGreaterThanOrEqual(4.5);
+            expect(getContrast(lightBg, helpLight)).toBeGreaterThanOrEqual(4.5);
+        });
+
+        it('tokens dedicados de texto secundário, placeholder e ajuda atingem contraste >= 4.5:1 no tema escuro', () => {
+            const darkBg = '#09090b';
+            const secondaryDark = '#cbd5e1';
+            const placeholderDark = '#94a3b8';
+            const helpDark = '#94a3b8';
+
+            expect(getContrast(darkBg, secondaryDark)).toBeGreaterThanOrEqual(4.5);
+            expect(getContrast(darkBg, placeholderDark)).toBeGreaterThanOrEqual(4.5);
+            expect(getContrast(darkBg, helpDark)).toBeGreaterThanOrEqual(4.5);
+        });
+
+        it('InputBase consome tokens semânticos dedicados para placeholder, help e disabled', () => {
+            const style = INPUT_BASE.split('<style')[1] ?? '';
+            expect(style).toMatch(/color:\s*var\(--max-content-placeholder/);
+            expect(style).toMatch(/color:\s*var\(--max-content-help/);
+            expect(style).toMatch(/color:\s*var\(--max-content-disabled/);
         });
     });
 });

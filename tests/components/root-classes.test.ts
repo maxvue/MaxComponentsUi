@@ -74,10 +74,13 @@ describe('Root Component Identifier Classes', () => {
     const defaultGlobal = {
         stubs: {
             MaxIcon: true,
+            Icon: true,
             RouterLink: { template: '<a><slot /></a>' },
             MaxButton: true,
             MaxIconButton: true,
-            Teleport: true
+            Teleport: true,
+            DotLottieVue: true,
+            VuePdfEmbed: true
         }
     };
 
@@ -177,7 +180,7 @@ describe('Root Component Identifier Classes', () => {
     });
 
     it('MaxListBox possui classe max-list-box', () => {
-        const wrapper = mount(MaxListBox, { props: { options: [] }, global: defaultGlobal });
+        const wrapper = mount(MaxListBox, { props: { options: [], ariaLabel: 'Opções' }, global: defaultGlobal });
         expect(wrapper.classes()).toContain('max-list-box');
     });
 
@@ -212,7 +215,7 @@ describe('Root Component Identifier Classes', () => {
     });
 
     it('MaxInputMarkdownToolbar possui classe max-input-markdown-toolbar', () => {
-        const wrapper = mount(MaxInputMarkdownToolbar, { global: defaultGlobal });
+        const wrapper = mount(MaxInputMarkdownToolbar, { props: { editor: { isActive: () => false, can: () => ({ undo: () => true, redo: () => true }) } as any }, global: defaultGlobal });
         expect(wrapper.classes()).toContain('max-input-markdown-toolbar');
     });
 
@@ -247,7 +250,7 @@ describe('Root Component Identifier Classes', () => {
     });
 
     it('MaxIconButton possui classe max-icon-button', () => {
-        const wrapper = mount(MaxIconButton, { props: { icon: 'home' }, global: defaultGlobal });
+        const wrapper = mount(MaxIconButton, { props: { icon: 'home', ariaLabel: 'Início' }, global: defaultGlobal });
         expect(wrapper.classes()).toContain('max-icon-button');
     });
 
@@ -344,7 +347,7 @@ describe('Root Component Identifier Classes', () => {
     });
 
     it('MaxModal possui classe max-modal', async () => {
-        const wrapper = mount(MaxModal, { global: { ...defaultGlobal, stubs: { teleport: true } } });
+        const wrapper = mount(MaxModal, { props: { ariaLabel: 'Modal' }, global: { ...defaultGlobal, stubs: { ...defaultGlobal.stubs, teleport: true } } });
         (wrapper.vm as any).open();
         await wrapper.vm.$nextTick();
         expect(wrapper.find('.max-modal').exists()).toBe(true);

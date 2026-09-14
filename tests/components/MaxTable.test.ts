@@ -210,7 +210,7 @@ describe('MaxTable', () => {
             expect(rows[2].text()).toContain('Ana');
         });
 
-        it('cabeçalho sortable possui tabindex="0", aria-sort e responde a Enter e Espaço', async () => {
+        it('cabeçalho sortable insere botão nativo .max-table-header-button, aria-sort no th, ícone aria-hidden e responde a Enter e Espaço', async () => {
             const wrapper = mount(MaxTable, {
                 props: {
                     value: [...sampleData]
@@ -223,17 +223,21 @@ describe('MaxTable', () => {
             });
 
             const header = wrapper.find('thead th.max-table-th-sortable');
-            expect(header.attributes('tabindex')).toBe('0');
+            const button = header.find('button.max-table-header-button');
+            expect(button.exists()).toBe(true);
+            expect(button.attributes('type')).toBe('button');
+            expect(header.attributes('tabindex')).toBeUndefined();
             expect(header.attributes('aria-sort')).toBe('none');
+            expect(header.find('.sort-icon-box').attributes('aria-hidden')).toBe('true');
 
             // Enter: Ascending
-            await header.trigger('keydown', { key: 'Enter' });
+            await button.trigger('keydown', { key: 'Enter' });
             expect(header.attributes('aria-sort')).toBe('ascending');
             let rows = wrapper.findAll('tbody tr.max-table-row');
             expect(rows[0].text()).toContain('Ana');
 
             // Space: Descending
-            await header.trigger('keydown', { key: ' ' });
+            await button.trigger('keydown', { key: ' ' });
             expect(header.attributes('aria-sort')).toBe('descending');
             rows = wrapper.findAll('tbody tr.max-table-row');
             expect(rows[0].text()).toContain('Carlos');
@@ -371,6 +375,195 @@ describe('MaxTable', () => {
             expect(buttons[0].text()).toBe('Ação 1');
             expect(buttons[1].text()).toBe('Ação 2');
             expect(buttons[2].text()).toBe('Ação 3');
+        });
+    });
+
+    describe('Acessibilidade e Operações por Teclado nas Linhas (E08-05)', () => {
+        const sampleData = [
+            { id: 1, name: 'Carlos', role: 'Admin' },
+            { id: 2, name: 'Ana', role: 'User' },
+            { id: 3, name: 'Bruno', role: 'Editor' }
+        ];
+
+        it('linhas estáticas permanecem fora do Tab e sem aria-selected', () => {
+            const wrapper = mount(MaxTable, {
+                props: { value: sampleData },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome' })
+                    ]
+                }
+            });
+
+            const rows = wrapper.findAll('tbody tr.max-table-row');
+            expect(rows.length).toBe(3);
+            for (const row of rows) {
+                expect(row.attributes('tabindex')).toBeUndefined();
+                expect(row.attributes('aria-selected')).toBeUndefined();
+                expect(row.classes()).not.toContain('max-table-row-interactive');
+            }
+        });
+
+        it('linhas interativas com selectionMode aplicam tabindex="0", classe interativa e aria-selected', async () => {
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: sampleData,
+                    selectionMode: 'single',
+                    selection: sampleData[0]
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome' })
+                    ]
+                }
+            });
+
+            const rows = wrapper.findAll('tbody tr.max-table-row');
+            expect(rows[0].attributes('tabindex')).toBe('0');
+            expect(rows[0].attributes('aria-selected')).toBe('true');
+            expect(rows[0].classes()).toContain('max-table-row-interactive');
+
+            expect(rows[1].attributes('tabindex')).toBe('0');
+            expect(rows[1].attributes('aria-selected')).toBe('false');
+            expect(rows[1].classes()).toContain('max-table-row-interactive');
+        });
+
+        it('tecla Espaço alterna seleção em selectionMode single', async () => {
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: sampleData,
+                    selectionMode: 'single'
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome' })
+                    ]
+                }
+            });
+
+            const rows = wrapper.findAll('tbody tr.max-table-row');
+
+            // Espaço na linha não selecionada: seleciona
+            await rows[0].trigger('keydown', { key: ' ' });
+            expect(wrapper.emitted('update:selection')).toBeTruthy();
+            expect(wrapper.emitted('update:selection')![0]).toEqual([sampleData[0]]);
+
+            // Atualiza prop selection para simular estado selecionado e pressiona Espaço novamente: desseleciona
+            await wrapper.setProps({ selection: sampleData[0] });
+            await rows[0].trigger('keydown', { key: ' ' });
+            expect(wrapper.emitted('update:selection')![1]).toEqual([null]);
+        });
+
+        it('tecla Espaço alterna seleção em selectionMode multiple', async () => {
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: sampleData,
+                    selectionMode: 'multiple',
+                    selection: [sampleData[0]]
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome' })
+                    ]
+                }
+            });
+
+            const rows = wrapper.findAll('tbody tr.max-table-row');
+
+            // Espaço na linha 2 (não selecionada): adiciona à seleção
+            await rows[1].trigger('keydown', { key: ' ' });
+            expect(wrapper.emitted('update:selection')).toBeTruthy();
+            expect(wrapper.emitted('update:selection')![0]).toEqual([[sampleData[0], sampleData[1]]]);
+
+            // Espaço na linha 1 (já selecionada): remove da seleção
+            await rows[0].trigger('keydown', { key: ' ' });
+            expect(wrapper.emitted('update:selection')![1]).toEqual([[]]);
+        });
+
+        it('tecla Enter ativa row-click quando ouvinte fornecido e não cria seleção implícita', async () => {
+            const onRowClick = vi.fn();
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: sampleData,
+                    onRowClick
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome' })
+                    ]
+                }
+            });
+
+            const rows = wrapper.findAll('tbody tr.max-table-row');
+            expect(rows[0].attributes('tabindex')).toBe('0');
+            // Como selectionMode não está configurado, aria-selected não deve existir
+            expect(rows[0].attributes('aria-selected')).toBeUndefined();
+
+            // Enter ativa row-click
+            await rows[0].trigger('keydown', { key: 'Enter' });
+            expect(wrapper.emitted('row-click')).toBeTruthy();
+            expect(wrapper.emitted('row-click')![0][0]).toMatchObject({
+                data: sampleData[0],
+                index: 0
+            });
+
+            // Espaço NÃO deve selecionar nem emitir nada
+            await rows[0].trigger('keydown', { key: ' ' });
+            expect(wrapper.emitted('update:selection')).toBeFalsy();
+            expect(wrapper.emitted('row-click')).toHaveLength(1);
+        });
+
+        it('quando apenas selectionMode existe sem row-click, tecla Enter não cria ação implícita', async () => {
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: sampleData,
+                    selectionMode: 'single'
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome' })
+                    ]
+                }
+            });
+
+            const rows = wrapper.findAll('tbody tr.max-table-row');
+            await rows[0].trigger('keydown', { key: 'Enter' });
+            expect(wrapper.emitted('row-click')).toBeFalsy();
+            expect(wrapper.emitted('update:selection')).toBeFalsy();
+        });
+
+        it('ignora eventos de teclado e clique disparados em controles interativos filhos da linha', async () => {
+            const onRowClick = vi.fn();
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: sampleData,
+                    selectionMode: 'single',
+                    onRowClick
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome' }),
+                        h(MaxTableColumn, { field: 'action', header: 'Ação' }, {
+                            body: () => h('button', { class: 'inner-action-btn' }, 'Excluir')
+                        })
+                    ]
+                }
+            });
+
+            const innerButton = wrapper.find('.inner-action-btn');
+            expect(innerButton.exists()).toBe(true);
+
+            // Clique no botão interno
+            await innerButton.trigger('click');
+            expect(wrapper.emitted('row-click')).toBeFalsy();
+            expect(wrapper.emitted('update:selection')).toBeFalsy();
+
+            // Teclado no botão interno
+            await innerButton.trigger('keydown', { key: 'Enter' });
+            expect(wrapper.emitted('row-click')).toBeFalsy();
+
+            await innerButton.trigger('keydown', { key: ' ' });
+            expect(wrapper.emitted('update:selection')).toBeFalsy();
         });
     });
 
@@ -665,6 +858,30 @@ describe('MaxTable', () => {
             await settle();
 
             expect((wrapper.vm as any).rowVirtualizer.getTotalSize()).toBeGreaterThanOrEqual(400);
+        });
+    });
+
+    describe('Anatomia visual compartilhada e feedback de célula (E10-08)', () => {
+        it('não contém regra display: none para .input-message no SFC', async () => {
+            const fs = await import('node:fs');
+            const path = await import('node:path');
+            const sfc = fs.readFileSync(path.resolve(__dirname, '../../src/components/MaxTable.vue'), 'utf-8');
+
+            expect(sfc).not.toMatch(/\.input-message\s*\{[^}]*display:\s*none/);
+        });
+
+        it('importa e consome os mixins compartilhados de table-anatomy', async () => {
+            const fs = await import('node:fs');
+            const path = await import('node:path');
+            const sfc = fs.readFileSync(path.resolve(__dirname, '../../src/components/MaxTable.vue'), 'utf-8');
+
+            expect(sfc).toContain('@use \'../themes/table-anatomy\' as table;');
+            expect(sfc).toContain('@include table.table-container');
+            expect(sfc).toContain('@include table.table-header-row');
+            expect(sfc).toContain('@include table.table-header-cell');
+            expect(sfc).toContain('@include table.table-body-row');
+            expect(sfc).toContain('@include table.table-row-zebra');
+            expect(sfc).toContain('@include table.table-cell-input-feedback');
         });
     });
 });

@@ -201,4 +201,41 @@ describe('MaxUserAvatar', () => {
         expect(iconComponent.props('size')).toBe('72%');
         expect(iconComponent.props('color')).toBe('#fff');
     });
+
+    it('renderiza button type="button" apenas quando remove=true e noClick=false, e div caso contrário', () => {
+        const wDivDefault = mountAvatar();
+        expect(wDivDefault.element.tagName).toBe('DIV');
+        expect(wDivDefault.attributes('type')).toBeUndefined();
+        expect(wDivDefault.attributes('aria-label')).toBeUndefined();
+
+        const wDivNoClick = mountAvatar({ remove: true, noClick: true });
+        expect(wDivNoClick.element.tagName).toBe('DIV');
+
+        const wButton = mountAvatar({ remove: true, name: 'Carlos' });
+        expect(wButton.element.tagName).toBe('BUTTON');
+        expect(wButton.attributes('type')).toBe('button');
+        expect(wButton.attributes('aria-label')).toBe('Remover Carlos');
+
+        const wButtonCustomLabel = mountAvatar({ remove: true, labelRemove: 'Remover usuário selecionado' });
+        expect(wButtonCustomLabel.attributes('aria-label')).toBe('Remover usuário selecionado');
+
+        const wButtonFallbackLabel = mountAvatar({ remove: true });
+        expect(wButtonFallbackLabel.attributes('aria-label')).toBe('Remover responsável');
+    });
+
+    it('permite acionamento via teclado (Enter e Espaço) quando em modo de remoção', async () => {
+        const confirmStore = useConfirmStore();
+        const wrapper = mountAvatar({ remove: true, name: 'Ana Silva' });
+
+        await wrapper.trigger('keydown', { key: 'Enter' });
+        expect(confirmStore.show).toBe(true);
+        expect(confirmStore.message).toBe('Remover responsável?');
+
+        confirmStore.show = false;
+        await wrapper.trigger('keydown', { key: ' ' });
+        expect(confirmStore.show).toBe(true);
+
+        confirmStore.acceptProps.action?.();
+        expect(wrapper.emitted('remove')).toHaveLength(1);
+    });
 });

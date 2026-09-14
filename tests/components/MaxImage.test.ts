@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxImage from '../../src/components/MaxImage.vue';
+import { calculateTargetCropDimensions } from '../../src/helpers/imageCrop';
 
 const mountedWrappers: any[] = [];
 
@@ -312,5 +313,108 @@ describe('MaxImage', () => {
         expect(modal.attributes('aria-modal')).toBe('true');
         expect(modal.attributes('aria-label')).toBe('Foto da paisagem');
         expect(modal.attributes('tabindex')).toBe('-1');
+    });
+
+    it('calcula corretamente as dimensões de recorte respeitando limites e proporção sem upscale', () => {
+        // Imagem pequena: nunca ampliada
+        const small = calculateTargetCropDimensions(500, 400, 2000, 2000, 4000000);
+        expect(small).toEqual({ width: 500, height: 400 });
+
+        // Imagem larga excedendo maxWidth
+        const wide = calculateTargetCropDimensions(8000, 4000, 4000, 4000, 32000000);
+        expect(wide.width).toBe(4000);
+        expect(wide.height).toBe(2000);
+
+        // Imagem 48 MP excedendo maxPixels
+        const photo48mp = calculateTargetCropDimensions(8000, 6000, 10000, 10000, 12000000);
+        expect(photo48mp.width * photo48mp.height).toBeLessThanOrEqual(12000000);
+        // Proporção 4:3 mantida
+        expect(photo48mp.width / photo48mp.height).toBeCloseTo(8000 / 6000, 1);
+    });
+
+    it('permite acionamento do preview via teclado (Enter e Espaço) com atributos de botão', async () => {
+        const wrapper = mountImage({ preview: true, alt: 'Imagem acessível' });
+        const trigger = wrapper.find('.max-image__preview-trigger');
+
+        expect(trigger.attributes('role')).toBe('button');
+        expect(trigger.attributes('tabindex')).toBe('0');
+        expect(trigger.attributes('aria-label')).toBe('Visualizar imagem: Imagem acessível');
+
+        // Enter abre o modal
+        await trigger.trigger('keydown.enter');
+        expect(wrapper.find('.max-image-modal').exists()).toBe(true);
+        expect(wrapper.emitted('show')).toHaveLength(1);
+
+        // Fecha e testa com Espaço
+        await wrapper.find('.max-image-modal').trigger('click');
+        expect(wrapper.find('.max-image-modal').exists()).toBe(false);
+
+        await trigger.trigger('keydown.space');
+        expect(wrapper.find('.max-image-modal').exists()).toBe(true);
+        expect(wrapper.emitted('show')).toHaveLength(2);
+    });
+
+    it('permite mover e redimensionar a crop box via teclado no modo de recorte', async () => {
+        const wrapper = mountImage({ preview: true, allowEdit: true });
+        await wrapper.find('.max-image__preview-trigger').trigger('click');
+
+        const editBtn = wrapper.findAllComponents({ name: 'MaxIconButton' })
+            .find((btn) => btn.attributes('title') === 'Recortar imagem');
+        await editBtn!.trigger('click');
+
+        const cropImg = wrapper.find('.max-image-crop-stage__img');
+        Object.defineProperty(cropImg.element, 'clientWidth', { value: 400, configurable: true });
+        Object.defineProperty(cropImg.element, 'clientHeight', { value: 300, configurable: true });
+        await cropImg.trigger('load');
+
+        const cropBoxEl = wrapper.find('.max-image-crop-box');
+        expect(cropBoxEl.exists()).toBe(true);
+        expect(cropBoxEl.attributes('role')).toBe('region');
+        expect(cropBoxEl.attributes('tabindex')).toBe('0');
+
+        const initialX = (wrapper.vm as any).cropBox.x;
+        const initialY = (wrapper.vm as any).cropBox.y;
+        const initialW = (wrapper.vm as any).cropBox.width;
+
+        // Seta para a direita: move x
+        await cropBoxEl.trigger('keydown', { key: 'ArrowRight', shiftKey: false });
+        expect((wrapper.vm as any).cropBox.x).toBe(initialX + 5);
+
+        // Seta para baixo: move y
+        await cropBoxEl.trigger('keydown', { key: 'ArrowDown', shiftKey: false });
+        expect((wrapper.vm as any).cropBox.y).toBe(initialY + 5);
+
+        // Shift + Seta para a direita: redimensiona largura
+        await cropBoxEl.trigger('keydown', { key: 'ArrowRight', shiftKey: true });
+        expect((wrapper.vm as any).cropBox.width).toBe(initialW + 10);
+    });
+
+    it('gerencia e revoga Object URLs criadas após recorte ao alterar src ou desmontar', async () => {
+        const createSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:http://localhost/cropped-uuid');
+        const revokeSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+
+        const wrapper = mountImage({ preview: true, allowEdit: true });
+
+        const fakeBlob = new Blob(['teste'], { type: 'image/png' });
+        const fakePayload = {
+            dataUrl: 'data:image/png;base64,xxx',
+            blob: fakeBlob,
+            file: new File([fakeBlob], 'crop.png', { type: 'image/png' }),
+            width: 100,
+            height: 100,
+            mimeType: 'image/png'
+        };
+
+        await (wrapper.vm as any).applyCropPayload(fakePayload);
+
+        expect(createSpy).toHaveBeenCalledWith(fakeBlob);
+        expect((wrapper.vm as any).currentSrc).toBe('blob:http://localhost/cropped-uuid');
+
+        // Desmontar revoga a Object URL ativa
+        wrapper.unmount();
+        expect(revokeSpy).toHaveBeenCalledWith('blob:http://localhost/cropped-uuid');
+
+        createSpy.mockRestore();
+        revokeSpy.mockRestore();
     });
 });

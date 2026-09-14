@@ -25,6 +25,7 @@
                             v-else
                             class="button-tab-action"
                             :icon="props.actionButtonIcon"
+                            :aria-label="props.actionButtonLabel || 'Ação da aba'"
                         />
                     </div>
                 </div>

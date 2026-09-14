@@ -40,7 +40,9 @@ describe('MaxInputFileUpload', () => {
         expect(wrapper.emitted('update:modelValue')).toBeTruthy();
 
         // branch catch JSON
+        const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
         wrapper.vm.onUploadHandler({ xhr: { response: 'invalid json' } });
+        expect(errorSpy).toHaveBeenCalled();
     });
 
     it('covers all slots and functions', async () => {
@@ -171,7 +173,7 @@ describe('MaxInputFileUpload', () => {
 
         const removeButtons = wrapper.findAll('.file-remove-btn');
         expect(removeButtons).toHaveLength(2);
-        expect(removeButtons[0].attributes('aria-label')).toBe('Remover arquivo');
+        expect(removeButtons[0].attributes('aria-label')).toBe('Remover arquivo relatorio.pdf');
 
         await removeButtons[0].trigger('click');
 
@@ -251,5 +253,152 @@ describe('MaxInputFileUpload', () => {
 
         const uploadBtn = wrapper.findAll('.p-button').find((b) => b.attributes('aria-label') === 'Enviar arquivos selecionados');
         expect(uploadBtn?.exists()).toBe(true);
+    });
+
+    it('transiciona corretamente os estados da máquina de upload: idle -> selected -> uploading -> error -> retry', async () => {
+        let createdXhr: any = null;
+        vi.spyOn(XMLHttpRequest.prototype, 'open').mockImplementation(function (this: any) {
+            createdXhr = this;
+        });
+        vi.spyOn(XMLHttpRequest.prototype, 'send').mockImplementation(() => {});
+
+        const wrapper = mount(MaxInputFileUpload, {
+            props: { modelValue: [] },
+            attrs: { url: '/api/upload', auto: false },
+            global: {
+                stubs: { Icon: true, MaxIcon: true, MaxButton: true, MaxIconButton: true },
+                directives: { tooltip: () => {} }
+            }
+        });
+
+        expect(wrapper.vm.uploadStatus).toBe('idle');
+
+        const testFile = new File(['conteudo'], 'doc.pdf', { type: 'application/pdf' });
+        wrapper.vm.onSelectHandler({ files: [testFile] });
+        expect(wrapper.vm.uploadStatus).toBe('selected');
+        expect(wrapper.vm.files).toHaveLength(1);
+
+        // Start upload
+        wrapper.vm.startUpload(wrapper.vm.files);
+        expect(wrapper.vm.uploadStatus).toBe('uploading');
+        expect(wrapper.vm.uploading).toBe(true);
+
+        // Simula erro HTTP
+        Object.defineProperty(createdXhr, 'status', { value: 500, writable: true, configurable: true });
+        Object.defineProperty(createdXhr, 'statusText', { value: 'Internal Server Error', writable: true, configurable: true });
+        createdXhr.onload();
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.vm.uploadStatus).toBe('error');
+        expect(wrapper.vm.showError).toBe(true);
+        // Arquivos originais permanecem intactos para retry
+        expect(wrapper.vm.files).toHaveLength(1);
+        expect(wrapper.vm.files[0].name).toBe('doc.pdf');
+
+        // Retry dispara nova requisição com os mesmos arquivos
+        wrapper.vm.retryUpload();
+        expect(wrapper.vm.uploadStatus).toBe('uploading');
+        expect(wrapper.vm.showError).toBe(false);
+
+        // Simula sucesso no retry
+        Object.defineProperty(createdXhr, 'status', { value: 200, writable: true, configurable: true });
+        Object.defineProperty(createdXhr, 'response', { value: JSON.stringify({ file: { id: 10, name: 'doc.pdf' } }), writable: true, configurable: true });
+        createdXhr.onload();
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.vm.uploadStatus).toBe('success');
+        expect(wrapper.vm.uploadProgress).toBe(100);
+
+        vi.restoreAllMocks();
+    });
+
+    it('aborta XHR ativo ao desmontar o componente ou ao reiniciar o upload', () => {
+        const abortSpy = vi.fn();
+        vi.spyOn(XMLHttpRequest.prototype, 'open').mockImplementation(() => {});
+        vi.spyOn(XMLHttpRequest.prototype, 'send').mockImplementation(function (this: any) {
+            this.abort = abortSpy;
+        });
+
+        const wrapper = mount(MaxInputFileUpload, {
+            props: { modelValue: [] },
+            attrs: { url: '/api/upload' },
+            global: { stubs: { Icon: true }, directives: { tooltip: () => {} } }
+        });
+
+        const testFile = new File(['data'], 'teste.pdf', { type: 'application/pdf' });
+        wrapper.vm.startUpload([testFile]);
+
+        // Novo startUpload aborta o anterior
+        wrapper.vm.startUpload([testFile]);
+        expect(abortSpy).toHaveBeenCalledTimes(1);
+
+        // Unmount aborta o atual
+        wrapper.unmount();
+        expect(abortSpy).toHaveBeenCalledTimes(2);
+
+        vi.restoreAllMocks();
+    });
+
+    it('emite evento progress com loaded, total e percentual calculado', () => {
+        let createdXhr: any = null;
+        vi.spyOn(XMLHttpRequest.prototype, 'open').mockImplementation(function (this: any) {
+            createdXhr = this;
+        });
+        vi.spyOn(XMLHttpRequest.prototype, 'send').mockImplementation(() => {});
+
+        const wrapper = mount(MaxInputFileUpload, {
+            props: { modelValue: [] },
+            attrs: { url: '/api/upload' },
+            global: { stubs: { Icon: true }, directives: { tooltip: () => {} } }
+        });
+
+        const testFile = new File(['data'], 'teste.pdf', { type: 'application/pdf' });
+        wrapper.vm.startUpload([testFile]);
+
+        // Simula evento onprogress com lengthComputable = true
+        const progressEvent = { lengthComputable: true, loaded: 50, total: 100 } as ProgressEvent;
+        createdXhr.upload.onprogress(progressEvent);
+
+        expect(wrapper.emitted('progress')).toBeTruthy();
+        expect(wrapper.emitted('progress')?.[0]?.[0]).toMatchObject({
+            progress: 50,
+            loaded: 50,
+            total: 100
+        });
+        expect(wrapper.vm.uploadProgress).toBe(50);
+
+        vi.restoreAllMocks();
+    });
+
+    it('lida com progresso indeterminado e atualiza anúncios na região live acessível', async () => {
+        let createdXhr: any = null;
+        vi.spyOn(XMLHttpRequest.prototype, 'open').mockImplementation(function (this: any) {
+            createdXhr = this;
+        });
+        vi.spyOn(XMLHttpRequest.prototype, 'send').mockImplementation(() => {});
+
+        const wrapper = mount(MaxInputFileUpload, {
+            props: { modelValue: [] },
+            attrs: { url: '/api/upload' },
+            global: { stubs: { Icon: true }, directives: { tooltip: () => {} } }
+        });
+
+        const testFile = new File(['data'], 'teste.pdf', { type: 'application/pdf' });
+        wrapper.vm.startUpload([testFile]);
+        await wrapper.vm.$nextTick();
+
+        const liveRegion = wrapper.find('[role="status"]');
+        expect(liveRegion.exists()).toBe(true);
+        expect(liveRegion.text()).toContain('Iniciando upload');
+
+        // Simula progresso com lengthComputable = false
+        createdXhr.upload.onprogress({ lengthComputable: false });
+        await wrapper.vm.$nextTick();
+
+        const progressBar = wrapper.find('.progress-bar-fill');
+        expect(progressBar.classes()).toContain('is-indeterminate');
+        expect(progressBar.attributes('aria-valuenow')).toBeUndefined();
+
+        vi.restoreAllMocks();
     });
 });

@@ -129,4 +129,43 @@ describe('MaxChart', () => {
 
         expect(wrapper.vm.toBase64Image()).toBe('data:image/png;base64,fake');
     });
+
+    it('renderiza representação em tabela acessível com linhas e botões de seleção', async () => {
+        const wrapper = mountChart({
+            ariaLabel: 'Vendas Trimestrais',
+            data: {
+                labels: ['Jan', 'Fev'],
+                datasets: [
+                    { label: 'Energia Solar', data: [150, 230] },
+                    { label: 'Rede', data: [80, 95] }
+                ]
+            }
+        });
+        await flushPromises();
+
+        const table = wrapper.find('.max-chart-accessible-table table');
+        expect(table.exists()).toBe(true);
+        expect(table.attributes('aria-label')).toBe('Vendas Trimestrais');
+        expect(wrapper.find('caption').text()).toBe('Vendas Trimestrais');
+
+        const cellButtons = wrapper.findAll('.max-chart-cell-btn');
+        // 2 labels * 2 datasets = 4 botões
+        expect(cellButtons).toHaveLength(4);
+
+        // Dispara clique acessível no botão da primeira célula (Jan, Energia Solar)
+        await cellButtons[0].trigger('click');
+
+        expect(wrapper.emitted('select')).toBeTruthy();
+        expect(wrapper.emitted('select')![0][0]).toEqual(expect.objectContaining({
+            index: 0,
+            datasetIndex: 0
+        }));
+
+        // Dispara clique acessível no botão da última célula (Fev, Rede)
+        await cellButtons[3].trigger('click');
+        expect(wrapper.emitted('select')![1][0]).toEqual(expect.objectContaining({
+            index: 1,
+            datasetIndex: 1
+        }));
+    });
 });

@@ -48,8 +48,8 @@ describe('MaxInputSearch', () => {
         await new Promise((resolve) => setTimeout(resolve, 350));
 
         const emitted = wrapper.emitted('search');
-        if (emitted) expect(emitted[0][0]).toBe('teste');
-
+        expect(emitted).toBeDefined();
+        expect(emitted![0][0]).toBe('teste');
     });
 
     it('não emite search quando valor tem 1 ou menos caracteres', async () => {

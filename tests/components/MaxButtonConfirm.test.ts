@@ -38,8 +38,10 @@ describe('MaxButtonConfirm', () => {
         const store = useConfirmStore();
         expect(store.show).toBe(false);
 
-        const acceptProps = { label: 'Confirmar', icon: 'mdi:check', action: () => {} };
-        const rejectProps = { label: 'Cancelar', icon: 'mdi:close', action: () => {} };
+        const onAccept = vi.fn();
+        const onReject = vi.fn();
+        const acceptProps = { label: 'Confirmar', icon: 'mdi:check', action: onAccept };
+        const rejectProps = { label: 'Cancelar', icon: 'mdi:close', action: onReject };
 
         const wrapper = mountButtonConfirm({
             message: 'Excluir item?',
@@ -53,8 +55,18 @@ describe('MaxButtonConfirm', () => {
         expect(store.show).toBe(true);
         expect(store.message).toBe('Excluir item?');
         expect(store.messageIcon).toBe('mdi:alert');
-        expect(store.acceptProps).toEqual(expect.objectContaining(acceptProps));
-        expect(store.rejectProps).toEqual(expect.objectContaining(rejectProps));
+        expect(store.acceptProps.label).toBe('Confirmar');
+        expect(store.acceptProps.icon).toBe('mdi:check');
+        expect(store.rejectProps.label).toBe('Cancelar');
+        expect(store.rejectProps.icon).toBe('mdi:close');
+
+        store.acceptProps.action();
+        expect(onAccept).toHaveBeenCalledTimes(1);
+        expect(wrapper.emitted('confirm')).toBeTruthy();
+
+        store.rejectProps.action();
+        expect(onReject).toHaveBeenCalledTimes(1);
+        expect(wrapper.emitted('cancel')).toBeTruthy();
     });
 
     it('usa mensagem padrão "Deseja continuar?" quando nenhuma mensagem é informada', async () => {

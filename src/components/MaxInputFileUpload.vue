@@ -54,13 +54,14 @@
                             <div
                                 class="progress-bar-fill"
                                 role="progressbar"
-                                :aria-valuenow="uploadProgress"
+                                :aria-valuenow="isComputable ? uploadProgress : undefined"
                                 aria-valuemin="0"
                                 aria-valuemax="100"
-                                :style="{ width: `${uploadProgress}%` }"
+                                :class="{ 'is-indeterminate': !isComputable }"
+                                :style="{ width: isComputable ? `${uploadProgress}%` : '100%' }"
                             />
                         </div>
-                        <span class="upload-progress-text">Enviando... {{ uploadProgress }}%</span>
+                        <span class="upload-progress-text">{{ isComputable ? `Enviando... ${uploadProgress}%` : 'Enviando...' }}</span>
                     </div>
                 </div>
                 <div v-else-if="showError" class="upload-error-state" role="alert">
@@ -92,46 +93,51 @@
                 <div
                     v-for="(file, index) in modelValue"
                     :key="file.id || index"
-                    class="file-icon"
-                    role="button"
-                    :tabindex="attrs.disabled ? -1 : 0"
-                    :aria-label="`Visualizar arquivo ${getFileName(file)}`"
-                    v-tooltip="getFileTooltip(file)"
-                    @click="$emit('file-click', file)"
-                    @keydown.enter.prevent="$emit('file-click', file)"
-                    @keydown.space.prevent="$emit('file-click', file)"
+                    class="file-item"
                 >
+                    <div
+                        class="file-icon"
+                        role="button"
+                        :tabindex="attrs.disabled ? -1 : 0"
+                        :aria-label="`Visualizar arquivo ${getFileName(file)}`"
+                        v-tooltip="getFileTooltip(file)"
+                        @click="$emit('file-click', file)"
+                        @keydown.enter.prevent="$emit('file-click', file)"
+                        @keydown.space.prevent="$emit('file-click', file)"
+                    >
+                        <img
+                            :src="file?.thumbnail ? `/media/thumbnails/${file.thumbnail}` : file?.src"
+                            :alt="getFileName(file)"
+                            class="file-thumb"
+                            v-if="file?.thumbnail || (file?.src && !file.file_name)"
+                        />
+                        <Icon
+                            :icon="resolveFileIcon(getFileName(file))"
+                            size="1.8"
+                            v-else
+                        />
+
+                        <Icon icon="fa:check-circle" class="file-check" size="0.7" />
+
+                        <div class="file-info-label" v-if="props.showMetadata">
+                            <span class="file-name-text">{{ getFileName(file) }}</span>
+                            <span class="file-size-text" v-if="formatFileSize(file?.size)">{{ formatFileSize(file?.size) }}</span>
+                        </div>
+                    </div>
+
                     <button
                         v-if="props.removable && !attrs.disabled"
                         type="button"
                         class="file-remove-btn"
-                        aria-label="Remover arquivo"
+                        :aria-label="`Remover arquivo ${getFileName(file)}`"
                         @click.stop="removeFile(index, file)"
                     >
                         <Icon icon="solar:close-circle-bold" size="0.9" />
                     </button>
-
-                    <img
-                        :src="file?.thumbnail ? `/media/thumbnails/${file.thumbnail}` : file?.src"
-                        :alt="getFileName(file)"
-                        class="file-thumb"
-                        v-if="file?.thumbnail || (file?.src && !file.file_name)"
-                    />
-                    <Icon
-                        :icon="resolveFileIcon(getFileName(file))"
-                        size="1.8"
-                        v-else
-                    />
-
-                    <Icon icon="fa:check-circle" class="file-check" size="0.7" />
-
-                    <div class="file-info-label" v-if="props.showMetadata">
-                        <span class="file-name-text">{{ getFileName(file) }}</span>
-                        <span class="file-size-text" v-if="formatFileSize(file?.size)">{{ formatFileSize(file?.size) }}</span>
-                    </div>
                 </div>
             </div>
         </div>
+        <div class="sr-only" aria-live="polite" role="status">{{ statusAnnouncement }}</div>
     </div>
 </template>
 
@@ -141,6 +147,7 @@
     import MaxIcon from './MaxIcon.vue';
     import MaxButton from './MaxButton.vue';
     import MaxIconButton from './MaxIconButton.vue';
+    import type { UploadState } from '../types/index.js';
 
     /**
      * Componente avançado para upload de arquivos.
@@ -176,11 +183,21 @@
 
     const modelValue = defineModel<any[]>({ default: () => [] });
 
+    export type { UploadState };
+    const uploadStatus = ref<UploadState>('idle');
     const files = ref<any[]>([]);
     const uploading = ref(false);
     const showError = ref(false);
     const uploadProgress = ref(0);
     const errorMessage = ref<string | null>(null);
+    const isComputable = ref(true);
+    const statusAnnouncement = ref('');
+
+    const setUploadStatus = (status: UploadState) => {
+        uploadStatus.value = status;
+        uploading.value = status === 'uploading';
+        showError.value = status === 'error';
+    };
 
     const emit = defineEmits<{
         'file-click': [file: any];
@@ -202,11 +219,10 @@
 
     const retryUpload = () => {
         if (files.value.length > 0) startUpload(files.value);
-
     };
 
     const dismissError = () => {
-        showError.value = false;
+        setUploadStatus('idle');
         errorMessage.value = null;
     };
 
@@ -236,12 +252,13 @@
     };
 
     const onSelectHandler = (event: any) => {
-        uploading.value = true;
+        setUploadStatus('selected');
         files.value = event?.files ?? [];
         emit('select', event);
         if (attrs.onSelect) attrs.onSelect(event);
     };
 
+    let attemptId = 0;
     let currentXhr: XMLHttpRequest | null = null;
 
     const startUpload = (toSend: any[]) => {
@@ -249,19 +266,32 @@
         const url = (attrs.url as string) ?? '';
         if (!url) return;
 
+        if (currentXhr) {
+            currentXhr.abort();
+            currentXhr = null;
+        }
+
+        attemptId++;
+        const currentAttempt = attemptId;
+
+        setUploadStatus('uploading');
         uploadProgress.value = 0;
-        showError.value = false;
+        isComputable.value = true;
         errorMessage.value = null;
+        statusAnnouncement.value = `Iniciando upload de ${toSend.length} arquivo(s)...`;
 
         const xhr = new XMLHttpRequest();
         currentXhr = xhr;
 
         xhr.upload.onprogress = (event: ProgressEvent) => {
+            if (currentAttempt !== attemptId) return;
             if (event.lengthComputable) {
+                isComputable.value = true;
                 const percent = Math.round((event.loaded / event.total) * 100);
                 uploadProgress.value = percent;
                 emit('progress', { originalEvent: event, progress: percent, loaded: event.loaded, total: event.total });
-            }
+            } else isComputable.value = false;
+
         };
 
         const formData = new FormData();
@@ -275,18 +305,25 @@
         onBeforeUpload({ xhr, formData });
 
         xhr.onload = () => {
+            if (currentAttempt !== attemptId) return;
             if (xhr.status >= 200 && xhr.status < 300) {
                 uploadProgress.value = 100;
+                setUploadStatus('success');
+                statusAnnouncement.value = 'Upload concluído com sucesso.';
                 onUploadHandler({ xhr });
-            } else onError({ xhr });
+            } else {
+                setUploadStatus('error');
+                onError({ xhr });
+            }
 
-
-            currentXhr = null;
+            if (currentXhr === xhr) currentXhr = null;
         };
 
         xhr.onerror = () => {
+            if (currentAttempt !== attemptId) return;
+            setUploadStatus('error');
             onError({ xhr });
-            currentXhr = null;
+            if (currentXhr === xhr) currentXhr = null;
         };
 
         xhr.send(formData);
@@ -294,10 +331,11 @@
 
     onBeforeUnmount(() => {
         currentXhr?.abort();
+        currentXhr = null;
     });
 
     const onUploadHandler = (event: any) => {
-        uploading.value = false;
+        setUploadStatus('success');
         emit('upload', event);
         if (attrs.onUpload) attrs.onUpload(event);
 
@@ -313,8 +351,7 @@
     };
 
     const onError = (event: any) => {
-        showError.value = true;
-        uploading.value = false;
+        setUploadStatus('error');
         uploadProgress.value = 0;
 
         let extractedMsg = 'Ocorreu um erro ao fazer o upload.';
@@ -329,6 +366,7 @@
         }
 
         errorMessage.value = extractedMsg;
+        statusAnnouncement.value = extractedMsg;
         emit('upload-error', { ...event, message: extractedMsg });
         if (attrs.onError) attrs.onError(event);
     };
@@ -387,6 +425,28 @@
         emit('delete', { file, index });
         emit('remove-file', { file, index });
     };
+
+    defineExpose({
+        uploadStatus,
+        uploading,
+        showError,
+        uploadProgress,
+        errorMessage,
+        files,
+        modelValue,
+        startUpload,
+        retryUpload,
+        dismissError,
+        triggerChoose,
+        onSelectHandler,
+        onUploadHandler,
+        onError,
+        onBeforeUpload,
+        resolveFileIcon,
+        formatFileSize,
+        getFileName,
+        removeFile
+    });
 </script>
 
 <style lang="scss" scoped>
@@ -515,6 +575,10 @@
                                 background-color: var(--max-primary-500, #00768E);
                                 border-radius: 3px;
                                 transition: width 0.2s ease-in-out;
+
+                                &.is-indeterminate {
+                                    animation: progress-indeterminate 1.5s infinite ease-in-out;
+                                }
                             }
                         }
 
@@ -613,21 +677,13 @@
                     height: 100%;
                     pointer-events: auto;
 
-                    .file-icon {
+                    .file-item {
                         position: relative;
                         min-width: 36px;
                         height: 32px;
                         display: flex;
                         align-items: center;
                         justify-content: center;
-                        cursor: pointer;
-                        transition: transform 0.15s ease;
-
-                        &:focus-visible {
-                            outline: 2px solid var(--max-primary-500, #00768E);
-                            outline-offset: 2px;
-                            border-radius: 4px;
-                        }
 
                         &:hover {
                             .icon-div {
@@ -640,22 +696,43 @@
                             }
                         }
 
-                        .file-thumb {
-                            max-width: 32px;
-                            max-height: 32px;
-                            object-fit: cover;
-                            border-radius: 4px;
-                        }
+                        .file-icon {
+                            position: relative;
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            cursor: pointer;
+                            transition: transform 0.15s ease;
 
-                        .file-check {
-                            position: absolute;
-                            color: var(--max-success-500, #10b981) !important;
-                            bottom: -2px;
-                            left: -2px;
-                            width: 14px;
-                            height: 14px;
-                            background: var(--background-0, #fff);
-                            border-radius: 50%;
+                            &:focus-visible {
+                                outline: 2px solid var(--max-primary-500, #00768E);
+                                outline-offset: 2px;
+                                border-radius: 4px;
+                            }
+
+                            .file-thumb {
+                                max-width: 32px;
+                                max-height: 32px;
+                                object-fit: cover;
+                                border-radius: 4px;
+                            }
+
+                            .file-check {
+                                position: absolute;
+                                color: var(--max-success-500, #10b981) !important;
+                                bottom: -2px;
+                                left: -2px;
+                                width: 14px;
+                                height: 14px;
+                                background: var(--background-0, #fff);
+                                border-radius: 50%;
+                            }
+
+                            .file-info-label {
+                                display: none;
+                            }
                         }
 
                         .file-remove-btn {
@@ -685,17 +762,13 @@
                                 border-radius: 50%;
                             }
                         }
-
-                        .file-info-label {
-                            display: none;
-                        }
                     }
                 }
             }
         }
 
         &.is-dragover {
-            outline: 2px dashed var(--primary-500);
+            outline: 2px dashed var(--max-primary-500, #00768e);
         }
     }
 
@@ -706,6 +779,20 @@
 
         to {
             transform: rotate(360deg);
+        }
+    }
+
+    @keyframes progress-indeterminate {
+        0% {
+            transform: translateX(-100%);
+        }
+
+        50% {
+            transform: translateX(0);
+        }
+
+        100% {
+            transform: translateX(100%);
         }
     }
 </style>

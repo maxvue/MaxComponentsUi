@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
+import { nextTick } from 'vue';
 import MaxInputDatePicker from '../../src/components/MaxInputDatePicker.vue';
 import InputBase from '../../src/components/InputBase.vue';
 
@@ -43,13 +44,15 @@ describe('MaxInputDatePicker', () => {
     });
 
     it('emite update:modelValue no formato YYYY-MM-DD HH:mm:ss', async () => {
-        const wrapper = mountDatePicker({ modelValue: '2024-01-15' });
+        const wrapper = mountDatePicker({ modelValue: '' });
+        await wrapper.setProps({ modelValue: '2024-01-15' });
+        await nextTick();
         const emitted = wrapper.emitted('update:modelValue');
 
-        if (emitted && emitted.length > 0) {
-            const value = emitted[emitted.length - 1][0] as string;
-            expect(value).toMatch(/^\d{4}-\d{2}-\d{2}/);
-        }
+        expect(emitted).toBeDefined();
+        expect(emitted!.length).toBeGreaterThan(0);
+        const value = emitted![emitted!.length - 1][0] as string;
+        expect(value).toMatch(/^\d{4}-\d{2}-\d{2}/);
     });
 
     it('aceita prop done para controle manual', () => {

@@ -36,6 +36,11 @@
                 role="separator"
                 tabindex="0"
                 aria-label="Redimensionar divisor"
+                :aria-orientation="isColumn ? 'vertical' : 'horizontal'"
+                aria-valuemin="10"
+                aria-valuemax="90"
+                :aria-valuenow="currentValueNow"
+                @keydown="onGutterKeydown"
                 @mousedown="onGutterMouseDown"
                 @touchstart="onGutterTouchStart"
             >
@@ -419,6 +424,47 @@
 
         percent = Math.max(10, Math.min(90, Math.round(percent * 10) / 10));
         customRatio.value = percent;
+    }
+
+    const currentValueNow = computed(() => {
+        if (parsedSizes.value) return Math.round(parsedSizes.value[0]);
+        return 50;
+    });
+
+    function onGutterKeydown(event: KeyboardEvent) {
+        if (!props.resizable || isMobile.value) return;
+
+        let delta = 0;
+        if (isColumn.value) {
+            if (event.key === 'ArrowLeft') delta = -1;
+            else if (event.key === 'ArrowRight') delta = 1;
+        } else
+            if (event.key === 'ArrowUp') delta = -1;
+            else if (event.key === 'ArrowDown') delta = 1;
+
+
+        if (event.shiftKey && delta !== 0) delta *= 5;
+
+        if (event.key === 'Home') {
+            event.preventDefault();
+            customRatio.value = 10;
+            if (parsedSizes.value) emit('resize', parsedSizes.value);
+            return;
+        }
+        if (event.key === 'End') {
+            event.preventDefault();
+            customRatio.value = 90;
+            if (parsedSizes.value) emit('resize', parsedSizes.value);
+            return;
+        }
+
+        if (delta !== 0) {
+            event.preventDefault();
+            const current = customRatio.value ?? (parsedSizes.value ? parsedSizes.value[0] : 50);
+            const next = Math.max(10, Math.min(90, Math.round((current + delta) * 10) / 10));
+            customRatio.value = next;
+            if (parsedSizes.value) emit('resize', parsedSizes.value);
+        }
     }
 </script>
 

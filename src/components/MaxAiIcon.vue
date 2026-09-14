@@ -169,6 +169,14 @@
         }
     }
 
-
+    @media (prefers-reduced-motion: reduce) {
+        &.is-animated {
+            .img-p-top svg,
+            .img-p-bottom svg,
+            .img-g-right svg {
+                animation: none !important;
+            }
+        }
+    }
 }
 </style>

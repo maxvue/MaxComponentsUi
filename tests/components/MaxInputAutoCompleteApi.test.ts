@@ -172,4 +172,146 @@ describe('MaxInputAutoCompleteApi.vue', () => {
         expect(labelEl?.textContent?.trim()).toBe('Model Test');
         expect(subLabelEl?.textContent?.trim()).toBe('Sub Test');
     });
+
+    it('rejeita respostas obsoletas e mantém apenas a da rota/dados mais recente (E05-04)', async () => {
+        let resolveA: any;
+        const promiseA = new Promise((resolve) => { resolveA = resolve; });
+
+        (maxUse.getCachedApiIDB as any).mockImplementation((route: string) => {
+            if (route === '/api/route-a') return promiseA;
+            if (route === '/api/route-b') return Promise.resolve([{ label: 'Item B', value: 'b' }]);
+            return Promise.resolve([]);
+        });
+
+        const wrapper = mountAutoCompleteApi({ route: '/api/route-a', data: { v: 1 } });
+        await wrapper.vm.$nextTick();
+
+        // Altera para rota B antes de A resolver
+        await wrapper.setProps({ route: '/api/route-b', data: { v: 2 } });
+        await wrapper.vm.$nextTick();
+        await new Promise((r) => setTimeout(r, 10));
+
+        // Rota B deve ter sido aplicada
+        expect((wrapper.vm as any).list).toEqual([{ label: 'Item B', value: 'b' }]);
+
+        // Agora a rota A antiga finalmente resolve
+        resolveA([{ label: 'Item A', value: 'a' }]);
+        await new Promise((r) => setTimeout(r, 10));
+        await wrapper.vm.$nextTick();
+
+        // O resultado deve continuar sendo B, A foi descartada
+        expect((wrapper.vm as any).list).toEqual([{ label: 'Item B', value: 'b' }]);
+        wrapper.unmount();
+    });
+
+    it('cancela controller e aborta requisição ativa no desmonte do componente (E05-04)', async () => {
+        let capturedSignal: AbortSignal | undefined;
+        (maxUse.getCachedApiIDB as any).mockImplementation((_route: string, _params: any, _cache: any, _ttl: any, _cb: any, opts: any) => {
+            capturedSignal = opts?.signal;
+            return new Promise(() => {}); // never resolves
+        });
+
+        const wrapper = mountAutoCompleteApi({ data: { fetch: 1 } });
+        await wrapper.vm.$nextTick();
+
+        expect(capturedSignal).toBeDefined();
+        expect(capturedSignal?.aborted).toBe(false);
+
+        wrapper.unmount();
+        expect(capturedSignal?.aborted).toBe(true);
+    });
+
+    it('uma digitação produz exatamente uma emissão de complete e busca única (E05-05)', async () => {
+        const wrapper = mountAutoCompleteApi();
+        (wrapper.vm as any).list = [
+            { label: 'Item 1', value: 'item-1' },
+            { label: 'Item 2', value: 'item-2' }
+        ];
+        await wrapper.vm.$nextTick();
+
+        // Simula evento de input
+        const input = wrapper.find('input');
+        await input.setValue('Item 1');
+        await wrapper.vm.$nextTick();
+
+        const emitted = wrapper.emitted('complete');
+        // Deve emitir exatamente uma vez para a digitação
+        expect(emitted).toBeDefined();
+        expect(emitted?.length).toBe(1);
+        expect((wrapper.vm as any).filtered_values.length).toBe(1);
+        expect((wrapper.vm as any).filtered_values[0].value).toBe('item-1');
+        wrapper.unmount();
+    });
+
+    it('sequência de digitações emite exatamente uma vez por alteração sem multiplicação reativa (E05-05)', async () => {
+        const wrapper = mountAutoCompleteApi();
+        (wrapper.vm as any).list = [
+            { label: 'Alpha', value: 'a' },
+            { label: 'Alphabet', value: 'ab' },
+            { label: 'Alphabetical', value: 'abc' }
+        ];
+        await wrapper.vm.$nextTick();
+
+        const input = wrapper.find('input');
+        await input.setValue('a');
+        await wrapper.vm.$nextTick();
+
+        await input.setValue('ab');
+        await wrapper.vm.$nextTick();
+
+        await input.setValue('abc');
+        await wrapper.vm.$nextTick();
+
+        const emitted = wrapper.emitted('complete');
+        expect(emitted?.length).toBe(3);
+        expect((wrapper.vm as any).filtered_values.length).toBe(1);
+        wrapper.unmount();
+    });
+
+    describe('Contrato WAI-ARIA Combobox (E06-02)', () => {
+        it('expõe atributos semânticos combobox no input e sincroniza com o listbox', async () => {
+            const wrapper = mountAutoCompleteApi({
+                modelValue: 'item-1'
+            });
+            (wrapper.vm as any).list = [
+                { label: 'Item 1', value: 'item-1' },
+                { label: 'Item 2', value: 'item-2' }
+            ];
+            await wrapper.vm.$nextTick();
+
+            const input = wrapper.find('input');
+            expect(input.attributes('role')).toBe('combobox');
+            expect(input.attributes('aria-autocomplete')).toBe('list');
+            expect(input.attributes('aria-expanded')).toBe('false');
+            expect(input.attributes('aria-controls')).toBeUndefined();
+            expect(input.attributes('aria-activedescendant')).toBeUndefined();
+
+            // Digita para abrir overlay
+            await input.setValue('Item');
+            await wrapper.vm.$nextTick();
+
+            expect(input.attributes('aria-expanded')).toBe('true');
+            const listboxId = input.attributes('aria-controls');
+            expect(listboxId).toBeTruthy();
+
+            const listbox = document.getElementById(listboxId!);
+            expect(listbox).not.toBeNull();
+            expect(listbox?.getAttribute('role')).toBe('listbox');
+
+            // Navegação por seta atualiza aria-activedescendant
+            await input.trigger('keydown.down');
+            await wrapper.vm.$nextTick();
+
+            const activeDescId = input.attributes('aria-activedescendant');
+            expect(activeDescId).toBe(`${listboxId}-opt-0`);
+
+            // Opções possuem role=option e aria-selected correto
+            const optionEls = listbox?.querySelectorAll('[role="option"]');
+            expect(optionEls?.length).toBe(2);
+            expect(optionEls?.[0].getAttribute('aria-selected')).toBe('true');
+            expect(optionEls?.[1].getAttribute('aria-selected')).toBe('false');
+
+            wrapper.unmount();
+        });
+    });
 });

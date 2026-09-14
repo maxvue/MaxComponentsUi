@@ -12,9 +12,11 @@ vi.mock('@maxvue/max-use', async (importOriginal) => {
     };
 });
 
-function mountIconButton(props: Record<string, any> = {}) {
+function mountIconButton(props: Record<string, any> = {}, autoAriaLabel = true) {
+    const finalProps = { icon: 'mdi:pencil', ...props };
+    if (autoAriaLabel && !finalProps.ariaLabel && !finalProps['aria-label'] && !finalProps.label && !finalProps.title && !finalProps.tooltip) finalProps.ariaLabel = 'Botão de ação';
     return mount(MaxIconButton, {
-        props: { icon: 'mdi:pencil', ...props },
+        props: finalProps,
         global: {
             stubs: {
                 MaxIcon: {

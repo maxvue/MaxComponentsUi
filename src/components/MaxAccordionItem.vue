@@ -147,7 +147,7 @@
                 }
 
                 &:focus-visible {
-                    outline: var(--max-focus-outline);
+                    outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
                     outline-offset: -2px;
                     border-radius: 4px;
                 }

@@ -1,6 +1,13 @@
 <template>
     <div class="max-popover-menu" ref="btn_el" v-tooltip="null" :style="{ width: size_icon, height: size_icon }">
-        <div
+        <slot
+            v-if="$slots.trigger || $slots.button"
+            :name="$slots.trigger ? 'trigger' : 'button'"
+            v-bind="triggerSlotProps"
+        />
+        <button
+            v-else
+            type="button"
             class="botao"
             ref="triggerButtonRef"
             role="button"
@@ -8,6 +15,7 @@
             aria-haspopup="menu"
             :aria-expanded="isOpen"
             :aria-controls="menuId"
+            :aria-label="props.ariaLabel || props.label || 'Menu de opções'"
             :style="{ width: size_icon, height: size_icon }"
             v-tooltip="null"
             @click.stop="toggle"
@@ -16,10 +24,17 @@
             @keydown.down.prevent="openAndFocusFirst"
             @keydown.up.prevent="openAndFocusLast"
         >
-            <slot name="button" :toggle="toggle" :is-open="isOpen" :menu-id="menuId">
-                <MaxButton v-bind="props" tabindex="-1" aria-hidden="true" :size="props.size ?? props.sizeIcon" class="max-popover-menu-btn" />
-            </slot>
-        </div>
+            <MaxIcon
+                v-if="props.icon || props.i"
+                :icon="props.icon ?? props.i"
+                :size="props.size ?? props.sizeIcon ?? props.iconSize ?? '1.1'"
+                :dark="props.dark"
+                :light="props.light"
+                aria-hidden="true"
+                class="max-popover-menu-icon"
+            />
+            <span v-if="props.label" class="max-popover-menu-label">{{ props.label }}</span>
+        </button>
 
         <Teleport to="body" v-if="isOpen">
             <div
@@ -54,7 +69,6 @@
 
 <script setup lang="ts">
     import { computed, ref, nextTick, watch, onBeforeUnmount } from 'vue';
-    import MaxButton from './MaxButton.vue';
     import MaxIcon from './MaxIcon.vue';
     import { goToRoute, useDefaultReset } from '@maxvue/max-use';
     import { useActiveOverlayPosition } from '../composables/useActiveOverlayPosition';
@@ -93,6 +107,8 @@
         checked?: boolean | string | number | undefined;
         /** Icone de adição opcional */
         plus?: boolean | string | number | undefined;
+        /** Nome acessível para o botão do menu */
+        ariaLabel?: string;
     }>(), {
         dark: 0.4,
         light: undefined,
@@ -197,6 +213,37 @@
             itemRefs.value[last]?.focus();
         });
     };
+
+    const onTriggerKeydown = (event: KeyboardEvent) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            toggle(event);
+        } else if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            openAndFocusFirst(event);
+        } else if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            openAndFocusLast(event);
+        }
+    };
+
+    const triggerSlotProps = computed(() => ({
+        'aria-expanded': isOpen.value,
+        'aria-controls': menuId,
+        'aria-haspopup': 'menu',
+        role: 'button',
+        tabindex: 0,
+        type: 'button' as const,
+        toggle,
+        show,
+        hide,
+        isOpen: isOpen.value,
+        menuId,
+        onClick: (event: any) => toggle(event),
+        onKeydown: onTriggerKeydown,
+        openAndFocusFirst,
+        openAndFocusLast
+    }));
 
     const executing = useDefaultReset<boolean>(false, 200);
 
@@ -342,11 +389,19 @@
         gap: 8px;
         cursor: pointer;
         outline: none;
+        background: transparent;
+        border: none;
+        padding: 0;
+        color: inherit;
 
         &:focus-visible {
             outline: 2px solid var(--max-primary-500, #00768E);
             outline-offset: 2px;
             border-radius: 4px;
+        }
+
+        .max-popover-menu-icon {
+            display: flex;
         }
 
         .max-popover-menu-btn {

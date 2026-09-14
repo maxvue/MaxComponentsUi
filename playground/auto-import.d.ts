@@ -11,12 +11,19 @@ declare global {
   const Accordion: typeof import('../src/index.ts').Accordion
   const AccordionItem: typeof import('../src/index.ts').AccordionItem
   const AuthCard: typeof import('../src/index.ts').AuthCard
+  const BADGE_STATUS_COLORS: typeof import('../src/index.ts').BADGE_STATUS_COLORS
+  const Badge: typeof import('../src/index.ts').Badge
+  const BadgeButton: typeof import('../src/index.ts').BadgeButton
+  const BadgeButtonGroup: typeof import('../src/index.ts').BadgeButtonGroup
+  const BadgeButtonsGroup: typeof import('../src/index.ts').BadgeButtonsGroup
   const Chips: typeof import('../src/index.ts').Chips
+  const Column: typeof import('../src/index.ts').Column
   const DefaultMagicKeysAliasMap: typeof import('@maxvue/max-use').DefaultMagicKeysAliasMap
   const Drawer: typeof import('../src/index.ts').Drawer
   const EffectScope: typeof import('vue').EffectScope
   const FORMAT_MAP: typeof import('@maxvue/max-use').FORMAT_MAP
   const ICON_CACHE_KEY: typeof import('../src/index.ts').ICON_CACHE_KEY
+  const INPUT_BASE_CONTEXT_KEY: typeof import('../src/index.ts').INPUT_BASE_CONTEXT_KEY
   const IconPicker: typeof import('../src/index.ts').IconPicker
   const InputBase: typeof import('../src/index.ts').InputBase
   const InputField: typeof import('../src/index.ts').InputField
@@ -34,6 +41,10 @@ declare global {
   const MaxAnimateFade: typeof import('../src/index.ts').MaxAnimateFade
   const MaxApp: typeof import('../src/index.ts').MaxApp
   const MaxAuthCard: typeof import('../src/index.ts').MaxAuthCard
+  const MaxBadge: typeof import('../src/index.ts').MaxBadge
+  const MaxBadgeButton: typeof import('../src/index.ts').MaxBadgeButton
+  const MaxBadgeButtonGroup: typeof import('../src/index.ts').MaxBadgeButtonGroup
+  const MaxBadgeButtonsGroup: typeof import('../src/index.ts').MaxBadgeButtonsGroup
   const MaxBadgeComponent: typeof import('../src/index.ts').MaxBadgeComponent
   const MaxBottomMenu: typeof import('../src/index.ts').MaxBottomMenu
   const MaxButton: typeof import('../src/index.ts').MaxButton
@@ -42,6 +53,7 @@ declare global {
   const MaxChart: typeof import('../src/index.ts').MaxChart
   const MaxChips: typeof import('../src/index.ts').MaxChips
   const MaxColorPicker: typeof import('../src/index.ts').MaxColorPicker
+  const MaxColumn: typeof import('../src/index.ts').MaxColumn
   const MaxContainerApp: typeof import('../src/index.ts').MaxContainerApp
   const MaxCreditCard: typeof import('../src/index.ts').MaxCreditCard
   const MaxDivider: typeof import('../src/index.ts').MaxDivider
@@ -61,6 +73,8 @@ declare global {
   const MaxInputAutoCompleteApi: typeof import('../src/index.ts').MaxInputAutoCompleteApi
   const MaxInputCep: typeof import('../src/index.ts').MaxInputCep
   const MaxInputCheckbox: typeof import('../src/index.ts').MaxInputCheckbox
+  const MaxInputCode: typeof import('../src/index.ts').MaxInputCode
+  const MaxInputCodeToolbar: typeof import('../src/index.ts').MaxInputCodeToolbar
   const MaxInputCoordinateDecimalLat: typeof import('../src/index.ts').MaxInputCoordinateDecimalLat
   const MaxInputCoordinateDecimalLng: typeof import('../src/index.ts').MaxInputCoordinateDecimalLng
   const MaxInputCpfCnpj: typeof import('../src/index.ts').MaxInputCpfCnpj
@@ -116,15 +130,17 @@ declare global {
   const MaxSelectTag: typeof import('../src/index.ts').MaxSelectTag
   const MaxSideMenu: typeof import('../src/index.ts').MaxSideMenu
   const MaxSideMenuMobile: typeof import('../src/index.ts').MaxSideMenuMobile
+  const MaxStats: typeof import('../src/index.ts').MaxStats
+  const MaxStyle: typeof import('../src/index.ts').MaxStyle
   const MaxTab: typeof import('../src/index.ts').MaxTab
   const MaxTabItem: typeof import('../src/index.ts').MaxTabItem
   const MaxTabList: typeof import('../src/index.ts').MaxTabList
   const MaxTabPanel: typeof import('../src/index.ts').MaxTabPanel
   const MaxTabPanels: typeof import('../src/index.ts').MaxTabPanels
   const MaxTable: typeof import('../src/index.ts').MaxTable
-  const MaxTableColumn: typeof import('../src/index.ts').MaxTableColumn
   const MaxTableFields: typeof import('../src/index.ts').MaxTableFields
   const MaxTabs: typeof import('../src/index.ts').MaxTabs
+  const MaxTag: typeof import('../src/index.ts').MaxTag
   const MaxTagSelect: typeof import('../src/index.ts').MaxTagSelect
   const MaxTagsList: typeof import('../src/index.ts').MaxTagsList
   const MaxTextInputFloatLabel: typeof import('../src/index.ts').MaxTextInputFloatLabel
@@ -154,6 +170,7 @@ declare global {
   const TabPanel: typeof import('../src/index.ts').TabPanel
   const TabPanels: typeof import('../src/index.ts').TabPanels
   const Tabs: typeof import('../src/index.ts').Tabs
+  const Tag: typeof import('../src/index.ts').Tag
   const Toast: typeof import('../src/index.ts').Toast
   const TransitionFade: typeof import('../src/index.ts').TransitionFade
   const TransitionPresets: typeof import('@maxvue/max-use').TransitionPresets
@@ -162,6 +179,7 @@ declare global {
   const abbrevName: typeof import('@maxvue/max-use').abbrevName
   const add: typeof import('@maxvue/max-use').add
   const addTime: typeof import('@maxvue/max-use').addTime
+  const adjustToWcagLuminance: typeof import('../src/index.ts').adjustToWcagLuminance
   const after: typeof import('@maxvue/max-use').after
   const apiDeleteRoute: typeof import('@maxvue/max-use').apiDeleteRoute
   const apiGetRoute: typeof import('@maxvue/max-use').apiGetRoute
@@ -238,6 +256,7 @@ declare global {
   const controlledComputed: typeof import('@maxvue/max-use').controlledComputed
   const controlledRef: typeof import('@maxvue/max-use').controlledRef
   const countBy: typeof import('@maxvue/max-use').countBy
+  const countWhere: typeof import('@maxvue/max-use').countWhere
   const cpf: typeof import('@maxvue/max-use').cpf
   const cpfCnpjIsValid: typeof import('@maxvue/max-use').cpfCnpjIsValid
   const cpfIsValid: typeof import('@maxvue/max-use').cpfIsValid
@@ -349,6 +368,7 @@ declare global {
   const forInRight: typeof import('@maxvue/max-use').forInRight
   const forOwn: typeof import('@maxvue/max-use').forOwn
   const forOwnRight: typeof import('@maxvue/max-use').forOwnRight
+  const forceReset: typeof import('../src/index.ts').forceReset
   const format: typeof import('@maxvue/max-use').format
   const formatBytes: typeof import('@maxvue/max-use').formatBytes
   const formatCep: typeof import('@maxvue/max-use').formatCep
@@ -385,6 +405,7 @@ declare global {
   const getRoute: typeof import('@maxvue/max-use').getRoute
   const getRouteByName: typeof import('@maxvue/max-use').getRouteByName
   const getSSRHandler: typeof import('@maxvue/max-use').getSSRHandler
+  const getWcagRelativeLuminance: typeof import('../src/index.ts').getWcagRelativeLuminance
   const getWithCredentials: typeof import('@maxvue/max-use').getWithCredentials
   const goToRoute: typeof import('@maxvue/max-use').goToRoute
   const goToRouteByName: typeof import('@maxvue/max-use').goToRouteByName
@@ -543,6 +564,7 @@ declare global {
   const mapValues: typeof import('@maxvue/max-use').mapValues
   const markRaw: typeof import('vue').markRaw
   const maskSensitive: typeof import('@maxvue/max-use').maskSensitive
+  const matchCasing: typeof import('@maxvue/max-use').matchCasing
   const matches: typeof import('@maxvue/max-use').matches
   const matchesProperty: typeof import('@maxvue/max-use').matchesProperty
   const max: typeof import('@maxvue/max-use').max
@@ -641,8 +663,10 @@ declare global {
   const property: typeof import('@maxvue/max-use').property
   const propertyOf: typeof import('@maxvue/max-use').propertyOf
   const provide: typeof import('vue').provide
+  const provideInputBaseContext: typeof import('../src/index.ts').provideInputBaseContext
   const provideLocal: typeof import('@maxvue/max-use').provideLocal
   const provideSSRWidth: typeof import('@maxvue/max-use').provideSSRWidth
+  const ptBR: typeof import('../src/index.ts').ptBR
   const pull: typeof import('@maxvue/max-use').pull
   const pullAll: typeof import('@maxvue/max-use').pullAll
   const pullAllBy: typeof import('@maxvue/max-use').pullAllBy
@@ -680,8 +704,10 @@ declare global {
   const replace: typeof import('@maxvue/max-use').replace
   const resetConfig: typeof import('@maxvue/max-use').resetConfig
   const resetMaxAppConfig: typeof import('../src/index.ts').resetMaxAppConfig
+  const resolveBadgeColors: typeof import('../src/index.ts').resolveBadgeColors
   const resolveComponent: typeof import('vue').resolveComponent
   const resolveRoute: typeof import('@maxvue/max-use').resolveRoute
+  const resolveStatItemColors: typeof import('../src/index.ts').resolveStatItemColors
   const rest: typeof import('@maxvue/max-use').rest
   const result: typeof import('@maxvue/max-use').result
   const reverse: typeof import('@maxvue/max-use').reverse
@@ -819,7 +845,7 @@ declare global {
   const useArraySome: typeof import('@maxvue/max-use').useArraySome
   const useArrayUnique: typeof import('@maxvue/max-use').useArrayUnique
   const useAsyncQueue: typeof import('@maxvue/max-use').useAsyncQueue
-  const useAsyncState: typeof import('@maxvue/max-use').useAsyncState
+  const useAsyncState: typeof import('../src/index.ts').useAsyncState
   const useAttrs: typeof import('vue').useAttrs
   const useBase64: typeof import('@maxvue/max-use').useBase64
   const useBattery: typeof import('@maxvue/max-use').useBattery
@@ -883,6 +909,7 @@ declare global {
   const useImage: typeof import('@maxvue/max-use').useImage
   const useInCacheApi: typeof import('@maxvue/max-use').useInCacheApi
   const useInfiniteScroll: typeof import('@maxvue/max-use').useInfiniteScroll
+  const useInputBaseContext: typeof import('../src/index.ts').useInputBaseContext
   const useIntersectionObserver: typeof import('@maxvue/max-use').useIntersectionObserver
   const useInterval: typeof import('@maxvue/max-use').useInterval
   const useIntervalFn: typeof import('@maxvue/max-use').useIntervalFn
@@ -938,7 +965,7 @@ declare global {
   const useScreenSafeArea: typeof import('@maxvue/max-use').useScreenSafeArea
   const useScriptTag: typeof import('@maxvue/max-use').useScriptTag
   const useScroll: typeof import('@maxvue/max-use').useScroll
-  const useScrollLock: typeof import('@maxvue/max-use').useScrollLock
+  const useScrollLock: typeof import('../src/index.ts').useScrollLock
   const useSearchBarStore: typeof import('../src/stores/useSearchBar.Store.ts').useSearchBarStore
   const useSessionStorage: typeof import('@maxvue/max-use').useSessionStorage
   const useShare: typeof import('@maxvue/max-use').useShare
@@ -948,6 +975,7 @@ declare global {
   const useSorted: typeof import('@maxvue/max-use').useSorted
   const useSpeechRecognition: typeof import('@maxvue/max-use').useSpeechRecognition
   const useSpeechSynthesis: typeof import('@maxvue/max-use').useSpeechSynthesis
+  const useSpellChecker: typeof import('@maxvue/max-use').useSpellChecker
   const useStepper: typeof import('@maxvue/max-use').useStepper
   const useStorage: typeof import('@maxvue/max-use').useStorage
   const useStorageAsync: typeof import('@maxvue/max-use').useStorageAsync
@@ -974,6 +1002,7 @@ declare global {
   const useToString: typeof import('@maxvue/max-use').useToString
   const useToastStore: typeof import('../src/stores/useToast.Store.ts').useToastStore
   const useToggle: typeof import('@maxvue/max-use').useToggle
+  const useToolbarNavigation: typeof import('../src/index.ts').useToolbarNavigation
   const useTopToolbarStore: typeof import('../src/stores/useTopToolbar.Store.ts').useTopToolbarStore
   const useTransition: typeof import('@maxvue/max-use').useTransition
   const useUrlSearchParams: typeof import('@maxvue/max-use').useUrlSearchParams
@@ -1076,10 +1105,13 @@ declare global {
   export type { ToastSeverity, ToastItem, ToastPayload } from '../src/stores/useToast.Store.ts'
   import('../src/stores/useToast.Store.ts')
   // @ts-ignore
-  export type { BaseComponentProps, MaxButtonBaseProps, MaxButtonsType, MaxLikeButtonProps, ConfirmProps, InputBaseProps, ChipObjectItem, ChipItem, MaxChipsProps, ComponentEmits, SelectItem, SelectGroupOptionsElement, SelectGroupOptions, SelectOptions, DBFile, MenuItem } from '../src/types/index.ts'
+  export type { ConfirmPayload } from '../src/stores/useConfirm.Store.ts'
+  import('../src/stores/useConfirm.Store.ts')
+  // @ts-ignore
+  export type { BaseComponentProps, MaxButtonBaseProps, ButtonSeverity, ButtonVariant, MaxButtonsType, MaxLikeButtonProps, ConfirmActionProps, ConfirmProps, InputBaseProps, ChipObjectItem, ChipItem, MaxChipsProps, ComponentEmits, SelectItem, SelectGroupOptionsElement, SelectGroupOptions, SelectOptions, InputValue, SelectOptionItem, SelectOptionsList, MaxTableColumn, DBFile, UploadFileStatus, UploadState, MenuItem, AsyncStatus, AsyncState } from '../src/types/index.ts'
   import('../src/types/index.ts')
   // @ts-ignore
-  export type { MaxDividersProps, AuthProvider, AuthOtpEndpoint, AuthMode, AuthStep, AuthLabels, MaxImageProps, MaxImageEditPayload } from '../src/index.ts'
+  export type { MaxPluginOptions, MaxDividersProps, AuthProvider, AuthOtpEndpoint, AuthMode, AuthStep, AuthLabels, MaxTopToolbarSubmenuItem, MaxBadgeProps, MaxBadgeStatus, MaxBadgeButtonProps, MaxBadgeButtonsGroupProps, MaxBadgeButtonsGroupItem, MaxImageProps, MaxImageEditPayload, MaxStatsItem, MaxStatsProps, StatItemColors, BadgeColors, ScrollLock } from '../src/index.ts'
   import('../src/index.ts')
 }
 
@@ -1091,12 +1123,19 @@ declare module 'vue' {
     readonly Accordion: UnwrapRef<typeof import('../src/index.ts')['Accordion']>
     readonly AccordionItem: UnwrapRef<typeof import('../src/index.ts')['AccordionItem']>
     readonly AuthCard: UnwrapRef<typeof import('../src/index.ts')['AuthCard']>
+    readonly BADGE_STATUS_COLORS: UnwrapRef<typeof import('../src/index.ts')['BADGE_STATUS_COLORS']>
+    readonly Badge: UnwrapRef<typeof import('../src/index.ts')['Badge']>
+    readonly BadgeButton: UnwrapRef<typeof import('../src/index.ts')['BadgeButton']>
+    readonly BadgeButtonGroup: UnwrapRef<typeof import('../src/index.ts')['BadgeButtonGroup']>
+    readonly BadgeButtonsGroup: UnwrapRef<typeof import('../src/index.ts')['BadgeButtonsGroup']>
     readonly Chips: UnwrapRef<typeof import('../src/index.ts')['Chips']>
+    readonly Column: UnwrapRef<typeof import('../src/index.ts')['Column']>
     readonly DefaultMagicKeysAliasMap: UnwrapRef<typeof import('@maxvue/max-use')['DefaultMagicKeysAliasMap']>
     readonly Drawer: UnwrapRef<typeof import('../src/index.ts')['Drawer']>
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
     readonly FORMAT_MAP: UnwrapRef<typeof import('@maxvue/max-use')['FORMAT_MAP']>
     readonly ICON_CACHE_KEY: UnwrapRef<typeof import('../src/index.ts')['ICON_CACHE_KEY']>
+    readonly INPUT_BASE_CONTEXT_KEY: UnwrapRef<typeof import('../src/index.ts')['INPUT_BASE_CONTEXT_KEY']>
     readonly IconPicker: UnwrapRef<typeof import('../src/index.ts')['IconPicker']>
     readonly InputBase: UnwrapRef<typeof import('../src/index.ts')['InputBase']>
     readonly InputField: UnwrapRef<typeof import('../src/index.ts')['InputField']>
@@ -1114,6 +1153,10 @@ declare module 'vue' {
     readonly MaxAnimateFade: UnwrapRef<typeof import('../src/index.ts')['MaxAnimateFade']>
     readonly MaxApp: UnwrapRef<typeof import('../src/index.ts')['MaxApp']>
     readonly MaxAuthCard: UnwrapRef<typeof import('../src/index.ts')['MaxAuthCard']>
+    readonly MaxBadge: UnwrapRef<typeof import('../src/index.ts')['MaxBadge']>
+    readonly MaxBadgeButton: UnwrapRef<typeof import('../src/index.ts')['MaxBadgeButton']>
+    readonly MaxBadgeButtonGroup: UnwrapRef<typeof import('../src/index.ts')['MaxBadgeButtonGroup']>
+    readonly MaxBadgeButtonsGroup: UnwrapRef<typeof import('../src/index.ts')['MaxBadgeButtonsGroup']>
     readonly MaxBadgeComponent: UnwrapRef<typeof import('../src/index.ts')['MaxBadgeComponent']>
     readonly MaxBottomMenu: UnwrapRef<typeof import('../src/index.ts')['MaxBottomMenu']>
     readonly MaxButton: UnwrapRef<typeof import('../src/index.ts')['MaxButton']>
@@ -1122,6 +1165,7 @@ declare module 'vue' {
     readonly MaxChart: UnwrapRef<typeof import('../src/index.ts')['MaxChart']>
     readonly MaxChips: UnwrapRef<typeof import('../src/index.ts')['MaxChips']>
     readonly MaxColorPicker: UnwrapRef<typeof import('../src/index.ts')['MaxColorPicker']>
+    readonly MaxColumn: UnwrapRef<typeof import('../src/index.ts')['MaxColumn']>
     readonly MaxContainerApp: UnwrapRef<typeof import('../src/index.ts')['MaxContainerApp']>
     readonly MaxCreditCard: UnwrapRef<typeof import('../src/index.ts')['MaxCreditCard']>
     readonly MaxDivider: UnwrapRef<typeof import('../src/index.ts')['MaxDivider']>
@@ -1141,6 +1185,8 @@ declare module 'vue' {
     readonly MaxInputAutoCompleteApi: UnwrapRef<typeof import('../src/index.ts')['MaxInputAutoCompleteApi']>
     readonly MaxInputCep: UnwrapRef<typeof import('../src/index.ts')['MaxInputCep']>
     readonly MaxInputCheckbox: UnwrapRef<typeof import('../src/index.ts')['MaxInputCheckbox']>
+    readonly MaxInputCode: UnwrapRef<typeof import('../src/index.ts')['MaxInputCode']>
+    readonly MaxInputCodeToolbar: UnwrapRef<typeof import('../src/index.ts')['MaxInputCodeToolbar']>
     readonly MaxInputCoordinateDecimalLat: UnwrapRef<typeof import('../src/index.ts')['MaxInputCoordinateDecimalLat']>
     readonly MaxInputCoordinateDecimalLng: UnwrapRef<typeof import('../src/index.ts')['MaxInputCoordinateDecimalLng']>
     readonly MaxInputCpfCnpj: UnwrapRef<typeof import('../src/index.ts')['MaxInputCpfCnpj']>
@@ -1196,15 +1242,17 @@ declare module 'vue' {
     readonly MaxSelectTag: UnwrapRef<typeof import('../src/index.ts')['MaxSelectTag']>
     readonly MaxSideMenu: UnwrapRef<typeof import('../src/index.ts')['MaxSideMenu']>
     readonly MaxSideMenuMobile: UnwrapRef<typeof import('../src/index.ts')['MaxSideMenuMobile']>
+    readonly MaxStats: UnwrapRef<typeof import('../src/index.ts')['MaxStats']>
+    readonly MaxStyle: UnwrapRef<typeof import('../src/index.ts')['MaxStyle']>
     readonly MaxTab: UnwrapRef<typeof import('../src/index.ts')['MaxTab']>
     readonly MaxTabItem: UnwrapRef<typeof import('../src/index.ts')['MaxTabItem']>
     readonly MaxTabList: UnwrapRef<typeof import('../src/index.ts')['MaxTabList']>
     readonly MaxTabPanel: UnwrapRef<typeof import('../src/index.ts')['MaxTabPanel']>
     readonly MaxTabPanels: UnwrapRef<typeof import('../src/index.ts')['MaxTabPanels']>
     readonly MaxTable: UnwrapRef<typeof import('../src/index.ts')['MaxTable']>
-    readonly MaxTableColumn: UnwrapRef<typeof import('../src/index.ts')['MaxTableColumn']>
     readonly MaxTableFields: UnwrapRef<typeof import('../src/index.ts')['MaxTableFields']>
     readonly MaxTabs: UnwrapRef<typeof import('../src/index.ts')['MaxTabs']>
+    readonly MaxTag: UnwrapRef<typeof import('../src/index.ts')['MaxTag']>
     readonly MaxTagSelect: UnwrapRef<typeof import('../src/index.ts')['MaxTagSelect']>
     readonly MaxTagsList: UnwrapRef<typeof import('../src/index.ts')['MaxTagsList']>
     readonly MaxTextInputFloatLabel: UnwrapRef<typeof import('../src/index.ts')['MaxTextInputFloatLabel']>
@@ -1234,6 +1282,7 @@ declare module 'vue' {
     readonly TabPanel: UnwrapRef<typeof import('../src/index.ts')['TabPanel']>
     readonly TabPanels: UnwrapRef<typeof import('../src/index.ts')['TabPanels']>
     readonly Tabs: UnwrapRef<typeof import('../src/index.ts')['Tabs']>
+    readonly Tag: UnwrapRef<typeof import('../src/index.ts')['Tag']>
     readonly Toast: UnwrapRef<typeof import('../src/index.ts')['Toast']>
     readonly TransitionFade: UnwrapRef<typeof import('../src/index.ts')['TransitionFade']>
     readonly TransitionPresets: UnwrapRef<typeof import('@maxvue/max-use')['TransitionPresets']>
@@ -1242,6 +1291,7 @@ declare module 'vue' {
     readonly abbrevName: UnwrapRef<typeof import('@maxvue/max-use')['abbrevName']>
     readonly add: UnwrapRef<typeof import('@maxvue/max-use')['add']>
     readonly addTime: UnwrapRef<typeof import('@maxvue/max-use')['addTime']>
+    readonly adjustToWcagLuminance: UnwrapRef<typeof import('../src/index.ts')['adjustToWcagLuminance']>
     readonly after: UnwrapRef<typeof import('@maxvue/max-use')['after']>
     readonly apiDeleteRoute: UnwrapRef<typeof import('@maxvue/max-use')['apiDeleteRoute']>
     readonly apiGetRoute: UnwrapRef<typeof import('@maxvue/max-use')['apiGetRoute']>
@@ -1318,6 +1368,7 @@ declare module 'vue' {
     readonly controlledComputed: UnwrapRef<typeof import('@maxvue/max-use')['controlledComputed']>
     readonly controlledRef: UnwrapRef<typeof import('@maxvue/max-use')['controlledRef']>
     readonly countBy: UnwrapRef<typeof import('@maxvue/max-use')['countBy']>
+    readonly countWhere: UnwrapRef<typeof import('@maxvue/max-use')['countWhere']>
     readonly cpf: UnwrapRef<typeof import('@maxvue/max-use')['cpf']>
     readonly cpfCnpjIsValid: UnwrapRef<typeof import('@maxvue/max-use')['cpfCnpjIsValid']>
     readonly cpfIsValid: UnwrapRef<typeof import('@maxvue/max-use')['cpfIsValid']>
@@ -1429,6 +1480,7 @@ declare module 'vue' {
     readonly forInRight: UnwrapRef<typeof import('@maxvue/max-use')['forInRight']>
     readonly forOwn: UnwrapRef<typeof import('@maxvue/max-use')['forOwn']>
     readonly forOwnRight: UnwrapRef<typeof import('@maxvue/max-use')['forOwnRight']>
+    readonly forceReset: UnwrapRef<typeof import('../src/index.ts')['forceReset']>
     readonly format: UnwrapRef<typeof import('@maxvue/max-use')['format']>
     readonly formatBytes: UnwrapRef<typeof import('@maxvue/max-use')['formatBytes']>
     readonly formatCep: UnwrapRef<typeof import('@maxvue/max-use')['formatCep']>
@@ -1465,6 +1517,7 @@ declare module 'vue' {
     readonly getRoute: UnwrapRef<typeof import('@maxvue/max-use')['getRoute']>
     readonly getRouteByName: UnwrapRef<typeof import('@maxvue/max-use')['getRouteByName']>
     readonly getSSRHandler: UnwrapRef<typeof import('@maxvue/max-use')['getSSRHandler']>
+    readonly getWcagRelativeLuminance: UnwrapRef<typeof import('../src/index.ts')['getWcagRelativeLuminance']>
     readonly getWithCredentials: UnwrapRef<typeof import('@maxvue/max-use')['getWithCredentials']>
     readonly goToRoute: UnwrapRef<typeof import('@maxvue/max-use')['goToRoute']>
     readonly goToRouteByName: UnwrapRef<typeof import('@maxvue/max-use')['goToRouteByName']>
@@ -1623,6 +1676,7 @@ declare module 'vue' {
     readonly mapValues: UnwrapRef<typeof import('@maxvue/max-use')['mapValues']>
     readonly markRaw: UnwrapRef<typeof import('vue')['markRaw']>
     readonly maskSensitive: UnwrapRef<typeof import('@maxvue/max-use')['maskSensitive']>
+    readonly matchCasing: UnwrapRef<typeof import('@maxvue/max-use')['matchCasing']>
     readonly matches: UnwrapRef<typeof import('@maxvue/max-use')['matches']>
     readonly matchesProperty: UnwrapRef<typeof import('@maxvue/max-use')['matchesProperty']>
     readonly max: UnwrapRef<typeof import('@maxvue/max-use')['max']>
@@ -1721,8 +1775,10 @@ declare module 'vue' {
     readonly property: UnwrapRef<typeof import('@maxvue/max-use')['property']>
     readonly propertyOf: UnwrapRef<typeof import('@maxvue/max-use')['propertyOf']>
     readonly provide: UnwrapRef<typeof import('vue')['provide']>
+    readonly provideInputBaseContext: UnwrapRef<typeof import('../src/index.ts')['provideInputBaseContext']>
     readonly provideLocal: UnwrapRef<typeof import('@maxvue/max-use')['provideLocal']>
     readonly provideSSRWidth: UnwrapRef<typeof import('@maxvue/max-use')['provideSSRWidth']>
+    readonly ptBR: UnwrapRef<typeof import('../src/index.ts')['ptBR']>
     readonly pull: UnwrapRef<typeof import('@maxvue/max-use')['pull']>
     readonly pullAll: UnwrapRef<typeof import('@maxvue/max-use')['pullAll']>
     readonly pullAllBy: UnwrapRef<typeof import('@maxvue/max-use')['pullAllBy']>
@@ -1760,8 +1816,10 @@ declare module 'vue' {
     readonly replace: UnwrapRef<typeof import('@maxvue/max-use')['replace']>
     readonly resetConfig: UnwrapRef<typeof import('@maxvue/max-use')['resetConfig']>
     readonly resetMaxAppConfig: UnwrapRef<typeof import('../src/index.ts')['resetMaxAppConfig']>
+    readonly resolveBadgeColors: UnwrapRef<typeof import('../src/index.ts')['resolveBadgeColors']>
     readonly resolveComponent: UnwrapRef<typeof import('vue')['resolveComponent']>
     readonly resolveRoute: UnwrapRef<typeof import('@maxvue/max-use')['resolveRoute']>
+    readonly resolveStatItemColors: UnwrapRef<typeof import('../src/index.ts')['resolveStatItemColors']>
     readonly rest: UnwrapRef<typeof import('@maxvue/max-use')['rest']>
     readonly result: UnwrapRef<typeof import('@maxvue/max-use')['result']>
     readonly reverse: UnwrapRef<typeof import('@maxvue/max-use')['reverse']>
@@ -1899,7 +1957,7 @@ declare module 'vue' {
     readonly useArraySome: UnwrapRef<typeof import('@maxvue/max-use')['useArraySome']>
     readonly useArrayUnique: UnwrapRef<typeof import('@maxvue/max-use')['useArrayUnique']>
     readonly useAsyncQueue: UnwrapRef<typeof import('@maxvue/max-use')['useAsyncQueue']>
-    readonly useAsyncState: UnwrapRef<typeof import('@maxvue/max-use')['useAsyncState']>
+    readonly useAsyncState: UnwrapRef<typeof import('../src/index.ts')['useAsyncState']>
     readonly useAttrs: UnwrapRef<typeof import('vue')['useAttrs']>
     readonly useBase64: UnwrapRef<typeof import('@maxvue/max-use')['useBase64']>
     readonly useBattery: UnwrapRef<typeof import('@maxvue/max-use')['useBattery']>
@@ -1963,6 +2021,7 @@ declare module 'vue' {
     readonly useImage: UnwrapRef<typeof import('@maxvue/max-use')['useImage']>
     readonly useInCacheApi: UnwrapRef<typeof import('@maxvue/max-use')['useInCacheApi']>
     readonly useInfiniteScroll: UnwrapRef<typeof import('@maxvue/max-use')['useInfiniteScroll']>
+    readonly useInputBaseContext: UnwrapRef<typeof import('../src/index.ts')['useInputBaseContext']>
     readonly useIntersectionObserver: UnwrapRef<typeof import('@maxvue/max-use')['useIntersectionObserver']>
     readonly useInterval: UnwrapRef<typeof import('@maxvue/max-use')['useInterval']>
     readonly useIntervalFn: UnwrapRef<typeof import('@maxvue/max-use')['useIntervalFn']>
@@ -2018,7 +2077,7 @@ declare module 'vue' {
     readonly useScreenSafeArea: UnwrapRef<typeof import('@maxvue/max-use')['useScreenSafeArea']>
     readonly useScriptTag: UnwrapRef<typeof import('@maxvue/max-use')['useScriptTag']>
     readonly useScroll: UnwrapRef<typeof import('@maxvue/max-use')['useScroll']>
-    readonly useScrollLock: UnwrapRef<typeof import('@maxvue/max-use')['useScrollLock']>
+    readonly useScrollLock: UnwrapRef<typeof import('../src/index.ts')['useScrollLock']>
     readonly useSearchBarStore: UnwrapRef<typeof import('../src/stores/useSearchBar.Store.ts')['useSearchBarStore']>
     readonly useSessionStorage: UnwrapRef<typeof import('@maxvue/max-use')['useSessionStorage']>
     readonly useShare: UnwrapRef<typeof import('@maxvue/max-use')['useShare']>
@@ -2028,6 +2087,7 @@ declare module 'vue' {
     readonly useSorted: UnwrapRef<typeof import('@maxvue/max-use')['useSorted']>
     readonly useSpeechRecognition: UnwrapRef<typeof import('@maxvue/max-use')['useSpeechRecognition']>
     readonly useSpeechSynthesis: UnwrapRef<typeof import('@maxvue/max-use')['useSpeechSynthesis']>
+    readonly useSpellChecker: UnwrapRef<typeof import('@maxvue/max-use')['useSpellChecker']>
     readonly useStepper: UnwrapRef<typeof import('@maxvue/max-use')['useStepper']>
     readonly useStorage: UnwrapRef<typeof import('@maxvue/max-use')['useStorage']>
     readonly useStorageAsync: UnwrapRef<typeof import('@maxvue/max-use')['useStorageAsync']>
@@ -2054,6 +2114,7 @@ declare module 'vue' {
     readonly useToString: UnwrapRef<typeof import('@maxvue/max-use')['useToString']>
     readonly useToastStore: UnwrapRef<typeof import('../src/stores/useToast.Store.ts')['useToastStore']>
     readonly useToggle: UnwrapRef<typeof import('@maxvue/max-use')['useToggle']>
+    readonly useToolbarNavigation: UnwrapRef<typeof import('../src/index.ts')['useToolbarNavigation']>
     readonly useTopToolbarStore: UnwrapRef<typeof import('../src/stores/useTopToolbar.Store.ts')['useTopToolbarStore']>
     readonly useTransition: UnwrapRef<typeof import('@maxvue/max-use')['useTransition']>
     readonly useUrlSearchParams: UnwrapRef<typeof import('@maxvue/max-use')['useUrlSearchParams']>

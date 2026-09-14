@@ -81,12 +81,11 @@ export async function loadAllIconsFromIDB(): Promise<Record<string, SanitizedSvg
                 request.onsuccess = () => {
                     const records: IconRecord[] = request.result ?? [];
                     const result: Record<string, SanitizedSvg> = {};
-                    for (const record of records) {
-                        if (record?.name && record?.svg) {
-                            const clean = sanitizeSvg(record.svg);
-                            if (clean) result[record.name] = clean;
-                        }
+                    for (const record of records) if (record?.name && record?.svg) {
+                        const clean = sanitizeSvg(record.svg);
+                        if (clean) result[record.name] = clean;
                     }
+
                     resolve(result);
                 };
 
@@ -119,9 +118,8 @@ export async function saveSanitizedIconsToIDB(icons: Record<string, SanitizedSvg
                 const tx = db.transaction(STORE_NAME, 'readwrite');
                 const store = tx.objectStore(STORE_NAME);
 
-                for (const [name, svg] of entries) {
-                    store.put({ name, svg });
-                }
+                for (const [name, svg] of entries) store.put({ name, svg });
+
 
                 tx.oncomplete = () => resolve();
                 tx.onerror = () => resolve();

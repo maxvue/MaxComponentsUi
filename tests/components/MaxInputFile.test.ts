@@ -257,4 +257,107 @@ describe('MaxInputFile', () => {
         await wrapper.setProps({ modelValue: [file1, file2] });
         expect(wrapper.findAll('.files-list-preview-content').length).toBe(2);
     });
+
+    describe('E07-01: Reconciliação de URLs e isolamento multi-instância', () => {
+        it('revoga Object URLs de arquivos removidos externamente via modelValue', async () => {
+            const revokeSpy = vi.spyOn(URL, 'revokeObjectURL');
+            const img1 = new File(['img1'], 'foto1.png', { type: 'image/png' });
+            const img2 = new File(['img2'], 'foto2.png', { type: 'image/png' });
+
+            const wrapper = mount(MaxInputFile, {
+                props: { modelValue: [img1, img2] }
+            });
+
+            // Ambos renderizam previews
+            const images = wrapper.findAll('.files-list-preview-content img');
+            expect(images.length).toBe(2);
+
+            // Remove img1 externamente
+            await wrapper.setProps({ modelValue: [img2] });
+            expect(revokeSpy).toHaveBeenCalledTimes(1);
+
+            // Remove img2 externamente
+            await wrapper.setProps({ modelValue: [] });
+            expect(revokeSpy).toHaveBeenCalledTimes(2);
+
+            wrapper.unmount();
+        });
+
+        it('isola paste entre duas instâncias ativas', async () => {
+            const wrapper1 = mount(MaxInputFile);
+            const wrapper2 = mount(MaxInputFile);
+            const pastedFile = new File(['data'], 'test.png', { type: 'image/png' });
+
+            const pasteEvent = Object.assign(new Event('paste', { bubbles: true, cancelable: true }), {
+                clipboardData: {
+                    items: [
+                        {
+                            kind: 'file',
+                            type: 'image/png',
+                            getAsFile: () => pastedFile
+                        }
+                    ],
+                    files: [pastedFile]
+                }
+            });
+
+            // Dispara na instância 1
+            wrapper1.find('.input-file-main-div').element.dispatchEvent(pasteEvent);
+            await wrapper1.vm.$nextTick();
+            await wrapper2.vm.$nextTick();
+
+            expect(wrapper1.emitted('update:modelValue')).toBeTruthy();
+            expect(wrapper2.emitted('update:modelValue')).toBeFalsy();
+
+            wrapper1.unmount();
+            wrapper2.unmount();
+        });
+    });
+
+    describe('E07-04: Operabilidade por teclado e acessibilidade', () => {
+        it('botão de remoção utiliza elemento button nativo com aria-label nomeado', () => {
+            const file = new File(['text'], 'relatorio.pdf', { type: 'application/pdf' });
+            const wrapper = mount(MaxInputFile, {
+                props: { modelValue: [file] }
+            });
+
+            const removeBtn = wrapper.find('button.trash-icon-remove-clipboard');
+            expect(removeBtn.exists()).toBe(true);
+            expect(removeBtn.element.tagName.toLowerCase()).toBe('button');
+            expect(removeBtn.attributes('aria-label')).toBe('Remover relatorio.pdf');
+        });
+
+        it('respeita prop disabled desabilitando container, input e botão de remoção', async () => {
+            const file = new File(['text'], 'documento.pdf', { type: 'application/pdf' });
+            const wrapper = mount(MaxInputFile, {
+                props: { modelValue: [file], disabled: true }
+            });
+
+            const mainDiv = wrapper.find('.input-file-main-div');
+            expect(mainDiv.classes()).toContain('is-disabled');
+            expect(mainDiv.attributes('tabindex')).toBe('-1');
+            expect(mainDiv.attributes('aria-disabled')).toBe('true');
+
+            const hiddenInput = wrapper.find<HTMLInputElement>('input.max-input-file-hidden');
+            expect(hiddenInput.attributes('disabled')).toBeDefined();
+
+            const removeBtn = wrapper.find('button.trash-icon-remove-clipboard');
+            expect(removeBtn.attributes('disabled')).toBeDefined();
+
+            // Clique na lixeira desabilitada não remove arquivo
+            await removeBtn.trigger('click');
+            expect(wrapper.emitted('update:modelValue')).toBeFalsy();
+        });
+
+        it('anuncia atualizações da lista em live region acessível', async () => {
+            const wrapper = mount(MaxInputFile);
+            const liveRegion = wrapper.find('[role="status"][aria-live="polite"]');
+            expect(liveRegion.exists()).toBe(true);
+
+            const file = new File(['test'], 'exemplo.txt', { type: 'text/plain' });
+            await wrapper.setProps({ modelValue: [file] });
+
+            expect(liveRegion.text()).toContain('1 arquivo selecionado');
+        });
+    });
 });

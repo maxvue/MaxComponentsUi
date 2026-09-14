@@ -21,4 +21,16 @@
         opacity: 0;
         transition-delay: 0.2s;
     }
+
+    @media (prefers-reduced-motion: reduce) {
+        :global(.fade-enter-active),
+        :global(.fade-leave-active) {
+            transition-duration: 0.01ms !important;
+        }
+
+        :global(.fade-enter-from),
+        :global(.fade-leave-to) {
+            transition-delay: 0s !important;
+        }
+    }
 </style>

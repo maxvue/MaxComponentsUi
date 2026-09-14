@@ -23,7 +23,7 @@ describe('MaxInputFileUploadBig (Keyboard Navigation & Accessibility)', () => {
     it('possui role=button, tabindex=0 e aria-label padrão quando habilitado', () => {
         const wrapper = mount(MaxInputFileUploadBig, {
             global: {
-                stubs: { Icon: true, DotLottieVue: true }
+                stubs: { Icon: true }
             }
         });
 
@@ -39,7 +39,7 @@ describe('MaxInputFileUploadBig (Keyboard Navigation & Accessibility)', () => {
         const wrapper = mount(MaxInputFileUploadBig, {
             props: { label: 'Envie seu comprovante' },
             global: {
-                stubs: { Icon: true, DotLottieVue: true }
+                stubs: { Icon: true }
             }
         });
 
@@ -51,7 +51,7 @@ describe('MaxInputFileUploadBig (Keyboard Navigation & Accessibility)', () => {
         const wrapper = mount(MaxInputFileUploadBig, {
             props: { disabled: true },
             global: {
-                stubs: { Icon: true, DotLottieVue: true }
+                stubs: { Icon: true }
             }
         });
 
@@ -65,7 +65,7 @@ describe('MaxInputFileUploadBig (Keyboard Navigation & Accessibility)', () => {
         openMock.mockClear();
         const wrapper = mount(MaxInputFileUploadBig, {
             global: {
-                stubs: { Icon: true, DotLottieVue: true }
+                stubs: { Icon: true }
             }
         });
 
@@ -82,7 +82,7 @@ describe('MaxInputFileUploadBig (Keyboard Navigation & Accessibility)', () => {
         const wrapper = mount(MaxInputFileUploadBig, {
             props: { disabled: true },
             global: {
-                stubs: { Icon: true, DotLottieVue: true }
+                stubs: { Icon: true }
             }
         });
 

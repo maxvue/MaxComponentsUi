@@ -160,6 +160,8 @@
     .input-upload-file-big-main-div {
         height: 100%;
         width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
         border-radius: calc(1rem - 5px);
         outline: 1px dashed var(--background-600);
         background-color: var(--background-0);
@@ -208,20 +210,25 @@
             width: 100%;
             height: 100%;
             padding: 1rem;
+            box-sizing: border-box;
         }
 
         .upload-state {
             display: grid;
             place-items: center;
             width: 100%;
+            max-width: 100%;
             height: 100%;
             padding: 1.5rem;
+            box-sizing: border-box;
 
             .screen-animation {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 gap: 12px;
+                max-width: 100%;
+                box-sizing: border-box;
 
                 :deep(.upload-spinner) {
                     color: var(--max-primary-500, #00768e);
@@ -236,13 +243,18 @@
                     font-weight: 500;
                     color: var(--background-700);
                     text-align: center;
+                    overflow-wrap: break-word;
+                    max-width: 100%;
                 }
 
                 .screen-animation-actions {
                     display: flex;
                     align-items: center;
+                    justify-content: center;
+                    flex-wrap: wrap;
                     gap: 8px;
                     margin-top: 4px;
+                    max-width: 100%;
                 }
             }
 
@@ -253,6 +265,14 @@
                     }
                 }
             }
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .upload-spinner,
+        :deep(.upload-spinner) {
+            animation: none !important;
+            transition: none !important;
         }
     }
 </style>

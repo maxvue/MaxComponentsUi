@@ -35,12 +35,17 @@
                 <div class="bottom-menu-fab-wrapper">
                     <slot name="fab">
                         <MaxPopoverMenu v-if="props.addItems?.length" :items="props.addItems" class="menu-plus-bottom">
-                            <template #button>
+                            <template #trigger="{ toggle, isOpen, menuId }">
                                 <button
                                     type="button"
                                     class="fab"
                                     aria-label="Adicionar novo"
-                                    @keydown.enter.prevent="(event) => (event.currentTarget as HTMLElement).click()"
+                                    aria-haspopup="menu"
+                                    :aria-expanded="isOpen"
+                                    :aria-controls="menuId"
+                                    @click.stop="toggle"
+                                    @keydown.enter.prevent="toggle"
+                                    @keydown.space.prevent="toggle"
                                 >
                                     <MaxIcon icon="ic:round-plus" size="1.5" />
                                 </button>

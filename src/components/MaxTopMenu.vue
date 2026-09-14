@@ -69,8 +69,9 @@
             </slot>
 
             <div class="tool-bar-plus">
-                <MaxIconButton v-tooltip.bottom="'Atualizar dados'" :i="reloading ? 'loading' : 'reload'" size="1.7" light icon-hover-white @click.stop="reloadAll" />
+                <MaxIconButton v-tooltip.bottom="'Atualizar dados'" aria-label="Atualizar dados" :i="reloading ? 'loading' : 'reload'" :loading="reloading" :disabled="reloading" size="1.7" light icon-hover-white @click.stop="reloadAll" />
             </div>
+
 
             <!-- Chat, notificações, VoIP e Live continuam na aplicação: dependem de
                  Reverb, LiveKit e das stores de domínio do engeapp. -->
@@ -161,11 +162,18 @@
         system.side_menu_open = !system.side_menu_open;
     };
 
-    const reloadAll = (): void => {
+    const reloadAll = async (): Promise<void> => {
+        if (reloading.value) return;
         reloading.value = true;
-        system.reloadAll();
-        reloading.value = false;
+        try {
+            await Promise.resolve(system.reloadAll?.());
+        } catch (err) {
+            console.error('[MaxTopMenu] Erro ao recarregar dados do sistema:', err);
+        } finally {
+            reloading.value = false;
+        }
     };
+
 </script>
 
 <style lang="scss" scoped>

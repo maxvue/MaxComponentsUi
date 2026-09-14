@@ -209,5 +209,51 @@ describe('MaxPdfView.vue', () => {
             const toolbar = wrapper.find('.pdf-div-bar-tools');
             expect(toolbar.exists()).toBe(true);
         });
+
+        it('repassa textLayer e annotationLayer verdadeiros por padrão e inclui link acessível de download', async () => {
+            const wrapper = mount(MaxPdfView, {
+                props: {
+                    file: 'documento-projeto.pdf',
+                    title: 'Projeto Executivo Solar'
+                },
+                global: {
+                    stubs: {
+                        VuePdfEmbed: {
+                            name: 'VuePdfEmbed',
+                            props: ['textLayer', 'annotationLayer', 'source', 'width', 'height'],
+                            template: '<div class="vue-pdf-embed-stub"><slot name="before-page" :page="1" /></div>'
+                        }
+                    }
+                }
+            });
+            await wrapper.vm.$nextTick();
+
+            const dialog = wrapper.find('.viewPDF');
+            expect(dialog.attributes('aria-label')).toBe('Projeto Executivo Solar');
+
+            const fallbackLink = wrapper.find('.pdf-fallback-link a');
+            expect(fallbackLink.exists()).toBe(true);
+            expect(fallbackLink.attributes('href')).toBe('documento-projeto.pdf');
+
+            const pdfEmbed = wrapper.findComponent({ name: 'VuePdfEmbed' });
+            expect(pdfEmbed.exists()).toBe(true);
+            expect(pdfEmbed.props('textLayer')).toBe(true);
+            expect(pdfEmbed.props('annotationLayer')).toBe(true);
+        });
+
+        it('renderiza botão de download acessível na barra de ferramentas quando showDownloadButton for true', async () => {
+            const wrapper = mount(MaxPdfView, {
+                props: {
+                    file: 'contrato.pdf',
+                    showDownloadButton: true
+                },
+                global: { stubs: { VuePdfEmbed: true } }
+            });
+            await wrapper.vm.$nextTick();
+
+            const downloadBtn = wrapper.find('.pdf-div-bar-tools [aria-label="Baixar documento PDF"]');
+            expect(downloadBtn.exists()).toBe(true);
+            expect(downloadBtn.attributes('tabindex')).toBe('0');
+        });
     });
 });

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { mount } from '@vue/test-utils';
@@ -141,10 +141,139 @@ describe('MaxInputTextArea', () => {
         expect(sfc).toMatch(/&::placeholder\s*\{[^}]*color:\s*var\(--background-650\)/s);
     });
 
-    it('define cor var(--background-700) e placeholder var(--background-650) para textarea no InputBase', () => {
+    it('define cor var(--background-700) e placeholder para textarea no InputBase', () => {
         const sfc = readFileSync(resolve(__dirname, '../../src/components/InputBase.vue'), 'utf-8');
         expect(sfc).toMatch(/input,\s*textarea\s*\{[^}]*color:\s*var\(--background-700\)/s);
-        expect(sfc).toMatch(/input,\s*textarea\s*\{[^}]*&::placeholder\s*\{[^}]*color:\s*var\(--background-650\)/s);
+        expect(sfc).toMatch(/input,\s*textarea\s*\{[^}]*&::placeholder\s*\{[^}]*color:\s*var\(--max-content-placeholder/s);
+    });
+
+    describe('Redimensionamento único e prevenção de layout thrashing (E11-02)', () => {
+        it('executa no máximo uma leitura de scrollHeight e um getComputedStyle ao alterar o valor pelo input', async () => {
+            const wrapper = mountTextArea({ modelValue: 'Linha 1' });
+            await wrapper.vm.$nextTick();
+            await wrapper.vm.$nextTick();
+
+            const textarea = wrapper.find('textarea');
+            const el = textarea.element as HTMLTextAreaElement;
+
+            let scrollHeightReads = 0;
+            Object.defineProperty(el, 'scrollHeight', {
+                get() {
+                    scrollHeightReads++;
+                    return 100;
+                },
+                configurable: true
+            });
+
+            const gcsSpy = vi.spyOn(window, 'getComputedStyle');
+            gcsSpy.mockClear();
+
+            // Simula digitação disparando evento de input
+            el.value = 'Linha 1\nLinha 2';
+            await textarea.trigger('input');
+            await wrapper.vm.$nextTick();
+            await wrapper.vm.$nextTick();
+
+            const callsForThisEl = gcsSpy.mock.calls.filter(([target]) => target === el);
+
+            // Uma alteração lógica executa exatamente uma leitura de scrollHeight e um getComputedStyle
+            expect(scrollHeightReads).toBe(1);
+            expect(callsForThisEl.length).toBe(1);
+
+            gcsSpy.mockRestore();
+            wrapper.unmount();
+        });
+
+        it('coalesce múltiplas alterações de propriedades no mesmo tick para um único resize', async () => {
+            const wrapper = mountTextArea({ modelValue: 'Inicial' });
+            await wrapper.vm.$nextTick();
+            await wrapper.vm.$nextTick();
+
+            const textarea = wrapper.find('textarea');
+            const el = textarea.element as HTMLTextAreaElement;
+
+            let resizeCount = 0;
+            Object.defineProperty(el, 'scrollHeight', {
+                get() {
+                    resizeCount++;
+                    return 150;
+                },
+                configurable: true
+            });
+
+            // Altera props e modelValue no mesmo ciclo
+            await wrapper.setProps({
+                modelValue: 'Linha 1\nLinha 2\nLinha 3',
+                minRows: 3,
+                maxRows: 6
+            });
+            await wrapper.vm.$nextTick();
+            await wrapper.vm.$nextTick();
+
+            expect(resizeCount).toBe(1);
+            wrapper.unmount();
+        });
+
+        it('não lê scrollHeight nem chama getComputedStyle quando autoResize é false', async () => {
+            const wrapper = mountTextArea({ modelValue: 'Linha 1', autoResize: false });
+            await wrapper.vm.$nextTick();
+            await wrapper.vm.$nextTick();
+
+            const textarea = wrapper.find('textarea');
+            const el = textarea.element as HTMLTextAreaElement;
+
+            let scrollHeightRead = false;
+            Object.defineProperty(el, 'scrollHeight', {
+                get() {
+                    scrollHeightRead = true;
+                    return 200;
+                },
+                configurable: true
+            });
+
+            const gcsSpy = vi.spyOn(window, 'getComputedStyle');
+            gcsSpy.mockClear();
+
+            const vm = wrapper.vm as any;
+            vm.resize();
+
+            const callsForThisEl = gcsSpy.mock.calls.filter(([target]) => target === el);
+
+            expect(scrollHeightRead).toBe(false);
+            expect(callsForThisEl.length).toBe(0);
+            expect(el.style.overflowY).toBe('auto');
+
+            gcsSpy.mockRestore();
+            wrapper.unmount();
+        });
+
+        it('ignora callbacks pendentes e previne escrita tardia após unmount', async () => {
+            const wrapper = mountTextArea({ modelValue: 'Texto' });
+            await wrapper.vm.$nextTick();
+            await wrapper.vm.$nextTick();
+
+            const textarea = wrapper.find('textarea');
+            const el = textarea.element as HTMLTextAreaElement;
+
+            let scrollHeightReads = 0;
+            Object.defineProperty(el, 'scrollHeight', {
+                get() {
+                    scrollHeightReads++;
+                    return 200;
+                },
+                configurable: true
+            });
+
+            const vm = wrapper.vm as any;
+            // Agenda resize e desmonta imediatamente antes do callback executar
+            vm.scheduleResize();
+            wrapper.unmount();
+
+            await wrapper.vm.$nextTick();
+            await wrapper.vm.$nextTick();
+
+            // Após unmount, o callback agendado é ignorado e não deve ler scrollHeight
+            expect(scrollHeightReads).toBe(0);
+        });
     });
 });
-

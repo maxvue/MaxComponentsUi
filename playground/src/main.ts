@@ -1,4 +1,5 @@
 import 'virtual:uno.css';
+import './styles.scss';
 
 import { createApp } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router';

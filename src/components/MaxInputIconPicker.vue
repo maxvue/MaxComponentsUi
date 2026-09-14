@@ -68,17 +68,22 @@
                         />
                     </div>
 
-                    <div v-if="isLoading" class="picker-state-area">
+                    <div v-if="isLoading" class="picker-state-area" role="status" aria-live="polite">
                         <MaxIcon i="svg-spinners:ring-resize" size="2" :dark="0.4" />
+                        <span class="picker-state-text">Carregando ícones...</span>
                     </div>
 
-                    <div v-else-if="flatIcons.length === 0 && search.length >= 2" class="picker-state-area">
-                        Nenhum ícone encontrado para "{{ search }}"
+                    <div v-else-if="hasLoadError" class="picker-state-area is-error" role="alert">
+                        <div class="picker-state-text">Não foi possível carregar os ícones.</div>
+                        <button type="button" class="picker-retry-btn" @click="fetchCuratedIcons(search)">
+                            Tentar novamente
+                        </button>
                     </div>
 
-                    <div v-else-if="flatIcons.length === 0 && !isLoading" class="picker-state-area">
-                        <MaxIcon i="svg-spinners:ring-resize" size="2" :dark="0.4" />
+                    <div v-else-if="flatIcons.length === 0" class="picker-state-area">
+                        {{ search.length >= 2 ? `Nenhum ícone encontrado para "${search}"` : 'Nenhum ícone disponível' }}
                     </div>
+
 
                     <div
                         v-else
@@ -201,7 +206,9 @@
     const search = ref('');
     const curatedIcons = ref<IconEntry[]>([]);
     const isLoading = ref(false);
+    const hasLoadError = ref(false);
     const isDone: Ref = ref(props.done ?? null);
+
 
     /** Cache local de SVGs: name → svg string */
     const svgCache = ref<Record<string, string>>({});
@@ -209,6 +216,10 @@
     /** Fila de nomes aguardando fetch de SVG */
     let svgFetchQueue: string[] = [];
     let svgFetchTimer: ReturnType<typeof setTimeout> | null = null;
+    let isDraining = false;
+
+    let catalogGeneration = 0;
+    let catalogAbortController: AbortController | null = null;
 
     const isRequiredDone = computed(() => (props.required ? hasContent(modelValue.value) : null));
 
@@ -252,37 +263,64 @@
     });
 
     /**
-     * Enfileira nomes de ícones para fetch de SVG com debounce de 150ms.
-     * Respeita o limite de 200 por request.
+     * Agenda a drenagem da fila em lotes limitados a 200 itens por requisição.
+     */
+    const scheduleDrain = (delay = 150) => {
+        if (svgFetchTimer !== null || isDraining) return;
+        svgFetchTimer = setTimeout(() => {
+            svgFetchTimer = null;
+            drainQueue();
+        }, delay);
+    };
+
+    /**
+     * Drena a fila de requisições de SVG em lotes de no máximo 200 itens.
+     */
+    const drainQueue = async () => {
+        if (svgFetchQueue.length === 0 || isDraining) return;
+        isDraining = true;
+
+        try {
+            while (svgFetchQueue.length > 0) {
+                const batch = svgFetchQueue.splice(0, 200);
+                if (batch.length === 0) break;
+
+                try {
+                    const res = await fetch(props.svgUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                        body: JSON.stringify({ names: batch })
+                    });
+                    if (res.ok !== false) {
+                        const data = await res.json();
+                        if (data && typeof data === 'object') {
+                            const sanitized_data: Record<string, string> = {};
+                            for (const name in data) if (typeof data[name] === 'string') {
+                                const clean = sanitizeSvg(data[name]);
+                                if (clean) sanitized_data[name] = clean;
+                            }
+
+                            svgCache.value = { ...svgCache.value, ...sanitized_data };
+                        }
+                    }
+                } catch {
+                    // Silencia erro de rede no lote individual
+                }
+            }
+        } finally {
+            isDraining = false;
+            if (svgFetchQueue.length > 0) scheduleDrain(50);
+        }
+    };
+
+    /**
+     * Enfileira nomes de ícones para fetch de SVG, garantindo deduplicação e agendamento.
      */
     const enqueueSvgFetch = (names: string[]) => {
         const pending = names.filter((n) => !svgCache.value[n] && !svgFetchQueue.includes(n));
         if (pending.length === 0) return;
         svgFetchQueue.push(...pending);
-
-        if (svgFetchTimer !== null) clearTimeout(svgFetchTimer);
-        svgFetchTimer = setTimeout(async () => {
-            const batch = svgFetchQueue.splice(0, 200);
-            svgFetchTimer = null;
-            if (batch.length === 0) return;
-
-            try {
-                const res = await fetch(props.svgUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                    body: JSON.stringify({ names: batch })
-                });
-                const data: Record<string, string> = await res.json();
-                const sanitized_data: Record<string, string> = {};
-                for (const name in data) sanitized_data[name] = sanitizeSvg(data[name]);
-                svgCache.value = { ...svgCache.value, ...sanitized_data };
-            } catch {
-                // Silencia erros de rede; ícones ficam sem SVG temporariamente
-            }
-
-            // Se ficaram itens na fila após o splice, reagenda
-            if (svgFetchQueue.length > 0) enqueueSvgFetch([]);
-        }, 150);
+        scheduleDrain(150);
     };
 
     /**
@@ -297,7 +335,6 @@
         const iconsToFetch: string[] = [];
         for (const entry of visibleItems.value) for (const icon of entry.item) iconsToFetch.push(icon.name);
 
-
         enqueueSvgFetch(iconsToFetch);
     };
 
@@ -309,29 +346,57 @@
         const names: string[] = [];
         for (const entry of visibleItems.value) for (const icon of entry.item) names.push(icon.name);
 
-
         enqueueSvgFetch(names);
     };
 
     /**
-     * Busca a lista curada de ícones no backend.
+     * Busca a lista curada de ícones no backend protegida por identificador de geração
+     * e AbortController para prevenir que respostas obsoletas sobrescrevam a busca atual.
      */
     const fetchCuratedIcons = async (query?: string) => {
+        if (catalogAbortController) {
+            catalogAbortController.abort();
+            catalogAbortController = null;
+        }
+
+        const generation = ++catalogGeneration;
+        const controller = new AbortController();
+        catalogAbortController = controller;
         isLoading.value = true;
+        hasLoadError.value = false;
+
         try {
             const url = query
                 ? `${props.listUrl}?q=${encodeURIComponent(query)}`
                 : props.listUrl;
-            const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-            const data: IconEntry[] = await res.json();
-            curatedIcons.value = Array.isArray(data) ? data : [];
-        } catch {
-            curatedIcons.value = [];
+            const res = await fetch(url, {
+                headers: { 'Accept': 'application/json' },
+                signal: controller.signal
+            });
+            if (res.ok === false) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+
+            if (generation === catalogGeneration) {
+                curatedIcons.value = Array.isArray(data) ? data : [];
+                isLoading.value = false;
+                hasLoadError.value = false;
+                await nextTick();
+                preloadInitialSvgs();
+            }
+        } catch (err: any) {
+            if (err?.name === 'AbortError') return;
+            if (generation === catalogGeneration) {
+                curatedIcons.value = [];
+                isLoading.value = false;
+                hasLoadError.value = true;
+            }
         } finally {
-            isLoading.value = false;
-            await nextTick();
-            preloadInitialSvgs();
+            if (generation === catalogGeneration) {
+                isLoading.value = false;
+                if (catalogAbortController === controller) catalogAbortController = null;
+            }
         }
+
     };
 
     const openDrawer = () => {
@@ -350,6 +415,12 @@
     };
 
     const closeDrawer = () => {
+        if (catalogAbortController) {
+            catalogAbortController.abort();
+            catalogAbortController = null;
+        }
+        catalogGeneration++;
+        isLoading.value = false;
         visible.value = false;
         trap.deactivate();
         nextTick(() => {
@@ -407,7 +478,24 @@
             clearTimeout(svgFetchTimer);
             svgFetchTimer = null;
         }
+        if (catalogAbortController) {
+            catalogAbortController.abort();
+            catalogAbortController = null;
+        }
+        catalogGeneration++;
         svgFetchQueue = [];
+    });
+
+    defineExpose({
+        enqueueSvgFetch,
+        svgCache,
+        svgFetchQueue,
+        visible,
+        search,
+        isLoading,
+        hasLoadError,
+        fetchCuratedIcons,
+        retryLoad: () => fetchCuratedIcons(search.value)
     });
 
     defineEmits<{
@@ -524,13 +612,34 @@
 
             .picker-state-area {
                 display: flex;
+                flex-direction: column;
                 align-items: center;
                 justify-content: center;
                 height: calc(90dvh - 140px);
                 color: var(--background-650);
                 font-size: 0.9rem;
                 gap: 0.5rem;
+
+                &.is-error {
+                    color: var(--max-danger-500, #ef4444);
+                }
+
+                .picker-retry-btn {
+                    margin-top: 0.5rem;
+                    padding: 0.35rem 0.75rem;
+                    border-radius: 6px;
+                    background: var(--max-primary-500, #00768e);
+                    color: #fff;
+                    border: none;
+                    cursor: pointer;
+                    font-size: 0.85rem;
+
+                    &:hover {
+                        background: var(--max-primary-600, #005f77);
+                    }
+                }
             }
+
 
             .icon-virtual-list {
                 position: relative;
@@ -624,6 +733,12 @@
 
     to {
         transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .icon-picker-mobile-drawer {
+        animation: none !important;
     }
 }
 </style>

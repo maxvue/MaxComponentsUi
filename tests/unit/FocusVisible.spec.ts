@@ -81,12 +81,46 @@ describe('Indicadores de Foco Visível (:focus-visible)', () => {
             expect(fileContent).toContain('&:focus-visible');
             expect(fileContent).toContain('--max-focus-ring-color');
         });
+
+        it('MaxAccordionItem.vue declara :focus-visible no cabeçalho interativo', () => {
+            const filePath = path.resolve(__dirname, '../../src/components/MaxAccordionItem.vue');
+            const fileContent = fs.readFileSync(filePath, 'utf-8');
+
+            expect(fileContent).toContain('&:focus-visible');
+            expect(fileContent).toContain('--max-focus-outline');
+        });
+
+        it('MaxListBox.vue declara :focus-visible com tokens canônicos de foco', () => {
+            const filePath = path.resolve(__dirname, '../../src/components/MaxListBox.vue');
+            const fileContent = fs.readFileSync(filePath, 'utf-8');
+
+            expect(fileContent).toContain('&:focus-visible');
+            expect(fileContent).toContain('--max-focus-outline');
+        });
+
+        it('InputBase.vue declara foco com tokens canônicos no field wrapper e no label', () => {
+            const filePath = path.resolve(__dirname, '../../src/components/InputBase.vue');
+            const fileContent = fs.readFileSync(filePath, 'utf-8');
+
+            expect(fileContent).toContain('&:focus-within');
+            expect(fileContent).toContain('--max-focus-ring-color');
+            expect(fileContent).toContain('&:has(.max-input-field-div:focus-within) .max-input-label');
+        });
+
+        it('src/themes/_focus.scss fornece mixin canônico @mixin max-focus-visible', () => {
+            const filePath = path.resolve(__dirname, '../../src/themes/_focus.scss');
+            const fileContent = fs.readFileSync(filePath, 'utf-8');
+
+            expect(fileContent).toContain('@mixin max-focus-visible');
+            expect(fileContent).toContain('--max-focus-ring-color');
+            expect(fileContent).toContain('--max-focus-outline');
+        });
     });
 
     describe('MaxIconButton - Acessibilidade de foco por teclado', () => {
         it('renderiza elemento button nativo com tabindex acessível', () => {
             const wrapper = mount(MaxIconButton, {
-                props: { icon: 'mdi:pencil' },
+                props: { icon: 'mdi:pencil', ariaLabel: 'Editar' },
                 global: {
                     stubs: {
                         MaxIcon: { template: '<span></span>' }

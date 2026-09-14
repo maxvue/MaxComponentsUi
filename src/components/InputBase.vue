@@ -292,7 +292,7 @@
             color: var(--background-700);
 
             &::placeholder {
-                color: var(--background-650);
+                color: var(--max-content-placeholder, var(--background-650));
             }
         }
     }
@@ -314,7 +314,7 @@
     }
 
     &:has(.max-input-field-div:focus-within) .max-input-label {
-        color: var(--max-primary-500, #00768E) !important;
+        color: var(--max-focus-ring-color, var(--max-primary-500, #00768e)) !important;
     }
 
     .max-input-field-div {
@@ -328,7 +328,7 @@
         position: relative;
 
         &:focus-within {
-            outline: 2px solid var(--max-primary-500, #00768E) !important;
+            outline: 2px solid var(--max-focus-ring-color, var(--max-primary-500, #00768e)) !important;
             outline-offset: 1px;
         }
 
@@ -399,7 +399,7 @@
         align-items: flex-start;
         justify-content: flex-start;
         padding: 2px 4px 0;
-        color: var(--max-surface-400);
+        color: var(--max-content-help, var(--max-surface-400));
         min-height: 19px;
         height: auto;
         width: 100%;
@@ -804,7 +804,7 @@
             font-size: 12px;
             font-weight: 500;
             background: var(--background-75) !important;
-            color: var(--background-650) !important;
+            color: var(--max-content-disabled, var(--background-650)) !important;
         }
     }
 
@@ -817,7 +817,7 @@
         :deep(span),
         :deep(.max-input-native),
         :deep(.max-select-label) {
-            color: var(--background-650) !important;
+            color: var(--max-content-disabled, var(--background-650)) !important;
         }
     }
 
@@ -832,7 +832,7 @@
         span,
         .max-select-label,
         .max-input-native {
-            color: var(--background-650) !important;
+            color: var(--max-content-disabled, var(--background-650)) !important;
         }
     }
 }

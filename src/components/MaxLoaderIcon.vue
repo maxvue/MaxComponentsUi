@@ -47,4 +47,10 @@
             display: flex;
         }
     }
+
+    @media (prefers-reduced-motion: reduce) {
+        .max-loader-icon-div {
+            animation-duration: 4s;
+        }
+    }
 </style>

@@ -2,8 +2,17 @@
     <InputBase v-bind="{...props}" class="max-input-text-list max-input-text-list-div">
         <template #default="{ inputAttrs }">
             <div class="max-code-editor">
-                <div class="line-numbers" ref="lineNumbersRef">
-                    <div v-for="n in lineCount" :key="n" class="line-number">{{ n }}</div>
+                <div
+                    ref="lineNumbersRef"
+                    class="line-numbers"
+                    aria-hidden="true"
+                    :style="{ minWidth: lineGutterWidth }"
+                >
+                    <div class="line-numbers-spacer" :style="{ height: `${totalHeight}px` }">
+                        <div class="line-numbers-window" :style="{ transform: `translateY(${offsetY}px)` }">
+                            <div v-for="n in visibleLineNumbers" :key="n" class="line-number">{{ n }}</div>
+                        </div>
+                    </div>
                 </div>
                 <textarea
                     ref="textareaRef"
@@ -13,16 +22,33 @@
                     wrap="off"
                     spellcheck="false"
                     :disabled="props.disabled"
+                    :aria-describedby="combinedAriaDescribedby(inputAttrs?.['aria-describedby'])"
                     @scroll="syncScroll"
                     @keydown="handleKeydown"
+                    @blur="handleBlur"
                 ></textarea>
+                <div
+                    v-if="props.indentWithTab"
+                    :id="instructionId"
+                    class="sr-only text-list-keyboard-instruction"
+                >
+                    Pressione Escape e depois Tab para sair do editor
+                </div>
+                <div
+                    v-if="props.indentWithTab && isEscapeArmed"
+                    class="sr-only escape-armed-status"
+                    role="status"
+                    aria-live="polite"
+                >
+                    Modo de saída do editor ativado. Pressione Tab para sair.
+                </div>
             </div>
         </template>
     </InputBase>
 </template>
 
 <script setup lang="ts">
-    import { ref, computed, useAttrs, nextTick } from 'vue';
+    import { ref, computed, useAttrs, nextTick, onMounted, onUnmounted } from 'vue';
     import InputBase from './InputBase.vue';
     import { useMirroredModel } from '../helpers/useMirroredModel';
 
@@ -44,8 +70,13 @@
             targetValue?: string;
             caution?: string | boolean | undefined;
             required?: boolean;
+            /** Define se a tecla Tab insere 4 espaços ou se navega nativamente entre campos */
+            indentWithTab?: boolean;
         }>(),
-        { modelValue: '' }
+        {
+            modelValue: '',
+            indentWithTab: true
+        }
     );
 
     const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
@@ -63,21 +94,127 @@
 
     const textareaRef = ref<HTMLTextAreaElement | null>(null);
     const lineNumbersRef = ref<HTMLDivElement | null>(null);
+    const isEscapeArmed = ref(false);
 
-    const lineCount = computed(() => {
-        return (temp_value.value || '').split(/\r\n|\r|\n/).length || 1;
+    const instructionId = `max-textlist-instruction-${Math.random().toString(36).slice(2, 9)}`;
+
+    const combinedAriaDescribedby = (inputDescribedby?: string) => {
+        const ids: string[] = [];
+        if (attrs['aria-describedby']) ids.push(String(attrs['aria-describedby']));
+        if (inputDescribedby) ids.push(inputDescribedby);
+        if (props.indentWithTab) ids.push(instructionId);
+        return ids.length > 0 ? ids.join(' ') : undefined;
+    };
+
+    /** Contagem de linhas em passagem única O(N), sem alocar arrays de strings */
+    function countLines(text: string): number {
+        if (!text) return 1;
+        let count = 1;
+        for (let i = 0; i < text.length; i++) {
+            const ch = text.charCodeAt(i);
+            if (ch === 10) count++;
+            else if (ch === 13) {
+                count++;
+                if (i + 1 < text.length && text.charCodeAt(i + 1) === 10) i++;
+            }
+        }
+        return count;
+    }
+
+    const lineCount = computed(() => countLines(temp_value.value));
+
+    // Constantes de virtualização da calha
+    const LINE_HEIGHT = 21;
+    const OVERSCAN = 10;
+
+    const scrollTop = ref(0);
+    const viewportHeight = ref(400);
+
+    const totalHeight = computed(() => lineCount.value * LINE_HEIGHT);
+
+    const startIndex = computed(() => {
+        const first = Math.floor(scrollTop.value / LINE_HEIGHT);
+        const maxStart = Math.max(0, lineCount.value - 1);
+        return Math.min(maxStart, Math.max(0, first - OVERSCAN));
+    });
+
+    const endIndex = computed(() => {
+        const visibleCount = Math.ceil(viewportHeight.value / LINE_HEIGHT);
+        const first = Math.floor(scrollTop.value / LINE_HEIGHT);
+        const last = first + visibleCount + OVERSCAN;
+        return Math.min(lineCount.value, Math.max(startIndex.value + 1, last));
+    });
+
+    const offsetY = computed(() => startIndex.value * LINE_HEIGHT);
+
+    const visibleLineNumbers = computed(() => {
+        const start = startIndex.value + 1;
+        const end = endIndex.value;
+        const numbers: number[] = [];
+        for (let i = start; i <= end; i++) numbers.push(i);
+        return numbers;
+    });
+
+    const lineGutterWidth = computed(() => {
+        const digits = Math.max(2, String(lineCount.value).length);
+        return `${Math.max(40, digits * 9 + 20)}px`;
     });
 
     const syncScroll = () => {
-        if (textareaRef.value && lineNumbersRef.value) lineNumbersRef.value.scrollTop = textareaRef.value.scrollTop;
+        if (!textareaRef.value) return;
+        const st = textareaRef.value.scrollTop;
+        const ch = textareaRef.value.clientHeight;
+        scrollTop.value = st;
+        if (ch > 0) viewportHeight.value = ch;
+        if (lineNumbersRef.value) lineNumbersRef.value.scrollTop = st;
+    };
 
+    let resizeObserver: ResizeObserver | null = null;
+
+    onMounted(() => {
+        if (textareaRef.value) {
+            if (textareaRef.value.clientHeight > 0) viewportHeight.value = textareaRef.value.clientHeight;
+            scrollTop.value = textareaRef.value.scrollTop;
+            if (typeof ResizeObserver !== 'undefined') {
+                resizeObserver = new ResizeObserver(() => {
+                    if (textareaRef.value && textareaRef.value.clientHeight > 0) viewportHeight.value = textareaRef.value.clientHeight;
+                });
+                resizeObserver.observe(textareaRef.value);
+            }
+        }
+    });
+
+    onUnmounted(() => {
+        if (resizeObserver) {
+            resizeObserver.disconnect();
+            resizeObserver = null;
+        }
+    });
+
+    const handleBlur = () => {
+        isEscapeArmed.value = false;
     };
 
     const handleKeydown = async (e: KeyboardEvent) => {
         if (!textareaRef.value) return;
         const el = textareaRef.value;
 
+        if (e.key === 'Escape') {
+            if (props.indentWithTab) {
+                e.stopPropagation();
+                isEscapeArmed.value = true;
+            }
+            return;
+        }
+
         if (e.key === 'Tab') {
+            if (!props.indentWithTab) return;
+
+            if (isEscapeArmed.value) {
+                isEscapeArmed.value = false;
+                return;
+            }
+
             e.preventDefault();
             const start = el.selectionStart;
             const end = el.selectionEnd;
@@ -99,9 +236,12 @@
                 el.selectionStart = start + spaces.length;
                 el.selectionEnd = end + (indented.length - block.length);
             }
+            return;
         }
 
-        else if (e.key === 'Enter') {
+        if (isEscapeArmed.value) isEscapeArmed.value = false;
+
+        if (e.key === 'Enter') {
             e.preventDefault();
             const start = el.selectionStart;
             const end = el.selectionEnd;
@@ -120,6 +260,8 @@
 
 <style lang="scss" scoped>
     .max-input-text-list-div {
+        --text-list-line-height: 21px;
+
         .max-code-editor {
             display: flex;
             align-items: stretch;
@@ -131,6 +273,7 @@
             max-height: 400px;
 
             .line-numbers {
+                position: relative;
                 padding: 10px 8px;
                 background-color: var(--background-100, rgb(0 0 0 / 2%));
                 color: var(--background-650);
@@ -142,8 +285,21 @@
                 border-top-left-radius: inherit;
                 border-bottom-left-radius: inherit;
 
+                .line-numbers-spacer {
+                    position: relative;
+                    width: 100%;
+                }
+
+                .line-numbers-window {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                }
+
                 .line-number {
-                    line-height: 1.5;
+                    height: var(--text-list-line-height);
+                    line-height: var(--text-list-line-height);
                     font-size: 14px;
                 }
             }
@@ -156,11 +312,23 @@
                 outline: none;
                 resize: none;
                 white-space: pre;
-                line-height: 1.5;
+                line-height: var(--text-list-line-height);
                 font-size: 14px;
                 background: transparent;
                 color: inherit;
                 overflow: auto;
+            }
+
+            .sr-only {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip-path: inset(50%);
+                white-space: nowrap;
+                border: 0;
             }
         }
     }

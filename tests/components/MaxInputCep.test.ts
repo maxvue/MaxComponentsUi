@@ -39,10 +39,10 @@ describe('MaxInputCep', () => {
         await input.setValue('01001000');
 
         const emitted = wrapper.emitted('update:modelValue');
-        if (emitted && emitted.length > 0) {
-            const value = emitted[emitted.length - 1][0] as string;
-            expect(/^\d*$/.test(value)).toBe(true);
-        }
+        expect(emitted).toBeDefined();
+        expect(emitted!.length).toBeGreaterThan(0);
+        const value = emitted![emitted!.length - 1][0] as string;
+        expect(/^\d*$/.test(value)).toBe(true);
     });
 
     it('emite evento complete quando CEP é válido', async () => {
@@ -51,8 +51,8 @@ describe('MaxInputCep', () => {
         await input.setValue('01001000');
 
         const complete = wrapper.emitted('complete');
-        if (complete) expect(complete.length).toBeGreaterThan(0);
-
+        expect(complete).toBeDefined();
+        expect(complete!.length).toBeGreaterThan(0);
     });
 
     it('done prop overrides internal validation', () => {

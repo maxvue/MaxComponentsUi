@@ -441,4 +441,14 @@
             transform: scale(1);
         }
     }
+
+    @media (prefers-reduced-motion: reduce) {
+        .max-like-icon-container {
+            transition: none !important;
+
+            &.animating {
+                animation: none !important;
+            }
+        }
+    }
 </style>

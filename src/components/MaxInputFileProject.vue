@@ -1,6 +1,12 @@
 <template>
     <div :class="`max-input-file-project input-project-div ${isOverDropZone ? 'in-drop' : 'not-in-drop'}`" ref="drop_zone_ref">
-        <MaxIconButton class="open-files-btn"  :hoverScale="1.06" @click="() => open()">
+        <MaxIconButton
+            class="open-files-btn"
+            :hoverScale="1.06"
+            :disabled="props.disabled"
+            aria-label="Carregar documentos"
+            @click="() => open()"
+        >
             <div class="open-files">
                 <div class="instruction">
                     Insira fotos dos documentos ou Documentos em PDF aqui
@@ -27,27 +33,53 @@
                 <MaxButton i="hugeicons:ai-file" light="0.7" label="Preencher" :action="button.action" :data="button" />
             </div>
         </div>
+        <div class="sr-only" aria-live="polite" role="status">{{ statusAnnouncement }}</div>
     </div>
 </template>
 <script setup lang="ts">
-    import { type Ref, watch, computed, onBeforeUnmount, ref } from 'vue';
+    import { type Ref, watch, onBeforeUnmount, ref } from 'vue';
     import { getRoute, useDropZone, useFileDialog, isBlank, ulid, size } from '@maxvue/max-use';
     import MaxIcon from './MaxIcon.vue';
     import MaxButton from './MaxButton.vue';
-    import { DBFile } from '../types/index.js';
+    import type { DBFile, UploadFileStatus, MaxButtonsType } from '../types/index.js';
     import MaxLoaderIcon from './MaxLoaderIcon.vue';
-    import type { MaxButtonsType } from '../types/index.js';
     import axios from 'axios';
     import MaxIconButton from './MaxIconButton.vue';
 
-    const props = withDefaults(defineProps<{ files: DBFile[]; uploadData?: any; auto?: boolean; url?: string; route?:string; ready?: boolean; uploadRoute?: string; buttons?: MaxButtonsType[]; disabled?: boolean }>(), { files: () => [], buttons: () => [], auto: true, disabled: false });
+    const props = withDefaults(
+        defineProps<{
+            files: DBFile[];
+            uploadData?: any;
+            auto?: boolean;
+            url?: string;
+            route?: string;
+            ready?: boolean;
+            uploadRoute?: string;
+            buttons?: MaxButtonsType[];
+            disabled?: boolean;
+        }>(),
+        {
+            files: () => [],
+            buttons: () => [],
+            auto: true,
+            disabled: false
+        }
+    );
 
     const emit = defineEmits<{
         'files-selected': [files: File[]];
+        'upload-success': [payload: { files: any[]; response: any }];
+        'upload-error': [payload: { files: any[]; error: any }];
     }>();
 
-    const temp_files = ref<DBFile[]>(props.files);
+    export type { UploadFileStatus };
+
+    const temp_files = ref<DBFile[]>([]);
+    const fileStatusMap = ref(new Map<string, UploadFileStatus>());
     const created_urls = new Set<string>();
+    const activeControllers = new Set<AbortController>();
+    const statusAnnouncement = ref('');
+    const isUnmounted = ref(false);
 
     const cleanupRemovedUrls = (currentFiles: DBFile[]) => {
         const activeUrls = new Set(currentFiles.map((f) => f.objectURL).filter(Boolean));
@@ -58,63 +90,83 @@
 
     };
 
-    watch(() => props.files, (files) => {
-        cleanupRemovedUrls(files);
-        temp_files.value = files;
-    }, { deep: true, immediate: true });
-
-    const count_files = computed(() => size(temp_files.value));
-    const files_to_upload = computed(() => temp_files.value.filter((file: DBFile) => ! file.in_server) );
-    const count_to_upload = computed(() => size(files_to_upload.value));
-
-
-    watch(count_files, () => temp_files.value.forEach((file: DBFile) => convertItem(file)), { deep: true, immediate: true });
-
-    function convertItem (item: DBFile) {
-        item.id ??= ulid();
-        item.name ??= item.file_name ?? item.label_file_name;
-        item.extension ??= item.name?.split('.')?.pop() ?? null;
-
-        if (!item.src && !item.thumbnail) {
-            if (!item.blob) if (item instanceof Blob) item.blob = item;
-            else item.blob = new Blob([item as any], { type: item.type });
-
-
-            if (!item.objectURL) {
-                item.objectURL = URL.createObjectURL(item.blob);
-                created_urls.add(item.objectURL);
-            }
-            item.src ??= item.objectURL;
-            item.file_bloob ??= item.objectURL;
-        }
-
-        item.message_type ??= checkFileType(item.extension) ?? 'document';
-        item.in_server ??= false;
-        item.to_request_ai ??= ! item.in_server;
-    };
-
-    function checkFileType (extension: string | null): string | null {
+    function checkFileType(extension: string | null): string | null {
         if (isBlank(extension) || extension === 'svg') return null;
-        else if (extension === 'jpg' || extension === 'jpeg' || extension === 'png' || extension === 'gif' || extension === 'webp' || extension === 'bmp') return 'image';
-        else if (extension === 'mp3' || extension === 'ogg' || extension === 'aac' || extension === 'wav' || extension === 'flac' || extension === 'wma' || extension === 'm4a') return 'audio';
-        else if (extension === 'mp4' || extension === 'avi' || extension === 'mov' || extension === 'webm' || extension === 'mkv' || extension === 'flv' || extension === '3gp' || extension === 'wmv' || extension === 'mpg' || extension === 'mpeg') return 'video';
-        else if (extension === 'docx' || extension === 'doc' || extension === 'pdf' || extension === 'txt' || extension === 'pptx' || extension === 'ppt' || extension === 'xlsx' || extension === 'xls' || extension === 'csv') return 'document';
+        if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(extension!)) return 'image';
+        if (['mp3', 'ogg', 'aac', 'wav', 'flac', 'wma', 'm4a'].includes(extension!)) return 'audio';
+        if (['mp4', 'avi', 'mov', 'webm', 'mkv', 'flv', '3gp', 'wmv', 'mpg', 'mpeg'].includes(extension!)) return 'video';
+        if (['docx', 'doc', 'pdf', 'txt', 'pptx', 'ppt', 'xlsx', 'xls', 'csv'].includes(extension!)) return 'document';
         return null;
     }
 
-    function fileIcon (file: DBFile): string {
+    function fileIcon(file: DBFile): string {
         const file_names = [file?.file_name?.toLowerCase() ?? '', file?.name?.toLowerCase() ?? '', file?.label_file_name?.toLowerCase() ?? ''];
+        for (const name of file_names) if (name && (name.includes('cnh') || name.includes('identidade') || name.includes('rg') || name.includes('carteira'))) return 'mdi:identification-card';
 
-        for (const name of file_names) if (name && name.includes('cnh') || name.includes('identidade')|| name.includes('rg') || name.includes('carteira') ) return 'mdi:identification-card';
         return 'mdi:file';
     }
 
+    function normalizeFile(item: any, isInitialServer = false): DBFile {
+        const cloned: any = { ...item };
+        cloned.id = item.id || ulid();
+        cloned.name = item.name || item.file_name || item.label_file_name || '';
+        cloned.extension = item.extension || cloned.name?.split('.')?.pop() || null;
+
+        if (!cloned.src && !cloned.thumbnail) {
+            if (!cloned.blob) cloned.blob = item instanceof Blob ? item : new Blob([item as any], { type: item.type });
+
+            if (!cloned.objectURL) {
+                cloned.objectURL = URL.createObjectURL(cloned.blob);
+                created_urls.add(cloned.objectURL);
+            }
+            cloned.src = cloned.objectURL;
+            cloned.file_bloob = cloned.objectURL;
+        }
+
+        cloned.message_type = cloned.message_type || checkFileType(cloned.extension) || 'document';
+        cloned.in_server = item.in_server ?? isInitialServer;
+        cloned.to_request_ai = item.to_request_ai ?? (!cloned.in_server);
+
+        const initialStatus: UploadFileStatus = cloned.in_server ? 'succeeded' : 'queued';
+        if (!fileStatusMap.value.has(cloned.id)) fileStatusMap.value.set(cloned.id, initialStatus);
+
+
+        return cloned as DBFile;
+    }
+
+    watch(
+        () => props.files,
+        (files) => {
+            cleanupRemovedUrls(files || []);
+            temp_files.value = (files || []).map((f) => normalizeFile(f, f.in_server ?? true));
+        },
+        { deep: true, immediate: true }
+    );
+
+    const scheduleUpload = () => {
+        if (!props.auto) return;
+        const queued = temp_files.value.filter((f) => fileStatusMap.value.get(f.id) === 'queued');
+        if (queued.length > 0) void sendFile(queued);
+
+    };
+
+    function ingestFiles(files: File[] | null) {
+        if (props.disabled || !files || files.length === 0) return;
+        const fileList = Array.from(files);
+        const normalized = fileList.map((f) => normalizeFile(f, false));
+        temp_files.value = [...temp_files.value, ...normalized];
+        statusAnnouncement.value = `${fileList.length} arquivo(s) selecionado(s)`;
+        emit('files-selected', fileList);
+        scheduleUpload();
+    }
 
     // REFS
     const drop_zone_ref: Ref = ref(null);
 
     const { isOverDropZone } = useDropZone(drop_zone_ref as any, {
-        onDrop,
+        onDrop: (files: File[] | null) => {
+            ingestFiles(files);
+        },
         multiple: true,
         preventDefaultForUnhandled: false
     });
@@ -124,20 +176,14 @@
     });
 
     onChange((files: any) => {
-        if (files && size(files) > 0){
-            temp_files.value = [...temp_files.value, ...(files ?? [])];
+        if (files && size(files) > 0) {
+            ingestFiles(Array.from(files));
             reset();
         }
     });
 
-    watch(count_to_upload, () => {
-        if (props.auto && count_to_upload.value > 0) sendFile(files_to_upload.value);
-
-    });
-
-
-    const sendFile = (files: any) => {
-        if (! props.uploadRoute && !props.url && !props.route) return;
+    const sendFile = async (filesArg?: any): Promise<any> => {
+        if (!props.uploadRoute && !props.url && !props.route) return;
 
         const route_url = props.url
             ?? (props.route ? getRoute(props.route) ?? props.route : null)
@@ -145,12 +191,36 @@
 
         if (!route_url) return;
 
-        // Criando o FormData
-        const formData = new FormData();
+        let targetList: DBFile[] = [];
+        if (filesArg) {
+            const raw = filesArg.files ?? filesArg;
+            const list = Array.isArray(raw) ? raw : [raw];
+            targetList = list
+                .map((item) => {
+                    if (typeof item === 'string') return temp_files.value.find((f) => f.id === item);
 
+                    if (item && item.id) return temp_files.value.find((f) => f.id === item.id) ?? item;
+
+                    return item;
+                })
+                .filter(Boolean) as DBFile[];
+        } else targetList = temp_files.value.filter((f) => fileStatusMap.value.get(f.id) === 'queued');
+
+
+        // Filter out any already uploading or succeeded
+        targetList = targetList.filter((f) => {
+            const st = fileStatusMap.value.get(f.id);
+            return st !== 'uploading' && st !== 'succeeded';
+        });
+
+        if (targetList.length === 0) return;
+
+        // Mark as uploading
+        targetList.forEach((f) => fileStatusMap.value.set(f.id, 'uploading'));
+
+        const formData = new FormData();
         const data = props.uploadData ?? {};
 
-        // Adicionando os dados ao FormData
         for (const key in data) if (Object.prototype.hasOwnProperty.call(data, key)) {
             const value = data[key];
             if (typeof value === 'object' && value !== null) formData.append(key, JSON.stringify(value));
@@ -158,48 +228,90 @@
         }
 
 
-        files = { files: files['files'] ?? files };
         const send_urls: string[] = [];
-
-        // Adicionando os arquivos ao FormData
-        files['files'].forEach((fileItem: any, index: number) => {
+        targetList.forEach((fileItem: any, index: number) => {
             const file = fileItem;
-            file['target'] = null;
-            if (!file['blob']) file['blob'] = file instanceof Blob ? file : new Blob([file], { type: file.type });
+            file.target = null;
+            if (!file.blob) file.blob = file instanceof Blob ? file : new Blob([file], { type: file.type });
 
-            if (!file['objectURL']) {
-                file['objectURL'] = URL.createObjectURL(file.blob);
-                send_urls.push(file['objectURL']);
+            if (!file.objectURL) {
+                file.objectURL = URL.createObjectURL(file.blob);
+                send_urls.push(file.objectURL);
             }
             formData.append(`files[${index}]`, file.blob, file.name);
         });
 
-        const token: string = document.head.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-        axios.post(route_url, formData, {
-            headers: {
-                Accept: 'application/json',
-                'X-CSRF-TOKEN': token,
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            withCredentials: true
-        }).catch( (error) => console.error('Erro ao enviar arquivo. ', error))
-            .finally(() => {
-                send_urls.forEach((url) => URL.revokeObjectURL(url));
+        const token = typeof document !== 'undefined'
+            ? document.head?.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+            : '';
+
+        const controller = new AbortController();
+        activeControllers.add(controller);
+
+        try {
+            const response = await axios.post(route_url, formData, {
+                headers: {
+                    Accept: 'application/json',
+                    'X-CSRF-TOKEN': token,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                withCredentials: true,
+                signal: controller.signal
             });
+
+            if (isUnmounted.value) return;
+
+            targetList.forEach((f) => {
+                f.in_server = true;
+                f.to_request_ai = false;
+                fileStatusMap.value.set(f.id, 'succeeded');
+            });
+            statusAnnouncement.value = `Upload de ${targetList.length} arquivo(s) concluído com sucesso`;
+            emit('upload-success', { files: targetList, response: response?.data });
+            return response;
+        } catch (error: any) {
+            if (isUnmounted.value) return;
+            if (axios.isCancel && axios.isCancel(error)) return;
+            if (error?.name === 'AbortError' || error?.name === 'CanceledError' || (axios.isAxiosError && axios.isAxiosError(error) && error.code === 'ERR_CANCELED')) return;
+
+            targetList.forEach((f) => fileStatusMap.value.set(f.id, 'failed'));
+            statusAnnouncement.value = `Erro no upload de ${targetList.length} arquivo(s)`;
+            emit('upload-error', { files: targetList, error });
+            console.error('Erro ao enviar arquivo. ', error);
+            throw error;
+        } finally {
+            activeControllers.delete(controller);
+            send_urls.forEach((url) => URL.revokeObjectURL(url));
+        }
+    };
+
+    const retry = (fileIds?: string[]) => {
+        const idSet = fileIds ? new Set(fileIds) : null;
+        const failed = temp_files.value.filter((f) =>
+            fileStatusMap.value.get(f.id) === 'failed' && (!idSet || idSet.has(f.id))
+        );
+        failed.forEach((f) => fileStatusMap.value.set(f.id, 'queued'));
+        return sendFile(failed);
     };
 
     onBeforeUnmount(() => {
-        for (const url of Array.from(created_urls)) URL.revokeObjectURL(url);
+        isUnmounted.value = true;
+        for (const controller of activeControllers) controller.abort();
 
+        activeControllers.clear();
+        activeControllers.clear();
+
+        for (const url of Array.from(created_urls)) URL.revokeObjectURL(url);
         created_urls.clear();
     });
 
-    function onDrop(files: File[] | null) {
-        if (props.disabled || !files || files.length === 0) return;
-
-        temp_files.value = [...temp_files.value, ...(files as any)];
-        emit('files-selected', files);
-    }
+    defineExpose({
+        temp_files,
+        sendFile,
+        retry,
+        fileStatusMap,
+        ingestFiles
+    });
 </script>
 
 <style lang="scss" scoped>

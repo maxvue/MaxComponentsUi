@@ -151,4 +151,32 @@ describe('MaxUserSection', () => {
         await wrapper.find('.button-avatar').trigger('click');
         expect(document.body.querySelector('.max-user-section-overlay')).not.toBeNull();
     });
+
+    it('renderiza o botão de personificação como botão nativo independente (sem controles aninhados)', async () => {
+        const wrapper = mountSection({ name: 'João', userId: 1, isImpersonated: true }, false);
+        const trigger = wrapper.find('.user-section.user-profile-trigger');
+        const impersonateBtn = wrapper.find('.impersonated-btn');
+
+        expect(trigger.element.tagName).toBe('BUTTON');
+        expect(impersonateBtn.element.tagName).toBe('BUTTON');
+        expect(impersonateBtn.attributes('type')).toBe('button');
+        expect(impersonateBtn.attributes('aria-label')).toBe('SAIR (RETORNAR)');
+
+        // Garante que são irmãos e não aninhados
+        expect(trigger.find('.impersonated-btn').exists()).toBe(false);
+
+        // Disparo por clique emite endImpersonate sem abrir o menu
+        await impersonateBtn.trigger('click');
+        expect(wrapper.emitted('endImpersonate')).toHaveLength(1);
+        expect(document.body.querySelector('.max-user-section-overlay')).toBeNull();
+
+        // Disparo por teclado (Enter e Espaço)
+        await impersonateBtn.trigger('keydown', { key: 'Enter' });
+        expect(wrapper.emitted('endImpersonate')).toHaveLength(2);
+        expect(document.body.querySelector('.max-user-section-overlay')).toBeNull();
+
+        await impersonateBtn.trigger('keydown', { key: ' ' });
+        expect(wrapper.emitted('endImpersonate')).toHaveLength(3);
+        expect(document.body.querySelector('.max-user-section-overlay')).toBeNull();
+    });
 });

@@ -186,10 +186,10 @@ describe('MaxTableFields.vue', () => {
         });
         expect(wrapper.exists()).toBe(true);
         // Fire updates to test setFieldValue for each input
-        ['MaxInputNumber', 'MaxInputSelect', 'MaxInputDatePicker', 'MaxInputCheckbox', 'MaxInputTextArea', 'MaxInputAutoComplete', 'MaxInputAutoCompleteApi', 'MaxInputPhone'].forEach((comp, _idx) => {
+        ['MaxInputNumber', 'MaxInputSelect', 'MaxInputDatePicker', 'MaxInputCheckbox', 'MaxInputTextArea', 'MaxInputAutoComplete', 'MaxInputAutoCompleteApi', 'MaxInputPhone'].forEach((comp) => {
             const compWrapper = wrapper.findComponent({ name: comp });
-            if(compWrapper.exists()) compWrapper.vm.$emit('update:modelValue', 'new-val');
-
+            expect(compWrapper.exists()).toBe(true);
+            compWrapper.vm.$emit('update:modelValue', comp === 'MaxInputCheckbox' ? true : 'new-val');
         });
     });
 
@@ -497,6 +497,30 @@ describe('MaxTableFields.vue', () => {
                 });
                 expect(wrapper.find('.max-table-fields').exists()).toBe(true);
             }).not.toThrow();
+        });
+    });
+
+    describe('Anatomia visual compartilhada e feedback de célula (E10-08)', () => {
+        it('não contém regra display: none para .input-message no SFC', async () => {
+            const fs = await import('node:fs');
+            const path = await import('node:path');
+            const sfc = fs.readFileSync(path.resolve(__dirname, '../../src/components/MaxTableFields.vue'), 'utf-8');
+
+            expect(sfc).not.toMatch(/\.input-message\s*\{[^}]*display:\s*none/);
+        });
+
+        it('importa e consome os mixins compartilhados de table-anatomy', async () => {
+            const fs = await import('node:fs');
+            const path = await import('node:path');
+            const sfc = fs.readFileSync(path.resolve(__dirname, '../../src/components/MaxTableFields.vue'), 'utf-8');
+
+            expect(sfc).toContain('@use \'../themes/table-anatomy\' as table;');
+            expect(sfc).toContain('@include table.table-container');
+            expect(sfc).toContain('@include table.table-header-row');
+            expect(sfc).toContain('@include table.table-header-cell');
+            expect(sfc).toContain('@include table.table-body-row');
+            expect(sfc).toContain('@include table.table-row-zebra');
+            expect(sfc).toContain('@include table.table-cell-input-feedback');
         });
     });
 });

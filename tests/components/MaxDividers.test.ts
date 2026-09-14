@@ -364,4 +364,45 @@ describe('MaxDividers', () => {
         expect(nested.find('.max-dividers-track.active-pane-1').exists()).toBe(true);
         expect(nested.find('.churches-list').exists()).toBe(true);
     });
+
+    it('possui atributos WAI-ARIA separator e suporta ajuste por teclado com setas, Home e End no gutter', async () => {
+        const wrapper = mount(MaxDividers, {
+            props: {
+                resizable: true,
+                mobile: false,
+                sizes: [50, 50]
+            }
+        });
+
+        const gutter = wrapper.find('.max-dividers-gutter');
+        expect(gutter.exists()).toBe(true);
+        expect(gutter.attributes('role')).toBe('separator');
+        expect(gutter.attributes('tabindex')).toBe('0');
+        expect(gutter.attributes('aria-orientation')).toBe('vertical');
+        expect(gutter.attributes('aria-valuemin')).toBe('10');
+        expect(gutter.attributes('aria-valuemax')).toBe('90');
+        expect(gutter.attributes('aria-valuenow')).toBe('50');
+
+        // Pressiona ArrowRight para aumentar tamanho
+        await gutter.trigger('keydown', { key: 'ArrowRight' });
+        expect(wrapper.emitted('resize')).toBeTruthy();
+        const resize1 = wrapper.emitted('resize')?.[0]?.[0] as [number, number];
+        expect(resize1[0]).toBe(51);
+        expect(gutter.attributes('aria-valuenow')).toBe('51');
+
+        // Pressiona ArrowLeft com Shift para diminuir em 5
+        await gutter.trigger('keydown', { key: 'ArrowLeft', shiftKey: true });
+        const resize2 = wrapper.emitted('resize')?.[1]?.[0] as [number, number];
+        expect(resize2[0]).toBe(46);
+
+        // Pressiona Home para ir ao mínimo
+        await gutter.trigger('keydown', { key: 'Home' });
+        const resize3 = wrapper.emitted('resize')?.[2]?.[0] as [number, number];
+        expect(resize3[0]).toBe(10);
+
+        // Pressiona End para ir ao máximo
+        await gutter.trigger('keydown', { key: 'End' });
+        const resize4 = wrapper.emitted('resize')?.[3]?.[0] as [number, number];
+        expect(resize4[0]).toBe(90);
+    });
 });

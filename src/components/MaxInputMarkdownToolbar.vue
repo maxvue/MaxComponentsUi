@@ -4,7 +4,7 @@
         class="max-input-markdown-toolbar md-toolbar"
         :class="{ 'md-toolbar--disabled': !editor || editor.isEditable === false }"
         role="toolbar"
-        aria-label="Barra de ferramentas de formatação markdown"
+        :aria-label="props.ariaLabel"
         @keydown="onToolbarKeydown"
     >
         <span v-if="props.label" class="md-toolbar__label">{{ props.label }}</span>
@@ -168,56 +168,116 @@
         <div class="md-toolbar__group">
             <div ref="linkPopoverRef" class="md-toolbar__popover-anchor">
                 <button
+                    ref="linkTriggerRef"
                     type="button"
                     class="md-toolbar__btn"
                     :class="{ active: editor?.isActive('link') }"
+                    :aria-pressed="Boolean(editor?.isActive('link'))"
+                    :aria-expanded="showLinkPopover"
+                    aria-haspopup="dialog"
                     title="Link"
                     :disabled="!editor || editor.isEditable === false"
                     @click="openLinkPopover"
                 >
                     <MaxIcon icon="mdi:link" :size="1.1" color="currentColor" />
                 </button>
-                <div v-if="showLinkPopover" class="md-popover" @click.stop>
+                <div
+                    v-if="showLinkPopover"
+                    class="md-popover"
+                    role="dialog"
+                    aria-label="Inserir link"
+                    @click.stop
+                >
+                    <label :for="linkInputId" class="md-popover__label">URL do link</label>
                     <input
+                        :id="linkInputId"
                         ref="linkInputRef"
                         v-model="linkUrl"
                         class="md-popover__input"
+                        :class="{ 'is-invalid': Boolean(linkError) }"
+                        aria-label="URL do link"
+                        :aria-invalid="Boolean(linkError)"
+                        :aria-describedby="linkError ? linkErrorId : undefined"
                         placeholder="https://..."
+                        @input="linkError = ''"
                         @keydown.enter.prevent="applyLink"
-                        @keydown.escape="showLinkPopover = false"
+                        @keydown.escape="closeLinkPopover"
                     />
-                    <button type="button" class="md-popover__btn md-popover__btn--primary" @click="applyLink">OK</button>
-                    <button type="button" class="md-popover__btn" @click="removeLink">Remover</button>
+                    <span v-if="linkError" :id="linkErrorId" class="md-popover__error" role="alert">
+                        {{ linkError }}
+                    </span>
+                    <div class="md-popover__actions">
+                        <button
+                            type="button"
+                            class="md-popover__btn md-popover__btn--primary"
+                            @click="applyLink"
+                        >
+                            Inserir link
+                        </button>
+                        <button
+                            type="button"
+                            class="md-popover__btn"
+                            @click="removeLink"
+                        >
+                            Remover
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <div ref="imagePopoverRef" class="md-toolbar__popover-anchor">
                 <button
+                    ref="imageTriggerRef"
                     type="button"
                     class="md-toolbar__btn"
+                    :aria-expanded="showImagePopover"
+                    aria-haspopup="dialog"
                     title="Imagem"
                     :disabled="!editor || editor.isEditable === false"
                     @click="openImagePopover"
                 >
                     <MaxIcon icon="mdi:image" :size="1.1" color="currentColor" />
                 </button>
-                <div v-if="showImagePopover" class="md-popover" @click.stop>
+                <div
+                    v-if="showImagePopover"
+                    class="md-popover"
+                    role="dialog"
+                    aria-label="Inserir imagem"
+                    @click.stop
+                >
+                    <label :for="imageInputId" class="md-popover__label">URL da imagem</label>
                     <input
+                        :id="imageInputId"
                         ref="imageInputRef"
                         v-model="imageUrl"
                         class="md-popover__input"
+                        :class="{ 'is-invalid': Boolean(imageError) }"
+                        aria-label="URL da imagem"
+                        :aria-invalid="Boolean(imageError)"
+                        :aria-describedby="imageError ? imageErrorId : undefined"
                         placeholder="https://..."
+                        @input="imageError = ''"
                         @keydown.enter.prevent="applyImage"
-                        @keydown.escape="showImagePopover = false"
+                        @keydown.escape="closeImagePopover"
                     />
-                    <button type="button" class="md-popover__btn md-popover__btn--primary" @click="applyImage">OK</button>
+                    <span v-if="imageError" :id="imageErrorId" class="md-popover__error" role="alert">
+                        {{ imageError }}
+                    </span>
+                    <div class="md-popover__actions">
+                        <button
+                            type="button"
+                            class="md-popover__btn md-popover__btn--primary"
+                            @click="applyImage"
+                        >
+                            Inserir imagem
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <button
                 type="button"
                 class="md-toolbar__btn"
-                :class="{ active: editor?.isActive('table') }"
                 title="Inserir tabela"
                 :disabled="!editor || editor.isEditable === false"
                 @click="editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()"
@@ -262,128 +322,150 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, nextTick, onMounted } from 'vue';
+    import { nextTick, onBeforeUnmount, ref, watch } from 'vue';
     import { onClickOutside } from '@maxvue/max-use';
     import type { Editor } from '@tiptap/core';
     import MaxIcon from './MaxIcon.vue';
     import { isSafeUrl } from '../helpers/isSafeUrl';
+    import { useToolbarNavigation } from '../helpers/useToolbarNavigation';
 
-    const props = defineProps<{
-        editor: Editor | null;
-        label?: string;
-    }>();
+    const props = withDefaults(
+        defineProps<{
+            editor: Editor | null;
+            label?: string;
+            ariaLabel?: string;
+        }>(),
+        {
+            label: undefined,
+            ariaLabel: 'Editor de Markdown'
+        }
+    );
 
     const toolbarRef = ref<HTMLElement | null>(null);
 
-    const getFocusableItems = (): HTMLElement[] => {
-        if (!toolbarRef.value) return [];
-        return Array.from(toolbarRef.value.querySelectorAll<HTMLElement>('.md-toolbar__btn:not(:disabled)'));
-    };
-
-    const onToolbarKeydown = (event: KeyboardEvent) => {
-        const items = getFocusableItems();
-        if (items.length === 0) return;
-
-        const activeEl = document.activeElement as HTMLElement | null;
-        const currentIndex = activeEl ? items.indexOf(activeEl) : -1;
-
-        let targetIndex = -1;
-
-        switch (event.key) {
-            case 'ArrowRight':
-            case 'ArrowDown': {
-                event.preventDefault();
-                targetIndex = currentIndex >= 0 ? (currentIndex + 1) % items.length : 0;
-                break;
-            }
-            case 'ArrowLeft':
-            case 'ArrowUp': {
-                event.preventDefault();
-                targetIndex = currentIndex >= 0 ? (currentIndex - 1 + items.length) % items.length : items.length - 1;
-                break;
-            }
-            case 'Home': {
-                event.preventDefault();
-                targetIndex = 0;
-                break;
-            }
-            case 'End': {
-                event.preventDefault();
-                targetIndex = items.length - 1;
-                break;
-            }
-        }
-
-        if (targetIndex >= 0 && items[targetIndex]) {
-            items.forEach((item, idx) => {
-                item.setAttribute('tabindex', idx === targetIndex ? '0' : '-1');
-            });
-            items[targetIndex].focus();
-        }
-    };
-
-    onMounted(() => {
-        const items = getFocusableItems();
-        items.forEach((item, idx) => {
-            item.setAttribute('tabindex', idx === 0 ? '0' : '-1');
-            item.addEventListener('focus', () => {
-                items.forEach((other) => other.setAttribute('tabindex', other === item ? '0' : '-1'));
-            });
-        });
+    const { onToolbarKeydown, updateTabindices } = useToolbarNavigation(toolbarRef, {
+        buttonSelector: '.md-toolbar__btn'
     });
 
+    const editorTick = ref(0);
+    const updateEditorState = () => {
+        editorTick.value++;
+        nextTick(() => updateTabindices());
+    };
+
+    watch(
+        () => props.editor,
+        (newEd, oldEd) => {
+            oldEd?.off?.('selectionUpdate', updateEditorState);
+            oldEd?.off?.('transaction', updateEditorState);
+            newEd?.on?.('selectionUpdate', updateEditorState);
+            newEd?.on?.('transaction', updateEditorState);
+            nextTick(() => updateTabindices());
+        },
+        { immediate: true }
+    );
+
+    onBeforeUnmount(() => {
+        props.editor?.off?.('selectionUpdate', updateEditorState);
+        props.editor?.off?.('transaction', updateEditorState);
+    });
+
+    const linkTriggerRef = ref<HTMLButtonElement | null>(null);
     const linkPopoverRef = ref<HTMLElement | null>(null);
     const showLinkPopover = ref(false);
     const linkUrl = ref('');
+    const linkError = ref('');
     const linkInputRef = ref<HTMLInputElement | null>(null);
+    const linkInputId = 'md-toolbar-link-input';
+    const linkErrorId = 'md-toolbar-link-error';
 
+    const imageTriggerRef = ref<HTMLButtonElement | null>(null);
     const imagePopoverRef = ref<HTMLElement | null>(null);
     const showImagePopover = ref(false);
     const imageUrl = ref('');
+    const imageError = ref('');
     const imageInputRef = ref<HTMLInputElement | null>(null);
+    const imageInputId = 'md-toolbar-image-input';
+    const imageErrorId = 'md-toolbar-image-error';
+
+    const closeLinkPopover = () => {
+        showLinkPopover.value = false;
+        linkUrl.value = '';
+        linkError.value = '';
+        linkTriggerRef.value?.focus();
+    };
+
+    const closeImagePopover = () => {
+        showImagePopover.value = false;
+        imageUrl.value = '';
+        imageError.value = '';
+        imageTriggerRef.value?.focus();
+    };
 
     onClickOutside(linkPopoverRef, () => {
-        showLinkPopover.value = false;
+        closeLinkPopover();
     });
 
     onClickOutside(imagePopoverRef, () => {
-        showImagePopover.value = false;
+        closeImagePopover();
     });
 
     const openLinkPopover = () => {
-        const existing = props.editor?.getAttributes('link').href ?? '';
+        const existing = props.editor?.getAttributes('link')?.href ?? '';
         linkUrl.value = existing;
+        linkError.value = '';
         showLinkPopover.value = !showLinkPopover.value;
         showImagePopover.value = false;
         if (showLinkPopover.value) nextTick(() => linkInputRef.value?.focus());
     };
 
     const applyLink = () => {
-        if (!linkUrl.value) props.editor?.chain().focus().unsetLink().run();
-        else if (isSafeUrl(linkUrl.value)) props.editor?.chain().focus().setLink({ href: linkUrl.value, target: '_blank' }).run();
+        const trimmed = linkUrl.value.trim();
+        if (!trimmed) {
+            props.editor?.chain().focus().unsetLink().run();
+            closeLinkPopover();
+            return;
+        }
 
-        showLinkPopover.value = false;
-        linkUrl.value = '';
+        if (!isSafeUrl(trimmed)) {
+            linkError.value = 'URL inválida ou insegura';
+            nextTick(() => linkInputRef.value?.focus());
+            return;
+        }
+
+        props.editor?.chain().focus().setLink({ href: trimmed, target: '_blank' }).run();
+        closeLinkPopover();
     };
 
     const removeLink = () => {
         props.editor?.chain().focus().unsetLink().run();
-        showLinkPopover.value = false;
-        linkUrl.value = '';
+        closeLinkPopover();
     };
 
     const openImagePopover = () => {
         imageUrl.value = '';
+        imageError.value = '';
         showImagePopover.value = !showImagePopover.value;
         showLinkPopover.value = false;
         if (showImagePopover.value) nextTick(() => imageInputRef.value?.focus());
     };
 
     const applyImage = () => {
-        if (imageUrl.value && isSafeUrl(imageUrl.value)) props.editor?.chain().focus().setImage({ src: imageUrl.value }).run();
+        const trimmed = imageUrl.value.trim();
+        if (!trimmed) {
+            imageError.value = 'Informe a URL da imagem';
+            nextTick(() => imageInputRef.value?.focus());
+            return;
+        }
 
-        showImagePopover.value = false;
-        imageUrl.value = '';
+        if (!isSafeUrl(trimmed)) {
+            imageError.value = 'URL inválida ou insegura';
+            nextTick(() => imageInputRef.value?.focus());
+            return;
+        }
+
+        props.editor?.chain().focus().setImage({ src: trimmed }).run();
+        closeImagePopover();
     };
 </script>
 
@@ -410,7 +492,7 @@
         &__label {
             font-size: 0.8rem;
             font-weight: 600;
-            color: var(--background-650, #4b5563);
+            color: var(--max-content-secondary, var(--background-650, #4b5563));
             white-space: nowrap;
             padding: 0 4px;
             height: auto;
@@ -465,9 +547,9 @@
             }
 
             &.active {
-                background: var(--max-primary-50);
+                background: var(--max-primary-50, #67C8DB);
                 color: var(--max-primary-600, #005F77);
-                border-color: var(--max-primary-200);
+                border-color: var(--max-primary-200, #46BCD4);
             }
 
             &:disabled {
@@ -489,7 +571,8 @@
         left: 0;
         z-index: 100;
         display: flex;
-        align-items: center;
+        flex-direction: column;
+        align-items: stretch;
         gap: 6px;
         padding: 8px 10px;
         background: var(--background-0, #fff);
@@ -500,8 +583,14 @@
         height: auto;
         box-sizing: border-box;
 
+        &__label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--max-content-secondary, var(--background-650, #4b5563));
+        }
+
         &__input {
-            flex: 1;
+            width: 100%;
             height: 30px;
             padding: 4px 8px;
             border: 1px solid var(--background-300, #d1d5db);
@@ -516,6 +605,25 @@
             &:focus {
                 border-color: var(--max-primary-500, #00768E);
             }
+
+            &.is-invalid,
+            &[aria-invalid='true'] {
+                border-color: var(--max-danger-500, #ef4444);
+            }
+        }
+
+        &__error {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--max-danger-500, #ef4444);
+            line-height: 1.2;
+            overflow-wrap: break-word;
+        }
+
+        &__actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         &__btn {

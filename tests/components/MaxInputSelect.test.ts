@@ -481,6 +481,283 @@ describe('MaxInputSelect', () => {
             removeSpy.mockRestore();
         });
     });
+
+    describe('Carga coordenada e reentrante de loadOptions (E05-06)', () => {
+        it('duplo clique rápido durante a carga chama loadOptions apenas uma vez', async () => {
+            let resolveLoad: any;
+            const loadPromise = new Promise((resolve) => { resolveLoad = resolve; });
+            const loadOptions = vi.fn().mockReturnValue(loadPromise);
+            const wrapper = mountSelect({ loadOptions });
+
+            // Primeiro clique inicia carga
+            await wrapper.find('.max-select').trigger('click');
+            // Segundo clique enquanto carrega cancela a intenção de abrir
+            await wrapper.find('.max-select').trigger('click');
+
+            expect(loadOptions).toHaveBeenCalledTimes(1);
+
+            resolveLoad([{ value: '1', name: 'Item 1' }]);
+            await loadPromise;
+            await wrapper.vm.$nextTick();
+
+            // Como o segundo clique cancelou a abertura, o dropdown permanece fechado
+            expect((wrapper.vm as any).isOpen).toBe(false);
+            wrapper.unmount();
+        });
+
+        it('passa AbortSignal em context e aborta se o select for fechado ou desmontado durante a carga', async () => {
+            let capturedSignal: AbortSignal | undefined;
+            const loadPromise = new Promise(() => {}); // never resolves
+            const loadOptions = vi.fn().mockImplementation((ctx: any) => {
+                capturedSignal = ctx?.signal;
+                return loadPromise;
+            });
+            const wrapper = mountSelect({ loadOptions });
+
+            await wrapper.find('.max-select').trigger('click');
+            expect(loadOptions).toHaveBeenCalled();
+            expect(capturedSignal).toBeDefined();
+            expect(capturedSignal?.aborted).toBe(false);
+
+            wrapper.unmount();
+            expect(capturedSignal?.aborted).toBe(true);
+        });
+
+        it('desabilitar o componente durante a carga cancela abertura e publicação', async () => {
+            let resolveLoad: any;
+            const loadPromise = new Promise((resolve) => { resolveLoad = resolve; });
+            const loadOptions = vi.fn().mockReturnValue(loadPromise);
+            const wrapper = mountSelect({ loadOptions });
+
+            await wrapper.find('.max-select').trigger('click');
+            expect((wrapper.vm as any).loading).toBe(true);
+
+            await wrapper.setProps({ disabled: true });
+            await wrapper.vm.$nextTick();
+
+            resolveLoad([{ value: '2', name: 'Item 2' }]);
+            await loadPromise;
+            await wrapper.vm.$nextTick();
+
+            expect((wrapper.vm as any).isOpen).toBe(false);
+            expect((wrapper.vm as any).loading).toBe(false);
+            wrapper.unmount();
+        });
+
+        it('trata falha/rejeição no loadOptions sem exceção não tratada e permite nova tentativa', async () => {
+            const loadOptions = vi.fn().mockRejectedValueOnce(new Error('Network error'))
+                .mockResolvedValueOnce([{ value: 'ok', name: 'OK' }]);
+            const wrapper = mountSelect({ loadOptions });
+
+            await wrapper.find('.max-select').trigger('click');
+            await new Promise((r) => setTimeout(r, 10));
+            await wrapper.vm.$nextTick();
+
+            expect((wrapper.vm as any).loading).toBe(false);
+            expect((wrapper.vm as any).isOpen).toBe(false);
+
+            // Segunda tentativa bem-sucedida
+            await wrapper.find('.max-select').trigger('click');
+            await new Promise((r) => setTimeout(r, 10));
+            await wrapper.vm.$nextTick();
+
+            expect((wrapper.vm as any).isOpen).toBe(true);
+            expect((wrapper.vm as any).optionsField).toEqual([{ value: 'ok', name: 'OK' }]);
+            wrapper.unmount();
+        });
+
+        it('resolver duas gerações de carga em ordem inversa mantém a mais recente (E05-06)', async () => {
+            let resolveLoad1: any;
+            const promise1 = new Promise((r) => { resolveLoad1 = r; });
+            let resolveLoad2: any;
+            const promise2 = new Promise((r) => { resolveLoad2 = r; });
+
+            let callCount = 0;
+            const loadOptions = vi.fn().mockImplementation(() => {
+                callCount++;
+                if (callCount === 1) return promise1;
+                return promise2;
+            });
+            const wrapper = mountSelect({ loadOptions });
+
+            // 1ª ativação
+            await wrapper.find('.max-select').trigger('click');
+            expect(loadOptions).toHaveBeenCalledTimes(1);
+
+            // Cancela fechando
+            await wrapper.find('.max-select').trigger('click');
+
+            // 2ª ativação
+            await wrapper.find('.max-select').trigger('click');
+            expect(loadOptions).toHaveBeenCalledTimes(2);
+
+            // Resposta 2 resolve primeiro
+            resolveLoad2([{ value: 'v2', name: 'Versão 2' }]);
+            await promise2;
+            await new Promise((r) => setTimeout(r, 20));
+            await wrapper.vm.$nextTick();
+
+            expect((wrapper.vm as any).isOpen).toBe(true);
+            expect((wrapper.vm as any).optionsField).toEqual([{ value: 'v2', name: 'Versão 2' }]);
+
+            // Resposta 1 resolve tardiamente
+            resolveLoad1([{ value: 'v1', name: 'Versão 1' }]);
+            await promise1;
+            await new Promise((r) => setTimeout(r, 20));
+            await wrapper.vm.$nextTick();
+
+            // Deve manter a versão 2 mais recente
+            expect((wrapper.vm as any).optionsField).toEqual([{ value: 'v2', name: 'Versão 2' }]);
+            wrapper.unmount();
+        });
+    });
+
+    describe('Estado Disabled Completo (E06-03)', () => {
+        it('define tabindex=-1 e aria-disabled=true quando desabilitado e bloqueia interações', async () => {
+            const wrapper = mountSelect({
+                disabled: true,
+                options: [{ value: 'a', name: 'Opção A' }]
+            });
+
+            const trigger = wrapper.find('.max-select');
+            expect(trigger.attributes('tabindex')).toBe('-1');
+            expect(trigger.attributes('aria-disabled')).toBe('true');
+            expect(trigger.attributes('aria-controls')).toBeUndefined();
+
+            // Tentativa de abertura via clique
+            await trigger.trigger('click');
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).isOpen).toBe(false);
+
+            // Tentativa de abertura via teclado
+            await trigger.trigger('keydown', { key: 'ArrowDown' });
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).isOpen).toBe(false);
+
+            await trigger.trigger('keydown', { key: 'Enter' });
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).isOpen).toBe(false);
+
+            await trigger.trigger('keydown', { key: ' ' });
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).isOpen).toBe(false);
+
+            // Reabilita dinamicamente
+            await wrapper.setProps({ disabled: false });
+            await wrapper.vm.$nextTick();
+
+            expect(trigger.attributes('tabindex')).toBe('0');
+            expect(trigger.attributes('aria-disabled')).toBeUndefined();
+
+            await trigger.trigger('click');
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).isOpen).toBe(true);
+
+            // Desabilita enquanto aberto: deve fechar imediatamente
+            await wrapper.setProps({ disabled: true });
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).isOpen).toBe(false);
+            expect(trigger.attributes('tabindex')).toBe('-1');
+            expect(trigger.attributes('aria-disabled')).toBe('true');
+
+            wrapper.unmount();
+        });
+    });
+
+    describe('Virtualização e Coleções Grandes (E06-06)', () => {
+        it('virtualiza automaticamente coleções acima do threshold (500 itens)', async () => {
+            const items = Array.from({ length: 600 }, (_, i) => ({ value: `v${i}`, name: `Item ${i}` }));
+            const wrapper = mountSelect({
+                options: items
+            });
+
+            await wrapper.find('.max-select').trigger('click');
+            await wrapper.vm.$nextTick();
+
+            const spacer = document.body.querySelector('.max-select-spacer');
+            expect(spacer).toBeTruthy();
+
+            const renderedOptions = document.body.querySelectorAll('.max-select-option');
+            expect(renderedOptions.length).toBeLessThan(600);
+
+            wrapper.unmount();
+        });
+
+        it('não virtualiza quando virtualScroll=false mesmo com mais de 500 itens', async () => {
+            const items = Array.from({ length: 550 }, (_, i) => ({ value: `v${i}`, name: `Item ${i}` }));
+            const wrapper = mountSelect({
+                options: items,
+                virtualScroll: false
+            });
+
+            await wrapper.find('.max-select').trigger('click');
+            await wrapper.vm.$nextTick();
+
+            const spacer = document.body.querySelector('.max-select-spacer');
+            expect(spacer).toBeNull();
+
+            const renderedOptions = document.body.querySelectorAll('.max-select-option');
+            expect(renderedOptions.length).toBe(550);
+
+            wrapper.unmount();
+        });
+
+        it('força virtualização quando virtualScroll=true mesmo com poucos itens', async () => {
+            const items = Array.from({ length: 20 }, (_, i) => ({ value: `v${i}`, name: `Item ${i}` }));
+            const wrapper = mountSelect({
+                options: items,
+                virtualScroll: true
+            });
+
+            await wrapper.find('.max-select').trigger('click');
+            await wrapper.vm.$nextTick();
+
+            const spacer = document.body.querySelector('.max-select-spacer');
+            expect(spacer).toBeTruthy();
+
+            wrapper.unmount();
+        });
+
+        it('achata groupOptions em O(N) e preserva seleção e cliques', async () => {
+            const groupOptions = [
+                {
+                    label: 'Grupo 1',
+                    items: [
+                        { value: 'g1_1', name: 'Item 1.1' },
+                        { value: 'g1_2', name: 'Item 1.2' }
+                    ]
+                },
+                {
+                    label: 'Grupo 2',
+                    items: [
+                        { value: 'g2_1', name: 'Item 2.1' },
+                        { value: 'g2_2', name: 'Item 2.2' }
+                    ]
+                }
+            ];
+
+            const wrapper = mountSelect({
+                groupOptions
+            });
+
+            await wrapper.find('.max-select').trigger('click');
+            await wrapper.vm.$nextTick();
+
+            const groups = document.body.querySelectorAll('.max-select-option-group');
+            expect(groups.length).toBe(2);
+
+            const options = document.body.querySelectorAll('.max-select-option');
+            expect(options.length).toBe(4);
+
+            // Clica na 3ª opção (primeira do grupo 2)
+            (options[2] as HTMLElement).click();
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.emitted('update:modelValue')?.[0]).toEqual(['g2_1']);
+
+            wrapper.unmount();
+        });
+    });
 });
 
 

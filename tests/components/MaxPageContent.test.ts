@@ -38,9 +38,6 @@ describe('MaxPageContent', () => {
     });
 
     it('integra com a useSystemStore preservando o estado inicial', () => {
-        const store = useSystemStore();
-        expect(store).toBeDefined();
-
         mount(MaxPageContent, {
             global: { plugins: [pinia] },
             slots: {
@@ -48,6 +45,33 @@ describe('MaxPageContent', () => {
             }
         });
 
+        const store = useSystemStore();
+        expect(store).toBeDefined();
         expect(store.content_page_size).toBeDefined();
+    });
+
+    it('utiliza o token semântico --layout-content-frame-bg e não referencia --blue-800 (E10-06)', async () => {
+        const fs = await import('node:fs');
+        const path = await import('node:path');
+        const sfc = fs.readFileSync(path.resolve(__dirname, '../../src/components/MaxPageContent.vue'), 'utf-8');
+
+        expect(sfc).toContain('var(--layout-content-frame-bg');
+        expect(sfc).not.toContain('var(--blue-800)');
+    });
+
+    it('define --layout-content-frame-bg de forma estável no tema claro e escuro em colors.scss (E10-06)', async () => {
+        const fs = await import('node:fs');
+        const path = await import('node:path');
+        const colors = fs.readFileSync(path.resolve(__dirname, '../../src/themes/colors.scss'), 'utf-8');
+
+        // Garante que o token existe em ambos os blocos
+        const lightBlock = colors.split(':root.dark')[0];
+        const darkBlock = colors.split(':root.dark')[1] ?? '';
+
+        expect(lightBlock).toMatch(/--layout-content-frame-bg:\s*#004860;/);
+        expect(darkBlock).toMatch(/--layout-content-frame-bg:\s*#004860;/);
+
+        // Garante que a moldura nunca resolve para quase branco no dark (#EEF8FB)
+        expect(darkBlock).not.toMatch(/--layout-content-frame-bg:\s*#EEF8FB;/i);
     });
 });

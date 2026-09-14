@@ -7,20 +7,26 @@
         :page_component="item.details.page_component"
         role="link"
         tabindex="0"
+        :aria-label="item.details.tooltip || item.details.label || item.details.title || item.details.route || 'Item de menu'"
+        :aria-current="isActive(item) ? 'page' : undefined"
         @click="(event) => handleItemClick(item, event)"
         @keydown.enter="(event) => handleItemClick(item, event)"
     >
-        <MaxIconButton
-            :i="item.details.icon ?? undefined"
+        <MaxIcon
+            v-if="item.details.icon"
+            :icon="item.details.icon"
+            :i="item.details.icon"
             size="1.5"
             :light="!isActive(item)"
             :color="isActive(item) ? 'var(--blue-750)' : undefined"
-            :route="item.details.route?.trim() ?? null"
+            aria-hidden="true"
+            tabindex="-1"
+            class="max-menu-vertical-item-icon"
         />
-        <svg class="curva cima" xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 3000 3000">
+        <svg class="curva cima" xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 3000 3000" aria-hidden="true" tabindex="-1">
             <path d="M-7.07 3007.07c0,-1656.85 1343.15,-3000 3000,-3000l-3000 0 0 3000z" />
         </svg>
-        <svg class="curva baixo" xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 3000 3000">
+        <svg class="curva baixo" xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 3000 3000" aria-hidden="true" tabindex="-1">
             <path d="M-7.07 3007.07c0,-1656.85 1343.15,-3000 3000,-3000l-3000 0 0 3000z" />
         </svg>
     </div>
@@ -30,7 +36,7 @@
     import { computed } from 'vue';
     import { useRoute } from 'vue-router';
     import { snakeCase, goToRoute } from '@maxvue/max-use';
-    import MaxIconButton from './MaxIconButton.vue';
+    import MaxIcon from './MaxIcon.vue';
     import { useSystemStore } from '../stores/useSystem.Store';
     import { useSearchBarStore } from '../stores/useSearchBar.Store';
     import type { SideMenuItem } from '../types/app';
@@ -82,12 +88,8 @@
         return false;
     };
 
-    const handleItemClick = (item: SideMenuItem, event?: MouseEvent | KeyboardEvent): void => {
+    const handleItemClick = (item: SideMenuItem, _event?: MouseEvent | KeyboardEvent): void => {
         useSearchBarStore().input_value = '';
-
-        // Se o clique originou do botão de ícone interno, deixa o MaxIconButton gerenciar a navegação
-        const target = event?.target as HTMLElement | null;
-        if (target?.closest('.max-icon-button')) return;
 
         const targetRoute = item.details.route?.trim();
         if (targetRoute) goToRoute(targetRoute);

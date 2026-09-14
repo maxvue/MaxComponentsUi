@@ -10,7 +10,10 @@ const globalOptions = {
 
 describe('MaxInputCoordinateDecimalLat', () => {
     it('deve renderizar o componente corretamente', () => {
-        const wrapper = mount(MaxInputCoordinateDecimalLat, { global: globalOptions });
+        const wrapper = mount(MaxInputCoordinateDecimalLat, {
+            props: { modelValue: '' },
+            global: globalOptions
+        });
         expect(wrapper.exists()).toBe(true);
     });
 

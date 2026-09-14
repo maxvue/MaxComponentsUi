@@ -1,6 +1,13 @@
 <template>
     <div ref="btn_el" v-tooltip="null" class="max-popover max-popover-main" :class="props.class">
-        <div
+        <slot
+            v-if="$slots.trigger || $slots.button"
+            :name="$slots.trigger ? 'trigger' : 'button'"
+            v-bind="triggerSlotProps"
+        />
+        <button
+            v-else
+            type="button"
             v-tooltip="null"
             @click.stop="toggle"
             @keydown="onKeydownTrigger"
@@ -8,13 +15,21 @@
             tabindex="0"
             :aria-expanded="isOpen"
             :aria-controls="dialog_id"
-            :style="{width: size_icon, height: size_icon}"
+            :aria-haspopup="'dialog'"
+            :aria-label="props.label || props.title || props.ariaLabel || 'Abrir informações adicionais'"
+            :style="{ width: size_icon, height: size_icon }"
             class="max-popover-icon"
         >
-            <slot name="button" v-bind="props">
-                <MaxButton v-bind="props" :size="String(props.size ?? props.sizeIcon ?? props.iconSize ?? 1.1)" :action="undefined" />
-            </slot>
-        </div>
+            <MaxIcon
+                v-if="props.icon || props.i"
+                :icon="props.icon ?? props.i"
+                :size="size_icon"
+                :dark="props.dark"
+                :light="props.light"
+                aria-hidden="true"
+            />
+            <span v-if="props.label" class="max-popover-label">{{ props.label }}</span>
+        </button>
         <Teleport to="body" v-if="isOpen">
             <div v-tooltip="null" class="popover-item">
                 <MaxAnimateFade :show="isOpen" :duration="0.3">
@@ -53,7 +68,7 @@
     import { useFocusTrap } from '../helpers/useFocusTrap';
     import { useActiveOverlayPosition } from '../composables/useActiveOverlayPosition';
     import MaxIconButton from './MaxIconButton.vue';
-    import MaxButton from './MaxButton.vue';
+    import MaxIcon from './MaxIcon.vue';
     import MaxTitle1 from './MaxTitle1.vue';
     import MaxGrid from './MaxGrid.vue';
     import MaxAnimateFade from './MaxAnimateFade.vue';
@@ -252,14 +267,29 @@
         opacity: isPositioned.value ? 1 : 0
     }));
 
+    const triggerSlotProps = computed(() => ({
+        'aria-expanded': isOpen.value,
+        'aria-controls': dialog_id.value,
+        'aria-haspopup': 'dialog',
+        role: 'button',
+        tabindex: 0,
+        type: 'button' as const,
+        toggle,
+        show,
+        hide,
+        isOpen: isOpen.value,
+        dialogId: dialog_id.value,
+        onClick: toggle,
+        onKeydown: onKeydownTrigger,
+        ...props
+    }));
+
     defineExpose({
         hide,
         show,
         toggle,
         style
     });
-
-
 </script>
 
 <style lang="scss" scoped>
@@ -273,6 +303,18 @@
         position: relative;
         display: grid;
         place-items: center;
+        background: transparent;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        color: inherit;
+        outline: none;
+
+        &:focus-visible {
+            outline: 2px solid var(--max-primary-500, #00768E);
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
     }
 }
 

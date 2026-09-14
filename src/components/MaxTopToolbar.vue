@@ -12,17 +12,30 @@
                     @keydown="onMenubarItemKeydown($event, index, item)"
                 >
                     <div class="p-menubar-item-content">
-                        <div v-if="item.divider" class="divider-space"></div>
+                        <div v-if="item.divider" class="divider-space" role="separator"></div>
                         <div
                             v-else-if="hasContent(item.label)"
+                            :ref="(el) => setItemRef(el, index)"
                             class="menu-item-content root"
+                            :class="{ 'is-disabled': item.disabled }"
                             role="menuitem"
-                            tabindex="0"
-                            :aria-haspopup="item.items && item.items.length ? 'true' : undefined"
-                            :aria-expanded="item.items && item.items.length ? activeSubmenu === index : undefined"
-                            @click="handleItemClick(item)"
+                            :id="`top-toolbar-item-${index}`"
+                            :tabindex="focusedIndex === index && !item.disabled ? 0 : -1"
+                            :aria-haspopup="item.items && item.items.length ? 'menu' : undefined"
+                            :aria-expanded="item.items && item.items.length ? (activeSubmenu === index ? 'true' : 'false') : undefined"
+                            :aria-controls="item.items && item.items.length ? `top-toolbar-submenu-${index}` : undefined"
+                            :aria-disabled="item.disabled ? 'true' : undefined"
+                            @click="handleItemClick(item, index)"
+                            @focus="focusedIndex = index"
                         >
-                            <MaxIconButton v-if="item.icon" :icon="item.icon" :size="item.icon_size" light :transparent="true" />
+                            <MaxIcon
+                                v-if="item.icon"
+                                :icon="item.icon"
+                                :size="item.icon_size ?? '1.2'"
+                                class="menu-item-icon"
+                                aria-hidden="true"
+                                tabindex="-1"
+                            />
                             <div class="menu-item-labels">
                                 <span class="menu-item-label">{{ item.label }}</span>
                                 <span v-if="item.subLabel" class="menu-item-sublabel">{{ item.subLabel }}</span>
@@ -30,7 +43,12 @@
                         </div>
                         <MaxIconButton
                             v-else
+                            :ref="(el) => setItemRef(el, index)"
                             v-tooltip.bottom="item.tooltip ?? false"
+                            role="menuitem"
+                            :id="`top-toolbar-item-${index}`"
+                            :tabindex="focusedIndex === index && !item.disabled ? 0 : -1"
+                            :aria-disabled="item.disabled ? 'true' : undefined"
                             :icon="item.icon"
                             light
                             :transparent="true"
@@ -39,17 +57,24 @@
                             :data="item.data ?? item.props ?? item.query"
                             class="root"
                             size="1.5"
+                            @focus="focusedIndex = index"
+                            @click="handleItemClick(item, index)"
                         />
                     </div>
 
                     <!-- Submenu se houver item.items -->
                     <MaxTopToolbarSubmenu
                         v-if="item.items && item.items.length && activeSubmenu === index"
+                        ref="submenuRef"
+                        :id="`top-toolbar-submenu-${index}`"
+                        :parent-id="`top-toolbar-item-${index}`"
                         class="p-menubar-submenu-root"
                         :items="item.items"
                         @keep-open="clearCloseTimer"
                         @schedule-close="scheduleCloseSubmenu"
-                        @item-click="handleItemClick"
+                        @item-click="handleSubmenuItemClick"
+                        @close="onSubmenuClose(index)"
+                        @close-all="onSubmenuCloseAll"
                     />
                 </li>
             </ul>
@@ -59,8 +84,9 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, computed, useAttrs, onBeforeUnmount } from 'vue';
+    import { ref, computed, useAttrs, onBeforeUnmount, watch, nextTick } from 'vue';
     import { hasContent } from '@maxvue/max-use';
+    import MaxIcon from './MaxIcon.vue';
     import MaxIconButton from './MaxIconButton.vue';
     import MaxTopToolbarSubmenu from './MaxTopToolbarSubmenu.vue';
     import { useTopToolbarStore } from '../stores/useTopToolbar.Store';
@@ -72,10 +98,59 @@
 
     const element_ref = ref();
     const menu_ref = ref();
+    const submenuRef = ref<any>(null);
     const activeSubmenu = ref<number | null>(null);
+    const focusedIndex = ref<number>(0);
+    const itemRefs = ref<Record<number, HTMLElement | null>>({});
+
     let closeTimer: ReturnType<typeof setTimeout> | null = null;
 
     const showed = computed(() => (attrs.plus === true ? true : toolbar.show));
+
+    const setItemRef = (el: any, index: number) => {
+        if (el) itemRefs.value[index] = el.$el ?? el;
+        else delete itemRefs.value[index];
+    };
+
+    const getNavigableIndices = (): number[] => {
+        if (!toolbar.items || !Array.isArray(toolbar.items)) return [];
+        return toolbar.items
+            .map((item: any, idx: number) => (!item.divider && !item.disabled ? idx : -1))
+            .filter((idx: number) => idx !== -1);
+    };
+
+    watch(
+        () => toolbar.items,
+        () => {
+            const navigable = getNavigableIndices();
+            if (navigable.length > 0 && !navigable.includes(focusedIndex.value)) focusedIndex.value = navigable[0];
+        },
+        { immediate: true, deep: true }
+    );
+
+    const getNextNavigableIndex = (currentIndex: number): number => {
+        const indices = getNavigableIndices();
+        if (indices.length === 0) return currentIndex;
+        const pos = indices.indexOf(currentIndex);
+        if (pos === -1) return indices[0];
+        return indices[(pos + 1) % indices.length];
+    };
+
+    const getPrevNavigableIndex = (currentIndex: number): number => {
+        const indices = getNavigableIndices();
+        if (indices.length === 0) return currentIndex;
+        const pos = indices.indexOf(currentIndex);
+        if (pos === -1) return indices[indices.length - 1];
+        return indices[(pos - 1 + indices.length) % indices.length];
+    };
+
+    const focusItemElement = (index: number): void => {
+        focusedIndex.value = index;
+        nextTick(() => {
+            const el = itemRefs.value[index];
+            if (el && typeof el.focus === 'function') el.focus();
+        });
+    };
 
     const clearCloseTimer = (): void => {
         if (closeTimer === null) return;
@@ -86,6 +161,7 @@
     const openSubmenu = (index: number): void => {
         clearCloseTimer();
         activeSubmenu.value = index;
+        focusedIndex.value = index;
     };
 
     const scheduleCloseSubmenu = (): void => {
@@ -96,41 +172,98 @@
         }, SUBMENU_CLOSE_DELAY_MS);
     };
 
+    const openSubmenuAndFocusFirst = (index: number): void => {
+        clearCloseTimer();
+        activeSubmenu.value = index;
+        focusedIndex.value = index;
+        nextTick(() => {
+            if (submenuRef.value?.focusFirstItem) submenuRef.value.focusFirstItem();
+        });
+    };
+
+    const onSubmenuClose = (index: number): void => {
+        activeSubmenu.value = null;
+        clearCloseTimer();
+        focusItemElement(index);
+    };
+
+    const onSubmenuCloseAll = (): void => {
+        activeSubmenu.value = null;
+        clearCloseTimer();
+    };
+
     onBeforeUnmount(clearCloseTimer);
 
     /**
-     * Tratamento de teclado na barra de menu superior:
-     * - ArrowDown ou Enter/Espaço: abre o submenu do item
-     * - Escape: fecha o submenu ativo
+     * Tratamento de teclado na barra de menu superior (menubar horizontal):
+     * - ArrowRight / ArrowLeft: navega circularmente entre itens da raiz (pula divisores e desabilitados)
+     * - Home / End: move para o primeiro / último item navegável
+     * - ArrowDown: abre submenu e foca seu primeiro item
+     * - Enter / Space: abre submenu ou dispara ação do item
+     * - Escape: fecha submenu ativo e retorna foco ao item raiz
      */
     const onMenubarItemKeydown = (event: KeyboardEvent, index: number, item: any): void => {
         switch (event.key) {
-            case 'ArrowDown':
-            case 'Enter':
+            case 'ArrowRight': {
+                event.preventDefault();
+                clearCloseTimer();
+                const nextIdx = getNextNavigableIndex(index);
+                focusItemElement(nextIdx);
+                break;
+            }
+            case 'ArrowLeft': {
+                event.preventDefault();
+                clearCloseTimer();
+                const prevIdx = getPrevNavigableIndex(index);
+                focusItemElement(prevIdx);
+                break;
+            }
+            case 'Home': {
+                event.preventDefault();
+                clearCloseTimer();
+                const indices = getNavigableIndices();
+                if (indices.length > 0) focusItemElement(indices[0]);
+                break;
+            }
+            case 'End': {
+                event.preventDefault();
+                clearCloseTimer();
+                const indices = getNavigableIndices();
+                if (indices.length > 0) focusItemElement(indices[indices.length - 1]);
+                break;
+            }
+            case 'ArrowDown': {
                 if (item.items && item.items.length) {
                     event.preventDefault();
-                    openSubmenu(index);
-                } else if (event.key === 'Enter') {
-                    event.preventDefault();
-                    handleItemClick(item);
+                    openSubmenuAndFocusFirst(index);
                 }
                 break;
-            case ' ':
+            }
+            case 'Enter':
+            case ' ': {
+                if (item.disabled) {
+                    event.preventDefault();
+                    break;
+                }
                 if (item.items && item.items.length) {
                     event.preventDefault();
-                    openSubmenu(index);
+                    openSubmenuAndFocusFirst(index);
                 } else {
                     event.preventDefault();
-                    handleItemClick(item);
+                    handleItemClick(item, index);
                 }
                 break;
-            case 'Escape':
+            }
+            case 'Escape': {
                 if (activeSubmenu.value !== null) {
                     event.preventDefault();
+                    const closedIdx = activeSubmenu.value;
                     activeSubmenu.value = null;
                     clearCloseTimer();
+                    focusItemElement(closedIdx);
                 }
                 break;
+            }
         }
     };
 
@@ -138,7 +271,23 @@
      * Executa a ação do item: função própria (`action`), callback do PrimeVue
      * (`command`) ou navegação por rota.
      */
-    const handleItemClick = (item: any): void => {
+    const handleItemClick = (item: any, index?: number): void => {
+        if (item?.disabled) return;
+        if (index !== undefined) focusedIndex.value = index;
+        if (item?.items && item.items.length) {
+            if (activeSubmenu.value === index) activeSubmenu.value = null;
+            else openSubmenu(index ?? 0);
+            return;
+        }
+        if (typeof item?.action === 'function') item.action();
+        else if (typeof item?.command === 'function') item.command({ item });
+        else if (item?.route || item?.data) toolbar.route(item.data ?? item.props ?? item.query, item.route);
+    };
+
+    const handleSubmenuItemClick = (item: any): void => {
+        if (item?.disabled) return;
+        activeSubmenu.value = null;
+        clearCloseTimer();
         if (typeof item?.action === 'function') item.action();
         else if (typeof item?.command === 'function') item.command({ item });
         else if (item?.route || item?.data) toolbar.route(item.data ?? item.props ?? item.query, item.route);
@@ -146,9 +295,11 @@
 
     defineExpose({
         activeSubmenu,
+        focusedIndex,
         openSubmenu,
         scheduleCloseSubmenu,
-        clearCloseTimer
+        clearCloseTimer,
+        focusItem: focusItemElement
     });
 </script>
 

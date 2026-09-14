@@ -1,0 +1,114 @@
+// Anatomia compartilhada para tabelas (MaxTable e MaxTableFields) - E10-08
+
+@mixin table-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    font-family: inherit;
+}
+
+@mixin table-header-row {
+    position: sticky !important;
+    height: var(--max-table-header-height, 40px) !important;
+    min-width: 100% !important;
+    display: flex;
+    padding: var(--max-table-header-padding, 0 6px) !important;
+    gap: var(--max-table-header-gap, 6px);
+    background-color: var(--max-table-header-bg, var(--table-header-bg, #003B53)) !important;
+}
+
+@mixin table-header-cell {
+    padding: 0;
+    background-color: transparent !important;
+    color: var(--max-table-header-text, var(--table-header-text, #8AD6E8)) !important;
+    position: relative;
+    font-weight: 400 !important;
+    font-family: inherit;
+    flex-grow: 1;
+    border: none !important;
+    height: 100%;
+}
+
+@mixin table-body-row {
+    display: flex;
+    width: 100% !important;
+    height: auto !important;
+    gap: 0 var(--max-table-row-gap, 6px);
+    padding: var(--max-table-row-padding, 3px 6px) !important;
+    font-family: inherit;
+
+    &:first-of-type {
+        padding-top: 6px !important;
+    }
+
+    &:last-of-type {
+        padding-bottom: 6px !important;
+    }
+}
+
+@mixin table-row-zebra {
+    &.p-row-even,
+    &.max-table-row-even,
+    &.max-table-fields-row-even {
+        background-color: var(--max-table-row-even-bg, var(--primary-25)) !important;
+    }
+
+    &.p-row-odd,
+    &.max-table-row-odd,
+    &.max-table-fields-row-odd {
+        background-color: var(--max-table-row-odd-bg, var(--primary-100)) !important;
+    }
+
+    &.max-table-row-selected {
+        background-color: var(--max-table-row-selected-bg, var(--primary-200)) !important;
+    }
+}
+
+@mixin table-cell-base {
+    flex-grow: 1;
+    padding: 0 !important;
+    display: grid;
+    place-items: center start;
+    border: none !important;
+    border-radius: 0 !important;
+    outline: none;
+}
+
+@mixin table-cell-input-feedback {
+    .max-input-main-div {
+        grid-template-rows: 1fr auto !important;
+        min-height: 20px;
+
+        .message-spacer {
+            display: none !important;
+        }
+
+        .input-message {
+            font-size: 0.7rem;
+            line-height: 1.1;
+            margin-top: 2px;
+            padding: 0 2px;
+        }
+    }
+}
+
+// Aliases compatíveis com prefixo max-
+@mixin max-table-header-row {
+    @include table-header-row;
+}
+
+@mixin max-table-header-cell {
+    @include table-header-cell;
+}
+
+@mixin max-table-body-row {
+    @include table-body-row;
+}
+
+@mixin max-table-body-cell {
+    @include table-cell-base;
+}
+
+@mixin max-table-input-cell {
+    @include table-cell-input-feedback;
+}

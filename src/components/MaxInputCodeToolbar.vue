@@ -4,7 +4,7 @@
         class="max-input-code-toolbar"
         :class="{ 'max-input-code-toolbar--disabled': props.disabled }"
         role="toolbar"
-        aria-label="Barra de ferramentas de código"
+        :aria-label="props.ariaLabel"
         @keydown="onToolbarKeydown"
     >
         <!-- Seletor de Linguagem -->
@@ -119,6 +119,7 @@
                 type="button"
                 class="max-input-code-toolbar__btn"
                 :class="{ active: props.wordWrap }"
+                :aria-pressed="props.wordWrap"
                 title="Alternar Quebra Automática de Linha"
                 :disabled="props.disabled"
                 @click="emit('toggle-wrap')"
@@ -129,6 +130,7 @@
                 type="button"
                 class="max-input-code-toolbar__btn"
                 :class="{ active: props.minimap }"
+                :aria-pressed="props.minimap"
                 title="Alternar Mini-mapa Lateral"
                 :disabled="props.disabled"
                 @click="emit('toggle-minimap')"
@@ -139,6 +141,7 @@
                 type="button"
                 class="max-input-code-toolbar__btn"
                 :class="{ active: props.isFullscreen }"
+                :aria-pressed="props.isFullscreen"
                 :title="props.isFullscreen ? 'Sair da Tela Cheia (Esc)' : 'Tela Cheia'"
                 :disabled="props.disabled"
                 @click="emit('toggle-fullscreen')"
@@ -161,8 +164,9 @@
 </template>
 
 <script setup lang="ts">
-    import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+    import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
     import MaxIcon from './MaxIcon.vue';
+    import { useToolbarNavigation } from '../helpers/useToolbarNavigation';
 
     export interface CodeLanguageOption {
         label: string;
@@ -197,6 +201,7 @@
             minimap?: boolean;
             isFullscreen?: boolean;
             disabled?: boolean;
+            ariaLabel?: string;
         }>(),
         {
             language: 'typescript',
@@ -204,7 +209,8 @@
             wordWrap: true,
             minimap: false,
             isFullscreen: false,
-            disabled: false
+            disabled: false,
+            ariaLabel: 'Editor de código'
         }
     );
 
@@ -246,62 +252,16 @@
 
     const toolbarRef = ref<HTMLElement | null>(null);
 
-    const getFocusableItems = (): HTMLElement[] => {
-        if (!toolbarRef.value) return [];
-        return Array.from(toolbarRef.value.querySelectorAll<HTMLElement>('.max-input-code-toolbar__select, .max-input-code-toolbar__btn:not(:disabled)'));
-    };
-
-    const onToolbarKeydown = (event: KeyboardEvent) => {
-        const items = getFocusableItems();
-        if (items.length === 0) return;
-
-        const activeEl = document.activeElement as HTMLElement | null;
-        const currentIndex = activeEl ? items.indexOf(activeEl) : -1;
-
-        let targetIndex = -1;
-
-        switch (event.key) {
-            case 'ArrowRight':
-            case 'ArrowDown': {
-                event.preventDefault();
-                targetIndex = currentIndex >= 0 ? (currentIndex + 1) % items.length : 0;
-                break;
-            }
-            case 'ArrowLeft':
-            case 'ArrowUp': {
-                event.preventDefault();
-                targetIndex = currentIndex >= 0 ? (currentIndex - 1 + items.length) % items.length : items.length - 1;
-                break;
-            }
-            case 'Home': {
-                event.preventDefault();
-                targetIndex = 0;
-                break;
-            }
-            case 'End': {
-                event.preventDefault();
-                targetIndex = items.length - 1;
-                break;
-            }
-        }
-
-        if (targetIndex >= 0 && items[targetIndex]) {
-            items.forEach((item, idx) => {
-                item.setAttribute('tabindex', idx === targetIndex ? '0' : '-1');
-            });
-            items[targetIndex].focus();
-        }
-    };
-
-    onMounted(() => {
-        const items = getFocusableItems();
-        items.forEach((item, idx) => {
-            item.setAttribute('tabindex', idx === 0 ? '0' : '-1');
-            item.addEventListener('focus', () => {
-                items.forEach((other) => other.setAttribute('tabindex', other === item ? '0' : '-1'));
-            });
-        });
+    const { onToolbarKeydown, updateTabindices } = useToolbarNavigation(toolbarRef, {
+        buttonSelector: '.max-input-code-toolbar__btn'
     });
+
+    watch(
+        () => props.disabled,
+        () => {
+            nextTick(() => updateTabindices());
+        }
+    );
 
     onBeforeUnmount(() => {
         if (copyTimeout) {
@@ -385,7 +345,7 @@
             border: 1px solid transparent;
             border-radius: 4px;
             background: transparent;
-            color: var(--background-650, #475569);
+            color: var(--max-content-secondary, var(--background-650, #475569));
             cursor: pointer;
             transition: background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease;
             outline: none;

@@ -30,10 +30,10 @@ export default defineConfig({
 
 O resolver segue esta lógica de resolução:
 
-1. **Verifica o manifesto de componentes** — Consulta o `components-manifest.json` para encontrar o componente pelo nome ou alias
-2. **Fallback para PrimeVue** — Se não encontrar no manifesto, tenta resolver via `PrimeVueResolver` e importa de `@maxvue/max-components-ui/prime`
+1. **Verifica o manifesto de componentes** — Consulta o `src/components-manifest.json` para encontrar o componente pelo nome nativo (`Max*`) ou por seus aliases canônicos (ex: `Button` -> `MaxButton`, `InputField` -> `MaxInputText`).
+2. **Importação direta do pacote** — Resolve os componentes diretamente a partir do entry point público `@maxvue/max-components-ui`.
 
-Isso significa que você pode usar **qualquer componente PrimeVue** diretamente, sem instalar o `@primevue/auto-import-resolver` separadamente.
+Componentes de bibliotecas externas (como `primevue/*`) não são resolvidos por este resolver. Caso utilize componentes PrimeVue na sua aplicação, configure o resolvedor oficial (`@primevue/auto-import-resolver`) separadamente ou importe-os diretamente de `primevue/*`.
 
 ---
 
@@ -67,17 +67,15 @@ Após configurar, basta usar os componentes no template:
   <Grid>
     <!-- Todos auto-importados, sem declarar import -->
     <MaxInputText v-model="nome" label="Nome" />
-    <InputSelect v-model="tipo" label="Tipo" :options="opcoes" />
+    <MaxInputSelect v-model="tipo" label="Tipo" :options="opcoes" />
     <MaxButton label="Salvar" icon="mdi:check" @click="salvar" />
 
-    <!-- Componentes PrimeVue também são auto-importados -->
-    <Card>
-      <template #content>
-        <DataTable :value="dados">
-          <Column field="nome" header="Nome" />
-        </DataTable>
-      </template>
-    </Card>
+    <!-- Modais e tabelas Max nativos também são auto-importados -->
+    <MaxModal v-model="modalAberto" header="Detalhes">
+      <MaxTable :data="dados">
+        <MaxTableColumn field="nome" label="Nome" />
+      </MaxTable>
+    </MaxModal>
   </Grid>
 </template>
 ```
@@ -87,5 +85,5 @@ Após configurar, basta usar os componentes no template:
 ## Notas Importantes
 
 - O resolver é **gerado automaticamente** pelo script `src/scripts/generateResolver.ts`. Não modifique o `MaxComponentsUiResolver.ts` manualmente.
-- Componentes PrimeVue importados via auto-import vêm de `@maxvue/max-components-ui/prime` (re-exportação), garantindo compatibilidade com o build da biblioteca.
+- Componentes de bibliotecas externas (ex: PrimeVue) não são resolvidos por este resolver e devem ser importados diretamente de seus pacotes oficiais (`primevue/*`).
 - Os aliases suportam formatos `PascalCase`, `kebab-case` e `snake_case`.
