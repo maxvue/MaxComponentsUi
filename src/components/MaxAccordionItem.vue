@@ -66,6 +66,13 @@
         headerAriaLevel: 2
     });
 
+    defineSlots<{
+        default?(): any;
+        header?(): any;
+        content?(): any;
+        [key: string]: any;
+    }>();
+
     const context = injectAccordionContext('MaxAccordionItem');
 
     /**

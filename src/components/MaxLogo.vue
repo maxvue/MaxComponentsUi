@@ -1,22 +1,58 @@
 <template>
     <div class="max-logo logo" :rounded="props.rounded ? true : undefined" :no-padding="props.noPadding ? true : undefined">
         <RouterLink :to="props.to">
-            <img v-if="props.src" :src="`${props.src}`" alt="Image" />
+            <img
+                v-if="props.src && !hasLoadError"
+                :src="`${props.src}`"
+                :alt="props.alt"
+                @error="handleImageError"
+            />
+            <span
+                v-else-if="hasLoadError"
+                class="max-logo-fallback"
+                role="img"
+                :aria-label="props.alt"
+            >
+                {{ props.fallbackLabel }}
+            </span>
         </RouterLink>
     </div>
 </template>
 
 <script setup lang="ts">
+    import { ref, watch } from 'vue';
     import { RouterLink } from 'vue-router';
 
     const props = withDefaults(
         defineProps<{
             src?: string;
+            alt?: string;
+            fallbackLabel?: string;
             rounded?: boolean;
             noPadding?: boolean;
             to?: string;
         }>(),
-        { src: undefined, rounded: false, noPadding: false, to: '/' }
+        {
+            src: undefined,
+            alt: 'Logo da aplicação',
+            fallbackLabel: 'Aplicação',
+            rounded: false,
+            noPadding: false,
+            to: '/'
+        }
+    );
+
+    const hasLoadError = ref(false);
+
+    function handleImageError(): void {
+        hasLoadError.value = true;
+    }
+
+    watch(
+        () => props.src,
+        () => {
+            hasLoadError.value = false;
+        }
     );
 </script>
 
@@ -93,6 +129,19 @@
             max-height: 100%;
             object-fit: contain;
             display: block;
+        }
+
+        .max-logo-fallback {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.875rem;
+            letter-spacing: -0.02em;
+            color: var(--text-b, #ffffff);
+            white-space: nowrap;
+            text-decoration: none;
+            user-select: none;
         }
     }
 </style>

@@ -152,6 +152,17 @@
         'closed': [];
     }>();
 
+    defineSlots<{
+        default?(): any;
+        button?(props: Record<string, any>): any;
+        header?(props: { titleId?: string }): any;
+        title?(props: Record<string, any>): any;
+        close?(props: { close: () => void; hide: () => void }): any;
+        content?(): any;
+        footer?(): any;
+        [key: string]: any;
+    }>();
+
     const isShaking = ref(false);
 
     const triggerShake = () => {

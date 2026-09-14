@@ -2,12 +2,16 @@
     <button
         type="button"
         ref="icon_ref"
+        v-bind="buttonAttrs"
         :class="`max-icon-button icon-div ico-btn ${hover ? 'hover' : ''} ${isDisabled ? 'is-disabled' : ''} ${props.transparent ? 'is-transparent' : ''}`"
-        :style="{
-            width: size,
-            height: size,
-            transform: 'scale(' + (hover && !isDisabled ? props.hoverScale : 1) + ')'
-        }"
+        :style="[
+            {
+                width: size,
+                height: size,
+                transform: 'scale(' + (hover && !isDisabled ? props.hoverScale : 1) + ')'
+            },
+            attrs.style
+        ]"
         :disabled="isDisabled"
         :aria-label="ariaLabelComputed"
         :aria-disabled="isDisabled ? 'true' : undefined"
@@ -42,10 +46,14 @@
 </template>
 
 <script setup lang="ts">
-    import { computed, ref, useAttrs } from 'vue';
+    import { computed, getCurrentInstance, ref, useAttrs } from 'vue';
     import MaxIcon from './MaxIcon.vue';
     import { goToRoute } from '@maxvue/max-use';
     import type { MaxButtonsType } from '../types';
+
+    defineOptions({
+        inheritAttrs: false
+    });
 
     const attrs = useAttrs();
     const hover = ref(false);
@@ -59,10 +67,16 @@
 
     const data = computed(() => ({ ...(props.data ?? {}), ...(props.query ?? {}), ...(props.params ?? {}) }));
 
-    // `size` também carrega os tamanhos textuais de botão ('small'/'lg'/…), que
-    // não são fatores de escala: Number('small') é NaN e gerava 'NaNpx', um valor
-    // CSS descartado pelo navegador — como o svg é width:100%, o ícone esticava
-    // até o contêiner. Só escalamos com valor numérico.
+    const buttonAttrs = computed(() => {
+        const result: Record<string, any> = {};
+        for (const [key, value] of Object.entries(attrs)) {
+            if (!key.startsWith('on') && key !== 'style') {
+                result[key] = value;
+            }
+        }
+        return result;
+    });
+
     const size = computed(() => {
         const factor = Number(props.size);
         return 16 * (isNaN(factor) ? 1 : factor) + 'px';
@@ -95,11 +109,13 @@
     });
 
     const emit = defineEmits<{
+        /** @deprecated Use o evento canônico click */
         action: [value: boolean];
+        click: [event: PointerEvent];
     }>();
 
-    const onClick = async (event: MouseEvent) => {
-        if (isDisabled.value) {
+    const onClick = async (event: PointerEvent | MouseEvent) => {
+        if (isDisabled.value || executing.value) {
             event.preventDefault();
             event.stopImmediatePropagation();
             return;
@@ -116,7 +132,21 @@
                 return;
             }
 
-            emit('action', true);
+            const parentProps = instance?.vnode.props ?? {};
+            const hasClick = Boolean(parentProps.onClick || attrs.onClick);
+            const hasAction = Boolean(parentProps.onAction || attrs.onAction);
+
+            if (hasClick) {
+                emit('click', event);
+                return;
+            }
+
+            if (hasAction) {
+                emit('action', true);
+                return;
+            }
+
+            emit('click', event);
         } finally {
             executing.value = false;
         }

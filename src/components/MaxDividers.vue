@@ -187,6 +187,13 @@
         'resize': [sizes: [number, number]];
     }>();
 
+    defineSlots<{
+        first?(props: { next: () => void; back: () => void; active: 1 | 2; isMobile: boolean }): any;
+        second?(props: { next: () => void; back: () => void; active: 1 | 2; isMobile: boolean }): any;
+        'second-header'?(props: { back: () => void; title: string }): any;
+        [key: string]: any;
+    }>();
+
     const containerRef = ref<HTMLElement | null>(null);
     const windowWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1200);
     const isDragging = ref(false);

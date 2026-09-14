@@ -327,6 +327,7 @@
                     @include table.table-header-cell;
 
                     color: var(--max-table-header-text, var(--table-header-text, #8AD6E8));
+                    font-family: inherit;
                     display: grid;
                     place-items: center;
                     text-align: center;
@@ -344,6 +345,7 @@
             display: grid;
             align-content: start;
             overflow-y: auto;
+            font-family: inherit;
 
             .max-table-fields-row {
                 @include table.table-body-row;

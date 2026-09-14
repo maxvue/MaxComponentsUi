@@ -411,6 +411,16 @@
         'sort': [event: { sortField: string; sortOrder: 1 | -1 | 0 }];
     }>();
 
+    defineSlots<{
+        default?(): any;
+        header?(): any;
+        loading?(): any;
+        empty?(): any;
+        buttons?(props: { data: any; index: number }): any;
+        footer?(): any;
+        [key: string]: any;
+    }>();
+
     const attrs = useAttrs();
     const slots = useSlots() as Record<string, any>;
     const instance = getCurrentInstance();
@@ -871,6 +881,7 @@
                     height: 100% !important;
                     width: 100% !important;
                     z-index: 1 !important;
+                    font-family: inherit;
                     display: grid;
                     background-color: transparent !important;
 
@@ -962,6 +973,7 @@
                 tbody {
                     width: 100% !important;
                     z-index: 1 !important;
+                    font-family: inherit;
                     display: flex !important;
                     flex-direction: column;
                     overflow-y: auto;

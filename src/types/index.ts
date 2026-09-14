@@ -353,6 +353,8 @@ export type SelectOptionsList<T = unknown> = Array<SelectOptionItem<T> | Record<
 /**
  * Definição de uma coluna para o componente MaxTableFields.
  */
+export type MaxTableColumnDefinition = MaxTableColumn;
+
 export interface MaxTableColumn {
     /** Texto do cabeçalho da coluna */
     header?: string;

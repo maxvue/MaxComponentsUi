@@ -77,11 +77,29 @@ describe('maxAppConfig', () => {
         expect(config.routeLogo).toBe('/dashboard');
     });
 
+    it('aceita logoAlt e logoFallbackLabel na configuração do app shell', () => {
+        configureMaxApp({
+            logo: 'brand.logo',
+            routeLogo: '/',
+            logoAlt: 'Símbolo ENGEAPP',
+            logoFallbackLabel: 'MaxCode'
+        });
+
+        const config = getMaxAppConfig();
+
+        expect(config.logo).toBe('brand.logo');
+        expect(config.routeLogo).toBe('/');
+        expect(config.logoAlt).toBe('Símbolo ENGEAPP');
+        expect(config.logoFallbackLabel).toBe('MaxCode');
+    });
+
     it('resetMaxAppConfig restaura os padrões', () => {
-        configureMaxApp({ routeUser: 'me', logo: '/logo.svg' });
+        configureMaxApp({ routeUser: 'me', logo: '/logo.svg', logoAlt: 'Alt', logoFallbackLabel: 'Fallback' });
         resetMaxAppConfig();
 
         expect(getMaxAppConfig().routeUser).toBe('user.data');
         expect(getMaxAppConfig().logo).toBeUndefined();
+        expect(getMaxAppConfig().logoAlt).toBeUndefined();
+        expect(getMaxAppConfig().logoFallbackLabel).toBeUndefined();
     });
 });

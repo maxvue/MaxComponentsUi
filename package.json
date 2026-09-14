@@ -28,7 +28,15 @@
         },
         "./style.css": "./dist/style.css",
         "./styles.css": "./dist/style.css",
-        "./themes/*": "./dist/themes/*"
+        "./themes/*": "./dist/themes/*",
+        "./dist/components/*": {
+            "types": "./dist/components/*",
+            "import": "./dist/components/*"
+        },
+        "./*": {
+            "types": "./*",
+            "import": "./*"
+        }
     },
     "files": [
         "dist"
