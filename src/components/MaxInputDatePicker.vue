@@ -174,7 +174,6 @@
     import { useActiveOverlayPosition } from '../composables/useActiveOverlayPosition';
     import { vMaska } from 'maska/vue';
     import { SelectGroupOptions } from '../types';
-    import { useOutsidePointer } from '../helpers/useOutsidePointer';
 
     const id = useId();
     const panelId = computed(() => 'max-datepicker-panel-' + id);
@@ -800,17 +799,40 @@
         }
     };
 
-    useOutsidePointer(isOpen, {
-        elements: () => [overlayEl.value, triggerEl.value],
-        onClose: () => {
+    const onGlobalKeydown = (event: KeyboardEvent) => {
+        if (event.key === 'Escape' && isOpen.value) {
             skipFocusOpen = true;
             hide();
-        },
-        closeOnEscape: true,
-        triggerEl: triggerEl
-    });
+        }
+    };
+
+    let outsidePointerDown = false;
+    const onDocPointerDown = (e: MouseEvent | TouchEvent | PointerEvent) => {
+        const target = e.target as Node | null;
+        if (overlayEl.value && !overlayEl.value.contains(target) && triggerEl.value && !triggerEl.value.contains(target)) outsidePointerDown = true;
+        else outsidePointerDown = false;
+
+    };
+
+    const onDocClick = (e: MouseEvent) => {
+        const target = e.target as Node | null;
+        if (outsidePointerDown && overlayEl.value && !overlayEl.value.contains(target) && triggerEl.value && !triggerEl.value.contains(target)) hide();
+
+        outsidePointerDown = false;
+    };
 
     watch(isOpen, (open) => {
+        if (typeof window !== 'undefined') if (open) {
+            window.addEventListener('keydown', onGlobalKeydown);
+            document.addEventListener('pointerdown', onDocPointerDown, true);
+            document.addEventListener('click', onDocClick, true);
+        } else {
+            window.removeEventListener('keydown', onGlobalKeydown);
+            document.removeEventListener('pointerdown', onDocPointerDown, true);
+            document.removeEventListener('click', onDocClick, true);
+        }
+
+
         if (open) {
             currentView.value = 'date';
             dayButtonRefs.value = [];
@@ -822,6 +844,14 @@
                     focusedCellIndex.value = firstDayIdx >= 0 ? firstDayIdx : 0;
                 }
             });
+        }
+    });
+
+    onBeforeUnmount(() => {
+        if (typeof window !== 'undefined') {
+            window.removeEventListener('keydown', onGlobalKeydown);
+            document.removeEventListener('pointerdown', onDocPointerDown, true);
+            document.removeEventListener('click', onDocClick, true);
         }
     });
 

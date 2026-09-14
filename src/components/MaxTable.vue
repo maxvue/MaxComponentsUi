@@ -1,7 +1,7 @@
 <template>
     <div class="max-table-main-div" :style="tableStyle">
-        <div class="max-table-container p-datatable" :class="{ 'max-table-scrollable p-datatable-scrollable': props.scrollable }">
-            <div class="max-table-wrapper p-datatable-table-container" :style="scrollContainerStyle">
+        <div class="p-datatable" :class="{ 'p-datatable-scrollable': props.scrollable }">
+            <div class="p-datatable-table-container" :style="scrollContainerStyle">
                 <table>
                     <!-- MODO A: TEMPLATE-DRIVEN (Cabeçalho ou Linhas manuais) -->
                     <template v-if="isTemplateDriven">
@@ -55,7 +55,6 @@
                                 <th
                                     v-for="col in resolvedColumns"
                                     :key="col.field || col.header || 'col'"
-                                    scope="col"
                                     :class="[
                                         'max-table-th',
                                         col.class,
@@ -70,11 +69,10 @@
                                         v-if="col.sortable"
                                         type="button"
                                         class="max-table-header-button"
-                                        :aria-label="col.header ? `Ordenar por ${col.header}` : 'Ordenar coluna'"
                                         @click="onHeaderClick(col)"
                                     >
-                                        <div class="max-table-column-header-content p-datatable-column-header-content">
-                                            <div class="max-table-column-title p-datatable-column-title">
+                                        <div class="p-datatable-column-header-content">
+                                            <div class="p-datatable-column-title">
                                                 <component v-if="col.headerSlot" :is="col.headerSlot" :column="col" />
                                                 <template v-else>
                                                     <span>{{ col.header }}</span>
@@ -102,7 +100,7 @@
                                         </div>
                                     </div>
                                 </th>
-                                <th v-if="slots.buttons" scope="col" class="max-table-th max-table-th-buttons p-column" :style="buttonsColumnStyle">
+                                <th v-if="slots.buttons" class="max-table-th max-table-th-buttons p-column" :style="buttonsColumnStyle">
                                     <div class="p-datatable-column-header-content">
                                         <div class="p-datatable-column-title">
                                             <span>{{ props.headerButton ?? '' }}</span>
@@ -257,14 +255,11 @@
 
             <!-- PAGINADOR (DATA-DRIVEN) -->
             <div v-if="!isTemplateDriven && props.paginator" class="max-table-paginator">
-                <div class="paginator-summary">
-                    <span>Exibindo {{ rangeStart }}–{{ rangeEnd }} de {{ total }}</span>
-                </div>
                 <div class="paginator-controls">
                     <button
                         type="button"
                         class="paginator-btn"
-                        :disabled="props.loading || currentPage === 0"
+                        :disabled="currentPage === 0"
                         @click.stop="changePage(0)"
                         aria-label="Primeira página"
                     >
@@ -275,7 +270,7 @@
                     <button
                         type="button"
                         class="paginator-btn"
-                        :disabled="props.loading || currentPage === 0"
+                        :disabled="currentPage === 0"
                         @click.stop="changePage(currentPage - 1)"
                         aria-label="Página anterior"
                     >
@@ -289,7 +284,7 @@
                     <button
                         type="button"
                         class="paginator-btn"
-                        :disabled="props.loading || currentPage >= pageCount - 1"
+                        :disabled="currentPage >= pageCount - 1"
                         @click.stop="changePage(currentPage + 1)"
                         aria-label="Próxima página"
                     >
@@ -300,7 +295,7 @@
                     <button
                         type="button"
                         class="paginator-btn"
-                        :disabled="props.loading || currentPage >= pageCount - 1"
+                        :disabled="currentPage >= pageCount - 1"
                         @click.stop="changePage(pageCount - 1)"
                         aria-label="Última página"
                     >
@@ -651,17 +646,6 @@
         return sortedData.value;
     });
 
-    const rangeStart = computed(() => {
-        if (total.value === 0) return 0;
-        return first.value + 1;
-    });
-
-    const rangeEnd = computed(() => {
-        if (total.value === 0) return 0;
-        const count = displayData.value.length;
-        return Math.min(first.value + count, total.value);
-    });
-
     /** Chave identificadora de linha */
     function getRowKey(row: any, index: number): string | number {
         if (props.dataKey && row?.[props.dataKey] !== undefined) return row[props.dataKey];
@@ -872,13 +856,11 @@
     border: 1px solid var(--max-table-border-color, var(--background-300)) !important;
     position: relative;
 
-    .max-table-container,
     :deep(.p-datatable) {
         height: 100%;
         display: flex;
         flex-direction: column;
 
-        .max-table-wrapper,
         .p-datatable-table-container {
             height: 100%;
             background-color: transparent;
@@ -938,7 +920,6 @@
                                 }
                             }
 
-                            .max-table-column-header-content,
                             .p-datatable-column-header-content {
                                 position: relative;
                                 display: grid;
@@ -947,7 +928,6 @@
                                 place-items: center;
                                 width: 100%;
 
-                                .max-table-column-title,
                                 .p-datatable-column-title {
                                     width: 100%;
                                     height: 100%;
@@ -1074,17 +1054,10 @@
         .max-table-paginator {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 12px;
-            padding: 8px 16px;
+            justify-content: center;
+            padding: 8px 12px;
             background-color: var(--background-50);
             border-top: 1px solid var(--background-200);
-
-            .paginator-summary {
-                font-size: 0.85rem;
-                color: var(--background-650, #4b5563);
-            }
 
             .paginator-controls {
                 display: flex;
@@ -1095,8 +1068,8 @@
                     display: inline-flex;
                     align-items: center;
                     justify-content: center;
-                    width: 32px;
-                    height: 32px;
+                    width: 28px;
+                    height: 28px;
                     padding: 0;
                     border: 1px solid var(--background-300);
                     border-radius: 6px;
@@ -1104,11 +1077,6 @@
                     color: var(--background-800);
                     cursor: pointer;
                     transition: background-color 0.2s, border-color 0.2s;
-
-                    @media (max-width: 640px) {
-                        width: 44px;
-                        height: 44px;
-                    }
 
                     &:disabled {
                         opacity: 0.4;

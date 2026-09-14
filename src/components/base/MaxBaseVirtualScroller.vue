@@ -2,7 +2,7 @@
     <div
         ref="parentRef"
         class="max-base-virtual-scroller"
-        :role="effectiveRole"
+        :role="props.role || undefined"
         :aria-label="props.ariaLabel || undefined"
         :aria-labelledby="props.ariaLabelledby || undefined"
         :style="style"
@@ -12,7 +12,7 @@
             <div
                 v-for="virtualRow in virtualizer.getVirtualItems()"
                 :key="String(virtualRow.key)"
-                :role="effectiveItemRole"
+                :role="itemRole || undefined"
                 :aria-setsize="isPositionalRole ? items.length : undefined"
                 :aria-posinset="isPositionalRole ? virtualRow.index + 1 : undefined"
                 :style="{
@@ -36,7 +36,7 @@
                         odd: virtualRow.index % 2 !== 0
                     }"
                     :aria-props="{
-                        role: effectiveItemRole,
+                        role: itemRole || undefined,
                         'aria-setsize': isPositionalRole ? items.length : undefined,
                         'aria-posinset': isPositionalRole ? virtualRow.index + 1 : undefined
                     }"
@@ -88,26 +88,7 @@
 
     const parentRef = ref<HTMLElement | null>(null);
 
-    const effectiveRole = computed(() => {
-        if (props.role === 'listbox') {
-            if (process.env.NODE_ENV !== 'production') {
-                console.warn(
-                    '[MaxBaseVirtualScroller] role="listbox" não é suportado no scroller base por não possuir contrato de foco, seleção e teclado. Para listbox interativa, utilize MaxListBox.'
-                );
-            }
-            return undefined;
-        }
-        return props.role || undefined;
-    });
-
-    const effectiveItemRole = computed(() => {
-        if (props.itemRole === 'option') {
-            return undefined;
-        }
-        return props.itemRole || undefined;
-    });
-
-    const isPositionalRole = computed(() => effectiveItemRole.value === 'listitem');
+    const isPositionalRole = computed(() => props.itemRole === 'option' || props.itemRole === 'listitem');
 
     const virtualizer = useVirtualizer(
         computed(() => ({

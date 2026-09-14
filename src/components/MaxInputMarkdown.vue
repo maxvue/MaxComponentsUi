@@ -22,13 +22,11 @@
                         ref="imageModalRef"
                         class="max-image-preview-modal"
                         role="dialog"
-                        :aria-modal="isTop ? 'true' : undefined"
-                        :aria-hidden="!isTop ? 'true' : undefined"
-                        :inert="!isTop ? true : undefined"
+                        aria-modal="true"
                         aria-label="Visualizador de Imagem"
                         tabindex="-1"
                         @click.self="closeImage"
-                        @keydown="onImageModalKeydown"
+                        @keydown="imageTrap.onKeydown"
                     >
                         <div class="max-image-preview-modal__toolbar">
                             <button type="button" class="max-image-preview-modal__btn" title="Diminuir Zoom" @click="zoomOutImage">
@@ -73,7 +71,7 @@
 </template>
 
 <script setup lang="ts">
-    import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, watch } from 'vue';
+    import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
     import { useEditor, EditorContent } from '@tiptap/vue-3';
     import StarterKit from '@tiptap/starter-kit';
     import Underline from '@tiptap/extension-underline';
@@ -91,7 +89,6 @@
     import { isSafeUrl } from '../helpers/isSafeUrl';
     import { useScrollLock } from '../helpers/useScrollLock';
     import { useFocusTrap } from '../helpers/useFocusTrap';
-    import { useModalStore } from '../stores';
 
     const props = withDefaults(
         defineProps<{
@@ -151,9 +148,6 @@
         required: props.required
     }));
 
-    const modalId = 'max-input-markdown-lightbox-' + useId();
-    const modalStore = useModalStore();
-    const isTop = computed(() => modalStore.isTop(modalId));
     const isImageModalOpen = ref(false);
     const activeImageSrc = ref('');
     const activeImageAlt = ref('');
@@ -163,23 +157,10 @@
 
     const activePdfUrl = ref('');
 
-    const scrollLock = useScrollLock(modalId);
+    const scrollLock = useScrollLock();
 
     const onImageModalEscape = (event: KeyboardEvent) => {
-        if (event.key === 'Escape' && isImageModalOpen.value && isTop.value) {
-            event.stopPropagation();
-            closeImage();
-        }
-    };
-
-    const onImageModalKeydown = (event: KeyboardEvent) => {
-        if (!isTop.value) return;
-        if (event.key === 'Escape') {
-            event.stopPropagation();
-            closeImage();
-            return;
-        }
-        imageTrap.onKeydown(event);
+        if (event.key === 'Escape' && isImageModalOpen.value) closeImage();
     };
 
     const openImage = (src: string, alt = '') => {
@@ -187,7 +168,6 @@
         activeImageAlt.value = alt;
         imageZoom.value = 1;
         isImageModalOpen.value = true;
-        modalStore.push(modalId);
         scrollLock.lock();
         imageTrap.activate();
         document.addEventListener('keydown', onImageModalEscape);
@@ -197,7 +177,6 @@
         isImageModalOpen.value = false;
         activeImageSrc.value = '';
         activeImageAlt.value = '';
-        modalStore.remove(modalId);
         imageTrap.deactivate();
         scrollLock.unlock();
         document.removeEventListener('keydown', onImageModalEscape);
@@ -445,7 +424,6 @@
     onBeforeUnmount(() => {
         document.removeEventListener('keydown', onImageModalEscape);
         if (isImageModalOpen.value) {
-            modalStore.remove(modalId);
             imageTrap.deactivate();
             scrollLock.unlock();
         }

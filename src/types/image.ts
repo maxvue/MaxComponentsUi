@@ -3,8 +3,8 @@ import type { StyleValue } from 'vue';
 export interface MaxImageEditPayload {
     /** Data URL em base64 da imagem resultante (opcional quando includeDataUrl for false) */
     dataUrl?: string;
-    /** Objeto Blob pronto para envio via FormData/API (payload canônico/default) */
-    blob: Blob;
+    /** Objeto Blob pronto para envio via FormData/API */
+    blob: Blob | null;
     /** Objeto File gerado pronto para envio multipart/form-data */
     file: File | null;
     /** Largura da imagem recortada */

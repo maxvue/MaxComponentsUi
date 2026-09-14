@@ -482,58 +482,26 @@ describe('MaxInputSelect', () => {
         });
     });
 
-    describe('Carga coordenada e reentrante de loadOptions (E05-06 / F12)', () => {
-        it('abre e renderiza mensagem "Carregando..." no Teleport imediatamente durante promise controlada (F12)', async () => {
+    describe('Carga coordenada e reentrante de loadOptions (E05-06)', () => {
+        it('duplo clique rápido durante a carga chama loadOptions apenas uma vez', async () => {
             let resolveLoad: any;
             const loadPromise = new Promise((resolve) => { resolveLoad = resolve; });
             const loadOptions = vi.fn().mockReturnValue(loadPromise);
             const wrapper = mountSelect({ loadOptions });
 
+            // Primeiro clique inicia carga
             await wrapper.find('.max-select').trigger('click');
-            await wrapper.vm.$nextTick();
-
-            // Overlay está aberto e exibe mensagem de loading antes da promessa resolver
-            expect((wrapper.vm as any).isOpen).toBe(true);
-            expect((wrapper.vm as any).loading).toBe(true);
-            const overlay = document.body.querySelector('.max-select-overlay');
-            expect(overlay).not.toBeNull();
-            const loadingMsg = document.body.querySelector('.max-select-empty-message');
-            expect(loadingMsg).not.toBeNull();
-            expect(loadingMsg?.textContent).toContain('Carregando...');
-
-            resolveLoad([{ value: 'done', name: 'Done' }]);
-            await loadPromise;
-            await wrapper.vm.$nextTick();
-
-            expect((wrapper.vm as any).loading).toBe(false);
-            wrapper.unmount();
-        });
-
-        it('duplo clique rápido durante a carga chama loadOptions apenas uma vez e compartilha promessa mantendo dropdown aberto', async () => {
-            let resolveLoad: any;
-            const loadPromise = new Promise((resolve) => { resolveLoad = resolve; });
-            const loadOptions = vi.fn().mockReturnValue(loadPromise);
-            const wrapper = mountSelect({ loadOptions });
-
-            // Primeiro clique inicia carga e abre o overlay com estado loading
+            // Segundo clique enquanto carrega cancela a intenção de abrir
             await wrapper.find('.max-select').trigger('click');
+
             expect(loadOptions).toHaveBeenCalledTimes(1);
-            expect((wrapper.vm as any).isOpen).toBe(true);
-            expect((wrapper.vm as any).loading).toBe(true);
 
-            // Segundo clique enquanto carrega compartilha a promessa em voo sem fechar
-            await wrapper.find('.max-select').trigger('click');
-            expect(loadOptions).toHaveBeenCalledTimes(1);
-            expect((wrapper.vm as any).isOpen).toBe(true);
-
-            // Resolução publica opções mantendo o dropdown aberto
             resolveLoad([{ value: '1', name: 'Item 1' }]);
             await loadPromise;
             await wrapper.vm.$nextTick();
 
-            expect((wrapper.vm as any).isOpen).toBe(true);
-            expect((wrapper.vm as any).loading).toBe(false);
-            expect((wrapper.vm as any).optionsField).toEqual([{ value: '1', name: 'Item 1' }]);
+            // Como o segundo clique cancelou a abertura, o dropdown permanece fechado
+            expect((wrapper.vm as any).isOpen).toBe(false);
             wrapper.unmount();
         });
 
@@ -576,49 +544,29 @@ describe('MaxInputSelect', () => {
             wrapper.unmount();
         });
 
-        it('trata falha/rejeição no loadOptions exibindo erro e retry no overlay, permitindo nova tentativa via retryLoad', async () => {
-            let resolveRetry: any;
-            const retryPromise = new Promise((r) => { resolveRetry = r; });
-            const loadOptions = vi.fn()
-                .mockRejectedValueOnce(new Error('Network error'))
-                .mockReturnValueOnce(retryPromise);
+        it('trata falha/rejeição no loadOptions sem exceção não tratada e permite nova tentativa', async () => {
+            const loadOptions = vi.fn().mockRejectedValueOnce(new Error('Network error'))
+                .mockResolvedValueOnce([{ value: 'ok', name: 'OK' }]);
             const wrapper = mountSelect({ loadOptions });
 
             await wrapper.find('.max-select').trigger('click');
             await new Promise((r) => setTimeout(r, 10));
             await wrapper.vm.$nextTick();
 
-            // Overlay permanece aberto com estado de erro e loading falso
             expect((wrapper.vm as any).loading).toBe(false);
-            expect((wrapper.vm as any).loadError).toBe(true);
-            expect((wrapper.vm as any).isOpen).toBe(true);
+            expect((wrapper.vm as any).isOpen).toBe(false);
 
-            // Botão de retry visível no DOM
-            const retryBtn = document.body.querySelector('.max-select-retry-btn') as HTMLButtonElement;
-            expect(retryBtn).not.toBeNull();
-            expect(retryBtn.textContent).toContain('Tentar novamente');
-
-            // Clica em tentar novamente (retryLoad)
-            retryBtn.click();
+            // Segunda tentativa bem-sucedida
+            await wrapper.find('.max-select').trigger('click');
+            await new Promise((r) => setTimeout(r, 10));
             await wrapper.vm.$nextTick();
 
-            expect(loadOptions).toHaveBeenCalledTimes(2);
-            expect((wrapper.vm as any).loading).toBe(true);
-            expect((wrapper.vm as any).loadError).toBe(false);
-
-            // Resolve a promessa do retry
-            resolveRetry([{ value: 'ok', name: 'OK' }]);
-            await retryPromise;
-            await wrapper.vm.$nextTick();
-
-            // Sucesso na segunda tentativa
-            expect((wrapper.vm as any).loading).toBe(false);
             expect((wrapper.vm as any).isOpen).toBe(true);
             expect((wrapper.vm as any).optionsField).toEqual([{ value: 'ok', name: 'OK' }]);
             wrapper.unmount();
         });
 
-        it('resolver duas gerações de carga em ordem inversa mantém a mais recente (E05-06 / F12)', async () => {
+        it('resolver duas gerações de carga em ordem inversa mantém a mais recente (E05-06)', async () => {
             let resolveLoad1: any;
             const promise1 = new Promise((r) => { resolveLoad1 = r; });
             let resolveLoad2: any;
@@ -636,9 +584,8 @@ describe('MaxInputSelect', () => {
             await wrapper.find('.max-select').trigger('click');
             expect(loadOptions).toHaveBeenCalledTimes(1);
 
-            // Cancelamento explícito
-            (wrapper.vm as any).hide();
-            await wrapper.vm.$nextTick();
+            // Cancela fechando
+            await wrapper.find('.max-select').trigger('click');
 
             // 2ª ativação
             await wrapper.find('.max-select').trigger('click');

@@ -130,16 +130,10 @@
         logoAlt?: string;
         /** Texto do fallback da logo caso falhe o carregamento. Sem ele, consulta `getMaxAppConfig().logoFallbackLabel`. */
         logoFallbackLabel?: string;
-        /**
-         * Indica se a aplicação consumidora controla o tema e dark mode por conta própria
-         * (desativando o watcher legado interno de user.data.settings.darkMode).
-         */
-        controlledTheme?: boolean;
     }>(), {
         allowUserName: true,
         allowEmail: true,
         allowPhone: true,
-        controlledTheme: false,
         blankPages: () => []
     });
 
@@ -284,11 +278,6 @@
      * 4. Emite o evento toggleDarkMode para compatibilidade com ouvintes externos
      */
     const handleToggleDarkMode = (): void => {
-        if (props.controlledTheme) {
-            emit('toggleDarkMode');
-            return;
-        }
-
         const currentDark = typeof document !== 'undefined'
             ? document.documentElement.classList.contains('dark')
             : Boolean(user.data?.settings?.darkMode);
@@ -302,16 +291,18 @@
             user.data.settings.darkMode = nextDark;
 
             if (typeof (user as any).save === 'function') (user as any).save();
+
         }
 
         emit('toggleDarkMode', nextDark);
     };
 
-    // Sincroniza a classe .dark com a preferência persistida do usuário ao carregar (se não for controlado pelo app)
+    // Sincroniza a classe .dark com a preferência persistida do usuário ao carregar
     watch(
-        () => [props.controlledTheme, isLoaded.value, user.data?.settings?.darkMode],
-        ([controlled, loaded, darkModeSetting]) => {
-            if (!controlled && loaded) applyDarkMode(Boolean(darkModeSetting));
+        () => [isLoaded.value, user.data?.settings?.darkMode],
+        ([loaded, darkModeSetting]) => {
+            if (loaded) applyDarkMode(Boolean(darkModeSetting));
+
         },
         { immediate: true }
     );

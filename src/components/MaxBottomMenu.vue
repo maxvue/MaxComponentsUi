@@ -307,15 +307,15 @@
             padding: 0;
             appearance: none;
             border-radius: 999px;
-            background: var(--primary-surface, var(--max-primary-surface, var(--max-primary-500)));
-            color: var(--on-primary, var(--max-on-primary, #fff));
+            background: var(--max-primary-500);
+            color: var(--background-0);
             cursor: pointer;
             box-shadow: 0 6px 16px rgb(0 32 58 / 28%);
             transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
 
             &:hover {
                 transform: translateY(-2px);
-                background: var(--primary-hover, var(--max-primary-hover, var(--max-primary-600)));
+                background: var(--max-primary-600);
                 box-shadow: 0 10px 22px rgb(0 32 58 / 34%);
             }
 

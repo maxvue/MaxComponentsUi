@@ -138,39 +138,4 @@ describe('MaxButton', () => {
             expect(comIconSize.find('.max-icon-stub').attributes('data-size')).toBe('2.5');
         });
     });
-
-    describe('atributo type', () => {
-        it('mantém type="button" como padrão quando omitido', () => {
-            const wrapper = mountButton({ label: 'Salvar' });
-            expect(wrapper.find('button').attributes('type')).toBe('button');
-        });
-
-        it('repassa type="submit" quando especificado', () => {
-            const wrapper = mountButton({ label: 'Entrar', type: 'submit' });
-            expect(wrapper.find('button').attributes('type')).toBe('submit');
-        });
-
-        it('repassa type="reset" quando especificado', () => {
-            const wrapper = mountButton({ label: 'Limpar', type: 'reset' });
-            expect(wrapper.find('button').attributes('type')).toBe('reset');
-        });
-
-        it('dispara submissão de formulário quando type="submit"', async () => {
-            const onSubmit = vi.fn();
-            const wrapper = mount({
-                components: { MaxButton },
-                template: `
-                    <form @submit.prevent="onSubmit">
-                        <MaxButton label="Enviar" type="submit" />
-                    </form>
-                `,
-                setup() {
-                    return { onSubmit };
-                }
-            });
-
-            await wrapper.find('button').trigger('submit');
-            expect(onSubmit).toHaveBeenCalledTimes(1);
-        });
-    });
 });

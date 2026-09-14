@@ -11,10 +11,10 @@
             @change="onNativeInputChange"
         />
 
-        <div class="max-fileupload p-fileupload" :disabled="attrs.disabled ?? false">
+        <div class="p-fileupload" :disabled="attrs.disabled ?? false">
             <button
                 type="button"
-                class="max-fileupload-button max-fileupload-choose p-button p-fileupload-choose"
+                class="p-button p-fileupload-choose"
                 :disabled="attrs.disabled ?? false"
                 :aria-label="uploading ? 'Carregando arquivos' : 'Escolher arquivos para envio'"
                 @click.stop="triggerChoose"
@@ -27,7 +27,7 @@
 
             <button
                 type="button"
-                class="max-fileupload-button p-button"
+                class="p-button"
                 v-if="showUploadButton"
                 v-tooltip="'Enviar arquivo'"
                 aria-label="Enviar arquivos selecionados"
@@ -38,7 +38,7 @@
                 </div>
             </button>
 
-            <div class="max-fileupload-content p-fileupload-content">
+            <div class="p-fileupload-content">
                 <div
                     @click.stop="triggerChoose"
                     class="label-file-upload"
@@ -142,7 +142,7 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, computed, useAttrs, onBeforeUnmount, onUnmounted } from 'vue';
+    import { ref, computed, useAttrs, onBeforeUnmount } from 'vue';
     import { useDropZone } from '@maxvue/max-use';
     import MaxIcon from './MaxIcon.vue';
     import MaxButton from './MaxButton.vue';
@@ -192,10 +192,8 @@
     const errorMessage = ref<string | null>(null);
     const isComputable = ref(true);
     const statusAnnouncement = ref('');
-    let isUnmounted = false;
 
     const setUploadStatus = (status: UploadState) => {
-        if (isUnmounted) return;
         uploadStatus.value = status;
         uploading.value = status === 'uploading';
         showError.value = status === 'error';
@@ -220,12 +218,10 @@
     });
 
     const retryUpload = () => {
-        if (isUnmounted) return;
         if (files.value.length > 0) startUpload(files.value);
     };
 
     const dismissError = () => {
-        if (isUnmounted) return;
         setUploadStatus('idle');
         errorMessage.value = null;
     };
@@ -256,7 +252,6 @@
     };
 
     const onSelectHandler = (event: any) => {
-        if (isUnmounted) return;
         setUploadStatus('selected');
         files.value = event?.files ?? [];
         emit('select', event);
@@ -267,19 +262,12 @@
     let currentXhr: XMLHttpRequest | null = null;
 
     const startUpload = (toSend: any[]) => {
-        if (isUnmounted) return;
         if (!toSend || !toSend.length) return;
         const url = (attrs.url as string) ?? '';
         if (!url) return;
 
         if (currentXhr) {
-            currentXhr.onload = null;
-            currentXhr.onerror = null;
-            currentXhr.onabort = null;
-            if (currentXhr.upload) currentXhr.upload.onprogress = null;
-            try {
-                currentXhr.abort();
-            } catch {}
+            currentXhr.abort();
             currentXhr = null;
         }
 
@@ -296,7 +284,7 @@
         currentXhr = xhr;
 
         xhr.upload.onprogress = (event: ProgressEvent) => {
-            if (isUnmounted || currentAttempt !== attemptId) return;
+            if (currentAttempt !== attemptId) return;
             if (event.lengthComputable) {
                 isComputable.value = true;
                 const percent = Math.round((event.loaded / event.total) * 100);
@@ -317,7 +305,7 @@
         onBeforeUpload({ xhr, formData });
 
         xhr.onload = () => {
-            if (isUnmounted || currentAttempt !== attemptId) return;
+            if (currentAttempt !== attemptId) return;
             if (xhr.status >= 200 && xhr.status < 300) {
                 uploadProgress.value = 100;
                 setUploadStatus('success');
@@ -332,7 +320,7 @@
         };
 
         xhr.onerror = () => {
-            if (isUnmounted || currentAttempt !== attemptId) return;
+            if (currentAttempt !== attemptId) return;
             setUploadStatus('error');
             onError({ xhr });
             if (currentXhr === xhr) currentXhr = null;
@@ -341,26 +329,12 @@
         xhr.send(formData);
     };
 
-    const cleanupActiveUpload = () => {
-        isUnmounted = true;
-        attemptId++;
-        if (currentXhr) {
-            currentXhr.onload = null;
-            currentXhr.onerror = null;
-            currentXhr.onabort = null;
-            if (currentXhr.upload) currentXhr.upload.onprogress = null;
-            try {
-                currentXhr.abort();
-            } catch {}
-            currentXhr = null;
-        }
-    };
-
-    onBeforeUnmount(cleanupActiveUpload);
-    onUnmounted(cleanupActiveUpload);
+    onBeforeUnmount(() => {
+        currentXhr?.abort();
+        currentXhr = null;
+    });
 
     const onUploadHandler = (event: any) => {
-        if (isUnmounted) return;
         setUploadStatus('success');
         emit('upload', event);
         if (attrs.onUpload) attrs.onUpload(event);
@@ -377,7 +351,6 @@
     };
 
     const onError = (event: any) => {
-        if (isUnmounted) return;
         setUploadStatus('error');
         uploadProgress.value = 0;
 
@@ -500,7 +473,6 @@
                 animation: max-spinner-rotate 1s linear infinite;
             }
 
-            .max-fileupload,
             .p-fileupload {
                 display: grid;
                 grid-template-columns: auto 1fr;
@@ -512,7 +484,6 @@
                 padding: 0 10px;
                 position: relative;
 
-                .max-fileupload-button,
                 .p-button {
                     display: grid;
                     place-items: center;
@@ -564,7 +535,6 @@
                 }
             }
 
-            .max-fileupload-content,
             .p-fileupload-content {
                 height: 30px;
                 display: grid;

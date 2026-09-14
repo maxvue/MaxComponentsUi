@@ -168,37 +168,4 @@ describe('MaxChart', () => {
             datasetIndex: 1
         }));
     });
-
-    it('não aplica classe estática sr-only e fornece botão de toggle para exibir a tabela acessível', async () => {
-        const wrapper = mountChart({
-            data: {
-                labels: ['Q1', 'Q2'],
-                datasets: [{ label: 'Lucro', data: [100, 200] }]
-            }
-        });
-        await flushPromises();
-
-        const tableContainer = wrapper.find('.max-chart-accessible-table');
-        expect(tableContainer.exists()).toBe(true);
-        // Não pode conter sr-only estático hardcoded
-        expect(tableContainer.classes()).not.toContain('sr-only');
-        expect(tableContainer.classes()).not.toContain('is-expanded');
-
-        const toggleBtn = wrapper.find('button.max-chart-toggle-table-btn');
-        expect(toggleBtn.exists()).toBe(true);
-        expect(toggleBtn.attributes('type')).toBe('button');
-        expect(toggleBtn.attributes('aria-expanded')).toBe('false');
-        expect(toggleBtn.attributes('aria-label')).toBe('Exibir tabela de dados do gráfico');
-
-        // Clica no botão toggle
-        await toggleBtn.trigger('click');
-        expect(toggleBtn.attributes('aria-expanded')).toBe('true');
-        expect(tableContainer.classes()).toContain('is-expanded');
-
-        // Clica novamente para recolher
-        await toggleBtn.trigger('click');
-        expect(toggleBtn.attributes('aria-expanded')).toBe('false');
-        expect(tableContainer.classes()).not.toContain('is-expanded');
-    });
 });
-

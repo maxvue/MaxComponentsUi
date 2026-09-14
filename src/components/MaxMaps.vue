@@ -13,25 +13,8 @@
             </div>
         </div>
 
-        <!-- Botão toggle para exibir controles acessíveis de coordenadas -->
-        <button
-            type="button"
-            class="map-accessible-toggle-btn"
-            :aria-expanded="isControlsExpanded"
-            :aria-label="isControlsExpanded ? 'Ocultar controles de coordenadas' : 'Exibir controles de coordenadas'"
-            :disabled="props.disabled"
-            @click="isControlsExpanded = !isControlsExpanded"
-        >
-            {{ isControlsExpanded ? 'Ocultar coordenadas' : 'Ajustar coordenadas' }}
-        </button>
-
         <!-- Controles acessíveis de coordenadas para teclado e tecnologias assistivas -->
-        <div
-            class="map-accessible-controls"
-            :class="{ 'is-expanded': isControlsExpanded }"
-            role="region"
-            aria-label="Controles acessíveis de coordenadas do mapa"
-        >
+        <div class="map-accessible-controls sr-only" role="region" aria-label="Controles acessíveis de coordenadas do mapa">
             <label>
                 <span>Latitude:</span>
                 <input
@@ -41,7 +24,6 @@
                     max="90"
                     :value="coordinates.latitude"
                     aria-label="Latitude do marcador"
-                    :disabled="props.disabled"
                     @change="onLatitudeChange"
                 />
             </label>
@@ -54,14 +36,13 @@
                     max="180"
                     :value="coordinates.longitude"
                     aria-label="Longitude do marcador"
-                    :disabled="props.disabled"
                     @change="onLongitudeChange"
                 />
             </label>
-            <button type="button" aria-label="Mover marcador para o Norte" :disabled="props.disabled" @click="stepCoordinate(0.0005, 0)">Norte</button>
-            <button type="button" aria-label="Mover marcador para o Sul" :disabled="props.disabled" @click="stepCoordinate(-0.0005, 0)">Sul</button>
-            <button type="button" aria-label="Mover marcador para o Oeste" :disabled="props.disabled" @click="stepCoordinate(0, -0.0005)">Oeste</button>
-            <button type="button" aria-label="Mover marcador para o Leste" :disabled="props.disabled" @click="stepCoordinate(0, 0.0005)">Leste</button>
+            <button type="button" aria-label="Mover marcador para o Norte" @click="stepCoordinate(0.0005, 0)">Norte</button>
+            <button type="button" aria-label="Mover marcador para o Sul" @click="stepCoordinate(-0.0005, 0)">Sul</button>
+            <button type="button" aria-label="Mover marcador para o Oeste" @click="stepCoordinate(0, -0.0005)">Oeste</button>
+            <button type="button" aria-label="Mover marcador para o Leste" @click="stepCoordinate(0, 0.0005)">Leste</button>
         </div>
     </div>
 </template>
@@ -79,19 +60,16 @@
         apiKey?: string;
         mapId?: string;
         mapTypeId?: string;
-        disabled?: boolean;
     }>(), {
         modelValue: null,
         apiKey: undefined,
         mapId: undefined,
-        mapTypeId: 'satellite',
-        disabled: false
+        mapTypeId: 'satellite'
     });
 
     const effectiveApiKey = computed(() => props.apiKey || getMaxAppConfig().googleMapsApiKey || '');
     const effectiveMapId = computed(() => props.mapId || getMaxAppConfig().googleMapsMapId || undefined);
 
-    const isControlsExpanded = ref(false);
     const coordinates = ref({ latitude: Number(props.modelValue?.latitude ?? 0), longitude: Number(props.modelValue?.longitude ?? 0) });
 
     const emit = defineEmits<{
@@ -118,8 +96,8 @@
     const zoom: Ref = ref(20);
     const marker_options = ref({
         position: center.value,
-        gmpDraggable: !props.disabled,
-        click: function (_e: unknown) {
+        gmpDraggable: true,
+        click: function (_e: any) {
         }
     });
     const pinOptions = ref({
@@ -129,18 +107,17 @@
     });
 
 
-    function onDrag(event: { latLng: { lat: () => number; lng: () => number } }) {
-        if (props.disabled) return;
+    function onDrag(event: any) {
         coordinates.value.latitude = Number(event.latLng.lat().toFixed(7));
         coordinates.value.longitude = Number(event.latLng.lng().toFixed(7));
     }
 
-    watch( () => [coordinates.value.latitude, coordinates.value.longitude, props.disabled], () => {
+    watch( () => [coordinates.value.latitude, coordinates.value.longitude], () => {
         center.value = { lat: toNumber(coordinates.value.latitude), lng: toNumber(coordinates.value.longitude) };
         marker_options.value = {
             position: center.value,
-            gmpDraggable: !props.disabled,
-            click: function (_e: unknown) {
+            gmpDraggable: true,
+            click: function (_e: any) {
             }
         };
     },{ immediate: true });
@@ -155,19 +132,18 @@
     });
 
     const onLatitudeChange = (event: Event) => {
-        if (props.disabled) return;
         const val = Number((event.target as HTMLInputElement).value);
         if (!isNaN(val) && val >= -90 && val <= 90) coordinates.value.latitude = Number(val.toFixed(7));
+
     };
 
     const onLongitudeChange = (event: Event) => {
-        if (props.disabled) return;
         const val = Number((event.target as HTMLInputElement).value);
         if (!isNaN(val) && val >= -180 && val <= 180) coordinates.value.longitude = Number(val.toFixed(7));
+
     };
 
     const stepCoordinate = (deltaLat: number, deltaLng: number) => {
-        if (props.disabled) return;
         const newLat = Math.min(90, Math.max(-90, coordinates.value.latitude + deltaLat));
         const newLng = Math.min(180, Math.max(-180, coordinates.value.longitude + deltaLng));
         coordinates.value = {
@@ -260,130 +236,16 @@
             grid-template-rows: 1fr 1fr 1fr;
         }
 
-        .map-accessible-toggle-btn {
+        .sr-only {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 12;
-            padding: 4px 8px;
-            font-size: 0.75rem;
-            border-radius: 4px;
-            background: var(--background-100, #f1f5f9);
-            color: var(--background-800, #001524);
-            border: 1px solid var(--background-300, #cbd5e1);
-            cursor: pointer;
-            font-family: inherit;
-
-            &:not(:focus-visible):not(:hover) {
-                position: absolute;
-                width: 1px;
-                height: 1px;
-                padding: 0;
-                margin: -1px;
-                overflow: hidden;
-                clip-path: inset(50%);
-                white-space: nowrap;
-                border: 0;
-            }
-
-            &:focus-visible {
-                outline: none;
-                box-shadow: var(--max-focus-ring);
-            }
-
-            &:hover:not(:disabled) {
-                background: var(--background-200, #e2e8f0);
-            }
-
-            &:disabled {
-                cursor: not-allowed;
-                opacity: 0.5;
-            }
-        }
-
-        .map-accessible-controls {
-            &:not(:focus-within):not(.is-expanded) {
-                position: absolute;
-                width: 1px;
-                height: 1px;
-                padding: 0;
-                margin: -1px;
-                overflow: hidden;
-                clip-path: inset(50%);
-                white-space: nowrap;
-                border: 0;
-            }
-
-            &:focus-within,
-            &.is-expanded {
-                position: absolute;
-                bottom: 10px;
-                left: 10px;
-                right: 10px;
-                z-index: 10;
-                background: var(--background-0, #ffffff);
-                color: var(--background-800, #001524);
-                padding: 0.75rem 1rem;
-                border-radius: 0.5rem;
-                border: 1px solid var(--background-300, #cbd5e1);
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-                display: flex;
-                flex-wrap: wrap;
-                gap: 0.5rem;
-                align-items: center;
-
-                label {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 0.25rem;
-                    font-size: 0.8rem;
-                    font-weight: 500;
-
-                    input {
-                        padding: 0.25rem 0.5rem;
-                        border: 1px solid var(--background-400, #94a3b8);
-                        border-radius: 4px;
-                        background: var(--background-0, #ffffff);
-                        color: inherit;
-                        font-size: 0.8rem;
-
-                        &:focus-visible {
-                            outline: none;
-                            box-shadow: var(--max-focus-ring);
-                        }
-
-                        &:disabled {
-                            cursor: not-allowed;
-                            opacity: 0.6;
-                        }
-                    }
-                }
-
-                button {
-                    padding: 0.25rem 0.6rem;
-                    background: var(--background-100, #f1f5f9);
-                    border: 1px solid var(--background-400, #94a3b8);
-                    border-radius: 4px;
-                    cursor: pointer;
-                    font-size: 0.8rem;
-                    color: inherit;
-                    font-family: inherit;
-
-                    &:focus-visible {
-                        outline: none;
-                        box-shadow: var(--max-focus-ring);
-                    }
-
-                    &:hover:not(:disabled) {
-                        background: var(--background-200, #e2e8f0);
-                    }
-
-                    &:disabled {
-                        cursor: not-allowed;
-                        opacity: 0.5;
-                    }
-                }
-            }
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip-path: inset(50%);
+            white-space: nowrap;
+            border: 0;
         }
     }
 </style>

@@ -19,14 +19,6 @@
     --max-primary-900: #001931;
     --max-primary-950: #00152A;
 
-    // Tokens semânticos de ação primária (WCAG 1.4.3 >= 4.5:1)
-    --primary-surface: var(--max-primary-surface, #00768E);
-    --primary-hover: var(--max-primary-hover, #005F77);
-    --on-primary: var(--max-on-primary, #ffffff);
-    --max-primary-surface: #00768E;
-    --max-primary-hover: #005F77;
-    --max-on-primary: #ffffff;
-
     // Primitivas independentes de esquema
     --max-orange-500: #f97316;
     --max-red-600: #dc2626;
@@ -138,14 +130,6 @@
 
 // Esquema escuro — surface deriva da rampa zinc (o Aura troca de rampa no dark)
 .dark {
-    // Tokens semânticos de ação primária - modo escuro (WCAG 1.4.3 >= 4.5:1)
-    --primary-surface: var(--max-primary-surface, #00768E);
-    --primary-hover: var(--max-primary-hover, #008fa8);
-    --on-primary: var(--max-on-primary, #ffffff);
-    --max-primary-surface: #00768E;
-    --max-primary-hover: #008fa8;
-    --max-on-primary: #ffffff;
-
     // Tokens canônicos de foco acessível - modo escuro
     --max-focus-ring-color: var(--max-primary-400, #178DA5);
     --max-focus-ring-offset-color: var(--background-900, #18181b);

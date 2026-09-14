@@ -180,59 +180,5 @@ describe('MaxMaps.vue', () => {
         await eastBtn.trigger('click');
         expect(wrapper.vm.coordinates.longitude).toBeCloseTo(currentLng + 0.0005, 5);
     });
-
-    it('não aplica classe estática sr-only e fornece botão de toggle para exibir controles de coordenadas', async () => {
-        const wrapper = mount(MaxMaps, {
-            props: { modelValue: { latitude: -15.7801, longitude: -47.9292 } }
-        });
-
-        const controls = wrapper.find('.map-accessible-controls');
-        expect(controls.exists()).toBe(true);
-        expect(controls.classes()).not.toContain('sr-only');
-        expect(controls.classes()).not.toContain('is-expanded');
-
-        const toggleBtn = wrapper.find('button.map-accessible-toggle-btn');
-        expect(toggleBtn.exists()).toBe(true);
-        expect(toggleBtn.attributes('aria-expanded')).toBe('false');
-        expect(toggleBtn.attributes('aria-label')).toBe('Exibir controles de coordenadas');
-
-        await toggleBtn.trigger('click');
-        expect(toggleBtn.attributes('aria-expanded')).toBe('true');
-        expect(controls.classes()).toContain('is-expanded');
-
-        await toggleBtn.trigger('click');
-        expect(toggleBtn.attributes('aria-expanded')).toBe('false');
-        expect(controls.classes()).not.toContain('is-expanded');
-    });
-
-    it('respeita prop disabled desabilitando inputs de coordenadas e botões direcionais', async () => {
-        const wrapper = mount(MaxMaps, {
-            props: {
-                modelValue: { latitude: -15.7801, longitude: -47.9292 },
-                disabled: true
-            }
-        });
-
-        const toggleBtn = wrapper.find('button.map-accessible-toggle-btn');
-        expect(toggleBtn.attributes('disabled')).toBeDefined();
-
-        const latInput = wrapper.find('input[aria-label="Latitude do marcador"]');
-        const lngInput = wrapper.find('input[aria-label="Longitude do marcador"]');
-        expect(latInput.attributes('disabled')).toBeDefined();
-        expect(lngInput.attributes('disabled')).toBeDefined();
-
-        const northBtn = wrapper.find('button[aria-label="Mover marcador para o Norte"]');
-        expect(northBtn.attributes('disabled')).toBeDefined();
-
-        // Tentativa de alteração com disabled não modifica coordenadas
-        const initialLat = wrapper.vm.coordinates.latitude;
-        await northBtn.trigger('click');
-        expect(wrapper.vm.coordinates.latitude).toBe(initialLat);
-
-        (latInput.element as HTMLInputElement).value = '-20.0000';
-        await latInput.trigger('change');
-        expect(wrapper.vm.coordinates.latitude).toBe(initialLat);
-    });
 });
-
 

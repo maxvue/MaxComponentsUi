@@ -504,24 +504,5 @@ describe('MaxApp', () => {
             expect(user.data?.settings?.darkMode).toBe(false);
             expect(saveSpy).toHaveBeenCalledTimes(2);
         });
-
-        it('não aplica classe .dark nem muta settings quando controlledTheme for true', async () => {
-            const user = loadUser({ id: 1, name: 'Maria', settings: { darkMode: true } });
-            document.documentElement.classList.remove('dark');
-
-            const wrapper = mountApp({ props: { controlledTheme: true } });
-            await wrapper.vm.$nextTick();
-
-            // Watcher não deve ter forçado dark no documento
-            expect(document.documentElement.classList.contains('dark')).toBe(false);
-
-            // toggleDarkMode reemite o evento sem manipular o DOM
-            const layout = wrapper.findComponent(MaxPageLayout);
-            layout.vm.$emit('toggleDarkMode');
-            await wrapper.vm.$nextTick();
-
-            expect(wrapper.emitted('toggleDarkMode')).toBeTruthy();
-            expect(document.documentElement.classList.contains('dark')).toBe(false);
-        });
     });
 });

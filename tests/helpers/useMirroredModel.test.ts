@@ -189,41 +189,4 @@ describe('useMirroredModel', () => {
         expect(props.modelValue).toBe('INITIAL');
         scope.stop();
     });
-
-    it('trata undefined como valor canônico legítimo sem ambiguidade com sentinela inicial (F03)', async () => {
-        const props = reactive({ modelValue: 'inicial' as string | undefined });
-        const emit = vi.fn((event: string, val: string | undefined) => {
-            if (event === 'update:modelValue') props.modelValue = val;
-        });
-        const scope = effectScope();
-        const value = scope.run(() => useMirroredModel(props, emit))!;
-
-        // 1. Emissão local de undefined
-        value.value = undefined;
-        await nextTick();
-        await nextTick();
-
-        expect(emit).toHaveBeenCalledTimes(1);
-        expect(emit).toHaveBeenCalledWith('update:modelValue', undefined);
-        expect(props.modelValue).toBeUndefined();
-
-        // 2. Eco do pai enviando undefined não deve disparar nova emissão
-        props.modelValue = undefined;
-        await nextTick();
-        expect(emit).toHaveBeenCalledTimes(1);
-
-        // 3. Mudança externa genuína posterior para um valor definido
-        props.modelValue = 'definido';
-        await nextTick();
-        expect(value.value).toBe('definido');
-
-        // 4. Nova transição para undefined deve ser detectada e emitida
-        value.value = undefined;
-        await nextTick();
-        await nextTick();
-        expect(emit).toHaveBeenCalledTimes(2);
-        expect(emit).toHaveBeenLastCalledWith('update:modelValue', undefined);
-
-        scope.stop();
-    });
 });

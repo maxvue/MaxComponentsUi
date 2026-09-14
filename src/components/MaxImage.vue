@@ -26,13 +26,12 @@
                     ref="modalRef"
                     class="max-image-modal"
                     role="dialog"
-                    :aria-modal="isTop ? 'true' : undefined"
-                    :aria-hidden="!isTop ? 'true' : undefined"
-                    :inert="!isTop ? true : undefined"
+                    aria-modal="true"
                     :aria-label="props.alt || 'Visualizador de Imagem'"
                     tabindex="-1"
                     @click.self="onBackdropClick"
-                    @keydown="onModalKeydown"
+                    @keydown="trap.onKeydown"
+                    @keydown.esc="closePreview"
                 >
                     <div class="max-image-modal__viewport" @click.self="onBackdropClick">
                         <!-- Imagem ampliada no modo preview normal -->
@@ -55,14 +54,6 @@
                             class="max-image-crop-stage"
                             ref="cropStageRef"
                         >
-                            <div
-                                v-if="cropError"
-                                class="max-image-crop-error"
-                                role="alert"
-                                aria-live="assertive"
-                            >
-                                {{ cropError }}
-                            </div>
                             <img
                                 ref="cropImgRef"
                                 :src="currentSrc"
@@ -182,12 +173,11 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, computed, watch, onBeforeUnmount, nextTick, useId } from 'vue';
+    import { ref, computed, watch, onBeforeUnmount, nextTick } from 'vue';
     import MaxIconButton from './MaxIconButton.vue';
     import { useScrollLock } from '../helpers/useScrollLock';
     import { useFocusTrap } from '../helpers/useFocusTrap';
     import { calculateTargetCropDimensions } from '../helpers/imageCrop';
-    import { useModalStore } from '../stores';
     import type { MaxImageEditPayload, MaxImageProps } from '../types/image.js';
 
     export type { MaxImageEditPayload, MaxImageProps };
@@ -202,7 +192,7 @@
         maxCropHeight: 4096,
         maxCropPixels: 16777216,
         cropQuality: 0.92,
-        includeDataUrl: false
+        includeDataUrl: true
     });
 
     const emit = defineEmits<{
@@ -213,12 +203,8 @@
         'hide': [];
     }>();
 
-    const modalId = 'max-image-lightbox-' + useId();
-    const modalStore = useModalStore();
-    const isTop = computed(() => modalStore.isTop(modalId));
-    const scrollLock = useScrollLock(modalId);
+    const scrollLock = useScrollLock();
     const currentSrc = ref(props.src);
-    const cropError = ref<string | null>(null);
 
     let activeObjectUrl: string | null = null;
     const revokeActiveObjectUrl = () => {
@@ -279,17 +265,10 @@
         openPreview();
     };
 
-    let triggerElement: HTMLElement | null = null;
-
     const openPreview = () => {
-        if (!props.preview) return;
-        if (typeof document !== 'undefined') {
-            triggerElement = (document.activeElement as HTMLElement | null) || imgRef.value;
-        }
         isOpen.value = true;
         zoomScale.value = 1;
         isCropping.value = false;
-        modalStore.push(modalId);
         scrollLock.lock();
         emit('show');
         trap.activate();
@@ -301,22 +280,12 @@
     const closePreview = () => {
         if (!isOpen.value) return;
         cleanupPointerListeners();
-        cropError.value = null;
         isOpen.value = false;
         isCropping.value = false;
         zoomScale.value = 1;
-        modalStore.remove(modalId);
         trap.deactivate();
         scrollLock.unlock();
         emit('hide');
-
-        const elToFocus = triggerElement || imgRef.value;
-        triggerElement = null;
-        if (elToFocus && typeof elToFocus.focus === 'function') {
-            setTimeout(() => {
-                elToFocus.focus();
-            }, 50);
-        }
     };
 
     const onBackdropClick = (event: MouseEvent) => {
@@ -332,7 +301,6 @@
     };
 
     const startCrop = () => {
-        cropError.value = null;
         isCropping.value = true;
         cropReady.value = false;
         zoomScale.value = 1;
@@ -340,7 +308,6 @@
 
     const cancelCrop = () => {
         cleanupPointerListeners();
-        cropError.value = null;
         isCropping.value = false;
         cropReady.value = false;
     };
@@ -491,6 +458,7 @@
             currentSrc.value = activeObjectUrl;
         } else if (payload.dataUrl) currentSrc.value = payload.dataUrl;
 
+
         emit('update:src', payload.dataUrl || currentSrc.value);
         emit('edit', payload);
         emit('crop', payload);
@@ -499,11 +467,9 @@
 
         isCropping.value = false;
         cropReady.value = false;
-        cropError.value = null;
     };
 
     const confirmCrop = async () => {
-        cropError.value = null;
         if (!cropImgRef.value) return;
         const img = cropImgRef.value;
         const naturalW = img.naturalWidth || img.clientWidth;
@@ -535,69 +501,49 @@
             props.maxCropPixels
         );
 
-        let canvas: HTMLCanvasElement;
-        let ctx: CanvasRenderingContext2D | null;
-        try {
-            canvas = document.createElement('canvas');
-            canvas.width = targetDims.width;
-            canvas.height = targetDims.height;
-            ctx = canvas.getContext('2d');
-            if (!ctx) throw new Error('Não foi possível obter o contexto 2D do canvas');
-            ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, canvas.width, canvas.height);
-        } catch (e: unknown) {
-            cropError.value = 'Falha ao processar imagem para recorte.';
-            console.error('MaxImage: erro ao desenhar no canvas', e);
-            return;
-        }
+        const canvas = document.createElement('canvas');
+        canvas.width = targetDims.width;
+        canvas.height = targetDims.height;
+        const ctx = canvas.getContext('2d');
+
+        if (!ctx) return;
+
+        ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, canvas.width, canvas.height);
 
         // Single compression via canvas.toBlob
-        let blob: Blob | null = null;
-        try {
-            blob = await new Promise<Blob | null>((resolve) => {
-                if (typeof canvas.toBlob === 'function') canvas.toBlob((b) => resolve(b), mimeType, quality);
-                else try {
-                    const data = canvas.toDataURL(mimeType, quality);
-                    const base64 = data.split(',')[1] || '';
-                    const bin = atob(base64);
-                    const arr = new Uint8Array(bin.length);
-                    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-                    resolve(new Blob([arr], { type: mimeType }));
-                } catch {
-                    resolve(null);
-                }
-            });
-        } catch (e: unknown) {
-            cropError.value = 'Erro ao codificar imagem recortada.';
-            console.error('MaxImage: erro ao codificar blob', e);
-            return;
-        }
+        const blob: Blob | null = await new Promise((resolve) => {
+            if (typeof canvas.toBlob === 'function') canvas.toBlob((b) => resolve(b), mimeType, quality);
+            else try {
+                const data = canvas.toDataURL(mimeType, quality);
+                const base64 = data.split(',')[1] || '';
+                const bin = atob(base64);
+                const arr = new Uint8Array(bin.length);
+                for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+                resolve(new Blob([arr], { type: mimeType }));
+            } catch {
+                resolve(null);
+            }
 
-        if (!blob) {
-            cropError.value = 'Falha ao codificar imagem recortada (blob nulo). Tente novamente.';
-            return;
-        }
+        });
 
         let dataUrl: string | undefined = undefined;
         if (props.includeDataUrl) {
-            try {
-                if (typeof FileReader !== 'undefined') dataUrl = await new Promise<string>((resolve) => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => resolve((reader.result as string) || '');
-                    reader.onerror = () => resolve('');
-                    reader.readAsDataURL(blob!);
-                });
+            if (blob && typeof FileReader !== 'undefined') dataUrl = await new Promise<string>((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve((reader.result as string) || '');
+                reader.onerror = () => resolve('');
+                reader.readAsDataURL(blob);
+            });
 
-                if (!dataUrl && typeof canvas.toDataURL === 'function') dataUrl = canvas.toDataURL(mimeType, quality);
-            } catch (e) {
-                console.warn('MaxImage: falha ao gerar dataUrl opcional', e);
-            }
+            if (!dataUrl && typeof canvas.toDataURL === 'function') dataUrl = canvas.toDataURL(mimeType, quality);
+
         }
 
         const extension = mimeType === 'image/jpeg' ? 'jpg' : 'png';
-        const file = new File([blob], `cropped.${extension}`, { type: mimeType });
+        const file = blob ? new File([blob], `cropped.${extension}`, { type: mimeType }) : null;
 
         const payload: MaxImageEditPayload = {
-            dataUrl,
+            dataUrl: dataUrl || '',
             blob,
             file,
             width: canvas.width,
@@ -653,21 +599,8 @@
         }
     };
 
-    const onModalKeydown = (e: KeyboardEvent) => {
-        if (!isTop.value) return;
-        if (e.key === 'Escape') {
-            e.stopPropagation();
-            closePreview();
-            return;
-        }
-        trap.onKeydown(e);
-    };
-
     const onKeydown = (e: KeyboardEvent) => {
-        if (e.key === 'Escape' && isOpen.value && isTop.value) {
-            e.stopPropagation();
-            closePreview();
-        }
+        if (e.key === 'Escape' && isOpen.value) closePreview();
     };
 
     watch(isOpen, (value) => {
@@ -679,7 +612,6 @@
         revokeActiveObjectUrl();
         cleanupPointerListeners();
         if (isOpen.value) {
-            modalStore.remove(modalId);
             window.removeEventListener('keydown', onKeydown);
             trap.deactivate();
             scrollLock.unlock();
@@ -696,7 +628,6 @@
         onCropBoxKeydown,
         calculateTargetCropDimensions,
         cropBox,
-        cropError,
         isCropping,
         isOpen,
         zoomScale
@@ -822,22 +753,6 @@
             display: block;
             user-select: none;
             -webkit-user-drag: none;
-        }
-
-        .max-image-crop-error {
-            position: absolute;
-            top: 16px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: var(--max-danger-surface, #dc2626);
-            color: var(--max-danger-content, #ffffff);
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 500;
-            z-index: 20;
-            box-shadow: 0 4px 12px rgb(0 0 0 / 35%);
-            pointer-events: auto;
         }
 
         .max-image-crop-overlay {

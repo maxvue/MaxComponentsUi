@@ -1,3 +1,8 @@
+body,
+html,
+#app {
+    font-family: var(--font-sans, (Quicksand, sans-serif));
+}
 
 $font-label-inputs: 12px;
 $size-h1: 21px;

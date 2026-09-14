@@ -21,7 +21,6 @@
     <!-- Versão Mobile: MaxIconButton que abre painel flutuante com slide-down -->
     <div v-else class="search-top-bar-mobile">
         <MaxIconButton
-            ref="mobileTriggerBtnRef"
             icon="material-symbols:search-rounded"
             size="1.3"
             light
@@ -105,8 +104,6 @@
     const input_search_ref: Ref<any> = ref();
     const input_search_mobile_ref: Ref<any> = ref();
     const mobilePanelRef = ref<HTMLElement | null>(null);
-    const mobileTriggerBtnRef = ref<any>(null);
-    let triggerElement: HTMLElement | null = null;
     const trap = useFocusTrap(mobilePanelRef);
     const is_open = ref(false);
 
@@ -140,9 +137,6 @@
     });
 
     const openSearch = (): void => {
-        if (typeof document !== 'undefined') {
-            triggerElement = document.activeElement as HTMLElement | null;
-        }
         is_open.value = true;
         trap.activate();
         nextTick(() => {
@@ -154,13 +148,6 @@
     const closeSearch = (): void => {
         is_open.value = false;
         trap.deactivate();
-        const elToFocus = triggerElement || mobileTriggerBtnRef.value?.$el?.querySelector?.('button') || mobileTriggerBtnRef.value?.$el;
-        triggerElement = null;
-        if (elToFocus && typeof elToFocus.focus === 'function') {
-            setTimeout(() => {
-                elToFocus.focus();
-            }, 50);
-        }
     };
 
     const toggleMobileSearch = (): void => {

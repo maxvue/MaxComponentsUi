@@ -1,7 +1,7 @@
 <template>
     <button
         v-if="props.label || Boolean($slots.default)"
-        :type="resolvedType"
+        type="button"
         class="max-button"
         :class="buttonClasses"
         :disabled="props.disabled || props.loading"
@@ -40,7 +40,6 @@
     const $slots = useSlots();
 
     const props = withDefaults(defineProps<MaxButtonsType>(), {
-        type: 'button',
         iconSize: 1.4,
         dark: undefined,
         route: null,
@@ -50,7 +49,6 @@
         uppercase: false
     });
 
-    const resolvedType = computed(() => props.type || 'button');
     const _isTransparentVariant = computed(() => props.variant === 'outlined' || props.variant === 'text' || props.variant === 'link' || props.dashed === true);
     const light = computed(() => undefined);
     const iconColor = computed(() => 'currentColor');
@@ -120,16 +118,18 @@
         font-weight: 500;
         font-family: inherit;
 
-        // Contratos semânticos de ação primária (WCAG 1.4.3 >= 4.5:1)
-        background: var(--primary-surface, var(--max-primary-surface, var(--max-primary-500)));
-        color: var(--on-primary, var(--max-on-primary, var(--max-primary-content, #fff)));
-        border-color: var(--primary-surface, var(--max-primary-surface, var(--max-primary-500)));
+        // Cor da marca (declarada em src/styles/style.ts, congelada em
+        // themes/tokens.scss). NÃO usar a rampa --primary-* de colors.scss:
+        // aquela é uma escala de cinza e deixa todos os botões acinzentados.
+        background: var(--max-primary-500);
+        color: var(--max-primary-content, #fff);
+        border-color: var(--max-primary-500);
         transition: background 0.2s, color 0.2s, border-color 0.2s;
 
         &:hover {
-            background: var(--primary-hover, var(--max-primary-hover, var(--max-primary-600)));
-            border-color: var(--primary-hover, var(--max-primary-hover, var(--max-primary-600)));
-            color: var(--on-primary, var(--max-on-primary, var(--max-primary-content, #fff)));
+            background: var(--max-primary-600);
+            border-color: var(--max-primary-600);
+            color: var(--max-primary-content, #fff);
         }
 
         &:focus-visible {

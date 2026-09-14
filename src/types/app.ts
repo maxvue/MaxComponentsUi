@@ -97,20 +97,12 @@ export interface SideMenuDetails {
     tooltip?: string | null;
     /** Título do item. */
     title?: string | null;
-    /** Subrotas ou rotas filhas que mantêm este menu ativo (compatibilidade legada). */
-    matches?: string[];
     [key: string]: any;
 }
 
 /** Item do menu lateral. */
 export interface SideMenuItem {
     id?: string;
-    /** Subrotas ou rotas filhas que mantêm este menu ativo no shell. */
-    matches?: string[];
-    /** Classificação da rota (navigable, contextual, internal, public). */
-    classification?: string;
-    /** Rota pai associada quando contextual. */
-    parent?: string | null;
     details: SideMenuDetails;
     [key: string]: any;
 }

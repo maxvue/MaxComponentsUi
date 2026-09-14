@@ -26,19 +26,6 @@ const localStorageMock = (() => {
 
 if (typeof globalThis.HTMLInputElement === 'undefined') globalThis.HTMLInputElement = (globalThis.window?.HTMLInputElement ?? class HTMLInputElement {}) as any;
 
-// Emulação do comportamento nativo do navegador para <button> onde Enter e Espaço disparam o evento click nativo
-const ButtonProto = (globalThis.window?.HTMLButtonElement || globalThis.HTMLButtonElement)?.prototype;
-console.log('DEBUG ButtonProto present:', !!ButtonProto, 'window:', !!globalThis.window);
-if (ButtonProto) {
-    const origDispatch = ButtonProto.dispatchEvent;
-    ButtonProto.dispatchEvent = function (event: Event) {
-        if (event.type === 'keydown' && ((event as KeyboardEvent).key === 'Enter' || (event as KeyboardEvent).key === ' ' || (event as KeyboardEvent).key === 'Spacebar')) {
-            this.click();
-        }
-        return origDispatch.call(this, event);
-    };
-}
-
 Object.defineProperty(globalThis, 'localStorage', { value: localStorageMock });
 
 // Mock global do Ziggy para suporte a rotas nomeadas via @maxvue/max-use
