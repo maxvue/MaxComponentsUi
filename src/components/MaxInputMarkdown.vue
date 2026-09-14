@@ -1,5 +1,5 @@
 <template>
-    <div class="max-input-markdown">
+    <div class="max-input-markdown" v-bind="props" >
         <div class="max-input-markdown__editor-wrap" :class="{ 'max-input-markdown__editor-wrap--disabled': props.disabled }">
             <MaxInputMarkdownToolbar :editor="editor ?? null" :hide-tools="props.hideTools" :tools="props.tools" />
             <EditorContent class="max-input-markdown__content" :style="{ minHeight: props.minHeight, maxHeight: props.maxHeight }" :editor="editor" />

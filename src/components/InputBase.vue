@@ -83,27 +83,9 @@
         </div>
 
         <!-- INPUT MESSAGE -->
-        <div
-            class="input-message"
-            :class="{ 'is-truncated': props.truncateMessage }"
-            :id="message_id"
-            aria-live="polite"
-            :role="isError ? 'alert' : undefined"
-            v-if="!props.noStatus && !props.noMessage"
-        >
-            <MaxIcon
-                :icon="props.iconMessage"
-                v-if="props.iconMessage && displayMessage"
-                :size="0.85"
-                :light="light"
-                :dark="dark"
-                class="message-icon"
-            />
-            <span
-                class="message-text"
-                :title="props.truncateMessage && displayMessage ? displayMessage : undefined"
-                v-if="displayMessage"
-            >{{ displayMessage }}</span>
+        <div class="input-message" :class="{ 'is-truncated': props.truncateMessage }" :id="message_id" aria-live="polite" :role="isError ? 'alert' : undefined" v-if="!props.noStatus && !props.noMessage" >
+            <MaxIcon :icon="props.iconMessage" v-if="props.iconMessage && displayMessage" :size="0.85" :light="light" :dark="dark" class="message-icon" />
+            <span class="message-text" :title="props.truncateMessage && displayMessage ? displayMessage : undefined" v-if="displayMessage" >{{ displayMessage }}</span>
         </div>
     </div>
 </template>
@@ -732,6 +714,7 @@
     &[input-click] {
         grid-template-rows: 20px;
         height: 20px;
+        min-height: 20px;
 
         :deep(div),
         :deep(span),

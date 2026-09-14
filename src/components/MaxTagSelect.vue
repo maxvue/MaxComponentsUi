@@ -39,7 +39,7 @@
                             >
                                 <MaxIcon
                                     :icon="option_selected?.icon ?? null"
-                                    :size="option_selected?.icon_size ?? 1.4"
+                                    :size="option_selected?.icon_size ?? 1"
                                     v-if="option_selected.icon"
                                     :color="getStyleColor(option_selected, false, true).color"
                                 />
@@ -831,7 +831,6 @@
 
             .max-select-label {
                 border: none !important;
-                padding: 0 10px !important;
                 display: grid;
                 place-items: center start;
                 outline: none !important;
@@ -858,8 +857,6 @@
 
                     :deep(> .max-icon-div) {
                         width: auto !important;
-                        padding: 3px 10px 3px 3px !important;
-
                         .max-icon {
                             padding: 0 !important;
                         }
