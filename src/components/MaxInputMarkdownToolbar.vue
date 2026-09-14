@@ -213,7 +213,7 @@
                         placeholder="https://..."
                         @input="linkError = ''"
                         @keydown.enter.prevent="applyLink"
-                        @keydown.escape="closeLinkPopover"
+                        @keydown.escape="closeLinkPopover()"
                     />
                     <span v-if="linkError" :id="linkErrorId" class="md-popover__error" role="alert">
                         {{ linkError }}
@@ -270,7 +270,7 @@
                         placeholder="https://..."
                         @input="imageError = ''"
                         @keydown.enter.prevent="applyImage"
-                        @keydown.escape="closeImagePopover"
+                        @keydown.escape="closeImagePopover()"
                     />
                     <span v-if="imageError" :id="imageErrorId" class="md-popover__error" role="alert">
                         {{ imageError }}
@@ -480,26 +480,26 @@
     const imageInputId = 'md-toolbar-image-input';
     const imageErrorId = 'md-toolbar-image-error';
 
-    const closeLinkPopover = () => {
+    const closeLinkPopover = (restoreFocus = true) => {
         showLinkPopover.value = false;
         linkUrl.value = '';
         linkError.value = '';
-        linkTriggerRef.value?.focus();
+        if (restoreFocus) linkTriggerRef.value?.focus();
     };
 
-    const closeImagePopover = () => {
+    const closeImagePopover = (restoreFocus = true) => {
         showImagePopover.value = false;
         imageUrl.value = '';
         imageError.value = '';
-        imageTriggerRef.value?.focus();
+        if (restoreFocus) imageTriggerRef.value?.focus();
     };
 
     onClickOutside(linkPopoverRef, () => {
-        closeLinkPopover();
+        closeLinkPopover(false);
     });
 
     onClickOutside(imagePopoverRef, () => {
-        closeImagePopover();
+        closeImagePopover(false);
     });
 
     const openLinkPopover = () => {

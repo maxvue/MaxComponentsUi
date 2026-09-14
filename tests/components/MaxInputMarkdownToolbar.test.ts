@@ -270,6 +270,28 @@ describe('MaxInputMarkdownToolbar', () => {
         expect(wrapper.find('.md-popover').exists()).toBe(false);
     });
 
+    it.each(['Link', 'Imagem'])('não devolve o foco para a toolbar ao fechar o popover de %s por clique externo', async (title) => {
+        const editor = createFakeEditor();
+        const wrapper = mountToolbar({ editor }, { attachTo: document.body });
+        const outsideButton = document.createElement('button');
+        document.body.appendChild(outsideButton);
+
+        await wrapper.find(`button[title="${title}"]`).trigger('click');
+        expect(wrapper.find('.md-popover').exists()).toBe(true);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        outsideButton.focus();
+        outsideButton.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+        outsideButton.click();
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find('.md-popover').exists()).toBe(false);
+        expect(document.activeElement).toBe(outsideButton);
+
+        wrapper.unmount();
+        outsideButton.remove();
+    });
+
     it('navega entre botões habilitados com setas e Home/End via roving tabindex', async () => {
         const editor = createFakeEditor();
         const wrapper = mountToolbar({ editor }, { attachTo: document.body });
