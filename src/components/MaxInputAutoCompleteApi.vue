@@ -118,6 +118,7 @@
         error?: string | boolean | null | undefined;
         caution?: string | boolean | null | undefined;
         required?: boolean | null | undefined;
+        noMessage?: boolean;
         disabled?: boolean | undefined;
         optionValue?: string | undefined;
         optionLabel?: string | undefined;

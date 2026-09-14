@@ -105,6 +105,7 @@
             targetValue?: string;
             caution?: string | boolean | undefined;
             required?: boolean;
+            noMessage?: boolean;
             forceSelection?: boolean;
             restoreOnInvalid?: boolean;
             spellcheck?: boolean | undefined;

@@ -24,6 +24,7 @@ import MaxInputSwitch from '../../src/components/MaxInputSwitch.vue';
 import MaxInputText from '../../src/components/MaxInputText.vue';
 import MaxInputTextArea from '../../src/components/MaxInputTextArea.vue';
 import MaxInputTextList from '../../src/components/MaxInputTextList.vue';
+import MaxInputTypeAddress from '../../src/components/MaxInputTypeAddress.vue';
 import MaxTagSelect from '../../src/components/MaxTagSelect.vue';
 
 const cases = [
@@ -50,11 +51,14 @@ const cases = [
     ['MaxInputText', MaxInputText, { modelValue: '' }],
     ['MaxInputTextArea', MaxInputTextArea, { modelValue: '' }],
     ['MaxInputTextList', MaxInputTextList, { modelValue: [] }],
+    ['MaxInputTypeAddress', MaxInputTypeAddress, { modelValue: '' }],
     ['MaxTagSelect', MaxTagSelect, { modelValue: [], options: [] }]
 ] as const;
 
 describe('Contrato no-message dos componentes de input', () => {
     it.each(cases)('%s encaminha no-message ao InputBase', (_name, component, props) => {
+        expect((component as any).props).toHaveProperty('noMessage');
+
         const wrapper = mount(component as any, {
             props: props as any,
             attrs: {

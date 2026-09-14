@@ -73,6 +73,7 @@
             targetValue?: string;
             caution?: string | boolean | undefined;
             required?: boolean;
+            noMessage?: boolean;
             /** Define se a tecla Tab insere 4 espaços ou se navega nativamente entre campos */
             indentWithTab?: boolean;
         }>(),

@@ -67,6 +67,8 @@
             caution?: string | boolean | undefined;
             /** Define se o campo é obrigatório */
             required?: boolean;
+            /** Oculta a área de mensagem */
+            noMessage?: boolean;
             /** Prefixo do campo */
             prefix?: string | undefined;
             /** Sufixo do campo */

@@ -263,6 +263,8 @@
         noError?: boolean;
         /** Flag que força ocultar os icones done, caution e error */
         noStatus?: boolean;
+        /** Flag que oculta a área de mensagem */
+        noMessage?: boolean;
         /** Flag que força ocultar o icone */
         noIcon?: boolean;
         /** Data Format */

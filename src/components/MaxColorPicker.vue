@@ -85,6 +85,8 @@
         caution?: string | boolean | undefined;
         /** Define se o campo é obrigatório */
         required?: boolean;
+        /** Oculta a área de mensagem */
+        noMessage?: boolean;
         /** Texto de placeholder do campo */
         placeholder?: string | undefined;
     }
