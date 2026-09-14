@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mount, VueWrapper } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import MaxBaseVirtualScroller from '../../../src/components/base/MaxBaseVirtualScroller.vue';
@@ -152,7 +152,8 @@ describe('MaxBaseVirtualScroller', () => {
         expect(rows[0].element.parentElement?.getAttribute('aria-posinset')).toBeNull();
     });
 
-    it('aplica role="listbox" e role="option" com aria-setsize/aria-posinset quando explicitamente configurado (E06-01)', async () => {
+    it('rejeita modo listbox incompleto sem contrato de foco, seleção ou teclado (E06-01 / F14)', async () => {
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
         wrapper = mount(MaxBaseVirtualScroller, {
             props: {
                 items: makeItems(5),
@@ -167,13 +168,10 @@ describe('MaxBaseVirtualScroller', () => {
         stubViewport(wrapper.element as HTMLElement, 400);
         await settle();
 
-        expect(wrapper.find('.max-base-virtual-scroller').attributes('role')).toBe('listbox');
-        expect(wrapper.find('.max-base-virtual-scroller').attributes('aria-label')).toBe('Opções disponíveis');
-
-        const options = wrapper.findAll('[role="option"]');
-        expect(options.length).toBeGreaterThan(0);
-        expect(options[0].attributes('aria-setsize')).toBe('5');
-        expect(options[0].attributes('aria-posinset')).toBe('1');
+        expect(wrapper.find('.max-base-virtual-scroller').attributes('role')).toBeUndefined();
+        expect(wrapper.findAll('[role="option"]')).toHaveLength(0);
+        expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('role="listbox" não é suportado no scroller base'));
+        warnSpy.mockRestore();
     });
 
     it('aplica role="list" e role="listitem" para listas informativas (E06-01)', async () => {

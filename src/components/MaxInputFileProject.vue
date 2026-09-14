@@ -82,12 +82,15 @@
     const isUnmounted = ref(false);
 
     const cleanupRemovedUrls = (currentFiles: DBFile[]) => {
-        const activeUrls = new Set(currentFiles.map((f) => f.objectURL).filter(Boolean));
+        const localPending = temp_files.value.filter((f) => {
+            const status = fileStatusMap.value.get(f.id);
+            return status === 'queued' || status === 'uploading';
+        });
+        const activeUrls = new Set([...currentFiles, ...localPending].map((f) => f.objectURL).filter(Boolean));
         for (const url of Array.from(created_urls)) if (!activeUrls.has(url)) {
             URL.revokeObjectURL(url);
             created_urls.delete(url);
         }
-
     };
 
     function checkFileType(extension: string | null): string | null {
@@ -130,15 +133,35 @@
         const initialStatus: UploadFileStatus = cloned.in_server ? 'succeeded' : 'queued';
         if (!fileStatusMap.value.has(cloned.id)) fileStatusMap.value.set(cloned.id, initialStatus);
 
-
         return cloned as DBFile;
     }
 
     watch(
         () => props.files,
         (files) => {
-            cleanupRemovedUrls(files || []);
-            temp_files.value = (files || []).map((f) => normalizeFile(f, f.in_server ?? true));
+            const incoming = files || [];
+            cleanupRemovedUrls(incoming);
+
+            const localPending = temp_files.value.filter((f) => {
+                const status = fileStatusMap.value.get(f.id);
+                return status === 'queued' || status === 'uploading';
+            });
+
+            const normalizedIncoming = incoming.map((f) => {
+                const existing = temp_files.value.find((t) => t.id === f.id);
+                if (existing) {
+                    existing.in_server = f.in_server ?? true;
+                    existing.data_ai = f.data_ai ?? existing.data_ai;
+                    existing.to_request_ai = f.to_request_ai ?? existing.to_request_ai;
+                    return existing;
+                }
+                return normalizeFile(f, f.in_server ?? true);
+            });
+
+            const incomingIds = new Set(normalizedIncoming.map((f) => f.id));
+            const remainingLocal = localPending.filter((f) => !incomingIds.has(f.id));
+
+            temp_files.value = [...normalizedIncoming, ...remainingLocal];
         },
         { deep: true, immediate: true }
     );
@@ -146,12 +169,16 @@
     const scheduleUpload = () => {
         if (!props.auto) return;
         const queued = temp_files.value.filter((f) => fileStatusMap.value.get(f.id) === 'queued');
-        if (queued.length > 0) void sendFile(queued);
-
+        if (queued.length > 0) {
+            sendFile(queued).catch((err) => {
+                // Erro automático capturado; emissão e estado 'failed' são gerenciados em sendFile
+                return err;
+            });
+        }
     };
 
     function ingestFiles(files: File[] | null) {
-        if (props.disabled || !files || files.length === 0) return;
+        if (isUnmounted.value || props.disabled || !files || files.length === 0) return;
         const fileList = Array.from(files);
         const normalized = fileList.map((f) => normalizeFile(f, false));
         temp_files.value = [...temp_files.value, ...normalized];
@@ -183,6 +210,7 @@
     });
 
     const sendFile = async (filesArg?: any): Promise<any> => {
+        if (isUnmounted.value) return;
         if (!props.uploadRoute && !props.url && !props.route) return;
 
         const route_url = props.url
@@ -286,10 +314,12 @@
     };
 
     const retry = (fileIds?: string[]) => {
+        if (isUnmounted.value) return Promise.resolve(undefined);
         const idSet = fileIds ? new Set(fileIds) : null;
         const failed = temp_files.value.filter((f) =>
             fileStatusMap.value.get(f.id) === 'failed' && (!idSet || idSet.has(f.id))
         );
+        if (failed.length === 0) return Promise.resolve(undefined);
         failed.forEach((f) => fileStatusMap.value.set(f.id, 'queued'));
         return sendFile(failed);
     };
@@ -298,7 +328,6 @@
         isUnmounted.value = true;
         for (const controller of activeControllers) controller.abort();
 
-        activeControllers.clear();
         activeControllers.clear();
 
         for (const url of Array.from(created_urls)) URL.revokeObjectURL(url);

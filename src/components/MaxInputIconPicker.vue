@@ -39,17 +39,19 @@
                 ref="drawerEl"
                 class="max-icon-picker-drawer p-drawer-bottom"
                 role="dialog"
-                aria-modal="true"
+                :aria-modal="isTop ? 'true' : undefined"
+                :aria-hidden="!isTop ? 'true' : undefined"
+                :inert="!isTop ? true : undefined"
                 aria-label="Escolha um ícone"
                 tabindex="-1"
                 @click.stop
-                @keydown="trap.onKeydown"
+                @keydown="isTop ? trap.onKeydown($event) : undefined"
             >
-                <div class="p-drawer-header">
-                    <span class="p-drawer-title">Escolha um ícone</span>
+                <div class="max-drawer-header p-drawer-header">
+                    <span class="max-drawer-title p-drawer-title">Escolha um ícone</span>
                     <button
                         type="button"
-                        class="p-drawer-close-button"
+                        class="max-drawer-close-button p-drawer-close-button"
                         aria-label="Fechar seletor de ícones"
                         @click="closeDrawer"
                     >
@@ -57,7 +59,7 @@
                     </button>
                 </div>
 
-                <div class="p-drawer-content">
+                <div class="max-drawer-content p-drawer-content">
                     <div class="picker-search-area">
                         <input
                             ref="searchInputRef"
@@ -134,13 +136,15 @@
 
 <script setup lang="ts">
     import { hasContent, watchDebounced } from '@maxvue/max-use';
-    import { ref, computed, watch, useAttrs, nextTick, onBeforeUnmount } from 'vue';
+    import { ref, computed, watch, useAttrs, nextTick, onBeforeUnmount, useId } from 'vue';
     import type { Ref } from 'vue';
     import InputBase from './InputBase.vue';
     import MaxIcon from './MaxIcon.vue';
     import { sanitizeSvg } from '../helpers/sanitizeSvg';
     import { useVirtualList } from '../composables/useVirtualList';
     import { useFocusTrap } from '../helpers/useFocusTrap';
+    import { useModalStore } from '../stores/useModal.Store';
+    import { useScrollLock } from '../helpers/useScrollLock';
 
     const COLS = 8;
     const ROW_HEIGHT = 40;
@@ -203,6 +207,10 @@
     const searchInputRef = ref<HTMLInputElement | null>(null);
     const drawerEl = ref<HTMLElement | null>(null);
     const trap = useFocusTrap(drawerEl);
+    const modalStore = useModalStore();
+    const modalId = 'max-icon-picker-' + useId();
+    const isTop = computed(() => modalStore.isTop(modalId));
+    const scrollLock = useScrollLock(modalId);
     const search = ref('');
     const curatedIcons = ref<IconEntry[]>([]);
     const isLoading = ref(false);
@@ -435,16 +443,23 @@
     };
 
     const onGlobalKeydown = (event: KeyboardEvent) => {
-        if (event.key === 'Escape' && visible.value) closeDrawer();
+        if (event.key === 'Escape' && visible.value && isTop.value) {
+            event.stopPropagation();
+            closeDrawer();
+        }
     };
 
     watch(visible, async (val) => {
         if (val) {
+            modalStore.push(modalId);
+            scrollLock.lock();
             if (typeof window !== 'undefined') window.addEventListener('keydown', onGlobalKeydown);
             trap.activate();
             await nextTick();
             searchInputRef.value?.focus();
         } else {
+            modalStore.remove(modalId);
+            scrollLock.unlock();
             if (typeof window !== 'undefined') window.removeEventListener('keydown', onGlobalKeydown);
             trap.deactivate();
             nextTick(() => {
@@ -472,6 +487,10 @@
     });
 
     onBeforeUnmount(() => {
+        if (visible.value) {
+            modalStore.remove(modalId);
+            scrollLock.unlock();
+        }
         trap.deactivate();
         if (typeof window !== 'undefined') window.removeEventListener('keydown', onGlobalKeydown);
         if (svgFetchTimer !== null) {
@@ -495,7 +514,11 @@
         isLoading,
         hasLoadError,
         fetchCuratedIcons,
-        retryLoad: () => fetchCuratedIcons(search.value)
+        retryLoad: () => fetchCuratedIcons(search.value),
+        openDrawer,
+        closeDrawer,
+        openDialog: openDrawer,
+        closeDialog: closeDrawer
     });
 
     defineEmits<{
@@ -553,6 +576,7 @@
         overflow: hidden;
         animation: drawer-slide-up 0.25s ease-out;
 
+        .max-drawer-header,
         .p-drawer-header {
             display: flex;
             align-items: center;
@@ -560,12 +584,14 @@
             padding: 16px 20px;
             border-bottom: 1px solid var(--surface-border);
 
+            .max-drawer-title,
             .p-drawer-title {
                 font-weight: 600;
                 font-size: 1.1rem;
                 color: var(--background-775);
             }
 
+            .max-drawer-close-button,
             .p-drawer-close-button {
                 background: transparent;
                 border: none;
@@ -584,6 +610,7 @@
             }
         }
 
+        .max-drawer-content,
         .p-drawer-content {
             flex: 1;
             padding: 16px 20px;

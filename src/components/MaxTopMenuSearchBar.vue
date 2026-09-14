@@ -39,10 +39,12 @@
                     ref="mobilePanelRef"
                     class="mobile-search-panel"
                     role="dialog"
-                    aria-modal="true"
+                    :aria-modal="isTop ? 'true' : undefined"
+                    :aria-hidden="!isTop ? 'true' : undefined"
+                    :inert="!isTop ? true : undefined"
                     aria-label="Pesquisa"
                     tabindex="-1"
-                    @keydown="trap.onKeydown"
+                    @keydown="onMobilePanelKeydown"
                 >
                     <div class="mobile-search-content">
                         <MaxInputText
@@ -73,12 +75,14 @@
 
 <script setup lang="ts">
     import type { Ref } from 'vue';
-    import { ref, computed, nextTick, onMounted, onUnmounted, useAttrs } from 'vue';
+    import { ref, computed, nextTick, onMounted, onUnmounted, useAttrs, useId } from 'vue';
     import MaxInputText from './MaxInputText.vue';
     import MaxIconButton from './MaxIconButton.vue';
     import { useSearchBarStore } from '../stores/useSearchBar.Store';
     import { useSystemStore } from '../stores/useSystem.Store';
     import { useFocusTrap } from '../helpers/useFocusTrap';
+    import { useScrollLock } from '../helpers/useScrollLock';
+    import { useModalStore } from '../stores';
 
     const props = withDefaults(defineProps<{
         /**
@@ -101,6 +105,10 @@
     const attrs = useAttrs();
     const system = useSystemStore();
     const search_bar = useSearchBarStore();
+    const modalStore = useModalStore();
+    const modalId = 'max-top-menu-search-' + useId();
+    const isTop = computed(() => modalStore.isTop(modalId));
+    const scrollLock = useScrollLock(modalId);
     const input_search_ref: Ref<any> = ref();
     const input_search_mobile_ref: Ref<any> = ref();
     const mobilePanelRef = ref<HTMLElement | null>(null);
@@ -138,6 +146,8 @@
 
     const openSearch = (): void => {
         is_open.value = true;
+        modalStore.push(modalId);
+        scrollLock.lock();
         trap.activate();
         nextTick(() => {
             input_search_mobile_ref.value?.focus?.();
@@ -146,8 +156,11 @@
     };
 
     const closeSearch = (): void => {
+        if (!is_open.value) return;
         is_open.value = false;
+        modalStore.remove(modalId);
         trap.deactivate();
+        scrollLock.unlock();
     };
 
     const toggleMobileSearch = (): void => {
@@ -155,9 +168,22 @@
         else openSearch();
     };
 
+    const onMobilePanelKeydown = (event: KeyboardEvent): void => {
+        if (!isTop.value) return;
+        if (event.key === 'Escape') {
+            event.stopPropagation();
+            closeSearch();
+            return;
+        }
+        trap.onKeydown(event);
+    };
+
     const handleSearchKeydown = (event: KeyboardEvent): void => {
         if (event.key === 'Escape' && is_open.value) {
-            closeSearch();
+            if (isTop.value) {
+                event.stopPropagation();
+                closeSearch();
+            }
             return;
         }
 
@@ -194,6 +220,10 @@
 
     onMounted(() => document.addEventListener('keydown', handleSearchKeydown));
     onUnmounted(() => {
+        if (is_open.value) {
+            modalStore.remove(modalId);
+            scrollLock.unlock();
+        }
         trap.deactivate();
         document.removeEventListener('keydown', handleSearchKeydown);
     });

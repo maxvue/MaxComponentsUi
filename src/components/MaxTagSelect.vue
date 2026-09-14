@@ -51,7 +51,18 @@
                                 </div>
                             </div>
                             <div v-else-if="isButton">
-                                <MaxIconButton :icon="props.i ?? props.icon ?? props.iconLeft" :size="option_selected?.icon_size ?? 1.8" />
+                                <MaxIconButton
+                                    :icon="props.i ?? props.icon ?? props.iconLeft ?? 'lucide:tag'"
+                                    :size="option_selected?.icon_size ?? 1.8"
+                                    :disabled="props.disabled"
+                                    :aria-label="buttonAriaLabel"
+                                    :ariaLabel="buttonAriaLabel"
+                                    :aria-haspopup="'listbox'"
+                                    :aria-expanded="isOpen"
+                                    :aria-controls="isOpen ? listboxId : undefined"
+                                    @click.stop="toggle"
+                                    @keydown="onTriggerKeydown"
+                                />
                             </div>
                         </slot>
                     </div>
@@ -183,6 +194,7 @@
     import { useVirtualList } from '../composables/useVirtualList';
     import MaxIcon from './MaxIcon.vue';
     import MaxIconButton from './MaxIconButton.vue';
+    import { useOutsidePointer } from '../helpers/useOutsidePointer';
 
     const attrs: any = useAttrs();
 
@@ -228,6 +240,10 @@
             options?: any[];
             /** Lista de opções agrupadas [{ label, items: [] }] */
             groupOptions?: SelectGroupOptions;
+            /** Rótulo textual do campo */
+            label?: string | undefined;
+            /** Nome acessível explícito para o gatilho */
+            ariaLabel?: string | undefined;
             disabled?: boolean | undefined;
             filter?: boolean | undefined;
             hasRemove?: boolean | undefined;
@@ -244,6 +260,8 @@
         }>(),
         {
             modelValue: null,
+            label: undefined,
+            ariaLabel: undefined,
             done: undefined,
             optionValue: 'value',
             optionName: 'name',
@@ -397,6 +415,18 @@
 
     const showPlaceholder = computed(() => placeholderText.value !== undefined && !hasSelected.value);
 
+    const buttonAriaLabel = computed(() => {
+        const custom = props.ariaLabel || (attrs['aria-label'] as string) || (attrs.ariaLabel as string);
+        if (custom && typeof custom === 'string' && custom.trim()) return custom.trim();
+        if (props.label && typeof props.label === 'string' && props.label.trim()) return props.label.trim();
+        if (placeholderText.value && typeof placeholderText.value === 'string' && placeholderText.value.trim()) return placeholderText.value.trim();
+        if (hasSelected.value) {
+            const selectedName = option_selected.value?.[props.optionName] ?? option_selected.value?.name ?? option_selected.value?.label;
+            if (selectedName) return `Selecionado: ${selectedName}`;
+        }
+        return 'Selecionar tag';
+    });
+
     const filteredOptions = computed(() => {
         const raw = options.value;
         if (!props.filter || !searchQuery.value.trim()) return raw;
@@ -527,12 +557,17 @@
             const container = listContainerEl.value;
             if (!container || highlightedIndex.value < 0) return;
 
+            const flatIdx = flattenedItems.value.findIndex(
+                (e) => e.type === 'option' && e.selectableIndex === highlightedIndex.value
+            );
+            const scrollIndex = flatIdx >= 0 ? flatIdx : highlightedIndex.value;
+
             if (isVirtual.value) {
-                const targetScroll = scrollToIndex(highlightedIndex.value, 'auto');
+                const targetScroll = scrollToIndex(scrollIndex, 'auto');
                 container.scrollTop = targetScroll;
             } else {
                 const h = numericItemHeight.value;
-                const targetTop = highlightedIndex.value * h;
+                const targetTop = scrollIndex * h;
                 const targetBottom = targetTop + h;
 
                 if (targetTop < container.scrollTop) container.scrollTop = targetTop;
@@ -658,40 +693,17 @@
         }
     };
 
-    const onKeydown = (event: KeyboardEvent) => {
-        if (event.key === 'Escape') {
+    useOutsidePointer(isOpen, {
+        elements: () => [overlayEl.value, triggerEl.value],
+        onClose: () => {
             hide();
             triggerEl.value?.focus();
-        }
-    };
-
-    let outsidePointerDown = false;
-    const onDocPointerDown = (e: MouseEvent | TouchEvent | PointerEvent) => {
-        const target = e.target as Node | null;
-        if (overlayEl.value && !overlayEl.value.contains(target) && triggerEl.value && !triggerEl.value.contains(target)) outsidePointerDown = true;
-        else outsidePointerDown = false;
-
-    };
-
-    const onDocClick = (e: MouseEvent) => {
-        const target = e.target as Node | null;
-        if (outsidePointerDown && overlayEl.value && !overlayEl.value.contains(target) && triggerEl.value && !triggerEl.value.contains(target)) hide();
-
-        outsidePointerDown = false;
-    };
+        },
+        closeOnEscape: true,
+        triggerEl: triggerEl
+    });
 
     watch(isOpen, async (open) => {
-        if (typeof window !== 'undefined') if (open) {
-            window.addEventListener('keydown', onKeydown);
-            document.addEventListener('pointerdown', onDocPointerDown, true);
-            document.addEventListener('click', onDocClick, true);
-        } else {
-            window.removeEventListener('keydown', onKeydown);
-            document.removeEventListener('pointerdown', onDocPointerDown, true);
-            document.removeEventListener('click', onDocClick, true);
-        }
-
-
         if (open) {
             const items = flatSelectableOptions.value;
             const selectedIdx = items.findIndex((opt: any) => isOptionSelected(opt));
@@ -703,21 +715,12 @@
                 filterInputEl.value?.focus();
             }
         } else highlightedIndex.value = -1;
-
     });
 
     watch(searchQuery, () => {
         if (isOpen.value) {
             highlightedIndex.value = flatSelectableOptions.value.length > 0 ? 0 : -1;
             scrollHighlightedIntoView();
-        }
-    });
-
-    onBeforeUnmount(() => {
-        if (typeof window !== 'undefined') {
-            window.removeEventListener('keydown', onKeydown);
-            document.removeEventListener('pointerdown', onDocPointerDown, true);
-            document.removeEventListener('click', onDocClick, true);
         }
     });
 

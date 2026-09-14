@@ -1,5 +1,6 @@
 <template>
     <div
+        v-bind="rootAttrs"
         :class="[
             'max-input-base',
             'max-input-main-div',
@@ -230,7 +231,49 @@
      * Usado para associar o `<label>` (via `for`) e a mensagem de feedback (via `aria-describedby`)
      * ao elemento real de input no slot.
      */
+    defineOptions({ inheritAttrs: false });
+
     const attrs = useAttrs();
+
+    const CONTROL_ATTR_KEYS = new Set([
+        'name',
+        'autocomplete',
+        'autocapitalize',
+        'autocorrect',
+        'maxlength',
+        'minlength',
+        'pattern',
+        'inputmode',
+        'readonly',
+        'step',
+        'min',
+        'max',
+        'size',
+        'form',
+        'tabindex',
+        'autofocus',
+        'spellcheck',
+        'enterkeyhint',
+        'aria-keyshortcuts',
+        'aria-label'
+    ]);
+
+    const rootAttrs = computed(() => {
+        const result: Record<string, any> = {};
+        for (const [key, value] of Object.entries(attrs)) {
+            if (!CONTROL_ATTR_KEYS.has(key)) result[key] = value;
+        }
+        return result;
+    });
+
+    const controlAttrs = computed(() => {
+        const result: Record<string, any> = {};
+        for (const [key, value] of Object.entries(attrs)) {
+            if (CONTROL_ATTR_KEYS.has(key)) result[key] = value;
+        }
+        return result;
+    });
+
     const generated_id = useId();
     const input_id = computed(() => props.id || generated_id);
     const message_id = computed(() => `${input_id.value}-message`);
@@ -261,7 +304,8 @@
         id: input_id.value,
         'aria-invalid': isError.value ? ('true' as const) : undefined,
         'aria-required': props.required ? ('true' as const) : undefined,
-        'aria-describedby': ariaDescribedby.value
+        'aria-describedby': ariaDescribedby.value,
+        ...controlAttrs.value
     }));
 
     const hasIconRight = computed(() => hasContent(props.iconRight ?? props.icon ?? props.i) && !props.noIcon && Boolean(props.iconRight || props.iconPos === 'right'));

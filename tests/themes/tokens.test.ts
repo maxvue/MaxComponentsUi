@@ -127,7 +127,7 @@ const SCHEME_DEPENDENT: Record<string, { light: string; dark: string }> = {
         light: 'var(--max-primary-500, #00768E)',
         dark: 'var(--max-primary-400, #178DA5)'
     },
-    '--max-selection-content': { light: '#ffffff', dark: '#00202e' },
+    '--max-selection-content': { light: '#ffffff', dark: '#001524' },
     '--max-selection-hover-background': {
         light: 'var(--max-primary-600, #005F77)',
         dark: 'var(--max-primary-500, #00768E)'
@@ -183,5 +183,27 @@ describe('themes/tokens.scss', () => {
 
     it('não referencia o Aura nem deixa placeholders de token', () => {
         expect(CSS).not.toMatch(/\{[a-z.]+\}/);
+    });
+
+    it('par de seleção atinge contraste >= 4.5:1 nos temas claro e escuro (WCAG AA)', () => {
+        const getLuminance = (hex: string): number => {
+            const clean = hex.replace('#', '');
+            const r = parseInt(clean.substring(0, 2), 16) / 255;
+            const g = parseInt(clean.substring(2, 4), 16) / 255;
+            const b = parseInt(clean.substring(4, 6), 16) / 255;
+            const a = [r, g, b].map((v) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)));
+            return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+        };
+        const getContrast = (bg: string, fg: string): number => {
+            const l1 = getLuminance(bg);
+            const l2 = getLuminance(fg);
+            return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+        };
+
+        // Light: --max-primary-500 (#00768E) / --max-selection-content (#ffffff)
+        expect(getContrast('#00768E', '#ffffff')).toBeGreaterThanOrEqual(4.5);
+
+        // Dark: --max-primary-400 (#178DA5) / --max-selection-content (#001524)
+        expect(getContrast('#178DA5', '#001524')).toBeGreaterThanOrEqual(4.5);
     });
 });

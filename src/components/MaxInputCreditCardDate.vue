@@ -1,5 +1,14 @@
 <template>
-    <InputBase v-bind="props" class="max-input-credit-card-date input-credit-card-date-base" :text-center="true" :label="props.label" :done="done" :required="props.required" :error="error_msg">
+    <InputBase
+        v-bind="props"
+        class="max-input-credit-card-date input-credit-card-date-base"
+        :text-center="true"
+        :label="props.label"
+        :done="done ?? undefined"
+        :caution="caution"
+        :required="props.required"
+        :error="error_msg ?? undefined"
+    >
         <template #default="{ inputAttrs }">
             <MaxBaseInput
                 v-bind="{ ...inputAttrs, ...attrs }"
@@ -7,7 +16,7 @@
                 v-model="temp_value"
                 v-maska:unmaskedValue.unmasked="maskValue"
                 placeholder="MM/AA"
-                @blur="checkDone()"
+                @blur="checkDone"
             />
         </template>
     </InputBase>
@@ -19,6 +28,7 @@
     import InputBase from './InputBase.vue';
     import MaxBaseInput from './base/MaxBaseInput.vue';
     import { onlyNumbers } from '@maxvue/max-use';
+    import { useInputValidation } from '../helpers/useInputValidation';
 
     const attrs: any = useAttrs();
 
@@ -27,8 +37,11 @@
             modelValue: string;
             label?: string | undefined;
             required?: boolean;
+            done?: boolean | undefined;
+            caution?: boolean | string | undefined;
+            error?: string | boolean | undefined;
         }>(),
-        { modelValue: '', label: 'Validade', required: false }
+        { modelValue: '', label: 'Validade', required: false, done: undefined, caution: undefined, error: undefined }
     );
 
     const emit = defineEmits<{
@@ -38,27 +51,52 @@
     const toText = (value: unknown): string => (value === null || value === undefined ? '' : String(value));
 
     const temp_value = ref(toText(props.modelValue));
-    const unmaskedValue = ref('');
-
-    const isDone = ref<boolean | null>(null);
+    const unmaskedValue = ref(onlyNumbers(toText(props.modelValue)));
 
     /** Válido quando há 4 dígitos (MMAA) e o mês está entre 01 e 12. */
-    const isValidDate = (value: string): boolean => {
+    const isValidDate = (raw: any): boolean => {
+        const value = onlyNumbers(String(raw ?? ''));
         if (value.length !== 4) return false;
         const month = Number(value.slice(0, 2));
         return month >= 1 && month <= 12;
     };
 
-    const done = computed(() => isDone.value ?? (unmaskedValue.value.length > 0 ? isValidDate(unmaskedValue.value) : null));
-
-    const checkDone = () => {
-        isDone.value = unmaskedValue.value.length > 0 ? isValidDate(unmaskedValue.value) : (props.required ? false : null);
+    const isComplete = (raw: any): boolean => {
+        const value = onlyNumbers(String(raw ?? ''));
+        return value.length === 4;
     };
 
-    const error_msg = computed(() => {
-        if (isDone.value === false) return unmaskedValue.value.length === 0 ? 'Campo obrigatório' : 'Validade inválida';
-        return null;
+    const explicitError = computed<string | null>(() =>
+        (typeof props.error === 'string' ? props.error : null)
+        ?? (props as any).errMsg
+        ?? attrs.errMsg
+        ?? (props as any).error_message
+        ?? attrs.error_message
+        ?? (props as any).error_msg
+        ?? attrs.error_msg
+        ?? null
+    );
+
+    const invalidMessage = computed(() => explicitError.value ?? 'Validade inválida');
+
+    const validation = useInputValidation({
+        value: unmaskedValue,
+        required: computed(() => props.required),
+        caution: computed(() => props.caution),
+        done: computed(() => props.done),
+        validator: isValidDate,
+        isComplete,
+        invalidMessage,
+        requiredMessage: computed(() => explicitError.value ?? 'Campo obrigatório')
     });
+
+    const done = validation.done;
+    const caution = computed(() => (explicitError.value ? true : validation.caution.value));
+    const error_msg = computed(() => explicitError.value ?? validation.error.value);
+
+    const checkDone = () => {
+        validation.onBlur();
+    };
 
     const maskValue = computed(() => {
         const tokens = {
@@ -73,7 +111,7 @@
 
     watch(unmaskedValue, () => {
         emit('update:modelValue', unmaskedValue.value);
-        if (isDone.value !== null) checkDone();
+        validation.onInput();
     });
 
     watch(
@@ -84,7 +122,17 @@
         }
     );
 
-    defineExpose({ unmaskedValue });
+    defineExpose({
+        unmaskedValue,
+        checkDone,
+        done,
+        caution,
+        error_msg,
+        maskValue,
+        validation,
+        submit: validation.submit,
+        reset: validation.reset
+    });
 </script>
 
 <style lang="scss" scoped>

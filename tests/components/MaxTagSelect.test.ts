@@ -20,7 +20,22 @@ function mountTagSelect(props: Record<string, any> = {}, attrs: Record<string, a
         global: {
             stubs: {
                 MaxIcon: true,
-                MaxIconButton: { template: '<button class="max-icon-button-stub"></button>', props: ['icon', 'i', 'size'] }
+                MaxIconButton: {
+                    template: '<button class="max-icon-button-stub" :disabled="disabled" :aria-label="ariaLabel"></button>',
+                    props: ['icon', 'i', 'size', 'disabled', 'ariaLabel']
+                }
+            }
+        }
+    });
+}
+
+function mountTagSelectRealButton(props: Record<string, any> = {}, attrs: Record<string, any> = {}) {
+    return mount(MaxTagSelect, {
+        props: { modelValue: null, isButton: true, icon: 'lucide:tag', ...props },
+        attrs,
+        global: {
+            stubs: {
+                MaxIcon: true
             }
         }
     });
@@ -148,6 +163,87 @@ describe('MaxTagSelect', () => {
 
         expect(wrapper.find('.max-icon-button-stub').exists()).toBe(false);
         expect(wrapper.find('.value-tag-div').exists()).toBe(true);
+    });
+
+    describe('Modo Botão (F15 / E06-03 / E08-04)', () => {
+        it('modo isButton: propaga disabled para MaxIconButton impedindo Tab e click', async () => {
+            const options = [{ value: 'a', name: 'Tag A' }];
+            const wrapper = mountTagSelectRealButton({
+                modelValue: null,
+                options,
+                disabled: true
+            });
+            await wrapper.vm.$nextTick();
+
+            const button = wrapper.find('button.max-icon-button');
+            expect(button.exists()).toBe(true);
+            expect(button.attributes('disabled')).toBeDefined();
+            expect(button.attributes('aria-disabled')).toBe('true');
+            expect((button.element as HTMLButtonElement).disabled).toBe(true);
+
+            // Clique não abre dropdown quando desabilitado
+            await button.trigger('click');
+            await wrapper.vm.$nextTick();
+            expect(document.body.querySelector('.max-select-overlay')).toBeNull();
+
+            // Ao habilitar, o botão é destravado
+            await wrapper.setProps({ disabled: false });
+            await wrapper.vm.$nextTick();
+            expect((button.element as HTMLButtonElement).disabled).toBe(false);
+            expect(button.attributes('disabled')).toBeUndefined();
+
+            await button.trigger('click');
+            await wrapper.vm.$nextTick();
+            expect(document.body.querySelector('.max-select-overlay')).not.toBeNull();
+        });
+
+        it('modo isButton: atribui nome acessível contextual sem fallback genérico Botão de ação e sem warnings', async () => {
+            const warnSpy = vi.spyOn(console, 'warn');
+            const options = [{ value: 'a', name: 'Tag A' }];
+            const wrapper = mountTagSelectRealButton({
+                modelValue: null,
+                options
+            });
+            await wrapper.vm.$nextTick();
+
+            const button = wrapper.find('button.max-icon-button');
+            expect(button.exists()).toBe(true);
+            const ariaLabel = button.attributes('aria-label');
+            expect(ariaLabel).toBe('Selecionar tag');
+            expect(ariaLabel).not.toBe('Botão de ação');
+
+            // Nenhuma advertência emitida pelo MaxIconButton
+            expect(warnSpy).not.toHaveBeenCalledWith(expect.stringContaining('[MaxIconButton]'));
+            warnSpy.mockRestore();
+        });
+
+        it('modo isButton: propaga label e aria-label customizados ao MaxIconButton', async () => {
+            const warnSpy = vi.spyOn(console, 'warn');
+            const options = [{ value: 'a', name: 'Tag A' }];
+            const wrapper = mountTagSelectRealButton({
+                modelValue: null,
+                options,
+                label: 'Status do Projeto'
+            });
+            await wrapper.vm.$nextTick();
+
+            const button = wrapper.find('button.max-icon-button');
+            expect(button.attributes('aria-label')).toBe('Status do Projeto');
+            expect(warnSpy).not.toHaveBeenCalledWith(expect.stringContaining('[MaxIconButton]'));
+            warnSpy.mockRestore();
+        });
+
+        it('modo isButton: com item selecionado, nome reflete o valor selecionado', async () => {
+            const options = [{ value: 'a', name: 'Tag A' }];
+            const wrapper = mountTagSelectRealButton({
+                modelValue: 'a',
+                options
+            });
+            await wrapper.vm.$nextTick();
+
+            const button = wrapper.find('button.max-icon-button');
+            expect(button.attributes('aria-label')).toBe('Selecionado: Tag A');
+        });
     });
 
     it('aplica valor default quando modelValue está vazio (watchDebounced mockado para rodar imediatamente)', async () => {
@@ -529,6 +625,57 @@ describe('MaxTagSelect', () => {
 
             const renderedOptions = document.body.querySelectorAll('.max-select-option');
             expect(renderedOptions.length).toBe(550);
+
+            wrapper.unmount();
+        });
+
+        it('em listas agrupadas virtualizadas (>500 itens), mapeia highlightedIndex para índice em flattenedItems incluindo headers', async () => {
+            // 10 grupos com 60 itens cada = 600 itens selecionáveis + 10 headers = 610 itens achatados
+            const groupOptions = Array.from({ length: 10 }, (_, gIdx) => ({
+                label: `Grupo ${gIdx + 1}`,
+                items: Array.from({ length: 60 }, (_, oIdx) => ({
+                    value: `g${gIdx}_item_${oIdx}`,
+                    name: `G${gIdx + 1} Item ${oIdx + 1}`,
+                    label: `G${gIdx + 1} Item ${oIdx + 1}`
+                }))
+            }));
+
+            const wrapper = mountTagSelect({
+                groupOptions
+            });
+
+            await wrapper.find('.max-select').trigger('click');
+            await wrapper.vm.$nextTick();
+
+            // Virtual scroll deve estar ativo (total 610 itens achatados > threshold 500)
+            const spacer = document.body.querySelector('.max-select-spacer');
+            expect(spacer).toBeTruthy();
+
+            // Total de opções selecionáveis
+            const totalSelectable = (wrapper.vm as any).flatSelectableOptions.length;
+            expect(totalSelectable).toBe(600);
+
+            // Total de itens achatados (incluindo 10 cabeçalhos)
+            const totalFlattened = (wrapper.vm as any).flattenedItems.length;
+            expect(totalFlattened).toBe(610);
+
+            // Item selecionável 120 pertence ao Grupo 2
+            // Em flattenedItems:
+            // Grupo 0: 1 header + 60 items = 61 posições (índices 0..60)
+            // Grupo 1: 1 header + 60 items = 61 posições (índices 61..121)
+            // Header Grupo 2: índice 122
+            // Item 120 selecionável: índice 123 em flattenedItems
+            const flatIdxFor120 = (wrapper.vm as any).flattenedItems.findIndex(
+                (e: any) => e.type === 'option' && e.selectableIndex === 120
+            );
+            expect(flatIdxFor120).toBe(123);
+
+            (wrapper.vm as any).highlightedIndex = 120;
+            (wrapper.vm as any).scrollHighlightedIntoView();
+            await wrapper.vm.$nextTick();
+
+            const container = (wrapper.vm as any).listContainerEl as HTMLElement;
+            expect(container).toBeTruthy();
 
             wrapper.unmount();
         });

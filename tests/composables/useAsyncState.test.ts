@@ -3,7 +3,7 @@ import { useAsyncState } from '../../src/composables/useAsyncState';
 
 describe('useAsyncState composable (E05-07)', () => {
     it('inicia com status idle e sem erro', () => {
-        const state = useAsyncState<string[]>('initial');
+        const state = useAsyncState<string>('initial');
 
         expect(state.status.value).toBe('idle');
         expect(state.isIdle.value).toBe(true);

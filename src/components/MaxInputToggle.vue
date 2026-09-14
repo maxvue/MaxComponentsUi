@@ -1,16 +1,19 @@
 <template>
-    <div :class="`max-input-toggle input-toggle-field-main-div ${attrs.label !== undefined ? 'labeled' : ''}`">
-        <div :class="`input-toggle-field-label-main-div ${attrs.labelCenter !== undefined ? 'label-center' : ''}`">
+    <div
+        v-bind="rootAttrs"
+        :class="`max-input-toggle input-toggle-field-main-div ${hasLabel ? 'labeled' : ''}`"
+    >
+        <div :class="`input-toggle-field-label-main-div ${hasLabelCenter ? 'label-center' : ''}`">
             <label
                 :for="toggleInputId"
                 class="input-toggle-field-label-div"
-                v-if="attrs.label !== undefined"
+                v-if="hasLabel"
             >
-                {{ attrs.label }}
+                {{ resolvedLabel }}
             </label>
         </div>
-        <div :class="`input-toggle-field-input-div ${attrs.label !== undefined ? 'labeled' : ''}`">
-            <div :class="`input-toggle-field ${attrs.label !== undefined ? 'labeled' : ''}`">
+        <div :class="`input-toggle-field-input-div ${hasLabel ? 'labeled' : ''}`">
+            <div :class="`input-toggle-field ${hasLabel ? 'labeled' : ''}`">
                 <div :class="`input-toggle-field-label ${falseValue === modelvalue ? 'active' : ''}`" v-if="falseLabel">
                     {{ falseLabel ?? '' }}
                 </div>
@@ -21,7 +24,11 @@
                             type="checkbox"
                             class="max-toggleswitch-input"
                             :checked="modelvalue === trueValue"
-                            :aria-label="attrs.label ? undefined : 'Alternar opção'"
+                            :aria-label="resolvedLabel ? undefined : 'Alternar opção'"
+                            :disabled="resolvedDisabled"
+                            :name="resolvedName"
+                            :required="resolvedRequired"
+                            v-bind="controlAttrs"
                             @change="on_toggle(($event.target as HTMLInputElement).checked)"
                         />
                         <span class="max-toggleswitch-slider"></span>
@@ -38,7 +45,11 @@
 <script setup lang="ts">
     import { ref, computed, watch, useAttrs } from 'vue';
 
-    const attrs: any = useAttrs();
+    defineOptions({
+        inheritAttrs: false
+    });
+
+    const attrs = useAttrs();
 
     const props = withDefaults(
         defineProps<{
@@ -65,15 +76,103 @@
             labelLeft?: string;
             trueValue?: any;
             falseValue?: any;
+            label?: string;
+            labelCenter?: boolean | string;
+            id?: string;
+            name?: string;
+            disabled?: boolean;
+            required?: boolean;
         }>(),
-        { modelValue: false, trueValue: true, falseValue: false }
+        {
+            modelValue: false,
+            trueValue: true,
+            falseValue: false,
+            trueLabel: undefined,
+            falseLabel: undefined,
+            labelRight: undefined,
+            labelLeft: undefined,
+            label: undefined,
+            labelCenter: undefined,
+            id: undefined,
+            name: undefined,
+            disabled: undefined,
+            required: undefined
+        }
     );
 
     const emit = defineEmits<{
         'update:modelValue': [value: any];
     }>();
 
-    const toggleInputId = (attrs.id as string) || `max-toggle-${Math.random().toString(36).slice(2, 9)}`;
+    const fallbackId = ref(`max-toggle-${Math.random().toString(36).slice(2, 9)}`);
+    const toggleInputId = computed(() => props.id ?? (attrs.id as string | undefined) ?? fallbackId.value);
+
+    const resolvedLabel = computed(() => props.label ?? (attrs.label as string | undefined));
+    const hasLabel = computed(() => resolvedLabel.value !== undefined);
+    const hasLabelCenter = computed(() => props.labelCenter !== undefined || attrs.labelCenter !== undefined);
+
+    const resolvedDisabled = computed(() => {
+        if (props.disabled !== undefined) return props.disabled;
+        if (attrs.disabled !== undefined && attrs.disabled !== false) return true;
+        return undefined;
+    });
+
+    const resolvedName = computed(() => props.name ?? (attrs.name as string | undefined));
+
+    const resolvedRequired = computed(() => {
+        if (props.required !== undefined) return props.required;
+        if (attrs.required !== undefined && attrs.required !== false) return true;
+        return undefined;
+    });
+
+    const CONTROL_ATTR_KEYS = new Set([
+        'name',
+        'disabled',
+        'required',
+        'tabindex',
+        'form',
+        'value',
+        'checked',
+        'aria-label',
+        'aria-labelledby',
+        'aria-describedby',
+        'aria-required',
+        'aria-disabled'
+    ]);
+
+    const rootAttrs = computed(() => {
+        const result: Record<string, unknown> = {};
+        for (const [key, value] of Object.entries(attrs)) {
+            if (
+                !CONTROL_ATTR_KEYS.has(key) &&
+                key !== 'id' &&
+                key !== 'label' &&
+                key !== 'labelCenter' &&
+                key !== 'labelTrue' &&
+                key !== 'labelFalse' &&
+                key !== 'true-label' &&
+                key !== 'false-label'
+            ) {
+                result[key] = value;
+            }
+        }
+        return result;
+    });
+
+    const controlAttrs = computed(() => {
+        const result: Record<string, unknown> = {};
+        for (const [key, value] of Object.entries(attrs)) {
+            if (
+                CONTROL_ATTR_KEYS.has(key) &&
+                key !== 'name' &&
+                key !== 'disabled' &&
+                key !== 'required'
+            ) {
+                result[key] = value;
+            }
+        }
+        return result;
+    });
 
     const modelvalue = ref(props.modelValue);
 
@@ -88,8 +187,8 @@
         }
     );
 
-    const trueLabel = computed(() => props.trueLabel ?? props.labelRight ?? attrs.labelTrue ?? attrs['true-label'] ?? null);
-    const falseLabel = computed(() => props.falseLabel ?? props.labelLeft ?? attrs.labelFalse ?? attrs['false-label'] ?? null);
+    const trueLabel = computed(() => props.trueLabel ?? props.labelRight ?? (attrs.labelTrue as string | undefined) ?? (attrs['true-label'] as string | undefined) ?? null);
+    const falseLabel = computed(() => props.falseLabel ?? props.labelLeft ?? (attrs.labelFalse as string | undefined) ?? (attrs['false-label'] as string | undefined) ?? null);
     const trueValue = computed(() => props.trueValue ?? true);
     const falseValue = computed(() => props.falseValue ?? false);
 
