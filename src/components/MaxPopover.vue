@@ -40,7 +40,7 @@
                         :id="dialog_id"
                         :aria-labelledby="computedAriaLabelledby"
                         :aria-label="computedAriaLabel"
-                        :style="{top: position.top + 'px', left: position.left + 'px', opacity: isPositioned ? 1 : 0}"
+                        :style="dialogStyle"
                         :class="[position.isTop ? 'is-top' : 'is-bottom', position.isLeft ? 'is-left' : 'is-right', props.noPicker ? 'no-picker' : '', props.class]"
                         @click.stop="() => {}"
                         @keydown="trap.onKeydown"
@@ -48,7 +48,7 @@
                         <div v-if="!props.noHeader" :id="title_id" class="max-popover-header-wrapper">
                             <slot name="header" :title-id="title_id">
                                 <MaxGrid class="max-popover-header">
-                                    <MaxTitle1 class="max-popover-title" :title="props.title ?? 'Titulo'" :subtitle="props.subTitle ?? 'Sub Titulo'" />
+                                    <MaxTitle1 class="max-popover-title" :title="props.title ?? 'Titulo'" :subtitle="resolvedSubTitle ?? 'Sub Titulo'" />
                                     <MaxIconButton class="max-popover-close" i="iconoir:xmark" size="1.3" aria-label="Fechar" @click.stop="hide" />
                                 </MaxGrid>
                             </slot>
@@ -183,6 +183,8 @@
         }
     };
 
+    const resolvedSubTitle = computed(() => props.subTitle ?? (props as any).subtitle);
+
     const computedAriaLabelledby = computed(() => {
         if (props.ariaLabelledby) {
             const rawId = props.ariaLabelledby.trim();
@@ -195,7 +197,7 @@
             const slotText = getSlotText(slots.header);
             return slotText.length > 0 ? title_id.value : undefined;
         }
-        if (props.title?.trim() || props.subTitle?.trim()) return title_id.value;
+        if (props.title?.trim() || resolvedSubTitle.value?.trim()) return title_id.value;
         return undefined;
     });
 
@@ -268,6 +270,23 @@
         }
     });
 
+    const dialogStyle = computed(() => {
+        const style: Record<string, string | number> = {
+            top: `${position.value.top}px`,
+            left: `${position.value.left}px`,
+            opacity: isPositioned.value ? 1 : 0
+        };
+
+        if (props.width) {
+            const widthVal = typeof props.width === 'number' ? `${props.width}px` : props.width;
+            style.width = `min(${widthVal}, calc(100vw - 16px))`;
+        }
+
+        if (props.height) style.height = typeof props.height === 'number' ? `${props.height}px` : props.height;
+
+
+        return style;
+    });
 
     const onEscape = (event: KeyboardEvent) => {
         if (event.key === 'Escape' && isOpen.value) hide();
@@ -399,6 +418,7 @@
         max-height: calc(100dvh - 32px);
         max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 32px);
         overflow-y: auto;
+        overflow-x: hidden;
         background-color: var(--background-0);
         color: var(--background-700);
         z-index: var(--max-layer-popover, 1200);

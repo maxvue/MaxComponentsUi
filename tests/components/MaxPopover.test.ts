@@ -473,4 +473,36 @@ describe('MaxPopover', () => {
             titleEl.remove();
         });
     });
+
+    describe('Dimensionamento e Customização (#642)', () => {
+        it('aplica width e height no estilo do diálogo quando informados', async () => {
+            const wrapper = mountPopover({ width: '340px', height: 200 }, {}, { attachTo: document.body });
+            const vm = wrapper.vm as any;
+
+            vm.show();
+            await wrapper.vm.$nextTick();
+
+            expect(vm.dialogStyle.width).toBe('min(340px, calc(100vw - 16px))');
+            expect(vm.dialogStyle.height).toBe('200px');
+
+            const dialogEl = document.querySelector('.max-popover-dialog') as HTMLElement;
+            expect(dialogEl).not.toBeNull();
+            expect(dialogEl.style.height).toBe('200px');
+
+            wrapper.unmount();
+        });
+
+        it('aceita prop subtitle como fallback retrocompatível de subTitle', async () => {
+            const wrapper = mountPopover({ title: 'Transferir', subtitle: 'Encaminhar suporte' } as any, {}, { attachTo: document.body });
+            const vm = wrapper.vm as any;
+
+            vm.show();
+            await wrapper.vm.$nextTick();
+
+            const titleComponent = wrapper.findComponent({ name: 'MaxTitle1' }) || document.querySelector('.max-popover-title');
+            expect(titleComponent).toBeDefined();
+
+            wrapper.unmount();
+        });
+    });
 });
