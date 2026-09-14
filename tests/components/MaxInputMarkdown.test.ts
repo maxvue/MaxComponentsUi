@@ -119,14 +119,10 @@ describe('MaxInputMarkdown', () => {
         expect(wrapper.find('.max-input-markdown__editor-wrap--disabled').exists()).toBe(true);
     });
 
-    it('passa label para InputBase via inLine quando inLine=true', () => {
+    it('não renderiza o InputBase', () => {
         const wrapper = mountMarkdown({ label: 'Descrição', inLine: true });
-        expect(wrapper.find('.in-line-label').text()).toBe('Descrição');
-    });
-
-    it('passa label para InputBase como floating label padrão quando inLine=false', () => {
-        const wrapper = mountMarkdown({ label: 'Descrição' });
-        expect(wrapper.find('.max-input-label').text()).toBe('Descrição');
+        expect(wrapper.find('.max-input-base').exists()).toBe(false);
+        expect(wrapper.element.classList.contains('max-input-markdown')).toBe(true);
     });
 
     it('processa colagem (Ctrl+V) de imagem e emite evento paste-image', () => {
