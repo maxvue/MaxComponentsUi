@@ -40,6 +40,64 @@ describe('MaxTagSelect', () => {
         expect(wrapper.exists()).toBe(true);
     });
 
+    it('limita o overlay a 300px e aplica reticências em textos longos', async () => {
+        const wrapper = mountTagSelect({
+            options: [{ value: 'sc', name: 'Celesc Santa Catarina com um nome excepcionalmente longo' }]
+        });
+
+        const trigger = wrapper.find('.max-select');
+        Object.defineProperty(trigger.element, 'getBoundingClientRect', {
+            configurable: true,
+            value: () => ({
+                width: 180,
+                height: 36,
+                top: 10,
+                left: 10,
+                right: 190,
+                bottom: 46,
+                x: 10,
+                y: 10,
+                toJSON: () => ({})
+            })
+        });
+
+        await trigger.trigger('click');
+        await wrapper.vm.$nextTick();
+
+        const overlay = document.body.querySelector('.max-select-overlay') as HTMLElement;
+        const label = overlay.querySelector('.label-tag > div') as HTMLElement;
+
+        expect(overlay).not.toBeNull();
+        Object.defineProperties(label, {
+            clientWidth: { configurable: true, value: 120 },
+            scrollWidth: { configurable: true, value: 200 }
+        });
+        Object.defineProperty(overlay, 'getBoundingClientRect', {
+            configurable: true,
+            value: () => ({
+                width: 180,
+                height: 200,
+                top: 48,
+                left: 10,
+                right: 190,
+                bottom: 248,
+                x: 10,
+                y: 48,
+                toJSON: () => ({})
+            })
+        });
+
+        (wrapper.vm as any).updatePosition();
+        await wrapper.vm.$nextTick();
+
+        expect(overlay.style.width).toBe('260px');
+        expect(label.style.overflow).toBe('hidden');
+        expect(label.style.textOverflow).toBe('ellipsis');
+        expect(label.style.whiteSpace).toBe('nowrap');
+
+        wrapper.unmount();
+    });
+
     it('ciclo v-model: selecionar uma opção emite update:modelValue com o valor correto', async () => {
         const options = [{ value: 'a', name: 'Tag A' }];
         const wrapper = mountTagSelect({ options });
@@ -87,6 +145,18 @@ describe('MaxTagSelect', () => {
         await wrapper.vm.$nextTick();
 
         expect(wrapper.text()).toContain('Tag A');
+    });
+
+    it('faz a tag selecionada ocupar toda a largura e altura do fundo', async () => {
+        const options = [{ value: 'reprovado', name: 'Reprovado', background_color: '#ff8f8f' }];
+        const wrapper = mountTagSelect({ modelValue: 'reprovado', options });
+        await wrapper.vm.$nextTick();
+
+        const selectedTag = wrapper.find('.value-tag-div').element as HTMLElement;
+
+        expect(selectedTag.style.width).toBe('100%');
+        expect(selectedTag.style.height).toBe('100%');
+        expect(selectedTag.style.boxSizing).toBe('border-box');
     });
 
     describe('getColorString / getStyleColor', () => {
@@ -610,5 +680,3 @@ describe('MaxTagSelect', () => {
         });
     });
 });
-
-

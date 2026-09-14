@@ -24,6 +24,11 @@ describe('getOverlayWidth', () => {
         expect(getOverlayWidth({ triggerWidth: 900, windowWidth: 1280, maxWidth: 500 })).toBe(500);
     });
 
+    it('acompanha a largura intrínseca do conteúdo sem ultrapassar o teto', () => {
+        expect(getOverlayWidth({ triggerWidth: 180, contentWidth: 260, windowWidth: 1280, maxWidth: 300 })).toBe(260);
+        expect(getOverlayWidth({ triggerWidth: 180, contentWidth: 480, windowWidth: 1280, maxWidth: 300 })).toBe(300);
+    });
+
     it('nunca devolve largura maior que a viewport útil', () => {
         for (const w of [320, 768, 1024, 1920]) {
             const width = getOverlayWidth({ triggerWidth: 5000, windowWidth: w });

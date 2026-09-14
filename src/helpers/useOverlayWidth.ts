@@ -9,6 +9,8 @@ interface OverlayWidthArgs {
     triggerWidth: number;
     /** Largura da viewport. */
     windowWidth: number;
+    /** Largura intrínseca do conteúdo, quando o painel deve crescer para acomodá-lo. */
+    contentWidth?: number;
     /** Piso: o overlay nunca fica menor que isto. */
     minWidth?: number;
     /** Teto: o overlay nunca fica maior que isto. */
@@ -23,9 +25,15 @@ interface OverlayWidthArgs {
  * formulários largos isso gerava dropdowns atravessando a tela. Aqui a largura
  * fica limitada pelo teto e pelo espaço realmente disponível na viewport.
  */
-export function getOverlayWidth({ triggerWidth, windowWidth, minWidth = 160, maxWidth = MAX_OVERLAY_WIDTH }: OverlayWidthArgs): number {
+export function getOverlayWidth({
+    triggerWidth,
+    windowWidth,
+    contentWidth = 0,
+    minWidth = 160,
+    maxWidth = MAX_OVERLAY_WIDTH
+}: OverlayWidthArgs): number {
     const available = Math.max(minWidth, windowWidth - VIEWPORT_GUTTER * 2);
-    return Math.min(Math.max(triggerWidth, minWidth), maxWidth, available);
+    return Math.min(Math.max(triggerWidth, contentWidth, minWidth), maxWidth, available);
 }
 
 /**

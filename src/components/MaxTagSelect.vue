@@ -149,7 +149,12 @@
                                                     :color="getStyleColor(entry.item.option, false, false).color"
                                                 />
                                                 <div class="label-tag">
-                                                    <div style="display: grid; white-space: nowrap;" v-text="entry.item.option[props.optionLabel] ?? entry.item.option.label" :style="{ color: attrs.color }"></div>
+                                                    <div
+                                                        class="max-tag-select-option-label"
+                                                        style="display: grid; min-width: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                                                        v-text="entry.item.option[props.optionLabel] ?? entry.item.option.label"
+                                                        :style="{ color: attrs.color }"
+                                                    ></div>
                                                 </div>
                                                 <div class="sub-label-tag" v-text="entry.item.option?.sub_label ?? entry.item.option?.sub ?? entry.item.option?.subLabel"></div>
                                                 <img v-if="entry.item.option['img']" :src="`/media/images/${entry.item.option['img']}`" alt="Image" class="img-label" />
@@ -295,7 +300,10 @@
             color: text,
             borderRadius: '6px',
             padding: is_value ? '0 8px 0 6px !important' : '0 10px 0 6px !important',
-            gap: is_value ? '4px' : 0
+            gap: is_value ? '4px' : 0,
+            width: is_value ? '100%' : undefined,
+            height: is_value ? '100%' : undefined,
+            boxSizing: is_value ? 'border-box' : undefined
         };
         styleColorCache.set(cacheKey, style);
         return style;
@@ -345,7 +353,20 @@
     const overlayEl = ref<HTMLElement | null>(null);
     const filterInputEl = ref<HTMLInputElement | null>(null);
 
-    const { position } = useActiveOverlayPosition({
+    const getOverlayContentWidth = (currentWidth: number) => {
+        const overlay = overlayEl.value;
+        if (!overlay) return currentWidth;
+
+        const textElements = overlay.querySelectorAll<HTMLElement>('.max-tag-select-option-label, .sub-label-tag');
+        const overflowWidth = Array.from(textElements).reduce(
+            (largest, element) => Math.max(largest, element.scrollWidth - element.clientWidth),
+            0
+        );
+
+        return currentWidth + Math.max(0, overflowWidth);
+    };
+
+    const { position, updatePosition } = useActiveOverlayPosition({
         target: triggerEl,
         overlay: overlayEl,
         active: isOpen,
@@ -356,7 +377,13 @@
             const targetH = targetRect.height;
             const overlayH = overlayRect.height || 200;
 
-            const width = getOverlayWidth({ triggerWidth: targetRect.width, windowWidth: viewportWidth, minWidth: 140 });
+            const width = getOverlayWidth({
+                triggerWidth: targetRect.width,
+                contentWidth: getOverlayContentWidth(overlayRect.width),
+                windowWidth: viewportWidth,
+                minWidth: 140,
+                maxWidth: 300
+            });
             let top = targetY + targetH + 2;
 
             if (top + overlayH > viewportHeight && targetY - overlayH > 0) top = targetY - overlayH - 2;
@@ -563,6 +590,7 @@
         if (open) nextTick(() => {
             const container = listContainerEl.value;
             if (container) setViewport(container.scrollTop, container.clientHeight || 200);
+            updatePosition();
         });
     });
 
@@ -771,9 +799,11 @@
 
                 .value-tag-div {
                     grid-template-columns: auto 1fr auto;
-                    width: auto !important;
+                    width: 100% !important;
+                    height: 100% !important;
                     max-width: 100%;
                     padding: 0 !important;
+                    box-sizing: border-box;
                 }
             }
         }
@@ -851,12 +881,15 @@
                     display: grid;
                     overflow: hidden;
                     position: relative;
-                    width: fit-content;
+                    width: 100%;
+                    height: 100%;
                     max-width: 100%;
+                    box-sizing: border-box;
                     gap: 4px;
 
                     :deep(> .max-icon-div) {
                         width: auto !important;
+
                         .max-icon {
                             padding: 0 !important;
                         }
@@ -944,6 +977,7 @@
 
     .max-select-overlay {
         position: fixed;
+        box-sizing: border-box;
         z-index: var(--z-dropdown, 1000);
         background: var(--background-0, #fff);
         border: 1px solid var(--surface-border);
@@ -1031,6 +1065,7 @@
                         display: grid;
                         grid-template-columns: auto 1fr auto;
                         width: 100% !important;
+                        min-width: 0;
                         place-items: center start;
                         gap: 10px;
                         height: 30px;
@@ -1040,12 +1075,25 @@
                             place-items: center;
                             display: flex;
                             flex-flow: row nowrap;
+                            min-width: 0;
+                            overflow: hidden;
+
+                            > div {
+                                min-width: 0;
+                                max-width: 100%;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                            }
                         }
 
                         .sub-label-tag {
                             padding-left: 1rem;
                             text-align: right;
                             width: 100%;
+                            min-width: 0;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            white-space: nowrap;
                             font-size: 0.85rem;
                         }
 
