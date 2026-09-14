@@ -1,7 +1,6 @@
 <template>
     <div
         :class="`max-input-checkbox max-check-box ${!label ? 'no-label' : ''} ${isDisabled ? 'disabled' : ''}`"
-        :disabled="isDisabled ? '' : undefined"
         v-bind="rootAttrs"
     >
         <input

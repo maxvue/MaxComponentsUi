@@ -1,6 +1,12 @@
 <template>
     <div class="max-table-fields-wrapper" :id="tableId">
-        <table class="max-table-fields">
+        <div
+            class="max-table-fields-scroll-region"
+            role="region"
+            tabindex="0"
+            :aria-label="props.ariaLabel"
+        >
+            <table class="max-table-fields">
             <!-- Cabeçalho -->
             <thead class="max-table-fields-head">
                 <tr class="max-table-fields-head-row">
@@ -103,6 +109,7 @@
                 </tr>
             </tbody>
         </table>
+        </div>
     </div>
 </template>
 
@@ -145,13 +152,16 @@
             buttonsWidth?: string | number;
             /** Lista de botões */
             buttons?: MaxButtonsType[];
+            /** Rótulo acessível para a região de rolagem da tabela */
+            ariaLabel?: string;
         }>(),
         {
             list: () => [],
             columns: () => [],
             emptyMessage: 'Nenhum registro encontrado',
             loadingMessage: 'Carregando registros...',
-            loading: false
+            loading: false,
+            ariaLabel: 'Tabela de dados rolável'
         }
     );
 
@@ -301,155 +311,173 @@
     border-radius: 1rem;
     max-height: 100%;
     border: 1px solid var(--max-table-border-color, var(--background-300));
-    display: grid;
-    grid-template-rows: 1fr;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 
-    .max-table-fields {
+    .max-table-fields-scroll-region {
+        min-width: 0;
+        min-height: 0;
         width: 100%;
         height: 100%;
-        border-collapse: collapse;
-        display: grid;
-        grid-template-rows: auto 1fr;
+        overflow: auto;
+        scrollbar-gutter: stable;
+        overscroll-behavior: contain;
+        touch-action: pan-x pan-y;
+        outline: none;
 
-        // CABEÇALHO
-        .max-table-fields-head {
-            display: grid;
-            position: sticky;
-            top: 0;
-            z-index: 1;
+        &:focus-visible {
+            outline: var(--max-focus-outline);
+            outline-offset: -2px;
+        }
 
-            .max-table-fields-head-row {
-                @include table.table-header-row;
+        .max-table-fields {
+            width: max-content;
+            min-width: 100%;
+            height: auto;
+            border-collapse: collapse;
+            display: table;
 
-                background-color: var(--max-table-header-bg, var(--table-header-bg, #003B53));
+            // CABEÇALHO
+            .max-table-fields-head {
+                display: table-header-group;
+                position: sticky;
+                top: 0;
+                z-index: 1;
 
-                .max-table-fields-th {
-                    @include table.table-header-cell;
+                .max-table-fields-head-row {
+                    @include table.table-header-row;
+                    display: table-row;
 
-                    color: var(--max-table-header-text, var(--table-header-text, #8AD6E8));
-                    font-family: inherit;
-                    display: grid;
-                    place-items: center;
-                    text-align: center;
+                    .max-table-fields-th {
+                        @include table.table-header-cell;
 
-                    &.max-table-fields-th-buttons {
-                        flex-grow: 0;
-                        width: auto;
+                        display: table-cell;
+                        vertical-align: middle;
+                        text-align: center;
+
+                        &.max-table-fields-th-buttons {
+                            width: auto;
+                        }
                     }
                 }
             }
-        }
 
-        // CORPO DA TABELA
-        .max-table-fields-body {
-            display: grid;
-            align-content: start;
-            overflow-y: auto;
-            font-family: inherit;
+            // CORPO DA TABELA
+            .max-table-fields-body {
+                display: table-row-group;
+                font-family: inherit;
 
-            .max-table-fields-row {
-                @include table.table-body-row;
-                @include table.table-row-zebra;
+                .max-table-fields-row {
+                    @include table.table-body-row;
+                    @include table.table-row-zebra;
+                    display: table-row;
 
-                .max-table-fields-td {
-                    @include table.table-cell-base;
+                    .max-table-fields-td {
+                        @include table.table-cell-base;
 
-                    place-items: center start;
-                    outline: none;
-
-                    &:focus:not(:focus-visible) {
+                        display: table-cell;
+                        vertical-align: middle;
                         outline: none;
-                    }
 
-                    &:focus-visible {
-                        outline: var(--max-focus-outline);
-                        outline-offset: -1px;
-                    }
+                        &:focus:not(:focus-visible) {
+                            outline: none;
+                        }
 
-                    .table-field-control {
-                        width: 100%;
-                    }
+                        &:focus-visible {
+                            outline: var(--max-focus-outline);
+                            outline-offset: -1px;
+                        }
 
-                    // Quando inputs estão dentro da célula
-                    :deep() {
-                        @include table.table-cell-input-feedback;
-                    }
-
-                    // Input de incremento (+/-)
-                    .max-table-fields-increment {
-                        display: grid;
-                        grid-template-columns: auto 1fr auto;
-                        place-items: center;
-                        gap: 10px;
-                        width: 100%;
-                        padding: 0 10px;
-
-                        .table-field-increment-input {
+                        .table-field-control {
                             width: 100%;
+                        }
 
-                            :deep(input) {
-                                text-align: center;
+                        // Quando inputs estão dentro da célula
+                        :deep() {
+                            @include table.table-cell-input-feedback;
+                        }
+
+                        // Input de incremento (+/-)
+                        .max-table-fields-increment {
+                            display: grid;
+                            grid-template-columns: auto 1fr auto;
+                            place-items: center;
+                            gap: 10px;
+                            width: 100%;
+                            padding: 0 10px;
+
+                            .table-field-increment-input {
+                                width: 100%;
+
+                                :deep(input) {
+                                    text-align: center;
+                                }
                             }
                         }
-                    }
 
-                    // Botões de ação
-                    &.max-table-fields-buttons {
-                        display: flex;
-                        flex-direction: row;
-                        align-items: center;
-                        gap: 8px;
-                        width: auto;
-                        flex-grow: 0;
-                        padding: 0 6px;
-                    }
+                        // Botões de ação
+                        &.max-table-fields-buttons {
+                            white-space: nowrap;
+                            text-align: center;
+                            vertical-align: middle;
+                            padding: 0 6px;
+                            width: auto;
 
-                    // Estado de carregamento e estado vazio
-                    &.max-table-fields-loading-cell,
-                    &.max-table-fields-empty-cell {
-                        width: 100%;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        padding: 0;
+                            .table-icon-button {
+                                display: inline-flex;
+                                vertical-align: middle;
+                                margin: 0 4px;
+                            }
+                        }
 
-                        .max-table-loading-container,
-                        .max-table-empty-container {
+                        // Estado de carregamento e estado vazio
+                        &.max-table-fields-loading-cell,
+                        &.max-table-fields-empty-cell {
+                            width: 100%;
+                            text-align: center;
+                            vertical-align: middle;
+                            padding: 0;
+
+                            .max-table-loading-container,
+                            .max-table-empty-container {
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                gap: 12px;
+                                padding: 32px 16px;
+                                width: 100%;
+                                color: var(--background-650);
+
+                                .max-table-loading-text,
+                                .max-table-empty-text {
+                                    font-size: 0.95rem;
+                                    font-weight: 500;
+                                }
+
+                                .max-table-spinner {
+                                    width: 22px;
+                                    height: 22px;
+                                    border: 2px solid var(--background-300);
+                                    border-top-color: var(--max-primary-500);
+                                    border-radius: 50%;
+                                    animation: max-table-spin 0.8s linear infinite;
+                                }
+                            }
+                        }
+
+                        .default-slot {
+                            width: 100%;
                             display: flex;
                             align-items: center;
-                            justify-content: center;
-                            gap: 12px;
-                            padding: 32px 16px;
-                            width: 100%;
-                            color: var(--background-650);
-
-                            .max-table-loading-text,
-                            .max-table-empty-text {
-                                font-size: 0.95rem;
-                                font-weight: 500;
-                            }
-
-                            .max-table-spinner {
-                                width: 22px;
-                                height: 22px;
-                                border: 2px solid var(--background-300);
-                                border-top-color: var(--max-primary-500);
-                                border-radius: 50%;
-                                animation: max-table-spin 0.8s linear infinite;
-                            }
+                            justify-content: flex-start;
                         }
-                    }
 
-                    .default-slot {
-                        width: 100%;
-                        display: grid;
-                        place-items: center start;
-                    }
-
-                    .table-icon-button {
-                        :deep(svg) {
-                            width: 20px;
-                            height: 20px;
+                        .table-icon-button {
+                            :deep(svg) {
+                                width: 20px;
+                                height: 20px;
+                            }
                         }
                     }
                 }

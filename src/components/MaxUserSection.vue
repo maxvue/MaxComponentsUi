@@ -92,10 +92,11 @@
 </template>
 
 <script setup lang="ts">
-    import { computed, ref, nextTick, watch, onBeforeUnmount } from 'vue';
+    import { computed, ref, nextTick, watch } from 'vue';
     import MaxIcon from './MaxIcon.vue';
     import MaxUserAvatar from './MaxUserAvatar.vue';
     import { useActiveOverlayPosition } from '../composables/useActiveOverlayPosition';
+    import { useOutsidePointer } from '../helpers/useOutsidePointer';
 
     const props = withDefaults(defineProps<{
         /** Nome do usuário */
@@ -353,53 +354,19 @@
         }
     };
 
-    const onDocPointerDown = (e: PointerEvent) => {
-        if (!isOpen.value) return;
-        const target = e.target as Node | null;
-        if (!target) return;
-        if (menuEl.value?.contains(target)) return;
-        if (root_el.value?.contains(target)) return;
-        if (anchorEl.value?.contains(target)) return;
-        hide();
-    };
-
-    const onDocClick = (e: MouseEvent) => {
-        if (!isOpen.value) return;
-        const target = e.target as Node | null;
-        if (!target) return;
-        if (menuEl.value?.contains(target)) return;
-        if (root_el.value?.contains(target)) return;
-        if (anchorEl.value?.contains(target)) return;
-        hide();
-    };
-
-    const onGlobalKeydown = (event: KeyboardEvent) => {
-        if (event.key === 'Escape' && isOpen.value) {
+    useOutsidePointer(isOpen, {
+        elements: () => [menuEl.value, root_el.value, anchorEl.value],
+        onClose: () => {
             hide();
             root_el.value?.focus();
-        }
-    };
-
-    watch(isOpen, (open) => {
-        if (typeof window === 'undefined') return;
-        if (open) {
-            menuItemRefs.value = [];
-            window.addEventListener('keydown', onGlobalKeydown);
-            document.addEventListener('pointerdown', onDocPointerDown, true);
-            document.addEventListener('click', onDocClick, true);
-        } else {
-            window.removeEventListener('keydown', onGlobalKeydown);
-            document.removeEventListener('pointerdown', onDocPointerDown, true);
-            document.removeEventListener('click', onDocClick, true);
-        }
+        },
+        closeOnEscape: true,
+        triggerEl: root_el
     });
 
-    onBeforeUnmount(() => {
-        if (typeof window !== 'undefined') {
-            window.removeEventListener('keydown', onGlobalKeydown);
-            document.removeEventListener('pointerdown', onDocPointerDown, true);
-            document.removeEventListener('click', onDocClick, true);
-        }
+    watch(isOpen, (open) => {
+        if (open) menuItemRefs.value = [];
+
     });
 
     defineExpose({

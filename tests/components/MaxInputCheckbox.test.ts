@@ -127,6 +127,6 @@ describe('MaxInputCheckbox', () => {
             props: { modelValue: false, disabled: true }
         });
         expect(wrapper.classes()).toContain('disabled');
-        expect(wrapper.attributes('disabled')).toBeDefined();
+        expect(wrapper.find('input').attributes('disabled')).toBeDefined();
     });
 });

@@ -371,7 +371,7 @@
 
             .max-app-error-desc {
                 font-size: 0.875rem;
-                color: var(--color-secondary-text, #6b7280);
+                color: var(--max-content-secondary, #6b7280);
                 max-width: 28rem;
                 margin: 0;
             }
@@ -382,7 +382,7 @@
                 font-size: 0.875rem;
                 font-weight: 500;
                 border-radius: 0.5rem;
-                background-color: var(--primary-color, #2563eb);
+                background-color: var(--max-primary-500, #00768e);
                 color: #fff;
                 border: none;
                 cursor: pointer;

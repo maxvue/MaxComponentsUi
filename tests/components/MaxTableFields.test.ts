@@ -523,4 +523,125 @@ describe('MaxTableFields.vue', () => {
             expect(sfc).toContain('@include table.table-cell-input-feedback');
         });
     });
+
+    describe('Contrato estrutural e acessibilidade de rolagem compartilhada (ui-design/tabela-max-recorta-colunas-sem-scroll-compartilhado)', () => {
+        it('possui exatamente uma região de scroll compartilhada envolvendo thead e tbody com role e tabindex acessíveis', () => {
+            const columns = [
+                { field: 'col1', header: 'Col 1', minWidth: '200px' },
+                { field: 'col2', header: 'Col 2', minWidth: '200px' },
+                { field: 'col3', header: 'Col 3', minWidth: '200px' }
+            ];
+            const list = [
+                { col1: 'A1', col2: 'B1', col3: 'C1' },
+                { col1: 'A2', col2: 'B2', col3: 'C2' }
+            ];
+
+            const wrapper = mount(MaxTableFields, {
+                props: { columns, list }
+            });
+
+            const scrollRegions = wrapper.findAll('.max-table-fields-scroll-region');
+            expect(scrollRegions).toHaveLength(1);
+
+            const scrollRegion = scrollRegions[0];
+            expect(scrollRegion.attributes('role')).toBe('region');
+            expect(scrollRegion.attributes('tabindex')).toBe('0');
+            expect(scrollRegion.attributes('aria-label')).toBe('Tabela de dados rolável');
+
+            const table = scrollRegion.find('table.max-table-fields');
+            expect(table.exists()).toBe(true);
+
+            const thead = table.find('thead.max-table-fields-head');
+            const tbody = table.find('tbody.max-table-fields-body');
+            expect(thead.exists()).toBe(true);
+            expect(tbody.exists()).toBe(true);
+
+            expect(thead.find('tr.max-table-fields-head-row').exists()).toBe(true);
+            expect(thead.findAll('th.max-table-fields-th')).toHaveLength(3);
+            expect(tbody.findAll('tr.max-table-fields-row')).toHaveLength(2);
+            expect(tbody.findAll('.max-table-fields-td')).toHaveLength(6);
+        });
+
+        it('permite sobrescrever ariaLabel por prop', () => {
+            const wrapper = mount(MaxTableFields, {
+                props: {
+                    columns: [{ field: 'id', header: 'ID' }],
+                    list: [{ id: 1 }],
+                    ariaLabel: 'Tabela de lançamentos contábeis'
+                }
+            });
+
+            const scrollRegion = wrapper.find('.max-table-fields-scroll-region');
+            expect(scrollRegion.attributes('aria-label')).toBe('Tabela de lançamentos contábeis');
+        });
+
+        it('mantém overflow e rolagem horizontal na região compartilhada e preserva último th e td no mesmo table', async () => {
+            const columns = [
+                { field: 'col1', header: 'Col 1', minWidth: '200px' },
+                { field: 'col2', header: 'Col 2', minWidth: '200px' },
+                { field: 'col3', header: 'Col 3', minWidth: '200px' }
+            ];
+            const list = [
+                { col1: 'A1', col2: 'B1', col3: 'C1' },
+                { col1: 'A2', col2: 'B2', col3: 'C2' }
+            ];
+
+            const wrapper = mount(MaxTableFields, {
+                props: { columns, list }
+            });
+
+            const scrollRegion = wrapper.find<HTMLElement>('.max-table-fields-scroll-region');
+            expect(scrollRegion.exists()).toBe(true);
+
+            let scrollLeftValue = 0;
+            Object.defineProperty(scrollRegion.element, 'clientWidth', { configurable: true, value: 320 });
+            Object.defineProperty(scrollRegion.element, 'scrollWidth', { configurable: true, value: 600 });
+            Object.defineProperty(scrollRegion.element, 'scrollLeft', {
+                configurable: true,
+                get: () => scrollLeftValue,
+                set: (val: number) => { scrollLeftValue = val; }
+            });
+
+            scrollRegion.element.scrollLeft = 280;
+            await scrollRegion.trigger('scroll');
+
+            expect(scrollRegion.element.scrollLeft).toBe(280);
+
+            // Último th e último td pertencem à mesma tabela dentro desse único scroll
+            const lastTh = wrapper.findAll('th.max-table-fields-th').at(-1);
+            const lastTd = wrapper.findAll('tr.max-table-fields-row').at(-1)?.findAll('td.max-table-fields-td').at(-1);
+
+            expect(lastTh?.text()).toContain('Col 3');
+            expect(lastTd?.text()).toContain('C2');
+            expect(scrollRegion.element.contains(lastTh!.element)).toBe(true);
+            expect(scrollRegion.element.contains(lastTd!.element)).toBe(true);
+
+            // Não existe outro ancestral ou descendente com scroller horizontal no corpo
+            const tbody = wrapper.find('.max-table-fields-body');
+            expect(tbody.attributes('class')).not.toContain('scroll-region');
+        });
+
+        it('valida o contrato de estilos CSS no SFC (tabela nativa, thead sticky, sem overflow no tbody)', async () => {
+            const fs = await import('node:fs');
+            const path = await import('node:path');
+            const sfc = fs.readFileSync(path.resolve(__dirname, '../../src/components/MaxTableFields.vue'), 'utf-8');
+
+            // Região de scroll única com overflow nos dois eixos
+            expect(sfc).toMatch(/\.max-table-fields-scroll-region\s*\{[^}]*overflow:\s*auto/);
+            expect(sfc).toMatch(/\.max-table-fields-scroll-region\s*\{[^}]*scrollbar-gutter:\s*stable/);
+            expect(sfc).toMatch(/\.max-table-fields-scroll-region\s*\{[^}]*overscroll-behavior:\s*contain/);
+
+            // Tabela com layout tabular nativo e largura intrínseca
+            expect(sfc).toMatch(/\.max-table-fields\s*\{[^}]*width:\s*max-content/);
+            expect(sfc).toMatch(/\.max-table-fields\s*\{[^}]*min-width:\s*100%/);
+            expect(sfc).toMatch(/\.max-table-fields\s*\{[^}]*display:\s*table/);
+
+            // thead sticky no topo
+            expect(sfc).toMatch(/\.max-table-fields-head\s*\{[^}]*position:\s*sticky/);
+            expect(sfc).toMatch(/\.max-table-fields-head\s*\{[^}]*top:\s*0/);
+
+            // tbody não tem overflow próprio (o scroller é a região)
+            expect(sfc).not.toMatch(/\.max-table-fields-body\s*\{[^}]*overflow-y:\s*auto/);
+        });
+    });
 });

@@ -28,18 +28,20 @@
                         @keydown="isTopModal ? trap.onKeydown($event) : undefined"
                         :class="[{ 'is-shaking': isShaking }, props.class]"
                     >
-                        <slot name="header" v-if="!props.noHeader" :title-id="title_id">
-                            <MaxGrid class="max-modal-header" :id="title_id">
-                                <slot name="title" v-bind="props">
-                                    <MaxTitle1 class="max-modal-title" :title="props.title ?? 'Titulo'" :subtitle="props.subTitle ?? 'Sub Titulo'" />
-                                </slot>
-                                <div class="max-modal-close-wrapper">
-                                    <slot name="close" :close="handleClose" :hide="handleClose">
-                                        <MaxIconButton i="iconoir:xmark" size="1.3" aria-label="Fechar" @click.stop="handleClose" class="close-btn" />
+                        <header v-if="!props.noHeader" :id="title_id" class="max-modal-header-wrapper">
+                            <slot name="header" :title-id="title_id">
+                                <MaxGrid class="max-modal-header">
+                                    <slot name="title" v-bind="props">
+                                        <MaxTitle1 class="max-modal-title" :title="props.title ?? 'Titulo'" :subtitle="props.subTitle ?? 'Sub Titulo'" />
                                     </slot>
-                                </div>
-                            </MaxGrid>
-                        </slot>
+                                    <div class="max-modal-close-wrapper">
+                                        <slot name="close" :close="handleClose" :hide="handleClose">
+                                            <MaxIconButton i="iconoir:xmark" size="1.3" aria-label="Fechar" @click.stop="handleClose" class="close-btn" />
+                                        </slot>
+                                    </div>
+                                </MaxGrid>
+                            </slot>
+                        </header>
                         <div class="max-modal-content">
                             <slot name="content"></slot>
                             <slot></slot>
@@ -53,7 +55,7 @@
 
 <script setup lang="ts">
     import { useModalStore } from '../stores/useModal.Store';
-    import { useTemplateRef, computed, ref, watch, useId, onBeforeUnmount, onMounted, useSlots, nextTick } from 'vue';
+    import { useTemplateRef, computed, ref, watch, useId, onBeforeUnmount, onMounted, getCurrentInstance, useSlots } from 'vue';
     import { useFocusTrap } from '../helpers/useFocusTrap';
     import { useScrollLock } from '../helpers/useScrollLock';
     import { useBrowserEventListener } from '../composables/useBrowserEventListener';
@@ -61,6 +63,17 @@
     import MaxButton from './MaxButton.vue';
     import MaxTitle1 from './MaxTitle1.vue';
     import MaxGrid from './MaxGrid.vue';
+
+    export type ModalCloseReason = 'button' | 'escape' | 'backdrop' | 'model' | 'api';
+
+    export interface ModalBeforeCloseEvent {
+        (done?: () => void): void;
+        reason: ModalCloseReason;
+        preventDefault: () => void;
+        waitUntil: (promise: Promise<boolean | void>) => void;
+        done: () => void;
+        isDefaultPrevented: () => boolean;
+    }
 
     const props = withDefaults(defineProps<{
         /** ID único do modal (se omitido, gerado automaticamente via useId()) */
@@ -122,7 +135,7 @@
         /** Permite fechar ao clicar no backdrop/máscara. Default true. */
         dismissable?: boolean;
         /** Hook chamado antes de fechar o modal, permitindo cancelar ou confirmar o descarte */
-        beforeClose?: (done: () => void) => void;
+        beforeClose?: (event: ModalBeforeCloseEvent) => void | boolean | Promise<boolean | void>;
         /** Nome acessível explícito para o diálogo */
         ariaLabel?: string;
         /** ID do elemento que rotula o diálogo */
@@ -144,7 +157,7 @@
     const emit = defineEmits<{
         'update:visible': [value: boolean];
         'update:modelValue': [value: boolean];
-        'before-close': [done: () => void];
+        'before-close': [event: ModalBeforeCloseEvent];
         'after-hide': [];
         'show': [];
         'hide': [];
@@ -172,35 +185,40 @@
         }, 400);
     };
 
-    const modal_store = useModalStore();
-    const generatedId = useId();
-    const id = computed(() => props.id ?? generatedId);
-
-    const isTopModal = computed(() => modal_store.isTop(id.value));
-
-    const is_show = computed(() => {
-        if (props.visible !== undefined) return Boolean(props.visible);
-        if (props.modelValue !== undefined) return Boolean(props.modelValue);
-        return modal_store.isOpen(id.value);
-    });
-
-    const isClosing = ref(false);
+    const instance = getCurrentInstance();
     let closeGeneration = 0;
-    let previousActiveElement: HTMLElement | null = null;
+    const isClosing = ref(false);
 
-    const open = () => {
-        if (typeof document !== 'undefined') previousActiveElement = document.activeElement as HTMLElement | null;
-        closeGeneration++;
-        isClosing.value = false;
-        emit('update:visible', true);
-        emit('update:modelValue', true);
-        modal_store.push(id.value);
-        emit('show');
-    };
+    function createCloseEvent(
+        reason: ModalCloseReason,
+        onDone: () => void,
+        onPrevent: () => void,
+        onWait: (promise: Promise<boolean | void>) => void
+    ): ModalBeforeCloseEvent {
+        let defaultPrevented = false;
+        const callable = Object.assign(
+            () => {
+                onDone();
+            },
+            {
+                reason,
+                preventDefault: () => {
+                    defaultPrevented = true;
+                    onPrevent();
+                },
+                waitUntil: (promise: Promise<boolean | void>) => {
+                    onWait(promise);
+                },
+                done: () => {
+                    onDone();
+                },
+                isDefaultPrevented: () => defaultPrevented
+            }
+        );
+        return callable as unknown as ModalBeforeCloseEvent;
+    }
 
-    const close = () => {
-        if (!modal_store.isOpen(id.value) && !is_show.value) return;
-        closeGeneration++;
+    const forceClose = () => {
         isClosing.value = false;
         emit('update:visible', false);
         emit('update:modelValue', false);
@@ -208,56 +226,96 @@
         emit('hide');
     };
 
-    export type ModalCloseReason = 'button' | 'escape' | 'backdrop' | 'model' | 'api';
+    const requestClose = (reason: ModalCloseReason = 'api'): Promise<boolean> => {
+        if (!is_show.value) return Promise.resolve(false);
 
-    const requestClose = (_reason: ModalCloseReason = 'api') => {
-        if (!is_show.value || isClosing.value) return;
-
-        const currentGen = ++closeGeneration;
+        const generation = ++closeGeneration;
         let settled = false;
+        let pendingPromise: Promise<boolean | void> | null = null;
 
         const onDone = () => {
-            if (settled || currentGen !== closeGeneration) return;
+            if (settled || generation !== closeGeneration) return;
             settled = true;
             isClosing.value = false;
-            close();
+            forceClose();
         };
 
-        if (props.beforeClose) {
-            isClosing.value = true;
-            try {
-                const result: unknown = props.beforeClose(onDone);
-                if (result && typeof (result as any).then === 'function') (result as Promise<any>).then(
-                    (val) => {
-                        if (val === false) {
-                            if (currentGen === closeGeneration) {
-                                settled = true;
-                                isClosing.value = false;
-                            }
-                            return;
-                        }
-                        onDone();
-                    },
-                    () => {
-                        if (currentGen === closeGeneration) {
-                            settled = true;
-                            isClosing.value = false;
-                        }
-                    }
-                );
+        const onPrevent = () => {
+            if (settled || generation !== closeGeneration) return;
+            settled = true;
+            isClosing.value = false;
+        };
 
-            } catch (err) {
-                if (currentGen === closeGeneration) {
-                    settled = true;
-                    isClosing.value = false;
-                }
-                throw err;
-            }
-            return;
+        const onWait = (promise: Promise<boolean | void>) => {
+            pendingPromise = promise;
+        };
+
+        const closeEvent = createCloseEvent(reason, onDone, onPrevent, onWait);
+
+        const vnodeProps = instance?.vnode?.props;
+        const hasEventBeforeClose = Boolean(
+            vnodeProps && ('onBefore-close' in vnodeProps || 'onBeforeClose' in vnodeProps)
+        );
+        const hasPropBeforeClose = Boolean(props.beforeClose);
+
+        if (!hasPropBeforeClose && !hasEventBeforeClose) {
+            emit('before-close', closeEvent);
+            onDone();
+            return Promise.resolve(true);
         }
 
-        emit('before-close', onDone);
+        isClosing.value = true;
+        emit('before-close', closeEvent);
+
+        let propResult: any;
+        if (props.beforeClose) try {
+            propResult = (props.beforeClose as any)(closeEvent);
+        } catch (err) {
+            isClosing.value = false;
+            settled = true;
+            console.error('[MaxModal] Error in beforeClose prop:', err);
+            return Promise.resolve(false);
+        }
+
+
+        if (settled) return Promise.resolve(true);
+
+        if (closeEvent.isDefaultPrevented() || propResult === false) {
+            onPrevent();
+            if (reason === 'model') {
+                emit('update:modelValue', true);
+                emit('update:visible', true);
+            }
+            return Promise.resolve(false);
+        }
+
+        if (propResult instanceof Promise) pendingPromise = propResult;
+
+        if (pendingPromise) return (pendingPromise as Promise<boolean | void>)
+            .then((res) => {
+                if (generation !== closeGeneration || settled) return false;
+                if (res === false || closeEvent.isDefaultPrevented()) {
+                    onPrevent();
+                    if (reason === 'model') {
+                        emit('update:modelValue', true);
+                        emit('update:visible', true);
+                    }
+                    return false;
+                }
+                onDone();
+                return true;
+            })
+            .catch(() => {
+                if (generation !== closeGeneration || settled) return false;
+                onPrevent();
+                return false;
+            });
+
+
+        if (hasPropBeforeClose) return Promise.resolve(false);
+
         onDone();
+        return Promise.resolve(true);
     };
 
     const handleClose = () => {
@@ -273,13 +331,33 @@
         requestClose('backdrop');
     };
 
+    const modal_store = useModalStore();
+    const generatedId = useId();
+    const id = computed(() => props.id ?? generatedId);
+
+    const isTopModal = computed(() => modal_store.isTop(id.value));
+
+    const is_show = computed(() => {
+        if (props.visible !== undefined && !modal_store.isOpen(id.value)) return Boolean(props.visible);
+        if (props.modelValue !== undefined && !modal_store.isOpen(id.value)) return Boolean(props.modelValue);
+        return modal_store.isOpen(id.value);
+    });
+
     const modalDepth = computed(() => {
         const idx = modal_store.getIndex(id.value);
         return idx >= 0 ? idx : 0;
     });
 
-    const backdropZIndex = computed(() => 1200 + modalDepth.value * 20);
-    const dialogZIndex = computed(() => backdropZIndex.value + 10);
+    const backdropZIndex = computed(() => {
+        if (modalDepth.value > 0) return `calc(var(--max-layer-modal-backdrop, 1300) + ${modalDepth.value * 20})`;
+
+        return 'var(--max-layer-modal-backdrop, 1300)';
+    });
+    const dialogZIndex = computed(() => {
+        if (modalDepth.value > 0) return `calc(var(--max-layer-modal, 1310) + ${modalDepth.value * 20})`;
+
+        return 'var(--max-layer-modal, 1310)';
+    });
 
     const modal_padding = computed(() => {
         if (props.padding === undefined) return undefined;
@@ -300,7 +378,6 @@
     const trap = useFocusTrap(el);
     const scroll_lock = useScrollLock();
 
-    const title_id = computed(() => (!props.noHeader ? 'max-modal-title-' + id.value : undefined));
     const slots = useSlots();
 
     const isNonEmptyTextInDom = (elementId?: string): boolean => {
@@ -313,23 +390,50 @@
         return text.length > 0;
     };
 
+    const getTextFromVNodes = (vnodes: any): string => {
+        if (!vnodes) return '';
+        if (typeof vnodes === 'string') return vnodes.trim();
+        if (typeof vnodes === 'number') return String(vnodes);
+        if (Array.isArray(vnodes)) return vnodes.map(getTextFromVNodes).join('').trim();
+        if (typeof vnodes === 'object') {
+            if (typeof vnodes.children === 'string') return vnodes.children.trim();
+            if (Array.isArray(vnodes.children)) return getTextFromVNodes(vnodes.children);
+            if (typeof vnodes.children === 'object' && vnodes.children !== null) if (typeof vnodes.children.default === 'function') return getTextFromVNodes(vnodes.children.default());
+
+        }
+        return '';
+    };
+
+    const getSlotText = (slotFn?: (props: any) => any): string => {
+        if (!slotFn) return '';
+        try {
+            return getTextFromVNodes(slotFn({}));
+        } catch {
+            return '';
+        }
+    };
+
+    const title_id = computed(() => (!props.noHeader ? 'max-modal-title-' + id.value : undefined));
+
     const computedAriaLabelledby = computed(() => {
-        void is_mounted.value;
         if (props.ariaLabelledby) {
             const rawId = props.ariaLabelledby.trim();
             if (!rawId) return undefined;
             if (typeof document !== 'undefined') return isNonEmptyTextInDom(rawId) ? rawId : undefined;
-
             return rawId;
         }
-        if (slots.header) return undefined;
-        if (!props.noHeader && (props.title?.trim() || props.subTitle?.trim())) return title_id.value;
+        if (props.noHeader) return undefined;
+        if (slots.header) {
+            const slotText = getSlotText(slots.header);
+            return slotText.length > 0 ? title_id.value : undefined;
+        }
+        if (props.title?.trim() || props.subTitle?.trim()) return title_id.value;
         return undefined;
     });
 
     const computedAriaLabel = computed(() => {
         if (computedAriaLabelledby.value) return undefined;
-        const rawLabel = props.ariaLabel?.trim() || props.title?.trim();
+        const rawLabel = props.ariaLabel?.trim() || (props.title?.trim() || undefined);
         return rawLabel && rawLabel.length > 0 ? rawLabel : 'Diálogo';
     });
 
@@ -341,32 +445,29 @@
     let has_scroll_lock = false;
 
     const onEscape = (event: KeyboardEvent) => {
-        if (event.key === 'Escape' && isTopModal.value) {
-            event.stopPropagation();
-            event.stopImmediatePropagation?.();
-            if (props.closeOnEscape) requestClose('escape');
-        }
+        if (event.key === 'Escape' && props.closeOnEscape && isTopModal.value) requestClose('escape');
+
     };
+
+    let previousActiveElement: HTMLElement | null = null;
 
     const restoreCallerFocus = () => {
         if (previousActiveElement && typeof previousActiveElement.focus === 'function') {
             const elToFocus = previousActiveElement;
             previousActiveElement = null;
-            nextTick(() => {
-                if (elToFocus.isConnected) elToFocus.focus();
-
-            });
+            setTimeout(() => {
+                elToFocus.focus();
+            }, 50);
         }
     };
 
     watch(
         () => props.visible,
-        (val) => {
+        (val, oldVal) => {
             if (val === true) {
-                if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) previousActiveElement = document.activeElement;
-
+                closeGeneration++;
                 modal_store.push(id.value);
-            } else if (val === false) modal_store.pop(id.value);
+            } else if (val === false && oldVal === true && modal_store.isOpen(id.value)) requestClose('model');
 
         },
         { immediate: true }
@@ -374,12 +475,11 @@
 
     watch(
         () => props.modelValue,
-        (val) => {
+        (val, oldVal) => {
             if (val === true) {
-                if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) previousActiveElement = document.activeElement;
-
+                closeGeneration++;
                 modal_store.push(id.value);
-            } else if (val === false) modal_store.pop(id.value);
+            } else if (val === false && oldVal === true && modal_store.isOpen(id.value)) requestClose('model');
 
         },
         { immediate: true }
@@ -430,11 +530,6 @@
         { immediate: true }
     );
 
-    watch(isTopModal, (isTop) => {
-        if (is_show.value && is_mounted.value && isTop) trap.activate();
-
-    });
-
     onBeforeUnmount(() => {
         trap.deactivate();
         if (has_scroll_lock) {
@@ -444,20 +539,38 @@
         if (modal_store.isOpen(id.value)) modal_store.pop(id.value);
     });
 
-    const toggle = () => {
-        if (is_show.value) close();
-        else open();
+    const open = () => {
+        closeGeneration++;
+        isClosing.value = false;
+        if (typeof document !== 'undefined') previousActiveElement = document.activeElement as HTMLElement | null;
+        emit('update:visible', true);
+        emit('update:modelValue', true);
+        modal_store.push(id.value);
+        emit('show');
+    };
 
+    const close = () => {
+        requestClose('api');
+    };
+
+    const hide = () => {
+        requestClose('api');
+    };
+
+    const toggle = () => {
+        if (is_show.value) requestClose('button');
+        else open();
     };
 
     defineExpose({
         toggle,
         is_show,
         show: open,
-        hide: close,
+        hide,
         open,
         close,
         requestClose,
+        forceClose,
         id,
         style,
         is_changing,
@@ -548,6 +661,11 @@
             @media (width <= 768px) {
                 padding: 12px;
                 max-width: calc(100vw - 50px);
+            }
+
+            .max-modal-header-wrapper {
+                display: block;
+                width: 100%;
             }
 
             .max-modal-header {

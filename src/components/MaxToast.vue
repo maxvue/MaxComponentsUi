@@ -201,28 +201,42 @@
 <style lang="scss" scoped>
     /* ─── Container principal ─── */
     .max-toast-container {
+        --max-toast-viewport-gutter: 16px;
+        --max-toast-top-offset: 74px;
+        --max-toast-safe-top: env(safe-area-inset-top, 0px);
+        --max-toast-safe-right: env(safe-area-inset-right, 0px);
+        --max-toast-safe-bottom: env(safe-area-inset-bottom, 0px);
+        --max-toast-safe-left: env(safe-area-inset-left, 0px);
+
         position: fixed;
-        top: 74px;
-        right: 16px;
+        top: calc(var(--max-toast-top-offset) + var(--max-toast-safe-top));
+        right: max(var(--max-toast-viewport-gutter), var(--max-toast-safe-right));
+        max-width: calc(100vw - max(var(--max-toast-viewport-gutter), var(--max-toast-safe-left)) - max(var(--max-toast-viewport-gutter), var(--max-toast-safe-right)));
+        max-height: calc(100vh - (var(--max-toast-top-offset) + var(--max-toast-safe-top) + max(var(--max-toast-viewport-gutter), var(--max-toast-safe-bottom))));
+        max-height: calc(100dvh - (var(--max-toast-top-offset) + var(--max-toast-safe-top) + max(var(--max-toast-viewport-gutter), var(--max-toast-safe-bottom))));
         z-index: var(--max-layer-toast, 1500);
         display: flex;
         flex-direction: column;
         align-items: flex-end;
         gap: 10px;
         pointer-events: none;
-        max-height: calc(100vh - 90px);
-        overflow: hidden;
+        box-sizing: border-box;
+        min-width: 0;
+        overflow-x: clip;
+        overflow-y: auto;
+        overscroll-behavior: contain;
 
         /* ─── Card do toast ─── */
         .max-toast-item {
+            box-sizing: border-box;
             pointer-events: auto;
             display: grid;
-            grid-template-columns: auto 1fr auto;
+            grid-template-columns: auto minmax(0, 1fr) auto;
             grid-template-rows: 1fr auto;
             align-items: center;
             column-gap: 10px;
             min-width: 320px;
-            max-width: 420px;
+            max-width: min(420px, 100%);
             width: fit-content;
             padding: 14px 16px 0;
             border-radius: 10px;

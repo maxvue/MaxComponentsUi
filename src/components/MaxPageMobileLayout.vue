@@ -200,7 +200,7 @@
 
         .mobile-bug-draggable {
             position: fixed;
-            z-index: 850;
+            z-index: var(--max-layer-floating, 850);
             touch-action: none;
             cursor: grab;
             user-select: none;

@@ -172,8 +172,14 @@
         return Object.fromEntries(Object.entries(props.closeButtonProps ?? {}).filter(([key]) => ! props_to_strip.includes(key)));
     });
 
-    /** Fica acima do MaxModal (z-index 59) quando autoZIndex esta ligado. */
-    const z_index = computed(() => (props.autoZIndex ? props.baseZIndex + 60 : props.baseZIndex));
+    /** Usa token canônico de modal, permitindo offset via baseZIndex quando autoZIndex está ativo. */
+    const z_index = computed(() => {
+        if (!props.autoZIndex) return props.baseZIndex ? String(props.baseZIndex) : undefined;
+
+        if (props.baseZIndex > 0) return `calc(var(--max-layer-modal, 1310) + ${props.baseZIndex})`;
+
+        return 'var(--max-layer-modal, 1310)';
+    });
 
     /**
      * O componente nunca muta o proprio estado: apenas emite a intencao e

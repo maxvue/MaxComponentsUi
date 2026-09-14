@@ -23,7 +23,6 @@ const ROOT = blockVars(CSS, ':root');
 const DARK = blockVars(CSS, '.dark');
 
 const SCHEME_INDEPENDENT: Record<string, string> = {
-    '--max-primary-50': '#67C8DB',
     '--max-primary-100': '#56C2D7',
     '--max-primary-200': '#46BCD4',
     '--max-primary-300': '#2EA4BC',

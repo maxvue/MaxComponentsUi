@@ -315,11 +315,121 @@ describe('MaxInputAutoComplete.vue — forceSelection', () => {
             const activeDescId = input.attributes('aria-activedescendant');
             expect(activeDescId).toBe(`${listboxId}-opt-0`);
 
-            // Opções possuem role=option e aria-selected correto
-            const optionEls = listbox?.querySelectorAll('[role="option"]');
+            // Opções possuem role=option e aria-selected reflete apenas a seleção real (alpha)
+            let optionEls = listbox?.querySelectorAll('[role="option"]');
             expect(optionEls?.length).toBe(2);
             expect(optionEls?.[0].getAttribute('aria-selected')).toBe('true');
             expect(optionEls?.[1].getAttribute('aria-selected')).toBe('false');
+
+            // Navegar para a opção 1 destaca sem selecionar (aria-selected de option 1 continua false)
+            await input.trigger('keydown.down');
+            await wrapper.vm.$nextTick();
+
+            expect(input.attributes('aria-activedescendant')).toBe(`${listboxId}-opt-1`);
+            optionEls = listbox?.querySelectorAll('[role="option"]');
+            expect(optionEls?.[0].getAttribute('aria-selected')).toBe('true');
+            expect(optionEls?.[1].getAttribute('aria-selected')).toBe('false');
+
+            wrapper.unmount();
+        });
+
+        it('ArrowDown sem Enter destaca com aria-activedescendant sem alterar seleção e Enter posterior seleciona (F14)', async () => {
+            const wrapper = mountAutoComplete({
+                options: [
+                    { label: 'Item A', value: 'a' },
+                    { label: 'Item B', value: 'b' }
+                ],
+                modelValue: null,
+                forceSelection: false
+            });
+
+            const input = wrapper.find('input');
+            await input.setValue('Item');
+            await input.trigger('input');
+            await wrapper.vm.$nextTick();
+
+            const listboxId = input.attributes('aria-controls')!;
+            const listbox = document.getElementById(listboxId);
+            expect(listbox).not.toBeNull();
+
+            // Inicialmente sem seleção
+            let optionEls = listbox?.querySelectorAll('[role="option"]');
+            expect(optionEls?.[0].getAttribute('aria-selected')).toBe('false');
+            expect(optionEls?.[1].getAttribute('aria-selected')).toBe('false');
+
+            // ArrowDown move activeDescendant para opt-0 sem selecionar
+            await input.trigger('keydown.down');
+            await wrapper.vm.$nextTick();
+
+            expect(input.attributes('aria-activedescendant')).toBe(`${listboxId}-opt-0`);
+            optionEls = listbox?.querySelectorAll('[role="option"]');
+            expect(optionEls?.[0].getAttribute('aria-selected')).toBe('false');
+            expect(optionEls?.[1].getAttribute('aria-selected')).toBe('false');
+            expect(optionEls?.[0].classList.contains('max-autocomplete-item-active')).toBe(true);
+
+            // ArrowDown move activeDescendant para opt-1 sem selecionar
+            await input.trigger('keydown.down');
+            await wrapper.vm.$nextTick();
+
+            expect(input.attributes('aria-activedescendant')).toBe(`${listboxId}-opt-1`);
+            optionEls = listbox?.querySelectorAll('[role="option"]');
+            expect(optionEls?.[0].getAttribute('aria-selected')).toBe('false');
+            expect(optionEls?.[1].getAttribute('aria-selected')).toBe('false');
+            expect(optionEls?.[1].classList.contains('max-autocomplete-item-active')).toBe(true);
+
+            // Enter seleciona o item ativo (opt-1)
+            await input.trigger('keydown.enter');
+            await wrapper.vm.$nextTick();
+            expect(wrapper.emitted('update:modelValue')).toBeTruthy();
+
+            // Reabre digitando 'Item' para exibir ambas as opções e verificar aria-selected
+            await input.setValue('Item');
+            await input.trigger('input');
+            await wrapper.vm.$nextTick();
+            await new Promise((r) => setTimeout(r, 0));
+            await wrapper.vm.$nextTick();
+
+            const currentListbox = document.getElementById(listboxId);
+            optionEls = currentListbox?.querySelectorAll('[role="option"]');
+            expect(optionEls?.length).toBe(2);
+            expect(optionEls?.[1].getAttribute('aria-selected')).toBe('true');
+            expect(optionEls?.[0].getAttribute('aria-selected')).toBe('false');
+
+            wrapper.unmount();
+        });
+
+        it('active descendant permanece sempre montado no DOM durante navegação em lista virtualizada (F14)', async () => {
+            const items = Array.from({ length: 100 }, (_, i) => ({
+                id: i,
+                label: `Sugestão ${i}`,
+                value: `sug-${i}`
+            }));
+            const wrapper = mountAutoComplete({
+                options: items,
+                modelValue: null,
+                virtualScroll: true,
+                numToleratedItems: 3
+            });
+
+            const input = wrapper.find('input');
+            await input.setValue('Sugestão');
+            await input.trigger('input');
+            await wrapper.vm.$nextTick();
+
+            const listboxId = input.attributes('aria-controls')!;
+
+            // Navega 15 vezes para baixo
+            for (let i = 0; i < 15; i++) {
+                await input.trigger('keydown.down');
+                await wrapper.vm.$nextTick();
+                const activeId = input.attributes('aria-activedescendant');
+                expect(activeId).toBe(`${listboxId}-opt-${i}`);
+                // O nó apontado por aria-activedescendant DEVE estar montado no DOM
+                const activeEl = document.getElementById(activeId!);
+                expect(activeEl).not.toBeNull();
+                expect(activeEl?.getAttribute('role')).toBe('option');
+                expect(activeEl?.getAttribute('aria-selected')).toBe('false');
+            }
 
             wrapper.unmount();
         });

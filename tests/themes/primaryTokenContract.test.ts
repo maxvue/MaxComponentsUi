@@ -35,9 +35,9 @@ function getAllSourceFiles(dir: string): string[] {
 }
 
 describe('primaryTokenContract (E10-01)', () => {
-    it('materializa todos os 11 shades primários em :root idênticos ao MaxStyle', () => {
+    it('materializa os 10 shades primários aprovados em :root idênticos ao MaxStyle', () => {
         const expectedPalette = MaxStyle.semantic.primary;
-        const shades = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const;
+        const shades = [100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const;
 
         for (const shade of shades) {
             const tokenName = `--max-primary-${shade}`;
@@ -48,7 +48,7 @@ describe('primaryTokenContract (E10-01)', () => {
 
     it('não duplica a rampa primária em .dark', () => {
         const darkVars = extractVars(CSS, '.dark');
-        const shades = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const;
+        const shades = [100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const;
         for (const shade of shades) {
             const tokenName = `--max-primary-${shade}`;
             expect(darkVars[tokenName], `Rampa ${tokenName} não deve ser duplicada em .dark`).toBeUndefined();

@@ -46,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-    import { computed, getCurrentInstance, ref, useAttrs } from 'vue';
+    import { computed, ref, useAttrs } from 'vue';
     import MaxIcon from './MaxIcon.vue';
     import { goToRoute } from '@maxvue/max-use';
     import type { MaxButtonsType } from '../types';
@@ -58,7 +58,6 @@
     const attrs = useAttrs();
     const hover = ref(false);
     const warned = ref(false);
-    const instance = getCurrentInstance();
 
     const props = withDefaults(defineProps<MaxButtonsType>(), { data: {}, params: {}, query: {}, hoverScale: 1.2 });
 
@@ -131,21 +130,8 @@
                 return;
             }
 
-            const parentProps = instance?.vnode.props ?? {};
-            const hasClick = Boolean(parentProps.onClick || attrs.onClick);
-            const hasAction = Boolean(parentProps.onAction || attrs.onAction);
-
-            if (hasClick) {
-                emit('click', event);
-                return;
-            }
-
-            if (hasAction) {
-                emit('action', true);
-                return;
-            }
-
             emit('click', event);
+            emit('action', true);
         } finally {
             executing.value = false;
         }

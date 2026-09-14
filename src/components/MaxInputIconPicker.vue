@@ -39,11 +39,13 @@
                 ref="drawerEl"
                 class="max-icon-picker-drawer p-drawer-bottom"
                 role="dialog"
-                aria-modal="true"
+                :aria-modal="isTop ? 'true' : undefined"
+                :aria-hidden="!isTop ? 'true' : undefined"
+                :inert="!isTop ? true : undefined"
                 aria-label="Escolha um ícone"
                 tabindex="-1"
                 @click.stop
-                @keydown="trap.onKeydown"
+                @keydown="isTop ? trap.onKeydown($event) : undefined"
             >
                 <div class="max-icon-picker-header p-drawer-header">
                     <span class="max-icon-picker-title p-drawer-title">Escolha um ícone</span>
@@ -134,13 +136,15 @@
 
 <script setup lang="ts">
     import { hasContent, watchDebounced } from '@maxvue/max-use';
-    import { ref, computed, watch, useAttrs, nextTick, onBeforeUnmount } from 'vue';
+    import { ref, computed, watch, useAttrs, nextTick, onBeforeUnmount, useId } from 'vue';
     import type { Ref } from 'vue';
     import InputBase from './InputBase.vue';
     import MaxIcon from './MaxIcon.vue';
     import { sanitizeSvg } from '../helpers/sanitizeSvg';
     import { useVirtualList } from '../composables/useVirtualList';
     import { useFocusTrap } from '../helpers/useFocusTrap';
+    import { useModalStore } from '../stores/useModal.Store';
+    import { useScrollLock } from '../helpers/useScrollLock';
 
     const COLS = 8;
     const ROW_HEIGHT = 40;
@@ -205,6 +209,10 @@
     const searchInputRef = ref<HTMLInputElement | null>(null);
     const drawerEl = ref<HTMLElement | null>(null);
     const trap = useFocusTrap(drawerEl);
+    const modalStore = useModalStore();
+    const modalId = 'max-icon-picker-' + useId();
+    const isTop = computed(() => modalStore.isTop(modalId));
+    const scrollLock = useScrollLock(modalId);
     const search = ref('');
     const curatedIcons = ref<IconEntry[]>([]);
     const isLoading = ref(false);
@@ -437,16 +445,23 @@
     };
 
     const onGlobalKeydown = (event: KeyboardEvent) => {
-        if (event.key === 'Escape' && visible.value) closeDrawer();
+        if (event.key === 'Escape' && visible.value && isTop.value) {
+            event.stopPropagation();
+            closeDrawer();
+        }
     };
 
     watch(visible, async (val) => {
         if (val) {
+            modalStore.push(modalId);
+            scrollLock.lock();
             if (typeof window !== 'undefined') window.addEventListener('keydown', onGlobalKeydown);
             trap.activate();
             await nextTick();
             searchInputRef.value?.focus();
         } else {
+            modalStore.remove(modalId);
+            scrollLock.unlock();
             if (typeof window !== 'undefined') window.removeEventListener('keydown', onGlobalKeydown);
             trap.deactivate();
             nextTick(() => {
@@ -474,6 +489,10 @@
     });
 
     onBeforeUnmount(() => {
+        if (visible.value) {
+            modalStore.remove(modalId);
+            scrollLock.unlock();
+        }
         trap.deactivate();
         if (typeof window !== 'undefined') window.removeEventListener('keydown', onGlobalKeydown);
         if (svgFetchTimer !== null) {
@@ -497,7 +516,11 @@
         isLoading,
         hasLoadError,
         fetchCuratedIcons,
-        retryLoad: () => fetchCuratedIcons(search.value)
+        retryLoad: () => fetchCuratedIcons(search.value),
+        openDrawer,
+        closeDrawer,
+        openDialog: openDrawer,
+        closeDialog: closeDrawer
     });
 
     defineEmits<{

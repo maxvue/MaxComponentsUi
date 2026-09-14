@@ -45,12 +45,14 @@
                         @click.stop="() => {}"
                         @keydown="trap.onKeydown"
                     >
-                        <slot name="header" :title-id="title_id">
-                            <MaxGrid class="max-popover-header" :id="title_id">
-                                <MaxTitle1 class="max-popover-title" :title="props.title ?? 'Titulo'" :subtitle="props.subTitle ?? 'Sub Titulo'" />
-                                <MaxIconButton class="max-popover-close" i="iconoir:xmark" size="1.3" aria-label="Fechar" @click.stop="hide" />
-                            </MaxGrid>
-                        </slot>
+                        <div v-if="!props.noHeader" :id="title_id" class="max-popover-header-wrapper">
+                            <slot name="header" :title-id="title_id">
+                                <MaxGrid class="max-popover-header">
+                                    <MaxTitle1 class="max-popover-title" :title="props.title ?? 'Titulo'" :subtitle="props.subTitle ?? 'Sub Titulo'" />
+                                    <MaxIconButton class="max-popover-close" i="iconoir:xmark" size="1.3" aria-label="Fechar" @click.stop="hide" />
+                                </MaxGrid>
+                            </slot>
+                        </div>
                         <div class="max-popover-content">
                             <slot name="content"></slot>
                             <slot></slot>
@@ -63,7 +65,7 @@
 </template>
 
 <script setup lang="ts">
-    import { useTemplateRef, ref, computed, useId, watch, onBeforeUnmount, onMounted, useSlots } from 'vue';
+    import { useTemplateRef, ref, computed, useId, watch, onBeforeUnmount, useSlots } from 'vue';
     import { usePopoverStore } from '../stores/usePopover.Store';
     import { useFocusTrap } from '../helpers/useFocusTrap';
     import { useActiveOverlayPosition } from '../composables/useActiveOverlayPosition';
@@ -117,6 +119,8 @@
         plus?: boolean | string | number | undefined;
         /** Oculta o triangulo de ligação com o botão */
         noPicker?: boolean;
+        /** Desativa o cabeçalho do popover */
+        noHeader?: boolean;
         /** Nome acessível explícito para o diálogo */
         ariaLabel?: string;
         /** ID do elemento que rotula o diálogo */
@@ -125,7 +129,8 @@
         dark: 0.4,
         light: undefined,
         loading: false,
-        noPicker: false
+        noPicker: false,
+        noHeader: false
     });
 
     const size_icon = computed(() => {
@@ -141,14 +146,9 @@
 
     const isOpen = computed(() => popover_store.show_id === id.value);
 
-    const dialog_id = computed(() => 'max-popover-dialog-' + id.value);
-    const title_id = computed(() => (props.title || props.subTitle ? 'max-popover-title-' + id.value : undefined));
-    const is_mounted = ref(false);
-    onMounted(() => {
-        is_mounted.value = true;
-    });
-
     const slots = useSlots();
+    const dialog_id = computed(() => 'max-popover-dialog-' + id.value);
+    const title_id = computed(() => (!props.noHeader ? 'max-popover-title-' + id.value : undefined));
 
     const isNonEmptyTextInDom = (elementId?: string): boolean => {
         if (!elementId || typeof document === 'undefined') return false;
@@ -160,24 +160,48 @@
         return text.length > 0;
     };
 
+    const getTextFromVNodes = (vnodes: any): string => {
+        if (!vnodes) return '';
+        if (typeof vnodes === 'string') return vnodes.trim();
+        if (typeof vnodes === 'number') return String(vnodes);
+        if (Array.isArray(vnodes)) return vnodes.map(getTextFromVNodes).join('').trim();
+        if (typeof vnodes === 'object') {
+            if (typeof vnodes.children === 'string') return vnodes.children.trim();
+            if (Array.isArray(vnodes.children)) return getTextFromVNodes(vnodes.children);
+            if (typeof vnodes.children === 'object' && vnodes.children !== null) if (typeof vnodes.children.default === 'function') return getTextFromVNodes(vnodes.children.default());
+
+        }
+        return '';
+    };
+
+    const getSlotText = (slotFn?: (props: any) => any): string => {
+        if (!slotFn) return '';
+        try {
+            return getTextFromVNodes(slotFn({}));
+        } catch {
+            return '';
+        }
+    };
+
     const computedAriaLabelledby = computed(() => {
-        void is_mounted.value;
-        void isOpen.value;
         if (props.ariaLabelledby) {
             const rawId = props.ariaLabelledby.trim();
             if (!rawId) return undefined;
             if (typeof document !== 'undefined') return isNonEmptyTextInDom(rawId) ? rawId : undefined;
-
             return rawId;
         }
-        if (slots.header) return undefined;
+        if (props.noHeader) return undefined;
+        if (slots.header) {
+            const slotText = getSlotText(slots.header);
+            return slotText.length > 0 ? title_id.value : undefined;
+        }
         if (props.title?.trim() || props.subTitle?.trim()) return title_id.value;
         return undefined;
     });
 
     const computedAriaLabel = computed(() => {
         if (computedAriaLabelledby.value) return undefined;
-        const rawLabel = props.ariaLabel?.trim() || props.title?.trim();
+        const rawLabel = props.ariaLabel?.trim() || (props.title?.trim() || undefined);
         return rawLabel && rawLabel.length > 0 ? rawLabel : 'Informações adicionais';
     });
 
@@ -201,22 +225,39 @@
             const width_el = overlayRect.width || 300;
             const height_el = overlayRect.height || 60;
 
-            let top = targetRect.top + height_btn + 15;
-            let left = targetRect.left + (width_btn / 2) - (width_el / 2);
+            const margin = 8;
+            const arrowSpacing = 15;
+
+            const spaceBelow = viewportHeight - (targetRect.top + height_btn);
+            const spaceAbove = targetRect.top;
+
             let isTop = false;
-            let isLeft = false;
+            let top: number;
 
-            if (top + height_el + 15 > viewportHeight) {
-                top = targetRect.top - height_btn - height_el;
+            if (spaceBelow >= height_el + arrowSpacing) {
+                top = targetRect.top + height_btn + arrowSpacing;
+                isTop = false;
+            } else if (spaceAbove >= height_el + arrowSpacing) {
+                top = targetRect.top - height_el - arrowSpacing;
                 isTop = true;
+            } else if (spaceAbove > spaceBelow) {
+                top = targetRect.top - height_el - arrowSpacing;
+                isTop = true;
+            } else {
+                top = targetRect.top + height_btn + arrowSpacing;
+                isTop = false;
             }
 
-            if (left + width_el + 15 > viewportWidth) {
-                left = targetRect.left + width_btn - width_el + 10;
-                isLeft = true;
-            }
+            top = Math.max(margin, Math.min(top, viewportHeight - height_el - margin));
 
-            left = Math.max(8, Math.min(left, viewportWidth - width_el - 8));
+            let left = targetRect.left + (width_btn / 2) - (width_el / 2);
+
+            if (left + width_el + margin > viewportWidth) left = targetRect.left + width_btn - width_el + 10;
+
+
+            left = Math.max(margin, Math.min(left, viewportWidth - width_el - margin));
+
+            const isLeft = (targetRect.left + (width_btn / 2)) > (left + (width_el / 2));
 
             return {
                 top,
@@ -346,7 +387,7 @@
 
 .popover-item {
     position: fixed;
-    z-index: var(--z-popover, 1300);
+    z-index: var(--max-layer-popover, 1200);
 
     .max-popover-dialog {
         position: fixed;
@@ -354,11 +395,13 @@
         max-width: calc(100vw - 16px);
         box-sizing: border-box;
         min-height: 60px;
+        max-height: calc(100vh - 32px);
         max-height: calc(100dvh - 32px);
+        max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 32px);
         overflow-y: auto;
         background-color: var(--background-0);
         color: var(--background-700);
-        z-index: var(--z-popover, 1300);
+        z-index: var(--max-layer-popover, 1200);
         border: 1px solid var(--surface-border);
         display: grid;
         grid-template-rows: auto 1fr;
@@ -399,6 +442,11 @@
             &.is-right::before {
                 left: 15px;
             }
+        }
+
+        .max-popover-header-wrapper {
+            display: block;
+            width: 100%;
         }
 
         .max-popover-header {
