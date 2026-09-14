@@ -257,6 +257,8 @@ export interface InputBaseProps {
     caution?: string | boolean | undefined;
     /** Define se o campo é obrigatório */
     required?: boolean;
+    /** Oculta a mensagem de feedback e remove a reserva vertical */
+    noMessage?: boolean;
 }
 
 /**
