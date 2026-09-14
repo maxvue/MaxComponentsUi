@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import MaxInputMarkdown from '../../src/components/MaxInputMarkdown.vue';
 
 let latestEditorOptions: any = null;
@@ -112,6 +114,16 @@ describe('MaxInputMarkdown', () => {
         const content = wrapper.find('.max-input-markdown__content');
         expect(content.attributes('style')).toContain('min-height: 300px');
         expect(content.attributes('style')).toContain('max-height: 600px');
+    });
+
+    it('ocupa 100% da altura disponível quando minHeight e maxHeight não são informados', () => {
+        const wrapper = mountMarkdown();
+        const content = wrapper.get('.max-input-markdown__content');
+        const source = readFileSync(resolve(__dirname, '../../src/components/MaxInputMarkdown.vue'), 'utf-8');
+
+        expect(source).toMatch(/\.max-input-markdown\s*\{[\s\S]*?height:\s*100%;/);
+        expect(content.attributes('style') ?? '').not.toContain('min-height');
+        expect(content.attributes('style') ?? '').not.toContain('max-height');
     });
 
     it('aplica classe disabled quando disabled=true', () => {
