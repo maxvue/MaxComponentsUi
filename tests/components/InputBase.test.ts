@@ -1,6 +1,8 @@
 import { mount } from '@vue/test-utils';
 import { describe, it, expect } from 'vitest';
 import { defineComponent, h } from 'vue';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import InputBase from '../../src/components/InputBase.vue';
 import MaxIcon from '../../src/components/MaxIcon.vue';
 
@@ -283,6 +285,10 @@ describe('InputBase.vue', () => {
         const root = wrapper.find('.max-input-main-div');
         expect(root.classes()).toContain('no-message');
         expect(wrapper.find('.input-message').exists()).toBe(false);
+
+        const source = readFileSync(resolve('src/components/InputBase.vue'), 'utf8');
+        const compactStyle = source.slice(source.indexOf('&.no-status'), source.indexOf('&[input-click]'));
+        expect(compactStyle).toContain('min-height: 36px;');
     });
 
     it('renderiza mensagem de erro sem truncamento por padrao', () => {

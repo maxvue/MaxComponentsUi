@@ -580,6 +580,7 @@
     &[no-message],
     &[no-messages] {
         grid-template-rows: 36px !important;
+        min-height: 36px;
 
         .input-message {
             display: none !important;
