@@ -6,7 +6,7 @@ import { configureMaxApp, resetMaxAppConfig } from '../../src/helpers/maxAppConf
 
 const mockUseRefCachedApi = vi.fn((route: string) => {
     return ref<ListMenu | null | undefined>({
-        side: [{ title: `Menu for ${route}` }]
+        side: [{ details: { title: `Menu for ${route}` } }]
     });
 });
 
@@ -31,7 +31,7 @@ describe('useListMenusStore', () => {
 
         expect(store.list).toBeDefined();
         expect(store.list).toEqual({
-            side: [{ title: 'Menu for menus' }]
+            side: [{ details: { title: 'Menu for menus' } }]
         });
     });
 
@@ -61,7 +61,7 @@ describe('useListMenusStore', () => {
 
         expect(store1).not.toBe(store2);
 
-        store1.list = { side: [{ title: 'Instância 1' }] };
-        expect(store2.list).toEqual({ side: [{ title: 'Menu for menus' }] });
+        store1.list = { side: [{ details: { title: 'Instância 1' } }] };
+        expect(store2.list).toEqual({ side: [{ details: { title: 'Menu for menus' } }] });
     });
 });

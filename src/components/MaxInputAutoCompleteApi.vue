@@ -15,7 +15,7 @@
                     aria-autocomplete="list"
                     :aria-expanded="isOverlayActive"
                     :aria-controls="isOverlayActive ? listboxId : undefined"
-                    :aria-activedescendant="isOverlayActive && activeIndex >= 0 && activeIndex < filtered_values.length ? `${listboxId}-opt-${activeIndex}` : undefined"
+                    :aria-activedescendant="isOverlayActive && activeIndex >= 0 && activeIndex < filtered_values.length && isItemMounted ? `${listboxId}-opt-${activeIndex}` : undefined"
                     :aria-busy="isLoading"
                     @input="onInput"
                     @focus="onFocus"
@@ -71,7 +71,7 @@
                                 class="max-autocomplete-item"
                                 :class="{ 'max-autocomplete-item-active': activeIndex === entry.index }"
                                 role="option"
-                                :aria-selected="activeIndex === entry.index ? 'true' : (isOptionSelected(entry.item) ? 'true' : 'false')"
+                                :aria-selected="isOptionSelected(entry.item) ? 'true' : 'false'"
                                 @click.stop="selectOption(entry.item)"
                                 @mouseenter="activeIndex = entry.index"
                             >
@@ -102,6 +102,7 @@
     import type { Ref } from 'vue';
     import { ref, computed, watch, nextTick, onBeforeUnmount, useId } from 'vue';
     import InputBase from './InputBase.vue';
+    import { useOutsidePointer } from '../helpers/useOutsidePointer';
 
     interface Props {
         modelValue?: any;
@@ -189,6 +190,17 @@
         overscan: props.numToleratedItems ?? 5
     });
 
+    const isItemMounted = computed(() => {
+        if (!isVirtual.value) return true;
+        return visibleItems.value.some((entry) => entry.index === activeIndex.value);
+    });
+
+    watch(filtered_values, (newVals) => {
+        if (activeIndex.value >= newVals.length) {
+            activeIndex.value = -1;
+        }
+    });
+
     const onOverlayScroll = (e: Event) => {
         const el = e.target as HTMLElement;
         if (el) setViewport(el.scrollTop, el.clientHeight);
@@ -235,12 +247,30 @@
     });
 
     const isOptionSelected = (option: any): boolean => {
-        if (!temp_value.value) return false;
-        if (typeof temp_value.value === 'string') {
-            const valKey = props.optionValue ?? 'value';
-            return option[valKey] === temp_value.value || option.id === temp_value.value || option.value === temp_value.value || option.model === temp_value.value;
+        const target = (temp_value.value && typeof temp_value.value !== 'string')
+            ? temp_value.value
+            : (props.modelValue ?? null);
+        if (!target) return false;
+        const valKey = props.optionValue ?? 'value';
+        if (typeof target === 'object') {
+            if (target[valKey] !== undefined && option[valKey] !== undefined) {
+                return target[valKey] === option[valKey];
+            }
+            if (target.id !== undefined && option.id !== undefined) {
+                return target.id === option.id;
+            }
+            if (target.value !== undefined && option.value !== undefined) {
+                return target.value === option.value;
+            }
+            if (target.model !== undefined && option.model !== undefined) {
+                return target.model === option.model;
+            }
+            return option === target;
         }
-        return option === temp_value.value;
+        if (typeof target === 'string') {
+            return option[valKey] === target || option.id === target || option.value === target || option.model === target;
+        }
+        return option === target;
     };
 
     let requestGeneration = 0;
@@ -349,10 +379,38 @@
         activeIndex.value = -1;
     };
 
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const cancelDebounce = () => {
+        if (debounceTimer) {
+            clearTimeout(debounceTimer);
+            debounceTimer = null;
+        }
+    };
+
+    const triggerDebouncedFetch = () => {
+        cancelDebounce();
+        const query = temp_value_string.value;
+        if (query.length < props.minLength) {
+            if (currentAbortController) {
+                currentAbortController.abort();
+                currentAbortController = null;
+            }
+            isLoading.value = false;
+            return;
+        }
+
+        const waitMs = typeof props.delay === 'number' ? props.delay : 300;
+        debounceTimer = setTimeout(() => {
+            fetchData();
+        }, waitMs);
+    };
+
     const onInput = (event: Event) => {
         const val = (event.target as HTMLInputElement).value;
         temp_value.value = val;
         isOpen.value = temp_value_string.value.length >= props.minLength;
+        triggerDebouncedFetch();
     };
 
     const onFocus = () => {
@@ -418,49 +476,20 @@
         if (temp_value.value && typeof temp_value.value !== 'string') emit('update:modelValue', temp_value.value);
     }, { flush: 'sync' });
 
-    const onGlobalKeydown = (event: KeyboardEvent) => {
-        if (event.key === 'Escape' && isOpen.value) hide();
-    };
-
-    let outsidePointerDown = false;
-    const onDocPointerDown = (e: MouseEvent | TouchEvent | PointerEvent) => {
-        const target = e.target as Node | null;
-        if (overlayEl.value && !overlayEl.value.contains(target) && ac.value && !ac.value.contains(target)) outsidePointerDown = true;
-        else outsidePointerDown = false;
-    };
-
-    const onDocClick = (e: MouseEvent) => {
-        const target = e.target as Node | null;
-        if (outsidePointerDown && overlayEl.value && !overlayEl.value.contains(target) && ac.value && !ac.value.contains(target)) hide();
-
-        outsidePointerDown = false;
-    };
-
-    watch(isOpen, (open) => {
-        if (typeof window === 'undefined') return;
-        if (open) {
-            window.addEventListener('keydown', onGlobalKeydown);
-            document.addEventListener('pointerdown', onDocPointerDown, true);
-            document.addEventListener('click', onDocClick, true);
-        } else {
-            window.removeEventListener('keydown', onGlobalKeydown);
-            document.removeEventListener('pointerdown', onDocPointerDown, true);
-            document.removeEventListener('click', onDocClick, true);
-        }
+    useOutsidePointer(isOpen, {
+        elements: () => [overlayEl.value, ac.value],
+        onClose: () => hide(),
+        closeOnEscape: true,
+        triggerEl: ac
     });
 
     onBeforeUnmount(() => {
+        cancelDebounce();
         if (currentAbortController) {
             currentAbortController.abort();
             currentAbortController = null;
         }
         requestGeneration++;
-
-        if (typeof window !== 'undefined') {
-            window.removeEventListener('keydown', onGlobalKeydown);
-            document.removeEventListener('pointerdown', onDocPointerDown, true);
-            document.removeEventListener('click', onDocClick, true);
-        }
     });
 
     defineExpose({

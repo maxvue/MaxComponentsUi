@@ -359,5 +359,46 @@ describe('MaxInputFile', () => {
 
             expect(liveRegion.text()).toContain('1 arquivo selecionado');
         });
+
+        it('chooser principal utiliza elemento button nativo com aria-label limpo e aria-controls', () => {
+            const wrapper = mount(MaxInputFile, {
+                props: { label: 'Enviar <b>comprovante</b>' }
+            });
+
+            const chooserBtn = wrapper.find('button.input-file-content');
+            expect(chooserBtn.exists()).toBe(true);
+            expect(chooserBtn.element.tagName.toLowerCase()).toBe('button');
+            expect(chooserBtn.attributes('type')).toBe('button');
+            expect(chooserBtn.attributes('aria-label')).toBe('Enviar comprovante');
+
+            const hiddenInput = wrapper.find<HTMLInputElement>('input.max-input-file-hidden');
+            expect(chooserBtn.attributes('aria-controls')).toBe(hiddenInput.attributes('id'));
+        });
+
+        it('aciona o clique no input oculto ao clicar no botão chooser nativo', async () => {
+            const wrapper = mount(MaxInputFile);
+            const hiddenInput = wrapper.find<HTMLInputElement>('input.max-input-file-hidden');
+            const clickSpy = vi.spyOn(hiddenInput.element, 'click');
+
+            const chooserBtn = wrapper.find('button.input-file-content');
+            await chooserBtn.trigger('click');
+            expect(clickSpy).toHaveBeenCalledTimes(1);
+        });
+
+        it('desabilita o botão chooser nativo quando disabled for true', async () => {
+            const wrapper = mount(MaxInputFile, {
+                props: { disabled: true }
+            });
+
+            const chooserBtn = wrapper.find('button.input-file-content');
+            expect(chooserBtn.attributes('disabled')).toBeDefined();
+
+            const hiddenInput = wrapper.find<HTMLInputElement>('input.max-input-file-hidden');
+            const clickSpy = vi.spyOn(hiddenInput.element, 'click');
+
+            await chooserBtn.trigger('click');
+            expect(clickSpy).not.toHaveBeenCalled();
+        });
     });
 });
+

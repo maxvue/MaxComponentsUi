@@ -2,8 +2,24 @@
     <div class="max-chart-main-div">
         <canvas ref="canvas_ref" :aria-label="effectiveAriaLabel" :role="effectiveAriaLabel ? 'img' : undefined"></canvas>
 
+        <!-- Botão alternativo acessível para exibir/ocultar a tabela de dados -->
+        <button
+            v-if="accessibleRows.length > 0"
+            type="button"
+            class="max-chart-toggle-table-btn"
+            :aria-expanded="isTableExpanded"
+            :aria-label="isTableExpanded ? 'Ocultar tabela de dados do gráfico' : 'Exibir tabela de dados do gráfico'"
+            @click="isTableExpanded = !isTableExpanded"
+        >
+            {{ isTableExpanded ? 'Ocultar dados' : 'Ver dados em tabela' }}
+        </button>
+
         <!-- Tabela acessível alternativa para navegação por teclado e tecnologias assistivas -->
-        <div v-if="accessibleRows.length > 0" class="max-chart-accessible-table sr-only">
+        <div
+            v-if="accessibleRows.length > 0"
+            class="max-chart-accessible-table"
+            :class="{ 'is-expanded': isTableExpanded }"
+        >
             <table :aria-label="effectiveAriaLabel || 'Tabela de dados do gráfico'">
                 <caption>{{ effectiveAriaLabel || 'Dados do gráfico' }}</caption>
                 <thead>
@@ -70,13 +86,15 @@
         return 'Gráfico de dados';
     });
 
+    const isTableExpanded = ref(false);
+
     const accessibleRows = computed(() => {
         if (!props.data || !props.data.labels || !props.data.datasets) return [];
         const labels = props.data.labels;
         const datasets = props.data.datasets;
-        return labels.map((label: any, rIdx: number) => ({
+        return labels.map((label: string | number, rIdx: number) => ({
             label: String(label),
-            values: datasets.map((ds: any) => {
+            values: datasets.map((ds) => {
                 const val = ds.data?.[rIdx];
                 return val !== undefined && val !== null ? String(val) : '';
             })
@@ -204,16 +222,111 @@
             height: 100%;
         }
 
-        .sr-only {
+        .max-chart-toggle-table-btn {
             position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip-path: inset(50%);
-            white-space: nowrap;
-            border: 0;
+            top: 6px;
+            right: 6px;
+            z-index: 12;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            border-radius: 4px;
+            background: var(--background-100, #f1f5f9);
+            color: var(--background-800, #001524);
+            border: 1px solid var(--background-300, #cbd5e1);
+            cursor: pointer;
+            font-family: inherit;
+
+            &:not(:focus-visible):not(:hover) {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip-path: inset(50%);
+                white-space: nowrap;
+                border: 0;
+            }
+
+            &:focus-visible {
+                outline: none;
+                box-shadow: var(--max-focus-ring);
+            }
+
+            &:hover {
+                background: var(--background-200, #e2e8f0);
+            }
+        }
+
+        .max-chart-accessible-table {
+            &:not(:focus-within):not(.is-expanded) {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip-path: inset(50%);
+                white-space: nowrap;
+                border: 0;
+            }
+
+            &:focus-within,
+            &.is-expanded {
+                position: absolute;
+                inset: 0;
+                z-index: 10;
+                background: var(--background-0, #ffffff);
+                color: var(--background-800, #001524);
+                padding: 1rem;
+                overflow: auto;
+                border-radius: 0.5rem;
+                border: 1px solid var(--background-300, #cbd5e1);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 0.85rem;
+
+                caption {
+                    font-weight: 600;
+                    margin-bottom: 0.5rem;
+                    text-align: left;
+                }
+
+                th, td {
+                    padding: 0.4rem 0.6rem;
+                    border: 1px solid var(--background-200, #e2e8f0);
+                    text-align: left;
+                }
+
+                th {
+                    background: var(--background-50, #f8fafc);
+                    font-weight: 600;
+                }
+
+                .max-chart-cell-btn {
+                    background: var(--background-100, #f1f5f9);
+                    border: 1px solid var(--background-300, #cbd5e1);
+                    border-radius: 4px;
+                    padding: 0.2rem 0.5rem;
+                    cursor: pointer;
+                    color: inherit;
+                    font-family: inherit;
+                    font-size: inherit;
+
+                    &:focus-visible {
+                        outline: none;
+                        box-shadow: var(--max-focus-ring);
+                    }
+
+                    &:hover {
+                        background: var(--background-200, #e2e8f0);
+                    }
+                }
+            }
         }
     }
 </style>

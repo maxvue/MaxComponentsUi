@@ -168,7 +168,7 @@
     height: 100vh;
     width: 100vw;
     position: fixed;
-    z-index: var(--z-popover, 1300);
+    z-index: var(--max-layer-popover, 1200);
     top: 0;
     left: 0;
 

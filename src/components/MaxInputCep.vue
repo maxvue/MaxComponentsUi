@@ -1,5 +1,13 @@
 <template>
-    <InputBase v-bind="props" class="max-input-cep input-base-cep-main-div" :value="temp_value" :done="done ?? undefined" :caution="caution" :error="error_msg ?? undefined" :icon-right="loading ? 'line-md:loading-loop' : undefined">
+    <InputBase
+        v-bind="props"
+        class="max-input-cep input-base-cep-main-div"
+        :value="temp_value"
+        :done="done ?? undefined"
+        :caution="caution"
+        :error="error_msg ?? undefined"
+        :icon-right="loading ? 'line-md:loading-loop' : undefined"
+    >
         <template #default="{ inputAttrs }">
             <input
                 v-bind="inputAttrs"
@@ -10,7 +18,8 @@
                 v-maska="maskValue"
                 placeholder="00000-000"
                 :disabled="props.disabled"
-                @blur="onBlur"
+                @input="validation.onInput"
+                @blur="validation.onBlur"
             />
         </template>
     </InputBase>
@@ -26,6 +35,7 @@
     import InputBase from './InputBase.vue';
     import { vMaska } from 'maska/vue';
     import { useMirroredModel } from '../helpers/useMirroredModel';
+    import { useInputValidation } from '../helpers/useInputValidation';
     import type { InputBaseProps } from '../types';
 
     const attrs: any = useAttrs();
@@ -63,38 +73,58 @@
     const temp_value_numbers = computed(() => onlyNumbers(temp_value.value ?? ''));
     const maskValue = computed(() => ({ tokens: { '#': { pattern: /[0-9]/ } }, mask: '#####-###' }));
 
-    const hasBeenTouched = ref(false);
-
-    const onBlur = () => {
-        hasBeenTouched.value = true;
+    const isValidCep = (raw: any): boolean => {
+        const numbers = onlyNumbers(raw ?? '');
+        return cepIsValid(numbers);
     };
 
-    const isValidCep = computed(() => cepIsValid(temp_value_numbers.value));
+    const isComplete = (raw: any): boolean => {
+        const numbers = onlyNumbers(raw ?? '');
+        return numbers.length === 8;
+    };
 
-    const done = computed(() => {
-        if (props.done !== undefined) return props.done ?? null;
-        if (temp_value_numbers.value.length > 0) return isValidCep.value;
-        return null;
+    const explicitError = computed<string | null>(() =>
+        (typeof props.error === 'string' ? props.error : null)
+        ?? (props as any).errMsg
+        ?? attrs.errMsg
+        ?? (props as any).error_message
+        ?? attrs.error_message
+        ?? (props as any).error_msg
+        ?? attrs.error_msg
+        ?? null
+    );
+
+    const invalidMessage = computed(() => explicitError.value ?? 'CEP inválido');
+
+    const validation = useInputValidation({
+        value: temp_value,
+        required: computed(() => props.required),
+        caution: computed(() => props.caution),
+        done: computed(() => props.done),
+        validator: isValidCep,
+        isComplete,
+        invalidMessage,
+        requiredMessage: computed(() => explicitError.value ?? 'Campo obrigatório')
     });
 
-    const caution = computed(() => {
-        if (props.caution !== undefined) return props.caution;
-        if (temp_value_numbers.value.length === 0) return Boolean(props.required && hasBeenTouched.value);
-
-        return done.value === false;
-    });
-
-    const error_msg = computed(() => {
-        if (!caution.value) return null;
-        const attrs_error_message = attrs.errMsg ?? attrs.error_message ?? attrs.error_msg ?? null;
-        if (temp_value_numbers.value.length === 0 && props.required) return attrs_error_message ?? 'Campo obrigatório';
-        if (temp_value_numbers.value.length > 0 && !isValidCep.value) return attrs_error_message ?? 'CEP inválido';
-        return attrs_error_message;
-    });
+    const done = validation.done;
+    const caution = computed(() => (explicitError.value ? true : validation.caution.value));
+    const error_msg = computed(() => explicitError.value ?? validation.error.value);
 
     // Emite 'complete' quando o CEP se torna valido. A emissao de
     // 'update:modelValue' em si fica a cargo do useMirroredModel acima.
     watch(temp_value, () => {
-        if (isValidCep.value) emit('complete', temp_value_numbers.value);
+        if (isValidCep(temp_value.value)) emit('complete', temp_value_numbers.value);
+    });
+
+    defineExpose({
+        temp_value,
+        maskValue,
+        done,
+        caution,
+        error_msg,
+        validation,
+        submit: validation.submit,
+        reset: validation.reset
     });
 </script>

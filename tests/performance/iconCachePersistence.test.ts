@@ -40,7 +40,12 @@ describe('Performance & Cardinality: Icon Cache Persistence (E05-02)', () => {
         const currentDb = await openIconsDB();
         const currentTx = currentDb!.transaction('icons', 'readwrite');
         const currentStore = currentTx.objectStore('icons');
-        expect(currentStore.data.size).toBe(k);
+        const count = await new Promise<number>((resolve, reject) => {
+            const req = currentStore.count();
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+        });
+        expect(count).toBe(k);
     });
 
     it('persistência incremental não reprocessa os N ícones já presentes no catálogo', async () => {

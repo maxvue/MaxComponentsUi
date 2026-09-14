@@ -1,5 +1,11 @@
 <template>
-    <InputBase class="max-input-cpf-cnpj" v-bind="props" :error="error_msg ?? (props.error === true ? true : undefined)" :caution="caution" :done="done ?? undefined">
+    <InputBase
+        class="max-input-cpf-cnpj"
+        v-bind="props"
+        :error="explicitError ?? (typeof props.caution === 'string' ? undefined : (validation.error.value ?? undefined))"
+        :caution="props.caution ?? (explicitError ? true : validation.caution.value)"
+        :done="props.done ?? validation.done.value ?? undefined"
+    >
         <template #default="{ inputAttrs }">
             <input
                 v-bind="inputAttrs"
@@ -10,7 +16,7 @@
                 v-maska="maskValue"
                 :disabled="props.disabled"
                 @input="onUserInput"
-                @blur="onBlur"
+                @blur="validation.onBlur"
             />
         </template>
     </InputBase>
@@ -27,6 +33,7 @@
     import InputBase from './InputBase.vue';
     import { vMaska } from 'maska/vue';
     import { useMirroredModel } from '../helpers/useMirroredModel';
+    import { useInputValidation } from '../helpers/useInputValidation';
     import type { InputBaseProps } from '../types';
 
     const attrs: any = useAttrs();
@@ -47,12 +54,6 @@
         'update:modelValue': [value: string];
         'complete': [value: string];
     }>();
-
-    const hasBeenTouched = ref(false);
-
-    const onBlur = () => {
-        hasBeenTouched.value = true;
-    };
 
     // O modelValue e sempre normalizado para "so digitos" antes de emitir e
     // ao receber um valor externo, entao a igualdade estrita (default) ja
@@ -91,6 +92,7 @@
         if (masked_value.value !== el.value) masked_value.value = el.value;
         const numbers = onlyNumbers(el.value);
         if (temp_value.value !== numbers) temp_value.value = numbers;
+        validation.onInput();
     };
 
     // Valor vindo de fora (prop) em vez da digitação: alimenta a exibição. O guard por dígitos
@@ -126,62 +128,54 @@
         };
     });
 
-    const done = computed<boolean | null>(() => {
-        if (props.done !== undefined) return props.done ?? null;
-        const only_numbers = onlyNumbers(temp_value.value ?? '');
-        if (only_numbers.length === 0) return null;
-        if (props.cpf) return only_numbers.length === 11 ? cpfIsValid(only_numbers) : null;
-        if (props.cnpj) return only_numbers.length === 14 ? cnpjIsValid(only_numbers) : null;
+    const isComplete = (val: any) => {
+        const only_numbers = onlyNumbers(val ?? '');
+        return (type_mask.value === 'cpf' && only_numbers.length === 11) ||
+               (type_mask.value === 'cnpj' && only_numbers.length === 14);
+    };
+
+    const isDocumentValid = (raw: any): boolean => {
+        const only_numbers = onlyNumbers(raw ?? '');
+        if (only_numbers.length === 0) return false;
+        if (props.cpf) return only_numbers.length === 11 && cpfIsValid(only_numbers);
+        if (props.cnpj) return only_numbers.length === 14 && cnpjIsValid(only_numbers);
         if (only_numbers.length === 11) return cpfIsValid(only_numbers);
         if (only_numbers.length === 14) return cnpjIsValid(only_numbers);
-        return null;
-    });
-
-    const caution = computed(() => {
-        if (props.caution !== undefined) return props.caution;
-        const only_numbers = onlyNumbers(temp_value.value ?? '');
-        if (only_numbers.length === 0) return false;
-
-        const isComplete = (type_mask.value === 'cpf' && only_numbers.length === 11)
-            || (type_mask.value === 'cnpj' && only_numbers.length === 14);
-
-        if (isComplete) return done.value === false;
-
-
-        if (hasBeenTouched.value) return true;
-
-
         return false;
+    };
+
+    const explicitError = computed(() =>
+        (typeof props.error === 'string' ? props.error : null)
+        ?? (props as any).errMsg
+        ?? attrs.errMsg
+        ?? (props as any).error_message
+        ?? attrs.error_message
+        ?? (props as any).error_msg
+        ?? attrs.error_msg
+        ?? null
+    );
+
+    const invalidMessage = computed(() => {
+        if (explicitError.value) return explicitError.value;
+        if (type_mask.value === 'cpf') return 'CPF inválido';
+        if (type_mask.value === 'cnpj') return 'CNPJ inválido';
+        return 'Documento inválido';
     });
 
-    const error_msg = computed<string | null>(() => {
-        const attrs_error_message = (typeof props.error === 'string' ? props.error : null)
-            ?? (props as any).errMsg
-            ?? attrs.errMsg
-            ?? (props as any).error_message
-            ?? attrs.error_message
-            ?? (props as any).error_msg
-            ?? attrs.error_msg
-            ?? null;
-        const only_numbers = onlyNumbers(temp_value.value ?? '');
-
-        if (only_numbers.length === 0) {
-            if (props.required && hasBeenTouched.value) return attrs_error_message ?? 'Campo obrigatório';
-            if (typeof props.error === 'string') return props.error;
-
-            return null;
-        }
-
-
-        if (caution.value) {
-            if (typeof attrs_error_message === 'string') return attrs_error_message;
-            if (type_mask.value === 'cpf') return 'CPF inválido';
-            if (type_mask.value === 'cnpj') return 'CNPJ inválido';
-            return 'Documento inválido';
-        }
-
-        return attrs_error_message;
+    const validation = useInputValidation({
+        value: temp_value,
+        required: computed(() => props.required),
+        caution: computed(() => props.caution),
+        done: computed(() => props.done),
+        validator: isDocumentValid,
+        isComplete,
+        invalidMessage,
+        requiredMessage: computed(() => explicitError.value ?? 'Campo obrigatório')
     });
+
+    const done = validation.done;
+    const caution = computed(() => (explicitError.value ? true : validation.caution.value));
+    const error_msg = computed(() => explicitError.value ?? validation.error.value);
 
     // Emite 'complete' quando o documento atinge 11 (CPF) ou 14 (CNPJ)
     // digitos e passa na validacao. A emissao de 'update:modelValue' em si
@@ -190,6 +184,18 @@
         const only_numbers: string = onlyNumbers(temp_value.value);
         if ((only_numbers.length === 11 || only_numbers.length === 14) && done.value) emit('complete', only_numbers);
     }, { immediate: true });
+
+    defineExpose({
+        temp_value,
+        masked_value,
+        maskValue,
+        done,
+        caution,
+        error_msg,
+        validation,
+        submit: validation.submit,
+        reset: validation.reset
+    });
 </script>
 
 <style lang="scss" scoped>

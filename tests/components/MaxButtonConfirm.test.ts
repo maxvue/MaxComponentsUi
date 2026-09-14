@@ -60,11 +60,11 @@ describe('MaxButtonConfirm', () => {
         expect(store.rejectProps.label).toBe('Cancelar');
         expect(store.rejectProps.icon).toBe('mdi:close');
 
-        store.acceptProps.action();
+        store.acceptProps.action?.();
         expect(onAccept).toHaveBeenCalledTimes(1);
         expect(wrapper.emitted('confirm')).toBeTruthy();
 
-        store.rejectProps.action();
+        store.rejectProps.action?.();
         expect(onReject).toHaveBeenCalledTimes(1);
         expect(wrapper.emitted('cancel')).toBeTruthy();
     });

@@ -358,4 +358,177 @@ describe('MaxPopover', () => {
             expect(iconContainer.attributes('style')).toContain('height: 1.4rem');
         });
     });
+
+    describe('Geometria Responsiva, Clamp e Camadas (F11 / E04-07)', () => {
+        const originalGetBoundingClientRect = Element.prototype.getBoundingClientRect;
+
+        afterEach(() => {
+            Element.prototype.getBoundingClientRect = originalGetBoundingClientRect;
+        });
+
+        it('aplica clamp vertical e horizontal em viewport estreito de 280px', async () => {
+            Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: 280 });
+            Object.defineProperty(window, 'innerHeight', { writable: true, configurable: true, value: 400 });
+
+            Element.prototype.getBoundingClientRect = vi.fn(function (this: HTMLElement) {
+                if (this.classList?.contains('max-popover-dialog')) {
+                    return {
+                        width: 250,
+                        height: 180,
+                        top: 0,
+                        left: 0,
+                        bottom: 180,
+                        right: 250,
+                        x: 0,
+                        y: 0,
+                        toJSON: () => {}
+                    } as DOMRect;
+                }
+                return {
+                    width: 36,
+                    height: 36,
+                    top: 250,
+                    left: 20,
+                    bottom: 286,
+                    right: 56,
+                    x: 20,
+                    y: 250,
+                    toJSON: () => {}
+                } as DOMRect;
+            });
+
+            const wrapper = mountPopover();
+            const vm = wrapper.vm as any;
+            vm.show();
+            await wrapper.vm.$nextTick();
+
+            expect(vm.position.left).toBeGreaterThanOrEqual(8);
+            expect(vm.position.left).toBeLessThanOrEqual(280 - 250 - 8);
+            expect(vm.position.top).toBeGreaterThanOrEqual(8);
+            expect(vm.position.top).toBeLessThanOrEqual(400 - 180 - 8);
+        });
+
+        it('aplica clamp em viewport landscape com altura reduzida (320px)', async () => {
+            Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: 568 });
+            Object.defineProperty(window, 'innerHeight', { writable: true, configurable: true, value: 320 });
+
+            Element.prototype.getBoundingClientRect = vi.fn(function (this: HTMLElement) {
+                if (this.classList?.contains('max-popover-dialog')) {
+                    return {
+                        width: 280,
+                        height: 200,
+                        top: 0,
+                        left: 0,
+                        bottom: 200,
+                        right: 280,
+                        x: 0,
+                        y: 0,
+                        toJSON: () => {}
+                    } as DOMRect;
+                }
+                return {
+                    width: 40,
+                    height: 40,
+                    top: 240,
+                    left: 200,
+                    bottom: 280,
+                    right: 240,
+                    x: 200,
+                    y: 240,
+                    toJSON: () => {}
+                } as DOMRect;
+            });
+
+            const wrapper = mountPopover();
+            const vm = wrapper.vm as any;
+            vm.show();
+            await wrapper.vm.$nextTick();
+
+            // Espaço abaixo é insuficiente (320 - 280 = 40px < 200px), deve posicionar acima
+            expect(vm.position.isTop).toBe(true);
+            expect(vm.position.top).toBeGreaterThanOrEqual(8);
+            expect(vm.position.top).toBeLessThanOrEqual(320 - 200 - 8);
+        });
+
+        it('mantém popover dentro dos limites sob zoom de 200% (viewport efetivo 400x300)', async () => {
+            Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: 400 });
+            Object.defineProperty(window, 'innerHeight', { writable: true, configurable: true, value: 300 });
+
+            Element.prototype.getBoundingClientRect = vi.fn(function (this: HTMLElement) {
+                if (this.classList?.contains('max-popover-dialog')) {
+                    return {
+                        width: 260,
+                        height: 160,
+                        top: 0,
+                        left: 0,
+                        bottom: 160,
+                        right: 260,
+                        x: 0,
+                        y: 0,
+                        toJSON: () => {}
+                    } as DOMRect;
+                }
+                return {
+                    width: 32,
+                    height: 32,
+                    top: 260,
+                    left: 360,
+                    bottom: 292,
+                    right: 392,
+                    x: 360,
+                    y: 260,
+                    toJSON: () => {}
+                } as DOMRect;
+            });
+
+            const wrapper = mountPopover();
+            const vm = wrapper.vm as any;
+            vm.show();
+            await wrapper.vm.$nextTick();
+
+            expect(vm.position.left).toBeGreaterThanOrEqual(8);
+            expect(vm.position.left).toBeLessThanOrEqual(400 - 260 - 8);
+            expect(vm.position.top).toBeGreaterThanOrEqual(8);
+            expect(vm.position.top).toBeLessThanOrEqual(300 - 160 - 8);
+            // Botão está à direita do popover clamped, então isLeft é true (seta à direita)
+            expect(vm.position.isLeft).toBe(true);
+        });
+
+        it('sincroniza seta com a posição do gatilho (is-top / is-bottom / is-left / is-right)', async () => {
+            Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: 1000 });
+            Object.defineProperty(window, 'innerHeight', { writable: true, configurable: true, value: 800 });
+
+            // Caso 1: botão no topo esquerdo -> abre abaixo (isTop = false), seta à esquerda (isLeft = false)
+            Element.prototype.getBoundingClientRect = vi.fn(function (this: HTMLElement) {
+                if (this.classList?.contains('max-popover-dialog')) {
+                    return { width: 300, height: 100, top: 0, left: 0, bottom: 100, right: 300, x: 0, y: 0, toJSON: () => {} } as DOMRect;
+                }
+                return { width: 40, height: 40, top: 50, left: 100, bottom: 90, right: 140, x: 100, y: 50, toJSON: () => {} } as DOMRect;
+            });
+
+            const wrapper1 = mountPopover();
+            const vm1 = wrapper1.vm as any;
+            vm1.show();
+            await wrapper1.vm.$nextTick();
+
+            expect(vm1.position.isTop).toBe(false);
+            expect(vm1.position.isLeft).toBe(false);
+
+            // Caso 2: botão na extrema direita e parte inferior -> abre acima (isTop = true) e desloca popover à esquerda (isLeft = true)
+            Element.prototype.getBoundingClientRect = vi.fn(function (this: HTMLElement) {
+                if (this.classList?.contains('max-popover-dialog')) {
+                    return { width: 300, height: 100, top: 0, left: 0, bottom: 100, right: 300, x: 0, y: 0, toJSON: () => {} } as DOMRect;
+                }
+                return { width: 40, height: 40, top: 750, left: 920, bottom: 790, right: 960, x: 920, y: 750, toJSON: () => {} } as DOMRect;
+            });
+
+            const wrapper2 = mountPopover();
+            const vm2 = wrapper2.vm as any;
+            vm2.show();
+            await wrapper2.vm.$nextTick();
+
+            expect(vm2.position.isTop).toBe(true);
+            expect(vm2.position.isLeft).toBe(true);
+        });
+    });
 });

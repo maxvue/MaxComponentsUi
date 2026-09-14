@@ -673,9 +673,9 @@ describe('MaxModal', () => {
             const bg1 = wrapper1.find('.background-modal');
             const bg2 = wrapper2.find('.background-modal');
 
-            // z-index: 1200 + depth * 20
-            expect(bg1.attributes('style')).toContain('z-index: 1200');
-            expect(bg2.attributes('style')).toContain('z-index: 1220');
+            // z-index: token backdrop (1300) + depth * 20
+            expect(bg1.attributes('style')).toContain('z-index: var(--max-layer-modal-backdrop, 1300)');
+            expect(bg2.attributes('style')).toContain('z-index: calc(var(--max-layer-modal-backdrop, 1300) + 20)');
         });
 
         it('marca camadas inferiores com aria-hidden e inert mantendo apenas o topo acessível', async () => {
@@ -742,6 +742,252 @@ describe('MaxModal', () => {
             vm.requestClose('api');
             await wrapper.vm.$nextTick();
             expect(store.show_id).toBeNull();
+        });
+    });
+
+    describe('Contrato unificado de fechamento requestClose e before-close (F08)', () => {
+        it('cancela fechamento via evento @before-close com event.preventDefault() para todas as razões', async () => {
+            let lastReason: string | null = null;
+            let shouldPrevent = true;
+
+            const onBeforeClose = vi.fn((e: any) => {
+                lastReason = e.reason;
+                if (shouldPrevent) e.preventDefault();
+            });
+
+            const wrapper = mountModal({}, {}, {
+                attrs: {
+                    onBeforeClose
+                }
+            });
+            const vm = wrapper.vm as any;
+            const store = useModalStore();
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+            expect(store.show_id).toBe(vm.id);
+
+            // 1. Razão 'button' (clique no botão fechar)
+            const closeBtn = wrapper.find('.close-btn');
+            await closeBtn.trigger('click');
+            expect(lastReason).toBe('button');
+            expect(store.show_id).toBe(vm.id); // Cancelado!
+
+            // 2. Razão 'escape' (tecla Escape)
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+            expect(lastReason).toBe('escape');
+            expect(store.show_id).toBe(vm.id); // Cancelado!
+
+            // 3. Razão 'backdrop' (clique no fundo)
+            const bg = wrapper.find('.background-modal');
+            await bg.trigger('click');
+            expect(lastReason).toBe('backdrop');
+            expect(store.show_id).toBe(vm.id); // Cancelado!
+
+            // 4. Razão 'api' (chamada imperativa vm.close())
+            vm.close();
+            expect(lastReason).toBe('api');
+            expect(store.show_id).toBe(vm.id); // Cancelado!
+
+            // 5. Agora autoriza (shouldPrevent = false) e fecha via close()
+            shouldPrevent = false;
+            vm.close();
+            await wrapper.vm.$nextTick();
+            expect(store.show_id).toBeNull();
+        });
+
+        it('cancela fechamento via evento @before-close e confirma assincronamente com done()', async () => {
+            let capturedDone: (() => void) | null = null;
+            const onBeforeClose = vi.fn((e: any) => {
+                e.preventDefault();
+                capturedDone = e.done;
+            });
+
+            const wrapper = mountModal({}, {}, {
+                attrs: {
+                    onBeforeClose
+                }
+            });
+            const vm = wrapper.vm as any;
+            const store = useModalStore();
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+            expect(store.show_id).toBe(vm.id);
+
+            vm.close();
+            await wrapper.vm.$nextTick();
+            expect(onBeforeClose).toHaveBeenCalledTimes(1);
+            // Modal continua aberto aguardando invocação de done
+            expect(store.show_id).toBe(vm.id);
+
+            // Quando done() é invocado, o modal fecha
+            capturedDone!();
+            await wrapper.vm.$nextTick();
+            expect(store.show_id).toBeNull();
+        });
+
+        it('cancela fechamento via prop :beforeClose retornando false e autoriza com true', async () => {
+            let allow = false;
+            const beforeClose = vi.fn(() => allow);
+
+            const wrapper = mountModal({ beforeClose });
+            const vm = wrapper.vm as any;
+            const store = useModalStore();
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+            expect(store.show_id).toBe(vm.id);
+
+            // Tentativa de fechar: rejeitada
+            vm.close();
+            await wrapper.vm.$nextTick();
+            expect(beforeClose).toHaveBeenCalledTimes(1);
+            expect(store.show_id).toBe(vm.id);
+
+            // Agora autoriza
+            allow = true;
+            vm.close();
+            await wrapper.vm.$nextTick();
+            expect(beforeClose).toHaveBeenCalledTimes(2);
+            expect(store.show_id).toBeNull();
+        });
+
+        it('adia fechamento com waitUntil e fecha quando promise resolve em true', async () => {
+            let resolvePromise!: (val: boolean) => void;
+            const asyncPromise = new Promise<boolean>((resolve) => {
+                resolvePromise = resolve;
+            });
+
+            const onBeforeClose = vi.fn((e: any) => {
+                e.waitUntil(asyncPromise);
+            });
+
+            const wrapper = mountModal({}, {}, {
+                attrs: {
+                    onBeforeClose
+                }
+            });
+            const vm = wrapper.vm as any;
+            const store = useModalStore();
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+            expect(store.show_id).toBe(vm.id);
+
+            const closePromise = vm.requestClose('button');
+            await wrapper.vm.$nextTick();
+            // Enquanto a promise não resolve, modal permanece aberto
+            expect(store.show_id).toBe(vm.id);
+
+            // Resolve em true
+            resolvePromise(true);
+            const result = await closePromise;
+            expect(result).toBe(true);
+            await wrapper.vm.$nextTick();
+            expect(store.show_id).toBeNull();
+        });
+
+        it('adia fechamento com waitUntil e mantém aberto quando promise resolve em false', async () => {
+            let resolvePromise!: (val: boolean) => void;
+            const asyncPromise = new Promise<boolean>((resolve) => {
+                resolvePromise = resolve;
+            });
+
+            const onBeforeClose = vi.fn((e: any) => {
+                e.waitUntil(asyncPromise);
+            });
+
+            const wrapper = mountModal({}, {}, {
+                attrs: {
+                    onBeforeClose
+                }
+            });
+            const vm = wrapper.vm as any;
+            const store = useModalStore();
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+            expect(store.show_id).toBe(vm.id);
+
+            const closePromise = vm.requestClose('button');
+            await wrapper.vm.$nextTick();
+            expect(store.show_id).toBe(vm.id);
+
+            // Resolve em false (cancelamento)
+            resolvePromise(false);
+            const result = await closePromise;
+            expect(result).toBe(false);
+            await wrapper.vm.$nextTick();
+            expect(store.show_id).toBe(vm.id);
+        });
+
+        it('reabrir o modal durante espera de fechamento anula fechamento tardio (proteção de geração)', async () => {
+            let pendingDone!: () => void;
+            const onBeforeClose = vi.fn((e: any) => {
+                e.preventDefault();
+                pendingDone = e.done;
+            });
+
+            const wrapper = mountModal({}, {}, {
+                attrs: {
+                    onBeforeClose
+                }
+            });
+            const vm = wrapper.vm as any;
+            const store = useModalStore();
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+            expect(store.show_id).toBe(vm.id);
+
+            // Dispara solicitação de fechamento
+            vm.close();
+            await wrapper.vm.$nextTick();
+            expect(store.show_id).toBe(vm.id);
+
+            // Usuário reabre o modal antes de resolver a confirmação
+            vm.open();
+            await wrapper.vm.$nextTick();
+            expect(store.show_id).toBe(vm.id);
+
+            // Agora o callback obsoleto de done() é disparado tardiamente
+            pendingDone();
+            await wrapper.vm.$nextTick();
+
+            // O modal DEVE PERMANECER ABERTO graças à proteção de geração!
+            expect(store.show_id).toBe(vm.id);
+            expect(vm.is_show).toBe(true);
+        });
+
+        it('sincroniza modelValue emitindo true quando fechamento via model é cancelado', async () => {
+            const onBeforeClose = vi.fn((e: any) => {
+                expect(e.reason).toBe('model');
+                e.preventDefault();
+            });
+
+            const wrapper = mountModal({ modelValue: true }, {}, {
+                attrs: {
+                    onBeforeClose
+                }
+            });
+            const vm = wrapper.vm as any;
+            const store = useModalStore();
+
+            await wrapper.vm.$nextTick();
+            expect(store.show_id).toBe(vm.id);
+
+            // O pai tenta fechar mudando modelValue para false
+            await wrapper.setProps({ modelValue: false });
+            await wrapper.vm.$nextTick();
+
+            expect(onBeforeClose).toHaveBeenCalledTimes(1);
+            // Modal continua aberto
+            expect(store.show_id).toBe(vm.id);
+            // Emite update:modelValue com true para reverter a prop do pai
+            expect(wrapper.emitted('update:modelValue')).toBeTruthy();
+            const lastEmit = wrapper.emitted('update:modelValue')!.slice(-1)[0];
+            expect(lastEmit).toEqual([true]);
         });
     });
 });

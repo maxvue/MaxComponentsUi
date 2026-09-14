@@ -7,8 +7,8 @@
                 class="max-base-overlay"
                 :role="role"
                 tabindex="-1"
-                :aria-label="ariaLabelledby ? undefined : ariaLabel"
-                :aria-labelledby="ariaLabelledby"
+                :aria-label="computedAriaLabel"
+                :aria-labelledby="computedAriaLabelledby"
                 :style="panelStyle"
             >
                 <slot></slot>
@@ -18,7 +18,8 @@
 </template>
 
 <script setup lang="ts">
-    import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+    import { computed, nextTick, onMounted, ref, toRef, watch } from 'vue';
+    import { useOutsidePointer } from '../../helpers/useOutsidePointer';
 
     const props = withDefaults(
         defineProps<{
@@ -77,31 +78,59 @@
     const panelRef = ref<HTMLElement | null>(null);
     const panelStyle = ref<Record<string, string | undefined>>({});
 
-    const computeZIndex = (): number => {
+    const isValidExternalId = (idToCheck?: string): boolean => {
+        if (!idToCheck) return false;
+        if (typeof document === 'undefined') return true;
+        return Boolean(document.getElementById(idToCheck));
+    };
+
+    const computedAriaLabelledby = computed(() => {
+        if (props.ariaLabelledby) {
+            return isValidExternalId(props.ariaLabelledby) ? props.ariaLabelledby : undefined;
+        }
+        return undefined;
+    });
+
+    const computedAriaLabel = computed(() => {
+        if (computedAriaLabelledby.value) return undefined;
+        if (props.ariaLabel) return props.ariaLabel;
+        if (props.role === 'dialog' || props.role === 'alertdialog') {
+            return 'Painel de sobreposição';
+        }
+        return undefined;
+    });
+
+    const zIndex = computed(() => {
         const isInModal = Boolean(props.target?.closest?.('.max-modal, .max-drawer, [role="dialog"]'));
-        let base = 1000;
+        const offset = props.layerOffset ?? 0;
+        let token: string;
+
         switch (props.layer) {
             case 'popover':
-                base = 1200;
+                token = 'var(--max-layer-popover, 1200)';
                 break;
             case 'modal':
-                base = 1310;
+                token = 'var(--max-layer-modal, 1310)';
                 break;
             case 'fullscreen':
-                base = 1400;
+                token = 'var(--max-layer-fullscreen, 1400)';
                 break;
             case 'tooltip':
-                base = 1600;
+                token = 'var(--max-layer-tooltip, 1600)';
                 break;
             case 'dropdown':
             default:
-                base = isInModal ? 1320 : 1000;
+                token = isInModal
+                    ? 'calc(var(--max-layer-modal, 1310) + 10)'
+                    : 'var(--max-layer-dropdown, 1000)';
                 break;
         }
-        return base + (props.layerOffset ?? 0);
-    };
 
-    const zIndex = computed(() => String(computeZIndex()));
+        if (offset !== 0) {
+            return `calc(${token} + ${offset})`;
+        }
+        return token;
+    });
 
     const position = () => {
         if (!props.target || !panelRef.value) return;
@@ -115,7 +144,8 @@
         const spaceBelow = vh - t.bottom;
         const spaceAbove = t.top;
         const openUp = spaceBelow < pHeight && spaceAbove > spaceBelow;
-        const top = openUp ? t.top - pHeight - props.offset : t.bottom + props.offset;
+        const rawTop = openUp ? t.top - pHeight - props.offset : t.bottom + props.offset;
+        const top = Math.max(8, Math.min(rawTop, vh - pHeight - 8));
 
         let left = props.align === 'right' ? t.right - p.width : t.left;
         left = Math.max(8, Math.min(left, vw - p.width - 8));
@@ -129,56 +159,22 @@
         };
     };
 
-    const onDocumentPointerDown = (event: PointerEvent | MouseEvent) => {
-        if (!props.dismissable) return;
-        const el = event.target as Node;
-        if (panelRef.value?.contains(el)) return;
-        if (props.target?.contains(el)) return;
-        close();
-    };
-
-    const onKeydown = (event: KeyboardEvent) => {
-        if (!props.closeOnEscape) return;
-        if (event.key === 'Escape') close();
-    };
-
-    let rafId: number | null = null;
-
-    const onReposition = () => {
-        if (rafId !== null) return;
-
-        if (typeof requestAnimationFrame !== 'undefined') rafId = requestAnimationFrame(() => {
-            rafId = null;
-            position();
-        });
-        else position();
-
-    };
-
-    const attachListeners = () => {
-        document.addEventListener('pointerdown', onDocumentPointerDown);
-        document.addEventListener('click', onDocumentPointerDown);
-        document.addEventListener('keydown', onKeydown);
-        window.addEventListener('scroll', onReposition, true);
-        window.addEventListener('resize', onReposition);
-    };
-
-    const detachListeners = () => {
-        if (rafId !== null) {
-            if (typeof cancelAnimationFrame !== 'undefined') cancelAnimationFrame(rafId);
-
-            rafId = null;
-        }
-        document.removeEventListener('pointerdown', onDocumentPointerDown);
-        document.removeEventListener('click', onDocumentPointerDown);
-        document.removeEventListener('keydown', onKeydown);
-        window.removeEventListener('scroll', onReposition, true);
-        window.removeEventListener('resize', onReposition);
-    };
-
     const close = () => {
         emit('update:visible', false);
     };
+
+    useOutsidePointer(toRef(props, 'visible'), {
+        elements: () => [panelRef.value, props.target],
+        onClose: () => {
+            close();
+        },
+        closeOnEscape: toRef(props, 'closeOnEscape'),
+        dismissable: toRef(props, 'dismissable'),
+        triggerEl: () => props.target,
+        repositionOnScroll: true,
+        repositionOnResize: true,
+        onReposition: position
+    });
 
     const openOverlay = async () => {
         panelStyle.value = {
@@ -190,7 +186,6 @@
         await nextTick();
         position();
         panelRef.value?.focus();
-        attachListeners();
     };
 
     watch(
@@ -202,7 +197,6 @@
                 emit('show');
             } else {
                 emit('before-hide');
-                detachListeners();
                 props.target?.focus();
                 emit('hide');
             }
@@ -211,10 +205,6 @@
 
     onMounted(() => {
         if (props.visible) openOverlay();
-    });
-
-    onBeforeUnmount(() => {
-        detachListeners();
     });
 </script>
 

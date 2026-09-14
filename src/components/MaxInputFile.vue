@@ -3,19 +3,18 @@
         ref="mainDivRef"
         class="input-file-main-div"
         :class="{ 'is-disabled': props.disabled }"
-        :tabindex="props.disabled ? -1 : 0"
+        :tabindex="props.disabled ? -1 : undefined"
         role="region"
         aria-label="Área de envio de arquivos"
         :aria-disabled="props.disabled ? 'true' : undefined"
         v-bind="attrs"
         @focus="isFocused = true"
         @blur="isFocused = false"
-        @click="triggerChoose"
-        @keydown.enter.prevent="triggerChoose"
-        @keydown.space.prevent="triggerChoose"
+        @click="onContainerClick"
         @paste="handlePaste"
     >
         <input
+            :id="inputId"
             ref="nativeInputRef"
             type="file"
             class="max-input-file-hidden"
@@ -23,6 +22,7 @@
             tabindex="-1"
             aria-hidden="true"
             :disabled="props.disabled"
+            :aria-label="plainTextLabel"
             @click.stop
             @change="onNativeInputChange"
             @paste="handlePaste"
@@ -33,15 +33,23 @@
         </div>
 
         <slot name="button">
-            <div class="input-file-content" v-if="!isOverDropZone">
-                <div class="input-file-content-icon-label">
+            <button
+                type="button"
+                class="input-file-content"
+                v-if="!isOverDropZone"
+                :disabled="props.disabled"
+                :aria-label="plainTextLabel"
+                :aria-controls="inputId"
+                @click.stop="triggerChoose"
+            >
+                <span class="input-file-content-icon-label">
                     <MaxIcon icon="lets-icons:upload-light" size="3" />
-                    <div
+                    <span
                         class="input-file-content-label"
                         v-html="displayLabel"
-                    ></div>
-                </div>
-            </div>
+                    ></span>
+                </span>
+            </button>
             <div ref="dropZoneRef" :class="`drop-zone-div ${isOverDropZone ? 'dropping' : ''}`">
                 <div class="drop-zone-div-content">
                     <MaxIcon icon="tabler:drag-drop" size="2.6" />
@@ -131,6 +139,7 @@
     const dropZoneRef = ref<HTMLDivElement | null>(null);
     const temp_value = ref<File[]>([...props.modelValue]);
     const statusAnnouncement = ref('');
+    const inputId = ref(`max-input-file-${Math.random().toString(36).slice(2, 9)}`);
 
     // Mapa de Object URLs geradas para pré-visualização de imagens, garantindo cleanup em onBeforeUnmount
     const previewUrlMap = new Map<File, string>();
@@ -140,6 +149,10 @@
             ?? (typeof attrs['label'] === 'string' ? attrs['label'] : undefined)
             ?? 'Clique aqui, arraste e solte seus arquivos para enviar ou <b>Cole com Ctrl+V</b>';
         return sanitizeHtml(String(rawLabel));
+    });
+
+    const plainTextLabel = computed((): string => {
+        return displayLabel.value.replace(/<[^>]*>/g, '').trim() || 'Selecionar arquivos para envio';
     });
 
     const isVisibleFiles = computed((): boolean => {
@@ -220,6 +233,12 @@
         nativeInputRef.value?.click();
     };
 
+    const onContainerClick = (event: MouseEvent) => {
+        if (props.disabled) return;
+        if ((event.target as HTMLElement).closest('button')) return;
+        triggerChoose(event);
+    };
+
     const onNativeInputChange = (event: Event) => {
         if (props.disabled) return;
         const target = event.target as HTMLInputElement;
@@ -268,7 +287,17 @@
 
 <style lang="scss" scoped>
     .max-input-file-hidden {
-        display: none !important;
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+        opacity: 0;
+        pointer-events: none;
     }
 
     .input-file-main-div {
@@ -278,12 +307,10 @@
         position: relative;
         width: 100%;
         height: 100%;
-        cursor: pointer;
 
-        &:focus-visible {
-            outline: none;
-            box-shadow: var(--max-focus-ring);
-            border-radius: 1rem;
+        &.is-disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
         }
 
         .input-file-content {
@@ -295,6 +322,22 @@
             border: 1px dashed var(--background-500);
             border-radius: 1rem;
             grid-template-rows: 130px 1fr;
+            background: transparent;
+            color: inherit;
+            font-family: inherit;
+            padding: 0;
+            cursor: pointer;
+
+            &:focus-visible {
+                outline: none;
+                box-shadow: var(--max-focus-ring);
+            }
+
+            &:disabled {
+                cursor: not-allowed;
+                opacity: 0.5;
+                pointer-events: none;
+            }
 
             .input-file-content-icon-label {
                 display: grid;

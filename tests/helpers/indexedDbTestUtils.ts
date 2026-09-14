@@ -48,6 +48,18 @@ export class MemoryIDBObjectStore {
         });
         return req;
     }
+
+    count(): any {
+        const req: any = {
+            result: this.data.size,
+            onsuccess: null,
+            onerror: null
+        };
+        queueMicrotask(() => {
+            if (typeof req.onsuccess === 'function') req.onsuccess({ target: req });
+        });
+        return req;
+    }
 }
 
 export class MemoryIDBTransaction {
