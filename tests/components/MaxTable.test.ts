@@ -226,6 +226,8 @@ describe('MaxTable', () => {
             const button = header.find('button.max-table-header-button');
             expect(button.exists()).toBe(true);
             expect(button.attributes('type')).toBe('button');
+            expect(button.attributes('aria-label')).toBe('Ordenar por Nome');
+            expect(header.attributes('scope')).toBe('col');
             expect(header.attributes('tabindex')).toBeUndefined();
             expect(header.attributes('aria-sort')).toBe('none');
             expect(header.find('.sort-icon-box').attributes('aria-hidden')).toBe('true');
@@ -337,6 +339,71 @@ describe('MaxTable', () => {
                 rows: 2,
                 pageCount: 2
             }]);
+        });
+
+        it('renderiza resumo "Exibindo X–Y de Z" e desabilita controles durante loading', async () => {
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: sampleData,
+                    paginator: true,
+                    rows: 2,
+                    totalRecords: 3,
+                    loading: false
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome' })
+                    ]
+                }
+            });
+
+            const summary = wrapper.find('.paginator-summary');
+            expect(summary.exists()).toBe(true);
+            expect(summary.text()).toContain('Exibindo 1–2 de 3');
+
+            const info = wrapper.find('.paginator-info');
+            expect(info.exists()).toBe(true);
+            expect(info.text()).toContain('Página 1 de 2');
+
+            // Quando loading é ativado, botões de paginação ficam desabilitados
+            await wrapper.setProps({ loading: true });
+            const buttons = wrapper.findAll('.paginator-btn');
+            for (const btn of buttons) {
+                expect(btn.attributes('disabled')).toBeDefined();
+            }
+        });
+
+        it('em modo lazy não fatia registros localmente e respeita totalRecords', () => {
+            const remotePageItems = [
+                { id: '10', name: 'Item Remoto 1' },
+                { id: '11', name: 'Item Remoto 2' }
+            ];
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: remotePageItems,
+                    paginator: true,
+                    lazy: true,
+                    first: 20,
+                    rows: 10,
+                    totalRecords: 50
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome' })
+                    ]
+                }
+            });
+
+            // No modo lazy, exibe todos os itens passados na página sem fatia local
+            const rows = wrapper.findAll('tbody tr.max-table-row');
+            expect(rows.length).toBe(2);
+            expect(rows[0].text()).toContain('Item Remoto 1');
+
+            const summary = wrapper.find('.paginator-summary');
+            expect(summary.text()).toContain('Exibindo 21–22 de 50');
+
+            const info = wrapper.find('.paginator-info');
+            expect(info.text()).toContain('Página 3 de 5');
         });
 
         it('emite @row-click e atualiza seleção quando clicado', async () => {

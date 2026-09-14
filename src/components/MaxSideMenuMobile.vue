@@ -91,6 +91,7 @@
     import { useUserStore } from '../stores/useUser.Store';
     import { useListMenusStore } from '../stores/useListMenus.Store';
     import type { SideMenuItem } from '../types/app';
+    import { isMenuRouteActive } from '../helpers/menuRouteMatches';
 
     export interface MenuGroup {
         title?: string;
@@ -161,12 +162,8 @@
     }
 
     function isItemActive(item: any): boolean {
-        const routeName = getItemRoute(item);
-        if (!routeName) return false;
-
-        const currentName = String(route?.name ?? '');
-
-        return currentName === routeName || (item.matches?.includes(currentName) ?? false);
+        const currentName = route?.name ? String(route.name) : system.page;
+        return isMenuRouteActive(item, currentName);
     }
 
     function openItem(item: any): void {

@@ -2,18 +2,19 @@
     <div
         v-for="(item, index) in props.items"
         :key="item.id ?? index"
-        v-tooltip.right="item.details.tooltip"
+        v-tooltip.right="resolveTooltip(item)"
         :class="`max-menu-vertical-item item_menu ${isActive(item) ? 'active' : ''}`"
-        :page_component="item.details.page_component"
+        :page_component="item.details?.page_component"
         role="link"
         tabindex="0"
-        :aria-label="item.details.tooltip || item.details.label || item.details.title || item.details.route || 'Item de menu'"
+        :aria-label="resolveLabel(item)"
         :aria-current="isActive(item) ? 'page' : undefined"
         @click="(event) => handleItemClick(item, event)"
         @keydown.enter="(event) => handleItemClick(item, event)"
+        @keydown.space.prevent="(event) => handleItemClick(item, event)"
     >
         <MaxIcon
-            v-if="item.details.icon"
+            v-if="item.details?.icon"
             :icon="item.details.icon"
             :i="item.details.icon"
             size="1.5"
@@ -35,11 +36,12 @@
 <script setup lang="ts">
     import { computed } from 'vue';
     import { useRoute } from 'vue-router';
-    import { snakeCase, goToRoute } from '@maxvue/max-use';
+    import { goToRoute } from '@maxvue/max-use';
     import MaxIcon from './MaxIcon.vue';
     import { useSystemStore } from '../stores/useSystem.Store';
     import { useSearchBarStore } from '../stores/useSearchBar.Store';
     import type { SideMenuItem } from '../types/app';
+    import { isMenuRouteActive } from '../helpers/menuRouteMatches';
 
     const props = withDefaults(defineProps<{
         /** Itens renderizados. */
@@ -53,14 +55,6 @@
     const system = useSystemStore();
     const route = useRoute();
 
-    /** Mapa de rotas filhas/subpáginas que mantêm o menu pai ativo. */
-    const ROUTE_MATCHES: Record<string, string[]> = {
-        commercial_proposals: ['commercial_proposal_detail', 'proposals', 'proposal_public_view'],
-        proposals: ['commercial_proposals', 'commercial_proposal_detail', 'proposal_public_view'],
-        solar_company_projects: ['integrador_client_show', 'integrador_projects', 'integrador_inspections', 'integrador_approved', 'integrador_finished', 'integrador_clients'],
-        board: ['project', 'planner_card']
-    };
-
     /** Nome da página/rota atual, priorizando o useRoute reativo local com fallback na store. */
     const currentPage = computed<string>(() => {
         return String(route?.name || system.page || '');
@@ -68,30 +62,28 @@
 
     /** Marca o item cujo componente de página ou rotas filhas correspondem à rota atual. */
     const isActive = (item: SideMenuItem): boolean => {
-        const current = currentPage.value;
-        if (!current) return false;
+        return isMenuRouteActive(item, currentPage.value);
+    };
 
-        const pageComponent = snakeCase(item.details.page_component ?? '');
-        const itemRoute = snakeCase(item.details.route ?? '');
+    /** Resolve o texto do tooltip dando prioridade a details.tooltip e fallback para title raiz ou details.title */
+    const resolveTooltip = (item: SideMenuItem): string => {
+        const raw = item.details?.tooltip ?? item.title ?? item.details?.title ?? item.details?.label;
+        return typeof raw === 'string' ? raw.trim() : '';
+    };
 
-        // 1. Correspondência exata pelo page_component ou pela route
-        if (pageComponent === current || itemRoute === current) return true;
+    /** Resolve o rótulo acessível específico, rejeitando string vazia */
+    const resolveLabel = (item: SideMenuItem): string => {
+        const tooltip = resolveTooltip(item);
+        if (tooltip) return tooltip;
 
-        // 2. Correspondência declarada explicitamente no item (matches)
-        const customMatches: string[] = (item.details as any)?.matches || (item as any)?.matches || [];
-        if (customMatches.includes(current)) return true;
-
-        // 3. Correspondência pelo mapa padrão de rotas filhas
-        const knownMatches = ROUTE_MATCHES[pageComponent] || ROUTE_MATCHES[itemRoute];
-        if (knownMatches?.includes(current)) return true;
-
-        return false;
+        const raw = item.details?.route ?? 'Item de menu';
+        return typeof raw === 'string' && raw.trim() ? raw.trim() : 'Item de menu';
     };
 
     const handleItemClick = (item: SideMenuItem, _event?: MouseEvent | KeyboardEvent): void => {
         useSearchBarStore().input_value = '';
 
-        const targetRoute = item.details.route?.trim();
+        const targetRoute = item.details?.route?.trim();
         if (targetRoute) goToRoute(targetRoute);
     };
 </script>

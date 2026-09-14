@@ -111,4 +111,57 @@ describe('MaxMenuVerticalItem', () => {
 
         expect(goToRoute).toHaveBeenCalledWith('settings');
     });
+
+    it('resolve o rótulo acessível e tooltip via fallback em title quando details.tooltip estiver ausente', () => {
+        const itemComTitle: SideMenuItem[] = [
+            {
+                id: 'item-title-only',
+                title: 'Relatórios Financeiros',
+                details: {
+                    page_component: 'reports',
+                    route: 'reports',
+                    icon: 'mdi:chart-bar'
+                }
+            }
+        ];
+
+        const wrapper = mount(MaxMenuVerticalItem, {
+            props: { items: itemComTitle },
+            global: {
+                plugins: [pinia],
+                directives: { tooltip: () => {} },
+                stubs: { MaxIcon: true }
+            }
+        });
+
+        const item = wrapper.find('.max-menu-vertical-item');
+        expect(item.attributes('aria-label')).toBe('Relatórios Financeiros');
+    });
+
+    it('mantém details.tooltip prioritário sobre title quando ambos existirem', () => {
+        const itemComAmbos: SideMenuItem[] = [
+            {
+                id: 'item-both',
+                title: 'Título Genérico',
+                details: {
+                    page_component: 'custom',
+                    route: 'custom',
+                    tooltip: 'Tooltip Específico',
+                    icon: 'mdi:star'
+                }
+            }
+        ];
+
+        const wrapper = mount(MaxMenuVerticalItem, {
+            props: { items: itemComAmbos },
+            global: {
+                plugins: [pinia],
+                directives: { tooltip: () => {} },
+                stubs: { MaxIcon: true }
+            }
+        });
+
+        const item = wrapper.find('.max-menu-vertical-item');
+        expect(item.attributes('aria-label')).toBe('Tooltip Específico');
+    });
 });

@@ -140,6 +140,8 @@ export interface MaxButtonsType extends /* @vue-ignore */ MaxButtonBaseProps {
     uppercase?: boolean;
     /** Borda tracejada com fundo transparente */
     dashed?: boolean;
+    /** Tipo HTML do elemento button ('button' | 'submit' | 'reset') */
+    type?: 'button' | 'submit' | 'reset';
 }
 
 /**

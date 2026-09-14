@@ -9,67 +9,71 @@
                     class="auth-card-title"
                 />
             </slot>
+            <div v-if="$slots.default || mode === 'custom'" class="auth-card-custom">
+                <slot></slot>
+            </div>
 
-            <MaxGrid class="auth-card-grid" :aria-describedby="error ? errorId : undefined">
-                <!-- Modo Tradicional (E-mail / Senha) -->
-                <template v-if="mode === 'password'">
-                    <MaxInputPhoneMail
-                        v-if="identifier === 'email-phone'"
-                        ref="emailInputRef"
-                        class="auth-card-field"
-                        v-model="email"
-                        :error="emailError || phoneError"
-                        :aria-describedby="error ? errorId : undefined"
-                        @keyup.enter="onEnter"
-                    />
-                    <MaxInputText
-                        v-else
-                        ref="emailInputRef"
-                        class="auth-card-field"
-                        :label="t.email"
-                        type="email"
-                        v-model="email"
-                        :error="emailError"
-                        icon="mdi:email-outline"
-                        :aria-describedby="error ? errorId : undefined"
-                        @keyup.enter="onEnter"
-                    />
-                    <MaxInputText
-                        ref="passwordInputRef"
-                        class="auth-card-field"
-                        :label="t.password"
-                        type="password"
-                        v-model="password"
-                        :error="passwordError"
-                        icon="mdi:lock-outline"
-                        :aria-describedby="error ? errorId : undefined"
-                        @keyup.enter="onEnter"
-                    />
+            <form v-else @submit.prevent="onFormSubmit" class="auth-card-form">
+                <MaxGrid class="auth-card-grid" :aria-describedby="error ? errorId : undefined">
+                    <!-- Modo Tradicional (E-mail / Senha) -->
+                    <template v-if="mode === 'password'">
+                        <MaxInputPhoneMail
+                            v-if="identifier === 'email-phone'"
+                            ref="emailInputRef"
+                            class="auth-card-field"
+                            v-model="email"
+                            :error="emailError || phoneError"
+                            :aria-describedby="error ? errorId : undefined"
+                            @keyup.enter="onEnter"
+                        />
+                        <MaxInputText
+                            v-else
+                            ref="emailInputRef"
+                            class="auth-card-field"
+                            :label="t.email"
+                            type="email"
+                            v-model="email"
+                            :error="emailError"
+                            icon="mdi:email-outline"
+                            :aria-describedby="error ? errorId : undefined"
+                            @keyup.enter="onEnter"
+                        />
+                        <MaxInputText
+                            ref="passwordInputRef"
+                            class="auth-card-field"
+                            :label="t.password"
+                            type="password"
+                            v-model="password"
+                            :error="passwordError"
+                            icon="mdi:lock-outline"
+                            :aria-describedby="error ? errorId : undefined"
+                            @keyup.enter="onEnter"
+                        />
 
-                    <div class="max-auth-options" v-if="showRemember || forgotTo">
-                        <label class="max-auth-remember" v-if="showRemember">
-                            <input type="checkbox" v-model="remember" />
-                            <span>{{ t.remember }}</span>
-                        </label>
-                        <router-link v-if="forgotTo" :to="forgotTo" class="max-auth-link max-auth-link--muted">{{ t.forgot }}</router-link>
-                    </div>
+                        <div class="max-auth-options" v-if="showRemember || forgotTo">
+                            <label class="max-auth-remember" v-if="showRemember">
+                                <input type="checkbox" v-model="remember" />
+                                <span>{{ t.remember }}</span>
+                            </label>
+                            <router-link v-if="forgotTo" :to="forgotTo" class="max-auth-link max-auth-link--muted">{{ t.forgot }}</router-link>
+                        </div>
 
-                    <slot name="extra"></slot>
+                        <slot name="extra"></slot>
 
-                    <span
-                        v-if="error"
-                        :id="errorId"
-                        class="max-auth-error"
-                        role="alert"
-                        aria-live="assertive"
-                        aria-atomic="true"
-                    >{{ error }}</span>
+                        <span
+                            v-if="error"
+                            :id="errorId"
+                            class="max-auth-error"
+                            role="alert"
+                            aria-live="assertive"
+                            aria-atomic="true"
+                        >{{ error }}</span>
 
-                    <MaxButton class="auth-card-field" :label="t.submit" icon="mdi:login" :loading="loading" :action="onSubmit" />
-                </template>
+                        <MaxButton class="auth-card-field" type="submit" :label="t.submit" icon="mdi:login" :loading="loading" :action="onSubmit" />
+                    </template>
 
-                <!-- Modo Phone OTP (Telefone + MaxInputOTP + Botão Dinâmico) -->
-                <template v-else-if="mode === 'phone-otp'">
+                    <!-- Modo Phone OTP (Telefone + MaxInputOTP + Botão Dinâmico) -->
+                    <template v-else-if="mode === 'phone-otp'">
                     <slot name="phone-input">
                         <MaxInputPhone
                             ref="phoneInputRef"
@@ -163,7 +167,8 @@
                         <router-link :to="registerTo" class="max-auth-link">{{ t.register }}</router-link>
                     </div>
                 </slot>
-            </MaxGrid>
+                </MaxGrid>
+            </form>
         </div>
     </div>
 </template>
@@ -221,7 +226,7 @@
         endpointIndex?: number;
     }
 
-    export type AuthMode = 'password' | 'phone-otp';
+    export type AuthMode = 'password' | 'phone-otp' | 'custom';
     export type AuthStep = 'phone' | 'code';
 
     /** Textos do card (todos com default pt-BR) */
@@ -706,6 +711,8 @@
         });
     };
 
+    const onFormSubmit = onSubmit;
+
     watch(
         () => props.error,
         (newError) => {
@@ -771,21 +778,30 @@
 
 <style lang="scss" scoped>
     .max-auth-page {
-        width: 100vw;
-        height: 100vh;
+        width: 100%;
+        min-height: 100%;
         background: var(--background-75);
-        display: grid;
-        place-items: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem 1rem;
+        box-sizing: border-box;
 
         .max-auth-card-inner,
         .max-auth-card {
-            width: 360px;
-            max-width: 90vw;
+            width: 100%;
+            max-width: 420px;
+            box-sizing: border-box;
             background: var(--background-0);
             border: 1px solid var(--background-200);
-            border-radius: 12px;
-            padding: 2rem;
+            border-radius: 1rem;
+            padding: clamp(1.25rem, 5vw, 2rem);
             box-shadow: 0 8px 30px rgb(0 0 0 / 8%);
+
+            .auth-card-form,
+            .auth-card-custom {
+                width: 100%;
+            }
 
             .auth-card-title {
                 padding: 0;

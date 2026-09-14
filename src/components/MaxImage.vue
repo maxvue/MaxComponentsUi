@@ -265,7 +265,13 @@
         openPreview();
     };
 
+    let triggerElement: HTMLElement | null = null;
+
     const openPreview = () => {
+        if (!props.preview) return;
+        if (typeof document !== 'undefined') {
+            triggerElement = (document.activeElement as HTMLElement | null) || imgRef.value;
+        }
         isOpen.value = true;
         zoomScale.value = 1;
         isCropping.value = false;
@@ -286,6 +292,14 @@
         trap.deactivate();
         scrollLock.unlock();
         emit('hide');
+
+        const elToFocus = triggerElement || imgRef.value;
+        triggerElement = null;
+        if (elToFocus && typeof elToFocus.focus === 'function') {
+            setTimeout(() => {
+                elToFocus.focus();
+            }, 50);
+        }
     };
 
     const onBackdropClick = (event: MouseEvent) => {
