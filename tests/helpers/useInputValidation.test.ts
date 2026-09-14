@@ -229,4 +229,62 @@ describe('useInputValidation', () => {
         expect(validation.submitted.value).toBe(false);
         expect(validation.error.value).toBeNull();
     });
+
+    it('suporta isComplete: formato incompleto não exibe erro antes do blur e exibe após blur', () => {
+        const value = ref('123');
+        const validation = useInputValidation({
+            validator: (v) => v === '12345',
+            isComplete: (v) => String(v).length === 5,
+            value,
+            invalidMessage: 'Formato inválido'
+        });
+
+        // Incompleto, não tocado: sem erro
+        expect(validation.done.value).toBeNull();
+        expect(validation.caution.value).toBe(false);
+        expect(validation.error.value).toBeNull();
+
+        // Usuário digita mais um caractere (continua incompleto)
+        value.value = '1234';
+        validation.onInput();
+        expect(validation.done.value).toBeNull();
+        expect(validation.caution.value).toBe(false);
+        expect(validation.error.value).toBeNull();
+
+        // Usuário perde o foco: agora exibe erro
+        validation.onBlur();
+        expect(validation.done.value).toBe(false);
+        expect(validation.caution.value).toBe(true);
+        expect(validation.error.value).toBe('Formato inválido');
+
+        // Formato completo mas inválido exibe erro imediatamente
+        value.value = '99999';
+        validation.onInput();
+        expect(validation.done.value).toBe(false);
+        expect(validation.caution.value).toBe(true);
+        expect(validation.error.value).toBe('Formato inválido');
+
+        // Correção para válido limpa o erro
+        value.value = '12345';
+        validation.onInput();
+        expect(validation.done.value).toBe(true);
+        expect(validation.caution.value).toBe(false);
+        expect(validation.error.value).toBeNull();
+    });
+
+    it('suporta mensagens dinâmicas reativas (Ref e getter)', () => {
+        const value = ref('errado');
+        const msg = ref('Primeiro erro');
+        const validation = useInputValidation({
+            validator: (v) => v === 'ok',
+            value,
+            invalidMessage: msg
+        });
+        validation.onBlur();
+        expect(validation.error.value).toBe('Primeiro erro');
+
+        msg.value = 'Segundo erro';
+        expect(validation.error.value).toBe('Segundo erro');
+    });
 });
+

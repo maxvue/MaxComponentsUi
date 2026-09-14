@@ -73,9 +73,12 @@ describe('MaxInputCep', () => {
         expect(ib.props('caution')).toBe(true);
     });
 
-    it('displays error_msg when caution is true', () => {
+    it('displays error_msg when caution is true após blur', async () => {
         const wrapper = mountCep({ modelValue: '010', required: true });
         const ib = wrapper.findComponent(InputBase);
+        expect(ib.props('error')).toBeUndefined();
+        await wrapper.find('input').trigger('blur');
+        await wrapper.vm.$nextTick();
         expect(ib.props('caution')).toBe(true);
         expect(ib.props('error')).toBe('CEP inválido');
     });
@@ -103,9 +106,12 @@ describe('MaxInputCep', () => {
         expect(ib.props('error')).toBe('Campo obrigatório');
     });
 
-    it('exibe CEP invalido quando preenchido parcialmente', () => {
+    it('exibe CEP invalido quando preenchido parcialmente após blur', async () => {
         const wrapper = mountCep({ modelValue: '010' });
         const ib = wrapper.findComponent(InputBase);
+        expect(ib.props('error')).toBeUndefined();
+        await wrapper.find('input').trigger('blur');
+        await wrapper.vm.$nextTick();
         expect(ib.props('error')).toBe('CEP inválido');
     });
 

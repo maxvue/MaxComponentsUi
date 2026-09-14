@@ -1,5 +1,5 @@
 import type { ComputedRef, Ref } from 'vue';
-import { computed, ref, watch } from 'vue';
+import { computed, ref, unref, watch } from 'vue';
 
 export interface UseInputValidationOptions {
     /** Se o campo e obrigatorio (usado para a mensagem de erro de campo vazio). */
@@ -18,13 +18,15 @@ export interface UseInputValidationOptions {
     /** Ref do valor atual sendo validado. */
     value: Ref<any>;
     /** Mensagem de erro a usar quando o valor e invalido. Default: 'Valor inválido'. */
-    invalidMessage?: string;
+    invalidMessage?: string | Ref<string | undefined> | (() => string | undefined);
     /** Mensagem de erro a usar quando o campo e obrigatorio e esta vazio. Default: 'Campo obrigatório'. */
-    requiredMessage?: string;
+    requiredMessage?: string | Ref<string | undefined> | (() => string | undefined);
     /** Modo de validação: 'lazy' (padrão: valida após blur/submit) ou 'eager' (imediato no mount). */
     mode?: 'lazy' | 'eager';
     /** Alias para mode === 'eager' */
     immediate?: boolean;
+    /** Função opcional para verificar se a entrada atingiu o tamanho/formato completo (para máscaras como CPF/CNPJ, CEP, Cartão). */
+    isComplete?: (value: any) => boolean;
 }
 
 export interface UseInputValidationResult {
@@ -46,6 +48,15 @@ const isEmpty = (val: any): boolean => {
     if (typeof val === 'string') return val.trim().length === 0;
     if (Array.isArray(val)) return val.length === 0;
     return false;
+};
+
+const resolveMessage = (msg: string | Ref<string | undefined> | (() => string | undefined) | undefined, fallback: string): string => {
+    if (typeof msg === 'function') {
+        const res = msg();
+        return res ?? fallback;
+    }
+    const res = unref(msg);
+    return res ?? fallback;
 };
 
 /**
@@ -87,6 +98,13 @@ export function useInputValidation(options: UseInputValidationOptions): UseInput
         const empty = isEmpty(options.value.value);
         if (empty) return isRequired() && (touched.value || submitted.value);
 
+        if (options.isComplete) {
+            const complete = options.isComplete(options.value.value);
+            if (complete) {
+                return true;
+            }
+            return touched.value || submitted.value || hadError.value;
+        }
 
         return touched.value || submitted.value || hadError.value || dirty.value;
     });
@@ -101,6 +119,14 @@ export function useInputValidation(options: UseInputValidationOptions): UseInput
         }
 
         if (isValid.value) return true;
+
+        if (options.isComplete) {
+            const complete = options.isComplete(options.value.value);
+            if (!complete && !touched.value && !submitted.value && !hadError.value) {
+                return null;
+            }
+        }
+
         return false;
     });
 
@@ -114,9 +140,9 @@ export function useInputValidation(options: UseInputValidationOptions): UseInput
 
         if (!caution.value || isValid.value) return null;
         const empty = isEmpty(options.value.value);
-        if (empty && isRequired()) return options.requiredMessage ?? 'Campo obrigatório';
+        if (empty && isRequired()) return resolveMessage(options.requiredMessage, 'Campo obrigatório');
 
-        return options.invalidMessage ?? 'Valor inválido';
+        return resolveMessage(options.invalidMessage, 'Valor inválido');
     });
 
     const onBlur = () => {

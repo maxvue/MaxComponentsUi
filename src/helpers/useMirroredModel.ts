@@ -55,15 +55,17 @@ export function useMirroredModel<T>(
     const value = ref(props.modelValue) as Ref<T>;
 
     // Guarda o último valor canônico emitido (ou recebido) para suprimir ecos
+    let hasLastCanonical = false;
     let lastCanonicalEmitted: T | undefined = undefined;
 
     watch(
         value,
         (newValue) => {
             const canonical = transform ? transform(newValue) : newValue;
-            if (lastCanonicalEmitted !== undefined && compare(canonical, lastCanonicalEmitted)) return;
+            if (hasLastCanonical && compare(canonical, lastCanonicalEmitted as T)) return;
 
             // Atualizar o guard canônico antes de emitir para prevenir qualquer corrida síncrona
+            hasLastCanonical = true;
             lastCanonicalEmitted = canonical;
             emit('update:modelValue', canonical);
         },
@@ -77,12 +79,13 @@ export function useMirroredModel<T>(
             if (compare(newExternalValue, value.value)) return;
 
             // Se o novo valor da prop for equivalente ao último valor canônico que nós mesmos emitimos (eco do pai)
-            if (lastCanonicalEmitted !== undefined && compare(newExternalValue, lastCanonicalEmitted)) return;
+            if (hasLastCanonical && compare(newExternalValue, lastCanonicalEmitted as T)) return;
 
             // Trata-se de uma alteração externa genuína:
             // Sincroniza o guard com a prop externa para que a emissão subsequente
             // pelo watch local ocorra somente se `transform(newExternalValue)` produzir
             // um valor semanticamente novo em relação ao que o pai forneceu.
+            hasLastCanonical = true;
             lastCanonicalEmitted = newExternalValue;
             value.value = newExternalValue;
         }

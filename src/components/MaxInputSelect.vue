@@ -636,18 +636,18 @@
     const toggle = async (event?: any) => {
         if (props.disabled) return;
         if (!isOpen.value) {
-            if (loading.value) {
-                hide();
-                return;
-            }
             wantsOpen = true;
             loadError.value = false;
-            const shouldOpen = await before_show(event);
-            if (shouldOpen && wantsOpen && !props.disabled) {
-                searchQuery.value = '';
-                isOpen.value = true;
+            searchQuery.value = '';
+            isOpen.value = true;
+            await before_show(event);
+        } else {
+            // Se estiver carregando com promessa em voo, ativações concorrentes compartilham e não fecham
+            if (loading.value && inFlightLoadPromise) {
+                return;
             }
-        } else hide();
+            hide();
+        }
     };
 
     const hide = () => {

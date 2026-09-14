@@ -1,7 +1,7 @@
 <template>
     <div class="max-table-main-div" :style="tableStyle">
-        <div class="p-datatable" :class="{ 'p-datatable-scrollable': props.scrollable }">
-            <div class="p-datatable-table-container" :style="scrollContainerStyle">
+        <div class="max-table-container p-datatable" :class="{ 'max-table-scrollable p-datatable-scrollable': props.scrollable }">
+            <div class="max-table-wrapper p-datatable-table-container" :style="scrollContainerStyle">
                 <table>
                     <!-- MODO A: TEMPLATE-DRIVEN (Cabeçalho ou Linhas manuais) -->
                     <template v-if="isTemplateDriven">
@@ -73,8 +73,8 @@
                                         :aria-label="col.header ? `Ordenar por ${col.header}` : 'Ordenar coluna'"
                                         @click="onHeaderClick(col)"
                                     >
-                                        <div class="p-datatable-column-header-content">
-                                            <div class="p-datatable-column-title">
+                                        <div class="max-table-column-header-content p-datatable-column-header-content">
+                                            <div class="max-table-column-title p-datatable-column-title">
                                                 <component v-if="col.headerSlot" :is="col.headerSlot" :column="col" />
                                                 <template v-else>
                                                     <span>{{ col.header }}</span>
@@ -872,11 +872,13 @@
     border: 1px solid var(--max-table-border-color, var(--background-300)) !important;
     position: relative;
 
+    .max-table-container,
     :deep(.p-datatable) {
         height: 100%;
         display: flex;
         flex-direction: column;
 
+        .max-table-wrapper,
         .p-datatable-table-container {
             height: 100%;
             background-color: transparent;
@@ -936,6 +938,7 @@
                                 }
                             }
 
+                            .max-table-column-header-content,
                             .p-datatable-column-header-content {
                                 position: relative;
                                 display: grid;
@@ -944,6 +947,7 @@
                                 place-items: center;
                                 width: 100%;
 
+                                .max-table-column-title,
                                 .p-datatable-column-title {
                                     width: 100%;
                                     height: 100%;

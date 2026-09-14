@@ -401,13 +401,260 @@ describe('MaxInputAutoCompleteApi.vue', () => {
             const activeDescId = input.attributes('aria-activedescendant');
             expect(activeDescId).toBe(`${listboxId}-opt-0`);
 
-            // Opções possuem role=option e aria-selected correto
-            const optionEls = listbox?.querySelectorAll('[role="option"]');
+            // Opções possuem role=option e aria-selected reflete a seleção inicial (item-1)
+            let optionEls = listbox?.querySelectorAll('[role="option"]');
             expect(optionEls?.length).toBe(2);
             expect(optionEls?.[0].getAttribute('aria-selected')).toBe('true');
             expect(optionEls?.[1].getAttribute('aria-selected')).toBe('false');
 
+            // Navega para a opção 1: activeDescendant atualiza para opt-1, mas aria-selected continua false
+            await input.trigger('keydown.down');
+            await wrapper.vm.$nextTick();
+
+            expect(input.attributes('aria-activedescendant')).toBe(`${listboxId}-opt-1`);
+            optionEls = listbox?.querySelectorAll('[role="option"]');
+            expect(optionEls?.[0].getAttribute('aria-selected')).toBe('true');
+            expect(optionEls?.[1].getAttribute('aria-selected')).toBe('false');
+
             wrapper.unmount();
+        });
+
+        it('ArrowDown sem Enter destaca com aria-activedescendant sem alterar seleção e Enter posterior seleciona (F14)', async () => {
+            const wrapper = mountAutoCompleteApi({
+                modelValue: null,
+                minLength: 0
+            });
+            (wrapper.vm as any).list = [
+                { label: 'Item A', value: 'a' },
+                { label: 'Item B', value: 'b' }
+            ];
+            (wrapper.vm as any).filtered_values = [
+                { label: 'Item A', value: 'a' },
+                { label: 'Item B', value: 'b' }
+            ];
+            (wrapper.vm as any).isOpen = true;
+            await wrapper.vm.$nextTick();
+
+            const input = wrapper.find('input');
+            const listboxId = input.attributes('aria-controls')!;
+            const listbox = document.getElementById(listboxId);
+            expect(listbox).not.toBeNull();
+
+            // Inicialmente sem seleção
+            let optionEls = listbox?.querySelectorAll('[role="option"]');
+            expect(optionEls?.[0].getAttribute('aria-selected')).toBe('false');
+            expect(optionEls?.[1].getAttribute('aria-selected')).toBe('false');
+
+            // ArrowDown move activeDescendant para opt-0 sem selecionar
+            await input.trigger('keydown.down');
+            await wrapper.vm.$nextTick();
+
+            expect(input.attributes('aria-activedescendant')).toBe(`${listboxId}-opt-0`);
+            optionEls = listbox?.querySelectorAll('[role="option"]');
+            expect(optionEls?.[0].getAttribute('aria-selected')).toBe('false');
+            expect(optionEls?.[1].getAttribute('aria-selected')).toBe('false');
+            expect(optionEls?.[0].classList.contains('max-autocomplete-item-active')).toBe(true);
+
+            // ArrowDown move activeDescendant para opt-1 sem selecionar
+            await input.trigger('keydown.down');
+            await wrapper.vm.$nextTick();
+
+            expect(input.attributes('aria-activedescendant')).toBe(`${listboxId}-opt-1`);
+            optionEls = listbox?.querySelectorAll('[role="option"]');
+            expect(optionEls?.[0].getAttribute('aria-selected')).toBe('false');
+            expect(optionEls?.[1].getAttribute('aria-selected')).toBe('false');
+            expect(optionEls?.[1].classList.contains('max-autocomplete-item-active')).toBe(true);
+
+            // Enter seleciona o item ativo (opt-1)
+            await input.trigger('keydown.enter');
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.emitted('update:modelValue')?.[0]?.[0]).toEqual({ label: 'Item B', value: 'b' });
+
+            // Reabre o overlay para verificar aria-selected
+            (wrapper.vm as any).filtered_values = [
+                { label: 'Item A', value: 'a' },
+                { label: 'Item B', value: 'b' }
+            ];
+            (wrapper.vm as any).isOpen = true;
+            await wrapper.vm.$nextTick();
+
+            optionEls = document.getElementById(listboxId)?.querySelectorAll('[role="option"]');
+            expect(optionEls?.[1].getAttribute('aria-selected')).toBe('true');
+            expect(optionEls?.[0].getAttribute('aria-selected')).toBe('false');
+
+            wrapper.unmount();
+        });
+
+        it('active descendant permanece sempre montado no DOM durante navegação em lista virtualizada (F14)', async () => {
+            const items = Array.from({ length: 100 }, (_, i) => ({
+                id: i,
+                label: `Sugestão ${i}`,
+                value: `sug-${i}`
+            }));
+            const wrapper = mountAutoCompleteApi({
+                modelValue: null,
+                virtualScroll: true,
+                numToleratedItems: 3,
+                minLength: 0
+            });
+            (wrapper.vm as any).list = items;
+            (wrapper.vm as any).filtered_values = items;
+            (wrapper.vm as any).isOpen = true;
+            await wrapper.vm.$nextTick();
+
+            const input = wrapper.find('input');
+            const listboxId = input.attributes('aria-controls')!;
+
+            // Navega 15 vezes para baixo
+            for (let i = 0; i < 15; i++) {
+                await input.trigger('keydown.down');
+                await wrapper.vm.$nextTick();
+                const activeId = input.attributes('aria-activedescendant');
+                expect(activeId).toBe(`${listboxId}-opt-${i}`);
+                // O nó apontado por aria-activedescendant DEVE estar montado no DOM
+                const activeEl = document.getElementById(activeId!);
+                expect(activeEl).not.toBeNull();
+                expect(activeEl?.getAttribute('role')).toBe('option');
+                expect(activeEl?.getAttribute('aria-selected')).toBe('false');
+            }
+
+            wrapper.unmount();
+        });
+    });
+
+    describe('Contrato Remoto com minLength, delay e debounce (F13 / E05-07)', () => {
+        it('abaixo de minLength produz zero requisições remotas', async () => {
+            vi.useFakeTimers();
+            const wrapper = mountAutoCompleteApi({
+                minLength: 3,
+                delay: 200,
+                data: { search: true }
+            });
+            await wrapper.vm.$nextTick();
+            // A chamada inicial do mount ocorreu
+            expect(maxUse.getCachedApiIDB).toHaveBeenCalledTimes(1);
+            vi.clearAllMocks();
+
+            const input = wrapper.find('input');
+            await input.setValue('ab'); // 2 caracteres < minLength 3
+            await wrapper.vm.$nextTick();
+
+            // Avança o tempo além do delay
+            vi.advanceTimersByTime(500);
+            await wrapper.vm.$nextTick();
+
+            // Nenhuma requisição deve ter sido disparada
+            expect(maxUse.getCachedApiIDB).not.toHaveBeenCalled();
+            wrapper.unmount();
+            vi.useRealTimers();
+        });
+
+        it('rajada de digitações dispara apenas uma requisição após o delay (debounce)', async () => {
+            vi.useFakeTimers();
+            const wrapper = mountAutoCompleteApi({
+                minLength: 2,
+                delay: 300,
+                data: { search: true }
+            });
+            await wrapper.vm.$nextTick();
+            vi.clearAllMocks();
+
+            const input = wrapper.find('input');
+
+            // Simula rajada rápida de digitações
+            await input.setValue('ab');
+            await wrapper.vm.$nextTick();
+            vi.advanceTimersByTime(100);
+
+            await input.setValue('abc');
+            await wrapper.vm.$nextTick();
+            vi.advanceTimersByTime(100);
+
+            await input.setValue('abcd');
+            await wrapper.vm.$nextTick();
+            vi.advanceTimersByTime(100);
+
+            await input.setValue('abcde');
+            await wrapper.vm.$nextTick();
+
+            // Ainda dentro do delay após a última digitação: zero chamadas
+            expect(maxUse.getCachedApiIDB).not.toHaveBeenCalled();
+
+            // Avança o tempo após o delay da última digitação
+            vi.advanceTimersByTime(300);
+            await wrapper.vm.$nextTick();
+
+            // Exatamente UMA requisição com o valor final 'abcde'
+            expect(maxUse.getCachedApiIDB).toHaveBeenCalledTimes(1);
+            const [, payload] = (maxUse.getCachedApiIDB as any).mock.calls[0];
+            expect(payload.input_value).toBe('abcde');
+
+            wrapper.unmount();
+            vi.useRealTimers();
+        });
+
+        it('descarta respostas remotas obsoletas de gerações anteriores com abort da requisição anterior', async () => {
+            vi.useFakeTimers();
+            let resolveReq1: any;
+            const promise1 = new Promise((resolve) => { resolveReq1 = resolve; });
+            let capturedSignal1: AbortSignal | undefined;
+            let capturedSignal2: AbortSignal | undefined;
+
+            let callCount = 0;
+            (maxUse.getCachedApiIDB as any).mockImplementation((_route: string, _params: any, _cache: any, _ttl: any, _cb: any, opts: any) => {
+                callCount++;
+                if (callCount === 1) {
+                    capturedSignal1 = opts?.signal;
+                    return promise1;
+                }
+                capturedSignal2 = opts?.signal;
+                return Promise.resolve([{ label: 'Resultado 2', value: 'r2' }]);
+            });
+
+            const wrapper = mountAutoCompleteApi({
+                minLength: 2,
+                delay: 200,
+                data: { search: true }
+            });
+            await wrapper.vm.$nextTick();
+            vi.clearAllMocks();
+            callCount = 0;
+
+            const input = wrapper.find('input');
+
+            // Primeira busca remota
+            await input.setValue('primeiro');
+            await wrapper.vm.$nextTick();
+            vi.advanceTimersByTime(200);
+            await wrapper.vm.$nextTick();
+            expect(callCount).toBe(1);
+            expect(capturedSignal1?.aborted).toBe(false);
+
+            // Segunda busca remota antes da primeira resolver
+            await input.setValue('segundo');
+            await wrapper.vm.$nextTick();
+            vi.advanceTimersByTime(200);
+            await wrapper.vm.$nextTick();
+            expect(callCount).toBe(2);
+            // O primeiro signal foi abortado
+            expect(capturedSignal1?.aborted).toBe(true);
+
+            // Resposta 2 resolve
+            await Promise.resolve();
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).list).toEqual([{ label: 'Resultado 2', value: 'r2' }]);
+
+            // Resposta 1 resolve tardiamente
+            resolveReq1([{ label: 'Resultado 1 Obsoleto', value: 'r1' }]);
+            await promise1;
+            await wrapper.vm.$nextTick();
+
+            // Continua com Resultado 2, resposta obsoleta ignorada
+            expect((wrapper.vm as any).list).toEqual([{ label: 'Resultado 2', value: 'r2' }]);
+
+            wrapper.unmount();
+            vi.useRealTimers();
         });
     });
 });
