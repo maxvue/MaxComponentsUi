@@ -90,12 +90,12 @@
         screen?: string;
         /** Atalho de teclado para focar na pesquisa (default: 'ctrl+k'). Passe false para desabilitar. */
         shortcut?: boolean | string;
-        /** Exibir o badge visual do atalho no campo de busca. */
+        /** Exibir o badge visual do atalho no campo de busca (desativado por padrão). */
         showShortcutBadge?: boolean;
     }>(), {
         placeholder: 'Pesquisar',
         shortcut: 'ctrl+k',
-        showShortcutBadge: true
+        showShortcutBadge: false
     });
 
     const attrs = useAttrs();
