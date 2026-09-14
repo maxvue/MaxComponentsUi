@@ -1,6 +1,12 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
+import { ref } from 'vue';
+
+vi.mock('@maxvue/max-use', async (importOriginal) => ({
+    ...(await importOriginal<Record<string, any>>()),
+    useRefCachedApi: () => ref(null)
+}));
 
 import InputBase from '../../src/components/InputBase.vue';
 import MaxInputText from '../../src/components/MaxInputText.vue';

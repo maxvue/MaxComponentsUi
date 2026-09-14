@@ -28,6 +28,16 @@ if (typeof globalThis.HTMLInputElement === 'undefined') globalThis.HTMLInputElem
 
 Object.defineProperty(globalThis, 'localStorage', { value: localStorageMock });
 
+// Mock global do Ziggy para suporte a rotas nomeadas via @maxvue/max-use
+if (typeof (globalThis as any).Ziggy === 'undefined') (globalThis as any).Ziggy = {
+    url: 'http://localhost',
+    port: null,
+    defaults: {},
+    routes: {
+        menus: { uri: 'api/menus', methods: ['GET'] }
+    }
+};
+
 // Mock do getComputedStyle para testes de getColorFromVar e wrappers do VTU.
 Object.defineProperty(globalThis, 'getComputedStyle', {
     value: vi.fn((element?: HTMLElement) => ({

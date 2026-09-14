@@ -4,8 +4,6 @@
         tag="div"
         class="max-toast-container"
         role="region"
-        aria-live="polite"
-        aria-atomic="false"
         aria-label="Notificações"
     >
         <div

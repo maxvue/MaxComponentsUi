@@ -53,7 +53,7 @@
 
 <script setup lang="ts">
     import { useModalStore } from '../stores/useModal.Store';
-    import { useTemplateRef, computed, ref, watch, useId, onBeforeUnmount, onMounted } from 'vue';
+    import { useTemplateRef, computed, ref, watch, useId, onBeforeUnmount, onMounted, useSlots, nextTick } from 'vue';
     import { useFocusTrap } from '../helpers/useFocusTrap';
     import { useScrollLock } from '../helpers/useScrollLock';
     import { useBrowserEventListener } from '../composables/useBrowserEventListener';
@@ -172,15 +172,92 @@
         }, 400);
     };
 
+    const modal_store = useModalStore();
+    const generatedId = useId();
+    const id = computed(() => props.id ?? generatedId);
+
+    const isTopModal = computed(() => modal_store.isTop(id.value));
+
+    const is_show = computed(() => {
+        if (props.visible !== undefined) return Boolean(props.visible);
+        if (props.modelValue !== undefined) return Boolean(props.modelValue);
+        return modal_store.isOpen(id.value);
+    });
+
+    const isClosing = ref(false);
+    let closeGeneration = 0;
+    let previousActiveElement: HTMLElement | null = null;
+
+    const open = () => {
+        if (typeof document !== 'undefined') previousActiveElement = document.activeElement as HTMLElement | null;
+        closeGeneration++;
+        isClosing.value = false;
+        emit('update:visible', true);
+        emit('update:modelValue', true);
+        modal_store.push(id.value);
+        emit('show');
+    };
+
+    const close = () => {
+        if (!modal_store.isOpen(id.value) && !is_show.value) return;
+        closeGeneration++;
+        isClosing.value = false;
+        emit('update:visible', false);
+        emit('update:modelValue', false);
+        modal_store.pop(id.value);
+        emit('hide');
+    };
+
     export type ModalCloseReason = 'button' | 'escape' | 'backdrop' | 'model' | 'api';
 
     const requestClose = (_reason: ModalCloseReason = 'api') => {
+        if (!is_show.value || isClosing.value) return;
+
+        const currentGen = ++closeGeneration;
+        let settled = false;
+
+        const onDone = () => {
+            if (settled || currentGen !== closeGeneration) return;
+            settled = true;
+            isClosing.value = false;
+            close();
+        };
+
         if (props.beforeClose) {
-            props.beforeClose(() => close());
+            isClosing.value = true;
+            try {
+                const result: unknown = props.beforeClose(onDone);
+                if (result && typeof (result as any).then === 'function') (result as Promise<any>).then(
+                    (val) => {
+                        if (val === false) {
+                            if (currentGen === closeGeneration) {
+                                settled = true;
+                                isClosing.value = false;
+                            }
+                            return;
+                        }
+                        onDone();
+                    },
+                    () => {
+                        if (currentGen === closeGeneration) {
+                            settled = true;
+                            isClosing.value = false;
+                        }
+                    }
+                );
+
+            } catch (err) {
+                if (currentGen === closeGeneration) {
+                    settled = true;
+                    isClosing.value = false;
+                }
+                throw err;
+            }
             return;
         }
-        emit('before-close', () => close());
-        close();
+
+        emit('before-close', onDone);
+        onDone();
     };
 
     const handleClose = () => {
@@ -195,18 +272,6 @@
         }
         requestClose('backdrop');
     };
-
-    const modal_store = useModalStore();
-    const generatedId = useId();
-    const id = computed(() => props.id ?? generatedId);
-
-    const isTopModal = computed(() => modal_store.isTop(id.value));
-
-    const is_show = computed(() => {
-        if (props.visible !== undefined) return Boolean(props.visible);
-        if (props.modelValue !== undefined) return Boolean(props.modelValue);
-        return modal_store.isOpen(id.value);
-    });
 
     const modalDepth = computed(() => {
         const idx = modal_store.getIndex(id.value);
@@ -236,16 +301,36 @@
     const scroll_lock = useScrollLock();
 
     const title_id = computed(() => (!props.noHeader ? 'max-modal-title-' + id.value : undefined));
+    const slots = useSlots();
+
+    const isNonEmptyTextInDom = (elementId?: string): boolean => {
+        if (!elementId || typeof document === 'undefined') return false;
+        const target = document.getElementById(elementId);
+        if (!target) return false;
+        if (target.hidden || target.getAttribute('aria-hidden') === 'true') return false;
+        if (target.style?.display === 'none' || target.style?.visibility === 'hidden') return false;
+        const text = (target.innerText || target.textContent || '').trim();
+        return text.length > 0;
+    };
 
     const computedAriaLabelledby = computed(() => {
-        if (props.ariaLabelledby) return props.ariaLabelledby;
-        if (!props.noHeader && (props.title || props.subTitle)) return title_id.value;
+        void is_mounted.value;
+        if (props.ariaLabelledby) {
+            const rawId = props.ariaLabelledby.trim();
+            if (!rawId) return undefined;
+            if (typeof document !== 'undefined') return isNonEmptyTextInDom(rawId) ? rawId : undefined;
+
+            return rawId;
+        }
+        if (slots.header) return undefined;
+        if (!props.noHeader && (props.title?.trim() || props.subTitle?.trim())) return title_id.value;
         return undefined;
     });
 
     const computedAriaLabel = computed(() => {
         if (computedAriaLabelledby.value) return undefined;
-        return props.ariaLabel ?? (props.title || 'Diálogo');
+        const rawLabel = props.ariaLabel?.trim() || props.title?.trim();
+        return rawLabel && rawLabel.length > 0 ? rawLabel : 'Diálogo';
     });
 
     const style = ref({
@@ -256,27 +341,33 @@
     let has_scroll_lock = false;
 
     const onEscape = (event: KeyboardEvent) => {
-        if (event.key === 'Escape' && props.closeOnEscape && isTopModal.value) requestClose('escape');
-
+        if (event.key === 'Escape' && isTopModal.value) {
+            event.stopPropagation();
+            event.stopImmediatePropagation?.();
+            if (props.closeOnEscape) requestClose('escape');
+        }
     };
-
-    let previousActiveElement: HTMLElement | null = null;
 
     const restoreCallerFocus = () => {
         if (previousActiveElement && typeof previousActiveElement.focus === 'function') {
             const elToFocus = previousActiveElement;
             previousActiveElement = null;
-            setTimeout(() => {
-                elToFocus.focus();
-            }, 50);
+            nextTick(() => {
+                if (elToFocus.isConnected) elToFocus.focus();
+
+            });
         }
     };
 
     watch(
         () => props.visible,
         (val) => {
-            if (val === true) modal_store.push(id.value);
-            else if (val === false) modal_store.pop(id.value);
+            if (val === true) {
+                if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) previousActiveElement = document.activeElement;
+
+                modal_store.push(id.value);
+            } else if (val === false) modal_store.pop(id.value);
+
         },
         { immediate: true }
     );
@@ -284,8 +375,12 @@
     watch(
         () => props.modelValue,
         (val) => {
-            if (val === true) modal_store.push(id.value);
-            else if (val === false) modal_store.pop(id.value);
+            if (val === true) {
+                if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) previousActiveElement = document.activeElement;
+
+                modal_store.push(id.value);
+            } else if (val === false) modal_store.pop(id.value);
+
         },
         { immediate: true }
     );
@@ -335,6 +430,11 @@
         { immediate: true }
     );
 
+    watch(isTopModal, (isTop) => {
+        if (is_show.value && is_mounted.value && isTop) trap.activate();
+
+    });
+
     onBeforeUnmount(() => {
         trap.deactivate();
         if (has_scroll_lock) {
@@ -343,21 +443,6 @@
         }
         if (modal_store.isOpen(id.value)) modal_store.pop(id.value);
     });
-
-    const open = () => {
-        if (typeof document !== 'undefined') previousActiveElement = document.activeElement as HTMLElement | null;
-        emit('update:visible', true);
-        emit('update:modelValue', true);
-        modal_store.push(id.value);
-        emit('show');
-    };
-
-    const close = () => {
-        emit('update:visible', false);
-        emit('update:modelValue', false);
-        modal_store.pop(id.value);
-        emit('hide');
-    };
 
     const toggle = () => {
         if (is_show.value) close();
@@ -375,7 +460,8 @@
         requestClose,
         id,
         style,
-        is_changing
+        is_changing,
+        isClosing
     });
 </script>
 

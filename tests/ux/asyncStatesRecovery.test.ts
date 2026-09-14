@@ -223,7 +223,7 @@ describe('E05-07: Estados Assíncronos Distinguíveis e Recuperação', () => {
             }));
 
             const wrapper = mount(MaxInputAutoCompleteApi, {
-                props: { route: '/api/search', data: { query: 'test' } },
+                props: { route: '/api/search', data: { query: 'test' }, delay: 0 },
                 global: {
                     stubs: {
                         InputBase: {

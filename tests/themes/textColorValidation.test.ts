@@ -222,11 +222,25 @@ describe('Matriz Semântica de 4 Níveis de Cor de Texto (background-650/700/750
             return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
         };
 
+        const tokensPath = resolve(__dirname, '../../src/themes/tokens.scss');
+        const tokensContent = readFileSync(tokensPath, 'utf-8');
+
+        const extractHexFallback = (tokenName: string, block: 'light' | 'dark' = 'light'): string => {
+            const darkIdx = tokensContent.indexOf('.dark');
+            const targetSection = block === 'dark' ? tokensContent.slice(darkIdx) : tokensContent.slice(0, darkIdx);
+            const match = targetSection.match(new RegExp(`${tokenName}:\\s*(?:var\\([^,]+,\\s*)?(#[0-9a-fA-F]{3,8})`));
+            return match ? match[1] : '';
+        };
+
         it('tokens dedicados de texto secundário, placeholder e ajuda atingem contraste >= 4.5:1 no tema claro', () => {
             const lightBg = '#ffffff';
-            const secondaryLight = '#334155';
-            const placeholderLight = '#475569';
-            const helpLight = '#475569';
+            const secondaryLight = extractHexFallback('--max-content-secondary', 'light');
+            const placeholderLight = extractHexFallback('--max-content-placeholder', 'light');
+            const helpLight = extractHexFallback('--max-content-help', 'light');
+
+            expect(secondaryLight).toBeTruthy();
+            expect(placeholderLight).toBeTruthy();
+            expect(helpLight).toBeTruthy();
 
             expect(getContrast(lightBg, secondaryLight)).toBeGreaterThanOrEqual(4.5);
             expect(getContrast(lightBg, placeholderLight)).toBeGreaterThanOrEqual(4.5);
@@ -235,9 +249,13 @@ describe('Matriz Semântica de 4 Níveis de Cor de Texto (background-650/700/750
 
         it('tokens dedicados de texto secundário, placeholder e ajuda atingem contraste >= 4.5:1 no tema escuro', () => {
             const darkBg = '#09090b';
-            const secondaryDark = '#cbd5e1';
-            const placeholderDark = '#94a3b8';
-            const helpDark = '#94a3b8';
+            const secondaryDark = extractHexFallback('--max-content-secondary', 'dark');
+            const placeholderDark = extractHexFallback('--max-content-placeholder', 'dark');
+            const helpDark = extractHexFallback('--max-content-help', 'dark');
+
+            expect(secondaryDark).toBeTruthy();
+            expect(placeholderDark).toBeTruthy();
+            expect(helpDark).toBeTruthy();
 
             expect(getContrast(darkBg, secondaryDark)).toBeGreaterThanOrEqual(4.5);
             expect(getContrast(darkBg, placeholderDark)).toBeGreaterThanOrEqual(4.5);

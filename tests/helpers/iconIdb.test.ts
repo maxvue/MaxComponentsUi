@@ -224,8 +224,8 @@ describe('iconIdb helper com IndexedDB real', () => {
 
         const origTx = db!.transaction.bind(db);
         // Simula transação que aborta
-        vi.spyOn(db!, 'transaction').mockImplementation((...args: any[]) => {
-            const tx = origTx(...args);
+        vi.spyOn(db!, 'transaction').mockImplementation((storeNames: string | Iterable<string>, mode?: IDBTransactionMode, options?: IDBTransactionOptions) => {
+            const tx = origTx(storeNames, mode, options);
             setTimeout(() => {
                 if (tx.onerror) tx.onerror(new Event('error'));
                 if (tx.onabort) tx.onabort(new Event('abort'));

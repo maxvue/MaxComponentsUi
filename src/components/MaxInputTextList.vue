@@ -1,7 +1,10 @@
 <template>
     <InputBase v-bind="{...props}" class="max-input-text-list max-input-text-list-div">
         <template #default="{ inputAttrs }">
-            <div class="max-code-editor">
+            <div
+                class="max-code-editor"
+                :style="{ '--text-list-line-height': `${LINE_HEIGHT}px` }"
+            >
                 <div
                     ref="lineNumbersRef"
                     class="line-numbers"
@@ -260,8 +263,6 @@
 
 <style lang="scss" scoped>
     .max-input-text-list-div {
-        --text-list-line-height: 21px;
-
         .max-code-editor {
             display: flex;
             align-items: stretch;

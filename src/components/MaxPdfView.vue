@@ -400,4 +400,10 @@
             transform: rotate(360deg);
         }
     }
+
+    @media (prefers-reduced-motion: reduce) {
+        .max-spinner-rotate {
+            animation-duration: 4s;
+        }
+    }
 </style>

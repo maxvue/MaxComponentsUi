@@ -358,4 +358,119 @@ describe('MaxPopover', () => {
             expect(iconContainer.attributes('style')).toContain('height: 1.4rem');
         });
     });
+
+    describe('Accessible Name efetivo e Fallbacks em MaxPopover (R08)', () => {
+        function computeAccessibleName(el: Element): string {
+            const labelledby = el.getAttribute('aria-labelledby');
+            if (labelledby) {
+                const text = labelledby
+                    .split(/\s+/)
+                    .map((id) => {
+                        const target = document.getElementById(id);
+                        if (!target) return '';
+                        if (target.hidden || target.getAttribute('aria-hidden') === 'true') return '';
+                        if (target.style?.display === 'none' || target.style?.visibility === 'hidden') return '';
+                        return (target.innerText || target.textContent || '').trim();
+                    })
+                    .filter(Boolean)
+                    .join(' ');
+                if (text) return text;
+            }
+            const label = el.getAttribute('aria-label');
+            if (label && label.trim()) return label.trim();
+
+            return '';
+        }
+
+        it('fornece fallback de accessible name "Informações adicionais" quando slot header é vazio', async () => {
+            const wrapper = mountPopover({ title: '', subTitle: '' }, {
+                header: '   '
+            }, { attachTo: document.body });
+            const vm = wrapper.vm as any;
+
+            vm.show();
+            await wrapper.vm.$nextTick();
+
+            const dialogEl = document.querySelector('.max-popover-dialog');
+            expect(dialogEl).not.toBeNull();
+            expect(dialogEl?.getAttribute('aria-labelledby')).toBeNull();
+            expect(dialogEl?.getAttribute('aria-label')).toBe('Informações adicionais');
+            expect(computeAccessibleName(dialogEl!)).toBe('Informações adicionais');
+            wrapper.unmount();
+        });
+
+        it('fornece fallback de accessible name quando title é vazio ou apenas whitespace', async () => {
+            const wrapper = mountPopover({ title: '   ', subTitle: '   ' }, {}, { attachTo: document.body });
+            const vm = wrapper.vm as any;
+
+            vm.show();
+            await wrapper.vm.$nextTick();
+
+            const dialogEl = document.querySelector('.max-popover-dialog');
+            expect(dialogEl).not.toBeNull();
+            expect(dialogEl?.getAttribute('aria-label')).toBe('Informações adicionais');
+            expect(computeAccessibleName(dialogEl!)).toBe('Informações adicionais');
+            wrapper.unmount();
+        });
+
+        it('ignora ariaLabelledby que aponta para ID inexistente no DOM e usa fallback estável', async () => {
+            const wrapper = mountPopover({ title: '', subTitle: '', ariaLabelledby: 'id-inexistente-popover' }, {}, { attachTo: document.body });
+            const vm = wrapper.vm as any;
+
+            vm.show();
+            await wrapper.vm.$nextTick();
+
+            const dialogEl = document.querySelector('.max-popover-dialog');
+            expect(dialogEl).not.toBeNull();
+            expect(dialogEl?.getAttribute('aria-labelledby')).toBeNull();
+            expect(dialogEl?.getAttribute('aria-label')).toBe('Informações adicionais');
+            expect(computeAccessibleName(dialogEl!)).toBe('Informações adicionais');
+            wrapper.unmount();
+        });
+
+        it('ignora ariaLabelledby que aponta para elemento oculto ou com texto vazio', async () => {
+            const hiddenEl = document.createElement('div');
+            hiddenEl.id = 'elemento-oculto-popover';
+            hiddenEl.hidden = true;
+            hiddenEl.textContent = 'Texto Oculto';
+            document.body.appendChild(hiddenEl);
+
+            const wrapper = mountPopover({ title: '', subTitle: '', ariaLabelledby: 'elemento-oculto-popover' }, {}, { attachTo: document.body });
+            const vm = wrapper.vm as any;
+
+            vm.show();
+            await wrapper.vm.$nextTick();
+
+            const dialogEl = document.querySelector('.max-popover-dialog');
+            expect(dialogEl).not.toBeNull();
+            expect(dialogEl?.getAttribute('aria-labelledby')).toBeNull();
+            expect(dialogEl?.getAttribute('aria-label')).toBe('Informações adicionais');
+            expect(computeAccessibleName(dialogEl!)).toBe('Informações adicionais');
+
+            wrapper.unmount();
+            hiddenEl.remove();
+        });
+
+        it('utiliza ariaLabelledby quando referenciar elemento externo existente e visível com texto', async () => {
+            const titleEl = document.createElement('h3');
+            titleEl.id = 'titulo-externo-valido-popover';
+            titleEl.textContent = 'Ajuda Contextual';
+            document.body.appendChild(titleEl);
+
+            const wrapper = mountPopover({ ariaLabelledby: 'titulo-externo-valido-popover' }, {}, { attachTo: document.body });
+            const vm = wrapper.vm as any;
+
+            vm.show();
+            await wrapper.vm.$nextTick();
+
+            const dialogEl = document.querySelector('.max-popover-dialog');
+            expect(dialogEl).not.toBeNull();
+            expect(dialogEl?.getAttribute('aria-labelledby')).toBe('titulo-externo-valido-popover');
+            expect(dialogEl?.getAttribute('aria-label')).toBeNull();
+            expect(computeAccessibleName(dialogEl!)).toBe('Ajuda Contextual');
+
+            wrapper.unmount();
+            titleEl.remove();
+        });
+    });
 });

@@ -546,6 +546,119 @@ describe('MaxModal', () => {
             vi.useRealTimers();
         });
 
+        it('fechamento preventivo via callback síncrono é estritamente idempotente', async () => {
+            const beforeClose = vi.fn((done: () => void) => {
+                done();
+            });
+
+            const wrapper = mountModal({ beforeClose, modelValue: true });
+            const vm = wrapper.vm as any;
+            const store = useModalStore();
+
+            expect(store.show_id).toBe(vm.id);
+
+            vm.requestClose('button');
+            await wrapper.vm.$nextTick();
+
+            expect(beforeClose).toHaveBeenCalledTimes(1);
+            expect(wrapper.emitted('hide')?.length).toBe(1);
+            expect(wrapper.emitted('update:modelValue')?.length).toBe(1);
+            expect(wrapper.emitted('update:modelValue')?.[0]).toEqual([false]);
+            expect(store.isOpen(vm.id)).toBe(false);
+        });
+
+        it('fechamento com done() chamado duas vezes é estritamente idempotente (1 hide, 1 update, 1 pop)', async () => {
+            const beforeClose = vi.fn((done: () => void) => {
+                done();
+                done();
+            });
+
+            const wrapper = mountModal({ beforeClose, modelValue: true });
+            const vm = wrapper.vm as any;
+            const store = useModalStore();
+            const popSpy = vi.spyOn(store, 'pop');
+
+            expect(store.show_id).toBe(vm.id);
+
+            vm.requestClose('button');
+            await wrapper.vm.$nextTick();
+
+            expect(beforeClose).toHaveBeenCalledTimes(1);
+            expect(wrapper.emitted('hide')?.length).toBe(1);
+            expect(wrapper.emitted('update:modelValue')?.length).toBe(1);
+            expect(wrapper.emitted('update:modelValue')?.[0]).toEqual([false]);
+            expect(popSpy).toHaveBeenCalledTimes(1);
+            expect(store.isOpen(vm.id)).toBe(false);
+
+            popSpy.mockRestore();
+        });
+
+        it('fechamento com Promises concorrentes que chamam done() é estritamente idempotente', async () => {
+            let doneFn: (() => void) | null = null;
+            const beforeClose = vi.fn((done: () => void) => {
+                doneFn = done;
+            });
+
+            const wrapper = mountModal({ beforeClose, modelValue: true });
+            const vm = wrapper.vm as any;
+            const store = useModalStore();
+            const popSpy = vi.spyOn(store, 'pop');
+
+            vm.requestClose('api');
+            await wrapper.vm.$nextTick();
+
+            expect(doneFn).toBeTruthy();
+
+            // Simula resolução concorrente de múltiplas promises chamando done
+            await Promise.all([
+                Promise.resolve().then(() => doneFn!()),
+                Promise.resolve().then(() => doneFn!()),
+                Promise.resolve().then(() => doneFn!())
+            ]);
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.emitted('hide')?.length).toBe(1);
+            expect(wrapper.emitted('update:modelValue')?.length).toBe(1);
+            expect(popSpy).toHaveBeenCalledTimes(1);
+            expect(store.isOpen(vm.id)).toBe(false);
+
+            popSpy.mockRestore();
+        });
+
+        it('reabrir o modal antes do término de fechamento descarta chamada tardia de done (geração coerente)', async () => {
+            let doneFn: (() => void) | null = null;
+            const beforeClose = vi.fn((done: () => void) => {
+                doneFn = done;
+            });
+
+            const wrapper = mountModal({ beforeClose });
+            const vm = wrapper.vm as any;
+            const store = useModalStore();
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+            expect(store.isOpen(vm.id)).toBe(true);
+
+            // Inicia fechamento
+            vm.requestClose('api');
+            await wrapper.vm.$nextTick();
+            expect(vm.isClosing).toBe(true);
+
+            // Reabre o modal antes de done() ser chamado
+            vm.open();
+            await wrapper.vm.$nextTick();
+            expect(vm.isClosing).toBe(false);
+            expect(store.isOpen(vm.id)).toBe(true);
+
+            // Agora o done() antigo é invocado tardiamente
+            doneFn!();
+            await wrapper.vm.$nextTick();
+
+            // O modal deve permanecer aberto porque a geração mudou
+            expect(store.isOpen(vm.id)).toBe(true);
+            expect(wrapper.emitted('hide')).toBeFalsy();
+        });
+
         it('emite evento before-close ao fechar quando beforeClose não é fornecido', async () => {
             vi.useFakeTimers();
             const wrapper = mountModal();
@@ -742,6 +855,116 @@ describe('MaxModal', () => {
             vm.requestClose('api');
             await wrapper.vm.$nextTick();
             expect(store.show_id).toBeNull();
+        });
+    });
+
+    describe('Accessible Name efetivo e Fallbacks (R08)', () => {
+        function computeAccessibleName(el: Element): string {
+            const labelledby = el.getAttribute('aria-labelledby');
+            if (labelledby) {
+                const text = labelledby
+                    .split(/\s+/)
+                    .map((id) => {
+                        const target = document.getElementById(id);
+                        if (!target) return '';
+                        if (target.hidden || target.getAttribute('aria-hidden') === 'true') return '';
+                        if (target.style?.display === 'none' || target.style?.visibility === 'hidden') return '';
+                        return (target.innerText || target.textContent || '').trim();
+                    })
+                    .filter(Boolean)
+                    .join(' ');
+                if (text) return text;
+            }
+            const label = el.getAttribute('aria-label');
+            if (label && label.trim()) return label.trim();
+
+            return '';
+        }
+
+        it('fornece fallback de accessible name "Diálogo" quando slot header é vazio', async () => {
+            const wrapper = mountModal({}, {
+                header: '   '
+            }, { attachTo: document.body });
+            const vm = wrapper.vm as any;
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+
+            const modalEl = wrapper.find('.max-modal').element;
+            expect(modalEl.getAttribute('aria-labelledby')).toBeNull();
+            expect(modalEl.getAttribute('aria-label')).toBe('Diálogo');
+            expect(computeAccessibleName(modalEl)).toBe('Diálogo');
+            wrapper.unmount();
+        });
+
+        it('fornece fallback de accessible name quando title é vazio ou apenas whitespace', async () => {
+            const wrapper = mountModal({ title: '   ' }, {}, { attachTo: document.body });
+            const vm = wrapper.vm as any;
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+
+            const modalEl = wrapper.find('.max-modal').element;
+            expect(modalEl.getAttribute('aria-label')).toBe('Diálogo');
+            expect(computeAccessibleName(modalEl)).toBe('Diálogo');
+            wrapper.unmount();
+        });
+
+        it('ignora ariaLabelledby que aponta para ID inexistente no DOM e usa fallback estável', async () => {
+            const wrapper = mountModal({ ariaLabelledby: 'id-inexistente-123' }, {}, { attachTo: document.body });
+            const vm = wrapper.vm as any;
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+
+            const modalEl = wrapper.find('.max-modal').element;
+            expect(modalEl.getAttribute('aria-labelledby')).toBeNull();
+            expect(modalEl.getAttribute('aria-label')).toBe('Diálogo');
+            expect(computeAccessibleName(modalEl)).toBe('Diálogo');
+            wrapper.unmount();
+        });
+
+        it('ignora ariaLabelledby que aponta para elemento oculto ou com texto vazio', async () => {
+            const hiddenEl = document.createElement('div');
+            hiddenEl.id = 'elemento-oculto-modal';
+            hiddenEl.hidden = true;
+            hiddenEl.textContent = 'Texto Oculto';
+            document.body.appendChild(hiddenEl);
+
+            const wrapper = mountModal({ ariaLabelledby: 'elemento-oculto-modal' }, {}, { attachTo: document.body });
+            const vm = wrapper.vm as any;
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+
+            const modalEl = wrapper.find('.max-modal').element;
+            expect(modalEl.getAttribute('aria-labelledby')).toBeNull();
+            expect(modalEl.getAttribute('aria-label')).toBe('Diálogo');
+            expect(computeAccessibleName(modalEl)).toBe('Diálogo');
+
+            wrapper.unmount();
+            hiddenEl.remove();
+        });
+
+        it('utiliza ariaLabelledby quando referenciar elemento externo existente e visível com texto', async () => {
+            const titleEl = document.createElement('h2');
+            titleEl.id = 'titulo-externo-valido-modal';
+            titleEl.textContent = 'Título Externo do Diálogo';
+            document.body.appendChild(titleEl);
+
+            const wrapper = mountModal({ ariaLabelledby: 'titulo-externo-valido-modal' }, {}, { attachTo: document.body });
+            const vm = wrapper.vm as any;
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+
+            const modalEl = wrapper.find('.max-modal').element;
+            expect(modalEl.getAttribute('aria-labelledby')).toBe('titulo-externo-valido-modal');
+            expect(modalEl.getAttribute('aria-label')).toBeNull();
+            expect(computeAccessibleName(modalEl)).toBe('Título Externo do Diálogo');
+
+            wrapper.unmount();
+            titleEl.remove();
         });
     });
 });

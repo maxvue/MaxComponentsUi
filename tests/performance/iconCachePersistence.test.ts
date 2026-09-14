@@ -4,7 +4,7 @@ import { setActivePinia, createPinia } from 'pinia';
 import { useIconStore } from '../../src/stores/useIcon.Store';
 import { saveSanitizedIconsToIDB, openIconsDB } from '../../src/helpers/iconIdb';
 import * as sanitizeSvgModule from '../../src/helpers/sanitizeSvg';
-import { createFreshIndexedDB, withTimeout, cleanupIconsDatabase } from '../helpers/indexedDbTestUtils';
+import { createFreshIndexedDB, withTimeout, cleanupIconsDatabase, type MemoryIDBObjectStore } from '../helpers/indexedDbTestUtils';
 
 describe('Performance & Cardinality: Icon Cache Persistence (E05-02)', () => {
     let pinia: ReturnType<typeof createPinia>;
@@ -39,7 +39,7 @@ describe('Performance & Cardinality: Icon Cache Persistence (E05-02)', () => {
         // put deve ser chamado exatamente k vezes no store
         const currentDb = await openIconsDB();
         const currentTx = currentDb!.transaction('icons', 'readwrite');
-        const currentStore = currentTx.objectStore('icons');
+        const currentStore = currentTx.objectStore('icons') as unknown as MemoryIDBObjectStore;
         expect(currentStore.data.size).toBe(k);
     });
 

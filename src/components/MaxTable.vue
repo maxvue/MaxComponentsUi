@@ -70,8 +70,6 @@
                                         type="button"
                                         class="max-table-header-button"
                                         @click="onHeaderClick(col)"
-                                        @keydown.enter="onHeaderClick(col)"
-                                        @keydown.space.prevent="onHeaderClick(col)"
                                     >
                                         <div class="p-datatable-column-header-content">
                                             <div class="p-datatable-column-title">
@@ -888,25 +886,8 @@
                     tr {
                         @include table.table-header-row;
 
-                        position: sticky !important;
-                        height: var(--max-table-header-height, 40px) !important;
-                        min-width: 100% !important;
-                        display: flex;
-                        padding: var(--max-table-header-padding, 0 6px) !important;
-                        gap: var(--max-table-header-gap, 6px);
-                        background-color: var(--max-table-header-bg, var(--table-header-bg, #003B53)) !important;
-
                         th {
                             @include table.table-header-cell;
-
-                            padding: 0;
-                            background-color: transparent !important;
-                            color: var(--max-table-header-text, var(--table-header-text, #8AD6E8)) !important;
-                            position: relative;
-                            font-weight: 400 !important;
-                            flex-grow: 1;
-                            border: none !important;
-                            height: 100%;
 
                             &.max-table-th-sortable {
                                 cursor: pointer;
@@ -981,12 +962,6 @@
                     tr {
                         @include table.table-body-row;
 
-                        width: 100% !important;
-                        display: flex !important;
-                        height: auto !important;
-                        gap: 0 var(--max-table-row-gap, 6px);
-                        padding: var(--max-table-row-padding, 3px 6px) !important;
-
                         &.max-table-virtual-spacer {
                             padding: 0 !important;
                             margin: 0 !important;
@@ -994,14 +969,6 @@
                             pointer-events: none;
                             background: transparent !important;
                             min-height: 0 !important;
-                        }
-
-                        &:first-of-type {
-                            padding-top: 6px !important;
-                        }
-
-                        &:last-of-type {
-                            padding-bottom: 6px !important;
                         }
 
                         @include table.table-row-zebra;
@@ -1067,12 +1034,7 @@
                         td {
                             @include table.table-cell-base;
 
-                            flex-grow: 1;
-                            padding: 0 !important;
-                            display: grid;
                             place-items: center;
-                            border: none !important;
-                            border-radius: 0 !important;
 
                             @include table.table-cell-input-feedback;
                         }

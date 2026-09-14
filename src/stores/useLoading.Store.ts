@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import type { Ref } from 'vue';
-import { ref, computed } from 'vue';
+import { ref, computed, getCurrentScope, onScopeDispose } from 'vue';
 import { valuesInKey, size, watchDebounced } from '@maxvue/max-use';
 
 import type { LoadingItem, LoadingTarget } from '../types/app';
@@ -50,6 +50,17 @@ export const useLoadingStore = defineStore('loading', () => {
     /** Timers ativos de auto-limpeza de itens concluídos. */
     const doneTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
+    /** Cancela e descarta todos os timers ativos em doneTimers. */
+    const clearTimers = (): void => {
+        doneTimers.forEach((timer) => clearTimeout(timer));
+        doneTimers.clear();
+    };
+
+    if (getCurrentScope()) onScopeDispose(() => {
+        clearTimers();
+    });
+
+
     /**
      * Gera (uma única vez) a chave interna de uma chave lógica.
      * O prefixo numérico com zeros à esquerda mantém a ordem de inserção.
@@ -68,11 +79,28 @@ export const useLoadingStore = defineStore('loading', () => {
     };
 
     /**
+     * Reseta completamente a store, cancelando timers e esvaziando todas as filas.
+     */
+    const reset = (): void => {
+        clearTimers();
+        for (const target of Object.keys(targets.value ?? {})) delete targets.value[target];
+        keys.value = {};
+        keys_target.value = {};
+        count.value = 0;
+    };
+
+    /**
      * Registra um novo item de carregamento.
      */
     function start(item_loading: LoadingItem): void {
-        const key = setKeys(item_loading.key);
         const target = item_loading.target ?? 'body';
+        let key = keys.value[item_loading.key];
+
+        // Se a chave lógica já existe mas está vinculada a outro target ativo, gera nova chave interna para evitar conflito
+        if (!key || (keys_target.value[key] && keys_target.value[key] !== target)) {
+            key = String(count.value++).padStart(4, '0') + '.' + item_loading.key;
+            keys.value[item_loading.key] = key;
+        }
 
         keys_target.value[key] = target;
 
@@ -108,12 +136,26 @@ export const useLoadingStore = defineStore('loading', () => {
         if (!internal_key && keys_target.value[loading_key]) internal_key = loading_key;
 
         if (!internal_key) {
-            for (const t of Object.values(targets.value ?? {})) if (t.items[loading_key]) return { item: t.items[loading_key], internal_key: loading_key, target: t.target };
+            for (const t of Object.values(targets.value ?? {})) {
+                if (t.items[loading_key]) return { item: t.items[loading_key], internal_key: loading_key, target: t.target };
+                for (const [iKey, item] of Object.entries(t.items)) {
+                    const dot = iKey.indexOf('.');
+                    if (dot !== -1 && iKey.substring(dot + 1) === loading_key) return { item, internal_key: iKey, target: t.target };
+                    if (item.key === loading_key) return { item, internal_key: iKey, target: t.target };
+                }
+            }
 
             return null;
         }
 
-        const target = keys_target.value[internal_key] ?? null;
+        let target = keys_target.value[internal_key] ?? null;
+        if (!target || !targets.value[target] || !targets.value[target].items[internal_key]) for (const t of Object.values(targets.value ?? {})) if (t.items[internal_key]) {
+            target = t.target;
+            keys_target.value[internal_key] = target;
+            break;
+        }
+
+
         if (!target || !targets.value[target] || !targets.value[target].items[internal_key]) return null;
 
         return { item: targets.value[target].items[internal_key], internal_key, target };
@@ -124,12 +166,7 @@ export const useLoadingStore = defineStore('loading', () => {
      */
     const dismiss = (loading_key?: string): void => {
         if (!loading_key) {
-            doneTimers.forEach((timer) => clearTimeout(timer));
-            doneTimers.clear();
-            for (const target of Object.keys(targets.value ?? {})) delete targets.value[target];
-            keys.value = {};
-            keys_target.value = {};
-            count.value = 0;
+            reset();
             return;
         }
 
@@ -150,7 +187,7 @@ export const useLoadingStore = defineStore('loading', () => {
         const dotIndex = internal_key.indexOf('.');
         if (dotIndex !== -1) {
             const logical = internal_key.substring(dotIndex + 1);
-            delete keys.value[logical];
+            if (keys.value[logical] === internal_key) delete keys.value[logical];
         }
 
         const totalItems = Object.values(targets.value ?? {}).reduce(
@@ -177,6 +214,11 @@ export const useLoadingStore = defineStore('loading', () => {
 
         // Libera a chave lógica imediatamente para permitir novos ciclos
         delete keys.value[loading_key];
+        const dotIndex = internal_key.indexOf('.');
+        if (dotIndex !== -1) {
+            const logical = internal_key.substring(dotIndex + 1);
+            if (keys.value[logical] === internal_key) delete keys.value[logical];
+        }
 
         const duration = options?.done_duration ?? item.done_duration ?? 500;
         if (duration <= 0) {
@@ -201,7 +243,7 @@ export const useLoadingStore = defineStore('loading', () => {
         const resolved = resolveItem(loading_key);
         if (!resolved) return;
 
-        const { item, internal_key } = resolved;
+        const { item, internal_key, target } = resolved;
         const prevTimer = doneTimers.get(internal_key);
         if (prevTimer) {
             clearTimeout(prevTimer);
@@ -229,8 +271,14 @@ export const useLoadingStore = defineStore('loading', () => {
             ...(retryFn ? { retry: retryFn } : {})
         });
 
-        // Libera a chave lógica para permitir novas tentativas
-        delete keys.value[loading_key];
+        // Assegura que a chave lógica permaneça mapeada para a identidade interna do item enquanto existir
+        const dotIndex = internal_key.indexOf('.');
+        if (dotIndex !== -1) {
+            const logical = internal_key.substring(dotIndex + 1);
+            keys.value[logical] = internal_key;
+        }
+        keys.value[loading_key] = internal_key;
+        keys_target.value[internal_key] = target;
     };
 
     /**
@@ -240,18 +288,26 @@ export const useLoadingStore = defineStore('loading', () => {
         const resolved = resolveItem(loading_key);
         if (!resolved) return;
 
-        const { item, internal_key } = resolved;
+        const { item, internal_key, target } = resolved;
         const prevTimer = doneTimers.get(internal_key);
         if (prevTimer) {
             clearTimeout(prevTimer);
             doneTimers.delete(internal_key);
         }
 
-        if (item.retry) {
-            item.status = 'loading';
-            item.error = undefined;
-            await item.retry();
+        // Assegura que a chave lógica esteja íntegra no mapa de chaves
+        const dotIndex = internal_key.indexOf('.');
+        if (dotIndex !== -1) {
+            const logical = internal_key.substring(dotIndex + 1);
+            keys.value[logical] = internal_key;
         }
+        keys.value[loading_key] = internal_key;
+        keys_target.value[internal_key] = target;
+
+        item.status = 'loading';
+        item.error = undefined;
+
+        if (item.retry) await item.retry();
     };
 
     /** Alias de {@link end}, exigido pelo adapter do `@maxvue/max-pinia`. */
@@ -281,6 +337,7 @@ export const useLoadingStore = defineStore('loading', () => {
         stop,
         error,
         dismiss,
-        retry
+        retry,
+        reset
     };
 });

@@ -10,7 +10,7 @@
                 />
             </slot>
 
-            <MaxGrid class="auth-card-grid" :aria-describedby="error ? 'max-auth-card-error' : undefined">
+            <MaxGrid class="auth-card-grid" :aria-describedby="error ? errorId : undefined">
                 <!-- Modo Tradicional (E-mail / Senha) -->
                 <template v-if="mode === 'password'">
                     <MaxInputPhoneMail
@@ -19,7 +19,7 @@
                         class="auth-card-field"
                         v-model="email"
                         :error="emailError || phoneError"
-                        :aria-describedby="error ? 'max-auth-card-error' : undefined"
+                        :aria-describedby="error ? errorId : undefined"
                         @keyup.enter="onEnter"
                     />
                     <MaxInputText
@@ -31,7 +31,7 @@
                         v-model="email"
                         :error="emailError"
                         icon="mdi:email-outline"
-                        :aria-describedby="error ? 'max-auth-card-error' : undefined"
+                        :aria-describedby="error ? errorId : undefined"
                         @keyup.enter="onEnter"
                     />
                     <MaxInputText
@@ -42,7 +42,7 @@
                         v-model="password"
                         :error="passwordError"
                         icon="mdi:lock-outline"
-                        :aria-describedby="error ? 'max-auth-card-error' : undefined"
+                        :aria-describedby="error ? errorId : undefined"
                         @keyup.enter="onEnter"
                     />
 
@@ -58,7 +58,7 @@
 
                     <span
                         v-if="error"
-                        id="max-auth-card-error"
+                        :id="errorId"
                         class="max-auth-error"
                         role="alert"
                         aria-live="assertive"
@@ -77,7 +77,7 @@
                             v-model="phone"
                             :label="t.phone"
                             :error="phoneError"
-                            :aria-describedby="error ? 'max-auth-card-error' : undefined"
+                            :aria-describedby="error ? errorId : undefined"
                             @keyup.enter="onEnter"
                         />
                     </slot>
@@ -93,7 +93,7 @@
                             :integer-only="true"
                             :autofocus="true"
                             :error="codeError"
-                            :aria-describedby="error ? 'max-auth-card-error' : undefined"
+                            :aria-describedby="error ? errorId : undefined"
                             @complete="onEnter"
                         />
                     </slot>
@@ -106,7 +106,7 @@
 
                     <span
                         v-if="error"
-                        id="max-auth-card-error"
+                        :id="errorId"
                         class="max-auth-error"
                         role="alert"
                         aria-live="assertive"
@@ -185,6 +185,7 @@
     import MaxButton from './MaxButton.vue';
     import MaxInputCheckbox from './MaxInputCheckbox.vue';
     import { clearAuthOtpCache } from '../helpers/clearAuthOtpCache';
+    import { nextInstanceId } from '../helpers/nextInstanceId';
 
     /** Provedor de login social configurável */
     export interface AuthProvider {
@@ -336,6 +337,8 @@
     const remember = defineModel<boolean>('remember', { default: true });
     const phone = defineModel<string>('phone', { default: '' });
     const code = defineModel<string>('code', { default: '' });
+
+    const errorId = nextInstanceId('max-auth-card-error');
 
     const emailInputRef = ref<any>(null);
     const passwordInputRef = ref<any>(null);

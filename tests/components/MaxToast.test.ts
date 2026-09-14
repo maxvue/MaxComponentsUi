@@ -301,13 +301,13 @@ describe('MaxToast', () => {
     });
 
     describe('Acessibilidade (Etapa 5.1)', () => {
-        it('container de toasts possui role="region", aria-live="polite", aria-atomic="false" e aria-label="Notificações"', () => {
+        it('container de toasts possui role="region" e aria-label="Notificações", sem aria-live no container para evitar anúncios duplicados', () => {
             const wrapper = mountToast();
             const container = wrapper.find('.max-toast-container');
             expect(container.exists()).toBe(true);
             expect(container.attributes('role')).toBe('region');
-            expect(container.attributes('aria-live')).toBe('polite');
-            expect(container.attributes('aria-atomic')).toBe('false');
+            expect(container.attributes('aria-live')).toBeUndefined();
+            expect(container.attributes('aria-atomic')).toBeUndefined();
             expect(container.attributes('aria-label')).toBe('Notificações');
         });
 
@@ -321,6 +321,38 @@ describe('MaxToast', () => {
             const items = wrapper.findAll('.max-toast-item');
             expect(items[0].attributes('role')).toBe('status');
             expect(items[1].attributes('role')).toBe('alert');
+        });
+
+        it('garante exatamente um único owner de live region por evento de toast para evitar anúncios duplicados', async () => {
+            const wrapper = mountToast((store) => {
+                store.add({ title: 'Sucesso', message: 'Item salvo', severity: 'success' });
+                store.add({ title: 'Erro', message: 'Falha ao salvar', severity: 'error' });
+                store.add({ title: 'Info', message: 'Aviso informativo', severity: 'info' });
+                store.add({ title: 'Alerta', message: 'Atenção aos dados', severity: 'warning' });
+            });
+            await flushPromises();
+
+            // O container TransitionGroup NÃO possui aria-live
+            const container = wrapper.find('.max-toast-container');
+            expect(container.attributes('aria-live')).toBeUndefined();
+
+            const items = wrapper.findAll('.max-toast-item');
+            expect(items).toHaveLength(4);
+
+            // Cada toast é o único owner de sua live region (error => alert, outros => status)
+            expect(items[0].attributes('role')).toBe('status');
+            expect(items[1].attributes('role')).toBe('alert');
+            expect(items[2].attributes('role')).toBe('status');
+            expect(items[3].attributes('role')).toBe('status');
+
+            // No total do componente montado, há exatamente 4 live regions (uma por toast, sem duplicatas)
+            const allLiveElements = wrapper.findAll('[aria-live], [role="alert"], [role="status"]');
+            expect(allLiveElements).toHaveLength(4);
+
+            // Cada uma das live regions corresponde ao próprio elemento raiz do toast
+            allLiveElements.forEach((el, index) => {
+                expect(el.element).toBe(items[index].element);
+            });
         });
 
         it('pausa e retoma o toast com eventos de foco de teclado (@focusin e @focusout)', async () => {

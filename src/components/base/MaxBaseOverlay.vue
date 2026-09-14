@@ -77,31 +77,63 @@
     const panelRef = ref<HTMLElement | null>(null);
     const panelStyle = ref<Record<string, string | undefined>>({});
 
-    const computeZIndex = (): number => {
+    const computeZIndex = (): string => {
         const isInModal = Boolean(props.target?.closest?.('.max-modal, .max-drawer, [role="dialog"]'));
-        let base = 1000;
+        let token = 'var(--max-layer-dropdown, 1000)';
+        let baseNum = 1000;
+        let minBound = 900;
+        let maxBound = 1100;
+
         switch (props.layer) {
             case 'popover':
-                base = 1200;
+                token = 'var(--max-layer-popover, 1200)';
+                baseNum = 1200;
+                minBound = 1150;
+                maxBound = 1290;
                 break;
             case 'modal':
-                base = 1310;
+                token = 'var(--max-layer-modal, 1310)';
+                baseNum = 1310;
+                minBound = 1300;
+                maxBound = 1390;
                 break;
             case 'fullscreen':
-                base = 1400;
+                token = 'var(--max-layer-fullscreen, 1400)';
+                baseNum = 1400;
+                minBound = 1395;
+                maxBound = 1490;
                 break;
             case 'tooltip':
-                base = 1600;
+                token = 'var(--max-layer-tooltip, 1600)';
+                baseNum = 1600;
+                minBound = 1590;
+                maxBound = 9999;
                 break;
             case 'dropdown':
             default:
-                base = isInModal ? 1320 : 1000;
+                if (isInModal) {
+                    token = 'calc(var(--max-layer-modal, 1310) + 10)';
+                    baseNum = 1320;
+                    minBound = 1315;
+                    maxBound = 1390;
+                } else {
+                    token = 'var(--max-layer-dropdown, 1000)';
+                    baseNum = 1000;
+                    minBound = 900;
+                    maxBound = 1100;
+                }
                 break;
         }
-        return base + (props.layerOffset ?? 0);
+
+        const rawOffset = props.layerOffset ?? 0;
+        const clampedOffset = Math.max(minBound - baseNum, Math.min(rawOffset, maxBound - baseNum));
+
+        if (clampedOffset !== 0) return `calc(${token} + ${clampedOffset})`;
+
+        return token;
     };
 
-    const zIndex = computed(() => String(computeZIndex()));
+    const zIndex = computed(() => computeZIndex());
 
     const position = () => {
         if (!props.target || !panelRef.value) return;
@@ -115,7 +147,10 @@
         const spaceBelow = vh - t.bottom;
         const spaceAbove = t.top;
         const openUp = spaceBelow < pHeight && spaceAbove > spaceBelow;
-        const top = openUp ? t.top - pHeight - props.offset : t.bottom + props.offset;
+        let top = openUp ? t.top - pHeight - props.offset : t.bottom + props.offset;
+
+        // Safe area / viewport boundaries clamp (8px safe margin)
+        top = Math.max(8, Math.min(top, vh - pHeight - 8));
 
         let left = props.align === 'right' ? t.right - p.width : t.left;
         left = Math.max(8, Math.min(left, vw - p.width - 8));

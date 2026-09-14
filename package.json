@@ -28,16 +28,13 @@
         },
         "./style.css": "./dist/style.css",
         "./styles.css": "./dist/style.css",
-        "./themes/*": "./dist/themes/*",
-        "./dist/components/*": {
-            "types": "./dist/components/*",
-            "import": "./dist/components/*"
-        },
-        "./*": {
-            "types": "./*",
-            "import": "./*"
-        }
+        "./themes/*": "./dist/themes/*"
     },
+    "engines": {
+        "node": ">=20.0.0",
+        "npm": ">=10.0.0"
+    },
+    "packageManager": "npm@10.8.2",
     "files": [
         "dist"
     ],
@@ -71,7 +68,7 @@
     ],
     "dependencies": {
         "@lottiefiles/dotlottie-vue": "^0.11.24",
-        "@maxvue/max-use": "file:../MaxUse",
+        "@maxvue/max-use": "^1.1.47",
         "@monaco-editor/loader": "^1.7.0",
         "@tanstack/vue-virtual": "^3.13.34",
         "@tiptap/core": "^3.30.3",
@@ -152,7 +149,7 @@
         "@maxvue/max-pinia": "^0.2.0",
         "pinia": "^4.0.0",
         "unocss": "^66.0.0",
-        "vue": "^3.6.0 || ^3.6.0-rc.5",
+        "vue": "^3.5.11 || ^3.6.0 || ^3.6.0-rc.5",
         "vue-router": "^5.2.0"
     },
     "peerDependenciesMeta": {

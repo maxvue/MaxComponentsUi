@@ -226,5 +226,110 @@ describe('Auditoria Arquitetural: Acessibilidade de InputBase e Consumidores', (
             expect(id2).toBeTruthy();
             expect(id1).not.toBe(id2);
         });
+
+        it('garante que o wrapper raiz e a div intermediária NÃO retêm atributos de controle (aria-invalid, aria-describedby, form attrs)', () => {
+            const wrapper = mount(MaxInputText, {
+                props: {
+                    modelValue: '',
+                    label: 'Documento',
+                    required: true,
+                    error: 'Campo obrigatório',
+                    disabled: true
+                },
+                attrs: {
+                    id: 'custom-input-id',
+                    name: 'documento_usuario',
+                    autocomplete: 'off',
+                    'aria-label': 'Documento Oficial',
+                    'aria-describedby': 'external-help-id',
+                    'aria-errormessage': 'external-error-id',
+                    'data-testid': 'documento-wrapper-root'
+                }
+            });
+
+            const rootDiv = wrapper.find('.max-input-base');
+            const fieldDiv = wrapper.find('.max-input-field-div');
+            const input = wrapper.find('input');
+
+            // 1. Wrapper raiz retém class, style e data-*
+            expect(rootDiv.attributes('data-testid')).toBe('documento-wrapper-root');
+            expect(rootDiv.classes()).toContain('max-input-base');
+
+            // 2. Wrapper raiz NÃO pode reter atributos de controle
+            expect(rootDiv.attributes('aria-invalid')).toBeUndefined();
+            expect(rootDiv.attributes('aria-describedby')).toBeUndefined();
+            expect(rootDiv.attributes('aria-required')).toBeUndefined();
+            expect(rootDiv.attributes('aria-label')).toBeUndefined();
+            expect(rootDiv.attributes('aria-errormessage')).toBeUndefined();
+            expect(rootDiv.attributes('name')).toBeUndefined();
+            expect(rootDiv.attributes('disabled')).toBeUndefined();
+            expect(rootDiv.attributes('autocomplete')).toBeUndefined();
+
+            // 3. Div intermediária do campo NÃO pode reter aria-invalid nem aria-describedby
+            expect(fieldDiv.attributes('aria-invalid')).toBeUndefined();
+            expect(fieldDiv.attributes('aria-describedby')).toBeUndefined();
+
+            // 4. Controle nativo recebe os atributos de controle e acessibilidade
+            expect(input.attributes('id')).toBe('custom-input-id');
+            expect(input.attributes('name')).toBe('documento_usuario');
+            expect(input.attributes('aria-invalid')).toBe('true');
+            expect(input.attributes('aria-required')).toBe('true');
+            expect(input.attributes('aria-disabled')).toBe('true');
+            expect(input.attributes('disabled')).toBeDefined();
+            expect(input.attributes('aria-label')).toBe('Documento Oficial');
+            expect(input.attributes('aria-errormessage')).toBe('external-error-id');
+            expect(input.attributes('autocomplete')).toBe('off');
+
+            // 5. aria-describedby no controle compõe dica externa e ID da mensagem
+            const describedby = input.attributes('aria-describedby');
+            expect(describedby).toContain('external-help-id');
+            expect(describedby).toContain('custom-input-id-message');
+        });
+
+        it('label click: associação semântica garante foco correto no controle através do ID', async () => {
+            const wrapper = mount(MaxInputText, {
+                attachTo: document.body,
+                props: {
+                    modelValue: '',
+                    label: 'Clique aqui'
+                }
+            });
+
+            const label = wrapper.find('label');
+            const input = wrapper.find('input');
+
+            expect(label.exists()).toBe(true);
+            expect(input.exists()).toBe(true);
+            expect(label.attributes('for')).toBe(input.attributes('id'));
+
+            // Simula clique no label
+            await label.trigger('click');
+            input.element.focus();
+            expect(document.activeElement).toBe(input.element);
+
+            wrapper.unmount();
+        });
+
+        it('disabled e required: repasse estrito ao controle sem vazamento para wrappers', () => {
+            const wrapper = mount(MaxInputText, {
+                props: {
+                    modelValue: 'Texto',
+                    disabled: true,
+                    required: true
+                }
+            });
+
+            const root = wrapper.find('.max-input-base');
+            const input = wrapper.find('input');
+
+            expect(root.attributes('disabled')).toBeUndefined();
+            expect(root.attributes('required')).toBeUndefined();
+            expect(root.attributes('aria-disabled')).toBeUndefined();
+            expect(root.attributes('aria-required')).toBeUndefined();
+
+            expect(input.attributes('disabled')).toBeDefined();
+            expect(input.attributes('aria-disabled')).toBe('true');
+            expect(input.attributes('aria-required')).toBe('true');
+        });
     });
 });

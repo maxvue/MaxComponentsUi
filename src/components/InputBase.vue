@@ -1,5 +1,6 @@
 <template>
     <div
+        v-bind="rootAttrs"
         :class="[
             'max-input-base',
             'max-input-main-div',
@@ -22,8 +23,10 @@
                 'no-status': props.noStatus,
                 'no-message': props.noMessage
             },
-            props.class
+            props.class,
+            attrs.class
         ]"
+        :style="attrs.style"
     >
         <!-- INPUT LABEL -->
         <!--
@@ -39,13 +42,7 @@
 
 
         <!-- INPUT FIELD -->
-        <!--
-            `aria-invalid` aplicado aqui (no wrapper) e nao no `<input>` real,
-            pois este ultimo esta fora do controle direto do InputBase (vive no
-            slot). Nao e o padrao ARIA ideal, mas serve como sinal semantico
-            adicional ate que os consumidores adotem o slot prop `inputId`.
-        -->
-        <div class="max-input-field-div" :aria-invalid="isError ? 'true' : undefined">
+        <div class="max-input-field-div">
             <MaxIcon :icon="props.iconLeft ?? props.icon ?? props.i" :size="1.2" :light="light" :dark="dark" v-if="hasContent(props.iconLeft ?? props.icon ?? props.i) && !props.noIcon && (props.iconLeft || props.iconPos === 'left')" class="input-icon-left" />
             <div v-else></div>
             <div class="input-slot-div">
@@ -116,7 +113,12 @@
     import { computed, useAttrs, useId } from 'vue';
     import MaxIcon from './MaxIcon.vue';
     import type { InputValue, SelectOptionsList, SelectGroupOptions } from '../types';
-    import { provideInputBaseContext } from './base/inputBaseContext';
+    import { provideInputBaseContext, type InputAttrs } from './base/inputBaseContext';
+
+    defineOptions({
+        name: 'InputBase',
+        inheritAttrs: false
+    });
 
     /**
      * Propriedades base para componentes de entrada (inputs).
@@ -257,12 +259,76 @@
         return tokens.length > 0 ? tokens.join(' ') : undefined;
     });
 
-    const inputAttrs = computed(() => ({
-        id: input_id.value,
-        'aria-invalid': isError.value ? ('true' as const) : undefined,
-        'aria-required': props.required ? ('true' as const) : undefined,
-        'aria-describedby': ariaDescribedby.value
-    }));
+    const isControlAttribute = (key: string): boolean => {
+        if (key.startsWith('aria-')) return true;
+        const controlKeys = new Set([
+            'id',
+            'name',
+            'disabled',
+            'required',
+            'readonly',
+            'autocomplete',
+            'autofocus',
+            'tabindex',
+            'placeholder',
+            'min',
+            'max',
+            'step',
+            'maxlength',
+            'minlength',
+            'pattern',
+            'inputmode',
+            'type',
+            'form',
+            'rows',
+            'cols',
+            'spellcheck',
+            'title'
+        ]);
+        return controlKeys.has(key);
+    };
+
+    const rootAttrs = computed(() => {
+        const result: Record<string, any> = {};
+        for (const [key, value] of Object.entries(attrs)) {
+            if (key === 'class' || key === 'style') continue;
+            if (!isControlAttribute(key)) result[key] = value;
+
+        }
+        return result;
+    });
+
+    const controlAttrsFromAttrs = computed(() => {
+        const result: Record<string, any> = {};
+        for (const [key, value] of Object.entries(attrs)) if (isControlAttribute(key) && key !== 'id' && key !== 'aria-describedby') result[key] = value;
+
+
+        return result;
+    });
+
+    const inputAttrs = computed<InputAttrs>(() => {
+        const base: InputAttrs = {
+            ...controlAttrsFromAttrs.value,
+            id: input_id.value,
+            'aria-invalid': isError.value ? ('true' as const) : undefined,
+            'aria-required': (props.required || attrs.required === '' || attrs.required === true) ? ('true' as const) : undefined,
+            'aria-describedby': ariaDescribedby.value
+        };
+
+        if (props.disabled !== undefined) {
+            base.disabled = props.disabled ? true : undefined;
+            if (props.disabled) base['aria-disabled'] = 'true' as const;
+
+        } else if (attrs.disabled !== undefined && attrs.disabled !== false) {
+            base.disabled = true;
+            base['aria-disabled'] = 'true' as const;
+        }
+
+        for (const key of Object.keys(base)) if (base[key] === undefined) delete base[key];
+
+
+        return base;
+    });
 
     const hasIconRight = computed(() => hasContent(props.iconRight ?? props.icon ?? props.i) && !props.noIcon && Boolean(props.iconRight || props.iconPos === 'right'));
 

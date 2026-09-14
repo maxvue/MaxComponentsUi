@@ -2,15 +2,15 @@
 
 A biblioteca oferece dois sistemas de estilos complementares:
 
-1. **MaxStyle** — Preset PrimeVue (define as cores semânticas dos componentes)
+1. **MaxStyle** — Tokens semânticos e paleta canônica de cores do ecossistema Max
 2. **presetMaxUno** — Preset UnoCSS (classes utilitárias para layout, espaçamento e cores)
 
 ---
 
-## MaxStyle — Preset PrimeVue
+## MaxStyle — Tokens Semânticos e Paleta Canônica
 
-O `MaxStyle` é um preset baseado no **Aura** (PrimeVue) com paleta de cores personalizada.
-É aplicado automaticamente ao usar `app.use(MaxComponentsUi)`.
+O `MaxStyle` define a identidade cromática e a escala de variáveis CSS (`--max-primary-*`, etc.) do Design System Max.
+É importado diretamente via CSS (`import '@maxvue/max-components-ui/style.css'`) ou integrado via tokens.
 
 ### Paleta de Cores Semânticas
 

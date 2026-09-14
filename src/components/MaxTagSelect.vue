@@ -522,24 +522,47 @@
         return opt[props.optionValue] === temp_value.value;
     };
 
+    const getFlattenedIndexForHighlighted = () => {
+        if (highlightedIndex.value < 0) return -1;
+        if (props.groupOptions !== undefined) {
+            const found = flattenedItems.value.findIndex(
+                (entry) => entry.type === 'option' && entry.selectableIndex === highlightedIndex.value
+            );
+            return found >= 0 ? found : highlightedIndex.value;
+        }
+        return highlightedIndex.value;
+    };
+
     const scrollHighlightedIntoView = () => {
         nextTick(() => {
             const container = listContainerEl.value;
             if (!container || highlightedIndex.value < 0) return;
 
+            const flatIdx = getFlattenedIndexForHighlighted();
+            const clientH = container.clientHeight || 200;
+
             if (isVirtual.value) {
-                const targetScroll = scrollToIndex(highlightedIndex.value, 'auto');
+                setViewport(container.scrollTop, clientH);
+                const targetScroll = scrollToIndex(flatIdx, 'auto');
                 container.scrollTop = targetScroll;
+                setViewport(targetScroll, clientH);
             } else {
                 const h = numericItemHeight.value;
-                const targetTop = highlightedIndex.value * h;
+                const targetTop = flatIdx * h;
                 const targetBottom = targetTop + h;
 
                 if (targetTop < container.scrollTop) container.scrollTop = targetTop;
-                else if (targetBottom > container.scrollTop + container.clientHeight) container.scrollTop = targetBottom - container.clientHeight;
+                else if (targetBottom > container.scrollTop + clientH) container.scrollTop = targetBottom - clientH;
             }
         });
     };
+
+    watch(isOpen, (open) => {
+        if (open) nextTick(() => {
+            const container = listContainerEl.value;
+            if (container) setViewport(container.scrollTop, container.clientHeight || 200);
+        });
+    });
 
     const navigateOptions = (step: number) => {
         const total = flatSelectableOptions.value.length;

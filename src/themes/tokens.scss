@@ -37,7 +37,9 @@
     --max-whatsapp-500: #25d366;
     --max-whatsapp-600: #1da851;
     --max-whatsapp-700: #075e54;
+    --max-whatsapp-800: #054a42;
     --max-whatsapp-surface: var(--max-whatsapp-700, #075e54);
+    --max-whatsapp-hover: var(--max-whatsapp-800, #054a42);
     --max-whatsapp-content: #ffffff;
     --max-help-500: #7c3aed;
     --max-help-600: #6d28d9;
@@ -159,7 +161,7 @@
 
     // Tokens semânticos de seleção acessível - modo escuro (contraste >= 4.5:1)
     --max-selection-background: var(--max-primary-400, #178DA5);
-    --max-selection-content: #00202e;
+    --max-selection-content: #00152A;
     --max-selection-hover-background: var(--max-primary-500, #00768E);
     --max-selection-hover-content: #ffffff;
 

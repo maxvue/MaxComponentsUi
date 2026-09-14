@@ -1,3 +1,5 @@
+import { SCENARIO_LOADERS } from './scenarios';
+
 export type ComponentFamily =
     | 'inputs'
     | 'buttons'
@@ -183,10 +185,13 @@ export function getCoverageStats() {
     const total = PLAYGROUND_CATALOG.length;
     const aliases = PLAYGROUND_CATALOG.filter((item) => item.isAlias).length;
     const canonical = total - aliases;
+    const coveredCount = PLAYGROUND_CATALOG.filter((item) => Boolean(SCENARIO_LOADERS[item.scenarioId])).length;
+    const coveragePercentage = total > 0 ? Math.round((coveredCount / total) * 100) : 0;
     return {
         total,
         canonical,
         aliases,
-        coveragePercentage: 100
+        coveredCount,
+        coveragePercentage
     };
 }

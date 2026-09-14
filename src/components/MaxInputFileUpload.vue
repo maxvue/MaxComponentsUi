@@ -795,4 +795,11 @@
             transform: translateX(100%);
         }
     }
+
+    @media (prefers-reduced-motion: reduce) {
+        .max-spinner-rotate,
+        .progress-indeterminate {
+            animation-duration: 4s;
+        }
+    }
 </style>

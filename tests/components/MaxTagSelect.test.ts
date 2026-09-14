@@ -532,6 +532,82 @@ describe('MaxTagSelect', () => {
 
             wrapper.unmount();
         });
+
+        it('lista agrupada com mais de 500 itens valida virtualização, scrollTop, aria-activedescendant e seleção correta (F16 / E06-06)', async () => {
+            // Gera 12 grupos com 50 itens cada = 600 itens (mais de 500 itens)
+            const groupOptions = Array.from({ length: 12 }, (_, gIdx) => ({
+                label: `Grupo ${gIdx + 1}`,
+                items: Array.from({ length: 50 }, (_, iIdx) => {
+                    const id = `g${gIdx + 1}_item${iIdx + 1}`;
+                    return {
+                        value: id,
+                        name: `Item ${gIdx + 1}-${iIdx + 1}`,
+                        label: `Item ${gIdx + 1}-${iIdx + 1}`
+                    };
+                })
+            }));
+
+            const wrapper = mountTagSelect({
+                groupOptions,
+                itemHeight: 36
+            });
+
+            const trigger = wrapper.find('.max-select');
+            await trigger.trigger('click');
+            await wrapper.vm.$nextTick();
+
+            expect((wrapper.vm as any).isOpen).toBe(true);
+            expect((wrapper.vm as any).isVirtual).toBe(true);
+
+            // Container virtualizado renderiza spacer e apenas um subconjunto de itens
+            const container = document.body.querySelector('.max-select-list-container') as HTMLElement;
+            expect(container).not.toBeNull();
+            Object.defineProperty(container, 'clientHeight', { value: 200, configurable: true });
+            const spacer = container.querySelector('.max-select-spacer');
+            expect(spacer).not.toBeNull();
+
+            // Total de itens virtuais é 600 opções + 12 cabeçalhos = 612 itens
+            expect((wrapper.vm as any).flattenedItems.length).toBe(612);
+            // Renderiza muito menos que 600 nós no DOM
+            const renderedOptions = container.querySelectorAll('.max-select-option');
+            expect(renderedOptions.length).toBeLessThan(100);
+
+            // Simula navegação por teclado: avança para a opção no índice 35
+            // (que fica abaixo da viewport inicial)
+            for (let i = 0; i < 35; i++) await trigger.trigger('keydown', { key: 'ArrowDown' });
+            await wrapper.vm.$nextTick();
+            await new Promise((r) => setTimeout(r, 10));
+            await wrapper.vm.$nextTick();
+
+            expect((wrapper.vm as any).highlightedIndex).toBe(35);
+
+            // aria-activedescendant sincronizado com a opção ativa
+            const activeDescendant = trigger.attributes('aria-activedescendant');
+            expect(activeDescendant).toBeTruthy();
+            expect(activeDescendant).toContain('-opt-35');
+
+            // Validação de scroll: container.scrollTop foi recalculado para trazer o item em foco
+            expect(container.scrollTop).toBeGreaterThan(0);
+
+            // O elemento referenciado por aria-activedescendant deve estar efetivamente montado no DOM
+            const activeElement = document.getElementById(activeDescendant!);
+            expect(activeElement).not.toBeNull();
+            expect(activeElement?.classList.contains('max-select-option-highlighted')).toBe(true);
+            expect(activeElement?.textContent).toContain('Item 1-36');
+
+            // Seleção correta via teclado (Enter)
+            await trigger.trigger('keydown', { key: 'Enter' });
+            await wrapper.vm.$nextTick();
+
+            const emitted = wrapper.emitted('update:modelValue');
+            expect(emitted).toBeTruthy();
+            expect(emitted?.pop()).toEqual(['g1_item36']);
+
+            // Dropdown deve ter sido fechado após a seleção
+            expect((wrapper.vm as any).isOpen).toBe(false);
+
+            wrapper.unmount();
+        });
     });
 });
 

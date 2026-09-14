@@ -1,5 +1,5 @@
 <template>
-    <InputBase class="max-input-cpf-cnpj" v-bind="props" :error="error_msg ?? (props.error === true ? true : undefined)" :caution="caution" :done="done ?? undefined">
+    <InputBase class="max-input-cpf-cnpj" v-bind="props" :error="resolvedError" :caution="caution" :done="done ?? undefined">
         <template #default="{ inputAttrs }">
             <input
                 v-bind="inputAttrs"
@@ -39,6 +39,8 @@
             cpf?: boolean;
             /** Força a máscara e validação de CNPJ */
             cnpj?: boolean;
+            /** Mensagem ou estado booleano de erro */
+            error?: string | boolean | null | undefined;
         }>(),
         { modelValue: '', done: undefined, required: false, caution: undefined, error: undefined }
     );
@@ -49,10 +51,31 @@
     }>();
 
     const hasBeenTouched = ref(false);
+    const isSubmitted = ref(false);
 
     const onBlur = () => {
         hasBeenTouched.value = true;
     };
+
+    const submit = (): boolean => {
+        isSubmitted.value = true;
+        hasBeenTouched.value = true;
+        return done.value === true;
+    };
+
+    const reset = (): void => {
+        hasBeenTouched.value = false;
+        isSubmitted.value = false;
+    };
+
+    watch(
+        () => props.modelValue,
+        (newVal) => {
+            const numbers = onlyNumbers(newVal ?? '');
+            if (!numbers) reset();
+
+        }
+    );
 
     // O modelValue e sempre normalizado para "so digitos" antes de emitir e
     // ao receber um valor externo, entao a igualdade estrita (default) ja
@@ -138,7 +161,7 @@
     });
 
     const caution = computed(() => {
-        if (props.caution !== undefined) return props.caution;
+        if (props.caution !== undefined) return Boolean(props.caution);
         const only_numbers = onlyNumbers(temp_value.value ?? '');
         if (only_numbers.length === 0) return false;
 
@@ -147,9 +170,7 @@
 
         if (isComplete) return done.value === false;
 
-
-        if (hasBeenTouched.value) return true;
-
+        if (hasBeenTouched.value || isSubmitted.value) return true;
 
         return false;
     });
@@ -166,12 +187,10 @@
         const only_numbers = onlyNumbers(temp_value.value ?? '');
 
         if (only_numbers.length === 0) {
-            if (props.required && hasBeenTouched.value) return attrs_error_message ?? 'Campo obrigatório';
+            if (props.required && (hasBeenTouched.value || isSubmitted.value)) return attrs_error_message ?? 'Campo obrigatório';
             if (typeof props.error === 'string') return props.error;
-
             return null;
         }
-
 
         if (caution.value) {
             if (typeof attrs_error_message === 'string') return attrs_error_message;
@@ -180,7 +199,19 @@
             return 'Documento inválido';
         }
 
+        if (done.value === true) return null;
+
         return attrs_error_message;
+    });
+
+    const resolvedError = computed<string | boolean | null | undefined>(() => {
+        if (props.error !== undefined) {
+            if (props.error === false || props.error === null) return undefined;
+            if (props.error === true) return true;
+            if (typeof props.error === 'string') return props.error;
+        }
+
+        return error_msg.value ?? undefined;
     });
 
     // Emite 'complete' quando o documento atinge 11 (CPF) ou 14 (CNPJ)
@@ -190,6 +221,20 @@
         const only_numbers: string = onlyNumbers(temp_value.value);
         if ((only_numbers.length === 11 || only_numbers.length === 14) && done.value) emit('complete', only_numbers);
     }, { immediate: true });
+
+    defineExpose({
+        temp_value,
+        masked_value,
+        done,
+        caution,
+        error_msg,
+        resolvedError,
+        maskValue,
+        onBlur,
+        onUserInput,
+        submit,
+        reset
+    });
 </script>
 
 <style lang="scss" scoped>

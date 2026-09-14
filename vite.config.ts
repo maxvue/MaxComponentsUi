@@ -78,6 +78,9 @@ export default defineConfig({
         minify: 'terser'
     },
     resolve: {
-        alias: { '@': path.resolve(import.meta.dirname, './src'),'@helpers': path.resolve(import.meta.dirname, './src/helpers'),'@maxvue/max-use': path.resolve(import.meta.dirname, '../MaxUse/src/index.ts') }
+        alias: {
+            '@': path.resolve(import.meta.dirname, './src'),
+            '@helpers': path.resolve(import.meta.dirname, './src/helpers')
+        }
     }
 });

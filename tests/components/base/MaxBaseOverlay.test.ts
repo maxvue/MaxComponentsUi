@@ -219,14 +219,28 @@ describe('MaxBaseOverlay', () => {
         t.remove();
     });
 
+    function parseZIndex(styleZIndex: string): number {
+        if (!styleZIndex) return 0;
+        const direct = Number(styleZIndex);
+        if (!Number.isNaN(direct)) return direct;
+        const match = styleZIndex.match(/var\([^,]+,\s*(\d+)\)/);
+        if (match) {
+            let base = Number(match[1]);
+            const offsetMatch = styleZIndex.match(/\+\s*(-?\d+)\)/);
+            if (offsetMatch) base += Number(offsetMatch[1]);
+            return base;
+        }
+        return 0;
+    }
+
     it('z-index é determinístico e estável através de reposicionamento/resize', async () => {
         wrapper = mount(MaxBaseOverlay, { props: { visible: true, target } });
         await settle();
-        const firstZ = Number(getPanel().style.zIndex);
+        const firstZ = parseZIndex(getPanel().style.zIndex);
 
         window.dispatchEvent(new Event('resize'));
         await settle();
-        const secondZ = Number(getPanel().style.zIndex);
+        const secondZ = parseZIndex(getPanel().style.zIndex);
 
         expect(firstZ).toBe(1000);
         expect(secondZ).toBe(firstZ);
@@ -250,17 +264,59 @@ describe('MaxBaseOverlay', () => {
         wrapper = mount(MaxBaseOverlay, { props: { visible: true, target } });
         await settle();
 
-        const initialZIndex = Number(getPanel().style.zIndex);
+        const initialZIndex = parseZIndex(getPanel().style.zIndex);
 
         // Dispara 10 eventos de scroll em sequência no mesmo frame
         for (let i = 0; i < 10; i++) window.dispatchEvent(new Event('scroll'));
 
-
         await settle();
 
         // Com o throttle de RAF, o reposicionamento só deve ter sido executado uma vez
-        const finalZIndex = Number(getPanel().style.zIndex);
+        const finalZIndex = parseZIndex(getPanel().style.zIndex);
         expect(finalZIndex - initialZIndex).toBeLessThanOrEqual(1);
+    });
+
+    it('clamp vertical: não deixa o painel ultrapassar as bordas superior e inferior da viewport (safe-area)', async () => {
+        Object.defineProperty(window, 'innerHeight', { value: 300, configurable: true });
+        const t = makeTarget({ top: 280, bottom: 300, left: 50, right: 150, width: 100, height: 20 });
+
+        wrapper = mount(MaxBaseOverlay, { props: { visible: true, target: t } });
+        await settle();
+        mockRect(getPanel(), { width: 100, height: 150 });
+        window.dispatchEvent(new Event('resize'));
+        await settle();
+
+        const panel = getPanel();
+        const top = parseInt(panel.style.top, 10);
+        expect(top).toBeLessThanOrEqual(300 - 150 - 8);
+        expect(top).toBeGreaterThanOrEqual(8);
+        t.remove();
+    });
+
+    it('clamp de z-index: limita layerOffset para não invadir outras faixas de camadas', async () => {
+        wrapper = mount(MaxBaseOverlay, { props: { visible: true, target, layer: 'dropdown', layerOffset: 5000 } });
+        await settle();
+        const zIndexStr = getPanel().style.zIndex;
+        expect(zIndexStr).toContain('var(--max-layer-dropdown, 1000)');
+        const resolved = parseZIndex(zIndexStr);
+        expect(resolved).toBeLessThanOrEqual(1100);
+        wrapper.unmount();
+
+        wrapper = mount(MaxBaseOverlay, { props: { visible: true, target, layer: 'dropdown', layerOffset: -5000 } });
+        await settle();
+        const resolvedNeg = parseZIndex(getPanel().style.zIndex);
+        expect(resolvedNeg).toBeGreaterThanOrEqual(900);
+    });
+
+    it('utiliza custom property semântica --max-layer-* no z-index', async () => {
+        wrapper = mount(MaxBaseOverlay, { props: { visible: true, target, layer: 'popover' } });
+        await settle();
+        expect(getPanel().style.zIndex).toContain('var(--max-layer-popover, 1200)');
+        wrapper.unmount();
+
+        wrapper = mount(MaxBaseOverlay, { props: { visible: true, target, layer: 'modal' } });
+        await settle();
+        expect(getPanel().style.zIndex).toContain('var(--max-layer-modal, 1310)');
     });
 
     it('aplica o role informado via prop no painel', async () => {

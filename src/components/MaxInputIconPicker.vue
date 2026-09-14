@@ -45,11 +45,11 @@
                 @click.stop
                 @keydown="trap.onKeydown"
             >
-                <div class="p-drawer-header">
-                    <span class="p-drawer-title">Escolha um ícone</span>
+                <div class="max-icon-picker-header p-drawer-header">
+                    <span class="max-icon-picker-title p-drawer-title">Escolha um ícone</span>
                     <button
                         type="button"
-                        class="p-drawer-close-button"
+                        class="max-icon-picker-close-button p-drawer-close-button"
                         aria-label="Fechar seletor de ícones"
                         @click="closeDrawer"
                     >
@@ -57,7 +57,7 @@
                     </button>
                 </div>
 
-                <div class="p-drawer-content">
+                <div class="max-icon-picker-content p-drawer-content">
                     <div class="picker-search-area">
                         <input
                             ref="searchInputRef"
@@ -553,6 +553,7 @@
         overflow: hidden;
         animation: drawer-slide-up 0.25s ease-out;
 
+        .max-icon-picker-header,
         .p-drawer-header {
             display: flex;
             align-items: center;
@@ -560,12 +561,14 @@
             padding: 16px 20px;
             border-bottom: 1px solid var(--surface-border);
 
+            .max-icon-picker-title,
             .p-drawer-title {
                 font-weight: 600;
                 font-size: 1.1rem;
                 color: var(--background-775);
             }
 
+            .max-icon-picker-close-button,
             .p-drawer-close-button {
                 background: transparent;
                 border: none;
@@ -584,6 +587,7 @@
             }
         }
 
+        .max-icon-picker-content,
         .p-drawer-content {
             flex: 1;
             padding: 16px 20px;

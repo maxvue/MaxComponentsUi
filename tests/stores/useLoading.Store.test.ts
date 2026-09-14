@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { effectScope } from 'vue';
 import { setActivePinia, createPinia } from 'pinia';
 import { useLoadingStore } from '../../src/stores/useLoading.Store';
 
@@ -290,5 +291,189 @@ describe('useLoadingStore', () => {
         expect(store.targets['body']?.items[internal_key]).toBeUndefined();
 
         vi.useRealTimers();
+    });
+
+    describe('R15 — F22 / E09-02: Ciclo de retry, múltiplos targets e descarte de timers', () => {
+        it('executa ciclo completo start -> error -> retry -> end com a MESMA chave lógica sem prender o loading', async () => {
+            vi.useFakeTimers();
+            const store = useLoadingStore();
+            let retryExecutionCount = 0;
+
+            const logicalKey = 'usuario.fatura.download';
+
+            store.start({
+                key: logicalKey,
+                message: 'Iniciando download da fatura...',
+                retry: async () => {
+                    retryExecutionCount++;
+                    // A própria rotina de recuperação chama end com a mesma chave lógica
+                    store.end(logicalKey);
+                }
+            });
+
+            const internalKey = store.keys[logicalKey];
+            expect(internalKey).toBeDefined();
+            expect(store.targets['body'].items[internalKey].status).toBe('loading');
+            expect(store.isPending()).toBe(true);
+
+            // 1. Simula falha na operação
+            store.error(logicalKey, 'Falha ao conectar no gateway de pagamento');
+
+            // A chave lógica NÃO deve ser apagada no erro para permitir resolução pública
+            expect(store.keys[logicalKey]).toBe(internalKey);
+            expect(store.targets['body'].items[internalKey].status).toBe('error');
+            expect(store.targets['body'].items[internalKey].message).toBe('Falha ao conectar no gateway de pagamento');
+            expect(store.isPending()).toBe(false);
+
+            // 2. Aciona retry usando a MESMA chave lógica
+            await store.retry(logicalKey);
+
+            expect(retryExecutionCount).toBe(1);
+            // Durante o retry, o status é restaurado para loading e em seguida para done pelo end(logicalKey)
+            expect(store.targets['body'].items[internalKey].status).toBe('done');
+
+            // 3. Após a expiração do timer de conclusão (500ms padrão), o item é limpo e não fica preso
+            await vi.advanceTimersByTimeAsync(600);
+
+            expect(store.targets['body'].items[internalKey]).toBeUndefined();
+            expect(store.keys[logicalKey]).toBeUndefined();
+            expect(store.isPending()).toBe(false);
+            vi.useRealTimers();
+        });
+
+        it('permite chamada de retry diretamente pela chave lógica mesmo sem callback registrado', async () => {
+            const store = useLoadingStore();
+            const logicalKey = 'consulta.cep';
+
+            store.start({ key: logicalKey, message: 'Consultando CEP...' });
+            store.error(logicalKey, 'Timeout');
+
+            const internalKey = store.keys[logicalKey];
+            expect(store.targets['body'].items[internalKey].status).toBe('error');
+
+            // Retry restaura status para loading e preserva a chave
+            await store.retry(logicalKey);
+
+            expect(store.targets['body'].items[internalKey].status).toBe('loading');
+            expect(store.targets['body'].items[internalKey].error).toBeUndefined();
+
+            store.end(logicalKey);
+            expect(store.targets['body'].items[internalKey].status).toBe('done');
+        });
+
+        it('gerencia múltiplos targets de forma isolada e segura em operações concorrentes', async () => {
+            vi.useFakeTimers();
+            const store = useLoadingStore();
+
+            // Dispara itens simultâneos em 3 targets distintos
+            store.start({ key: 'job.geral', target: 'body', message: 'Carga geral' });
+            store.start({ key: 'job.menu', target: '#menu-lateral', message: 'Carga menu' });
+            store.start({ key: 'job.painel', target: '#painel-central', message: 'Carga painel' });
+
+            expect(store.isPending('body')).toBe(true);
+            expect(store.isPending('#menu-lateral')).toBe(true);
+            expect(store.isPending('#painel-central')).toBe(true);
+            expect(store.isPending()).toBe(true);
+
+            // Falha apenas no menu
+            store.error('job.menu', {
+                message: 'Erro na API do menu',
+                retry: async () => {
+                    store.end('job.menu');
+                }
+            });
+
+            expect(store.isPending('body')).toBe(true);
+            expect(store.isPending('#menu-lateral')).toBe(false);
+            expect(store.isPending('#painel-central')).toBe(true);
+
+            // Finaliza o body com sucesso
+            store.end('job.geral');
+            await vi.advanceTimersByTimeAsync(600);
+
+            expect(store.isPending('body')).toBe(false);
+            expect(store.isPending('#painel-central')).toBe(true);
+
+            // Recupera o menu via retry pela chave lógica
+            await store.retry('job.menu');
+            await vi.advanceTimersByTimeAsync(600);
+
+            expect(store.isPending('#menu-lateral')).toBe(false);
+            expect(store.isPending('#painel-central')).toBe(true);
+
+            // Finaliza o painel
+            store.end('job.painel');
+            await vi.advanceTimersByTimeAsync(600);
+
+            expect(store.isPending('#painel-central')).toBe(false);
+            expect(store.isPending()).toBe(false);
+            vi.useRealTimers();
+        });
+
+        it('evita colisão de chaves internas caso a mesma chave lógica seja iniciada em targets diferentes', () => {
+            const store = useLoadingStore();
+
+            store.start({ key: 'recurso.sync', target: '#secao-a' });
+            store.start({ key: 'recurso.sync', target: '#secao-b' });
+
+            const itemA = Object.values(store.targets['#secao-a'].items)[0];
+            const itemB = Object.values(store.targets['#secao-b'].items)[0];
+
+            expect(itemA).toBeDefined();
+            expect(itemB).toBeDefined();
+            expect(itemA.key).not.toBe(itemB.key);
+            expect(itemA.target).toBe('#secao-a');
+            expect(itemB.target).toBe('#secao-b');
+        });
+
+        it('store.reset() cancela todos os timers pendentes e descarta alvos e chaves', async () => {
+            vi.useFakeTimers();
+            const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
+            const store = useLoadingStore();
+
+            store.start({ key: 'timer.1' });
+            store.start({ key: 'timer.2' });
+            store.end('timer.1', { done_duration: 10000 });
+            store.end('timer.2', { done_duration: 10000 });
+
+            expect(clearTimeoutSpy).not.toHaveBeenCalled();
+
+            store.reset();
+
+            // Garante que clearTimeout foi chamado para cada timer ativo
+            expect(clearTimeoutSpy).toHaveBeenCalled();
+            expect(store.targets).toEqual({});
+            expect(store.keys).toEqual({});
+            expect(store.keys_target).toEqual({});
+            expect(store.items).toEqual([]);
+
+            clearTimeoutSpy.mockRestore();
+            vi.useRealTimers();
+        });
+
+        it('cancela timers pendentes no descarte de escopo do Vue (unmount / scope dispose)', async () => {
+            vi.useFakeTimers();
+            const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
+
+            const scope = effectScope();
+            let scopedStore: ReturnType<typeof useLoadingStore>;
+
+            scope.run(() => {
+                const pinia = createPinia();
+                setActivePinia(pinia);
+                scopedStore = useLoadingStore();
+            });
+
+            scopedStore!.start({ key: 'transiente' });
+            scopedStore!.end('transiente', { done_duration: 15000 });
+
+            // Descarta a store / escopo do Pinia (simula unmount do contexto da store)
+            scopedStore!.$dispose();
+
+            expect(clearTimeoutSpy).toHaveBeenCalled();
+
+            clearTimeoutSpy.mockRestore();
+            vi.useRealTimers();
+        });
     });
 });

@@ -210,7 +210,7 @@ describe('MaxTable', () => {
             expect(rows[2].text()).toContain('Ana');
         });
 
-        it('cabeçalho sortable insere botão nativo .max-table-header-button, aria-sort no th, ícone aria-hidden e responde a Enter e Espaço', async () => {
+        it('cabeçalho sortable insere botão nativo .max-table-header-button, aria-sort no th, ícone aria-hidden e responde a ativação nativa por clique/teclado (F20 / E08-05)', async () => {
             const wrapper = mount(MaxTable, {
                 props: {
                     value: [...sampleData]
@@ -230,17 +230,49 @@ describe('MaxTable', () => {
             expect(header.attributes('aria-sort')).toBe('none');
             expect(header.find('.sort-icon-box').attributes('aria-hidden')).toBe('true');
 
-            // Enter: Ascending
-            await button.trigger('keydown', { key: 'Enter' });
+            // Ativação nativa (botão HTML despacha click ao ser acionado por Enter/Espaço): Ascending
+            await button.trigger('click');
             expect(header.attributes('aria-sort')).toBe('ascending');
             let rows = wrapper.findAll('tbody tr.max-table-row');
             expect(rows[0].text()).toContain('Ana');
 
-            // Space: Descending
-            await button.trigger('keydown', { key: ' ' });
+            // Segunda ativação nativa: Descending
+            await button.trigger('click');
             expect(header.attributes('aria-sort')).toBe('descending');
             rows = wrapper.findAll('tbody tr.max-table-row');
             expect(rows[0].text()).toContain('Carlos');
+
+            // Terceira ativação: limpa ordenação
+            await button.trigger('click');
+            expect(header.attributes('aria-sort')).toBe('none');
+        });
+
+        it('garante exatamente uma ordenação por interação no cabeçalho sortable sem duplicação de ativação (F20 / E08-05)', async () => {
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: [...sampleData]
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome', sortable: true })
+                    ]
+                }
+            });
+
+            const header = wrapper.find('thead th.max-table-th-sortable');
+            const button = header.find('button.max-table-header-button');
+
+            // Uma única ativação
+            await button.trigger('click');
+            expect(header.attributes('aria-sort')).toBe('ascending');
+            expect(wrapper.findAll('tbody tr.max-table-row')[0].text()).toContain('Ana');
+
+            // Exatamente mais uma ativação inverte a ordenação para descending
+            await button.trigger('click');
+            expect(header.attributes('aria-sort')).toBe('descending');
+            expect(wrapper.findAll('tbody tr.max-table-row')[0].text()).toContain('Carlos');
+
+            wrapper.unmount();
         });
 
         it('emite evento @sort em modo lazy sem ordenar localmente', async () => {

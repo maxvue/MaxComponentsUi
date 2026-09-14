@@ -79,34 +79,76 @@ describe('MaxAuthCard', () => {
             expect(wrapper.emitted('submit')).toBeFalsy();
         });
 
-        it('exibe a mensagem de erro quando a prop error é informada e associa via aria-describedby', () => {
+        it('exibe a mensagem de erro quando a prop error é informada e associa via aria-describedby com ID único', () => {
             const wrapper = mountAuthCard({ error: 'Credenciais inválidas' });
 
-            const errorEl = wrapper.find('#max-auth-card-error');
+            const errorEl = wrapper.find('.max-auth-error');
             expect(errorEl.exists()).toBe(true);
+            expect(errorEl.attributes('id')).toMatch(/^max-auth-card-error-/);
             expect(errorEl.attributes('role')).toBe('alert');
             expect(errorEl.attributes('aria-live')).toBe('assertive');
             expect(errorEl.attributes('aria-atomic')).toBe('true');
             expect(errorEl.text()).toContain('Credenciais inválidas');
 
+            const errorId = errorEl.attributes('id')!;
             const textInputs = wrapper.findAllComponents({ name: 'MaxInputText' });
             textInputs.forEach((input) => {
-                expect(input.attributes('aria-describedby') || input.find('input').attributes('aria-describedby')).toContain('max-auth-card-error');
+                expect(input.attributes('aria-describedby') || input.find('input').attributes('aria-describedby')).toContain(errorId);
             });
         });
 
-        it('associa o container de grade ao erro via aria-describedby', () => {
+        it('associa o container de grade ao erro via aria-describedby com ID único', () => {
             const wrapper = mountAuthCard({ error: 'Erro geral' });
+            const errorEl = wrapper.find('.max-auth-error');
             const grid = wrapper.find('.auth-card-grid');
-            expect(grid.attributes('aria-describedby')).toBe('max-auth-card-error');
+            expect(grid.attributes('aria-describedby')).toBe(errorEl.attributes('id'));
         });
 
         it('não duplica regiões alert simultâneas no card', () => {
             const wrapper = mountAuthCard({ error: 'Erro de autenticação' });
+            const errorEl = wrapper.find('.max-auth-error');
             const alertEls = wrapper.findAll('[role="alert"]');
             expect(alertEls).toHaveLength(1);
-            expect(alertEls[0].attributes('id')).toBe('max-auth-card-error');
+            expect(alertEls[0].attributes('id')).toBe(errorEl.attributes('id'));
             expect(alertEls[0].attributes('aria-atomic')).toBe('true');
+        });
+
+        it('gera IDs de erro únicos e não colidentes ao montar duas instâncias simultâneas', () => {
+            const wrapper1 = mountAuthCard({ error: 'Erro no form 1' });
+            const wrapper2 = mountAuthCard({ error: 'Erro no form 2' });
+
+            const errorEl1 = wrapper1.find('.max-auth-error');
+            const errorEl2 = wrapper2.find('.max-auth-error');
+
+            expect(errorEl1.exists()).toBe(true);
+            expect(errorEl2.exists()).toBe(true);
+
+            const id1 = errorEl1.attributes('id');
+            const id2 = errorEl2.attributes('id');
+
+            expect(id1).toMatch(/^max-auth-card-error-/);
+            expect(id2).toMatch(/^max-auth-card-error-/);
+            expect(id1).not.toBe(id2);
+
+            // Cada grid referencia o ID exclusivo da sua respectiva instância
+            expect(wrapper1.find('.auth-card-grid').attributes('aria-describedby')).toBe(id1);
+            expect(wrapper2.find('.auth-card-grid').attributes('aria-describedby')).toBe(id2);
+
+            // Cada input referencia o ID exclusivo da sua respectiva instância
+            const inputs1 = wrapper1.findAllComponents({ name: 'MaxInputText' });
+            inputs1.forEach((input) => {
+                const describedBy = input.attributes('aria-describedby') || input.find('input').attributes('aria-describedby');
+                expect(describedBy).toBe(id1);
+            });
+
+            const inputs2 = wrapper2.findAllComponents({ name: 'MaxInputText' });
+            inputs2.forEach((input) => {
+                const describedBy = input.attributes('aria-describedby') || input.find('input').attributes('aria-describedby');
+                expect(describedBy).toBe(id2);
+            });
+
+            wrapper1.unmount();
+            wrapper2.unmount();
         });
 
         it('não move foco passivamente no mount com erro, mas move após submissão inválida', async () => {

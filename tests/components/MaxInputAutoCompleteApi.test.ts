@@ -43,8 +43,37 @@ describe('MaxInputAutoCompleteApi.vue', () => {
         expect(wrapper.exists()).toBe(true);
     });
 
-    it('busca dados da API no mount quando data tiver conteudo', async () => {
-        const wrapper = mountAutoCompleteApi({ data: { category: 1 } });
+    it('não busca dados da API no mount se valor inicial estiver abaixo do minLength (F13)', async () => {
+        vi.useFakeTimers();
+        const wrapper = mountAutoCompleteApi({ data: { category: 1 }, modelValue: '', minLength: 1, delay: 300 });
+        await wrapper.vm.$nextTick();
+        vi.advanceTimersByTime(500);
+        await wrapper.vm.$nextTick();
+
+        expect(maxUse.getCachedApiIDB).not.toHaveBeenCalled();
+        vi.useRealTimers();
+    });
+
+    it('busca dados da API no mount quando valor inicial atender minLength após delay (F13)', async () => {
+        vi.useFakeTimers();
+        const wrapper = mountAutoCompleteApi({ data: { category: 1 }, modelValue: 'painel', minLength: 1, delay: 300 });
+        await wrapper.vm.$nextTick();
+
+        expect(maxUse.getCachedApiIDB).not.toHaveBeenCalled();
+
+        vi.advanceTimersByTime(300);
+        await wrapper.vm.$nextTick();
+
+        expect(maxUse.getCachedApiIDB).toHaveBeenCalledTimes(1);
+        const [url, payload] = (maxUse.getCachedApiIDB as any).mock.calls[0];
+        expect(url).toBe('/api/test');
+        expect(payload).toEqual({ category: 1, input_value: 'painel' });
+
+        vi.useRealTimers();
+    });
+
+    it('busca dados no mount com minLength=0 e delay=0', async () => {
+        const wrapper = mountAutoCompleteApi({ data: { category: 1 }, minLength: 0, delay: 0 });
         await wrapper.vm.$nextTick();
 
         expect(maxUse.getCachedApiIDB).toHaveBeenCalled();
@@ -58,7 +87,7 @@ describe('MaxInputAutoCompleteApi.vue', () => {
     });
 
     it('não busca dados da API se data for em branco e não mudar', async () => {
-        const wrapper = mountAutoCompleteApi({ data: null });
+        const wrapper = mountAutoCompleteApi({ data: null, minLength: 0, delay: 0 });
         await wrapper.vm.$nextTick();
         expect(maxUse.getCachedApiIDB).not.toHaveBeenCalled();
     });
@@ -66,7 +95,9 @@ describe('MaxInputAutoCompleteApi.vue', () => {
     it('não envia objeto complexo no input_value quando modelValue for objeto', async () => {
         const wrapper = mountAutoCompleteApi({
             data: { category: 1 },
-            modelValue: { id: '123', name: 'Painel Solar', specs: { voc: 40, isc: 10 } }
+            modelValue: { id: '123', name: 'Painel Solar', specs: { voc: 40, isc: 10 } },
+            minLength: 0,
+            delay: 0
         });
         await wrapper.vm.$nextTick();
 
@@ -158,12 +189,13 @@ describe('MaxInputAutoCompleteApi.vue', () => {
     });
 
     it('renderiza o slot de option corretamente', async () => {
-        const wrapper = mountAutoCompleteApi({ data: { fetch: 1 } });
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        const wrapper = mountAutoCompleteApi({ data: { fetch: 1 }, delay: 0 });
         await wrapper.vm.$nextTick();
 
         const input = wrapper.find('input');
         await input.setValue('Test');
+        await wrapper.vm.$nextTick();
+        await new Promise((resolve) => setTimeout(resolve, 0));
         await wrapper.vm.$nextTick();
 
         const labelEl = document.body.querySelector('.autocomplete-item-select-label');
@@ -183,7 +215,7 @@ describe('MaxInputAutoCompleteApi.vue', () => {
             return Promise.resolve([]);
         });
 
-        const wrapper = mountAutoCompleteApi({ route: '/api/route-a', data: { v: 1 } });
+        const wrapper = mountAutoCompleteApi({ route: '/api/route-a', data: { v: 1 }, minLength: 0, delay: 0 });
         await wrapper.vm.$nextTick();
 
         // Altera para rota B antes de A resolver
@@ -211,7 +243,7 @@ describe('MaxInputAutoCompleteApi.vue', () => {
             return new Promise(() => {}); // never resolves
         });
 
-        const wrapper = mountAutoCompleteApi({ data: { fetch: 1 } });
+        const wrapper = mountAutoCompleteApi({ data: { fetch: 1 }, minLength: 0, delay: 0 });
         await wrapper.vm.$nextTick();
 
         expect(capturedSignal).toBeDefined();
@@ -219,6 +251,70 @@ describe('MaxInputAutoCompleteApi.vue', () => {
 
         wrapper.unmount();
         expect(capturedSignal?.aborted).toBe(true);
+    });
+
+    it('não dispara busca na alteração de route ou data quando abaixo do minLength', async () => {
+        vi.useFakeTimers();
+        const wrapper = mountAutoCompleteApi({ route: '/api/test-1', data: { v: 1 }, modelValue: '', minLength: 2 });
+        await wrapper.vm.$nextTick();
+        vi.advanceTimersByTime(500);
+        expect(maxUse.getCachedApiIDB).not.toHaveBeenCalled();
+
+        await wrapper.setProps({ route: '/api/test-2', data: { v: 2 } });
+        await wrapper.vm.$nextTick();
+        vi.advanceTimersByTime(500);
+        expect(maxUse.getCachedApiIDB).not.toHaveBeenCalled();
+        vi.useRealTimers();
+    });
+
+    it('agenda busca debounced na alteração de route ou data quando acima do minLength', async () => {
+        vi.useFakeTimers();
+        const wrapper = mountAutoCompleteApi({ route: '/api/test-1', data: { v: 1 }, modelValue: 'solar', minLength: 2, delay: 200 });
+        await wrapper.vm.$nextTick();
+        vi.advanceTimersByTime(200);
+        expect(maxUse.getCachedApiIDB).toHaveBeenCalledTimes(1);
+
+        vi.clearAllMocks();
+        await wrapper.setProps({ route: '/api/test-2' });
+        await wrapper.vm.$nextTick();
+        expect(maxUse.getCachedApiIDB).not.toHaveBeenCalled();
+
+        vi.advanceTimersByTime(200);
+        await wrapper.vm.$nextTick();
+        expect(maxUse.getCachedApiIDB).toHaveBeenCalledTimes(1);
+        const [url, payload] = (maxUse.getCachedApiIDB as any).mock.calls[0];
+        expect(url).toBe('/api/test-2');
+        expect(payload).toEqual({ v: 1, input_value: 'solar' });
+
+        vi.useRealTimers();
+    });
+
+    it('agrupa rajadas de digitação em uma única busca remota após o delay', async () => {
+        vi.useFakeTimers();
+        const wrapper = mountAutoCompleteApi({ data: { fetch: 1 }, minLength: 2, delay: 300 });
+        await wrapper.vm.$nextTick();
+
+        const input = wrapper.find('input');
+        await input.setValue('a');
+        await wrapper.vm.$nextTick();
+        vi.advanceTimersByTime(100);
+
+        await input.setValue('ab');
+        await wrapper.vm.$nextTick();
+        vi.advanceTimersByTime(100);
+
+        await input.setValue('abc');
+        await wrapper.vm.$nextTick();
+        expect(maxUse.getCachedApiIDB).not.toHaveBeenCalled();
+
+        vi.advanceTimersByTime(300);
+        await wrapper.vm.$nextTick();
+
+        expect(maxUse.getCachedApiIDB).toHaveBeenCalledTimes(1);
+        const [, payload] = (maxUse.getCachedApiIDB as any).mock.calls[0];
+        expect(payload.input_value).toBe('abc');
+
+        vi.useRealTimers();
     });
 
     it('uma digitação produz exatamente uma emissão de complete e busca única (E05-05)', async () => {

@@ -49,7 +49,9 @@ const SCHEME_INDEPENDENT: Record<string, string> = {
     '--max-whatsapp-500': '#25d366',
     '--max-whatsapp-600': '#1da851',
     '--max-whatsapp-700': '#075e54',
+    '--max-whatsapp-800': '#054a42',
     '--max-whatsapp-surface': 'var(--max-whatsapp-700, #075e54)',
+    '--max-whatsapp-hover': 'var(--max-whatsapp-800, #054a42)',
     '--max-whatsapp-content': '#ffffff',
     '--max-help-500': '#7c3aed',
     '--max-help-600': '#6d28d9',
@@ -127,7 +129,7 @@ const SCHEME_DEPENDENT: Record<string, { light: string; dark: string }> = {
         light: 'var(--max-primary-500, #00768E)',
         dark: 'var(--max-primary-400, #178DA5)'
     },
-    '--max-selection-content': { light: '#ffffff', dark: '#00202e' },
+    '--max-selection-content': { light: '#ffffff', dark: '#00152A' },
     '--max-selection-hover-background': {
         light: 'var(--max-primary-600, #005F77)',
         dark: 'var(--max-primary-500, #00768E)'
@@ -183,5 +185,76 @@ describe('themes/tokens.scss', () => {
 
     it('não referencia o Aura nem deixa placeholders de token', () => {
         expect(CSS).not.toMatch(/\{[a-z.]+\}/);
+    });
+
+    describe('Resolução de tokens/CSS real e contraste WCAG nos estados light/dark/default/hover/focus (F16 / E06-05)', () => {
+        const resolveCssVar = (val: string, scope: Record<string, string>): string => {
+            if (!val) return '';
+            const varMatch = /var\(\s*(--[a-zA-Z0-9_-]+)(?:\s*,\s*([^)]+))?\)/.exec(val);
+            if (!varMatch) return val.trim();
+            const varName = varMatch[1];
+            const fallback = varMatch[2];
+            if (scope[varName]) return resolveCssVar(scope[varName], scope);
+            if (ROOT[varName]) return resolveCssVar(ROOT[varName], ROOT);
+            if (fallback) return resolveCssVar(fallback, scope);
+            return val.trim();
+        };
+
+        const hexLuminance = (hex: string): number => {
+            const clean = hex.replace('#', '');
+            const r = parseInt(clean.slice(0, 2), 16) / 255;
+            const g = parseInt(clean.slice(2, 4), 16) / 255;
+            const b = parseInt(clean.slice(4, 6), 16) / 255;
+            const srgb = [r, g, b].map((v) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)));
+            return 0.2126 * srgb[0] + 0.7152 * srgb[1] + 0.0722 * srgb[2];
+        };
+
+        const contrastRatio = (hex1: string, hex2: string): number => {
+            const l1 = hexLuminance(hex1);
+            const l2 = hexLuminance(hex2);
+            return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+        };
+
+        it('resolve tokens reais de seleção no modo light (default e hover) com contraste >= 4.5:1', () => {
+            const bgDefault = resolveCssVar(ROOT['--max-selection-background'], ROOT);
+            const contentDefault = resolveCssVar(ROOT['--max-selection-content'], ROOT);
+            expect(bgDefault).toBe('#00768E');
+            expect(contentDefault).toBe('#ffffff');
+            expect(contrastRatio(bgDefault, contentDefault)).toBeGreaterThanOrEqual(4.5);
+
+            const bgHover = resolveCssVar(ROOT['--max-selection-hover-background'], ROOT);
+            const contentHover = resolveCssVar(ROOT['--max-selection-hover-content'], ROOT);
+            expect(bgHover).toBe('#005F77');
+            expect(contentHover).toBe('#ffffff');
+            expect(contrastRatio(bgHover, contentHover)).toBeGreaterThanOrEqual(4.5);
+        });
+
+        it('resolve tokens reais de seleção no modo dark (default e hover) com contraste >= 4.5:1', () => {
+            const bgDefault = resolveCssVar(DARK['--max-selection-background'], DARK);
+            const contentDefault = resolveCssVar(DARK['--max-selection-content'], DARK);
+            expect(bgDefault).toBe('#178DA5');
+            expect(contentDefault).toBe('#00152A');
+            expect(contrastRatio(bgDefault, contentDefault)).toBeGreaterThanOrEqual(4.5);
+
+            const bgHover = resolveCssVar(DARK['--max-selection-hover-background'], DARK);
+            const contentHover = resolveCssVar(DARK['--max-selection-hover-content'], DARK);
+            expect(bgHover).toBe('#00768E');
+            expect(contentHover).toBe('#ffffff');
+            expect(contrastRatio(bgHover, contentHover)).toBeGreaterThanOrEqual(4.5);
+        });
+
+        it('resolve tokens reais de foco em light e dark garantindo contraste adequado (>= 3:1)', () => {
+            const ringColorLight = resolveCssVar(ROOT['--max-focus-ring-color'], ROOT);
+            const offsetLight = resolveCssVar(ROOT['--max-focus-ring-offset-color'], ROOT);
+            expect(ringColorLight).toBe('#00768E');
+            expect(offsetLight).toBe('#ffffff');
+            expect(contrastRatio(ringColorLight, offsetLight)).toBeGreaterThanOrEqual(3.0);
+
+            const ringColorDark = resolveCssVar(DARK['--max-focus-ring-color'], DARK);
+            const offsetDark = resolveCssVar(DARK['--max-focus-ring-offset-color'], DARK);
+            expect(ringColorDark).toBe('#178DA5');
+            expect(offsetDark).toBe('#18181b');
+            expect(contrastRatio(ringColorDark, offsetDark)).toBeGreaterThanOrEqual(3.0);
+        });
     });
 });

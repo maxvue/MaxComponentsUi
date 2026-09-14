@@ -112,4 +112,61 @@ describe('E10-09: Política Sistêmica de Movimento Reduzido (prefers-reduced-mo
             expect(iconPickerContent).toMatch(/animation:\s*none/);
         });
     });
+
+    describe('Inventário Automatizado de Motion e Cobertura Sistêmica (R18 / E10-09)', () => {
+        function getVueFiles(dir: string): string[] {
+            const results: string[] = [];
+            const entries = fs.readdirSync(dir, { withFileTypes: true });
+            for (const entry of entries) {
+                const fullPath = path.join(dir, entry.name);
+                if (entry.isDirectory()) results.push(...getVueFiles(fullPath));
+                else if (entry.isFile() && entry.name.endsWith('.vue')) results.push(fullPath);
+            }
+            return results;
+        }
+
+        it('gera inventário de todos os SFCs com animações ou transições e garante conformidade', () => {
+            const componentsDir = path.resolve(SRC_DIR, 'components');
+            const allFiles = getVueFiles(componentsDir);
+
+            const motionComponents: { file: string; hasKeyframes: boolean; hasExplicitReduced: boolean }[] = [];
+
+            for (const file of allFiles) {
+                const content = fs.readFileSync(file, 'utf-8');
+                const styles = [...content.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)].map((m) => m[1]).join('\n');
+                const hasKeyframes = /@keyframes/i.test(styles);
+                const hasTransition = /transition(?:\s*:\s*|-duration|-delay)/i.test(styles);
+                const hasAnimation = /animation(?:\s*:\s*|-name|-duration)/i.test(styles);
+
+                if (hasKeyframes || hasTransition || hasAnimation) {
+                    const hasExplicitReduced = /prefers-reduced-motion/i.test(styles);
+                    motionComponents.push({
+                        file: path.basename(file),
+                        hasKeyframes,
+                        hasExplicitReduced
+                    });
+                }
+            }
+
+            expect(motionComponents.length).toBeGreaterThan(0);
+
+            // Todos os componentes com keyframes explícitos devem ter redução específica ou documentada
+            const keyframeComponents = motionComponents.filter((c) => c.hasKeyframes);
+            for (const comp of keyframeComponents) {
+                const msg = `Componente com keyframes ${comp.file} deve possuir regra específica de prefers-reduced-motion`;
+                expect(comp.hasExplicitReduced, msg).toBe(true);
+            }
+
+
+        });
+
+        it('src/themes/_motion.scss define cobertura universal para *, *::before e *::after', () => {
+            const motionScssPath = path.resolve(SRC_DIR, 'themes/_motion.scss');
+            const content = fs.readFileSync(motionScssPath, 'utf-8');
+
+            expect(content).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{[\s\S]*?\*,\s*\*::before,\s*\*::after\s*\{/);
+            expect(content).toContain('animation-duration: 0.01ms !important');
+            expect(content).toContain('transition-duration: 0.01ms !important');
+        });
+    });
 });

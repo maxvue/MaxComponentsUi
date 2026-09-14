@@ -10,13 +10,13 @@
         <li
             v-for="(item, index) in props.items"
             :key="index"
-            class="submenu-item p-menubar-item"
+            class="submenu-item max-top-toolbar-item p-menubar-item"
             :class="{ 'has-nested': hasChildren(item), 'is-active': activeSubmenu === index, 'is-disabled': item.disabled }"
             role="none"
             @mouseenter="onItemEnter(index, item)"
             @mouseleave="emit('schedule-close')"
         >
-            <div class="submenu-item-content p-menubar-item-content">
+            <div class="submenu-item-content max-top-toolbar-item-content p-menubar-item-content">
                 <div v-if="item.divider" class="divider-space" role="separator"></div>
                 <div
                     v-else-if="hasContent(item.label)"

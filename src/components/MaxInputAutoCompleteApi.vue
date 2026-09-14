@@ -245,19 +245,38 @@
 
     let requestGeneration = 0;
     let currentAbortController: AbortController | null = null;
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
     const isLoading = ref(false);
     const hasError = ref(false);
     const errorMessage = ref<string | null>(null);
     const hasSearched = ref(false);
 
-    const fetchData = () => {
-        if (isBlank(props.route)) return;
-        if (isBlank(props.data)) return;
+    const clearScheduler = () => {
+        if (debounceTimer) {
+            clearTimeout(debounceTimer);
+            debounceTimer = null;
+        }
+    };
 
+    const abortInFlight = () => {
         if (currentAbortController) {
             currentAbortController.abort();
             currentAbortController = null;
         }
+    };
+
+    const executeFetch = () => {
+        if (isBlank(props.route)) return;
+        if (isBlank(props.data)) return;
+
+        const input_value = typeof temp_value.value === 'string' ? temp_value.value : '';
+        if (input_value.length < props.minLength) {
+            abortInFlight();
+            isLoading.value = false;
+            return;
+        }
+
+        abortInFlight();
         const generation = ++requestGeneration;
 
         const controller = new AbortController();
@@ -267,7 +286,6 @@
         hasError.value = false;
         errorMessage.value = null;
 
-        const input_value = typeof temp_value.value === 'string' ? temp_value.value : '';
         const requestParams = { ...(props.data ?? {}), input_value };
 
         const applyIfCurrent = (res: any) => {
@@ -284,15 +302,18 @@
             search();
         };
 
-        getCachedApiIDB(
+        (getCachedApiIDB as any)(
             props.route,
             requestParams,
             null,
             undefined,
             applyIfCurrent,
             { signal: controller.signal }
-        ).then(applyIfCurrent).catch((err: any) => {
-            if (err?.name === 'AbortError') return;
+        ).then((res: any) => {
+            if (controller.signal.aborted) return;
+            applyIfCurrent(res);
+        }).catch((err: any) => {
+            if (controller.signal.aborted || err?.name === 'AbortError') return;
             if (generation === requestGeneration) {
                 isLoading.value = false;
                 hasError.value = true;
@@ -301,16 +322,47 @@
         });
     };
 
+    const scheduleFetch = (immediate: boolean = false) => {
+        clearScheduler();
+
+        if (isBlank(props.route) || isBlank(props.data)) {
+            abortInFlight();
+            isLoading.value = false;
+            return;
+        }
+
+        const input_value = typeof temp_value.value === 'string' ? temp_value.value : '';
+        if (input_value.length < props.minLength) {
+            abortInFlight();
+            isLoading.value = false;
+            return;
+        }
+
+        const delay = props.delay ?? 300;
+        if (immediate || delay <= 0) executeFetch();
+        else debounceTimer = setTimeout(() => {
+            executeFetch();
+        }, delay);
+    };
+
+    const fetchData = () => {
+        scheduleFetch(true);
+    };
+
     watch(
         [() => props.route, () => props.data],
         ([newRoute, newData], [oldRoute, oldData] = ['', {}]) => {
             if (isBlank(newRoute)) return;
             if (isBlank(newData)) return;
             if (isEqual(newData, oldData) && newRoute === oldRoute) return;
-            fetchData();
+            scheduleFetch();
         },
         { deep: true, immediate: true }
     );
+
+    watch(() => props.minLength, () => {
+        scheduleFetch();
+    });
 
     const emit = defineEmits<{
         'update:modelValue': [value: any];
@@ -412,10 +464,11 @@
 
     });
 
-    watch(temp_value, () => {
+    watch(temp_value, (newVal) => {
         search();
         isDone.value = testIsDone();
         if (temp_value.value && typeof temp_value.value !== 'string') emit('update:modelValue', temp_value.value);
+        if (typeof newVal === 'string') scheduleFetch();
     }, { flush: 'sync' });
 
     const onGlobalKeydown = (event: KeyboardEvent) => {
@@ -450,10 +503,8 @@
     });
 
     onBeforeUnmount(() => {
-        if (currentAbortController) {
-            currentAbortController.abort();
-            currentAbortController = null;
-        }
+        clearScheduler();
+        abortInFlight();
         requestGeneration++;
 
         if (typeof window !== 'undefined') {
@@ -475,7 +526,8 @@
         isLoading,
         hasError,
         errorMessage,
-        fetchData
+        fetchData,
+        scheduleFetch
     });
 </script>
 
@@ -637,6 +689,12 @@
 
     to {
         transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .loading-spinner {
+        animation-duration: 4s;
     }
 }
 </style>

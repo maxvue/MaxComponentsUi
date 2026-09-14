@@ -131,4 +131,79 @@ describe('Indicadores de Foco Visível (:focus-visible)', () => {
             expect(wrapper.element.tabIndex).toBe(0);
         });
     });
+
+    describe('Inventário Global de Elementos Focáveis e Indicadores Visíveis (R16 / E10-04)', () => {
+        const componentsDir = path.resolve(__dirname, '../../src/components');
+
+        function getVueFiles(dir: string): string[] {
+            const results: string[] = [];
+            const entries = fs.readdirSync(dir, { withFileTypes: true });
+            for (const entry of entries) {
+                const fullPath = path.join(dir, entry.name);
+                if (entry.isDirectory()) results.push(...getVueFiles(fullPath));
+                else if (entry.isFile() && entry.name.endsWith('.vue')) results.push(fullPath);
+            }
+            return results;
+        }
+
+        it('todos os componentes interativos do design system possuem regras de foco visível', () => {
+            const vueFiles = getVueFiles(componentsDir);
+            const interactiveComponents = [
+                'MaxButton.vue',
+                'MaxIconButton.vue',
+                'MaxBadgeButton.vue',
+                'MaxAccordionItem.vue',
+                'MaxListBox.vue',
+                'InputBase.vue',
+                'MaxTable.vue',
+                'MaxTopToolbar.vue',
+                'MaxMenuVerticalItem.vue'
+            ];
+
+            for (const compName of interactiveComponents) {
+                const filePath = vueFiles.find((f) => path.basename(f) === compName);
+                expect(filePath, `Componente ${compName} deve existir`).toBeDefined();
+
+                const content = fs.readFileSync(filePath!, 'utf-8');
+                const hasFocusRule = /:(?:focus-visible|focus-within|focus)\b|--max-focus/i.test(content);
+                expect(hasFocusRule, `Componente interativo ${compName} deve declarar regra de foco visível`).toBe(true);
+            }
+        });
+
+        it('nenhum componente deve anular foco com outline: none sem fornecer indicador substituto', () => {
+            const vueFiles = getVueFiles(componentsDir);
+            const violations: string[] = [];
+
+            // Exceções contratuais documentadas:
+            // - Controles internos de input que delegam o anel de foco visível ao wrapper InputBase (que possui :focus-within)
+            // - Containers de overlay/máscara com tabindex="-1" que recebem foco programático
+            const documentedExceptions = new Set([
+                'MaxDrawer.vue',
+                'MaxImage.vue',
+                'MaxTagsList.vue',
+                'MaxInputAutoComplete.vue',
+                'MaxInputSelect.vue',
+                'MaxInputTextArea.vue',
+                'MaxInputTextList.vue',
+                'MaxBaseInput.vue'
+            ]);
+
+            for (const file of vueFiles) {
+                const basename = path.basename(file);
+                if (documentedExceptions.has(basename)) continue;
+
+                const content = fs.readFileSync(file, 'utf-8');
+                const styles = [...content.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)].map((m) => m[1]).join('\n');
+
+                // Detecta outline: none ou outline: 0 desacompanhado de :focus-visible ou var(--max-focus
+                const hasOutlineNone = /outline:\s*(?:none|0)(?:\s*!important)?/i.test(styles);
+                if (hasOutlineNone) {
+                    const hasFocusVisibleOrTokens = /focus-visible|--max-focus|focus-within/i.test(styles);
+                    if (!hasFocusVisibleOrTokens) violations.push(basename);
+                }
+            }
+
+            expect(violations, 'Nenhum componente pode ter outline: none sem indicador de foco alternativo').toEqual([]);
+        });
+    });
 });

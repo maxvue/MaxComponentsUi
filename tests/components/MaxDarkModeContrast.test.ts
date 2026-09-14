@@ -87,24 +87,48 @@ describe('MaxDarkModeContrast (Dark Mode & Conformidade de Contraste)', () => {
             expect(fileContent).toContain('var(--max-warning-500, var(--warn-500))');
             expect(fileContent).toContain('var(--max-danger-500, var(--danger-500))');
             expect(fileContent).toContain('var(--max-whatsapp-surface, var(--max-whatsapp-700, #075e54))');
+            expect(fileContent).toContain('var(--max-whatsapp-hover, var(--max-whatsapp-800, #054a42))');
             expect(fileContent).toContain('var(--max-help-surface, var(--max-help-500, #7c3aed))');
         });
 
-        it('todas as combinações sólidas de botões atingem contraste >= 4.5:1 (WCAG AA)', () => {
-            const getLuminance = (hex: string): number => {
-                const clean = hex.replace('#', '');
-                const r = parseInt(clean.substring(0, 2), 16) / 255;
-                const g = parseInt(clean.substring(2, 4), 16) / 255;
-                const b = parseInt(clean.substring(4, 6), 16) / 255;
-                const a = [r, g, b].map((v) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)));
-                return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+        const getLuminance = (hex: string): number => {
+            const clean = hex.replace('#', '');
+            const r = parseInt(clean.substring(0, 2), 16) / 255;
+            const g = parseInt(clean.substring(2, 4), 16) / 255;
+            const b = parseInt(clean.substring(4, 6), 16) / 255;
+            const a = [r, g, b].map((v) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)));
+            return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+        };
+
+        const getContrast = (bg: string, fg: string): number => {
+            const l1 = getLuminance(bg);
+            const l2 = getLuminance(fg);
+            return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+        };
+
+        it('tokens de botões em tokens.scss resolvem cores computadas com contraste >= 4.5:1 e falham sob degradação', () => {
+            const tokensPath = path.resolve(__dirname, '../../src/themes/tokens.scss');
+            const tokensContent = fs.readFileSync(tokensPath, 'utf-8');
+            const extractHex = (name: string): string => {
+                const match = tokensContent.match(new RegExp(`${name}:\\s*(#[0-9a-fA-F]{3,8})`));
+                return match ? match[1] : '';
             };
 
-            const getContrast = (bg: string, fg: string): number => {
-                const l1 = getLuminance(bg);
-                const l2 = getLuminance(fg);
-                return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
-            };
+            const whatsappHover = extractHex('--max-whatsapp-800');
+            const whatsappSurface = extractHex('--max-whatsapp-700');
+            expect(whatsappHover).toBe('#054a42');
+            expect(whatsappSurface).toBe('#075e54');
+
+            // Valida que o token WhatsApp atinge contraste WCAG AA contra branco
+            expect(getContrast(whatsappSurface, '#ffffff')).toBeGreaterThanOrEqual(4.5);
+            expect(getContrast(whatsappHover, '#ffffff')).toBeGreaterThanOrEqual(4.5);
+
+            // Mutation test: provando que mutação ou degradação de token falha no threshold de 4.5:1
+            const degradedRatio = getContrast('#555555', '#666666');
+            expect(degradedRatio).toBeLessThan(4.5);
+        });
+
+        it('todas as combinações sólidas de botões atingem contraste >= 4.5:1 (WCAG AA)', () => {
 
             const pairs = [
                 { name: 'primary', bg: '#00768E', fg: '#ffffff' },

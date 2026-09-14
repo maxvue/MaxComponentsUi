@@ -5,6 +5,7 @@ export interface InputAttrs {
     'aria-invalid'?: 'true' | undefined;
     'aria-required'?: 'true' | undefined;
     'aria-describedby'?: string | undefined;
+    [key: string]: any;
 }
 
 export interface InputBaseContext {

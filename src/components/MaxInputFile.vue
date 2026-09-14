@@ -83,8 +83,6 @@
                             :aria-label="`Remover ${file.name}`"
                             :disabled="props.disabled"
                             @click.stop="deleteItem(index)"
-                            @keydown.enter.stop.prevent="deleteItem(index)"
-                            @keydown.space.stop.prevent="deleteItem(index)"
                         >
                             <MaxIcon icon="tabler:trash" size="1.3" />
                         </button>

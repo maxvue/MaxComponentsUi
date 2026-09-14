@@ -359,5 +359,104 @@ describe('MaxInputFile', () => {
 
             expect(liveRegion.text()).toContain('1 arquivo selecionado');
         });
+
+        it('ativa seleção de arquivo via teclado no container (Enter e Espaço) (F19 / E07-04)', async () => {
+            const wrapper = mount(MaxInputFile);
+            const hiddenInput = wrapper.find<HTMLInputElement>('input.max-input-file-hidden');
+            const clickSpy = vi.spyOn(hiddenInput.element, 'click');
+
+            const container = wrapper.find('.input-file-main-div');
+
+            // Ativação via tecla Enter
+            await container.trigger('keydown.enter');
+            expect(clickSpy).toHaveBeenCalledTimes(1);
+
+            // Ativação via tecla Espaço
+            await container.trigger('keydown.space');
+            expect(clickSpy).toHaveBeenCalledTimes(2);
+
+            wrapper.unmount();
+        });
+
+        it('remove arquivo através da ativação nativa por clique do botão (F19 / E07-04)', async () => {
+            const file1 = new File(['1'], 'doc1.pdf', { type: 'application/pdf' });
+            const file2 = new File(['2'], 'doc2.pdf', { type: 'application/pdf' });
+            const wrapper = mount(MaxInputFile, {
+                props: { modelValue: [file1, file2] }
+            });
+
+            const removeBtn = wrapper.find('button.trash-icon-remove-clipboard');
+            expect(removeBtn.exists()).toBe(true);
+            expect(removeBtn.element.tagName.toLowerCase()).toBe('button');
+
+            // Botão HTML nativo recebe Enter/Espaço e despacha evento click nativo
+            await removeBtn.trigger('click');
+            await wrapper.vm.$nextTick();
+
+            const emitted = wrapper.emitted('update:modelValue');
+            expect(emitted).toBeTruthy();
+            expect(emitted?.length).toBe(1);
+            expect(emitted?.[0][0]).toEqual([file2]);
+
+            wrapper.unmount();
+        });
+
+        it('gerencia foco visível no container e remove listeners adequadamente (F19 / E07-04)', async () => {
+            const wrapper = mount(MaxInputFile);
+            const container = wrapper.find('.input-file-main-div');
+
+            expect(container.attributes('tabindex')).toBe('0');
+
+            await container.trigger('focus');
+            expect((wrapper.vm as any).isFocused).toBe(true);
+
+            await container.trigger('blur');
+            expect((wrapper.vm as any).isFocused).toBe(false);
+
+            wrapper.unmount();
+        });
+
+        it('quando desabilitado, impede ativação por teclado no container (F19 / E07-04)', async () => {
+            const wrapper = mount(MaxInputFile, {
+                props: { disabled: true }
+            });
+            const hiddenInput = wrapper.find<HTMLInputElement>('input.max-input-file-hidden');
+            const clickSpy = vi.spyOn(hiddenInput.element, 'click');
+
+            const container = wrapper.find('.input-file-main-div');
+            expect(container.attributes('tabindex')).toBe('-1');
+            expect(container.attributes('aria-disabled')).toBe('true');
+
+            await container.trigger('keydown.enter');
+            await container.trigger('keydown.space');
+            await container.trigger('click');
+
+            expect(clickSpy).not.toHaveBeenCalled();
+            wrapper.unmount();
+        });
+
+        it('emite update:modelValue exatamente uma vez com múltiplos arquivos selecionados simultaneamente (F19 / E07-05)', async () => {
+            const wrapper = mount(MaxInputFile);
+            const hiddenInput = wrapper.find<HTMLInputElement>('input.max-input-file-hidden');
+
+            const f1 = new File(['a'], 'a.txt', { type: 'text/plain' });
+            const f2 = new File(['b'], 'b.txt', { type: 'text/plain' });
+            const f3 = new File(['c'], 'c.txt', { type: 'text/plain' });
+
+            Object.defineProperty(hiddenInput.element, 'files', {
+                value: [f1, f2, f3],
+                writable: true
+            });
+
+            await hiddenInput.trigger('change');
+            await wrapper.vm.$nextTick();
+
+            const emitted = wrapper.emitted('update:modelValue');
+            expect(emitted).toBeTruthy();
+            expect(emitted?.length).toBe(1);
+            expect(emitted?.[0][0]).toEqual([f1, f2, f3]);
+
+            wrapper.unmount();
+        });
     });
 });

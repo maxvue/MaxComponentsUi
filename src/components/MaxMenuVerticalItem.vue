@@ -115,6 +115,15 @@
             transition: color 0.3s ease;
             place-items: center;
 
+            &:focus:not(:focus-visible) {
+                outline: none;
+            }
+
+            &:focus-visible {
+                outline: var(--max-focus-outline, 2px solid var(--max-primary-500, #00768e));
+                outline-offset: -2px;
+            }
+
             &:hover {
                 color: var(--blue-100);
             }

@@ -1,17 +1,17 @@
 <template>
     <div v-if="showed && hasContent(toolbar.items)" ref="element_ref" :class="`max-top-toolbar tool-bar-top-main-div ${attrs.plus === true ? 'onlyOne' : ''}`">
         <nav ref="menu_ref" class="menu_bar_project_top" role="menubar">
-            <ul class="p-menubar-root-list">
+            <ul class="max-top-toolbar-root-list p-menubar-root-list">
                 <li
                     v-for="(item, index) in toolbar.items"
                     :key="index"
-                    class="p-menubar-item"
+                    class="max-top-toolbar-item p-menubar-item"
                     role="none"
                     @mouseenter="openSubmenu(index)"
                     @mouseleave="scheduleCloseSubmenu"
                     @keydown="onMenubarItemKeydown($event, index, item)"
                 >
-                    <div class="p-menubar-item-content">
+                    <div class="max-top-toolbar-item-content p-menubar-item-content">
                         <div v-if="item.divider" class="divider-space" role="separator"></div>
                         <div
                             v-else-if="hasContent(item.label)"
@@ -68,7 +68,7 @@
                         ref="submenuRef"
                         :id="`top-toolbar-submenu-${index}`"
                         :parent-id="`top-toolbar-item-${index}`"
-                        class="p-menubar-submenu-root"
+                        class="max-top-toolbar-submenu-root p-menubar-submenu-root"
                         :items="item.items"
                         @keep-open="clearCloseTimer"
                         @schedule-close="scheduleCloseSubmenu"
@@ -318,6 +318,7 @@
             background-color: transparent !important;
             z-index: 1 !important;
 
+            .max-top-toolbar-root-list,
             .p-menubar-root-list {
                 display: flex;
                 list-style: none;
@@ -325,12 +326,14 @@
                 padding: 0;
 
                 // ITENS DA BARRA RAIZ (PRIMEIRA CAMADA)
+                > .max-top-toolbar-item,
                 > .p-menubar-item {
                     position: relative;
 
                     &:has(.divider-space) {
                         opacity: 0;
 
+                        .max-top-toolbar-item-content,
                         .p-menubar-item-content {
                             padding: 0;
                         }
@@ -340,6 +343,7 @@
                         }
                     }
 
+                    .max-top-toolbar-item-content,
                     .p-menubar-item-content {
                         height: 40px !important;
                         display: grid;
@@ -400,21 +404,26 @@
                             }
                         }
 
+                        &.max-top-toolbar-item-active,
                         &.p-menubar-item-active {
+                            .max-top-toolbar-item-content,
                             .p-menubar-item-content {
                                 background-color: transparent !important;
                             }
                         }
                     }
 
+                    &.max-top-toolbar-item-active,
                     &.p-menubar-item-active,
                     &:hover {
+                        .max-top-toolbar-item-content,
                         .p-menubar-item-content {
                             background-color: transparent;
                             opacity: 1;
                         }
                     }
 
+                    :deep(.max-top-toolbar-submenu-root),
                     :deep(.p-menubar-submenu-root) {
                         position: absolute;
                         left: unset;
@@ -426,13 +435,16 @@
             }
         }
 
+        .is-focused,
         .p-focus {
             background-color: transparent !important;
 
+            .max-top-toolbar-item,
             .p-menubar-item {
                 background-color: transparent !important;
             }
 
+            .max-top-toolbar-item-content,
             .p-menubar-item-content {
                 background-color: transparent !important;
             }

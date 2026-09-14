@@ -229,8 +229,8 @@
             color: var(--max-whatsapp-content, #fff);
 
             &:hover {
-                background: #054a42;
-                border-color: #054a42;
+                background: var(--max-whatsapp-hover, var(--max-whatsapp-800, #054a42));
+                border-color: var(--max-whatsapp-hover, var(--max-whatsapp-800, #054a42));
                 color: var(--max-whatsapp-content, #fff);
             }
         }

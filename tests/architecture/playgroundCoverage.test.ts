@@ -90,4 +90,23 @@ describe('E10-10: Cobertura do Playground e Identidade Canônica', () => {
         expect(toolbarContent).toContain('isDark');
         expect(toolbarContent).toContain('toggleDark');
     });
+
+    it('R19: todos os 36 arquivos de cenário existem fisicamente em playground/src/scenarios/', () => {
+        const scenariosDir = path.resolve(PLAYGROUND_DIR, 'src/scenarios');
+        expect(fs.existsSync(scenariosDir)).toBe(true);
+
+        const scenarioIds = [...new Set(PLAYGROUND_CATALOG.map((c) => c.scenarioId))];
+        expect(scenarioIds.length).toBe(36);
+
+        for (const id of scenarioIds) {
+            const scenarioFile = path.resolve(scenariosDir, `${id}.vue`);
+            expect(fs.existsSync(scenarioFile), `Arquivo de cenário ${id}.vue deve existir`).toBe(true);
+        }
+    });
+
+    it('R19: cálculo de cobertura é determinístico e reflete cenários implementados', () => {
+        const stats = getCoverageStats();
+        expect(stats.coveredCount).toBe(stats.total);
+        expect(stats.coveragePercentage).toBe(100);
+    });
 });

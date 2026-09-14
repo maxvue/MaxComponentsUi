@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-    import { useTemplateRef, ref, computed, useId, watch, onBeforeUnmount } from 'vue';
+    import { useTemplateRef, ref, computed, useId, watch, onBeforeUnmount, onMounted, useSlots } from 'vue';
     import { usePopoverStore } from '../stores/usePopover.Store';
     import { useFocusTrap } from '../helpers/useFocusTrap';
     import { useActiveOverlayPosition } from '../composables/useActiveOverlayPosition';
@@ -143,16 +143,42 @@
 
     const dialog_id = computed(() => 'max-popover-dialog-' + id.value);
     const title_id = computed(() => (props.title || props.subTitle ? 'max-popover-title-' + id.value : undefined));
+    const is_mounted = ref(false);
+    onMounted(() => {
+        is_mounted.value = true;
+    });
+
+    const slots = useSlots();
+
+    const isNonEmptyTextInDom = (elementId?: string): boolean => {
+        if (!elementId || typeof document === 'undefined') return false;
+        const target = document.getElementById(elementId);
+        if (!target) return false;
+        if (target.hidden || target.getAttribute('aria-hidden') === 'true') return false;
+        if (target.style?.display === 'none' || target.style?.visibility === 'hidden') return false;
+        const text = (target.innerText || target.textContent || '').trim();
+        return text.length > 0;
+    };
 
     const computedAriaLabelledby = computed(() => {
-        if (props.ariaLabelledby) return props.ariaLabelledby;
-        if (props.title || props.subTitle) return title_id.value;
+        void is_mounted.value;
+        void isOpen.value;
+        if (props.ariaLabelledby) {
+            const rawId = props.ariaLabelledby.trim();
+            if (!rawId) return undefined;
+            if (typeof document !== 'undefined') return isNonEmptyTextInDom(rawId) ? rawId : undefined;
+
+            return rawId;
+        }
+        if (slots.header) return undefined;
+        if (props.title?.trim() || props.subTitle?.trim()) return title_id.value;
         return undefined;
     });
 
     const computedAriaLabel = computed(() => {
         if (computedAriaLabelledby.value) return undefined;
-        return props.ariaLabel ?? (props.title || 'Informações adicionais');
+        const rawLabel = props.ariaLabel?.trim() || props.title?.trim();
+        return rawLabel && rawLabel.length > 0 ? rawLabel : 'Informações adicionais';
     });
 
     const el = useTemplateRef<HTMLElement>('el');
