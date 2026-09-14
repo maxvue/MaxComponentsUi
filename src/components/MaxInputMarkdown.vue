@@ -102,8 +102,6 @@
             disabled: false,
             inLine: false,
             spellcheck: true,
-            minHeight: '200px',
-            maxHeight: '500px',
             hideTools: undefined,
             tools: undefined,
             onImageUpload: undefined,
@@ -416,7 +414,8 @@
     flex-direction: column;
     align-items: stretch;
     width: 100%;
-    min-height: 120px;
+    height: 100%;
+    min-height: 0;
     position: relative;
     overflow: visible;
     background-color: var(--background-0, #fff);
@@ -429,7 +428,9 @@
     }
 
     .max-input-markdown__editor-wrap {
+        flex: 1;
         width: 100%;
+        min-height: 0;
         display: flex;
         flex-direction: column;
         border-radius: inherit;
@@ -445,6 +446,7 @@
 
     .max-input-markdown__content {
         flex: 1;
+        min-height: 0;
         overflow-y: auto;
         cursor: text;
         width: 100%;
