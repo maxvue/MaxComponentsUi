@@ -1,5 +1,13 @@
 <template>
-    <InputBase v-bind="props" class="max-input-cep input-base-cep-main-div" :value="temp_value" :done="done ?? undefined" :caution="caution" :error="resolvedError" :icon-right="loading ? 'line-md:loading-loop' : undefined">
+    <InputBase
+        v-bind="props"
+        class="max-input-cep input-base-cep-main-div"
+        :value="temp_value"
+        :done="done ?? undefined"
+        :caution="caution"
+        :error="error_msg ?? undefined"
+        :icon-right="loading ? 'line-md:loading-loop' : undefined"
+    >
         <template #default="{ inputAttrs }">
             <input
                 v-bind="inputAttrs"
@@ -10,7 +18,8 @@
                 v-maska="maskValue"
                 placeholder="00000-000"
                 :disabled="props.disabled"
-                @blur="onBlur"
+                @input="validation.onInput"
+                @blur="validation.onBlur"
             />
         </template>
     </InputBase>
@@ -22,10 +31,11 @@
      * Possui máscara automática (00000-000) e validação integrada.
      */
     import { formatCep, onlyNumbers, cepIsValid } from '@maxvue/max-use';
-    import { ref, computed, watch, useAttrs } from 'vue';
+    import { computed, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
     import { vMaska } from 'maska/vue';
     import { useMirroredModel } from '../helpers/useMirroredModel';
+    import { useInputValidation } from '../helpers/useInputValidation';
     import type { InputBaseProps } from '../types';
 
     const attrs: any = useAttrs();
@@ -47,13 +57,6 @@
         'complete': [value: string];
     }>();
 
-    // temp_value guarda o valor FORMATADO (ex.: '01001-000'), enquanto
-    // props.modelValue e o emitido/recebido em formato cru (so digitos).
-    // Por isso: `transform` desfaz a formatacao antes de emitir, e `compare`
-    // normaliza ambos os lados para digitos antes de decidir se reatribui o
-    // ref local — evita que a formatacao local seja descartada quando o
-    // valor externo "equivalente" (mesmos digitos) volta via prop, o mesmo
-    // guard que a Etapa 7c precisou preservar aqui manualmente.
     const temp_value = useMirroredModel(
         { get modelValue() { return formatCep(props.modelValue); } },
         emit as (event: 'update:modelValue', value: string) => void,
@@ -65,88 +68,68 @@
     const temp_value_numbers = computed(() => onlyNumbers(temp_value.value ?? ''));
     const maskValue = computed(() => ({ tokens: { '#': { pattern: /[0-9]/ } }, mask: '#####-###' }));
 
-    const hasBeenTouched = ref(false);
-    const isSubmitted = ref(false);
-
-    const onBlur = () => {
-        hasBeenTouched.value = true;
+    const isValidCep = (raw: any): boolean => {
+        const numbers = onlyNumbers(raw ?? '');
+        return cepIsValid(numbers);
     };
 
-    const submit = (): boolean => {
-        isSubmitted.value = true;
-        hasBeenTouched.value = true;
-        return done.value === true;
+    const isComplete = (raw: any): boolean => {
+        const numbers = onlyNumbers(raw ?? '');
+        return numbers.length === 8;
     };
 
-    const reset = (): void => {
-        hasBeenTouched.value = false;
-        isSubmitted.value = false;
-    };
-
-    watch(
-        () => props.modelValue,
-        (newVal) => {
-            const numbers = onlyNumbers(newVal ?? '');
-            if (!numbers) reset();
-
-        }
+    const explicitErrorMsg = computed<string | null>(() =>
+        (typeof props.error === 'string' ? props.error : null)
+        ?? (props as any).errMsg
+        ?? attrs.errMsg
+        ?? (props as any).error_message
+        ?? attrs.error_message
+        ?? (props as any).error_msg
+        ?? attrs.error_msg
+        ?? null
     );
 
-    const isValidCep = computed(() => cepIsValid(temp_value_numbers.value));
+    const hasExplicitBooleanError = computed(() => props.error === true || attrs.error === true || attrs.error === '');
 
-    const done = computed(() => {
-        if (props.done !== undefined) return props.done ?? null;
-        if (temp_value_numbers.value.length > 0) return isValidCep.value;
-        return null;
+    const invalidMessage = computed(() => explicitErrorMsg.value ?? 'CEP inválido');
+
+    const validation = useInputValidation({
+        value: temp_value,
+        required: computed(() => props.required),
+        caution: computed(() => props.caution),
+        done: computed(() => props.done),
+        validator: isValidCep,
+        isComplete,
+        invalidMessage,
+        requiredMessage: computed(() => explicitErrorMsg.value ?? 'Campo obrigatório')
     });
 
+    const done = validation.done;
     const caution = computed(() => {
         if (props.caution !== undefined) return Boolean(props.caution);
-        if (temp_value_numbers.value.length === 0) return Boolean(props.required && (hasBeenTouched.value || isSubmitted.value));
-
-        return done.value === false;
+        if (hasExplicitBooleanError.value || explicitErrorMsg.value) return true;
+        if (temp_value_numbers.value.length > 0 && !isValidCep(temp_value.value)) return true;
+        return validation.caution.value;
     });
-
     const error_msg = computed(() => {
-        if (!caution.value) return null;
-        const attrs_error_message = (props as any).errMsg
-            ?? attrs.errMsg
-            ?? (props as any).error_message
-            ?? attrs.error_message
-            ?? (props as any).error_msg
-            ?? attrs.error_msg
-            ?? null;
-        if (temp_value_numbers.value.length === 0 && props.required) return attrs_error_message ?? 'Campo obrigatório';
-        if (temp_value_numbers.value.length > 0 && !isValidCep.value) return attrs_error_message ?? 'CEP inválido';
-        return attrs_error_message;
+        if (explicitErrorMsg.value) return explicitErrorMsg.value;
+        if (hasExplicitBooleanError.value) return true;
+        if (temp_value_numbers.value.length > 0 && !isValidCep(temp_value.value)) return invalidMessage.value;
+        return validation.error.value;
     });
 
-    const resolvedError = computed<string | boolean | null | undefined>(() => {
-        if (props.error !== undefined) {
-            if (props.error === false || props.error === null) return undefined;
-            if (props.error === true) return true;
-            if (typeof props.error === 'string') return props.error;
-        }
-
-        return error_msg.value ?? undefined;
-    });
-
-    // Emite 'complete' quando o CEP se torna valido. A emissao de
-    // 'update:modelValue' em si fica a cargo do useMirroredModel acima.
     watch(temp_value, () => {
-        if (isValidCep.value) emit('complete', temp_value_numbers.value);
+        if (isValidCep(temp_value.value)) emit('complete', temp_value_numbers.value);
     });
 
     defineExpose({
         temp_value,
-        temp_value_numbers,
+        maskValue,
         done,
         caution,
         error_msg,
-        resolvedError,
-        maskValue,
-        onBlur,
-        submit,
-        reset
+        validation,
+        submit: validation.submit,
+        reset: validation.reset
     });
 </script>

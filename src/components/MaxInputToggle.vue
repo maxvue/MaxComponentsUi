@@ -142,35 +142,31 @@
 
     const rootAttrs = computed(() => {
         const result: Record<string, unknown> = {};
-        for (const [key, value] of Object.entries(attrs)) {
-            if (
-                !CONTROL_ATTR_KEYS.has(key) &&
-                key !== 'id' &&
-                key !== 'label' &&
-                key !== 'labelCenter' &&
-                key !== 'labelTrue' &&
-                key !== 'labelFalse' &&
-                key !== 'true-label' &&
-                key !== 'false-label'
-            ) {
-                result[key] = value;
-            }
-        }
+        for (const [key, value] of Object.entries(attrs)) if (
+            !CONTROL_ATTR_KEYS.has(key) &&
+            key !== 'id' &&
+            key !== 'label' &&
+            key !== 'labelCenter' &&
+            key !== 'labelTrue' &&
+            key !== 'labelFalse' &&
+            key !== 'true-label' &&
+            key !== 'false-label'
+        ) result[key] = value;
+
+
         return result;
     });
 
     const controlAttrs = computed(() => {
         const result: Record<string, unknown> = {};
-        for (const [key, value] of Object.entries(attrs)) {
-            if (
-                CONTROL_ATTR_KEYS.has(key) &&
-                key !== 'name' &&
-                key !== 'disabled' &&
-                key !== 'required'
-            ) {
-                result[key] = value;
-            }
-        }
+        for (const [key, value] of Object.entries(attrs)) if (
+            CONTROL_ATTR_KEYS.has(key) &&
+            key !== 'name' &&
+            key !== 'disabled' &&
+            key !== 'required'
+        ) result[key] = value;
+
+
         return result;
     });
 

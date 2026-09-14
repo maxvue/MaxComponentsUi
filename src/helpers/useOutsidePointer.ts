@@ -91,9 +91,8 @@ export function useOutsidePointer(
     const onKeydown = (e: KeyboardEvent) => {
         if (e.key !== 'Escape') return;
         // Apenas o overlay no TOPO da pilha fecha com Escape
-        if (overlayStack.length > 0 && overlayStack[overlayStack.length - 1].id !== id) {
-            return;
-        }
+        if (overlayStack.length > 0 && overlayStack[overlayStack.length - 1].id !== id) return;
+
         const canClose = options.closeOnEscape !== undefined ? Boolean(unref(options.closeOnEscape)) : true;
         if (canClose) {
             e.stopPropagation();
@@ -116,9 +115,8 @@ export function useOutsidePointer(
         }
 
         const target = e.target as Node | null;
-        if (!isInsideElements(target, options.elements())) {
-            options.onClose('outside');
-        }
+        if (!isInsideElements(target, options.elements())) options.onClose('outside');
+
     };
 
     const handleReposition = () => {
@@ -129,9 +127,8 @@ export function useOutsidePointer(
                 rafId = null;
                 options.onReposition?.();
             });
-        } else {
-            options.onReposition();
-        }
+        } else options.onReposition();
+
     };
 
     const attachInstanceListeners = () => {
@@ -185,9 +182,8 @@ export function useOutsidePointer(
         if (isActive.value) return;
         isActive.value = true;
 
-        if (typeof document !== 'undefined') {
-            previousActiveElement = document.activeElement as HTMLElement | null;
-        }
+        if (typeof document !== 'undefined') previousActiveElement = document.activeElement as HTMLElement | null;
+
 
         pointerDownInside = false;
         overlayStack.push(entry);
@@ -199,18 +195,16 @@ export function useOutsidePointer(
         isActive.value = false;
 
         const idx = overlayStack.findIndex((item) => item.id === id);
-        if (idx >= 0) {
-            overlayStack.splice(idx, 1);
-        }
+        if (idx >= 0) overlayStack.splice(idx, 1);
+
 
         detachInstanceListeners();
 
         if (options.restoreFocus !== false && typeof document !== 'undefined') {
             const explicitTrigger = typeof options.triggerEl === 'function' ? options.triggerEl() : options.triggerEl?.value;
             const targetToFocus = explicitTrigger ?? previousActiveElement;
-            if (targetToFocus && typeof targetToFocus.focus === 'function' && document.body.contains(targetToFocus)) {
-                targetToFocus.focus();
-            }
+            if (targetToFocus && typeof targetToFocus.focus === 'function' && document.body.contains(targetToFocus)) targetToFocus.focus();
+
         }
         previousActiveElement = null;
     };
@@ -218,11 +212,9 @@ export function useOutsidePointer(
     watch(
         isOpen,
         (open) => {
-            if (open) {
-                activate();
-            } else {
-                deactivate();
-            }
+            if (open) activate();
+            else deactivate();
+
         },
         { immediate: true }
     );

@@ -16,14 +16,12 @@ export function isMenuRouteActive(
     const rawRoute = item.route || item.details?.route || item.rota || item.details?.page_component;
     if (rawRoute && snakeCase(String(rawRoute).trim()) === current) return true;
 
-    if (item.details?.page_component && snakeCase(String(item.details.page_component).trim()) === current) {
-        return true;
-    }
+    if (item.details?.page_component && snakeCase(String(item.details.page_component).trim()) === current) return true;
+
 
     const declaredMatches: unknown = item.matches || item.details?.matches;
-    if (Array.isArray(declaredMatches)) {
-        return declaredMatches.some((match) => typeof match === 'string' && snakeCase(match.trim()) === current);
-    }
+    if (Array.isArray(declaredMatches)) return declaredMatches.some((match) => typeof match === 'string' && snakeCase(match.trim()) === current);
+
 
     return false;
 }

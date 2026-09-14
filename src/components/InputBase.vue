@@ -268,7 +268,10 @@
             'required',
             'readonly',
             'autocomplete',
+            'autocorrect',
+            'autocapitalize',
             'autofocus',
+            'enterkeyhint',
             'tabindex',
             'placeholder',
             'min',
@@ -280,10 +283,23 @@
             'inputmode',
             'type',
             'form',
+            'formaction',
+            'formenctype',
+            'formmethod',
+            'formnovalidate',
+            'formtarget',
             'rows',
             'cols',
             'spellcheck',
-            'title'
+            'title',
+            'size',
+            'accept',
+            'multiple',
+            'capture',
+            'checked',
+            'value',
+            'list',
+            'dirname'
         ]);
         return controlKeys.has(key);
     };

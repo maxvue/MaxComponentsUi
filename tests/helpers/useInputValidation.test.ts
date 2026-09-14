@@ -40,43 +40,39 @@ describe('useInputValidation', () => {
         expect(caution.value).toBe(false);
     });
 
-    // Prova da correcao do achado 22: override explicito de caution do pai
-    // deve passar DIRETO, sem AND com o estado interno de validacao (ex.:
-    // done === false). Mesmo quando o valor e valido (done=true), uma
-    // caution=true explicita do pai deve prevalecer.
-    it('achado 22: override de caution do pai passa direto, mesmo com done=true internamente', () => {
+    it('caution prop explicita do pai tem prioridade sobre done=true', () => {
         const value = ref('ok');
-        const cautionOverride = ref<string | boolean | undefined>(true);
+        const cautionOverride = ref(true);
         const { caution } = useInputValidation({ validator: (v) => v === 'ok', value, caution: cautionOverride });
         expect(caution.value).toBe(true);
     });
 
-    it('achado 22: override de caution=false do pai suprime a caution mesmo com valor invalido', () => {
+    it('caution prop explicita do pai tem prioridade sobre done=false', () => {
         const value = ref('errado');
-        const cautionOverride = ref<string | boolean | undefined>(false);
+        const cautionOverride = ref(false);
         const { caution } = useInputValidation({ validator: (v) => v === 'ok', value, caution: cautionOverride });
         expect(caution.value).toBe(false);
     });
 
-    it('achado 22: override de caution como string do pai passa direto e vira a mensagem de erro', () => {
-        const value = ref('ok');
-        const cautionOverride = ref<string | boolean | undefined>('Atenção customizada');
-        const { caution, error } = useInputValidation({ validator: (v) => v === 'ok', value, caution: cautionOverride });
-        expect(caution.value).toBe(true);
-        expect(error.value).toBe('Atenção customizada');
+    it('error reflete a string de caution quando caution e string', () => {
+        const value = ref('errado');
+        const cautionOverride = ref('Mensagem customizada');
+        const { error } = useInputValidation({ validator: (v) => v === 'ok', value, caution: cautionOverride });
+        expect(error.value).toBe('Mensagem customizada');
     });
 
-    it('error e null quando nao ha caution', () => {
+    it('error e null quando valor e valido', () => {
         const value = ref('ok');
         const { error } = useInputValidation({ validator: (v) => v === 'ok', value });
         expect(error.value).toBeNull();
     });
 
-    it('campo obrigatorio vazio nao exibe erro no mount e exibe apos blur', () => {
+    it('error e null no mount para campo obrigatorio vazio (estado neutro) e exibe erro apos blur', () => {
         const value = ref('');
         const { error, onBlur, done } = useInputValidation({ validator: (v) => v === 'ok', value, required: true });
         expect(error.value).toBeNull();
         expect(done.value).toBeNull();
+
         onBlur();
         expect(error.value).toBe('Campo obrigatório');
         expect(done.value).toBe(false);
@@ -228,5 +224,62 @@ describe('useInputValidation', () => {
         expect(validation.dirty.value).toBe(false);
         expect(validation.submitted.value).toBe(false);
         expect(validation.error.value).toBeNull();
+    });
+
+    it('suporta isComplete: formato incompleto não exibe erro antes do blur e exibe após blur', () => {
+        const value = ref('123');
+        const validation = useInputValidation({
+            validator: (v) => v === '12345',
+            isComplete: (v) => String(v).length === 5,
+            value,
+            invalidMessage: 'Formato inválido'
+        });
+
+        // Incompleto, não tocado: sem erro
+        expect(validation.done.value).toBeNull();
+        expect(validation.caution.value).toBe(false);
+        expect(validation.error.value).toBeNull();
+
+        // Usuário digita mais um caractere (continua incompleto)
+        value.value = '1234';
+        validation.onInput();
+        expect(validation.done.value).toBeNull();
+        expect(validation.caution.value).toBe(false);
+        expect(validation.error.value).toBeNull();
+
+        // Usuário perde o foco: agora exibe erro
+        validation.onBlur();
+        expect(validation.done.value).toBe(false);
+        expect(validation.caution.value).toBe(true);
+        expect(validation.error.value).toBe('Formato inválido');
+
+        // Formato completo mas inválido exibe erro imediatamente
+        value.value = '99999';
+        validation.onInput();
+        expect(validation.done.value).toBe(false);
+        expect(validation.caution.value).toBe(true);
+        expect(validation.error.value).toBe('Formato inválido');
+
+        // Correção para válido limpa o erro
+        value.value = '12345';
+        validation.onInput();
+        expect(validation.done.value).toBe(true);
+        expect(validation.caution.value).toBe(false);
+        expect(validation.error.value).toBeNull();
+    });
+
+    it('suporta mensagens dinâmicas reativas (Ref e getter)', () => {
+        const value = ref('errado');
+        const msg = ref('Primeiro erro');
+        const validation = useInputValidation({
+            validator: (v) => v === 'ok',
+            value,
+            invalidMessage: msg
+        });
+        validation.onBlur();
+        expect(validation.error.value).toBe('Primeiro erro');
+
+        msg.value = 'Segundo erro';
+        expect(validation.error.value).toBe('Segundo erro');
     });
 });

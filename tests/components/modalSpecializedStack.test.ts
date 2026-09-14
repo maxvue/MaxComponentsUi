@@ -1,9 +1,54 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
+import { nextTick, ref, defineComponent } from 'vue';
 import MaxModal from '../../src/components/MaxModal.vue';
+import MaxImage from '../../src/components/MaxImage.vue';
+import MaxInputIconPicker from '../../src/components/MaxInputIconPicker.vue';
+import MaxInputMarkdown from '../../src/components/MaxInputMarkdown.vue';
+import MaxTopMenuSearchBar from '../../src/components/MaxTopMenuSearchBar.vue';
 import { useModalStore } from '../../src/stores/useModal.Store';
-import { nextTick, defineComponent, h, ref } from 'vue';
+import { getActiveLockCount, forceReset } from '../../src/helpers/useScrollLock';
+
+const mockEditor = {
+    commands: {
+        setContent: vi.fn(),
+        focus: vi.fn()
+    },
+    getHTML: vi.fn(() => '<p>Hello</p>'),
+    getText: vi.fn(() => 'Hello'),
+    destroy: vi.fn(),
+    setEditable: vi.fn(),
+    isActive: vi.fn(() => false),
+    getAttributes: vi.fn(() => ({})),
+    on: vi.fn(),
+    off: vi.fn()
+};
+
+vi.mock('@tiptap/vue-3', () => ({
+    useEditor: vi.fn(() => ({ value: mockEditor })),
+    EditorContent: {
+        name: 'EditorContent',
+        template: '<div class="editor-content-stub"></div>',
+        props: ['editor']
+    }
+}));
+
+vi.mock('tiptap-markdown', () => ({
+    Markdown: { configure: vi.fn(() => ({})) }
+}));
+
+vi.mock('@tiptap/starter-kit', () => ({ default: {} }));
+vi.mock('@tiptap/extension-underline', () => ({ default: {} }));
+vi.mock('@tiptap/extension-link', () => ({ default: { configure: vi.fn(() => ({})) } }));
+vi.mock('@tiptap/extension-image', () => ({ default: {} }));
+vi.mock('@tiptap/extension-table', () => {
+    const Table = { configure: vi.fn(() => ({})) };
+    return { Table, default: Table };
+});
+vi.mock('@tiptap/extension-table-row', () => ({ default: {} }));
+vi.mock('@tiptap/extension-table-header', () => ({ default: {} }));
+vi.mock('@tiptap/extension-table-cell', () => ({ default: {} }));
 
 const stubs = {
     MaxButton: {
@@ -25,65 +70,249 @@ const stubs = {
     Teleport: true
 };
 
-// Modais especializados de referência para testar o contrato de empilhamento
-const MaxModalAction = defineComponent({
-    name: 'MaxModalAction',
-    props: {
-        id: { type: String, default: undefined },
-        title: { type: String, default: 'Ação Principal' },
-        visible: { type: Boolean, default: false }
-    },
-    emits: ['update:visible', 'closed'],
-    setup(props, { emit, slots }) {
-        return () => h(MaxModal, {
-            id: props.id,
-            title: props.title,
-            visible: props.visible,
-            'onUpdate:visible': (val: boolean) => emit('update:visible', val),
-            onClosed: () => emit('closed')
-        }, slots);
-    }
-});
-
-const MaxModalConfirm = defineComponent({
-    name: 'MaxModalConfirm',
-    props: {
-        id: { type: String, default: undefined },
-        title: { type: String, default: 'Confirmar Ação' },
-        visible: { type: Boolean, default: false }
-    },
-    emits: ['update:visible', 'confirm', 'cancel'],
-    setup(props, { emit, slots }) {
-        return () => h(MaxModal, {
-            id: props.id,
-            title: props.title,
-            visible: props.visible,
-            'onUpdate:visible': (val: boolean) => emit('update:visible', val)
-        }, {
-            default: () => [
-                slots.default ? slots.default() : null,
-                h('button', { id: 'btn-confirm-yes', onClick: () => emit('confirm') }, 'Sim'),
-                h('button', { id: 'btn-confirm-no', onClick: () => emit('cancel') }, 'Não')
-            ]
-        });
-    }
-});
-
 describe('modalSpecializedStack (R07 — F09 / E04-04)', () => {
     let pinia: ReturnType<typeof createPinia>;
 
     beforeEach(() => {
         pinia = createPinia();
         setActivePinia(pinia);
+        forceReset();
         document.body.innerHTML = '';
     });
 
     afterEach(() => {
+        forceReset();
         document.body.innerHTML = '';
     });
 
-    describe('Foco cíclico (Tab / Shift+Tab)', () => {
-        it('mantém o foco cíclico dentro do modal: Tab no último elemento volta para o primeiro', async () => {
+    describe('Balanceamento de stack e scroll lock com componentes especializados reais', () => {
+        it('balanceia scroll lock e stack quando MaxImage abre sobre MaxModal', async () => {
+            const modalStore = useModalStore();
+
+            // 1. MaxModal abre via open()
+            const modalWrapper = mount(MaxModal, {
+                props: {
+                    id: 'base-modal'
+                },
+                global: {
+                    plugins: [pinia],
+                    stubs
+                },
+                attachTo: document.body
+            });
+
+            modalWrapper.vm.open();
+            await nextTick();
+            expect(modalStore.stack).toContain('base-modal');
+            expect(modalStore.isTop('base-modal')).toBe(true);
+            expect(getActiveLockCount()).toBe(1);
+
+            // 2. MaxImage abre
+            const imageWrapper = mount(MaxImage, {
+                props: {
+                    src: 'https://example.com/photo.jpg',
+                    preview: true
+                },
+                global: {
+                    plugins: [pinia],
+                    stubs
+                },
+                attachTo: document.body
+            });
+
+            await imageWrapper.vm.openPreview();
+            await nextTick();
+
+            // Agora a stack tem 2 modais
+            expect(modalStore.stack.length).toBe(2);
+            const imageModalId = modalStore.top;
+            expect(imageModalId).toBeTruthy();
+            expect(imageModalId).not.toBe('base-modal');
+            expect(modalStore.isTop(imageModalId!)).toBe(true);
+            expect(modalStore.isTop('base-modal')).toBe(false);
+            expect(getActiveLockCount()).toBe(2);
+
+            // O modal inferior (MaxModal) deve se tornar inerte / oculto para leitores
+            const modalDialog = modalWrapper.find('.max-modal');
+            expect(modalDialog.attributes('aria-hidden')).toBe('true');
+            expect(modalDialog.attributes('inert')).toBeDefined();
+
+            // 3. Pressionar Escape fecha apenas o topo (MaxImage)
+            const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
+            window.dispatchEvent(escapeEvent);
+            await nextTick();
+
+            // MaxImage fechou, MaxModal retomou posse e é topo
+            expect(imageWrapper.vm.isOpen).toBe(false);
+            expect(modalStore.stack.length).toBe(1);
+            expect(modalStore.isTop('base-modal')).toBe(true);
+            expect(getActiveLockCount()).toBe(1);
+            expect(modalDialog.attributes('aria-hidden')).toBeUndefined();
+            expect(modalDialog.attributes('aria-modal')).toBe('true');
+
+            // 4. Fechar MaxModal esvazia stack e zera scroll lock
+            modalWrapper.vm.close();
+            await nextTick();
+            expect(modalStore.stack.length).toBe(0);
+            expect(getActiveLockCount()).toBe(0);
+
+            modalWrapper.unmount();
+            imageWrapper.unmount();
+        });
+
+        it('balanceia stack e locks com MaxInputIconPicker', async () => {
+            const modalStore = useModalStore();
+
+            const pickerWrapper = mount(MaxInputIconPicker, {
+                props: {
+                    modelValue: 'material-symbols:home'
+                },
+                global: {
+                    plugins: [pinia],
+                    stubs: {
+                        Teleport: true,
+                        InputBase: true,
+                        MaxIcon: true,
+                        MaxIconButton: true
+                    }
+                },
+                attachTo: document.body
+            });
+
+            await pickerWrapper.vm.openDrawer();
+            await nextTick();
+
+            expect(modalStore.stack.length).toBe(1);
+            const pickerId = modalStore.top!;
+            expect(modalStore.isTop(pickerId)).toBe(true);
+            expect(getActiveLockCount()).toBe(1);
+
+            // Fecha dialog
+            pickerWrapper.vm.closeDrawer();
+            await nextTick();
+
+            expect(modalStore.stack.length).toBe(0);
+            expect(getActiveLockCount()).toBe(0);
+
+            pickerWrapper.unmount();
+        });
+
+        it('balanceia stack e locks com MaxInputMarkdown lightbox', async () => {
+            const modalStore = useModalStore();
+
+            const markdownWrapper = mount(MaxInputMarkdown, {
+                props: {
+                    modelValue: 'Hello world'
+                },
+                global: {
+                    plugins: [pinia],
+                    stubs: {
+                        Teleport: true,
+                        InputBase: true,
+                        MaxIcon: true,
+                        MaxInputMarkdownToolbar: true,
+                        MaxPdfView: true,
+                        EditorContent: true
+                    }
+                },
+                attachTo: document.body
+            });
+
+            await markdownWrapper.vm.openImage('https://example.com/test.png');
+            await nextTick();
+
+            expect(markdownWrapper.vm.isImageModalOpen).toBe(true);
+            expect(modalStore.stack.length).toBe(1);
+            const lightboxId = modalStore.top!;
+            expect(modalStore.isTop(lightboxId)).toBe(true);
+            expect(getActiveLockCount()).toBe(1);
+
+            // Fecha lightbox
+            markdownWrapper.vm.closeImage();
+            await nextTick();
+
+            expect(markdownWrapper.vm.isImageModalOpen).toBe(false);
+            expect(modalStore.stack.length).toBe(0);
+            expect(getActiveLockCount()).toBe(0);
+
+            markdownWrapper.unmount();
+        });
+
+        it('balanceia stack e locks com MaxTopMenuSearchBar painel mobile', async () => {
+            const modalStore = useModalStore();
+
+            const searchWrapper = mount(MaxTopMenuSearchBar, {
+                props: {
+                    screen: 'mobile'
+                },
+                global: {
+                    plugins: [pinia],
+                    stubs: {
+                        Teleport: true,
+                        MaxInputText: true,
+                        MaxIconButton: true
+                    }
+                },
+                attachTo: document.body
+            });
+
+            // Abre mobile search
+            searchWrapper.vm.openSearch();
+            await nextTick();
+
+            expect(searchWrapper.vm.is_open).toBe(true);
+            expect(modalStore.stack.length).toBe(1);
+            const searchModalId = modalStore.top!;
+            expect(modalStore.isTop(searchModalId)).toBe(true);
+            expect(getActiveLockCount()).toBe(1);
+
+            // Escape fecha o painel mobile
+            const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
+            document.dispatchEvent(escapeEvent);
+            await nextTick();
+
+            expect(searchWrapper.vm.is_open).toBe(false);
+            expect(modalStore.stack.length).toBe(0);
+            expect(getActiveLockCount()).toBe(0);
+
+            searchWrapper.unmount();
+        });
+
+        it('limpa stack e scroll lock ao desmontar componente aberto', async () => {
+            const modalStore = useModalStore();
+
+            const imageWrapper = mount(MaxImage, {
+                props: {
+                    src: 'https://example.com/photo.jpg',
+                    preview: true
+                },
+                global: {
+                    plugins: [pinia],
+                    stubs: {
+                        Teleport: true,
+                        MaxIconButton: true
+                    }
+                },
+                attachTo: document.body
+            });
+
+            await imageWrapper.vm.openPreview();
+            await nextTick();
+
+            expect(modalStore.stack.length).toBe(1);
+            expect(getActiveLockCount()).toBe(1);
+
+            // Desmonta sem chamar closePreview
+            imageWrapper.unmount();
+            await nextTick();
+
+            expect(modalStore.stack.length).toBe(0);
+            expect(getActiveLockCount()).toBe(0);
+        });
+    });
+
+    describe('Foco cíclico (Tab / Shift+Tab) e isolamento da camada ativa', () => {
+        it('mantém foco cíclico dentro do modal ativo (Tab no último vai para o primeiro)', async () => {
             const wrapper = mount(MaxModal, {
                 props: { id: 'modal-tab-cycle', visible: true, title: 'Modal Cíclico' },
                 slots: {
@@ -93,7 +322,7 @@ describe('modalSpecializedStack (R07 — F09 / E04-04)', () => {
                         <button id="btn-last">Último</button>
                     `
                 },
-                global: { stubs },
+                global: { stubs, plugins: [pinia] },
                 attachTo: document.body
             });
 
@@ -116,13 +345,12 @@ describe('modalSpecializedStack (R07 — F09 / E04-04)', () => {
             const tabEvent = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
             modalEl.dispatchEvent(tabEvent);
 
-            // O primeiro elemento focável no modal é o botão fechar do header
             expect(document.activeElement).toBe(closeBtn);
 
             wrapper.unmount();
         });
 
-        it('mantém o foco cíclico dentro do modal: Shift+Tab no primeiro elemento vai para o último', async () => {
+        it('mantém foco cíclico reverso dentro do modal ativo (Shift+Tab no primeiro vai para o último)', async () => {
             const wrapper = mount(MaxModal, {
                 props: { id: 'modal-shift-tab-cycle', visible: true, title: 'Modal Cíclico Reverso' },
                 slots: {
@@ -131,7 +359,7 @@ describe('modalSpecializedStack (R07 — F09 / E04-04)', () => {
                         <button id="btn-end">Final</button>
                     `
                 },
-                global: { stubs },
+                global: { stubs, plugins: [pinia] },
                 attachTo: document.body
             });
 
@@ -142,11 +370,9 @@ describe('modalSpecializedStack (R07 — F09 / E04-04)', () => {
             const closeBtn = wrapper.find<HTMLElement>('.close-btn').element;
             const btnEnd = document.getElementById('btn-end') as HTMLElement;
 
-            // Foca o primeiro elemento focável (botão fechar no header)
             closeBtn.focus();
             expect(document.activeElement).toBe(closeBtn);
 
-            // Pressiona Shift+Tab no primeiro elemento -> deve mover para o último focável
             const shiftTabEvent = new KeyboardEvent('keydown', {
                 key: 'Tab',
                 shiftKey: true,
@@ -161,262 +387,99 @@ describe('modalSpecializedStack (R07 — F09 / E04-04)', () => {
         });
     });
 
-    describe('Cadeia de retorno de foco (Trigger -> Modal A -> Modal B -> fechar B -> A -> fechar A -> Trigger)', () => {
-        it('restaura o foco corretamente em cadeia entre múltiplos modais e o gatilho externo', async () => {
-            // Cria o gatilho inicial externo no DOM
+    describe('Cadeia de retorno de foco e composição real de stack (Trigger -> Modal -> Especializado -> Retorno)', () => {
+        it('restaura o foco corretamente em cadeia: Trigger -> MaxModal -> MaxImage preview -> Fecha Image -> Retorna foco em MaxModal -> Fecha MaxModal -> Retorna foco ao Trigger', async () => {
             const triggerBtn = document.createElement('button');
-            triggerBtn.id = 'external-trigger-btn';
-            triggerBtn.textContent = 'Abrir Ação';
+            triggerBtn.id = 'page-trigger-btn';
+            triggerBtn.textContent = 'Abrir Documento';
             document.body.appendChild(triggerBtn);
             triggerBtn.focus();
             expect(document.activeElement).toBe(triggerBtn);
 
-            // Componente que orquestra Modal A (Action) abrindo Modal B (Confirm)
             const Orchestrator = defineComponent({
-                components: { MaxModalAction, MaxModalConfirm },
+                components: { MaxModal, MaxImage },
                 setup() {
-                    const isActionOpen = ref(false);
-                    const isConfirmOpen = ref(false);
-                    return { isActionOpen, isConfirmOpen };
+                    const isModalOpen = ref(false);
+                    const imageRef = ref<any>(null);
+                    return { isModalOpen, imageRef };
                 },
                 template: `
                     <div>
-                        <MaxModalAction id="modal-chain-a" v-model:visible="isActionOpen" title="Modal Action A">
-                            <input id="action-input" type="text" />
-                            <button id="btn-open-confirm" @click="isConfirmOpen = true">Abrir Confirmação B</button>
-                        </MaxModalAction>
-
-                        <MaxModalConfirm id="modal-chain-b" v-model:visible="isConfirmOpen" title="Modal Confirm B" />
+                        <MaxModal id="doc-modal" v-model:visible="isModalOpen" title="Documento com Imagem">
+                            <input id="doc-title-input" type="text" />
+                            <button id="btn-open-preview" @click="imageRef?.openPreview?.()">Ver Foto</button>
+                            <MaxImage
+                                ref="imageRef"
+                                src="https://example.com/doc-scan.jpg"
+                                :preview="true"
+                            />
+                        </MaxModal>
                     </div>
                 `
             });
 
             const wrapper = mount(Orchestrator, {
                 global: {
-                    components: { MaxModalAction, MaxModalConfirm },
+                    plugins: [pinia],
                     stubs
                 },
                 attachTo: document.body
             });
 
-            const store = useModalStore();
+            const modalStore = useModalStore();
 
-            // 1. Abre Modal A a partir do triggerBtn
-            wrapper.vm.isActionOpen = true;
+            // 1. Trigger abre MaxModal
+            wrapper.vm.isModalOpen = true;
             await nextTick();
             await nextTick();
 
-            expect(store.stack.length).toBe(1);
+            expect(modalStore.stack.length).toBe(1);
+            expect(modalStore.isTop('doc-modal')).toBe(true);
 
-            // Foca o botão dentro de A que abrirá B
-            const btnOpenConfirm = document.getElementById('btn-open-confirm') as HTMLElement;
-            expect(btnOpenConfirm).not.toBeNull();
-            btnOpenConfirm.focus();
-            expect(document.activeElement).toBe(btnOpenConfirm);
+            // Usuário foca o botão de preview dentro do modal
+            const btnOpenPreview = document.getElementById('btn-open-preview') as HTMLElement;
+            expect(btnOpenPreview).not.toBeNull();
+            btnOpenPreview.focus();
+            expect(document.activeElement).toBe(btnOpenPreview);
 
-            // 2. Abre Modal B a partir do botão em A
-            wrapper.vm.isConfirmOpen = true;
+            // 2. Abre o MaxImage preview especializado
+            btnOpenPreview.click();
             await nextTick();
             await nextTick();
 
-            expect(store.stack.length).toBe(2);
-            expect(store.isTop('modal-chain-b')).toBe(true);
+            expect(modalStore.stack.length).toBe(2);
+            const imageModalId = modalStore.top!;
+            expect(imageModalId).not.toBe('doc-modal');
+            expect(modalStore.isTop(imageModalId)).toBe(true);
 
-            // Foco inicial dentro de Modal B
-            const btnConfirmYes = document.getElementById('btn-confirm-yes') as HTMLElement;
-            expect(btnConfirmYes).not.toBeNull();
+            // MaxModal fica inerte
+            const modalEl = wrapper.find('.max-modal');
+            expect(modalEl.attributes('inert')).toBeDefined();
+            expect(modalEl.attributes('aria-hidden')).toBe('true');
 
-            // 3. Fecha Modal B -> Foco deve retornar exatamente para btnOpenConfirm dentro de Modal A
-            wrapper.vm.isConfirmOpen = false;
-            await nextTick();
-            await nextTick();
-            await nextTick();
-
-            expect(store.stack.length).toBe(1);
-            expect(document.activeElement).toBe(btnOpenConfirm);
-
-            // 4. Fecha Modal A -> Foco deve retornar para o gatilho externo triggerBtn
-            wrapper.vm.isActionOpen = false;
-            await nextTick();
+            // 3. Pressiona Escape para fechar o MaxImage do topo
+            const escEvent = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
+            window.dispatchEvent(escEvent);
             await nextTick();
             await nextTick();
 
-            expect(store.stack.length).toBe(0);
+            // Apenas MaxImage fechou, MaxModal retomou posse e o foco voltou para o botão que o chamou
+            expect(modalStore.stack.length).toBe(1);
+            expect(modalStore.isTop('doc-modal')).toBe(true);
+            expect(modalEl.attributes('inert')).toBeUndefined();
+            expect(modalEl.attributes('aria-hidden')).toBeUndefined();
+            expect(document.activeElement).toBe(btnOpenPreview);
+
+            // 4. Fecha o MaxModal
+            wrapper.vm.isModalOpen = false;
+            await nextTick();
+            await nextTick();
+
+            expect(modalStore.stack.length).toBe(0);
             expect(document.activeElement).toBe(triggerBtn);
 
             wrapper.unmount();
             triggerBtn.remove();
-        });
-    });
-
-    describe('Ownership centralizado do listener de Escape', () => {
-        it('quando múltiplos modais estão empilhados, tecla Escape fecha apenas o modal do topo', async () => {
-            const Orchestrator = defineComponent({
-                components: { MaxModal },
-                setup() {
-                    const isAOpen = ref(true);
-                    const isBOpen = ref(true);
-                    return { isAOpen, isBOpen };
-                },
-                template: `
-                    <div>
-                        <MaxModal id="esc-modal-a" v-model:visible="isAOpen" title="Modal A">
-                            <div id="content-a">Conteúdo A</div>
-                        </MaxModal>
-                        <MaxModal id="esc-modal-b" v-model:visible="isBOpen" title="Modal B">
-                            <div id="content-b">Conteúdo B</div>
-                        </MaxModal>
-                    </div>
-                `
-            });
-
-            const wrapper = mount(Orchestrator, {
-                global: {
-                    components: { MaxModal },
-                    stubs
-                },
-                attachTo: document.body
-            });
-
-            const store = useModalStore();
-            await nextTick();
-            await nextTick();
-
-            expect(store.stack.length).toBe(2);
-            expect(store.isTop('esc-modal-b')).toBe(true);
-
-            // Dispara Escape no document
-            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
-            await nextTick();
-            await nextTick();
-
-            // Apenas Modal B (o topo) deve ter fechado; Modal A permanece aberto
-            expect(wrapper.vm.isBOpen).toBe(false);
-            expect(wrapper.vm.isAOpen).toBe(true);
-            expect(store.stack.length).toBe(1);
-            expect(store.isTop('esc-modal-a')).toBe(true);
-
-            // Dispara Escape novamente -> agora Modal A fecha
-            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
-            await nextTick();
-            await nextTick();
-
-            expect(wrapper.vm.isAOpen).toBe(false);
-            expect(store.stack.length).toBe(0);
-
-            wrapper.unmount();
-        });
-    });
-
-    describe('Unmount e recuperação do topo da pilha', () => {
-        it('ao desmontar o modal do topo sem close explícito, o modal inferior reassume o topo e o trap', async () => {
-            const store = useModalStore();
-
-            const wrapperA = mount(MaxModal, {
-                props: { id: 'unmount-modal-a', visible: true, title: 'Modal Base' },
-                global: { stubs },
-                attachTo: document.body
-            });
-            await nextTick();
-
-            const wrapperB = mount(MaxModal, {
-                props: { id: 'unmount-modal-b', visible: true, title: 'Modal Topo' },
-                global: { stubs },
-                attachTo: document.body
-            });
-            await nextTick();
-
-            expect(store.stack.length).toBe(2);
-            expect(store.isTop('unmount-modal-b')).toBe(true);
-            expect(store.isTop('unmount-modal-a')).toBe(false);
-
-            const modalAEl = wrapperA.find('.max-modal');
-            expect(modalAEl.attributes('aria-hidden')).toBe('true');
-            expect(modalAEl.attributes('inert')).toBeDefined();
-
-            // Desmonta o modal do topo (wrapperB)
-            wrapperB.unmount();
-            await nextTick();
-            await nextTick();
-
-            // Modal A automaticamente reassume o topo da pilha
-            expect(store.stack.length).toBe(1);
-            expect(store.isTop('unmount-modal-a')).toBe(true);
-
-            expect(modalAEl.attributes('aria-hidden')).toBeUndefined();
-            expect(modalAEl.attributes('inert')).toBeUndefined();
-            expect(modalAEl.attributes('aria-modal')).toBe('true');
-
-            wrapperA.unmount();
-            expect(store.stack.length).toBe(0);
-        });
-    });
-
-    describe('Nested Stack de 3 camadas', () => {
-        it('suporta empilhamento de 3 modais especializados mantendo isolamento estrito', async () => {
-            const store = useModalStore();
-
-            const wrapper1 = mount(MaxModalAction, {
-                props: { id: 'nest-1', visible: true, title: 'Nível 1' },
-                global: { stubs },
-                attachTo: document.body
-            });
-            await nextTick();
-
-            const wrapper2 = mount(MaxModalAction, {
-                props: { id: 'nest-2', visible: true, title: 'Nível 2' },
-                global: { stubs },
-                attachTo: document.body
-            });
-            await nextTick();
-
-            const wrapper3 = mount(MaxModalConfirm, {
-                props: { id: 'nest-3', visible: true, title: 'Nível 3' },
-                global: { stubs },
-                attachTo: document.body
-            });
-            await nextTick();
-
-            expect(store.stack.length).toBe(3);
-
-            const modal1 = wrapper1.find('.max-modal');
-            const modal2 = wrapper2.find('.max-modal');
-            const modal3 = wrapper3.find('.max-modal');
-
-            // Apenas o nível 3 é ativo
-            expect(modal3.attributes('aria-modal')).toBe('true');
-            expect(modal3.attributes('inert')).toBeUndefined();
-
-            // Níveis 1 e 2 são inertes
-            expect(modal1.attributes('inert')).toBeDefined();
-            expect(modal2.attributes('inert')).toBeDefined();
-
-            // Fecha nível 3
-            await wrapper3.setProps({ visible: false });
-            await nextTick();
-
-            expect(store.stack.length).toBe(2);
-            expect(modal2.attributes('aria-modal')).toBe('true');
-            expect(modal2.attributes('inert')).toBeUndefined();
-            expect(modal1.attributes('inert')).toBeDefined();
-
-            // Fecha nível 2
-            await wrapper2.setProps({ visible: false });
-            await nextTick();
-
-            expect(store.stack.length).toBe(1);
-            expect(modal1.attributes('aria-modal')).toBe('true');
-            expect(modal1.attributes('inert')).toBeUndefined();
-
-            // Fecha nível 1
-            await wrapper1.setProps({ visible: false });
-            await nextTick();
-
-            expect(store.stack.length).toBe(0);
-
-            wrapper1.unmount();
-            wrapper2.unmount();
-            wrapper3.unmount();
         });
     });
 });

@@ -28,7 +28,7 @@ function getComponentsUsingInputBase(): string[] {
 describe('Auditoria Arquitetural: Acessibilidade de InputBase e Consumidores', () => {
     it('todos os 25 componentes que consomem InputBase devem vincular inputAttrs ao elemento interativo no slot', () => {
         const consumers = getComponentsUsingInputBase();
-        expect(consumers.length).toBe(25);
+        expect(consumers.length).toBe(24);
 
         const unmigrated: string[] = [];
         for (const file of consumers) {

@@ -786,9 +786,9 @@ describe('MaxModal', () => {
             const bg1 = wrapper1.find('.background-modal');
             const bg2 = wrapper2.find('.background-modal');
 
-            // z-index: 1200 + depth * 20
-            expect(bg1.attributes('style')).toContain('z-index: 1200');
-            expect(bg2.attributes('style')).toContain('z-index: 1220');
+            // z-index semântico de modal backdrop com incremento por profundidade
+            expect(bg1.attributes('style')).toContain('var(--max-layer-modal-backdrop, 1300)');
+            expect(bg2.attributes('style')).toContain('calc(var(--max-layer-modal-backdrop, 1300) + 20)');
         });
 
         it('marca camadas inferiores com aria-hidden e inert mantendo apenas o topo acessível', async () => {

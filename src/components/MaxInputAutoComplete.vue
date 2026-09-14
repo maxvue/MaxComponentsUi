@@ -16,7 +16,7 @@
                     aria-autocomplete="list"
                     :aria-expanded="isOpen && filtered_values.length > 0"
                     :aria-controls="isOpen && filtered_values.length > 0 ? listboxId : undefined"
-                    :aria-activedescendant="isOpen && activeIndex >= 0 && activeIndex < filtered_values.length ? `${listboxId}-opt-${activeIndex}` : undefined"
+                    :aria-activedescendant="isOpen && activeIndex >= 0 && activeIndex < filtered_values.length && isItemMounted ? `${listboxId}-opt-${activeIndex}` : undefined"
                     @input="onInput"
                     @change="onChange"
                     @focus="onFocus"
@@ -53,7 +53,7 @@
                                 class="max-autocomplete-item"
                                 :class="{ 'max-autocomplete-item-active': activeIndex === entry.index }"
                                 role="option"
-                                :aria-selected="activeIndex === entry.index ? 'true' : (isOptionSelected(entry.item) ? 'true' : 'false')"
+                                :aria-selected="isOptionSelected(entry.item) ? 'true' : 'false'"
                                 @click.stop="selectOption(entry.item)"
                                 @mouseenter="activeIndex = entry.index"
                             >
@@ -82,8 +82,9 @@
     import { getOverlayWidth, getOverlayLeft } from '../helpers/useOverlayWidth';
     import { useVirtualList } from '../composables/useVirtualList';
     import type { Ref } from 'vue';
-    import { ref, computed, watch, nextTick, onBeforeUnmount, useId } from 'vue';
+    import { ref, computed, watch, nextTick, useId } from 'vue';
     import InputBase from './InputBase.vue';
+    import { useOutsidePointer } from '../helpers/useOutsidePointer';
 
     const props = withDefaults(
         defineProps<{
@@ -177,6 +178,16 @@
     const overlayEl = ref<HTMLElement | null>(null);
     const isOpen = ref(false);
     const activeIndex = ref<number>(-1);
+
+    const isItemMounted = computed(() => {
+        if (!isVirtual.value) return true;
+        return visibleItems.value.some((entry) => entry.index === activeIndex.value);
+    });
+
+    watch(filtered_values, (newVals) => {
+        if (activeIndex.value >= newVals.length) activeIndex.value = -1;
+
+    });
 
     const isOverlayActive = computed(() => isOpen.value && filtered_values.value.length > 0);
     const { position } = useActiveOverlayPosition({
@@ -289,10 +300,18 @@
             ? temp_value.value
             : (last_valid.value ?? props.modelValue);
         if (!target) return false;
-        if (typeof target === 'string') {
-            const valKey = props.optionValue ?? 'value';
-            return option[valKey] === target || option.id === target || option.value === target;
+        const valKey = props.optionValue ?? 'value';
+        if (typeof target === 'object') {
+            if (target[valKey] !== undefined && option[valKey] !== undefined) return target[valKey] === option[valKey];
+
+            if (target.id !== undefined && option.id !== undefined) return target.id === option.id;
+
+            if (target.value !== undefined && option.value !== undefined) return target.value === option.value;
+
+            return option === target;
         }
+        if (typeof target === 'string') return option[valKey] === target || option.id === target || option.value === target;
+
         return option === target;
     };
 
@@ -404,44 +423,11 @@
         if (props.modelValue && typeof props.modelValue !== 'string') last_valid.value = props.modelValue;
     });
 
-    const onGlobalKeydown = (event: KeyboardEvent) => {
-        if (event.key === 'Escape' && isOpen.value) hide();
-    };
-
-    let outsidePointerDown = false;
-    const onDocPointerDown = (e: MouseEvent | TouchEvent | PointerEvent) => {
-        const target = e.target as Node | null;
-        if (overlayEl.value && !overlayEl.value.contains(target) && ac.value && !ac.value.contains(target)) outsidePointerDown = true;
-        else outsidePointerDown = false;
-
-    };
-
-    const onDocClick = (e: MouseEvent) => {
-        const target = e.target as Node | null;
-        if (outsidePointerDown && overlayEl.value && !overlayEl.value.contains(target) && ac.value && !ac.value.contains(target)) hide();
-
-        outsidePointerDown = false;
-    };
-
-    watch(isOpen, (open) => {
-        if (typeof window === 'undefined') return;
-        if (open) {
-            window.addEventListener('keydown', onGlobalKeydown);
-            document.addEventListener('pointerdown', onDocPointerDown, true);
-            document.addEventListener('click', onDocClick, true);
-        } else {
-            window.removeEventListener('keydown', onGlobalKeydown);
-            document.removeEventListener('pointerdown', onDocPointerDown, true);
-            document.removeEventListener('click', onDocClick, true);
-        }
-    });
-
-    onBeforeUnmount(() => {
-        if (typeof window !== 'undefined') {
-            window.removeEventListener('keydown', onGlobalKeydown);
-            document.removeEventListener('pointerdown', onDocPointerDown, true);
-            document.removeEventListener('click', onDocClick, true);
-        }
+    useOutsidePointer(isOpen, {
+        elements: () => [overlayEl.value, ac.value],
+        onClose: () => hide(),
+        closeOnEscape: true,
+        triggerEl: ac
     });
 </script>
 

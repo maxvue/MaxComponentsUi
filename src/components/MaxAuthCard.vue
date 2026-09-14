@@ -1,5 +1,5 @@
 <template>
-    <div class="max-auth-card max-auth-page" @keyup.enter="onEnter">
+    <form class="max-auth-card max-auth-page" @submit.prevent="onEnter" @keyup.enter="onEnter">
         <div class="max-auth-card-inner">
             <slot name="header" :step="codeSent ? 'code' : 'phone'" :mode="mode" :phone="phone">
                 <MaxTitle2
@@ -165,7 +165,7 @@
                 </slot>
             </MaxGrid>
         </div>
-    </div>
+    </form>
 </template>
 
 /**
@@ -174,7 +174,7 @@
  * Emite os eventos `submit`, `send-code`, `resend-code` e `social` para o projeto consumidor tratar a lógica.
  */
 <script setup lang="ts">
-    import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
+    import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick, useId } from 'vue';
     import type { RouteLocationRaw } from 'vue-router';
     import MaxTitle2 from './MaxTitle2.vue';
     import MaxGrid from './MaxGrid.vue';
@@ -338,7 +338,7 @@
     const phone = defineModel<string>('phone', { default: '' });
     const code = defineModel<string>('code', { default: '' });
 
-    const errorId = nextInstanceId('max-auth-card-error');
+    const errorId = `${nextInstanceId('max-auth-card-error')}-${useId()}`;
 
     const emailInputRef = ref<any>(null);
     const passwordInputRef = ref<any>(null);

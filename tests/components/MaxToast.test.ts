@@ -537,4 +537,64 @@ describe('MaxToast', () => {
             expect(contrast).toBeGreaterThanOrEqual(4.5);
         });
     });
+
+    describe('Contrato de viewport móvel e safe-area (ui-design/toast-recortado-em-viewport-movel)', () => {
+        it('renderiza conteúdo longo, ações e botão fechar com acessibilidade preservada', async () => {
+            const longToken = 'https://example.com/api/v1/auth/verify?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE1MTYyNDI2MjJ9';
+            const wrapper = mountToast((store) => {
+                store.add({
+                    title: 'Falha de conexão com token muito longo',
+                    message: `Ocorreu um erro no endpoint com parâmetro longo: ${longToken}`,
+                    severity: 'error',
+                    duration: 0
+                });
+            });
+            await flushPromises();
+
+            expect(wrapper.find('.max-toast-title').text()).toContain('Falha de conexão');
+            expect(wrapper.find('.max-toast-message').text()).toContain(longToken);
+
+            const expandBtn = wrapper.find('.action-expand');
+            expect(expandBtn.exists()).toBe(true);
+
+            const copyBtn = wrapper.find('.action-copy');
+            expect(copyBtn.exists()).toBe(true);
+
+            const closeBtn = wrapper.find('.max-toast-close');
+            expect(closeBtn.exists()).toBe(true);
+            expect(closeBtn.attributes('aria-label')).toContain('Fechar notificação');
+        });
+
+        it('valida o contrato de regras CSS no SFC (border-box, safe-area, minmax, overflow-wrap, breakpoint 480px)', async () => {
+            const fs = await import('node:fs');
+            const path = await import('node:path');
+            const sfc = fs.readFileSync(path.resolve(__dirname, '../../src/components/MaxToast.vue'), 'utf-8');
+
+            // Custom properties privadas para insets e offsets
+            expect(sfc).toContain('--max-toast-viewport-gutter: 16px');
+            expect(sfc).toContain('--max-toast-top-offset: 74px');
+            expect(sfc).toMatch(/--max-toast-safe-top:\s*env\(safe-area-inset-top,\s*0px\)/);
+            expect(sfc).toMatch(/--max-toast-safe-right:\s*env\(safe-area-inset-right,\s*0px\)/);
+            expect(sfc).toMatch(/--max-toast-safe-bottom:\s*env\(safe-area-inset-bottom,\s*0px\)/);
+            expect(sfc).toMatch(/--max-toast-safe-left:\s*env\(safe-area-inset-left,\s*0px\)/);
+
+            // Container com box-sizing: border-box, clipping horizontal e scroll vertical
+            expect(sfc).toMatch(/\.max-toast-container\s*\{[^}]*box-sizing:\s*border-box/);
+            expect(sfc).toMatch(/\.max-toast-container\s*\{[^}]*overflow-x:\s*clip/);
+            expect(sfc).toMatch(/\.max-toast-container\s*\{[^}]*overflow-y:\s*auto/);
+            expect(sfc).toMatch(/\.max-toast-container\s*\{[^}]*overscroll-behavior:\s*contain/);
+
+            // Item com border-box e trilha minmax(0, 1fr)
+            expect(sfc).toMatch(/\.max-toast-item\s*\{[^}]*box-sizing:\s*border-box/);
+            expect(sfc).toMatch(/\.max-toast-item\s*\{[^}]*grid-template-columns:\s*auto\s+minmax\(0,\s*1fr\)\s+auto/);
+
+            // Quebra de texto anywhere e wrap de ações
+            expect(sfc).toMatch(/\.max-toast-title\s*\{[^}]*overflow-wrap:\s*anywhere/);
+            expect(sfc).toMatch(/\.max-toast-message\s*\{[^}]*overflow-wrap:\s*anywhere/);
+            expect(sfc).toMatch(/\.max-toast-actions\s*\{[^}]*flex-wrap:\s*wrap/);
+
+            // Breakpoint móvel <= 480px
+            expect(sfc).toMatch(/@media\s*\(max-width:\s*480px\)\s*\{/);
+        });
+    });
 });

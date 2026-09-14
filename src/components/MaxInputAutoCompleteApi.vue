@@ -71,7 +71,7 @@
                                 class="max-autocomplete-item"
                                 :class="{ 'max-autocomplete-item-active': activeIndex === entry.index }"
                                 role="option"
-                                :aria-selected="activeIndex === entry.index ? 'true' : (isOptionSelected(entry.item) ? 'true' : 'false')"
+                                :aria-selected="isOptionSelected(entry.item) ? 'true' : 'false'"
                                 @click.stop="selectOption(entry.item)"
                                 @mouseenter="activeIndex = entry.index"
                             >
@@ -158,10 +158,15 @@
 
     const listboxId = useId();
     const temp_value: Ref = ref(props.modelValue);
+    const last_valid = ref<any>(props.modelValue && typeof props.modelValue !== 'string' ? props.modelValue : null);
     const list: Ref<any[]> = ref([]);
     const filtered_values: Ref<any[]> = ref([]);
     const isOpen = ref(false);
     const activeIndex = ref<number>(-1);
+
+    watch(() => props.modelValue, (val) => {
+        if (val && typeof val !== 'string') last_valid.value = val;
+    });
 
     const numericItemHeight = computed(() => {
         if (typeof props.itemHeight === 'number') return props.itemHeight;
@@ -235,12 +240,19 @@
     });
 
     const isOptionSelected = (option: any): boolean => {
-        if (!temp_value.value) return false;
-        if (typeof temp_value.value === 'string') {
-            const valKey = props.optionValue ?? 'value';
-            return option[valKey] === temp_value.value || option.id === temp_value.value || option.value === temp_value.value || option.model === temp_value.value;
+        const target = (temp_value.value && typeof temp_value.value !== 'string')
+            ? temp_value.value
+            : (last_valid.value ?? props.modelValue);
+        if (!target) return false;
+        const valKey = props.optionValue ?? 'value';
+        if (typeof target === 'object') {
+            if (target[valKey] !== undefined && option[valKey] !== undefined) return target[valKey] === option[valKey];
+            if (target.id !== undefined && option.id !== undefined) return target.id === option.id;
+            if (target.value !== undefined && option.value !== undefined) return target.value === option.value;
+            return option === target;
         }
-        return option === temp_value.value;
+        if (typeof target === 'string') return option[valKey] === target || option.id === target || option.value === target || option.model === target;
+        return option === target;
     };
 
     let requestGeneration = 0;
@@ -423,6 +435,7 @@
     };
 
     const selectOption = (item: any) => {
+        last_valid.value = item;
         temp_value.value = item;
         hide();
     };
@@ -606,7 +619,7 @@
                 transition: background-color 0.15s ease, color 0.15s ease;
 
                 &:hover {
-                    background: var(--max-primary-50, #67C8DB);
+                    background: var(--blue-50, #f0fdfa);
                     color: var(--max-primary-600, #005f77);
                 }
 
