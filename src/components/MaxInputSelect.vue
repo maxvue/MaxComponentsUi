@@ -791,9 +791,8 @@
     watch(
         () => props.disabled,
         (disabled) => {
-            if (disabled && isOpen.value) {
-                hide();
-            }
+            if (disabled && isOpen.value) hide();
+
         }
     );
 

@@ -138,7 +138,7 @@
             font-weight: 700;
             font-size: 0.875rem;
             letter-spacing: -0.02em;
-            color: var(--text-b, #ffffff);
+            color: var(--text-b, #fff);
             white-space: nowrap;
             text-decoration: none;
             user-select: none;

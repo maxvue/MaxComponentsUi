@@ -58,6 +58,7 @@
     const attrs = useAttrs();
     const hover = ref(false);
     const warned = ref(false);
+    const instance = getCurrentInstance();
 
     const props = withDefaults(defineProps<MaxButtonsType>(), { data: {}, params: {}, query: {}, hoverScale: 1.2 });
 
@@ -69,11 +70,9 @@
 
     const buttonAttrs = computed(() => {
         const result: Record<string, any> = {};
-        for (const [key, value] of Object.entries(attrs)) {
-            if (!key.startsWith('on') && key !== 'style') {
-                result[key] = value;
-            }
-        }
+        for (const [key, value] of Object.entries(attrs)) if (!key.startsWith('on') && key !== 'style') result[key] = value;
+
+
         return result;
     });
 
@@ -114,7 +113,7 @@
         click: [event: PointerEvent];
     }>();
 
-    const onClick = async (event: PointerEvent | MouseEvent) => {
+    const onClick = async (event: PointerEvent) => {
         if (isDisabled.value || executing.value) {
             event.preventDefault();
             event.stopImmediatePropagation();

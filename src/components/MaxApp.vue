@@ -234,7 +234,7 @@
     const isBlank = computed<boolean>(() => route?.meta?.layout === 'blank' || props.blankPages.includes(system.page));
 
     /** Indica que a store de usuário encerrou seu ciclo inicial de requisição (sucesso ou erro). */
-    const isSettled = computed<boolean>(() => isLoaded.value || Boolean((user as any).status?.server?.get?.is_error));
+    const _isSettled = computed<boolean>(() => isLoaded.value || Boolean((user as any).status?.server?.get?.is_error));
 
     /** Erro capturado no bootstrap da aplicação ao tentar carregar o usuário autenticado. */
     const bootstrapError = computed(() => {
@@ -249,13 +249,10 @@
 
     /** Executa nova tentativa de buscar o usuário no servidor de forma idempotente. */
     const retryBootstrap = async (): Promise<void> => {
-        if (typeof (user as any).retry === 'function') {
-            await (user as any).retry();
-        } else if (typeof (user as any).get === 'function') {
-            await (user as any).get();
-        } else if (typeof (user as any).reload === 'function') {
-            await (user as any).reload();
-        }
+        if (typeof (user as any).retry === 'function') await (user as any).retry();
+        else if (typeof (user as any).get === 'function') await (user as any).get();
+        else if (typeof (user as any).reload === 'function') await (user as any).reload();
+
     };
 
     // Propaga as permissões de login para a store do formulário.
@@ -386,7 +383,7 @@
                 font-weight: 500;
                 border-radius: 0.5rem;
                 background-color: var(--primary-color, #2563eb);
-                color: #ffffff;
+                color: #fff;
                 border: none;
                 cursor: pointer;
                 transition: opacity 0.2s;

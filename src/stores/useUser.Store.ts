@@ -115,11 +115,9 @@ export const useUserStore = defineStore('user', () => {
             this.status.server.get.is_loading = true;
             this.status.server.get.is_success = false;
         }
-        if (typeof this?.get === 'function') {
-            await this.get();
-        } else if (typeof (this as any)?.reload === 'function') {
-            await (this as any).reload();
-        }
+        if (typeof this?.get === 'function') await this.get();
+        else if (typeof (this as any)?.reload === 'function') await (this as any).reload();
+
     }
 
     return {
