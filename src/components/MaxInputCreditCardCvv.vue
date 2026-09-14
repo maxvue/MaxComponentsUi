@@ -28,6 +28,7 @@
             label?: string | undefined;
             len?: number;
             required?: boolean;
+            noMessage?: boolean;
         }>(),
         { modelValue: '', label: 'CVV', len: 3, required: false }
     );

@@ -108,6 +108,8 @@
         iconMessage?: string;
         /** Oculta os ícones de status */
         noStatus?: boolean;
+        /** Oculta a área de mensagem */
+        noMessage?: boolean;
     }
 
     const props = withDefaults(defineProps<Props>(), {

@@ -2,6 +2,7 @@
     <InputBase
         class="max-input-search input-search-main-div"
         :iconRight="isLoading === true ? 'line-md:loading-twotone-loop' : 'material-symbols:search-rounded'"
+        :no-message="props.noMessage"
     >
         <template #default="{ inputAttrs }">
             <input
@@ -33,6 +34,7 @@
         type?: string;
         placeholder?: string;
         ariaLabel?: string;
+        noMessage?: boolean;
     }
 
     const props = withDefaults(
@@ -101,4 +103,3 @@
         }
     }
 </style>
-

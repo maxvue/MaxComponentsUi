@@ -123,6 +123,7 @@
             targetValue?: string;
             caution?: string | boolean | undefined;
             required?: boolean;
+            noMessage?: boolean;
             noLabel?: boolean;
             noIcon?: boolean;
             /** Altura de cada linha em px (padrão: 36) */

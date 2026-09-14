@@ -220,6 +220,8 @@
             caution?: string | null | boolean | undefined;
             /** Indica se o campo é obrigatório */
             required?: boolean | undefined;
+            /** Oculta a área de mensagem */
+            noMessage?: boolean;
             /** Ícone da mensagem de feedback */
             iconMessage?: string | undefined;
             /** Default Value */

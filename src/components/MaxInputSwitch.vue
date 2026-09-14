@@ -109,6 +109,8 @@
             caution?: string | boolean | undefined;
             /** Define se o campo é obrigatório */
             required?: boolean;
+            /** Oculta a área de mensagem */
+            noMessage?: boolean;
         }>(),
         { modelValue: false, done: undefined, required: false, caution: undefined, trueValue: true, falseValue: false }
     );

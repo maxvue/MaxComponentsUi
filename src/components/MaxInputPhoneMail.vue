@@ -40,6 +40,7 @@
             targetValue?: string;
             caution?: string | boolean | undefined;
             required?: boolean;
+            noMessage?: boolean;
         }>(),
         { modelValue: '', done: undefined, required: false, caution: undefined }
     );

@@ -45,6 +45,7 @@
             targetValue?: string;
             caution?: string | boolean | undefined;
             required?: boolean;
+            noMessage?: boolean;
             autoResize?: boolean;
             /** Habilita ou desabilita a verificação ortográfica nativa */
             spellcheck?: boolean;

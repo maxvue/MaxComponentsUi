@@ -109,6 +109,8 @@
             caution?: string | boolean;
             /** Se o preenchimento do campo é obrigatório */
             required?: boolean;
+            /** Oculta a área de mensagem */
+            noMessage?: boolean;
         }>(),
         {
             modelValue: () => [],
