@@ -608,8 +608,12 @@ describe('MaxTableFields.vue', () => {
             expect(scrollRegion.element.scrollLeft).toBe(280);
 
             // Último th e último td pertencem à mesma tabela dentro desse único scroll
-            const lastTh = wrapper.findAll('th.max-table-fields-th').at(-1);
-            const lastTd = wrapper.findAll('tr.max-table-fields-row').at(-1)?.findAll('td.max-table-fields-td').at(-1);
+            const allThs = wrapper.findAll('th.max-table-fields-th');
+            const lastTh = allThs[allThs.length - 1];
+            const allRows = wrapper.findAll('tr.max-table-fields-row');
+            const lastRow = allRows[allRows.length - 1];
+            const allTds = lastRow?.findAll('td.max-table-fields-td') ?? [];
+            const lastTd = allTds[allTds.length - 1];
 
             expect(lastTh?.text()).toContain('Col 3');
             expect(lastTd?.text()).toContain('C2');

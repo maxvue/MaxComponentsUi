@@ -7,108 +7,108 @@
             :aria-label="props.ariaLabel"
         >
             <table class="max-table-fields">
-            <!-- Cabeçalho -->
-            <thead class="max-table-fields-head">
-                <tr class="max-table-fields-head-row">
-                    <th v-for="col in safeColumns" :key="col.field" class="max-table-fields-th" :style="getColumnStyle(col)">
-                        <slot :name="`header-${col.field}`" :column="col">
-                            {{ col.header }}
-                        </slot>
-                    </th>
-                    <!-- Coluna extra para botões de ação -->
-                    <th v-if="hasActionsColumn" class="max-table-fields-th max-table-fields-th-buttons" :style="buttonsColumnStyle">
-                        <slot name="buttons-header">
-                            {{ props.headerButton }}
-                        </slot>
-                    </th>
-                </tr>
-            </thead>
-
-            <!-- Corpo -->
-            <tbody class="max-table-fields-body">
-                <!-- 1. Estado de carregamento (prioridade absoluta) -->
-                <tr v-if="props.loading" class="max-table-fields-row max-table-fields-loading">
-                    <td :colspan="totalColspan" class="max-table-fields-td max-table-fields-loading-cell">
-                        <slot name="loading">
-                            <div class="max-table-loading-container">
-                                <div class="max-table-spinner" role="status" aria-label="Carregando"></div>
-                                <span class="max-table-loading-text">{{ props.loadingMessage }}</span>
-                            </div>
-                        </slot>
-                    </td>
-                </tr>
-
-                <!-- 2. Linhas de dados quando houver itens -->
-                <template v-else-if="hasItems">
-                    <tr v-for="(row, index) in normalizedList" :key="rowKey(row, index)" class="max-table-fields-row" :class="{ 'max-table-fields-row-even': index % 2 === 0, 'max-table-fields-row-odd': index % 2 !== 0 }">
-                        <td v-for="col in safeColumns" :key="col.field" class="max-table-fields-td" :style="getColumnStyle(col)">
-                            <!-- Slot customizado tem prioridade -->
-                            <slot v-if="col.slot && !col.input" :name="col.slot ?? col.field" :data="row" :value="getFieldValue(row, col.field)" :index="index" :field="col.field">
-                                <div class="default-slot">
-                                    {{ getFieldValue(row, col.field) }}
-                                </div>
+                <!-- Cabeçalho -->
+                <thead class="max-table-fields-head">
+                    <tr class="max-table-fields-head-row">
+                        <th v-for="col in safeColumns" :key="col.field" class="max-table-fields-th" :style="getColumnStyle(col)">
+                            <slot :name="`header-${col.field}`" :column="col">
+                                {{ col.header }}
                             </slot>
+                        </th>
+                        <!-- Coluna extra para botões de ação -->
+                        <th v-if="hasActionsColumn" class="max-table-fields-th max-table-fields-th-buttons" :style="buttonsColumnStyle">
+                            <slot name="buttons-header">
+                                {{ props.headerButton }}
+                            </slot>
+                        </th>
+                    </tr>
+                </thead>
 
-                            <!-- Input de incremento (+/-) -->
-                            <div v-else-if="col.input === 'increment'" class="max-table-fields-increment">
-                                <MaxIconButton i="icons8:minus" size="1.3" dark @click.stop="decrementValue(row, col)" />
-                                <MaxInputText :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-increment-input" :placeholder="col.placeholder" :required="col.required" />
-                                <MaxIconButton i="icons8:plus" size="1.3" dark @click.stop="incrementValue(row, col)" />
-                            </div>
-
-                            <!-- Input de texto -->
-                            <MaxInputText v-else-if="col.input === 'text' || col.input === 'input'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :placeholder="col.placeholder" :required="col.required" />
-
-                            <!-- Input numérico -->
-                            <MaxInputNumber v-else-if="col.input === 'number'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :placeholder="col.placeholder" :required="col.required" />
-
-                            <!-- Select -->
-                            <MaxInputSelect v-else-if="col.input === 'select'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :options="col.options ?? []" :placeholder="col.placeholder" :required="col.required" />
-
-                            <!-- Date Picker -->
-                            <MaxInputDatePicker v-else-if="col.input === 'date'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :placeholder="col.placeholder" :required="col.required" />
-
-                            <!-- Checkbox -->
-                            <MaxInputCheckbox v-else-if="col.input === 'checkbox'" :modelValue="Boolean(getFieldValue(row, col.field))" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" />
-
-                            <!-- Textarea -->
-                            <MaxInputTextArea v-else-if="col.input === 'textarea'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :placeholder="col.placeholder" :required="col.required" />
-
-                            <!-- AutoComplete -->
-                            <MaxInputAutoComplete v-else-if="col.input === 'auto-complete'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :options="col.options ?? []" :placeholder="col.placeholder" :required="col.required" />
-
-                            <!-- AutoComplete via API -->
-                            <MaxInputAutoCompleteApi v-else-if="col.input === 'auto-complete-api'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :route="col.route ?? ''" :data="resolveData(row, col.data)" :placeholder="col.placeholder" :required="col.required" />
-                            <!-- Phone Number -->
-                            <MaxInputPhone v-else-if="col.input === 'phone-number'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :placeholder="col.placeholder" :required="col.required" />
-
-                            <!-- Sem input: exibe o valor como texto -->
-                            <template v-else>
-                                {{ getFieldValue(row, col.field) }}
-                            </template>
-                        </td>
-
-                        <!-- Coluna de botões -->
-                        <td v-if="hasActionsColumn" class="max-table-fields-td max-table-fields-buttons" :style="buttonsColumnStyle">
-                            <slot name="buttons" :data="row" :index="index">
-                                <MaxIconButton v-for="btn in props.buttons" v-bind="btn" :key="btn.id" :data="btn.data ? resolveData(row, btn.data) : row" :size="btn.size ?? 1.2" class="table-icon-button" />
+                <!-- Corpo -->
+                <tbody class="max-table-fields-body">
+                    <!-- 1. Estado de carregamento (prioridade absoluta) -->
+                    <tr v-if="props.loading" class="max-table-fields-row max-table-fields-loading">
+                        <td :colspan="totalColspan" class="max-table-fields-td max-table-fields-loading-cell">
+                            <slot name="loading">
+                                <div class="max-table-loading-container">
+                                    <div class="max-table-spinner" role="status" aria-label="Carregando"></div>
+                                    <span class="max-table-loading-text">{{ props.loadingMessage }}</span>
+                                </div>
                             </slot>
                         </td>
                     </tr>
-                </template>
 
-                <!-- 3. Estado vazio (só renderiza se NÃO estiver carregando) -->
-                <tr v-else class="max-table-fields-row max-table-fields-empty">
-                    <td :colspan="totalColspan" class="max-table-fields-td max-table-fields-empty-cell">
-                        <slot name="empty">
-                            <div class="max-table-empty-container">
-                                <span class="max-table-empty-text">{{ props.emptyMessage }}</span>
-                            </div>
-                        </slot>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+                    <!-- 2. Linhas de dados quando houver itens -->
+                    <template v-else-if="hasItems">
+                        <tr v-for="(row, index) in normalizedList" :key="rowKey(row, index)" class="max-table-fields-row" :class="{ 'max-table-fields-row-even': index % 2 === 0, 'max-table-fields-row-odd': index % 2 !== 0 }">
+                            <td v-for="col in safeColumns" :key="col.field" class="max-table-fields-td" :style="getColumnStyle(col)">
+                                <!-- Slot customizado tem prioridade -->
+                                <slot v-if="col.slot && !col.input" :name="col.slot ?? col.field" :data="row" :value="getFieldValue(row, col.field)" :index="index" :field="col.field">
+                                    <div class="default-slot">
+                                        {{ getFieldValue(row, col.field) }}
+                                    </div>
+                                </slot>
+
+                                <!-- Input de incremento (+/-) -->
+                                <div v-else-if="col.input === 'increment'" class="max-table-fields-increment">
+                                    <MaxIconButton i="icons8:minus" size="1.3" dark @click.stop="decrementValue(row, col)" />
+                                    <MaxInputText :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-increment-input" :placeholder="col.placeholder" :required="col.required" />
+                                    <MaxIconButton i="icons8:plus" size="1.3" dark @click.stop="incrementValue(row, col)" />
+                                </div>
+
+                                <!-- Input de texto -->
+                                <MaxInputText v-else-if="col.input === 'text' || col.input === 'input'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :placeholder="col.placeholder" :required="col.required" />
+
+                                <!-- Input numérico -->
+                                <MaxInputNumber v-else-if="col.input === 'number'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :placeholder="col.placeholder" :required="col.required" />
+
+                                <!-- Select -->
+                                <MaxInputSelect v-else-if="col.input === 'select'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :options="col.options ?? []" :placeholder="col.placeholder" :required="col.required" />
+
+                                <!-- Date Picker -->
+                                <MaxInputDatePicker v-else-if="col.input === 'date'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :placeholder="col.placeholder" :required="col.required" />
+
+                                <!-- Checkbox -->
+                                <MaxInputCheckbox v-else-if="col.input === 'checkbox'" :modelValue="Boolean(getFieldValue(row, col.field))" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" />
+
+                                <!-- Textarea -->
+                                <MaxInputTextArea v-else-if="col.input === 'textarea'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :placeholder="col.placeholder" :required="col.required" />
+
+                                <!-- AutoComplete -->
+                                <MaxInputAutoComplete v-else-if="col.input === 'auto-complete'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :options="col.options ?? []" :placeholder="col.placeholder" :required="col.required" />
+
+                                <!-- AutoComplete via API -->
+                                <MaxInputAutoCompleteApi v-else-if="col.input === 'auto-complete-api'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :route="col.route ?? ''" :data="resolveData(row, col.data)" :placeholder="col.placeholder" :required="col.required" />
+                                <!-- Phone Number -->
+                                <MaxInputPhone v-else-if="col.input === 'phone-number'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :placeholder="col.placeholder" :required="col.required" />
+
+                                <!-- Sem input: exibe o valor como texto -->
+                                <template v-else>
+                                    {{ getFieldValue(row, col.field) }}
+                                </template>
+                            </td>
+
+                            <!-- Coluna de botões -->
+                            <td v-if="hasActionsColumn" class="max-table-fields-td max-table-fields-buttons" :style="buttonsColumnStyle">
+                                <slot name="buttons" :data="row" :index="index">
+                                    <MaxIconButton v-for="btn in props.buttons" v-bind="btn" :key="btn.id" :data="btn.data ? resolveData(row, btn.data) : row" :size="btn.size ?? 1.2" class="table-icon-button" />
+                                </slot>
+                            </td>
+                        </tr>
+                    </template>
+
+                    <!-- 3. Estado vazio (só renderiza se NÃO estiver carregando) -->
+                    <tr v-else class="max-table-fields-row max-table-fields-empty">
+                        <td :colspan="totalColspan" class="max-table-fields-td max-table-fields-empty-cell">
+                            <slot name="empty">
+                                <div class="max-table-empty-container">
+                                    <span class="max-table-empty-text">{{ props.emptyMessage }}</span>
+                                </div>
+                            </slot>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </template>
@@ -347,6 +347,7 @@
 
                 .max-table-fields-head-row {
                     @include table.table-header-row;
+
                     display: table-row;
 
                     .max-table-fields-th {
@@ -371,6 +372,7 @@
                 .max-table-fields-row {
                     @include table.table-body-row;
                     @include table.table-row-zebra;
+
                     display: table-row;
 
                     .max-table-fields-td {

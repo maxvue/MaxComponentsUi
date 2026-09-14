@@ -40,8 +40,9 @@
             done?: boolean | undefined;
             caution?: boolean | string | undefined;
             error?: string | boolean | undefined;
+            noMessage?: boolean;
         }>(),
-        { modelValue: '', label: 'Validade', required: false, done: undefined, caution: undefined, error: undefined }
+        { modelValue: '', label: 'Validade', required: false, done: undefined, caution: undefined, error: undefined, noMessage: false }
     );
 
     const emit = defineEmits<{

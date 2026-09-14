@@ -222,6 +222,7 @@
         pointer-events: none;
         box-sizing: border-box;
         min-width: 0;
+        /* stylelint-disable-next-line declaration-block-no-redundant-longhand-properties */
         overflow-x: clip;
         overflow-y: auto;
         overscroll-behavior: contain;
@@ -302,7 +303,7 @@
                     font-weight: 600;
                     color: inherit;
                     line-height: 1.3;
-                    overflow-wrap: break-word;
+                    overflow-wrap: anywhere;
                 }
 
                 .max-toast-message {
@@ -314,7 +315,7 @@
                     -webkit-line-clamp: 2;
                     -webkit-box-orient: vertical;
                     overflow: hidden;
-                    overflow-wrap: break-word;
+                    overflow-wrap: anywhere;
 
                     &.is-expanded {
                         display: block;
@@ -327,6 +328,7 @@
 
                 .max-toast-actions {
                     display: flex;
+                    flex-wrap: wrap;
                     gap: 10px;
                     margin-top: 4px;
 
@@ -473,6 +475,23 @@
         clip-path: inset(50%);
         white-space: nowrap;
         border: 0;
+    }
+
+    /* stylelint-disable-next-line media-feature-range-notation */
+    @media (max-width: 480px) {
+        .max-toast-container {
+            left: max(var(--max-toast-viewport-gutter), var(--max-toast-safe-left));
+            right: max(var(--max-toast-viewport-gutter), var(--max-toast-safe-right));
+            width: auto;
+            max-width: none;
+            align-items: stretch;
+
+            .max-toast-item {
+                width: 100%;
+                min-width: 0;
+                max-width: 100%;
+            }
+        }
     }
 
     @media (prefers-reduced-motion: reduce) {
