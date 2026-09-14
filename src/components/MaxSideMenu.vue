@@ -2,7 +2,15 @@
     <div class="max-side-menu side-menu" v-bind="attrs">
         <div class="grid-logo-and-menu">
             <div v-if="!isMobile" v-tooltip="system.version" class="space-logo" @click="onLogoClick">
-                <MaxLogo v-if="logoSrc" :src="logoSrc" :to="effectiveRouteLogo" :no-padding="true" class="side-menu-logo" />
+                <MaxLogo
+                    v-if="logoSrc"
+                    :src="logoSrc"
+                    :to="effectiveRouteLogo"
+                    :alt="effectiveLogoAlt"
+                    :fallback-label="effectiveLogoFallbackLabel"
+                    :no-padding="true"
+                    class="side-menu-logo"
+                />
             </div>
             <div class="menu">
                 <div v-if="items" class="grupo items">
@@ -39,6 +47,10 @@
         logo?: string;
         /** Rota de destino ao clicar na logo. Padrão: '/'. */
         routeLogo?: string;
+        /** Texto alternativo da logo. Sem ele, consulta `getMaxAppConfig().logoAlt`. */
+        logoAlt?: string;
+        /** Texto de fallback da logo. Sem ele, consulta `getMaxAppConfig().logoFallbackLabel`. */
+        logoFallbackLabel?: string;
         /** Dispositivo atual ('desktop' | 'mobile'). Quando omitido, consulta useSystemStore(). */
         screen?: string;
     }>();
@@ -63,6 +75,12 @@
 
     /** Rota efetiva de destino ao clicar na logo. */
     const effectiveRouteLogo = computed<string>(() => props.routeLogo ?? getMaxAppConfig().routeLogo ?? '/');
+
+    /** Texto alternativo efetivo da logo. */
+    const effectiveLogoAlt = computed<string | undefined>(() => props.logoAlt ?? getMaxAppConfig().logoAlt);
+
+    /** Texto de fallback efetivo da logo. */
+    const effectiveLogoFallbackLabel = computed<string | undefined>(() => props.logoFallbackLabel ?? getMaxAppConfig().logoFallbackLabel);
 
     /** Indica que o valor já é um caminho utilizável, e não um nome de rota. */
     const isUrl = (value: string): boolean => /^(https?:\/\/|\/|data:|blob:)/.test(value);

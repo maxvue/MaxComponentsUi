@@ -10,12 +10,13 @@
                 v-bind="inputAttrs"
                 class="max-select"
                 :class="{ 'is-disabled': props.disabled, 'is-focused': isOpen }"
-                tabindex="0"
+                :tabindex="props.disabled ? -1 : 0"
                 role="combobox"
                 aria-haspopup="listbox"
-                :aria-expanded="isOpen"
-                :aria-controls="listboxId"
-                :aria-activedescendant="activeDescendantId"
+                :aria-expanded="props.disabled ? false : isOpen"
+                :aria-disabled="props.disabled ? 'true' : undefined"
+                :aria-controls="props.disabled ? undefined : listboxId"
+                :aria-activedescendant="props.disabled ? undefined : activeDescendantId"
                 @click.stop="toggle"
                 @keydown="onTriggerKeydown"
             >
@@ -257,6 +258,16 @@
         'change': [value: any];
         'clear': [];
         'before-show': [event?: Event];
+    }>();
+
+    defineSlots<{
+        default?(): any;
+        value?(props: { value: any }): any;
+        option?(props: { option: any; selected: boolean; index: string | number }): any;
+        optiongroup?(props: { option: any }): any;
+        header?(): any;
+        footer?(): any;
+        [key: string]: any;
     }>();
 
     const temp_value = ref<any>(props.modelValue);
@@ -646,6 +657,15 @@
             scrollHighlightedIntoView();
         }
     });
+
+    watch(
+        () => props.disabled,
+        (disabled) => {
+            if (disabled && isOpen.value) {
+                hide();
+            }
+        }
+    );
 
     onBeforeUnmount(() => {
         if (typeof window !== 'undefined') {

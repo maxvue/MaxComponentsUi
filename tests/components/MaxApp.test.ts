@@ -129,6 +129,69 @@ describe('MaxApp', () => {
             expect(wrapper.find('.auth-custom').exists()).toBe(true);
             expect(wrapper.findComponent(MaxPageLayout).exists()).toBe(false);
         });
+
+        it('renderiza tela de login em rota guest mesmo quando o carregamento de usuário falhar (is_error)', () => {
+            route.meta = { layout: 'guest' };
+            const user = useUserStore();
+            user.data = null;
+            (user as any).status = { server: { get: { is_success: false, is_error: true } } };
+
+            const wrapper = mountApp();
+
+            expect(wrapper.find('.max-app-login').exists()).toBe(true);
+            expect(wrapper.find('.router-view-stub').exists()).toBe(true);
+            expect(wrapper.findComponent(MaxPageLayout).exists()).toBe(false);
+            expect(wrapper.find('.max-app-error').exists()).toBe(false);
+        });
+
+        it('renderiza o fallback de erro acessível quando o usuário falha em rota protegida', () => {
+            route.meta = { layout: 'default', requiresAuth: true };
+            const user = useUserStore();
+            user.data = null;
+            (user as any).status = { server: { get: { is_success: false, is_error: true, error: 'Network Error' } } };
+
+            const wrapper = mountApp();
+            console.log('DEBUG HTML:', wrapper.html());
+            console.log('DEBUG ROUTE:', JSON.stringify(route));
+
+            expect(wrapper.findComponent(MaxPageLayout).exists()).toBe(false);
+            expect(wrapper.find('.max-app-error').exists()).toBe(true);
+            const alert = wrapper.find('[role="alert"]');
+            expect(alert.exists()).toBe(true);
+            expect(alert.text()).toContain('Falha ao carregar a aplicação');
+            expect(alert.find('.max-app-error-retry-btn').exists()).toBe(true);
+        });
+
+        it('permite substituir o estado de erro pelo slot error com props error e retry', async () => {
+            route.meta = { layout: 'default', requiresAuth: true };
+            const user = useUserStore();
+            user.data = null;
+            (user as any).status = { server: { get: { is_success: false, is_error: true, error: '500 Server Error' } } };
+
+            let retryChamado = false;
+            (user as any).retry = async () => {
+                retryChamado = true;
+            };
+
+            const wrapper = mountApp({
+                slots: {
+                    error: `
+                        <template #error="{ error, retry }">
+                            <div class="custom-error">
+                                <span class="err-msg">{{ error }}</span>
+                                <button class="custom-retry" @click="retry">Recarregar</button>
+                            </div>
+                        </template>
+                    `
+                }
+            });
+
+            expect(wrapper.find('.custom-error').exists()).toBe(true);
+            expect(wrapper.find('.err-msg').text()).toBe('500 Server Error');
+
+            await wrapper.find('.custom-retry').trigger('click');
+            expect(retryChamado).toBe(true);
+        });
     });
 
     describe('singletons de UI', () => {

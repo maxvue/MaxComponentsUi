@@ -7,8 +7,8 @@
             </slot>
         </div>
 
-        <!-- Usuário carregado, mas sem sessão: tela de login. -->
-        <div v-else-if="isLoaded && !isLogged" class="max-app-view max-app-login">
+        <!-- Usuário carregado, mas sem sessão: tela de login. Em rotas de visitante/guest, libera a exibição mesmo sem sessão ou se o usuário falhou. -->
+        <div v-else-if="isGuest || (isLoaded && !isLogged)" class="max-app-view max-app-login">
             <slot name="login">
                 <RouterView />
             </slot>
@@ -27,6 +27,8 @@
                     :avatar-path="props.avatarPath"
                     :logo="effectiveLogo"
                     :route-logo="effectiveRouteLogo"
+                    :logo-alt="effectiveLogoAlt"
+                    :logo-fallback-label="effectiveLogoFallbackLabel"
                     @profile="emit('profile')"
                     @settings="emit('settings')"
                     @support="emit('support')"
@@ -41,6 +43,19 @@
                         <slot :name="name" v-bind="slotProps ?? {}"></slot>
                     </template>
                 </MaxPageLayout>
+            </slot>
+        </div>
+
+        <!-- Falha no bootstrap (erro ao carregar usuário sem ser rota pública). -->
+        <div v-else-if="bootstrapError" class="max-app-view max-app-error">
+            <slot name="error" :error="bootstrapError" :retry="retryBootstrap">
+                <div class="max-app-error-fallback" role="alert" aria-live="assertive">
+                    <h2 class="max-app-error-title">Falha ao carregar a aplicação</h2>
+                    <p class="max-app-error-desc">Não foi possível carregar as informações do usuário. Verifique sua conexão e tente novamente.</p>
+                    <button type="button" class="max-app-error-retry-btn" @click="retryBootstrap">
+                        Tentar novamente
+                    </button>
+                </div>
             </slot>
         </div>
 
@@ -111,6 +126,10 @@
         logo?: string;
         /** Rota de destino ao clicar na logo. Padrão: '/'. */
         routeLogo?: string;
+        /** Texto alternativo da logo. Sem ele, consulta `getMaxAppConfig().logoAlt`. */
+        logoAlt?: string;
+        /** Texto do fallback da logo caso falhe o carregamento. Sem ele, consulta `getMaxAppConfig().logoFallbackLabel`. */
+        logoFallbackLabel?: string;
     }>(), {
         allowUserName: true,
         allowEmail: true,
@@ -134,13 +153,37 @@
         logoClick: [];
     }>();
 
+    defineSlots<{
+        default?(): any;
+        blank?(): any;
+        login?(): any;
+        authenticated?(): any;
+        extras?(): any;
+        status?(props: Record<string, any>): any;
+        search?(props: Record<string, any>): any;
+        add?(props: Record<string, any>): any;
+        chat?(props: Record<string, any>): any;
+        bugs?(props: Record<string, any>): any;
+        notifications?(props: Record<string, any>): any;
+        voip?(props: Record<string, any>): any;
+        live?(props: Record<string, any>): any;
+        user?(props: Record<string, any>): any;
+        'mobile-center'?(props: Record<string, any>): any;
+        'mobile-actions'?(props: Record<string, any>): any;
+        switcher?(props: Record<string, any>): any;
+        error?(props: { error: any; retry: () => Promise<void> | void }): any;
+        [key: string]: any;
+    }>();
+
     // A configuração precisa ser aplicada antes das stores resolverem suas rotas.
     configureMaxApp({
         ...(props.routeLogin ? { routeLogin: props.routeLogin } : {}),
         ...(props.routeProviders ? { routeProviders: props.routeProviders } : {}),
         ...(props.routeUser ? { routeUser: props.routeUser } : {}),
         ...(props.logo ? { logo: props.logo } : {}),
-        ...(props.routeLogo ? { routeLogo: props.routeLogo } : {})
+        ...(props.routeLogo ? { routeLogo: props.routeLogo } : {}),
+        ...(props.logoAlt ? { logoAlt: props.logoAlt } : {}),
+        ...(props.logoFallbackLabel ? { logoFallbackLabel: props.logoFallbackLabel } : {})
     });
 
     /** Logo efetiva exibida no shell (prop ou fallback da configuração global). */
@@ -148,6 +191,12 @@
 
     /** Rota efetiva de destino ao clicar na logo. */
     const effectiveRouteLogo = computed<string>(() => props.routeLogo ?? getMaxAppConfig().routeLogo ?? '/');
+
+    /** Texto alternativo efetivo da logo. */
+    const effectiveLogoAlt = computed<string | undefined>(() => props.logoAlt ?? getMaxAppConfig().logoAlt);
+
+    /** Texto efetivo de fallback da logo. */
+    const effectiveLogoFallbackLabel = computed<string | undefined>(() => props.logoFallbackLabel ?? getMaxAppConfig().logoFallbackLabel);
 
     const route = useRoute();
     const system = useSystemStore();
@@ -183,6 +232,31 @@
 
     /** Rota sem layout, por `meta.layout` ou por estar em `blankPages`. */
     const isBlank = computed<boolean>(() => route?.meta?.layout === 'blank' || props.blankPages.includes(system.page));
+
+    /** Indica que a store de usuário encerrou seu ciclo inicial de requisição (sucesso ou erro). */
+    const isSettled = computed<boolean>(() => isLoaded.value || Boolean((user as any).status?.server?.get?.is_error));
+
+    /** Erro capturado no bootstrap da aplicação ao tentar carregar o usuário autenticado. */
+    const bootstrapError = computed(() => {
+        if (isLoaded.value) return null;
+        return (user as any).status?.server?.get?.is_error ? ((user as any).status?.server?.get?.error ?? true) : null;
+    });
+
+    /** Rota acessível sem sessão (guest/pública), permitindo login e recuperação mesmo se o usuário falhou. */
+    const isGuest = computed<boolean>(() => {
+        return route?.meta?.layout === 'guest' || route?.meta?.requiresAuth === false || route?.name === 'login';
+    });
+
+    /** Executa nova tentativa de buscar o usuário no servidor de forma idempotente. */
+    const retryBootstrap = async (): Promise<void> => {
+        if (typeof (user as any).retry === 'function') {
+            await (user as any).retry();
+        } else if (typeof (user as any).get === 'function') {
+            await (user as any).get();
+        } else if (typeof (user as any).reload === 'function') {
+            await (user as any).reload();
+        }
+    };
 
     // Propaga as permissões de login para a store do formulário.
     watch(() => [props.allowEmail, props.allowPhone, props.allowUserName], ([email, phone, userName]) => {
@@ -280,6 +354,47 @@
         .fade-enter-from,
         .fade-leave-to {
             opacity: 0;
+        }
+
+        .max-app-error-fallback {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+            text-align: center;
+            gap: 1rem;
+
+            .max-app-error-title {
+                font-size: 1.25rem;
+                font-weight: 600;
+                margin: 0;
+            }
+
+            .max-app-error-desc {
+                font-size: 0.875rem;
+                color: var(--color-secondary-text, #6b7280);
+                max-width: 28rem;
+                margin: 0;
+            }
+
+            .max-app-error-retry-btn {
+                margin-top: 0.5rem;
+                padding: 0.5rem 1.25rem;
+                font-size: 0.875rem;
+                font-weight: 500;
+                border-radius: 0.5rem;
+                background-color: var(--primary-color, #2563eb);
+                color: #ffffff;
+                border: none;
+                cursor: pointer;
+                transition: opacity 0.2s;
+
+                &:hover {
+                    opacity: 0.9;
+                }
+            }
         }
     }
 

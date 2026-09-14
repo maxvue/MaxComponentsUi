@@ -121,4 +121,20 @@ describe('useUserStore', () => {
             vi.useRealTimers();
         }
     });
+
+    it('retry limpa flags de erro e invoca método get quando disponível', async () => {
+        const store = useUserStore();
+        (store as any).status = { server: { get: { is_success: false, is_error: true, is_loading: false } } };
+
+        let getChamado = false;
+        (store as any).get = async () => {
+            getChamado = true;
+        };
+
+        await store.retry();
+
+        expect((store as any).status.server.get.is_error).toBe(false);
+        expect((store as any).status.server.get.is_loading).toBe(true);
+        expect(getChamado).toBe(true);
+    });
 });

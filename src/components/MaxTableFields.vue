@@ -329,7 +329,7 @@
                     padding: 0;
                     background-color: transparent;
                     color: var(--table-header-text, var(--blue-200));
-                    font-family: Jost, sans-serif;
+                    font-family: inherit;
                     font-weight: 400;
                     flex-grow: 1;
                     border: none;
@@ -351,7 +351,7 @@
             display: grid;
             align-content: start;
             overflow-y: auto;
-            font-family: Jost, sans-serif;
+            font-family: inherit;
 
             .max-table-fields-row {
                 display: flex;

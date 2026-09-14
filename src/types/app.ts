@@ -136,5 +136,9 @@ export interface MaxAppConfig {
     logo?: string;
     /** Rota de destino ao clicar na logo. Padrão: '/'. */
     routeLogo?: string;
+    /** Texto alternativo acessível da logo. Padrão: 'Logo da aplicação'. */
+    logoAlt?: string;
+    /** Rótulo textual visível de fallback caso a imagem falhe. Padrão: 'Aplicação'. */
+    logoFallbackLabel?: string;
 }
 

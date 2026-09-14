@@ -17,6 +17,14 @@
         "./resolver": {
             "types": "./dist/helpers/MaxComponentsUiResolver.d.ts",
             "import": "./dist/resolver.es.js"
+        },
+        "./dist/components/*": {
+            "types": "./dist/components/*",
+            "import": "./dist/components/*"
+        },
+        "./*": {
+            "types": "./*",
+            "import": "./*"
         }
     },
     "files": [

@@ -580,10 +580,10 @@
                             }
 
                             &.selected {
-                                background-color: var(--max-primary-50);
+                                background-color: var(--blue-50);
 
                                 .picker-icon-svg {
-                                    color: var(--max-primary-600, #005F77);
+                                    color: var(--blue-800);
                                 }
                             }
 

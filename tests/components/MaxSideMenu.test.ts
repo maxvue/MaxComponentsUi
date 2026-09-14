@@ -48,7 +48,7 @@ const mountWithPinia = (component: any, options: Record<string, any> = {}) => mo
         // O stub declara `src` e `to` para que os testes da prop `logo` e `routeLogo`
         // possam inspecionar os valores que chegam ao MaxLogo.
         stubs: {
-            MaxLogo: { name: 'MaxLogo', props: ['src', 'to'], template: '<div class="max-logo-stub" />' },
+            MaxLogo: { name: 'MaxLogo', props: ['src', 'to', 'alt', 'fallbackLabel'], template: '<div class="max-logo-stub" />' },
             MaxIcon: { template: '<span class="max-icon-stub" />' },
             ...(options.global?.stubs ?? {})
         }
@@ -234,6 +234,38 @@ describe('MaxSideMenu', () => {
         const wrapper = mountWithPinia(MaxSideMenu);
 
         expect(wrapper.findComponent({ name: 'MaxLogo' }).props('to')).toBe('/dashboard');
+
+        resetMaxAppConfig();
+    });
+
+    it('propaga logoAlt e logoFallbackLabel passados via props para o MaxLogo', () => {
+        menusRef.value = { side: [] };
+        const wrapper = mountWithPinia(MaxSideMenu, {
+            props: {
+                logo: '/logo.svg',
+                logoAlt: 'Símbolo ENGEAPP',
+                logoFallbackLabel: 'MaxCode'
+            }
+        });
+
+        const maxLogo = wrapper.findComponent({ name: 'MaxLogo' });
+        expect(maxLogo.props('alt')).toBe('Símbolo ENGEAPP');
+        expect(maxLogo.props('fallbackLabel')).toBe('MaxCode');
+    });
+
+    it('utiliza logoAlt e logoFallbackLabel de getMaxAppConfig() quando omitidos das props', () => {
+        menusRef.value = { side: [] };
+        configureMaxApp({
+            logo: '/logo.svg',
+            logoAlt: 'Símbolo ENGEAPP',
+            logoFallbackLabel: 'MaxCode'
+        });
+
+        const wrapper = mountWithPinia(MaxSideMenu);
+
+        const maxLogo = wrapper.findComponent({ name: 'MaxLogo' });
+        expect(maxLogo.props('alt')).toBe('Símbolo ENGEAPP');
+        expect(maxLogo.props('fallbackLabel')).toBe('MaxCode');
 
         resetMaxAppConfig();
     });

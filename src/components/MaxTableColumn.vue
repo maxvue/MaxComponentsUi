@@ -24,4 +24,12 @@
         expander?: boolean;
         selectionMode?: 'single' | 'multiple';
     }>();
+
+    defineSlots<{
+        default?(): any;
+        body?(props: { data: any; field?: string; index?: number }): any;
+        header?(props: { field?: string }): any;
+        filter?(props: { field?: string }): any;
+        editor?(props: { data: any; field?: string }): any;
+    }>();
 </script>

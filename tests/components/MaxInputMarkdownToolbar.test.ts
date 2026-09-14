@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
+import fs from 'node:fs';
+import { resolve } from 'node:path';
 import MaxInputMarkdownToolbar from '../../src/components/MaxInputMarkdownToolbar.vue';
 
 /**
@@ -94,6 +96,27 @@ describe('MaxInputMarkdownToolbar', () => {
 
         const boldButton = wrapper.find('button[title="Negrito (Ctrl+B)"]');
         expect(boldButton.classes()).toContain('active');
+    });
+
+    it('botão ativo possui aria-pressed=true e estilo consome os tokens aprovados --blue-50, --blue-800 e --blue-200', () => {
+        const editor = createFakeEditor({
+            isActive: vi.fn((name: string) => name === 'bold')
+        });
+        const wrapper = mountToolbar({ editor });
+
+        const boldButton = wrapper.find('button[title="Negrito (Ctrl+B)"]');
+        expect(boldButton.classes()).toContain('active');
+        expect(boldButton.attributes('aria-pressed')).toBe('true');
+
+        const sfcContent = fs.readFileSync(resolve(__dirname, '../../src/components/MaxInputMarkdownToolbar.vue'), 'utf-8');
+        const activeMatch = sfcContent.match(/&\.active\s*\{([^}]+)\}/);
+        expect(activeMatch).toBeTruthy();
+        const activeCss = activeMatch![1];
+
+        expect(activeCss).toContain('var(--blue-50)');
+        expect(activeCss).toContain('var(--blue-800)');
+        expect(activeCss).toContain('var(--blue-200)');
+        expect(activeCss).not.toContain('--max-primary-50');
     });
 
     it('chama toggleHeading com o nível correto ao clicar em Título 2', async () => {

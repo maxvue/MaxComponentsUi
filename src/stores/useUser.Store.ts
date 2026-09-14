@@ -106,12 +106,29 @@ export const useUserStore = defineStore('user', () => {
         });
     }
 
+    /**
+     * Tenta recarregar os dados do usuário limpando flags de erro e disparando get()/reload().
+     */
+    async function retry(this: any): Promise<void> {
+        if (this?.status?.server?.get) {
+            this.status.server.get.is_error = false;
+            this.status.server.get.is_loading = true;
+            this.status.server.get.is_success = false;
+        }
+        if (typeof this?.get === 'function') {
+            await this.get();
+        } else if (typeof (this as any)?.reload === 'function') {
+            await (this as any).reload();
+        }
+    }
+
     return {
         data,
         options,
         isCached,
         departments_id,
         isImpersonated,
-        waitRequest
+        waitRequest,
+        retry
     };
 });

@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
+import fs from 'node:fs';
+import { resolve } from 'node:path';
 import MaxInputIconPicker from '../../src/components/MaxInputIconPicker.vue';
 import InputBase from '../../src/components/InputBase.vue';
 
@@ -156,5 +158,16 @@ describe('MaxInputIconPicker', () => {
 
         expect((wrapper.vm as any).visible).toBe(false);
         wrapper.unmount();
+    });
+
+    it('estilo da célula selecionada (&.selected) consome os tokens aprovados --blue-50 e --blue-800', () => {
+        const sfcContent = fs.readFileSync(resolve(__dirname, '../../src/components/MaxInputIconPicker.vue'), 'utf-8');
+        const selectedMatch = sfcContent.match(/&\.selected\s*\{([^}]+(?:\.picker-icon-svg\s*\{[^}]+\})?[^}]*)\}/);
+        expect(selectedMatch).toBeTruthy();
+        const selectedCss = selectedMatch![0];
+
+        expect(selectedCss).toContain('var(--blue-50)');
+        expect(selectedCss).toContain('var(--blue-800)');
+        expect(selectedCss).not.toContain('--max-primary-50');
     });
 });

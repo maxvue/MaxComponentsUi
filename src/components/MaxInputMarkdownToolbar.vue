@@ -465,9 +465,9 @@
             }
 
             &.active {
-                background: var(--max-primary-50);
-                color: var(--max-primary-600, #005F77);
-                border-color: var(--max-primary-200);
+                background: var(--blue-50);
+                color: var(--blue-800);
+                border-color: var(--blue-200);
             }
 
             &:disabled {

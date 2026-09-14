@@ -2,7 +2,7 @@
 // estes estilos na tag <head> em tempo de import no runtime do consumidor. NÃO REMOVER.
 import 'virtual:uno.css';
 
-import { defineAsyncComponent, type App } from 'vue';
+import { defineAsyncComponent, type App, type Plugin } from 'vue';
 export { MaxStyle, type MaxThemePreset, type SemanticColorPalette } from './styles/style';
 export { default as ptBR } from './locales/pt-br';
 
@@ -158,9 +158,9 @@ export { default as MaxApp } from './components/MaxApp.vue';
 // Data & Display
 export { default as MaxBadge } from './components/MaxBadge.vue';
 export { default as MaxBadgeComponent } from './components/MaxBadge.vue';
-export { default as MaxTag } from './components/MaxBadge.vue';
+export { default as MaxTag } from './components/MaxTag.vue';
 export { default as Badge } from './components/MaxBadge.vue';
-export { default as Tag } from './components/MaxBadge.vue';
+export { default as Tag } from './components/MaxTag.vue';
 export { default as MaxBadgeButton } from './components/MaxBadgeButton.vue';
 export { default as BadgeButton } from './components/MaxBadgeButton.vue';
 export { default as MaxBadgeButtonsGroup } from './components/MaxBadgeButtonsGroup.vue';
@@ -168,6 +168,7 @@ export { default as MaxBadgeButtonGroup } from './components/MaxBadgeButtonsGrou
 export { default as BadgeButtonsGroup } from './components/MaxBadgeButtonsGroup.vue';
 export { default as BadgeButtonGroup } from './components/MaxBadgeButtonsGroup.vue';
 export type { MaxBadgeProps, MaxBadgeStatus } from './components/MaxBadge.vue';
+export type { MaxTagProps, MaxTagSeverity } from './components/MaxTag.vue';
 export type { MaxBadgeButtonProps } from './components/MaxBadgeButton.vue';
 export type { MaxBadgeButtonsGroupProps, MaxBadgeButtonsGroupItem } from './components/MaxBadgeButtonsGroup.vue';
 export { default as MaxImage } from './components/MaxImage.vue';
@@ -241,9 +242,11 @@ export const install = (app: App, options: MaxPluginOptions = {}): void => {
     app.provide?.('maxComponentsOptions', options);
 };
 
-export default {
+const plugin: Plugin = {
     install
 };
+
+export default plugin;
 
 
 export * from './types';
