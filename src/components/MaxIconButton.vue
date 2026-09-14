@@ -135,16 +135,17 @@
             const hasClick = Boolean(parentProps.onClick || attrs.onClick);
             const hasAction = Boolean(parentProps.onAction || attrs.onAction);
 
-            if (hasClick) {
+            if (hasClick && !hasAction) {
                 emit('click', event);
                 return;
             }
 
-            if (hasAction) {
+            if (hasAction && !hasClick) {
                 emit('action', true);
                 return;
             }
 
+            emit('action', true);
             emit('click', event);
         } finally {
             executing.value = false;

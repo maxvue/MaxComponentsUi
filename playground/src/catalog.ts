@@ -89,6 +89,7 @@ export const PLAYGROUND_CATALOG: CatalogComponent[] = [
     { name: 'MaxBadgeButtonsGroup', family: 'buttons', scenarioId: 'buttons-badges', description: 'Grupo horizontal ou vertical de botões em formato de badge.' },
     { name: 'MaxBadge', family: 'buttons', scenarioId: 'buttons-badges', description: 'Indicador visual de contagem, estado ou severidade.' },
     { name: 'MaxBadgeComponent', family: 'buttons', scenarioId: 'buttons-badges', description: 'Alias de compatibilidade para MaxBadge.', isAlias: true, aliasOf: 'MaxBadge' },
+    { name: 'MaxTag', family: 'buttons', scenarioId: 'buttons-badges', description: 'Alias de compatibilidade para MaxBadge.', isAlias: true, aliasOf: 'MaxBadge' },
     { name: 'MaxLikeButton', family: 'buttons', scenarioId: 'buttons-main', description: 'Botão reativo de curtir com animação e contador de likes.' },
     { name: 'MaxLink', family: 'buttons', scenarioId: 'buttons-main', description: 'Componente de navegação em link com estilo acessível.' },
 

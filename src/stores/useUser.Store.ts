@@ -25,6 +25,9 @@ export const useUserStore = defineStore('user', () => {
     /** Dados do usuário autenticado. `null` enquanto não carregado. */
     const data: Ref<MaxAppUser | null> = ref(null);
 
+    /** Estado do servidor injetado pelo plugin @maxvue/max-pinia. */
+    const status: Ref<any> = ref(undefined);
+
     /** Habilita o cache offline do `@maxvue/max-pinia`. */
     const isCached: Ref<boolean> = ref(true);
 
@@ -121,6 +124,7 @@ export const useUserStore = defineStore('user', () => {
     }
 
     return {
+        status,
         data,
         options,
         isCached,

@@ -547,9 +547,9 @@
             }
 
             &.active {
-                background: var(--max-primary-50, #67C8DB);
-                color: var(--max-primary-600, #005F77);
-                border-color: var(--max-primary-200, #46BCD4);
+                background: var(--blue-50);
+                color: var(--blue-800);
+                border-color: var(--blue-200);
             }
 
             &:disabled {

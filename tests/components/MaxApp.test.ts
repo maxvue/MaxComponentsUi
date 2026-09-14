@@ -28,15 +28,20 @@ import { useSystemStore } from '../../src/stores/useSystem.Store';
 import { configureMaxApp, getMaxAppConfig, resetMaxAppConfig } from '../../src/helpers/maxAppConfig';
 
 let pinia: Pinia;
+const mountedWrappers: any[] = [];
 
-const mountApp = (options: Record<string, any> = {}) => mount(MaxApp, {
-    ...options,
-    global: {
-        ...(options.global ?? {}),
-        plugins: [pinia],
-        stubs: { teleport: true, MaxLogo: { template: '<div class="max-logo-stub" />' }, ...(options.global?.stubs ?? {}) }
-    }
-});
+const mountApp = (options: Record<string, any> = {}) => {
+    const wrapper = mount(MaxApp, {
+        ...options,
+        global: {
+            ...(options.global ?? {}),
+            plugins: [pinia],
+            stubs: { teleport: true, MaxLogo: { template: '<div class="max-logo-stub" />' }, ...(options.global?.stubs ?? {}) }
+        }
+    });
+    mountedWrappers.push(wrapper);
+    return wrapper;
+};
 
 /** Simula o usuário já carregado pelo @maxvue/max-pinia. */
 const loadUser = (data: Record<string, any> | null = { id: 1, name: 'Maria' }) => {
@@ -56,7 +61,13 @@ describe('MaxApp', () => {
         localStorage.clear();
     });
 
-    afterEach(() => resetMaxAppConfig());
+    afterEach(() => {
+        resetMaxAppConfig();
+        while (mountedWrappers.length > 0) {
+            const w = mountedWrappers.pop();
+            try { w.unmount(); } catch {}
+        }
+    });
 
     describe('branching de layout', () => {
         it('não renderiza nada sem rota resolvida', () => {
@@ -151,8 +162,6 @@ describe('MaxApp', () => {
             (user as any).status = { server: { get: { is_success: false, is_error: true, error: 'Network Error' } } };
 
             const wrapper = mountApp();
-            console.log('DEBUG HTML:', wrapper.html());
-            console.log('DEBUG ROUTE:', JSON.stringify(route));
 
             expect(wrapper.findComponent(MaxPageLayout).exists()).toBe(false);
             expect(wrapper.find('.max-app-error').exists()).toBe(true);
