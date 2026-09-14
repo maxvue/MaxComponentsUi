@@ -90,9 +90,17 @@ describe('MaxTopMenuSearchBar', () => {
         expect(wrapper.find('.mobile-search-panel').exists()).toBe(false);
     });
 
-    it('exibe o badge de atalho kbd por padrão no modo desktop', () => {
+    it('não exibe o badge de atalho por padrão no modo desktop', () => {
         const wrapper = mountSearchBar({
             props: { screen: 'desktop' }
+        });
+
+        expect(wrapper.find('.search-shortcut-badge').exists()).toBe(false);
+    });
+
+    it('exibe o badge quando showShortcutBadge=true', () => {
+        const wrapper = mountSearchBar({
+            props: { screen: 'desktop', showShortcutBadge: true }
         });
 
         const badge = wrapper.find('.search-shortcut-badge');
@@ -100,16 +108,11 @@ describe('MaxTopMenuSearchBar', () => {
         expect(['⌘K', 'Ctrl+K']).toContain(badge.text());
     });
 
-    it('não exibe o badge quando showShortcutBadge=false ou shortcut=false', () => {
+    it('não exibe o badge quando shortcut=false, mesmo que solicitado', () => {
         const wrapper1 = mountSearchBar({
-            props: { screen: 'desktop', showShortcutBadge: false }
+            props: { screen: 'desktop', shortcut: false, showShortcutBadge: true }
         });
         expect(wrapper1.find('.search-shortcut-badge').exists()).toBe(false);
-
-        const wrapper2 = mountSearchBar({
-            props: { screen: 'desktop', shortcut: false }
-        });
-        expect(wrapper2.find('.search-shortcut-badge').exists()).toBe(false);
     });
 
     it('NÃO sequestra nem previne o comportamento nativo de Ctrl+F / Meta+F', () => {
