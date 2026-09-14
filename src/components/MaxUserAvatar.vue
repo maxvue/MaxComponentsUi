@@ -207,8 +207,8 @@
         justify-content: center;
         width: 40px;
         height: 40px;
-        min-width: 24px;
-        min-height: 24px;
+        min-width: 16px;
+        min-height: 16px;
         border-radius: 50% !important;
         overflow: hidden !important;
         clip-path: circle(50% at 50% 50%);

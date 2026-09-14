@@ -712,7 +712,7 @@
     &.is-slim,
     &[slim],
     &[input-click] {
-        grid-template-rows: 20px;
+        grid-template-rows: 20px !important;
         height: 20px;
         min-height: 20px;
 
