@@ -30,7 +30,7 @@ function mountPopover(props: Record<string, any> = {}, slots: Record<string, any
                     props: ['icon', 'i', 'size']
                 },
                 MaxTitle1: {
-                    template: '<div class="title" v-bind="$attrs"><slot /></div>',
+                    template: '<div class="title" :data-subtitle="subtitle" v-bind="$attrs"><slot /></div>',
                     props: ['h1', 'h2', 'title', 'subtitle', 'subTitle']
                 },
                 MaxGrid: {
@@ -493,14 +493,14 @@ describe('MaxPopover', () => {
         });
 
         it('aceita prop subtitle como fallback retrocompatível de subTitle', async () => {
-            const wrapper = mountPopover({ title: 'Transferir', subtitle: 'Encaminhar suporte' } as any, {}, { attachTo: document.body });
+            const wrapper = mountPopover({ title: 'Transferir', subTitle: undefined, subtitle: 'Encaminhar suporte' }, {}, { attachTo: document.body });
             const vm = wrapper.vm as any;
 
             vm.show();
             await wrapper.vm.$nextTick();
 
-            const titleComponent = wrapper.findComponent({ name: 'MaxTitle1' }) || document.querySelector('.max-popover-title');
-            expect(titleComponent).toBeDefined();
+            expect(vm.resolvedSubTitle).toBe('Encaminhar suporte');
+            expect(wrapper.find('.max-popover-title').attributes('data-subtitle')).toBe('Encaminhar suporte');
 
             wrapper.unmount();
         });

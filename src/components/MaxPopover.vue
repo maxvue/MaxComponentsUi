@@ -93,6 +93,8 @@
         title?: string;
         /** Subtitulo do popover */
         subTitle?: string;
+        /** Alias retrocompatível para o subtítulo */
+        subtitle?: string;
         /** Rotação do ícone em graus */
         rotate?: number;
         /** Inversão do ícone */
@@ -183,7 +185,7 @@
         }
     };
 
-    const resolvedSubTitle = computed(() => props.subTitle ?? (props as any).subtitle);
+    const resolvedSubTitle = computed(() => props.subTitle ?? props.subtitle);
 
     const computedAriaLabelledby = computed(() => {
         if (props.ariaLabelledby) {
@@ -283,7 +285,6 @@
         }
 
         if (props.height) style.height = typeof props.height === 'number' ? `${props.height}px` : props.height;
-
 
         return style;
     });
@@ -417,8 +418,7 @@
         max-height: calc(100vh - 32px);
         max-height: calc(100dvh - 32px);
         max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 32px);
-        overflow-y: auto;
-        overflow-x: hidden;
+        overflow: hidden auto;
         background-color: var(--background-0);
         color: var(--background-700);
         z-index: var(--max-layer-popover, 1200);
