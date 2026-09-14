@@ -180,6 +180,8 @@
             caution?: string | boolean;
             /** Define se o campo é obrigatório */
             required?: boolean;
+            /** Oculta a mensagem de feedback e remove a reserva vertical */
+            noMessage?: boolean;
             /** Texto de placeholder quando nenhum ícone está selecionado */
             placeholder?: string;
             /** URL base para listar/buscar ícones curados */
