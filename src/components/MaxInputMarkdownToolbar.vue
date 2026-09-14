@@ -11,8 +11,9 @@
         <span v-if="props.label" class="md-toolbar__divider" />
 
         <!-- Formatação inline -->
-        <div class="md-toolbar__group">
+        <div v-if="isGroupVisible('inline')" class="md-toolbar__group">
             <button
+                v-if="isToolVisible('bold')"
                 type="button"
                 class="md-toolbar__btn"
                 :class="{ active: editor?.isActive('bold') }"
@@ -24,6 +25,7 @@
                 <MaxIcon icon="mdi:format-bold" :size="1.1" color="currentColor" />
             </button>
             <button
+                v-if="isToolVisible('italic')"
                 type="button"
                 class="md-toolbar__btn"
                 :class="{ active: editor?.isActive('italic') }"
@@ -35,6 +37,7 @@
                 <MaxIcon icon="mdi:format-italic" :size="1.1" color="currentColor" />
             </button>
             <button
+                v-if="isToolVisible('underline')"
                 type="button"
                 class="md-toolbar__btn"
                 :class="{ active: editor?.isActive('underline') }"
@@ -46,6 +49,7 @@
                 <MaxIcon icon="mdi:format-underline" :size="1.1" color="currentColor" />
             </button>
             <button
+                v-if="isToolVisible('strike')"
                 type="button"
                 class="md-toolbar__btn"
                 :class="{ active: editor?.isActive('strike') }"
@@ -58,11 +62,12 @@
             </button>
         </div>
 
-        <span class="md-toolbar__divider"></span>
+        <span v-if="isGroupVisible('inline') && hasVisibleGroupAfter('inline')" class="md-toolbar__divider" />
 
         <!-- Títulos -->
-        <div class="md-toolbar__group">
+        <div v-if="isGroupVisible('heading')" class="md-toolbar__group">
             <button
+                v-if="isToolVisible('heading-1')"
                 type="button"
                 class="md-toolbar__btn"
                 :class="{ active: editor?.isActive('heading', { level: 1 }) }"
@@ -74,6 +79,7 @@
                 <MaxIcon icon="mdi:format-header-1" :size="1.1" color="currentColor" />
             </button>
             <button
+                v-if="isToolVisible('heading-2')"
                 type="button"
                 class="md-toolbar__btn"
                 :class="{ active: editor?.isActive('heading', { level: 2 }) }"
@@ -85,6 +91,7 @@
                 <MaxIcon icon="mdi:format-header-2" :size="1.1" color="currentColor" />
             </button>
             <button
+                v-if="isToolVisible('heading-3')"
                 type="button"
                 class="md-toolbar__btn"
                 :class="{ active: editor?.isActive('heading', { level: 3 }) }"
@@ -97,11 +104,12 @@
             </button>
         </div>
 
-        <span class="md-toolbar__divider"></span>
+        <span v-if="isGroupVisible('heading') && hasVisibleGroupAfter('heading')" class="md-toolbar__divider" />
 
         <!-- Listas -->
-        <div class="md-toolbar__group">
+        <div v-if="isGroupVisible('lists')" class="md-toolbar__group">
             <button
+                v-if="isToolVisible('bullet-list')"
                 type="button"
                 class="md-toolbar__btn"
                 :class="{ active: editor?.isActive('bulletList') }"
@@ -113,6 +121,7 @@
                 <MaxIcon icon="mdi:format-list-bulleted" :size="1.1" color="currentColor" />
             </button>
             <button
+                v-if="isToolVisible('ordered-list')"
                 type="button"
                 class="md-toolbar__btn"
                 :class="{ active: editor?.isActive('orderedList') }"
@@ -125,11 +134,12 @@
             </button>
         </div>
 
-        <span class="md-toolbar__divider"></span>
+        <span v-if="isGroupVisible('lists') && hasVisibleGroupAfter('lists')" class="md-toolbar__divider" />
 
         <!-- Blocos -->
-        <div class="md-toolbar__group">
+        <div v-if="isGroupVisible('blocks')" class="md-toolbar__group">
             <button
+                v-if="isToolVisible('blockquote')"
                 type="button"
                 class="md-toolbar__btn"
                 :class="{ active: editor?.isActive('blockquote') }"
@@ -141,6 +151,7 @@
                 <MaxIcon icon="mdi:format-quote-close" :size="1.1" color="currentColor" />
             </button>
             <button
+                v-if="isToolVisible('code-block')"
                 type="button"
                 class="md-toolbar__btn"
                 :class="{ active: editor?.isActive('codeBlock') }"
@@ -152,6 +163,7 @@
                 <MaxIcon icon="mdi:code-tags" :size="1.1" color="currentColor" />
             </button>
             <button
+                v-if="isToolVisible('horizontal-rule')"
                 type="button"
                 class="md-toolbar__btn"
                 title="Separador horizontal"
@@ -162,11 +174,11 @@
             </button>
         </div>
 
-        <span class="md-toolbar__divider"></span>
+        <span v-if="isGroupVisible('blocks') && hasVisibleGroupAfter('blocks')" class="md-toolbar__divider" />
 
         <!-- Mídia: Link e Imagem -->
-        <div class="md-toolbar__group">
-            <div ref="linkPopoverRef" class="md-toolbar__popover-anchor">
+        <div v-if="isGroupVisible('media')" class="md-toolbar__group">
+            <div v-if="isToolVisible('link')" ref="linkPopoverRef" class="md-toolbar__popover-anchor">
                 <button
                     ref="linkTriggerRef"
                     type="button"
@@ -225,7 +237,7 @@
                 </div>
             </div>
 
-            <div ref="imagePopoverRef" class="md-toolbar__popover-anchor">
+            <div v-if="isToolVisible('image')" ref="imagePopoverRef" class="md-toolbar__popover-anchor">
                 <button
                     ref="imageTriggerRef"
                     type="button"
@@ -276,6 +288,7 @@
             </div>
 
             <button
+                v-if="isToolVisible('table')"
                 type="button"
                 class="md-toolbar__btn"
                 title="Inserir tabela"
@@ -286,11 +299,12 @@
             </button>
         </div>
 
-        <span class="md-toolbar__divider"></span>
+        <span v-if="isGroupVisible('media') && hasVisibleGroupAfter('media')" class="md-toolbar__divider" />
 
         <!-- Histórico e Limpeza -->
-        <div class="md-toolbar__group">
+        <div v-if="isGroupVisible('history')" class="md-toolbar__group">
             <button
+                v-if="isToolVisible('undo')"
                 type="button"
                 class="md-toolbar__btn"
                 title="Desfazer (Ctrl+Z)"
@@ -300,6 +314,7 @@
                 <MaxIcon icon="mdi:undo" :size="1.1" color="currentColor" />
             </button>
             <button
+                v-if="isToolVisible('redo')"
                 type="button"
                 class="md-toolbar__btn"
                 title="Refazer (Ctrl+Y)"
@@ -309,6 +324,7 @@
                 <MaxIcon icon="mdi:redo" :size="1.1" color="currentColor" />
             </button>
             <button
+                v-if="isToolVisible('clear')"
                 type="button"
                 class="md-toolbar__btn"
                 title="Limpar formatação"
@@ -329,17 +345,93 @@
     import { isSafeUrl } from '../helpers/isSafeUrl';
     import { useToolbarNavigation } from '../helpers/useToolbarNavigation';
 
+    export type MarkdownToolbarTool =
+        | 'bold'
+        | 'italic'
+        | 'underline'
+        | 'strike'
+        | 'heading'
+        | 'heading-1'
+        | 'heading-2'
+        | 'heading-3'
+        | 'lists'
+        | 'bullet-list'
+        | 'ordered-list'
+        | 'blocks'
+        | 'blockquote'
+        | 'code-block'
+        | 'horizontal-rule'
+        | 'media'
+        | 'link'
+        | 'image'
+        | 'table'
+        | 'history'
+        | 'undo'
+        | 'redo'
+        | 'clear';
+
+    type ToolbarGroupKey = 'inline' | 'heading' | 'lists' | 'blocks' | 'media' | 'history';
+
     const props = withDefaults(
         defineProps<{
             editor: Editor | null;
             label?: string;
             ariaLabel?: string;
+            hideTools?: MarkdownToolbarTool[];
+            tools?: MarkdownToolbarTool[];
         }>(),
         {
             label: undefined,
-            ariaLabel: 'Editor de Markdown'
+            ariaLabel: 'Editor de Markdown',
+            hideTools: undefined,
+            tools: undefined
         }
     );
+
+    const groupToolMap: Record<ToolbarGroupKey, MarkdownToolbarTool[]> = {
+        inline: ['bold', 'italic', 'underline', 'strike'],
+        heading: ['heading-1', 'heading-2', 'heading-3'],
+        lists: ['bullet-list', 'ordered-list'],
+        blocks: ['blockquote', 'code-block', 'horizontal-rule'],
+        media: ['link', 'image', 'table'],
+        history: ['undo', 'redo', 'clear']
+    };
+
+    const groupKeys: ToolbarGroupKey[] = ['inline', 'heading', 'lists', 'blocks', 'media', 'history'];
+
+    const isToolVisible = (tool: MarkdownToolbarTool): boolean => {
+        if (props.hideTools && props.hideTools.length > 0) {
+            if (props.hideTools.includes(tool)) return false;
+            // Aliases de grupo em hideTools
+            if (tool.startsWith('heading-') && props.hideTools.includes('heading')) return false;
+            if ((tool === 'bullet-list' || tool === 'ordered-list') && props.hideTools.includes('lists')) return false;
+            if ((tool === 'blockquote' || tool === 'code-block' || tool === 'horizontal-rule') && props.hideTools.includes('blocks')) return false;
+            if ((tool === 'link' || tool === 'image' || tool === 'table') && props.hideTools.includes('media')) return false;
+            if ((tool === 'undo' || tool === 'redo' || tool === 'clear') && props.hideTools.includes('history')) return false;
+        }
+
+        if (props.tools && props.tools.length > 0) {
+            if (props.tools.includes(tool)) return true;
+            if (tool.startsWith('heading-') && props.tools.includes('heading')) return true;
+            if ((tool === 'bullet-list' || tool === 'ordered-list') && props.tools.includes('lists')) return true;
+            if ((tool === 'blockquote' || tool === 'code-block' || tool === 'horizontal-rule') && props.tools.includes('blocks')) return true;
+            if ((tool === 'link' || tool === 'image' || tool === 'table') && props.tools.includes('media')) return true;
+            if ((tool === 'undo' || tool === 'redo' || tool === 'clear') && props.tools.includes('history')) return true;
+            return false;
+        }
+
+        return true;
+    };
+
+    const isGroupVisible = (group: ToolbarGroupKey): boolean => {
+        return groupToolMap[group].some((tool) => isToolVisible(tool));
+    };
+
+    const hasVisibleGroupAfter = (group: ToolbarGroupKey): boolean => {
+        const index = groupKeys.indexOf(group);
+        if (index === -1) return false;
+        return groupKeys.slice(index + 1).some((nextGroup) => isGroupVisible(nextGroup));
+    };
 
     const toolbarRef = ref<HTMLElement | null>(null);
 

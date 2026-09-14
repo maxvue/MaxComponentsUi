@@ -123,7 +123,7 @@ export { default as MaxInputTextList } from './components/MaxInputTextList.vue';
 // como export estático ele entraria no bundle eager de TODOS os apps consumidores, mesmo sem uso.
 // Mesmo padrão de MaxPdfView/MaxLoaderAi (deps pesadas sob demanda).
 export const MaxInputMarkdown = defineAsyncComponent(() => import('./components/MaxInputMarkdown.vue'));
-export { default as MaxInputMarkdownToolbar } from './components/MaxInputMarkdownToolbar.vue';
+export { default as MaxInputMarkdownToolbar, type MarkdownToolbarTool } from './components/MaxInputMarkdownToolbar.vue';
 // Async: o MaxInputCode carrega o Monaco Editor sob demanda via @monaco-editor/loader
 export const MaxInputCode = defineAsyncComponent(() => import('./components/MaxInputCode.vue'));
 export { default as MaxInputCodeToolbar } from './components/MaxInputCodeToolbar.vue';

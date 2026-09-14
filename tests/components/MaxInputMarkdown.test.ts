@@ -64,7 +64,7 @@ function mountMarkdown(props: Record<string, any> = {}) {
                 MaxInputMarkdownToolbar: {
                     name: 'MaxInputMarkdownToolbar',
                     template: '<div class="toolbar-stub"></div>',
-                    props: ['editor']
+                    props: ['editor', 'hideTools', 'tools']
                 },
                 MaxIcon: {
                     template: '<span class="max-icon-stub"></span>',
@@ -436,5 +436,18 @@ describe('MaxInputMarkdown', () => {
         await wrapper.vm.$nextTick();
 
         expect(mockEditor.commands.setContent).toHaveBeenCalledWith('# Novo Conteúdo Externo');
+    });
+
+    it('repassa hideTools e tools para o MaxInputMarkdownToolbar', () => {
+        const wrapper = mountMarkdown({
+            modelValue: 'Teste',
+            hideTools: ['image', 'table'],
+            tools: ['bold', 'italic']
+        });
+
+        const toolbar = wrapper.findComponent({ name: 'MaxInputMarkdownToolbar' });
+        expect(toolbar.exists()).toBe(true);
+        expect(toolbar.props('hideTools')).toEqual(['image', 'table']);
+        expect(toolbar.props('tools')).toEqual(['bold', 'italic']);
     });
 });

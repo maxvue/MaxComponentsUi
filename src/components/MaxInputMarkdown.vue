@@ -2,7 +2,7 @@
     <InputBase v-bind="inputBaseProps" class="max-input-markdown">
         <template #default="{ inputAttrs }">
             <div v-bind="inputAttrs" class="max-input-markdown__editor-wrap" :class="{ 'max-input-markdown__editor-wrap--disabled': props.disabled }" >
-                <MaxInputMarkdownToolbar :editor="editor ?? null" />
+                <MaxInputMarkdownToolbar :editor="editor ?? null" :hide-tools="props.hideTools" :tools="props.tools" />
                 <EditorContent class="max-input-markdown__content" :style="{ minHeight: props.minHeight, maxHeight: props.maxHeight }" :editor="editor" />
             </div>
 
@@ -64,13 +64,15 @@
     import TableHeader from '@tiptap/extension-table-header';
     import TableCell from '@tiptap/extension-table-cell';
     import { Markdown } from 'tiptap-markdown';
-    import MaxInputMarkdownToolbar from './MaxInputMarkdownToolbar.vue';
+    import MaxInputMarkdownToolbar, { type MarkdownToolbarTool } from './MaxInputMarkdownToolbar.vue';
     import MaxPdfView from './MaxPdfView.vue';
     import MaxIcon from './MaxIcon.vue';
     import InputBase from './InputBase.vue';
     import { isSafeUrl } from '../helpers/isSafeUrl';
     import { useScrollLock } from '../helpers/useScrollLock';
     import { useFocusTrap } from '../helpers/useFocusTrap';
+
+    export type { MarkdownToolbarTool };
 
     const props = withDefaults(
         defineProps<{
@@ -93,6 +95,8 @@
             spellcheck?: boolean;
             minHeight?: string;
             maxHeight?: string;
+            hideTools?: MarkdownToolbarTool[];
+            tools?: MarkdownToolbarTool[];
             onImageUpload?: (file: File) => Promise<string>;
             onFileUpload?: (file: File) => Promise<string>;
         }>(),
@@ -103,6 +107,8 @@
             spellcheck: true,
             minHeight: '200px',
             maxHeight: '500px',
+            hideTools: undefined,
+            tools: undefined,
             onImageUpload: undefined,
             onFileUpload: undefined
         }

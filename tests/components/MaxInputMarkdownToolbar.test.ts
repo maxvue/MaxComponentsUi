@@ -295,4 +295,62 @@ describe('MaxInputMarkdownToolbar', () => {
 
         wrapper.unmount();
     });
+
+    describe('customização de ferramentas (hideTools e tools)', () => {
+        it('oculta botões individuais quando informados em hideTools', () => {
+            const editor = createFakeEditor();
+            const wrapper = mountToolbar({
+                editor,
+                hideTools: ['image', 'table', 'strike']
+            });
+
+            expect(wrapper.find('button[title="Imagem"]').exists()).toBe(false);
+            expect(wrapper.find('button[title="Inserir tabela"]').exists()).toBe(false);
+            expect(wrapper.find('button[title="Tachado"]').exists()).toBe(false);
+            expect(wrapper.find('button[title="Negrito (Ctrl+B)"]').exists()).toBe(true);
+            expect(wrapper.find('button[title="Link"]').exists()).toBe(true);
+        });
+
+        it('oculta grupos inteiros quando a chave de grupo é informada em hideTools', () => {
+            const editor = createFakeEditor();
+            const wrapper = mountToolbar({
+                editor,
+                hideTools: ['heading', 'history']
+            });
+
+            expect(wrapper.find('button[title="Título 1"]').exists()).toBe(false);
+            expect(wrapper.find('button[title="Título 2"]').exists()).toBe(false);
+            expect(wrapper.find('button[title="Título 3"]').exists()).toBe(false);
+            expect(wrapper.find('button[title="Desfazer (Ctrl+Z)"]').exists()).toBe(false);
+            expect(wrapper.find('button[title="Refazer (Ctrl+Y)"]').exists()).toBe(false);
+            expect(wrapper.find('button[title="Limpar formatação"]').exists()).toBe(false);
+            expect(wrapper.find('button[title="Negrito (Ctrl+B)"]').exists()).toBe(true);
+        });
+
+        it('exibe apenas as ferramentas permitidas quando tools é fornecido', () => {
+            const editor = createFakeEditor();
+            const wrapper = mountToolbar({
+                editor,
+                tools: ['bold', 'italic']
+            });
+
+            expect(wrapper.find('button[title="Negrito (Ctrl+B)"]').exists()).toBe(true);
+            expect(wrapper.find('button[title="Itálico (Ctrl+I)"]').exists()).toBe(true);
+            expect(wrapper.find('button[title="Sublinhado (Ctrl+U)"]').exists()).toBe(false);
+            expect(wrapper.find('button[title="Título 1"]').exists()).toBe(false);
+            expect(wrapper.find('button[title="Link"]').exists()).toBe(false);
+            expect(wrapper.findAll('.md-toolbar__divider').length).toBe(0);
+        });
+
+        it('não exibe divisores órfãos no final quando grupos subsequentes estão ocultos', () => {
+            const editor = createFakeEditor();
+            const wrapper = mountToolbar({
+                editor,
+                hideTools: ['heading', 'lists', 'blocks', 'media', 'history']
+            });
+
+            expect(wrapper.findAll('.md-toolbar__group').length).toBe(1);
+            expect(wrapper.findAll('.md-toolbar__divider').length).toBe(0);
+        });
+    });
 });
