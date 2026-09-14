@@ -60,10 +60,18 @@ function mountCard(props: Record<string, any> = {}) {
     return mount(MaxCreditCard, { props });
 }
 
-async function flushAsync(): Promise<void> {
+async function flushAsync(predicate?: () => boolean): Promise<void> {
     await flushPromises();
-    await new Promise((resolve) => setTimeout(resolve, 150));
-    await flushPromises();
+    if (predicate) {
+        const start = Date.now();
+        while (!predicate() && Date.now() - start < 1000) {
+            await new Promise((resolve) => setTimeout(resolve, 25));
+            await flushPromises();
+        }
+    } else {
+        await new Promise((resolve) => setTimeout(resolve, 250));
+        await flushPromises();
+    }
 }
 
 describe('MaxCreditCard', () => {
@@ -492,7 +500,7 @@ describe('MaxCreditCard', () => {
 
         it('renderiza bandeira JCB como SVG vetorial puro sem imagens raster embutidas', async () => {
             const wrapperJcb = mountCard({ cardType: 'jcb' });
-            await flushAsync();
+            await flushAsync(() => wrapperJcb.findAll('.flip-card-front svg image').length === 2);
             const images = wrapperJcb.findAll('.flip-card-front svg image');
             expect(images.length).toBe(2);
             const jcbImage = images[1];

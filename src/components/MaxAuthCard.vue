@@ -18,6 +18,7 @@
                         ref="emailInputRef"
                         class="auth-card-field"
                         v-model="email"
+                        :error="emailError || phoneError"
                         :aria-describedby="error ? 'max-auth-card-error' : undefined"
                         @keyup.enter="onEnter"
                     />
@@ -28,6 +29,7 @@
                         :label="t.email"
                         type="email"
                         v-model="email"
+                        :error="emailError"
                         icon="mdi:email-outline"
                         :aria-describedby="error ? 'max-auth-card-error' : undefined"
                         @keyup.enter="onEnter"
@@ -38,6 +40,7 @@
                         :label="t.password"
                         type="password"
                         v-model="password"
+                        :error="passwordError"
                         icon="mdi:lock-outline"
                         :aria-describedby="error ? 'max-auth-card-error' : undefined"
                         @keyup.enter="onEnter"
@@ -73,6 +76,7 @@
                             class="auth-card-field"
                             v-model="phone"
                             :label="t.phone"
+                            :error="phoneError"
                             :aria-describedby="error ? 'max-auth-card-error' : undefined"
                             @keyup.enter="onEnter"
                         />
@@ -88,6 +92,7 @@
                             :length="codeLength"
                             :integer-only="true"
                             :autofocus="true"
+                            :error="codeError"
                             :aria-describedby="error ? 'max-auth-card-error' : undefined"
                             @complete="onEnter"
                         />
@@ -259,8 +264,16 @@
             providers?: AuthProvider[];
             /** Estado de carregamento do botão entrar */
             loading?: boolean;
-            /** Mensagem de erro */
+            /** Mensagem de erro global */
             error?: string;
+            /** Erro específico para o campo de telefone */
+            phoneError?: string;
+            /** Erro específico para o campo de código OTP */
+            codeError?: string;
+            /** Erro específico para o campo de email */
+            emailError?: string;
+            /** Erro específico para o campo de senha */
+            passwordError?: string;
             /** Exibe o checkbox "lembrar-me" */
             showRemember?: boolean;
             /** Rota do "Cadastre-se" (vazio = link oculto) */

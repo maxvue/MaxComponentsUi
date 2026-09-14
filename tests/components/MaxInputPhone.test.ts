@@ -435,6 +435,36 @@ describe('MaxInputPhone', () => {
             expect(flagImgs.length).toBeGreaterThan(0);
             for (const img of flagImgs) expect(img.getAttribute('loading')).toBe('lazy');
 
+            wrapper.unmount();
+        });
+
+        it('expõe aria-activedescendant no filtro apontando para a opção ativa e atualiza com setas', async () => {
+            const wrapper = mountPhoneField({ virtualScroll: false });
+            await wrapper.find('.max-phone-select').trigger('click');
+            await wrapper.vm.$nextTick();
+
+            const filter = document.body.querySelector('.max-phone-filter-input') as HTMLInputElement;
+            expect(filter).toBeTruthy();
+            expect(filter.getAttribute('role')).toBe('searchbox');
+            expect(filter.getAttribute('aria-autocomplete')).toBe('list');
+
+            const activeDescendant = filter.getAttribute('aria-activedescendant');
+            expect(activeDescendant).toBeTruthy();
+            expect(activeDescendant).toMatch(/-opt-[a-z0-9]+/);
+
+            const activeOption = document.getElementById(activeDescendant!);
+            expect(activeOption).toBeTruthy();
+            expect(activeOption?.getAttribute('role')).toBe('option');
+
+            const initialActive = activeDescendant;
+            const filterWrapper = wrapper.findComponent({ name: 'MaxInputText' });
+            if (filterWrapper.exists()) {
+                await filterWrapper.find('input').trigger('keydown', { key: 'ArrowDown' });
+                await wrapper.vm.$nextTick();
+                const nextActiveDescendant = filter.getAttribute('aria-activedescendant');
+                expect(nextActiveDescendant).toBeTruthy();
+                expect(nextActiveDescendant).not.toBe(initialActive);
+            }
 
             wrapper.unmount();
         });

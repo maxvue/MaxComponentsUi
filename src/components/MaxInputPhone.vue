@@ -51,6 +51,10 @@
                         <input
                             ref="filter_el"
                             type="text"
+                            role="searchbox"
+                            aria-autocomplete="list"
+                            :aria-controls="listbox_id"
+                            :aria-activedescendant="activeDescendantId"
                             v-model="filter_text"
                             class="max-input-native max-phone-filter-input"
                             :placeholder="'Buscar país ou código'"
@@ -68,9 +72,11 @@
                             <div
                                 v-for="entry in visibleItems"
                                 :key="entry.item.sigla"
+                                :id="getOptionId(entry.item)"
                                 class="max-phone-select-option"
                                 role="option"
                                 :aria-selected="entry.item.sigla === country.sigla"
+                                :aria-label="`${entry.item.label} (+${entry.item.value})`"
                                 :class="{ 'is-focused': entry.index === focused_index, 'is-selected': entry.item.sigla === country.sigla }"
                                 :style="isVirtual ? { height: `${numericItemHeight}px` } : undefined"
                                 @click.stop="selectOption(entry.item)"
@@ -290,6 +296,16 @@
         );
     });
 
+    const getOptionId = (option: DDIFlag): string => `${listbox_id}-opt-${option.sigla.toLowerCase()}`;
+
+    const activeDescendantId = computed(() => {
+        if (!isOpen.value || focused_index.value < 0 || !filtered_options.value.length) return undefined;
+        const currentOption = filtered_options.value[focused_index.value];
+        if (!currentOption) return undefined;
+        const isRendered = visibleItems.value.some((entry) => entry.item.sigla === currentOption.sigla);
+        return isRendered ? getOptionId(currentOption) : undefined;
+    });
+
     const numericItemHeight = computed(() => {
         if (typeof props.itemHeight === 'number') return props.itemHeight;
         if (typeof props.itemHeight === 'string') {
@@ -422,11 +438,23 @@
         } else if (event.key === 'ArrowUp') {
             event.preventDefault();
             moveFocus(-1);
+        } else if (event.key === 'Home') {
+            event.preventDefault();
+            focused_index.value = 0;
+            nextTick(scrollFocusedIntoView);
+        } else if (event.key === 'End') {
+            event.preventDefault();
+            focused_index.value = Math.max(0, filtered_options.value.length - 1);
+            nextTick(scrollFocusedIntoView);
         } else if (event.key === 'Enter') {
             event.preventDefault();
             const option = filtered_options.value[focused_index.value];
             if (option) selectOption(option);
-        } else if (event.key === 'Escape' || event.key === 'Tab') close();
+        } else if (event.key === 'Escape') {
+            event.preventDefault();
+            close();
+            select_el.value?.focus();
+        } else if (event.key === 'Tab') close();
     }
 
     // Se o filtro encurta a lista, o índice focado pode ficar fora do intervalo.
