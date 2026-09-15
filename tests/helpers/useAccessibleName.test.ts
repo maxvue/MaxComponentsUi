@@ -182,7 +182,7 @@ describe('useAccessibleName (R08)', () => {
             expect(result).toBe('parte-1 parte-2');
         });
 
-        it('descarta IDs que apontam para elementos com texto vazio ou whitespace', () => {
+        it('preserva IDs existentes mesmo quando o rótulo ainda está vazio', () => {
             const elVazio = document.createElement('span');
             elVazio.id = 'id-vazio';
             elVazio.textContent = '    ';
@@ -193,11 +193,13 @@ describe('useAccessibleName (R08)', () => {
             elValido.textContent = 'Conteúdo';
             testContainer.appendChild(elValido);
 
-            expect(resolveAriaLabelledby('id-vazio id-valido')).toBe('id-valido');
-            expect(resolveAriaLabelledby('id-vazio')).toBeUndefined();
+            // A validade de um IDREF depende da existência do alvo, não do
+            // conteúdo instantâneo: o texto pode ser preenchido depois.
+            expect(resolveAriaLabelledby('id-vazio id-valido')).toBe('id-vazio id-valido');
+            expect(resolveAriaLabelledby('id-vazio')).toBe('id-vazio');
         });
 
-        it('descarta IDs cujos nós estão ocultos por CSS inline ou computado', () => {
+        it('preserva IDs que apontam para rótulos ocultos por CSS', () => {
             const elOculto = document.createElement('span');
             elOculto.id = 'id-oculto-css';
             elOculto.style.display = 'none';
@@ -209,11 +211,13 @@ describe('useAccessibleName (R08)', () => {
             elVisivel.textContent = 'Texto Visível';
             testContainer.appendChild(elVisivel);
 
-            expect(resolveAriaLabelledby('id-oculto-css id-visivel-css')).toBe('id-visivel-css');
-            expect(resolveAriaLabelledby('id-oculto-css')).toBeUndefined();
+            // O algoritmo AccName usa o conteúdo de referências explícitas mesmo
+            // que elas estejam ocultas. Removê-las altera o nome anunciado.
+            expect(resolveAriaLabelledby('id-oculto-css id-visivel-css')).toBe('id-oculto-css id-visivel-css');
+            expect(resolveAriaLabelledby('id-oculto-css')).toBe('id-oculto-css');
         });
 
-        it('descarta IDs cujos nós têm ancestrais com aria-hidden ou inert', () => {
+        it('preserva IDs cujos rótulos estão sob ancestrais aria-hidden ou inert', () => {
             const containerAriaHidden = document.createElement('div');
             containerAriaHidden.setAttribute('aria-hidden', 'true');
             const filhoOculto = document.createElement('span');
@@ -235,8 +239,8 @@ describe('useAccessibleName (R08)', () => {
             elValido.textContent = 'Válido';
             testContainer.appendChild(elValido);
 
-            expect(resolveAriaLabelledby('id-filho-aria-hidden id-filho-inert id-valido-fora')).toBe('id-valido-fora');
-            expect(resolveAriaLabelledby('id-filho-aria-hidden id-filho-inert')).toBeUndefined();
+            expect(resolveAriaLabelledby('id-filho-aria-hidden id-filho-inert id-valido-fora')).toBe('id-filho-aria-hidden id-filho-inert id-valido-fora');
+            expect(resolveAriaLabelledby('id-filho-aria-hidden id-filho-inert')).toBe('id-filho-aria-hidden id-filho-inert');
         });
 
         it('retorna undefined em ambiente sem document disponível', () => {
@@ -337,7 +341,7 @@ describe('useAccessibleName (R08)', () => {
         });
     });
 
-    describe('validateDialogA11y (axe-core compliance)', () => {
+    describe('validateDialogA11y (validação estrutural local)', () => {
         it('aprova diálogo com role="dialog" e nome acessível válido via aria-labelledby', () => {
             const titleEl = document.createElement('h2');
             titleEl.id = 'modal-title-valid';
@@ -379,7 +383,7 @@ describe('useAccessibleName (R08)', () => {
             expect(result.violations.some((v) => v.id === 'aria-dialog-name')).toBe(true);
         });
 
-        it('reprova diálogo que referencia elemento oculto', () => {
+        it('aceita diálogo nomeado por elemento oculto referenciado', () => {
             const hiddenTitle = document.createElement('div');
             hiddenTitle.id = 'titulo-oculto-axe';
             hiddenTitle.hidden = true;
@@ -392,8 +396,8 @@ describe('useAccessibleName (R08)', () => {
             testContainer.appendChild(dialog);
 
             const result = validateDialogA11y(dialog);
-            expect(result.passes).toBe(false);
-            expect(result.violations.some((v) => v.id === 'aria-valid-attr-value')).toBe(true);
+            expect(result.passes).toBe(true);
+            expect(result.accessibleName).toBe('Título Oculto');
         });
 
         it('reprova elemento com role inválido', () => {
@@ -592,7 +596,7 @@ describe('useAccessibleName (R08)', () => {
             extH.remove();
         });
 
-        it('MaxPopover descarta referência externa oculta e usa fallback seguro', async () => {
+        it('MaxPopover preserva referência externa oculta para manter o nome explícito', async () => {
             const hiddenH = document.createElement('h3');
             hiddenH.id = 'popover-hidden-ref';
             hiddenH.style.display = 'none';
@@ -614,8 +618,8 @@ describe('useAccessibleName (R08)', () => {
 
             const popoverEl = document.querySelector('.max-popover-dialog') as HTMLElement;
             expect(popoverEl).not.toBeNull();
-            expect(popoverEl.getAttribute('aria-labelledby')).not.toBe('popover-hidden-ref');
-            expect(computeAccessibleName(popoverEl)).toBe('Título Fallback');
+            expect(popoverEl.getAttribute('aria-labelledby')).toBe('popover-hidden-ref');
+            expect(computeAccessibleName(popoverEl)).toBe('Título Oculto');
 
             wrapper.unmount();
             hiddenH.remove();

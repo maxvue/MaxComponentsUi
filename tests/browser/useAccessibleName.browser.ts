@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { page } from 'vitest/browser';
+import axe from 'axe-core';
 import {
     resolveAriaLabelledby,
     isElementAccessible,
@@ -55,8 +56,10 @@ describe('useAccessibleName no Chromium Real (R08)', () => {
         expect(isElementAccessible(elVis)).toBe(false);
         expect(isElementAccessible(elVisible)).toBe(true);
 
+        // Referências explícitas de aria-labelledby preservam conteúdo oculto
+        // pelo algoritmo de nome acessível; CSS não pode apagar IDREFs.
         const resolved = resolveAriaLabelledby('el-css-display el-css-vis el-css-ok');
-        expect(resolved).toBe('el-css-ok');
+        expect(resolved).toBe('el-css-display el-css-vis el-css-ok');
     });
 
     it('avalia suporte nativo a atributo inert e ancestrais inert no Chromium', () => {
@@ -69,7 +72,7 @@ describe('useAccessibleName no Chromium Real (R08)', () => {
         container.appendChild(inertSection);
 
         expect(isElementAccessible(titleInert)).toBe(false);
-        expect(resolveAriaLabelledby('title-inside-inert')).toBeUndefined();
+        expect(resolveAriaLabelledby('title-inside-inert')).toBe('title-inside-inert');
     });
 
     it('resolve múltiplos IDREFs no Chromium real e valida via page.getByRole', async () => {
@@ -102,10 +105,57 @@ describe('useAccessibleName no Chromium Real (R08)', () => {
         const dialogLocator = page.getByRole('dialog', { name: 'Painel Administrativo Configurações de Acesso' });
         await expect.element(dialogLocator).toBeVisible();
 
-        // Validação axe
+        // Validação estrutural local; a auditoria axe-core é responsabilidade
+        // do gate browser após a dependência ser provisionada.
         const a11yResult = validateDialogA11y(dialog);
         expect(a11yResult.passes).toBe(true);
         expect(a11yResult.accessibleName).toBe('Painel Administrativo Configurações de Acesso');
+    });
+
+    it('executa axe-core real mantendo IDREFs ocultos e ancestrais no nome do diálogo', async () => {
+        const cssHidden = document.createElement('h2');
+        cssHidden.id = 'axe-css-hidden-title';
+        cssHidden.className = 'css-hidden-display';
+        cssHidden.textContent = 'Título oculto por CSS';
+        container.appendChild(cssHidden);
+
+        const inertAncestor = document.createElement('section');
+        inertAncestor.inert = true;
+        const nestedTitle = document.createElement('span');
+        nestedTitle.id = 'axe-inert-title';
+        nestedTitle.textContent = ' complemento em ancestral inerte';
+        inertAncestor.appendChild(nestedTitle);
+        container.appendChild(inertAncestor);
+
+        const dialog = document.createElement('div');
+        dialog.setAttribute('role', 'dialog');
+        dialog.setAttribute('aria-modal', 'true');
+        dialog.setAttribute('aria-labelledby', resolveAriaLabelledby('axe-css-hidden-title axe-inert-title')!);
+        dialog.textContent = 'Conteúdo do diálogo';
+        container.appendChild(dialog);
+
+        const result = await axe.run(container, {
+            runOnly: {
+                type: 'rule',
+                values: ['aria-dialog-name', 'aria-valid-attr-value']
+            }
+        });
+
+        expect(result.violations).toEqual([]);
+
+        // Mutação adversarial: o mesmo motor real deve acusar a perda de um
+        // nome acessível, sem recorrer ao validador local.
+        const action = document.createElement('button');
+        action.setAttribute('aria-label', 'Confirmar alterações');
+        container.appendChild(action);
+        action.removeAttribute('aria-label');
+        const mutated = await axe.run(container, {
+            runOnly: {
+                type: 'rule',
+                values: ['button-name']
+            }
+        });
+        expect(mutated.violations.some(({ id }) => id === 'button-name')).toBe(true);
     });
 
     it('descarta ID órfão e preserva conformidade WCAG do diálogo', () => {
