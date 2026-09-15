@@ -67,7 +67,10 @@ function isInsideElements(target: Node | null, elements: (Node | null | undefine
     return false;
 }
 
+let lastHandledKeyEvent: KeyboardEvent | null = null;
 const onGlobalKeydown = (e: KeyboardEvent) => {
+    if (lastHandledKeyEvent === e) return;
+    lastHandledKeyEvent = e;
     if (e.key !== 'Escape' || overlayStack.length === 0) return;
 
     // Apenas o overlay no TOPO da pilha fecha com Escape
@@ -127,6 +130,7 @@ const handleGlobalReposition = () => {
 
 const attachGlobalListeners = () => {
     if (isGlobalAttached || typeof window === 'undefined') return;
+    window.addEventListener('keydown', onGlobalKeydown);
     document.addEventListener('keydown', onGlobalKeydown);
     document.addEventListener('pointerdown', onGlobalPointerDown, true);
     document.addEventListener('click', onGlobalClick, true);
@@ -141,6 +145,7 @@ const detachGlobalListeners = () => {
         cancelAnimationFrame(globalRafId);
         globalRafId = null;
     }
+    window.removeEventListener('keydown', onGlobalKeydown);
     document.removeEventListener('keydown', onGlobalKeydown);
     document.removeEventListener('pointerdown', onGlobalPointerDown, true);
     document.removeEventListener('click', onGlobalClick, true);

@@ -341,8 +341,8 @@ describe('MaxInputDatePicker (Unit / WAI-ARIA, Multi-View, Range & Conditional L
 
     describe('5. Listener Global Condicional', () => {
         it('anexa listener no window somente com popup aberto e remove ao fechar', async () => {
-            const addSpy = vi.spyOn(window, 'addEventListener');
-            const removeSpy = vi.spyOn(window, 'removeEventListener');
+            const addSpy = vi.spyOn(document, 'addEventListener');
+            const removeSpy = vi.spyOn(document, 'removeEventListener');
 
             const wrapper = mountDatePicker();
             expect(addSpy.mock.calls.some((call) => call[0] === 'keydown')).toBe(false);;
@@ -354,7 +354,7 @@ describe('MaxInputDatePicker (Unit / WAI-ARIA, Multi-View, Range & Conditional L
             expect(addSpy.mock.calls.some((call) => call[0] === 'keydown')).toBe(true);;
 
             // Pressiona Escape no window
-            window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
             await wrapper.vm.$nextTick();
 
             expect((wrapper.vm as any).isOpen).toBe(false);
@@ -362,7 +362,7 @@ describe('MaxInputDatePicker (Unit / WAI-ARIA, Multi-View, Range & Conditional L
         });
 
         it('remove listener ao desmontar o componente aberto', async () => {
-            const removeSpy = vi.spyOn(window, 'removeEventListener');
+            const removeSpy = vi.spyOn(document, 'removeEventListener');
             const wrapper = mountDatePicker();
 
             await wrapper.find('input').trigger('click');

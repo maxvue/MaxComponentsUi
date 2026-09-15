@@ -1,4 +1,4 @@
-import { nextTick, type Ref, unref, onBeforeUnmount, getCurrentInstance } from 'vue';
+import { nextTick, type Ref, onBeforeUnmount, getCurrentInstance } from 'vue';
 
 export interface FocusTrapOptions {
     onEscape?: () => void;

@@ -185,7 +185,7 @@
      * Componente de seleção (dropdown).
      * Suporta opções simples, agrupadas e carregamento dinâmico via callback.
      */
-    import { ref, computed, watch, useAttrs, onBeforeUnmount, nextTick, type Ref } from 'vue';
+    import { ref, computed, watch, useAttrs, nextTick, type Ref } from 'vue';
     import InputBase from './InputBase.vue';
     import { SelectGroupOptions } from '../types';
     import { getColorFromVar, contrastColor, isBlank, watchDebounced } from '@maxvue/max-use';

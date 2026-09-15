@@ -222,15 +222,15 @@ describe('MaxTagSelect (Unit / WAI-ARIA & Keyboard Navigation)', () => {
 
     describe('Ciclo de Vida de Listeners de Teclado', () => {
         it('não associa keydown no window quando fechado', () => {
-            const addSpy = vi.spyOn(window, 'addEventListener');
+            const addSpy = vi.spyOn(document, 'addEventListener');
             mountTagSelect();
             expect(addSpy.mock.calls.some((call) => call[0] === 'keydown')).toBe(false);;
             addSpy.mockRestore();
         });
 
         it('associa keydown no window ao abrir e remove ao fechar', async () => {
-            const addSpy = vi.spyOn(window, 'addEventListener');
-            const removeSpy = vi.spyOn(window, 'removeEventListener');
+            const addSpy = vi.spyOn(document, 'addEventListener');
+            const removeSpy = vi.spyOn(document, 'removeEventListener');
 
             const wrapper = mountTagSelect();
             const trigger = wrapper.find('.max-select');
@@ -248,7 +248,7 @@ describe('MaxTagSelect (Unit / WAI-ARIA & Keyboard Navigation)', () => {
         });
 
         it('remove keydown no unmount se o menu estiver aberto', async () => {
-            const removeSpy = vi.spyOn(window, 'removeEventListener');
+            const removeSpy = vi.spyOn(document, 'removeEventListener');
 
             const wrapper = mountTagSelect();
             await wrapper.find('.max-select').trigger('click');

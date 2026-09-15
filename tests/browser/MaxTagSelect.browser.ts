@@ -1,7 +1,6 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { createApp, h, type App } from 'vue';
 import MaxTagSelect from '../../src/components/MaxTagSelect.vue';
-import { page } from '@vitest/browser/context';
 
 let activeApp: App | null = null;
 let hostElement: HTMLElement | null = null;
@@ -82,35 +81,45 @@ describe('MaxTagSelect no Chromium (F16 / E06-05, E06-06)', () => {
         const { host } = await mountTagSelect();
 
         // Open
-        const trigger = host.querySelector('.max-tag-select') as HTMLElement;
+        const trigger = host.querySelector('.max-select') as HTMLElement;
+        expect(trigger).not.toBeNull();
         trigger.click();
         await nextFrame();
+        await nextFrame();
 
-        const listbox = document.querySelector('.max-list-box-virtual-list') as HTMLElement;
+        const listbox = document.querySelector('.max-select-list-container') as HTMLElement;
         expect(listbox).not.toBeNull();
 
         // Items rendered are limited (virtualized)
-        let items = document.querySelectorAll('.max-list-box-item');
+        let items = document.querySelectorAll('.max-select-option');
         expect(items.length).toBeLessThan(100); // Because total is 1000
 
         // Scroll
         listbox.scrollTop = 5000;
         listbox.dispatchEvent(new Event('scroll'));
         await nextFrame();
+        await nextFrame();
 
         // Check computed CSS of an item
-        const item = document.querySelector('.max-list-box-item') as HTMLElement;
+        const item = document.querySelector('.max-select-option') as HTMLElement;
         expect(item).not.toBeNull();
 
-        // Test Default state
-        let comp = window.getComputedStyle(item);
-        let bg = parseRGB(comp.backgroundColor);
-        let color = parseRGB(comp.color);
-        // Expect standard contrast
-        expect(getContrast(bg, color)).toBeGreaterThanOrEqual(4.5);
+        const label = (item.querySelector('.max-tag-select-option-label') ?? item) as HTMLElement;
 
-        // Simulate Hover state using page API (if using @vitest/browser/context)
-        // Note: vitest browser page API might not be fully standard, let's use element class if possible, or just skip manual hover interaction if complex and trust the component class state.
-        // We will just dispatch mouseenter / mouseleave if that triggers a class. If it's pure CSS :hover, getComputedStyle won't catch it unless we force it or use page.hover().
+        // Test Default state
+        let compLabel = window.getComputedStyle(label);
+        let compItem = window.getComputedStyle(item);
+        let compList = window.getComputedStyle(listbox);
+
+        let bgStr = compItem.backgroundColor !== 'rgba(0, 0, 0, 0)' && compItem.backgroundColor !== 'transparent'
+            ? compItem.backgroundColor
+            : compList.backgroundColor !== 'rgba(0, 0, 0, 0)' && compList.backgroundColor !== 'transparent'
+                ? compList.backgroundColor
+                : 'rgb(255, 255, 255)';
+
+        let bg = parseRGB(bgStr);
+        let color = parseRGB(compLabel.color);
+        // Expect standard accessible contrast >= 4.5:1
+        expect(getContrast(bg, color)).toBeGreaterThanOrEqual(4.5);
     });
 });

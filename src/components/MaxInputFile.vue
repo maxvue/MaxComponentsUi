@@ -111,7 +111,7 @@
     }>();
 
     const mainDivRef = ref<HTMLLabelElement | null>(null);
-    const isFocused = ref(false);
+    const _isFocused = ref(false);
     const nativeInputRef = ref<HTMLInputElement | null>(null);
     const dropZoneRef = ref<HTMLDivElement | null>(null);
     const temp_value = ref<File[]>([...props.modelValue]);

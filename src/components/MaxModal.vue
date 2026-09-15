@@ -408,10 +408,7 @@
     const title_id = computed(() => (!props.noHeader ? 'max-modal-title-' + id.value : undefined));
 
     const computedAriaLabelledby = computed(() => {
-        if (props.ariaLabelledby) {
-            const resolved = resolveAriaLabelledby(props.ariaLabelledby);
-            if (resolved) return resolved;
-        }
+        if (props.ariaLabelledby) return resolveAriaLabelledby(props.ariaLabelledby);
         if (props.noHeader) return undefined;
         if (slots.header) {
             const slotText = getSlotText(slots.header);

@@ -162,7 +162,7 @@ describe('MaxUserSection - WAI-ARIA e Teclado (Etapa 10)', () => {
         await wrapper.vm.$nextTick();
         expect(document.querySelector('.max-user-section-overlay')).not.toBeNull();
 
-        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
         await wrapper.vm.$nextTick();
 
         expect(document.querySelector('.max-user-section-overlay')).toBeNull();
@@ -170,8 +170,8 @@ describe('MaxUserSection - WAI-ARIA e Teclado (Etapa 10)', () => {
     });
 
     it('registra ouvinte global de keydown apenas enquanto o menu estiver aberto', async () => {
-        const addSpy = vi.spyOn(window, 'addEventListener');
-        const removeSpy = vi.spyOn(window, 'removeEventListener');
+        const addSpy = vi.spyOn(document, 'addEventListener');
+        const removeSpy = vi.spyOn(document, 'removeEventListener');
 
         const wrapper = mountSection();
 

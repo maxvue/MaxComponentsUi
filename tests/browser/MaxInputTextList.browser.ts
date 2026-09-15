@@ -85,7 +85,7 @@ describe('MaxInputTextList no Chromium (E11-01)', () => {
 
                 // Pega o primeiro e o último renderizado
                 const firstRendered = renderedNumbers[0] as HTMLElement;
-                const lastRendered = renderedNumbers[renderedNumbers.length - 1] as HTMLElement;
+                const _lastRendered = renderedNumbers[renderedNumbers.length - 1] as HTMLElement;
 
                 // Check that they are positioned inside the viewport (they use absolute/translate)
                 const firstRect = firstRendered.getBoundingClientRect();

@@ -444,8 +444,8 @@ describe('MaxTagSelect', () => {
 
     describe('Eliminação do Listener Global Permanente', () => {
         it('registra o listener de keydown somente quando aberto e remove ao fechar', async () => {
-            const addSpy = vi.spyOn(window, 'addEventListener');
-            const removeSpy = vi.spyOn(window, 'removeEventListener');
+            const addSpy = vi.spyOn(document, 'addEventListener');
+            const removeSpy = vi.spyOn(document, 'removeEventListener');
 
             const wrapper = mountTagSelect();
             expect(addSpy).not.toHaveBeenCalledWith('keydown', expect.any(Function));
@@ -463,7 +463,7 @@ describe('MaxTagSelect', () => {
         });
 
         it('remove o listener de keydown ao desmontar se estava aberto', async () => {
-            const removeSpy = vi.spyOn(window, 'removeEventListener');
+            const removeSpy = vi.spyOn(document, 'removeEventListener');
             const wrapper = mountTagSelect();
 
             await wrapper.find('.max-select').trigger('click');
