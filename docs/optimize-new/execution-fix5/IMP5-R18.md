@@ -11,9 +11,13 @@ O inventário deixou de ser suficiente por si só: foi incluído um teste de nav
 
 O teste também monta `TransitionFade` e `MaxTransitionUp` reais, espera o término de entrada/saída entregue pelo Chromium e confirma a remoção dos nós sob `reduce`.
 
-## Limite identificado pela refutação
+## Limite identificado pela refutação e diferença causal do baseline
 
-Este retry ainda não atende à condição de aceite integral: os 59 SFCs não são todos montados individualmente, e o commit de referência `aac16bca` já contém as mesmas regras de motion relevantes. Portanto não há caso comportamental honesto que falhe naquele baseline e passe neste HEAD sem introduzir uma mudança de produto não motivada pelo achado. O papel deve permanecer aberto até que a coordenação decida entre reclassificar R18 como preservação já existente no baseline ou autorizar uma nova correção concreta.
+Este retry ainda não atende à condição de aceite integral: os 59 SFCs não são todos montados individualmente. A tentativa de montar o inventário inteiro com uma fixture genérica foi descartada, pois falha legitimamente por contratos reais de produto (por exemplo, `MaxAccordionItem` exige `MaxAccordion`, `MaxTabList` exige `MaxTabs`, `MaxApp` exige rota/router, e componentes de layout iniciam stores/rotas Ziggy). Suprimir essas dependências com stubs faria a prova ser sintética e não resolveria a objeção de REV5-R18.
+
+Também não existe uma diferença causal de produto atribuível a R18 contra `aac16bca`: `git show aac16bca:src/themes/_motion.scss` comparado com o HEAD retorna igualdade (`cmp` status `0`), enquanto o teste Chromium novo não existe no baseline (`git cat-file -e aac16bca:tests/browser/motionReduced.browser.ts` retorna status `128`). Logo, fazer o teste novo falhar no baseline provaria apenas a ausência do teste, não uma regressão/correção de comportamento. Não foi alterado CSS nem criado baseline artificial para fabricar esse resultado.
+
+O papel deve permanecer aberto até haver fixtures reais, por família, que montem cada SFC com seus pais, providers, stores, rotas e props válidas — ou até a coordenação reclassificar o requisito como preservação de comportamento já presente no baseline.
 
 ## Comando de validação
 

@@ -82,3 +82,41 @@ exit 0
 ```
 
 **IMPLEMENTADO — aguarda nova revalidação independente do REV5-R04.**
+
+## Retry de autofill por CDP e submit especializado — 2026-09-15
+
+O teste de integração `tests/integration/r04ChromiumAutofill.test.ts` monta um
+`MaxInputText` real em um servidor Vite e tenta o caminho oficial do Chrome
+DevTools Protocol: `Autofill.enable` seguido de `Autofill.trigger`. O runtime
+fornecido é `HeadlessChrome/153.0.8010.12`; ele responde
+`Protocol error (Autofill.enable): 'Autofill.enable' wasn't found`. Embora as
+declarações do Playwright instalado contenham `Autofill.enable`,
+`Autofill.setAddresses` e `Autofill.trigger`, esse domínio não é exposto pelo
+Chromium headless disponível. O teste registra essa capacidade ausente de modo
+assertivo; ele **não** a contabiliza como cobertura de autofill.
+
+Assim, não é possível obter neste ambiente a evidência exigida de um perfil
+salvo/preenchimento real de Chromium, e `userEvent.fill` continua corretamente
+classificado somente como interação de digitação. A pendência de autofill real
+permanece aberta até haver Chromium com o domínio Autofill habilitado (ou uma
+política de produto que forneça um perfil real controlável).
+
+Também foram preenchidas as duas lacunas independentes da matriz Chromium:
+
+- `MaxColorPicker` agora prova o valor `#000000` presente em `FormData` e
+  `checkValidity() === true`, por meio do seu `input[type=color]` nativo;
+- `MaxInputToggle` é marcado com clique real no checkbox visível, depois prova
+  `FormData` positivo e validade nativa, sem escrever `.checked`.
+
+```text
+$ npx vitest run tests/integration/r04ChromiumAutofill.test.ts
+Test Files  1 passed (1)
+Tests  1 passed (1)
+
+$ npx vitest run --config vitest.browser.config.ts tests/browser/InputBaseForms.browser.ts
+Test Files  1 passed (1)
+Tests  2 passed (2)
+```
+
+**BLOQUEIO TÉCNICO VERIFICADO — não declarar R04 aceito enquanto o autofill
+real não puder ser executado.**

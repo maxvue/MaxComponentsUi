@@ -5,10 +5,11 @@ import { fileURLToPath } from 'node:url';
 
 const DIST_DIR = resolve(fileURLToPath(new URL('../playground/dist', import.meta.url)));
 const LIMITS = Object.freeze({
-    // Menor que o baseline R19 (2.507.440 B / 814.514 B gzip), para impedir
-    // que uma regressão volte a aceitar o bundle original.
-    rawBytes: 2_500_000,
-    gzipBytes: 814_000
+    // Baseline R19: 2.507.440 B / 814.514 B gzip. O playground foi separado
+    // em cenários lazy e o maior chunk efetivo agora precisa permanecer pelo
+    // menos 70% menor que aquele baseline, não apenas alguns bytes abaixo.
+    rawBytes: 750_000,
+    gzipBytes: 245_000
 });
 
 function listJavaScriptFiles(directory) {

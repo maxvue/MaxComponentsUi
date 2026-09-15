@@ -143,7 +143,7 @@ describe('InputBase no Chromium (R04 / E03-02)', () => {
         expect(families).toHaveLength(25);
 
         for (const family of families) {
-            const modelValue = await mountFamily(family);
+            await mountFamily(family);
             const form = host!.querySelector('form')!;
             const wrapper = host!.querySelector('.max-input-main-div, .max-input-toggle')!;
             const label = host!.querySelector('label')!;
@@ -186,12 +186,23 @@ describe('InputBase no Chromium (R04 / E03-02)', () => {
                 expect(form.checkValidity(), `${family.name}: required é validável pelo browser`).toBe(true);
             }
 
+            if (family.name === 'MaxColorPicker') {
+                // `input[type=color]` sempre possui uma cor válida; a prova
+                // positiva é a serialização nativa, não uma atribuição manual.
+                expect(new FormData(form).get(`field-${family.name}`), `${family.name}: serializa a cor nativa`).toBe('#000000');
+                expect(form.checkValidity(), `${family.name}: participa da validação nativa`).toBe(true);
+            }
+
             if (family.nativeFormOwner) {
                 // A associação não é uma sonda: o owner nativo é a origem de
                 // FormData e da constraint validation nos controles compostos.
-                if (formOwner.type === 'checkbox') formOwner.checked = true;
+                if (family.name === 'MaxInputToggle') {
+                    await userEvent.click(owner);
+                    await nextFrame();
+                } else if (formOwner.type === 'checkbox') formOwner.checked = true;
                 else formOwner.value = 'valor-nativo';
                 expect(new FormData(form).has(`field-${family.name}`), `${family.name}: participa do FormData pelo owner nativo`).toBe(true);
+                if (family.name === 'MaxInputToggle') expect(new FormData(form).get(`field-${family.name}`), `${family.name}: Toggle marcado serializa valor`).not.toBeNull();
                 expect(form.checkValidity(), `${family.name}: required é validável pelo browser`).toBe(true);
             }
 
