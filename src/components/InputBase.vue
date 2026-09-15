@@ -294,6 +294,7 @@
         const result: Record<string, any> = {};
         for (const [key, value] of Object.entries(attrs)) {
             if (key === 'class' || key === 'style') continue;
+            if (value === undefined) continue;
             if (!isControlAttribute(key)) result[key] = value;
 
         }
@@ -302,7 +303,7 @@
 
     const controlAttrsFromAttrs = computed(() => {
         const result: Record<string, any> = {};
-        for (const [key, value] of Object.entries(attrs)) if (isControlAttribute(key) && key !== 'id' && key !== 'aria-describedby') result[key] = value;
+        for (const [key, value] of Object.entries(attrs)) if (value !== undefined && isControlAttribute(key) && key !== 'id' && key !== 'aria-describedby') result[key] = value;
 
 
         return result;

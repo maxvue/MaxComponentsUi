@@ -1,4 +1,5 @@
 import { expect, vi, beforeEach, afterEach } from 'vitest';
+import { setImmediate as waitForImmediate } from 'node:timers/promises';
 
 export interface SpyTracker {
     method: 'warn' | 'error';
@@ -254,7 +255,13 @@ export function initConsolePolicy() {
         testAllowlist = [];
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        // Dá uma volta ao event loop antes de encerrar o teste. Assim, erros
+        // agendados pelo lifecycle do componente não escapam para a próxima
+        // execução nem são apagados pelo beforeEach seguinte.
+        // Usa o timer nativo: testes com vi.useFakeTimers() não podem deixar
+        // o teardown pendurado.
+        await waitForImmediate();
         verifyConsoleClean();
     });
 }

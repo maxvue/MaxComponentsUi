@@ -100,5 +100,34 @@ As 13 falhas restantes pertencem aos blocos R04, R08, F15, R17, R21 e R24.
 Não houve alteração em `package.json`, lockfile ou CI. Não houve commit nesta
 revalidação, conforme solicitado.
 
+## Segunda revalidação após REV5-R02
+
+A primeira medida foi substituída: a suíte não mocka mais a store. A correção
+de lifecycle está em `useListMenusStore`: sem `routeMenus` configurada, ela
+expõe uma ref vazia e não instancia `useRefCachedApi`, portanto não dispara
+uma requisição relativa ao documento durante a montagem real do menu móvel.
+O teste configura explicitamente a ausência de endpoint e monta o componente
+real.
+
+A política também aguarda um turno nativo (`node:timers/promises`) no
+`afterEach`, sem ficar bloqueada por `vi.useFakeTimers()`. O caso adversarial
+agenda um warning após o corpo do teste; seu próprio teardown o encontra e o
+rejeita depois de o spy já ter sido consumido.
+
+Execuções globais de `2026-09-15T15:55:19-03:00` a
+`2026-09-15T15:57:18-03:00`:
+
+```text
+npm run test                         # 2x
+npm run test:coverage                # 2x
+
+Todas: 3.690/3.703 testes passaram; 13 falhas restantes são de owners
+paralelos. Nenhuma saída contém AbortError, EPROTO, DOMException ou DEBUG.
+```
+
+As quatro execuções retornam código 1 exclusivamente pelas 13 falhas alheias
+existentes; a evidência de estabilidade de R02 está limpa. Nenhum arquivo de
+pacote ou CI foi alterado e não houve commit.
+
 - Fim: `2026-09-15T14:21:01-03:00`
 - HEAD de validação: `31bbd8514e98f3ad83221828e192cdbaffd6d90a`
