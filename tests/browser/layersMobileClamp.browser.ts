@@ -4,6 +4,7 @@ import { createApp, h, ref, nextTick, type App } from 'vue';
 import { createPinia } from 'pinia';
 import MaxPopover from '../../src/components/MaxPopover.vue';
 import MaxPopoverConfirm from '../../src/components/MaxPopoverConfirm.vue';
+import MaxBaseOverlay from '../../src/components/base/MaxBaseOverlay.vue';
 import { useConfirmStore } from '../../src/stores/useConfirm.Store';
 import '../../src/themes/tokens.scss';
 import '../../src/themes/params.scss';
@@ -36,6 +37,44 @@ afterEach(async () => {
 });
 
 describe('Camadas Semânticas, Z-Index e Clamp Responsivo no Chromium Real (R09/F11)', () => {
+    it('mantém MaxBaseOverlay visível, rolável e atingível em 280px', async () => {
+        if (typeof page?.viewport === 'function') await page.viewport(280, 320);
+
+        hostElement = document.createElement('div');
+        document.body.appendChild(hostElement);
+        const visible = ref(true);
+        const target = document.createElement('button');
+        target.textContent = 'Gatilho';
+        target.style.position = 'fixed';
+        target.style.right = '0';
+        target.style.bottom = '0';
+        document.body.appendChild(target);
+
+        const app = createApp({
+            setup: () => () => h(MaxBaseOverlay, {
+                visible: visible.value,
+                target,
+                'onUpdate:visible': (value: boolean) => { visible.value = value; }
+            }, {
+                default: () => h('div', { style: 'width: 400px; height: 400px;', 'data-testid': 'conteudo-overlay' }, 'Conteúdo extenso')
+            })
+        });
+        activeApp = app;
+        app.mount(hostElement);
+        await settle();
+
+        const panel = document.querySelector('.max-base-overlay') as HTMLElement;
+        const rect = panel.getBoundingClientRect();
+        expect(rect.left).toBeGreaterThanOrEqual(0);
+        expect(rect.right).toBeLessThanOrEqual(280);
+        expect(rect.top).toBeGreaterThanOrEqual(0);
+        expect(rect.bottom).toBeLessThanOrEqual(320);
+        expect(getComputedStyle(panel).overflow).toBe('auto');
+        expect(panel.contains(document.elementFromPoint(rect.left + 4, rect.top + 4))).toBe(true);
+
+        target.remove();
+    });
+
     it('adapta e faz clamp de MaxPopover em viewport estreito de 280px sem transbordar', async () => {
         if (typeof page?.viewport === 'function') await page.viewport(280, 653);
 

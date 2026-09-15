@@ -38,6 +38,18 @@ describe('MaxMaps.vue', () => {
         expect(wrapper.find('.mapa').exists()).toBe(false);
     });
 
+    it.each([
+        { latitude: 0, longitude: -46.6 },
+        { latitude: -23.5, longitude: 0 },
+        { latitude: 0, longitude: 0 }
+    ])('aceita coordenadas zero e preserva a alternativa acessível: %o', async (modelValue) => {
+        const wrapper = mount(MaxMaps, { props: { modelValue, apiKey: 'chave-de-teste' } });
+
+        expect(wrapper.find('.mapa').exists()).toBe(true);
+        expect(wrapper.find('.map-accessible-controls').exists()).toBe(true);
+        expect(wrapper.find('.map-accessible-summary').text()).toContain(`Latitude ${modelValue.latitude.toFixed(5)}`);
+    });
+
     it('deve atualizar modelValue quando as coordenadas mudam', async () => {
         const wrapper = mount(MaxMaps, {
             props: {
@@ -187,4 +199,3 @@ describe('MaxMaps.vue', () => {
         expect(wrapper.vm.coordinates.longitude).toBeCloseTo(currentLng + 0.0005, 5);
     });
 });
-

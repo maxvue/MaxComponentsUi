@@ -20,6 +20,7 @@
 <script setup lang="ts">
     import { computed, nextTick, onMounted, ref, toRef, watch } from 'vue';
     import { useOutsidePointer } from '../../helpers/useOutsidePointer';
+    import { resolveSafeAreaInsets } from '../../composables/useActiveOverlayPosition';
 
     const props = withDefaults(
         defineProps<{
@@ -138,22 +139,33 @@
         const vv = typeof window !== 'undefined' ? window.visualViewport : null;
         const vh = vv ? vv.height : window.innerHeight;
         const vw = vv ? vv.width : window.innerWidth;
+        const viewportTop = vv?.offsetTop ?? 0;
+        const viewportLeft = vv?.offsetLeft ?? 0;
+        const safeArea = resolveSafeAreaInsets();
 
-        const pHeight = p.height || panelRef.value.offsetHeight || 200;
-        const spaceBelow = vh - t.bottom;
-        const spaceAbove = t.top;
+        const minTop = viewportTop + Math.max(8, safeArea.top + 8);
+        const maxBottom = Math.max(minTop, viewportTop + vh - safeArea.bottom - 8);
+        const minLeft = viewportLeft + Math.max(8, safeArea.left + 8);
+        const maxRight = Math.max(minLeft, viewportLeft + vw - safeArea.right - 8);
+        const pHeight = Math.min(p.height || panelRef.value.offsetHeight || 200, maxBottom - minTop);
+        const pWidth = Math.min(p.width || panelRef.value.offsetWidth || t.width || 200, maxRight - minLeft);
+        const spaceBelow = maxBottom - t.bottom;
+        const spaceAbove = t.top - minTop;
         const openUp = spaceBelow < pHeight && spaceAbove > spaceBelow;
         const rawTop = openUp ? t.top - pHeight - props.offset : t.bottom + props.offset;
-        const top = Math.max(8, Math.min(rawTop, vh - pHeight - 8));
+        const top = Math.max(minTop, Math.min(rawTop, maxBottom - pHeight));
 
-        let left = props.align === 'right' ? t.right - p.width : t.left;
-        left = Math.max(8, Math.min(left, vw - p.width - 8));
+        let left = props.align === 'right' ? t.right - pWidth : t.left;
+        left = Math.max(minLeft, Math.min(left, maxRight - pWidth));
 
         panelStyle.value = {
             position: 'fixed',
             top: `${top}px`,
             left: `${left}px`,
             minWidth: props.matchTargetWidth ? `${t.width}px` : undefined,
+            maxWidth: `${Math.max(0, maxRight - minLeft)}px`,
+            maxHeight: `${Math.max(0, maxBottom - minTop)}px`,
+            overflow: 'auto',
             zIndex: zIndex.value
         };
     };

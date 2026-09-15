@@ -293,6 +293,40 @@ describe('MaxBaseOverlay', () => {
         t.remove();
     });
 
+    it('respeita offset da visualViewport, safe-area e scroll em 280px sob zoom 200%', async () => {
+        const originalVV = window.visualViewport;
+        const mockVisualViewport = {
+            width: 280, height: 200, offsetLeft: 40, offsetTop: 300, scale: 2,
+            addEventListener: vi.fn(), removeEventListener: vi.fn()
+        };
+        Object.defineProperty(window, 'visualViewport', { value: mockVisualViewport, configurable: true });
+        vi.spyOn(window, 'getComputedStyle').mockReturnValue({
+            getPropertyValue: (prop: string) => ({ '--safe-area-top': '10px', '--safe-area-right': '12px', '--safe-area-bottom': '16px', '--safe-area-left': '8px' }[prop] ?? '0px')
+        } as any);
+        const t = makeTarget({ top: 402, bottom: 422, left: 276, right: 316, width: 40, height: 20 });
+        wrapper = mount(MaxBaseOverlay, { props: { visible: true, target: t } });
+        await settle();
+        mockRect(getPanel(), { width: 180, height: 180 });
+        mockVisualViewport.offsetTop = 320; // scroll da viewport visual
+        window.dispatchEvent(new Event('resize'));
+        await settle();
+
+        const panel = getPanel();
+        const left = Number.parseInt(panel.style.left, 10);
+        const top = Number.parseInt(panel.style.top, 10);
+        expect(left).toBe(120);
+        expect(top).toBe(338);
+        expect(left).toBeGreaterThanOrEqual(56);
+        expect(left + 180).toBeLessThanOrEqual(300);
+        expect(top).toBeGreaterThanOrEqual(338);
+        expect(top + 158).toBeLessThanOrEqual(496);
+        expect(panel.style.maxWidth).toBe('244px');
+        expect(panel.style.maxHeight).toBe('158px');
+
+        t.remove();
+        Object.defineProperty(window, 'visualViewport', { value: originalVV, configurable: true });
+    });
+
     it('clamp de z-index: limita layerOffset para não invadir outras faixas de camadas', async () => {
         wrapper = mount(MaxBaseOverlay, { props: { visible: true, target, layer: 'dropdown', layerOffset: 5000 } });
         await settle();

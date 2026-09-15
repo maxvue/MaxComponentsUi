@@ -20,7 +20,7 @@ describe('REV-R12 — Testes Adversariais MaxMaps', () => {
      * os controles acessíveis (.map-accessible-controls) também NÃO aparecem.
      * Isso viola o requisito R12 de alternativa sempre perceptível ao foco.
      */
-    it('[ADVERSARIAL MAPS-1] controles acessíveis ficam OCULTOS quando coordenadas são 0,0 (possível regressão acessibilidade)', async () => {
+    it('[ADVERSARIAL MAPS-1] aceita 0,0 e mantém controles acessíveis operáveis', async () => {
         // Coordenadas nulas/zero — caso típico de "mapa em branco"
         const wrapper = mount(MaxMaps, {
             props: { modelValue: { latitude: 0, longitude: 0 } }
@@ -29,16 +29,10 @@ describe('REV-R12 — Testes Adversariais MaxMaps', () => {
         // O componente inteiro não renderiza quando lat=0 e lng=0
         const controls = wrapper.find('.map-accessible-controls');
 
-        // DOCUMENTAÇÃO: Este teste evidencia que os controles acessíveis ficam
-        // indisponíveis quando lat=0, lng=0. Usuário de teclado não tem como
-        // inserir coordenadas iniciais via interface acessível neste estado.
-        // Esta é uma limitação funcional identificada pela auditoria REV-R12.
-
-        // O comportamento atual: controles NÃO existem em 0,0
-        // (não necessariamente um bug crítico, mas uma limitação documentada)
         const componentRendered = wrapper.find('.map-main-div').exists();
-        expect(componentRendered).toBe(false);
-        expect(controls.exists()).toBe(false);
+        expect(componentRendered).toBe(true);
+        expect(controls.exists()).toBe(true);
+        expect(wrapper.find('.map-accessible-summary').text()).toContain('Latitude 0.00000, Longitude 0.00000');
     });
 
     /**

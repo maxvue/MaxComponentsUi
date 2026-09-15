@@ -1,6 +1,6 @@
 <template>
-    <div class="max-maps map-main-div" v-if="coordinates.latitude !== 0 && coordinates.longitude !== 0">
-        <div class="mapa" ref="mapDiv" v-if="effectiveApiKey">
+    <div class="max-maps map-main-div">
+        <div class="mapa" ref="mapDiv" v-if="hasCoordinates && effectiveApiKey">
             <GoogleMap :api-key="effectiveApiKey" class="google-map-canvas" :center="center" :zoom="zoom" ref="mapRef" :mapTypeId="props.mapTypeId" :mapId="effectiveMapId" v-if="isMounted">
                 <AdvancedMarker :options="marker_options" :pin-options="pinOptions" ref="markerRef" @dragend="onDrag" />
             </GoogleMap>
@@ -78,6 +78,12 @@
     const effectiveApiKey = computed(() => props.apiKey || getMaxAppConfig().googleMapsApiKey || '');
     const effectiveMapId = computed(() => props.mapId || getMaxAppConfig().googleMapsMapId || undefined);
 
+    // Zero é uma coordenada válida: equador e meridiano de Greenwich não podem
+    // ser confundidos com a ausência de uma posição.
+    const hasCoordinates = computed(() => props.modelValue !== null
+        && Number.isFinite(coordinates.value.latitude)
+        && Number.isFinite(coordinates.value.longitude));
+
     const coordinates = ref({ latitude: Number(props.modelValue?.latitude ?? 0), longitude: Number(props.modelValue?.longitude ?? 0) });
 
     const emit = defineEmits<{
@@ -92,7 +98,7 @@
         () => {
             const lat = Number(props.modelValue?.latitude ?? 0);
             const lng = Number(props.modelValue?.longitude ?? 0);
-            const is_valid = !isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0;
+            const is_valid = !isNaN(lat) && !isNaN(lng);
             const is_different = coordinates.value.latitude !== lat || coordinates.value.longitude !== lng;
 
             if (is_valid && is_different) coordinates.value = { latitude: lat, longitude: lng };

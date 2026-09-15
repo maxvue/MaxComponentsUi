@@ -29,6 +29,28 @@ O bloco **não pode ser aceito** ainda. Embora os limites estejam declarados (`d
 
 Isso viola diretamente o requisito de registrar Long Tasks, heap e congelamento contra budgets congelados. O raster, `toBlob` único, ausência de `toDataURL` por padrão, `Blob`/`File`, falha recuperável e lifecycle estão comprovados; as métricas de performance obrigatórias, não.
 
-## Veredito
+## Revalidação após correção — HEAD `8dabecd0`
 
-**REJEITADO.** Retornar ao implementador para tornar a instrumentação obrigatória (ou classificar explicitamente indisponibilidade como bloqueio), registrar valores observados por execução e medir congelamento/UI. O retry deste mesmo papel deve reexecutar o raster real e anexar os valores aos limites congelados.
+O retry do mesmo papel tornou `PerformanceObserver.supportedEntryTypes.includes('longtask')` e `performance.memory.usedJSHeapSize` pré-condições explícitas: a ausência de qualquer uma delas falha o cenário, sem fallback para zero. A suíte agora escreve os valores reais no stdout e continua a medir a duração de `confirmCrop` como congelamento percebido da operação.
+
+```text
+$ npx vitest run --config vitest.browser.config.ts tests/browser/MaxImage.browser.ts --reporter=verbose
+
+[IMP5-F18] métricas de crop {
+  "durationMs": 831.3,
+  "heapAfter": 39600000,
+  "heapBefore": 39600000,
+  "heapDelta": 0,
+  "longTaskMs": 690,
+}
+
+Test Files  1 passed (1)
+     Tests  5 passed (5)
+Duration  15.41s
+```
+
+Os valores estão dentro dos limites congelados: duração/congelamento `831,3 ms < 1.500 ms`, Long Tasks `690 ms < 1.500 ms` e delta de heap `0 B < 96 MiB`. Os outros requisitos continuaram aprovados no mesmo raster real: uma chamada a `toBlob`, nenhuma a `toDataURL` no caminho padrão, `Blob`/`File` válidos, falha recuperável e revogação nas duas transições de lifecycle.
+
+## Veredito final
+
+**ACEITO.** A lacuna apontada na primeira refutação foi corrigida e reexecutada no commit `8dabecd0`.
