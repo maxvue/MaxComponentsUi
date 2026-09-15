@@ -499,7 +499,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .max-table-wrapper .max-table-container table tbody tr.max-table-loading-row .max-table-spinner {
+    .max-table-fields-wrapper .max-table-spinner {
         animation-duration: 4s;
     }
 }

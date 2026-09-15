@@ -575,6 +575,35 @@ describe('MaxTableFields.vue', () => {
             expect(scrollRegion.attributes('aria-label')).toBe('Tabela de lançamentos contábeis');
         });
 
+        function setElementScrollGeometry(element: HTMLElement, geometry: {
+            clientWidth?: number;
+            scrollWidth?: number;
+            clientHeight?: number;
+            scrollHeight?: number;
+            scrollLeft?: number;
+            scrollTop?: number;
+        }) {
+            let scrollLeftVal = geometry.scrollLeft ?? 0;
+            let scrollTopVal = geometry.scrollTop ?? 0;
+            if (geometry.clientWidth !== undefined) Object.defineProperty(element, 'clientWidth', { configurable: true, value: geometry.clientWidth });
+
+            if (geometry.scrollWidth !== undefined) Object.defineProperty(element, 'scrollWidth', { configurable: true, value: geometry.scrollWidth });
+
+            if (geometry.clientHeight !== undefined) Object.defineProperty(element, 'clientHeight', { configurable: true, value: geometry.clientHeight });
+
+            if (geometry.scrollHeight !== undefined) Object.defineProperty(element, 'scrollHeight', { configurable: true, value: geometry.scrollHeight });
+            Object.defineProperty(element, 'scrollLeft', {
+                configurable: true,
+                get: () => scrollLeftVal,
+                set: (val: number) => { scrollLeftVal = val; }
+            });
+            Object.defineProperty(element, 'scrollTop', {
+                configurable: true,
+                get: () => scrollTopVal,
+                set: (val: number) => { scrollTopVal = val; }
+            });
+        }
+
         it('mantém overflow e rolagem horizontal na região compartilhada e preserva último th e td no mesmo table', async () => {
             const columns = [
                 { field: 'col1', header: 'Col 1', minWidth: '200px' },
@@ -593,13 +622,10 @@ describe('MaxTableFields.vue', () => {
             const scrollRegion = wrapper.find<HTMLElement>('.max-table-fields-scroll-region');
             expect(scrollRegion.exists()).toBe(true);
 
-            let scrollLeftValue = 0;
-            Object.defineProperty(scrollRegion.element, 'clientWidth', { configurable: true, value: 320 });
-            Object.defineProperty(scrollRegion.element, 'scrollWidth', { configurable: true, value: 600 });
-            Object.defineProperty(scrollRegion.element, 'scrollLeft', {
-                configurable: true,
-                get: () => scrollLeftValue,
-                set: (val: number) => { scrollLeftValue = val; }
+            setElementScrollGeometry(scrollRegion.element, {
+                clientWidth: 320,
+                scrollWidth: 600,
+                scrollLeft: 0
             });
 
             scrollRegion.element.scrollLeft = 280;
@@ -625,7 +651,22 @@ describe('MaxTableFields.vue', () => {
             expect(tbody.attributes('class')).not.toContain('scroll-region');
         });
 
-        it('valida o contrato de estilos CSS no SFC (tabela nativa, thead sticky, sem overflow no tbody)', async () => {
+        it('renderiza a totalidade das linhas de normalizedList no DOM sem aplicar virtualização implícita', () => {
+            const columns = [
+                { field: 'id', header: 'ID' },
+                { field: 'name', header: 'Nome' }
+            ];
+            const list = Array.from({ length: 30 }, (_, i) => ({ id: i + 1, name: `Item ${i + 1}` }));
+
+            const wrapper = mount(MaxTableFields, {
+                props: { columns, list }
+            });
+
+            const rows = wrapper.findAll('tbody.max-table-fields-body tr.max-table-fields-row');
+            expect(rows).toHaveLength(30);
+        });
+
+        it('valida o contrato de estilos CSS no SFC (tabela nativa, thead sticky, foco visível, sem overflow no tbody)', async () => {
             const fs = await import('node:fs');
             const path = await import('node:path');
             const sfc = fs.readFileSync(path.resolve(__dirname, '../../src/components/MaxTableFields.vue'), 'utf-8');
@@ -634,6 +675,9 @@ describe('MaxTableFields.vue', () => {
             expect(sfc).toMatch(/\.max-table-fields-scroll-region\s*\{[^}]*overflow:\s*auto/);
             expect(sfc).toMatch(/\.max-table-fields-scroll-region\s*\{[^}]*scrollbar-gutter:\s*stable/);
             expect(sfc).toMatch(/\.max-table-fields-scroll-region\s*\{[^}]*overscroll-behavior:\s*contain/);
+
+            // Foco visível com outline na região de rolagem
+            expect(sfc).toMatch(/\.max-table-fields-scroll-region[\s\S]*?&:focus-visible\s*\{[^}]*outline:\s*var\(--max-focus-outline\)/);
 
             // Tabela com layout tabular nativo e largura intrínseca
             expect(sfc).toMatch(/\.max-table-fields\s*\{[^}]*width:\s*max-content/);
@@ -646,6 +690,9 @@ describe('MaxTableFields.vue', () => {
 
             // tbody não tem overflow próprio (o scroller é a região)
             expect(sfc).not.toMatch(/\.max-table-fields-body\s*\{[^}]*overflow-y:\s*auto/);
+
+            // Reduced motion protege spinner em MaxTableFields
+            expect(sfc).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*?\.max-table-fields-wrapper/);
         });
     });
 });

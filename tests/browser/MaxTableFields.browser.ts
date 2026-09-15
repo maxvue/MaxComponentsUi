@@ -1,5 +1,6 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { createApp, h, type App } from 'vue';
+import { createPinia } from 'pinia';
 import MaxTableFields from '../../src/components/MaxTableFields.vue';
 
 let activeApp: App | null = null;
@@ -45,6 +46,7 @@ async function mountTableAtWidth(widthPx: number, options: {
         }
     });
 
+    app.use(createPinia());
     activeApp = app;
     app.mount(hostElement);
     await nextFrame();
@@ -169,5 +171,54 @@ describe('MaxTableFields no Chromium real (ui-design/tabela-max-recorta-colunas-
         const btnRect = btn.getBoundingClientRect();
         expect(btnRect.right).toBeLessThanOrEqual(regionRect.right + 2);
         expect(btnRect.left).toBeGreaterThanOrEqual(regionRect.left - 2);
+    });
+
+    it('renderiza a totalidade das linhas recebidas no DOM sem virtualização e alcança coluna de ações com buttonsWidth', async () => {
+        const columns = [
+            { field: 'col1', header: 'Coluna 1', minWidth: '150px' },
+            { field: 'col2', header: 'Coluna 2', minWidth: '150px' }
+        ];
+        const list = Array.from({ length: 25 }, (_, i) => ({
+            col1: `Valor 1-${i}`,
+            col2: `Valor 2-${i}`
+        }));
+        const buttons = [{ id: 'delete', icon: 'mdi:trash', ariaLabel: 'Excluir item' }];
+
+        const { scrollRegion } = await mountTableAtWidth(320, {
+            columns,
+            list,
+            buttons,
+            buttonsWidth: '120px'
+        });
+
+        // Confirma que não há virtualização: todas as 25 linhas estão no DOM
+        const rows = scrollRegion.querySelectorAll('tbody tr.max-table-fields-row');
+        expect(rows.length).toBe(25);
+
+        // A coluna de ações tem botões alcançáveis no final da rolagem
+        const maxScroll = scrollRegion.scrollWidth - scrollRegion.clientWidth;
+        scrollRegion.scrollLeft = maxScroll;
+        await nextFrame();
+
+        const lastActionCell = rows[0].querySelector('.max-table-fields-buttons') as HTMLElement;
+        expect(lastActionCell).not.toBeNull();
+        const cellRect = lastActionCell.getBoundingClientRect();
+        const regionRect = scrollRegion.getBoundingClientRect();
+        expect(cellRect.right).toBeLessThanOrEqual(regionRect.right + 2);
+        expect(cellRect.left).toBeGreaterThanOrEqual(regionRect.left - 2);
+    });
+
+    it('preenche 100% da largura em viewport ampla sem gerar overflow horizontal quando as colunas cabem', async () => {
+        const columns = [
+            { field: 'col1', header: 'Coluna 1', width: '200px' },
+            { field: 'col2', header: 'Coluna 2', width: '200px' }
+        ];
+        const list = [{ col1: 'Dado A', col2: 'Dado B' }];
+
+        const { scrollRegion, table } = await mountTableAtWidth(800, { columns, list });
+
+        // Em 800px com duas colunas que cabem, table deve ocupar pelo menos a largura da região
+        expect(scrollRegion.scrollWidth).toBeLessThanOrEqual(scrollRegion.clientWidth + 2);
+        expect(table.clientWidth).toBeGreaterThanOrEqual(scrollRegion.clientWidth - 2);
     });
 });
