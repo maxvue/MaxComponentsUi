@@ -309,6 +309,12 @@
 </script>
 
 <style lang="scss" scoped>
+
+    // :global(*, *::before,*::after ){
+    //     box-sizing: border-box;
+    // }
+
+
     .max-app {
         min-height: 100vh;
         min-height: 100dvh;

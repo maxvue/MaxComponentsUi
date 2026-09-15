@@ -13,12 +13,19 @@
             <div class="meio">
                 <Transition>
                     <div class="loading" v-if="isLoading && !hasError" @click="closePDF">
-                        <div class="conjunto">
-                            <div class="texto">Carregando documento...</div>
-                            <div class="circle">
-                                <div class="max-spinner" role="status" aria-label="Carregando PDF"></div>
+                        <div
+                            class="conjunto"
+                            role="progressbar"
+                            :aria-label="resolvedLabels.progress"
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                            :aria-valuenow="percent"
+                        >
+                            <div class="texto">{{ resolvedLabels.loading }}</div>
+                            <div class="circle" aria-hidden="true">
+                                <div class="max-spinner"></div>
                             </div>
-                            <div class="percent">{{ percent }}%</div>
+                            <div class="percent" aria-hidden="true">{{ percent }}%</div>
                         </div>
                     </div>
                 </Transition>
@@ -69,10 +76,11 @@
      * Exibe um modal em tela cheia com ferramentas de zoom e paginação.
      */
     import { useWindowSize } from '@maxvue/max-use';
-    import { defineAsyncComponent, ref, watch, useTemplateRef, onBeforeUnmount, onMounted } from 'vue';
+    import { defineAsyncComponent, ref, watch, useTemplateRef, onBeforeUnmount, onMounted, computed } from 'vue';
     import { useFocusTrap } from '../helpers/useFocusTrap';
     import { useScrollLock } from '../helpers/useScrollLock';
     import { useBrowserEventListener } from '../composables/useBrowserEventListener';
+    import { maxComponentsPtBR, type MaxPdfViewLabels } from '../locales/pt-br';
     import MaxButton from './MaxButton.vue';
 
     // Async: vue-pdf-embed pesa ~2,6 MB (814 KB gzip) — só carrega quando um PDF é exibido no cliente
@@ -94,13 +102,21 @@
         title?: string;
         /** Se deve exibir o botão de download na barra de ferramentas */
         showDownloadButton?: boolean;
+        /** Rótulos localizáveis para o carregamento do PDF */
+        labels?: Partial<MaxPdfViewLabels>;
     }>(), {
         file: '',
         textLayer: true,
         annotationLayer: true,
         title: 'Visualizador de PDF',
-        showDownloadButton: false
+        showDownloadButton: false,
+        labels: () => ({})
     });
+
+    const resolvedLabels = computed<MaxPdfViewLabels>(() => ({
+        ...maxComponentsPtBR.pdfView,
+        ...(props.labels ?? {})
+    }));
 
     const downloadPdf = () => {
         if (typeof props.file !== 'string' || !props.file) return;

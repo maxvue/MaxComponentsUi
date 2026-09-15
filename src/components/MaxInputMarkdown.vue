@@ -58,7 +58,7 @@
         </Teleport>
 
         <!-- Visualizador Modal de PDF -->
-        <MaxPdfView :file="activePdfUrl" />
+        <MaxPdfView :file="activePdfUrl" :labels="props.pdfLabels" />
     </div>
 </template>
 
@@ -76,6 +76,7 @@
     import { Markdown } from 'tiptap-markdown';
     import MaxInputMarkdownToolbar, { type MarkdownToolbarTool } from './MaxInputMarkdownToolbar.vue';
     import MaxPdfView from './MaxPdfView.vue';
+    import type { MaxPdfViewLabels } from '../locales/pt-br';
     import MaxIcon from './MaxIcon.vue';
     import { isSafeUrl } from '../helpers/isSafeUrl';
     import { useScrollLock } from '../helpers/useScrollLock';
@@ -109,6 +110,8 @@
             tools?: MarkdownToolbarTool[];
             onImageUpload?: (file: File) => Promise<string>;
             onFileUpload?: (file: File) => Promise<string>;
+            /** Rótulos opcionais de localização para o modal do visualizador de PDF */
+            pdfLabels?: Partial<MaxPdfViewLabels>;
         }>(),
         {
             modelValue: '',

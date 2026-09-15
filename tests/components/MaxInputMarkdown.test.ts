@@ -75,7 +75,7 @@ function mountMarkdown(props: Record<string, any> = {}) {
                 MaxPdfView: {
                     name: 'MaxPdfView',
                     template: '<div class="max-pdf-view-stub" :data-file="file"></div>',
-                    props: ['file']
+                    props: ['file', 'labels']
                 }
             }
         }
@@ -457,5 +457,17 @@ describe('MaxInputMarkdown', () => {
         expect(toolbar.exists()).toBe(true);
         expect(toolbar.props('hideTools')).toEqual(['image', 'table']);
         expect(toolbar.props('tools')).toEqual(['bold', 'italic']);
+    });
+
+    it('repassa pdfLabels para o componente MaxPdfView', () => {
+        const customLabels = { loading: 'Carregando...', progress: 'Progresso...' };
+        const wrapper = mountMarkdown({
+            modelValue: 'Teste',
+            pdfLabels: customLabels
+        });
+
+        const pdfView = wrapper.findComponent({ name: 'MaxPdfView' });
+        expect(pdfView.exists()).toBe(true);
+        expect(pdfView.props('labels')).toEqual(customLabels);
     });
 });

@@ -20,6 +20,12 @@ describe('index install', () => {
         expect(indexExports.MaxStyle.semantic).toBeDefined();
         expect(indexExports.MaxStyle.semantic.primary).toBeDefined();
         expect(indexExports.ptBR).toBeDefined();
+        expect(indexExports.ptBR.accept).toBe('Aceitar');
+        expect(indexExports.ptBR.reject).toBe('Cancelar');
+        expect(indexExports.ptBR.dayNames).toHaveLength(7);
+        expect(indexExports.maxComponentsPtBR).toBeDefined();
+        expect(indexExports.maxComponentsPtBR.pdfView.loading).toBe('Carregando PDF');
+        expect(indexExports.maxComponentsPtBR.pdfView.progress).toBe('Progresso de carregamento do PDF');
     });
 
     it('exporta MaxBadgeButtonsGroup e seus aliases', async () => {

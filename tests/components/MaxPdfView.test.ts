@@ -255,5 +255,57 @@ describe('MaxPdfView.vue', () => {
             expect(downloadBtn.exists()).toBe(true);
             expect(downloadBtn.attributes('tabindex')).toBe('0');
         });
+
+        describe('Localização pt-BR e Progresso Acessível', () => {
+            it('exibe texto de carregamento em pt-BR e esconde spinner da árvore acessível', async () => {
+                const wrapper = mountPdf({ file: 'doc.pdf' });
+                await wrapper.vm.$nextTick();
+
+                expect(wrapper.find('.texto').text()).toBe('Carregando PDF');
+                expect(wrapper.html()).not.toContain('Loading');
+                expect(wrapper.html()).not.toContain('Custom ProgressSpinner');
+
+                const progressbars = wrapper.findAll('[role="progressbar"]');
+                expect(progressbars.length).toBe(1);
+
+                const progressbar = progressbars[0];
+                expect(progressbar.attributes('aria-label')).toBe('Progresso de carregamento do PDF');
+                expect(progressbar.attributes('aria-valuemin')).toBe('0');
+                expect(progressbar.attributes('aria-valuemax')).toBe('100');
+                expect(progressbar.attributes('aria-valuenow')).toBe('0');
+
+                const circle = wrapper.find('.circle');
+                expect(circle.attributes('aria-hidden')).toBe('true');
+            });
+
+            it('atualiza percentual visual e aria-valuenow ao reportar progresso', async () => {
+                const wrapper = mountPdf({ file: 'doc.pdf' });
+                await wrapper.vm.$nextTick();
+
+                const vm = wrapper.vm as any;
+                vm.progressPdf({ loaded: 42, total: 100 });
+                await wrapper.vm.$nextTick();
+
+                const progressbar = wrapper.find('[role="progressbar"]');
+                expect(progressbar.attributes('aria-valuenow')).toBe('42');
+                expect(wrapper.find('.percent').text()).toBe('42%');
+                expect(progressbar.attributes('aria-label')).toBe('Progresso de carregamento do PDF');
+            });
+
+            it('aceita override tipado de labels com precedência de props', async () => {
+                const wrapper = mountPdf({
+                    file: 'doc.pdf',
+                    labels: {
+                        loading: 'Loading document',
+                        progress: 'Document loading progress'
+                    }
+                });
+                await wrapper.vm.$nextTick();
+
+                expect(wrapper.find('.texto').text()).toBe('Loading document');
+                const progressbar = wrapper.find('[role="progressbar"]');
+                expect(progressbar.attributes('aria-label')).toBe('Document loading progress');
+            });
+        });
     });
 });

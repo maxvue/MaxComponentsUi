@@ -1,7 +1,7 @@
 
 import { defineAsyncComponent, type App, type Plugin } from 'vue';
 export { MaxStyle, type MaxThemePreset, type SemanticColorPalette } from './styles/style';
-export { default as ptBR } from './locales/pt-br';
+export { default as ptBR, maxComponentsPtBR, type MaxPdfViewLabels } from './locales/pt-br';
 
 // NÃO REMOVER O INPUTBASE DO INDEX.TS
 export { default as InputBase } from './components/InputBase.vue';
