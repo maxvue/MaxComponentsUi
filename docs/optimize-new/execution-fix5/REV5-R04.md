@@ -1,5 +1,60 @@
 # REV5-R04 — Refutação independente de E03-02
 
+## Revalidação nativa — 2026-09-15 (HEAD f02b0b28)
+
+- Papel: `REV5-R04` (somente leitura no código de produção).
+- Agente: `/root/rev5_r04_native`.
+- Início: `2026-09-15T16:24:00-03:00`.
+- Fim: `2026-09-15T16:25:00-03:00`.
+- HEAD auditado: `f02b0b286e01523537a607c80623aef713ea9e9f`.
+- Referência adversarial: `aac16bca`.
+
+### Evidência reproduzida
+
+```text
+$ npx vitest run --config vitest.browser.config.ts tests/browser/InputBaseForms.browser.ts
+Test Files  1 passed (1)
+Tests  2 passed (2)
+```
+
+A implementação e a matriz melhoraram materialmente desde a revalidação anterior:
+
+- para 24 famílias validáveis (a exceção HTML é `MaxColorPicker`), a montagem
+  vazia com `required` prova `form.checkValidity() === false` e
+  `owner.validity.valid === false`;
+- para as 25 famílias, a montagem `disabled` prova a ausência da chave em
+  `new FormData(form)`;
+- `label.htmlFor` aponta para o owner nativo (proxy em Select, TagSelect,
+  IconPicker, OTP e Switch), e `userEvent.click(label)` prova o foco nativo
+  desse owner, sem foco manual do wrapper.
+
+Isso é evidência suficiente para required vazio, disabled excluído e a
+associação label/owner-proxy que a revalidação anterior havia recusado.
+
+Porém, **`userEvent.fill` não é prova de autofill**. Ele gera a sequência de
+interação de digitação simulada pelo usuário; não aciona o gerenciador de
+autofill do Chromium, não seleciona um perfil salvo e não prova a política
+`autocomplete` do navegador. O segundo caso do arquivo continua usando
+`input.value = ...` seguido de `Event('input')`, que é útil para testar a
+sincronização de uma alteração programática, mas também não é autofill real.
+Assim, a afirmação de que as 18 famílias textuais “fazem autofill” deve ser
+rejeitada. Os cinco proxies compostos declaram `autocomplete=off`, uma
+política plausível, mas ela não é validada contra autofill real.
+
+Há ainda cobertura positiva incompleta de submissão: as 18 famílias
+`nativeText` e os cinco proxies verificam a presença em `FormData` depois de
+receber valor, mas `MaxColorPicker` e `MaxInputToggle` não a verificam. Para o
+Toggle inicial desmarcado, tampouco há passo que o marque e prove
+`checkValidity()`/`FormData` positivo. Portanto a matriz não prova o contrato
+de submit/owner completo das 25 famílias.
+
+**Veredito: REJEITADO.** R04 permanece aberto até que: (1) seja definido e
+testado um fluxo de autofill real do Chromium, ou o requisito seja
+explicitamente reescrito como alteração programática/entrada de usuário; e
+(2) ColorPicker e Toggle tenham prova positiva de `FormData`, com Toggle
+marcado e válido. Não é necessário reabrir a correção de required, disabled ou
+label/proxy, que estão aceitos nesta revalidação.
+
 ## Revalidação nativa — 2026-09-15
 
 - Papel: `REV5-R04` (somente leitura no código de produção).
