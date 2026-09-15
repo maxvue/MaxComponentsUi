@@ -2,16 +2,16 @@
 
 ## Resultado auditado do fix5
 
-A execução de `docs/optimize-new/instructions_to_implementation_fix5.md` trouxe avanço técnico real, porém **não concluiu o plano inicial**. A revisão independente foi feita no commit `99e3d9a3`, por três subagentes com ownership disjunto, reprodução focal e execução do gate canônico.
+A execução de `docs/optimize-new/instructions_to_implementation_fix5.md` trouxe avanço técnico real, porém **não concluiu o plano inicial**. A revisão independente foi feita primeiro no commit `99e3d9a3` e repetida após a integração final no commit `738bd749`, por três subagentes com ownership disjunto, reprodução focal e execução do gate canônico.
 
 - Plano inicial: **72 achados**.
 - Aceitos antes do fix5: **43/72 (59,7%)**.
-- Dos 22 blocos abertos no fix5, **14 fecharam integralmente e 8 continuam abertos**.
-- Aceitos integralmente agora: **60/72 (83,3%)**.
-- Ainda vinculados a blocos sem aceite integral: **12/72 (16,7%)**.
-- Em granularidade técnica, F15 e R16 têm um achado corrigido e outro pendente; por isso somente **10 achados individuais** ainda apresentam lacuna, mas o contrato do plano não permite fechar parcialmente esses blocos.
+- Dos 22 blocos abertos no fix5, 14 fecharam na branch isolada; a integração com o `dev` reabriu R09, R18 e R24. O saldo final é **11 blocos fechados e 11 abertos**.
+- Aceitos integralmente agora: **56/72 (77,8%)**.
+- Ainda vinculados a blocos sem aceite integral: **16/72 (22,2%)**.
+- Em granularidade técnica, F15 e R16 têm um achado corrigido e outro pendente; existem **13 lacunas técnicas individuais**, mas o contrato do plano exige manter os 16 achados vinculados como pendentes até aceite integral dos blocos.
 
-Preserve todos os 14 blocos confirmados nesta rodada: **F14, F18, R03, R08, R09, R12, R14, R17, R18, R19, R22, R23, R24 e R25**. Preserve também os dez blocos aceitos anteriormente: **F03, F12, F17, R05/F06, R06/F08, R10/F13, R11/F16, R13/F20, R15/F22 e R20/F26**.
+Preserve os 11 blocos confirmados nesta rodada e mantidos após a integração: **F14, F18, R03, R08, R12, R14, R17, R19, R22, R23 e R25**. Preserve também os dez blocos aceitos anteriormente: **F03, F12, F17, R05/F06, R06/F08, R10/F13, R11/F16, R13/F20, R15/F22 e R20/F26**.
 
 ### Contabilidade obrigatória dos blocos ainda abertos
 
@@ -23,20 +23,23 @@ Preserve todos os 14 blocos confirmados nesta rodada: **F14, F18, R03, R08, R09,
 | R02 | E01-04 | duas suítes e duas coberturas precisam ser repetidas no HEAD final imutável |
 | R04 | E03-02 | autofill real cobre só MaxInputText; não há matriz nativa integral das 25 famílias |
 | R07 | E04-04 | `useFocusTrap` e `useOutsidePointer` ainda mantêm stacks/listeners globais concorrentes |
+| R09 | E04-06, E04-07 | merge final mantém `z-index: 9999` em MaxInputSelect e MaxTagSelect; gate de camadas falha |
 | R16 | E10-03, E10-04 | E10-03 passou; E10-04 ainda usa associação textual e fixtures sintéticas |
+| R18 | E10-09 | inventário browser fixa 59 componentes, mas o merge final possui 60 SFCs com motion |
 | R21 | E11-03 | regressão visual de cartão flutua sob carga por espera fixa de frames |
-| **Total estrito** | **12 achados vinculados** | **10 lacunas técnicas individuais** |
+| R24 | E11-04 | MaxInputBirthday foi adicionado sem entrada no mapa explícito de exports |
+| **Total estrito** | **16 achados vinculados** | **13 lacunas técnicas individuais** |
 
 `E12-02` continua sendo gate transversal associado a R02, não um achado adicional.
 
 ## Evidências reproduzidas pela auditoria
 
-O comando `npm run verify` passou localmente no commit auditado:
+O comando `npm run verify` passou na branch isolada `99e3d9a3`, mas **falhou em cinco etapas** no merge final `738bd749`:
 
 - build limpo, type-checks, ESLint e Stylelint: passaram;
-- unitários: **242 arquivos / 3.710 testes**;
+- unitários finais: **242 arquivos passaram e 2 falharam; 3.719 testes passaram e 2 falharam**;
 - cobertura: **86,82% statements / 78,09% branches / 87,54% functions / 90,18% lines**;
-- browser: **19 arquivos / 73 testes**;
+- browser final: **18 arquivos passaram e 1 falhou; 72 testes passaram e 1 falhou**;
 - axe-core, playground, SVGO, benchmark e budgets: passaram;
 - consumidores públicos, CSS e seis temas: passaram;
 - duas instalações `npm ci` em checkouts limpos: passaram nesta máquina.
@@ -51,6 +54,7 @@ Esses resultados não substituem os critérios adversariais abaixo:
 6. O inventário de foco aceita correspondência textual de seletor e monta várias famílias como `div` sintética em vez do componente real.
 7. Em suíte browser combinada, `MaxCreditCard.browser.ts` falhou 1/16 porque dez `requestAnimationFrame` não garantem o término do `fetch` do SVG. Reruns isolados passaram, confirmando flutuação dependente de carga.
 8. A matriz anterior contém 65 papéis canônicos, porém 67 linhas e cerca de 70 IDs citados, com retries por IDs novos, papéis reutilizados e relatórios sem identidade autocontida. Não há prova válida de “exatamente 65 agentes distintos”.
+9. No merge final, o lint falha em `MaxIconButton.vue:158,160`; unitários/cobertura falham pelo `z-index: 9999` de Select/TagSelect e pelo export ausente de MaxInputBirthday; browser falha porque o inventário de motion espera 59 componentes e encontra 60; budgets repetem a falha de export.
 
 ## Contrato obrigatório — 72 subagentes reais, distintos e concluídos
 
@@ -58,7 +62,7 @@ Instancie **exatamente 72 subagentes canônicos**, em ondas compatíveis com o l
 
 Cada agente deve ter ID real único, parent ID, tarefa original, início, fim, commit/HEAD, manifesto de arquivos, comandos, saída resumida, status final e relatório próprio em `docs/optimize-new/execution-fix6/`. A matriz deve ter exatamente 72 linhas de papel e exatamente 72 IDs primários distintos.
 
-### Grupo A — 8 implementadores
+### Grupo A — 11 implementadores
 
 1. `IMP6-F07`
 2. `IMP6-F15`
@@ -68,10 +72,13 @@ Cada agente deve ter ID real único, parent ID, tarefa original, início, fim, c
 6. `IMP6-R07`
 7. `IMP6-R16`
 8. `IMP6-R21`
+9. `IMP6-R09`
+10. `IMP6-R18`
+11. `IMP6-R24`
 
 Cada implementador possui um bloco inteiro, reproduz a falha antes da edição, corrige a causa raiz, fortalece os testes e salva `IMP6-<BLOCO>.md`.
 
-### Grupo B — 8 refutadores independentes
+### Grupo B — 11 refutadores independentes
 
 1. `REV6-F07`
 2. `REV6-F15`
@@ -81,10 +88,13 @@ Cada implementador possui um bloco inteiro, reproduz a falha antes da edição, 
 6. `REV6-R07`
 7. `REV6-R16`
 8. `REV6-R21`
+9. `REV6-R09`
+10. `REV6-R18`
+11. `REV6-R24`
 
 O refutador não pode ser o implementador, não pode editar a worktree canônica e somente marca `ACEITO` quando um caso adversarial falha na referência e passa no HEAD integrado.
 
-### Grupo C — 16 especialistas adversariais
+### Grupo C — 22 especialistas adversariais
 
 1. `ADV6-F07-CHROMIUM`
 2. `ADV6-F07-LISTENERS`
@@ -102,6 +112,12 @@ O refutador não pode ser o implementador, não pode editar a worktree canônica
 14. `ADV6-R16-BROWSER`
 15. `ADV6-R21-CORRIDA`
 16. `ADV6-R21-STRESS`
+17. `ADV6-R09-CAMADAS`
+18. `ADV6-R09-VIEWPORT`
+19. `ADV6-R18-INVENTARIO`
+20. `ADV6-R18-BROWSER`
+21. `ADV6-R24-EXPORTS`
+22. `ADV6-R24-CONSUMIDOR`
 
 Há exatamente dois especialistas por bloco. Eles criam provas adversariais independentes e salvam `ADV6-<BLOCO>-<FOCO>.md`.
 
@@ -128,34 +144,22 @@ Há exatamente dois especialistas por bloco. Eles criam provas adversariais inde
 19. `GATE6-CONSUMERS-CONCURRENT`
 20. `GATE6-CI-CLEANROOM`
 
-Cada gate roda somente após integração dos oito blocos e salva `GATE6-<AREA>.md`. Os agentes de duas execuções globais devem ser distintos; não reutilize um refutador como gate.
+Cada gate roda somente após integração dos onze blocos e salva `GATE6-<AREA>.md`. Os agentes de duas execuções globais devem ser distintos; não reutilize um refutador como gate.
 
-### Grupo E — 20 auditores de preservação
+### Grupo E — 8 auditores de preservação
 
-1. `PRES6-F03`
-2. `PRES6-F12`
-3. `PRES6-F17`
-4. `PRES6-R05`
-5. `PRES6-R06`
-6. `PRES6-R10`
-7. `PRES6-R11`
-8. `PRES6-R13`
-9. `PRES6-R15`
-10. `PRES6-R20`
-11. `PRES6-F14`
-12. `PRES6-F18`
-13. `PRES6-R03`
-14. `PRES6-R08`
-15. `PRES6-R09-R12`
-16. `PRES6-R14-R17`
-17. `PRES6-R18`
-18. `PRES6-R19`
-19. `PRES6-R22-R23`
-20. `PRES6-R24-R25`
+1. `PRES6-LEGACY-A` — F03, F12 e F17
+2. `PRES6-LEGACY-B` — R05, R06 e R10
+3. `PRES6-LEGACY-C` — R11, R13, R15 e R20
+4. `PRES6-NEW-A` — F14, F18 e R03
+5. `PRES6-NEW-B` — R08, R12 e R14
+6. `PRES6-NEW-C` — R17 e R19
+7. `PRES6-NEW-D` — R22 e R23
+8. `PRES6-NEW-E` — R25
 
-Os dez primeiros agentes cobrem os dez blocos aceitos antes do fix5. Os dez seguintes cobrem nominalmente os 14 blocos confirmados nesta rodada; os portfólios duplos agrupam apenas contratos tecnicamente relacionados. Cada agente verifica arquitetura/contrato e comportamento real de todos os blocos do seu portfólio e salva um relatório próprio. Assim, os **24 blocos preservados** possuem auditor responsável explícito.
+Cada agente verifica arquitetura, contrato e comportamento real de todos os blocos do seu portfólio e salva um relatório próprio. Assim, os **21 blocos preservados** possuem auditor responsável explícito.
 
-**Contagem fechada:** 8 implementadores + 8 refutadores + 16 adversariais + 20 gates + 20 preservações = **72 subagentes**.
+**Contagem fechada:** 11 implementadores + 11 refutadores + 22 adversariais + 20 gates + 8 preservações = **72 subagentes**.
 
 ## Regras de ownership e integração
 
@@ -173,7 +177,7 @@ Os dez primeiros agentes cobrem os dez blocos aceitos antes do fix5. Os dez segu
 
 ### Etapa 1 — baseline integrado e matriz de 72 agentes
 
-Parta do `dev` remoto mais recente em worktree limpa. Resolva previamente qualquer merge pendente e prove `git status` limpo. Faça uma onda inicial de cadastro, sem edições: instancie os papéis em lotes compatíveis com a concorrência, capture o ID real e o parent, receba o manifesto e deixe o agente ocioso/concluído. Preencha a matriz somente com esses IDs reais. Quando chegar a onda de trabalho, use follow-up no mesmo ID; não crie substituto. Registre o commit baseline, os 72 IDs, ownerships, dependências e ondas. Reproduza todos os oito bloqueios antes das correções.
+Parta do `dev` remoto mais recente em worktree limpa. Resolva previamente qualquer merge pendente e prove `git status` limpo. Faça uma onda inicial de cadastro, sem edições: instancie os papéis em lotes compatíveis com a concorrência, capture o ID real e o parent, receba o manifesto e deixe o agente ocioso/concluído. Preencha a matriz somente com esses IDs reais. Quando chegar a onda de trabalho, use follow-up no mesmo ID; não crie substituto. Registre o commit baseline, os 72 IDs, ownerships, dependências e ondas. Reproduza todos os onze bloqueios antes das correções.
 
 ### Etapa 2 — R01: pipeline portável
 
@@ -203,17 +207,20 @@ Crie inventário explícito das 25 famílias e prove para cada uma os contratos 
 
 Troque a correlação textual de CSS por parser/DOM que associe cada alvo focável ao seletor, ancestral, estado e regra computada corretos. Monte todos os componentes reais descobertos, não `div`s sintéticas equivalentes. Teste Tab, `:focus-visible`, light/dark, forced-colors e zoom. Mutation tests devem trocar ancestral, classe, estado e ordem de cascata e fazer o mesmo gate falhar.
 
-### Etapa 9 — R21: SVG assíncrono sem flake
+### Etapa 9 — R09, R18, R21 e R24: regressões do merge final
 
-Substitua espera fixa de dez frames por condição observável com timeout limitado: logo/fundo efetivamente carregados ou estado de erro concluído. Não aumente sleeps. Preserve fallback gracioso de fetch, corrida JCB→Visa, revogação/limpeza, grafo transitivo, SVGO, orçamento e snapshot visual.
+- **R09:** remova `z-index: 9999` de MaxInputSelect e MaxTagSelect e use o token semântico correto, preservando viewport visual, safe-area, seta, margem, scroll e hit-test.
+- **R18:** torne o inventário de motion derivado dos SFCs atuais; inclua MaxInputBirthday e prove `reduce`/`no-preference`, lifecycle e CSSOM sem cardinalidade hardcoded.
+- **R21:** substitua espera fixa de dez frames por condição observável com timeout limitado: logo/fundo efetivamente carregados ou estado de erro concluído. Não aumente sleeps. Preserve fallback gracioso de fetch, corrida JCB→Visa, revogação/limpeza, grafo transitivo, SVGO, orçamento e snapshot visual.
+- **R24:** inclua MaxInputBirthday no mapa explícito de exports e faça o gate derivar/validar manifest, entrypoints, tipos, CSS opt-in e consumidor real, sem voltar a wildcard.
 
 ### Etapa 10 — provas adversariais especializadas
 
-Execute os 16 `ADV6-*` depois dos commits dos implementadores e antes da refutação final. Cada relatório deve demonstrar o caso que escapava ao fix5, o resultado na referência e no commit candidato. Achado adversarial volta ao mesmo implementador por follow-up.
+Execute os 22 `ADV6-*` depois dos commits dos implementadores e antes da refutação final. Cada relatório deve demonstrar o caso que escapava ao fix5, o resultado na referência e no commit candidato. Achado adversarial volta ao mesmo implementador por follow-up.
 
 ### Etapa 11 — integração e inspeção estrutural
 
-Integre os oito commits em worktree limpa, resolvendo conflitos sem escolher `ours`/`theirs` indiscriminadamente. Execute `git diff --check`, verifique arquivos órfãos, artefatos `.tgz`, temporários e alterações geradas. Revise correção, legibilidade, arquitetura, segurança e performance antes dos gates globais.
+Integre os onze commits em worktree limpa, resolvendo conflitos sem escolher `ours`/`theirs` indiscriminadamente. Execute `git diff --check`, verifique arquivos órfãos, artefatos `.tgz`, temporários e alterações geradas. Revise correção, legibilidade, arquitetura, segurança e performance antes dos gates globais.
 
 ### Etapa 12 — gates rápidos e focais
 
@@ -225,7 +232,7 @@ Execute a suíte browser completa e pelo menos dez repetições mistas de `MaxCr
 
 ### Etapa 14 — refutação e preservação
 
-Os oito `REV6-*` revisam commits já integrados e imutáveis. Em paralelo, os 20 `PRES6-*` revalidam os 24 blocos preservados conforme os portfólios nominais do Grupo E. Um `REJEITADO` reabre o bloco e retorna ao mesmo `IMP6-*`; não aumente a contagem de agentes.
+Os onze `REV6-*` revisam commits já integrados e imutáveis. Em paralelo, os oito `PRES6-*` revalidam os 21 blocos preservados conforme os portfólios nominais do Grupo E. Um `REJEITADO` reabre o bloco e retorna ao mesmo `IMP6-*`; não aumente a contagem de agentes.
 
 ### Etapa 15 — aceite final pelos 20 gates
 
@@ -242,4 +249,4 @@ Execute os 20 `GATE6-*` no mesmo commit final. Exija:
 
 ## Critério de término
 
-Somente declare conclusão quando **F07, F15, R01, R02, R04, R07, R16 e R21** forem integralmente aceitos, os **12 achados vinculados** saírem do estado pendente, todas as preservações permanecerem válidas, os 20 gates passarem no mesmo commit e os **72 subagentes canônicos** estiverem comprovados. Caso contrário, informe a contagem estrita restante e não marque o plano como concluído.
+Somente declare conclusão quando **F07, F15, R01, R02, R04, R07, R09, R16, R18, R21 e R24** forem integralmente aceitos, os **16 achados vinculados** saírem do estado pendente, todas as preservações permanecerem válidas, os 20 gates passarem no mesmo commit e os **72 subagentes canônicos** estiverem comprovados. Caso contrário, informe a contagem estrita restante e não marque o plano como concluído.
