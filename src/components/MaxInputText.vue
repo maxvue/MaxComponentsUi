@@ -1,6 +1,6 @@
 <template>
     <InputBase
-        v-bind="props"
+        v-bind="{...props, ...attrs}"
         class="max-input-text"
         :done="props.done ?? validation.done.value"
         :error="props.error ?? (typeof props.caution === 'string' ? null : validation.error.value)"
