@@ -1,5 +1,7 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import { userEvent } from 'vitest/browser';
 import { createApp, h, ref, type App } from 'vue';
+import { createPinia } from 'pinia';
 import MaxTagSelect from '../../src/components/MaxTagSelect.vue';
 import '../../src/themes/all.scss';
 
@@ -48,6 +50,8 @@ async function mountTagSelect(props: Record<string, any> = {}) {
     });
 
     activeApp = app;
+    app.use(createPinia());
+    app.directive('tooltip', {});
     app.mount(hostElement);
     await settle();
 
@@ -102,6 +106,62 @@ function getEffectiveBackgroundColor(el: HTMLElement, defaultColor = 'rgb(255, 2
 }
 
 describe('MaxTagSelect no Chromium (R11 / F16)', () => {
+    it('opera isButton por Tab, Enter e Espaço sem emissão duplicada e respeita disabled', async () => {
+        let beforeShowCalls = 0;
+        const { host } = await mountTagSelect({
+            isButton: true,
+            icon: 'mdi:tag',
+            placeholder: 'Gerenciar categorias',
+            onBeforeShow: () => {
+                beforeShowCalls += 1;
+            }
+        });
+
+        const button = host.querySelector('button.max-icon-button') as HTMLButtonElement;
+        expect(button).not.toBeNull();
+        expect(button.getAttribute('aria-label')).toBe('Gerenciar categorias');
+
+        await userEvent.keyboard('{Tab}');
+        expect(document.activeElement).toBe(button);
+
+        await userEvent.keyboard('{Enter}');
+        await settle();
+        expect(document.querySelector('[role="listbox"]')).not.toBeNull();
+        expect(beforeShowCalls).toBe(1);
+
+        await userEvent.keyboard('{Escape}');
+        await settle();
+        expect(document.querySelector('[role="listbox"]')).toBeNull();
+
+        await userEvent.keyboard('{Space}');
+        await settle();
+        expect(document.querySelector('[role="listbox"]')).not.toBeNull();
+        expect(beforeShowCalls).toBe(2);
+
+        activeApp?.unmount();
+        activeApp = null;
+        hostElement?.remove();
+        hostElement = null;
+
+        const disabled = await mountTagSelect({
+            isButton: true,
+            icon: 'mdi:tag',
+            placeholder: 'Gerenciar categorias',
+            disabled: true,
+            onBeforeShow: () => {
+                beforeShowCalls += 1;
+            }
+        });
+        const disabledButton = disabled.host.querySelector('button.max-icon-button') as HTMLButtonElement;
+        expect(disabledButton.disabled).toBe(true);
+        disabledButton.focus();
+        await userEvent.keyboard('{Enter}');
+        await userEvent.keyboard('{Space}');
+        await settle();
+        expect(document.querySelector('[role="listbox"]')).toBeNull();
+        expect(beforeShowCalls).toBe(2);
+    });
+
     it('valida first paint, virtualização de lista grande (>500 itens) e contraste em tema claro (default, hover, focus / active descendant)', async () => {
         const { host } = await mountTagSelect();
 

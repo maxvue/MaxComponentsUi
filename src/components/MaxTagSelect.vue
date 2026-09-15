@@ -26,8 +26,8 @@
                     :aria-controls="props.isButton ? undefined : (isOpen ? listboxId : undefined)"
                     :aria-activedescendant="props.isButton ? undefined : activeDescendantId"
                     :aria-disabled="!props.isButton && props.disabled ? 'true' : undefined"
-                    @click.stop="toggle"
-                    @keydown="onTriggerKeydown"
+                    @click.stop="!props.isButton && toggle($event)"
+                    @keydown="!props.isButton && onTriggerKeydown($event)"
                 >
                     <div class="max-select-label">
                         <slot name="value">
@@ -61,6 +61,7 @@
                                     :aria-expanded="isOpen"
                                     :aria-controls="isOpen ? listboxId : undefined"
                                     :tabindex="props.disabled ? -1 : 0"
+                                    @click.stop="toggle"
                                 />
                             </div>
                         </slot>

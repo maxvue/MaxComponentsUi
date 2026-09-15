@@ -7,7 +7,7 @@ Referência adversarial: `aac16bca`. Esta matriz é atualizada somente com evid�
 |---|---|---|---|---|
 | IMP5-F07 | implementação | F07 | concluído — E04-02 reproduzido e corrigido; teste focal aprovado | agente `/root/imp5_f07`; início `2026-09-15T14:21:00-03:00`; fim `2026-09-15T14:24:00-03:00`; HEAD auditado `31bbd8514e98f3ad83221828e192cdbaffd6d90a`; manifesto: `src/helpers/useOutsidePointer.ts`, `tests/helpers/useOutsidePointer.test.ts`, `docs/optimize-new/execution-fix5/IMP5-F07.md`, `docs/optimize-new/execution-fix5/MATRIZ_ORQUESTRACAO.md` |
 | IMP5-F14 | implementação | F14 | concluído — E06-01/E06-02 reproduzidos e corrigidos; unitário e type-check focal aprovados; cenário Chromium adicionado, mas não executável sem binário Playwright | agente `/root/imp5_f14`; início `2026-09-15T14:20:14-03:00`; fim `2026-09-15T14:25:27-03:00`; HEAD auditado `b44e6b744d4940bb5a05afa7f8c02d04ba1802ed`; manifesto: `src/components/base/MaxBaseVirtualScroller.vue`, `tests/components/base/MaxBaseVirtualScroller.test.ts`, `tests/browser/MaxBaseVirtualScroller.browser.ts`, `docs/optimize-new/execution-fix5/IMP5-F14.md`, `docs/optimize-new/execution-fix5/MATRIZ_ORQUESTRACAO.md` |
-| IMP5-F15 | implementação | F15 | planejado | TagSelect e icon-buttons |
+| IMP5-F15 | implementação | F15 | concluído — E06-03/E08-04 reproduzidos e corrigidos; unitários, type-check e Chromium focais aprovados | agente `/root/imp5_f15`; início `2026-09-15T14:29:00-03:00`; fim `2026-09-15T14:33:49-03:00`; HEAD auditado `31bbd8514e98f3ad83221828e192cdbaffd6d90a`; manifesto: `src/components/MaxTagSelect.vue`, `src/components/MaxTopToolbar.vue`, `src/components/MaxTopToolbarSubmenu.vue`, `src/components/MaxTableFields.vue`, `tests/browser/MaxTagSelect.browser.ts`, `tests/unit/MaxTopToolbar.spec.ts`, `tests/components/MaxTopToolbarSubmenu.test.ts`, `tests/components/MaxTableFields.test.ts`, `docs/optimize-new/execution-fix5/IMP5-F15.md`, `docs/optimize-new/execution-fix5/MATRIZ_ORQUESTRACAO.md` |
 | IMP5-F18 | implementação | F18 | planejado | crop de imagens |
 | IMP5-R01 | implementação | R01 | concluído | package.json, CI e verify (serializado); ver `IMP5-R01.md` |
 | IMP5-R02 | implementação | R02 | concluído — lint focal aprovado; lint global bloqueado em arquivo fora do ownership; verify bloqueado antes do lint por `svgo` ausente | agente `/root/imp5_r02`; início `2026-09-15T14:20:14-03:00`; fim `2026-09-15T14:21:01-03:00`; HEAD auditado `31bbd8514e98f3ad83221828e192cdbaffd6d90a`; manifesto: `src/locales/pt-br.ts`, `docs/optimize-new/execution-fix5/IMP5-R02.md` |
@@ -28,8 +28,8 @@ Referência adversarial: `aac16bca`. Esta matriz é atualizada somente com evid�
 | IMP5-R24 | implementação | R24 | planejado | exports/CSS |
 | IMP5-R25 | implementação | R25 | planejado | consumidores |
 
-| REV5-F07 | refutação | F07 | planejado | somente leitura |
-| REV5-F14 | refutação | F14 | planejado | somente leitura |
+| REV5-F07 | refutação | F07 | concluído — caso adversarial falha em `aac16bca` e passa no HEAD; ACEITO | agente `/root/rev5_f07`; início `2026-09-15T14:28:00-03:00`; fim `2026-09-15T14:31:56-03:00`; HEAD auditado `925b8bf1b74fc3e187f12664b784f974e0a402e1`; relatório `docs/optimize-new/execution-fix5/REV5-F07.md`; somente leitura |
+| REV5-F14 | refutação | F14 | REJEITADO — contrato runtime refutou `aac16bca`, mas o aceite obrigatório Chromium + axe real não foi executado e `axe-core` não existe no checkout | agente `/root/rev5_f14`; início `2026-09-15T14:29:00-03:00`; fim `2026-09-15T14:30:32-03:00`; HEAD auditado `925b8bf1b74fc3e187f12664b784f974e0a402e1`; relatório: `docs/optimize-new/execution-fix5/REV5-F14.md`; somente leitura |
 | REV5-F15 | refutação | F15 | planejado | somente leitura |
 | REV5-F18 | refutação | F18 | planejado | somente leitura |
 | REV5-R01 | refutação | R01 | planejado | somente leitura |
