@@ -1,5 +1,5 @@
 import type { ComponentResolverObject } from 'unplugin-vue-components/types';
-import manifest from '../components-manifest.json';
+import manifest from '../components-manifest.json' with { type: 'json' };
 
 const aliases = manifest.aliases as Record<string, string>;
 const componentNames = new Set(manifest.components as string[]);
