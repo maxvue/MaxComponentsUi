@@ -61,3 +61,24 @@ Tests  59 passed (59)
 Esta revalidação elimina as cinco falhas de cartões/distribuição do diagnóstico
 original; o gate permanece rejeitado até as demais falhas e as duas rodadas de
 cobertura completas serem resolvidas e executadas novamente.
+
+## Revalidação isolada final
+
+Após o commit `aa27fc7a`, as quatro rodadas foram executadas de forma
+estritamente serializada, sem outro processo Vitest no worktree. A tentativa
+concorrente anterior foi invalidada e não entra nesta evidência.
+
+| Comando | Resultado | Arquivos/testes | Duração |
+|---|---:|---:|---:|
+| `npm test` #1 | 0 | 242 / 3.710 | 219,33 s |
+| `npm test` #2 | 0 | 242 / 3.710 | 220,39 s |
+| `npm run test:coverage` #1 | 0 | 242 / 3.710 | 256,48 s |
+| `npm run test:coverage` #2 | 0 | 242 / 3.710 | 262,82 s |
+
+Cobertura idêntica: statements 86,83%, branches 78,09%, functions 87,54% e
+lines 90,19% — acima dos thresholds 85/76/84/89. As quatro saídas foram
+verificadas sem `AbortError`, `EPROTO`, `DOMException`, `Unhandled`, warnings
+Vue ou `console.warn/error`.
+
+**Veredito final: ACEITO.** Evidência coletada pelo agente
+`/root/gate5_unit_rerun` no HEAD `aa27fc7a`.
