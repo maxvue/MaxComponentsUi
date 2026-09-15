@@ -1,0 +1,77 @@
+# Matriz de orquestração — fix5
+
+Baseline: `31bbd8514e98f3ad83221828e192cdbaffd6d90a` (branch `fixes/optimize-fix5`).
+Referência adversarial: `aac16bca`. Esta matriz é atualizada somente com evidências reais: ID do agente, timestamps, HEAD auditado, comandos, saída e status final.
+
+| Papel | Tipo | Bloco/área | Status | Owner/manifest |
+|---|---|---|---|---|
+| IMP5-F07 | implementação | F07 | planejado | overlays canônicos e testes focais |
+| IMP5-F14 | implementação | F14 | planejado | semântica de listas |
+| IMP5-F15 | implementação | F15 | planejado | TagSelect e icon-buttons |
+| IMP5-F18 | implementação | F18 | planejado | crop de imagens |
+| IMP5-R01 | implementação | R01 | planejado | package.json, CI e verify (serializado) |
+| IMP5-R02 | implementação | R02 | concluído — lint focal aprovado; lint global bloqueado em arquivo fora do ownership; verify bloqueado antes do lint por `svgo` ausente | agente `/root/imp5_r02`; início `2026-09-15T14:20:14-03:00`; fim `2026-09-15T14:21:01-03:00`; HEAD auditado `31bbd8514e98f3ad83221828e192cdbaffd6d90a`; manifesto: `src/locales/pt-br.ts`, `docs/optimize-new/execution-fix5/IMP5-R02.md` |
+| IMP5-R03 | implementação | R03 | planejado | anatomia InputBase |
+| IMP5-R04 | implementação | R04 | planejado | matriz InputBase |
+| IMP5-R07 | implementação | R07 | planejado | foco/Escape de overlays |
+| IMP5-R08 | implementação | R08 | planejado | helper de nomes acessíveis |
+| IMP5-R09 | implementação | R09 | planejado | BaseOverlay e viewport |
+| IMP5-R12 | implementação | R12 | planejado | input file e MaxMaps |
+| IMP5-R14 | implementação | R14 | planejado | submit/live region |
+| IMP5-R16 | implementação | R16 | planejado | contraste e foco |
+| IMP5-R17 | implementação | R17 | planejado | matriz de contraste |
+| IMP5-R18 | implementação | R18 | planejado | reduced motion |
+| IMP5-R19 | implementação | R19 | planejado | playground |
+| IMP5-R21 | implementação | R21 | planejado | SVG |
+| IMP5-R22 | implementação | R22 | planejado | lista virtual |
+| IMP5-R23 | implementação | R23 | planejado | benchmark Vue |
+| IMP5-R24 | implementação | R24 | planejado | exports/CSS |
+| IMP5-R25 | implementação | R25 | planejado | consumidores |
+
+| REV5-F07 | refutação | F07 | planejado | somente leitura |
+| REV5-F14 | refutação | F14 | planejado | somente leitura |
+| REV5-F15 | refutação | F15 | planejado | somente leitura |
+| REV5-F18 | refutação | F18 | planejado | somente leitura |
+| REV5-R01 | refutação | R01 | planejado | somente leitura |
+| REV5-R02 | refutação | R02 | planejado | somente leitura |
+| REV5-R03 | refutação | R03 | planejado | somente leitura |
+| REV5-R04 | refutação | R04 | planejado | somente leitura |
+| REV5-R07 | refutação | R07 | planejado | somente leitura |
+| REV5-R08 | refutação | R08 | planejado | somente leitura |
+| REV5-R09 | refutação | R09 | planejado | somente leitura |
+| REV5-R12 | refutação | R12 | planejado | somente leitura |
+| REV5-R14 | refutação | R14 | planejado | somente leitura |
+| REV5-R16 | refutação | R16 | planejado | somente leitura |
+| REV5-R17 | refutação | R17 | planejado | somente leitura |
+| REV5-R18 | refutação | R18 | planejado | somente leitura |
+| REV5-R19 | refutação | R19 | planejado | somente leitura |
+| REV5-R21 | refutação | R21 | planejado | somente leitura |
+| REV5-R22 | refutação | R22 | planejado | somente leitura |
+| REV5-R23 | refutação | R23 | planejado | somente leitura |
+| REV5-R24 | refutação | R24 | planejado | somente leitura |
+| REV5-R25 | refutação | R25 | planejado | somente leitura |
+| GATE5-LINT-TSC | gate | lint/type-check | planejado | package/TS |
+| GATE5-UNIT-ASYNC | gate | unitários/async | planejado | testes |
+| GATE5-BROWSER-AXE | gate | browser/axe | planejado | browser |
+| GATE5-OVERLAYS-FOCUS | gate | overlays/foco | planejado | browser |
+| GATE5-INPUTS-FORMS | gate | inputs/forms | planejado | browser |
+| GATE5-IMAGE-PERFORMANCE | gate | imagem/performance | planejado | testes |
+| GATE5-MOTION-CONTRAST | gate | motion/contraste | planejado | browser |
+| GATE5-PLAYGROUND | gate | playground | planejado | playground |
+| GATE5-SVG-BUNDLE | gate | SVG/bundle | planejado | scripts |
+| GATE5-PACKAGE-CONSUMERS | gate | consumidores | planejado | scripts |
+| GATE5-CI-REPRODUCIBILIDADE | gate | CI/reprodutibilidade | planejado | CI |
+| PRES5-F03 | preservação | F03 | planejado | somente leitura |
+| PRES5-F12 | preservação | F12 | planejado | somente leitura |
+| PRES5-F17 | preservação | F17 | planejado | somente leitura |
+| PRES5-R05 | preservação | R05/F06 | planejado | somente leitura |
+| PRES5-R06 | preservação | R06/F08 | planejado | somente leitura |
+| PRES5-R10 | preservação | R10/F13 | planejado | somente leitura |
+| PRES5-R11 | preservação | R11/F16 | planejado | somente leitura |
+| PRES5-R13 | preservação | R13/F20 | planejado | somente leitura |
+| PRES5-R15 | preservação | R15/F22 | planejado | somente leitura |
+| PRES5-R20 | preservação | R20/F26 | planejado | somente leitura |
+
+Nenhum status planejado ou em execução é evidência de conclusão. Cada linha será atualizada com identificador real do agente, timestamps, HEAD e link para seu relatório próprio.
+
+Ordem de ondas: R02 (lint) → commit limpo → implementadores sem conflito → R01 (integração de gates) → refutadores → gates e preservações. Orçamento de cada papel: reprodução, mudança/teste focal quando aplicável, relatório com saída integral relevante.
