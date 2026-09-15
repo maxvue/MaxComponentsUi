@@ -154,6 +154,19 @@ describe('MaxBaseOverlay', () => {
         expect(panel.style.minWidth).toBe('100px');
     });
 
+    it('matchTargetWidth limita min-width à área segura em viewport estreita', async () => {
+        Object.defineProperty(window, 'innerWidth', { value: 280, configurable: true });
+        const t = makeTarget({ top: 100, bottom: 120, left: 0, right: 400, width: 400, height: 20 });
+        wrapper = mount(MaxBaseOverlay, { props: { visible: true, target: t, matchTargetWidth: true } });
+        await settle();
+
+        const panel = getPanel();
+        // 280px menos margens laterais de 8px: min-width não pode vencer max-width.
+        expect(panel.style.minWidth).toBe('264px');
+        expect(panel.style.maxWidth).toBe('264px');
+        t.remove();
+    });
+
     it('flip vertical: abre acima quando nao ha espaco abaixo', async () => {
         Object.defineProperty(window, 'innerHeight', { value: 300, configurable: true });
         const t = makeTarget({ top: 250, bottom: 270, left: 50, right: 150, width: 100, height: 20 });

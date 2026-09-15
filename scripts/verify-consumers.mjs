@@ -16,7 +16,7 @@
  */
 
 import { execSync } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -51,11 +51,10 @@ const UNOCSS_VERSION = '^66.0.0';
 try {
     console.log('\n--- Empacotando projeto com npm pack ---');
 
-    // Garante que o build está presente antes de empacotar
-    if (!existsSync(join(projectRoot, 'dist', 'index.es.js'))) {
-        console.log('dist ausente — executando npm run build...');
-        execSync('npm run build', { cwd: projectRoot, stdio: 'inherit' });
-    }
+    // Consumidores só podem receber a distribuição deste HEAD. Não aceitar um
+    // dist existente evita validar artefatos obsoletos após alterações no código.
+    console.log('Reconstruindo dist limpo antes de empacotar...');
+    execSync('npm run build:clean', { cwd: projectRoot, stdio: 'inherit' });
 
     // O destino exclusivo elimina a colisão do nome fixo do tarball em execuções paralelas.
     packDir = mkdtempSync(join(tmpdir(), 'max-components-pack-'));

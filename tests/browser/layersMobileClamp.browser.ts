@@ -48,12 +48,14 @@ describe('Camadas Semânticas, Z-Index e Clamp Responsivo no Chromium Real (R09/
         target.style.position = 'fixed';
         target.style.right = '0';
         target.style.bottom = '0';
+        target.style.width = '400px';
         document.body.appendChild(target);
 
         const app = createApp({
             setup: () => () => h(MaxBaseOverlay, {
                 visible: visible.value,
                 target,
+                matchTargetWidth: true,
                 'onUpdate:visible': (value: boolean) => { visible.value = value; }
             }, {
                 default: () => h('div', { style: 'width: 400px; height: 400px;', 'data-testid': 'conteudo-overlay' }, 'Conteúdo extenso')
@@ -65,12 +67,18 @@ describe('Camadas Semânticas, Z-Index e Clamp Responsivo no Chromium Real (R09/
 
         const panel = document.querySelector('.max-base-overlay') as HTMLElement;
         const rect = panel.getBoundingClientRect();
+        const visualViewport = window.visualViewport;
+        expect(visualViewport).not.toBeNull();
+        expect(visualViewport?.width).toBeCloseTo(280, 0);
         expect(rect.left).toBeGreaterThanOrEqual(0);
         expect(rect.right).toBeLessThanOrEqual(280);
         expect(rect.top).toBeGreaterThanOrEqual(0);
         expect(rect.bottom).toBeLessThanOrEqual(320);
+        expect(rect.width).toBeLessThanOrEqual(264);
         expect(getComputedStyle(panel).overflow).toBe('auto');
         expect(panel.contains(document.elementFromPoint(rect.left + 4, rect.top + 4))).toBe(true);
+        panel.scrollTop = 40;
+        expect(panel.scrollTop).toBe(40);
 
         target.remove();
     });

@@ -6,6 +6,13 @@
 
 /* stylelint-disable color-hex-length */
 :root {
+    // Insets físicos publicados como tokens para componentes teletransportados.
+    // env() resolve a área segura em navegadores móveis e mantém 0px nos demais.
+    --safe-area-top: env(safe-area-inset-top, 0px);
+    --safe-area-right: env(safe-area-inset-right, 0px);
+    --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-area-left: env(safe-area-inset-left, 0px);
+
     // Rampa primária — declarada em src/styles/style.ts (MaxStyle)
     --max-primary-100: #56C2D7;
     --max-primary-200: #46BCD4;

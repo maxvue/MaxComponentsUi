@@ -162,7 +162,9 @@
             position: 'fixed',
             top: `${top}px`,
             left: `${left}px`,
-            minWidth: props.matchTargetWidth ? `${t.width}px` : undefined,
+            // min-width tem precedência sobre max-width no CSS; limite-o também
+            // para que um gatilho largo não empurre o painel para fora da tela.
+            minWidth: props.matchTargetWidth ? `${Math.min(t.width, maxRight - minLeft)}px` : undefined,
             maxWidth: `${Math.max(0, maxRight - minLeft)}px`,
             maxHeight: `${Math.max(0, maxBottom - minTop)}px`,
             overflow: 'auto',

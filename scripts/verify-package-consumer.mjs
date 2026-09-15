@@ -21,11 +21,10 @@ import { fileURLToPath } from 'node:url';
 export async function verifyPackageConsumer(cwd = process.cwd()) {
     console.log('📦 [verify-package-consumer] Gerando tarball com npm pack...');
 
-    // Certifica que o build está atualizado
-    if (!fs.existsSync(path.join(cwd, 'dist', 'index.es.js'))) {
-        console.log('⚙️ [verify-package-consumer] dist ausente, executando npm run build...');
-        execSync('npm run build', { cwd, stdio: 'inherit' });
-    }
+    // Nunca reutiliza um dist de outro HEAD: os consumidores validam apenas o
+    // tarball produzido por uma reconstrução limpa desta execução.
+    console.log('⚙️ [verify-package-consumer] reconstruindo dist limpo...');
+    execSync('npm run build:clean', { cwd, stdio: 'inherit' });
 
     const packDir = fs.mkdtempSync(path.join(os.tmpdir(), 'max-package-pack-'));
     let tarballPath;

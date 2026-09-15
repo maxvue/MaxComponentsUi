@@ -40,8 +40,35 @@ O `finally` foi executado e removeu tanto o diretório do consumidor quanto o do
 tarball. A falha pertence ao entrypoint raiz/distribuição de `MaxPdfView`, fora do
 ownership de consumidores de R25; não foi ocultada reduzindo a cobertura Node.
 
+## Reabertura após REV5-R25
+
+A refutação encontrou corretamente que o import estático de
+`pdfjs-dist/build/pdf.worker.min.mjs?url` em `MaxPdfView` vazava a transformação
+específica do Vite para o entrypoint raiz. O Node tenta interpretar esse specifier
+mesmo quando o componente PDF não é montado e rejeita o `default` inexistente.
+
+O worker passou a ser resolvido por import dinâmico, exclusivamente no cliente e
+apenas quando o visualizador é carregado. Assim o Vite continua emitindo o asset
+do worker no consumidor web, enquanto Node e SSR podem importar a raiz sem
+executar esse specifier.
+
+Os dois runners também passaram a executar `npm run build:clean` antes de
+empacotar; não há mais caminho que reutilize um `dist` obsoleto.
+
+## Revalidação
+
+```text
+npm run verify:consumers    # passou
+npx eslint src/components/MaxPdfView.vue scripts/verify-consumers.mjs scripts/verify-package-consumer.mjs  # passou
+git diff --check            # passou
+```
+
+O gate completo aprovou Node ESM com e sem peers, TypeScript, Vite (incluindo CSS
+e seis temas, sem warning de chunk), SSR e subpath desconhecido. A reconstrução
+limpa, o tarball exclusivo e os dois diretórios temporários foram removidos no
+`finally` ao término.
+
 ## Estado
 
-Implementação de E11-05 concluída, mas aceite bloqueado pela incompatibilidade
-Node real do entrypoint raiz acima. A revalidação deve ocorrer após a correção do
-entrypoint de distribuição.
+Implementação R25 reaberta e concluída; aguarda somente revalidação independente
+de `REV5-R25`.
