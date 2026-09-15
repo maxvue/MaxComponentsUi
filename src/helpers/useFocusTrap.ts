@@ -3,6 +3,10 @@ import { nextTick, type Ref, onBeforeUnmount, getCurrentInstance } from 'vue';
 export interface FocusTrapOptions {
     onEscape?: () => void;
     escapeDeactivates?: boolean;
+    /** Elementos que pertencem ao overlay além do seu container (por exemplo, o gatilho). */
+    outsideElements?: () => (Node | null | undefined)[];
+    /** Fechamento solicitado para um clique iniciado e terminado fora do overlay do topo. */
+    onOutsidePointer?: () => void;
 }
 
 export interface FocusTrap {
@@ -31,6 +35,7 @@ const FOCUSABLE = [
 let nextId = 1;
 const trapStack: TrapEntry[] = [];
 let isGlobalAttached = false;
+let pointerDownTargetInsideTop = false;
 
 const isBrowser = (): boolean => typeof window !== 'undefined' && typeof document !== 'undefined';
 
@@ -60,15 +65,40 @@ const onGlobalKeydown = (event: KeyboardEvent) => {
     topTrap.onKeydown(event);
 };
 
+const isInside = (target: Node | null, entry: TrapEntry): boolean => {
+    if (!target) return false;
+    const elements = [entry.el.value, ...(entry.options?.outsideElements?.() ?? [])];
+    return elements.some((element) => Boolean(element && (element === target || element.contains(target))));
+};
+
+const onGlobalPointerDown = (event: PointerEvent) => {
+    const topTrap = trapStack[trapStack.length - 1];
+    pointerDownTargetInsideTop = topTrap ? isInside(event.target as Node | null, topTrap) : false;
+};
+
+const onGlobalClick = (event: MouseEvent) => {
+    const topTrap = trapStack[trapStack.length - 1];
+    if (!topTrap) return;
+
+    const beganInside = pointerDownTargetInsideTop;
+    pointerDownTargetInsideTop = false;
+    if (!beganInside && !isInside(event.target as Node | null, topTrap)) topTrap.options?.onOutsidePointer?.();
+};
+
 const attachGlobal = () => {
     if (isGlobalAttached || !isBrowser()) return;
     document.addEventListener('keydown', onGlobalKeydown, true);
+    document.addEventListener('pointerdown', onGlobalPointerDown, true);
+    document.addEventListener('click', onGlobalClick, true);
     isGlobalAttached = true;
 };
 
 const detachGlobal = () => {
     if (!isGlobalAttached || !isBrowser()) return;
     document.removeEventListener('keydown', onGlobalKeydown, true);
+    document.removeEventListener('pointerdown', onGlobalPointerDown, true);
+    document.removeEventListener('click', onGlobalClick, true);
+    pointerDownTargetInsideTop = false;
     isGlobalAttached = false;
 };
 

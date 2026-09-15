@@ -198,7 +198,11 @@
     const el = useTemplateRef<HTMLElement>('el');
     const btn_el = useTemplateRef('btn_el');
 
-    const trap = useFocusTrap(el, { onEscape: () => hide() });
+    const trap = useFocusTrap(el, {
+        onEscape: () => hide(),
+        outsideElements: () => [btn_el.value],
+        onOutsidePointer: () => hide()
+    });
 
     const { position, isPositioned } = useActiveOverlayPosition<{
         top: number;
@@ -291,36 +295,13 @@
         }
     };
 
-    let outsidePointerDown = false;
-    const onDocPointerDown = (e: MouseEvent | TouchEvent | PointerEvent) => {
-        const target = e.target as Node | null;
-        if (el.value && !el.value.contains(target) && btn_el.value && !btn_el.value.contains(target)) outsidePointerDown = true;
-        else outsidePointerDown = false;
-    };
-
-    const onDocClick = (e: MouseEvent) => {
-        const target = e.target as Node | null;
-        if (outsidePointerDown && el.value && !el.value.contains(target) && btn_el.value && !btn_el.value.contains(target)) hide();
-
-        outsidePointerDown = false;
-    };
-
     watch(isOpen, (value) => {
-        if (value) {
-            trap.activate();
-            document.addEventListener('pointerdown', onDocPointerDown, true);
-            document.addEventListener('click', onDocClick, true);
-        } else {
-            trap.deactivate();
-            document.removeEventListener('pointerdown', onDocPointerDown, true);
-            document.removeEventListener('click', onDocClick, true);
-        }
+        if (value) trap.activate();
+        else trap.deactivate();
     });
 
     onBeforeUnmount(() => {
         trap.deactivate();
-        document.removeEventListener('pointerdown', onDocPointerDown, true);
-        document.removeEventListener('click', onDocClick, true);
         if (popover_store.show_id === id.value) popover_store.hide();
     });
 
