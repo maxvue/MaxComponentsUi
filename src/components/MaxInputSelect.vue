@@ -1,6 +1,7 @@
 <template>
-    <InputBase v-bind="{ ...props, ...attrsWithoutModelProps }" class="max-input-select select_input_div">
-        <template #default="{ inputAttrs }">
+    <InputBase v-bind="{ ...props, ...attrsWithoutModelProps }" native-form-proxy class="max-input-select select_input_div">
+        <template #default="{ formAttrs, triggerAttrs }">
+            <input v-bind="formAttrs" class="max-native-form-proxy" type="text" :value="temp_value ?? ''" tabindex="-1" />
             <div v-if="showPlaceholder" class="placeholder-select">
                 {{ placeholderText }}
             </div>
@@ -8,7 +9,7 @@
             <div class="max-select-wrapper">
                 <div
                     ref="triggerEl"
-                    v-bind="inputAttrs"
+                    v-bind="triggerAttrs"
                     class="max-select"
                     :class="{ 'is-disabled': props.disabled, 'is-focused': isOpen }"
                     :tabindex="props.disabled ? -1 : 0"

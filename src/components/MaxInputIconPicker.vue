@@ -5,12 +5,14 @@
         :error="props.error ?? error_msg"
         :caution="caution"
         class="max-input-icon-picker"
+        native-form-proxy
         @click.stop="openDrawer"
     >
-        <template #default="{ inputAttrs }">
+        <template #default="{ formAttrs, triggerAttrs }">
+            <input v-bind="formAttrs" class="max-native-form-proxy" type="text" :value="modelValue" tabindex="-1" />
             <div
                 ref="triggerRef"
-                v-bind="inputAttrs"
+                v-bind="triggerAttrs"
                 class="icon-picker-trigger"
                 :class="{ 'is-disabled': props.disabled }"
                 role="button"

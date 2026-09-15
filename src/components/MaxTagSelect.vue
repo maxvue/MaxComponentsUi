@@ -7,8 +7,10 @@
         no-dropdown
         :no-icon="props.isButton || (attrs as any)?.noIcon"
         :no-status="props.isButton || (attrs as any)?.noStatus"
+        native-form-proxy
     >
-        <template #default="{ inputAttrs }">
+        <template #default="{ formAttrs, triggerAttrs }">
+            <input v-bind="formAttrs" class="max-native-form-proxy" type="text" :value="temp_value ?? ''" tabindex="-1" />
             <div v-if="showPlaceholder" class="tab-placeholder-select">
                 {{ placeholderText }}
             </div>
@@ -16,7 +18,7 @@
             <div class="max-select-wrapper">
                 <div
                     ref="triggerEl"
-                    v-bind="inputAttrs"
+                    v-bind="triggerAttrs"
                     class="max-select"
                     :class="{ 'is-disabled': props.disabled, 'is-focused': isOpen }"
                     :tabindex="props.disabled || props.isButton ? -1 : 0"

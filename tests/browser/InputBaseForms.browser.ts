@@ -37,6 +37,7 @@ interface BrowserFamily {
     selector: string;
     props?: Record<string, any>;
     nativeText?: boolean;
+    nativeFormOwner?: boolean;
 }
 
 const families: BrowserFamily[] = [
@@ -54,15 +55,15 @@ const families: BrowserFamily[] = [
     { name: 'MaxInputCreditCardCvv', component: MaxInputCreditCardCvv, selector: 'input.max-base-input', nativeText: true },
     { name: 'MaxInputCoordinateDecimalLat', component: MaxInputCoordinateDecimalLat, selector: 'input.max-input-native', nativeText: true },
     { name: 'MaxInputCoordinateDecimalLng', component: MaxInputCoordinateDecimalLng, selector: 'input.max-input-native', nativeText: true },
-    { name: 'MaxInputSelect', component: MaxInputSelect, selector: '.max-select', props: { options: [] } },
+    { name: 'MaxInputSelect', component: MaxInputSelect, selector: '.max-select', props: { options: [] }, nativeFormOwner: true },
     { name: 'MaxInputAutoComplete', component: MaxInputAutoComplete, selector: 'input.max-autocomplete-input', props: { options: [] }, nativeText: true },
     { name: 'MaxInputAutoCompleteApi', component: MaxInputAutoCompleteApi, selector: 'input.max-autocomplete-input', props: { options: [], route: 'api.test' }, nativeText: true },
     { name: 'MaxChips', component: MaxChips, selector: 'input.max-chips-input', props: { modelValue: [] }, nativeText: true },
-    { name: 'MaxTagSelect', component: MaxTagSelect, selector: '.max-select', props: { modelValue: [], options: [] } },
+    { name: 'MaxTagSelect', component: MaxTagSelect, selector: '.max-select', props: { modelValue: [], options: [] }, nativeFormOwner: true },
     { name: 'MaxColorPicker', component: MaxColorPicker, selector: 'input.max-colorpicker-native', props: { modelValue: '#000000' } },
-    { name: 'MaxInputIconPicker', component: MaxInputIconPicker, selector: '.icon-picker-trigger' },
-    { name: 'MaxInputOTP', component: MaxInputOTP, selector: '.max-input-otp-container' },
-    { name: 'MaxInputSwitch', component: MaxInputSwitch, selector: '.max-switch-toggle', props: { modelValue: false } },
+    { name: 'MaxInputIconPicker', component: MaxInputIconPicker, selector: '.icon-picker-trigger', nativeFormOwner: true },
+    { name: 'MaxInputOTP', component: MaxInputOTP, selector: '.max-input-otp-container', nativeFormOwner: true },
+    { name: 'MaxInputSwitch', component: MaxInputSwitch, selector: '.max-switch-toggle', props: { modelValue: false }, nativeFormOwner: true },
     { name: 'MaxInputTextList', component: MaxInputTextList, selector: 'textarea.code-textarea', nativeText: true },
     { name: 'MaxInputToggle', component: MaxInputToggle, selector: 'input.max-toggleswitch-input', props: { modelValue: false } }
 ];
@@ -145,13 +146,15 @@ describe('InputBase no Chromium (R04 / E03-02)', () => {
             const wrapper = host!.querySelector('.max-input-main-div, .max-input-toggle')!;
             const label = host!.querySelector('label')!;
             const owner = host!.querySelector(family.selector) as HTMLElement;
+            const formOwner = (family.nativeFormOwner ? host!.querySelector('.max-native-form-proxy') : owner) as HTMLInputElement;
 
             expect(owner, `${family.name}: owner real`).not.toBeNull();
-            expect(label.htmlFor, `${family.name}: label aponta ao owner`).toBe(owner.id);
+            expect(formOwner, `${family.name}: owner nativo`).not.toBeNull();
+            expect(label.htmlFor, `${family.name}: label aponta ao owner`).toBe(formOwner.id);
             expect(wrapper.hasAttribute('name'), `${family.name}: name não vaza ao wrapper`).toBe(false);
             expect(wrapper.hasAttribute('disabled'), `${family.name}: disabled não vaza ao wrapper`).toBe(false);
             expect(wrapper.hasAttribute('required'), `${family.name}: required não vaza ao wrapper`).toBe(false);
-            expect(owner.getAttribute('aria-required') === 'true' || owner.hasAttribute('required'), `${family.name}: owner recebe required`).toBe(true);
+            expect(formOwner.getAttribute('aria-required') === 'true' || formOwner.hasAttribute('required'), `${family.name}: owner recebe required`).toBe(true);
             expect(owner.getAttribute('aria-disabled')).not.toBe('true');
 
             // Chromium executa o comportamento nativo do rótulo; para owners
@@ -171,6 +174,15 @@ describe('InputBase no Chromium (R04 / E03-02)', () => {
                 expect(form.checkValidity(), `${family.name}: required é validável pelo browser`).toBe(true);
             }
 
+            if (family.nativeFormOwner) {
+                // A associação não é uma sonda: o owner nativo é a origem de
+                // FormData e da constraint validation nos controles compostos.
+                if (formOwner.type === 'checkbox') formOwner.checked = true;
+                else formOwner.value = 'valor-nativo';
+                expect(new FormData(form).has(`field-${family.name}`), `${family.name}: participa do FormData pelo owner nativo`).toBe(true);
+                expect(form.checkValidity(), `${family.name}: required é validável pelo browser`).toBe(true);
+            }
+
             app?.unmount();
             host?.remove();
             app = null;
@@ -178,8 +190,9 @@ describe('InputBase no Chromium (R04 / E03-02)', () => {
 
             await mountFamily(family, true);
             const disabledOwner = host!.querySelector(family.selector) as HTMLElement;
+            const disabledFormOwner = (family.nativeFormOwner ? host!.querySelector('.max-native-form-proxy') : disabledOwner) as HTMLInputElement;
             const disabledWrapper = host!.querySelector('.max-input-main-div, .max-input-toggle')!;
-            expect(disabledOwner.hasAttribute('disabled') || disabledOwner.getAttribute('aria-disabled') === 'true', `${family.name}: disabled chega ao owner`).toBe(true);
+            expect(disabledFormOwner.hasAttribute('disabled') || disabledFormOwner.getAttribute('aria-disabled') === 'true', `${family.name}: disabled chega ao owner`).toBe(true);
             expect(disabledWrapper.hasAttribute('disabled'), `${family.name}: disabled não vaza ao wrapper`).toBe(false);
 
             app?.unmount();

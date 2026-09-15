@@ -32,8 +32,27 @@ Tests  2 passed (2)
 
 ## Veredito
 
-## Limite conhecido para a refutação
+## Retry nativo — 2026-09-15
 
-Sete famílias compostas (`MaxInputSelect`, `MaxTagSelect`, `MaxInputIconPicker`, `MaxInputOTP`, `MaxInputSwitch` e controles equivalentes não-textuais) têm owner em `div[role]`, portanto não são *form-associated elements* do HTML: ARIA não os inclui em `FormData` nem lhes dá `checkValidity()`. A matriz Chromium agora prova esse owner real em vez de escondê-lo com uma sonda sintética. Para o requisito literal de `FormData`/`checkValidity` nas 25, será necessária uma evolução de contrato nesses componentes (por exemplo, controle nativo associado ao formulário e sincronizado ao modelo), que excede o reparo de encaminhamento do `InputBase`.
+Os cinco owners compostos que eram `div[role]` receberam proxy nativo de formulário sincronizado ao `modelValue`: `MaxInputSelect`, `MaxTagSelect`, `MaxInputIconPicker`, `MaxInputOTP` e `MaxInputSwitch`. `InputBase` agora oferece `formAttrs` e `triggerAttrs`: o primeiro dá ao input proxy o `id` apontado pelo `label`, `name`, `required`, `disabled` e `form`; o segundo mantém ARIA no trigger visual sem duplicar atributos de formulário em uma `div`.
 
-**IMPLEMENTADO PARCIALMENTE — pronto para nova refutação, com a limitação acima explicitada.**
+O proxy é visualmente recortado e `tabindex=-1`: não cria segundo ponto de tabulação, mas continua um elemento form-associated real. O modelo continua sendo a fonte do valor (renderização reativa para `value`/`checked`).
+
+Verificação adicional:
+
+```text
+$ npm exec vitest run tests/components/inputBaseAttributesSeparation.test.ts
+Test Files  1 passed (1)
+Tests  99 passed (99)
+
+$ npx vitest run --config vitest.browser.config.ts tests/browser/InputBaseForms.browser.ts
+Test Files  1 passed (1)
+Tests  2 passed (2)
+
+$ npx vue-tsc --noEmit --pretty false --project tsconfig.json
+exit 0
+```
+
+O cenário Chromium cobre as 25 famílias e, nos cinco compostos, verifica especificamente que o owner nativo recebe o `label[for]`, participa de `FormData` e determina `form.checkValidity()`; no Switch a semântica é `checkbox` nativo.
+
+**IMPLEMENTADO — aguarda refutação independente pelo mesmo REV5-R04.**

@@ -10,10 +10,12 @@
         :error="props.error ?? error_msg"
         :caution="props.caution"
         :no-status="props.noStatus"
+        native-form-proxy
     >
-        <template #default="{ inputAttrs, inputId, messageId, hasMessage, isError: slotError, isRequired }">
+        <template #default="{ formAttrs, triggerAttrs, inputId, messageId, hasMessage, isError: slotError, isRequired }">
+            <input v-bind="formAttrs" class="max-native-form-proxy" type="text" :value="values.join('')" tabindex="-1" />
             <div
-                v-bind="inputAttrs"
+                v-bind="triggerAttrs"
                 class="max-input-otp-container"
                 :class="{ 'is-disabled': props.disabled }"
                 role="group"
