@@ -41,6 +41,7 @@ vite_error.log
 .augment*/
 .aider*
 .cline/
+.claude/worktrees/
 .continue/
 .roo/
 .superpowers*
