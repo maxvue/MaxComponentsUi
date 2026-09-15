@@ -60,3 +60,71 @@ duas invariantes de produto acima e a matriz real de 280/320, landscape e zoom
 200% não estão provadas. O implementador deve publicar tokens safe-area com
 fallback `env()`, limitar também `minWidth`/largura efetiva e adicionar cenários
 Chromium que alterem `VisualViewport` de verdade e cubram as métricas requeridas.
+
+## Revalidação — HEAD `3ee209c5e8b9eee339616f9eeed1aeda3f67f65c`
+
+Data: `2026-09-15T16:05:00-03:00`. Auditoria somente leitura da implementação e
+execução das suítes focais.
+
+### Correções agora comprovadas
+
+- `src/themes/tokens.scss` publica `--safe-area-top/right/bottom/left` com
+  `env(safe-area-inset-*, 0px)`, e `resolveSafeAreaInsets()` os consome.
+- `MaxBaseOverlay` limita `minWidth` de `matchTargetWidth` à área útil. O cenário
+  Chromium de 280 px usa gatilho de 400 px e mede painel de no máximo 264 px,
+  margem, `overflow: auto`, scroll e `elementFromPoint` no painel real.
+- `useActiveOverlayPosition` inclui `offsetLeft`/`offsetTop`; o unitário simula
+  `VisualViewport` 280×200, offsets 40/300, escala 2 e safe-areas, comprovando o
+  clamp matemático e os listeners de viewport.
+- O cenário Chromium cobre `MaxBaseOverlay` em 280 px, `MaxPopover` em 280 px,
+  `MaxPopoverConfirm` em landscape 568×320, além de hit-test e override de
+  tokens. As execuções reais foram: 33/33 unitários e 6/6 browser aprovados.
+
+### Refutação remanescente: zoom real de 200%
+
+O teste chamado `preserva clamp e limites visuais sob zoom de 200%` não realiza
+pinch/page zoom nem emulação CDP: define apenas `hostElement.style.zoom = '2'`.
+Ele monta `MaxPopover` e afirma exclusivamente que seu `z-index` computado é
+1200. Não mede margem, seta, scroll, hit-test ou `MaxBaseOverlay` nesse caso e
+não afirma `window.visualViewport.scale === 2`. Portanto CSS `zoom` local e o
+mock unitário não constituem evidência de zoom visual real no Chromium.
+
+Também houve avisos reais de diretiva `tooltip` não resolvida durante a suíte
+browser; eles não invalidam os seis asserts focais, mas impedem classificá-la
+como gate browser limpo.
+
+### Veredito de revalidação
+
+**REJEITADO.** Safe-area, `matchTargetWidth`, offsets, margem, scroll e hit-test
+agora têm evidência suficiente nos escopos acima. O aceite integral de R09 ainda
+exige uma execução Chromium com zoom real de 200% (por CDP/emulação de dispositivo
+ou equivalente), registrando `VisualViewport.scale === 2` e as métricas de
+margem, seta, scroll e hit-test para o overlay real.
+
+## Revalidação final — HEAD `8ac50943`
+
+Data: `2026-09-15T16:18:05-03:00`. Auditoria independente, somente leitura da
+implementação; relatório e matriz são os únicos artefatos atualizados.
+
+```text
+$ npx vitest run tests/integration/r09VisualViewportZoom.test.ts
+Test Files  1 passed (1)
+Tests  1 passed (1)
+Duration  1.84s
+```
+
+O teste inicia um Chromium headless por Playwright, aplica
+`Emulation.setDeviceMetricsOverride` em 280×320 e
+`Emulation.setPageScaleFactor({ pageScaleFactor: 2 })` por uma sessão CDP. A
+prova espera explicitamente `window.visualViewport.scale` igual a 2 antes das
+medições — não há `style.zoom` como substituto. A fixture monta os componentes
+de produção `MaxBaseOverlay` e `MaxPopover`, e o teste verifica em ambos a
+margem de pelo menos 7 px em cada borda da `VisualViewport`, `scrollTop = 40` e
+`elementFromPoint` contido no painel real. Para o `MaxPopover`, também verifica
+a seta computada real (`::before`, 14×14 px, transformação matricial).
+
+### Veredito final
+
+**ACEITO.** A lacuna de zoom real apontada na refutação anterior foi coberta por
+CDP e `VisualViewport.scale === 2`, com margem, seta, scroll e hit-test dos
+overlays de produção no mesmo cenário.

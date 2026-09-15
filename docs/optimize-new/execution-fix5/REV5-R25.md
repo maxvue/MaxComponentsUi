@@ -2,64 +2,68 @@
 
 ## Escopo e referência
 
-Refutação independente e somente leitura do agente `/root/rev5_r25`, parent
-`/root`, no HEAD `4f9e79ab399423d1599679389ad807c80fa8d8df`, contra a referência
-`aac16bca`. O contrato de R25 exige import Node do entrypoint raiz, CSS e todos
-os temas públicos, rejeição de subpath desconhecido, falha em warning de chunk,
-e execução concorrente sem colisão nem resíduos mesmo quando há falha.
+Revalidação independente e somente leitura do agente `/root/rev5_r25_retry`,
+parent `/root`, no HEAD `3ee209c5e8b9eee339616f9eeed1aeda3f67f65c`, contra a
+referência adversarial `aac16bca`. O contrato de R25 exige import Node do
+entrypoint raiz, CSS e todos os temas públicos, rejeição de subpath desconhecido,
+falha em warning de chunk e execução concorrente sem colisão nem resíduos.
 
-## Caso adversarial
+## Caso adversarial e execução
 
-Foram iniciadas duas instâncias reais, simultâneas, do consumidor canônico:
+Duas instâncias reais foram executadas em paralelo no checkout limpo do HEAD:
 
 ```text
-$ npm run verify:consumers > /tmp/rev5-r25-consumer-1.log 2>&1 &
-$ npm run verify:consumers > /tmp/rev5-r25-consumer-2.log 2>&1 &
+$ npm run verify:consumers > /tmp/rev5-r25-retry.cb8ECW/a.log 2>&1 &
+$ npm run verify:consumers > /tmp/rev5-r25-retry.cb8ECW/b.log 2>&1 &
 $ wait ...
-CONCORRENTE_STATUS=1,1
+CONCORRENTE_STATUS=0,0
 ```
 
-Cada processo criou nomes independentes para tarball e consumidor:
+Cada uma fez `npm run build:clean`, gerou seu próprio tarball e consumidor:
 
 ```text
-/tmp/max-components-pack-stppvQ/maxvue-max-components-ui-1.1.2.tgz
-/tmp/max-components-test-dAthxW
-/tmp/max-components-pack-6Oauzd/maxvue-max-components-ui-1.1.2.tgz
-/tmp/max-components-test-w6YcFH
+/tmp/max-components-pack-6OZWc6/maxvue-max-components-ui-1.1.2.tgz
+/tmp/max-components-test-yvVAbh
+/tmp/max-components-pack-Ufn9GH/maxvue-max-components-ui-1.1.2.tgz
+/tmp/max-components-test-Goax0q
 ```
 
-Logo, a colisão histórica do tarball de nome fixo foi eliminada. Ambos os
-processos, porém, falharam antes de alcançar CSS, temas, subpath e Vite, pois o
-primeiro cenário obrigatório de Node ESM não consegue importar a raiz:
+Ambas executaram integralmente os seis cenários. A saída final de cada log foi:
 
 ```text
-SyntaxError: The requested module 'pdfjs-dist/build/pdf.worker.min.mjs?url'
-does not provide an export named 'default'
+Node ESM sem/com dependências opcionais — OK
+TypeScript Consumer — OK
+Vite Consumer — OK (sem warning de chunk)
+SSR Consumer — OK
+Subpath desconhecido corretamente rejeitado com: ERR_PACKAGE_PATH_NOT_EXPORTED
+✅ --- Todos os cenários de validação passaram com sucesso ---
+Diretório temporário removido: ...
+Diretório do tarball removido: ...
 ```
 
-O mesmo caminho já existe no commit de referência: `aac16bca` importa o
-entrypoint raiz no cenário Node ESM de `scripts/verify-consumers.mjs`. Portanto
-o caso adversarial é capaz de falhar na referência exigida; o HEAD ainda não o
-resolveu.
+O caso é discriminante: em `aac16bca` o import obrigatório da raiz em Node ESM
+falhava por `pdfjs-dist/build/pdf.worker.min.mjs?url` não exportar `default`.
+O HEAD substitui esse ponto pelo carregamento dinâmico compatível, e o cenário
+Node real agora passa antes dos demais.
 
-## Evidências adicionais
+## Cobertura e cleanup
 
-- A inspeção de `scripts/verify-consumers.mjs` confirma `npm pack --json
-  --pack-destination` sob diretório criado por `mkdtempSync`, com `finally` que
-  remove tanto o consumidor como o diretório do pacote.
-- Após as duas falhas, `find /tmp -maxdepth 1` para os prefixos
-  `max-components-pack-*` e `max-components-test-*` não retornou resíduos.
-- Não há `process.exit()` no fluxo do runner antes do `finally`: a falha usa
-  `process.exitCode = 1`. `scripts/verify-package-consumer.mjs` também protege
-  o diretório exclusivo de pack com `try/finally`.
-- O código contém os imports diretos de `style.css` e dos seis temas públicos,
-  o teste negativo de subpath e a política de warning de chunk. Esta cobertura
-  permanece **não executada** porque o import Node raiz falha primeiro.
+- O cenário Vite importa `style.css` e os seis temas exportados: `all`, `app`,
+  `colors`, `font`, `params` e `tokens`.
+- Node ESM com/sem peer opcional, TypeScript, Vite e SSR foram exercitados por
+  cada processo. O wrapper do build trata warnings de chunk como falha; nenhum
+  warning foi produzido.
+- O cenário negativo exige `ERR_PACKAGE_PATH_NOT_EXPORTED` (ou equivalentes)
+  para subpath não publicado e recebeu `ERR_PACKAGE_PATH_NOT_EXPORTED`.
+- `npm pack --pack-destination` recebe diretório exclusivo criado por
+  `mkdtempSync`. Os dois runners encerram com `process.exitCode`, nunca com
+  `process.exit()` antes do `finally`.
+- Os quatro caminhos temporários apresentados foram removidos pelo `finally`;
+  ao final não havia processo `verify-consumers` ativo nem resíduos nesses
+  caminhos.
 
 ## Veredito
 
-**REJEITADO.** A correção de isolamento concorrente e cleanup é comprovada,
-mas E11-05 exige consumidores Node funcionais. O import público raiz ainda é
-incompatível com Node por causa de `pdfjs-dist/...mjs?url`; enquanto isso não
-for corrigido e todos os cenários completarem sem warning de chunk, o bloco não
-pode receber aceite.
+**ACEITO.** R25 atende a distribuição para Node, TypeScript, Vite e SSR; CSS e
+todos os temas; subpath negativo; política de warning de chunk; e consumidores
+concorrentes com tarballs/diretórios isolados e cleanup garantido.
