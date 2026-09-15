@@ -14,6 +14,7 @@ export const gates = Object.freeze([
     ['testes unitários (incluindo distribuição)', ['run', 'test']],
     ['cobertura', ['run', 'test:coverage']],
     ['browser', ['run', 'test:browser']],
+    ['axe-core no Chromium', ['run', 'test:axe']],
     ['playground completo e orçamento', ['run', 'build:playground']],
     ['SVGO', ['run', 'check:svgo']],
     ['benchmarks', ['run', 'test:benchmark']],

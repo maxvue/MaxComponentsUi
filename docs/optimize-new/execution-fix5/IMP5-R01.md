@@ -16,6 +16,10 @@ O contrato anterior também foi inspecionado: `verify` encadeava comandos com `&
 
 O workflow de CI já consome exclusivamente `npm run verify` após `npm ci`, portanto herda o gate canônico sem duplicar uma lista divergente de comandos.
 
+## Complemento: axe-core real
+
+Após a constatação de R08, `axe-core@4.11.0` foi adicionado como dependência de desenvolvimento e ao lockfile. O novo comando `npm run test:axe` executa um cenário Chromium com o motor oficial, verifica zero violações WCAG 2 A/AA em um diálogo nomeado e prova a sensibilidade do gate ao remover o nome de um botão (violação `button-name`). O comando integra o `verify` como etapa separada de `test:browser`; os cenários de componentes de F14/R08 podem reutilizar esse motor sem mocks.
+
 ## Comandos e saída relevante
 
 ```text

@@ -72,6 +72,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:browser": "vitest run --config vitest.browser.config.ts",
+    "test:axe": "vitest run --config vitest.browser.config.ts tests/browser/axeCore.axe.browser.ts",
     "test:benchmark": "npx tsx tests/benchmarks/run-benchmarks.ts",
     "verify:reproducibility": "node scripts/verify-reproducibility.mjs"
   },
@@ -122,6 +123,7 @@
     "@vue/tsconfig": "^0.9.1",
     "@vueuse/core": "^14.4.0",
     "ajv": "^8.20.0",
+    "axe-core": "4.11.0",
     "eslint": "^10.8.0",
     "eslint-plugin-vue": "^10.10.0",
     "fake-indexeddb": "^6.2.5",
