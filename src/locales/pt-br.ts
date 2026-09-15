@@ -1,13 +1,13 @@
 export interface MaxPdfViewLabels {
-    loading: string
-    progress: string
+    loading: string;
+    progress: string;
 }
 
 export const maxComponentsPtBR = {
     pdfView: {
         loading: 'Carregando PDF',
-        progress: 'Progresso de carregamento do PDF',
-    },
+        progress: 'Progresso de carregamento do PDF'
+    }
 } satisfies { pdfView: MaxPdfViewLabels };
 
 export default {

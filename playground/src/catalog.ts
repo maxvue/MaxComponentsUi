@@ -54,6 +54,7 @@ export const PLAYGROUND_CATALOG: CatalogComponent[] = [
     { name: 'MaxInputCoordinateDecimalLat', family: 'inputs', scenarioId: 'inputs-coords', description: 'Input especializado para latitude em graus decimais (-90 a 90).' },
     { name: 'MaxInputCoordinateDecimalLng', family: 'inputs', scenarioId: 'inputs-coords', description: 'Input especializado para longitude em graus decimais (-180 a 180).' },
     { name: 'MaxInputDatePicker', family: 'inputs', scenarioId: 'inputs-select', description: 'Seletor de data com calendário modal ou embutido no padrão pt-BR.' },
+    { name: 'MaxInputBirthday', family: 'inputs', scenarioId: 'inputs-select', description: 'Seletor de data de nascimento com 3 seletores customizados (Dia, Mês, Ano) separados por "de".' },
     { name: 'MaxInputFile', family: 'inputs', scenarioId: 'inputs-files', description: 'Controle compacto para upload e seleção de arquivos locais.' },
     { name: 'MaxInputFileProject', family: 'inputs', scenarioId: 'inputs-files', description: 'Gerenciador especializado de anexos em nível de projeto.' },
     { name: 'MaxInputFileUpload', family: 'inputs', scenarioId: 'inputs-files', description: 'Área completa de envio de arquivos com barra de progresso.' },
