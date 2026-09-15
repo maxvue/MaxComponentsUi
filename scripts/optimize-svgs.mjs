@@ -8,8 +8,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const assetsDir = path.resolve(__dirname, '../src/assets/credit-card');
 
-function optimizeDirectory(directory) {
+function optimizeDirectory(directory, checkOnly = false) {
     const files = fs.readdirSync(directory);
+    let hasChanges = false;
+    let errorCount = 0;
 
     for (const file of files) {
         if (file.endsWith('.svg')) {
@@ -18,15 +20,40 @@ function optimizeDirectory(directory) {
             const result = optimize(content, { path: filePath, ...svgoConfig });
 
             if (result.error) {
-                console.error(`Error optimizing ${file}:`, result.error);
+                console.error(`Erro ao otimizar ${file}:`, result.error);
+                errorCount++;
                 continue;
             }
 
-            fs.writeFileSync(filePath, result.data, 'utf-8');
-            console.log(`Optimized ${file}`);
+            if (result.data !== content) {
+                hasChanges = true;
+                if (checkOnly) {
+                    console.error(`SVG não otimizado ou divergente encontrado: ${file}`);
+                } else {
+                    fs.writeFileSync(filePath, result.data, 'utf-8');
+                    console.log(`Optimized ${file}`);
+                }
+            } else if (!checkOnly) {
+                console.log(`Already optimized: ${file}`);
+            }
         }
+    }
+
+    if (errorCount > 0) {
+        process.exit(1);
+    }
+
+    if (checkOnly) {
+        if (hasChanges) {
+            console.error('Falha na verificação de SVGO: existem SVGs não otimizados. Execute `node scripts/optimize-svgs.mjs` para corrigir.');
+            process.exit(1);
+        } else {
+            console.log('✅ Verificação SVGO: todos os SVGs de bandeiras estão otimizados e idempotentes.');
+        }
+    } else {
+        console.log('SVG optimization complete.');
     }
 }
 
-optimizeDirectory(assetsDir);
-console.log('SVG optimization complete.');
+const isCheck = process.argv.includes('--check');
+optimizeDirectory(assetsDir, isCheck);

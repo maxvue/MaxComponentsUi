@@ -109,7 +109,7 @@
     transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
 
     &:focus-visible {
-        outline: 2px solid var(--max-primary-500, #00768E);
+        outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e)); /* Foco canônico */
         outline-offset: -2px;
         border-radius: 4px;
     }
@@ -187,9 +187,25 @@
     overflow: hidden;
 
     &:focus-visible {
-        outline: 2px solid var(--max-primary-500, #00768E);
+        outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e)); /* Foco canônico */
         outline-offset: -2px;
         border-radius: 4px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .max-tab-item-title,
+    .max-tab-item-title::before {
+        transition: none !important;
     }
 }
 </style>

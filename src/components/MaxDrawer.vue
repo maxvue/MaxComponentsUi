@@ -330,6 +330,12 @@
                     cursor: pointer;
                     display: flex;
                     color: var(--background-700);
+
+                    &:focus-visible {
+                        outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
+                        outline-offset: 2px;
+                        box-shadow: var(--max-focus-ring);
+                    }
                 }
             }
 

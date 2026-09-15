@@ -500,7 +500,9 @@
 
             &:focus-visible {
                 border-radius: 4px;
-                outline: 2px solid var(--max-inputtext-focus-border-color);
+
+                /* Foco canônico: --max-focus-ring-color adapta em dark mode */
+                outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
             }
 
             .max-phone-select-label {
@@ -571,12 +573,12 @@
 .max-phone-overlay-mask {
     position: fixed;
     inset: 0;
-    z-index: var(--max-layer-dropdown, 1000);
+    z-index: var(--max-z-index-dropdown, var(--max-layer-dropdown, 1000));
 }
 
 .max-phone-select-overlay {
     position: fixed;
-    z-index: calc(var(--max-layer-dropdown, 1000) + 1);
+    z-index: calc(var(--max-z-index-dropdown, var(--max-layer-dropdown, 1000)) + 1);
     display: grid;
     grid-template-rows: auto 1fr;
     overflow: hidden;

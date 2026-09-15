@@ -459,13 +459,15 @@
                 }
 
                 &:focus {
-                    border-color: var(--max-primary-500) !important;
-                    box-shadow: 0 0 0 2px var(--max-primary-200) !important;
+                    /* Foco canônico para mobile/virtual-keyboard: :focus-visible pode não disparar */
+                    border-color: var(--max-focus-ring-color, var(--max-primary-500)) !important;
+                    box-shadow: var(--max-focus-ring, 0 0 0 2px var(--background-0, #fff), 0 0 0 4px var(--max-focus-ring-color, #00768e)) !important;
                     background-color: var(--background-0);
                 }
 
                 &:focus-visible {
-                    outline: 2px solid var(--max-primary-500, #00768E) !important;
+                    /* Foco canônico: outline adapta em dark mode via --max-focus-ring-color */
+                    outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e)) !important;
                     outline-offset: 1px;
                     z-index: 1;
                 }
@@ -502,6 +504,21 @@
                 box-shadow: 0 0 0 2px rgb(234 88 12 / 20%) !important;
             }
         }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .max-input-otp-cell {
+        transition: none !important;
     }
 }
 </style>

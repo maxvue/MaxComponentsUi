@@ -14,10 +14,21 @@ export type TerminalStatus = 'done' | 'error';
 /** Estado de um item de carregamento. */
 export type ItemStatus = PendingStatus | TerminalStatus;
 
+/**
+ * Handle opaco identificador de uma instância individual de operação de carregamento (R15/F22).
+ * Permite controlar instâncias concorrentes independentemente mesmo quando compartilham a mesma chave lógica.
+ */
+declare const LoadingHandleBrand: unique symbol;
+export type LoadingHandle = string & { readonly [LoadingHandleBrand]?: never };
+
 /** Um item individual da fila de carregamento. */
 export interface LoadingItem {
-    /** Identificador lógico do item (não é a chave interna gerada). */
+    /** Identificador lógico do item (ou chave única interna). */
     key: string;
+    /** Handle opaco identificador da instância individual (R15/F22). */
+    handle?: LoadingHandle;
+    /** Chave lógica da operação para agrupamento semântico. */
+    logicalKey?: string;
     /** Mensagem exibida ao usuário. */
     message?: string;
     /** Estado atual. Padrão: `'loading'`. */
@@ -50,6 +61,10 @@ export interface LoadingItem {
     persistent_error?: boolean;
     /** Callback opcional de retry para recuperação */
     retry?: () => void | Promise<void>;
+    /** Contador de tentativas de retry executadas nesta instância (R15/F22). */
+    retryCount?: number;
+    /** Limite opcional de tentativas de retry. */
+    maxRetries?: number;
     /** Detalhes do erro ou exceção associada para diagnóstico e recuperação. */
     error?: any;
 }

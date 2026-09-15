@@ -143,6 +143,7 @@ describe('E05-07: Estados Assíncronos Distinguíveis e Recuperação', () => {
             // Volta para loading e reseta erro
             expect(vm.isLoading).toBe(true);
             expect(vm.hasError).toBe(false);
+            expect(errSpy).toHaveBeenCalled();
             wrapper.unmount();
             errSpy.mockRestore();
         });
@@ -180,8 +181,10 @@ describe('E05-07: Estados Assíncronos Distinguíveis e Recuperação', () => {
             await wrapper.vm.$nextTick();
 
             expect(vm.hasLoadError).toBe(false);
+            expect(errSpy).toHaveBeenCalled();
             wrapper.unmount();
             errSpy.mockRestore();
+            vi.unstubAllGlobals();
         });
     });
 

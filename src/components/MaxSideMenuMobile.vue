@@ -342,7 +342,8 @@
             }
 
             &:focus-visible {
-                outline: 2px solid var(--blue-500, #0ea5e9);
+                /* Foco canônico: --blue-500 era legado; --max-focus-ring-color é a referência da marca */
+                outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
                 outline-offset: -2px;
             }
         }
@@ -396,6 +397,22 @@
                 font-size: 0.7rem;
                 color: var(--background-650);
             }
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        ::before,
+        ::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+
+        .mobile-menu-item,
+        .mobile-footer-btn {
+            transition: none !important;
         }
     }
 </style>

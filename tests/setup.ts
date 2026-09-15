@@ -166,39 +166,34 @@ config.global.directives = {
     maska: {}
 };
 
-// Captura e verificação de warnings e erros não tratados
-const originalConsoleWarn = console.warn;
-const originalConsoleError = console.error;
+// Mock global do @lottiefiles/dotlottie-vue para evitar requisições de rede ou carregamento de WASM em testes
+vi.mock('@lottiefiles/dotlottie-vue', () => ({
+    DotLottieVue: {
+        name: 'DotLottieVue',
+        props: ['src', 'autoplay', 'loop', 'speed'],
+        template: '<div class="mock-dot-lottie" :data-src="src"></div>'
+    }
+}));
 
-let unhandledWarnings: string[] = [];
-let unhandledErrors: string[] = [];
-
-console.warn = (...args: any[]) => {
-    const msg = args.map((a) => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' ');
-    unhandledWarnings.push(msg);
-    originalConsoleWarn(...args);
-};
-
-console.error = (...args: any[]) => {
-    const msg = args.map((a) => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' ');
-    unhandledErrors.push(msg);
-    originalConsoleError(...args);
-};
+// Inicializa política de console e detecção de erros assíncronos
+import { initConsolePolicy } from './helpers/consolePolicy';
+initConsolePolicy();
 
 beforeEach(() => {
-    unhandledWarnings = [];
-    unhandledErrors = [];
-    globalThis.fetch = createDefaultFetch();
+    const freshFetch = createDefaultFetch();
+    globalThis.fetch = freshFetch;
+    if (typeof window !== 'undefined') window.fetch = freshFetch;
     setActivePinia(createPinia());
 });
 
 afterEach(() => {
-    const warnings = [...unhandledWarnings];
-    const errors = [...unhandledErrors];
+    try {
+        vi.unstubAllGlobals();
+    } catch {
+        // no-op
+    }
 
-    unhandledWarnings = [];
-    unhandledErrors = [];
-
-    if (warnings.length > 0) throw new Error(`[tests/setup] Teste emitiu console.warn inesperado:\n${warnings.join('\n')}`);
-    if (errors.length > 0) throw new Error(`[tests/setup] Teste emitiu console.error inesperado:\n${errors.join('\n')}`);
+    const freshFetch = createDefaultFetch();
+    globalThis.fetch = freshFetch;
+    if (typeof window !== 'undefined') window.fetch = freshFetch;
 });

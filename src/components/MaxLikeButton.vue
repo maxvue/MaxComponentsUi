@@ -316,6 +316,12 @@
         transition: all 0.2s ease-in-out;
         user-select: none;
 
+        &:focus-visible {
+            outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
+            outline-offset: 2px;
+            box-shadow: var(--max-focus-ring);
+        }
+
         &:hover {
             border-color: var(--background-400);
             background: var(--background-100, #f8fafc);

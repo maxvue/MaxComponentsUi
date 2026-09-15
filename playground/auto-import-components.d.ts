@@ -11,7 +11,6 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    Button: typeof import('primevue/button')['default']
     InputBase: typeof import('./../src/components/InputBase.vue')['default']
     MaxAccordion: typeof import('./../src/components/MaxAccordion.vue')['default']
     MaxAccordionItem: typeof import('./../src/components/MaxAccordionItem.vue')['default']
@@ -19,6 +18,9 @@ declare module 'vue' {
     MaxAnimateFade: typeof import('./../src/components/MaxAnimateFade.vue')['default']
     MaxApp: typeof import('./../src/components/MaxApp.vue')['default']
     MaxAuthCard: typeof import('./../src/components/MaxAuthCard.vue')['default']
+    MaxBadge: typeof import('./../src/components/MaxBadge.vue')['default']
+    MaxBadgeButton: typeof import('./../src/components/MaxBadgeButton.vue')['default']
+    MaxBadgeButtonsGroup: typeof import('./../src/components/MaxBadgeButtonsGroup.vue')['default']
     MaxBadgeComponent: typeof import('./../src/components/MaxBadgeComponent.vue')['default']
     MaxBaseInput: typeof import('./../src/components/base/MaxBaseInput.vue')['default']
     MaxBaseOverlay: typeof import('./../src/components/base/MaxBaseOverlay.vue')['default']
@@ -47,6 +49,8 @@ declare module 'vue' {
     MaxInputAutoCompleteApi: typeof import('./../src/components/MaxInputAutoCompleteApi.vue')['default']
     MaxInputCep: typeof import('./../src/components/MaxInputCep.vue')['default']
     MaxInputCheckbox: typeof import('./../src/components/MaxInputCheckbox.vue')['default']
+    MaxInputCode: typeof import('./../src/components/MaxInputCode.vue')['default']
+    MaxInputCodeToolbar: typeof import('./../src/components/MaxInputCodeToolbar.vue')['default']
     MaxInputCoordinateDecimalLat: typeof import('./../src/components/MaxInputCoordinateDecimalLat.vue')['default']
     MaxInputCoordinateDecimalLng: typeof import('./../src/components/MaxInputCoordinateDecimalLng.vue')['default']
     MaxInputCpfCnpj: typeof import('./../src/components/MaxInputCpfCnpj.vue')['default']
@@ -97,6 +101,7 @@ declare module 'vue' {
     MaxPopoverMenu: typeof import('./../src/components/MaxPopoverMenu.vue')['default']
     MaxSideMenu: typeof import('./../src/components/MaxSideMenu.vue')['default']
     MaxSideMenuMobile: typeof import('./../src/components/MaxSideMenuMobile.vue')['default']
+    MaxStats: typeof import('./../src/components/MaxStats.vue')['default']
     MaxTab: typeof import('./../src/components/MaxTab.vue')['default']
     MaxTabItem: typeof import('./../src/components/MaxTabItem.vue')['default']
     MaxTable: typeof import('./../src/components/MaxTable.vue')['default']
@@ -106,6 +111,7 @@ declare module 'vue' {
     MaxTabPanel: typeof import('./../src/components/MaxTabPanel.vue')['default']
     MaxTabPanels: typeof import('./../src/components/MaxTabPanels.vue')['default']
     MaxTabs: typeof import('./../src/components/MaxTabs.vue')['default']
+    MaxTag: typeof import('./../src/components/MaxTag.vue')['default']
     MaxTagSelect: typeof import('./../src/components/MaxTagSelect.vue')['default']
     MaxTagsList: typeof import('./../src/components/MaxTagsList.vue')['default']
     MaxTextInputFloatLabel: typeof import('./../src/components/MaxTextInputFloatLabel.vue')['default']
@@ -125,8 +131,5 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     TransitionFade: typeof import('./../src/components/TransitionFade.vue')['default']
-  }
-  export interface GlobalDirectives {
-    Tooltip: typeof import('primevue/tooltip')['default']
   }
 }

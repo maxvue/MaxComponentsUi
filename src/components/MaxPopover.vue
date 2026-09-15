@@ -43,7 +43,6 @@
                         :style="dialogStyle"
                         :class="[position.isTop ? 'is-top' : 'is-bottom', position.isLeft ? 'is-left' : 'is-right', props.noPicker ? 'no-picker' : '', props.class]"
                         @click.stop="() => {}"
-                        @keydown="trap.onKeydown"
                     >
                         <div v-if="!props.noHeader" :id="title_id" class="max-popover-header-wrapper">
                             <slot name="header" :title-id="title_id">
@@ -199,7 +198,7 @@
     const el = useTemplateRef<HTMLElement>('el');
     const btn_el = useTemplateRef('btn_el');
 
-    const trap = useFocusTrap(el);
+    const trap = useFocusTrap(el, { onEscape: () => hide() });
 
     const { position, isPositioned } = useActiveOverlayPosition<{
         top: number;
@@ -210,17 +209,27 @@
         target: btn_el,
         overlay: el,
         active: isOpen,
-        compute: ({ targetRect, overlayRect, viewportWidth, viewportHeight }) => {
+        compute: ({ targetRect, overlayRect, viewportWidth, viewportHeight, safeArea }) => {
             const width_btn = targetRect.width;
             const height_btn = targetRect.height;
             const width_el = overlayRect.width || 300;
             const height_el = overlayRect.height || 60;
 
+            const safeTop = safeArea?.top ?? 0;
+            const safeRight = safeArea?.right ?? 0;
+            const safeBottom = safeArea?.bottom ?? 0;
+            const safeLeft = safeArea?.left ?? 0;
+
             const margin = 8;
             const arrowSpacing = 15;
 
-            const spaceBelow = viewportHeight - (targetRect.top + height_btn);
-            const spaceAbove = targetRect.top;
+            const minTop = Math.max(margin, safeTop + margin);
+            const maxBottom = Math.max(minTop, viewportHeight - safeBottom - margin);
+            const minLeft = Math.max(margin, safeLeft + margin);
+            const maxRight = Math.max(minLeft, viewportWidth - safeRight - margin);
+
+            const spaceBelow = maxBottom - (targetRect.top + height_btn);
+            const spaceAbove = targetRect.top - minTop;
 
             let isTop = false;
             let top: number;
@@ -239,14 +248,13 @@
                 isTop = false;
             }
 
-            top = Math.max(margin, Math.min(top, viewportHeight - height_el - margin));
+            top = Math.max(minTop, Math.min(top, maxBottom - height_el));
 
             let left = targetRect.left + (width_btn / 2) - (width_el / 2);
 
-            if (left + width_el + margin > viewportWidth) left = targetRect.left + width_btn - width_el + 10;
+            if (left + width_el + margin > maxRight) left = targetRect.left + width_btn - width_el + 10;
 
-
-            left = Math.max(margin, Math.min(left, viewportWidth - width_el - margin));
+            left = Math.max(minLeft, Math.min(left, maxRight - width_el));
 
             const isLeft = (targetRect.left + (width_btn / 2)) > (left + (width_el / 2));
 
@@ -276,10 +284,6 @@
         return style;
     });
 
-    const onEscape = (event: KeyboardEvent) => {
-        if (event.key === 'Escape' && isOpen.value) hide();
-    };
-
     const onKeydownTrigger = (event: KeyboardEvent) => {
         if (event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar') {
             event.preventDefault();
@@ -292,7 +296,6 @@
         const target = e.target as Node | null;
         if (el.value && !el.value.contains(target) && btn_el.value && !btn_el.value.contains(target)) outsidePointerDown = true;
         else outsidePointerDown = false;
-
     };
 
     const onDocClick = (e: MouseEvent) => {
@@ -305,12 +308,10 @@
     watch(isOpen, (value) => {
         if (value) {
             trap.activate();
-            document.addEventListener('keydown', onEscape);
             document.addEventListener('pointerdown', onDocPointerDown, true);
             document.addEventListener('click', onDocClick, true);
         } else {
             trap.deactivate();
-            document.removeEventListener('keydown', onEscape);
             document.removeEventListener('pointerdown', onDocPointerDown, true);
             document.removeEventListener('click', onDocClick, true);
         }
@@ -318,7 +319,6 @@
 
     onBeforeUnmount(() => {
         trap.deactivate();
-        document.removeEventListener('keydown', onEscape);
         document.removeEventListener('pointerdown', onDocPointerDown, true);
         document.removeEventListener('click', onDocClick, true);
         if (popover_store.show_id === id.value) popover_store.hide();
@@ -385,7 +385,7 @@
         outline: none;
 
         &:focus-visible {
-            outline: 2px solid var(--max-primary-500, #00768E);
+            outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e)); /* Foco canônico */
             outline-offset: 2px;
             border-radius: 4px;
         }
@@ -394,12 +394,12 @@
 
 .popover-item {
     position: fixed;
-    z-index: var(--max-layer-popover, 1200);
+    z-index: var(--max-z-index-popover, var(--max-layer-popover, 1200));
 
     .max-popover-dialog {
         position: fixed;
-        width: min(300px, calc(100vw - 16px));
-        max-width: calc(100vw - 16px);
+        width: min(300px, calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 16px));
+        max-width: calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 16px);
         box-sizing: border-box;
         min-height: 60px;
         max-height: calc(100vh - 32px);
@@ -408,7 +408,7 @@
         overflow: hidden auto;
         background-color: var(--background-0);
         color: var(--background-700);
-        z-index: var(--max-layer-popover, 1200);
+        z-index: var(--max-z-index-popover, var(--max-layer-popover, 1200));
         border: 1px solid var(--surface-border);
         display: grid;
         grid-template-rows: auto 1fr;
@@ -443,11 +443,11 @@
             }
 
             &.is-left::before {
-                right: 15px;
+                right: clamp(10px, 15px, calc(100% - 24px));
             }
 
             &.is-right::before {
-                left: 15px;
+                left: clamp(10px, 15px, calc(100% - 24px));
             }
         }
 

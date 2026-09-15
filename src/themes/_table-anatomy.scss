@@ -47,15 +47,15 @@
 }
 
 @mixin table-row-zebra {
-    &.p-row-even,
     &.max-table-row-even,
-    &.max-table-fields-row-even {
+    &.max-table-fields-row-even,
+    &.p-row-even {
         background-color: var(--max-table-row-even-bg, var(--primary-25)) !important;
     }
 
-    &.p-row-odd,
     &.max-table-row-odd,
-    &.max-table-fields-row-odd {
+    &.max-table-fields-row-odd,
+    &.p-row-odd {
         background-color: var(--max-table-row-odd-bg, var(--primary-100)) !important;
     }
 

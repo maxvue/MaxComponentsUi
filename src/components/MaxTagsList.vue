@@ -19,7 +19,7 @@
             />
         </div>
         <div class="tag-add-wrapper">
-            <MaxTagSelect v-model="add_tag" :options="options_array" is-button icon="fluent:tag-add-20-regular" icon-size="2" />
+            <MaxTagSelect v-model="add_tag" :options="options_array" is-button icon="fluent:tag-add-20-regular" icon-size="2" aria-label="Adicionar tag" />
         </div>
     </div>
 </template>

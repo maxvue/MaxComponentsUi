@@ -1,3 +1,16 @@
+/**
+ * Suíte Determinística — Coleções Virtualizadas (R23/F28A)
+ *
+ * Conserva SOMENTE asserções de cardinalidade (número de nós DOM na viewport).
+ *
+ * ⚠️  As medições temporais (`performance.now`, `expect(duration).toBeLessThan`)
+ * foram movidas para o benchmark temporal separado:
+ *   tests/benchmarks/MaxBaseVirtualScroller.benchmark.ts
+ *
+ * Motivação: medições de tempo têm variação natural e não são determinísticas,
+ * portanto não pertencem à suíte de CI. Ver R23/F28A.
+ */
+
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
@@ -26,7 +39,7 @@ function generateGroupItems(groupCount: number, itemsPerGroup: number) {
     }));
 }
 
-describe('Benchmark: Coleções Virtualizadas (100, 1.000, 5.000 itens)', () => {
+describe('Cardinalidade: Coleções Virtualizadas (100, 1.000, 5.000 itens)', () => {
     beforeEach(() => {
         setActivePinia(createPinia());
         document.body.innerHTML = '';
@@ -41,7 +54,6 @@ describe('Benchmark: Coleções Virtualizadas (100, 1.000, 5.000 itens)', () => 
     describe('MaxInputSelect - Limite de nós DOM com coleção grande', () => {
         for (const count of counts) it(`renderiza com ${count} itens limitando nós DOM na viewport`, async () => {
             const items = generateItems(count);
-            const startTime = performance.now();
 
             const wrapper = mount(MaxInputSelect, {
                 props: {
@@ -53,25 +65,23 @@ describe('Benchmark: Coleções Virtualizadas (100, 1.000, 5.000 itens)', () => 
             await wrapper.find('.max-select').trigger('click');
             await wrapper.vm.$nextTick();
 
-            const duration = performance.now() - startTime;
             const renderedOptions = document.body.querySelectorAll('.max-select-option');
 
-            // Quando virtualizado (count >= 500), DOM não escala com N
+            // Cardinalidade: quando virtualizado (count >= 500), DOM não escala com N
             if (count >= 500) {
                 expect(renderedOptions.length).toBeLessThan(60);
                 const spacer = document.body.querySelector('.max-select-spacer');
                 expect(spacer).toBeTruthy();
-            } else expect(renderedOptions.length).toBe(count);
+            }
+            else expect(renderedOptions.length).toBe(count);
 
 
-            expect(duration).toBeLessThan(2000);
             wrapper.unmount();
         });
 
 
         it('achata grupos em O(N) com 5.000 itens (50 grupos x 100 itens)', async () => {
             const groupOptions = generateGroupItems(50, 100);
-            const startTime = performance.now();
 
             const wrapper = mount(MaxInputSelect, {
                 props: {
@@ -83,13 +93,12 @@ describe('Benchmark: Coleções Virtualizadas (100, 1.000, 5.000 itens)', () => 
             await wrapper.find('.max-select').trigger('click');
             await wrapper.vm.$nextTick();
 
-            const duration = performance.now() - startTime;
             const renderedOptions = document.body.querySelectorAll('.max-select-option');
             const spacer = document.body.querySelector('.max-select-spacer');
 
+            // Cardinalidade: DOM virtualizado, não proporcional à coleção
             expect(spacer).toBeTruthy();
             expect(renderedOptions.length).toBeLessThan(60);
-            expect(duration).toBeLessThan(2000);
 
             wrapper.unmount();
         });
@@ -98,7 +107,6 @@ describe('Benchmark: Coleções Virtualizadas (100, 1.000, 5.000 itens)', () => 
     describe('MaxTagSelect - Limite de nós DOM com coleção grande', () => {
         for (const count of counts) it(`renderiza com ${count} itens limitando nós DOM`, async () => {
             const items = generateItems(count);
-            const startTime = performance.now();
 
             const wrapper = mount(MaxTagSelect, {
                 props: {
@@ -110,17 +118,17 @@ describe('Benchmark: Coleções Virtualizadas (100, 1.000, 5.000 itens)', () => 
             await wrapper.find('.max-select').trigger('click');
             await wrapper.vm.$nextTick();
 
-            const duration = performance.now() - startTime;
             const renderedOptions = document.body.querySelectorAll('.max-select-option');
 
+            // Cardinalidade: DOM proporcional à viewport, não à coleção
             if (count >= 500) {
                 expect(renderedOptions.length).toBeLessThan(60);
                 const spacer = document.body.querySelector('.max-select-spacer');
                 expect(spacer).toBeTruthy();
-            } else expect(renderedOptions.length).toBe(count);
+            }
+            else expect(renderedOptions.length).toBe(count);
 
 
-            expect(duration).toBeLessThan(2000);
             wrapper.unmount();
         });
 
@@ -129,7 +137,6 @@ describe('Benchmark: Coleções Virtualizadas (100, 1.000, 5.000 itens)', () => 
     describe('MaxInputAutoComplete - Limite de nós DOM com coleção grande', () => {
         for (const count of counts) it(`busca e renderiza sugestões com ${count} itens mantendo DOM proporcional à viewport`, async () => {
             const items = generateItems(count);
-            const startTime = performance.now();
 
             const wrapper = mount(MaxInputAutoComplete, {
                 props: {
@@ -142,17 +149,17 @@ describe('Benchmark: Coleções Virtualizadas (100, 1.000, 5.000 itens)', () => 
             await input.setValue('Option');
             await wrapper.vm.$nextTick();
 
-            const duration = performance.now() - startTime;
             const renderedItems = document.body.querySelectorAll('.max-autocomplete-item');
 
+            // Cardinalidade: DOM proporcional à viewport, não à coleção
             if (count >= 500) {
                 expect(renderedItems.length).toBeLessThan(60);
                 const spacer = document.body.querySelector('.max-autocomplete-spacer');
                 expect(spacer).toBeTruthy();
-            } else expect(renderedItems.length).toBe(count);
+            }
+            else expect(renderedItems.length).toBe(count);
 
 
-            expect(duration).toBeLessThan(2000);
             wrapper.unmount();
         });
 
@@ -160,8 +167,6 @@ describe('Benchmark: Coleções Virtualizadas (100, 1.000, 5.000 itens)', () => 
 
     describe('MaxInputPhone - Limite de nós DOM com 237 países', () => {
         it('renderiza opções virtualizadas mantendo DOM proporcional à viewport', async () => {
-            const startTime = performance.now();
-
             const wrapper = mount(MaxInputPhone, {
                 props: {
                     modelValue: ''
@@ -172,13 +177,12 @@ describe('Benchmark: Coleções Virtualizadas (100, 1.000, 5.000 itens)', () => 
             await wrapper.find('.max-phone-select').trigger('click');
             await wrapper.vm.$nextTick();
 
-            const duration = performance.now() - startTime;
             const renderedOptions = document.body.querySelectorAll('.max-phone-select-option');
             const spacer = document.body.querySelector('.max-phone-select-spacer');
 
+            // Cardinalidade: DOM virtualizado com menos de 40 opções visíveis
             expect(spacer).toBeTruthy();
             expect(renderedOptions.length).toBeLessThan(40);
-            expect(duration).toBeLessThan(1000);
 
             wrapper.unmount();
         });

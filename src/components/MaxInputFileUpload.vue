@@ -2,28 +2,35 @@
     <div ref="rootRef" class="max-input-file-upload input-upload-file-main-div" :class="{ 'is-dragover': isOverDropZone }" v-bind="attrs">
         <input
             ref="nativeInputRef"
+            :id="inputId"
             type="file"
-            class="max-file-native-input"
+            class="max-file-native-input sr-only"
             :name="(attrs.name as string) ?? 'file'"
             :accept="(attrs.accept as string) ?? '.pdf, .jpg, .jpeg, .png, .doc, .docx'"
             :multiple="(attrs.multiple as boolean) ?? true"
-            :disabled="attrs.disabled ?? false"
+            :disabled="isDisabled"
+            tabindex="-1"
             @change="onNativeInputChange"
         />
 
-        <div class="max-fileupload p-fileupload" :disabled="attrs.disabled ?? false">
-            <button
-                type="button"
+        <div class="max-fileupload p-fileupload" :disabled="isDisabled">
+            <label
+                :for="isDisabled ? undefined : inputId"
                 class="max-fileupload-button max-fileupload-choose p-button p-fileupload-choose"
-                :disabled="attrs.disabled ?? false"
+                :class="{ 'is-disabled': isDisabled }"
+                :tabindex="isDisabled ? -1 : 0"
+                role="button"
+                :aria-disabled="isDisabled ? 'true' : 'false'"
                 :aria-label="uploading ? 'Carregando arquivos' : 'Escolher arquivos para envio'"
-                @click.stop="triggerChoose"
+                @click="onChooserClick"
+                @keydown.enter.prevent="onChooserKeydown"
+                @keydown.space.prevent="onChooserKeydown"
             >
                 <div class="chose-icon-div">
                     <Icon icon="line-md:loading-loop" size="2" v-if="uploading" />
                     <Icon icon="quill:folder-open" size="2" v-else />
                 </div>
-            </button>
+            </label>
 
             <button
                 type="button"
@@ -39,15 +46,22 @@
             </button>
 
             <div class="max-fileupload-content p-fileupload-content">
-                <div
-                    @click.stop="triggerChoose"
+                <label
+                    :for="isDisabled ? undefined : inputId"
                     class="label-file-upload"
+                    :class="{ 'is-disabled': isDisabled }"
+                    :tabindex="isDisabled ? -1 : 0"
+                    role="button"
+                    :aria-disabled="isDisabled ? 'true' : 'false'"
+                    @click="onChooserClick"
+                    @keydown.enter.prevent="onChooserKeydown"
+                    @keydown.space.prevent="onChooserKeydown"
                     v-if="(files.length > 0 || modelValue.length > 0) && !uploading && !showError && (attrs.uploading === false || attrs.uploading === undefined)"
                 >
                     <slot>
                         <span class="text">{{ displayLabel }}</span>
                     </slot>
-                </div>
+                </label>
                 <div v-else-if="uploading || attrs.uploading" class="upload-loading-state">
                     <div class="upload-progress-container">
                         <div class="progress-bar-track">
@@ -76,15 +90,22 @@
                         </div>
                     </slot>
                 </div>
-                <div
-                    @click.stop="triggerChoose"
+                <label
+                    :for="isDisabled ? undefined : inputId"
                     class="label-file-upload"
+                    :class="{ 'is-disabled': isDisabled }"
+                    :tabindex="isDisabled ? -1 : 0"
+                    role="button"
+                    :aria-disabled="isDisabled ? 'true' : 'false'"
+                    @click="onChooserClick"
+                    @keydown.enter.prevent="onChooserKeydown"
+                    @keydown.space.prevent="onChooserKeydown"
                     v-else-if="files.length === 0 && (attrs.uploading === false || attrs.uploading === undefined)"
                 >
                     <slot>
                         <span class="text">{{ displayLabel }}</span>
                     </slot>
-                </div>
+                </label>
             </div>
         </div>
 
@@ -149,6 +170,8 @@
     import MaxIconButton from './MaxIconButton.vue';
     import type { UploadState } from '../types/index.js';
 
+    let uploadComponentInstanceId = 0;
+
     /**
      * Componente avançado para upload de arquivos.
      * Suporta múltiplos arquivos, pré-visualização (thumbnails), progresso de upload e integração com backend.
@@ -156,6 +179,9 @@
     const attrs: any = useAttrs();
     const rootRef = ref<HTMLElement | null>(null);
     const nativeInputRef = ref<HTMLInputElement | null>(null);
+    const instanceId = ++uploadComponentInstanceId;
+    const inputId = computed(() => (attrs.id as string) || `max-file-upload-${instanceId}`);
+    const isDisabled = computed(() => attrs.disabled !== undefined && attrs.disabled !== false && attrs.disabled !== 'false');
 
     const props = withDefaults(
         defineProps<{
@@ -214,8 +240,7 @@
     const showUploadButton = computed(() => attrs.showUploadButton !== undefined && attrs.showUploadButton !== false);
 
     const displayLabel = computed(() => {
-        const isDisabled = attrs.disabled !== undefined && attrs.disabled !== false;
-        if (isDisabled) return attrs['label-disabled'] ?? attrs.labelDisabled ?? attrs.label_disabled ?? props.label;
+        if (isDisabled.value) return attrs['label-disabled'] ?? attrs.labelDisabled ?? attrs.label_disabled ?? props.label;
         return props.label;
     });
 
@@ -230,21 +255,36 @@
         errorMessage.value = null;
     };
 
-    const triggerChoose = () => {
-        if (attrs.disabled) return;
-        if (nativeInputRef.value) nativeInputRef.value.click();
+    const onChooserClick = (event: MouseEvent) => {
+        if (isDisabled.value) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    };
 
+    const onChooserKeydown = (event: KeyboardEvent) => {
+        if (isDisabled.value) {
+            event.preventDefault();
+            return;
+        }
+        triggerChoose();
+    };
+
+    const triggerChoose = () => {
+        if (isDisabled.value) return;
+        if (nativeInputRef.value) nativeInputRef.value.click();
     };
 
     const onNativeInputChange = (event: Event) => {
+        if (isDisabled.value) return;
         const target = event.target as HTMLInputElement;
         if (target.files && target.files.length > 0) handleSelectedFiles(Array.from(target.files));
-
+        target.value = '';
     };
 
     const { isOverDropZone } = useDropZone(rootRef as any, {
         onDrop: (dropped) => {
-            if (attrs.disabled) return;
+            if (isDisabled.value) return;
             if (dropped && dropped.length) handleSelectedFiles(dropped);
         }
     });
@@ -479,7 +519,17 @@
 <style lang="scss" scoped>
     .input-upload-file-main-div {
         .max-file-native-input {
-            display: none !important;
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
         }
 
         &:not(.no-style) {
@@ -521,16 +571,28 @@
                     width: 30px;
                     background-color: var(--max-primary-500, #00768E) !important;
                     border: none;
+                    border-radius: 6px;
                     opacity: 1;
                     color: var(--text-b, #fff);
                     cursor: pointer;
                     z-index: 1;
 
+                    &:focus-visible {
+                        outline: var(--max-focus-outline, 2px solid var(--max-primary-500, #00768E));
+                        outline-offset: 2px;
+                    }
+
+                    &.is-disabled {
+                        cursor: not-allowed;
+                        opacity: 0.6;
+                        pointer-events: none;
+                    }
+
                     span {
                         display: none;
                     }
 
-                    &:hover {
+                    &:hover:not(.is-disabled) {
                         background-color: var(--max-primary-600, #005F77) !important;
                         border: none;
                         color: var(--icon-mouse, #fff);
@@ -557,8 +619,20 @@
                     height: auto;
                     color: var(--background-700);
                     cursor: pointer;
+                    border-radius: 4px;
 
-                    &:hover {
+                    &:focus-visible {
+                        outline: var(--max-focus-outline, 2px solid var(--max-primary-500, #00768E));
+                        outline-offset: 2px;
+                    }
+
+                    &.is-disabled {
+                        cursor: not-allowed;
+                        opacity: 0.6;
+                        pointer-events: none;
+                    }
+
+                    &:hover:not(.is-disabled) {
                         color: var(--blue-700) !important;
                     }
                 }
@@ -737,7 +811,7 @@
                             transition: transform 0.15s ease;
 
                             &:focus-visible {
-                                outline: 2px solid var(--max-primary-500, #00768E);
+                                outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e)); /* Foco canônico */
                                 outline-offset: 2px;
                                 border-radius: 4px;
                             }
@@ -787,7 +861,7 @@
                             }
 
                             &:focus-visible {
-                                outline: 2px solid var(--max-primary-500, #00768e);
+                                outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e)); /* Foco canônico */
                                 outline-offset: 1px;
                                 border-radius: 50%;
                             }

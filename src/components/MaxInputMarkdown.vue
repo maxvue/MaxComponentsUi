@@ -19,7 +19,6 @@
                     aria-label="Visualizador de Imagem"
                     tabindex="-1"
                     @click.self="closeImage"
-                    @keydown="onImageModalKeydown"
                 >
                     <div class="max-image-preview-modal__toolbar">
                         <button type="button" class="max-image-preview-modal__btn" title="Diminuir Zoom" @click="zoomOutImage">
@@ -141,16 +140,6 @@
     const activePdfUrl = ref('');
 
     const scrollLock = useScrollLock(modalId);
-
-    const onImageModalKeydown = (event: KeyboardEvent) => {
-        if (!isTop.value) return;
-        if (event.key === 'Escape') {
-            event.stopPropagation();
-            closeImage();
-            return;
-        }
-        imageTrap.onKeydown(event);
-    };
 
     const openImage = (src: string, alt = '') => {
         activeImageSrc.value = src;
@@ -449,7 +438,9 @@
     transition: outline 0.15s ease-in-out;
 
     &:focus-within {
-        outline: 1px solid var(--max-primary-500, #00768E);
+        outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
+        outline-offset: 2px;
+        box-shadow: var(--max-focus-ring);
     }
 
     .max-input-markdown__editor-wrap {
@@ -738,7 +729,7 @@
 .max-image-preview-modal {
     position: fixed;
     inset: 0;
-    z-index: var(--max-layer-fullscreen, 1400);
+    z-index: var(--max-z-index-fullscreen, var(--max-layer-fullscreen, 1400));
     background-color: rgb(0 0 0 / 85%);
     backdrop-filter: blur(8px);
     display: flex;

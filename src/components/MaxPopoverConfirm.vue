@@ -111,30 +111,41 @@
         target: activeTarget,
         overlay: el,
         active: () => confirm_store.show,
-        compute: ({ targetRect, overlayRect, viewportWidth, viewportHeight }) => {
+        compute: ({ targetRect, overlayRect, viewportWidth, viewportHeight, safeArea }) => {
             const targetX = targetRect.left;
             const targetY = targetRect.top;
             const targetH = targetRect.height;
             const width_el = overlayRect.width || 300;
             const height_el = overlayRect.height || 60;
 
+            const safeTop = safeArea?.top ?? 0;
+            const safeRight = safeArea?.right ?? 0;
+            const safeBottom = safeArea?.bottom ?? 0;
+            const safeLeft = safeArea?.left ?? 0;
+
+            const margin = 8;
+            const minTop = Math.max(margin, safeTop + margin);
+            const maxBottom = Math.max(minTop, viewportHeight - safeBottom - margin);
+            const minLeft = Math.max(margin, safeLeft + margin);
+            const maxRight = Math.max(minLeft, viewportWidth - safeRight - margin);
+
             let top = targetY + targetH + 15;
             let left = targetX;
             let isTop = false;
             let isLeft = false;
 
-            if (top + height_el + 15 > viewportHeight) {
+            if (top + height_el + 15 > maxBottom) {
                 top = targetY - height_el - 30;
                 isTop = true;
             }
 
-            if (left + width_el + 15 > viewportWidth) {
+            if (left + width_el + 15 > maxRight) {
                 left = targetX - width_el + 20;
                 isLeft = true;
             }
 
-            left = Math.max(8, Math.min(left, viewportWidth - width_el - 8));
-            top = Math.max(8, Math.min(top, viewportHeight - height_el - 8));
+            left = Math.max(minLeft, Math.min(left, maxRight - width_el));
+            top = Math.max(minTop, Math.min(top, maxBottom - height_el));
 
             return {
                 top,
@@ -166,23 +177,26 @@
 .background-popover-confirm {
     background-color: rgb(0 0 0 / 10%);
     height: 100vh;
+    height: 100dvh;
     width: 100vw;
     position: fixed;
-    z-index: var(--z-popover, 1300);
+    z-index: var(--max-z-index-popover, var(--max-layer-popover, 1200));
     top: 0;
     left: 0;
 
     .max-icon-confirm-dialog {
         position: fixed;
-        width: min(300px, calc(100vw - 16px));
-        max-width: calc(100vw - 16px);
+        width: min(300px, calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 16px));
+        max-width: calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 16px);
         box-sizing: border-box;
         min-height: 60px;
+        max-height: calc(100vh - 32px);
         max-height: calc(100dvh - 32px);
+        max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 32px);
         overflow-y: auto;
         background-color: var(--background-0);
         color: var(--background-700);
-        z-index: 2;
+        z-index: 2; /* Stacking interno relativo ao backdrop .background-popover-confirm */
         border: 1px solid var(--surface-border);
 
         /* O drop-shadow traça o contorno real do elemento + seus ::before, criando o balão perfeito */
@@ -213,11 +227,11 @@
         }
 
         &.is-left::before {
-            right: 15px;
+            right: clamp(10px, 15px, calc(100% - 24px));
         }
 
         &.is-right::before {
-            left: 15px;
+            left: clamp(10px, 15px, calc(100% - 24px));
         }
 
         .popover-confirm-content {

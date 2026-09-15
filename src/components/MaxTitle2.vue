@@ -13,6 +13,7 @@
 
 <script setup lang="ts">
     import { computed } from 'vue';
+    import MaxIcon from './MaxIcon.vue';
     import { sanitizeHtml } from '../helpers/sanitizeHtml';
 
     const props = defineProps<{

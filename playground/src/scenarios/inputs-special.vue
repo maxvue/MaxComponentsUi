@@ -10,17 +10,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxInputIconPicker />
+                            <MaxInputIconPicker v-bind="scenarioProps"  />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxInputIconPicker disabled />
+                            <MaxInputIconPicker v-bind="scenarioProps" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxInputIconPicker error severity="danger" />
+                            <MaxInputIconPicker v-bind="scenarioProps" error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -31,17 +31,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxInputNumber />
+                            <MaxInputNumber v-bind="scenarioProps"  />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxInputNumber disabled />
+                            <MaxInputNumber v-bind="scenarioProps" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxInputNumber error severity="danger" />
+                            <MaxInputNumber v-bind="scenarioProps" error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -52,17 +52,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxInputOTP />
+                            <MaxInputOTP v-bind="scenarioProps"  />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxInputOTP disabled />
+                            <MaxInputOTP v-bind="scenarioProps" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxInputOTP error severity="danger" />
+                            <MaxInputOTP v-bind="scenarioProps" error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -73,17 +73,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxInputTextList />
+                            <MaxInputTextList v-bind="scenarioProps"  />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxInputTextList disabled />
+                            <MaxInputTextList v-bind="scenarioProps" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxInputTextList error severity="danger" />
+                            <MaxInputTextList v-bind="scenarioProps" error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -94,17 +94,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxColorPicker />
+                            <MaxColorPicker v-bind="scenarioProps"  />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxColorPicker disabled />
+                            <MaxColorPicker v-bind="scenarioProps" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxColorPicker error severity="danger" />
+                            <MaxColorPicker v-bind="scenarioProps" error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -114,6 +114,8 @@
 </template>
 
 <script setup lang="ts">
+    // Props neutras permitem exercitar os estados sem omitir contratos obrigatórios.
+    const scenarioProps: any = { modelValue: '', options: [], items: [], route: '/', target: document.body };
     import { MaxInputIconPicker } from '@maxvue/max-components-ui';
     import { MaxInputNumber } from '@maxvue/max-components-ui';
     import { MaxInputOTP } from '@maxvue/max-components-ui';

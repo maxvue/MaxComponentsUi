@@ -18,10 +18,8 @@ declare global {
   const BadgeButtonsGroup: typeof import('../src/index.ts').BadgeButtonsGroup
   const Chips: typeof import('../src/index.ts').Chips
   const Column: typeof import('../src/index.ts').Column
-  const DefaultMagicKeysAliasMap: typeof import('@maxvue/max-use').DefaultMagicKeysAliasMap
   const Drawer: typeof import('../src/index.ts').Drawer
   const EffectScope: typeof import('vue').EffectScope
-  const FORMAT_MAP: typeof import('@maxvue/max-use').FORMAT_MAP
   const ICON_CACHE_KEY: typeof import('../src/index.ts').ICON_CACHE_KEY
   const INPUT_BASE_CONTEXT_KEY: typeof import('../src/index.ts').INPUT_BASE_CONTEXT_KEY
   const IconPicker: typeof import('../src/index.ts').IconPicker
@@ -131,7 +129,7 @@ declare global {
   const MaxSideMenu: typeof import('../src/index.ts').MaxSideMenu
   const MaxSideMenuMobile: typeof import('../src/index.ts').MaxSideMenuMobile
   const MaxStats: typeof import('../src/index.ts').MaxStats
-  const MaxStyle: typeof import('../src/index.ts').MaxStyle
+  const MaxStyle: typeof import('../src/styles.ts').MaxStyle
   const MaxTab: typeof import('../src/index.ts').MaxTab
   const MaxTabItem: typeof import('../src/index.ts').MaxTabItem
   const MaxTabList: typeof import('../src/index.ts').MaxTabList
@@ -160,7 +158,6 @@ declare global {
   const Obj: typeof import('@maxvue/max-use').Obj
   const PhoneField: typeof import('../src/index.ts').PhoneField
   const Random: typeof import('@maxvue/max-use').Random
-  const StorageSerializers: typeof import('@maxvue/max-use').StorageSerializers
   const Str: typeof import('@maxvue/max-use').Str
   const StrCase: typeof import('@maxvue/max-use').StrCase
   const StrFilter: typeof import('@maxvue/max-use').StrFilter
@@ -173,136 +170,69 @@ declare global {
   const Tag: typeof import('../src/index.ts').Tag
   const Toast: typeof import('../src/index.ts').Toast
   const TransitionFade: typeof import('../src/index.ts').TransitionFade
-  const TransitionPresets: typeof import('@maxvue/max-use').TransitionPresets
   const UserSection: typeof import('../src/index.ts').UserSection
   const _: typeof import('@maxvue/max-use')._
-  const abbrevName: typeof import('@maxvue/max-use').abbrevName
-  const add: typeof import('@maxvue/max-use').add
   const addTime: typeof import('@maxvue/max-use').addTime
   const adjustToWcagLuminance: typeof import('../src/index.ts').adjustToWcagLuminance
-  const after: typeof import('@maxvue/max-use').after
   const apiDeleteRoute: typeof import('@maxvue/max-use').apiDeleteRoute
   const apiGetRoute: typeof import('@maxvue/max-use').apiGetRoute
   const apiPostRoute: typeof import('@maxvue/max-use').apiPostRoute
   const apiPutRoute: typeof import('@maxvue/max-use').apiPutRoute
   const apiUploadRoute: typeof import('@maxvue/max-use').apiUploadRoute
-  const ary: typeof import('@maxvue/max-use').ary
   const assert: typeof import('@maxvue/max-use').assert
-  const assign: typeof import('@maxvue/max-use').assign
-  const assignIn: typeof import('@maxvue/max-use').assignIn
-  const assignInWith: typeof import('@maxvue/max-use').assignInWith
-  const assignWith: typeof import('@maxvue/max-use').assignWith
-  const asyncComputed: typeof import('@maxvue/max-use').asyncComputed
-  const at: typeof import('@maxvue/max-use').at
-  const attempt: typeof import('@maxvue/max-use').attempt
-  const autoResetRef: typeof import('@maxvue/max-use').autoResetRef
   const average: typeof import('@maxvue/max-use').average
-  const before: typeof import('@maxvue/max-use').before
-  const bind: typeof import('@maxvue/max-use').bind
-  const bindAll: typeof import('@maxvue/max-use').bindAll
-  const bindKey: typeof import('@maxvue/max-use').bindKey
   const blank: typeof import('@maxvue/max-use').blank
-  const breakpointsAntDesign: typeof import('@maxvue/max-use').breakpointsAntDesign
-  const breakpointsBootstrapV5: typeof import('@maxvue/max-use').breakpointsBootstrapV5
-  const breakpointsElement: typeof import('@maxvue/max-use').breakpointsElement
-  const breakpointsMasterCss: typeof import('@maxvue/max-use').breakpointsMasterCss
-  const breakpointsPrimeFlex: typeof import('@maxvue/max-use').breakpointsPrimeFlex
-  const breakpointsQuasar: typeof import('@maxvue/max-use').breakpointsQuasar
-  const breakpointsSematic: typeof import('@maxvue/max-use').breakpointsSematic
-  const breakpointsTailwind: typeof import('@maxvue/max-use').breakpointsTailwind
-  const breakpointsVuetify: typeof import('@maxvue/max-use').breakpointsVuetify
-  const breakpointsVuetifyV2: typeof import('@maxvue/max-use').breakpointsVuetifyV2
-  const breakpointsVuetifyV3: typeof import('@maxvue/max-use').breakpointsVuetifyV3
   const bypassFilter: typeof import('@maxvue/max-use').bypassFilter
   const calculaCabo: typeof import('@maxvue/max-use').calculaCabo
   const camelCase: typeof import('@maxvue/max-use').camelCase
   const camelize: typeof import('@maxvue/max-use').camelize
   const canIterate: typeof import('@maxvue/max-use').canIterate
   const capitalize: typeof import('@maxvue/max-use').capitalize
-  const castArray: typeof import('@maxvue/max-use').castArray
-  const ceil: typeof import('@maxvue/max-use').ceil
   const cep: typeof import('@maxvue/max-use').cep
   const cepIsValid: typeof import('@maxvue/max-use').cepIsValid
-  const chain: typeof import('@maxvue/max-use').chain
   const chunk: typeof import('@maxvue/max-use').chunk
   const clamp: typeof import('@maxvue/max-use').clamp
   const clearAuthOtpCache: typeof import('../src/index.ts').clearAuthOtpCache
   const clearCacheIDB: typeof import('@maxvue/max-use').clearCacheIDB
-  const clearCachedApi: typeof import('@maxvue/max-use').clearCachedApi
   const clearMaxCache: typeof import('../src/index.ts').clearMaxCache
-  const clone: typeof import('@maxvue/max-use').clone
   const cloneDeep: typeof import('@maxvue/max-use').cloneDeep
-  const cloneDeepWith: typeof import('@maxvue/max-use').cloneDeepWith
   const cloneFnJSON: typeof import('@maxvue/max-use').cloneFnJSON
-  const cloneWith: typeof import('@maxvue/max-use').cloneWith
   const cnpj: typeof import('@maxvue/max-use').cnpj
   const cnpjIsValid: typeof import('@maxvue/max-use').cnpjIsValid
   const cnpjOrCpf: typeof import('@maxvue/max-use').cnpjOrCpf
-  const commit: typeof import('@maxvue/max-use').commit
-  const compact: typeof import('@maxvue/max-use').compact
   const computed: typeof import('vue').computed
   const computedAsync: typeof import('@maxvue/max-use').computedAsync
-  const computedEager: typeof import('@maxvue/max-use').computedEager
   const computedInject: typeof import('@maxvue/max-use').computedInject
   const computedWithControl: typeof import('@maxvue/max-use').computedWithControl
-  const concat: typeof import('@maxvue/max-use').concat
-  const cond: typeof import('@maxvue/max-use').cond
   const configureMaxApp: typeof import('../src/index.ts').configureMaxApp
-  const conforms: typeof import('@maxvue/max-use').conforms
-  const conformsTo: typeof import('@maxvue/max-use').conformsTo
-  const constant: typeof import('@maxvue/max-use').constant
   const containsProp: typeof import('@maxvue/max-use').containsProp
   const contrastColor: typeof import('@maxvue/max-use').contrastColor
-  const controlledComputed: typeof import('@maxvue/max-use').controlledComputed
-  const controlledRef: typeof import('@maxvue/max-use').controlledRef
   const countBy: typeof import('@maxvue/max-use').countBy
-  const countWhere: typeof import('@maxvue/max-use').countWhere
   const cpf: typeof import('@maxvue/max-use').cpf
   const cpfCnpjIsValid: typeof import('@maxvue/max-use').cpfCnpjIsValid
   const cpfIsValid: typeof import('@maxvue/max-use').cpfIsValid
   const cpfOrCnpj: typeof import('@maxvue/max-use').cpfOrCnpj
   const cpfcnpj: typeof import('@maxvue/max-use').cpfcnpj
-  const create: typeof import('@maxvue/max-use').create
   const createApp: typeof import('vue').createApp
-  const createDisposableDirective: typeof import('@maxvue/max-use').createDisposableDirective
   const createEventHook: typeof import('@maxvue/max-use').createEventHook
   const createFetch: typeof import('@maxvue/max-use').createFetch
   const createFilterWrapper: typeof import('@maxvue/max-use').createFilterWrapper
   const createGlobalState: typeof import('@maxvue/max-use').createGlobalState
   const createInjectionState: typeof import('@maxvue/max-use').createInjectionState
-  const createReactiveFn: typeof import('@maxvue/max-use').createReactiveFn
   const createRef: typeof import('@maxvue/max-use').createRef
   const createReusableTemplate: typeof import('@maxvue/max-use').createReusableTemplate
   const createSharedComposable: typeof import('@maxvue/max-use').createSharedComposable
   const createSingletonPromise: typeof import('@maxvue/max-use').createSingletonPromise
   const createTemplatePromise: typeof import('@maxvue/max-use').createTemplatePromise
   const createUnrefFn: typeof import('@maxvue/max-use').createUnrefFn
-  const creditCard: typeof import('@maxvue/max-use').creditCard
-  const creditCardIsValid: typeof import('@maxvue/max-use').creditCardIsValid
-  const curry: typeof import('@maxvue/max-use').curry
-  const curryRight: typeof import('@maxvue/max-use').curryRight
   const customRef: typeof import('vue').customRef
-  const customStorageEventName: typeof import('@maxvue/max-use').customStorageEventName
   const dateFormat: typeof import('@maxvue/max-use').dateFormat
   const daysAgo: typeof import('@maxvue/max-use').daysAgo
-  const debounce: typeof import('@maxvue/max-use').debounce
   const debounceFilter: typeof import('@maxvue/max-use').debounceFilter
-  const debouncedRef: typeof import('@maxvue/max-use').debouncedRef
-  const debouncedWatch: typeof import('@maxvue/max-use').debouncedWatch
-  const deburr: typeof import('@maxvue/max-use').deburr
   const deepClone: typeof import('@maxvue/max-use').deepClone
   const deepMerge: typeof import('@maxvue/max-use').deepMerge
-  const defaultDocument: typeof import('@maxvue/max-use').defaultDocument
-  const defaultLocation: typeof import('@maxvue/max-use').defaultLocation
-  const defaultNavigator: typeof import('@maxvue/max-use').defaultNavigator
-  const defaultTo: typeof import('@maxvue/max-use').defaultTo
-  const defaultWindow: typeof import('@maxvue/max-use').defaultWindow
-  const defaults: typeof import('@maxvue/max-use').defaults
-  const defaultsDeep: typeof import('@maxvue/max-use').defaultsDeep
-  const defer: typeof import('@maxvue/max-use').defer
   const defineAsyncComponent: typeof import('vue').defineAsyncComponent
   const defineComponent: typeof import('vue').defineComponent
-  const delay: typeof import('@maxvue/max-use').delay
   const deleteFromIDB: typeof import('@maxvue/max-use').deleteFromIDB
   const diff: typeof import('@maxvue/max-use').diff
   const diffInDays: typeof import('@maxvue/max-use').diffInDays
@@ -311,63 +241,20 @@ declare global {
   const diffInMonths: typeof import('@maxvue/max-use').diffInMonths
   const diffInSeconds: typeof import('@maxvue/max-use').diffInSeconds
   const diffInYears: typeof import('@maxvue/max-use').diffInYears
-  const difference: typeof import('@maxvue/max-use').difference
-  const differenceBy: typeof import('@maxvue/max-use').differenceBy
-  const differenceWith: typeof import('@maxvue/max-use').differenceWith
-  const divide: typeof import('@maxvue/max-use').divide
-  const drop: typeof import('@maxvue/max-use').drop
-  const dropRight: typeof import('@maxvue/max-use').dropRight
-  const dropRightWhile: typeof import('@maxvue/max-use').dropRightWhile
-  const dropWhile: typeof import('@maxvue/max-use').dropWhile
   const eMail: typeof import('@maxvue/max-use').eMail
   const eMailIsValid: typeof import('@maxvue/max-use').eMailIsValid
-  const each: typeof import('@maxvue/max-use').each
-  const eachRight: typeof import('@maxvue/max-use').eachRight
-  const eagerComputed: typeof import('@maxvue/max-use').eagerComputed
   const effectScope: typeof import('vue').effectScope
   const electric: typeof import('@maxvue/max-use').electric
   const electrical: typeof import('@maxvue/max-use').electrical
   const email: typeof import('@maxvue/max-use').email
   const emailIsValid: typeof import('@maxvue/max-use').emailIsValid
   const empty: typeof import('@maxvue/max-use').empty
-  const endsWith: typeof import('@maxvue/max-use').endsWith
-  const entries: typeof import('@maxvue/max-use').entries
-  const entriesIn: typeof import('@maxvue/max-use').entriesIn
-  const eq: typeof import('@maxvue/max-use').eq
-  const escape: typeof import('@maxvue/max-use').escape
-  const escapeRegExp: typeof import('@maxvue/max-use').escapeRegExp
-  const every: typeof import('@maxvue/max-use').every
-  const executeTransition: typeof import('@maxvue/max-use').executeTransition
-  const extend: typeof import('@maxvue/max-use').extend
   const extendRef: typeof import('@maxvue/max-use').extendRef
-  const extendWith: typeof import('@maxvue/max-use').extendWith
-  const fill: typeof import('@maxvue/max-use').fill
   const filter: typeof import('@maxvue/max-use').filter
   const filterBy: typeof import('@maxvue/max-use').filterBy
   const filterByNot: typeof import('@maxvue/max-use').filterByNot
-  const find: typeof import('@maxvue/max-use').find
-  const findIndex: typeof import('@maxvue/max-use').findIndex
-  const findKey: typeof import('@maxvue/max-use').findKey
   const findLast: typeof import('@maxvue/max-use').findLast
-  const findLastIndex: typeof import('@maxvue/max-use').findLastIndex
-  const findLastKey: typeof import('@maxvue/max-use').findLastKey
   const first: typeof import('@maxvue/max-use').first
-  const flatMap: typeof import('@maxvue/max-use').flatMap
-  const flatMapDeep: typeof import('@maxvue/max-use').flatMapDeep
-  const flatMapDepth: typeof import('@maxvue/max-use').flatMapDepth
-  const flatten: typeof import('@maxvue/max-use').flatten
-  const flattenDeep: typeof import('@maxvue/max-use').flattenDeep
-  const flattenDepth: typeof import('@maxvue/max-use').flattenDepth
-  const flip: typeof import('@maxvue/max-use').flip
-  const floor: typeof import('@maxvue/max-use').floor
-  const flow: typeof import('@maxvue/max-use').flow
-  const flowRight: typeof import('@maxvue/max-use').flowRight
-  const forEach: typeof import('@maxvue/max-use').forEach
-  const forEachRight: typeof import('@maxvue/max-use').forEachRight
-  const forIn: typeof import('@maxvue/max-use').forIn
-  const forInRight: typeof import('@maxvue/max-use').forInRight
-  const forOwn: typeof import('@maxvue/max-use').forOwn
-  const forOwnRight: typeof import('@maxvue/max-use').forOwnRight
   const forceReset: typeof import('../src/index.ts').forceReset
   const format: typeof import('@maxvue/max-use').format
   const formatBytes: typeof import('@maxvue/max-use').formatBytes
@@ -377,23 +264,15 @@ declare global {
   const formatCpfCnpj: typeof import('@maxvue/max-use').formatCpfCnpj
   const formatCurrency: typeof import('@maxvue/max-use').formatCurrency
   const formatDate: typeof import('@maxvue/max-use').formatDate
-  const formatMailDate: typeof import('@maxvue/max-use').formatMailDate
   const formatPhone: typeof import('@maxvue/max-use').formatPhone
   const formatTimeAgo: typeof import('@maxvue/max-use').formatTimeAgo
   const formatTimeAgoIntl: typeof import('@maxvue/max-use').formatTimeAgoIntl
   const formatTimeAgoIntlParts: typeof import('@maxvue/max-use').formatTimeAgoIntlParts
-  const fromPairs: typeof import('@maxvue/max-use').fromPairs
-  const functions: typeof import('@maxvue/max-use').functions
-  const functionsHelpers: typeof import('@maxvue/max-use').functionsHelpers
-  const functionsIn: typeof import('@maxvue/max-use').functionsIn
   const get: typeof import('@maxvue/max-use').get
   const getCachedApi: typeof import('@maxvue/max-use').getCachedApi
   const getCachedApiIDB: typeof import('@maxvue/max-use').getCachedApiIDB
-  const getClientId: typeof import('@maxvue/max-use').getClientId
-  const getClientIdHeader: typeof import('@maxvue/max-use').getClientIdHeader
   const getColorFromVar: typeof import('@maxvue/max-use').getColorFromVar
   const getColorOpposite: typeof import('@maxvue/max-use').getColorOpposite
-  const getConfiguredHeaders: typeof import('@maxvue/max-use').getConfiguredHeaders
   const getContrastColor: typeof import('@maxvue/max-use').getContrastColor
   const getCurrentInstance: typeof import('vue').getCurrentInstance
   const getCurrentScope: typeof import('vue').getCurrentScope
@@ -406,127 +285,74 @@ declare global {
   const getRouteByName: typeof import('@maxvue/max-use').getRouteByName
   const getSSRHandler: typeof import('@maxvue/max-use').getSSRHandler
   const getWcagRelativeLuminance: typeof import('../src/index.ts').getWcagRelativeLuminance
-  const getWithCredentials: typeof import('@maxvue/max-use').getWithCredentials
   const goToRoute: typeof import('@maxvue/max-use').goToRoute
   const goToRouteByName: typeof import('@maxvue/max-use').goToRouteByName
   const groupBy: typeof import('@maxvue/max-use').groupBy
-  const gt: typeof import('@maxvue/max-use').gt
-  const gte: typeof import('@maxvue/max-use').gte
   const h: typeof import('vue').h
-  const has: typeof import('@maxvue/max-use').has
   const hasContent: typeof import('@maxvue/max-use').hasContent
   const hasContentFn: typeof import('@maxvue/max-use').hasContentFn
   const hasEMail: typeof import('@maxvue/max-use').hasEMail
   const hasEmail: typeof import('@maxvue/max-use').hasEmail
-  const hasIn: typeof import('@maxvue/max-use').hasIn
   const hasOwn: typeof import('@maxvue/max-use').hasOwn
   const hasPassedDays: typeof import('@maxvue/max-use').hasPassedDays
   const hasPassedHours: typeof import('@maxvue/max-use').hasPassedHours
   const hasPassedMinutes: typeof import('@maxvue/max-use').hasPassedMinutes
   const hasPhone: typeof import('@maxvue/max-use').hasPhone
-  const hasRoute: typeof import('@maxvue/max-use').hasRoute
   const hasValidCep: typeof import('@maxvue/max-use').hasValidCep
   const hasValidCnpj: typeof import('@maxvue/max-use').hasValidCnpj
   const hasValidCnpjOrCpf: typeof import('@maxvue/max-use').hasValidCnpjOrCpf
   const hasValidCpf: typeof import('@maxvue/max-use').hasValidCpf
   const hasValidCpfCnpj: typeof import('@maxvue/max-use').hasValidCpfCnpj
   const hasValidCpfOrCnpj: typeof import('@maxvue/max-use').hasValidCpfOrCnpj
-  const hasValidCreditCard: typeof import('@maxvue/max-use').hasValidCreditCard
   const hasValidEMail: typeof import('@maxvue/max-use').hasValidEMail
   const hasValidEmail: typeof import('@maxvue/max-use').hasValidEmail
   const hasValidPhone: typeof import('@maxvue/max-use').hasValidPhone
-  const head: typeof import('@maxvue/max-use').head
   const hoursAgo: typeof import('@maxvue/max-use').hoursAgo
   const hyphenate: typeof import('@maxvue/max-use').hyphenate
   const identity: typeof import('@maxvue/max-use').identity
-  const ignorableWatch: typeof import('@maxvue/max-use').ignorableWatch
   const inDateInterval: typeof import('@maxvue/max-use').inDateInterval
-  const inRange: typeof import('@maxvue/max-use').inRange
-  const includes: typeof import('@maxvue/max-use').includes
   const increaseWithUnit: typeof import('@maxvue/max-use').increaseWithUnit
-  const indexOf: typeof import('@maxvue/max-use').indexOf
-  const initial: typeof import('@maxvue/max-use').initial
   const initials: typeof import('@maxvue/max-use').initials
   const inject: typeof import('vue').inject
   const injectLocal: typeof import('@maxvue/max-use').injectLocal
   const install: typeof import('../src/index.ts').install
-  const intersection: typeof import('@maxvue/max-use').intersection
-  const intersectionBy: typeof import('@maxvue/max-use').intersectionBy
-  const intersectionWith: typeof import('@maxvue/max-use').intersectionWith
   const intervalRandom: typeof import('@maxvue/max-use').intervalRandom
-  const invert: typeof import('@maxvue/max-use').invert
-  const invertBy: typeof import('@maxvue/max-use').invertBy
   const invoke: typeof import('@maxvue/max-use').invoke
-  const invokeMap: typeof import('@maxvue/max-use').invokeMap
-  const isArguments: typeof import('@maxvue/max-use').isArguments
   const isArray: typeof import('@maxvue/max-use').isArray
-  const isArrayBuffer: typeof import('@maxvue/max-use').isArrayBuffer
-  const isArrayLike: typeof import('@maxvue/max-use').isArrayLike
-  const isArrayLikeObject: typeof import('@maxvue/max-use').isArrayLikeObject
   const isBlank: typeof import('@maxvue/max-use').isBlank
-  const isBoolean: typeof import('@maxvue/max-use').isBoolean
-  const isBuffer: typeof import('@maxvue/max-use').isBuffer
   const isCepValid: typeof import('@maxvue/max-use').isCepValid
-  const isClient: typeof import('@maxvue/max-use').isClient
   const isCnpj: typeof import('@maxvue/max-use').isCnpj
   const isCnpjOrCpf: typeof import('@maxvue/max-use').isCnpjOrCpf
   const isCpf: typeof import('@maxvue/max-use').isCpf
   const isCpfCnpj: typeof import('@maxvue/max-use').isCpfCnpj
   const isCpfOrCnpj: typeof import('@maxvue/max-use').isCpfOrCnpj
-  const isCreditCard: typeof import('@maxvue/max-use').isCreditCard
   const isDate: typeof import('@maxvue/max-use').isDate
   const isDef: typeof import('@maxvue/max-use').isDef
   const isDefined: typeof import('@maxvue/max-use').isDefined
   const isEMail: typeof import('@maxvue/max-use').isEMail
-  const isElement: typeof import('@maxvue/max-use').isElement
   const isEmail: typeof import('@maxvue/max-use').isEmail
   const isEmpty: typeof import('@maxvue/max-use').isEmpty
   const isEqual: typeof import('@maxvue/max-use').isEqual
-  const isEqualWith: typeof import('@maxvue/max-use').isEqualWith
-  const isError: typeof import('@maxvue/max-use').isError
-  const isFinite: typeof import('@maxvue/max-use').isFinite
-  const isFocusedElementEditable: typeof import('@maxvue/max-use').isFocusedElementEditable
-  const isFunction: typeof import('@maxvue/max-use').isFunction
   const isFuture: typeof import('@maxvue/max-use').isFuture
-  const isIOS: typeof import('@maxvue/max-use').isIOS
   const isInDateInterval: typeof import('@maxvue/max-use').isInDateInterval
-  const isInteger: typeof import('@maxvue/max-use').isInteger
   const isIterable: typeof import('@maxvue/max-use').isIterable
-  const isLength: typeof import('@maxvue/max-use').isLength
-  const isMap: typeof import('@maxvue/max-use').isMap
-  const isMatch: typeof import('@maxvue/max-use').isMatch
-  const isMatchWith: typeof import('@maxvue/max-use').isMatchWith
   const isMaxCacheKey: typeof import('../src/index.ts').isMaxCacheKey
-  const isNaN: typeof import('@maxvue/max-use').isNaN
-  const isNative: typeof import('@maxvue/max-use').isNative
-  const isNil: typeof import('@maxvue/max-use').isNil
   const isNotEmpty: typeof import('@maxvue/max-use').isNotEmpty
   const isNotValid: typeof import('@maxvue/max-use').isNotValid
-  const isNull: typeof import('@maxvue/max-use').isNull
   const isNumber: typeof import('@maxvue/max-use').isNumber
   const isNumeric: typeof import('@maxvue/max-use').isNumeric
   const isObject: typeof import('@maxvue/max-use').isObject
-  const isObjectLike: typeof import('@maxvue/max-use').isObjectLike
   const isObjectValid: typeof import('@maxvue/max-use').isObjectValid
   const isPast: typeof import('@maxvue/max-use').isPast
   const isPhone: typeof import('@maxvue/max-use').isPhone
   const isPhoneValid: typeof import('@maxvue/max-use').isPhoneValid
-  const isPlainObject: typeof import('@maxvue/max-use').isPlainObject
   const isProxy: typeof import('vue').isProxy
   const isReactive: typeof import('vue').isReactive
   const isReadonly: typeof import('vue').isReadonly
   const isRef: typeof import('vue').isRef
-  const isRegExp: typeof import('@maxvue/max-use').isRegExp
-  const isSafeInteger: typeof import('@maxvue/max-use').isSafeInteger
   const isSameDay: typeof import('@maxvue/max-use').isSameDay
-  const isSet: typeof import('@maxvue/max-use').isSet
   const isShallow: typeof import('vue').isShallow
-  const isString: typeof import('@maxvue/max-use').isString
-  const isSymbol: typeof import('@maxvue/max-use').isSymbol
   const isTouchDevice: typeof import('@maxvue/max-use').isTouchDevice
-  const isTypedArray: typeof import('@maxvue/max-use').isTypedArray
-  const isTypedCharValid: typeof import('@maxvue/max-use').isTypedCharValid
-  const isUndefined: typeof import('@maxvue/max-use').isUndefined
   const isValid: typeof import('@maxvue/max-use').isValid
   const isValidCep: typeof import('@maxvue/max-use').isValidCep
   const isValidCnpj: typeof import('@maxvue/max-use').isValidCnpj
@@ -534,60 +360,23 @@ declare global {
   const isValidCpf: typeof import('@maxvue/max-use').isValidCpf
   const isValidCpfCnpj: typeof import('@maxvue/max-use').isValidCpfCnpj
   const isValidCpfOrCnpj: typeof import('@maxvue/max-use').isValidCpfOrCnpj
-  const isValidCreditCard: typeof import('@maxvue/max-use').isValidCreditCard
   const isValidEMail: typeof import('@maxvue/max-use').isValidEMail
   const isValidEmail: typeof import('@maxvue/max-use').isValidEmail
   const isValidPhone: typeof import('@maxvue/max-use').isValidPhone
-  const isWeakMap: typeof import('@maxvue/max-use').isWeakMap
-  const isWeakSet: typeof import('@maxvue/max-use').isWeakSet
   const isWeekend: typeof import('@maxvue/max-use').isWeekend
-  const isWorker: typeof import('@maxvue/max-use').isWorker
-  const iteratee: typeof import('@maxvue/max-use').iteratee
-  const join: typeof import('@maxvue/max-use').join
   const kebabCase: typeof import('@maxvue/max-use').kebabCase
   const keyBy: typeof import('@maxvue/max-use').keyBy
   const keyExists: typeof import('@maxvue/max-use').keyExists
-  const keys: typeof import('@maxvue/max-use').keys
-  const keysIn: typeof import('@maxvue/max-use').keysIn
-  const lang: typeof import('@maxvue/max-use').lang
   const last: typeof import('@maxvue/max-use').last
-  const lastIndexOf: typeof import('@maxvue/max-use').lastIndexOf
-  const lodash: typeof import('@maxvue/max-use').lodash
-  const lowerCase: typeof import('@maxvue/max-use').lowerCase
-  const lowerFirst: typeof import('@maxvue/max-use').lowerFirst
-  const lt: typeof import('@maxvue/max-use').lt
-  const lte: typeof import('@maxvue/max-use').lte
   const makeDestructurable: typeof import('@maxvue/max-use').makeDestructurable
-  const map: typeof import('@maxvue/max-use').map
   const mapGamepadToXbox360Controller: typeof import('@maxvue/max-use').mapGamepadToXbox360Controller
-  const mapKeys: typeof import('@maxvue/max-use').mapKeys
   const mapValues: typeof import('@maxvue/max-use').mapValues
   const markRaw: typeof import('vue').markRaw
   const maskSensitive: typeof import('@maxvue/max-use').maskSensitive
-  const matchCasing: typeof import('@maxvue/max-use').matchCasing
-  const matches: typeof import('@maxvue/max-use').matches
-  const matchesProperty: typeof import('@maxvue/max-use').matchesProperty
-  const max: typeof import('@maxvue/max-use').max
-  const maxBy: typeof import('@maxvue/max-use').maxBy
   const maxUnoPreset: typeof import('../src/presetMaxUno.ts').maxUnoPreset
-  const maxUseAutoImport: typeof import('@maxvue/max-use').maxUseAutoImport
-  const maxUseItems: typeof import('@maxvue/max-use').maxUseItems
-  const mean: typeof import('@maxvue/max-use').mean
-  const meanBy: typeof import('@maxvue/max-use').meanBy
   const median: typeof import('@maxvue/max-use').median
-  const memoize: typeof import('@maxvue/max-use').memoize
-  const merge: typeof import('@maxvue/max-use').merge
-  const mergeWith: typeof import('@maxvue/max-use').mergeWith
-  const method: typeof import('@maxvue/max-use').method
-  const methodOf: typeof import('@maxvue/max-use').methodOf
-  const min: typeof import('@maxvue/max-use').min
-  const minBy: typeof import('@maxvue/max-use').minBy
   const minutesAgo: typeof import('@maxvue/max-use').minutesAgo
-  const mixin: typeof import('@maxvue/max-use').mixin
   const monthsAgo: typeof import('@maxvue/max-use').monthsAgo
-  const multiply: typeof import('@maxvue/max-use').multiply
-  const negate: typeof import('@maxvue/max-use').negate
-  const next: typeof import('@maxvue/max-use').next
   const nextTick: typeof import('vue').nextTick
   const noEmpty: typeof import('@maxvue/max-use').noEmpty
   const noHtml: typeof import('@maxvue/max-use').noHtml
@@ -598,15 +387,12 @@ declare global {
   const notHasValidContent: typeof import('@maxvue/max-use').notHasValidContent
   const notNullish: typeof import('@maxvue/max-use').notNullish
   const now: typeof import('@maxvue/max-use').now
-  const nth: typeof import('@maxvue/max-use').nth
-  const nthArg: typeof import('@maxvue/max-use').nthArg
   const numeric: typeof import('@maxvue/max-use').numeric
   const objectEntries: typeof import('@maxvue/max-use').objectEntries
   const objectOmit: typeof import('@maxvue/max-use').objectOmit
   const objectPick: typeof import('@maxvue/max-use').objectPick
   const objectSize: typeof import('@maxvue/max-use').objectSize
   const omit: typeof import('@maxvue/max-use').omit
-  const omitBy: typeof import('@maxvue/max-use').omitBy
   const onActivated: typeof import('vue').onActivated
   const onBeforeMount: typeof import('vue').onBeforeMount
   const onBeforeUnmount: typeof import('vue').onBeforeUnmount
@@ -623,60 +409,32 @@ declare global {
   const onMounted: typeof import('vue').onMounted
   const onRenderTracked: typeof import('vue').onRenderTracked
   const onRenderTriggered: typeof import('vue').onRenderTriggered
-  const onResetConfig: typeof import('@maxvue/max-use').onResetConfig
   const onScopeDispose: typeof import('vue').onScopeDispose
   const onServerPrefetch: typeof import('vue').onServerPrefetch
   const onStartTyping: typeof import('@maxvue/max-use').onStartTyping
   const onUnmounted: typeof import('vue').onUnmounted
   const onUpdated: typeof import('vue').onUpdated
   const onWatcherCleanup: typeof import('vue').onWatcherCleanup
-  const once: typeof import('@maxvue/max-use').once
   const onlyLetters: typeof import('@maxvue/max-use').onlyLetters
   const onlyLettersAndNumbers: typeof import('@maxvue/max-use').onlyLettersAndNumbers
   const onlyNumbers: typeof import('@maxvue/max-use').onlyNumbers
   const onlySymbols: typeof import('@maxvue/max-use').onlySymbols
   const orderBy: typeof import('@maxvue/max-use').orderBy
   const orderByWithKey: typeof import('@maxvue/max-use').orderByWithKey
-  const over: typeof import('@maxvue/max-use').over
-  const overArgs: typeof import('@maxvue/max-use').overArgs
-  const overEvery: typeof import('@maxvue/max-use').overEvery
-  const overSome: typeof import('@maxvue/max-use').overSome
-  const pad: typeof import('@maxvue/max-use').pad
-  const padEnd: typeof import('@maxvue/max-use').padEnd
-  const padStart: typeof import('@maxvue/max-use').padStart
-  const parseBrNumber: typeof import('@maxvue/max-use').parseBrNumber
-  const parseInt: typeof import('@maxvue/max-use').parseInt
-  const partial: typeof import('@maxvue/max-use').partial
-  const partialRight: typeof import('@maxvue/max-use').partialRight
-  const partition: typeof import('@maxvue/max-use').partition
   const pausableFilter: typeof import('@maxvue/max-use').pausableFilter
-  const pausableWatch: typeof import('@maxvue/max-use').pausableWatch
   const phone: typeof import('@maxvue/max-use').phone
   const phoneIsValid: typeof import('@maxvue/max-use').phoneIsValid
   const pick: typeof import('@maxvue/max-use').pick
-  const pickBy: typeof import('@maxvue/max-use').pickBy
-  const placeholder: typeof import('@maxvue/max-use').placeholder
-  const plant: typeof import('@maxvue/max-use').plant
   const postCachedApiIDB: typeof import('@maxvue/max-use').postCachedApiIDB
   const presetMaxUno: typeof import('../src/presetMaxUno.ts').presetMaxUno
   const promiseTimeout: typeof import('@maxvue/max-use').promiseTimeout
-  const property: typeof import('@maxvue/max-use').property
-  const propertyOf: typeof import('@maxvue/max-use').propertyOf
   const provide: typeof import('vue').provide
   const provideInputBaseContext: typeof import('../src/index.ts').provideInputBaseContext
   const provideLocal: typeof import('@maxvue/max-use').provideLocal
   const provideSSRWidth: typeof import('@maxvue/max-use').provideSSRWidth
   const ptBR: typeof import('../src/index.ts').ptBR
-  const pull: typeof import('@maxvue/max-use').pull
-  const pullAll: typeof import('@maxvue/max-use').pullAll
-  const pullAllBy: typeof import('@maxvue/max-use').pullAllBy
-  const pullAllWith: typeof import('@maxvue/max-use').pullAllWith
-  const pullAt: typeof import('@maxvue/max-use').pullAt
   const pxValue: typeof import('@maxvue/max-use').pxValue
   const rand: typeof import('@maxvue/max-use').rand
-  const random: typeof import('@maxvue/max-use').random
-  const range: typeof import('@maxvue/max-use').range
-  const rangeRight: typeof import('@maxvue/max-use').rangeRight
   const reactify: typeof import('@maxvue/max-use').reactify
   const reactifyObject: typeof import('@maxvue/max-use').reactifyObject
   const reactive: typeof import('vue').reactive
@@ -685,9 +443,6 @@ declare global {
   const reactivePick: typeof import('@maxvue/max-use').reactivePick
   const readingTime: typeof import('@maxvue/max-use').readingTime
   const readonly: typeof import('vue').readonly
-  const rearg: typeof import('@maxvue/max-use').rearg
-  const reduce: typeof import('@maxvue/max-use').reduce
-  const reduceRight: typeof import('@maxvue/max-use').reduceRight
   const ref: typeof import('vue').ref
   const refAutoReset: typeof import('@maxvue/max-use').refAutoReset
   const refDebounced: typeof import('@maxvue/max-use').refDebounced
@@ -696,113 +451,47 @@ declare global {
   const refThrottled: typeof import('@maxvue/max-use').refThrottled
   const refWithControl: typeof import('@maxvue/max-use').refWithControl
   const registerMaxCacheKey: typeof import('../src/index.ts').registerMaxCacheKey
-  const reject: typeof import('@maxvue/max-use').reject
-  const remove: typeof import('@maxvue/max-use').remove
   const removeSpaces: typeof import('@maxvue/max-use').removeSpaces
   const renameKeys: typeof import('@maxvue/max-use').renameKeys
-  const repeat: typeof import('@maxvue/max-use').repeat
-  const replace: typeof import('@maxvue/max-use').replace
-  const resetConfig: typeof import('@maxvue/max-use').resetConfig
   const resetMaxAppConfig: typeof import('../src/index.ts').resetMaxAppConfig
   const resolveBadgeColors: typeof import('../src/index.ts').resolveBadgeColors
   const resolveComponent: typeof import('vue').resolveComponent
-  const resolveRoute: typeof import('@maxvue/max-use').resolveRoute
   const resolveStatItemColors: typeof import('../src/index.ts').resolveStatItemColors
-  const rest: typeof import('@maxvue/max-use').rest
-  const result: typeof import('@maxvue/max-use').result
-  const reverse: typeof import('@maxvue/max-use').reverse
-  const round: typeof import('@maxvue/max-use').round
   const roundDown: typeof import('@maxvue/max-use').roundDown
   const roundUp: typeof import('@maxvue/max-use').roundUp
   const sample: typeof import('@maxvue/max-use').sample
-  const sampleSize: typeof import('@maxvue/max-use').sampleSize
   const secondsAgo: typeof import('@maxvue/max-use').secondsAgo
-  const seq: typeof import('@maxvue/max-use').seq
   const set: typeof import('@maxvue/max-use').set
-  const setApiRequestConfig: typeof import('@maxvue/max-use').setApiRequestConfig
   const setLibraryRouter: typeof import('@maxvue/max-use').setLibraryRouter
-  const setRouteResolver: typeof import('@maxvue/max-use').setRouteResolver
   const setSSRHandler: typeof import('@maxvue/max-use').setSSRHandler
-  const setWith: typeof import('@maxvue/max-use').setWith
   const shallowReactive: typeof import('vue').shallowReactive
   const shallowReadonly: typeof import('vue').shallowReadonly
   const shallowRef: typeof import('vue').shallowRef
   const shuffle: typeof import('@maxvue/max-use').shuffle
   const size: typeof import('@maxvue/max-use').size
-  const slice: typeof import('@maxvue/max-use').slice
   const slugify: typeof import('@maxvue/max-use').slugify
   const snakeCase: typeof import('@maxvue/max-use').snakeCase
-  const some: typeof import('@maxvue/max-use').some
   const sortBy: typeof import('@maxvue/max-use').sortBy
   const sortByMulti: typeof import('@maxvue/max-use').sortByMulti
-  const sortedIndex: typeof import('@maxvue/max-use').sortedIndex
-  const sortedIndexBy: typeof import('@maxvue/max-use').sortedIndexBy
-  const sortedIndexOf: typeof import('@maxvue/max-use').sortedIndexOf
-  const sortedLastIndex: typeof import('@maxvue/max-use').sortedLastIndex
-  const sortedLastIndexBy: typeof import('@maxvue/max-use').sortedLastIndexBy
-  const sortedLastIndexOf: typeof import('@maxvue/max-use').sortedLastIndexOf
-  const sortedUniq: typeof import('@maxvue/max-use').sortedUniq
-  const sortedUniqBy: typeof import('@maxvue/max-use').sortedUniqBy
-  const split: typeof import('@maxvue/max-use').split
-  const spread: typeof import('@maxvue/max-use').spread
   const src: typeof import('../src/index.ts').default
-  const startCase: typeof import('@maxvue/max-use').startCase
-  const startsWith: typeof import('@maxvue/max-use').startsWith
   const stripHtml: typeof import('@maxvue/max-use').stripHtml
-  const stubArray: typeof import('@maxvue/max-use').stubArray
-  const stubFalse: typeof import('@maxvue/max-use').stubFalse
-  const stubObject: typeof import('@maxvue/max-use').stubObject
-  const stubString: typeof import('@maxvue/max-use').stubString
-  const stubTrue: typeof import('@maxvue/max-use').stubTrue
-  const subtract: typeof import('@maxvue/max-use').subtract
   const sum: typeof import('@maxvue/max-use').sum
   const sumBy: typeof import('@maxvue/max-use').sumBy
   const syncRef: typeof import('@maxvue/max-use').syncRef
   const syncRefs: typeof import('@maxvue/max-use').syncRefs
-  const tail: typeof import('@maxvue/max-use').tail
-  const take: typeof import('@maxvue/max-use').take
-  const takeRight: typeof import('@maxvue/max-use').takeRight
-  const takeRightWhile: typeof import('@maxvue/max-use').takeRightWhile
-  const takeWhile: typeof import('@maxvue/max-use').takeWhile
-  const tap: typeof import('@maxvue/max-use').tap
-  const template: typeof import('@maxvue/max-use').template
-  const templateRef: typeof import('@maxvue/max-use').templateRef
-  const templateSettings: typeof import('@maxvue/max-use').templateSettings
-  const throttle: typeof import('@maxvue/max-use').throttle
   const throttleFilter: typeof import('@maxvue/max-use').throttleFilter
-  const throttledRef: typeof import('@maxvue/max-use').throttledRef
-  const throttledWatch: typeof import('@maxvue/max-use').throttledWatch
-  const thru: typeof import('@maxvue/max-use').thru
   const timeAgo: typeof import('@maxvue/max-use').timeAgo
-  const times: typeof import('@maxvue/max-use').times
   const timestamp: typeof import('@maxvue/max-use').timestamp
   const toArray: typeof import('@maxvue/max-use').toArray
-  const toFinite: typeof import('@maxvue/max-use').toFinite
-  const toInteger: typeof import('@maxvue/max-use').toInteger
-  const toIterator: typeof import('@maxvue/max-use').toIterator
-  const toJSON: typeof import('@maxvue/max-use').toJSON
-  const toLength: typeof import('@maxvue/max-use').toLength
-  const toLower: typeof import('@maxvue/max-use').toLower
   const toNumber: typeof import('@maxvue/max-use').toNumber
-  const toPairs: typeof import('@maxvue/max-use').toPairs
-  const toPairsIn: typeof import('@maxvue/max-use').toPairsIn
-  const toPath: typeof import('@maxvue/max-use').toPath
-  const toPlainObject: typeof import('@maxvue/max-use').toPlainObject
   const toRaw: typeof import('vue').toRaw
   const toReactive: typeof import('@maxvue/max-use').toReactive
-  const toRef: typeof import('@maxvue/max-use').toRef
-  const toRefs: typeof import('@maxvue/max-use').toRefs
-  const toSafeInteger: typeof import('@maxvue/max-use').toSafeInteger
+  const toRef: typeof import('vue').toRef
+  const toRefs: typeof import('vue').toRefs
   const toSearchableString: typeof import('@maxvue/max-use').toSearchableString
-  const toString: typeof import('@maxvue/max-use').toString
-  const toUpper: typeof import('@maxvue/max-use').toUpper
   const toValue: typeof import('vue').toValue
-  const transform: typeof import('@maxvue/max-use').transform
   const transition: typeof import('@maxvue/max-use').transition
   const triggerRef: typeof import('vue').triggerRef
-  const trim: typeof import('@maxvue/max-use').trim
-  const trimEnd: typeof import('@maxvue/max-use').trimEnd
-  const trimStart: typeof import('@maxvue/max-use').trimStart
   const truncate: typeof import('@maxvue/max-use').truncate
   const tryOnBeforeMount: typeof import('@maxvue/max-use').tryOnBeforeMount
   const tryOnBeforeUnmount: typeof import('@maxvue/max-use').tryOnBeforeUnmount
@@ -810,26 +499,12 @@ declare global {
   const tryOnScopeDispose: typeof import('@maxvue/max-use').tryOnScopeDispose
   const tryOnUnmounted: typeof import('@maxvue/max-use').tryOnUnmounted
   const ulid: typeof import('@maxvue/max-use').ulid
-  const unary: typeof import('@maxvue/max-use').unary
-  const unescape: typeof import('@maxvue/max-use').unescape
-  const union: typeof import('@maxvue/max-use').union
-  const unionBy: typeof import('@maxvue/max-use').unionBy
-  const unionWith: typeof import('@maxvue/max-use').unionWith
   const uniq: typeof import('@maxvue/max-use').uniq
-  const uniqBy: typeof import('@maxvue/max-use').uniqBy
-  const uniqWith: typeof import('@maxvue/max-use').uniqWith
   const uniqueBy: typeof import('@maxvue/max-use').uniqueBy
-  const uniqueId: typeof import('@maxvue/max-use').uniqueId
   const unref: typeof import('vue').unref
   const unrefElement: typeof import('@maxvue/max-use').unrefElement
   const unset: typeof import('@maxvue/max-use').unset
   const until: typeof import('@maxvue/max-use').until
-  const unzip: typeof import('@maxvue/max-use').unzip
-  const unzipWith: typeof import('@maxvue/max-use').unzipWith
-  const update: typeof import('@maxvue/max-use').update
-  const updateWith: typeof import('@maxvue/max-use').updateWith
-  const upperCase: typeof import('@maxvue/max-use').upperCase
-  const upperFirst: typeof import('@maxvue/max-use').upperFirst
   const useActiveElement: typeof import('@maxvue/max-use').useActiveElement
   const useAnimate: typeof import('@maxvue/max-use').useAnimate
   const useArrayDifference: typeof import('@maxvue/max-use').useArrayDifference
@@ -871,7 +546,6 @@ declare global {
   const useCycleList: typeof import('@maxvue/max-use').useCycleList
   const useDark: typeof import('@maxvue/max-use').useDark
   const useDateFormat: typeof import('@maxvue/max-use').useDateFormat
-  const useDebounce: typeof import('@maxvue/max-use').useDebounce
   const useDebounceFn: typeof import('@maxvue/max-use').useDebounceFn
   const useDebouncedRefHistory: typeof import('@maxvue/max-use').useDebouncedRefHistory
   const useDefaultReset: typeof import('@maxvue/max-use').useDefaultReset
@@ -886,7 +560,6 @@ declare global {
   const useElementBounding: typeof import('@maxvue/max-use').useElementBounding
   const useElementByPoint: typeof import('@maxvue/max-use').useElementByPoint
   const useElementHover: typeof import('@maxvue/max-use').useElementHover
-  const useElementOverflow: typeof import('@maxvue/max-use').useElementOverflow
   const useElementSize: typeof import('@maxvue/max-use').useElementSize
   const useElementVisibility: typeof import('@maxvue/max-use').useElementVisibility
   const useEventBus: typeof import('@maxvue/max-use').useEventBus
@@ -975,7 +648,6 @@ declare global {
   const useSorted: typeof import('@maxvue/max-use').useSorted
   const useSpeechRecognition: typeof import('@maxvue/max-use').useSpeechRecognition
   const useSpeechSynthesis: typeof import('@maxvue/max-use').useSpeechSynthesis
-  const useSpellChecker: typeof import('@maxvue/max-use').useSpellChecker
   const useStepper: typeof import('@maxvue/max-use').useStepper
   const useStorage: typeof import('@maxvue/max-use').useStorage
   const useStorageAsync: typeof import('@maxvue/max-use').useStorageAsync
@@ -988,7 +660,6 @@ declare global {
   const useTextDirection: typeof import('@maxvue/max-use').useTextDirection
   const useTextSelection: typeof import('@maxvue/max-use').useTextSelection
   const useTextareaAutosize: typeof import('@maxvue/max-use').useTextareaAutosize
-  const useThrottle: typeof import('@maxvue/max-use').useThrottle
   const useThrottleFn: typeof import('@maxvue/max-use').useThrottleFn
   const useThrottledRefHistory: typeof import('@maxvue/max-use').useThrottledRefHistory
   const useTimeAgo: typeof import('@maxvue/max-use').useTimeAgo
@@ -1020,21 +691,15 @@ declare global {
   const useWindowFocus: typeof import('@maxvue/max-use').useWindowFocus
   const useWindowScroll: typeof import('@maxvue/max-use').useWindowScroll
   const useWindowSize: typeof import('@maxvue/max-use').useWindowSize
-  const utils: typeof import('@maxvue/max-use').utils
   const validCnpj: typeof import('@maxvue/max-use').validCnpj
   const validCnpjOrCpf: typeof import('@maxvue/max-use').validCnpjOrCpf
   const validCpf: typeof import('@maxvue/max-use').validCpf
   const validCpfCnpj: typeof import('@maxvue/max-use').validCpfCnpj
   const validCpfOrCnpj: typeof import('@maxvue/max-use').validCpfOrCnpj
-  const validCreditCard: typeof import('@maxvue/max-use').validCreditCard
   const validEMail: typeof import('@maxvue/max-use').validEMail
   const validEmail: typeof import('@maxvue/max-use').validEmail
   const validPhone: typeof import('@maxvue/max-use').validPhone
   const validate: typeof import('@maxvue/max-use').validate
-  const value: typeof import('@maxvue/max-use').value
-  const valueOf: typeof import('@maxvue/max-use').valueOf
-  const values: typeof import('@maxvue/max-use').values
-  const valuesIn: typeof import('@maxvue/max-use').valuesIn
   const valuesInKey: typeof import('@maxvue/max-use').valuesInKey
   const vueUse: typeof import('@maxvue/max-use').vueUse
   const watch: typeof import('vue').watch
@@ -1056,7 +721,6 @@ declare global {
   const watchIsValid: typeof import('@maxvue/max-use').watchIsValid
   const watchIsValidComputed: typeof import('@maxvue/max-use').watchIsValidComputed
   const watchOnce: typeof import('@maxvue/max-use').watchOnce
-  const watchPausable: typeof import('@maxvue/max-use').watchPausable
   const watchPostEffect: typeof import('vue').watchPostEffect
   const watchSyncEffect: typeof import('vue').watchSyncEffect
   const watchThrottled: typeof import('@maxvue/max-use').watchThrottled
@@ -1066,26 +730,7 @@ declare global {
   const watchWithFilter: typeof import('@maxvue/max-use').watchWithFilter
   const whenever: typeof import('@maxvue/max-use').whenever
   const wireSize: typeof import('@maxvue/max-use').wireSize
-  const without: typeof import('@maxvue/max-use').without
-  const words: typeof import('@maxvue/max-use').words
-  const wrap: typeof import('@maxvue/max-use').wrap
-  const wrapperAt: typeof import('@maxvue/max-use').wrapperAt
-  const wrapperChain: typeof import('@maxvue/max-use').wrapperChain
-  const wrapperCommit: typeof import('@maxvue/max-use').wrapperCommit
-  const wrapperLodash: typeof import('@maxvue/max-use').wrapperLodash
-  const wrapperNext: typeof import('@maxvue/max-use').wrapperNext
-  const wrapperPlant: typeof import('@maxvue/max-use').wrapperPlant
-  const wrapperReverse: typeof import('@maxvue/max-use').wrapperReverse
-  const wrapperToIterator: typeof import('@maxvue/max-use').wrapperToIterator
-  const wrapperValue: typeof import('@maxvue/max-use').wrapperValue
-  const xor: typeof import('@maxvue/max-use').xor
-  const xorBy: typeof import('@maxvue/max-use').xorBy
-  const xorWith: typeof import('@maxvue/max-use').xorWith
   const yearsAgo: typeof import('@maxvue/max-use').yearsAgo
-  const zip: typeof import('@maxvue/max-use').zip
-  const zipObject: typeof import('@maxvue/max-use').zipObject
-  const zipObjectDeep: typeof import('@maxvue/max-use').zipObjectDeep
-  const zipWith: typeof import('@maxvue/max-use').zipWith
 }
 // for type re-export
 declare global {
@@ -1093,8 +738,11 @@ declare global {
   export type { Component, Slot, Slots, ComponentPublicInstance, DirectiveBinding, ExtractDefaultPropTypes, ExtractPropTypes, ExtractPublicPropTypes, InjectionKey, MaybeRef, MaybeRefOrGetter, VNode, WritableComputedRef, Ref, ComputedRef, ShallowRef, ShallowComputedRef, PropType, WatchStopHandle, Watch } from 'vue'
   import('vue')
   // @ts-ignore
-  export type { AfterFetchContext, AsyncComputedOnCancel, AsyncComputedOptions, BasicColorMode, BasicColorSchema, BatteryManager, BeforeFetchContext, Breakpoints, BrowserLocationState, CloneFn, ColorSchemeType, ComputedInjectGetter, ComputedInjectGetterWithDefault, ComputedInjectSetter, ConfigurableDeepRefs, ConfigurableDocument, ConfigurableDocumentOrShadowRoot, ConfigurableLocation, ConfigurableNavigator, ConfigurableScheduler, ConfigurableWindow, ContrastType, CreateFetchOptions, CreateReusableTemplateOptions, CubicBezierPoints, DefineTemplateComponent, DeviceMotionOptions, DocumentEventName, EasingFunction, ElementSize, EventBusEvents, EventBusIdentifier, EventBusKey, EventBusListener, EventSourceStatus, EyeDropper, EyeDropperOpenOptions, FileSystemAccessShowOpenFileOptions, FileSystemAccessShowSaveFileOptions, FileSystemAccessWindow, FileSystemFileHandle, FormatTimeAgoIntlOptions, FormatTimeAgoOptions, GeneralEventListener, GeneralPermissionDescriptor, InterpolationFunction, KeyFilter, KeyModifier, KeyPredicate, KeyStrokeEventName, MagicKeysInternal, MaybeComputedElementRef, MaybeComputedElementRefOrArray, MaybeElement, MaybeElementRef, MemoryInfo, MouseInElementOptions, MousePressedOptions, NavigatorLanguageState, NetworkEffectiveType, NetworkState, NetworkType, OnClickOutsideHandler, OnClickOutsideOptions, OnClickOutsideReturn, OnElementRemovalOptions, OnFetchErrorContext, OnKeyStrokeOptions, OnLongPressModifiers, OnLongPressOptions, OnLongPressReturn, OnStartTypingOptions, OrientationLockType, OrientationType, PointerType, Position, ReducedMotionType, ReducedTransparencyType, RenderableComponent, ResizeObserverCallback, ResizeObserverEntry, ResizeObserverSize, ReusableTemplatePair, ReuseTemplateComponent, SSRHandlersMap, ScreenOrientation, Serializer, SerializerAsync, ShadowRootEventName, StorageEventLike, StorageLike, StorageLikeAsync, Supportable, TemplatePromise, TemplatePromiseOptions, TemplatePromiseProps, TemplateRefsList, TimeAgoUnit, ToDataURLOptions, TransitionOptions, UnRefElementReturn, UnrefFn, UrlParams, UseActiveElementOptions, UseActiveElementReturn, UseAnimateKeyframes, UseAnimateOptions, UseAnimateReturn, UseAsyncQueueOptions, UseAsyncQueueResult, UseAsyncQueueReturn, UseAsyncQueueTask, UseAsyncStateOptions, UseAsyncStateReturn, UseAsyncStateReturnBase, UseBase64ObjectOptions, UseBase64Options, UseBase64Return, UseBatteryOptions, UseBatteryReturn, UseBluetoothOptions, UseBluetoothRequestDeviceOptions, UseBluetoothReturn, UseBreakpointReturn, UseBreakpointsOptions, UseBroadcastChannelOptions, UseBroadcastChannelReturn, UseBrowserLocationOptions, UseBrowserLocationReturn, UseCachedOptions, UseCachedReturn, UseClipboardItemsOptions, UseClipboardItemsReturn, UseClipboardOptions, UseClipboardReturn, UseClonedOptions, UseClonedReturn, UseColorModeOptions, UseColorModeReturn, UseConfirmDialogReturn, UseConfirmDialogRevealResult, UseCountdownOptions, UseCountdownReturn, UseCssSupportsOptions, UseCssSupportsReturn, UseCssVarOptions, UseCycleListOptions, UseCycleListReturn, UseDarkOptions, UseDarkReturn, UseDeviceMotionOptions, UseDeviceMotionReturn, UseDeviceOrientationOptions, UseDeviceOrientationReturn, UseDevicePixelRatioOptions, UseDevicePixelRatioReturn, UseDevicesListOptions, UseDevicesListReturn, UseDisplayMediaOptions, UseDisplayMediaReturn, UseDocumentVisibilityOptions, UseDocumentVisibilityReturn, UseDraggableOptions, UseDraggableReturn, UseDropZoneOptions, UseDropZoneReturn, UseElementBoundingOptions, UseElementBoundingReturn, UseElementByPointOptions, UseElementByPointReturn, UseElementHoverOptions, UseElementOverflowOptions, UseElementOverflowReturn, UseElementSizeOptions, UseElementSizeReturn, UseElementVisibilityOptions, UseElementVisibilityReturn, UseElementVisibilityReturnWithControls, UseEventBusReturn, UseEventSourceOptions, UseEventSourceReturn, UseEyeDropperOptions, UseEyeDropperReturn, UseFaviconOptions, UseFaviconReturn, UseFetchOptions, UseFetchReturn, UseFileDialogOptions, UseFileDialogReturn, UseFileSystemAccessCommonOptions, UseFileSystemAccessOptions, UseFileSystemAccessReturn, UseFileSystemAccessShowSaveFileOptions, UseFocusOptions, UseFocusReturn, UseFocusWithinReturn, UseFpsOptions, UseFullscreenOptions, UseFullscreenReturn, UseGamepadOptions, UseGamepadReturn, UseGeolocationOptions, UseGeolocationReturn, UseHorizontalVirtualListOptions, UseIdleOptions, UseIdleReturn, UseImageOptions, UseImageReturn, UseInfiniteScrollOptions, UseInfiniteScrollReturn, UseIntersectionObserverOptions, UseIntersectionObserverReturn, UseKeyModifierReturn, UseMagicKeysOptions, UseMagicKeysReturn, UseManualRefHistoryOptions, UseManualRefHistoryReturn, UseMediaControlsReturn, UseMediaSource, UseMediaTextTrack, UseMediaTextTrackSource, UseMemoizeCache, UseMemoizeOptions, UseMemoizeReturn, UseMemoryOptions, UseMemoryReturn, UseModifierOptions, UseMouseCoordType, UseMouseEventExtractor, UseMouseInElementReturn, UseMouseOptions, UseMousePressedOptions, UseMousePressedReturn, UseMouseReturn, UseMouseSourceType, UseMutationObserverOptions, UseMutationObserverReturn, UseNavigatorLanguageOptions, UseNavigatorLanguageReturn, UseNetworkOptions, UseNetworkReturn, UseNowOptions, UseNowReturn, UseOffsetPaginationInfinityPageReturn, UseOffsetPaginationOptions, UseOffsetPaginationReturn, UseOnLongPressReturn, UsePageLeaveOptions, UsePageLeaveReturn, UseParallaxOptions, UseParallaxReturn, UsePerformanceObserverOptions, UsePermissionOptions, UsePermissionReturn, UsePermissionReturnWithControls, UsePointerLockOptions, UsePointerLockReturn, UsePointerOptions, UsePointerReturn, UsePointerState, UsePointerSwipeOptions, UsePointerSwipeReturn, UseRafFnCallbackArguments, UseRafFnOptions, UseRefHistoryOptions, UseRefHistoryRecord, UseRefHistoryReturn, UseResizeObserverOptions, UseResizeObserverReturn, UseScreenOrientationOptions, UseScreenOrientationReturn, UseScreenSafeAreaReturn, UseScriptTagOptions, UseScriptTagReturn, UseScrollOptions, UseScrollReturn, UseShareOptions, UseShareReturn, UseSortedCompareFn, UseSortedFn, UseSortedOptions, UseSpeechRecognitionOptions, UseSpeechRecognitionReturn, UseSpeechSynthesisOptions, UseSpeechSynthesisReturn, UseSpeechSynthesisStatus, UseStepperReturn, UseStorageAsyncOptions, UseStorageOptions, UseStyleTagOptions, UseStyleTagReturn, UseSupportedReturn, UseSwipeDirection, UseSwipeOptions, UseSwipeReturn, UseTextDirectionOptions, UseTextDirectionValue, UseTextSelectionOptions, UseTextSelectionReturn, UseTextareaAutosizeOptions, UseTextareaAutosizeReturn, UseThrottledRefHistoryOptions, UseThrottledRefHistoryReturn, UseTimeAgoFormatter, UseTimeAgoIntlOptions, UseTimeAgoMessages, UseTimeAgoMessagesBuiltIn, UseTimeAgoOptions, UseTimeAgoReturn, UseTimeAgoUnit, UseTimeAgoUnitNamesDefault, UseTimeoutPollOptions, UseTimestampOptions, UseTimestampReturn, UseTitleOptions, UseTitleOptionsBase, UseTitleReturn, UseTransitionOptions, UseUrlSearchParamsOptions, UseUserMediaOptions, UseUserMediaReturn, UseVModelOptions, UseVerticalVirtualListOptions, UseVibrateOptions, UseVibrateReturn, UseVirtualListItem, UseVirtualListOptions, UseVirtualListOptionsBase, UseVirtualListReturn, UseVirtualListScrollToOptions, UseWakeLockOptions, UseWakeLockReturn, UseWebNotificationOptions, UseWebNotificationReturn, UseWebSocketOptions, UseWebSocketReturn, UseWebWorkerFnReturn, UseWebWorkerOptions, UseWebWorkerReturn, UseWindowScrollOptions, UseWindowScrollReturn, UseWindowSizeOptions, UseWindowSizeReturn, VueInstance, WakeLockSentinel, WebNotificationOptions, WebSocketHeartbeatMessage, WebSocketStatus, WebWorkerStatus, WindowEventName, WritableComputedInjectOptions, WritableComputedInjectOptionsWithDefault, AnyFn, ArgumentsType, Arrayable, Awaitable, Awaited, CancelableEventFilter, CancelablePromisifyFn, ComputedEagerOptions, ComputedEagerReturn, ComputedRefWithControl, ComputedWithControlRef, ComputedWithControlRefExtra, ConfigurableEventFilter, ConfigurableFlush, ConfigurableFlushSync, ControlledRefOptions, CreateGlobalStateReturn, CreateInjectionStateOptions, CreateInjectionStateReturn, CreateRefReturn, DateLike, DebounceFilterOptions, DeepMaybeRef, ElementOf, EventFilter, EventHook, EventHookOff, EventHookOn, EventHookReturn, EventHookTrigger, ExtendRefOptions, ExtendRefReturn, Fn, FunctionArgs, FunctionWrapperOptions, IfAny, IgnoredPrevAsyncUpdates, IgnoredUpdater, InstanceProxy, IsAny, IsDefinedReturn, ManualResetRefReturn, MapOldSources, MapSources, MultiWatchSources, Mutable, Pausable, PausableFilterOptions, Promisify, PromisifyFn, ProvideLocalReturn, Reactified, ReactifyNested, ReactifyObjectOptions, ReactifyObjectReturn, ReactifyOptions, ReactifyReturn, ReactiveComputedReturn, ReactiveOmitPredicate, ReactiveOmitReturn, ReactivePickPredicate, ReactivePickReturn, ReadonlyRefOrGetter, RefAutoResetReturn, RefDebouncedReturn, RefThrottledReturn, RemovableRef, ShallowOrDeepRef, ShallowUnwrapRef, SharedComposableReturn, SingletonPromiseReturn, Stoppable, SyncRefOptions, SyncRefsOptions, ThrottleFilterOptions, TimerHandle, ToRefsOptions, ToggleFn, UntilArrayInstance, UntilBaseInstance, UntilToMatchOptions, UntilValueInstance, UseArrayDifferenceOptions, UseArrayDifferenceReturn, UseArrayEveryReturn, UseArrayFilterReturn, UseArrayFindIndexReturn, UseArrayFindLastReturn, UseArrayFindReturn, UseArrayIncludesComparatorFn, UseArrayIncludesOptions, UseArrayIncludesReturn, UseArrayJoinReturn, UseArrayMapReturn, UseArrayReduceReturn, UseArrayReducer, UseArraySomeReturn, UseArrayUniqueReturn, UseCounterOptions, UseCounterReturn, UseDateFormatOptions, UseDateFormatReturn, UseDebounceFnReturn, UseIntervalControls, UseIntervalFnOptions, UseIntervalFnReturn, UseIntervalOptions, UseIntervalReturn, UseLastChangedOptions, UseLastChangedReturn, UseTimeoutFnOptions, UseTimeoutFnReturn, UseTimeoutOptions, UseTimeoutReturn, UseTimoutReturn, UseToNumberOptions, UseToggleOptions, UseToggleReturn, WatchArrayCallback, WatchAtMostOptions, WatchAtMostReturn, WatchDebouncedOptions, WatchIgnorableReturn, WatchOptionFlush, WatchPausableOptions, WatchPausableReturn, WatchThrottledOptions, WatchTriggerableCallback, WatchTriggerableReturn, WatchWithFilterOptions, WheneverOptions, WritableComputedRefWithControl } from '@maxvue/max-use'
+  export type { AfterFetchContext, AsyncComputedOnCancel, AsyncComputedOptions, BasicColorMode, BasicColorSchema, BatteryManager, BeforeFetchContext, Breakpoints, BrowserLocationState, CloneFn, ColorSchemeType, ComputedInjectGetter, ComputedInjectGetterWithDefault, ComputedInjectSetter, ConfigurableDeepRefs, ConfigurableDocument, ConfigurableDocumentOrShadowRoot, ConfigurableLocation, ConfigurableNavigator, ConfigurableScheduler, ConfigurableWindow, ContrastType, CreateFetchOptions, CreateReusableTemplateOptions, CubicBezierPoints, DefaultMagicKeysAliasMap, DefineTemplateComponent, DeviceMotionOptions, DocumentEventName, EasingFunction, ElementSize, EventBusEvents, EventBusIdentifier, EventBusKey, EventBusListener, EventSourceStatus, EyeDropper, EyeDropperOpenOptions, FileSystemAccessShowOpenFileOptions, FileSystemAccessShowSaveFileOptions, FileSystemAccessWindow, FileSystemFileHandle, FormatTimeAgoIntlOptions, FormatTimeAgoOptions, GeneralEventListener, GeneralPermissionDescriptor, InterpolationFunction, KeyFilter, KeyModifier, KeyPredicate, KeyStrokeEventName, MagicKeysInternal, MaybeComputedElementRef, MaybeElement, MaybeElementRef, MemoryInfo, MouseInElementOptions, MousePressedOptions, NavigatorLanguageState, NetworkEffectiveType, NetworkState, NetworkType, OnClickOutsideHandler, OnClickOutsideOptions, OnClickOutsideReturn, OnElementRemovalOptions, OnFetchErrorContext, OnKeyStrokeOptions, OnLongPressModifiers, OnLongPressOptions, OnLongPressReturn, OrientationLockType, OrientationType, PointerType, Position, ReducedMotionType, ReducedTransparencyType, RenderableComponent, ResizeObserverCallback, ResizeObserverEntry, ResizeObserverSize, ReusableTemplatePair, ReuseTemplateComponent, SSRHandlersMap, ScreenOrientation, Serializer, SerializerAsync, ShadowRootEventName, StorageEventLike, StorageLike, StorageLikeAsync, StorageSerializers, Supportable, TemplatePromise, TemplatePromiseOptions, TemplatePromiseProps, TemplateRefsList, TimeAgoUnit, ToDataURLOptions, TransitionOptions, TransitionPresets, UnRefElementReturn, UnrefFn, UrlParams, UseActiveElementOptions, UseActiveElementReturn, UseAnimateKeyframes, UseAnimateOptions, UseAnimateReturn, UseAsyncQueueOptions, UseAsyncQueueResult, UseAsyncQueueReturn, UseAsyncQueueTask, UseAsyncStateOptions, UseAsyncStateReturn, UseAsyncStateReturnBase, UseBase64ObjectOptions, UseBase64Options, UseBase64Return, UseBatteryOptions, UseBatteryReturn, UseBluetoothOptions, UseBluetoothRequestDeviceOptions, UseBluetoothReturn, UseBreakpointReturn, UseBreakpointsOptions, UseBroadcastChannelOptions, UseBroadcastChannelReturn, UseBrowserLocationOptions, UseBrowserLocationReturn, UseCachedOptions, UseCachedReturn, UseClipboardItemsOptions, UseClipboardItemsReturn, UseClipboardOptions, UseClipboardReturn, UseClonedOptions, UseClonedReturn, UseColorModeOptions, UseColorModeReturn, UseConfirmDialogReturn, UseConfirmDialogRevealResult, UseCountdownOptions, UseCountdownReturn, UseCssSupportsOptions, UseCssSupportsReturn, UseCssVarOptions, UseCycleListOptions, UseCycleListReturn, UseDarkOptions, UseDarkReturn, UseDeviceMotionOptions, UseDeviceMotionReturn, UseDeviceOrientationOptions, UseDeviceOrientationReturn, UseDevicePixelRatioOptions, UseDevicePixelRatioReturn, UseDevicesListOptions, UseDevicesListReturn, UseDisplayMediaOptions, UseDisplayMediaReturn, UseDocumentVisibilityOptions, UseDocumentVisibilityReturn, UseDraggableOptions, UseDraggableReturn, UseDropZoneOptions, UseDropZoneReturn, UseElementBoundingOptions, UseElementBoundingReturn, UseElementByPointOptions, UseElementByPointReturn, UseElementHoverOptions, UseElementSizeOptions, UseElementSizeReturn, UseElementVisibilityOptions, UseElementVisibilityReturn, UseElementVisibilityReturnWithControls, UseEventBusReturn, UseEventSourceOptions, UseEventSourceReturn, UseEyeDropperOptions, UseEyeDropperReturn, UseFaviconOptions, UseFaviconReturn, UseFetchOptions, UseFetchReturn, UseFileDialogOptions, UseFileDialogReturn, UseFileSystemAccessCommonOptions, UseFileSystemAccessOptions, UseFileSystemAccessReturn, UseFileSystemAccessShowSaveFileOptions, UseFocusOptions, UseFocusReturn, UseFocusWithinReturn, UseFpsOptions, UseFullscreenOptions, UseFullscreenReturn, UseGamepadOptions, UseGamepadReturn, UseGeolocationOptions, UseGeolocationReturn, UseHorizontalVirtualListOptions, UseIdleOptions, UseIdleReturn, UseImageOptions, UseImageReturn, UseInfiniteScrollOptions, UseInfiniteScrollReturn, UseIntersectionObserverOptions, UseIntersectionObserverReturn, UseKeyModifierReturn, UseMagicKeysOptions, UseMagicKeysReturn, UseManualRefHistoryOptions, UseManualRefHistoryReturn, UseMediaControlsReturn, UseMediaSource, UseMediaTextTrack, UseMediaTextTrackSource, UseMemoizeCache, UseMemoizeOptions, UseMemoizeReturn, UseMemoryOptions, UseMemoryReturn, UseModifierOptions, UseMouseCoordType, UseMouseEventExtractor, UseMouseInElementReturn, UseMouseOptions, UseMousePressedOptions, UseMousePressedReturn, UseMouseReturn, UseMouseSourceType, UseMutationObserverOptions, UseMutationObserverReturn, UseNavigatorLanguageOptions, UseNavigatorLanguageReturn, UseNetworkOptions, UseNetworkReturn, UseNowOptions, UseNowReturn, UseOffsetPaginationInfinityPageReturn, UseOffsetPaginationOptions, UseOffsetPaginationReturn, UseOnLongPressReturn, UsePageLeaveOptions, UsePageLeaveReturn, UseParallaxOptions, UseParallaxReturn, UsePerformanceObserverOptions, UsePermissionOptions, UsePermissionReturn, UsePermissionReturnWithControls, UsePointerLockOptions, UsePointerLockReturn, UsePointerOptions, UsePointerReturn, UsePointerState, UsePointerSwipeOptions, UsePointerSwipeReturn, UseRafFnCallbackArguments, UseRafFnOptions, UseRefHistoryOptions, UseRefHistoryRecord, UseRefHistoryReturn, UseResizeObserverOptions, UseResizeObserverReturn, UseScreenOrientationOptions, UseScreenOrientationReturn, UseScreenSafeAreaReturn, UseScriptTagOptions, UseScriptTagReturn, UseScrollOptions, UseScrollReturn, UseShareOptions, UseShareReturn, UseSortedCompareFn, UseSortedFn, UseSortedOptions, UseSpeechRecognitionOptions, UseSpeechRecognitionReturn, UseSpeechSynthesisOptions, UseSpeechSynthesisReturn, UseSpeechSynthesisStatus, UseStepperReturn, UseStorageAsyncOptions, UseStorageOptions, UseStyleTagOptions, UseStyleTagReturn, UseSupportedReturn, UseSwipeDirection, UseSwipeOptions, UseSwipeReturn, UseTextDirectionOptions, UseTextDirectionValue, UseTextSelectionOptions, UseTextSelectionReturn, UseTextareaAutosizeOptions, UseTextareaAutosizeReturn, UseThrottledRefHistoryOptions, UseThrottledRefHistoryReturn, UseTimeAgoFormatter, UseTimeAgoIntlOptions, UseTimeAgoMessages, UseTimeAgoMessagesBuiltIn, UseTimeAgoOptions, UseTimeAgoReturn, UseTimeAgoUnit, UseTimeAgoUnitNamesDefault, UseTimeoutPollOptions, UseTimestampOptions, UseTimestampReturn, UseTitleOptions, UseTitleOptionsBase, UseTitleReturn, UseTransitionOptions, UseUrlSearchParamsOptions, UseUserMediaOptions, UseUserMediaReturn, UseVModelOptions, UseVerticalVirtualListOptions, UseVibrateOptions, UseVibrateReturn, UseVirtualListItem, UseVirtualListOptions, UseVirtualListOptionsBase, UseVirtualListReturn, UseWakeLockOptions, UseWakeLockReturn, UseWebNotificationOptions, UseWebNotificationReturn, UseWebSocketOptions, UseWebSocketReturn, UseWebWorkerFnReturn, UseWebWorkerOptions, UseWebWorkerReturn, UseWindowScrollOptions, UseWindowScrollReturn, UseWindowSizeOptions, UseWindowSizeReturn, VueInstance, WakeLockSentinel, WebNotificationOptions, WebSocketHeartbeatMessage, WebSocketStatus, WebWorkerStatus, WindowEventName, WritableComputedInjectOptions, WritableComputedInjectOptionsWithDefault, asyncComputed, breakpointsAntDesign, breakpointsBootstrapV5, breakpointsElement, breakpointsMasterCss, breakpointsPrimeFlex, breakpointsQuasar, breakpointsSematic, breakpointsTailwind, breakpointsVuetify, breakpointsVuetifyV2, breakpointsVuetifyV3, customStorageEventName, defaultDocument, defaultLocation, defaultNavigator, defaultWindow, executeTransition, templateRef, useCached, useStorage, useTimeAgo, AnyFn, ArgumentsType, Arrayable, Awaitable, Awaited, ComputedEagerOptions, ComputedEagerReturn, ComputedRefWithControl, ComputedWithControlRef, ComputedWithControlRefExtra, ConfigurableEventFilter, ConfigurableFlush, ConfigurableFlushSync, ControlledRefOptions, CreateGlobalStateReturn, CreateInjectionStateOptions, CreateInjectionStateReturn, CreateRefReturn, DateLike, DebounceFilterOptions, DeepMaybeRef, ElementOf, EventFilter, EventHook, EventHookOff, EventHookOn, EventHookReturn, EventHookTrigger, ExtendRefOptions, ExtendRefReturn, Fn, FunctionArgs, FunctionWrapperOptions, IfAny, IgnoredPrevAsyncUpdates, IgnoredUpdater, InstanceProxy, IsAny, IsDefinedReturn, ManualResetRefReturn, MapOldSources, MapSources, type MultiWatchSources, Mutable, Pausable, PausableFilterOptions, Promisify, PromisifyFn, ProvideLocalReturn, Reactified, ReactifyNested, ReactifyObjectOptions, ReactifyObjectReturn, ReactifyOptions, ReactifyReturn, ReactiveComputedReturn, ReactiveOmitPredicate, ReactiveOmitReturn, ReactivePickPredicate, ReactivePickReturn, ReadonlyRefOrGetter, RefAutoResetReturn, RefDebouncedReturn, RefThrottledReturn, RemovableRef, ShallowOrDeepRef, ShallowUnwrapRef, SharedComposableReturn, SingletonPromiseReturn, Stoppable, SyncRefOptions, SyncRefsOptions, ThrottleFilterOptions, TimerHandle, ToRefsOptions, ToggleFn, UntilArrayInstance, UntilBaseInstance, UntilToMatchOptions, UntilValueInstance, UseArrayDifferenceOptions, UseArrayDifferenceReturn, UseArrayEveryReturn, UseArrayFilterReturn, UseArrayFindIndexReturn, UseArrayFindLastReturn, UseArrayFindReturn, UseArrayIncludesComparatorFn, UseArrayIncludesOptions, UseArrayIncludesReturn, UseArrayJoinReturn, UseArrayMapReturn, UseArrayReduceReturn, UseArrayReducer, UseArraySomeReturn, UseArrayUniqueReturn, UseCounterOptions, UseCounterReturn, UseDateFormatOptions, UseDateFormatReturn, UseDebounceFnReturn, UseIntervalControls, UseIntervalFnOptions, UseIntervalFnReturn, UseIntervalOptions, UseIntervalReturn, UseLastChangedOptions, UseLastChangedReturn, UseTimeoutFnOptions, UseTimeoutFnReturn, UseTimeoutOptions, UseTimeoutReturn, UseTimoutReturn, UseToNumberOptions, UseToggleOptions, UseToggleReturn, WatchArrayCallback, WatchAtMostOptions, WatchAtMostReturn, WatchDebouncedOptions, WatchIgnorableReturn, WatchOptionFlush, WatchPausableOptions, WatchPausableReturn, WatchThrottledOptions, WatchTriggerableCallback, WatchTriggerableReturn, WatchWithFilterOptions, WheneverOptions, WritableComputedRefWithControl, autoResetRef, computedEager, controlledComputed, controlledRef, createDisposableDirective, createReactiveFn, debouncedRef, debouncedWatch, eagerComputed, get, ignorableWatch, isClient, isIOS, isObject, isWorker, now, pausableWatch, set, throttledRef, throttledWatch, useDateFormat, useDebounce, useThrottle, watchPausable } from '@maxvue/max-use'
   import('@maxvue/max-use')
+  // @ts-ignore
+  export type { LoadingHandle } from '../src/stores/useLoading.Store.ts'
+  import('../src/stores/useLoading.Store.ts')
   // @ts-ignore
   export type { LoginProvider } from '../src/stores/useLogin.Store.ts'
   import('../src/stores/useLogin.Store.ts')
@@ -1108,10 +756,10 @@ declare global {
   export type { ConfirmPayload } from '../src/stores/useConfirm.Store.ts'
   import('../src/stores/useConfirm.Store.ts')
   // @ts-ignore
-  export type { BaseComponentProps, MaxButtonBaseProps, ButtonSeverity, ButtonVariant, MaxButtonsType, MaxLikeButtonProps, ConfirmActionProps, ConfirmProps, InputBaseProps, ChipObjectItem, ChipItem, MaxChipsProps, ComponentEmits, SelectItem, SelectGroupOptionsElement, SelectGroupOptions, SelectOptions, InputValue, SelectOptionItem, SelectOptionsList, MaxTableColumn, DBFile, UploadFileStatus, UploadState, MenuItem, AsyncStatus, AsyncState } from '../src/types/index.ts'
+  export type { BaseComponentProps, MaxButtonBaseProps, ButtonSeverity, ButtonVariant, MaxButtonsType, MaxLikeButtonProps, ConfirmActionProps, ConfirmProps, InputBaseProps, ChipObjectItem, ChipItem, MaxChipsProps, ComponentEmits, SelectItem, SelectGroupOptionsElement, SelectGroupOptions, SelectOptions, InputValue, SelectOptionItem, SelectOptionsList, MaxTableColumnDefinition, MaxTableColumn, DBFile, UploadFileStatus, UploadState, MenuItem, AsyncStatus, AsyncState } from '../src/types/index.ts'
   import('../src/types/index.ts')
   // @ts-ignore
-  export type { MaxPluginOptions, MaxDividersProps, AuthProvider, AuthOtpEndpoint, AuthMode, AuthStep, AuthLabels, MaxTopToolbarSubmenuItem, MaxBadgeProps, MaxBadgeStatus, MaxBadgeButtonProps, MaxBadgeButtonsGroupProps, MaxBadgeButtonsGroupItem, MaxImageProps, MaxImageEditPayload, MaxStatsItem, MaxStatsProps, StatItemColors, BadgeColors, ScrollLock } from '../src/index.ts'
+  export type { MaxPluginOptions, MaxDividersProps, AuthProvider, AuthOtpEndpoint, AuthMode, AuthStep, AuthLabels, MaxTopToolbarSubmenuItem, MaxBadgeProps, MaxBadgeStatus, MaxTagProps, MaxTagSeverity, MaxBadgeButtonProps, MaxBadgeButtonsGroupProps, MaxBadgeButtonsGroupItem, MaxImageProps, MaxImageEditPayload, MaxStatsItem, MaxStatsProps, StatItemColors, BadgeColors, ScrollLock } from '../src/index.ts'
   import('../src/index.ts')
 }
 
@@ -1130,10 +778,8 @@ declare module 'vue' {
     readonly BadgeButtonsGroup: UnwrapRef<typeof import('../src/index.ts')['BadgeButtonsGroup']>
     readonly Chips: UnwrapRef<typeof import('../src/index.ts')['Chips']>
     readonly Column: UnwrapRef<typeof import('../src/index.ts')['Column']>
-    readonly DefaultMagicKeysAliasMap: UnwrapRef<typeof import('@maxvue/max-use')['DefaultMagicKeysAliasMap']>
     readonly Drawer: UnwrapRef<typeof import('../src/index.ts')['Drawer']>
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
-    readonly FORMAT_MAP: UnwrapRef<typeof import('@maxvue/max-use')['FORMAT_MAP']>
     readonly ICON_CACHE_KEY: UnwrapRef<typeof import('../src/index.ts')['ICON_CACHE_KEY']>
     readonly INPUT_BASE_CONTEXT_KEY: UnwrapRef<typeof import('../src/index.ts')['INPUT_BASE_CONTEXT_KEY']>
     readonly IconPicker: UnwrapRef<typeof import('../src/index.ts')['IconPicker']>
@@ -1243,7 +889,7 @@ declare module 'vue' {
     readonly MaxSideMenu: UnwrapRef<typeof import('../src/index.ts')['MaxSideMenu']>
     readonly MaxSideMenuMobile: UnwrapRef<typeof import('../src/index.ts')['MaxSideMenuMobile']>
     readonly MaxStats: UnwrapRef<typeof import('../src/index.ts')['MaxStats']>
-    readonly MaxStyle: UnwrapRef<typeof import('../src/index.ts')['MaxStyle']>
+    readonly MaxStyle: UnwrapRef<typeof import('../src/styles.ts')['MaxStyle']>
     readonly MaxTab: UnwrapRef<typeof import('../src/index.ts')['MaxTab']>
     readonly MaxTabItem: UnwrapRef<typeof import('../src/index.ts')['MaxTabItem']>
     readonly MaxTabList: UnwrapRef<typeof import('../src/index.ts')['MaxTabList']>
@@ -1272,7 +918,6 @@ declare module 'vue' {
     readonly Obj: UnwrapRef<typeof import('@maxvue/max-use')['Obj']>
     readonly PhoneField: UnwrapRef<typeof import('../src/index.ts')['PhoneField']>
     readonly Random: UnwrapRef<typeof import('@maxvue/max-use')['Random']>
-    readonly StorageSerializers: UnwrapRef<typeof import('@maxvue/max-use')['StorageSerializers']>
     readonly Str: UnwrapRef<typeof import('@maxvue/max-use')['Str']>
     readonly StrCase: UnwrapRef<typeof import('@maxvue/max-use')['StrCase']>
     readonly StrFilter: UnwrapRef<typeof import('@maxvue/max-use')['StrFilter']>
@@ -1285,136 +930,69 @@ declare module 'vue' {
     readonly Tag: UnwrapRef<typeof import('../src/index.ts')['Tag']>
     readonly Toast: UnwrapRef<typeof import('../src/index.ts')['Toast']>
     readonly TransitionFade: UnwrapRef<typeof import('../src/index.ts')['TransitionFade']>
-    readonly TransitionPresets: UnwrapRef<typeof import('@maxvue/max-use')['TransitionPresets']>
     readonly UserSection: UnwrapRef<typeof import('../src/index.ts')['UserSection']>
     readonly _: UnwrapRef<typeof import('@maxvue/max-use')['_']>
-    readonly abbrevName: UnwrapRef<typeof import('@maxvue/max-use')['abbrevName']>
-    readonly add: UnwrapRef<typeof import('@maxvue/max-use')['add']>
     readonly addTime: UnwrapRef<typeof import('@maxvue/max-use')['addTime']>
     readonly adjustToWcagLuminance: UnwrapRef<typeof import('../src/index.ts')['adjustToWcagLuminance']>
-    readonly after: UnwrapRef<typeof import('@maxvue/max-use')['after']>
     readonly apiDeleteRoute: UnwrapRef<typeof import('@maxvue/max-use')['apiDeleteRoute']>
     readonly apiGetRoute: UnwrapRef<typeof import('@maxvue/max-use')['apiGetRoute']>
     readonly apiPostRoute: UnwrapRef<typeof import('@maxvue/max-use')['apiPostRoute']>
     readonly apiPutRoute: UnwrapRef<typeof import('@maxvue/max-use')['apiPutRoute']>
     readonly apiUploadRoute: UnwrapRef<typeof import('@maxvue/max-use')['apiUploadRoute']>
-    readonly ary: UnwrapRef<typeof import('@maxvue/max-use')['ary']>
     readonly assert: UnwrapRef<typeof import('@maxvue/max-use')['assert']>
-    readonly assign: UnwrapRef<typeof import('@maxvue/max-use')['assign']>
-    readonly assignIn: UnwrapRef<typeof import('@maxvue/max-use')['assignIn']>
-    readonly assignInWith: UnwrapRef<typeof import('@maxvue/max-use')['assignInWith']>
-    readonly assignWith: UnwrapRef<typeof import('@maxvue/max-use')['assignWith']>
-    readonly asyncComputed: UnwrapRef<typeof import('@maxvue/max-use')['asyncComputed']>
-    readonly at: UnwrapRef<typeof import('@maxvue/max-use')['at']>
-    readonly attempt: UnwrapRef<typeof import('@maxvue/max-use')['attempt']>
-    readonly autoResetRef: UnwrapRef<typeof import('@maxvue/max-use')['autoResetRef']>
     readonly average: UnwrapRef<typeof import('@maxvue/max-use')['average']>
-    readonly before: UnwrapRef<typeof import('@maxvue/max-use')['before']>
-    readonly bind: UnwrapRef<typeof import('@maxvue/max-use')['bind']>
-    readonly bindAll: UnwrapRef<typeof import('@maxvue/max-use')['bindAll']>
-    readonly bindKey: UnwrapRef<typeof import('@maxvue/max-use')['bindKey']>
     readonly blank: UnwrapRef<typeof import('@maxvue/max-use')['blank']>
-    readonly breakpointsAntDesign: UnwrapRef<typeof import('@maxvue/max-use')['breakpointsAntDesign']>
-    readonly breakpointsBootstrapV5: UnwrapRef<typeof import('@maxvue/max-use')['breakpointsBootstrapV5']>
-    readonly breakpointsElement: UnwrapRef<typeof import('@maxvue/max-use')['breakpointsElement']>
-    readonly breakpointsMasterCss: UnwrapRef<typeof import('@maxvue/max-use')['breakpointsMasterCss']>
-    readonly breakpointsPrimeFlex: UnwrapRef<typeof import('@maxvue/max-use')['breakpointsPrimeFlex']>
-    readonly breakpointsQuasar: UnwrapRef<typeof import('@maxvue/max-use')['breakpointsQuasar']>
-    readonly breakpointsSematic: UnwrapRef<typeof import('@maxvue/max-use')['breakpointsSematic']>
-    readonly breakpointsTailwind: UnwrapRef<typeof import('@maxvue/max-use')['breakpointsTailwind']>
-    readonly breakpointsVuetify: UnwrapRef<typeof import('@maxvue/max-use')['breakpointsVuetify']>
-    readonly breakpointsVuetifyV2: UnwrapRef<typeof import('@maxvue/max-use')['breakpointsVuetifyV2']>
-    readonly breakpointsVuetifyV3: UnwrapRef<typeof import('@maxvue/max-use')['breakpointsVuetifyV3']>
     readonly bypassFilter: UnwrapRef<typeof import('@maxvue/max-use')['bypassFilter']>
     readonly calculaCabo: UnwrapRef<typeof import('@maxvue/max-use')['calculaCabo']>
     readonly camelCase: UnwrapRef<typeof import('@maxvue/max-use')['camelCase']>
     readonly camelize: UnwrapRef<typeof import('@maxvue/max-use')['camelize']>
     readonly canIterate: UnwrapRef<typeof import('@maxvue/max-use')['canIterate']>
     readonly capitalize: UnwrapRef<typeof import('@maxvue/max-use')['capitalize']>
-    readonly castArray: UnwrapRef<typeof import('@maxvue/max-use')['castArray']>
-    readonly ceil: UnwrapRef<typeof import('@maxvue/max-use')['ceil']>
     readonly cep: UnwrapRef<typeof import('@maxvue/max-use')['cep']>
     readonly cepIsValid: UnwrapRef<typeof import('@maxvue/max-use')['cepIsValid']>
-    readonly chain: UnwrapRef<typeof import('@maxvue/max-use')['chain']>
     readonly chunk: UnwrapRef<typeof import('@maxvue/max-use')['chunk']>
     readonly clamp: UnwrapRef<typeof import('@maxvue/max-use')['clamp']>
     readonly clearAuthOtpCache: UnwrapRef<typeof import('../src/index.ts')['clearAuthOtpCache']>
     readonly clearCacheIDB: UnwrapRef<typeof import('@maxvue/max-use')['clearCacheIDB']>
-    readonly clearCachedApi: UnwrapRef<typeof import('@maxvue/max-use')['clearCachedApi']>
     readonly clearMaxCache: UnwrapRef<typeof import('../src/index.ts')['clearMaxCache']>
-    readonly clone: UnwrapRef<typeof import('@maxvue/max-use')['clone']>
     readonly cloneDeep: UnwrapRef<typeof import('@maxvue/max-use')['cloneDeep']>
-    readonly cloneDeepWith: UnwrapRef<typeof import('@maxvue/max-use')['cloneDeepWith']>
     readonly cloneFnJSON: UnwrapRef<typeof import('@maxvue/max-use')['cloneFnJSON']>
-    readonly cloneWith: UnwrapRef<typeof import('@maxvue/max-use')['cloneWith']>
     readonly cnpj: UnwrapRef<typeof import('@maxvue/max-use')['cnpj']>
     readonly cnpjIsValid: UnwrapRef<typeof import('@maxvue/max-use')['cnpjIsValid']>
     readonly cnpjOrCpf: UnwrapRef<typeof import('@maxvue/max-use')['cnpjOrCpf']>
-    readonly commit: UnwrapRef<typeof import('@maxvue/max-use')['commit']>
-    readonly compact: UnwrapRef<typeof import('@maxvue/max-use')['compact']>
     readonly computed: UnwrapRef<typeof import('vue')['computed']>
     readonly computedAsync: UnwrapRef<typeof import('@maxvue/max-use')['computedAsync']>
-    readonly computedEager: UnwrapRef<typeof import('@maxvue/max-use')['computedEager']>
     readonly computedInject: UnwrapRef<typeof import('@maxvue/max-use')['computedInject']>
     readonly computedWithControl: UnwrapRef<typeof import('@maxvue/max-use')['computedWithControl']>
-    readonly concat: UnwrapRef<typeof import('@maxvue/max-use')['concat']>
-    readonly cond: UnwrapRef<typeof import('@maxvue/max-use')['cond']>
     readonly configureMaxApp: UnwrapRef<typeof import('../src/index.ts')['configureMaxApp']>
-    readonly conforms: UnwrapRef<typeof import('@maxvue/max-use')['conforms']>
-    readonly conformsTo: UnwrapRef<typeof import('@maxvue/max-use')['conformsTo']>
-    readonly constant: UnwrapRef<typeof import('@maxvue/max-use')['constant']>
     readonly containsProp: UnwrapRef<typeof import('@maxvue/max-use')['containsProp']>
     readonly contrastColor: UnwrapRef<typeof import('@maxvue/max-use')['contrastColor']>
-    readonly controlledComputed: UnwrapRef<typeof import('@maxvue/max-use')['controlledComputed']>
-    readonly controlledRef: UnwrapRef<typeof import('@maxvue/max-use')['controlledRef']>
     readonly countBy: UnwrapRef<typeof import('@maxvue/max-use')['countBy']>
-    readonly countWhere: UnwrapRef<typeof import('@maxvue/max-use')['countWhere']>
     readonly cpf: UnwrapRef<typeof import('@maxvue/max-use')['cpf']>
     readonly cpfCnpjIsValid: UnwrapRef<typeof import('@maxvue/max-use')['cpfCnpjIsValid']>
     readonly cpfIsValid: UnwrapRef<typeof import('@maxvue/max-use')['cpfIsValid']>
     readonly cpfOrCnpj: UnwrapRef<typeof import('@maxvue/max-use')['cpfOrCnpj']>
     readonly cpfcnpj: UnwrapRef<typeof import('@maxvue/max-use')['cpfcnpj']>
-    readonly create: UnwrapRef<typeof import('@maxvue/max-use')['create']>
     readonly createApp: UnwrapRef<typeof import('vue')['createApp']>
-    readonly createDisposableDirective: UnwrapRef<typeof import('@maxvue/max-use')['createDisposableDirective']>
     readonly createEventHook: UnwrapRef<typeof import('@maxvue/max-use')['createEventHook']>
     readonly createFetch: UnwrapRef<typeof import('@maxvue/max-use')['createFetch']>
     readonly createFilterWrapper: UnwrapRef<typeof import('@maxvue/max-use')['createFilterWrapper']>
     readonly createGlobalState: UnwrapRef<typeof import('@maxvue/max-use')['createGlobalState']>
     readonly createInjectionState: UnwrapRef<typeof import('@maxvue/max-use')['createInjectionState']>
-    readonly createReactiveFn: UnwrapRef<typeof import('@maxvue/max-use')['createReactiveFn']>
     readonly createRef: UnwrapRef<typeof import('@maxvue/max-use')['createRef']>
     readonly createReusableTemplate: UnwrapRef<typeof import('@maxvue/max-use')['createReusableTemplate']>
     readonly createSharedComposable: UnwrapRef<typeof import('@maxvue/max-use')['createSharedComposable']>
     readonly createSingletonPromise: UnwrapRef<typeof import('@maxvue/max-use')['createSingletonPromise']>
     readonly createTemplatePromise: UnwrapRef<typeof import('@maxvue/max-use')['createTemplatePromise']>
     readonly createUnrefFn: UnwrapRef<typeof import('@maxvue/max-use')['createUnrefFn']>
-    readonly creditCard: UnwrapRef<typeof import('@maxvue/max-use')['creditCard']>
-    readonly creditCardIsValid: UnwrapRef<typeof import('@maxvue/max-use')['creditCardIsValid']>
-    readonly curry: UnwrapRef<typeof import('@maxvue/max-use')['curry']>
-    readonly curryRight: UnwrapRef<typeof import('@maxvue/max-use')['curryRight']>
     readonly customRef: UnwrapRef<typeof import('vue')['customRef']>
-    readonly customStorageEventName: UnwrapRef<typeof import('@maxvue/max-use')['customStorageEventName']>
     readonly dateFormat: UnwrapRef<typeof import('@maxvue/max-use')['dateFormat']>
     readonly daysAgo: UnwrapRef<typeof import('@maxvue/max-use')['daysAgo']>
-    readonly debounce: UnwrapRef<typeof import('@maxvue/max-use')['debounce']>
     readonly debounceFilter: UnwrapRef<typeof import('@maxvue/max-use')['debounceFilter']>
-    readonly debouncedRef: UnwrapRef<typeof import('@maxvue/max-use')['debouncedRef']>
-    readonly debouncedWatch: UnwrapRef<typeof import('@maxvue/max-use')['debouncedWatch']>
-    readonly deburr: UnwrapRef<typeof import('@maxvue/max-use')['deburr']>
     readonly deepClone: UnwrapRef<typeof import('@maxvue/max-use')['deepClone']>
     readonly deepMerge: UnwrapRef<typeof import('@maxvue/max-use')['deepMerge']>
-    readonly defaultDocument: UnwrapRef<typeof import('@maxvue/max-use')['defaultDocument']>
-    readonly defaultLocation: UnwrapRef<typeof import('@maxvue/max-use')['defaultLocation']>
-    readonly defaultNavigator: UnwrapRef<typeof import('@maxvue/max-use')['defaultNavigator']>
-    readonly defaultTo: UnwrapRef<typeof import('@maxvue/max-use')['defaultTo']>
-    readonly defaultWindow: UnwrapRef<typeof import('@maxvue/max-use')['defaultWindow']>
-    readonly defaults: UnwrapRef<typeof import('@maxvue/max-use')['defaults']>
-    readonly defaultsDeep: UnwrapRef<typeof import('@maxvue/max-use')['defaultsDeep']>
-    readonly defer: UnwrapRef<typeof import('@maxvue/max-use')['defer']>
     readonly defineAsyncComponent: UnwrapRef<typeof import('vue')['defineAsyncComponent']>
     readonly defineComponent: UnwrapRef<typeof import('vue')['defineComponent']>
-    readonly delay: UnwrapRef<typeof import('@maxvue/max-use')['delay']>
     readonly deleteFromIDB: UnwrapRef<typeof import('@maxvue/max-use')['deleteFromIDB']>
     readonly diff: UnwrapRef<typeof import('@maxvue/max-use')['diff']>
     readonly diffInDays: UnwrapRef<typeof import('@maxvue/max-use')['diffInDays']>
@@ -1423,63 +1001,20 @@ declare module 'vue' {
     readonly diffInMonths: UnwrapRef<typeof import('@maxvue/max-use')['diffInMonths']>
     readonly diffInSeconds: UnwrapRef<typeof import('@maxvue/max-use')['diffInSeconds']>
     readonly diffInYears: UnwrapRef<typeof import('@maxvue/max-use')['diffInYears']>
-    readonly difference: UnwrapRef<typeof import('@maxvue/max-use')['difference']>
-    readonly differenceBy: UnwrapRef<typeof import('@maxvue/max-use')['differenceBy']>
-    readonly differenceWith: UnwrapRef<typeof import('@maxvue/max-use')['differenceWith']>
-    readonly divide: UnwrapRef<typeof import('@maxvue/max-use')['divide']>
-    readonly drop: UnwrapRef<typeof import('@maxvue/max-use')['drop']>
-    readonly dropRight: UnwrapRef<typeof import('@maxvue/max-use')['dropRight']>
-    readonly dropRightWhile: UnwrapRef<typeof import('@maxvue/max-use')['dropRightWhile']>
-    readonly dropWhile: UnwrapRef<typeof import('@maxvue/max-use')['dropWhile']>
     readonly eMail: UnwrapRef<typeof import('@maxvue/max-use')['eMail']>
     readonly eMailIsValid: UnwrapRef<typeof import('@maxvue/max-use')['eMailIsValid']>
-    readonly each: UnwrapRef<typeof import('@maxvue/max-use')['each']>
-    readonly eachRight: UnwrapRef<typeof import('@maxvue/max-use')['eachRight']>
-    readonly eagerComputed: UnwrapRef<typeof import('@maxvue/max-use')['eagerComputed']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
     readonly electric: UnwrapRef<typeof import('@maxvue/max-use')['electric']>
     readonly electrical: UnwrapRef<typeof import('@maxvue/max-use')['electrical']>
     readonly email: UnwrapRef<typeof import('@maxvue/max-use')['email']>
     readonly emailIsValid: UnwrapRef<typeof import('@maxvue/max-use')['emailIsValid']>
     readonly empty: UnwrapRef<typeof import('@maxvue/max-use')['empty']>
-    readonly endsWith: UnwrapRef<typeof import('@maxvue/max-use')['endsWith']>
-    readonly entries: UnwrapRef<typeof import('@maxvue/max-use')['entries']>
-    readonly entriesIn: UnwrapRef<typeof import('@maxvue/max-use')['entriesIn']>
-    readonly eq: UnwrapRef<typeof import('@maxvue/max-use')['eq']>
-    readonly escape: UnwrapRef<typeof import('@maxvue/max-use')['escape']>
-    readonly escapeRegExp: UnwrapRef<typeof import('@maxvue/max-use')['escapeRegExp']>
-    readonly every: UnwrapRef<typeof import('@maxvue/max-use')['every']>
-    readonly executeTransition: UnwrapRef<typeof import('@maxvue/max-use')['executeTransition']>
-    readonly extend: UnwrapRef<typeof import('@maxvue/max-use')['extend']>
     readonly extendRef: UnwrapRef<typeof import('@maxvue/max-use')['extendRef']>
-    readonly extendWith: UnwrapRef<typeof import('@maxvue/max-use')['extendWith']>
-    readonly fill: UnwrapRef<typeof import('@maxvue/max-use')['fill']>
     readonly filter: UnwrapRef<typeof import('@maxvue/max-use')['filter']>
     readonly filterBy: UnwrapRef<typeof import('@maxvue/max-use')['filterBy']>
     readonly filterByNot: UnwrapRef<typeof import('@maxvue/max-use')['filterByNot']>
-    readonly find: UnwrapRef<typeof import('@maxvue/max-use')['find']>
-    readonly findIndex: UnwrapRef<typeof import('@maxvue/max-use')['findIndex']>
-    readonly findKey: UnwrapRef<typeof import('@maxvue/max-use')['findKey']>
     readonly findLast: UnwrapRef<typeof import('@maxvue/max-use')['findLast']>
-    readonly findLastIndex: UnwrapRef<typeof import('@maxvue/max-use')['findLastIndex']>
-    readonly findLastKey: UnwrapRef<typeof import('@maxvue/max-use')['findLastKey']>
     readonly first: UnwrapRef<typeof import('@maxvue/max-use')['first']>
-    readonly flatMap: UnwrapRef<typeof import('@maxvue/max-use')['flatMap']>
-    readonly flatMapDeep: UnwrapRef<typeof import('@maxvue/max-use')['flatMapDeep']>
-    readonly flatMapDepth: UnwrapRef<typeof import('@maxvue/max-use')['flatMapDepth']>
-    readonly flatten: UnwrapRef<typeof import('@maxvue/max-use')['flatten']>
-    readonly flattenDeep: UnwrapRef<typeof import('@maxvue/max-use')['flattenDeep']>
-    readonly flattenDepth: UnwrapRef<typeof import('@maxvue/max-use')['flattenDepth']>
-    readonly flip: UnwrapRef<typeof import('@maxvue/max-use')['flip']>
-    readonly floor: UnwrapRef<typeof import('@maxvue/max-use')['floor']>
-    readonly flow: UnwrapRef<typeof import('@maxvue/max-use')['flow']>
-    readonly flowRight: UnwrapRef<typeof import('@maxvue/max-use')['flowRight']>
-    readonly forEach: UnwrapRef<typeof import('@maxvue/max-use')['forEach']>
-    readonly forEachRight: UnwrapRef<typeof import('@maxvue/max-use')['forEachRight']>
-    readonly forIn: UnwrapRef<typeof import('@maxvue/max-use')['forIn']>
-    readonly forInRight: UnwrapRef<typeof import('@maxvue/max-use')['forInRight']>
-    readonly forOwn: UnwrapRef<typeof import('@maxvue/max-use')['forOwn']>
-    readonly forOwnRight: UnwrapRef<typeof import('@maxvue/max-use')['forOwnRight']>
     readonly forceReset: UnwrapRef<typeof import('../src/index.ts')['forceReset']>
     readonly format: UnwrapRef<typeof import('@maxvue/max-use')['format']>
     readonly formatBytes: UnwrapRef<typeof import('@maxvue/max-use')['formatBytes']>
@@ -1489,23 +1024,15 @@ declare module 'vue' {
     readonly formatCpfCnpj: UnwrapRef<typeof import('@maxvue/max-use')['formatCpfCnpj']>
     readonly formatCurrency: UnwrapRef<typeof import('@maxvue/max-use')['formatCurrency']>
     readonly formatDate: UnwrapRef<typeof import('@maxvue/max-use')['formatDate']>
-    readonly formatMailDate: UnwrapRef<typeof import('@maxvue/max-use')['formatMailDate']>
     readonly formatPhone: UnwrapRef<typeof import('@maxvue/max-use')['formatPhone']>
     readonly formatTimeAgo: UnwrapRef<typeof import('@maxvue/max-use')['formatTimeAgo']>
     readonly formatTimeAgoIntl: UnwrapRef<typeof import('@maxvue/max-use')['formatTimeAgoIntl']>
     readonly formatTimeAgoIntlParts: UnwrapRef<typeof import('@maxvue/max-use')['formatTimeAgoIntlParts']>
-    readonly fromPairs: UnwrapRef<typeof import('@maxvue/max-use')['fromPairs']>
-    readonly functions: UnwrapRef<typeof import('@maxvue/max-use')['functions']>
-    readonly functionsHelpers: UnwrapRef<typeof import('@maxvue/max-use')['functionsHelpers']>
-    readonly functionsIn: UnwrapRef<typeof import('@maxvue/max-use')['functionsIn']>
     readonly get: UnwrapRef<typeof import('@maxvue/max-use')['get']>
     readonly getCachedApi: UnwrapRef<typeof import('@maxvue/max-use')['getCachedApi']>
     readonly getCachedApiIDB: UnwrapRef<typeof import('@maxvue/max-use')['getCachedApiIDB']>
-    readonly getClientId: UnwrapRef<typeof import('@maxvue/max-use')['getClientId']>
-    readonly getClientIdHeader: UnwrapRef<typeof import('@maxvue/max-use')['getClientIdHeader']>
     readonly getColorFromVar: UnwrapRef<typeof import('@maxvue/max-use')['getColorFromVar']>
     readonly getColorOpposite: UnwrapRef<typeof import('@maxvue/max-use')['getColorOpposite']>
-    readonly getConfiguredHeaders: UnwrapRef<typeof import('@maxvue/max-use')['getConfiguredHeaders']>
     readonly getContrastColor: UnwrapRef<typeof import('@maxvue/max-use')['getContrastColor']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
@@ -1518,127 +1045,74 @@ declare module 'vue' {
     readonly getRouteByName: UnwrapRef<typeof import('@maxvue/max-use')['getRouteByName']>
     readonly getSSRHandler: UnwrapRef<typeof import('@maxvue/max-use')['getSSRHandler']>
     readonly getWcagRelativeLuminance: UnwrapRef<typeof import('../src/index.ts')['getWcagRelativeLuminance']>
-    readonly getWithCredentials: UnwrapRef<typeof import('@maxvue/max-use')['getWithCredentials']>
     readonly goToRoute: UnwrapRef<typeof import('@maxvue/max-use')['goToRoute']>
     readonly goToRouteByName: UnwrapRef<typeof import('@maxvue/max-use')['goToRouteByName']>
     readonly groupBy: UnwrapRef<typeof import('@maxvue/max-use')['groupBy']>
-    readonly gt: UnwrapRef<typeof import('@maxvue/max-use')['gt']>
-    readonly gte: UnwrapRef<typeof import('@maxvue/max-use')['gte']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
-    readonly has: UnwrapRef<typeof import('@maxvue/max-use')['has']>
     readonly hasContent: UnwrapRef<typeof import('@maxvue/max-use')['hasContent']>
     readonly hasContentFn: UnwrapRef<typeof import('@maxvue/max-use')['hasContentFn']>
     readonly hasEMail: UnwrapRef<typeof import('@maxvue/max-use')['hasEMail']>
     readonly hasEmail: UnwrapRef<typeof import('@maxvue/max-use')['hasEmail']>
-    readonly hasIn: UnwrapRef<typeof import('@maxvue/max-use')['hasIn']>
     readonly hasOwn: UnwrapRef<typeof import('@maxvue/max-use')['hasOwn']>
     readonly hasPassedDays: UnwrapRef<typeof import('@maxvue/max-use')['hasPassedDays']>
     readonly hasPassedHours: UnwrapRef<typeof import('@maxvue/max-use')['hasPassedHours']>
     readonly hasPassedMinutes: UnwrapRef<typeof import('@maxvue/max-use')['hasPassedMinutes']>
     readonly hasPhone: UnwrapRef<typeof import('@maxvue/max-use')['hasPhone']>
-    readonly hasRoute: UnwrapRef<typeof import('@maxvue/max-use')['hasRoute']>
     readonly hasValidCep: UnwrapRef<typeof import('@maxvue/max-use')['hasValidCep']>
     readonly hasValidCnpj: UnwrapRef<typeof import('@maxvue/max-use')['hasValidCnpj']>
     readonly hasValidCnpjOrCpf: UnwrapRef<typeof import('@maxvue/max-use')['hasValidCnpjOrCpf']>
     readonly hasValidCpf: UnwrapRef<typeof import('@maxvue/max-use')['hasValidCpf']>
     readonly hasValidCpfCnpj: UnwrapRef<typeof import('@maxvue/max-use')['hasValidCpfCnpj']>
     readonly hasValidCpfOrCnpj: UnwrapRef<typeof import('@maxvue/max-use')['hasValidCpfOrCnpj']>
-    readonly hasValidCreditCard: UnwrapRef<typeof import('@maxvue/max-use')['hasValidCreditCard']>
     readonly hasValidEMail: UnwrapRef<typeof import('@maxvue/max-use')['hasValidEMail']>
     readonly hasValidEmail: UnwrapRef<typeof import('@maxvue/max-use')['hasValidEmail']>
     readonly hasValidPhone: UnwrapRef<typeof import('@maxvue/max-use')['hasValidPhone']>
-    readonly head: UnwrapRef<typeof import('@maxvue/max-use')['head']>
     readonly hoursAgo: UnwrapRef<typeof import('@maxvue/max-use')['hoursAgo']>
     readonly hyphenate: UnwrapRef<typeof import('@maxvue/max-use')['hyphenate']>
     readonly identity: UnwrapRef<typeof import('@maxvue/max-use')['identity']>
-    readonly ignorableWatch: UnwrapRef<typeof import('@maxvue/max-use')['ignorableWatch']>
     readonly inDateInterval: UnwrapRef<typeof import('@maxvue/max-use')['inDateInterval']>
-    readonly inRange: UnwrapRef<typeof import('@maxvue/max-use')['inRange']>
-    readonly includes: UnwrapRef<typeof import('@maxvue/max-use')['includes']>
     readonly increaseWithUnit: UnwrapRef<typeof import('@maxvue/max-use')['increaseWithUnit']>
-    readonly indexOf: UnwrapRef<typeof import('@maxvue/max-use')['indexOf']>
-    readonly initial: UnwrapRef<typeof import('@maxvue/max-use')['initial']>
     readonly initials: UnwrapRef<typeof import('@maxvue/max-use')['initials']>
     readonly inject: UnwrapRef<typeof import('vue')['inject']>
     readonly injectLocal: UnwrapRef<typeof import('@maxvue/max-use')['injectLocal']>
     readonly install: UnwrapRef<typeof import('../src/index.ts')['install']>
-    readonly intersection: UnwrapRef<typeof import('@maxvue/max-use')['intersection']>
-    readonly intersectionBy: UnwrapRef<typeof import('@maxvue/max-use')['intersectionBy']>
-    readonly intersectionWith: UnwrapRef<typeof import('@maxvue/max-use')['intersectionWith']>
     readonly intervalRandom: UnwrapRef<typeof import('@maxvue/max-use')['intervalRandom']>
-    readonly invert: UnwrapRef<typeof import('@maxvue/max-use')['invert']>
-    readonly invertBy: UnwrapRef<typeof import('@maxvue/max-use')['invertBy']>
     readonly invoke: UnwrapRef<typeof import('@maxvue/max-use')['invoke']>
-    readonly invokeMap: UnwrapRef<typeof import('@maxvue/max-use')['invokeMap']>
-    readonly isArguments: UnwrapRef<typeof import('@maxvue/max-use')['isArguments']>
     readonly isArray: UnwrapRef<typeof import('@maxvue/max-use')['isArray']>
-    readonly isArrayBuffer: UnwrapRef<typeof import('@maxvue/max-use')['isArrayBuffer']>
-    readonly isArrayLike: UnwrapRef<typeof import('@maxvue/max-use')['isArrayLike']>
-    readonly isArrayLikeObject: UnwrapRef<typeof import('@maxvue/max-use')['isArrayLikeObject']>
     readonly isBlank: UnwrapRef<typeof import('@maxvue/max-use')['isBlank']>
-    readonly isBoolean: UnwrapRef<typeof import('@maxvue/max-use')['isBoolean']>
-    readonly isBuffer: UnwrapRef<typeof import('@maxvue/max-use')['isBuffer']>
     readonly isCepValid: UnwrapRef<typeof import('@maxvue/max-use')['isCepValid']>
-    readonly isClient: UnwrapRef<typeof import('@maxvue/max-use')['isClient']>
     readonly isCnpj: UnwrapRef<typeof import('@maxvue/max-use')['isCnpj']>
     readonly isCnpjOrCpf: UnwrapRef<typeof import('@maxvue/max-use')['isCnpjOrCpf']>
     readonly isCpf: UnwrapRef<typeof import('@maxvue/max-use')['isCpf']>
     readonly isCpfCnpj: UnwrapRef<typeof import('@maxvue/max-use')['isCpfCnpj']>
     readonly isCpfOrCnpj: UnwrapRef<typeof import('@maxvue/max-use')['isCpfOrCnpj']>
-    readonly isCreditCard: UnwrapRef<typeof import('@maxvue/max-use')['isCreditCard']>
     readonly isDate: UnwrapRef<typeof import('@maxvue/max-use')['isDate']>
     readonly isDef: UnwrapRef<typeof import('@maxvue/max-use')['isDef']>
     readonly isDefined: UnwrapRef<typeof import('@maxvue/max-use')['isDefined']>
     readonly isEMail: UnwrapRef<typeof import('@maxvue/max-use')['isEMail']>
-    readonly isElement: UnwrapRef<typeof import('@maxvue/max-use')['isElement']>
     readonly isEmail: UnwrapRef<typeof import('@maxvue/max-use')['isEmail']>
     readonly isEmpty: UnwrapRef<typeof import('@maxvue/max-use')['isEmpty']>
     readonly isEqual: UnwrapRef<typeof import('@maxvue/max-use')['isEqual']>
-    readonly isEqualWith: UnwrapRef<typeof import('@maxvue/max-use')['isEqualWith']>
-    readonly isError: UnwrapRef<typeof import('@maxvue/max-use')['isError']>
-    readonly isFinite: UnwrapRef<typeof import('@maxvue/max-use')['isFinite']>
-    readonly isFocusedElementEditable: UnwrapRef<typeof import('@maxvue/max-use')['isFocusedElementEditable']>
-    readonly isFunction: UnwrapRef<typeof import('@maxvue/max-use')['isFunction']>
     readonly isFuture: UnwrapRef<typeof import('@maxvue/max-use')['isFuture']>
-    readonly isIOS: UnwrapRef<typeof import('@maxvue/max-use')['isIOS']>
     readonly isInDateInterval: UnwrapRef<typeof import('@maxvue/max-use')['isInDateInterval']>
-    readonly isInteger: UnwrapRef<typeof import('@maxvue/max-use')['isInteger']>
     readonly isIterable: UnwrapRef<typeof import('@maxvue/max-use')['isIterable']>
-    readonly isLength: UnwrapRef<typeof import('@maxvue/max-use')['isLength']>
-    readonly isMap: UnwrapRef<typeof import('@maxvue/max-use')['isMap']>
-    readonly isMatch: UnwrapRef<typeof import('@maxvue/max-use')['isMatch']>
-    readonly isMatchWith: UnwrapRef<typeof import('@maxvue/max-use')['isMatchWith']>
     readonly isMaxCacheKey: UnwrapRef<typeof import('../src/index.ts')['isMaxCacheKey']>
-    readonly isNaN: UnwrapRef<typeof import('@maxvue/max-use')['isNaN']>
-    readonly isNative: UnwrapRef<typeof import('@maxvue/max-use')['isNative']>
-    readonly isNil: UnwrapRef<typeof import('@maxvue/max-use')['isNil']>
     readonly isNotEmpty: UnwrapRef<typeof import('@maxvue/max-use')['isNotEmpty']>
     readonly isNotValid: UnwrapRef<typeof import('@maxvue/max-use')['isNotValid']>
-    readonly isNull: UnwrapRef<typeof import('@maxvue/max-use')['isNull']>
     readonly isNumber: UnwrapRef<typeof import('@maxvue/max-use')['isNumber']>
     readonly isNumeric: UnwrapRef<typeof import('@maxvue/max-use')['isNumeric']>
     readonly isObject: UnwrapRef<typeof import('@maxvue/max-use')['isObject']>
-    readonly isObjectLike: UnwrapRef<typeof import('@maxvue/max-use')['isObjectLike']>
     readonly isObjectValid: UnwrapRef<typeof import('@maxvue/max-use')['isObjectValid']>
     readonly isPast: UnwrapRef<typeof import('@maxvue/max-use')['isPast']>
     readonly isPhone: UnwrapRef<typeof import('@maxvue/max-use')['isPhone']>
     readonly isPhoneValid: UnwrapRef<typeof import('@maxvue/max-use')['isPhoneValid']>
-    readonly isPlainObject: UnwrapRef<typeof import('@maxvue/max-use')['isPlainObject']>
     readonly isProxy: UnwrapRef<typeof import('vue')['isProxy']>
     readonly isReactive: UnwrapRef<typeof import('vue')['isReactive']>
     readonly isReadonly: UnwrapRef<typeof import('vue')['isReadonly']>
     readonly isRef: UnwrapRef<typeof import('vue')['isRef']>
-    readonly isRegExp: UnwrapRef<typeof import('@maxvue/max-use')['isRegExp']>
-    readonly isSafeInteger: UnwrapRef<typeof import('@maxvue/max-use')['isSafeInteger']>
     readonly isSameDay: UnwrapRef<typeof import('@maxvue/max-use')['isSameDay']>
-    readonly isSet: UnwrapRef<typeof import('@maxvue/max-use')['isSet']>
     readonly isShallow: UnwrapRef<typeof import('vue')['isShallow']>
-    readonly isString: UnwrapRef<typeof import('@maxvue/max-use')['isString']>
-    readonly isSymbol: UnwrapRef<typeof import('@maxvue/max-use')['isSymbol']>
     readonly isTouchDevice: UnwrapRef<typeof import('@maxvue/max-use')['isTouchDevice']>
-    readonly isTypedArray: UnwrapRef<typeof import('@maxvue/max-use')['isTypedArray']>
-    readonly isTypedCharValid: UnwrapRef<typeof import('@maxvue/max-use')['isTypedCharValid']>
-    readonly isUndefined: UnwrapRef<typeof import('@maxvue/max-use')['isUndefined']>
     readonly isValid: UnwrapRef<typeof import('@maxvue/max-use')['isValid']>
     readonly isValidCep: UnwrapRef<typeof import('@maxvue/max-use')['isValidCep']>
     readonly isValidCnpj: UnwrapRef<typeof import('@maxvue/max-use')['isValidCnpj']>
@@ -1646,60 +1120,23 @@ declare module 'vue' {
     readonly isValidCpf: UnwrapRef<typeof import('@maxvue/max-use')['isValidCpf']>
     readonly isValidCpfCnpj: UnwrapRef<typeof import('@maxvue/max-use')['isValidCpfCnpj']>
     readonly isValidCpfOrCnpj: UnwrapRef<typeof import('@maxvue/max-use')['isValidCpfOrCnpj']>
-    readonly isValidCreditCard: UnwrapRef<typeof import('@maxvue/max-use')['isValidCreditCard']>
     readonly isValidEMail: UnwrapRef<typeof import('@maxvue/max-use')['isValidEMail']>
     readonly isValidEmail: UnwrapRef<typeof import('@maxvue/max-use')['isValidEmail']>
     readonly isValidPhone: UnwrapRef<typeof import('@maxvue/max-use')['isValidPhone']>
-    readonly isWeakMap: UnwrapRef<typeof import('@maxvue/max-use')['isWeakMap']>
-    readonly isWeakSet: UnwrapRef<typeof import('@maxvue/max-use')['isWeakSet']>
     readonly isWeekend: UnwrapRef<typeof import('@maxvue/max-use')['isWeekend']>
-    readonly isWorker: UnwrapRef<typeof import('@maxvue/max-use')['isWorker']>
-    readonly iteratee: UnwrapRef<typeof import('@maxvue/max-use')['iteratee']>
-    readonly join: UnwrapRef<typeof import('@maxvue/max-use')['join']>
     readonly kebabCase: UnwrapRef<typeof import('@maxvue/max-use')['kebabCase']>
     readonly keyBy: UnwrapRef<typeof import('@maxvue/max-use')['keyBy']>
     readonly keyExists: UnwrapRef<typeof import('@maxvue/max-use')['keyExists']>
-    readonly keys: UnwrapRef<typeof import('@maxvue/max-use')['keys']>
-    readonly keysIn: UnwrapRef<typeof import('@maxvue/max-use')['keysIn']>
-    readonly lang: UnwrapRef<typeof import('@maxvue/max-use')['lang']>
     readonly last: UnwrapRef<typeof import('@maxvue/max-use')['last']>
-    readonly lastIndexOf: UnwrapRef<typeof import('@maxvue/max-use')['lastIndexOf']>
-    readonly lodash: UnwrapRef<typeof import('@maxvue/max-use')['lodash']>
-    readonly lowerCase: UnwrapRef<typeof import('@maxvue/max-use')['lowerCase']>
-    readonly lowerFirst: UnwrapRef<typeof import('@maxvue/max-use')['lowerFirst']>
-    readonly lt: UnwrapRef<typeof import('@maxvue/max-use')['lt']>
-    readonly lte: UnwrapRef<typeof import('@maxvue/max-use')['lte']>
     readonly makeDestructurable: UnwrapRef<typeof import('@maxvue/max-use')['makeDestructurable']>
-    readonly map: UnwrapRef<typeof import('@maxvue/max-use')['map']>
     readonly mapGamepadToXbox360Controller: UnwrapRef<typeof import('@maxvue/max-use')['mapGamepadToXbox360Controller']>
-    readonly mapKeys: UnwrapRef<typeof import('@maxvue/max-use')['mapKeys']>
     readonly mapValues: UnwrapRef<typeof import('@maxvue/max-use')['mapValues']>
     readonly markRaw: UnwrapRef<typeof import('vue')['markRaw']>
     readonly maskSensitive: UnwrapRef<typeof import('@maxvue/max-use')['maskSensitive']>
-    readonly matchCasing: UnwrapRef<typeof import('@maxvue/max-use')['matchCasing']>
-    readonly matches: UnwrapRef<typeof import('@maxvue/max-use')['matches']>
-    readonly matchesProperty: UnwrapRef<typeof import('@maxvue/max-use')['matchesProperty']>
-    readonly max: UnwrapRef<typeof import('@maxvue/max-use')['max']>
-    readonly maxBy: UnwrapRef<typeof import('@maxvue/max-use')['maxBy']>
     readonly maxUnoPreset: UnwrapRef<typeof import('../src/presetMaxUno.ts')['maxUnoPreset']>
-    readonly maxUseAutoImport: UnwrapRef<typeof import('@maxvue/max-use')['maxUseAutoImport']>
-    readonly maxUseItems: UnwrapRef<typeof import('@maxvue/max-use')['maxUseItems']>
-    readonly mean: UnwrapRef<typeof import('@maxvue/max-use')['mean']>
-    readonly meanBy: UnwrapRef<typeof import('@maxvue/max-use')['meanBy']>
     readonly median: UnwrapRef<typeof import('@maxvue/max-use')['median']>
-    readonly memoize: UnwrapRef<typeof import('@maxvue/max-use')['memoize']>
-    readonly merge: UnwrapRef<typeof import('@maxvue/max-use')['merge']>
-    readonly mergeWith: UnwrapRef<typeof import('@maxvue/max-use')['mergeWith']>
-    readonly method: UnwrapRef<typeof import('@maxvue/max-use')['method']>
-    readonly methodOf: UnwrapRef<typeof import('@maxvue/max-use')['methodOf']>
-    readonly min: UnwrapRef<typeof import('@maxvue/max-use')['min']>
-    readonly minBy: UnwrapRef<typeof import('@maxvue/max-use')['minBy']>
     readonly minutesAgo: UnwrapRef<typeof import('@maxvue/max-use')['minutesAgo']>
-    readonly mixin: UnwrapRef<typeof import('@maxvue/max-use')['mixin']>
     readonly monthsAgo: UnwrapRef<typeof import('@maxvue/max-use')['monthsAgo']>
-    readonly multiply: UnwrapRef<typeof import('@maxvue/max-use')['multiply']>
-    readonly negate: UnwrapRef<typeof import('@maxvue/max-use')['negate']>
-    readonly next: UnwrapRef<typeof import('@maxvue/max-use')['next']>
     readonly nextTick: UnwrapRef<typeof import('vue')['nextTick']>
     readonly noEmpty: UnwrapRef<typeof import('@maxvue/max-use')['noEmpty']>
     readonly noHtml: UnwrapRef<typeof import('@maxvue/max-use')['noHtml']>
@@ -1710,15 +1147,12 @@ declare module 'vue' {
     readonly notHasValidContent: UnwrapRef<typeof import('@maxvue/max-use')['notHasValidContent']>
     readonly notNullish: UnwrapRef<typeof import('@maxvue/max-use')['notNullish']>
     readonly now: UnwrapRef<typeof import('@maxvue/max-use')['now']>
-    readonly nth: UnwrapRef<typeof import('@maxvue/max-use')['nth']>
-    readonly nthArg: UnwrapRef<typeof import('@maxvue/max-use')['nthArg']>
     readonly numeric: UnwrapRef<typeof import('@maxvue/max-use')['numeric']>
     readonly objectEntries: UnwrapRef<typeof import('@maxvue/max-use')['objectEntries']>
     readonly objectOmit: UnwrapRef<typeof import('@maxvue/max-use')['objectOmit']>
     readonly objectPick: UnwrapRef<typeof import('@maxvue/max-use')['objectPick']>
     readonly objectSize: UnwrapRef<typeof import('@maxvue/max-use')['objectSize']>
     readonly omit: UnwrapRef<typeof import('@maxvue/max-use')['omit']>
-    readonly omitBy: UnwrapRef<typeof import('@maxvue/max-use')['omitBy']>
     readonly onActivated: UnwrapRef<typeof import('vue')['onActivated']>
     readonly onBeforeMount: UnwrapRef<typeof import('vue')['onBeforeMount']>
     readonly onBeforeUnmount: UnwrapRef<typeof import('vue')['onBeforeUnmount']>
@@ -1735,60 +1169,32 @@ declare module 'vue' {
     readonly onMounted: UnwrapRef<typeof import('vue')['onMounted']>
     readonly onRenderTracked: UnwrapRef<typeof import('vue')['onRenderTracked']>
     readonly onRenderTriggered: UnwrapRef<typeof import('vue')['onRenderTriggered']>
-    readonly onResetConfig: UnwrapRef<typeof import('@maxvue/max-use')['onResetConfig']>
     readonly onScopeDispose: UnwrapRef<typeof import('vue')['onScopeDispose']>
     readonly onServerPrefetch: UnwrapRef<typeof import('vue')['onServerPrefetch']>
     readonly onStartTyping: UnwrapRef<typeof import('@maxvue/max-use')['onStartTyping']>
     readonly onUnmounted: UnwrapRef<typeof import('vue')['onUnmounted']>
     readonly onUpdated: UnwrapRef<typeof import('vue')['onUpdated']>
     readonly onWatcherCleanup: UnwrapRef<typeof import('vue')['onWatcherCleanup']>
-    readonly once: UnwrapRef<typeof import('@maxvue/max-use')['once']>
     readonly onlyLetters: UnwrapRef<typeof import('@maxvue/max-use')['onlyLetters']>
     readonly onlyLettersAndNumbers: UnwrapRef<typeof import('@maxvue/max-use')['onlyLettersAndNumbers']>
     readonly onlyNumbers: UnwrapRef<typeof import('@maxvue/max-use')['onlyNumbers']>
     readonly onlySymbols: UnwrapRef<typeof import('@maxvue/max-use')['onlySymbols']>
     readonly orderBy: UnwrapRef<typeof import('@maxvue/max-use')['orderBy']>
     readonly orderByWithKey: UnwrapRef<typeof import('@maxvue/max-use')['orderByWithKey']>
-    readonly over: UnwrapRef<typeof import('@maxvue/max-use')['over']>
-    readonly overArgs: UnwrapRef<typeof import('@maxvue/max-use')['overArgs']>
-    readonly overEvery: UnwrapRef<typeof import('@maxvue/max-use')['overEvery']>
-    readonly overSome: UnwrapRef<typeof import('@maxvue/max-use')['overSome']>
-    readonly pad: UnwrapRef<typeof import('@maxvue/max-use')['pad']>
-    readonly padEnd: UnwrapRef<typeof import('@maxvue/max-use')['padEnd']>
-    readonly padStart: UnwrapRef<typeof import('@maxvue/max-use')['padStart']>
-    readonly parseBrNumber: UnwrapRef<typeof import('@maxvue/max-use')['parseBrNumber']>
-    readonly parseInt: UnwrapRef<typeof import('@maxvue/max-use')['parseInt']>
-    readonly partial: UnwrapRef<typeof import('@maxvue/max-use')['partial']>
-    readonly partialRight: UnwrapRef<typeof import('@maxvue/max-use')['partialRight']>
-    readonly partition: UnwrapRef<typeof import('@maxvue/max-use')['partition']>
     readonly pausableFilter: UnwrapRef<typeof import('@maxvue/max-use')['pausableFilter']>
-    readonly pausableWatch: UnwrapRef<typeof import('@maxvue/max-use')['pausableWatch']>
     readonly phone: UnwrapRef<typeof import('@maxvue/max-use')['phone']>
     readonly phoneIsValid: UnwrapRef<typeof import('@maxvue/max-use')['phoneIsValid']>
     readonly pick: UnwrapRef<typeof import('@maxvue/max-use')['pick']>
-    readonly pickBy: UnwrapRef<typeof import('@maxvue/max-use')['pickBy']>
-    readonly placeholder: UnwrapRef<typeof import('@maxvue/max-use')['placeholder']>
-    readonly plant: UnwrapRef<typeof import('@maxvue/max-use')['plant']>
     readonly postCachedApiIDB: UnwrapRef<typeof import('@maxvue/max-use')['postCachedApiIDB']>
     readonly presetMaxUno: UnwrapRef<typeof import('../src/presetMaxUno.ts')['presetMaxUno']>
     readonly promiseTimeout: UnwrapRef<typeof import('@maxvue/max-use')['promiseTimeout']>
-    readonly property: UnwrapRef<typeof import('@maxvue/max-use')['property']>
-    readonly propertyOf: UnwrapRef<typeof import('@maxvue/max-use')['propertyOf']>
     readonly provide: UnwrapRef<typeof import('vue')['provide']>
     readonly provideInputBaseContext: UnwrapRef<typeof import('../src/index.ts')['provideInputBaseContext']>
     readonly provideLocal: UnwrapRef<typeof import('@maxvue/max-use')['provideLocal']>
     readonly provideSSRWidth: UnwrapRef<typeof import('@maxvue/max-use')['provideSSRWidth']>
     readonly ptBR: UnwrapRef<typeof import('../src/index.ts')['ptBR']>
-    readonly pull: UnwrapRef<typeof import('@maxvue/max-use')['pull']>
-    readonly pullAll: UnwrapRef<typeof import('@maxvue/max-use')['pullAll']>
-    readonly pullAllBy: UnwrapRef<typeof import('@maxvue/max-use')['pullAllBy']>
-    readonly pullAllWith: UnwrapRef<typeof import('@maxvue/max-use')['pullAllWith']>
-    readonly pullAt: UnwrapRef<typeof import('@maxvue/max-use')['pullAt']>
     readonly pxValue: UnwrapRef<typeof import('@maxvue/max-use')['pxValue']>
     readonly rand: UnwrapRef<typeof import('@maxvue/max-use')['rand']>
-    readonly random: UnwrapRef<typeof import('@maxvue/max-use')['random']>
-    readonly range: UnwrapRef<typeof import('@maxvue/max-use')['range']>
-    readonly rangeRight: UnwrapRef<typeof import('@maxvue/max-use')['rangeRight']>
     readonly reactify: UnwrapRef<typeof import('@maxvue/max-use')['reactify']>
     readonly reactifyObject: UnwrapRef<typeof import('@maxvue/max-use')['reactifyObject']>
     readonly reactive: UnwrapRef<typeof import('vue')['reactive']>
@@ -1797,9 +1203,6 @@ declare module 'vue' {
     readonly reactivePick: UnwrapRef<typeof import('@maxvue/max-use')['reactivePick']>
     readonly readingTime: UnwrapRef<typeof import('@maxvue/max-use')['readingTime']>
     readonly readonly: UnwrapRef<typeof import('vue')['readonly']>
-    readonly rearg: UnwrapRef<typeof import('@maxvue/max-use')['rearg']>
-    readonly reduce: UnwrapRef<typeof import('@maxvue/max-use')['reduce']>
-    readonly reduceRight: UnwrapRef<typeof import('@maxvue/max-use')['reduceRight']>
     readonly ref: UnwrapRef<typeof import('vue')['ref']>
     readonly refAutoReset: UnwrapRef<typeof import('@maxvue/max-use')['refAutoReset']>
     readonly refDebounced: UnwrapRef<typeof import('@maxvue/max-use')['refDebounced']>
@@ -1808,113 +1211,47 @@ declare module 'vue' {
     readonly refThrottled: UnwrapRef<typeof import('@maxvue/max-use')['refThrottled']>
     readonly refWithControl: UnwrapRef<typeof import('@maxvue/max-use')['refWithControl']>
     readonly registerMaxCacheKey: UnwrapRef<typeof import('../src/index.ts')['registerMaxCacheKey']>
-    readonly reject: UnwrapRef<typeof import('@maxvue/max-use')['reject']>
-    readonly remove: UnwrapRef<typeof import('@maxvue/max-use')['remove']>
     readonly removeSpaces: UnwrapRef<typeof import('@maxvue/max-use')['removeSpaces']>
     readonly renameKeys: UnwrapRef<typeof import('@maxvue/max-use')['renameKeys']>
-    readonly repeat: UnwrapRef<typeof import('@maxvue/max-use')['repeat']>
-    readonly replace: UnwrapRef<typeof import('@maxvue/max-use')['replace']>
-    readonly resetConfig: UnwrapRef<typeof import('@maxvue/max-use')['resetConfig']>
     readonly resetMaxAppConfig: UnwrapRef<typeof import('../src/index.ts')['resetMaxAppConfig']>
     readonly resolveBadgeColors: UnwrapRef<typeof import('../src/index.ts')['resolveBadgeColors']>
     readonly resolveComponent: UnwrapRef<typeof import('vue')['resolveComponent']>
-    readonly resolveRoute: UnwrapRef<typeof import('@maxvue/max-use')['resolveRoute']>
     readonly resolveStatItemColors: UnwrapRef<typeof import('../src/index.ts')['resolveStatItemColors']>
-    readonly rest: UnwrapRef<typeof import('@maxvue/max-use')['rest']>
-    readonly result: UnwrapRef<typeof import('@maxvue/max-use')['result']>
-    readonly reverse: UnwrapRef<typeof import('@maxvue/max-use')['reverse']>
-    readonly round: UnwrapRef<typeof import('@maxvue/max-use')['round']>
     readonly roundDown: UnwrapRef<typeof import('@maxvue/max-use')['roundDown']>
     readonly roundUp: UnwrapRef<typeof import('@maxvue/max-use')['roundUp']>
     readonly sample: UnwrapRef<typeof import('@maxvue/max-use')['sample']>
-    readonly sampleSize: UnwrapRef<typeof import('@maxvue/max-use')['sampleSize']>
     readonly secondsAgo: UnwrapRef<typeof import('@maxvue/max-use')['secondsAgo']>
-    readonly seq: UnwrapRef<typeof import('@maxvue/max-use')['seq']>
     readonly set: UnwrapRef<typeof import('@maxvue/max-use')['set']>
-    readonly setApiRequestConfig: UnwrapRef<typeof import('@maxvue/max-use')['setApiRequestConfig']>
     readonly setLibraryRouter: UnwrapRef<typeof import('@maxvue/max-use')['setLibraryRouter']>
-    readonly setRouteResolver: UnwrapRef<typeof import('@maxvue/max-use')['setRouteResolver']>
     readonly setSSRHandler: UnwrapRef<typeof import('@maxvue/max-use')['setSSRHandler']>
-    readonly setWith: UnwrapRef<typeof import('@maxvue/max-use')['setWith']>
     readonly shallowReactive: UnwrapRef<typeof import('vue')['shallowReactive']>
     readonly shallowReadonly: UnwrapRef<typeof import('vue')['shallowReadonly']>
     readonly shallowRef: UnwrapRef<typeof import('vue')['shallowRef']>
     readonly shuffle: UnwrapRef<typeof import('@maxvue/max-use')['shuffle']>
     readonly size: UnwrapRef<typeof import('@maxvue/max-use')['size']>
-    readonly slice: UnwrapRef<typeof import('@maxvue/max-use')['slice']>
     readonly slugify: UnwrapRef<typeof import('@maxvue/max-use')['slugify']>
     readonly snakeCase: UnwrapRef<typeof import('@maxvue/max-use')['snakeCase']>
-    readonly some: UnwrapRef<typeof import('@maxvue/max-use')['some']>
     readonly sortBy: UnwrapRef<typeof import('@maxvue/max-use')['sortBy']>
     readonly sortByMulti: UnwrapRef<typeof import('@maxvue/max-use')['sortByMulti']>
-    readonly sortedIndex: UnwrapRef<typeof import('@maxvue/max-use')['sortedIndex']>
-    readonly sortedIndexBy: UnwrapRef<typeof import('@maxvue/max-use')['sortedIndexBy']>
-    readonly sortedIndexOf: UnwrapRef<typeof import('@maxvue/max-use')['sortedIndexOf']>
-    readonly sortedLastIndex: UnwrapRef<typeof import('@maxvue/max-use')['sortedLastIndex']>
-    readonly sortedLastIndexBy: UnwrapRef<typeof import('@maxvue/max-use')['sortedLastIndexBy']>
-    readonly sortedLastIndexOf: UnwrapRef<typeof import('@maxvue/max-use')['sortedLastIndexOf']>
-    readonly sortedUniq: UnwrapRef<typeof import('@maxvue/max-use')['sortedUniq']>
-    readonly sortedUniqBy: UnwrapRef<typeof import('@maxvue/max-use')['sortedUniqBy']>
-    readonly split: UnwrapRef<typeof import('@maxvue/max-use')['split']>
-    readonly spread: UnwrapRef<typeof import('@maxvue/max-use')['spread']>
     readonly src: UnwrapRef<typeof import('../src/index.ts')['default']>
-    readonly startCase: UnwrapRef<typeof import('@maxvue/max-use')['startCase']>
-    readonly startsWith: UnwrapRef<typeof import('@maxvue/max-use')['startsWith']>
     readonly stripHtml: UnwrapRef<typeof import('@maxvue/max-use')['stripHtml']>
-    readonly stubArray: UnwrapRef<typeof import('@maxvue/max-use')['stubArray']>
-    readonly stubFalse: UnwrapRef<typeof import('@maxvue/max-use')['stubFalse']>
-    readonly stubObject: UnwrapRef<typeof import('@maxvue/max-use')['stubObject']>
-    readonly stubString: UnwrapRef<typeof import('@maxvue/max-use')['stubString']>
-    readonly stubTrue: UnwrapRef<typeof import('@maxvue/max-use')['stubTrue']>
-    readonly subtract: UnwrapRef<typeof import('@maxvue/max-use')['subtract']>
     readonly sum: UnwrapRef<typeof import('@maxvue/max-use')['sum']>
     readonly sumBy: UnwrapRef<typeof import('@maxvue/max-use')['sumBy']>
     readonly syncRef: UnwrapRef<typeof import('@maxvue/max-use')['syncRef']>
     readonly syncRefs: UnwrapRef<typeof import('@maxvue/max-use')['syncRefs']>
-    readonly tail: UnwrapRef<typeof import('@maxvue/max-use')['tail']>
-    readonly take: UnwrapRef<typeof import('@maxvue/max-use')['take']>
-    readonly takeRight: UnwrapRef<typeof import('@maxvue/max-use')['takeRight']>
-    readonly takeRightWhile: UnwrapRef<typeof import('@maxvue/max-use')['takeRightWhile']>
-    readonly takeWhile: UnwrapRef<typeof import('@maxvue/max-use')['takeWhile']>
-    readonly tap: UnwrapRef<typeof import('@maxvue/max-use')['tap']>
-    readonly template: UnwrapRef<typeof import('@maxvue/max-use')['template']>
-    readonly templateRef: UnwrapRef<typeof import('@maxvue/max-use')['templateRef']>
-    readonly templateSettings: UnwrapRef<typeof import('@maxvue/max-use')['templateSettings']>
-    readonly throttle: UnwrapRef<typeof import('@maxvue/max-use')['throttle']>
     readonly throttleFilter: UnwrapRef<typeof import('@maxvue/max-use')['throttleFilter']>
-    readonly throttledRef: UnwrapRef<typeof import('@maxvue/max-use')['throttledRef']>
-    readonly throttledWatch: UnwrapRef<typeof import('@maxvue/max-use')['throttledWatch']>
-    readonly thru: UnwrapRef<typeof import('@maxvue/max-use')['thru']>
     readonly timeAgo: UnwrapRef<typeof import('@maxvue/max-use')['timeAgo']>
-    readonly times: UnwrapRef<typeof import('@maxvue/max-use')['times']>
     readonly timestamp: UnwrapRef<typeof import('@maxvue/max-use')['timestamp']>
     readonly toArray: UnwrapRef<typeof import('@maxvue/max-use')['toArray']>
-    readonly toFinite: UnwrapRef<typeof import('@maxvue/max-use')['toFinite']>
-    readonly toInteger: UnwrapRef<typeof import('@maxvue/max-use')['toInteger']>
-    readonly toIterator: UnwrapRef<typeof import('@maxvue/max-use')['toIterator']>
-    readonly toJSON: UnwrapRef<typeof import('@maxvue/max-use')['toJSON']>
-    readonly toLength: UnwrapRef<typeof import('@maxvue/max-use')['toLength']>
-    readonly toLower: UnwrapRef<typeof import('@maxvue/max-use')['toLower']>
     readonly toNumber: UnwrapRef<typeof import('@maxvue/max-use')['toNumber']>
-    readonly toPairs: UnwrapRef<typeof import('@maxvue/max-use')['toPairs']>
-    readonly toPairsIn: UnwrapRef<typeof import('@maxvue/max-use')['toPairsIn']>
-    readonly toPath: UnwrapRef<typeof import('@maxvue/max-use')['toPath']>
-    readonly toPlainObject: UnwrapRef<typeof import('@maxvue/max-use')['toPlainObject']>
     readonly toRaw: UnwrapRef<typeof import('vue')['toRaw']>
     readonly toReactive: UnwrapRef<typeof import('@maxvue/max-use')['toReactive']>
-    readonly toRef: UnwrapRef<typeof import('@maxvue/max-use')['toRef']>
-    readonly toRefs: UnwrapRef<typeof import('@maxvue/max-use')['toRefs']>
-    readonly toSafeInteger: UnwrapRef<typeof import('@maxvue/max-use')['toSafeInteger']>
+    readonly toRef: UnwrapRef<typeof import('vue')['toRef']>
+    readonly toRefs: UnwrapRef<typeof import('vue')['toRefs']>
     readonly toSearchableString: UnwrapRef<typeof import('@maxvue/max-use')['toSearchableString']>
-    readonly toString: UnwrapRef<typeof import('@maxvue/max-use')['toString']>
-    readonly toUpper: UnwrapRef<typeof import('@maxvue/max-use')['toUpper']>
     readonly toValue: UnwrapRef<typeof import('vue')['toValue']>
-    readonly transform: UnwrapRef<typeof import('@maxvue/max-use')['transform']>
     readonly transition: UnwrapRef<typeof import('@maxvue/max-use')['transition']>
     readonly triggerRef: UnwrapRef<typeof import('vue')['triggerRef']>
-    readonly trim: UnwrapRef<typeof import('@maxvue/max-use')['trim']>
-    readonly trimEnd: UnwrapRef<typeof import('@maxvue/max-use')['trimEnd']>
-    readonly trimStart: UnwrapRef<typeof import('@maxvue/max-use')['trimStart']>
     readonly truncate: UnwrapRef<typeof import('@maxvue/max-use')['truncate']>
     readonly tryOnBeforeMount: UnwrapRef<typeof import('@maxvue/max-use')['tryOnBeforeMount']>
     readonly tryOnBeforeUnmount: UnwrapRef<typeof import('@maxvue/max-use')['tryOnBeforeUnmount']>
@@ -1922,26 +1259,12 @@ declare module 'vue' {
     readonly tryOnScopeDispose: UnwrapRef<typeof import('@maxvue/max-use')['tryOnScopeDispose']>
     readonly tryOnUnmounted: UnwrapRef<typeof import('@maxvue/max-use')['tryOnUnmounted']>
     readonly ulid: UnwrapRef<typeof import('@maxvue/max-use')['ulid']>
-    readonly unary: UnwrapRef<typeof import('@maxvue/max-use')['unary']>
-    readonly unescape: UnwrapRef<typeof import('@maxvue/max-use')['unescape']>
-    readonly union: UnwrapRef<typeof import('@maxvue/max-use')['union']>
-    readonly unionBy: UnwrapRef<typeof import('@maxvue/max-use')['unionBy']>
-    readonly unionWith: UnwrapRef<typeof import('@maxvue/max-use')['unionWith']>
     readonly uniq: UnwrapRef<typeof import('@maxvue/max-use')['uniq']>
-    readonly uniqBy: UnwrapRef<typeof import('@maxvue/max-use')['uniqBy']>
-    readonly uniqWith: UnwrapRef<typeof import('@maxvue/max-use')['uniqWith']>
     readonly uniqueBy: UnwrapRef<typeof import('@maxvue/max-use')['uniqueBy']>
-    readonly uniqueId: UnwrapRef<typeof import('@maxvue/max-use')['uniqueId']>
     readonly unref: UnwrapRef<typeof import('vue')['unref']>
     readonly unrefElement: UnwrapRef<typeof import('@maxvue/max-use')['unrefElement']>
     readonly unset: UnwrapRef<typeof import('@maxvue/max-use')['unset']>
     readonly until: UnwrapRef<typeof import('@maxvue/max-use')['until']>
-    readonly unzip: UnwrapRef<typeof import('@maxvue/max-use')['unzip']>
-    readonly unzipWith: UnwrapRef<typeof import('@maxvue/max-use')['unzipWith']>
-    readonly update: UnwrapRef<typeof import('@maxvue/max-use')['update']>
-    readonly updateWith: UnwrapRef<typeof import('@maxvue/max-use')['updateWith']>
-    readonly upperCase: UnwrapRef<typeof import('@maxvue/max-use')['upperCase']>
-    readonly upperFirst: UnwrapRef<typeof import('@maxvue/max-use')['upperFirst']>
     readonly useActiveElement: UnwrapRef<typeof import('@maxvue/max-use')['useActiveElement']>
     readonly useAnimate: UnwrapRef<typeof import('@maxvue/max-use')['useAnimate']>
     readonly useArrayDifference: UnwrapRef<typeof import('@maxvue/max-use')['useArrayDifference']>
@@ -1983,7 +1306,6 @@ declare module 'vue' {
     readonly useCycleList: UnwrapRef<typeof import('@maxvue/max-use')['useCycleList']>
     readonly useDark: UnwrapRef<typeof import('@maxvue/max-use')['useDark']>
     readonly useDateFormat: UnwrapRef<typeof import('@maxvue/max-use')['useDateFormat']>
-    readonly useDebounce: UnwrapRef<typeof import('@maxvue/max-use')['useDebounce']>
     readonly useDebounceFn: UnwrapRef<typeof import('@maxvue/max-use')['useDebounceFn']>
     readonly useDebouncedRefHistory: UnwrapRef<typeof import('@maxvue/max-use')['useDebouncedRefHistory']>
     readonly useDefaultReset: UnwrapRef<typeof import('@maxvue/max-use')['useDefaultReset']>
@@ -1998,7 +1320,6 @@ declare module 'vue' {
     readonly useElementBounding: UnwrapRef<typeof import('@maxvue/max-use')['useElementBounding']>
     readonly useElementByPoint: UnwrapRef<typeof import('@maxvue/max-use')['useElementByPoint']>
     readonly useElementHover: UnwrapRef<typeof import('@maxvue/max-use')['useElementHover']>
-    readonly useElementOverflow: UnwrapRef<typeof import('@maxvue/max-use')['useElementOverflow']>
     readonly useElementSize: UnwrapRef<typeof import('@maxvue/max-use')['useElementSize']>
     readonly useElementVisibility: UnwrapRef<typeof import('@maxvue/max-use')['useElementVisibility']>
     readonly useEventBus: UnwrapRef<typeof import('@maxvue/max-use')['useEventBus']>
@@ -2087,7 +1408,6 @@ declare module 'vue' {
     readonly useSorted: UnwrapRef<typeof import('@maxvue/max-use')['useSorted']>
     readonly useSpeechRecognition: UnwrapRef<typeof import('@maxvue/max-use')['useSpeechRecognition']>
     readonly useSpeechSynthesis: UnwrapRef<typeof import('@maxvue/max-use')['useSpeechSynthesis']>
-    readonly useSpellChecker: UnwrapRef<typeof import('@maxvue/max-use')['useSpellChecker']>
     readonly useStepper: UnwrapRef<typeof import('@maxvue/max-use')['useStepper']>
     readonly useStorage: UnwrapRef<typeof import('@maxvue/max-use')['useStorage']>
     readonly useStorageAsync: UnwrapRef<typeof import('@maxvue/max-use')['useStorageAsync']>
@@ -2100,7 +1420,6 @@ declare module 'vue' {
     readonly useTextDirection: UnwrapRef<typeof import('@maxvue/max-use')['useTextDirection']>
     readonly useTextSelection: UnwrapRef<typeof import('@maxvue/max-use')['useTextSelection']>
     readonly useTextareaAutosize: UnwrapRef<typeof import('@maxvue/max-use')['useTextareaAutosize']>
-    readonly useThrottle: UnwrapRef<typeof import('@maxvue/max-use')['useThrottle']>
     readonly useThrottleFn: UnwrapRef<typeof import('@maxvue/max-use')['useThrottleFn']>
     readonly useThrottledRefHistory: UnwrapRef<typeof import('@maxvue/max-use')['useThrottledRefHistory']>
     readonly useTimeAgo: UnwrapRef<typeof import('@maxvue/max-use')['useTimeAgo']>
@@ -2132,21 +1451,15 @@ declare module 'vue' {
     readonly useWindowFocus: UnwrapRef<typeof import('@maxvue/max-use')['useWindowFocus']>
     readonly useWindowScroll: UnwrapRef<typeof import('@maxvue/max-use')['useWindowScroll']>
     readonly useWindowSize: UnwrapRef<typeof import('@maxvue/max-use')['useWindowSize']>
-    readonly utils: UnwrapRef<typeof import('@maxvue/max-use')['utils']>
     readonly validCnpj: UnwrapRef<typeof import('@maxvue/max-use')['validCnpj']>
     readonly validCnpjOrCpf: UnwrapRef<typeof import('@maxvue/max-use')['validCnpjOrCpf']>
     readonly validCpf: UnwrapRef<typeof import('@maxvue/max-use')['validCpf']>
     readonly validCpfCnpj: UnwrapRef<typeof import('@maxvue/max-use')['validCpfCnpj']>
     readonly validCpfOrCnpj: UnwrapRef<typeof import('@maxvue/max-use')['validCpfOrCnpj']>
-    readonly validCreditCard: UnwrapRef<typeof import('@maxvue/max-use')['validCreditCard']>
     readonly validEMail: UnwrapRef<typeof import('@maxvue/max-use')['validEMail']>
     readonly validEmail: UnwrapRef<typeof import('@maxvue/max-use')['validEmail']>
     readonly validPhone: UnwrapRef<typeof import('@maxvue/max-use')['validPhone']>
     readonly validate: UnwrapRef<typeof import('@maxvue/max-use')['validate']>
-    readonly value: UnwrapRef<typeof import('@maxvue/max-use')['value']>
-    readonly valueOf: UnwrapRef<typeof import('@maxvue/max-use')['valueOf']>
-    readonly values: UnwrapRef<typeof import('@maxvue/max-use')['values']>
-    readonly valuesIn: UnwrapRef<typeof import('@maxvue/max-use')['valuesIn']>
     readonly valuesInKey: UnwrapRef<typeof import('@maxvue/max-use')['valuesInKey']>
     readonly vueUse: UnwrapRef<typeof import('@maxvue/max-use')['vueUse']>
     readonly watch: UnwrapRef<typeof import('vue')['watch']>
@@ -2168,7 +1481,6 @@ declare module 'vue' {
     readonly watchIsValid: UnwrapRef<typeof import('@maxvue/max-use')['watchIsValid']>
     readonly watchIsValidComputed: UnwrapRef<typeof import('@maxvue/max-use')['watchIsValidComputed']>
     readonly watchOnce: UnwrapRef<typeof import('@maxvue/max-use')['watchOnce']>
-    readonly watchPausable: UnwrapRef<typeof import('@maxvue/max-use')['watchPausable']>
     readonly watchPostEffect: UnwrapRef<typeof import('vue')['watchPostEffect']>
     readonly watchSyncEffect: UnwrapRef<typeof import('vue')['watchSyncEffect']>
     readonly watchThrottled: UnwrapRef<typeof import('@maxvue/max-use')['watchThrottled']>
@@ -2178,25 +1490,6 @@ declare module 'vue' {
     readonly watchWithFilter: UnwrapRef<typeof import('@maxvue/max-use')['watchWithFilter']>
     readonly whenever: UnwrapRef<typeof import('@maxvue/max-use')['whenever']>
     readonly wireSize: UnwrapRef<typeof import('@maxvue/max-use')['wireSize']>
-    readonly without: UnwrapRef<typeof import('@maxvue/max-use')['without']>
-    readonly words: UnwrapRef<typeof import('@maxvue/max-use')['words']>
-    readonly wrap: UnwrapRef<typeof import('@maxvue/max-use')['wrap']>
-    readonly wrapperAt: UnwrapRef<typeof import('@maxvue/max-use')['wrapperAt']>
-    readonly wrapperChain: UnwrapRef<typeof import('@maxvue/max-use')['wrapperChain']>
-    readonly wrapperCommit: UnwrapRef<typeof import('@maxvue/max-use')['wrapperCommit']>
-    readonly wrapperLodash: UnwrapRef<typeof import('@maxvue/max-use')['wrapperLodash']>
-    readonly wrapperNext: UnwrapRef<typeof import('@maxvue/max-use')['wrapperNext']>
-    readonly wrapperPlant: UnwrapRef<typeof import('@maxvue/max-use')['wrapperPlant']>
-    readonly wrapperReverse: UnwrapRef<typeof import('@maxvue/max-use')['wrapperReverse']>
-    readonly wrapperToIterator: UnwrapRef<typeof import('@maxvue/max-use')['wrapperToIterator']>
-    readonly wrapperValue: UnwrapRef<typeof import('@maxvue/max-use')['wrapperValue']>
-    readonly xor: UnwrapRef<typeof import('@maxvue/max-use')['xor']>
-    readonly xorBy: UnwrapRef<typeof import('@maxvue/max-use')['xorBy']>
-    readonly xorWith: UnwrapRef<typeof import('@maxvue/max-use')['xorWith']>
     readonly yearsAgo: UnwrapRef<typeof import('@maxvue/max-use')['yearsAgo']>
-    readonly zip: UnwrapRef<typeof import('@maxvue/max-use')['zip']>
-    readonly zipObject: UnwrapRef<typeof import('@maxvue/max-use')['zipObject']>
-    readonly zipObjectDeep: UnwrapRef<typeof import('@maxvue/max-use')['zipObjectDeep']>
-    readonly zipWith: UnwrapRef<typeof import('@maxvue/max-use')['zipWith']>
   }
 }

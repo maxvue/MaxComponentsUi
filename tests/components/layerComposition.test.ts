@@ -185,6 +185,9 @@ describe('Composição de Camadas Visuais (Layer Composition)', () => {
     });
 
     it('valida hierarquia de composição completa sem inversão de prioridade', () => {
+        const sticky = 100;
+        const navigation = 500;
+        const floating = 850;
         const dropdownBase = 1000;
         const popoverBase = 1200;
         const modalBackdrop = 1300;
@@ -195,6 +198,9 @@ describe('Composição de Camadas Visuais (Layer Composition)', () => {
         const tooltip = 1600;
         const screenBlock = 10000;
 
+        expect(sticky).toBeLessThan(navigation);
+        expect(navigation).toBeLessThan(floating);
+        expect(floating).toBeLessThan(dropdownBase);
         expect(dropdownBase).toBeLessThan(popoverBase);
         expect(popoverBase).toBeLessThan(modalBackdrop);
         expect(modalBackdrop).toBeLessThan(modalDialog);

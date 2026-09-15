@@ -7,20 +7,20 @@
                 <div class="component-block">
                     <h3>MaxBadgeButton</h3>
                     <div class="states">
-                        <!-- Default -->
+                        <!-- Normal -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxBadgeButton />
+                            <MaxBadgeButton label="Ativo" />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxBadgeButton disabled />
+                            <MaxBadgeButton label="Desabilitado" disabled />
                         </div>
-                        <!-- Error / Variant -->
+                        <!-- Neon -->
                         <div class="state-col">
-                            <span>Erro / Secundário</span>
-                            <MaxBadgeButton error severity="danger" />
+                            <span>Neon</span>
+                            <MaxBadgeButton label="Neon" neon />
                         </div>
                     </div>
                 </div>
@@ -28,20 +28,18 @@
                 <div class="component-block">
                     <h3>MaxBadgeButtonsGroup</h3>
                     <div class="states">
-                        <!-- Default -->
+                        <!-- Normal -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxBadgeButtonsGroup />
+                            <MaxBadgeButtonsGroup
+                                v-model="selectedBadges"
+                                :items="badgeItems"
+                            />
                         </div>
-                        <!-- Disabled -->
+                        <!-- Sem itens -->
                         <div class="state-col">
-                            <span>Disabled</span>
-                            <MaxBadgeButtonsGroup disabled />
-                        </div>
-                        <!-- Error / Variant -->
-                        <div class="state-col">
-                            <span>Erro / Secundário</span>
-                            <MaxBadgeButtonsGroup error severity="danger" />
+                            <span>Vazio</span>
+                            <MaxBadgeButtonsGroup :items="[]" />
                         </div>
                     </div>
                 </div>
@@ -49,20 +47,20 @@
                 <div class="component-block">
                     <h3>MaxBadge</h3>
                     <div class="states">
-                        <!-- Default -->
+                        <!-- Normal -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxBadge />
+                            <MaxBadge label="Ativo" />
                         </div>
-                        <!-- Disabled -->
+                        <!-- Neon -->
                         <div class="state-col">
-                            <span>Disabled</span>
-                            <MaxBadge disabled />
+                            <span>Neon</span>
+                            <MaxBadge label="Neon" neon />
                         </div>
-                        <!-- Error / Variant -->
+                        <!-- Com status -->
                         <div class="state-col">
-                            <span>Erro / Secundário</span>
-                            <MaxBadge error severity="danger" />
+                            <span>Com status</span>
+                            <MaxBadge label="Online" status="done" />
                         </div>
                     </div>
                 </div>
@@ -70,20 +68,20 @@
                 <div class="component-block">
                     <h3>MaxBadgeComponent</h3>
                     <div class="states">
-                        <!-- Default -->
+                        <!-- Normal -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxBadgeComponent />
+                            <MaxBadgeComponent label="Badge" />
                         </div>
-                        <!-- Disabled -->
+                        <!-- Numérico -->
                         <div class="state-col">
-                            <span>Disabled</span>
-                            <MaxBadgeComponent disabled />
+                            <span>Numérico</span>
+                            <MaxBadgeComponent :label="42" />
                         </div>
-                        <!-- Error / Variant -->
+                        <!-- Com ícone -->
                         <div class="state-col">
-                            <span>Erro / Secundário</span>
-                            <MaxBadgeComponent error severity="danger" />
+                            <span>Com ícone</span>
+                            <MaxBadgeComponent label="Novo" icon="mdi:star" />
                         </div>
                     </div>
                 </div>
@@ -91,20 +89,20 @@
                 <div class="component-block">
                     <h3>MaxTag</h3>
                     <div class="states">
-                        <!-- Default -->
+                        <!-- Normal -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxTag />
+                            <MaxTag label="Ativo" />
                         </div>
-                        <!-- Disabled -->
+                        <!-- Neon -->
                         <div class="state-col">
-                            <span>Disabled</span>
-                            <MaxTag disabled />
+                            <span>Neon</span>
+                            <MaxTag label="Neon" neon />
                         </div>
-                        <!-- Error / Variant -->
+                        <!-- Com ícone -->
                         <div class="state-col">
-                            <span>Erro / Secundário</span>
-                            <MaxTag error severity="danger" />
+                            <span>Com ícone</span>
+                            <MaxTag label="Verificado" icon="mdi:check-circle" />
                         </div>
                     </div>
                 </div>
@@ -114,11 +112,17 @@
 </template>
 
 <script setup lang="ts">
-    import { MaxBadgeButton } from '@maxvue/max-components-ui';
-    import { MaxBadgeButtonsGroup } from '@maxvue/max-components-ui';
-    import { MaxBadge } from '@maxvue/max-components-ui';
-    import { MaxBadgeComponent } from '@maxvue/max-components-ui';
-    import { MaxTag } from '@maxvue/max-components-ui';
+    import { ref } from 'vue';
+    import { MaxBadgeButton, MaxBadgeButtonsGroup, MaxBadge, MaxBadgeComponent, MaxTag } from '@maxvue/max-components-ui';
+    import type { MaxBadgeButtonsGroupItem } from '@maxvue/max-components-ui';
+
+    const selectedBadges = ref<any[]>([]);
+
+    const badgeItems: MaxBadgeButtonsGroupItem[] = [
+        { label: 'Opção A', value: 'a' },
+        { label: 'Opção B', value: 'b' },
+        { label: 'Opção C', value: 'c' }
+    ];
 </script>
 
 <style lang="scss" scoped>

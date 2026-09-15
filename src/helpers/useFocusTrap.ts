@@ -42,6 +42,7 @@ const isVisible = (element: HTMLElement, container: HTMLElement | null): boolean
         if (curr.style?.display === 'none') return false;
         if (curr.style?.visibility === 'hidden') return false;
         if (curr.getAttribute?.('aria-hidden') === 'true') return false;
+        if (curr.hasAttribute?.('inert')) return false;
         curr = curr.parentElement;
     }
     return true;
@@ -69,6 +70,13 @@ const detachGlobal = () => {
     if (!isGlobalAttached || !isBrowser()) return;
     document.removeEventListener('keydown', onGlobalKeydown, true);
     isGlobalAttached = false;
+};
+
+export const getActiveFocusTrapsCount = (): number => trapStack.length;
+
+export const clearFocusTrapStack = (): void => {
+    trapStack.length = 0;
+    detachGlobal();
 };
 
 export const useFocusTrap = (el: Ref<HTMLElement | null>, options?: FocusTrapOptions): FocusTrap => {
@@ -111,16 +119,22 @@ export const useFocusTrap = (el: Ref<HTMLElement | null>, options?: FocusTrapOpt
                 return;
             }
 
-            if (event.shiftKey && target === first) {
-                event.preventDefault();
-                last.focus();
-                return;
-            }
+            event.preventDefault();
 
-            if (!event.shiftKey && target === last) {
-                event.preventDefault();
-                first.focus();
+            if (event.shiftKey) if (target === first) last.focus();
+            else {
+                const currentIndex = items.indexOf(target);
+                const prevIndex = currentIndex > 0 ? currentIndex - 1 : items.length - 1;
+                items[prevIndex].focus();
             }
+            else
+                if (target === last) first.focus();
+                else {
+                    const currentIndex = items.indexOf(target);
+                    const nextIndex = currentIndex < items.length - 1 ? currentIndex + 1 : 0;
+                    items[nextIndex].focus();
+                }
+
         }
     };
 
@@ -151,20 +165,37 @@ export const useFocusTrap = (el: Ref<HTMLElement | null>, options?: FocusTrapOpt
 
         const idx = trapStack.findIndex((t) => t.id === id);
         if (idx >= 0) {
+            const isTop = idx === trapStack.length - 1;
             const entry = trapStack[idx];
             trapStack.splice(idx, 1);
-            if (entry.previous?.isConnected) entry.previous.focus();
+
+            if (isTop) if (entry.previous?.isConnected) entry.previous.focus();
+            else {
+                const nextTop = trapStack[trapStack.length - 1];
+                if (nextTop?.el.value?.isConnected) {
+                    const items = getFocusable(nextTop.el.value);
+                    if (items.length > 0) items[0]?.focus();
+                    else {
+                        if (!nextTop.el.value.hasAttribute('tabindex')) nextTop.el.value.setAttribute('tabindex', '-1');
+
+                        nextTop.el.value.focus();
+                    }
+                }
+            }
+            else for (let i = idx; i < trapStack.length; i++) {
+                const above = trapStack[i];
+                if (!above.previous?.isConnected || (entry.el.value && above.previous && entry.el.value.contains(above.previous))) above.previous = entry.previous;
+
+            }
 
         }
 
         if (trapStack.length === 0) detachGlobal();
-
     };
 
     if (getCurrentInstance()) onBeforeUnmount(() => {
         deactivate();
     });
-
 
     return { activate, deactivate, onKeydown };
 };

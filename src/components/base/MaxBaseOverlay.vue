@@ -106,22 +106,22 @@
 
         switch (props.layer) {
             case 'popover':
-                token = 'var(--max-layer-popover, 1200)';
+                token = 'var(--max-z-index-popover, var(--max-layer-popover, 1200))';
                 break;
             case 'modal':
-                token = 'var(--max-layer-modal, 1310)';
+                token = 'var(--max-z-index-modal, var(--max-layer-modal, 1310))';
                 break;
             case 'fullscreen':
-                token = 'var(--max-layer-fullscreen, 1400)';
+                token = 'var(--max-z-index-fullscreen, var(--max-layer-fullscreen, 1400))';
                 break;
             case 'tooltip':
-                token = 'var(--max-layer-tooltip, 1600)';
+                token = 'var(--max-z-index-tooltip, var(--max-layer-tooltip, 1600))';
                 break;
             case 'dropdown':
             default:
                 token = isInModal
-                    ? 'calc(var(--max-layer-modal, 1310) + 10)'
-                    : 'var(--max-layer-dropdown, 1000)';
+                    ? 'calc(var(--max-z-index-modal, var(--max-layer-modal, 1310)) + 10)'
+                    : 'var(--max-z-index-dropdown, var(--max-layer-dropdown, 1000))';
                 break;
         }
 
@@ -135,8 +135,9 @@
 
         const t = props.target.getBoundingClientRect();
         const p = panelRef.value.getBoundingClientRect();
-        const vh = window.innerHeight;
-        const vw = window.innerWidth;
+        const vv = typeof window !== 'undefined' ? window.visualViewport : null;
+        const vh = vv ? vv.height : window.innerHeight;
+        const vw = vv ? vv.width : window.innerWidth;
 
         const pHeight = p.height || panelRef.value.offsetHeight || 200;
         const spaceBelow = vh - t.bottom;

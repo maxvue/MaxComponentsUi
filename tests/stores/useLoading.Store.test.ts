@@ -49,13 +49,15 @@ describe('useLoadingStore', () => {
         expect(store.keys['c']?.[0]).toBe('0002.c');
     });
 
-    it('reusa a mesma chave interna para a mesma chave lógica', () => {
+    it('cria instâncias independentes com handles distintos para chamadas concorrentes com a mesma chave lógica', () => {
         const store = useLoadingStore();
-        store.start({ key: 'a' });
-        store.start({ key: 'a', message: 'segunda' });
+        const handle1 = store.start({ key: 'a' });
+        const handle2 = store.start({ key: 'a', message: 'segunda' });
 
-        expect(Object.keys(store.targets['body'].items)).toHaveLength(1);
-        expect(store.targets['body'].items['0000.a'].message).toBe('segunda');
+        expect(handle1).not.toBe(handle2);
+        expect(Object.keys(store.targets['body'].items)).toHaveLength(2);
+        expect(store.targets['body'].items[handle1].message).toBe('Carregando mais informações.');
+        expect(store.targets['body'].items[handle2].message).toBe('segunda');
     });
 
     it('agrupa itens por target', () => {
@@ -473,6 +475,201 @@ describe('useLoadingStore', () => {
             expect(clearTimeoutSpy).toHaveBeenCalled();
 
             clearTimeoutSpy.mockRestore();
+            vi.useRealTimers();
+        });
+
+        it('start() retorna um handle opaco e individualiza instâncias concorrentes com a mesma chave', () => {
+            const store = useLoadingStore();
+
+            const handleA = store.start({ key: 'relatorio.pdf', message: 'Gerando página 1' });
+            const handleB = store.start({ key: 'relatorio.pdf', message: 'Gerando página 2' });
+
+            expect(handleA).toBeDefined();
+            expect(handleB).toBeDefined();
+            expect(handleA).not.toBe(handleB);
+
+            // Cada instância é registrada com seu handle opaco individual
+            expect(store.targets['body'].items[handleA]).toBeDefined();
+            expect(store.targets['body'].items[handleB]).toBeDefined();
+            expect(store.targets['body'].items[handleA].handle).toBe(handleA);
+            expect(store.targets['body'].items[handleB].handle).toBe(handleB);
+            expect(store.targets['body'].items[handleA].message).toBe('Gerando página 1');
+            expect(store.targets['body'].items[handleB].message).toBe('Gerando página 2');
+
+            // Ambas estão sob a mesma chave lógica
+            expect(store.keys['relatorio.pdf']).toEqual([handleA, handleB]);
+        });
+
+        it('end(handle) encerra exatamente a instância individual disparada mantendo a concorrente ativa', async () => {
+            vi.useFakeTimers();
+            const store = useLoadingStore();
+
+            const handleA = store.start({ key: 'processamento', message: 'Processo A' });
+            const handleB = store.start({ key: 'processamento', message: 'Processo B' });
+
+            expect(store.isPending()).toBe(true);
+            expect(store.isPending('processamento')).toBe(true);
+            expect(store.isPending(handleA)).toBe(true);
+            expect(store.isPending(handleB)).toBe(true);
+
+            // Encerra apenas o processo A pelo seu handle
+            store.end(handleA);
+
+            // Instância A foi para 'done'; instância B continua 'loading'
+            expect(store.targets['body'].items[handleA].status).toBe('done');
+            expect(store.targets['body'].items[handleB].status).toBe('loading');
+
+            // O loading da chave lógica e global continua pendente porque B ainda está rodando
+            expect(store.isPending(handleA)).toBe(false);
+            expect(store.isPending(handleB)).toBe(true);
+            expect(store.isPending('processamento')).toBe(true);
+            expect(store.isPending()).toBe(true);
+
+            // Após o tempo de auto-dismiss de A (500ms), A é descartada, mas B persiste
+            await vi.advanceTimersByTimeAsync(600);
+            expect(store.targets['body'].items[handleA]).toBeUndefined();
+            expect(store.targets['body'].items[handleB]).toBeDefined();
+            expect(store.targets['body'].items[handleB].status).toBe('loading');
+
+            // Agora encerra B pelo seu handle
+            store.end(handleB);
+            expect(store.targets['body'].items[handleB].status).toBe('done');
+            expect(store.isPending('processamento')).toBe(false);
+
+            await vi.advanceTimersByTimeAsync(600);
+            expect(store.targets['body'].items[handleB]).toBeUndefined();
+            expect(store.isPending()).toBe(false);
+
+            vi.useRealTimers();
+        });
+
+        it('end(chaveLogica) encerra de forma determinística todas as instâncias associadas à chave', async () => {
+            vi.useFakeTimers();
+            const store = useLoadingStore();
+
+            const handle1 = store.start({ key: 'batch.export', message: 'Parte 1' });
+            const handle2 = store.start({ key: 'batch.export', message: 'Parte 2' });
+            const handle3 = store.start({ key: 'batch.export', message: 'Parte 3' });
+
+            expect(store.keys['batch.export']).toHaveLength(3);
+
+            // Encerra pela chave lógica
+            store.end('batch.export');
+
+            // Todas as 3 instâncias devem transitar para 'done'
+            expect(store.targets['body'].items[handle1].status).toBe('done');
+            expect(store.targets['body'].items[handle2].status).toBe('done');
+            expect(store.targets['body'].items[handle3].status).toBe('done');
+            expect(store.isPending('batch.export')).toBe(false);
+
+            await vi.advanceTimersByTimeAsync(600);
+            expect(store.targets['body'].items[handle1]).toBeUndefined();
+            expect(store.targets['body'].items[handle2]).toBeUndefined();
+            expect(store.targets['body'].items[handle3]).toBeUndefined();
+            expect(store.keys['batch.export']).toBeUndefined();
+
+            vi.useRealTimers();
+        });
+
+        it('gerencia concorrência de timers independentes com durações distintas sob a mesma chave', async () => {
+            vi.useFakeTimers();
+            const store = useLoadingStore();
+
+            const handleRapido = store.start({ key: 'tarefa', done_duration: 200 });
+            const handleLongo = store.start({ key: 'tarefa', done_duration: 800 });
+
+            store.end(handleRapido);
+            store.end(handleLongo);
+
+            expect(store.targets['body'].items[handleRapido].status).toBe('done');
+            expect(store.targets['body'].items[handleLongo].status).toBe('done');
+
+            // Em 300ms, o rápido já foi descartado, mas o longo ainda permanece no DOM
+            await vi.advanceTimersByTimeAsync(300);
+            expect(store.targets['body'].items[handleRapido]).toBeUndefined();
+            expect(store.targets['body'].items[handleLongo]).toBeDefined();
+            expect(store.targets['body'].items[handleLongo].status).toBe('done');
+
+            // Em 900ms, ambos foram descartados
+            await vi.advanceTimersByTimeAsync(600);
+            expect(store.targets['body'].items[handleLongo]).toBeUndefined();
+
+            vi.useRealTimers();
+        });
+
+        it('retry(handle) opera exclusivamente sobre a instância individual e incrementa retryCount', async () => {
+            const store = useLoadingStore();
+            const retryA = vi.fn();
+            const retryB = vi.fn();
+
+            const handleA = store.start({ key: 'sync', retry: retryA });
+            const handleB = store.start({ key: 'sync', retry: retryB });
+
+            store.error(handleA, 'Erro no serviço A');
+            store.error(handleB, 'Erro no serviço B');
+
+            expect(store.targets['body'].items[handleA].status).toBe('error');
+            expect(store.targets['body'].items[handleB].status).toBe('error');
+            expect(store.targets['body'].items[handleA].retryCount).toBe(0);
+            expect(store.targets['body'].items[handleB].retryCount).toBe(0);
+
+            // Aciona retry somente para a instância A
+            await store.retry(handleA);
+
+            expect(retryA).toHaveBeenCalledTimes(1);
+            expect(retryB).not.toHaveBeenCalled();
+
+            expect(store.targets['body'].items[handleA].status).toBe('loading');
+            expect(store.targets['body'].items[handleA].retryCount).toBe(1);
+
+            // Instância B permanece inalterada em erro
+            expect(store.targets['body'].items[handleB].status).toBe('error');
+            expect(store.targets['body'].items[handleB].retryCount).toBe(0);
+
+            // Segunda tentativa na instância A
+            store.error(handleA, 'Falha secundária');
+            await store.retry(handleA);
+            expect(store.targets['body'].items[handleA].retryCount).toBe(2);
+            expect(retryA).toHaveBeenCalledTimes(2);
+        });
+
+        it('dismiss(handle) descarta imediatamente a instância individual sem afetar concorrentes', () => {
+            const store = useLoadingStore();
+
+            const handle1 = store.start({ key: 'upload.multi', message: 'Arquivo 1' });
+            const handle2 = store.start({ key: 'upload.multi', message: 'Arquivo 2' });
+
+            expect(Object.keys(store.targets['body'].items)).toHaveLength(2);
+
+            store.dismiss(handle1);
+
+            expect(store.targets['body'].items[handle1]).toBeUndefined();
+            expect(store.targets['body'].items[handle2]).toBeDefined();
+            expect(store.targets['body'].items[handle2].message).toBe('Arquivo 2');
+            expect(store.keys['upload.multi']).toEqual([handle2]);
+        });
+
+        it('não vaza estado após ciclos de execução concorrente', async () => {
+            vi.useFakeTimers();
+            const store = useLoadingStore();
+
+            const handles: string[] = [];
+            for (let i = 0; i < 5; i++) handles.push(store.start({ key: 'stress.key' }));
+
+
+            expect(Object.keys(store.targets['body'].items)).toHaveLength(5);
+
+            for (const h of handles) store.end(h);
+
+
+            await vi.advanceTimersByTimeAsync(600);
+
+            expect(store.targets['body'].items).toEqual({});
+            expect(store.keys['stress.key']).toBeUndefined();
+            expect(store.keys_target).toEqual({});
+            expect(store.items).toEqual([]);
+            expect(store.isPending()).toBe(false);
+
             vi.useRealTimers();
         });
     });

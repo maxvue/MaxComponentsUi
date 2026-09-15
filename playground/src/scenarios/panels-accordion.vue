@@ -1,90 +1,28 @@
 <template>
     <div class="scenario-content" data-scenario="panels-accordion">
-        <h2>Cenário panels-accordion</h2>
-        <div class="scenario-inner">
-            <div class="variants">
-
-                <div class="component-block">
-                    <h3>MaxAccordion</h3>
-                    <div class="states">
-                        <!-- Default -->
-                        <div class="state-col">
-                            <span>Normal</span>
-                            <MaxAccordion />
-                        </div>
-                        <!-- Disabled -->
-                        <div class="state-col">
-                            <span>Disabled</span>
-                            <MaxAccordion disabled />
-                        </div>
-                        <!-- Error / Variant -->
-                        <div class="state-col">
-                            <span>Erro / Secundário</span>
-                            <MaxAccordion error severity="danger" />
-                        </div>
-                    </div>
-                </div>
-
-                <div class="component-block">
-                    <h3>MaxAccordionItem</h3>
-                    <div class="states">
-                        <!-- Default -->
-                        <div class="state-col">
-                            <span>Normal</span>
-                            <MaxAccordionItem />
-                        </div>
-                        <!-- Disabled -->
-                        <div class="state-col">
-                            <span>Disabled</span>
-                            <MaxAccordionItem disabled />
-                        </div>
-                        <!-- Error / Variant -->
-                        <div class="state-col">
-                            <span>Erro / Secundário</span>
-                            <MaxAccordionItem error severity="danger" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <h2>Accordion</h2>
+        <p>Itens são sempre montados dentro do provedor <code>MaxAccordion</code>.</p>
+        <MaxAccordion v-model:value="openItem">
+            <MaxAccordionItem value="details" title="Detalhes">
+                Conteúdo do primeiro item.
+            </MaxAccordionItem>
+            <MaxAccordionItem value="settings" title="Configurações">
+                Conteúdo do segundo item.
+            </MaxAccordionItem>
+            <MaxAccordionItem value="disabled" title="Indisponível" disabled>
+                Este item não pode ser aberto.
+            </MaxAccordionItem>
+        </MaxAccordion>
     </div>
 </template>
 
 <script setup lang="ts">
-    import { MaxAccordion } from '@maxvue/max-components-ui';
-    import { MaxAccordionItem } from '@maxvue/max-components-ui';
+    import { ref } from 'vue';
+    import { MaxAccordion, MaxAccordionItem } from '@maxvue/max-components-ui';
+
+    const openItem = ref<string | undefined>('details');
 </script>
 
 <style lang="scss" scoped>
-    .scenario-content {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        padding: 1rem;
-    }
-    .variants {
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-    }
-    .component-block {
-        border: 1px solid var(--layout-border, #ccc);
-        padding: 1rem;
-        border-radius: 8px;
-    }
-    .states {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 2rem;
-        margin-top: 1rem;
-    }
-    .state-col {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-        span {
-            font-size: 0.8rem;
-            color: #666;
-        }
-    }
+    .scenario-content { display: flex; flex-direction: column; gap: 1rem; padding: 1rem; }
 </style>

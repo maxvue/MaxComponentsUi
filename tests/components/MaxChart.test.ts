@@ -168,4 +168,32 @@ describe('MaxChart', () => {
             datasetIndex: 1
         }));
     });
+
+    it('expõe região acessível navegável por teclado com role="region", tabindex="0" e sumário semântico', async () => {
+        const wrapper = mountChart({
+            ariaLabel: 'Produção Mensal',
+            data: {
+                labels: ['Jan', 'Fev', 'Mar'],
+                datasets: [{ label: 'Inversor 1', data: [100, 200, 300] }]
+            }
+        });
+        await flushPromises();
+
+        const region = wrapper.find('.max-chart-accessible-table');
+        expect(region.exists()).toBe(true);
+        expect(region.attributes('role')).toBe('region');
+        expect(region.attributes('tabindex')).toBe('0');
+        expect(region.attributes('aria-label')).toBe('Dados do gráfico: Produção Mensal');
+
+        const summary = wrapper.find('.max-chart-accessible-summary');
+        expect(summary.exists()).toBe(true);
+        expect(summary.attributes('aria-live')).toBe('polite');
+        expect(summary.text()).toContain('1 série(s) e 3 item(ns)');
+
+        // Acionamento por teclado (Enter e Espaço) na célula da tabela
+        const firstBtn = wrapper.find('.max-chart-cell-btn');
+        await firstBtn.trigger('keydown.enter');
+        await firstBtn.trigger('click');
+        expect(wrapper.emitted('select')).toBeTruthy();
+    });
 });

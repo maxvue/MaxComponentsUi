@@ -1,5 +1,5 @@
 <template>
-    <form class="max-auth-card max-auth-page" @submit.prevent="onEnter" @keyup.enter="onEnter">
+    <form class="max-auth-card max-auth-page" @submit.prevent="handleFormSubmit">
         <div class="max-auth-card-inner">
             <slot name="header" :step="codeSent ? 'code' : 'phone'" :mode="mode" :phone="phone">
                 <MaxTitle2
@@ -20,7 +20,6 @@
                         v-model="email"
                         :error="emailError || phoneError"
                         :aria-describedby="error ? errorId : undefined"
-                        @keyup.enter="onEnter"
                     />
                     <MaxInputText
                         v-else
@@ -32,7 +31,6 @@
                         :error="emailError"
                         icon="mdi:email-outline"
                         :aria-describedby="error ? errorId : undefined"
-                        @keyup.enter="onEnter"
                     />
                     <MaxInputText
                         ref="passwordInputRef"
@@ -43,7 +41,6 @@
                         :error="passwordError"
                         icon="mdi:lock-outline"
                         :aria-describedby="error ? errorId : undefined"
-                        @keyup.enter="onEnter"
                     />
 
                     <div class="max-auth-options" v-if="showRemember || forgotTo">
@@ -65,7 +62,14 @@
                         aria-atomic="true"
                     >{{ error }}</span>
 
-                    <MaxButton class="auth-card-field" :label="t.submit" icon="mdi:login" :loading="loading" :action="onSubmit" />
+                    <MaxButton
+                        type="submit"
+                        class="auth-card-field"
+                        :label="t.submit"
+                        icon="mdi:login"
+                        :loading="loading"
+                        :action="onSubmit"
+                    />
                 </template>
 
                 <!-- Modo Phone OTP (Telefone + MaxInputOTP + Botão Dinâmico) -->
@@ -78,7 +82,6 @@
                             :label="t.phone"
                             :error="phoneError"
                             :aria-describedby="error ? errorId : undefined"
-                            @keyup.enter="onEnter"
                         />
                     </slot>
 
@@ -94,7 +97,7 @@
                             :autofocus="true"
                             :error="codeError"
                             :aria-describedby="error ? errorId : undefined"
-                            @complete="onEnter"
+                            @complete="handleFormSubmit"
                         />
                     </slot>
 
@@ -115,6 +118,7 @@
 
                     <!-- Botão Dinâmico de Ação Única com suporte a cooldown e acessibilidade -->
                     <MaxButton
+                        type="submit"
                         class="auth-card-field"
                         :label="dynamicButtonLabel"
                         :icon="dynamicButtonIcon"
@@ -615,45 +619,21 @@
         }
     };
 
-    const handleDynamicSubmit = (): void => {
-        if (props.loading || isDynamicButtonDisabled.value) return;
-        hasSubmitted.value = true;
+    let isHandlingSubmitInTick = false;
 
-        if (props.mode === 'password') {
-            if (props.error) nextTick(() => {
-                focusFirstInvalidField();
-                hasSubmitted.value = false;
-            });
-            emit('submit', {
-                email: email.value,
-                password: password.value,
-                remember: remember.value,
-                clearCache
-            });
-            return;
-        }
+    const handleFormSubmit = (payloadOrEvent?: any): void => {
+        if (isHandlingSubmitInTick) return;
+        isHandlingSubmitInTick = true;
+        nextTick(() => {
+            isHandlingSubmitInTick = false;
+        });
 
-        if (!codeSent.value) {
-            onSendCode();
-            return;
-        }
+        if (payloadOrEvent && payloadOrEvent.event && typeof payloadOrEvent.event.preventDefault === 'function') payloadOrEvent.event.preventDefault();
 
-        if (isCodeComplete.value) {
-            onVerifyCode();
-            return;
-        }
-
-        if (remainingCooldown.value <= 0) {
-            onResendCode();
-            return;
-        }
-    };
-
-    const onEnter = (): void => {
         if (props.loading) return;
-        hasSubmitted.value = true;
 
         if (props.mode === 'password') {
+            hasSubmitted.value = true;
             if (props.error) nextTick(() => {
                 focusFirstInvalidField();
                 hasSubmitted.value = false;
@@ -667,44 +647,34 @@
             return;
         }
 
-        if (isDynamicButtonDisabled.value) return;
+        if (props.mode === 'phone-otp') {
+            if (isDynamicButtonDisabled.value) return;
+            hasSubmitted.value = true;
 
-        // Modo phone-otp:
-        // 1. Se ainda não tiver sido enviado código: Envia o código
-        if (!codeSent.value) {
-            if (!phone.value) {
-                focusFirstInvalidField();
-                hasSubmitted.value = false;
+            if (!codeSent.value) {
+                if (!phone.value) {
+                    focusFirstInvalidField();
+                    hasSubmitted.value = false;
+                    return;
+                }
+                onSendCode();
                 return;
             }
-            onSendCode();
-            return;
-        }
 
-        // 2. Se já tiver sido enviado e os dígitos estiverem completos: Tenta fazer login
-        if (isCodeComplete.value) onVerifyCode();
+            if (isCodeComplete.value) {
+                onVerifyCode();
+                return;
+            }
+
+            if (remainingCooldown.value <= 0) {
+                onResendCode();
+                return;
+            }
+        }
     };
 
-    const onSubmit = (): void => {
-        if (props.loading) return;
-        hasSubmitted.value = true;
-        if (props.mode === 'phone-otp') {
-            handleDynamicSubmit();
-            return;
-        }
-
-        if (props.error) nextTick(() => {
-            focusFirstInvalidField();
-            hasSubmitted.value = false;
-        });
-
-        emit('submit', {
-            email: email.value,
-            password: password.value,
-            remember: remember.value,
-            clearCache
-        });
-    };
+    const handleDynamicSubmit = handleFormSubmit;
+    const onSubmit = handleFormSubmit;
 
     watch(
         () => props.error,
@@ -829,6 +799,12 @@
                     height: 16px;
                     accent-color: var(--background-700);
                     cursor: pointer;
+
+                    &:focus-visible {
+                        outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
+                        outline-offset: 2px;
+                        box-shadow: var(--max-focus-ring);
+                    }
                 }
 
                 span {
@@ -854,6 +830,12 @@
                 &:hover {
                     text-decoration: underline;
                     color: var(--background-775);
+                }
+
+                &:focus-visible {
+                    outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
+                    outline-offset: 2px;
+                    box-shadow: var(--max-focus-ring);
                 }
 
                 &--muted {

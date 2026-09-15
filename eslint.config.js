@@ -8,6 +8,7 @@ export default [
     {
         ignores: [
             'dist/**',
+            'playground/dist/**',
             'coverage/**',
             'node_modules/**',
             '**/*.tsbuildinfo',

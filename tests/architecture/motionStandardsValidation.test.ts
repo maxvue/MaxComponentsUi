@@ -1,23 +1,53 @@
 import { describe, it, expect } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
+import { compileString } from 'sass';
+import { mount } from '@vue/test-utils';
+import { defineComponent, ref, nextTick } from 'vue';
+import MaxTransitionFadeLight from '../../src/components/MaxTransitionFadeLight.vue';
+import MaxTransitionUp from '../../src/components/MaxTransitionUp.vue';
 
 const SRC_DIR = path.resolve(__dirname, '../../src');
 
 describe('E10-09: Política Sistêmica de Movimento Reduzido (prefers-reduced-motion)', () => {
-    it('src/themes/_motion.scss deve existir e declarar o mixin @mixin reduced-motion', () => {
-        const motionScssPath = path.resolve(SRC_DIR, 'themes/_motion.scss');
-        expect(fs.existsSync(motionScssPath)).toBe(true);
+    describe('Centralização de Regras Globais (_motion.scss)', () => {
+        it('src/themes/_motion.scss deve existir e declarar o mixin @mixin reduced-motion', () => {
+            const motionScssPath = path.resolve(SRC_DIR, 'themes/_motion.scss');
+            expect(fs.existsSync(motionScssPath)).toBe(true);
 
-        const content = fs.readFileSync(motionScssPath, 'utf-8');
-        expect(content).toContain('@mixin reduced-motion');
-        expect(content).toContain('prefers-reduced-motion: reduce');
-    });
+            const content = fs.readFileSync(motionScssPath, 'utf-8');
+            expect(content).toContain('@mixin reduced-motion');
+            expect(content).toContain('prefers-reduced-motion: reduce');
+        });
 
-    it('src/themes/all.scss deve incluir motion.scss', () => {
-        const allScssPath = path.resolve(SRC_DIR, 'themes/all.scss');
-        const content = fs.readFileSync(allScssPath, 'utf-8');
-        expect(content).toMatch(/@use\s+['"].\/motion(?:\.scss)?['"]/);
+        it('src/themes/all.scss deve incluir motion.scss', () => {
+            const allScssPath = path.resolve(SRC_DIR, 'themes/all.scss');
+            const content = fs.readFileSync(allScssPath, 'utf-8');
+            expect(content).toMatch(/@use\s+['"].\/motion(?:\.scss)?['"]/);
+        });
+
+        it('src/themes/_motion.scss compila regras universais para durações instantâneas (0.01ms) e iteração simples', () => {
+            const motionScssPath = path.resolve(SRC_DIR, 'themes/_motion.scss');
+            const content = fs.readFileSync(motionScssPath, 'utf-8');
+            const compiled = compileString(content).css;
+
+            expect(compiled).toContain('animation-duration: 0.01ms !important');
+            expect(compiled).toContain('animation-iteration-count: 1 !important');
+            expect(compiled).toContain('transition-duration: 0.01ms !important');
+            expect(compiled).toContain('scroll-behavior: auto !important');
+        });
+
+        it('src/themes/_motion.scss desativa transformações agressivas decorativas sob prefers-reduced-motion', () => {
+            const motionScssPath = path.resolve(SRC_DIR, 'themes/_motion.scss');
+            const content = fs.readFileSync(motionScssPath, 'utf-8');
+            const compiled = compileString(content).css;
+
+            expect(compiled).toContain('transform: none !important');
+            expect(content).toContain('.slide-up-enter-active');
+            expect(content).toContain('.flip-enter-active');
+            expect(content).toContain('.is-shaking');
+            expect(content).toContain('.is-pulsing');
+        });
     });
 
     describe('Primitivas de Transição', () => {
@@ -46,6 +76,36 @@ describe('E10-09: Política Sistêmica de Movimento Reduzido (prefers-reduced-mo
             expect(content).toContain('@media (prefers-reduced-motion: reduce)');
             expect(content).toContain('transition-duration');
             expect(content).toContain('transition-delay: 0s');
+        });
+    });
+
+    describe('Transições de Layout e Controles (SideMenuMobile, InputOTP, TabItem)', () => {
+        it('MaxSideMenuMobile.vue desativa transições de menu e rodapé sob prefers-reduced-motion', () => {
+            const filePath = path.resolve(SRC_DIR, 'components/MaxSideMenuMobile.vue');
+            const content = fs.readFileSync(filePath, 'utf-8');
+
+            expect(content).toContain('@media (prefers-reduced-motion: reduce)');
+            expect(content).toContain('.mobile-menu-item');
+            expect(content).toContain('.mobile-footer-btn');
+            expect(content).toMatch(/transition:\s*none\s*!important/);
+        });
+
+        it('MaxInputOTP.vue desativa transições de célula sob prefers-reduced-motion', () => {
+            const filePath = path.resolve(SRC_DIR, 'components/MaxInputOTP.vue');
+            const content = fs.readFileSync(filePath, 'utf-8');
+
+            expect(content).toContain('@media (prefers-reduced-motion: reduce)');
+            expect(content).toContain('.max-input-otp-cell');
+            expect(content).toMatch(/transition:\s*none\s*!important/);
+        });
+
+        it('MaxTabItem.vue desativa transições de título de aba sob prefers-reduced-motion', () => {
+            const filePath = path.resolve(SRC_DIR, 'components/MaxTabItem.vue');
+            const content = fs.readFileSync(filePath, 'utf-8');
+
+            expect(content).toContain('@media (prefers-reduced-motion: reduce)');
+            expect(content).toContain('.max-tab-item-title');
+            expect(content).toMatch(/transition:\s*none\s*!important/);
         });
     });
 
@@ -125,11 +185,20 @@ describe('E10-09: Política Sistêmica de Movimento Reduzido (prefers-reduced-mo
             return results;
         }
 
-        it('gera inventário de todos os SFCs com animações ou transições e garante conformidade', () => {
+        it('classifica todos os SFCs com animações ou transições e exige 100% de cobertura reduced-motion', () => {
             const componentsDir = path.resolve(SRC_DIR, 'components');
             const allFiles = getVueFiles(componentsDir);
 
-            const motionComponents: { file: string; hasKeyframes: boolean; hasExplicitReduced: boolean }[] = [];
+            interface ClassifiedComponent {
+                file: string;
+                category: 'keyframe-high-risk' | 'layout-transition' | 'micro-interaction';
+                hasKeyframes: boolean;
+                hasTransition: boolean;
+                hasAnimation: boolean;
+                hasExplicitReduced: boolean;
+            }
+
+            const motionComponents: ClassifiedComponent[] = [];
 
             for (const file of allFiles) {
                 const content = fs.readFileSync(file, 'utf-8');
@@ -140,33 +209,140 @@ describe('E10-09: Política Sistêmica de Movimento Reduzido (prefers-reduced-mo
 
                 if (hasKeyframes || hasTransition || hasAnimation) {
                     const hasExplicitReduced = /prefers-reduced-motion/i.test(styles);
+                    const baseName = path.basename(file);
+
+                    let category: ClassifiedComponent['category'] = 'micro-interaction';
+                    if (hasKeyframes) category = 'keyframe-high-risk';
+                    else if (
+                        /modal|drawer|menu|tab|side|toast|transition/i.test(baseName) ||
+                        /transform|height|width|top|bottom|left|right/i.test(styles)
+                    ) category = 'layout-transition';
+
+
                     motionComponents.push({
-                        file: path.basename(file),
+                        file: baseName,
+                        category,
                         hasKeyframes,
+                        hasTransition,
+                        hasAnimation,
                         hasExplicitReduced
                     });
                 }
             }
 
-            expect(motionComponents.length).toBeGreaterThan(0);
+            // Exige cobertura completa de todos os componentes com movimento (não apenas keyframes)
+            expect(motionComponents.length).toBeGreaterThanOrEqual(56);
 
-            // Todos os componentes com keyframes explícitos devem ter redução específica ou documentada
-            const keyframeComponents = motionComponents.filter((c) => c.hasKeyframes);
-            for (const comp of keyframeComponents) {
-                const msg = `Componente com keyframes ${comp.file} deve possuir regra específica de prefers-reduced-motion`;
-                expect(comp.hasExplicitReduced, msg).toBe(true);
+            const missingReduced = motionComponents.filter((c) => !c.hasExplicitReduced);
+            const msg = `Componentes com movimento sem regra prefers-reduced-motion: ${missingReduced.map((c) => c.file).join(', ')}`;
+            expect(missingReduced, msg).toHaveLength(0);
+
+            // Valida que as categorias de layout e alto risco possuem cobertura
+            const highRisk = motionComponents.filter((c) => c.category === 'keyframe-high-risk');
+            const layoutTransitions = motionComponents.filter((c) => c.category === 'layout-transition');
+            const microInteractions = motionComponents.filter((c) => c.category === 'micro-interaction');
+
+            expect(highRisk.length).toBeGreaterThan(0);
+            expect(layoutTransitions.length).toBeGreaterThan(0);
+            expect(microInteractions.length).toBeGreaterThan(0);
+
+            // Garante inclusão explícita dos componentes alvo do R18
+            const monitoredFiles = ['MaxSideMenuMobile.vue', 'MaxInputOTP.vue', 'MaxTabItem.vue'];
+            for (const monitored of monitoredFiles) {
+                const found = motionComponents.find((c) => c.file === monitored);
+                expect(found, `Componente ${monitored} deve constar no inventário`).toBeDefined();
+                expect(found?.hasExplicitReduced, `${monitored} deve ter prefers-reduced-motion`).toBe(true);
             }
-
-
         });
+    });
 
-        it('src/themes/_motion.scss define cobertura universal para *, *::before e *::after', () => {
+    describe('Emulação de prefers-reduced-motion e Integridade de Lifecycle', () => {
+        it('emula transição de tokens de movimento entre no-preference e reduce', () => {
             const motionScssPath = path.resolve(SRC_DIR, 'themes/_motion.scss');
             const content = fs.readFileSync(motionScssPath, 'utf-8');
+            const compiledCss = compileString(content).css;
 
-            expect(content).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{[\s\S]*?\*,\s*\*::before,\s*\*::after\s*\{/);
-            expect(content).toContain('animation-duration: 0.01ms !important');
-            expect(content).toContain('transition-duration: 0.01ms !important');
+            // Tokens no-preference em :root
+            expect(compiledCss).toContain('--max-motion-duration-fast: 0.15s');
+            expect(compiledCss).toContain('--max-motion-duration-normal: 0.2s');
+            expect(compiledCss).toContain('--max-motion-duration-slow: 0.35s');
+
+            // Tokens sob media query reduce
+            const reduceMediaIndex = compiledCss.indexOf('@media (prefers-reduced-motion: reduce)');
+            expect(reduceMediaIndex).toBeGreaterThan(0);
+            const reduceCss = compiledCss.slice(reduceMediaIndex);
+
+            expect(reduceCss).toContain('--max-motion-duration-fast: 0.01ms');
+            expect(reduceCss).toContain('--max-motion-duration-normal: 0.01ms');
+            expect(reduceCss).toContain('--max-motion-duration-slow: 0.01ms');
+        });
+
+        it('MaxTransitionFadeLight preserva lifecycle de montagem e desmontagem sem travar', async () => {
+            const enterHook = vitest.fn();
+            const leaveHook = vitest.fn();
+
+            const TestComponent = defineComponent({
+                components: { MaxTransitionFadeLight },
+                setup() {
+                    const visible = ref(false);
+                    return { visible, enterHook, leaveHook };
+                },
+                template: `
+                    <MaxTransitionFadeLight>
+                        <div v-if="visible" id="animated-target" class="fadelight-enter-active">
+                            Conteúdo com Transição
+                        </div>
+                    </MaxTransitionFadeLight>
+                `
+            });
+
+            const wrapper = mount(TestComponent);
+
+            // Inicialmente oculto
+            expect(wrapper.find('#animated-target').exists()).toBe(false);
+
+            // Entrada
+            wrapper.vm.visible = true;
+            await nextTick();
+            expect(wrapper.find('#animated-target').exists()).toBe(true);
+            expect(wrapper.find('#animated-target').text()).toBe('Conteúdo com Transição');
+
+            // Saída
+            wrapper.vm.visible = false;
+            await nextTick();
+            expect(wrapper.find('#animated-target').exists()).toBe(false);
+
+            wrapper.unmount();
+        });
+
+        it('MaxTransitionUp executa transição funcional com animação reduzida sem transform residual', async () => {
+            const TestComponent = defineComponent({
+                components: { MaxTransitionUp },
+                setup() {
+                    const visible = ref(false);
+                    return { visible };
+                },
+                template: `
+                    <MaxTransitionUp>
+                        <div v-if="visible" id="slide-target">
+                            Alvo Vertical
+                        </div>
+                    </MaxTransitionUp>
+                `
+            });
+
+            const wrapper = mount(TestComponent);
+            expect(wrapper.find('#slide-target').exists()).toBe(false);
+
+            wrapper.vm.visible = true;
+            await nextTick();
+            expect(wrapper.find('#slide-target').exists()).toBe(true);
+
+            wrapper.vm.visible = false;
+            await nextTick();
+            expect(wrapper.find('#slide-target').exists()).toBe(false);
+
+            wrapper.unmount();
         });
     });
 });

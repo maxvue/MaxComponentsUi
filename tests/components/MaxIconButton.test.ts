@@ -14,7 +14,7 @@ vi.mock('@maxvue/max-use', async (importOriginal) => {
 
 function mountIconButton(props: Record<string, any> = {}, autoAriaLabel = true) {
     const finalProps: Record<string, any> = { icon: 'mdi:pencil', ...props };
-    if (autoAriaLabel && !finalProps.ariaLabel && !finalProps['aria-label'] && !finalProps.label && !finalProps.title && !finalProps.tooltip) finalProps.ariaLabel = 'Botão de ação';
+    if (autoAriaLabel && !finalProps.ariaLabel && !finalProps['aria-label'] && !finalProps.label && !finalProps.title && !finalProps.tooltip) finalProps.ariaLabel = 'Editar item';
     return mount(MaxIconButton, {
         props: finalProps,
         global: {
@@ -173,6 +173,44 @@ describe('MaxIconButton', () => {
         it('prop color tem precedência sobre iconColor', () => {
             const wrapper = mountIconButton({ color: '#00ff00', iconColor: '#ff0000' });
             expect(wrapper.find('.max-icon').attributes('data-color')).toBe('#00ff00');
+        });
+    });
+
+    describe('Eliminação de rótulo genérico e exigência de nome contextual (F15)', () => {
+        it('elimina fallback genérico "Botão de ação" e deixa aria-label undefined para ícone desconhecido', () => {
+            const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+            const wrapper = mountIconButton({ icon: 'custom:unmapped-icon-xyz' }, false);
+            expect(wrapper.find('button').attributes('aria-label')).toBeUndefined();
+            expect(wrapper.find('button').attributes('aria-label')).not.toBe('Botão de ação');
+            expect(warnSpy).toHaveBeenCalledWith(
+                expect.stringContaining('[MaxIconButton] Botão de ícone renderizado sem nome acessível')
+            );
+        });
+
+        it('respeita nomes contextuais explícitos (ariaLabel, label, title, tooltip)', () => {
+            const w1 = mountIconButton({ icon: 'custom:foo', ariaLabel: 'Salvar rascunho' }, false);
+            expect(w1.find('button').attributes('aria-label')).toBe('Salvar rascunho');
+
+            const w2 = mountIconButton({ icon: 'custom:bar', label: 'Imprimir documento' }, false);
+            expect(w2.find('button').attributes('aria-label')).toBe('Imprimir documento');
+
+            const w3 = mountIconButton({ icon: 'custom:baz', title: 'Enviar e-mail' }, false);
+            expect(w3.find('button').attributes('aria-label')).toBe('Enviar e-mail');
+
+            const w4 = mountIconButton({ icon: 'custom:qux', tooltip: 'Ajuda online' }, false);
+            expect(w4.find('button').attributes('aria-label')).toBe('Ajuda online');
+        });
+
+        it('rejeita repetição de nomes genéricos em coleções', () => {
+            const buttons = [
+                mountIconButton({ icon: 'mdi:pencil', ariaLabel: 'Editar perfil' }, false),
+                mountIconButton({ icon: 'mdi:trash-can', ariaLabel: 'Excluir conta' }, false),
+                mountIconButton({ icon: 'mdi:download', ariaLabel: 'Baixar dados' }, false)
+            ];
+
+            const labels = buttons.map((b) => b.find('button').attributes('aria-label'));
+            expect(labels).not.toContain('Botão de ação');
+            expect(new Set(labels).size).toBe(3);
         });
     });
 });

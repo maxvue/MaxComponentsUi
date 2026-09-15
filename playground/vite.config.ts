@@ -1,25 +1,58 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import { resolve } from 'path';
+import { fileURLToPath } from 'url';
+import { readFileSync } from 'node:fs';
 import UnoCSS from 'unocss/vite';
 import AutoImport from 'unplugin-auto-import/vite';
-import Components from 'unplugin-vue-components/vite';
 import { maxUseAutoImport } from '@maxvue/max-use';
 
+const rootDir = fileURLToPath(new URL('.', import.meta.url));
+const maxUseImportsWithoutVueDuplicates = maxUseAutoImport.map((preset) => {
+    if (!('imports' in preset) || !Array.isArray(preset.imports)) return preset;
+    return { ...preset, imports: preset.imports.filter((name) => name !== 'toRef' && name !== 'toRefs') };
+});
 
 export default defineConfig({
     optimizeDeps: {
         include: ['max-use']
     },
     plugins: [
+        // O código-fonte da biblioteca fica acima de `root`. No dev server do
+        // Vite 8, imports dinâmicos `@fs/*.svg?raw` seriam servidos como SVG,
+        // em vez de módulo JS. Preservamos o contrato `?raw` também para esses
+        // assets externos ao playground.
+        {
+            name: 'playground-external-svg-raw',
+            enforce: 'pre',
+            load(id) {
+                const [file, query = ''] = id.split('?', 2);
+                if (!file.endsWith('.svg') || !query.split('&').includes('raw')) return null;
+                return `export default ${JSON.stringify(readFileSync(file, 'utf8'))};`;
+            },
+            configureServer(server) {
+                const sourceRoot = resolve(rootDir, '../src');
+                server.middlewares.use((request, response, next) => {
+                    const [pathname = '', query = ''] = (request.url ?? '').split('?', 2);
+                    if (!pathname.startsWith('/@fs/') || !pathname.endsWith('.svg') || !query.split('&').includes('raw')) return next();
+
+                    const file = decodeURIComponent(pathname.slice('/@fs'.length));
+                    if (!file.startsWith(sourceRoot)) return next();
+
+                    response.statusCode = 200;
+                    response.setHeader('Content-Type', 'application/javascript');
+                    response.end(`export default ${JSON.stringify(readFileSync(file, 'utf8'))};`);
+                });
+            }
+        },
         vue(),
         UnoCSS({
-            configFile: resolve(__dirname, '../uno.config.ts')
+            configFile: resolve(rootDir, '../uno.config.ts')
         }),
         AutoImport({
             imports: [
                 'vue',
-                ...maxUseAutoImport,
+                ...maxUseImportsWithoutVueDuplicates,
                 {
                     from: 'vue',
                     imports: ['Ref', 'ComputedRef', 'ShallowRef', 'ShallowComputedRef', 'PropType', 'WatchStopHandle', 'Watch'],
@@ -40,19 +73,9 @@ export default defineConfig({
             dirs: [
                 '../src/*.ts'
             ]
-        }),
-        Components({
-            dirs: ['../src/components/**'],
-            extensions: ['vue'],
-            directoryAsNamespace: false,
-            deep: true,
-            allowOverrides: true,
-            dts: './auto-import-components.d.ts',
-            directives: true,
-            syncMode: 'overwrite'
         })
     ],
-    root: resolve(__dirname),
+    root: resolve(rootDir),
     server: {
         host: 'maxcomponents.test',
         // Porta fixa fora da faixa 5173-5176, disputada pelos outros projetos de
@@ -68,11 +91,17 @@ export default defineConfig({
     },
     resolve: {
         alias: {
-            '@': resolve(__dirname, '../src')
+            '@': resolve(rootDir, '../src'),
+            '@maxvue/max-components-ui': resolve(rootDir, '../src/index.ts')
         }
     },
     define: {
         __VUE_OPTIONS_API__: true,
         __VUE_PROD_DEVTOOLS__: false
+    },
+    build: {
+        // O limite do Vite apenas evita warning redundante; o gate executável está
+        // em scripts/check-playground-bundle.mjs e também mede gzip.
+        chunkSizeWarningLimit: 2600
     }
 });

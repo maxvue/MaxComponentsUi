@@ -279,7 +279,8 @@
                 }
 
                 &:focus-visible {
-                    outline: 2px solid var(--blue-500, #38bdf8);
+                    /* Foco canônico: --blue-500 era legado; --max-focus-ring-color é a referência da marca */
+                    outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
                     outline-offset: 2px;
                 }
             }

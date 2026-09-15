@@ -184,4 +184,83 @@ describe('useActiveOverlayPosition', () => {
             customData: 'ok'
         });
     });
+
+    it('observa visualViewport quando disponível e aplica clamp com safe-area', async () => {
+        const active = ref(true);
+        const targetEl = document.createElement('div');
+        const overlayEl = document.createElement('div');
+
+        vi.spyOn(targetEl, 'getBoundingClientRect').mockReturnValue({
+            x: 0,
+            y: 10,
+            top: 10,
+            bottom: 40,
+            left: 0,
+            right: 200,
+            width: 200,
+            height: 30,
+            toJSON: () => {}
+        } as DOMRect);
+
+        vi.spyOn(overlayEl, 'getBoundingClientRect').mockReturnValue({
+            x: 0,
+            y: 44,
+            top: 44,
+            bottom: 244,
+            left: 0,
+            right: 200,
+            width: 200,
+            height: 200,
+            toJSON: () => {}
+        } as DOMRect);
+
+        const mockVisualViewport = {
+            width: 320,
+            height: 480,
+            offsetLeft: 0,
+            offsetTop: 0,
+            scale: 1,
+            addEventListener: vi.fn(),
+            removeEventListener: vi.fn()
+        };
+
+        const originalVV = window.visualViewport;
+        Object.defineProperty(window, 'visualViewport', {
+            value: mockVisualViewport,
+            writable: true,
+            configurable: true
+        });
+
+        vi.spyOn(window, 'getComputedStyle').mockReturnValue({
+            getPropertyValue: (prop: string) => {
+                if (prop === '--safe-area-left') return '16px';
+                if (prop === '--safe-area-top') return '20px';
+                return '0px';
+            }
+        } as any);
+
+        const { position } = useActiveOverlayPosition({
+            target: targetEl,
+            overlay: overlayEl,
+            active
+        });
+
+        await nextTick();
+
+        expect(mockVisualViewport.addEventListener).toHaveBeenCalledWith('resize', expect.any(Function), { passive: true });
+        expect(mockVisualViewport.addEventListener).toHaveBeenCalledWith('scroll', expect.any(Function), { passive: true });
+        expect(position.value.left).toBe(24);
+
+        active.value = false;
+        await nextTick();
+
+        expect(mockVisualViewport.removeEventListener).toHaveBeenCalledWith('resize', expect.any(Function));
+        expect(mockVisualViewport.removeEventListener).toHaveBeenCalledWith('scroll', expect.any(Function));
+
+        Object.defineProperty(window, 'visualViewport', {
+            value: originalVV,
+            writable: true,
+            configurable: true
+        });
+    });
 });

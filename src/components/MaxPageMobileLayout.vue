@@ -165,7 +165,7 @@
             .mobile-space {
                 width: 100%;
                 height: 20px;
-                z-index: var(--max-layer-sticky, 100);
+                z-index: var(--max-z-index-sticky, var(--max-layer-sticky, 100));
                 pointer-events: none;
 
                 &.top {
@@ -190,7 +190,7 @@
                 position: absolute;
                 top: 0;
                 left: 0;
-                z-index: calc(var(--max-layer-sticky, 100) - 1);
+                z-index: calc(var(--max-z-index-sticky, var(--max-layer-sticky, 100)) - 1);
                 content: '';
                 width: 100%;
                 height: 50px;
@@ -200,7 +200,7 @@
 
         .mobile-bug-draggable {
             position: fixed;
-            z-index: var(--max-layer-floating, 850);
+            z-index: var(--max-z-index-floating, var(--max-layer-floating, 850));
             touch-action: none;
             cursor: grab;
             user-select: none;

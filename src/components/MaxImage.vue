@@ -567,6 +567,11 @@
             props.maxCropPixels
         );
 
+        if (targetDims.width <= 0 || targetDims.height <= 0) {
+            cropError.value = 'Área de recorte inválida.';
+            return;
+        }
+
         let canvas: HTMLCanvasElement;
         let ctx: CanvasRenderingContext2D | null;
         try {
@@ -709,6 +714,7 @@
     });
 
     defineExpose({
+        currentSrc,
         openPreview,
         closePreview,
         startCrop,
@@ -742,6 +748,12 @@
             &:hover {
                 opacity: 0.92;
             }
+
+            &:focus-visible {
+                outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
+                outline-offset: 2px;
+                box-shadow: var(--max-focus-ring);
+            }
         }
     }
 
@@ -749,7 +761,7 @@
     .max-image-modal {
         position: fixed;
         inset: 0;
-        z-index: var(--max-layer-fullscreen, 1400);
+        z-index: var(--max-z-index-fullscreen, var(--max-layer-fullscreen, 1400));
         background-color: rgb(0 0 0 / 50%);
         display: flex;
         align-items: center;

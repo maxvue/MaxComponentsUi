@@ -7,20 +7,20 @@
                 <div class="component-block">
                     <h3>MaxInputCoordinateDecimalLat</h3>
                     <div class="states">
-                        <!-- Default -->
+                        <!-- Normal -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxInputCoordinateDecimalLat />
+                            <MaxInputCoordinateDecimalLat v-model="lat" label="Latitude" />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxInputCoordinateDecimalLat disabled />
+                            <MaxInputCoordinateDecimalLat v-model="latDisabled" label="Latitude" disabled />
                         </div>
-                        <!-- Error / Variant -->
+                        <!-- Com erro -->
                         <div class="state-col">
-                            <span>Erro / Secundário</span>
-                            <MaxInputCoordinateDecimalLat error severity="danger" />
+                            <span>Com erro</span>
+                            <MaxInputCoordinateDecimalLat v-model="latError" label="Latitude" :error="'Latitude inválida'" />
                         </div>
                     </div>
                 </div>
@@ -28,20 +28,20 @@
                 <div class="component-block">
                     <h3>MaxInputCoordinateDecimalLng</h3>
                     <div class="states">
-                        <!-- Default -->
+                        <!-- Normal -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxInputCoordinateDecimalLng />
+                            <MaxInputCoordinateDecimalLng v-model="lng" label="Longitude" />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxInputCoordinateDecimalLng disabled />
+                            <MaxInputCoordinateDecimalLng v-model="lngDisabled" label="Longitude" disabled />
                         </div>
-                        <!-- Error / Variant -->
+                        <!-- Preenchido -->
                         <div class="state-col">
-                            <span>Erro / Secundário</span>
-                            <MaxInputCoordinateDecimalLng error severity="danger" />
+                            <span>Preenchido</span>
+                            <MaxInputCoordinateDecimalLng v-model="lngFilled" label="Longitude" />
                         </div>
                     </div>
                 </div>
@@ -51,8 +51,16 @@
 </template>
 
 <script setup lang="ts">
-    import { MaxInputCoordinateDecimalLat } from '@maxvue/max-components-ui';
-    import { MaxInputCoordinateDecimalLng } from '@maxvue/max-components-ui';
+    import { ref } from 'vue';
+    import { MaxInputCoordinateDecimalLat, MaxInputCoordinateDecimalLng } from '@maxvue/max-components-ui';
+
+    const lat = ref('');
+    const latDisabled = ref('-23.5505');
+    const latError = ref('999');
+
+    const lng = ref('');
+    const lngDisabled = ref('-46.6333');
+    const lngFilled = ref('-46.6333');
 </script>
 
 <style lang="scss" scoped>
@@ -82,6 +90,7 @@
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
+        min-width: 220px;
         span {
             font-size: 0.8rem;
             color: #666;

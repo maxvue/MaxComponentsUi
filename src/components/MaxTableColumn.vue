@@ -9,6 +9,10 @@
 
     /**
      * Componente de coluna declarativa para tabelas (MaxTable).
+     *
+     * Define a anatomia canônica de coluna `.max-table-column`, materializando:
+     * - Células de cabeçalho: `.max-table-th`, `.max-table-header-cell` (compatibilidade legada: `.p-column`)
+     * - Células de dados: `.max-table-td`, `.max-table-cell` (compatibilidade legada: `.p-datatable-cell`)
      */
     defineProps<{
         field?: string;

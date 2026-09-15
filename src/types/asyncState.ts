@@ -9,3 +9,5 @@ export interface AsyncStateContext<T = any> {
     error: Error | string | null;
     attempt: number;
 }
+
+export type { LoadingHandle } from './app';

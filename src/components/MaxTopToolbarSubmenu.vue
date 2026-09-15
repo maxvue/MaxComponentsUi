@@ -61,7 +61,8 @@
                     role="menuitem"
                     :id="getItemId(index)"
                     :tabindex="focusedIndex === index && !item.disabled ? 0 : -1"
-                    :aria-label="item.ariaLabel || item.label || item.title || (typeof item.tooltip === 'string' ? item.tooltip : 'Opção')"
+                    :aria-label="item.ariaLabel || item.label || item.title || (typeof item.tooltip === 'string' ? item.tooltip : 'Opção de menu')"
+                    :tooltip="typeof item.tooltip === 'string' ? item.tooltip : undefined"
                     :aria-disabled="item.disabled ? 'true' : undefined"
                     :icon="item.icon"
                     :transparent="true"
@@ -371,7 +372,8 @@
                 transition: background-color 0.16s ease, color 0.16s ease;
 
                 &:focus-visible {
-                    outline: 2px solid var(--max-primary-500, #00768e);
+                    /* Foco canônico: --max-focus-ring-color adapta em dark mode */
+                    outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
                     outline-offset: -2px;
                     border-radius: 4px;
                 }
@@ -426,7 +428,7 @@
             right: unset !important;
             top: 0 !important;
             transform: translateX(8px) !important;
-            z-index: var(--max-layer-dropdown, 1000) !important;
+            z-index: var(--max-z-index-dropdown, var(--max-layer-dropdown, 1000)) !important;
         }
     }
 }

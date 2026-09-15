@@ -53,6 +53,7 @@
     // Escala semântica canônica de camadas (Stacking Layers)
     --max-layer-sticky: 100;
     --max-layer-navigation: 500;
+    --max-layer-floating: 850;
     --max-layer-dropdown: 1000;
     --max-layer-popover: 1200;
     --max-layer-modal-backdrop: 1300;
@@ -62,14 +63,27 @@
     --max-layer-tooltip: 1600;
     --max-layer-screen-block: 10000;
 
+    // Tokens semânticos de z-index (com suporte a override direto de --max-z-index-*)
+    --max-z-index-sticky: var(--max-layer-sticky, 100);
+    --max-z-index-navigation: var(--max-layer-navigation, 500);
+    --max-z-index-floating: var(--max-layer-floating, 850);
+    --max-z-index-dropdown: var(--max-layer-dropdown, 1000);
+    --max-z-index-popover: var(--max-layer-popover, 1200);
+    --max-z-index-modal-backdrop: var(--max-layer-modal-backdrop, 1300);
+    --max-z-index-modal: var(--max-layer-modal, 1310);
+    --max-z-index-fullscreen: var(--max-layer-fullscreen, 1400);
+    --max-z-index-toast: var(--max-layer-toast, 1500);
+    --max-z-index-tooltip: var(--max-layer-tooltip, 1600);
+    --max-z-index-screen-block: var(--max-layer-screen-block, 10000);
+
     // Aliases legados mantidos para compatibilidade
-    --z-dropdown: var(--max-layer-dropdown, 1000);
-    --z-sticky: var(--max-layer-sticky, 100);
-    --z-modal-backdrop: var(--max-layer-modal-backdrop, 1300);
-    --z-modal: var(--max-layer-modal, 1310);
-    --z-popover: var(--max-layer-popover, 1200);
-    --z-toast: var(--max-layer-toast, 1500);
-    --z-tooltip: var(--max-layer-tooltip, 1600);
+    --z-dropdown: var(--max-z-index-dropdown, var(--max-layer-dropdown, 1000));
+    --z-sticky: var(--max-z-index-sticky, var(--max-layer-sticky, 100));
+    --z-modal-backdrop: var(--max-z-index-modal-backdrop, var(--max-layer-modal-backdrop, 1300));
+    --z-modal: var(--max-z-index-modal, var(--max-layer-modal, 1310));
+    --z-popover: var(--max-z-index-popover, var(--max-layer-popover, 1200));
+    --z-toast: var(--max-z-index-toast, var(--max-layer-toast, 1500));
+    --z-tooltip: var(--max-z-index-tooltip, var(--max-layer-tooltip, 1600));
 
     // FloatLabel — literais do Aura
     --max-floatlabel-active-font-weight: 400;
@@ -95,7 +109,7 @@
     --max-primary-content: #ffffff;
     --max-secondary-content: #00152A;
     --max-success-content: #00152A;
-    --max-info-content: #00152A;
+    --max-info-content: #00142A;
     --max-warning-content: #00152A;
     --max-danger-content: #ffffff;
     --max-help-content: #ffffff;
@@ -159,8 +173,8 @@
     --max-content-disabled: var(--background-650, #52525b);
 
     // Tokens semânticos de seleção acessível - modo escuro (contraste >= 4.5:1)
-    --max-selection-background: var(--max-primary-400, #178DA5);
-    --max-selection-content: #00152A;
+    --max-selection-background: var(--max-primary-600, #005F77);
+    --max-selection-content: #ffffff;
     --max-selection-hover-background: var(--max-primary-500, #00768E);
     --max-selection-hover-content: #ffffff;
 

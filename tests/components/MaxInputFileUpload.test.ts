@@ -475,4 +475,110 @@ describe('MaxInputFileUpload', () => {
             sendSpy.mockRestore();
         });
     });
+
+    describe('Ações Nativas, Associação Explícita e Operação por Teclado (R12 / F19)', () => {
+        it('associa explicitamente o label :for ao input nativo type="file" com id correspondente', () => {
+            const wrapper = mount(MaxInputFileUpload, {
+                props: { modelValue: [], label: 'Selecione seus arquivos' },
+                attrs: { id: 'custom-file-id' },
+                global: { stubs: { Icon: true }, directives: { tooltip: () => {} } }
+            });
+
+            const nativeInput = wrapper.find('input[type="file"]');
+            expect(nativeInput.exists()).toBe(true);
+            expect(nativeInput.attributes('id')).toBe('custom-file-id');
+
+            const chooseLabel = wrapper.find('.max-fileupload-choose');
+            expect(chooseLabel.element.tagName.toLowerCase()).toBe('label');
+            expect(chooseLabel.attributes('for')).toBe('custom-file-id');
+            expect(chooseLabel.attributes('role')).toBe('button');
+            expect(chooseLabel.attributes('tabindex')).toBe('0');
+
+            const textLabel = wrapper.find('.label-file-upload');
+            expect(textLabel.element.tagName.toLowerCase()).toBe('label');
+            expect(textLabel.attributes('for')).toBe('custom-file-id');
+            expect(textLabel.attributes('role')).toBe('button');
+            expect(textLabel.attributes('tabindex')).toBe('0');
+        });
+
+        it('aciona o seletor nativo ao receber Enter ou Espaço nos gatilhos', async () => {
+            const wrapper = mount(MaxInputFileUpload, {
+                props: { modelValue: [], label: 'Upload' },
+                global: { stubs: { Icon: true }, directives: { tooltip: () => {} } }
+            });
+
+            const nativeInput = wrapper.find('input[type="file"]');
+            const clickSpy = vi.spyOn(nativeInput.element as HTMLInputElement, 'click');
+
+            const chooseLabel = wrapper.find('.max-fileupload-choose');
+            await chooseLabel.trigger('keydown.enter');
+            expect(clickSpy).toHaveBeenCalledTimes(1);
+
+            await chooseLabel.trigger('keydown.space');
+            expect(clickSpy).toHaveBeenCalledTimes(2);
+
+            const textLabel = wrapper.find('.label-file-upload');
+            await textLabel.trigger('keydown.enter');
+            expect(clickSpy).toHaveBeenCalledTimes(3);
+
+            await textLabel.trigger('keydown.space');
+            expect(clickSpy).toHaveBeenCalledTimes(4);
+
+            clickSpy.mockRestore();
+        });
+
+        it('respeita disabled estritamente, removendo associação for e impedindo clique, Enter e Espaço', async () => {
+            const wrapper = mount(MaxInputFileUpload, {
+                props: { modelValue: [], label: 'Upload' },
+                attrs: { disabled: true },
+                global: { stubs: { Icon: true }, directives: { tooltip: () => {} } }
+            });
+
+            const nativeInput = wrapper.find('input[type="file"]');
+            expect(nativeInput.attributes('disabled')).toBeDefined();
+            const clickSpy = vi.spyOn(nativeInput.element as HTMLInputElement, 'click');
+
+            const chooseLabel = wrapper.find('.max-fileupload-choose');
+            expect(chooseLabel.classes()).toContain('is-disabled');
+            expect(chooseLabel.attributes('tabindex')).toBe('-1');
+            expect(chooseLabel.attributes('aria-disabled')).toBe('true');
+            expect(chooseLabel.attributes('for')).toBeUndefined();
+
+            await chooseLabel.trigger('click');
+            await chooseLabel.trigger('keydown.enter');
+            await chooseLabel.trigger('keydown.space');
+
+            expect(clickSpy).not.toHaveBeenCalled();
+
+            clickSpy.mockRestore();
+        });
+
+        it('garante emissão única e suporte a múltiplos arquivos ao disparar change no input nativo', async () => {
+            const onSelectMock = vi.fn();
+            const wrapper = mount(MaxInputFileUpload, {
+                props: { modelValue: [], label: 'Upload' },
+                attrs: { onSelect: onSelectMock, auto: false },
+                global: { stubs: { Icon: true }, directives: { tooltip: () => {} } }
+            });
+
+            const nativeInput = wrapper.find('input[type="file"]');
+            expect(nativeInput.attributes('multiple')).toBeDefined();
+
+            const fileA = new File(['a'], 'a.pdf', { type: 'application/pdf' });
+            const fileB = new File(['b'], 'b.png', { type: 'image/png' });
+
+            Object.defineProperty(nativeInput.element, 'files', {
+                value: [fileA, fileB],
+                writable: true,
+                configurable: true
+            });
+
+            await nativeInput.trigger('change');
+
+            expect(wrapper.emitted('select')).toHaveLength(1);
+            expect(wrapper.emitted('select')![0][0]).toEqual({ files: [fileA, fileB] });
+            expect(onSelectMock).toHaveBeenCalledTimes(1);
+            expect((nativeInput.element as HTMLInputElement).value).toBe('');
+        });
+    });
 });

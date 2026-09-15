@@ -40,3 +40,12 @@
     outline: 2px solid var(--max-focus-ring-color, #00768e) !important;
     outline-offset: 1px;
 }
+
+// Preserva um indicador distinguível quando o sistema substitui cores autorais.
+@media (forced-colors: active) {
+    :focus-visible {
+        outline: 2px solid Highlight !important;
+        outline-offset: 2px;
+        box-shadow: none !important;
+    }
+}

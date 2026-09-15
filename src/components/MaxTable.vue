@@ -1,7 +1,7 @@
 <template>
     <div class="max-table-main-div" :style="tableStyle">
-        <div class="max-table p-datatable" :class="{ 'p-datatable-scrollable': props.scrollable }">
-            <div class="max-table-container p-datatable-table-container" :style="scrollContainerStyle">
+        <div class="max-table p-datatable" :class="{ 'max-table-scrollable': props.scrollable, 'p-datatable-scrollable': props.scrollable }">
+            <div class="max-table-container max-table-table-container p-datatable-table-container" :style="scrollContainerStyle">
                 <table>
                     <!-- MODO A: TEMPLATE-DRIVEN (Cabeçalho ou Linhas manuais) -->
                     <template v-if="isTemplateDriven">
@@ -12,7 +12,7 @@
                         </thead>
                         <tbody>
                             <tr v-if="props.loading" class="max-table-row-state max-table-loading-row">
-                                <td class="max-table-td p-datatable-cell state-cell">
+                                <td class="max-table-td max-table-cell p-datatable-cell state-cell">
                                     <slot name="loading">
                                         <div class="max-table-feedback-box">
                                             <div class="max-table-spinner" role="status" aria-label="Carregando"></div>
@@ -22,7 +22,7 @@
                                 </td>
                             </tr>
                             <tr v-else-if="props.empty" class="max-table-row-state max-table-empty-row">
-                                <td class="max-table-td p-datatable-cell state-cell">
+                                <td class="max-table-td max-table-cell p-datatable-cell state-cell">
                                     <slot name="empty">
                                         <div class="max-table-feedback-box">
                                             <span>{{ props.emptyMessage }}</span>
@@ -32,8 +32,8 @@
                             </tr>
                             <template v-else>
                                 <slot />
-                                <tr v-if="slots.buttons" class="max-table-th max-table-column-buttons p-column" :style="`width: ${width}px; max-width: ${width}px;`">
-                                    <td class="max-table-td p-datatable-cell">
+                                <tr v-if="slots.buttons" class="max-table-th max-table-column-buttons max-table-column p-column" :style="`width: ${width}px; max-width: ${width}px;`">
+                                    <td class="max-table-td max-table-cell p-datatable-cell">
                                         <div class="max-table-buttons" ref="el">
                                             <slot name="buttons" v-bind="{ data: {}, index: 0 }" />
                                         </div>
@@ -57,21 +57,30 @@
                                     :key="col.field || col.header || 'col'"
                                     :class="[
                                         'max-table-th',
+                                        'max-table-header-cell',
                                         col.class,
                                         col.headerClass,
-                                        { 'max-table-th-sortable': col.sortable }
+                                        {
+                                            'max-table-th-sortable': col.sortable,
+                                            'max-table-header-cell-sortable': col.sortable
+                                        }
                                     ]"
                                     :style="getColumnStyle(col)"
                                     :aria-sort="getAriaSort(col)"
+                                    :aria-label="getHeaderAriaLabel(col)"
                                     @click="onThClick(col, $event)"
+                                    @keydown.enter.prevent.stop="onThKeydown(col, $event)"
+                                    @keydown.space.prevent.stop="onThKeydown(col, $event)"
                                     scope="col"
                                 >
                                     <button
                                         v-if="col.sortable"
                                         type="button"
                                         class="max-table-header-button"
-                                        @click="onHeaderClick(col)"
-                                        :aria-label="col.header || col.field || 'Ordenar coluna'"
+                                        @click.stop="onHeaderClick(col, $event)"
+                                        @keydown.enter.prevent.stop="onHeaderKeydown(col, $event)"
+                                        @keydown.space.prevent.stop="onHeaderKeydown(col, $event)"
+                                        :aria-label="getSortButtonAriaLabel(col)"
                                     >
                                         <div class="max-table-column-header-content p-datatable-column-header-content">
                                             <div class="max-table-column-title p-datatable-column-title">
@@ -102,7 +111,13 @@
                                         </div>
                                     </div>
                                 </th>
-                                <th v-if="slots.buttons" class="max-table-th max-table-th-buttons p-column" :style="buttonsColumnStyle">
+                                <th
+                                    v-if="slots.buttons"
+                                    class="max-table-th max-table-th-buttons max-table-column p-column"
+                                    :style="buttonsColumnStyle"
+                                    scope="col"
+                                    :aria-label="props.headerButton?.trim() || 'Ações'"
+                                >
                                     <div class="max-table-column-header-content p-datatable-column-header-content">
                                         <div class="max-table-column-title p-datatable-column-title">
                                             <span>{{ props.headerButton ?? '' }}</span>
@@ -115,7 +130,7 @@
                         <tbody ref="tbodyRef">
                             <!-- 1. Loading (prioridade absoluta) -->
                             <tr v-if="props.loading" class="max-table-row-state max-table-loading-row">
-                                <td :colspan="resolvedColumns.length + (slots.buttons ? 1 : 0)" class="max-table-td p-datatable-cell state-cell">
+                                <td :colspan="resolvedColumns.length + (slots.buttons ? 1 : 0)" class="max-table-td max-table-cell p-datatable-cell state-cell">
                                     <slot name="loading">
                                         <div class="max-table-feedback-box">
                                             <div class="max-table-spinner" role="status" aria-label="Carregando"></div>
@@ -143,7 +158,7 @@
                                         :class="[
                                             'max-table-row',
                                             'max-table-virtual-row',
-                                            props.stripedRows !== false ? (virtualRow.index % 2 === 0 ? 'p-row-even max-table-row-even' : 'p-row-odd max-table-row-odd') : '',
+                                            props.stripedRows !== false ? (virtualRow.index % 2 === 0 ? 'max-table-row-even p-row-even' : 'max-table-row-odd p-row-odd') : '',
                                             {
                                                 'max-table-row-selected': isRowSelected(displayData[virtualRow.index]),
                                                 'max-table-row-interactive': isRowInteractive
@@ -158,7 +173,7 @@
                                         <td
                                             v-for="col in resolvedColumns"
                                             :key="col.field || col.header || 'td'"
-                                            :class="['max-table-td', 'p-datatable-cell', col.class]"
+                                            :class="['max-table-td', 'max-table-cell', 'p-datatable-cell', col.class]"
                                             :style="getColumnStyle(col)"
                                         >
                                             <component
@@ -174,7 +189,7 @@
                                             </template>
                                         </td>
 
-                                        <td v-if="slots.buttons" class="max-table-td max-table-td-buttons p-datatable-cell" :style="buttonsColumnStyle">
+                                        <td v-if="slots.buttons" class="max-table-td max-table-td-buttons max-table-cell p-datatable-cell" :style="buttonsColumnStyle">
                                             <div class="max-table-buttons" ref="el">
                                                 <slot name="buttons" :data="displayData[virtualRow.index]" :index="virtualRow.index" />
                                             </div>
@@ -195,7 +210,7 @@
                                         :key="getRowKey(row, index)"
                                         :class="[
                                             'max-table-row',
-                                            props.stripedRows !== false ? (index % 2 === 0 ? 'p-row-even max-table-row-even' : 'p-row-odd max-table-row-odd') : '',
+                                            props.stripedRows !== false ? (index % 2 === 0 ? 'max-table-row-even p-row-even' : 'max-table-row-odd p-row-odd') : '',
                                             {
                                                 'max-table-row-selected': isRowSelected(row),
                                                 'max-table-row-interactive': isRowInteractive
@@ -209,7 +224,7 @@
                                         <td
                                             v-for="col in resolvedColumns"
                                             :key="col.field || col.header || 'td'"
-                                            :class="['max-table-td', 'p-datatable-cell', col.class]"
+                                            :class="['max-table-td', 'max-table-cell', 'p-datatable-cell', col.class]"
                                             :style="getColumnStyle(col)"
                                         >
                                             <component
@@ -225,7 +240,7 @@
                                             </template>
                                         </td>
 
-                                        <td v-if="slots.buttons" class="max-table-td max-table-td-buttons p-datatable-cell" :style="buttonsColumnStyle">
+                                        <td v-if="slots.buttons" class="max-table-td max-table-td-buttons max-table-cell p-datatable-cell" :style="buttonsColumnStyle">
                                             <div class="max-table-buttons" ref="el">
                                                 <slot name="buttons" :data="row" :index="index" />
                                             </div>
@@ -236,7 +251,7 @@
 
                             <!-- 3. Empty state quando empty===true ou displayData estiver vazio -->
                             <tr v-else class="max-table-row-state max-table-empty-row">
-                                <td :colspan="resolvedColumns.length + (slots.buttons ? 1 : 0)" class="max-table-empty-cell p-datatable-cell state-cell">
+                                <td :colspan="resolvedColumns.length + (slots.buttons ? 1 : 0)" class="max-table-empty-cell max-table-td max-table-cell p-datatable-cell state-cell">
                                     <slot name="empty">
                                         <div class="empty-state-box max-table-feedback-box">
                                             <span>{{ props.emptyMessage || 'Nenhum registro encontrado' }}</span>
@@ -440,11 +455,6 @@
         return Boolean(props.selectionMode || hasRowClickListener.value);
     });
 
-    function onThClick(col: ResolvedColumn, event: MouseEvent) {
-        if ((event.target as HTMLElement)?.closest?.('.max-table-header-button')) return;
-        onHeaderClick(col);
-    }
-
     /** Normaliza nós filhos de slots lidando com Fragments e Comentários */
     function flattenVNodes(vnodes: VNode[]): VNode[] {
         if (!Array.isArray(vnodes)) return [];
@@ -566,8 +576,47 @@
     watch(() => props.sortField, (v) => { sortField.value = v ?? null; });
     watch(() => props.sortOrder, (v) => { sortOrder.value = v ?? 1; });
 
-    function onHeaderClick(col: ResolvedColumn) {
+    let keyboardTriggerPending = false;
+
+    function getHeaderAriaLabel(col: ResolvedColumn): string {
+        return col.header?.trim() || col.field?.trim() || 'Coluna';
+    }
+
+    function getSortButtonAriaLabel(col: ResolvedColumn): string {
+        const name = col.header?.trim() || col.field?.trim();
+        return name || 'Ordenar coluna';
+    }
+
+    function onHeaderKeydown(col: ResolvedColumn, event: KeyboardEvent) {
+        if (event.key === 'Enter' || event.key === ' ' || event.code === 'Space') {
+            keyboardTriggerPending = true;
+            onHeaderClick(col);
+            setTimeout(() => {
+                keyboardTriggerPending = false;
+            }, 0);
+        }
+    }
+
+    function onThKeydown(col: ResolvedColumn, event: KeyboardEvent) {
+        if ((event.target as HTMLElement)?.closest?.('.max-table-header-button')) return;
+        if (event.key === 'Enter' || event.key === ' ' || event.code === 'Space') {
+            keyboardTriggerPending = true;
+            onHeaderClick(col);
+            setTimeout(() => {
+                keyboardTriggerPending = false;
+            }, 0);
+        }
+    }
+
+    function onThClick(col: ResolvedColumn, event: MouseEvent) {
+        if ((event.target as HTMLElement)?.closest?.('.max-table-header-button')) return;
+        if (keyboardTriggerPending) return;
+        onHeaderClick(col, event);
+    }
+
+    function onHeaderClick(col: ResolvedColumn, event?: MouseEvent) {
         if (!col.sortable || !col.field) return;
+        if (keyboardTriggerPending && event) return;
 
         if (sortField.value === col.field) if (sortOrder.value === 1) sortOrder.value = -1;
         else {

@@ -10,17 +10,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxButton />
+                            <MaxButton label="Salvar" />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxButton disabled />
+                            <MaxButton label="Salvar" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxButton error severity="danger" />
+                            <MaxButton label="Excluir" severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -31,17 +31,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxIconButton />
+                            <MaxIconButton icon="iconoir:search" aria-label="Buscar" />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxIconButton disabled />
+                            <MaxIconButton icon="iconoir:search" aria-label="Buscar desabilitado" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxIconButton error severity="danger" />
+                            <MaxIconButton icon="iconoir:trash" aria-label="Excluir" />
                         </div>
                     </div>
                 </div>
