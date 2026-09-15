@@ -38,7 +38,7 @@ vi.mock('tiptap-markdown', () => ({
     Markdown: { configure: vi.fn(() => ({})) }
 }));
 
-vi.mock('@tiptap/starter-kit', () => ({ default: {} }));
+vi.mock('@tiptap/starter-kit', () => ({ default: { configure: vi.fn(() => ({})) } }));
 vi.mock('@tiptap/extension-underline', () => ({ default: {} }));
 vi.mock('@tiptap/extension-link', () => ({ default: { configure: vi.fn(() => ({})) } }));
 vi.mock('@tiptap/extension-image', () => ({ default: {} }));
