@@ -191,10 +191,10 @@ describe('Matriz Semântica de 4 Níveis de Cor de Texto (background-650/700/750
             expect(style).toMatch(/&\[disabled\]\s*\{[^}]*opacity:\s*0\.4/);
         });
 
-        it('MaxEmptyDiv deve usar Texto Fraco (650) no container e no ícone', () => {
+        it('MaxEmptyDiv deve usar texto secundário acessível no container e no ícone', () => {
             const style = EMPTY_DIV.split('<style')[1] ?? '';
-            expect(style).toMatch(/\.max-empty-div\s*\{[^}]*color:\s*var\(--background-650\)/);
-            expect(style).toMatch(/\.icon-div\s*\{[^}]*color:\s*var\(--background-650\)/);
+            expect(style).toMatch(/\.max-empty-div\s*\{[^}]*color:\s*var\(--max-content-secondary\)/);
+            expect(style).toMatch(/\.icon-div\s*\{[^}]*color:\s*var\(--max-content-secondary\)/);
         });
 
         it('MaxSideMenuMobile deve usar Texto Normal (700) no item, 750 no título do grupo, layout-shell-text no nome e 650 na versão', () => {

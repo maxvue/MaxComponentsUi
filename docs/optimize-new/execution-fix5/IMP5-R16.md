@@ -4,9 +4,9 @@
 - Agente: `/root/imp5_r16`
 - Parent: `/root`
 - Início: `2026-09-15T14:58:00-03:00`
-- Fim: `2026-09-15T15:04:00-03:00`
+- Fim: `2026-09-15T15:13:00-03:00` (reparo pós-REV5-R16)
 - HEAD auditado: `288db2242e066d97011664e994b3bdff61c80481`
-- Status: **concluído — aguarda refutação independente REV5-R16**
+- Status: **reparo pós-REV5-R16 concluído — aguarda revalidação pelo mesmo REV5-R16**
 
 ## Manifesto
 
@@ -34,12 +34,26 @@ Foram migrados conteúdos habilitados para `--max-content-placeholder` ou
 exceções restantes (disabled, decorativas, compatibilidade e primitivas) estão
 em `R16-background-650-inventory.md`.
 
+## Reparo após refutação REV5-R16
+
+O refutador demonstrou que a antiga fixture inseria uma regra
+`.r16-focus-family:focus-visible`, portanto não provava a folha de estilos da
+biblioteca. A fixture não injeta mais nenhum `<style>`: ela coleta a ordem de
+Tab diretamente do DOM montado e, para cada elemento encontrado, mede
+`outline`/`box-shadow` computados após teclado. A política usada é a folha
+real `themes/all.scss`, e a fixture inclui `MaxButton`, `MaxLikeButton`,
+`InputBase` e `MaxEmptyDiv` reais.
+
+`MaxEmptyDiv` deixou de ser exceção: seu texto e ícone agora usam
+`--max-content-secondary`. O teste Chromium mede a razão calculada entre suas
+cores computadas reais e exige 4,5:1 nos dois temas.
+
 ## Evidências
 
 | Comando | Resultado |
 |---|---|
 | `npx vitest run tests/architecture/focusVisibleInventory.test.ts tests/themes/textColorValidation.test.ts tests/components/MaxInputTextArea.test.ts` | passou: 3 arquivos, 53 testes |
-| `npm run test:browser -- tests/browser/FocusVisibleInventory.browser.ts` | passou: Chromium, 1 arquivo, 6 testes (Tab, claro/escuro, forced-colors e zoom 200%) |
+| `npm run test:browser -- tests/browser/FocusVisibleInventory.browser.ts` | passou: Chromium, 1 arquivo, 6 testes (DOM real/Tab, claro/escuro, forced-colors, zoom 200% e contraste computado do empty state) |
 | `npx eslint ...` | passou nos testes alterados |
 | `npx stylelint ...` | passou nos estilos alterados |
 | `git diff --check` | passou |

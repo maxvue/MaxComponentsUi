@@ -103,7 +103,7 @@ describe('R16/F23 — inventário de foco derivado dos fontes', () => {
         const remaining = vueFiles(componentsDir)
             .filter((file) => fs.readFileSync(file, 'utf8').includes('--background-650'))
             .map((file) => path.basename(file));
-        const documented = ['MaxAccordionItem.vue', 'MaxEmptyDiv.vue', 'MaxInputOTP.vue', 'MaxSideMenuMobile.vue'];
+        const documented = ['MaxAccordionItem.vue', 'MaxInputOTP.vue', 'MaxSideMenuMobile.vue'];
 
         expect(remaining.sort()).toEqual(documented.sort());
         for (const file of documented) expect(background650Inventory).toContain(file);

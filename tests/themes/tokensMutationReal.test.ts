@@ -168,7 +168,7 @@ function validarMatrizDeVariantes(cssTokens: string, escopo: Record<string, stri
         for (const [severidade] of SEVERIDADES_SOLIDAS) {
             const classe = severidade === 'primary' ? '' : `.max-button-${severidade}`;
             const seletor = `.max-button.max-button-${variante}${classe}`;
-            const seletorDeCor = variante === 'dashed' && severidade !== 'primary' && severidade !== 'whatsapp'
+            const seletorDeCor = variante === 'dashed' && severidade !== 'primary'
                 ? seletor
                 : variante === 'dashed'
                     ? '.max-button.max-button-dashed'
@@ -191,6 +191,13 @@ function validarMatrizDeVariantes(cssTokens: string, escopo: Record<string, stri
                     continue;
                 }
 
+                if (estado === 'active' && variante === 'dashed') {
+                    expect(
+                        extrairDeclaracao(CSS_MAX_BUTTON, '.max-button.max-button-dashed:active', 'background'),
+                        `${modo}/dashed/${severidade}/active deve preservar fundo transparente`
+                    ).toMatch(/^transparent/);
+                }
+
                 expect(texto, `${modo}/${variante}/${severidade}/${estado}: texto deve resolver`).toMatch(/^#[0-9a-fA-F]{6}$/);
                 expect(superficie, `${modo}/${variante}/${severidade}/${estado}: superfície deve resolver`).toMatch(/^#[0-9a-fA-F]{6}$/);
                 const fundo = estado === 'hover' && (variante === 'outlined' || variante === 'text')
@@ -199,6 +206,34 @@ function validarMatrizDeVariantes(cssTokens: string, escopo: Record<string, stri
                 expect(razaoContraste(texto, fundo), `${modo}/${variante}/${severidade}/${estado}: contraste insuficiente`).toBeGreaterThanOrEqual(4.5);
             }
         }
+    }
+}
+
+/** Estados que herdam a cor/fundo sólido precisam continuar no gate: a
+ * ausência de uma regra :active não é uma lacuna, mas a cascata real que
+ * preserva o estado de repouso. Focus-visible mede o anel compilado contra a
+ * superfície adjacente; disabled confirma a exceção de conteúdo inativo. */
+function validarEstadosSolidos(cssTokens: string, escopo: Record<string, string>, modo: 'light' | 'dark'): void {
+    const superficie = resolverCssVar('var(--background-0, #ffffff)', escopo);
+    const blocoDisabled = /\.max-button:disabled\s*\{([^}]*)\}/.exec(CSS_MAX_BUTTON)?.[1] ?? '';
+    expect(blocoDisabled, `${modo}/solid/disabled deve reduzir opacidade`).toMatch(/opacity:\s*0\.6/);
+    expect(blocoDisabled, `${modo}/solid/disabled não deve substituir color`).not.toMatch(/(?:^|;)\s*color:/);
+
+    for (const [severidade, seletor] of SEVERIDADES_SOLIDAS) {
+        const seletorEscuro = `:global(.dark) ${seletor}`;
+        const seletorEfetivo = modo === 'dark' && severidade === 'contrast' ? seletorEscuro : seletor;
+        const fundoRepouso = resolverCssVar(extrairDeclaracao(CSS_MAX_BUTTON, seletorEfetivo, 'background'), escopo);
+        const textoRepouso = resolverCssVar(extrairDeclaracao(CSS_MAX_BUTTON, seletorEfetivo, 'color'), escopo);
+        const fundoAtivo = fundoRepouso;
+        const textoAtivo = textoRepouso;
+
+        // MaxButton não declara :active para sólidos: o CSSOM preserva as
+        // declarações de repouso. Validamos explicitamente esse fallback da cascata.
+        expect(razaoContraste(fundoAtivo, textoAtivo), `${modo}/solid/${severidade}/active: contraste insuficiente`).toBeGreaterThanOrEqual(4.5);
+
+        const anel = resolverCssVar(escopo['--max-focus-ring-color'] ?? '', escopo);
+        expect(razaoContraste(anel, superficie), `${modo}/solid/${severidade}/focus-visible: contraste do anel insuficiente`).toBeGreaterThanOrEqual(3);
+        expect(razaoContraste(fundoRepouso, textoRepouso), `${modo}/solid/${severidade}/disabled: par herdado deve ser mensurável`).toBeGreaterThanOrEqual(4.5);
     }
 }
 
@@ -248,6 +283,7 @@ function executarGateDeContraste(cssTokens: string): void {
             expect(razaoContraste(par.fundo, par.texto), `${modo}/${par.severidade}/${par.estado}: contraste insuficiente`).toBeGreaterThanOrEqual(4.5);
         }
         validarMatrizDeVariantes(cssTokens, escopo, modo);
+        validarEstadosSolidos(cssTokens, escopo, modo);
     }
 }
 

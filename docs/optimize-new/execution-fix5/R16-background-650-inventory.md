@@ -8,7 +8,6 @@ permanecem são exceções não informativas ou estados indisponíveis.
 | Arquivo | Seletor/estado | Classificação | Decisão |
 |---|---|---|---|
 | `MaxAccordionItem.vue` | cabeçalho `.max-accordion-item-header-disabled` | disabled | Mantido: não é conteúdo disponível. |
-| `MaxEmptyDiv.vue` | container e ícone de empty state | decorativo | Mantido: o ícone não transmite informação sem o texto adjacente. |
 | `MaxInputOTP.vue` | célula `:disabled` | disabled | Mantido: campo indisponível. Separador e placeholder usam tokens semânticos. |
 | `MaxSideMenuMobile.vue` | `.mobile-app-version` | metadado não interativo | Mantido: versão é informação auxiliar do shell, fora de controles e fluxos de tarefa. |
 | `themes/params.scss` | `[disabled]` legado | compatibilidade de estado disabled | Mantido para consumidores legados; não se aplica a conteúdo habilitado. |
@@ -17,7 +16,7 @@ permanecem são exceções não informativas ou estados indisponíveis.
 
 Migrações verificadas: placeholders (`MaxBaseInput`, `MaxChips`,
 `MaxInputTextArea`, `MaxInputOTP`) usam `--max-content-placeholder`; sublabels,
-weekday e mensagem de tabela usam `--max-content-secondary`; hover de aba usa
+weekday, mensagem de tabela e `MaxEmptyDiv` usam `--max-content-secondary`; hover de aba usa
 `--background-775`. O teste arquitetural deriva alvos de Tab dos templates e
 os associa ao seletor de foco local ou à rede global canônica; o teste Chromium
 mede Tab, temas claro/escuro, forced-colors e zoom de 200%.

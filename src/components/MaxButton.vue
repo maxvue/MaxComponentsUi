@@ -354,6 +354,10 @@
                 color: var(--max-button-danger-action-content) !important;
             }
 
+            &.max-button-whatsapp {
+                color: var(--max-button-whatsapp-action-content) !important;
+            }
+
             &.max-button-contrast {
                 color: var(--max-button-contrast-action-content) !important;
             }
