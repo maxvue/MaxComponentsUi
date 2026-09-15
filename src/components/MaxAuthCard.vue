@@ -749,6 +749,8 @@
 
         .max-auth-card-inner,
         .max-auth-card {
+            display: grid;
+            place-items: center;
             width: 360px;
             max-width: 90vw;
             background: var(--background-0);
