@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
-import { compileStyle, parse, type ElementNode, type Node, type RootNode } from '@vue/compiler-sfc';
+import { compileStyle, parse } from '@vue/compiler-sfc';
 import postcss from 'postcss';
 import * as sass from 'sass';
 
@@ -10,7 +10,13 @@ const themesDir = path.resolve(__dirname, '../../src/themes');
 const background650Inventory = fs.readFileSync(path.resolve(__dirname, '../../docs/optimize-new/execution-fix5/R16-background-650-inventory.md'), 'utf8');
 const globalCss = sass.compile(path.join(themesDir, 'all.scss')).css;
 
-type FocusTarget = { tag: string; classes: string[]; role?: string; tabindex?: string; source: string };
+type DynamicBinding = 'class' | 'role' | 'tabindex' | 'disabled' | 'spread';
+type FocusTarget = { tag: string; classes: string[]; role?: string; tabindex?: string; source: string; dynamic: DynamicBinding[]; focusBranch: string };
+type BindingAudit = { file: string; source: string; bindings: DynamicBinding[]; classification: string };
+type AstArgument = { type: number; content: string };
+type AstProp = { type: number; name?: string; arg?: AstArgument; value?: { content: string } };
+type AstNode = { type: number; tag?: string; tagType?: number; props?: AstProp[]; children?: AstNode[]; loc: { source: string } };
+type AstRoot = { children: AstNode[] };
 
 function vueFiles(dir: string): string[] {
     return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -20,35 +26,78 @@ function vueFiles(dir: string): string[] {
     });
 }
 
-function attribute(node: ElementNode, name: string) {
-    const prop = node.props.find((candidate) => candidate.type === 6 && candidate.name === name);
+function attribute(node: AstNode, name: string) {
+    const prop = (node.props ?? []).find((candidate: AstProp) => candidate.type === 6 && candidate.name === name);
     return prop?.value?.content;
 }
 
-function targetOf(node: ElementNode): FocusTarget | undefined {
+function dynamicBindings(node: AstNode): DynamicBinding[] {
+    const bindings = new Set<DynamicBinding>();
+    for (const prop of node.props ?? []) {
+        if (prop.type !== 7 || prop.name !== 'bind') continue;
+        if (!prop.arg) {
+            bindings.add('spread');
+            continue;
+        }
+        if (prop.arg.type === 4 && ['class', 'role', 'tabindex', 'disabled'].includes(prop.arg.content)) bindings.add(prop.arg.content as DynamicBinding);
+    }
+    return [...bindings];
+}
+
+function targetOf(node: AstNode): FocusTarget | undefined {
     if (node.tagType !== 0) return undefined;
-    const tag = node.tag.toLowerCase();
+    const tag = node.tag?.toLowerCase() ?? '';
     const role = attribute(node, 'role');
     const tabindex = attribute(node, 'tabindex');
-    const disabled = node.props.some((prop) => prop.type === 6 && prop.name === 'disabled');
+    const disabled = (node.props ?? []).some((prop: AstProp) => prop.type === 6 && prop.name === 'disabled');
+    const dynamic = dynamicBindings(node);
     const native = ['button', 'input', 'select', 'textarea', 'summary', 'iframe', 'audio', 'video'].includes(tag);
     const aria = ['button', 'link', 'menuitem', 'option', 'tab', 'checkbox', 'switch', 'slider', 'combobox', 'listbox'].includes(role ?? '') && tabindex !== undefined;
     const tabbed = tabindex !== undefined && tabindex !== '-1';
-    if (disabled || (!native && !aria && !tabbed)) return undefined;
-    return { tag, classes: (attribute(node, 'class') ?? '').split(/\s+/).filter(Boolean), role, tabindex, source: node.loc.source };
+    // :disabled representa dois ramos: o disabled não participa do Tab, mas o
+    // ramo habilitado precisa de foco. tabindex dinâmico é igualmente tratado
+    // como ramo potencialmente 0; ele não pode desaparecer do inventário.
+    // Um v-bind sem argumento é auditado separadamente, mas não é prova de
+    // tabindex: atribuí-lo como foco criaria falsos alvos para qualquer div.
+    if (disabled || (!native && !aria && !tabbed && !dynamic.includes('tabindex'))) return undefined;
+    const focusBranch = native
+        ? dynamic.includes('disabled') || dynamic.includes('spread') ? 'nativo-habilitado-condicional' : 'nativo-habilitado'
+        : dynamic.includes('tabindex') ? 'tabindex-condicional-focável' : 'tabindex-estático-focável';
+    return { tag, classes: (attribute(node, 'class') ?? '').split(/\s+/).filter(Boolean), role, tabindex, source: node.loc.source, dynamic, focusBranch };
 }
 
-function targetsFromAst(root: RootNode) {
+function targetsFromAst(root: AstRoot) {
     const targets: FocusTarget[] = [];
-    const visit = (node: Node) => {
+    const visit = (node: AstNode) => {
         if (node.type === 1) {
             const target = targetOf(node);
             if (target) targets.push(target);
-            node.children.forEach(visit);
-        } else if ('children' in node && Array.isArray(node.children)) node.children.forEach(visit);
+            (node.children ?? []).forEach(visit);
+        } else if (Array.isArray(node.children)) node.children.forEach(visit);
     };
     root.children.forEach(visit);
     return targets;
+}
+
+function dynamicAudit(root: AstRoot, file: string) {
+    const records: BindingAudit[] = [];
+    const visit = (node: AstNode) => {
+        if (node.type === 1) {
+            const bindings = dynamicBindings(node);
+            if (bindings.length) {
+                const target = targetOf(node);
+                records.push({
+                    file,
+                    source: node.loc.source,
+                    bindings,
+                    classification: target?.focusBranch ?? (node.tagType === 0 ? 'não-focável-em-nenhum-ramo-conhecido' : 'componente-composto-sem-DOM-próprio')
+                });
+            }
+            (node.children ?? []).forEach(visit);
+        } else if (Array.isArray(node.children)) node.children.forEach(visit);
+    };
+    root.children.forEach(visit);
+    return records;
 }
 
 function compiledSelectors(source: string, filename: string) {
@@ -72,15 +121,22 @@ function selectorMatchesTarget(selector: string, target: FocusTarget) {
     if (selector.includes(target.tag)) return true;
     if (target.classes.some((className) => selector.includes(`.${className}`))) return true;
     if (target.role && (selector.includes(`[role='${target.role}']`) || selector.includes(`[role=${target.role}]`))) return true;
-    return target.tabindex !== undefined && selector.includes('[tabindex]');
+    return (target.tabindex !== undefined || target.dynamic.includes('tabindex')) && selector.includes('[tabindex');
 }
 
 describe('R16/F23 — inventário AST de foco e associação com CSS compilado', () => {
-    const inventory = vueFiles(componentsDir).map((file) => {
+    const parsedComponents = vueFiles(componentsDir).map((file) => {
         const source = fs.readFileSync(file, 'utf8');
         const descriptor = parse(source, { filename: file }).descriptor;
-        return { file, targets: descriptor.template ? targetsFromAst(descriptor.template.ast) : [], selectors: compiledSelectors(source, file) };
-    }).filter(({ targets }) => targets.length > 0);
+        const ast = descriptor.template?.ast as unknown as AstRoot | undefined;
+        return {
+            file,
+            targets: ast ? targetsFromAst(ast) : [],
+            bindings: ast ? dynamicAudit(ast, file) : [],
+            selectors: compiledSelectors(source, file)
+        };
+    });
+    const inventory = parsedComponents.filter(({ targets }) => targets.length > 0);
 
     it('deriva alvos do AST de cada template, sem regex nem catálogo manual', () => {
         expect(inventory.length).toBeGreaterThan(20);
@@ -92,6 +148,15 @@ describe('R16/F23 — inventário AST de foco e associação com CSS compilado',
             .filter((target) => ![...selectors, ...globalSelectors].some((selector) => selectorMatchesTarget(selector, target)))
             .map((target) => `${path.relative(componentsDir, file)} :: ${target.source}`));
         expect(unresolved, 'Cada alvo do AST deve possuir seletor :focus-visible local ou canônico global aplicável ao próprio DOM.').toEqual([]);
+    });
+
+    it('classifica cada binding dinâmico relevante e inclui todas as ramificações potencialmente focáveis', () => {
+        const bindings = parsedComponents.flatMap(({ bindings }) => bindings);
+        expect(bindings.length).toBeGreaterThan(100);
+        expect(bindings.every((binding) => binding.classification !== '')).toBe(true);
+        expect(bindings.filter((binding) => binding.bindings.includes('tabindex') || binding.bindings.includes('disabled')).every((binding) =>
+            ['nativo-habilitado-condicional', 'tabindex-condicional-focável', 'componente-composto-sem-DOM-próprio'].includes(binding.classification)
+            || binding.classification === 'não-focável-em-nenhum-ramo-conhecido')).toBe(true);
     });
 
     it('mantém a política global compilada para famílias focáveis sem estilo local', () => {

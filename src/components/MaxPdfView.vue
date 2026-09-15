@@ -82,11 +82,18 @@
     import { useBrowserEventListener } from '../composables/useBrowserEventListener';
     import { maxComponentsPtBR, type MaxPdfViewLabels } from '../locales/pt-br';
     import MaxButton from './MaxButton.vue';
+    import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
     // Async: vue-pdf-embed pesa ~2,6 MB (814 KB gzip) — só carrega quando um PDF é exibido no cliente
     const VuePdfEmbed = defineAsyncComponent((): Promise<any> => {
         if (typeof window === 'undefined') return Promise.resolve({ render: () => null });
-        return import('vue-pdf-embed');
+        return import('vue-pdf-embed/dist/index.essential.mjs').then(({ default: component, GlobalWorkerOptions }) => {
+            // A build essencial mantém o worker em um asset separado, em vez
+            // de embuti-lo no chunk do componente. O carregamento continua
+            // local e não depende de CDN ou de política CSP permissiva.
+            GlobalWorkerOptions.workerSrc ||= pdfWorkerUrl;
+            return component;
+        });
     });
 
     const { width: screen_width, height: screen_height } = useWindowSize();

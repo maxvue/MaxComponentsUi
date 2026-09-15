@@ -5,9 +5,10 @@ import { fileURLToPath } from 'node:url';
 
 const DIST_DIR = resolve(fileURLToPath(new URL('../playground/dist', import.meta.url)));
 const LIMITS = Object.freeze({
-    // Orçamento congelado a partir do maior chunk medido no R19 (2,507 MB / 823 kB gzip).
-    rawBytes: 2_600_000,
-    gzipBytes: 850_000
+    // Menor que o baseline R19 (2.507.440 B / 814.514 B gzip), para impedir
+    // que uma regressão volte a aceitar o bundle original.
+    rawBytes: 2_500_000,
+    gzipBytes: 814_000
 });
 
 function listJavaScriptFiles(directory) {

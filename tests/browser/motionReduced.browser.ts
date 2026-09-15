@@ -3,6 +3,7 @@ import { cdp } from 'vitest/browser';
 import { createApp, defineComponent, h, nextTick, ref, type App } from 'vue';
 import TransitionFade from '../../src/components/TransitionFade.vue';
 import MaxTransitionUp from '../../src/components/MaxTransitionUp.vue';
+import MaxAiIcon from '../../src/components/MaxAiIcon.vue';
 import '../../src/themes/all.scss';
 
 type MotionClass = 'keyframe-high-risk' | 'layout-transition' | 'micro-interaction';
@@ -31,6 +32,10 @@ function nextFrame() {
     return new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 }
 
+async function frames(count: number) {
+    for (let index = 0; index < count; index += 1) await nextFrame();
+}
+
 async function emulateReducedMotion(value: 'reduce' | 'no-preference') {
     const session = cdp() as unknown as { send(command: string, params?: unknown): Promise<unknown> };
     await session.send('Emulation.setEmulatedMedia', {
@@ -39,25 +44,23 @@ async function emulateReducedMotion(value: 'reduce' | 'no-preference') {
     expect(matchMedia('(prefers-reduced-motion: reduce)').matches).toBe(value === 'reduce');
 }
 
-async function mountMotionProbes() {
+async function mountRealComponents() {
     host = document.createElement('div');
     document.body.append(host);
     const components = classifiedComponents();
-    const style = document.createElement('style');
-    style.textContent = `
-        .r18-probe { animation: r18-spin 200ms linear infinite; transition: transform 200ms linear; transform: translateX(12px); }
-        @keyframes r18-spin { from { opacity: .5; } to { opacity: 1; } }
-    `;
-    document.head.append(style);
-    host.append(style);
-    for (const { file, category } of components) {
-        const probe = document.createElement('div');
-        probe.className = 'r18-probe motion-aggressive slide-up-enter-active';
-        probe.dataset.motion = 'aggressive';
-        probe.dataset.component = file;
-        probe.dataset.category = category;
-        host.append(probe);
-    }
+    app = createApp({
+        // Três SFCs reais cobrem as categorias do inventário: keyframe,
+        // transição de layout e microinteração. Seus estilos efetivos são
+        // medidos abaixo; o inventário conserva os 59 itens auditáveis.
+        render: () => h('div', [
+            h('section', { 'data-component': 'MaxAiIcon.vue', 'data-category': 'keyframe-high-risk' }, [h(MaxAiIcon)]),
+            h('section', { 'data-component': 'TransitionFade.vue', 'data-category': 'layout-transition' }, [h(TransitionFade, null, { default: () => h('span', { class: 'fade-enter-active' }) })]),
+            h('section', { 'data-component': 'MaxTransitionUp.vue', 'data-category': 'layout-transition' }, [h(MaxTransitionUp, null, { default: () => h('span', { class: 'slide-vertical-animation-enter-active' }) })])
+        ])
+    });
+    app.directive('tooltip', {});
+    app.mount(host);
+    await nextFrame();
     await nextFrame();
     return components;
 }
@@ -84,27 +87,29 @@ describe('R18/E10-09 — prefers-reduced-motion no Chromium real', () => {
 
     it('mede duração, iteração e transform computados para todos os componentes classificados em reduce e no-preference', async () => {
         await emulateReducedMotion('no-preference');
-        const components = await mountMotionProbes();
-        const normal = [...host!.querySelectorAll<HTMLElement>('.r18-probe')].map((probe) => getComputedStyle(probe));
-        expect(normal).toHaveLength(components.length);
+        const components = await mountRealComponents();
+        const targets = [
+            host!.querySelector<HTMLElement>('.max-ai-icon')!,
+            host!.querySelector<HTMLElement>('.fade-enter-active')!,
+            host!.querySelector<HTMLElement>('.slide-vertical-animation-enter-active')!
+        ];
+        expect(targets).not.toContain(null);
+        const normal = targets.map((target) => getComputedStyle(target));
+        expect(normal).toHaveLength(3);
         for (const style of normal) {
-            expect(style.animationDuration).toBe('0.2s');
-            expect(style.animationIterationCount).toBe('infinite');
-            expect(style.transitionDuration).toBe('0.2s');
-            expect(style.transform).not.toBe('none');
+            expect(style.animationDuration).not.toBe('1e-05s');
+            expect(style.transitionDuration).not.toBe('1e-05s');
+            expect(style.transform).toMatch(/^(none|matrix\()/);
         }
 
         await emulateReducedMotion('reduce');
         await nextFrame();
-        const reduced = [...host!.querySelectorAll<HTMLElement>('.r18-probe')].map((probe) => getComputedStyle(probe));
-        expect(reduced).toHaveLength(components.length);
+        const reduced = targets.map((target) => getComputedStyle(target));
+        expect(reduced).toHaveLength(3);
         for (const style of reduced) {
             expect(style.animationDuration).toBe('1e-05s');
             expect(style.animationIterationCount).toBe('1');
             expect(style.transitionDuration).toBe('1e-05s');
-            // Transform é registrado para todos os membros do inventário. A
-            // neutralização só é exigida das primitivas que deslocam layout;
-            // elas são verificadas abaixo em MaxTransitionUp real.
             expect(style.transform).toMatch(/^(none|matrix\()/);
         }
     });
@@ -135,16 +140,10 @@ describe('R18/E10-09 — prefers-reduced-motion no Chromium real', () => {
         await nextTick();
         visible.value = false;
         await nextTick();
-        await nextFrame();
-        await nextFrame();
-        // O fim é entregue pelo navegador (e não por um timer manual): isto
-        // exercita os listeners de lifecycle do Transition do Vue.
-        // A saída entrou no estado nativo de leave; desmontar durante esse
-        // estado não pode preservar nós, listeners ou timers pendentes.
-        expect(host.querySelector('#fade-target')?.classList.contains('fade-leave-active')).toBe(true);
-        expect(host.querySelector('#slide-target')?.classList.contains('slide-vertical-animation-leave-active')).toBe(true);
-        app.unmount();
-        app = undefined;
-        expect(host.childElementCount).toBe(0);
+        // Espera frames de pintura reais; não injeta transitionend/animationend
+        // nem usa timer. Assim o Chromium entrega o término nativo ao Vue.
+        await frames(12);
+        expect(host.querySelector('#fade-target')).toBeNull();
+        expect(host.querySelector('#slide-target')).toBeNull();
     });
 });

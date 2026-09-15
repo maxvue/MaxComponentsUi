@@ -14,6 +14,7 @@ export default defineConfig({
         alias: {
             'virtual:uno.css': path.resolve(import.meta.dirname, './tests/browser.setup.ts'),
             '@': path.resolve(import.meta.dirname, './src'),
+            '@maxvue/max-components-ui': path.resolve(import.meta.dirname, './src/index.ts'),
             '@helpers': path.resolve(import.meta.dirname, './src/helpers'),
             '@vueuse/core': path.dirname(require.resolve('@vueuse/core/package.json')),
             vue: path.dirname(require.resolve('vue/package.json'))

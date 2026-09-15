@@ -4,7 +4,7 @@
 - Agente: `/root/imp5_r16`
 - Parent: `/root`
 - Início: `2026-09-15T14:58:00-03:00`
-- Fim: `2026-09-15T15:18:00-03:00` (segundo reparo pós-REV5-R16)
+- Fim: `2026-09-15T15:25:00-03:00` (quarto reparo pós-REV5-R16)
 - HEAD auditado: `288db2242e066d97011664e994b3bdff61c80481`
 - Status: **reparo pós-REV5-R16 concluído — aguarda revalidação pelo mesmo REV5-R16**
 
@@ -35,6 +35,36 @@ exceções restantes (disabled, decorativas, compatibilidade e primitivas) estã
 em `R16-background-650-inventory.md`.
 
 ## Segundo reparo após refutação REV5-R16
+
+## Terceiro reparo após refutação REV5-R16
+
+## Quarto reparo após refutação REV5-R16
+
+Os tipos AST importados de `@vue/compiler-sfc` não fazem parte da sua API
+pública nesta versão. O teste agora usa tipos locais, mínimos e estritos para
+os nós/propriedades que consome; `vue-tsc` não reporta erros neste arquivo.
+Além disso, a auditoria de bindings passou a ser construída a partir de
+**todos** os SFCs parseados antes do filtro de alvos. Logo, um SFC sem alvo
+estático ainda precisa classificar cada binding relevante como alvo condicional,
+não focável em ramos conhecidos ou componente composto sem DOM próprio.
+
+O teste de bindings é executado contra essa população completa; não descarta
+mais os bindings dos SFCs que não entraram na lista de alvos estáticos.
+
+Bindings `:class`, `:role`, `:tabindex`, `:disabled` e `v-bind` sem argumento
+passaram a integrar uma auditoria própria da AST. `:disabled` produz o ramo
+nativo habilitado (focável) e o disabled (não tabulável); `:tabindex` produz o
+ramo condicional focável, associado a `[tabindex]:focus-visible`; `:class` e
+`:role` são registrados sem esconder a associação por tag/role global. Spreads
+não são promovidos indevidamente a foco — isso criaria falso positivo para
+qualquer `div` — e são classificados explicitamente como não focáveis, salvo
+quando o elemento nativo já possui foco inerente. Componentes compostos são
+classificados como sem DOM próprio, pois seu alvo é auditado no SFC que o
+renderiza.
+
+O teste exige mais de 100 bindings dinâmicos classificados e verifica que todo
+ramo condicional de `tabindex`/`disabled` se torna alvo focável ou possui uma
+justificativa explícita; não há curto-circuito silencioso.
 
 O inventário arquitetural anterior ainda extraía templates com regex. Ele foi
 substituído por `@vue/compiler-sfc`: percorre a AST de cada template e guarda o

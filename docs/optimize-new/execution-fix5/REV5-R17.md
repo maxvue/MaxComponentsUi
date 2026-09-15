@@ -4,8 +4,9 @@
 
 - Papel: `REV5-R17` (refutador independente de E10-02).
 - Agente: `/root/rev5_r17`; parent: `/root`.
-- Início: `2026-09-15T15:07:00-03:00`; fim: `2026-09-15T15:10:00-03:00`.
-- HEAD auditado: `107cef7a` (`fix: fortalece contraste e foco visível`).
+- Início: `2026-09-15T15:07:00-03:00`; primeira refutação: `2026-09-15T15:10:00-03:00`; revalidação: `2026-09-15T15:14:00-03:00`.
+- HEAD inicialmente auditado: `107cef7a`; HEAD de revalidação: `519c5000`
+  (`fix: valida contraste e foco por componentes reais`).
 - Referência adversarial: `aac16bca`.
 - Manifesto: somente este relatório e a linha `REV5-R17` em
   `MATRIZ_ORQUESTRACAO.md` foram escritos. Produção e testes foram somente
@@ -25,7 +26,7 @@ compilado, reprovaria a referência por cor não resolvida; a referência també
 não contém `VARIANTES_TRANSPARENTES` nem `validarMatrizDeVariantes` no teste.
 Essa é uma reprodução adversarial suficiente do E10-02.
 
-## Execução independente no HEAD
+## Revalidação independente no HEAD corrigido
 
 Comando:
 
@@ -38,7 +39,7 @@ Saída relevante:
 ```text
 Test Files  1 passed (1)
 Tests  49 passed (49)
-Duration  1.02s
+Duration  1.05s
 ```
 
 O mesmo teste compila `tokens.scss` e o SCSS extraído de `MaxButton.vue`.
@@ -51,25 +52,23 @@ cores hardcoded no oráculo.
 
 | Família | Severidades | Estados verificados pelo gate | Resultado |
 |---|---:|---|---|
-| solid | 9 | repouso, hover | calculado e aprovado |
+| solid | 9 | repouso, hover, focus-visible, active, disabled | calculado/estrutural e aprovado |
 | outlined | 9 | repouso, hover, focus-visible, active, disabled | calculado/estrutural e aprovado |
 | text | 9 | repouso, hover, focus-visible, active, disabled | calculado/estrutural e aprovado |
 | link | 9 | repouso, hover, focus-visible, active, disabled | calculado/estrutural e aprovado |
 | dashed | 9 | repouso, hover, focus-visible, active, disabled | calculado/estrutural e aprovado |
 
-## Veredito: REJEITADO
+## Veredito: ACEITO após revalidação
 
-O bloco não satisfaz a matriz completa exigida. Para botões `solid`, o gate
-somente enumera `repouso` e `hover` em `paresSolidosDoCssCompilado`; não
-verifica `focus-visible`, `active` ou `disabled`. Nas variantes transparentes,
-`active` não é extraído de regra CSS: recebe o mesmo cálculo de repouso, sem
-provar que o estado existe ou que seu estilo computado preserva contraste.
-Além disso, para `dashed/whatsapp` o seletor lido cai deliberadamente em
-`.max-button.max-button-dashed`, isto é, a cor específica de severidade não é
-auditada. O teste focal passar não fecha E10-02.
+O reparo adicionou `validarEstadosSolidos()`, que verifica, para todas as nove
+severidades e ambos os temas, o anel de `focus-visible`, a cascata de `active`
+e o contrato de opacidade/herança de `disabled`. A ausência de regra `:active`
+é agora uma condição explicitamente validada como herança do CSS de repouso,
+não uma lacuna silenciosa. O estado ativo de `dashed` extrai e exige fundo
+transparente, e `MaxButton.vue` contém a regra específica de
+`dashed/whatsapp`, consumida pelo seletor individual da matriz.
 
-Correção necessária: derivar e verificar regras computadas para todos os cinco
-estados de todas as famílias (incluindo solid), declarar explicitamente o
-tratamento de active/disabled quando herdam estilo e fazer cada combinação
-`dashed`/severidade apontar para seu seletor efetivo. Depois, repetir a mutação
-contra esse mesmo gate expandido.
+A mutação em memória de `--max-button-primary-action-content` continua
+quebrando a mesma `executarGateDeContraste()` que aprova o CSS real. Assim, o
+caso adversarial falha em `aac16bca`, o HEAD reparado passa e E10-02 recebe
+aceite integral.
