@@ -44,9 +44,8 @@ function getTransitiveChunkGraph(entryFile: string): Set<string> {
 
         const content = fs.readFileSync(path.join(DIST_DIR, file), 'utf-8');
         const imports = content.matchAll(/(?:import\(|from\s*)["']\.\/([^"']+\.js)["']/g);
-        for (const [, dependency] of imports) {
-            if (!visited.has(dependency)) pending.push(dependency);
-        }
+        for (const [, dependency] of imports) if (!visited.has(dependency)) pending.push(dependency);
+
     }
 
     return visited;
@@ -269,11 +268,8 @@ describe('R21 / F27: Otimização de Assets SVG, Segurança e Isolamento Modular
 
         it('cada bandeira de cartão possui seu próprio chunk isolado no dist', () => {
             expect(fs.existsSync(DIST_DIR), 'O teste de distribuição exige dist gerado por build limpo').toBe(true);
-            const distFiles = fs.readdirSync(DIST_DIR);
 
-            for (const brand of BRAND_ASSET_PREFIXES) {
-                expect(fs.existsSync(path.join(DIST_DIR, 'assets/credit-card', `${brand}.svg`)), `Asset publicado para ${brand} deve existir no dist`).toBe(true);
-            }
+            for (const brand of BRAND_ASSET_PREFIXES) expect(fs.existsSync(path.join(DIST_DIR, 'assets/credit-card', `${brand}.svg`)), `Asset publicado para ${brand} deve existir no dist`).toBe(true);
         });
 
         it('o grafo transitivo do componente MaxCreditCard não alcança bandeiras não solicitadas', () => {

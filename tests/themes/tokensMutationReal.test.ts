@@ -164,49 +164,47 @@ const ESTADOS_VARIANTE = ['repouso', 'hover', 'focus-visible', 'active', 'disabl
  */
 function validarMatrizDeVariantes(cssTokens: string, escopo: Record<string, string>, modo: 'light' | 'dark'): void {
     const superficie = resolverCssVar('var(--background-0, #ffffff)', escopo);
-    for (const variante of VARIANTES_TRANSPARENTES) {
-        for (const [severidade] of SEVERIDADES_SOLIDAS) {
-            const classe = severidade === 'primary' ? '' : `.max-button-${severidade}`;
-            const seletor = `.max-button.max-button-${variante}${classe}`;
-            const seletorDeCor = variante === 'dashed' && severidade !== 'primary'
-                ? seletor
-                : variante === 'dashed'
-                    ? '.max-button.max-button-dashed'
-                    : seletor;
-            const texto = resolverCssVar(extrairDeclaracao(CSS_MAX_BUTTON, seletorDeCor, 'color'), escopo);
+    for (const variante of VARIANTES_TRANSPARENTES) for (const [severidade] of SEVERIDADES_SOLIDAS) {
+        const classe = severidade === 'primary' ? '' : `.max-button-${severidade}`;
+        const seletor = `.max-button.max-button-${variante}${classe}`;
+        const seletorDeCor = variante === 'dashed' && severidade !== 'primary'
+            ? seletor
+            : variante === 'dashed'
+                ? '.max-button.max-button-dashed'
+                : seletor;
+        const texto = resolverCssVar(extrairDeclaracao(CSS_MAX_BUTTON, seletorDeCor, 'color'), escopo);
 
-            for (const estado of ESTADOS_VARIANTE) {
-                if (estado === 'disabled') {
-                    const blocoDisabled = /\.max-button:disabled\s*\{([^}]*)\}/.exec(CSS_MAX_BUTTON)?.[1] ?? '';
-                    // A ausência de `color` é esperada: disabled herda a cor e reduz opacidade.
-                    expect(blocoDisabled, `${modo}/${variante}/${severidade}/disabled deve reduzir opacidade`).toMatch(/opacity:\s*0\.6/);
-                    expect(blocoDisabled, `${modo}/${variante}/${severidade}/disabled não deve substituir color`).not.toMatch(/(?:^|;)\s*color:/);
-                    continue;
-                }
-
-                if (estado === 'focus-visible') {
-                    const anel = resolverCssVar(escopo['--max-focus-ring-color'] ?? '', escopo);
-                    expect(anel, `${modo}/${variante}/${severidade}/focus: anel deve resolver`).toMatch(/^#[0-9a-fA-F]{6}$/);
-                    expect(razaoContraste(anel, superficie), `${modo}/${variante}/${severidade}/focus: contraste do anel insuficiente`).toBeGreaterThanOrEqual(3);
-                    continue;
-                }
-
-                if (estado === 'active' && variante === 'dashed') {
-                    expect(
-                        extrairDeclaracao(CSS_MAX_BUTTON, '.max-button.max-button-dashed:active', 'background'),
-                        `${modo}/dashed/${severidade}/active deve preservar fundo transparente`
-                    ).toMatch(/^transparent/);
-                }
-
-                expect(texto, `${modo}/${variante}/${severidade}/${estado}: texto deve resolver`).toMatch(/^#[0-9a-fA-F]{6}$/);
-                expect(superficie, `${modo}/${variante}/${severidade}/${estado}: superfície deve resolver`).toMatch(/^#[0-9a-fA-F]{6}$/);
-                const fundo = estado === 'hover' && (variante === 'outlined' || variante === 'text')
-                    ? misturarSobreSuperficie(texto, superficie, 0.1)
-                    : superficie;
-                expect(razaoContraste(texto, fundo), `${modo}/${variante}/${severidade}/${estado}: contraste insuficiente`).toBeGreaterThanOrEqual(4.5);
+        for (const estado of ESTADOS_VARIANTE) {
+            if (estado === 'disabled') {
+                const blocoDisabled = /\.max-button:disabled\s*\{([^}]*)\}/.exec(CSS_MAX_BUTTON)?.[1] ?? '';
+                // A ausência de `color` é esperada: disabled herda a cor e reduz opacidade.
+                expect(blocoDisabled, `${modo}/${variante}/${severidade}/disabled deve reduzir opacidade`).toMatch(/opacity:\s*0\.6/);
+                expect(blocoDisabled, `${modo}/${variante}/${severidade}/disabled não deve substituir color`).not.toMatch(/(?:^|;)\s*color:/);
+                continue;
             }
+
+            if (estado === 'focus-visible') {
+                const anel = resolverCssVar(escopo['--max-focus-ring-color'] ?? '', escopo);
+                expect(anel, `${modo}/${variante}/${severidade}/focus: anel deve resolver`).toMatch(/^#[0-9a-fA-F]{6}$/);
+                expect(razaoContraste(anel, superficie), `${modo}/${variante}/${severidade}/focus: contraste do anel insuficiente`).toBeGreaterThanOrEqual(3);
+                continue;
+            }
+
+            if (estado === 'active' && variante === 'dashed') expect(
+                extrairDeclaracao(CSS_MAX_BUTTON, '.max-button.max-button-dashed:active', 'background'),
+                `${modo}/dashed/${severidade}/active deve preservar fundo transparente`
+            ).toMatch(/^transparent/);
+
+
+            expect(texto, `${modo}/${variante}/${severidade}/${estado}: texto deve resolver`).toMatch(/^#[0-9a-fA-F]{6}$/);
+            expect(superficie, `${modo}/${variante}/${severidade}/${estado}: superfície deve resolver`).toMatch(/^#[0-9a-fA-F]{6}$/);
+            const fundo = estado === 'hover' && (variante === 'outlined' || variante === 'text')
+                ? misturarSobreSuperficie(texto, superficie, 0.1)
+                : superficie;
+            expect(razaoContraste(texto, fundo), `${modo}/${variante}/${severidade}/${estado}: contraste insuficiente`).toBeGreaterThanOrEqual(4.5);
         }
     }
+
 }
 
 /** Estados que herdam a cor/fundo sólido precisam continuar no gate: a

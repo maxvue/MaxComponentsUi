@@ -72,6 +72,11 @@ async function nextFrame(): Promise<void> {
     await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 }
 
+function unmountCurrentApp(currentApp: App | null, currentHost: HTMLElement | null): void {
+    currentApp?.unmount();
+    currentHost?.remove();
+}
+
 async function mountNativeForm(disabled = false) {
     const modelValue = ref('');
     let submitCount = 0;
@@ -132,8 +137,7 @@ async function mountFamily(family: BrowserFamily, disabled = false) {
 }
 
 afterEach(() => {
-    app?.unmount();
-    host?.remove();
+    unmountCurrentApp(app, host);
     app = null;
     host = null;
 });
@@ -206,8 +210,7 @@ describe('InputBase no Chromium (R04 / E03-02)', () => {
                 expect(form.checkValidity(), `${family.name}: required é validável pelo browser`).toBe(true);
             }
 
-            app?.unmount();
-            host?.remove();
+            unmountCurrentApp(app, host);
             app = null;
             host = null;
 
@@ -220,8 +223,7 @@ describe('InputBase no Chromium (R04 / E03-02)', () => {
             const disabledForm = host!.querySelector('form')!;
             expect(new FormData(disabledForm).has(`field-${family.name}`), `${family.name}: disabled é excluído nativamente do FormData`).toBe(false);
 
-            app?.unmount();
-            host?.remove();
+            unmountCurrentApp(app, host);
             app = null;
             host = null;
         }
@@ -257,8 +259,7 @@ describe('InputBase no Chromium (R04 / E03-02)', () => {
         await nextFrame();
         expect(state.getSubmitCount()).toBe(1);
 
-        app?.unmount();
-        host?.remove();
+        unmountCurrentApp(app, host);
         app = null;
         host = null;
 

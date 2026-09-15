@@ -8,7 +8,7 @@ const app = createApp({
     render: () => h('form', { id: 'r04-autofill-form' }, [
         h(MaxInputText, {
             modelValue: email.value,
-            'onUpdate:modelValue': (value: string) => { email.value = value; },
+            'onUpdate:modelValue': (value: string | number | undefined) => { email.value = String(value ?? ''); },
             label: 'E-mail profissional',
             name: 'email',
             autocomplete: 'email',

@@ -169,34 +169,28 @@
         const role = props.role as unknown;
         const itemRole = props.itemRole as unknown;
 
-        if (role !== undefined && role !== 'listbox' && role !== 'list') {
-            throw new TypeError('[MaxBaseVirtualScroller] role deve ser "listbox" ou "list".');
-        }
+        if (role !== undefined && role !== 'listbox' && role !== 'list') throw new TypeError('[MaxBaseVirtualScroller] role deve ser "listbox" ou "list".');
 
-        if (itemRole !== undefined && itemRole !== 'option' && itemRole !== 'listitem') {
-            throw new TypeError('[MaxBaseVirtualScroller] itemRole deve ser "option" ou "listitem".');
-        }
+
+        if (itemRole !== undefined && itemRole !== 'option' && itemRole !== 'listitem') throw new TypeError('[MaxBaseVirtualScroller] itemRole deve ser "option" ou "listitem".');
+
 
         if (role === 'listbox') {
-            if (!props.ariaLabel?.trim() && !props.ariaLabelledby?.trim()) {
-                throw new TypeError('[MaxBaseVirtualScroller] O papel "listbox" exige um nome acessível via aria-label ou aria-labelledby.');
-            }
-            if (itemRole !== undefined && itemRole !== 'option') {
-                throw new TypeError('[MaxBaseVirtualScroller] role="listbox" só aceita itemRole="option".');
-            }
+            if (!props.ariaLabel?.trim() && !props.ariaLabelledby?.trim()) throw new TypeError('[MaxBaseVirtualScroller] O papel "listbox" exige um nome acessível via aria-label ou aria-labelledby.');
+
+            if (itemRole !== undefined && itemRole !== 'option') throw new TypeError('[MaxBaseVirtualScroller] role="listbox" só aceita itemRole="option".');
+
             return;
         }
 
         if (role === 'list') {
-            if (itemRole !== undefined && itemRole !== 'listitem') {
-                throw new TypeError('[MaxBaseVirtualScroller] role="list" só aceita itemRole="listitem".');
-            }
+            if (itemRole !== undefined && itemRole !== 'listitem') throw new TypeError('[MaxBaseVirtualScroller] role="list" só aceita itemRole="listitem".');
+
             return;
         }
 
-        if (itemRole !== undefined) {
-            throw new TypeError('[MaxBaseVirtualScroller] itemRole exige role="listbox" ou role="list" compatível.');
-        }
+        if (itemRole !== undefined) throw new TypeError('[MaxBaseVirtualScroller] itemRole exige role="listbox" ou role="list" compatível.');
+
     };
 
     validateAccessibilityContract();

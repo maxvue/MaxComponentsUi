@@ -80,14 +80,13 @@ describe('R18/E10-09 — prefers-reduced-motion no Chromium real', () => {
         expect(new Set(components.map(({ category }) => category))).toEqual(new Set<MotionClass>([
             'keyframe-high-risk', 'layout-transition', 'micro-interaction'
         ]));
-        for (const { file, source } of components) {
-            expect(source, `${file} não declara política reduced-motion`).toMatch(/prefers-reduced-motion/i);
-        }
+        for (const { file, source } of components) expect(source, `${file} não declara política reduced-motion`).toMatch(/prefers-reduced-motion/i);
+
     });
 
     it('mede duração, iteração e transform computados para todos os componentes classificados em reduce e no-preference', async () => {
         await emulateReducedMotion('no-preference');
-        const components = await mountRealComponents();
+        await mountRealComponents();
         const targets = [
             host!.querySelector<HTMLElement>('.max-ai-icon')!,
             host!.querySelector<HTMLElement>('.fade-enter-active')!,

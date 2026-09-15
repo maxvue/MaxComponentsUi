@@ -46,3 +46,28 @@ saída vazia (sucesso)
 ```
 
 Uma execução integral de `npm run verify` foi iniciada após o `npm ci`: o build limpo passou (`vite ... ✓ built in 12.08s`) e o executor percorreu até `verify:reproducibility`, sem retorno antecipado. A validação final do conjunto completo deve ser repetida na Etapa 15, depois das mudanças dos demais owners, conforme contrato.
+
+## Remediação transversal do gate lint/type-check
+
+No HEAD `515c3d17`, o gate `GATE5-LINT-TSC` apontou falhas independentes de lint e de tipos que impediam a validação final. A resolução de `@maxvue/max-components-ui` no `tsconfig.test.json` agora aponta para `src/index.ts`, como já faz o alias do Vite do playground. Isso faz com que os cenários importados pelo smoke sejam type-checkados contra a API local após o build, sem depender de pacote irmão ou de um `dist` previamente publicado.
+
+Foram eliminados os 11 erros `curly`, os dois avisos de variável não usada, o uso SCSS obsoleto de `clip`, o espaçamento obrigatório antes de comentário SCSS e os quatro erros TypeScript dos testes recentes. Em especial, o teardown da matriz de formulários passa por uma função tipada — evitando o estreitamento incorreto para `never` dentro do loop assíncrono — e o handler de `modelValue` aceita o contrato público `string | number | undefined`.
+
+Comandos de aceite executados nesta rodada:
+
+```text
+$ npm run lint:check
+eslint . && stylelint "src/**/*.{scss,vue}"
+exit 0
+
+$ npm run type-check:test
+vue-tsc -p tsconfig.test.json --noEmit
+exit 0
+
+$ npm run type-check
+vue-tsc --noEmit
+exit 0
+
+$ git diff --check
+saída vazia (sucesso)
+```

@@ -69,7 +69,7 @@ describe('Encadeamento de Foco e Escape em Overlays (Chromium Real)', () => {
                             ref: markdownRef,
                             modelValue: '![Imagem do teste](https://example.test/overlay.png)',
                             label: 'Markdown do teste',
-                            hideTools: ['image', 'file']
+                            hideTools: ['image']
                         }),
                         h('button', { id: 'popover-last-action' }, 'Última ação do Popover')
                     ])

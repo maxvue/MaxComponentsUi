@@ -309,6 +309,7 @@
 
             .code-textarea {
                 flex-grow: 1;
+
                 // InputBase possui regras globais de padding com !important.
                 // Sem a mesma prioridade, o texto começa 10 px acima da calha
                 // numerada e a virtualização perde o alinhamento visual.
