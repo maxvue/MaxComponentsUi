@@ -73,7 +73,7 @@
     "test:coverage": "vitest run --coverage",
     "test:browser": "vitest run --config vitest.browser.config.ts",
     "test:axe": "vitest run --config vitest.browser.config.ts tests/browser/axeCore.axe.browser.ts",
-    "test:benchmark": "npx tsx tests/benchmarks/run-benchmarks.ts",
+    "test:benchmark": "vitest run tests/benchmarks/run-benchmarks.test.ts",
     "verify:reproducibility": "node scripts/verify-reproducibility.mjs"
   },
   "sideEffects": [

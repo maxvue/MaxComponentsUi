@@ -20,6 +20,10 @@ O workflow de CI já consome exclusivamente `npm run verify` após `npm ci`, por
 
 Após a constatação de R08, `axe-core@4.11.0` foi adicionado como dependência de desenvolvimento e ao lockfile. O novo comando `npm run test:axe` executa um cenário Chromium com o motor oficial, verifica zero violações WCAG 2 A/AA em um diálogo nomeado e prova a sensibilidade do gate ao remover o nome de um botão (violação `button-name`). O comando integra o `verify` como etapa separada de `test:browser`; os cenários de componentes de F14/R08 podem reutilizar esse motor sem mocks.
 
+## Integração R23: benchmark pelo runner Vite/Vitest
+
+Foi revisada a alteração de R23 em `test:benchmark`: o comando deixa de usar `tsx` diretamente e passa a executar `vitest run tests/benchmarks/run-benchmarks.test.ts`. Assim o Vite aplica a transformação de SFC Vue antes de carregar `MaxBaseVirtualScroller.vue`, eliminando `ERR_UNKNOWN_FILE_EXTENSION`. A etapa `benchmarks` do gate canônico já chama esse script, portanto não houve lista paralela a alterar. A execução produziu o artefato ignorado `tests/benchmarks/benchmark-results.json` com componente `MaxBaseVirtualScroller` e 12 métricas.
+
 ## Comandos e saída relevante
 
 ```text
