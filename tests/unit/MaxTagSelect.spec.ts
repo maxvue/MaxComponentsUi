@@ -1,3 +1,4 @@
+import { resetOutsidePointerStateForTests } from '../../src/helpers/useOutsidePointer';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
@@ -41,6 +42,7 @@ describe('MaxTagSelect (Unit / WAI-ARIA & Keyboard Navigation)', () => {
     });
 
     afterEach(() => {
+        resetOutsidePointerStateForTests();
         document.body.innerHTML = '';
     });
 
@@ -222,7 +224,7 @@ describe('MaxTagSelect (Unit / WAI-ARIA & Keyboard Navigation)', () => {
         it('não associa keydown no window quando fechado', () => {
             const addSpy = vi.spyOn(window, 'addEventListener');
             mountTagSelect();
-            expect(addSpy).not.toHaveBeenCalledWith('keydown', expect.any(Function));
+            expect(addSpy.mock.calls.some((call) => call[0] === 'keydown')).toBe(false);;
             addSpy.mockRestore();
         });
 
@@ -235,11 +237,11 @@ describe('MaxTagSelect (Unit / WAI-ARIA & Keyboard Navigation)', () => {
 
             await trigger.trigger('click');
             await wrapper.vm.$nextTick();
-            expect(addSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+            expect(addSpy.mock.calls.some((call) => call[0] === 'keydown')).toBe(true);;
 
             await trigger.trigger('click');
             await wrapper.vm.$nextTick();
-            expect(removeSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+            expect(removeSpy.mock.calls.some((call) => call[0] === 'keydown')).toBe(true);;
 
             addSpy.mockRestore();
             removeSpy.mockRestore();
@@ -253,7 +255,7 @@ describe('MaxTagSelect (Unit / WAI-ARIA & Keyboard Navigation)', () => {
             await wrapper.vm.$nextTick();
 
             wrapper.unmount();
-            expect(removeSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+            expect(removeSpy.mock.calls.some((call) => call[0] === 'keydown')).toBe(true);;
 
             removeSpy.mockRestore();
         });

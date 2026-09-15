@@ -138,4 +138,14 @@ describe('MaxButton', () => {
             expect(comIconSize.find('.max-icon-stub').attributes('data-size')).toBe('2.5');
         });
     });
+
+    it('respeita o type="submit" quando passado, permitindo submissão nativa', () => {
+        const wrapper = mountButton({ label: 'Enviar', type: 'submit' });
+        expect(wrapper.find('button').attributes('type')).toBe('submit');
+    });
+
+    it('usa type="button" por padrão caso nada seja passado', () => {
+        const wrapper = mountButton({ label: 'Enviar' });
+        expect(wrapper.find('button').attributes('type')).toBe('button');
+    });
 });

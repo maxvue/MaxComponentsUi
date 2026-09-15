@@ -1,3 +1,4 @@
+import { resetOutsidePointerStateForTests } from '../../src/helpers/useOutsidePointer';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
@@ -32,6 +33,7 @@ describe('MaxTagSelect', () => {
     });
 
     afterEach(() => {
+        resetOutsidePointerStateForTests();
         document.body.innerHTML = '';
     });
 

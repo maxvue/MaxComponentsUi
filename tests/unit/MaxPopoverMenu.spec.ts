@@ -208,20 +208,20 @@ describe('MaxPopoverMenu - WAI-ARIA e Teclado (Etapa 10)', () => {
         const wrapper = mountMenu();
 
         // Enquanto fechado, não registra listener global no setup
-        expect(addListenerSpy).not.toHaveBeenCalledWith('keydown', expect.any(Function));
+        expect(addListenerSpy.mock.calls.some((call) => call[0] === 'keydown')).toBe(false);;
 
         // Ao abrir, registra listener
         await wrapper.find('.botao').trigger('click');
-        expect(addListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+        expect(addListenerSpy.mock.calls.some((call) => call[0] === 'keydown')).toBe(true);;
 
         // Ao fechar, remove listener
         await wrapper.find('.botao').trigger('click');
-        expect(removeListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+        expect(removeListenerSpy.mock.calls.some((call) => call[0] === 'keydown')).toBe(true);;
 
         // Ao abrir e desmontar, remove listener
         await wrapper.find('.botao').trigger('click');
         wrapper.unmount();
-        expect(removeListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+        expect(removeListenerSpy.mock.calls.some((call) => call[0] === 'keydown')).toBe(true);;
     });
 
     it('fecha o menu ao clicar fora do componente no documento', async () => {

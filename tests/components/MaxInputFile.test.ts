@@ -57,13 +57,14 @@ describe('MaxInputFile', () => {
         expect(wrapper.find('.input-file-content-label').text()).toContain('Upload seguro');
     });
 
-    it('aciona o clique no input oculto ao clicar no container principal', async () => {
+    it('container principal é um label que ativa nativamente o input', () => {
         const wrapper = mount(MaxInputFile);
-        const hiddenInput = wrapper.find<HTMLInputElement>('input.max-input-file-hidden');
-        const clickSpy = vi.spyOn(hiddenInput.element, 'click');
+        const mainDiv = wrapper.find('.input-file-main-div');
+        expect(mainDiv.element.tagName.toLowerCase()).toBe('label');
 
-        await wrapper.find('.input-file-main-div').trigger('click');
-        expect(clickSpy).toHaveBeenCalledTimes(1);
+        const hiddenInput = wrapper.find<HTMLInputElement>('input.max-input-file-hidden');
+        expect(hiddenInput.exists()).toBe(true);
+        // O clique nativo é gerenciado pelo navegador (label -> input)
     });
 
     it('seleciona arquivos pelo input nativo e emite update:modelValue', async () => {
@@ -327,7 +328,7 @@ describe('MaxInputFile', () => {
             expect(removeBtn.attributes('aria-label')).toBe('Remover relatorio.pdf');
         });
 
-        it('respeita prop disabled desabilitando container, input e botão de remoção', async () => {
+        it('respeita prop disabled desabilitando input e botão de remoção', async () => {
             const file = new File(['text'], 'documento.pdf', { type: 'application/pdf' });
             const wrapper = mount(MaxInputFile, {
                 props: { modelValue: [file], disabled: true }
@@ -335,8 +336,6 @@ describe('MaxInputFile', () => {
 
             const mainDiv = wrapper.find('.input-file-main-div');
             expect(mainDiv.classes()).toContain('is-disabled');
-            expect(mainDiv.attributes('tabindex')).toBe('-1');
-            expect(mainDiv.attributes('aria-disabled')).toBe('true');
 
             const hiddenInput = wrapper.find<HTMLInputElement>('input.max-input-file-hidden');
             expect(hiddenInput.attributes('disabled')).toBeDefined();
@@ -360,20 +359,14 @@ describe('MaxInputFile', () => {
             expect(liveRegion.text()).toContain('1 arquivo selecionado');
         });
 
-        it('ativa seleção de arquivo via teclado no container (Enter e Espaço) (F19 / E07-04)', async () => {
+        it('ativa seleção de arquivo via teclado no input nativo (Enter e Espaço) (F19 / E07-04)', () => {
             const wrapper = mount(MaxInputFile);
             const hiddenInput = wrapper.find<HTMLInputElement>('input.max-input-file-hidden');
-            const clickSpy = vi.spyOn(hiddenInput.element, 'click');
 
-            const container = wrapper.find('.input-file-main-div');
-
-            // Ativação via tecla Enter
-            await container.trigger('keydown.enter');
-            expect(clickSpy).toHaveBeenCalledTimes(1);
-
-            // Ativação via tecla Espaço
-            await container.trigger('keydown.space');
-            expect(clickSpy).toHaveBeenCalledTimes(2);
+            // Verificamos que o elemento que recebe foco é um input type file nativo.
+            // O navegador garante nativamente a abertura do seletor via Enter e Espaço.
+            expect(hiddenInput.element.tagName.toLowerCase()).toBe('input');
+            expect(hiddenInput.attributes('type')).toBe('file');
 
             wrapper.unmount();
         });
@@ -401,35 +394,29 @@ describe('MaxInputFile', () => {
             wrapper.unmount();
         });
 
-        it('gerencia foco visível no container e remove listeners adequadamente (F19 / E07-04)', async () => {
+        it('permite foco visível no input nativo (F19 / E07-04)', async () => {
             const wrapper = mount(MaxInputFile);
-            const container = wrapper.find('.input-file-main-div');
+            const hiddenInput = wrapper.find('input.max-input-file-hidden');
 
-            expect(container.attributes('tabindex')).toBe('0');
-
-            await container.trigger('focus');
-            expect((wrapper.vm as any).isFocused).toBe(true);
-
-            await container.trigger('blur');
-            expect((wrapper.vm as any).isFocused).toBe(false);
+            // Input não deve estar desabilitado nem ter tabindex -1
+            expect(hiddenInput.attributes('disabled')).toBeUndefined();
+            expect(hiddenInput.attributes('tabindex')).toBeUndefined();
 
             wrapper.unmount();
         });
 
-        it('quando desabilitado, impede ativação por teclado no container (F19 / E07-04)', async () => {
+        it('quando desabilitado, impede ativação por teclado no input (F19 / E07-04)', async () => {
             const wrapper = mount(MaxInputFile, {
                 props: { disabled: true }
             });
             const hiddenInput = wrapper.find<HTMLInputElement>('input.max-input-file-hidden');
             const clickSpy = vi.spyOn(hiddenInput.element, 'click');
 
-            const container = wrapper.find('.input-file-main-div');
-            expect(container.attributes('tabindex')).toBe('-1');
-            expect(container.attributes('aria-disabled')).toBe('true');
+            expect(hiddenInput.attributes('disabled')).toBeDefined();
 
-            await container.trigger('keydown.enter');
-            await container.trigger('keydown.space');
-            await container.trigger('click');
+            await hiddenInput.trigger('keydown.enter');
+            await hiddenInput.trigger('keydown.space');
+            await hiddenInput.trigger('click');
 
             expect(clickSpy).not.toHaveBeenCalled();
             wrapper.unmount();

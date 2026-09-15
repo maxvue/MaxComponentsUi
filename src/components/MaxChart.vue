@@ -3,7 +3,7 @@
         <canvas ref="canvas_ref" :aria-label="effectiveAriaLabel" :role="effectiveAriaLabel ? 'img' : undefined"></canvas>
 
         <!-- Tabela acessível alternativa para navegação por teclado e tecnologias assistivas -->
-        <div v-if="accessibleRows.length > 0" class="max-chart-accessible-table sr-only">
+        <div v-if="accessibleRows.length > 0" class="max-chart-accessible-table sr-only-focusable">
             <table :aria-label="effectiveAriaLabel || 'Tabela de dados do gráfico'">
                 <caption>{{ effectiveAriaLabel || 'Dados do gráfico' }}</caption>
                 <thead>
@@ -204,7 +204,7 @@
             height: 100%;
         }
 
-        .sr-only {
+        .sr-only-focusable {
             position: absolute;
             width: 1px;
             height: 1px;
@@ -214,6 +214,21 @@
             clip-path: inset(50%);
             white-space: nowrap;
             border: 0;
+
+            &:focus-within {
+                position: static;
+                width: auto;
+                height: auto;
+                margin: 0;
+                overflow: visible;
+                clip-path: none;
+                white-space: normal;
+                z-index: 10;
+                background: var(--max-surface-0, #fff);
+                border: 1px solid var(--max-border-color, #ccc);
+                padding: 1rem;
+                border-radius: 4px;
+            }
         }
     }
 </style>

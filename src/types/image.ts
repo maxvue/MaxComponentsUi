@@ -4,9 +4,9 @@ export interface MaxImageEditPayload {
     /** Data URL em base64 da imagem resultante (opcional quando includeDataUrl for false) */
     dataUrl?: string;
     /** Objeto Blob pronto para envio via FormData/API */
-    blob: Blob | null;
+    blob: Blob;
     /** Objeto File gerado pronto para envio multipart/form-data */
-    file: File | null;
+    file: File;
     /** Largura da imagem recortada */
     width: number;
     /** Altura da imagem recortada */

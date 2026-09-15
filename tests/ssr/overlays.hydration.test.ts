@@ -10,6 +10,13 @@ import MaxIcon from '../../src/components/MaxIcon.vue';
 import { useConfirmStore } from '../../src/stores/useConfirm.Store';
 import Tooltip from '../../src/directives/tooltip';
 
+vi.mock('vue-pdf-embed', () => ({
+    default: {
+        name: 'VuePdfEmbed',
+        template: '<div class="vue-pdf-embed-stub"></div>'
+    }
+}));
+
 describe('Overlays - Hidratação no Cliente', () => {
     let container: HTMLDivElement;
     let warnSpy: any;
@@ -18,7 +25,7 @@ describe('Overlays - Hidratação no Cliente', () => {
     beforeEach(() => {
         container = document.createElement('div');
         document.body.appendChild(container);
-        warnSpy = vi.spyOn(console, 'warn');
+        warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
         cleanups = [];
     });
 

@@ -1,25 +1,16 @@
 <template>
-    <div class="scenario-content" data-scenario="inputs-text">
-        <ScenarioCard
-            title="Cenário inputs-text"
-            family="generica"
-            description="Demonstração interativa dos componentes do cenário inputs-text."
-        >
-            <div class="scenario-inner">
-                <p>Cenário interativo para inputs-text</p>
-            </div>
-        </ScenarioCard>
+    <div class="flex flex-col gap-4 p-4">
+        <h2>Inputs Text</h2>
+        <MaxInputText v-model="val" label="Default Input" placeholder="Type here..." />
+        <MaxInputText v-model="val2" label="Error Input" has-error message="This field is required" />
+        <MaxInputText v-model="val3" label="Disabled Input" disabled />
     </div>
 </template>
-
 <script setup lang="ts">
-    import ScenarioCard from '../components/ScenarioCard.vue';
-</script>
+    import { ref } from 'vue';
+    import { MaxInputText } from '../../../src';
 
-<style lang="scss" scoped>
-    .scenario-content {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    }
-</style>
+    const val = ref('');
+    const val2 = ref('');
+    const val3 = ref('disabled value');
+</script>

@@ -821,7 +821,7 @@
                 gap: 0.5rem;
                 cursor: pointer;
                 font-size: 0.82rem;
-                color: var(--background-650);
+                color: var(--background-700);
                 user-select: none;
 
                 input[type='checkbox'] {
@@ -868,10 +868,10 @@
                 align-items: center;
                 margin-top: 1rem;
                 font-size: 0.875rem;
-                color: var(--background-650);
+                color: var(--background-700);
 
                 .register-prompt {
-                    color: var(--background-650);
+                    color: var(--background-700);
                 }
 
                 .max-auth-link {
@@ -883,7 +883,7 @@
                 display: flex;
                 align-items: center;
                 text-align: center;
-                color: var(--background-650);
+                color: var(--background-700);
                 margin: 1.5rem 0 1rem;
                 width: 100%;
 
@@ -897,7 +897,7 @@
                     font-size: 0.7rem;
                     text-transform: uppercase;
                     letter-spacing: 0.05em;
-                    color: var(--background-650);
+                    color: var(--background-700);
                     padding: 0 0.5rem;
                 }
             }
@@ -920,6 +920,17 @@
                 color: var(--background-500, #6b7280);
                 margin-top: 4px;
             }
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        ::before,
+        ::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
         }
     }
 </style>

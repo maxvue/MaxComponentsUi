@@ -51,7 +51,13 @@
                                 </div>
                             </div>
                             <div v-else-if="isButton">
-                                <MaxIconButton :icon="props.i ?? props.icon ?? props.iconLeft" :size="option_selected?.icon_size ?? 1.8" />
+                                <MaxIconButton
+                                    :icon="props.i ?? props.icon ?? props.iconLeft"
+                                    :size="option_selected?.icon_size ?? 1.8"
+                                    :disabled="props.disabled"
+                                    :aria-label="(attrs['aria-label'] as string) ?? (attrs.label as string) ?? 'Selecionar opção'"
+                                    tabindex="-1"
+                                />
                             </div>
                         </slot>
                     </div>
@@ -185,6 +191,7 @@
     import { getColorFromVar, contrastColor, isBlank, watchDebounced } from '@maxvue/max-use';
     import { useActiveOverlayPosition } from '../composables/useActiveOverlayPosition';
     import { getOverlayWidth, getOverlayLeft } from '../helpers/useOverlayWidth';
+    import { useOutsidePointer } from '../helpers/useOutsidePointer';
     import { useVirtualList } from '../composables/useVirtualList';
     import MaxIcon from './MaxIcon.vue';
     import MaxIconButton from './MaxIconButton.vue';
@@ -711,40 +718,13 @@
         }
     };
 
-    const onKeydown = (event: KeyboardEvent) => {
-        if (event.key === 'Escape') {
-            hide();
-            triggerEl.value?.focus();
-        }
-    };
-
-    let outsidePointerDown = false;
-    const onDocPointerDown = (e: MouseEvent | TouchEvent | PointerEvent) => {
-        const target = e.target as Node | null;
-        if (overlayEl.value && !overlayEl.value.contains(target) && triggerEl.value && !triggerEl.value.contains(target)) outsidePointerDown = true;
-        else outsidePointerDown = false;
-
-    };
-
-    const onDocClick = (e: MouseEvent) => {
-        const target = e.target as Node | null;
-        if (outsidePointerDown && overlayEl.value && !overlayEl.value.contains(target) && triggerEl.value && !triggerEl.value.contains(target)) hide();
-
-        outsidePointerDown = false;
-    };
+    useOutsidePointer(isOpen, {
+        elements: () => [triggerEl.value, overlayEl.value],
+        onClose: () => hide(),
+        triggerEl: triggerEl
+    });
 
     watch(isOpen, async (open) => {
-        if (typeof window !== 'undefined') if (open) {
-            window.addEventListener('keydown', onKeydown);
-            document.addEventListener('pointerdown', onDocPointerDown, true);
-            document.addEventListener('click', onDocClick, true);
-        } else {
-            window.removeEventListener('keydown', onKeydown);
-            document.removeEventListener('pointerdown', onDocPointerDown, true);
-            document.removeEventListener('click', onDocClick, true);
-        }
-
-
         if (open) {
             const items = flatSelectableOptions.value;
             const selectedIdx = items.findIndex((opt: any) => isOptionSelected(opt));
@@ -766,13 +746,6 @@
         }
     });
 
-    onBeforeUnmount(() => {
-        if (typeof window !== 'undefined') {
-            window.removeEventListener('keydown', onKeydown);
-            document.removeEventListener('pointerdown', onDocPointerDown, true);
-            document.removeEventListener('click', onDocClick, true);
-        }
-    });
 
     watchDebounced(
         () => props.modelValue,
@@ -814,7 +787,7 @@
 
         .tab-placeholder-select {
             position: absolute;
-            color: var(--background-650);
+            color: var(--background-700);
             font-size: 0.9rem;
             z-index: 1;
             display: grid;
@@ -1131,6 +1104,17 @@
     [transparent] {
         .max-select {
             background-color: transparent !important;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        ::before,
+        ::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
         }
     }
 </style>

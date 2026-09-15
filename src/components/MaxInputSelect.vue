@@ -836,7 +836,7 @@
     .placeholder-select {
         position: absolute;
         padding-left: 7px !important;
-        color: var(--background-650);
+        color: var(--background-700);
         font-size: 0.9rem;
     }
 
@@ -1012,7 +1012,7 @@
 
         .max-select-empty-message {
             padding: 8px 12px;
-            color: var(--background-650);
+            color: var(--background-700);
             font-size: 0.85rem;
 
             &.is-error {
@@ -1141,7 +1141,7 @@
             }
 
             .subLabel {
-                color: var(--background-650);
+                color: var(--background-700);
                 padding-left: 1rem;
                 text-align: right;
                 width: 100%;
@@ -1158,6 +1158,17 @@
                 max-height: 20px;
             }
         }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
     }
 }
 </style>

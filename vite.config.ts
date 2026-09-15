@@ -49,7 +49,15 @@ export default defineConfig({
                 preset: path.resolve(import.meta.dirname, './src/presetMaxUno.ts'),
                 resolver: path.resolve(import.meta.dirname, './src/helpers/MaxComponentsUiResolver.ts'),
                 stores: path.resolve(import.meta.dirname, './src/stores/index.ts'),
-                styles: path.resolve(import.meta.dirname, './src/styles.ts')
+                styles: path.resolve(import.meta.dirname, './src/styles.ts'),
+                ...Object.fromEntries(
+                    fs.readdirSync(path.resolve(import.meta.dirname, './src/components'))
+                        .filter((file) => file.endsWith('.vue'))
+                        .map((file) => [
+                            `components/${file.replace('.vue', '')}`,
+                            path.resolve(import.meta.dirname, `./src/components/${file}`)
+                        ])
+                )
             },
             name: 'MaxComponentsUi',
             fileName: (format, entryName) => `${entryName}.${format === 'es' ? 'es.js' : 'js'}`,

@@ -136,18 +136,11 @@
     const activeImageAlt = ref('');
     const imageZoom = ref(1);
     const imageModalRef = ref<HTMLElement | null>(null);
-    const imageTrap = useFocusTrap(imageModalRef);
+    const imageTrap = useFocusTrap(imageModalRef, { onEscape: () => closeImage() });
 
     const activePdfUrl = ref('');
 
     const scrollLock = useScrollLock(modalId);
-
-    const onImageModalEscape = (event: KeyboardEvent) => {
-        if (event.key === 'Escape' && isImageModalOpen.value && isTop.value) {
-            event.stopPropagation();
-            closeImage();
-        }
-    };
 
     const onImageModalKeydown = (event: KeyboardEvent) => {
         if (!isTop.value) return;
@@ -167,7 +160,7 @@
         modalStore.push(modalId);
         scrollLock.lock();
         imageTrap.activate();
-        document.addEventListener('keydown', onImageModalEscape);
+
     };
 
     const closeImage = () => {
@@ -177,7 +170,7 @@
         modalStore.remove(modalId);
         imageTrap.deactivate();
         scrollLock.unlock();
-        document.removeEventListener('keydown', onImageModalEscape);
+
     };
 
     const zoomInImage = () => {
@@ -420,7 +413,7 @@
     );
 
     onBeforeUnmount(() => {
-        document.removeEventListener('keydown', onImageModalEscape);
+
         if (isImageModalOpen.value) {
             modalStore.remove(modalId);
             imageTrap.deactivate();
@@ -511,7 +504,7 @@
                     > p:first-child:empty::before,
                     &:has(> p:only-child > br:only-child)::before {
                         content: attr(data-placeholder);
-                        color: var(--max-content-placeholder, var(--background-650));
+                        color: var(--max-content-placeholder, var(--background-700));
                         pointer-events: none;
                         position: absolute;
                         float: left;
@@ -588,7 +581,7 @@
                     border-left: 4px solid var(--max-primary-500, #00768E);
                     padding: 4px 12px 4px 16px;
                     margin: 0.75rem 0;
-                    color: var(--max-content-secondary, var(--background-650, #4b5563));
+                    color: var(--max-content-secondary, var(--background-700, #4b5563));
                     font-style: italic;
                     background: var(--background-50, #f9fafb);
                     border-radius: 0 6px 6px 0;
@@ -835,5 +828,16 @@
 .max-fade-enter-from,
 .max-fade-leave-to {
     opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }
 </style>

@@ -90,7 +90,7 @@
         &.max-tab-disabled {
             opacity: 0.5;
             cursor: not-allowed;
-            color: var(--background-650);
+            color: var(--background-700);
         }
     }
 

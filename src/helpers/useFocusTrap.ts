@@ -1,4 +1,9 @@
-import { nextTick, type Ref } from 'vue';
+import { nextTick, type Ref, unref, onBeforeUnmount, getCurrentInstance } from 'vue';
+
+export interface FocusTrapOptions {
+    onEscape?: () => void;
+    escapeDeactivates?: boolean;
+}
 
 export interface FocusTrap {
     activate: () => void;
@@ -6,7 +11,14 @@ export interface FocusTrap {
     onKeydown: (event: KeyboardEvent) => void;
 }
 
-/** Seletor dos elementos que podem receber foco pelo teclado. */
+interface TrapEntry {
+    id: number;
+    el: Ref<HTMLElement | null>;
+    previous: HTMLElement | null;
+    options?: FocusTrapOptions;
+    onKeydown: (event: KeyboardEvent) => void;
+}
+
 const FOCUSABLE = [
     'a[href]',
     'button:not([disabled])',
@@ -16,103 +28,143 @@ const FOCUSABLE = [
     '[tabindex]:not([tabindex="-1"])'
 ].join(',');
 
-/**
- * Mantem o foco do teclado dentro de um container enquanto ele estiver ativo,
- * devolvendo o foco ao elemento de origem quando desativado. Usado pelo
- * MaxDrawer para que a tabulacao nao escape para o conteudo atras da mascara.
- */
-export const useFocusTrap = (el: Ref<HTMLElement | null>): FocusTrap => {
+let nextId = 1;
+const trapStack: TrapEntry[] = [];
+let isGlobalAttached = false;
 
-    /** Elemento que tinha o foco antes de o trap ser ativado. */
-    let previous: HTMLElement | null = null;
+const isBrowser = (): boolean => typeof window !== 'undefined' && typeof document !== 'undefined';
+
+const isVisible = (element: HTMLElement, container: HTMLElement | null): boolean => {
+    if (typeof HTMLElement !== 'undefined' && !(element instanceof HTMLElement)) return false;
+    let curr: HTMLElement | null = element;
+    while (curr && curr !== container) {
+        if (curr.hidden) return false;
+        if (curr.style?.display === 'none') return false;
+        if (curr.style?.visibility === 'hidden') return false;
+        if (curr.getAttribute?.('aria-hidden') === 'true') return false;
+        curr = curr.parentElement;
+    }
+    return true;
+};
+
+const getFocusable = (container: HTMLElement | null): HTMLElement[] => {
+    if (!isBrowser() || !container) return [];
+    return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE)).filter((el) => isVisible(el, container));
+};
+
+const onGlobalKeydown = (event: KeyboardEvent) => {
+    if (!isBrowser() || trapStack.length === 0) return;
+
+    const topTrap = trapStack[trapStack.length - 1];
+    topTrap.onKeydown(event);
+};
+
+const attachGlobal = () => {
+    if (isGlobalAttached || !isBrowser()) return;
+    document.addEventListener('keydown', onGlobalKeydown, true);
+    isGlobalAttached = true;
+};
+
+const detachGlobal = () => {
+    if (!isGlobalAttached || !isBrowser()) return;
+    document.removeEventListener('keydown', onGlobalKeydown, true);
+    isGlobalAttached = false;
+};
+
+export const useFocusTrap = (el: Ref<HTMLElement | null>, options?: FocusTrapOptions): FocusTrap => {
+    const id = nextId++;
     let isActive = false;
 
-    const isBrowser = (): boolean => typeof window !== 'undefined' && typeof document !== 'undefined';
+    const onKeydown = (event: KeyboardEvent) => {
+        if (!isBrowser() || !el.value) return;
 
-    /**
-     * Verifica se o elemento e todos os seus ancestrais ate o container estao visiveis.
-     */
-    const isVisible = (element: HTMLElement): boolean => {
-        if (typeof HTMLElement !== 'undefined' && !(element instanceof HTMLElement)) return false;
-        let curr: HTMLElement | null = element;
-        while (curr && curr !== el.value) {
-            if (curr.hidden) return false;
-            if (curr.style?.display === 'none') return false;
-            if (curr.style?.visibility === 'hidden') return false;
-            if (curr.getAttribute?.('aria-hidden') === 'true') return false;
-            curr = curr.parentElement;
+        if (event.key === 'Escape') {
+            if (options?.onEscape) {
+                event.preventDefault();
+                event.stopPropagation();
+                options.onEscape();
+            }
+            return;
         }
-        return true;
-    };
 
-    const focusable = (): HTMLElement[] => {
-        if (!isBrowser() || !el.value) return [];
-        return Array.from(el.value.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(isVisible);
+        if (event.key === 'Tab') {
+            const container = el.value;
+            const items = getFocusable(container);
+
+            if (!items.length) {
+                event.preventDefault();
+                if (container) {
+                    if (!container.hasAttribute('tabindex')) container.setAttribute('tabindex', '-1');
+                    container.focus();
+                }
+                return;
+            }
+
+            const first = items[0];
+            const last = items[items.length - 1];
+            const target = event.target as HTMLElement | null;
+
+            // Ensure focus is within the trap
+            if (!target || !items.includes(target)) {
+                event.preventDefault();
+                (event.shiftKey ? last : first).focus();
+                return;
+            }
+
+            if (event.shiftKey && target === first) {
+                event.preventDefault();
+                last.focus();
+                return;
+            }
+
+            if (!event.shiftKey && target === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        }
     };
 
     const activate = () => {
         if (!isBrowser() || isActive) return;
         isActive = true;
-        previous = (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement)
+        const previous = (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement)
             ? document.activeElement
             : null;
+
+        trapStack.push({ id, el, previous, options, onKeydown });
+        attachGlobal();
+
         nextTick(() => {
             if (!isBrowser() || !isActive) return;
-            const items = focusable();
+            const items = getFocusable(el.value);
             if (items.length > 0) items[0]?.focus();
             else if (el.value) {
                 if (!el.value.hasAttribute('tabindex')) el.value.setAttribute('tabindex', '-1');
-
                 el.value.focus();
             }
         });
     };
 
     const deactivate = () => {
-        if (!isBrowser() || !isActive) {
-            previous = null;
-            return;
-        }
+        if (!isBrowser() || !isActive) return;
         isActive = false;
-        if (previous?.isConnected) previous.focus();
 
-        previous = null;
+        const idx = trapStack.findIndex((t) => t.id === id);
+        if (idx >= 0) {
+            const entry = trapStack[idx];
+            trapStack.splice(idx, 1);
+            if (entry.previous?.isConnected) entry.previous.focus();
+
+        }
+
+        if (trapStack.length === 0) detachGlobal();
+
     };
 
-    const onKeydown = (event: KeyboardEvent) => {
-        if (!isBrowser() || event.key !== 'Tab') return;
+    if (getCurrentInstance()) onBeforeUnmount(() => {
+        deactivate();
+    });
 
-        const items = focusable();
-        if (!items.length) {
-            event.preventDefault();
-            if (el.value) {
-                if (!el.value.hasAttribute('tabindex')) el.value.setAttribute('tabindex', '-1');
-                el.value.focus();
-            }
-            return;
-        }
-
-        const first = items[0];
-        const last = items[items.length - 1];
-        const target = event.target as HTMLElement | null;
-
-        if (!target || !items.includes(target)) {
-            event.preventDefault();
-            (event.shiftKey ? last : first).focus();
-            return;
-        }
-
-        if (event.shiftKey && target === first) {
-            event.preventDefault();
-            last.focus();
-            return;
-        }
-
-        if (!event.shiftKey && target === last) {
-            event.preventDefault();
-            first.focus();
-        }
-    };
 
     return { activate, deactivate, onKeydown };
 };

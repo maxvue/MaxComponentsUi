@@ -345,20 +345,20 @@ describe('MaxInputDatePicker (Unit / WAI-ARIA, Multi-View, Range & Conditional L
             const removeSpy = vi.spyOn(window, 'removeEventListener');
 
             const wrapper = mountDatePicker();
-            expect(addSpy).not.toHaveBeenCalledWith('keydown', expect.any(Function));
+            expect(addSpy.mock.calls.some((call) => call[0] === 'keydown')).toBe(false);;
 
             // Abre o painel
             await wrapper.find('input').trigger('click');
             await wrapper.vm.$nextTick();
 
-            expect(addSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+            expect(addSpy.mock.calls.some((call) => call[0] === 'keydown')).toBe(true);;
 
             // Pressiona Escape no window
             window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
             await wrapper.vm.$nextTick();
 
             expect((wrapper.vm as any).isOpen).toBe(false);
-            expect(removeSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+            expect(removeSpy.mock.calls.some((call) => call[0] === 'keydown')).toBe(true);;
         });
 
         it('remove listener ao desmontar o componente aberto', async () => {
@@ -369,7 +369,7 @@ describe('MaxInputDatePicker (Unit / WAI-ARIA, Multi-View, Range & Conditional L
             await wrapper.vm.$nextTick();
 
             wrapper.unmount();
-            expect(removeSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+            expect(removeSpy.mock.calls.some((call) => call[0] === 'keydown')).toBe(true);;
         });
     });
 

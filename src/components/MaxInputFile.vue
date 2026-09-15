@@ -1,29 +1,16 @@
 <template>
-    <div
+    <label
         ref="mainDivRef"
         class="input-file-main-div"
         :class="{ 'is-disabled': props.disabled }"
-        :tabindex="props.disabled ? -1 : 0"
-        role="region"
-        aria-label="Área de envio de arquivos"
-        :aria-disabled="props.disabled ? 'true' : undefined"
-        v-bind="attrs"
-        @focus="isFocused = true"
-        @blur="isFocused = false"
-        @click="triggerChoose"
-        @keydown.enter.prevent="triggerChoose"
-        @keydown.space.prevent="triggerChoose"
         @paste="handlePaste"
     >
         <input
             ref="nativeInputRef"
             type="file"
-            class="max-input-file-hidden"
+            class="max-input-file-hidden sr-only"
             multiple
-            tabindex="-1"
-            aria-hidden="true"
             :disabled="props.disabled"
-            @click.stop
             @change="onNativeInputChange"
             @paste="handlePaste"
         />
@@ -90,7 +77,7 @@
                 </div>
             </template>
         </slot>
-    </div>
+    </label>
 </template>
 
 <script setup lang="ts">
@@ -123,7 +110,7 @@
         (e: 'update:modelValue', value: File[]): void;
     }>();
 
-    const mainDivRef = ref<HTMLDivElement | null>(null);
+    const mainDivRef = ref<HTMLLabelElement | null>(null);
     const isFocused = ref(false);
     const nativeInputRef = ref<HTMLInputElement | null>(null);
     const dropZoneRef = ref<HTMLDivElement | null>(null);
@@ -212,12 +199,6 @@
         updateFiles(updated);
     };
 
-    const triggerChoose = (event?: Event) => {
-        if (props.disabled) return;
-        if (event?.target === nativeInputRef.value) return;
-        nativeInputRef.value?.click();
-    };
-
     const onNativeInputChange = (event: Event) => {
         if (props.disabled) return;
         const target = event.target as HTMLInputElement;
@@ -266,7 +247,7 @@
 
 <style lang="scss" scoped>
     .max-input-file-hidden {
-        display: none !important;
+        // Usa sr-only para ocultar visualmente, não display:none
     }
 
     .input-file-main-div {
@@ -278,7 +259,7 @@
         height: 100%;
         cursor: pointer;
 
-        &:focus-visible {
+        &:focus-within {
             outline: none;
             box-shadow: var(--max-focus-ring);
             border-radius: 1rem;
@@ -302,7 +283,7 @@
                     width: 100%;
                     text-align: center;
                     font-size: 0.85rem;
-                    color: var(--background-650);
+                    color: var(--background-700);
                 }
             }
         }

@@ -55,8 +55,6 @@ describe('Performance: Redimensionamento Único do MaxInputTextArea (E11-02)', (
                 // Reseta contadores após mount
                 scrollHeightReads = 0;
 
-                const startTime = performance.now();
-
                 // Simula digitação em todas as instâncias
                 for (let i = 0; i < count; i++) {
                     const el = textareas[i];
@@ -67,8 +65,6 @@ describe('Performance: Redimensionamento Único do MaxInputTextArea (E11-02)', (
                 // Aguarda atualização de layout de todas as instâncias
                 for (let i = 0; i < 3; i++) await wrappers[0].vm.$nextTick();
 
-                const duration = performance.now() - startTime;
-
                 const gcsCalls = gcsSpy.mock.calls.filter(([target]) => textareas.includes(target as HTMLTextAreaElement)).length;
 
                 gcsSpy.mockRestore();
@@ -76,9 +72,6 @@ describe('Performance: Redimensionamento Único do MaxInputTextArea (E11-02)', (
                 // Afirma exatamente 1 leitura de scrollHeight e 1 chamada de getComputedStyle por componente
                 expect(scrollHeightReads).toBe(count);
                 expect(gcsCalls).toBe(count);
-
-                // Benchmark temporal informativo e não-bloqueante para evitar falso-positivo em ambientes CI / CPU compartilhada
-                expect(duration).toBeGreaterThanOrEqual(0);
             });
 
             it(`coalesce múltiplas alterações de propriedades para um único resize por componente (${count} instâncias)`, async () => {

@@ -59,6 +59,7 @@
     import { useFocusTrap } from '../helpers/useFocusTrap';
     import { useScrollLock } from '../helpers/useScrollLock';
     import { useBrowserEventListener } from '../composables/useBrowserEventListener';
+    import { resolveAriaLabelledby } from '../helpers/useAccessibleName';
     import MaxIconButton from './MaxIconButton.vue';
     import MaxButton from './MaxButton.vue';
     import MaxTitle1 from './MaxTitle1.vue';
@@ -380,15 +381,6 @@
 
     const slots = useSlots();
 
-    const isNonEmptyTextInDom = (elementId?: string): boolean => {
-        if (!elementId || typeof document === 'undefined') return false;
-        const target = document.getElementById(elementId);
-        if (!target) return false;
-        if (target.hidden || target.getAttribute('aria-hidden') === 'true') return false;
-        if (target.style?.display === 'none' || target.style?.visibility === 'hidden') return false;
-        const text = (target.innerText || target.textContent || '').trim();
-        return text.length > 0;
-    };
 
     const getTextFromVNodes = (vnodes: any): string => {
         if (!vnodes) return '';
@@ -417,10 +409,8 @@
 
     const computedAriaLabelledby = computed(() => {
         if (props.ariaLabelledby) {
-            const rawId = props.ariaLabelledby.trim();
-            if (!rawId) return undefined;
-            if (typeof document !== 'undefined') return isNonEmptyTextInDom(rawId) ? rawId : undefined;
-            return rawId;
+            const resolved = resolveAriaLabelledby(props.ariaLabelledby);
+            if (resolved) return resolved;
         }
         if (props.noHeader) return undefined;
         if (slots.header) {

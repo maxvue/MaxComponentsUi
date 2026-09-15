@@ -174,18 +174,14 @@ let unhandledWarnings: string[] = [];
 let unhandledErrors: string[] = [];
 
 console.warn = (...args: any[]) => {
-    if (!vi.isMockFunction(console.warn)) {
-        const msg = args.map((a) => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' ');
-        unhandledWarnings.push(msg);
-    }
+    const msg = args.map((a) => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' ');
+    unhandledWarnings.push(msg);
     originalConsoleWarn(...args);
 };
 
 console.error = (...args: any[]) => {
-    if (!vi.isMockFunction(console.error)) {
-        const msg = args.map((a) => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' ');
-        unhandledErrors.push(msg);
-    }
+    const msg = args.map((a) => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' ');
+    unhandledErrors.push(msg);
     originalConsoleError(...args);
 };
 
@@ -197,16 +193,12 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-    const hasWarnSpy = vi.isMockFunction(console.warn);
-    const hasErrorSpy = vi.isMockFunction(console.error);
-
-    const warnings = hasWarnSpy ? [] : [...unhandledWarnings];
-    const errors = hasErrorSpy ? [] : [...unhandledErrors];
+    const warnings = [...unhandledWarnings];
+    const errors = [...unhandledErrors];
 
     unhandledWarnings = [];
     unhandledErrors = [];
 
     if (warnings.length > 0) throw new Error(`[tests/setup] Teste emitiu console.warn inesperado:\n${warnings.join('\n')}`);
-
     if (errors.length > 0) throw new Error(`[tests/setup] Teste emitiu console.error inesperado:\n${errors.join('\n')}`);
 });

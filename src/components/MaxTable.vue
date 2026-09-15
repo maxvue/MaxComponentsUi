@@ -1,7 +1,7 @@
 <template>
     <div class="max-table-main-div" :style="tableStyle">
-        <div class="p-datatable" :class="{ 'p-datatable-scrollable': props.scrollable }">
-            <div class="p-datatable-table-container" :style="scrollContainerStyle">
+        <div class="max-table p-datatable" :class="{ 'p-datatable-scrollable': props.scrollable }">
+            <div class="max-table-container p-datatable-table-container" :style="scrollContainerStyle">
                 <table>
                     <!-- MODO A: TEMPLATE-DRIVEN (Cabeçalho ou Linhas manuais) -->
                     <template v-if="isTemplateDriven">
@@ -12,7 +12,7 @@
                         </thead>
                         <tbody>
                             <tr v-if="props.loading" class="max-table-row-state max-table-loading-row">
-                                <td class="p-datatable-cell state-cell">
+                                <td class="max-table-td p-datatable-cell state-cell">
                                     <slot name="loading">
                                         <div class="max-table-feedback-box">
                                             <div class="max-table-spinner" role="status" aria-label="Carregando"></div>
@@ -22,7 +22,7 @@
                                 </td>
                             </tr>
                             <tr v-else-if="props.empty" class="max-table-row-state max-table-empty-row">
-                                <td class="p-datatable-cell state-cell">
+                                <td class="max-table-td p-datatable-cell state-cell">
                                     <slot name="empty">
                                         <div class="max-table-feedback-box">
                                             <span>{{ props.emptyMessage }}</span>
@@ -32,8 +32,8 @@
                             </tr>
                             <template v-else>
                                 <slot />
-                                <tr v-if="slots.buttons" class="p-column max-table-column-buttons" :style="`width: ${width}px; max-width: ${width}px;`">
-                                    <td class="p-datatable-cell">
+                                <tr v-if="slots.buttons" class="max-table-th max-table-column-buttons p-column" :style="`width: ${width}px; max-width: ${width}px;`">
+                                    <td class="max-table-td p-datatable-cell">
                                         <div class="max-table-buttons" ref="el">
                                             <slot name="buttons" v-bind="{ data: {}, index: 0 }" />
                                         </div>
@@ -64,15 +64,17 @@
                                     :style="getColumnStyle(col)"
                                     :aria-sort="getAriaSort(col)"
                                     @click="onThClick(col, $event)"
+                                    scope="col"
                                 >
                                     <button
                                         v-if="col.sortable"
                                         type="button"
                                         class="max-table-header-button"
                                         @click="onHeaderClick(col)"
+                                        :aria-label="col.header || col.field || 'Ordenar coluna'"
                                     >
-                                        <div class="p-datatable-column-header-content">
-                                            <div class="p-datatable-column-title">
+                                        <div class="max-table-column-header-content p-datatable-column-header-content">
+                                            <div class="max-table-column-title p-datatable-column-title">
                                                 <component v-if="col.headerSlot" :is="col.headerSlot" :column="col" />
                                                 <template v-else>
                                                     <span>{{ col.header }}</span>
@@ -91,8 +93,8 @@
                                             </div>
                                         </div>
                                     </button>
-                                    <div v-else class="p-datatable-column-header-content">
-                                        <div class="p-datatable-column-title">
+                                    <div v-else class="max-table-column-header-content p-datatable-column-header-content">
+                                        <div class="max-table-column-title p-datatable-column-title">
                                             <component v-if="col.headerSlot" :is="col.headerSlot" :column="col" />
                                             <template v-else>
                                                 <span>{{ col.header }}</span>
@@ -101,8 +103,8 @@
                                     </div>
                                 </th>
                                 <th v-if="slots.buttons" class="max-table-th max-table-th-buttons p-column" :style="buttonsColumnStyle">
-                                    <div class="p-datatable-column-header-content">
-                                        <div class="p-datatable-column-title">
+                                    <div class="max-table-column-header-content p-datatable-column-header-content">
+                                        <div class="max-table-column-title p-datatable-column-title">
                                             <span>{{ props.headerButton ?? '' }}</span>
                                         </div>
                                     </div>
@@ -113,7 +115,7 @@
                         <tbody ref="tbodyRef">
                             <!-- 1. Loading (prioridade absoluta) -->
                             <tr v-if="props.loading" class="max-table-row-state max-table-loading-row">
-                                <td :colspan="resolvedColumns.length + (slots.buttons ? 1 : 0)" class="p-datatable-cell state-cell">
+                                <td :colspan="resolvedColumns.length + (slots.buttons ? 1 : 0)" class="max-table-td p-datatable-cell state-cell">
                                     <slot name="loading">
                                         <div class="max-table-feedback-box">
                                             <div class="max-table-spinner" role="status" aria-label="Carregando"></div>
@@ -856,12 +858,12 @@
     border: 1px solid var(--max-table-border-color, var(--background-300)) !important;
     position: relative;
 
-    :deep(.p-datatable) {
+    :deep(.max-table) {
         height: 100%;
         display: flex;
         flex-direction: column;
 
-        .p-datatable-table-container {
+        .max-table-container {
             height: 100%;
             background-color: transparent;
             display: grid;
@@ -920,7 +922,7 @@
                                 }
                             }
 
-                            .p-datatable-column-header-content {
+                            .max-table-column-header-content {
                                 position: relative;
                                 display: grid;
                                 grid-template-columns: 1fr !important;
@@ -928,7 +930,7 @@
                                 place-items: center;
                                 width: 100%;
 
-                                .p-datatable-column-title {
+                                .max-table-column-title {
                                     width: 100%;
                                     height: 100%;
                                     text-align: center;
@@ -999,7 +1001,7 @@
                                     align-items: center;
                                     justify-content: center;
                                     gap: 12px;
-                                    color: var(--background-650);
+                                    color: var(--background-700);
                                     font-size: 0.95rem;
                                     font-weight: 500;
 
@@ -1024,7 +1026,7 @@
                                 align-items: center;
 
                                 .empty-state-box {
-                                    color: var(--background-650);
+                                    color: var(--background-700);
                                     font-style: italic;
                                     text-align: center;
                                 }

@@ -98,6 +98,7 @@
     import { hasContent, toSearchableString, getCachedApiIDB, isBlank, size, isEqual } from '@maxvue/max-use';
     import { useActiveOverlayPosition } from '../composables/useActiveOverlayPosition';
     import { getOverlayWidth, getOverlayLeft } from '../helpers/useOverlayWidth';
+    import { useOutsidePointer } from '../helpers/useOutsidePointer';
     import { useVirtualList } from '../composables/useVirtualList';
     import type { Ref } from 'vue';
     import { ref, computed, watch, nextTick, onBeforeUnmount, useId } from 'vue';
@@ -485,35 +486,10 @@
         if (typeof newVal === 'string') scheduleFetch();
     }, { flush: 'sync' });
 
-    const onGlobalKeydown = (event: KeyboardEvent) => {
-        if (event.key === 'Escape' && isOpen.value) hide();
-    };
-
-    let outsidePointerDown = false;
-    const onDocPointerDown = (e: MouseEvent | TouchEvent | PointerEvent) => {
-        const target = e.target as Node | null;
-        if (overlayEl.value && !overlayEl.value.contains(target) && ac.value && !ac.value.contains(target)) outsidePointerDown = true;
-        else outsidePointerDown = false;
-    };
-
-    const onDocClick = (e: MouseEvent) => {
-        const target = e.target as Node | null;
-        if (outsidePointerDown && overlayEl.value && !overlayEl.value.contains(target) && ac.value && !ac.value.contains(target)) hide();
-
-        outsidePointerDown = false;
-    };
-
-    watch(isOpen, (open) => {
-        if (typeof window === 'undefined') return;
-        if (open) {
-            window.addEventListener('keydown', onGlobalKeydown);
-            document.addEventListener('pointerdown', onDocPointerDown, true);
-            document.addEventListener('click', onDocClick, true);
-        } else {
-            window.removeEventListener('keydown', onGlobalKeydown);
-            document.removeEventListener('pointerdown', onDocPointerDown, true);
-            document.removeEventListener('click', onDocClick, true);
-        }
+    useOutsidePointer(isOpen, {
+        elements: () => [ac.value, overlayEl.value],
+        onClose: () => hide(),
+        triggerEl: inputEl
     });
 
     onBeforeUnmount(() => {
@@ -521,11 +497,7 @@
         abortInFlight();
         requestGeneration++;
 
-        if (typeof window !== 'undefined') {
-            window.removeEventListener('keydown', onGlobalKeydown);
-            document.removeEventListener('pointerdown', onDocPointerDown, true);
-            document.removeEventListener('click', onDocClick, true);
-        }
+
     });
 
     defineExpose({
@@ -580,7 +552,7 @@
     .max-autocomplete-status {
         padding: 12px 16px;
         font-size: 0.875rem;
-        color: var(--background-650, #64748b);
+        color: var(--background-700, #64748b);
         display: flex;
         align-items: center;
         justify-content: center;

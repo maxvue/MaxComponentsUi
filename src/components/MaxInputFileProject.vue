@@ -357,7 +357,7 @@
             place-items: center;
             text-align: center;
             gap: 5px;
-            color: var(--background-650);
+            color: var(--background-700);
             cursor: pointer;
 
             .instruction {
@@ -369,7 +369,7 @@
             }
 
             .icon-div {
-                color: var(--background-650);
+                color: var(--background-700);
             }
         }
 

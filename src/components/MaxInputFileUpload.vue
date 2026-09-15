@@ -545,7 +545,7 @@
                 &[disabled='true'] {
                     .label-file-upload {
                         font-weight: 400;
-                        color: var(--background-650);
+                        color: var(--background-700);
                         cursor: not-allowed;
                     }
                 }
@@ -678,7 +678,7 @@
                 padding: 0 5px;
 
                 .icon-div {
-                    color: var(--background-650) !important;
+                    color: var(--background-700) !important;
                 }
 
                 &:hover {

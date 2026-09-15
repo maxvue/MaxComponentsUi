@@ -5,6 +5,7 @@
         :role="props.role || undefined"
         :aria-label="props.ariaLabel || undefined"
         :aria-labelledby="props.ariaLabelledby || undefined"
+        :aria-activedescendant="validActivedescendant || undefined"
         :style="style"
         @scroll="onScroll"
     >
@@ -47,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, computed } from 'vue';
+    import { ref, computed, watchEffect, onMounted, nextTick } from 'vue';
     import { useVirtualizer } from '@tanstack/vue-virtual';
 
     const props = withDefaults(
@@ -68,6 +69,8 @@
             ariaLabel?: string;
             /** ID do elemento que rotula este container via aria-labelledby */
             ariaLabelledby?: string;
+            /** ID do item atualmente ativo para foco virtual */
+            ariaActivedescendant?: string;
         }>(),
         {
             items: () => [],
@@ -77,7 +80,8 @@
             role: undefined,
             itemRole: undefined,
             ariaLabel: undefined,
-            ariaLabelledby: undefined
+            ariaLabelledby: undefined,
+            ariaActivedescendant: undefined
         }
     );
 
@@ -87,6 +91,7 @@
     }>();
 
     const parentRef = ref<HTMLElement | null>(null);
+    const validActivedescendant = ref<string | null>(null);
 
     const isPositionalRole = computed(() => props.itemRole === 'option' || props.itemRole === 'listitem');
 
@@ -104,6 +109,27 @@
         const range = virtualizer.value.range;
         if (range) emit('scroll-index-change', { first: range.startIndex, last: range.endIndex });
     };
+
+    onMounted(() => {
+        if (props.role === 'listbox' && !props.ariaLabel && !props.ariaLabelledby) console.warn('[MaxBaseVirtualScroller] O papel "listbox" exige um nome acessível via aria-label ou aria-labelledby.');
+
+    });
+
+    watchEffect(() => {
+        if (!props.ariaActivedescendant || !parentRef.value) {
+            validActivedescendant.value = null;
+            return;
+        }
+
+        const activeId = props.ariaActivedescendant;
+        nextTick(() => {
+            if (parentRef.value) {
+                const element = parentRef.value.querySelector(`#${CSS.escape(activeId)}`);
+                validActivedescendant.value = element ? activeId : null;
+            } else validActivedescendant.value = null;
+
+        });
+    });
 
     defineExpose({ scrollToIndex: (i: number) => virtualizer.value.scrollToIndex(i) });
 </script>

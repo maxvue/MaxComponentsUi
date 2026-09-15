@@ -345,7 +345,7 @@
             border: 1px solid transparent;
             border-radius: 4px;
             background: transparent;
-            color: var(--max-content-secondary, var(--background-650, #475569));
+            color: var(--max-content-secondary, var(--background-700, #475569));
             cursor: pointer;
             transition: background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease;
             outline: none;
@@ -398,6 +398,17 @@
                     font-weight: 600;
                 }
             }
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        ::before,
+        ::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
         }
     }
 </style>
