@@ -3,34 +3,13 @@ import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import UnoCSS from 'unocss/vite';
 import dts from 'vite-plugin-dts';
-import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
 import fs from 'node:fs';
-
-let extractedCss = '';
 
 export default defineConfig({
     plugins: [
         vue(),
         UnoCSS({ inspector: false }),
         dts({ rollupTypes: false }),
-        cssInjectedByJsPlugin({
-            jsAssetsFilterFunction: (outputChunk) => {
-                return outputChunk.fileName === 'index.es.js';
-            },
-            preRenderCSSCode: (cssCode) => {
-                extractedCss = cssCode;
-                return cssCode;
-            }
-        }),
-        {
-            name: 'save-standalone-css',
-            closeBundle() {
-                if (extractedCss) {
-                    const distStyle = path.resolve(import.meta.dirname, 'dist/style.css');
-                    fs.writeFileSync(distStyle, extractedCss, 'utf-8');
-                }
-            }
-        },
         {
             name: 'copy-themes',
             closeBundle() {

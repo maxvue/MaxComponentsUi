@@ -24,7 +24,23 @@ const projectRoot = process.cwd();
 console.log('Diretório do projeto:', projectRoot);
 
 let tempDir;
+let packDir;
 let tarballPath;
+
+const CHUNK_WARNING = /(?:Some chunks are larger than|chunk size limit|chunk.*(?:warning|warn))/i;
+
+function runWithoutChunkWarnings(command, options) {
+    try {
+        const output = execSync(command, { ...options, encoding: 'utf-8', stdio: 'pipe' });
+        if (CHUNK_WARNING.test(output)) throw new Error(`Warning de chunk tratado como falha:\n${output}`);
+        if (output.trim()) console.log(output.trim());
+        return output;
+    } catch (error) {
+        const output = `${error.stdout?.toString() ?? ''}\n${error.stderr?.toString() ?? ''}`;
+        if (CHUNK_WARNING.test(output)) throw new Error(`Warning de chunk tratado como falha:\n${output}`);
+        throw error;
+    }
+}
 
 // ───── Versões compatíveis com pinia@^4.0.2 (que requer vue@^3.5.11) ─────
 const VUE_VERSION = '^3.5.11';
@@ -41,9 +57,13 @@ try {
         execSync('npm run build', { cwd: projectRoot, stdio: 'inherit' });
     }
 
-    const packOutput = execSync('npm pack', { cwd: projectRoot, encoding: 'utf-8' });
-    const tarballName = packOutput.trim().split('\n').pop().trim();
-    tarballPath = join(projectRoot, tarballName);
+    // O destino exclusivo elimina a colisão do nome fixo do tarball em execuções paralelas.
+    packDir = mkdtempSync(join(tmpdir(), 'max-components-pack-'));
+    const packOutput = execSync(`npm pack --json --pack-destination "${packDir}"`, { cwd: projectRoot, encoding: 'utf-8' });
+    const packInfo = JSON.parse(packOutput);
+    const packageInfo = Array.isArray(packInfo) ? packInfo[0] : Object.values(packInfo)[0];
+    const { filename: tarballName } = packageInfo;
+    tarballPath = join(packDir, tarballName);
     console.log('Tarball criado:', tarballPath);
 
     tempDir = mkdtempSync(join(tmpdir(), 'max-components-test-'));
@@ -142,6 +162,13 @@ try {
             import { createApp } from 'vue';
             import { MaxButton } from '@maxvue/max-components-ui';
             import granularBtn from '@maxvue/max-components-ui/components/MaxButton';
+            import '@maxvue/max-components-ui/style.css';
+            import '@maxvue/max-components-ui/themes/all.scss';
+            import '@maxvue/max-components-ui/themes/app.scss';
+            import '@maxvue/max-components-ui/themes/colors.scss';
+            import '@maxvue/max-components-ui/themes/font.scss';
+            import '@maxvue/max-components-ui/themes/params.scss';
+            import '@maxvue/max-components-ui/themes/tokens.scss';
 
             console.log('Vite import ok', MaxButton, granularBtn);
         `);
@@ -154,7 +181,7 @@ try {
                 },
             };
         `);
-        execSync('npx vite build', { cwd: dir, stdio: 'inherit' });
+        runWithoutChunkWarnings('npx vite build', { cwd: dir });
     });
 
     // ─── Cenário 5: SSR Consumer ────────────────────────────────────────────
@@ -183,16 +210,10 @@ try {
                 template: \`<MaxButton>Test</MaxButton>\`,
             });
 
-            renderToString(app).then(html => {
-                if (!html.includes('button')) {
-                    throw new Error('SSR: renderização falhou — botão não encontrado no HTML.');
-                }
-                console.log('SSR renderizou:', html.slice(0, 80));
-                console.log('SSR OK');
-            }).catch(err => {
-                console.error('Erro SSR:', err);
-                process.exit(1);
-            });
+            const html = await renderToString(app);
+            if (!html.includes('button')) throw new Error('SSR: renderização falhou — botão não encontrado no HTML.');
+            console.log('SSR renderizou:', html.slice(0, 80));
+            console.log('SSR OK');
         `);
         execSync('node index.js', { cwd: dir, stdio: 'inherit' });
     });
@@ -209,14 +230,12 @@ try {
             // Este import DEVE falhar — subpath inexistente não deve ser resolvido.
             try {
                 await import('@maxvue/max-components-ui/inexistente');
-                console.error('FALHA: subpath inexistente foi resolvido — não deveria!');
-                process.exit(1);
+                throw new Error('Subpath inexistente foi resolvido — não deveria!');
             } catch (err) {
                 if (err.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED' || err.code === 'MODULE_NOT_FOUND' || err.code === 'ERR_MODULE_NOT_FOUND') {
                     console.log('Subpath desconhecido corretamente rejeitado com:', err.code);
                 } else {
-                    console.error('Erro inesperado ao importar subpath desconhecido:', err.message);
-                    process.exit(1);
+                    throw new Error('Erro inesperado ao importar subpath desconhecido: ' + err.message);
                 }
             }
         `);
@@ -229,7 +248,7 @@ try {
     console.error('\n❌ Validação falhou:', err.message);
     if (err.stdout) console.log(err.stdout.toString());
     if (err.stderr) console.error(err.stderr.toString());
-    process.exit(1);
+    process.exitCode = 1;
 } finally {
     // Cleanup garantido mesmo em caso de falha
     console.log('\n--- Limpando arquivos temporários ---');
@@ -237,8 +256,8 @@ try {
         rmSync(tempDir, { recursive: true, force: true });
         console.log('Diretório temporário removido:', tempDir);
     }
-    if (tarballPath) {
-        rmSync(tarballPath, { force: true });
-        console.log('Tarball removido:', tarballPath);
+    if (packDir) {
+        rmSync(packDir, { recursive: true, force: true });
+        console.log('Diretório do tarball removido:', packDir);
     }
 }
