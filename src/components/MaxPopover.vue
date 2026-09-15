@@ -68,7 +68,7 @@
     import { usePopoverStore } from '../stores/usePopover.Store';
     import { useFocusTrap } from '../helpers/useFocusTrap';
     import { useActiveOverlayPosition } from '../composables/useActiveOverlayPosition';
-    import { resolveAriaLabelledby } from '../helpers/useAccessibleName';
+    import { getElementAccessibleText, resolveAriaLabelledby } from '../helpers/useAccessibleName';
     import MaxIconButton from './MaxIconButton.vue';
     import MaxIcon from './MaxIcon.vue';
     import MaxTitle1 from './MaxTitle1.vue';
@@ -178,8 +178,25 @@
 
     const resolvedSubTitle = computed(() => props.subTitle ?? props.subtitle);
 
+    // Ver comentário equivalente em MaxModal: referências removidas da árvore
+    // de acessibilidade ou sem texto usam o fallback do diálogo; o helper
+    // canônico continua sendo a fonte de AccName genérica.
+    const resolveDialogLabelledby = (ids: string) => {
+        const resolved = resolveAriaLabelledby(ids);
+        if (!resolved || typeof document === 'undefined') return undefined;
+        const usable = resolved.split(' ').filter((labelId) => {
+            const target = document.getElementById(labelId) as HTMLElement | null;
+            return Boolean(target)
+                && !target!.hasAttribute('hidden')
+                && target!.getAttribute('aria-hidden') !== 'true'
+                && !target!.hasAttribute('inert')
+                && Boolean(getElementAccessibleText(target!));
+        });
+        return usable.length ? usable.join(' ') : undefined;
+    };
+
     const computedAriaLabelledby = computed(() => {
-        if (props.ariaLabelledby) return resolveAriaLabelledby(props.ariaLabelledby);
+        if (props.ariaLabelledby) return resolveDialogLabelledby(props.ariaLabelledby);
         if (props.noHeader) return undefined;
         if (slots.header) {
             const slotText = getSlotText(slots.header);

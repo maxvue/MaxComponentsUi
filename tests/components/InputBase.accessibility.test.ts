@@ -241,7 +241,7 @@ describe('InputBase Accessibility & WAI-ARIA Contracts', () => {
             expect(input.attributes('aria-required')).toBe('true');
         });
 
-        it('MaxInputSelect forwards id, aria-describedby, aria-invalid and aria-required to combobox element', () => {
+        it('MaxInputSelect forwards form attributes to its native owner and ARIA to combobox', () => {
             const wrapper = mount(MaxInputSelect, {
                 props: {
                     label: 'País',
@@ -253,11 +253,14 @@ describe('InputBase Accessibility & WAI-ARIA Contracts', () => {
             });
 
             const trigger = wrapper.find('.max-select');
+            const formOwner = wrapper.find('.max-native-form-proxy');
             const label = wrapper.find('label.max-input-label');
             const message = wrapper.find('.input-message');
 
             expect(trigger.exists()).toBe(true);
-            expect(trigger.attributes('id')).toBe(label.attributes('for'));
+            expect(formOwner.exists()).toBe(true);
+            expect(formOwner.attributes('id')).toBe(label.attributes('for'));
+            expect(formOwner.attributes('required')).toBeDefined();
             expect(trigger.attributes('aria-describedby')).toBe(message.attributes('id'));
             expect(trigger.attributes('aria-invalid')).toBe('true');
             expect(trigger.attributes('aria-required')).toBe('true');

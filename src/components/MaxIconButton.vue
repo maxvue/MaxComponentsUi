@@ -17,6 +17,7 @@
         :aria-disabled="isDisabled ? 'true' : undefined"
         :aria-busy="isBusy ? 'true' : 'false'"
         @click="onClick"
+        @keydown="onKeydown"
         @mouseenter="!isDisabled && (hover = true)"
         @mouseleave="hover = false"
     >
@@ -126,7 +127,11 @@
         /** @deprecated Use o evento canônico click */
         action: [value: boolean];
         click: [event: PointerEvent];
+        /** Repassa o teclado do botão nativo para composições que o utilizam como gatilho. */
+        keydown: [event: KeyboardEvent];
     }>();
+
+    const onKeydown = (event: KeyboardEvent) => emit('keydown', event);
 
     const onClick = async (event: PointerEvent) => {
         if (isDisabled.value || executing.value) {

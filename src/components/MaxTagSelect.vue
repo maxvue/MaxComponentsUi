@@ -64,6 +64,7 @@
                                     :aria-controls="isOpen ? listboxId : undefined"
                                     :tabindex="props.disabled ? -1 : 0"
                                     @click.stop="toggle"
+                                    @keydown="onTriggerKeydown"
                                 />
                             </div>
                         </slot>

@@ -215,8 +215,10 @@
         }
 
         &.max-button-danger {
-            background: var(--max-danger-surface, var(--max-danger-600, #dc2626));
-            border-color: var(--max-danger-surface, var(--max-danger-600, #dc2626));
+            // Mantém a superfície semântica quando disponível, mas preserva a
+            // cadeia de compatibilidade para temas que expõem apenas a rampa.
+            background: var(--max-danger-surface, var(--max-danger-500, var(--danger-500)));
+            border-color: var(--max-danger-surface, var(--max-danger-500, var(--danger-500)));
             color: var(--max-danger-content, #fff);
 
             &:hover {
