@@ -2,12 +2,14 @@
 
 ## Identidade
 
-- Papel/agente: `REV5-F14` / `/root/rev5_f14`.
-- Início: `2026-09-15T14:29:00-03:00`.
-- Fim: `2026-09-15T14:30:32-03:00`.
+- Papel/agente: `REV5-F14` / `/root/rev5_f14_retry` (revalidação do mesmo papel).
+- Início original: `2026-09-15T14:29:00-03:00`.
+- Revalidação: `2026-09-15T16:19:35-03:00`.
+- Fim da revalidação: `2026-09-15T16:19:37-03:00`.
 - Worktree somente leitura: `/home/johnattas/GitHub/MaxComponentsUi/.worktrees/wt-optimize-fix5`.
 - Referência adversarial: `aac16bca`.
-- HEAD auditado: `925b8bf1b74fc3e187f12664b784f974e0a402e1`.
+- HEAD adversarial original: `925b8bf1b74fc3e187f12664b784f974e0a402e1`.
+- HEAD revalidado: `bac90d8c85e146fc206405014bba88ce08c6ef1e`.
 
 ## Caso adversarial independente
 
@@ -62,6 +64,39 @@ $ rg -n "axe-core|runAxe|axe\\(" package.json package-lock.json tests/browser te
 (sem saída; código 1)
 ```
 
+## Revalidação obrigatória no Chromium real
+
+No HEAD `bac90d8c`, o cenário agora existe em
+`tests/browser/MaxBaseVirtualScroller.browser.ts` e usa o pacote oficial
+`axe-core@4.11.0`, não um helper local. Ele monta `MaxBaseVirtualScroller`
+como `role="listbox"`, com nome acessível, **10.000** opções e viewport de
+200 px; executa as regras ARIA do axe, move o descendente ativo por teclado,
+faz scroll para `scrollTop=4000` e confirma que o elemento ativo desmontado
+some tanto do DOM quanto de `aria-activedescendant`.
+
+Comando executado independentemente:
+
+```text
+npx vitest run --config vitest.browser.config.ts tests/browser/MaxBaseVirtualScroller.browser.ts
+```
+
+Saída integral relevante:
+
+```text
+RUN  v4.1.11 /home/johnattas/GitHub/MaxComponentsUi/.worktrees/wt-optimize-fix5
+
+Test Files  1 passed (1)
+Tests  1 passed (1)
+Duration  1.49s (transform 0ms, setup 6ms, import 564ms, tests 95ms, environment 0ms)
+```
+
+O único aviso foi do próprio Vitest ao escolher outra porta porque `63315`
+estava ocupada; não houve warning da aplicação, violação axe nem erro do
+Chromium.
+
 ## Veredito
 
-**REJEITADO.** A correção de contrato runtime refuta `aac16bca` e passa no unitário atual, mas F14 não pode receber aceite enquanto o cenário Chromium não executar e não houver auditoria `axe-core` real no listbox virtualizado. Isso é requisito expresso da Etapa 4, não uma lacuna cosmética de evidência.
+**ACEITO.** O caso adversarial original falha em `aac16bca`; no HEAD
+`bac90d8c`, contrato runtime, listbox real em Chromium, `axe-core` oficial e
+virtualização/`aria-activedescendant` durante scroll de 10 mil itens foram
+executados e aprovados de forma independente.

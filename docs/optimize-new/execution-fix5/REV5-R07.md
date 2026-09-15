@@ -38,6 +38,38 @@ O único teste Chromium de stack (`MaxFocusStack.browser.ts`) monta um `MaxPopov
 
 Assim, não há execução independente que prove o requisito central de E04-04. A evidência atual também não demonstra, no navegador, que um Escape/pointer no topo real não alcance os demais overlays durante Teleport, nem que Tab/Shift+Tab atravesse apenas os focáveis da camada superior real.
 
+## Revalidação independente pós-retry
+
+- **Executor:** `/root/rev5_r07_retry`
+- **Parent:** `/root`
+- **Início:** `2026-09-15T16:19:00-03:00`
+- **Fim:** `2026-09-15T16:19:46-03:00`
+- **HEAD auditado:** `bac90d8c`
+- **Modo:** somente leitura; nenhuma fonte ou teste de produto foi alterado.
+
+O cenário agora monta no Chromium os três componentes reais: `MaxPopover`,
+`MaxInputMarkdown` com o lightbox real e `MaxInputIconPicker` com drawer/backdrop.
+Ele abre a pilha de três traps, verifica Tab e Shift+Tab dentro do drawer do
+IconPicker, despacha `pointerdown` e `click` no backdrop (externo ao drawer) e
+confirma que somente o topo fecha, sem click-through para lightbox/Popover. Em
+seguida fecha cada camada por Escape e comprova o retorno de foco ao gatilho do
+Popover e a pilha vazia.
+
+```text
+$ npx vitest run --config vitest.browser.config.ts tests/browser/MaxFocusStack.browser.ts
+Test Files  1 passed (1)
+Tests  3 passed (3)
+Duration  2.82s
+```
+
+O runner imprimiu um warning conhecido do Tiptap (`Duplicate extension names:
+['link', 'underline']`). Ele é emitido pela configuração do editor carregada
+pela fixture e não representa listener concorrente, falha de foco ou falha de
+pointer deste bloco; permanece sujeito ao gate global de política de warnings.
+
 ## Veredito
 
-**REJEITADO.** A implementação parece remover o motor concorrente do Popover e os testes focais passam, porém o teste adversarial obrigatório com os três componentes reais aninhados não existe/não foi executado. Para novo aceite, adicionar e executar em Chromium uma fixture real IconPicker + lightbox do Markdown + Popover, verificando Tab/Shift+Tab, um Escape por camada, pointer externo somente no topo, retorno de foco e limpeza dos três listeners globais após unmount.
+**ACEITO.** O caso adversarial obrigatório dos três componentes reais foi
+executado independentemente em Chromium no HEAD `bac90d8c`. Tab/Shift+Tab,
+pointer externo no topo sem click-through, Escape por camada, retorno de foco e
+limpeza da pilha foram comprovados.

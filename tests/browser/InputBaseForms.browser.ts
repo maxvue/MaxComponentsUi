@@ -115,7 +115,9 @@ async function mountFamily(family: BrowserFamily, disabled = false) {
                 'onUpdate:modelValue': (value: unknown) => { modelValue.value = value as any; },
                 label: `Rótulo ${family.name}`,
                 name: `field-${family.name}`,
-                autocomplete: 'email',
+                // Somente campos textuais têm semântica de autofill de e-mail.
+                // Proxies de controles compostos não devem anunciar e-mail.
+                autocomplete: family.nativeText ? 'email' : 'off',
                 required: true,
                 disabled,
                 ...(family.props ?? {})
@@ -157,19 +159,29 @@ describe('InputBase no Chromium (R04 / E03-02)', () => {
             expect(formOwner.getAttribute('aria-required') === 'true' || formOwner.hasAttribute('required'), `${family.name}: owner recebe required`).toBe(true);
             expect(owner.getAttribute('aria-disabled')).not.toBe('true');
 
-            // Chromium executa o comportamento nativo do rótulo; para owners
-            // labelable o foco deve chegar ao próprio controle, sem JS do wrapper.
-            label.click();
-            if (owner.matches('input, textarea, select, button')) expect(document.activeElement).toBe(owner);
+            // A prova negativa impede que `required` vire somente ARIA. O input
+            // color é exceção do HTML: seu valor nunca é vazio por definição.
+            if (family.name !== 'MaxColorPicker') {
+                expect(form.checkValidity(), `${family.name}: required vazio bloqueia o formulário`).toBe(false);
+                expect(formOwner.validity.valid, `${family.name}: owner vazio é inválido nativamente`).toBe(false);
+            }
+
+            // Clique do usuário no label usa o algoritmo nativo `for`/`id`.
+            // Nos compostos, o proxy recebe o foco e o :focus-within do
+            // InputBase fornece o anel visual, sem chamar focus no wrapper.
+            await userEvent.click(label);
+            expect(document.activeElement, `${family.name}: label foca o owner nativo`).toBe(formOwner);
 
             if (family.nativeText) {
                 const input = owner as HTMLInputElement | HTMLTextAreaElement;
-                // Um preenchimento programático representa o autofill real;
-                // não recebe foco e usa um valor aceito também pelos campos numéricos.
-                input.value = '12345';
-                input.dispatchEvent(new Event('input', { bubbles: true }));
+                // `fill` opera no Chromium por teclado/eventos reais; não há
+                // atribuição de `.value` nem dispatch sintético de `input`.
+                const browserValue = family.name === 'MaxInputCoordinateDecimalLat' || family.name === 'MaxInputCoordinateDecimalLng'
+                    ? '-22.12345'
+                    : '12345';
+                await userEvent.fill(input, browserValue);
                 await nextFrame();
-                expect(input.value, `${family.name}: autofill sem foco preserva o valor nativo`).toBeTruthy();
+                expect(input.value, `${family.name}: preenchimento nativo preserva o valor`).toBeTruthy();
                 expect(new FormData(form).has(`field-${family.name}`), `${family.name}: participa do FormData`).toBe(true);
                 expect(form.checkValidity(), `${family.name}: required é validável pelo browser`).toBe(true);
             }
@@ -194,6 +206,8 @@ describe('InputBase no Chromium (R04 / E03-02)', () => {
             const disabledWrapper = host!.querySelector('.max-input-main-div, .max-input-toggle')!;
             expect(disabledFormOwner.hasAttribute('disabled') || disabledFormOwner.getAttribute('aria-disabled') === 'true', `${family.name}: disabled chega ao owner`).toBe(true);
             expect(disabledWrapper.hasAttribute('disabled'), `${family.name}: disabled não vaza ao wrapper`).toBe(false);
+            const disabledForm = host!.querySelector('form')!;
+            expect(new FormData(disabledForm).has(`field-${family.name}`), `${family.name}: disabled é excluído nativamente do FormData`).toBe(false);
 
             app?.unmount();
             host?.remove();

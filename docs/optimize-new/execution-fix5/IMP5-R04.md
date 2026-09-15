@@ -56,3 +56,29 @@ exit 0
 O cenário Chromium cobre as 25 famílias e, nos cinco compostos, verifica especificamente que o owner nativo recebe o `label[for]`, participa de `FormData` e determina `form.checkValidity()`; no Switch a semântica é `checkbox` nativo.
 
 **IMPLEMENTADO — aguarda refutação independente pelo mesmo REV5-R04.**
+
+## Retry de evidência negativa — 2026-09-15
+
+A matriz de Chromium foi reforçada para que uma implementação ARIA-only não passe:
+
+- antes de preencher, cada família validável prova `form.checkValidity() === false` e `owner.validity.valid === false`; `input[type=color]` é documentado como a exceção do HTML, pois sempre tem valor;
+- após montar com `disabled`, cada família prova que sua chave está ausente de `new FormData(form)`;
+- o clique é feito com `userEvent.click(label)`, e `document.activeElement` deve ser o owner nativo. Nos compostos o owner é o proxy, e o `:focus-within` de `InputBase` mantém o indicador visual sem foco manual no wrapper;
+- campos textuais usam `userEvent.fill` no Chromium, que realiza interação de usuário/eventos do navegador, sem atribuição `.value` ou `dispatchEvent` manual. Controles compostos declaram `autocomplete="off"`, pois não representam e-mail/texto de perfil.
+
+Também foi corrigida a inicialização das coordenadas decimais: valor vazio não pode se converter em `NaN` (que satisfaria `required`), e ambas têm `pattern` nativo para que uma máscara parcial não seja aceita como coordenada completa.
+
+```text
+$ npx vitest run --config vitest.browser.config.ts tests/browser/InputBaseForms.browser.ts
+Test Files  1 passed (1)
+Tests  2 passed (2)
+
+$ npm exec vitest run tests/components/inputBaseAttributesSeparation.test.ts tests/components/MaxInputCoordinates.test.ts
+Test Files  2 passed (2)
+Tests  112 passed (112)
+
+$ npx vue-tsc --noEmit --pretty false --project tsconfig.json
+exit 0
+```
+
+**IMPLEMENTADO — aguarda nova revalidação independente do REV5-R04.**
