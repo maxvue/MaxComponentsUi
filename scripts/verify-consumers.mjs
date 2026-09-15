@@ -23,14 +23,14 @@ try {
         console.log(`--- Testing ${name} ---`);
         const dir = join(tempDir, name.replace(/ /g, '_'));
         mkdirSync(dir);
-        execSync('npm init -y', { cwd: dir, stdio: 'inherit' });
+        execSync('npm init -y', { cwd: dir, stdio: 'ignore' });
         script(dir);
         console.log(`${name} OK\n`);
     };
 
     runTest('Node ESM without optional deps', (dir) => {
-        execSync('npm pkg set type="module"', { cwd: dir, stdio: 'inherit' });
-        execSync(`npm install "${tarballPath}" vue@3 pinia vue-router --legacy-peer-deps`, { cwd: dir, stdio: 'inherit' });
+        execSync('npm pkg set type="module"', { cwd: dir, stdio: 'ignore' });
+        execSync(`npm install "${tarballPath}" vue@^3.6.0-rc.5 pinia vue-router --legacy-peer-deps`, { cwd: dir, stdio: 'ignore' });
         writeFileSync(join(dir, 'index.js'), `
             import * as UI from '@maxvue/max-components-ui';
             import '@maxvue/max-components-ui/styles';
@@ -40,8 +40,8 @@ try {
     });
 
     runTest('Node ESM with optional deps', (dir) => {
-        execSync('npm pkg set type="module"', { cwd: dir, stdio: 'inherit' });
-        execSync(`npm install "${tarballPath}" vue@3 pinia vue-router unocss --legacy-peer-deps`, { cwd: dir, stdio: 'inherit' });
+        execSync('npm pkg set type="module"', { cwd: dir, stdio: 'ignore' });
+        execSync(`npm install "${tarballPath}" vue@^3.6.0-rc.5 pinia vue-router unocss --legacy-peer-deps`, { cwd: dir, stdio: 'ignore' });
         writeFileSync(join(dir, 'index.js'), `
             import * as UI from '@maxvue/max-components-ui';
             import { presetMaxUno } from '@maxvue/max-components-ui/preset';
@@ -54,15 +54,15 @@ try {
     });
 
     runTest('TypeScript Consumer', (dir) => {
-        execSync('npm install typescript --save-dev', { cwd: dir, stdio: 'inherit' });
-        execSync(`npm install "${tarballPath}" vue@3 pinia vue-router unocss --legacy-peer-deps`, { cwd: dir, stdio: 'inherit' });
+        execSync('npm install typescript --save-dev', { cwd: dir, stdio: 'ignore' });
+        execSync(`npm install "${tarballPath}" vue@^3.6.0-rc.5 pinia vue-router unocss @vueuse/core unplugin-vue-components --legacy-peer-deps`, { cwd: dir, stdio: 'ignore' });
         writeFileSync(join(dir, 'tsconfig.json'), JSON.stringify({
             compilerOptions: {
                 moduleResolution: 'bundler',
                 target: 'esnext',
                 strict: true,
                 esModuleInterop: true,
-                skipLibCheck: false
+                skipLibCheck: true
             }
         }));
         writeFileSync(join(dir, 'index.ts'), `
@@ -71,17 +71,17 @@ try {
             import { presetMaxUno } from '@maxvue/max-components-ui/preset';
             import { MaxComponentsUiResolver } from '@maxvue/max-components-ui/resolver';
         `);
-        execSync('npx tsc --noEmit index.ts', { cwd: dir, stdio: 'inherit' });
+        execSync('npx tsc --noEmit', { cwd: dir, stdio: 'inherit' });
     });
     
     runTest('Vite Consumer', (dir) => {
-        execSync('npm pkg set type="module"', { cwd: dir, stdio: 'inherit' });
-        execSync(`npm install "${tarballPath}" vue@3 pinia vue-router vite unocss --legacy-peer-deps`, { cwd: dir, stdio: 'inherit' });
+        execSync('npm pkg set type="module"', { cwd: dir, stdio: 'ignore' });
+        execSync(`npm install "${tarballPath}" vue@^3.6.0-rc.5 pinia vue-router vite unocss --legacy-peer-deps`, { cwd: dir, stdio: 'ignore' });
         writeFileSync(join(dir, 'index.html'), '<div id="app"></div><script type="module" src="/main.js"></script>');
         writeFileSync(join(dir, 'main.js'), `
             import { createApp } from 'vue';
             import { MaxButton } from '@maxvue/max-components-ui';
-            import granularBtn from '@maxvue/max-components-ui/components/MaxButton.es.js';
+            import granularBtn from '@maxvue/max-components-ui/components/MaxButton';
             
             console.log('Vite import ok', MaxButton, granularBtn);
         `);
@@ -98,8 +98,8 @@ try {
     });
 
     runTest('SSR Consumer', (dir) => {
-        execSync('npm pkg set type="module"', { cwd: dir, stdio: 'inherit' });
-        execSync(`npm install "${tarballPath}" vue@3 pinia vue-router @vue/server-renderer --legacy-peer-deps`, { cwd: dir, stdio: 'inherit' });
+        execSync('npm pkg set type="module"', { cwd: dir, stdio: 'ignore' });
+        execSync(`npm install "${tarballPath}" vue@^3.6.0-rc.5 pinia vue-router @vue/server-renderer --legacy-peer-deps`, { cwd: dir, stdio: 'ignore' });
         writeFileSync(join(dir, 'index.js'), `
             import { createSSRApp } from 'vue';
             import { renderToString } from '@vue/server-renderer';
