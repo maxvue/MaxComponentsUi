@@ -118,12 +118,12 @@ describe('Arquitetura - Contrato de Exports e Subpaths Públicos', () => {
         expect(styles.MaxStyle.semantic.primary[500]).toBe('#00768E');
     });
 
-    it('sideEffects deve incluir CSS e o bundle raiz com injeção de estilo, mas poupar stores/preset/resolver/styles', () => {
+    it('sideEffects deve incluir somente folhas de estilo e poupar todos os entries JavaScript', () => {
         const sideEffects = pkg.sideEffects;
         expect(Array.isArray(sideEffects)).toBe(true);
         expect(sideEffects).toContain('**/*.css');
         expect(sideEffects).toContain('**/*.scss');
-        expect(sideEffects).toContain('./dist/index.es.js');
+        expect(sideEffects).not.toContain('./dist/index.es.js');
 
         // Entries modulares livres de side-effect para permitir tree-shaking
         expect(sideEffects).not.toContain('./dist/stores.es.js');

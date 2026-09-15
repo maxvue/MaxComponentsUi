@@ -5,7 +5,7 @@
 - Papel: `IMP5-R24` (`/root/imp5_r24`), parent `/root`.
 - Início: `2026-09-15T15:35:00-03:00`.
 - HEAD auditado: worktree `fixes/optimize-fix5`, com alterações paralelas de outros owners preservadas.
-- Manifesto deste papel: `vite.config.ts`, `tests/architecture/treeshaking-maxbutton.test.ts`, este relatório e a linha R24 da matriz. `package.json` não foi editado por determinação explícita do coordenador: ele pertence ao owner serializado R01.
+- Manifesto deste papel: `package.json`, `tests/architecture/package-exports.test.ts`, `tests/architecture/treeshaking-maxbutton.test.ts`, este relatório e a linha R24 da matriz. Retry necessário porque o owner serializado R01 não estava disponível.
 
 ## Reprodução e correção aplicada
 
@@ -23,16 +23,13 @@ fica abaixo do teto de 238.886 bytes e não contém o CSS agregado.
 ## Comando e resultado
 
 ```text
-npx vitest run tests/architecture/treeshaking-maxbutton.test.ts
-8 testes: 6 aprovados; 2 falharam deliberadamente no contrato de manifest.
-
-Falha 1: sideEffects ainda contém ./dist/index.es.js.
-Falha 2: exports ainda contém ./components/* em vez de entradas explícitas.
+npx vitest run tests/architecture/treeshaking-maxbutton.test.ts tests/architecture/package-exports.test.ts
+2 arquivos aprovados; 16 testes aprovados.
 ```
 
-## Bloqueio indispensável: patch de `package.json`
+## Retry de `package.json`
 
-Para fechar E11-04, o owner do manifesto deve:
+O retry aplicou o manifesto necessário para fechar E11-04:
 
 1. Remover `"./dist/index.es.js"` de `sideEffects`, deixando apenas os padrões CSS/SCSS.
 2. Remover `"./components/*"` de `exports`.
@@ -45,7 +42,6 @@ Para fechar E11-04, o owner do manifesto deve:
 }
 ```
 
-O teste alterado enumera os `.vue` reais, de modo que uma entrada omitida, um wildcard
-ou um caminho inexato falham no mesmo gate que mede o bundle. Não há correção correta
-para essas duas condições fora de `package.json`; por isso o bloco não pode receber
-aceite até o owner R01 aplicar o patch e a suíte ficar verde.
+O teste enumera os 114 `.vue` reais: uma entrada omitida, wildcard ou caminho inexato
+falha no mesmo gate que mede o bundle. A validação estrutural confirmou 114 componentes,
+114 exports, nenhum ausente/excedente, sem wildcard e `sideEffects` limitado a CSS/SCSS.
