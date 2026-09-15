@@ -46,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-    import { computed, ref, useAttrs } from 'vue';
+    import { computed, getCurrentInstance, ref, useAttrs } from 'vue';
     import MaxIcon from './MaxIcon.vue';
     import { goToRoute } from '@maxvue/max-use';
     import type { MaxButtonsType } from '../types';
@@ -55,6 +55,7 @@
         inheritAttrs: false
     });
 
+    const instance = getCurrentInstance();
     const attrs = useAttrs();
     const hover = ref(false);
     const warned = ref(false);
@@ -131,7 +132,13 @@
             }
 
             emit('click', event);
-            emit('action', true);
+            const hasClickListener = Boolean(
+                attrs.onClick ||
+                (instance?.vnode?.props && ('onClick' in instance.vnode.props || 'onclick' in instance.vnode.props))
+            );
+            if (!hasClickListener) {
+                emit('action', true);
+            }
         } finally {
             executing.value = false;
         }
@@ -158,15 +165,15 @@
         font-family: inherit;
         line-height: 1;
 
-        // Expansão da área de toque acessível (mínimo 36px) sem deformar o tamanho visual do ícone
+        // Expansão da área de toque acessível (mínimo 44px) sem deformar o tamanho visual do ícone
         &::after {
             content: '';
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            min-width: 36px;
-            min-height: 36px;
+            min-width: 44px;
+            min-height: 44px;
             width: 100%;
             height: 100%;
         }

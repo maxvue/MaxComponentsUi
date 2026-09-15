@@ -8,14 +8,16 @@ describe('Tipografia Canônica do Design System (E10-07)', () => {
     const appScss = readFileSync(resolve(srcDir, 'themes/app.scss'), 'utf-8');
     const fontScss = readFileSync(resolve(srcDir, 'themes/font.scss'), 'utf-8');
 
-    it('define --font-sans como token público canônico em app.scss', () => {
-        expect(appScss).toMatch(/--font-sans:\s*['"]?Quicksand['"]?,/i);
-        expect(appScss).toContain('Instrument Sans');
-        expect(appScss).toContain('sans-serif');
+    it('não impõe Quicksand ou --font-sans globalmente em app.scss, herdando a família do consumidor', () => {
+        expect(appScss).not.toMatch(/--font-sans/i);
+        expect(appScss).not.toMatch(/Quicksand/i);
     });
 
-    it('faz body, html e #app consumirem var(--font-sans) em font.scss', () => {
-        expect(fontScss).toMatch(/body,\s*html,\s*#app\s*\{[^}]*font-family:\s*var\(--font-sans/);
+    it('não declara regra global de família em body, html ou #app em font.scss', () => {
+        expect(fontScss).not.toContain('Quicksand');
+        expect(fontScss).not.toContain('body,');
+        expect(fontScss).not.toContain('html,');
+        expect(fontScss).not.toContain('#app');
     });
 
     it('garante que nenhum componente em src/components/ referencia a fonte legada Jost', () => {
