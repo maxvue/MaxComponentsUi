@@ -20,24 +20,33 @@ O teste Chromium confirma:
 - redução proporcional para os limites; erro com `role="alert"` e editor ainda aberto;
 - revogação da URL de Object ao trocar `src` e no unmount.
 
-## Budgets congelados
+## Budgets congelados e medição obrigatória
 
 O cenário mede e impõe os seguintes limites durante `confirmCrop`:
 
 | Métrica | Limite | Resultado |
 |---|---:|---|
-| Duração do crop | < 1.500 ms | aprovado |
-| Soma de Long Tasks observadas | < 1.500 ms | aprovado |
-| Delta de heap JS, se `performance.memory` disponível | < 96 MiB | medido condicionalmente; não exposto pelo runner Chromium |
+| Duração do crop | < 1.500 ms | 802,00 ms |
+| Soma de Long Tasks observadas | < 1.500 ms | 665,00 ms |
+| Delta de heap JS | < 96 MiB | 0 B (39.600.000 B → 39.600.000 B) |
 | Lifecycle | URL revogada em troca de `src` e unmount | aprovado |
+
+Após a rejeição de `REV5-F18`, suporte a `PerformanceObserver` com `longtask` e a `performance.memory` passou a ser pré-condição do teste Chromium. Assim, ambiente sem uma dessas APIs falha de modo explícito; não há fallback para zero nem métrica condicional. O runner atual expôs ambas. A soma de Long Tasks é observada somente entre o início e o fim de `confirmCrop`.
 
 ## Comandos executados
 
 ```text
-npx vitest run --config vitest.browser.config.ts tests/browser/MaxImage.browser.ts
+npx vitest run --config vitest.browser.config.ts tests/browser/MaxImage.browser.ts --reporter=verbose
 Test Files  1 passed (1)
 Tests  5 passed (5)
-Duration  12.87s
+Duration  13.26s
+
+[IMP5-F18] métricas de crop
+durationMs: 802
+longTaskMs: 665
+heapBefore: 39600000
+heapAfter: 39600000
+heapDelta: 0
 
 npx vue-tsc --noEmit --pretty false
 exit 0
@@ -51,4 +60,4 @@ git diff --check
 exit 0
 ```
 
-HEAD auditado: `41c526941508ddb72c72f1bf31f86d2d2e99bbb4`.
+HEAD auditado: `8ee9e0bc25f3a7f82fd516ffd93b2777a1621eed`.

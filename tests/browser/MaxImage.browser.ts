@@ -184,31 +184,34 @@ describe('MaxImage no Chromium Real — Performance de Recorte em Alta Resoluç�
         toBlobSpy.mockClear();
         toDataUrlSpy.mockClear();
 
+        expect(PerformanceObserver.supportedEntryTypes).toContain('longtask');
         const longTasks: PerformanceEntry[] = [];
-        const observer = typeof PerformanceObserver === 'undefined'
-            ? null
-            : new PerformanceObserver((entries) => longTasks.push(...entries.getEntries()));
-        try {
-            observer?.observe({ type: 'longtask', buffered: false });
-        } catch {
-            // Long Tasks não está disponível em todos os Chromium usados pelo runner.
-        }
+        const observer = new PerformanceObserver((entries) => longTasks.push(...entries.getEntries()));
+        observer.observe({ type: 'longtask', buffered: false });
         const memory = performance as Performance & { memory?: { usedJSHeapSize: number } };
         const heapBefore = memory.memory?.usedJSHeapSize;
+        expect(heapBefore, 'O runner Chromium deve expor performance.memory para medir o heap.').toBeTypeOf('number');
         const startTime = performance.now();
         await imageRef.value.confirmCrop();
         const duration = performance.now() - startTime;
         const heapAfter = memory.memory?.usedJSHeapSize;
         observer?.disconnect();
+        expect(heapAfter, 'O runner Chromium deve manter performance.memory após o crop.').toBeTypeOf('number');
 
         // 4. Orçamento de tempo e responsividade da UI (não bloquear main thread excessivamente)
         // O processamento e codificação com downscale deve completar dentro de um orçamento seguro (< 1500ms no Chromium)
         expect(duration).toBeLessThan(CROP_PERFORMANCE_BUDGET.durationMs);
         const observedLongTaskMs = longTasks.reduce((total, entry) => total + entry.duration, 0);
         expect(observedLongTaskMs).toBeLessThan(CROP_PERFORMANCE_BUDGET.longTaskMs);
-        if (heapBefore !== undefined && heapAfter !== undefined) {
-            expect(heapAfter - heapBefore).toBeLessThan(CROP_PERFORMANCE_BUDGET.heapDeltaBytes);
-        }
+        const heapDelta = heapAfter! - heapBefore!;
+        expect(heapDelta).toBeLessThan(CROP_PERFORMANCE_BUDGET.heapDeltaBytes);
+        console.info('[IMP5-F18] métricas de crop', {
+            durationMs: Number(duration.toFixed(2)),
+            longTaskMs: Number(observedLongTaskMs.toFixed(2)),
+            heapBefore,
+            heapAfter,
+            heapDelta
+        });
 
         // 5. Verifica que o payload foi emitido e respeita estritamente os limites
         expect(emittedCropPayload).toBeTruthy();
