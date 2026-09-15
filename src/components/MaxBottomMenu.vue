@@ -260,7 +260,7 @@
             height: 100%;
             min-height: 44px;
             cursor: pointer;
-            color: var(--background-650);
+            color: var(--background-700);
             transition: color 0.18s ease;
 
             .max-icon-div {
@@ -327,6 +327,17 @@
                 outline: 2px solid var(--max-primary-400);
                 outline-offset: 3px;
             }
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        ::before,
+        ::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
         }
     }
 </style>

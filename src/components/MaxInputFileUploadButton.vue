@@ -142,7 +142,7 @@
                 padding: 0 5px;
 
                 .icon-div {
-                    color: var(--background-650) !important;
+                    color: var(--background-700) !important;
                 }
 
                 &:hover {
@@ -213,7 +213,7 @@
 
                         .file-size {
                             font-size: 9px;
-                            color: var(--background-650);
+                            color: var(--background-700);
                             text-align: center;
                             width: 100%;
                         }

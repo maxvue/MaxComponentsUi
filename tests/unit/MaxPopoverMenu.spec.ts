@@ -194,7 +194,7 @@ describe('MaxPopoverMenu - WAI-ARIA e Teclado (Etapa 10)', () => {
         await wrapper.vm.$nextTick();
         expect(document.body.querySelector('.max-popover-menu-overlay')).not.toBeNull();
 
-        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
         await wrapper.vm.$nextTick();
 
         expect(document.body.querySelector('.max-popover-menu-overlay')).toBeNull();
@@ -202,26 +202,26 @@ describe('MaxPopoverMenu - WAI-ARIA e Teclado (Etapa 10)', () => {
     });
 
     it('registra ouvinte keydown no window SOMENTE quando aberto e remove ao fechar e ao desmontar', async () => {
-        const addListenerSpy = vi.spyOn(window, 'addEventListener');
-        const removeListenerSpy = vi.spyOn(window, 'removeEventListener');
+        const addListenerSpy = vi.spyOn(document, 'addEventListener');
+        const removeListenerSpy = vi.spyOn(document, 'removeEventListener');
 
         const wrapper = mountMenu();
 
         // Enquanto fechado, não registra listener global no setup
-        expect(addListenerSpy).not.toHaveBeenCalledWith('keydown', expect.any(Function));
+        expect(addListenerSpy.mock.calls.some((call) => call[0] === 'keydown')).toBe(false);;
 
         // Ao abrir, registra listener
         await wrapper.find('.botao').trigger('click');
-        expect(addListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+        expect(addListenerSpy.mock.calls.some((call) => call[0] === 'keydown')).toBe(true);;
 
         // Ao fechar, remove listener
         await wrapper.find('.botao').trigger('click');
-        expect(removeListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+        expect(removeListenerSpy.mock.calls.some((call) => call[0] === 'keydown')).toBe(true);;
 
         // Ao abrir e desmontar, remove listener
         await wrapper.find('.botao').trigger('click');
         wrapper.unmount();
-        expect(removeListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+        expect(removeListenerSpy.mock.calls.some((call) => call[0] === 'keydown')).toBe(true);;
     });
 
     it('fecha o menu ao clicar fora do componente no documento', async () => {

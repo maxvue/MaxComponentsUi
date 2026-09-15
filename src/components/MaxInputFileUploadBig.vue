@@ -204,7 +204,7 @@
             place-items: center;
             text-align: center;
             gap: 10px;
-            color: var(--background-650);
+            color: var(--background-700);
             font-size: 1rem;
             font-weight: 300;
             width: 100%;

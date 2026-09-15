@@ -23,6 +23,9 @@
         "paths": {
             "@/*": [
                 "../src/*"
+            ],
+            "@maxvue/max-components-ui": [
+                "../src/index.ts"
             ]
         }
     },

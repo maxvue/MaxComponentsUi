@@ -1,19 +1,102 @@
 <template>
     <div class="scenario-content" data-scenario="buttons-main">
-        <ScenarioCard
-            title="Cenário buttons-main"
-            family="generica"
-            description="Demonstração interativa dos componentes do cenário buttons-main."
-        >
-            <div class="scenario-inner">
-                <p>Cenário interativo para buttons-main</p>
+        <h2>Cenário buttons-main</h2>
+        <div class="scenario-inner">
+            <div class="variants">
+
+                <div class="component-block">
+                    <h3>MaxButton</h3>
+                    <div class="states">
+                        <!-- Default -->
+                        <div class="state-col">
+                            <span>Normal</span>
+                            <MaxButton />
+                        </div>
+                        <!-- Disabled -->
+                        <div class="state-col">
+                            <span>Disabled</span>
+                            <MaxButton disabled />
+                        </div>
+                        <!-- Error / Variant -->
+                        <div class="state-col">
+                            <span>Erro / Secundário</span>
+                            <MaxButton error severity="danger" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="component-block">
+                    <h3>MaxIconButton</h3>
+                    <div class="states">
+                        <!-- Default -->
+                        <div class="state-col">
+                            <span>Normal</span>
+                            <MaxIconButton />
+                        </div>
+                        <!-- Disabled -->
+                        <div class="state-col">
+                            <span>Disabled</span>
+                            <MaxIconButton disabled />
+                        </div>
+                        <!-- Error / Variant -->
+                        <div class="state-col">
+                            <span>Erro / Secundário</span>
+                            <MaxIconButton error severity="danger" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="component-block">
+                    <h3>MaxLikeButton</h3>
+                    <div class="states">
+                        <!-- Default -->
+                        <div class="state-col">
+                            <span>Normal</span>
+                            <MaxLikeButton />
+                        </div>
+                        <!-- Disabled -->
+                        <div class="state-col">
+                            <span>Disabled</span>
+                            <MaxLikeButton disabled />
+                        </div>
+                        <!-- Error / Variant -->
+                        <div class="state-col">
+                            <span>Erro / Secundário</span>
+                            <MaxLikeButton error severity="danger" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="component-block">
+                    <h3>MaxLink</h3>
+                    <div class="states">
+                        <!-- Default -->
+                        <div class="state-col">
+                            <span>Normal</span>
+                            <MaxLink />
+                        </div>
+                        <!-- Disabled -->
+                        <div class="state-col">
+                            <span>Disabled</span>
+                            <MaxLink disabled />
+                        </div>
+                        <!-- Error / Variant -->
+                        <div class="state-col">
+                            <span>Erro / Secundário</span>
+                            <MaxLink error severity="danger" />
+                        </div>
+                    </div>
+                </div>
             </div>
-        </ScenarioCard>
+        </div>
     </div>
 </template>
 
 <script setup lang="ts">
-    import ScenarioCard from '../components/ScenarioCard.vue';
+    import { MaxButton } from '@maxvue/max-components-ui';
+    import { MaxIconButton } from '@maxvue/max-components-ui';
+    import { MaxLikeButton } from '@maxvue/max-components-ui';
+    import { MaxLink } from '@maxvue/max-components-ui';
 </script>
 
 <style lang="scss" scoped>
@@ -21,5 +104,31 @@
         display: flex;
         flex-direction: column;
         gap: 1rem;
+        padding: 1rem;
+    }
+    .variants {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+    .component-block {
+        border: 1px solid var(--layout-border, #ccc);
+        padding: 1rem;
+        border-radius: 8px;
+    }
+    .states {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+        margin-top: 1rem;
+    }
+    .state-col {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        span {
+            font-size: 0.8rem;
+            color: #666;
+        }
     }
 </style>

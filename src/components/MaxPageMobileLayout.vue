@@ -84,8 +84,8 @@
 
     const { style: bugDraggableStyle } = useDraggable(bugDraggableEl, {
         initialValue: {
-            x: typeof window !== 'undefined' ? Math.max(15, window.innerWidth - 65) : 300,
-            y: typeof window !== 'undefined' ? Math.max(15, window.innerHeight - 130) : 550
+            x: typeof window !== 'undefined' ? Math.max(15, (window.visualViewport?.width || window.innerWidth) - 65) : 300,
+            y: typeof window !== 'undefined' ? Math.max(15, (window.visualViewport?.height || window.innerHeight) - 130) : 550
         }
     });
 
@@ -165,7 +165,7 @@
             .mobile-space {
                 width: 100%;
                 height: 20px;
-                z-index: 5;
+                z-index: var(--max-layer-sticky, 100);
                 pointer-events: none;
 
                 &.top {
@@ -190,7 +190,7 @@
                 position: absolute;
                 top: 0;
                 left: 0;
-                z-index: 3;
+                z-index: calc(var(--max-layer-sticky, 100) - 1);
                 content: '';
                 width: 100%;
                 height: 50px;

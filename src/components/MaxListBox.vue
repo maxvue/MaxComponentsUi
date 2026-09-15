@@ -680,7 +680,7 @@
             outline: none;
 
             &::placeholder {
-                color: var(--background-650);
+                color: var(--background-700);
             }
 
             &:focus {
@@ -861,7 +861,7 @@
         justify-content: center;
         gap: 8px;
         padding: 14px 12px;
-        color: var(--background-650);
+        color: var(--background-700);
         font-size: 0.9rem;
 
         .max-listbox-retry {

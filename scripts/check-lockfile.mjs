@@ -98,6 +98,44 @@ export function validateLockfile(dir = process.cwd()) {
         }
     }
 
+    // 2e. PeerDependencies & OptionalDependencies: package.json -> lockfile
+    const pkgPeerDeps = pkg.peerDependencies || {};
+    const pkgOptionalDeps = pkg.optionalDependencies || {};
+    const rootLockPeerDeps = rootLockPkg.peerDependencies || {};
+    const rootLockOptionalDeps = rootLockPkg.optionalDependencies || {};
+
+    for (const [dep, version] of Object.entries(pkgPeerDeps)) {
+        if (!rootLockPeerDeps[dep]) {
+            errors.push(`PeerDependência "${dep}" declarada em package.json ausente no bloco raiz de package-lock.json`);
+        } else if (rootLockPeerDeps[dep] !== version) {
+            errors.push(`Versão da peerDependência "${dep}" diverge: package.json declara "${version}", lockfile tem "${rootLockPeerDeps[dep]}"`);
+        }
+    }
+    for (const dep of Object.keys(rootLockPeerDeps)) {
+        if (!pkgPeerDeps[dep]) {
+            errors.push(`PeerDependência "${dep}" presente no bloco raiz de package-lock.json não está declarada em package.json`);
+        }
+    }
+
+    for (const [dep, version] of Object.entries(pkgOptionalDeps)) {
+        if (!rootLockOptionalDeps[dep]) {
+            errors.push(`OptionalDependência "${dep}" declarada em package.json ausente no bloco raiz de package-lock.json`);
+        } else if (rootLockOptionalDeps[dep] !== version) {
+            errors.push(`Versão da optionalDependência "${dep}" diverge: package.json declara "${version}", lockfile tem "${rootLockOptionalDeps[dep]}"`);
+        }
+    }
+    for (const dep of Object.keys(rootLockOptionalDeps)) {
+        if (!pkgOptionalDeps[dep]) {
+            errors.push(`OptionalDependência "${dep}" presente no bloco raiz de package-lock.json não está declarada em package.json`);
+        }
+    }
+
+    const pkgPeerDepsMeta = pkg.peerDependenciesMeta || {};
+    const rootLockPeerDepsMeta = rootLockPkg.peerDependenciesMeta || {};
+    if (JSON.stringify(pkgPeerDepsMeta) !== JSON.stringify(rootLockPeerDepsMeta)) {
+        errors.push(`peerDependenciesMeta diverge entre package.json e package-lock.json`);
+    }
+
     return {
         valid: errors.length === 0,
         errors

@@ -18,7 +18,7 @@ describe('useLoadingStore', () => {
         const store = useLoadingStore();
         store.start({ key: 'carregando.projeto' });
 
-        const internal_key = store.keys['carregando.projeto'];
+        const internal_key = store.keys['carregando.projeto'][0];
         const item = store.targets['body'].items[internal_key];
 
         expect(internal_key).toBe('0000.carregando.projeto');
@@ -31,7 +31,7 @@ describe('useLoadingStore', () => {
         const store = useLoadingStore();
         store.start({ key: 'x', target: '#painel', message: 'Aguarde', status: 'waiting' });
 
-        const item = store.targets['#painel'].items[store.keys['x']];
+        const item = store.targets['#painel'].items[store.keys['x'][0]];
 
         expect(item.target).toBe('#painel');
         expect(item.message).toBe('Aguarde');
@@ -44,9 +44,9 @@ describe('useLoadingStore', () => {
         store.start({ key: 'b' });
         store.start({ key: 'c' });
 
-        expect(store.keys['a']).toBe('0000.a');
-        expect(store.keys['b']).toBe('0001.b');
-        expect(store.keys['c']).toBe('0002.c');
+        expect(store.keys['a']?.[0]).toBe('0000.a');
+        expect(store.keys['b']?.[0]).toBe('0001.b');
+        expect(store.keys['c']?.[0]).toBe('0002.c');
     });
 
     it('reusa a mesma chave interna para a mesma chave lógica', () => {
@@ -85,7 +85,7 @@ describe('useLoadingStore', () => {
         store.end('a');
 
         expect(store.targets['body'].items['0000.a'].status).toBe('done');
-        expect(store.keys['a']).toBeUndefined();
+        expect(store.keys['a']?.[0]).toBeUndefined();
     });
 
     it('liberar a chave permite reiniciar o mesmo loading depois', () => {
@@ -95,7 +95,7 @@ describe('useLoadingStore', () => {
         store.start({ key: 'a' });
 
         // nova chave interna, pois a lógica foi liberada
-        expect(store.keys['a']).toBe('0001.a');
+        expect(store.keys['a']?.[0]).toBe('0001.a');
         expect(store.targets['body'].items['0001.a'].status).toBe('loading');
     });
 
@@ -149,7 +149,7 @@ describe('useLoadingStore', () => {
         await vi.advanceTimersByTimeAsync(600);
 
         expect(Object.keys(store.targets['body'].items)).toHaveLength(1);
-        expect(store.targets['body'].items[store.keys['b']].status).toBe('loading');
+        expect(store.targets['body'].items[store.keys['b']?.[0]].status).toBe('loading');
         vi.useRealTimers();
     });
 
@@ -229,8 +229,8 @@ describe('useLoadingStore', () => {
         store.error('d', 'Erro teste');
 
         expect(store.pendingItems).toHaveLength(2);
-        expect(store.pendingItems.map((i) => i.key)).toContain(store.keys['a']);
-        expect(store.pendingItems.map((i) => i.key)).toContain(store.keys['b']);
+        expect(store.pendingItems.map((i) => i.key)).toContain(store.keys['a']?.[0]);
+        expect(store.pendingItems.map((i) => i.key)).toContain(store.keys['b']?.[0]);
 
         expect(store.terminalItems).toHaveLength(2);
         expect(store.terminalItems.some((i) => i.status === 'done')).toBe(true);
@@ -311,7 +311,7 @@ describe('useLoadingStore', () => {
                 }
             });
 
-            const internalKey = store.keys[logicalKey];
+            const internalKey = store.keys[logicalKey]?.[0];
             expect(internalKey).toBeDefined();
             expect(store.targets['body'].items[internalKey].status).toBe('loading');
             expect(store.isPending()).toBe(true);
@@ -320,7 +320,7 @@ describe('useLoadingStore', () => {
             store.error(logicalKey, 'Falha ao conectar no gateway de pagamento');
 
             // A chave lógica NÃO deve ser apagada no erro para permitir resolução pública
-            expect(store.keys[logicalKey]).toBe(internalKey);
+            expect(store.keys[logicalKey]?.[0]).toBe(internalKey);
             expect(store.targets['body'].items[internalKey].status).toBe('error');
             expect(store.targets['body'].items[internalKey].message).toBe('Falha ao conectar no gateway de pagamento');
             expect(store.isPending()).toBe(false);
@@ -336,7 +336,7 @@ describe('useLoadingStore', () => {
             await vi.advanceTimersByTimeAsync(600);
 
             expect(store.targets['body'].items[internalKey]).toBeUndefined();
-            expect(store.keys[logicalKey]).toBeUndefined();
+            expect(store.keys[logicalKey]?.[0]).toBeUndefined();
             expect(store.isPending()).toBe(false);
             vi.useRealTimers();
         });
@@ -348,7 +348,7 @@ describe('useLoadingStore', () => {
             store.start({ key: logicalKey, message: 'Consultando CEP...' });
             store.error(logicalKey, 'Timeout');
 
-            const internalKey = store.keys[logicalKey];
+            const internalKey = store.keys[logicalKey]?.[0];
             expect(store.targets['body'].items[internalKey].status).toBe('error');
 
             // Retry restaura status para loading e preserva a chave

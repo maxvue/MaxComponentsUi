@@ -208,7 +208,7 @@
     const triggerRef = ref<HTMLElement | null>(null);
     const searchInputRef = ref<HTMLInputElement | null>(null);
     const drawerEl = ref<HTMLElement | null>(null);
-    const trap = useFocusTrap(drawerEl);
+    const trap = useFocusTrap(drawerEl, { onEscape: () => closeDrawer() });
     const modalStore = useModalStore();
     const modalId = 'max-icon-picker-' + useId();
     const isTop = computed(() => modalStore.isTop(modalId));
@@ -444,25 +444,19 @@
         closeDrawer();
     };
 
-    const onGlobalKeydown = (event: KeyboardEvent) => {
-        if (event.key === 'Escape' && visible.value && isTop.value) {
-            event.stopPropagation();
-            closeDrawer();
-        }
-    };
 
     watch(visible, async (val) => {
         if (val) {
             modalStore.push(modalId);
             scrollLock.lock();
-            if (typeof window !== 'undefined') window.addEventListener('keydown', onGlobalKeydown);
+
             trap.activate();
             await nextTick();
             searchInputRef.value?.focus();
         } else {
             modalStore.remove(modalId);
             scrollLock.unlock();
-            if (typeof window !== 'undefined') window.removeEventListener('keydown', onGlobalKeydown);
+
             trap.deactivate();
             nextTick(() => {
                 triggerRef.value?.focus();
@@ -494,7 +488,7 @@
             scrollLock.unlock();
         }
         trap.deactivate();
-        if (typeof window !== 'undefined') window.removeEventListener('keydown', onGlobalKeydown);
+
         if (svgFetchTimer !== null) {
             clearTimeout(svgFetchTimer);
             svgFetchTimer = null;
@@ -634,7 +628,7 @@
                     color: var(--background-700);
 
                     &::placeholder {
-                        color: var(--background-650);
+                        color: var(--background-700);
                     }
                 }
             }
@@ -645,7 +639,7 @@
                 align-items: center;
                 justify-content: center;
                 height: calc(90dvh - 140px);
-                color: var(--background-650);
+                color: var(--background-700);
                 font-size: 0.9rem;
                 gap: 0.5rem;
 

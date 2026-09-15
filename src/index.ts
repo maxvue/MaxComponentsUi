@@ -1,6 +1,3 @@
-// Importação essencial do CSS gerado pelo UnoCSS. O vite-plugin-css-injected-by-js injeta
-// estes estilos na tag <head> em tempo de import no runtime do consumidor. NÃO REMOVER.
-import 'virtual:uno.css';
 
 import { defineAsyncComponent, type App, type Plugin } from 'vue';
 export { MaxStyle, type MaxThemePreset, type SemanticColorPalette } from './styles/style';

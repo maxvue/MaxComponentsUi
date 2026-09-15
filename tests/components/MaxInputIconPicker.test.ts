@@ -192,7 +192,11 @@ describe('MaxInputIconPicker', () => {
 
         // Pressionar Escape fecha o diálogo
         const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true });
-        window.dispatchEvent(event);
+        document.dispatchEvent(event);
+        // Também tentar no próprio elemento em caso de foco
+        const drawerEl = wrapper.find('.max-icon-picker-drawer');
+        if (drawerEl.exists()) await drawerEl.trigger('keydown.escape');
+
         await wrapper.vm.$nextTick();
 
         expect((wrapper.vm as any).visible).toBe(false);

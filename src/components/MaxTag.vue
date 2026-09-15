@@ -68,7 +68,7 @@
         warning: 'var(--max-warning-500, #f59e0b)',
         danger: 'var(--max-danger-500, #ef4444)',
         error: 'var(--max-danger-500, #ef4444)',
-        secondary: 'var(--background-650, #64748b)'
+        secondary: 'var(--background-700, #64748b)'
     };
 
     const resolvedColor = computed<string | undefined>(() => {

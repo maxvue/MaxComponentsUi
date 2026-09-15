@@ -587,16 +587,8 @@
         try {
             blob = await new Promise<Blob | null>((resolve) => {
                 if (typeof canvas.toBlob === 'function') canvas.toBlob((b) => resolve(b), mimeType, quality);
-                else try {
-                    const data = canvas.toDataURL(mimeType, quality);
-                    const base64 = data.split(',')[1] || '';
-                    const bin = atob(base64);
-                    const arr = new Uint8Array(bin.length);
-                    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-                    resolve(new Blob([arr], { type: mimeType }));
-                } catch {
-                    resolve(null);
-                }
+                else resolve(null);
+
             });
         } catch (e: unknown) {
             cropError.value = 'Erro ao codificar imagem recortada.';
@@ -618,7 +610,6 @@
                 reader.readAsDataURL(blob!);
             });
 
-            if (!dataUrl && typeof canvas.toDataURL === 'function') dataUrl = canvas.toDataURL(mimeType, quality);
         } catch (e) {
             console.warn('MaxImage: falha ao gerar dataUrl opcional', e);
         }
@@ -916,6 +907,17 @@
                     &--br { bottom: -7px; right: -7px; cursor: nwse-resize; }
                 }
             }
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        ::before,
+        ::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
         }
     }
 </style>

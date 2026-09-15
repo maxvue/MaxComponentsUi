@@ -356,7 +356,7 @@
             color: var(--background-700);
 
             &::placeholder {
-                color: var(--max-content-placeholder, var(--background-650));
+                color: var(--max-content-placeholder, var(--background-700));
             }
         }
     }
@@ -870,7 +870,7 @@
             font-size: 12px;
             font-weight: 500;
             background: var(--background-75) !important;
-            color: var(--max-content-disabled, var(--background-650)) !important;
+            color: var(--max-content-disabled, var(--background-700)) !important;
         }
     }
 
@@ -883,7 +883,7 @@
         :deep(span),
         :deep(.max-input-native),
         :deep(.max-select-label) {
-            color: var(--max-content-disabled, var(--background-650)) !important;
+            color: var(--max-content-disabled, var(--background-700)) !important;
         }
     }
 
@@ -898,7 +898,7 @@
         span,
         .max-select-label,
         .max-input-native {
-            color: var(--max-content-disabled, var(--background-650)) !important;
+            color: var(--max-content-disabled, var(--background-700)) !important;
         }
     }
 }

@@ -104,8 +104,8 @@ export function useActiveOverlayPosition<T extends OverlayPositionResult = Overl
         const ctx: OverlayPositionContext = {
             targetRect,
             overlayRect,
-            viewportWidth: window.innerWidth,
-            viewportHeight: window.innerHeight
+            viewportWidth: window.visualViewport?.width || window.innerWidth,
+            viewportHeight: window.visualViewport?.height || window.innerHeight
         };
 
         if (options.compute) position.value = options.compute(ctx);

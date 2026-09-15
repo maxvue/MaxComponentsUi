@@ -653,7 +653,7 @@
                 }
 
                 .subLabel {
-                    color: var(--background-650);
+                    color: var(--background-700);
                     padding-left: 1rem;
                     text-align: right;
                     width: 100%;

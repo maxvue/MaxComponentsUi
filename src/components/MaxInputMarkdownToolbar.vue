@@ -584,7 +584,7 @@
         &__label {
             font-size: 0.8rem;
             font-weight: 600;
-            color: var(--max-content-secondary, var(--background-650, #4b5563));
+            color: var(--max-content-secondary, var(--background-700, #4b5563));
             white-space: nowrap;
             padding: 0 4px;
             height: auto;
@@ -678,7 +678,7 @@
         &__label {
             font-size: 0.75rem;
             font-weight: 500;
-            color: var(--max-content-secondary, var(--background-650, #4b5563));
+            color: var(--max-content-secondary, var(--background-700, #4b5563));
         }
 
         &__input {
@@ -746,6 +746,17 @@
                     border-color: var(--max-primary-600, #005F77);
                 }
             }
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        ::before,
+        ::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
         }
     }
 </style>

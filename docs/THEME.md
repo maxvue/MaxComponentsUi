@@ -10,8 +10,8 @@ A biblioteca oferece dois sistemas de estilos complementares:
 ## MaxStyle — Tokens Semânticos e Paleta Canônica
 
 O `MaxStyle` define a identidade cromática e a escala de variáveis CSS (`--max-primary-*`, etc.) do Design System Max.
-É importado diretamente via CSS (`import '@maxvue/max-components-ui/style.css'`) ou integrado via tokens.
-
+Não há mais injeção automática mandatória de estilos globais ou do UnoCSS na inicialização da aplicação. 
+O CSS deve ser importado granularmente onde necessário (ex: componentes específicos ou `import '@maxvue/max-components-ui/styles.css'` na raiz) para evitar side-effects e maximizar o tree-shaking.
 ### Paleta de Cores Semânticas
 
 | Token | Cor base (500) | Uso |
@@ -193,7 +193,7 @@ As variáveis CSS mais comuns geradas pelo tema:
 --background-750
 
 /* Cores semânticas (primary, success, info, warning, danger) */
---max-primary-50 a --max-primary-900
+--max-primary-100 a --max-primary-950
 --max-success-50 a --max-success-900
 /* ... */
 

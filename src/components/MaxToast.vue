@@ -66,7 +66,6 @@
                     v-if="copyStatus[toast.id] === 'success'"
                     class="toast-copy-status sr-only"
                     role="status"
-                    aria-live="polite"
                 >
                     Copiado para a área de transferência!
                 </span>
@@ -76,7 +75,6 @@
                     v-if="copyStatus[toast.id] === 'error'"
                     class="toast-copy-fallback"
                     role="alert"
-                    aria-live="assertive"
                 >
                     <span class="toast-copy-error-msg">Não foi possível copiar automaticamente. Copie manualmente abaixo:</span>
                     <textarea

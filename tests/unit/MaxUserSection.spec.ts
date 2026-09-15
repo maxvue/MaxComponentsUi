@@ -162,7 +162,7 @@ describe('MaxUserSection - WAI-ARIA e Teclado (Etapa 10)', () => {
         await wrapper.vm.$nextTick();
         expect(document.querySelector('.max-user-section-overlay')).not.toBeNull();
 
-        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
         await wrapper.vm.$nextTick();
 
         expect(document.querySelector('.max-user-section-overlay')).toBeNull();
@@ -170,26 +170,26 @@ describe('MaxUserSection - WAI-ARIA e Teclado (Etapa 10)', () => {
     });
 
     it('registra ouvinte global de keydown apenas enquanto o menu estiver aberto', async () => {
-        const addSpy = vi.spyOn(window, 'addEventListener');
-        const removeSpy = vi.spyOn(window, 'removeEventListener');
+        const addSpy = vi.spyOn(document, 'addEventListener');
+        const removeSpy = vi.spyOn(document, 'removeEventListener');
 
         const wrapper = mountSection();
 
         // Fechado -> sem listener
-        expect(addSpy).not.toHaveBeenCalledWith('keydown', expect.any(Function));
+        expect(addSpy.mock.calls.some((call) => call[0] === 'keydown')).toBe(false);;
 
         // Aberto -> com listener
         await wrapper.find('.user-section').trigger('click');
-        expect(addSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+        expect(addSpy.mock.calls.some((call) => call[0] === 'keydown')).toBe(true);;
 
         // Fechado -> remove
         await wrapper.find('.user-section').trigger('click');
-        expect(removeSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+        expect(removeSpy.mock.calls.some((call) => call[0] === 'keydown')).toBe(true);;
 
         // Aberto e desmontado -> remove
         await wrapper.find('.user-section').trigger('click');
         wrapper.unmount();
-        expect(removeSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+        expect(removeSpy.mock.calls.some((call) => call[0] === 'keydown')).toBe(true);;
     });
 
     it('fecha o menu ao clicar fora do componente no documento', async () => {

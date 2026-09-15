@@ -1,3 +1,4 @@
+import { resetOutsidePointerStateForTests } from '../../src/helpers/useOutsidePointer';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
@@ -41,6 +42,7 @@ describe('MaxTagSelect (Unit / WAI-ARIA & Keyboard Navigation)', () => {
     });
 
     afterEach(() => {
+        resetOutsidePointerStateForTests();
         document.body.innerHTML = '';
     });
 
@@ -220,40 +222,40 @@ describe('MaxTagSelect (Unit / WAI-ARIA & Keyboard Navigation)', () => {
 
     describe('Ciclo de Vida de Listeners de Teclado', () => {
         it('não associa keydown no window quando fechado', () => {
-            const addSpy = vi.spyOn(window, 'addEventListener');
+            const addSpy = vi.spyOn(document, 'addEventListener');
             mountTagSelect();
-            expect(addSpy).not.toHaveBeenCalledWith('keydown', expect.any(Function));
+            expect(addSpy.mock.calls.some((call) => call[0] === 'keydown')).toBe(false);;
             addSpy.mockRestore();
         });
 
         it('associa keydown no window ao abrir e remove ao fechar', async () => {
-            const addSpy = vi.spyOn(window, 'addEventListener');
-            const removeSpy = vi.spyOn(window, 'removeEventListener');
+            const addSpy = vi.spyOn(document, 'addEventListener');
+            const removeSpy = vi.spyOn(document, 'removeEventListener');
 
             const wrapper = mountTagSelect();
             const trigger = wrapper.find('.max-select');
 
             await trigger.trigger('click');
             await wrapper.vm.$nextTick();
-            expect(addSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+            expect(addSpy.mock.calls.some((call) => call[0] === 'keydown')).toBe(true);;
 
             await trigger.trigger('click');
             await wrapper.vm.$nextTick();
-            expect(removeSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+            expect(removeSpy.mock.calls.some((call) => call[0] === 'keydown')).toBe(true);;
 
             addSpy.mockRestore();
             removeSpy.mockRestore();
         });
 
         it('remove keydown no unmount se o menu estiver aberto', async () => {
-            const removeSpy = vi.spyOn(window, 'removeEventListener');
+            const removeSpy = vi.spyOn(document, 'removeEventListener');
 
             const wrapper = mountTagSelect();
             await wrapper.find('.max-select').trigger('click');
             await wrapper.vm.$nextTick();
 
             wrapper.unmount();
-            expect(removeSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+            expect(removeSpy.mock.calls.some((call) => call[0] === 'keydown')).toBe(true);;
 
             removeSpy.mockRestore();
         });

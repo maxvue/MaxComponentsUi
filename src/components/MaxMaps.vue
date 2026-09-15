@@ -14,7 +14,7 @@
         </div>
 
         <!-- Controles acessíveis de coordenadas para teclado e tecnologias assistivas -->
-        <div class="map-accessible-controls sr-only" role="region" aria-label="Controles acessíveis de coordenadas do mapa">
+        <div class="map-accessible-controls sr-only-focusable" role="region" aria-label="Controles acessíveis de coordenadas do mapa">
             <label>
                 <span>Latitude:</span>
                 <input
@@ -218,7 +218,7 @@
 
                 .t2 {
                     font-weight: 300;
-                    color: var(--background-650);
+                    color: var(--background-700);
                     font-size: 0.85rem;
                 }
             }
@@ -236,7 +236,7 @@
             grid-template-rows: 1fr 1fr 1fr;
         }
 
-        .sr-only {
+        .sr-only-focusable {
             position: absolute;
             width: 1px;
             height: 1px;
@@ -246,6 +246,21 @@
             clip-path: inset(50%);
             white-space: nowrap;
             border: 0;
+
+            &:focus-within {
+                position: static;
+                width: auto;
+                height: auto;
+                margin: 0;
+                overflow: visible;
+                clip-path: none;
+                white-space: normal;
+                z-index: 10;
+                background: var(--max-surface-0, #fff);
+                border: 1px solid var(--max-border-color, #ccc);
+                padding: 1rem;
+                border-radius: 4px;
+            }
         }
     }
 </style>

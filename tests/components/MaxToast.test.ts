@@ -597,4 +597,58 @@ describe('MaxToast', () => {
             expect(sfc).toMatch(/@media\s*\(max-width:\s*480px\)\s*\{/);
         });
     });
+
+    describe('Requisitos Fix 3 - Live Regions', () => {
+        it('mantém apenas um aria-live por toast e renderiza duas instâncias simultâneas', async () => {
+            const wrapper = mountToast((store) => {
+                store.add({ title: 'Notificação 1', severity: 'info', duration: 0 });
+                store.add({ title: 'Notificação 2', severity: 'error', duration: 0 });
+            });
+            await flushPromises();
+
+            const items = wrapper.findAll('.max-toast-item');
+            expect(items).toHaveLength(2);
+
+            const item1 = items[0];
+            expect(item1.attributes('role')).toBe('status');
+            expect(item1.findAll('[role="status"]')).toHaveLength(0);
+            expect(item1.findAll('[role="alert"]')).toHaveLength(0);
+
+            const item2 = items[1];
+            expect(item2.attributes('role')).toBe('alert');
+            expect(item2.findAll('[role="status"]')).toHaveLength(0);
+            expect(item2.findAll('[role="alert"]')).toHaveLength(0);
+        });
+
+        it('atualiza a mensagem do toast preservando o dono live único', async () => {
+            let toastStoreInstance: any = null;
+            let toastId: string = '';
+            const wrapper = mountToast((store) => {
+                toastStoreInstance = store;
+                toastId = store.add({ title: 'Título', message: 'Mensagem inicial', severity: 'info', duration: 0 });
+            });
+            await flushPromises();
+
+            let item = wrapper.find('.max-toast-item');
+            expect(item.text()).toContain('Mensagem inicial');
+
+            const index = toastStoreInstance.items.findIndex((t: any) => t.id === toastId);
+            // Para garantir reatividade no teste, substitua o objeto na array
+            if (index !== -1) {
+                const updatedToast = {
+                    ...toastStoreInstance.items[index],
+                    message: 'Mensagem atualizada'
+                };
+                toastStoreInstance.items.splice(index, 1, updatedToast);
+            }
+
+            await flushPromises();
+
+            item = wrapper.find('.max-toast-item');
+            expect(item.text()).toContain('Mensagem atualizada');
+            expect(item.attributes('role')).toBe('status');
+            expect(item.findAll('[role="status"]')).toHaveLength(0);
+            expect(item.findAll('[role="alert"]')).toHaveLength(0);
+        });
+    });
 });

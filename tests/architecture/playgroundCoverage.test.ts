@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
-import { PLAYGROUND_CATALOG, FAMILIES, getCoverageStats } from '../../playground/src/catalog';
+// We will dynamically import catalog to prevent TS from tracing playground dependencies during type-check
 
 const ROOT_DIR = path.resolve(__dirname, '../../');
 const MANIFEST_PATH = path.resolve(ROOT_DIR, 'src/components-manifest.json');
@@ -11,7 +11,21 @@ describe('E10-10: Cobertura do Playground e Identidade Canônica', () => {
     const manifestRaw = fs.readFileSync(MANIFEST_PATH, 'utf-8');
     const manifestComponents: string[] = JSON.parse(manifestRaw).components;
 
-    it('100% dos componentes do manifesto constam no catálogo do playground', () => {
+    let PLAYGROUND_CATALOG: any[];
+    let FAMILIES: any[];
+    let getCoverageStats: () => any;
+
+    const catalogPath = '../../playground/src/catalog.ts';
+
+    // @ts-ignore
+    beforeAll(async () => {
+        const mod = await import(/* @vite-ignore */ catalogPath);
+        PLAYGROUND_CATALOG = mod.PLAYGROUND_CATALOG;
+        FAMILIES = mod.FAMILIES;
+        getCoverageStats = mod.getCoverageStats;
+    });
+
+    it('100% dos componentes do manifesto constam no catálogo do playground', async () => {
         const catalogComponentNames = new Set(PLAYGROUND_CATALOG.map((c) => c.name));
 
         const missing = manifestComponents.filter((comp) => !catalogComponentNames.has(comp));

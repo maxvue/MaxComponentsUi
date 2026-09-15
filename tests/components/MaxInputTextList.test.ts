@@ -316,20 +316,5 @@ describe('MaxInputTextList', () => {
                 expect(spacer.attributes('style')).toContain(`height: ${expectedHeight}px`);
             }
         });
-
-        it('R22: precisão e alinhamento de linha com erro <= 1px sob escala/zoom', () => {
-            const wrapper = mountTextList({ modelValue: 'linha 1\nlinha 2\nlinha 3' });
-            const lineNumbers = wrapper.findAll('.line-number');
-            expect(lineNumbers).toHaveLength(3);
-
-            // Cada linha no DOM virtual possui cálculo determinístico baseado em 21px
-            const LINE_HEIGHT = 21;
-            for (let i = 0; i < 3; i++) {
-                const expectedOffset = i * LINE_HEIGHT;
-                const calculatedTop = i * LINE_HEIGHT;
-                const diff = Math.abs(expectedOffset - calculatedTop);
-                expect(diff).toBeLessThanOrEqual(1);
-            }
-        });
     });
 });

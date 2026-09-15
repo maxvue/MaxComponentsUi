@@ -88,12 +88,7 @@ export const LEGACY_COMPAT_CATALOG: Record<string, LegacyExceptionCatalogEntry> 
         requiredCanonicalClasses: ['max-tag-select']
     },
     'MaxTable.vue': {
-        allowedStyleSelectors: {
-            '.p-datatable': 1,
-            '.p-datatable-table-container': 1,
-            '.p-datatable-column-header-content': 1,
-            '.p-datatable-column-title': 1
-        },
+        allowedStyleSelectors: {},
         allowedTemplateClasses: {
             'p-datatable': 1,
             'p-datatable-table-container': 1,
@@ -102,7 +97,10 @@ export const LEGACY_COMPAT_CATALOG: Record<string, LegacyExceptionCatalogEntry> 
         },
         requiredCanonicalClasses: [
             'max-table',
-            'max-table-main-div'
+            'max-table-main-div',
+            'max-table-container',
+            'max-table-column-header-content',
+            'max-table-column-title'
         ]
     },
     'MaxInputIconPicker.vue': {

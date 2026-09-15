@@ -1,7 +1,7 @@
 <template>
     <button
         v-if="props.label || Boolean($slots.default)"
-        type="button"
+        :type="resolvedType"
         class="max-button"
         :class="buttonClasses"
         :disabled="props.disabled || props.loading"
@@ -58,6 +58,8 @@
         if (props.iconPos) return props.iconPos;
         return 'left';
     });
+
+    const resolvedType = computed(() => props.type ?? 'button');
 
     const showIcon = computed(() => Boolean(props.loading || props.icon || props.i));
 
@@ -382,6 +384,17 @@
                     color: inherit !important;
                 }
             }
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        ::before,
+        ::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
         }
     }
 </style>
