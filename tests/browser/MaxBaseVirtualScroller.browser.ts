@@ -1,6 +1,7 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { page } from 'vitest/browser';
 import { createApp, h, type App } from 'vue';
+import axe from 'axe-core';
 import MaxBaseVirtualScroller from '../../src/components/base/MaxBaseVirtualScroller.vue';
 
 let activeApp: App | null = null;
@@ -46,6 +47,24 @@ describe('MaxBaseVirtualScroller no Chromium real (F14)', () => {
         const scroller = await mountListbox();
         const listbox = page.getByRole('listbox', { name: 'Opções virtualizadas' });
         await expect.element(listbox).toBeVisible();
+
+        // A validação de runtime não substitui o motor de acessibilidade do
+        // navegador. Limitamos a auditoria às regras semânticas que compõem o
+        // contrato deste listbox, para não atribuir ao componente violações do
+        // host de teste.
+        const axeResult = await axe.run(hostElement!, {
+            runOnly: {
+                type: 'rule',
+                values: [
+                    'aria-allowed-attr',
+                    'aria-input-field-name',
+                    'aria-required-children',
+                    'aria-required-parent',
+                    'aria-valid-attr-value'
+                ]
+            }
+        });
+        expect(axeResult.violations).toEqual([]);
 
         scroller.focus();
         scroller.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));

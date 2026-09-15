@@ -48,6 +48,40 @@ sucesso
 
 O cenário Chromium exercita `MaxPopover` real em pilha aninhada, com Tab, Shift+Tab, Escape e retorno A → B → A → gatilho. Os testes dos componentes reais IconPicker e Markdown cobrem a integração deles ao mesmo trap para Escape.
 
+## Retry pós-REV5-R07 — pilha concreta em Chromium
+
+- **Executor:** `/root/imp5_r07_realstack`
+- **Data:** `2026-09-15T16:12:43-03:00`
+- **HEAD auditado:** `cc84e091` com alterações paralelas não relacionadas preservadas
+
+O cenário adversarial agora monta, no mesmo app Vue/Pinia e em Chromium, um
+`MaxPopover` real contendo `MaxInputMarkdown` real (editor Tiptap e lightbox)
+e `MaxInputIconPicker` real (trigger, drawer e backdrop). Não há `div` sintética
+nem chamada direta a `useFocusTrap` no cenário novo.
+
+Ele prova uma pilha de três traps ativos, `Tab` e `Shift+Tab` exclusivamente no
+drawer superior, pointer no backdrop fechando apenas o IconPicker sem atingir
+Markdown/Popover (sem click-through), e três Escapes fechando IconPicker,
+lightbox e Popover nessa ordem, com retorno final ao trigger original. A abertura
+do lightbox usa a API pública `openImage` que é a mesma chamada pelo handler de
+clique do editor; o runner Vitest Browser não oferece ponteiro físico do
+ProseMirror.
+
+```text
+$ npx vitest run --config vitest.browser.config.ts tests/browser/MaxFocusStack.browser.ts
+Test Files  1 passed (1)
+Tests  3 passed (3)
+
+$ npx eslint tests/browser/MaxFocusStack.browser.ts
+sucesso (0 erros, 0 avisos)
+
+$ git diff --check
+sucesso
+```
+
+O Chromium ainda imprime o warning preexistente do Tiptap sobre extensões
+duplicadas (`link`, `underline`); ele não é introduzido pelo cenário R07.
+
 ## Rollback
 
-Reverter somente as alterações nos três arquivos de código/teste listados no manifesto; não há alteração no helper de F07.
+Reverter somente as alterações nos três arquivos de código/teste listados no manifesto e no cenário browser; não há alteração no helper de F07.

@@ -59,6 +59,31 @@ Error: browserType.launch: Executable doesn't exist at
 
 O ESLint focal também não pôde iniciar porque a instalação local resolve `@stylistic/eslint-plugin/index.js` para um arquivo ausente. Isso é um defeito de dependência do checkout, independente destes arquivos.
 
+## Revalidação com Chromium e axe-core
+
+Em `2026-09-15T16:10:00-03:00`, o retry foi executado no HEAD
+`cc84e091621bde813900d05b9924e0a4105feb8c`, agora com Chromium e
+`axe-core@4.11.0` disponíveis. O cenário monta um listbox real nomeado com
+10.000 itens, executa o motor oficial contra as regras ARIA do contrato e,
+após rolar para desmontar a opção ativa, confirma que
+`aria-activedescendant` é removido e não referencia nó ausente.
+
+```text
+$ npx vitest run --config vitest.browser.config.ts tests/browser/MaxBaseVirtualScroller.browser.ts
+Test Files  1 passed (1)
+Tests  1 passed (1)
+
+$ npx vitest run tests/components/base/MaxBaseVirtualScroller.test.ts
+Test Files  1 passed (1)
+Tests  38 passed (38)
+```
+
+`npm run type-check:test` foi também reexecutado, mas continua bloqueado por
+imports de `@maxvue/max-components-ui` em cenários do playground e por dois
+erros já existentes de `never` em `InputBaseForms.browser.ts`; não houve erro
+atribuível ao virtual scroller.
+
 ## Veredito
 
-**IMPLEMENTADO — aguardando refutação independente e execução do gate browser/axe em ambiente com Chromium e axe-core.**
+**IMPLEMENTADO — E06-01/E06-02 agora possuem evidência Chromium e axe-core
+real; aguarda somente a revalidação independente do papel REV5-F14.**
