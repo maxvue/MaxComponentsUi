@@ -209,11 +209,13 @@
         left: number;
         isTop: boolean;
         isLeft: boolean;
+        maxWidth: number;
+        maxHeight: number;
     }>({
         target: btn_el,
         overlay: el,
         active: isOpen,
-        compute: ({ targetRect, overlayRect, viewportWidth, viewportHeight, safeArea }) => {
+        compute: ({ targetRect, overlayRect, viewportWidth, viewportHeight, safeArea, visualViewport }) => {
             const width_btn = targetRect.width;
             const height_btn = targetRect.height;
             const width_el = overlayRect.width || 300;
@@ -226,11 +228,16 @@
 
             const margin = 8;
             const arrowSpacing = 15;
+            // As coordenadas de `fixed` e de DOMRect pertencem à layout
+            // viewport. Em pinch-zoom, a viewport visual pode começar longe
+            // de zero: sem estes offsets o popover fica fora da área tocável.
+            const viewportLeft = visualViewport?.offsetLeft ?? 0;
+            const viewportTop = visualViewport?.offsetTop ?? 0;
 
-            const minTop = Math.max(margin, safeTop + margin);
-            const maxBottom = Math.max(minTop, viewportHeight - safeBottom - margin);
-            const minLeft = Math.max(margin, safeLeft + margin);
-            const maxRight = Math.max(minLeft, viewportWidth - safeRight - margin);
+            const minTop = viewportTop + Math.max(margin, safeTop + margin);
+            const maxBottom = Math.max(minTop, viewportTop + viewportHeight - safeBottom - margin);
+            const minLeft = viewportLeft + Math.max(margin, safeLeft + margin);
+            const maxRight = Math.max(minLeft, viewportLeft + viewportWidth - safeRight - margin);
 
             const spaceBelow = maxBottom - (targetRect.top + height_btn);
             const spaceAbove = targetRect.top - minTop;
@@ -266,7 +273,9 @@
                 top,
                 left,
                 isTop,
-                isLeft
+                isLeft,
+                maxWidth: maxRight - minLeft,
+                maxHeight: maxBottom - minTop
             };
         }
     });
@@ -275,7 +284,9 @@
         const style: Record<string, string | number> = {
             top: `${position.value.top}px`,
             left: `${position.value.left}px`,
-            opacity: isPositioned.value ? 1 : 0
+            opacity: isPositioned.value ? 1 : 0,
+            maxWidth: `${position.value.maxWidth}px`,
+            maxHeight: `${position.value.maxHeight}px`
         };
 
         if (props.width) {

@@ -49,4 +49,26 @@ O runner Chromium desta suíte expõe uma `VisualViewport` real, mas é iniciado
 
 ## Veredito
 
-**IMPLEMENTADO APÓS REJEIÇÃO — pronto para nova refutação de `REV5-R09`; a prova de pinch-zoom real permanece pendente de infraestrutura CDP.**
+## Retry: evidência CDP de pinch-zoom real
+
+Foi adicionada a fixture isolada `tests/browser/r09Zoom.fixture.html` e o teste de
+integração `tests/integration/r09VisualViewportZoom.test.ts`. Ele inicia Chromium
+por Playwright, aplica `Emulation.setDeviceMetricsOverride` e
+`Emulation.setPageScaleFactor({ pageScaleFactor: 2 })` pela sessão CDP e exige
+`window.visualViewport.scale === 2`. A medição ocorre nos componentes reais
+`MaxBaseOverlay` e `MaxPopover`: margem de 8 px dentro da viewport visual,
+scroll interno, `elementFromPoint` e pseudo-elemento de seta do popover.
+
+O retry também corrigiu `MaxPopover`: os limites de seu posicionamento agora
+incorporam `VisualViewport.offsetLeft/offsetTop` e publicam `maxWidth`/
+`maxHeight` na área visual útil, impedindo recorte após pinch-zoom deslocado.
+
+Comando executado:
+
+```text
+npx vitest run tests/integration/r09VisualViewportZoom.test.ts
+Test Files  1 passed (1)
+Tests       1 passed (1)
+```
+
+**IMPLEMENTADO — pronto para nova refutação independente de `REV5-R09`.**
