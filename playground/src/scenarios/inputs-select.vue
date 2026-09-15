@@ -47,6 +47,32 @@
                 </div>
 
                 <div class="component-block">
+                    <h3>MaxInputBirthday</h3>
+                    <div class="states">
+                        <!-- Default -->
+                        <div class="state-col">
+                            <span>Normal (Vazio)</span>
+                            <MaxInputBirthday label="Data de Nascimento" />
+                        </div>
+                        <!-- Preenchido -->
+                        <div class="state-col">
+                            <span>Preenchido (2000-01-15)</span>
+                            <MaxInputBirthday model-value="2000-01-15" label="Data de Nascimento" />
+                        </div>
+                        <!-- Disabled -->
+                        <div class="state-col">
+                            <span>Disabled</span>
+                            <MaxInputBirthday model-value="1995-10-25" label="Data de Nascimento" disabled />
+                        </div>
+                        <!-- Error -->
+                        <div class="state-col">
+                            <span>Com Erro</span>
+                            <MaxInputBirthday label="Data de Nascimento" error="Data obrigatória" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="component-block">
                     <h3>MaxInputAutoComplete</h3>
                     <div class="states">
                         <!-- Default -->
@@ -97,6 +123,7 @@
     const scenarioProps: any = { modelValue: '', options: [], items: [], route: '/', target: document.body };
     import { MaxInputSelect } from '@maxvue/max-components-ui';
     import { MaxInputDatePicker } from '@maxvue/max-components-ui';
+    import { MaxInputBirthday } from '@maxvue/max-components-ui';
     import { MaxInputAutoComplete } from '@maxvue/max-components-ui';
     import { MaxInputAutoCompleteApi } from '@maxvue/max-components-ui';
 </script>
