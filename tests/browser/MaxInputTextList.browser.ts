@@ -1,6 +1,7 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { createApp, h, type App } from 'vue';
 import MaxInputTextList from '../../src/components/MaxInputTextList.vue';
+import { installBrowserTestApp } from './bootstrap';
 
 let activeApp: App | null = null;
 let hostElement: HTMLElement | null = null;
@@ -43,6 +44,7 @@ async function mountTextList(modelValue: string, scale = 1): Promise<{ host: HTM
             return h(MaxInputTextList, { modelValue });
         }
     });
+    installBrowserTestApp(app);
 
     activeApp = app;
     app.mount(hostElement);

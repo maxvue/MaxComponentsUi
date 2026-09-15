@@ -120,3 +120,39 @@ Tests  2 passed (2)
 
 **BLOQUEIO TÉCNICO VERIFICADO — não declarar R04 aceito enquanto o autofill
 real não puder ser executado.**
+
+## Retry Chrome Selenium 151 — 2026-09-15
+
+O runtime que bloqueava a prova era somente o Chromium 153 distribuído pelo
+Playwright. O teste de integração agora seleciona explicitamente o Chrome
+151 do Selenium por `MAX_UI_AUTOFILL_EXECUTABLE` (com o caminho local
+diagnosticado como padrão) e falha de forma clara se nenhum runtime compatível
+for encontrado.
+
+Contra a fixture HTTP/Vite com `MaxInputText` real, o teste executa o fluxo
+CDP integral, sem `locator.fill`, `userEvent`, escrita de `.value` ou evento
+`input` sintético:
+
+1. `Autofill.enable`;
+2. `Autofill.setAddresses`;
+3. resolução do `backendNodeId` do owner nativo e do `frameId`;
+4. `Autofill.trigger({ fieldId, frameId, address })`;
+5. espera por `Autofill.addressFormFilled`;
+6. confirmação do campo preenchido, do DOM e de `FormData`.
+
+O evento retornou o campo `email`, valor `ada@example.test`, tipo de autofill
+`Email address` e estratégia `autocompleteAttribute`. O owner no DOM e o
+`FormData` do formulário exibiram o mesmo valor. Essa é uma prova do
+subsistema Autofill do Chrome, não de interação simulada.
+
+```text
+$ npx vitest run tests/integration/r04ChromiumAutofill.test.ts --reporter=verbose
+Test Files  1 passed (1)
+Tests  1 passed (1)
+
+$ npx vue-tsc -p tsconfig.test.json --noEmit --pretty false
+exit 0
+```
+
+**IMPLEMENTADO — R04 possui agora a evidência de autofill real exigida e
+aguarda a refutação independente REV5-R04.**

@@ -1,5 +1,60 @@
 # REV5-R04 — Refutação independente de E03-02
 
+## Revalidação final com Autofill CDP — 2026-09-15
+
+- Papel: `REV5-R04` (somente leitura no código de produção).
+- Agente: `/root/rev5_r04_chrome151`.
+- Início: `2026-09-15T18:14:00-03:00`.
+- Fim: `2026-09-15T18:15:00-03:00`.
+- HEAD auditado: `d12d4571799e97ca286f86fa716ce29b80709aaf`, com a implementação R04
+  local pendente de commit.
+- Referência adversarial: `aac16bca`.
+
+### Caso adversarial e evidência independente
+
+O runtime Playwright padrão continua inadequado: ele não expõe o domínio CDP
+`Autofill`. A revalidação usa explicitamente o Chrome Selenium 151 em
+`/home/johnattas/.cache/selenium/chrome/linux64/151.0.7922.76/chrome`, cuja
+versão é afirmada pelo próprio teste como `Chrome/151.*`.
+
+```text
+$ MAX_UI_AUTOFILL_EXECUTABLE=/home/johnattas/.cache/selenium/chrome/linux64/151.0.7922.76/chrome \\
+    npx vitest run tests/integration/r04ChromiumAutofill.test.ts --reporter=verbose
+Test Files  1 passed (1)
+Tests  1 passed (1)
+```
+
+O teste não escreve `.value` nem despacha `input` para fabricar autofill. Ele
+executa `Autofill.enable`, `Autofill.setAddresses` e `Autofill.trigger` pelo
+DevTools Protocol, aguarda `Autofill.addressFormFilled` e confirma que o
+evento contém `email=ada@example.test` (`Email address`). Em seguida lê o
+valor do owner nativo e `new FormData(form).get('email')`; ambos são
+`ada@example.test`.
+
+Também foram reproduzidos os casos de anatomia e formulário:
+
+```text
+$ npx vitest run --config vitest.browser.config.ts tests/browser/InputBaseForms.browser.ts --reporter=verbose
+Test Files  1 passed (1)
+Tests  2 passed (2)
+
+$ npm exec vitest run tests/components/inputBaseAttributesSeparation.test.ts -- --reporter=verbose
+Test Files  1 passed (1)
+Tests  99 passed (99)
+```
+
+A matriz Chromium monta as 25 famílias e verifica owner, `label[for]`,
+`required` vazio, exclusão nativa de `disabled` em `FormData` e serialização
+positiva. Os cinco controles compostos usam somente um owner nativo
+`.max-native-form-proxy`; o gatilho visual recebe `triggerAttrs`, dos quais os
+atributos de formulário foram removidos. A política explícita para controles
+sem semântica de perfil é `autocomplete="off"`; portanto não se declara que
+Select, TagSelect, IconPicker, OTP ou Switch aceitam perfil de e-mail.
+
+**Veredito: ACEITO.** O caso antes bloqueador — autofill real — é agora
+reproduzido pelo subsistema do Chrome, e a matriz independente preserva o
+contrato nativo das 25 famílias sem foco manual do wrapper.
+
 ## Revalidação nativa — 2026-09-15 (HEAD f02b0b28)
 
 - Papel: `REV5-R04` (somente leitura no código de produção).

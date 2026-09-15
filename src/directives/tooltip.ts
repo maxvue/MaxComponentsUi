@@ -12,6 +12,8 @@ interface TooltipOptions {
     class?: string;
 }
 
+type TooltipBindingValue = string | boolean | null | undefined | TooltipOptions;
+
 type Position = 'top' | 'right' | 'bottom' | 'left';
 
 interface TooltipState {
@@ -30,10 +32,13 @@ const states = new WeakMap<HTMLElement, TooltipState>();
 let idCounter = 0;
 const nextId = () => `max-tooltip-${++idCounter}`;
 
-const parseOptions = (binding: DirectiveBinding<string | TooltipOptions>): TooltipOptions =>
-    typeof binding.value === 'string' ? { value: binding.value } : (binding.value ?? {});
+const parseOptions = (binding: DirectiveBinding<TooltipBindingValue>): TooltipOptions => {
+    if (typeof binding.value === 'string') return { value: binding.value };
+    if (binding.value && typeof binding.value === 'object') return binding.value;
+    return {};
+};
 
-const parsePosition = (binding: DirectiveBinding<string | TooltipOptions>): Position => {
+const parsePosition = (binding: DirectiveBinding<TooltipBindingValue>): Position => {
     if (binding.modifiers.top) return 'top';
     if (binding.modifiers.right) return 'right';
     if (binding.modifiers.bottom) return 'bottom';
@@ -197,7 +202,7 @@ const hide = (el: HTMLElement, state: TooltipState) => {
     }, delay);
 };
 
-const attachListeners = (el: HTMLElement, state: TooltipState, binding: DirectiveBinding<string | TooltipOptions>) => {
+const attachListeners = (el: HTMLElement, state: TooltipState, binding: DirectiveBinding<TooltipBindingValue>) => {
     const listeners: Array<[string, EventListener]> = [];
 
     const onEnter = () => show(el, state);
@@ -218,7 +223,7 @@ const detachListeners = (el: HTMLElement, state: TooltipState) => {
     state.listeners = [];
 };
 
-export const Tooltip: Directive<HTMLElement, string | TooltipOptions> = {
+export const Tooltip: Directive<HTMLElement, TooltipBindingValue> = {
     mounted(el, binding) {
         const state: TooltipState = {
             tooltipEl: null,

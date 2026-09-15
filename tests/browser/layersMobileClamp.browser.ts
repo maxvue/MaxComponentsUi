@@ -6,6 +6,7 @@ import MaxPopover from '../../src/components/MaxPopover.vue';
 import MaxPopoverConfirm from '../../src/components/MaxPopoverConfirm.vue';
 import MaxBaseOverlay from '../../src/components/base/MaxBaseOverlay.vue';
 import { useConfirmStore } from '../../src/stores/useConfirm.Store';
+import { installBrowserTestApp } from './bootstrap';
 import '../../src/themes/tokens.scss';
 import '../../src/themes/params.scss';
 
@@ -61,6 +62,7 @@ describe('Camadas Semânticas, Z-Index e Clamp Responsivo no Chromium Real (R09/
                 default: () => h('div', { style: 'width: 400px; height: 400px;', 'data-testid': 'conteudo-overlay' }, 'Conteúdo extenso')
             })
         });
+        installBrowserTestApp(app);
         activeApp = app;
         app.mount(hostElement);
         await settle();
@@ -110,6 +112,7 @@ describe('Camadas Semânticas, Z-Index e Clamp Responsivo no Chromium Real (R09/
         });
 
         app.use(createPinia());
+        installBrowserTestApp(app);
         activeApp = app;
         app.mount(hostElement);
         await settle();
@@ -165,6 +168,7 @@ describe('Camadas Semânticas, Z-Index e Clamp Responsivo no Chromium Real (R09/
         });
 
         app.use(createPinia());
+        installBrowserTestApp(app);
         activeApp = app;
         app.mount(hostElement);
         await settle();
@@ -208,6 +212,7 @@ describe('Camadas Semânticas, Z-Index e Clamp Responsivo no Chromium Real (R09/
         });
 
         app.use(createPinia());
+        installBrowserTestApp(app);
         activeApp = app;
         app.mount(hostElement);
         await settle();

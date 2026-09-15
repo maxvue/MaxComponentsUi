@@ -1,5 +1,53 @@
 # Gate GATE5-INPUTS-FORMS — inputs e formulários nativos
 
+## Revalidação com Chrome 151 — 2026-09-15
+
+### Identidade
+
+- Papel: `GATE5-INPUTS-FORMS` (somente leitura de código de produção).
+- Agente de revalidação: `/root/rev5_r04_chrome151`.
+- Parent: `/root`.
+- Início: `2026-09-15T18:15:00-03:00`.
+- Fim: `2026-09-15T18:16:00-03:00`.
+- HEAD auditado: `d12d4571799e97ca286f86fa716ce29b80709aaf`, com a implementação R04
+  local pendente de commit.
+
+### Evidência reproduzida
+
+```text
+$ npx vitest run --config vitest.browser.config.ts tests/browser/InputBaseForms.browser.ts --reporter=verbose
+Test Files  1 passed (1)
+Tests  2 passed (2)
+
+$ MAX_UI_AUTOFILL_EXECUTABLE=/home/johnattas/.cache/selenium/chrome/linux64/151.0.7922.76/chrome \\
+    npx vitest run tests/integration/r04ChromiumAutofill.test.ts --reporter=verbose
+Test Files  1 passed (1)
+Tests  1 passed (1)
+
+$ npm exec vitest run tests/components/inputBaseAttributesSeparation.test.ts -- --reporter=verbose
+Test Files  1 passed (1)
+Tests  99 passed (99)
+```
+
+A matriz Chromium efetivamente monta as 25 famílias e confirma owner,
+`label[for]`, `required` nativo (com a exceção intrínseca de
+`input[type=color]`), exclusão de `disabled` em `FormData`, submissão e o
+owner/proxy único de cada controle composto. O wrapper visual não recebe
+atributos de formulário, nem há foco manual no wrapper.
+
+A prova de autofill não usa `userEvent.fill`, atribuição de `.value` ou evento
+sintético: no Chrome 151 configurado acima, o teste usa o DevTools Protocol
+real para `Autofill.enable`, `Autofill.setAddresses` e `Autofill.trigger`,
+aguarda `Autofill.addressFormFilled` e verifica `email=ada@example.test` no
+owner nativo e no `FormData`. Para controles sem semântica de perfil, a
+política é explícita (`autocomplete="off"`), em vez de anunciar falsamente
+autofill de e-mail.
+
+### Veredito da revalidação
+
+**ACEITO.** Os três conjuntos de prova passaram, incluindo o requisito antes
+bloqueado de autofill real do Chromium.
+
 ## Identidade
 
 - Papel: `GATE5-INPUTS-FORMS` (somente leitura de código de produção).

@@ -3,6 +3,7 @@ import { page } from 'vitest/browser';
 import { createApp, h, type App } from 'vue';
 import axe from 'axe-core';
 import MaxBaseVirtualScroller from '../../src/components/base/MaxBaseVirtualScroller.vue';
+import { installBrowserTestApp } from './bootstrap';
 
 let activeApp: App | null = null;
 let hostElement: HTMLElement | null = null;
@@ -29,6 +30,7 @@ async function mountListbox() {
             item: ({ item }: { item: string }) => h('span', { class: 'row-item' }, item)
         })
     });
+    installBrowserTestApp(activeApp);
     activeApp.mount(hostElement);
     await settle();
 

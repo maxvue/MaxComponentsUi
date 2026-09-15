@@ -2,6 +2,7 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { page } from 'vitest/browser';
 import { createApp, h, ref, type App } from 'vue';
 import MaxCreditCard from '../../src/components/MaxCreditCard.vue';
+import { installBrowserTestApp } from './bootstrap';
 
 let activeApp: App | null = null;
 let hostElement: HTMLElement | null = null;
@@ -39,6 +40,7 @@ async function mountCreditCard(props: Record<string, unknown> = {}) {
             return h(MaxCreditCard, reactiveProps.value);
         }
     });
+    installBrowserTestApp(app);
 
     activeApp = app;
     app.mount(hostElement);

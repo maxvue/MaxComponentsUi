@@ -522,7 +522,8 @@
 
 @media (prefers-reduced-motion: reduce) {
     .max-table-fields-wrapper .max-table-spinner {
-        animation-duration: 4s;
+        animation-duration: 0.01ms;
+        animation-iteration-count: 1;
     }
 }
 </style>

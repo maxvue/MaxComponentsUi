@@ -1,6 +1,7 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { createApp, h, ref, type App } from 'vue';
 import MaxTagSelect from '../../src/components/MaxTagSelect.vue';
+import { installBrowserTestApp } from './bootstrap';
 import '../../src/themes/all.scss';
 
 let activeApp: App | null = null;
@@ -46,6 +47,7 @@ async function mountTagSelect(props: Record<string, any> = {}) {
             });
         }
     });
+    installBrowserTestApp(app);
 
     activeApp = app;
     app.mount(hostElement);
