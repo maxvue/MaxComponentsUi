@@ -951,7 +951,7 @@
 
 .max-select-overlay {
     position: fixed;
-    z-index: var(--z-dropdown, 1000);
+    z-index: 9999;
     background: var(--background-0, #fff);
     border: 1px solid var(--surface-border);
     border-radius: 6px;
