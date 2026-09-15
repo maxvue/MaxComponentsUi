@@ -7,10 +7,6 @@
 @use './params.scss' as params;
 @use './tokens.scss' as tokens;
 
-:global(*, *::before,*::after ) {
-    box-sizing: border-box;
-}
-
 *, *::before, *::after {
     box-sizing: border-box;
 }

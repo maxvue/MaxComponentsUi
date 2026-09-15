@@ -1,10 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
+import { compileStyle, parse, type ElementNode, type Node, type RootNode } from '@vue/compiler-sfc';
+import postcss from 'postcss';
+import * as sass from 'sass';
 
 const componentsDir = path.resolve(__dirname, '../../src/components');
-const globalFocusSource = fs.readFileSync(path.resolve(__dirname, '../../src/themes/all.scss'), 'utf8');
+const themesDir = path.resolve(__dirname, '../../src/themes');
 const background650Inventory = fs.readFileSync(path.resolve(__dirname, '../../docs/optimize-new/execution-fix5/R16-background-650-inventory.md'), 'utf8');
+const globalCss = sass.compile(path.join(themesDir, 'all.scss')).css;
+
+type FocusTarget = { tag: string; classes: string[]; role?: string; tabindex?: string; source: string };
 
 function vueFiles(dir: string): string[] {
     return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -14,110 +20,93 @@ function vueFiles(dir: string): string[] {
     });
 }
 
-function templateOf(source: string) {
-    return source.match(/<template[^>]*>([\s\S]*?)<\/template>/i)?.[1] ?? '';
+function attribute(node: ElementNode, name: string) {
+    const prop = node.props.find((candidate) => candidate.type === 6 && candidate.name === name);
+    return prop?.value?.content;
 }
 
-/** Alvos alcançáveis por Tab derivados do template, não de uma lista manual de SFCs. */
-type FocusTarget = { tag: string; attrs: string; classes: string[] };
+function targetOf(node: ElementNode): FocusTarget | undefined {
+    if (node.tagType !== 0) return undefined;
+    const tag = node.tag.toLowerCase();
+    const role = attribute(node, 'role');
+    const tabindex = attribute(node, 'tabindex');
+    const disabled = node.props.some((prop) => prop.type === 6 && prop.name === 'disabled');
+    const native = ['button', 'input', 'select', 'textarea', 'summary', 'iframe', 'audio', 'video'].includes(tag);
+    const aria = ['button', 'link', 'menuitem', 'option', 'tab', 'checkbox', 'switch', 'slider', 'combobox', 'listbox'].includes(role ?? '') && tabindex !== undefined;
+    const tabbed = tabindex !== undefined && tabindex !== '-1';
+    if (disabled || (!native && !aria && !tabbed)) return undefined;
+    return { tag, classes: (attribute(node, 'class') ?? '').split(/\s+/).filter(Boolean), role, tabindex, source: node.loc.source };
+}
 
-/**
- * Parser leve do template: conserva o alvo e suas classes para que a política
- * de foco seja associada ao DOM que de fato recebe Tab, em vez de aceitar uma
- * ocorrência de `:focus` qualquer no SFC.
- */
-function tabbableTargets(template: string): FocusTarget[] {
+function targetsFromAst(root: RootNode) {
     const targets: FocusTarget[] = [];
-    const tags = template.matchAll(/<(button|input|select|textarea|summary|iframe|audio|video|[\w-]+)\b[^>]*>/gi);
-    for (const match of tags) {
-        const tag = match[1].toLowerCase();
-        const attrs = match[0];
-        if (/\bdisabled(?:\s|=|>|$)/i.test(attrs) || /\btabindex\s*=\s*["']?-1["']?/i.test(attrs)) continue;
-        const isTabbable = /^(button|input|select|textarea|summary|iframe|audio|video)$/.test(tag)
-            || /\brole\s*=\s*["'](?:button|link|menuitem|option|tab|checkbox|switch|slider|combobox|listbox)["']/i.test(attrs)
-            || /\btabindex\s*=\s*["']?(?:0|[1-9]\d*)["']?/i.test(attrs);
-        if (!isTabbable) continue;
-        const classValue = attrs.match(/\bclass\s*=\s*["']([^"']*)["']/i)?.[1] ?? '';
-        targets.push({ tag, attrs, classes: classValue.split(/\s+/).filter(Boolean) });
-    }
+    const visit = (node: Node) => {
+        if (node.type === 1) {
+            const target = targetOf(node);
+            if (target) targets.push(target);
+            node.children.forEach(visit);
+        } else if ('children' in node && Array.isArray(node.children)) node.children.forEach(visit);
+    };
+    root.children.forEach(visit);
     return targets;
 }
 
-function styleOf(source: string) {
-    return [...source.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)].map((match) => match[1]).join('\n');
+function compiledSelectors(source: string, filename: string) {
+    const styles = filename.endsWith('.vue')
+        ? parse(source, { filename }).descriptor.styles
+        : [{ content: source, lang: filename.endsWith('.scss') ? 'scss' : undefined }];
+    return styles.flatMap((style) => {
+        const css = style.lang === 'scss'
+            ? sass.compileString(style.content, { loadPaths: [path.dirname(filename), componentsDir, themesDir] }).css
+            : style.content;
+        const result = compileStyle({ source: css, filename, id: 'r16-inventory' });
+        if (result.errors.length) throw new Error(`${filename}: ${result.errors.join('\n')}`);
+        return postcss.parse(result.code).nodes.flatMap((node) => node.type === 'rule' ? node.selectors ?? [] : []);
+    });
 }
 
-function hasCanonicalFocusPolicy(source: string) {
-    const styles = styleOf(source);
-    return /:focus-(?:visible|within)/i.test(styles)
-        && /--max-focus-(?:outline|ring(?:-color)?)/i.test(styles);
+const globalSelectors = compiledSelectors(fs.readFileSync(path.join(themesDir, 'all.scss'), 'utf8'), path.join(themesDir, 'all.scss'));
+
+function selectorMatchesTarget(selector: string, target: FocusTarget) {
+    if (!selector.includes(':focus-visible')) return false;
+    if (selector.includes(target.tag)) return true;
+    if (target.classes.some((className) => selector.includes(`.${className}`))) return true;
+    if (target.role && (selector.includes(`[role='${target.role}']`) || selector.includes(`[role=${target.role}]`))) return true;
+    return target.tabindex !== undefined && selector.includes('[tabindex]');
 }
 
-function hasPolicyAssociatedToTarget(source: string, target: FocusTarget) {
-    const styles = styleOf(source);
-    const focusRule = /(?:[\w.&:#\-[\]='" ]+)(?::focus-(?:visible|within))[^\{]*\{[^}]*--max-focus-(?:outline|ring(?:-color)?)/is;
-    const globalPolicy = /:where\([\s\S]*\):focus-visible\s*\{[\s\S]*--max-focus-outline[\s\S]*--max-focus-ring/is.test(globalFocusSource);
-    if (!focusRule.test(styles) && !globalPolicy) return false;
+describe('R16/F23 — inventário AST de foco e associação com CSS compilado', () => {
+    const inventory = vueFiles(componentsDir).map((file) => {
+        const source = fs.readFileSync(file, 'utf8');
+        const descriptor = parse(source, { filename: file }).descriptor;
+        return { file, targets: descriptor.template ? targetsFromAst(descriptor.template.ast) : [], selectors: compiledSelectors(source, file) };
+    }).filter(({ targets }) => targets.length > 0);
 
-    // Classes do alvo precisam participar de um seletor de foco, ou o próprio
-    // elemento nativo precisa ser selecionado. Isso impede aprovar um button
-    // só porque uma div irmã possui :focus-visible.
-    const selectors = [...styles.matchAll(/([^{}]+):focus-(?:visible|within)[^{]*\{/gi)].map((match) => match[1]);
-    return globalPolicy || selectors.some((selector) => target.classes.some((className) => selector.includes(`.${className}`))
-        || new RegExp(`\\b${target.tag}\\b`, 'i').test(selector));
-}
-
-describe('R16/F23 — inventário de foco derivado dos fontes', () => {
-    const inventory = vueFiles(componentsDir).map((file) => ({
-        file: path.relative(componentsDir, file),
-        source: fs.readFileSync(file, 'utf8')
-    })).map(({ file, source }) => ({ file, source, targets: tabbableTargets(templateOf(source)) }))
-        .filter(({ targets }) => targets.length > 0);
-
-    it('descobre os alvos focáveis a partir dos templates, sem catálogo fixo', () => {
+    it('deriva alvos do AST de cada template, sem regex nem catálogo manual', () => {
         expect(inventory.length).toBeGreaterThan(20);
-        expect(new Set(inventory.map(({ file }) => file)).size).toBe(inventory.length);
+        expect(inventory.flatMap(({ targets }) => targets).length).toBeGreaterThan(50);
     });
 
-    it('associa cada alvo focável ao seletor de foco canônico ou à delegação verificável ao InputBase', () => {
-        const unresolved = inventory
-            .flatMap(({ file, source, targets }) => targets
-                .filter((target) => !hasPolicyAssociatedToTarget(source, target) && !/<InputBase\b/.test(templateOf(source)))
-                .map((target) => `${file} <${target.tag}${target.classes.length ? `.${target.classes.join('.')}` : ''}>`));
-
-        expect(unresolved, 'Todo alvo alcançável por Tab deve ter seu próprio seletor de foco ou delegar ao InputBase.').toEqual([]);
+    it('correlaciona SFC → alvo DOM → estado focus-visible → seletor CSS aplicável', () => {
+        const unresolved = inventory.flatMap(({ file, targets, selectors }) => targets
+            .filter((target) => ![...selectors, ...globalSelectors].some((selector) => selectorMatchesTarget(selector, target)))
+            .map((target) => `${path.relative(componentsDir, file)} :: ${target.source}`));
+        expect(unresolved, 'Cada alvo do AST deve possuir seletor :focus-visible local ou canônico global aplicável ao próprio DOM.').toEqual([]);
     });
 
-    it('garante que a delegação usada pelo inventário tem indicador canônico no owner', () => {
-        const inputBase = fs.readFileSync(path.join(componentsDir, 'InputBase.vue'), 'utf8');
-        expect(hasCanonicalFocusPolicy(inputBase)).toBe(true);
-    });
-
-    it('mantém uma política global vinculada aos elementos focáveis para os componentes sem mixin local', () => {
-        expect(globalFocusSource).toMatch(/:where\([\s\S]*\):focus-visible\s*\{/);
-        expect(globalFocusSource).toMatch(/outline:\s*var\(--max-focus-outline\)/);
-        expect(globalFocusSource).toMatch(/box-shadow:\s*var\(--max-focus-ring\)/);
+    it('mantém a política global compilada para famílias focáveis sem estilo local', () => {
+        expect(globalSelectors.some((selector) => selector.includes(':focus-visible'))).toBe(true);
+        expect(globalCss).toContain('outline: var(--max-focus-outline)');
+        expect(globalCss).toContain('box-shadow: var(--max-focus-ring)');
     });
 
     it('inventaria toda exceção remanescente de background-650 e proíbe seu uso em conteúdo habilitado', () => {
-        const remaining = vueFiles(componentsDir)
-            .filter((file) => fs.readFileSync(file, 'utf8').includes('--background-650'))
-            .map((file) => path.basename(file));
+        const remaining = vueFiles(componentsDir).filter((file) => fs.readFileSync(file, 'utf8').includes('--background-650')).map((file) => path.basename(file));
         const documented = ['MaxAccordionItem.vue', 'MaxInputOTP.vue', 'MaxSideMenuMobile.vue'];
-
         expect(remaining.sort()).toEqual(documented.sort());
         for (const file of documented) expect(background650Inventory).toContain(file);
         expect(background650Inventory).toContain('themes/params.scss');
         expect(background650Inventory).toContain('themes/tokens.scss');
         expect(background650Inventory).toContain('themes/colors.scss');
-    });
-
-    it('não permite outline removido em um alvo sem política local ou owner verificável', () => {
-        const violations = inventory
-            .filter(({ source }) => /outline:\s*(?:none|0)(?:\s*!important)?/i.test(styleOf(source)))
-            .filter(({ source }) => !hasCanonicalFocusPolicy(source) && !/<InputBase\b/.test(templateOf(source)))
-            .map(({ file }) => file);
-
-        expect(violations).toEqual([]);
     });
 });

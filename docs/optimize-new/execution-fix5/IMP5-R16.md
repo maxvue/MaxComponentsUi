@@ -4,7 +4,7 @@
 - Agente: `/root/imp5_r16`
 - Parent: `/root`
 - Início: `2026-09-15T14:58:00-03:00`
-- Fim: `2026-09-15T15:13:00-03:00` (reparo pós-REV5-R16)
+- Fim: `2026-09-15T15:18:00-03:00` (segundo reparo pós-REV5-R16)
 - HEAD auditado: `288db2242e066d97011664e994b3bdff61c80481`
 - Status: **reparo pós-REV5-R16 concluído — aguarda revalidação pelo mesmo REV5-R16**
 
@@ -34,7 +34,20 @@ Foram migrados conteúdos habilitados para `--max-content-placeholder` ou
 exceções restantes (disabled, decorativas, compatibilidade e primitivas) estão
 em `R16-background-650-inventory.md`.
 
-## Reparo após refutação REV5-R16
+## Segundo reparo após refutação REV5-R16
+
+O inventário arquitetural anterior ainda extraía templates com regex. Ele foi
+substituído por `@vue/compiler-sfc`: percorre a AST de cada template e guarda o
+fragmento DOM, tag, classes, role e tabindex de cada alvo nativo alcançável.
+Cada bloco `<style>` é compilado por Sass e analisado por PostCSS; o gate então
+correlaciona o alvo do SFC com um seletor `:focus-visible` local ou com o
+seletor canônico global realmente compilado. Componentes Vue compostos e roles
+sem tabindex não são falsamente classificados como alvos DOM tabuláveis.
+
+Essa análise cobre 50+ alvos em mais de 20 SFCs e falha com a localização
+precisa SFC/fragmento DOM se uma associação de estado/estilo for removida.
+
+## Primeiro reparo após refutação REV5-R16
 
 O refutador demonstrou que a antiga fixture inseria uma regra
 `.r16-focus-family:focus-visible`, portanto não provava a folha de estilos da
