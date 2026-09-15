@@ -130,12 +130,16 @@
         logoAlt?: string;
         /** Texto do fallback da logo caso falhe o carregamento. Sem ele, consulta `getMaxAppConfig().logoFallbackLabel`. */
         logoFallbackLabel?: string;
+        /** Se verdadeiro, a aplicação hospedeira controla a classe dark e o tema de forma autônoma. */
+        controlledTheme?: boolean;
     }>(), {
         allowUserName: true,
         allowEmail: true,
         allowPhone: true,
-        blankPages: () => []
+        blankPages: () => [],
+        controlledTheme: false
     });
+
 
     /**
      * Eventos do menu do usuário, vindos do `MaxUserSection` e repassados pelo
@@ -283,30 +287,30 @@
             : Boolean(user.data?.settings?.darkMode);
         const nextDark = !currentDark;
 
-        applyDarkMode(nextDark);
+        if (!props.controlledTheme) {
+            applyDarkMode(nextDark);
 
-        if (user.data) {
-            if (!user.data.settings || typeof user.data.settings !== 'object') user.data.settings = {};
-
-            user.data.settings.darkMode = nextDark;
-
-            if (typeof (user as any).save === 'function') (user as any).save();
-
+            if (user.data) {
+                if (!user.data.settings || typeof user.data.settings !== 'object') user.data.settings = {};
+                user.data.settings.darkMode = nextDark;
+                if (typeof (user as any).save === 'function') (user as any).save();
+            }
         }
 
         emit('toggleDarkMode', nextDark);
     };
 
-    // Sincroniza a classe .dark com a preferência persistida do usuário ao carregar
+    // Sincroniza a classe .dark com a preferência persistida do usuário ao carregar, salvo se o tema for controlado
     watch(
-        () => [isLoaded.value, user.data?.settings?.darkMode],
-        ([loaded, darkModeSetting]) => {
+        () => [isLoaded.value, user.data?.settings?.darkMode, props.controlledTheme],
+        ([loaded, darkModeSetting, controlled]) => {
+            if (controlled) return;
             if (loaded) applyDarkMode(Boolean(darkModeSetting));
-
         },
         { immediate: true }
     );
 </script>
+
 
 <style lang="scss" scoped>
 
