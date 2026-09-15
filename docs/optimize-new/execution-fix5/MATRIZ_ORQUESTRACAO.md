@@ -61,8 +61,8 @@ Referência adversarial: `aac16bca`. Esta matriz é atualizada somente com evid�
 | GATE5-SVG-BUNDLE | gate | SVG/bundle | planejado | scripts |
 | GATE5-PACKAGE-CONSUMERS | gate | consumidores | planejado | scripts |
 | GATE5-CI-REPRODUCIBILIDADE | gate | CI/reprodutibilidade | planejado | CI |
-| PRES5-F03 | preservação | F03 | planejado | somente leitura |
-| PRES5-F12 | preservação | F12 | planejado | somente leitura |
+| PRES5-F03 | preservação | F03 | concluído — ACEITO; `hasLastCanonical` separa presença de `undefined`, e a suíte focal confirma emissão local, eco, round-trip e alteração externa posterior | agente `/root/pres5_f03`; início `2026-09-15T16:54:00-03:00`; fim `2026-09-15T16:55:00-03:00`; HEAD auditado `aa27fc7aa307d58a7fe143a95a5126db94b1c51c`; comandos `npx vitest run tests/helpers/useMirroredModel.test.ts` (1 arquivo/15 testes passou) e `npm run type-check:test` (código 0); relatório `docs/optimize-new/execution-fix5/PRES5-F03.md`; somente leitura |
+| PRES5-F12 | preservação | F12 | concluído — ACEITO: seis cenários focais preservam loading imediato no Teleport, deduplicação de promessa, cancelamento explícito, desabilitação, retry visível e bloqueio de atualização obsoleta | agente `/root/pres5_f12`; parent `/root`; início `2026-09-15T16:55:00-03:00`; fim `2026-09-15T16:55:27-03:00`; HEAD auditado `aa27fc7a`; comando `npx vitest run tests/components/MaxInputSelect.test.ts -t 'Carga coordenada e reentrante de loadOptions' --reporter=verbose` (`6/6` passou); relatório `docs/optimize-new/execution-fix5/PRES5-F12.md`; somente leitura |
 | PRES5-F17 | preservação | F17 | planejado | somente leitura |
 | PRES5-R05 | preservação | R05/F06 | planejado | somente leitura |
 | PRES5-R06 | preservação | R06/F08 | planejado | somente leitura |
