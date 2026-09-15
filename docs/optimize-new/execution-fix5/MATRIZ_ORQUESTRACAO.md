@@ -5,11 +5,11 @@ Referência adversarial: `aac16bca`. Esta matriz é atualizada somente com evid�
 
 | Papel | Tipo | Bloco/área | Status | Owner/manifest |
 |---|---|---|---|---|
-| IMP5-F07 | implementação | F07 | planejado | overlays canônicos e testes focais |
-| IMP5-F14 | implementação | F14 | planejado | semântica de listas |
+| IMP5-F07 | implementação | F07 | concluído — E04-02 reproduzido e corrigido; teste focal aprovado | agente `/root/imp5_f07`; início `2026-09-15T14:21:00-03:00`; fim `2026-09-15T14:24:00-03:00`; HEAD auditado `31bbd8514e98f3ad83221828e192cdbaffd6d90a`; manifesto: `src/helpers/useOutsidePointer.ts`, `tests/helpers/useOutsidePointer.test.ts`, `docs/optimize-new/execution-fix5/IMP5-F07.md`, `docs/optimize-new/execution-fix5/MATRIZ_ORQUESTRACAO.md` |
+| IMP5-F14 | implementação | F14 | concluído — E06-01/E06-02 reproduzidos e corrigidos; unitário e type-check focal aprovados; cenário Chromium adicionado, mas não executável sem binário Playwright | agente `/root/imp5_f14`; início `2026-09-15T14:20:14-03:00`; fim `2026-09-15T14:25:27-03:00`; HEAD auditado `b44e6b744d4940bb5a05afa7f8c02d04ba1802ed`; manifesto: `src/components/base/MaxBaseVirtualScroller.vue`, `tests/components/base/MaxBaseVirtualScroller.test.ts`, `tests/browser/MaxBaseVirtualScroller.browser.ts`, `docs/optimize-new/execution-fix5/IMP5-F14.md`, `docs/optimize-new/execution-fix5/MATRIZ_ORQUESTRACAO.md` |
 | IMP5-F15 | implementação | F15 | planejado | TagSelect e icon-buttons |
 | IMP5-F18 | implementação | F18 | planejado | crop de imagens |
-| IMP5-R01 | implementação | R01 | planejado | package.json, CI e verify (serializado) |
+| IMP5-R01 | implementação | R01 | concluído | package.json, CI e verify (serializado); ver `IMP5-R01.md` |
 | IMP5-R02 | implementação | R02 | concluído — lint focal aprovado; lint global bloqueado em arquivo fora do ownership; verify bloqueado antes do lint por `svgo` ausente | agente `/root/imp5_r02`; início `2026-09-15T14:20:14-03:00`; fim `2026-09-15T14:21:01-03:00`; HEAD auditado `31bbd8514e98f3ad83221828e192cdbaffd6d90a`; manifesto: `src/locales/pt-br.ts`, `docs/optimize-new/execution-fix5/IMP5-R02.md` |
 | IMP5-R03 | implementação | R03 | planejado | anatomia InputBase |
 | IMP5-R04 | implementação | R04 | planejado | matriz InputBase |

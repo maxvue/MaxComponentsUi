@@ -136,6 +136,35 @@ describe('useOutsidePointer', () => {
         externalButton.remove();
     });
 
+    it('remove o topo sincronicamente antes do callback, impedindo duplicação entre eventos no mesmo tick', async () => {
+        const isOpen = ref(true);
+        const onClose = vi.fn(() => { isOpen.value = false; });
+        const outside = document.createElement('button');
+        document.body.appendChild(outside);
+
+        const Comp = defineComponent({
+            setup() {
+                useOutsidePointer(isOpen, { elements: () => [], onClose });
+                return () => h('div');
+            }
+        });
+        const wrapper = mount(Comp, { attachTo: container });
+
+        // Não aguardamos o tick reativo entre os dois cliques: esta era a janela do E04-02.
+        outside.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+        outside.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        expect(getOverlayStackDepth()).toBe(0);
+        expect(getActiveOutsidePointerListenersCount()).toBe(0);
+
+        outside.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+        outside.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        expect(onClose).toHaveBeenCalledTimes(1);
+
+        await wrapper.vm.$nextTick();
+        wrapper.unmount();
+        outside.remove();
+    });
+
     it('não fecha se o clique for dentro dos elementos do overlay', async () => {
         const isOpen = ref(true);
         const onClose = vi.fn();
@@ -459,7 +488,9 @@ describe('useOutsidePointer', () => {
         // 3 overlays abertos, mas dispatcher é unificado (não triplica)
         expect(getOverlayStackDepth()).toBe(3);
         const initialListeners = getActiveOutsidePointerListenersCount();
-        expect(initialListeners).toBeGreaterThanOrEqual(5);
+        // document: keydown/pointerdown/click; window: scroll/resize.
+        // Cada overlay adicional reaproveita exatamente esses cinco listeners.
+        expect(initialListeners).toBe(5);
 
         // Fecha 1
         openA.value = false;

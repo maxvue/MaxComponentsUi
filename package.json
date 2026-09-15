@@ -57,7 +57,12 @@
     "lint": "npm run lint:check",
     "lint:check": "eslint . && stylelint \"src/**/*.{scss,vue}\"",
     "lint:fix": "eslint . --fix && stylelint \"src/**/*.{scss,vue}\" --fix",
-    "verify": "npm run check:filenames && npm run check:lockfile && npm run type-check && npm run type-check:test && npm run lint:check && npm run test && npm run build && npm run verify:consumers",
+    "build:clean": "node scripts/build-clean.mjs",
+    "build:playground": "npm --prefix playground run build",
+    "check:svgo": "node scripts/optimize-svgs.mjs --check",
+    "check:distribution-budgets": "vitest run tests/architecture/treeshaking-maxbutton.test.ts tests/architecture/package-exports.test.ts tests/assets/creditCardAssetsOptimization.test.ts tests/unit/svgPipeline.test.ts",
+    "verify": "node scripts/verify.mjs",
+    "test:verify-gate": "node --test scripts/verify.test.mjs",
     "verify:consumers": "node scripts/verify-consumers.mjs",
     "verify:package": "node scripts/verify-package-consumer.mjs",
     "prerelease": "node -e \"const b=require('node:child_process').execSync('git branch --show-current').toString().trim(); if(b!=='main'){console.error(`Release só é permitido a partir da branch main (branch atual: ${b}).`); process.exit(1);}\"",
@@ -67,7 +72,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:browser": "vitest run --config vitest.browser.config.ts",
-    "test:benchmark": "npx tsx tests/benchmarks/run-benchmarks.ts"
+    "test:benchmark": "npx tsx tests/benchmarks/run-benchmarks.ts",
+    "verify:reproducibility": "node scripts/verify-reproducibility.mjs"
   },
   "sideEffects": [
     "**/*.css",
