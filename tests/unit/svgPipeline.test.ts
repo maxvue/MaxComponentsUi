@@ -52,13 +52,13 @@ describe('SVG Pipeline & Budgets', () => {
 
 
     it('should demonstrate tree-shaking capability for credit card flags', async () => {
-        // A simple test to verify that individual SVGs can be imported
-        // without pulling in the entire directory, proving they are separate modules.
+        // Verifica que SVGs individuais são importados como módulos separados
         const amex = await import('../../src/assets/credit-card/card-amex.svg?raw');
         expect(amex.default).toContain('<svg');
+        expect(amex.default).toContain('viewBox');
 
-        // This is a unit test asserting the architectural decision that SVGs are kept separate
-        // for tree-shaking and not bundled into a single huge file prematurely.
-        expect(true).toBe(true);
+        // Confirma que o módulo individual do amex não inclui conteúdo nem identificadores de outras bandeiras
+        expect(amex.default).not.toContain('card-visa');
+        expect(amex.default).not.toContain('card-jcb');
     });
 });

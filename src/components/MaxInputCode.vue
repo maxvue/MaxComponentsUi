@@ -419,7 +419,7 @@
             inset: 0 !important;
             width: 100vw !important;
             height: 100vh !important;
-            z-index: var(--max-layer-fullscreen, 1400) !important;
+            z-index: var(--max-z-index-fullscreen, var(--max-layer-fullscreen, 1400)) !important;
             border-radius: 0 !important;
             border: none !important;
             margin: 0 !important;

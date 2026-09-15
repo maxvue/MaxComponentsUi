@@ -15,12 +15,12 @@
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxApp disabled />
+                            <MaxApp />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxApp error severity="danger" />
+                            <MaxApp />
                         </div>
                     </div>
                 </div>
@@ -36,12 +36,12 @@
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxContainerApp disabled />
+                            <MaxContainerApp />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxContainerApp error severity="danger" />
+                            <MaxContainerApp />
                         </div>
                     </div>
                 </div>
@@ -57,12 +57,12 @@
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxPageLayout disabled />
+                            <MaxPageLayout />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxPageLayout error severity="danger" />
+                            <MaxPageLayout />
                         </div>
                     </div>
                 </div>
@@ -78,12 +78,12 @@
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxPageMobileLayout disabled />
+                            <MaxPageMobileLayout />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxPageMobileLayout error severity="danger" />
+                            <MaxPageMobileLayout />
                         </div>
                     </div>
                 </div>
@@ -99,12 +99,12 @@
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxPageContent disabled />
+                            <MaxPageContent />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxPageContent error severity="danger" />
+                            <MaxPageContent />
                         </div>
                     </div>
                 </div>

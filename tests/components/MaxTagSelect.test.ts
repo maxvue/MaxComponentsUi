@@ -14,15 +14,16 @@ vi.mock('@maxvue/max-use', async (importOriginal) => {
 
 import MaxTagSelect from '../../src/components/MaxTagSelect.vue';
 
-function mountTagSelect(props: Record<string, any> = {}, attrs: Record<string, any> = {}) {
+function mountTagSelect(props: Record<string, any> = {}, attrs: Record<string, any> = {}, mountOptions: Record<string, any> = {}) {
     return mount(MaxTagSelect, {
         props: { modelValue: null, ...props },
         attrs,
+        ...mountOptions,
         global: {
             stubs: {
-                MaxIcon: true,
-                MaxIconButton: { template: '<button class="max-icon-button-stub"></button>', props: ['icon', 'i', 'size'] }
-            }
+                MaxIcon: true
+            },
+            ...(mountOptions.global ?? {})
         }
     });
 }
@@ -202,6 +203,34 @@ describe('MaxTagSelect', () => {
             const style = vm.getStyleColor({ background_color: '#ff0000' }, false, false);
             expect(style.backgroundColor.toLowerCase()).toContain('ff0000');
         });
+
+        it('opção sem cor customizada selecionada (is_selected=true) aplica tokens semânticos de seleção', () => {
+            const wrapper = mountTagSelect();
+            const vm = wrapper.vm as any;
+            const style = vm.getStyleColor({}, false, false, true);
+            expect(style.backgroundColor).toContain('--max-selection-background');
+            expect(style.color).toContain('--max-selection-content');
+        });
+
+        it('opção sem cor customizada selecionada em hover aplica tokens semânticos de hover de seleção', () => {
+            const wrapper = mountTagSelect();
+            const vm = wrapper.vm as any;
+            const style = vm.getStyleColor({}, true, false, true);
+            expect(style.backgroundColor).toContain('--max-selection-hover-background');
+            expect(style.color).toContain('--max-selection-hover-content');
+        });
+
+        it('garante contraste acessível (>= 4.5:1) em tags customizadas de diferentes luminâncias', () => {
+            const wrapper = mountTagSelect();
+            const vm = wrapper.vm as any;
+
+            const testColors = ['#10B981', '#EF4444', '#F59E0B', '#00768E', '#005F77'];
+            for (const bg of testColors) {
+                const style = vm.getStyleColor({ background_color: bg }, false, false);
+                expect(style.color).toBeTruthy();
+                expect(style.backgroundColor).toBeTruthy();
+            }
+        });
     });
 
     it('modo isButton: renderiza MaxIconButton em vez do valor selecionado', async () => {
@@ -209,7 +238,7 @@ describe('MaxTagSelect', () => {
         const wrapper = mountTagSelect({ modelValue: 'a', options, isButton: true, icon: 'mdi:tag' });
         await wrapper.vm.$nextTick();
 
-        expect(wrapper.find('.max-icon-button-stub').exists()).toBe(true);
+        expect(wrapper.find('.max-icon-button').exists()).toBe(true);
         expect(wrapper.find('.value-tag-div').exists()).toBe(false);
     });
 
@@ -218,7 +247,7 @@ describe('MaxTagSelect', () => {
         const wrapper = mountTagSelect({ modelValue: 'a', options });
         await wrapper.vm.$nextTick();
 
-        expect(wrapper.find('.max-icon-button-stub').exists()).toBe(false);
+        expect(wrapper.find('.max-icon-button').exists()).toBe(false);
         expect(wrapper.find('.value-tag-div').exists()).toBe(true);
     });
 
@@ -300,7 +329,7 @@ describe('MaxTagSelect', () => {
         expect(wrapper.find('.tab-placeholder-select').exists()).toBe(true);
     });
 
-    it('renderiza placeholder e NÃO renderiza .value-tag-div nem .max-icon-button-stub quando modelValue é vazio ("")', async () => {
+    it('renderiza placeholder e NÃO renderiza .value-tag-div nem .max-icon-button quando modelValue é vazio ("")', async () => {
         const options = [{ value: 'a', name: 'Tag A' }];
         const wrapper = mountTagSelect({ modelValue: '', options }, { placeholder: 'Selecione' });
         await wrapper.vm.$nextTick();
@@ -308,24 +337,24 @@ describe('MaxTagSelect', () => {
         expect(wrapper.find('.tab-placeholder-select').exists()).toBe(true);
         expect(wrapper.find('.tab-placeholder-select').text()).toBe('Selecione');
         expect(wrapper.find('.value-tag-div').exists()).toBe(false);
-        expect(wrapper.find('.max-icon-button-stub').exists()).toBe(false);
+        expect(wrapper.find('.max-icon-button').exists()).toBe(false);
     });
 
-    it('não renderiza .value-tag-div nem .max-icon-button-stub quando modelValue é null e possui propriedades de ícone', async () => {
+    it('não renderiza .value-tag-div nem .max-icon-button quando modelValue é null e possui propriedades de ícone', async () => {
         const options = [{ value: 'a', name: 'Tag A' }];
         const wrapper = mountTagSelect({ modelValue: null, iconLeft: 'mdi:user', options });
         await wrapper.vm.$nextTick();
 
         expect(wrapper.find('.tab-placeholder-select').exists()).toBe(false);
         expect(wrapper.find('.value-tag-div').exists()).toBe(false);
-        expect(wrapper.find('.max-icon-button-stub').exists()).toBe(false);
+        expect(wrapper.find('.max-icon-button').exists()).toBe(false);
     });
 
     it('modo isButton com modelValue null: renderiza MaxIconButton e não renderiza .value-tag-div', async () => {
         const wrapper = mountTagSelect({ isButton: true, icon: 'mdi:tag', modelValue: null });
         await wrapper.vm.$nextTick();
 
-        expect(wrapper.find('.max-icon-button-stub').exists()).toBe(true);
+        expect(wrapper.find('.max-icon-button').exists()).toBe(true);
         expect(wrapper.find('.value-tag-div').exists()).toBe(false);
     });
 
@@ -676,6 +705,204 @@ describe('MaxTagSelect', () => {
             expect(emitted?.pop()).toEqual(['g1_item36']);
 
             // Dropdown deve ter sido fechado após a seleção
+            expect((wrapper.vm as any).isOpen).toBe(false);
+
+            wrapper.unmount();
+        });
+    });
+
+    describe('Modo isButton e acessibilidade (F15)', () => {
+        it('garante um único owner focável: wrapper inerte e botão nativo interno com foco e semântica', async () => {
+            const options = [{ value: 'a', name: 'Tag A' }];
+            const wrapper = mountTagSelect({
+                isButton: true,
+                icon: 'mdi:tag',
+                options
+            });
+
+            const triggerWrapper = wrapper.find('.max-select');
+            const iconButton = wrapper.find('.max-icon-button');
+
+            expect(triggerWrapper.exists()).toBe(true);
+            expect(iconButton.exists()).toBe(true);
+
+            // Wrapper não deve competir por foco nem ter role de controle
+            expect(triggerWrapper.attributes('tabindex')).toBe('-1');
+            expect(triggerWrapper.attributes('role')).toBeUndefined();
+            expect(triggerWrapper.attributes('aria-haspopup')).toBeUndefined();
+            expect(triggerWrapper.attributes('aria-expanded')).toBeUndefined();
+            expect(triggerWrapper.attributes('aria-disabled')).toBeUndefined();
+
+            // Botão nativo interno é o único owner focável
+            expect(iconButton.element.tagName.toLowerCase()).toBe('button');
+            expect(iconButton.attributes('tabindex')).toBe('0');
+            expect(iconButton.attributes('aria-haspopup')).toBe('listbox');
+            expect(iconButton.attributes('aria-expanded')).toBe('false');
+
+            wrapper.unmount();
+        });
+
+        it('evita que o wrapper receba aria-disabled quando desabilitado, propagando disabled ao botão interno', async () => {
+            const options = [{ value: 'a', name: 'Tag A' }];
+            const wrapper = mountTagSelect({
+                isButton: true,
+                icon: 'mdi:tag',
+                disabled: true,
+                options
+            });
+
+            const triggerWrapper = wrapper.find('.max-select');
+            const iconButton = wrapper.find('.max-icon-button');
+
+            // Wrapper NUNCA deve receber aria-disabled no modo isButton
+            expect(triggerWrapper.attributes('aria-disabled')).toBeUndefined();
+
+            // Botão nativo interno recebe disabled e atributos de desabilitado
+            expect(iconButton.attributes('disabled')).toBeDefined();
+            expect(iconButton.attributes('aria-disabled')).toBe('true');
+            expect(iconButton.attributes('tabindex')).toBe('-1');
+            expect(iconButton.classes()).toContain('is-disabled');
+
+            wrapper.unmount();
+        });
+
+        it('propaga nome contextual acessível ao botão interno sem usar rótulos genéricos', async () => {
+            // 1. Via aria-label explícito
+            const w1 = mountTagSelect({ isButton: true, icon: 'mdi:tag' }, { 'aria-label': 'Selecionar categoria do produto' });
+            expect(w1.find('.max-icon-button').attributes('aria-label')).toBe('Selecionar categoria do produto');
+            w1.unmount();
+
+            // 2. Via placeholder
+            const w2 = mountTagSelect({ isButton: true, icon: 'mdi:tag', placeholder: 'Filtrar por etiqueta' });
+            expect(w2.find('.max-icon-button').attributes('aria-label')).toBe('Filtrar por etiqueta');
+            w2.unmount();
+
+            // 3. Via label
+            const w3 = mountTagSelect({ isButton: true, icon: 'mdi:tag' }, { label: 'Status da ordem' });
+            expect(w3.find('.max-icon-button').attributes('aria-label')).toBe('Status da ordem');
+            w3.unmount();
+
+            // 4. Com opção selecionada
+            const w4 = mountTagSelect({
+                isButton: true,
+                icon: 'mdi:tag',
+                modelValue: 'aprovado',
+                options: [{ value: 'aprovado', name: 'Aprovado' }]
+            });
+            expect(w4.find('.max-icon-button').attributes('aria-label')).toBe('Selecionar opção: Aprovado');
+            w4.unmount();
+
+            // 5. Padrão sem contexto (nunca "Botão de ação")
+            const w5 = mountTagSelect({ isButton: true, icon: 'mdi:tag' });
+            expect(w5.find('.max-icon-button').attributes('aria-label')).toBe('Selecionar opção');
+            expect(w5.find('.max-icon-button').attributes('aria-label')).not.toBe('Botão de ação');
+            w5.unmount();
+        });
+
+        it('permite navegação por teclado: Enter abre, Escape fecha e retorna foco, e seleção emite uma única vez', async () => {
+            const options = [
+                { value: '1', name: 'Opção 1' },
+                { value: '2', name: 'Opção 2' }
+            ];
+            const wrapper = mountTagSelect({
+                isButton: true,
+                icon: 'mdi:tag',
+                options
+            }, {}, { attachTo: document.body });
+
+            const button = wrapper.find('.max-icon-button');
+            (button.element as HTMLElement).focus();
+            expect(document.activeElement).toBe(button.element);
+
+            // Tecla Enter abre dropdown
+            await button.trigger('keydown', { key: 'Enter' });
+            await wrapper.vm.$nextTick();
+
+            expect((wrapper.vm as any).isOpen).toBe(true);
+            expect(button.attributes('aria-expanded')).toBe('true');
+
+            // Tecla Escape fecha dropdown e devolve foco ao botão interno
+            await button.trigger('keydown', { key: 'Escape' });
+            await wrapper.vm.$nextTick();
+
+            expect((wrapper.vm as any).isOpen).toBe(false);
+            expect(button.attributes('aria-expanded')).toBe('false');
+            expect(document.activeElement).toBe(button.element);
+
+            // Tecla Espaço abre dropdown
+            await button.trigger('keydown', { key: ' ' });
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).isOpen).toBe(true);
+
+            // Seleciona com ArrowDown + Enter e verifica emissão única
+            await button.trigger('keydown', { key: 'ArrowDown' });
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).highlightedIndex).toBe(1);
+
+            await button.trigger('keydown', { key: 'Enter' });
+            await wrapper.vm.$nextTick();
+
+            expect((wrapper.vm as any).isOpen).toBe(false);
+            expect(wrapper.emitted('update:modelValue')).toHaveLength(1);
+            expect(wrapper.emitted('update:modelValue')![0]).toEqual(['2']);
+            expect(wrapper.emitted('change')).toHaveLength(1);
+            expect(wrapper.emitted('change')![0]).toEqual(['2']);
+
+            wrapper.unmount();
+        });
+
+        it('clique no botão interno abre e fecha com emissão única na seleção', async () => {
+            const options = [
+                { value: 'a', name: 'Item A' }
+            ];
+            const wrapper = mountTagSelect({
+                isButton: true,
+                icon: 'mdi:tag',
+                options
+            });
+
+            const button = wrapper.find('.max-icon-button');
+
+            // Clique abre
+            await button.trigger('click');
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).isOpen).toBe(true);
+
+            // Clique na opção seleciona e fecha
+            const optionEl = document.body.querySelector('.max-select-option') as HTMLElement;
+            expect(optionEl).toBeTruthy();
+            optionEl.click();
+            await wrapper.vm.$nextTick();
+
+            expect((wrapper.vm as any).isOpen).toBe(false);
+            expect(wrapper.emitted('update:modelValue')).toHaveLength(1);
+            expect(wrapper.emitted('update:modelValue')![0]).toEqual(['a']);
+            expect(wrapper.emitted('change')).toHaveLength(1);
+            expect(wrapper.emitted('change')![0]).toEqual(['a']);
+
+            wrapper.unmount();
+        });
+
+        it('quando desabilitado no modo isButton, bloqueia abertura via clique e teclado', async () => {
+            const wrapper = mountTagSelect({
+                isButton: true,
+                icon: 'mdi:tag',
+                disabled: true,
+                options: [{ value: 'a', name: 'Item A' }]
+            });
+
+            const button = wrapper.find('.max-icon-button');
+
+            await button.trigger('click');
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).isOpen).toBe(false);
+
+            await button.trigger('keydown', { key: 'Enter' });
+            await wrapper.vm.$nextTick();
+            expect((wrapper.vm as any).isOpen).toBe(false);
+
+            await button.trigger('keydown', { key: ' ' });
+            await wrapper.vm.$nextTick();
             expect((wrapper.vm as any).isOpen).toBe(false);
 
             wrapper.unmount();

@@ -10,17 +10,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxLogo />
+                            <MaxLogo v-bind="scenarioProps"  />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxLogo disabled />
+                            <MaxLogo v-bind="scenarioProps" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxLogo error severity="danger" />
+                            <MaxLogo v-bind="scenarioProps" error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -36,12 +36,12 @@
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxMaps disabled />
+                            <MaxMaps />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxMaps error severity="danger" />
+                            <MaxMaps />
                         </div>
                     </div>
                 </div>
@@ -52,17 +52,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxUserAvatar />
+                            <MaxUserAvatar v-bind="scenarioProps"  />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxUserAvatar disabled />
+                            <MaxUserAvatar v-bind="scenarioProps" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxUserAvatar error severity="danger" />
+                            <MaxUserAvatar v-bind="scenarioProps" error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -73,17 +73,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxUserSection />
+                            <MaxUserSection v-bind="scenarioProps"  />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxUserSection disabled />
+                            <MaxUserSection v-bind="scenarioProps" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxUserSection error severity="danger" />
+                            <MaxUserSection v-bind="scenarioProps" error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -94,17 +94,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxAuthCard />
+                            <MaxAuthCard v-bind="scenarioProps"  />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxAuthCard disabled />
+                            <MaxAuthCard v-bind="scenarioProps" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxAuthCard error severity="danger" />
+                            <MaxAuthCard v-bind="scenarioProps" error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -115,17 +115,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxCreditCard />
+                            <MaxCreditCard v-bind="scenarioProps"  />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxCreditCard disabled />
+                            <MaxCreditCard v-bind="scenarioProps" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxCreditCard error severity="danger" />
+                            <MaxCreditCard v-bind="scenarioProps" error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -136,17 +136,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxTitle1 />
+                            <MaxTitle1 v-bind="scenarioProps"  />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxTitle1 disabled />
+                            <MaxTitle1 v-bind="scenarioProps" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxTitle1 error severity="danger" />
+                            <MaxTitle1 v-bind="scenarioProps" error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -157,17 +157,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxTitle2 />
+                            <MaxTitle2 v-bind="scenarioProps"  />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxTitle2 disabled />
+                            <MaxTitle2 v-bind="scenarioProps" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxTitle2 error severity="danger" />
+                            <MaxTitle2 v-bind="scenarioProps" error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -177,6 +177,8 @@
 </template>
 
 <script setup lang="ts">
+    // Props neutras permitem exercitar os estados sem omitir contratos obrigatórios.
+    const scenarioProps: any = { modelValue: '', options: [], items: [], route: '/', target: document.body };
     import { MaxLogo } from '@maxvue/max-components-ui';
     import { MaxMaps } from '@maxvue/max-components-ui';
     import { MaxUserAvatar } from '@maxvue/max-components-ui';

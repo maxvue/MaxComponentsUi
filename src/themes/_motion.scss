@@ -29,4 +29,22 @@
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
     }
+
+    // Desativa transformações agressivas decorativas (slide, flip, scale/zoom e shake),
+    // preservando alinhamento estático e posicionamentos essenciais de layout.
+    [data-motion='aggressive'],
+    .motion-aggressive,
+    .max-motion-aggressive,
+    .slide-up-enter-active,
+    .slide-up-leave-active,
+    .slide-enter-active,
+    .slide-leave-active,
+    .scale-enter-active,
+    .scale-leave-active,
+    .flip-enter-active,
+    .flip-leave-active,
+    .is-shaking,
+    .is-pulsing {
+        transform: none !important;
+    }
 }

@@ -84,8 +84,10 @@
 
         &:enabled:focus {
             outline: 0 none;
-            border-color: var(--max-primary-500);
-            box-shadow: 0 0 0 2px var(--max-primary-200);
+
+            /* Foco canônico: borda + halo suave via --max-focus-ring-color */
+            border-color: var(--max-focus-ring-color, var(--max-primary-500));
+            box-shadow: var(--max-focus-ring, 0 0 0 2px var(--background-0, #fff), 0 0 0 4px var(--max-focus-ring-color, #00768e));
         }
 
         &:disabled {

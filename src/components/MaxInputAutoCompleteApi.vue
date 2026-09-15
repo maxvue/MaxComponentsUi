@@ -10,7 +10,7 @@
                     :value="displayedText"
                     :placeholder="props.placeholder ?? 'SELECIONE'"
                     :disabled="props.disabled"
-                    autocomplete="off"
+                    :autocomplete="inputAttrs?.autocomplete ?? 'off'"
                     role="combobox"
                     aria-autocomplete="list"
                     :aria-expanded="isOverlayActive"

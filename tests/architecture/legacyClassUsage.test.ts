@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import fs from 'fs';
 import path from 'path';
+import { parse as parseSfc } from '@vue/compiler-sfc';
 
 function getVueFiles(dir: string): string[] {
     const results: string[] = [];
@@ -18,6 +19,15 @@ function getVueFiles(dir: string): string[] {
 const COMPONENTS_DIR = path.resolve(__dirname, '../../src/components');
 const vueFiles = getVueFiles(COMPONENTS_DIR);
 
+export interface TemplateClassOccurrence {
+    tag: string;
+    parentTag: string;
+    path: string;
+    className: string;
+    isDynamic: boolean;
+    allClassesInNode: string[];
+}
+
 export interface LegacyExceptionCatalogEntry {
     /** Seletores .p-* com contagem exata de ocorrências no bloco <style> */
     allowedStyleSelectors: Record<string, number>;
@@ -25,6 +35,8 @@ export interface LegacyExceptionCatalogEntry {
     allowedTemplateClasses: Record<string, number>;
     /** Classes canônicas .max-* obrigatórias que devem existir no arquivo */
     requiredCanonicalClasses: string[];
+    /** Mapeamento de tags autorizadas e classes canônicas irmãs por classe legada de template */
+    structuralRules?: Record<string, { allowedTags: string[]; requiredSiblingCanonical?: string }>;
 }
 
 /**
@@ -91,17 +103,43 @@ export const LEGACY_COMPAT_CATALOG: Record<string, LegacyExceptionCatalogEntry> 
         allowedStyleSelectors: {},
         allowedTemplateClasses: {
             'p-datatable': 1,
+            'p-datatable-scrollable': 1,
             'p-datatable-table-container': 1,
-            'p-datatable-cell': 3,
-            'p-column': 1
+            'p-datatable-cell': 9,
+            'p-column': 2,
+            'p-datatable-column-header-content': 3,
+            'p-datatable-column-title': 3,
+            'p-row-even': 2,
+            'p-row-odd': 2
         },
         requiredCanonicalClasses: [
             'max-table',
             'max-table-main-div',
             'max-table-container',
+            'max-table-scrollable',
+            'max-table-table-container',
             'max-table-column-header-content',
-            'max-table-column-title'
-        ]
+            'max-table-column-title',
+            'max-table-column',
+            'max-table-th',
+            'max-table-header-cell',
+            'max-table-row',
+            'max-table-row-even',
+            'max-table-row-odd',
+            'max-table-td',
+            'max-table-cell'
+        ],
+        structuralRules: {
+            'p-datatable': { allowedTags: ['div'], requiredSiblingCanonical: 'max-table' },
+            'p-datatable-scrollable': { allowedTags: ['div'], requiredSiblingCanonical: 'max-table-scrollable' },
+            'p-datatable-table-container': { allowedTags: ['div'], requiredSiblingCanonical: 'max-table-container' },
+            'p-datatable-cell': { allowedTags: ['td'], requiredSiblingCanonical: 'max-table-cell' },
+            'p-column': { allowedTags: ['tr', 'th'], requiredSiblingCanonical: 'max-table-column' },
+            'p-datatable-column-header-content': { allowedTags: ['div'], requiredSiblingCanonical: 'max-table-column-header-content' },
+            'p-datatable-column-title': { allowedTags: ['div'], requiredSiblingCanonical: 'max-table-column-title' },
+            'p-row-even': { allowedTags: ['tr'], requiredSiblingCanonical: 'max-table-row-even' },
+            'p-row-odd': { allowedTags: ['tr'], requiredSiblingCanonical: 'max-table-row-odd' }
+        }
     },
     'MaxInputIconPicker.vue': {
         allowedStyleSelectors: {
@@ -110,7 +148,13 @@ export const LEGACY_COMPAT_CATALOG: Record<string, LegacyExceptionCatalogEntry> 
             '.p-drawer-close-button': 1,
             '.p-drawer-content': 1
         },
-        allowedTemplateClasses: {},
+        allowedTemplateClasses: {
+            'p-drawer-bottom': 1,
+            'p-drawer-header': 1,
+            'p-drawer-title': 1,
+            'p-drawer-close-button': 1,
+            'p-drawer-content': 1
+        },
         requiredCanonicalClasses: [
             'max-icon-picker',
             'max-icon-picker-drawer',
@@ -152,6 +196,15 @@ export const LEGACY_COMPAT_CATALOG: Record<string, LegacyExceptionCatalogEntry> 
     }
 };
 
+function extractStringLiterals(code: string): string[] {
+    const literals: string[] = [];
+    const strRegex = /['"`]([^'"`]+)['"`]/g;
+    let m: RegExpExecArray | null;
+    while ((m = strRegex.exec(code)) !== null) literals.push(...m[1].split(/\s+/).filter(Boolean));
+
+    return literals;
+}
+
 /**
  * Extrai todos os seletores que casam com .p-* de blocos <style>, mantendo a contagem de ocorrências.
  */
@@ -174,28 +227,60 @@ export function extractStylePSelectors(content: string): Record<string, number> 
 }
 
 /**
- * Extrai classes com prefixo p-* no bloco <template>, mantendo a contagem de ocorrências.
+ * Extrai ocorrências estruturais completas de classes p-* no template via AST do @vue/compiler-sfc.
  */
-export function extractTemplatePClasses(content: string): Record<string, number> {
-    const templateMatch = content.match(/<template\b[^>]*>([\s\S]*?)<\/template>/i);
-    if (!templateMatch) return {};
+export function extractTemplateAstPOccurrences(content: string): TemplateClassOccurrence[] {
+    const parsed = parseSfc(content);
+    const ast = parsed.descriptor.template?.ast;
+    if (!ast) return [];
 
-    const templateContent = templateMatch[1];
-    const occurrences: Record<string, number> = {};
+    const occurrences: TemplateClassOccurrence[] = [];
+    function walk(node: any, parent: any, pathParts: string[] = []) {
+        if (!node) return;
+        if (node.type !== 1) { // not an ElementNode
+            if (node.children) for (const child of node.children) walk(child, parent, pathParts);
 
-    const classAttrRegex = /\bclass=["']([^"']+)["']/g;
-    let match: RegExpExecArray | null;
-
-    while ((match = classAttrRegex.exec(templateContent)) !== null) {
-        const classNames = match[1].split(/\s+/);
-        for (const cls of classNames) if (/^p-[a-z0-9_-]+$/i.test(cls)) {
-            const c = cls.toLowerCase();
-            occurrences[c] = (occurrences[c] || 0) + 1;
+            return;
         }
+
+        const tag = node.tag;
+        const currentPath = [...pathParts, tag];
+        const staticClasses: string[] = [];
+        const dynamicClasses: string[] = [];
+
+        if (node.props) for (const prop of node.props) if (prop.type === 6 && prop.name === 'class' && prop.value) staticClasses.push(...prop.value.content.split(/\s+/).filter(Boolean));
+        else if (prop.type === 7 && prop.name === 'bind' && prop.arg?.content === 'class' && prop.exp) dynamicClasses.push(...extractStringLiterals(prop.exp.content));
+
+
+        const allClasses = [...staticClasses, ...dynamicClasses];
+        for (const cls of allClasses) if (/^p-[a-z][a-z0-9_-]*$/i.test(cls)) occurrences.push({
+            tag,
+            parentTag: parent?.tag || 'root',
+            path: currentPath.join(' > '),
+            className: cls.toLowerCase(),
+            isDynamic: !staticClasses.includes(cls),
+            allClassesInNode: allClasses
+        });
+
+
+        if (node.children) for (const child of node.children) walk(child, node, currentPath);
+
 
     }
 
+    walk(ast, null);
     return occurrences;
+}
+
+/**
+ * Extrai classes com prefixo p-* no bloco <template>, mantendo a contagem de ocorrências exatas.
+ */
+export function extractTemplatePClasses(content: string): Record<string, number> {
+    const occurrences = extractTemplateAstPOccurrences(content);
+    const counts: Record<string, number> = {};
+    for (const occ of occurrences) counts[occ.className] = (counts[occ.className] || 0) + 1;
+
+    return counts;
 }
 
 /**
@@ -247,6 +332,20 @@ export function auditVueFileForLegacyClasses(filename: string, content: string):
         const hasReqClass = new RegExp(`\\b${req}\\b`, 'i').test(content);
         if (!hasReqClass) violations.push(`${basename}: ausência da anatomia canônica obrigatória '${req}'`);
 
+    }
+
+    // Validação estrutural de contexto, posição e anatomia canônica obrigatória em cada nó
+    if (catalogEntry.structuralRules) {
+        const astOccurrences = extractTemplateAstPOccurrences(content);
+        for (const occ of astOccurrences) {
+            const rule = catalogEntry.structuralRules[occ.className];
+            if (rule) {
+                if (!rule.allowedTags.includes(occ.tag)) violations.push(`${basename}: classe '${occ.className}' inserida em tag/contexto inválido <${occ.tag}> (esperado: [${rule.allowedTags.join(', ')}])`);
+
+                if (rule.requiredSiblingCanonical && !occ.allClassesInNode.includes(rule.requiredSiblingCanonical)) violations.push(`${basename}: classe '${occ.className}' no nó <${occ.tag}> requer a classe canônica associada '${rule.requiredSiblingCanonical}'`);
+
+            }
+        }
     }
 
     return violations;

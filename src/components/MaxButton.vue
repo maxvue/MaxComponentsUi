@@ -31,13 +31,14 @@
 </template>
 
 <script setup lang="ts">
-    import { computed, useSlots } from 'vue';
+    import { computed, useSlots, useAttrs } from 'vue';
     import MaxIcon from './MaxIcon.vue';
     import MaxIconButton from './MaxIconButton.vue';
     import { goToRoute } from '@maxvue/max-use';
     import type { MaxButtonsType } from '../types';
 
     const $slots = useSlots();
+    const attrs = useAttrs();
 
     const props = withDefaults(defineProps<MaxButtonsType>(), {
         iconSize: 1.4,
@@ -59,7 +60,7 @@
         return 'left';
     });
 
-    const resolvedType = computed(() => props.type ?? 'button');
+    const resolvedType = computed(() => (props.type as any) ?? (attrs.type as any) ?? 'button');
 
     const showIcon = computed(() => Boolean(props.loading || props.icon || props.i));
 

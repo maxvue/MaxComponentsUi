@@ -152,7 +152,13 @@ describe('MaxMaps.vue', () => {
         const controls = wrapper.find('.map-accessible-controls');
         expect(controls.exists()).toBe(true);
         expect(controls.attributes('role')).toBe('region');
+        expect(controls.attributes('tabindex')).toBe('0');
         expect(controls.attributes('aria-label')).toBe('Controles acessíveis de coordenadas do mapa');
+
+        const summary = wrapper.find('.map-accessible-summary');
+        expect(summary.exists()).toBe(true);
+        expect(summary.attributes('aria-live')).toBe('polite');
+        expect(summary.text()).toContain('Latitude -15.78010, Longitude -47.92920');
 
         // Inputs de latitude e longitude
         const latInput = wrapper.find('input[aria-label="Latitude do marcador"]');

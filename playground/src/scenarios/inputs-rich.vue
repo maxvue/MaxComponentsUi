@@ -10,17 +10,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxInputMarkdown />
+                            <MaxInputMarkdown v-bind="scenarioProps" />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxInputMarkdown disabled />
+                            <MaxInputMarkdown v-bind="scenarioProps" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxInputMarkdown error severity="danger" />
+                            <MaxInputMarkdown v-bind="scenarioProps" error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -31,17 +31,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxInputMarkdownToolbar />
+                            <MaxInputMarkdownToolbar v-bind="scenarioProps" />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxInputMarkdownToolbar disabled />
+                            <MaxInputMarkdownToolbar v-bind="scenarioProps" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxInputMarkdownToolbar error severity="danger" />
+                            <MaxInputMarkdownToolbar v-bind="scenarioProps" error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -52,17 +52,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxInputCode />
+                            <MaxInputCode v-bind="scenarioProps" />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxInputCode disabled />
+                            <MaxInputCode v-bind="scenarioProps" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxInputCode error severity="danger" />
+                            <MaxInputCode v-bind="scenarioProps" error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -73,17 +73,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxInputCodeToolbar />
+                            <MaxInputCodeToolbar v-bind="scenarioProps" />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxInputCodeToolbar disabled />
+                            <MaxInputCodeToolbar v-bind="scenarioProps" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxInputCodeToolbar error severity="danger" />
+                            <MaxInputCodeToolbar v-bind="scenarioProps" error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -93,6 +93,10 @@
 </template>
 
 <script setup lang="ts">
+    // Os cenários compartilham props neutras para satisfazer os contratos dos
+    // componentes sem ocultar a renderização dos estados demonstrados.
+    const scenarioProps: any = { modelValue: '', options: [], items: [], route: '/', target: document.body };
+
     import { MaxInputMarkdown } from '@maxvue/max-components-ui';
     import { MaxInputMarkdownToolbar } from '@maxvue/max-components-ui';
     import { MaxInputCode } from '@maxvue/max-components-ui';

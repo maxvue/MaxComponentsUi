@@ -254,7 +254,7 @@
         height: 100%;
         backdrop-filter: blur(4px);
         place-items: center;
-        z-index: var(--max-layer-screen-block, 10000) !important;
+        z-index: var(--max-z-index-screen-block, var(--max-layer-screen-block, 10000)) !important;
 
         &.is-body-target,
         &.is-global {
@@ -359,6 +359,12 @@
 
                         &:hover {
                             background: var(--background-100, #f1f5f9);
+                        }
+
+                        &:focus-visible {
+                            outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
+                            outline-offset: 2px;
+                            box-shadow: var(--max-focus-ring);
                         }
 
                         &.action-retry {

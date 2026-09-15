@@ -48,6 +48,8 @@
                             role="menuitem"
                             :id="`top-toolbar-item-${index}`"
                             :tabindex="focusedIndex === index && !item.disabled ? 0 : -1"
+                            :aria-label="item.ariaLabel || item.label || item.title || (typeof item.tooltip === 'string' ? item.tooltip : undefined) || 'Ação da barra de ferramentas'"
+                            :tooltip="typeof item.tooltip === 'string' ? item.tooltip : undefined"
                             :aria-disabled="item.disabled ? 'true' : undefined"
                             :icon="item.icon"
                             light
@@ -370,7 +372,7 @@
                             }
 
                             &:focus-visible {
-                                outline: 2px solid var(--max-primary-500, #00768E);
+                                outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e)); /* Foco canônico */
                                 outline-offset: 2px;
                                 border-radius: 4px;
                                 color: var(--layout-shell-text, #fff) !important;

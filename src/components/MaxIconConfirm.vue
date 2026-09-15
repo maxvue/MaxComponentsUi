@@ -1,13 +1,14 @@
 <template>
-    <MaxIconButton class="max-icon-confirm" :icon="props.icon" :i="props.i" :blank="props.blank" :route="props.route" :data="props.data" :params="props.params" :rotate="props.rotate" :flip="props.flip" :size="props.size" :scale="props.scale" :loading="props.loading" :width="props.width" :height="props.height" :dark="props.dark" :light="props.light" :checked="props.checked" :plus="props.plus" v-tooltip="null" :action="onClickToggle" ref="btn_el" />
+    <MaxIconButton class="max-icon-confirm" :icon="props.icon" :i="props.i" :blank="props.blank" :route="props.route" :data="props.data" :params="props.params" :rotate="props.rotate" :flip="props.flip" :size="props.size" :scale="props.scale" :loading="props.loading" :width="props.width" :height="props.height" :dark="props.dark" :light="props.light" :checked="props.checked" :plus="props.plus" :aria-label="(attrs.ariaLabel as string) || (attrs['aria-label'] as string) || (attrs.title as string) || props.message || 'Confirmar ação'" v-tooltip="null" :action="onClickToggle" ref="btn_el" />
 </template>
 
 <script setup lang="ts">
     import MaxIconButton from './MaxIconButton.vue';
-    import { useTemplateRef } from 'vue';
+    import { useTemplateRef, useAttrs } from 'vue';
     import { useConfirmStore } from '../stores/useConfirm.Store';
     import type { ConfirmProps } from '../types';
 
+    const attrs = useAttrs();
     const confirm_store = useConfirmStore();
 
     const props = withDefaults(defineProps<ConfirmProps & {

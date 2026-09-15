@@ -224,8 +224,8 @@ describe('MaxAuthCard', () => {
 
             expect(wrapper.findComponent({ name: 'MaxInputOTP' }).exists()).toBe(false);
 
-            // Pressiona ENTER no card com telefone preenchido antes do envio
-            await wrapper.find('.max-auth-page').trigger('keyup.enter');
+            // Pressiona ENTER no card com telefone preenchido antes do envio (aciona submit nativo)
+            await wrapper.find('form').trigger('submit');
 
             expect(wrapper.emitted('send-code')).toBeTruthy();
             const sendPayload = wrapper.emitted('send-code')![0][0] as any;
@@ -247,7 +247,7 @@ describe('MaxAuthCard', () => {
                 }
             });
 
-            await wrapper.find('.max-auth-page').trigger('keyup.enter');
+            await wrapper.find('form').trigger('submit');
             await wrapper.vm.$nextTick();
 
             expect(wrapper.emitted('send-code')).toBeFalsy();
@@ -330,8 +330,8 @@ describe('MaxAuthCard', () => {
             await wrapper.setProps({ code: '123' });
             await wrapper.vm.$nextTick();
 
-            // Pressiona ENTER
-            await wrapper.find('.max-auth-page').trigger('keyup.enter');
+            // Submete o form (como acionado pelo Enter)
+            await wrapper.find('form').trigger('submit');
 
             expect(wrapper.emitted('submit')).toBeFalsy();
         });
@@ -363,8 +363,8 @@ describe('MaxAuthCard', () => {
             await wrapper.setProps({ code: '654321' });
             await wrapper.vm.$nextTick();
 
-            // Pressiona ENTER
-            await wrapper.find('.max-auth-page').trigger('keyup.enter');
+            // Pressiona ENTER (aciona submit nativo do form)
+            await wrapper.find('form').trigger('submit');
 
             expect(wrapper.emitted('submit')).toBeTruthy();
             const submitPayload = wrapper.emitted('submit')![0][0] as any;
@@ -400,8 +400,8 @@ describe('MaxAuthCard', () => {
             expect(wrapper.emitted('resend-code')).toBeFalsy();
             expect(wrapper.emitted('submit')).toBeFalsy();
 
-            // Pressiona Enter durante cooldown com código incompleto: não contorna cooldown
-            await wrapper.find('.max-auth-page').trigger('keyup.enter');
+            // Pressiona Enter / submit durante cooldown com código incompleto: não contorna cooldown
+            await wrapper.find('form').trigger('submit');
             expect(wrapper.emitted('submit')).toBeFalsy();
 
             // Avança 30 segundos
@@ -557,6 +557,150 @@ describe('MaxAuthCard', () => {
             // Limpa tudo
             clearAuthOtpCache('max_auth_otp_');
             expect(window.localStorage.getItem('max_auth_otp_456')).toBeNull();
+        });
+    });
+
+    describe('Submit Nativo HTML5 e Acessibilidade de Feedback (R14 / F21)', () => {
+        it('botão principal possui type="submit" no modo password e no modo phone-otp', () => {
+            const wrapperPassword = mountAuthCard({ mode: 'password' });
+            const btnPassword = wrapperPassword.findComponent({ name: 'MaxButton' });
+            expect(btnPassword.props('type')).toBe('submit');
+            expect(btnPassword.find('button').attributes('type')).toBe('submit');
+
+            const wrapperPhoneOtp = mountAuthCard({ mode: 'phone-otp' });
+            const btnPhoneOtp = wrapperPhoneOtp.findComponent({ name: 'MaxButton' });
+            expect(btnPhoneOtp.props('type')).toBe('submit');
+            expect(btnPhoneOtp.find('button').attributes('type')).toBe('submit');
+        });
+
+        it('submete o formulário via evento submit nativo HTML5 (simulando Enter em input ou autofill)', async () => {
+            const wrapper = mountAuthCard({
+                email: 'usuario@teste.com',
+                password: 'minhasenha123',
+                remember: true
+            });
+
+            // Dispara submit nativo diretamente no elemento <form>
+            await wrapper.find('form').trigger('submit');
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.emitted('submit')).toBeTruthy();
+            expect(wrapper.emitted('submit')).toHaveLength(1);
+            expect(wrapper.emitted('submit')![0][0]).toMatchObject({
+                email: 'usuario@teste.com',
+                password: 'minhasenha123',
+                remember: true
+            });
+        });
+
+        it('garante ausência de submissão duplicada quando click no botão de submit e evento submit ocorrem no mesmo ciclo', async () => {
+            const wrapper = mountAuthCard({
+                email: 'usuario@teste.com',
+                password: 'minhasenha123',
+                remember: true
+            });
+
+            // Dispara click no botão e submit no form no mesmo ciclo de eventos
+            const btn = wrapper.findComponent({ name: 'MaxButton' });
+            (btn.props('action') as any)?.();
+            await wrapper.find('form').trigger('submit');
+            await wrapper.vm.$nextTick();
+
+            // A proteção de coalescência garante EXATAMENTE 1 emissão
+            expect(wrapper.emitted('submit')).toHaveLength(1);
+        });
+
+        it('suporta autofill nativo onde valores são injetados e form.submit é acionado', async () => {
+            const wrapper = mountAuthCard();
+
+            const inputs = wrapper.findAll('input');
+            const emailInput = inputs.find((i) => i.attributes('type') === 'email') ?? inputs[0];
+            const passInput = inputs.find((i) => i.attributes('type') === 'password') ?? inputs[1];
+
+            // Simula preenchimento por gerenciador de senhas / autofill do navegador
+            await emailInput.setValue('autofill@empresa.com');
+            await passInput.setValue('senhaForteAutofill!#');
+
+            // Gerenciador submete o form nativo
+            await wrapper.find('form').trigger('submit');
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.emitted('submit')).toBeTruthy();
+            expect(wrapper.emitted('submit')![0][0]).toMatchObject({
+                email: 'autofill@empresa.com',
+                password: 'senhaForteAutofill!#'
+            });
+        });
+
+        it('modo phone-otp submete envio de código via evento submit nativo', async () => {
+            const wrapper = mountAuthCard({
+                mode: 'phone-otp',
+                phone: '62988887777'
+            });
+
+            // Dispara submit nativo no <form>
+            await wrapper.find('form').trigger('submit');
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.emitted('send-code')).toBeTruthy();
+            expect(wrapper.emitted('send-code')).toHaveLength(1);
+            const payload = wrapper.emitted('send-code')![0][0] as any;
+            expect(payload.phone).toBe('62988887777');
+        });
+
+        it('instâncias concorrentes com erros independentes mantêm IDs distintos e exatamente 1 live region alert cada', async () => {
+            const wrapperA = mountAuthCard({ error: 'Erro no Card A' });
+            const wrapperB = mountAuthCard();
+
+            expect(wrapperA.findAll('[role="alert"]')).toHaveLength(1);
+            expect(wrapperB.findAll('[role="alert"]')).toHaveLength(0);
+
+            const alertA = wrapperA.find('[role="alert"]');
+            const idA = alertA.attributes('id');
+
+            // Adiciona erro ao Card B
+            await wrapperB.setProps({ error: 'Erro no Card B' });
+            await wrapperB.vm.$nextTick();
+
+            expect(wrapperB.findAll('[role="alert"]')).toHaveLength(1);
+            const alertB = wrapperB.find('[role="alert"]');
+            const idB = alertB.attributes('id');
+
+            expect(idA).not.toBe(idB);
+            expect(alertA.text()).toContain('Erro no Card A');
+            expect(alertB.text()).toContain('Erro no Card B');
+
+            // Atualiza erro do Card A
+            await wrapperA.setProps({ error: 'Erro no Card A Atualizado' });
+            await wrapperA.vm.$nextTick();
+
+            expect(wrapperA.findAll('[role="alert"]')).toHaveLength(1);
+            expect(wrapperB.findAll('[role="alert"]')).toHaveLength(1);
+            expect(wrapperA.find('[role="alert"]').text()).toContain('Erro no Card A Atualizado');
+            expect(wrapperB.find('[role="alert"]').text()).toContain('Erro no Card B');
+        });
+
+        it('adversarial: ciclo completo de tecla Enter (submit nativo no pressionamento e keyup 80ms depois) emite submit exatamente uma vez', async () => {
+            const wrapper = mountAuthCard({
+                email: 'adversarial@teste.com',
+                password: 'senhaSegura123!',
+                remember: true
+            });
+
+            // 1. Navegador dispara submit nativo ao pressionar Enter em campo de formulário
+            await wrapper.find('form').trigger('submit');
+            await wrapper.vm.$nextTick();
+
+            // 2. Tecla Enter é liberada 80ms depois (keyup borbulha até o form)
+            vi.advanceTimersByTime(80);
+            const passInput = wrapper.findAll('input').find((i) => i.attributes('type') === 'password');
+            if (passInput) await passInput.trigger('keyup.enter');
+            await wrapper.find('form').trigger('keyup.enter');
+            await wrapper.vm.$nextTick();
+
+            // Sem handler duplicado @keyup.enter no form, emite EXATAMENTE 1 vez
+            const emitted = wrapper.emitted('submit');
+            expect(emitted).toHaveLength(1);
         });
     });
 });

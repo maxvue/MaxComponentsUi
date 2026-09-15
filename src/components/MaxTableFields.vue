@@ -10,13 +10,26 @@
                 <!-- Cabeçalho -->
                 <thead class="max-table-fields-head">
                     <tr class="max-table-fields-head-row">
-                        <th v-for="col in safeColumns" :key="col.field" class="max-table-fields-th" :style="getColumnStyle(col)">
+                        <th
+                            v-for="col in safeColumns"
+                            :key="col.field"
+                            class="max-table-fields-th"
+                            :style="getColumnStyle(col)"
+                            scope="col"
+                            :aria-label="col.header?.trim() || col.field?.trim() || 'Coluna'"
+                        >
                             <slot :name="`header-${col.field}`" :column="col">
                                 {{ col.header }}
                             </slot>
                         </th>
                         <!-- Coluna extra para botões de ação -->
-                        <th v-if="hasActionsColumn" class="max-table-fields-th max-table-fields-th-buttons" :style="buttonsColumnStyle">
+                        <th
+                            v-if="hasActionsColumn"
+                            class="max-table-fields-th max-table-fields-th-buttons"
+                            :style="buttonsColumnStyle"
+                            scope="col"
+                            :aria-label="props.headerButton?.trim() || 'Ações'"
+                        >
                             <slot name="buttons-header">
                                 {{ props.headerButton }}
                             </slot>
@@ -51,9 +64,9 @@
 
                                 <!-- Input de incremento (+/-) -->
                                 <div v-else-if="col.input === 'increment'" class="max-table-fields-increment">
-                                    <MaxIconButton i="icons8:minus" size="1.3" dark @click.stop="decrementValue(row, col)" />
+                                    <MaxIconButton i="icons8:minus" size="1.3" dark @click.stop="decrementValue(row, col)" :aria-label="`Diminuir ${col.label || col.field || 'valor'}`" />
                                     <MaxInputText :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-increment-input" :placeholder="col.placeholder" :required="col.required" />
-                                    <MaxIconButton i="icons8:plus" size="1.3" dark @click.stop="incrementValue(row, col)" />
+                                    <MaxIconButton i="icons8:plus" size="1.3" dark @click.stop="incrementValue(row, col)" :aria-label="`Aumentar ${col.label || col.field || 'valor'}`" />
                                 </div>
 
                                 <!-- Input de texto -->

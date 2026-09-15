@@ -44,14 +44,44 @@ interface OverlayEntry {
     repositionOnResize?: boolean;
 }
 
+interface RegisteredListener {
+    target: EventTarget;
+    type: string;
+    listener: EventListenerOrEventListenerObject;
+    options?: boolean | AddEventListenerOptions;
+}
+
 let nextId = 1;
 const overlayStack: OverlayEntry[] = [];
 let isGlobalAttached = false;
 let globalRafId: number | null = null;
-let pointerDownTargetInside: boolean = false;
+let pointerDownTargetInsideTop = false;
+let lastCloseReason: 'outside' | 'escape' | null = null;
+
+const registeredGlobalListeners: RegisteredListener[] = [];
+
+function addGlobalListener(
+    target: EventTarget,
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions
+) {
+    if (options !== undefined) target.addEventListener(type, listener, options);
+    else target.addEventListener(type, listener);
+
+    registeredGlobalListeners.push({ target, type, listener, options });
+}
+
+function removeAllGlobalListeners() {
+    for (const entry of registeredGlobalListeners) if (entry.options !== undefined) entry.target.removeEventListener(entry.type, entry.listener, entry.options);
+    else entry.target.removeEventListener(entry.type, entry.listener);
+
+
+    registeredGlobalListeners.length = 0;
+}
 
 export function getActiveOutsidePointerListenersCount(): number {
-    return isGlobalAttached ? 5 : 0;
+    return registeredGlobalListeners.length;
 }
 
 export function getOverlayStackDepth(): number {
@@ -80,62 +110,89 @@ const onGlobalKeydown = (e: KeyboardEvent) => {
     if (canClose) {
         e.stopPropagation();
         e.preventDefault();
+        lastCloseReason = 'escape';
         topOverlay.onClose('escape');
     }
 };
 
 const onGlobalPointerDown = (e: PointerEvent | MouseEvent | TouchEvent) => {
-    if (overlayStack.length === 0) return;
-    const target = e.target as Node | null;
-
-    pointerDownTargetInside = false;
-    for (let i = overlayStack.length - 1; i >= 0; i--) if (isInsideElements(target, overlayStack[i].elements())) {
-        pointerDownTargetInside = true;
-        break;
+    if (overlayStack.length === 0) {
+        pointerDownTargetInsideTop = false;
+        return;
     }
+    const target = e.target as Node | null;
+    const topOverlay = overlayStack[overlayStack.length - 1];
 
+    // Verifica se o pointerdown ocorreu dentro da camada superior (topo da pilha)
+    pointerDownTargetInsideTop = isInsideElements(target, topOverlay.elements());
 };
 
 const onGlobalClick = (e: MouseEvent) => {
-    if (overlayStack.length === 0) return;
-
-    if (pointerDownTargetInside) {
-        pointerDownTargetInside = false;
+    if (overlayStack.length === 0) {
+        pointerDownTargetInsideTop = false;
         return;
     }
 
+    const topOverlay = overlayStack[overlayStack.length - 1];
     const target = e.target as Node | null;
 
-    const topOverlay = overlayStack[overlayStack.length - 1];
+    const isInsideTop = isInsideElements(target, topOverlay.elements());
+    const startedInsideTop = pointerDownTargetInsideTop;
+    pointerDownTargetInsideTop = false;
+
+    // Se começou dentro do topo ou terminou dentro do topo, não fecha o topo
+    if (startedInsideTop || isInsideTop) return;
+
+
     const canDismiss = topOverlay.dismissable !== undefined ? Boolean(unref(topOverlay.dismissable)) : true;
-
-    if (canDismiss && !isInsideElements(target, topOverlay.elements())) topOverlay.onClose('outside');
-
-
-    pointerDownTargetInside = false;
+    if (canDismiss) {
+        lastCloseReason = 'outside';
+        topOverlay.onClose('outside');
+    }
 };
 
 const handleGlobalReposition = () => {
     if (globalRafId !== null) return;
-    if (typeof requestAnimationFrame !== 'undefined') globalRafId = requestAnimationFrame(() => {
+    const runReposition = () => {
         globalRafId = null;
-        for (const overlay of overlayStack) if (overlay.onReposition && (overlay.repositionOnScroll || overlay.repositionOnResize)) overlay.onReposition();
+        for (const overlay of overlayStack) if (overlay.onReposition && (overlay.repositionOnScroll || overlay.repositionOnResize)) {
+            // Se o trigger/âncora foi desconectado do DOM, fecha o overlay em vez de reposicionar erraticamente
+            const trigger = typeof overlay.triggerEl === 'function' ? overlay.triggerEl() : overlay.triggerEl?.value;
+            if (trigger && !trigger.isConnected) {
+                lastCloseReason = 'outside';
+                overlay.onClose('outside');
+                continue;
+            }
+            overlay.onReposition();
+        }
 
+    };
 
-    });
-    else for (const overlay of overlayStack) if (overlay.onReposition && (overlay.repositionOnScroll || overlay.repositionOnResize)) overlay.onReposition();
-
+    if (typeof requestAnimationFrame !== 'undefined') globalRafId = requestAnimationFrame(runReposition);
+    else runReposition();
 
 };
 
 const attachGlobalListeners = () => {
     if (isGlobalAttached || typeof window === 'undefined') return;
-    window.addEventListener('keydown', onGlobalKeydown);
-    document.addEventListener('keydown', onGlobalKeydown);
-    document.addEventListener('pointerdown', onGlobalPointerDown, true);
-    document.addEventListener('click', onGlobalClick, true);
-    window.addEventListener('scroll', handleGlobalReposition, true);
-    window.addEventListener('resize', handleGlobalReposition, true);
+
+    // Keydown unificado em document (eliminando registro duplicado em window)
+    addGlobalListener(document, 'keydown', onGlobalKeydown as EventListener);
+
+    // Pointerdown e click em document capture para clique-through
+    addGlobalListener(document, 'pointerdown', onGlobalPointerDown as EventListener, true);
+    addGlobalListener(document, 'click', onGlobalClick as EventListener, true);
+
+    // Reposition em scroll e resize da janela
+    addGlobalListener(window, 'scroll', handleGlobalReposition as EventListener, true);
+    addGlobalListener(window, 'resize', handleGlobalReposition as EventListener, true);
+
+    // Suporte a zoom e redimensionamento via visualViewport quando disponível
+    if (window.visualViewport) {
+        addGlobalListener(window.visualViewport, 'resize', handleGlobalReposition as EventListener);
+        addGlobalListener(window.visualViewport, 'scroll', handleGlobalReposition as EventListener);
+    }
+
     isGlobalAttached = true;
 };
 
@@ -145,12 +202,7 @@ const detachGlobalListeners = () => {
         cancelAnimationFrame(globalRafId);
         globalRafId = null;
     }
-    window.removeEventListener('keydown', onGlobalKeydown);
-    document.removeEventListener('keydown', onGlobalKeydown);
-    document.removeEventListener('pointerdown', onGlobalPointerDown, true);
-    document.removeEventListener('click', onGlobalClick, true);
-    window.removeEventListener('scroll', handleGlobalReposition, true);
-    window.removeEventListener('resize', handleGlobalReposition, true);
+    removeAllGlobalListeners();
     isGlobalAttached = false;
 };
 
@@ -197,15 +249,35 @@ export function useOutsidePointer(
             overlayStack.splice(idx, 1);
 
             if (entry.restoreFocus !== false && typeof document !== 'undefined') {
-                const explicitTrigger = typeof entry.triggerEl === 'function' ? entry.triggerEl() : entry.triggerEl?.value;
-                const targetToFocus = explicitTrigger ?? entry.previousActiveElement;
-                if (targetToFocus && typeof targetToFocus.focus === 'function' && document.body.contains(targetToFocus)) targetToFocus.focus();
+                const currentActive = document.activeElement;
+                const isFocusOnExternalControl =
+                    currentActive &&
+                    currentActive !== document.body &&
+                    currentActive !== document.documentElement &&
+                    !isInsideElements(currentActive, entry.elements());
 
+                // Não rouba foco do controle clicado no clique-through
+                const shouldRestore = lastCloseReason === 'escape' || !isFocusOnExternalControl;
+
+                if (shouldRestore) {
+                    const explicitTrigger = typeof entry.triggerEl === 'function' ? entry.triggerEl() : entry.triggerEl?.value;
+                    let targetToFocus: HTMLElement | null = null;
+
+                    if (explicitTrigger && (explicitTrigger.isConnected ?? document.body.contains(explicitTrigger))) targetToFocus = explicitTrigger;
+                    else if (entry.previousActiveElement && (entry.previousActiveElement.isConnected ?? document.body.contains(entry.previousActiveElement))) targetToFocus = entry.previousActiveElement;
+
+
+                    if (targetToFocus && typeof targetToFocus.focus === 'function') targetToFocus.focus();
+
+                }
             }
         }
 
-        if (overlayStack.length === 0 && isGlobalAttached) detachGlobalListeners();
-
+        if (overlayStack.length === 0 && isGlobalAttached) {
+            detachGlobalListeners();
+            lastCloseReason = null;
+            pointerDownTargetInsideTop = false;
+        }
     };
 
     watch(
@@ -230,6 +302,9 @@ export function useOutsidePointer(
 
 export function resetOutsidePointerStateForTests() {
     overlayStack.length = 0;
+    lastHandledKeyEvent = null;
+    lastCloseReason = null;
+    pointerDownTargetInsideTop = false;
     if (isGlobalAttached) detachGlobalListeners();
 
 }

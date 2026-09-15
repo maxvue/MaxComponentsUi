@@ -156,7 +156,10 @@
 
         &:focus-visible {
             border-radius: 6px;
-            box-shadow: 0 0 0 2px var(--blue-500);
+
+            /* Foco canônico: --max-focus-ring garante contraste em light/dark/forced-colors */
+            outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
+            outline-offset: 2px;
         }
 
         &:hover:not(:disabled) {

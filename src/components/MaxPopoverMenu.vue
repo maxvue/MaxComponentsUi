@@ -360,7 +360,7 @@
         color: inherit;
 
         &:focus-visible {
-            outline: 2px solid var(--max-primary-500, #00768E);
+            outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e)); /* Foco canônico */
             outline-offset: 2px;
             border-radius: 4px;
         }
@@ -396,7 +396,7 @@
         cursor: pointer;
 
         &:focus-visible {
-            outline: 2px solid var(--max-primary-500, #00768E);
+            outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e)); /* Foco canônico */
             outline-offset: -2px;
             background-color: var(--background-100, #f1f5f9);
         }

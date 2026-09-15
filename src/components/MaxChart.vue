@@ -3,7 +3,16 @@
         <canvas ref="canvas_ref" :aria-label="effectiveAriaLabel" :role="effectiveAriaLabel ? 'img' : undefined"></canvas>
 
         <!-- Tabela acessível alternativa para navegação por teclado e tecnologias assistivas -->
-        <div v-if="accessibleRows.length > 0" class="max-chart-accessible-table sr-only-focusable">
+        <div
+            v-if="accessibleRows.length > 0"
+            class="max-chart-accessible-table sr-only-focusable"
+            role="region"
+            tabindex="0"
+            :aria-label="accessibleRegionLabel"
+        >
+            <div class="max-chart-accessible-summary" tabindex="0" aria-live="polite">
+                {{ chartSummaryText }}
+            </div>
             <table :aria-label="effectiveAriaLabel || 'Tabela de dados do gráfico'">
                 <caption>{{ effectiveAriaLabel || 'Dados do gráfico' }}</caption>
                 <thead>
@@ -68,6 +77,16 @@
         if (props.ariaLabel) return props.ariaLabel;
         if (props.data?.datasets?.[0]?.label) return `Gráfico: ${props.data.datasets[0].label}`;
         return 'Gráfico de dados';
+    });
+
+    const accessibleRegionLabel = computed(() => {
+        return effectiveAriaLabel.value ? `Dados do gráfico: ${effectiveAriaLabel.value}` : 'Dados do gráfico';
+    });
+
+    const chartSummaryText = computed(() => {
+        const numLabels = props.data?.labels?.length ?? 0;
+        const numSeries = props.data?.datasets?.length ?? 0;
+        return `Gráfico com ${numSeries} série(s) e ${numLabels} item(ns). Navegue pela tabela para consultar os dados ou selecionar pontos.`;
     });
 
     const accessibleRows = computed(() => {
@@ -215,11 +234,12 @@
             white-space: nowrap;
             border: 0;
 
+            &:focus,
             &:focus-within {
                 position: static;
                 width: auto;
                 height: auto;
-                margin: 0;
+                margin: 0.5rem 0;
                 overflow: visible;
                 clip-path: none;
                 white-space: normal;
@@ -227,7 +247,40 @@
                 background: var(--max-surface-0, #fff);
                 border: 1px solid var(--max-border-color, #ccc);
                 padding: 1rem;
-                border-radius: 4px;
+                border-radius: 6px;
+                outline: var(--max-focus-outline, 2px solid var(--max-primary-500, #00768E));
+                outline-offset: 2px;
+            }
+        }
+
+        .max-chart-accessible-summary {
+            font-size: 0.875rem;
+            color: var(--background-800, #333);
+            margin-bottom: 0.75rem;
+            outline: none;
+
+            &:focus-visible {
+                outline: var(--max-focus-outline, 2px solid var(--max-primary-500, #00768E));
+                outline-offset: 2px;
+            }
+        }
+
+        .max-chart-cell-btn {
+            background: transparent;
+            border: 1px solid var(--max-border-color, #ccc);
+            border-radius: 4px;
+            padding: 2px 8px;
+            cursor: pointer;
+            color: inherit;
+            font-size: 0.85rem;
+
+            &:hover {
+                background: var(--max-surface-100, #f0f4f8);
+            }
+
+            &:focus-visible {
+                outline: var(--max-focus-outline, 2px solid var(--max-primary-500, #00768E));
+                outline-offset: 2px;
             }
         }
     }

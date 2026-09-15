@@ -1,22 +1,46 @@
 <template>
-    <div :class="`max-input-file-project input-project-div ${isOverDropZone ? 'in-drop' : 'not-in-drop'}`" ref="drop_zone_ref">
-        <MaxIconButton
-            class="open-files-btn"
-            :hoverScale="1.06"
+    <div :class="`max-input-file-project input-project-div ${isOverDropZone ? 'in-drop' : 'not-in-drop'} ${props.disabled ? 'is-disabled' : ''}`" ref="drop_zone_ref">
+        <input
+            ref="nativeInputRef"
+            :id="inputId"
+            type="file"
+            class="sr-only max-file-project-native-input"
+            multiple
             :disabled="props.disabled"
+            tabindex="-1"
+            @change="onNativeInputChange"
+        />
+        <label
+            :for="props.disabled ? undefined : inputId"
+            class="open-files-btn-label"
+            :class="{ 'is-disabled': props.disabled }"
+            :tabindex="props.disabled ? -1 : 0"
+            role="button"
+            :aria-disabled="props.disabled ? 'true' : 'false'"
             aria-label="Carregar documentos"
-            @click="() => open()"
+            @click="onChooserClick"
+            @keydown.enter.prevent="onChooserKeydown"
+            @keydown.space.prevent="onChooserKeydown"
         >
-            <div class="open-files">
-                <div class="instruction">
-                    Insira fotos dos documentos ou Documentos em PDF aqui
-                    <br />
-                    para registrar os dados automaticamente.
+            <MaxIconButton
+                class="open-files-btn"
+                :hoverScale="1.06"
+                :disabled="props.disabled"
+                tabindex="-1"
+                aria-label="Carregar documentos"
+                @click.stop="triggerChoose"
+            >
+                <div class="open-files">
+                    <div class="instruction">
+                        Insira fotos dos documentos ou Documentos em PDF aqui
+                        <br />
+                        para registrar os dados automaticamente.
+                    </div>
+                    <div>Clique aqui ou arraste e solte os documentos para carregar.</div>
+                    <MaxIcon icon="material-symbols:folder-open" size="4" class="folder-icon" />
                 </div>
-                <div>Clique aqui ou arraste e solte os documentos para carregar.</div>
-                <MaxIcon icon="material-symbols:folder-open" size="4" class="folder-icon" />
-            </div>
-        </MaxIconButton>
+            </MaxIconButton>
+        </label>
         <div class="file-list">
             <div v-for="file in temp_files" :key="file.id" class="file-item">
                 <div class="icons-file">
@@ -74,12 +98,45 @@
 
     export type { UploadFileStatus };
 
+    let projectInstanceId = 0;
+    const instanceId = ++projectInstanceId;
+    const inputId = ref(`max-file-project-${instanceId}`);
+    const nativeInputRef = ref<HTMLInputElement | null>(null);
+
     const temp_files = ref<DBFile[]>([]);
     const fileStatusMap = ref(new Map<string, UploadFileStatus>());
     const created_urls = new Set<string>();
     const activeControllers = new Set<AbortController>();
     const statusAnnouncement = ref('');
     const isUnmounted = ref(false);
+
+    const onChooserClick = (event: MouseEvent) => {
+        if (props.disabled) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    };
+
+    const onChooserKeydown = (event: KeyboardEvent) => {
+        if (props.disabled) {
+            event.preventDefault();
+            return;
+        }
+        triggerChoose();
+    };
+
+    const triggerChoose = () => {
+        if (props.disabled) return;
+        if (nativeInputRef.value) nativeInputRef.value.click();
+        open();
+    };
+
+    const onNativeInputChange = (event: Event) => {
+        if (props.disabled) return;
+        const target = event.target as HTMLInputElement;
+        if (target.files && target.files.length > 0) ingestFiles(Array.from(target.files));
+        target.value = '';
+    };
 
     const cleanupRemovedUrls = (currentFiles: DBFile[]) => {
         const localPending = temp_files.value.filter((f) => {
@@ -338,11 +395,47 @@
         sendFile,
         retry,
         fileStatusMap,
-        ingestFiles
+        ingestFiles,
+        triggerChoose,
+        nativeInputRef,
+        inputId
     });
 </script>
 
 <style lang="scss" scoped>
+    .max-file-project-native-input {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        padding: 0 !important;
+        margin: -1px !important;
+        overflow: hidden !important;
+        clip-path: inset(50%) !important;
+        white-space: nowrap !important;
+        border: 0 !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
+    .open-files-btn-label {
+        display: block;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+        border-radius: 0.8rem;
+
+        &:focus-visible {
+            outline: var(--max-focus-outline, 2px solid var(--max-primary-500, #00768E));
+            outline-offset: 2px;
+        }
+
+        &.is-disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+    }
+
     .input-project-div {
         width: 100%;
         height: 300px;

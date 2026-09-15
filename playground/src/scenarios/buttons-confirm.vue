@@ -10,17 +10,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxButtonConfirm />
+                            <MaxButtonConfirm label="Confirmar" />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxButtonConfirm disabled />
+                            <MaxButtonConfirm label="Confirmar" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxButtonConfirm error severity="danger" />
+                            <MaxButtonConfirm label="Excluir" severity="danger" />
                         </div>
                     </div>
                 </div>

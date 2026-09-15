@@ -1,7 +1,7 @@
 <template>
     <MaxPopover class="max-toggle-popover">
         <slot name="button" v-if="! props.label">
-            <MaxIconButton :icon="props.i ?? props.icon" @click.stop="onClickToggle" ref="btn_el" />
+            <MaxIconButton :icon="props.i ?? props.icon" :aria-label="(attrs.ariaLabel as string) || (attrs['aria-label'] as string) || (attrs.title as string) || props.label || 'Alternar opções'" @click.stop="onClickToggle" ref="btn_el" />
         </slot>
         <slot name="button" v-else>
             <MaxButton :label="props.label" :icon="props.i ?? props.icon" v-tooltip="null" @click.stop="onClickToggle" ref="btn_el" />
@@ -13,9 +13,10 @@
     import MaxIconButton from './MaxIconButton.vue';
     import MaxPopover from './MaxPopover.vue';
     import MaxButton from './MaxButton.vue';
-    import { useTemplateRef } from 'vue';
+    import { useTemplateRef, useAttrs } from 'vue';
     import { useConfirmStore } from '../stores/useConfirm.Store';
 
+    const attrs = useAttrs();
     const confirm_store = useConfirmStore();
 
     const props = withDefaults(defineProps<{

@@ -14,7 +14,15 @@
         </div>
 
         <!-- Controles acessíveis de coordenadas para teclado e tecnologias assistivas -->
-        <div class="map-accessible-controls sr-only-focusable" role="region" aria-label="Controles acessíveis de coordenadas do mapa">
+        <div
+            class="map-accessible-controls sr-only-focusable"
+            role="region"
+            tabindex="0"
+            aria-label="Controles acessíveis de coordenadas do mapa"
+        >
+            <div class="map-accessible-summary" tabindex="0" aria-live="polite">
+                Marcador posicionado em: Latitude {{ coordinates.latitude.toFixed(5) }}, Longitude {{ coordinates.longitude.toFixed(5) }}
+            </div>
             <label>
                 <span>Latitude:</span>
                 <input
@@ -247,19 +255,84 @@
             white-space: nowrap;
             border: 0;
 
+            &:focus,
             &:focus-within {
-                position: static;
+                position: absolute;
+                top: 8px;
+                left: 8px;
+                right: 8px;
                 width: auto;
                 height: auto;
                 margin: 0;
                 overflow: visible;
                 clip-path: none;
                 white-space: normal;
-                z-index: 10;
+                z-index: 100;
                 background: var(--max-surface-0, #fff);
                 border: 1px solid var(--max-border-color, #ccc);
                 padding: 1rem;
+                border-radius: 6px;
+                outline: var(--max-focus-outline, 2px solid var(--max-primary-500, #00768E));
+                outline-offset: 2px;
+                box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+            }
+        }
+
+        .map-accessible-summary {
+            width: 100%;
+            font-size: 0.875rem;
+            color: var(--background-800, #333);
+            margin-bottom: 0.5rem;
+            outline: none;
+
+            &:focus-visible {
+                outline: var(--max-focus-outline, 2px solid var(--max-primary-500, #00768E));
+                outline-offset: 2px;
+            }
+        }
+
+        .map-accessible-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+
+            label {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                font-size: 0.85rem;
+
+                input {
+                    padding: 4px 8px;
+                    border: 1px solid var(--max-border-color, #ccc);
+                    border-radius: 4px;
+                    background: var(--background-0, #fff);
+                    color: inherit;
+
+                    &:focus-visible {
+                        outline: var(--max-focus-outline, 2px solid var(--max-primary-500, #00768E));
+                        outline-offset: 2px;
+                    }
+                }
+            }
+
+            button {
+                padding: 4px 10px;
+                border: 1px solid var(--max-border-color, #ccc);
                 border-radius: 4px;
+                background: var(--max-surface-100, #f8f9fa);
+                cursor: pointer;
+                font-size: 0.85rem;
+
+                &:hover {
+                    background: var(--max-surface-200, #e9ecef);
+                }
+
+                &:focus-visible {
+                    outline: var(--max-focus-outline, 2px solid var(--max-primary-500, #00768E));
+                    outline-offset: 2px;
+                }
             }
         }
     }

@@ -15,11 +15,43 @@ export function resolveValue<V>(val: MaybeRefOrGetter<V> | undefined): V | undef
     return typeof val === 'function' ? (val as () => V)() : unref(val);
 }
 
+export interface SafeAreaInsets {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+}
+
+export function resolveSafeAreaInsets(): SafeAreaInsets {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return { top: 0, right: 0, bottom: 0, left: 0 };
+
+    const computed = window.getComputedStyle(document.documentElement);
+    const parsePx = (prop: string): number => {
+        const val = computed.getPropertyValue(prop);
+        const parsed = parseFloat(val);
+        return Number.isFinite(parsed) ? parsed : 0;
+    };
+    return {
+        top: parsePx('--safe-area-top'),
+        right: parsePx('--safe-area-right'),
+        bottom: parsePx('--safe-area-bottom'),
+        left: parsePx('--safe-area-left')
+    };
+}
+
 export interface OverlayPositionContext {
     targetRect: DOMRect;
     overlayRect: DOMRect;
     viewportWidth: number;
     viewportHeight: number;
+    safeArea?: SafeAreaInsets;
+    visualViewport?: {
+        width: number;
+        height: number;
+        offsetLeft: number;
+        offsetTop: number;
+        scale: number;
+    };
 }
 
 export interface OverlayPositionResult {
@@ -51,17 +83,28 @@ function defaultCompute(
     ctx: OverlayPositionContext,
     options: { offset: number; align: 'left' | 'right'; matchTargetWidth: boolean }
 ): OverlayPositionResult {
-    const { targetRect: t, overlayRect: p, viewportWidth: vw, viewportHeight: vh } = ctx;
+    const { targetRect: t, overlayRect: p, viewportWidth: vw, viewportHeight: vh, safeArea } = ctx;
     const pHeight = p.height || 200;
     const pWidth = p.width || t.width || 200;
 
-    const spaceBelow = vh - t.bottom;
-    const spaceAbove = t.top;
+    const safeTop = safeArea?.top ?? 0;
+    const safeRight = safeArea?.right ?? 0;
+    const safeBottom = safeArea?.bottom ?? 0;
+    const safeLeft = safeArea?.left ?? 0;
+
+    const minTop = Math.max(8, safeTop + 8);
+    const maxBottom = Math.max(minTop, vh - safeBottom - 8);
+    const minLeft = Math.max(8, safeLeft + 8);
+    const maxRight = Math.max(minLeft, vw - safeRight - 8);
+
+    const spaceBelow = maxBottom - t.bottom;
+    const spaceAbove = t.top - minTop;
     const openUp = spaceBelow < pHeight && spaceAbove > spaceBelow;
-    const top = openUp ? t.top - pHeight - options.offset : t.bottom + options.offset;
+    const rawTop = openUp ? t.top - pHeight - options.offset : t.bottom + options.offset;
+    const top = Math.max(minTop, Math.min(rawTop, maxBottom - pHeight));
 
     let left = options.align === 'right' ? t.right - pWidth : t.left;
-    left = Math.max(8, Math.min(left, vw - pWidth - 8));
+    left = Math.max(minLeft, Math.min(left, maxRight - pWidth));
 
     return {
         top,
@@ -101,11 +144,22 @@ export function useActiveOverlayPosition<T extends OverlayPositionResult = Overl
             ? overlayEl.getBoundingClientRect()
             : new DOMRect(0, 0, 0, 0);
 
+        const vv = typeof window !== 'undefined' ? window.visualViewport : null;
         const ctx: OverlayPositionContext = {
             targetRect,
             overlayRect,
-            viewportWidth: window.visualViewport?.width || window.innerWidth,
-            viewportHeight: window.visualViewport?.height || window.innerHeight
+            viewportWidth: vv ? vv.width : window.innerWidth,
+            viewportHeight: vv ? vv.height : window.innerHeight,
+            safeArea: resolveSafeAreaInsets(),
+            visualViewport: vv
+                ? {
+                    width: vv.width,
+                    height: vv.height,
+                    offsetLeft: vv.offsetLeft,
+                    offsetTop: vv.offsetTop,
+                    scale: vv.scale
+                }
+                : undefined
         };
 
         if (options.compute) position.value = options.compute(ctx);
@@ -152,6 +206,10 @@ export function useActiveOverlayPosition<T extends OverlayPositionResult = Overl
 
         window.addEventListener('scroll', scheduleUpdate, { capture: true, passive: true });
         window.addEventListener('resize', scheduleUpdate, { passive: true });
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', scheduleUpdate, { passive: true });
+            window.visualViewport.addEventListener('scroll', scheduleUpdate, { passive: true });
+        }
 
         observeElements();
         measureAndPosition();
@@ -169,6 +227,10 @@ export function useActiveOverlayPosition<T extends OverlayPositionResult = Overl
         if (typeof window !== 'undefined') {
             window.removeEventListener('scroll', scheduleUpdate, { capture: true });
             window.removeEventListener('resize', scheduleUpdate);
+            if (window.visualViewport) {
+                window.visualViewport.removeEventListener('resize', scheduleUpdate);
+                window.visualViewport.removeEventListener('scroll', scheduleUpdate);
+            }
         }
 
         if (resizeObserver) {

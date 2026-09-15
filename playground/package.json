@@ -5,13 +5,14 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "vue-tsc && vite build",
+        "build": "vue-tsc && vite build && node ../scripts/check-playground-bundle.mjs",
         "preview": "vite preview"
     },
     "dependencies": {
         "@iconify/vue": "^5.0.0",
         "@unocss/reset": "^66.6.8",
         "sass": "^1.99.0",
+        "pinia": "^3.0.4",
         "vue": "^3.5.13",
         "vue-router": "^5.0.6"
     },

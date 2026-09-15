@@ -8,5 +8,6 @@ declare module '*.vue' {
 
 declare module 'vitest/browser' {
     export const page: any;
+    export const cdp: any;
+    export const userEvent: any;
 }
-

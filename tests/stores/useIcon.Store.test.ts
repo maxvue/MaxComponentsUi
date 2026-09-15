@@ -267,6 +267,7 @@ describe('useIconStore', () => {
         await vi.advanceTimersByTimeAsync(50);
 
         expect(store.icons_data['icon-after-reset']).toContain('<path');
+        expect(consoleSpy).toHaveBeenCalled();
 
         consoleSpy.mockRestore();
         vi.useRealTimers();
@@ -311,6 +312,7 @@ describe('useIconStore', () => {
 
         expect(mockFetch).toHaveBeenCalled();
         expect(jsonSpy).not.toHaveBeenCalled();
+        expect(consoleSpy).toHaveBeenCalled();
 
         consoleSpy.mockRestore();
     });
@@ -564,6 +566,7 @@ describe('useIconStore', () => {
 
         expect(store.icons_data['icon-catch-1']).toContain('data-icon="icon-catch-1"');
         expect(store.icons_data['icon-catch-2']).toContain('data-icon="icon-catch-2"');
+        expect(consoleSpy).toHaveBeenCalled();
 
         consoleSpy.mockRestore();
     });

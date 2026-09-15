@@ -665,6 +665,12 @@
             background-color: var(--blue-400, #60a5fa);
         }
 
+        &:focus-visible {
+            outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
+            outline-offset: 2px;
+            box-shadow: var(--max-focus-ring);
+        }
+
         &.gutter-col {
             width: 6px;
             cursor: col-resize;

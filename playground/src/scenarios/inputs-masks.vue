@@ -7,20 +7,20 @@
                 <div class="component-block">
                     <h3>MaxInputPhone</h3>
                     <div class="states">
-                        <!-- Default -->
+                        <!-- Normal -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxInputPhone />
+                            <MaxInputPhone v-model="phone" label="Telefone" />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxInputPhone disabled />
+                            <MaxInputPhone v-model="phoneDisabled" label="Telefone" disabled />
                         </div>
-                        <!-- Error / Variant -->
+                        <!-- Com erro -->
                         <div class="state-col">
-                            <span>Erro / Secundário</span>
-                            <MaxInputPhone error severity="danger" />
+                            <span>Com erro</span>
+                            <MaxInputPhone v-model="phoneError" label="Telefone" :error="'Número inválido'" />
                         </div>
                     </div>
                 </div>
@@ -28,20 +28,15 @@
                 <div class="component-block">
                     <h3>MaxInputPhoneMail</h3>
                     <div class="states">
-                        <!-- Default -->
+                        <!-- Normal -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxInputPhoneMail />
+                            <MaxInputPhoneMail v-model="phoneMail" label="Telefone / E-mail" />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxInputPhoneMail disabled />
-                        </div>
-                        <!-- Error / Variant -->
-                        <div class="state-col">
-                            <span>Erro / Secundário</span>
-                            <MaxInputPhoneMail error severity="danger" />
+                            <MaxInputPhoneMail v-model="phoneMailDisabled" label="Telefone / E-mail" disabled />
                         </div>
                     </div>
                 </div>
@@ -49,20 +44,20 @@
                 <div class="component-block">
                     <h3>MaxInputCep</h3>
                     <div class="states">
-                        <!-- Default -->
+                        <!-- Normal -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxInputCep />
+                            <MaxInputCep v-model="cep" label="CEP" />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxInputCep disabled />
+                            <MaxInputCep v-model="cepDisabled" label="CEP" disabled />
                         </div>
-                        <!-- Error / Variant -->
+                        <!-- Com erro -->
                         <div class="state-col">
-                            <span>Erro / Secundário</span>
-                            <MaxInputCep error severity="danger" />
+                            <span>Com erro</span>
+                            <MaxInputCep v-model="cepError" label="CEP" :error="'CEP não encontrado'" />
                         </div>
                     </div>
                 </div>
@@ -70,20 +65,20 @@
                 <div class="component-block">
                     <h3>MaxInputCpfCnpj</h3>
                     <div class="states">
-                        <!-- Default -->
+                        <!-- Normal -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxInputCpfCnpj />
+                            <MaxInputCpfCnpj v-model="cpfCnpj" label="CPF / CNPJ" />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxInputCpfCnpj disabled />
+                            <MaxInputCpfCnpj v-model="cpfCnpjDisabled" label="CPF / CNPJ" disabled />
                         </div>
-                        <!-- Error / Variant -->
+                        <!-- Com erro -->
                         <div class="state-col">
-                            <span>Erro / Secundário</span>
-                            <MaxInputCpfCnpj error severity="danger" />
+                            <span>Com erro</span>
+                            <MaxInputCpfCnpj v-model="cpfCnpjError" label="CPF / CNPJ" :error="'Documento inválido'" />
                         </div>
                     </div>
                 </div>
@@ -91,20 +86,15 @@
                 <div class="component-block">
                     <h3>MaxInputTypeAddress</h3>
                     <div class="states">
-                        <!-- Default -->
+                        <!-- Normal -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxInputTypeAddress />
+                            <MaxInputTypeAddress v-model="address" />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxInputTypeAddress disabled />
-                        </div>
-                        <!-- Error / Variant -->
-                        <div class="state-col">
-                            <span>Erro / Secundário</span>
-                            <MaxInputTypeAddress error severity="danger" />
+                            <MaxInputTypeAddress v-model="addressDisabled" disabled />
                         </div>
                     </div>
                 </div>
@@ -114,11 +104,32 @@
 </template>
 
 <script setup lang="ts">
-    import { MaxInputPhone } from '@maxvue/max-components-ui';
-    import { MaxInputPhoneMail } from '@maxvue/max-components-ui';
-    import { MaxInputCep } from '@maxvue/max-components-ui';
-    import { MaxInputCpfCnpj } from '@maxvue/max-components-ui';
-    import { MaxInputTypeAddress } from '@maxvue/max-components-ui';
+    import { ref } from 'vue';
+    import {
+        MaxInputPhone,
+        MaxInputPhoneMail,
+        MaxInputCep,
+        MaxInputCpfCnpj,
+        MaxInputTypeAddress
+    } from '@maxvue/max-components-ui';
+
+    const phone = ref('');
+    const phoneDisabled = ref('(11) 99999-9999');
+    const phoneError = ref('123');
+
+    const phoneMail = ref('');
+    const phoneMailDisabled = ref('contato@empresa.com.br');
+
+    const cep = ref('');
+    const cepDisabled = ref('01310-100');
+    const cepError = ref('00000');
+
+    const cpfCnpj = ref<string | null>(null);
+    const cpfCnpjDisabled = ref<string | null>('123.456.789-09');
+    const cpfCnpjError = ref<string | null>('111.111.111-11');
+
+    const address = ref('');
+    const addressDisabled = ref('Rua das Flores');
 </script>
 
 <style lang="scss" scoped>
@@ -148,6 +159,7 @@
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
+        min-width: 220px;
         span {
             font-size: 0.8rem;
             color: #666;

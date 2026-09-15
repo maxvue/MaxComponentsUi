@@ -126,8 +126,9 @@
         }
 
         &:focus-visible {
+            /* Foco canônico: ring duplo (offset + borda) conforme WCAG 2.4.11 */
             outline: none;
-            box-shadow: 0 0 0 3px color-mix(in srgb, var(--max-primary-500, #00768e) 25%, transparent);
+            box-shadow: var(--max-focus-ring, 0 0 0 2px var(--background-0, #fff), 0 0 0 4px var(--max-focus-ring-color, #00768e));
         }
 
         &:disabled {

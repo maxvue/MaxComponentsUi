@@ -1,178 +1,29 @@
 <template>
     <div class="scenario-content" data-scenario="panels-tabs">
-        <h2>Cenário panels-tabs</h2>
-        <div class="scenario-inner">
-            <div class="variants">
-
-                <div class="component-block">
-                    <h3>MaxTabs</h3>
-                    <div class="states">
-                        <!-- Default -->
-                        <div class="state-col">
-                            <span>Normal</span>
-                            <MaxTabs />
-                        </div>
-                        <!-- Disabled -->
-                        <div class="state-col">
-                            <span>Disabled</span>
-                            <MaxTabs disabled />
-                        </div>
-                        <!-- Error / Variant -->
-                        <div class="state-col">
-                            <span>Erro / Secundário</span>
-                            <MaxTabs error severity="danger" />
-                        </div>
-                    </div>
-                </div>
-
-                <div class="component-block">
-                    <h3>MaxTabList</h3>
-                    <div class="states">
-                        <!-- Default -->
-                        <div class="state-col">
-                            <span>Normal</span>
-                            <MaxTabList />
-                        </div>
-                        <!-- Disabled -->
-                        <div class="state-col">
-                            <span>Disabled</span>
-                            <MaxTabList disabled />
-                        </div>
-                        <!-- Error / Variant -->
-                        <div class="state-col">
-                            <span>Erro / Secundário</span>
-                            <MaxTabList error severity="danger" />
-                        </div>
-                    </div>
-                </div>
-
-                <div class="component-block">
-                    <h3>MaxTab</h3>
-                    <div class="states">
-                        <!-- Default -->
-                        <div class="state-col">
-                            <span>Normal</span>
-                            <MaxTab />
-                        </div>
-                        <!-- Disabled -->
-                        <div class="state-col">
-                            <span>Disabled</span>
-                            <MaxTab disabled />
-                        </div>
-                        <!-- Error / Variant -->
-                        <div class="state-col">
-                            <span>Erro / Secundário</span>
-                            <MaxTab error severity="danger" />
-                        </div>
-                    </div>
-                </div>
-
-                <div class="component-block">
-                    <h3>MaxTabPanels</h3>
-                    <div class="states">
-                        <!-- Default -->
-                        <div class="state-col">
-                            <span>Normal</span>
-                            <MaxTabPanels />
-                        </div>
-                        <!-- Disabled -->
-                        <div class="state-col">
-                            <span>Disabled</span>
-                            <MaxTabPanels disabled />
-                        </div>
-                        <!-- Error / Variant -->
-                        <div class="state-col">
-                            <span>Erro / Secundário</span>
-                            <MaxTabPanels error severity="danger" />
-                        </div>
-                    </div>
-                </div>
-
-                <div class="component-block">
-                    <h3>MaxTabPanel</h3>
-                    <div class="states">
-                        <!-- Default -->
-                        <div class="state-col">
-                            <span>Normal</span>
-                            <MaxTabPanel />
-                        </div>
-                        <!-- Disabled -->
-                        <div class="state-col">
-                            <span>Disabled</span>
-                            <MaxTabPanel disabled />
-                        </div>
-                        <!-- Error / Variant -->
-                        <div class="state-col">
-                            <span>Erro / Secundário</span>
-                            <MaxTabPanel error severity="danger" />
-                        </div>
-                    </div>
-                </div>
-
-                <div class="component-block">
-                    <h3>MaxTabItem</h3>
-                    <div class="states">
-                        <!-- Default -->
-                        <div class="state-col">
-                            <span>Normal</span>
-                            <MaxTabItem />
-                        </div>
-                        <!-- Disabled -->
-                        <div class="state-col">
-                            <span>Disabled</span>
-                            <MaxTabItem disabled />
-                        </div>
-                        <!-- Error / Variant -->
-                        <div class="state-col">
-                            <span>Erro / Secundário</span>
-                            <MaxTabItem error severity="danger" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <h2>Tabs</h2>
+        <p>Lista, abas e painéis compartilham o mesmo contexto de <code>MaxTabs</code>.</p>
+        <MaxTabs v-model:value="activeTab" id="playground-tabs" scrollable>
+            <MaxTabList>
+                <MaxTab value="overview">Visão geral</MaxTab>
+                <MaxTab value="activity">Atividade</MaxTab>
+                <MaxTab value="disabled" disabled>Indisponível</MaxTab>
+            </MaxTabList>
+            <MaxTabPanels>
+                <MaxTabPanel value="overview">Resumo do conteúdo selecionado.</MaxTabPanel>
+                <MaxTabPanel value="activity">Histórico de atividade.</MaxTabPanel>
+                <MaxTabPanel value="disabled">Painel indisponível.</MaxTabPanel>
+            </MaxTabPanels>
+        </MaxTabs>
     </div>
 </template>
 
 <script setup lang="ts">
-    import { MaxTabs } from '@maxvue/max-components-ui';
-    import { MaxTabList } from '@maxvue/max-components-ui';
-    import { MaxTab } from '@maxvue/max-components-ui';
-    import { MaxTabPanels } from '@maxvue/max-components-ui';
-    import { MaxTabPanel } from '@maxvue/max-components-ui';
-    import { MaxTabItem } from '@maxvue/max-components-ui';
+    import { ref } from 'vue';
+    import { MaxTab, MaxTabList, MaxTabPanel, MaxTabPanels, MaxTabs } from '@maxvue/max-components-ui';
+
+    const activeTab = ref<string | number>('overview');
 </script>
 
 <style lang="scss" scoped>
-    .scenario-content {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        padding: 1rem;
-    }
-    .variants {
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-    }
-    .component-block {
-        border: 1px solid var(--layout-border, #ccc);
-        padding: 1rem;
-        border-radius: 8px;
-    }
-    .states {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 2rem;
-        margin-top: 1rem;
-    }
-    .state-col {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-        span {
-            font-size: 0.8rem;
-            color: #666;
-        }
-    }
+    .scenario-content { display: flex; flex-direction: column; gap: 1rem; padding: 1rem; }
 </style>

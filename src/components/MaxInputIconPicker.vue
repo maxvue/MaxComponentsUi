@@ -1,6 +1,6 @@
 <template>
     <InputBase
-        v-bind="props"
+        v-bind="{ ...props, ...attrs }"
         :done="props.done ?? isDone"
         :error="props.error ?? error_msg"
         :caution="caution"
@@ -34,7 +34,7 @@
     </InputBase>
 
     <Teleport to="body" v-if="visible">
-        <div class="max-icon-picker-drawer-backdrop" @click="closeDrawer" @keydown.esc="closeDrawer">
+        <div class="max-icon-picker-drawer-backdrop" @click="closeDrawer">
             <div
                 ref="drawerEl"
                 class="max-icon-picker-drawer p-drawer-bottom"
@@ -45,7 +45,6 @@
                 aria-label="Escolha um ícone"
                 tabindex="-1"
                 @click.stop
-                @keydown="isTop ? trap.onKeydown($event) : undefined"
             >
                 <div class="max-icon-picker-header p-drawer-header">
                     <span class="max-icon-picker-title p-drawer-title">Escolha um ícone</span>
@@ -139,6 +138,10 @@
     import { ref, computed, watch, useAttrs, nextTick, onBeforeUnmount, useId } from 'vue';
     import type { Ref } from 'vue';
     import InputBase from './InputBase.vue';
+
+    defineOptions({
+        inheritAttrs: false
+    });
     import MaxIcon from './MaxIcon.vue';
     import { sanitizeSvg } from '../helpers/sanitizeSvg';
     import { useVirtualList } from '../composables/useVirtualList';
@@ -420,7 +423,6 @@
             svgFetchTimer = null;
         }
         visible.value = true;
-        trap.activate();
         fetchCuratedIcons();
     };
 
@@ -432,10 +434,6 @@
         catalogGeneration++;
         isLoading.value = false;
         visible.value = false;
-        trap.deactivate();
-        nextTick(() => {
-            triggerRef.value?.focus();
-        });
     };
 
     const selectIcon = (iconName: string) => {
@@ -533,7 +531,8 @@
         cursor: pointer;
 
         &:focus-visible {
-            outline: 2px solid var(--max-primary-500, #00768e);
+            /* Foco canônico: --max-focus-ring-color adapta em dark mode */
+            outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
             outline-offset: 1px;
         }
 
@@ -702,7 +701,8 @@
                             transition: background-color 0.15s ease;
 
                             &:focus-visible {
-                                outline: 2px solid var(--max-primary-500, #00768E);
+                                /* Foco canônico: --max-focus-ring-color adapta em dark mode */
+                                outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
                                 outline-offset: 1px;
                                 border-radius: 4px;
                             }

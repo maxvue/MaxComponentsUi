@@ -26,7 +26,7 @@ function getComponentsUsingInputBase(): string[] {
 }
 
 describe('Auditoria Arquitetural: Acessibilidade de InputBase e Consumidores', () => {
-    it('todos os 25 componentes que consomem InputBase devem vincular inputAttrs ao elemento interativo no slot', () => {
+    it('as 25 famílias de componentes de entrada devem conectar atributos de controle e ID aos elementos operáveis', () => {
         const consumers = getComponentsUsingInputBase();
         expect(consumers.length).toBe(24);
 
@@ -38,6 +38,15 @@ describe('Auditoria Arquitetural: Acessibilidade de InputBase e Consumidores', (
         }
 
         expect(unmigrated).toEqual([]);
+
+        // A 25ª família de entrada é MaxInputToggle (componente especializado com input checkbox nativo)
+        const toggleContent = fs.readFileSync(path.join(COMPONENTS_DIR, 'MaxInputToggle.vue'), 'utf-8');
+        expect(toggleContent).toMatch(/<input[^>]*type="checkbox"[^>]*class="max-toggleswitch-input"/);
+        expect(toggleContent).toMatch(/v-bind="controlAttrs"/);
+        expect(toggleContent).toMatch(/:id="toggleInputId"/);
+
+        const allFamilies = [...consumers, 'MaxInputToggle.vue'];
+        expect(allFamilies.length).toBe(25);
     });
 
     describe('Conexão acessível de controles representativos', () => {
@@ -304,7 +313,6 @@ describe('Auditoria Arquitetural: Acessibilidade de InputBase e Consumidores', (
 
             // Simula clique no label
             await label.trigger('click');
-            input.element.focus();
             expect(document.activeElement).toBe(input.element);
 
             wrapper.unmount();

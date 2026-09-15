@@ -12,7 +12,24 @@ import { fileURLToPath } from 'node:url';
 export function validateLockfile(dir = process.cwd()) {
     const pkgPath = path.join(dir, 'package.json');
     const lockPath = path.join(dir, 'package-lock.json');
+    const npmrcPath = path.join(dir, '.npmrc');
     const errors = [];
+
+    // 0. Rejeição estrita de diretiva permissiva legacy-peer-deps em .npmrc
+    if (fs.existsSync(npmrcPath)) {
+        const npmrcContent = fs.readFileSync(npmrcPath, 'utf-8');
+        const lines = npmrcContent.split('\n');
+        for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed || trimmed.startsWith('#') || trimmed.startsWith(';')) continue;
+            if (/legacy-peer-deps/i.test(trimmed)) {
+                if (!/legacy-peer-deps\s*=\s*(false|0|off)\b/i.test(trimmed)) {
+                    errors.push('O arquivo .npmrc contém diretiva ativa "legacy-peer-deps", o que é proibido.');
+                    break;
+                }
+            }
+        }
+    }
 
     if (!fs.existsSync(pkgPath)) {
         return { valid: false, errors: ['package.json não encontrado'] };
@@ -26,28 +43,57 @@ export function validateLockfile(dir = process.cwd()) {
 
     const packages = lock.packages || {};
 
-    // 1. Rejeita caminhos absolutos de máquina, worktrees, file:, link: e relatives em packages
+    // Padrões proibidos para caminhos locais, symlinks e caminhos de máquina
     const forbiddenPatterns = [
-        /^\/home\//,
-        /^[a-zA-Z]:\\/,
-        /\.max-code-worktrees/,
-        /\.worktrees\//,
-        /\.\.\//,
-        /^file:/,
-        /^link:/
+        /^\//,                                       // Caminho absoluto POSIX (/home/, /Users/, /tmp/, /root/, /opt/, etc.)
+        /^[a-zA-Z]:[\\/]/,                           // Caminho absoluto Windows (C:\, D:/, etc.)
+        /^\\\\/,                                     // Caminho UNC Windows (\\server\share)
+        /^\.\.?([\\/]|$)/,                           // Caminho relativo (. ou .. ou ./... ou ../...)
+        /\/\.\.\//,                                  // Traversal relativo embutido (/../)
+        /^(file|link|portal|workspace|git\+file):/i, // Protocolos locais ou workspace
+        /\.max-code-worktrees/i,
+        /\.worktrees[\\/]/i
     ];
 
+    // 1. Validação em package.json: nenhum tipo de dependência pode ter especificação de versão local proibida
+    const manifestSections = [
+        { name: 'dependencies', data: pkg.dependencies || {} },
+        { name: 'devDependencies', data: pkg.devDependencies || {} },
+        { name: 'peerDependencies', data: pkg.peerDependencies || {} },
+        { name: 'optionalDependencies', data: pkg.optionalDependencies || {} }
+    ];
+
+    for (const section of manifestSections) {
+        for (const [dep, version] of Object.entries(section.data)) {
+            if (typeof version !== 'string') continue;
+            for (const pattern of forbiddenPatterns) {
+                if (pattern.test(version)) {
+                    errors.push(`Dependência "${dep}" em package.json (${section.name}) possui especificação de versão local proibida: "${version}"`);
+                    break;
+                }
+            }
+        }
+    }
+
+    // 2. Rejeição em package-lock.json:
+    // 2a. Toda chave de packages DEVE ser a raiz ("") ou começar com "node_modules/"
     for (const key of Object.keys(packages)) {
-        for (const pattern of forbiddenPatterns) {
-            if (pattern.test(key)) {
-                errors.push(`Chave de pacote contém caminho de máquina, relativo ou local proibido: "${key}"`);
-                break;
+        if (key !== '' && !key.startsWith('node_modules/')) {
+            errors.push(`Chave de pacote "${key}" no lockfile não é canônica (deve começar com "node_modules/"). Caminhos locais ou worktrees órfãos são proibidos.`);
+        }
+
+        if (key !== '') {
+            for (const pattern of forbiddenPatterns) {
+                if (pattern.test(key)) {
+                    errors.push(`Chave de pacote contém caminho de máquina, relativo ou local proibido: "${key}"`);
+                    break;
+                }
             }
         }
 
         const pkgEntry = packages[key];
-        if (pkgEntry?.link) {
-            errors.push(`Pacote "${key}" é um link simbólico local (link: true), proibido para distribuição limpa.`);
+        if (pkgEntry?.link || pkgEntry?.symlink) {
+            errors.push(`Pacote "${key}" é um link simbólico local (link/symlink: true), proibido para distribuição limpa.`);
         }
         if (pkgEntry?.resolved) {
             for (const pattern of forbiddenPatterns) {
@@ -57,83 +103,107 @@ export function validateLockfile(dir = process.cwd()) {
                 }
             }
         }
+        if (pkgEntry?.version && typeof pkgEntry.version === 'string') {
+            for (const pattern of forbiddenPatterns) {
+                if (pattern.test(pkgEntry.version)) {
+                    errors.push(`Campo 'version' do pacote "${key}" contém caminho proibido: "${pkgEntry.version}"`);
+                    break;
+                }
+            }
+        }
     }
 
-    // 2. Validação bidirecional rigorosa entre package.json e bloco raiz de package-lock.json
+    // 2b. Se existir formato legado lock.dependencies (lockfile v1/v2), validar recursivamente
+    function checkLegacyDeps(deps, prefix = '') {
+        if (!deps || typeof deps !== 'object') return;
+        for (const [depName, depData] of Object.entries(deps)) {
+            const fullName = prefix ? `${prefix} > ${depName}` : depName;
+            if (depData.version && typeof depData.version === 'string') {
+                for (const pattern of forbiddenPatterns) {
+                    if (pattern.test(depData.version)) {
+                        errors.push(`Dependência legada "${fullName}" contém versão com caminho proibido: "${depData.version}"`);
+                        break;
+                    }
+                }
+            }
+            if (depData.resolved && typeof depData.resolved === 'string') {
+                for (const pattern of forbiddenPatterns) {
+                    if (pattern.test(depData.resolved)) {
+                        errors.push(`Dependência legada "${fullName}" contém resolved com caminho proibido: "${depData.resolved}"`);
+                        break;
+                    }
+                }
+            }
+            if (depData.dependencies) {
+                checkLegacyDeps(depData.dependencies, fullName);
+            }
+        }
+    }
+    if (lock.dependencies) {
+        checkLegacyDeps(lock.dependencies);
+    }
+
+    // 3. Validação bidirecional rigorosa entre package.json e bloco raiz de package-lock.json
     const rootLockPkg = packages[''] || {};
-    const rootLockDeps = rootLockPkg.dependencies || {};
-    const rootLockDevDeps = rootLockPkg.devDependencies || {};
-    const pkgDeps = pkg.dependencies || {};
-    const pkgDevDeps = pkg.devDependencies || {};
 
-    // 2a. Dependências diretas: package.json -> lockfile
-    for (const [dep, version] of Object.entries(pkgDeps)) {
-        if (!rootLockDeps[dep]) {
-            errors.push(`Dependência direta "${dep}" declarada em package.json ausente no bloco raiz de package-lock.json`);
-        } else if (rootLockDeps[dep] !== version) {
-            errors.push(`Versão da dependência "${dep}" diverge: package.json declara "${version}", lockfile tem "${rootLockDeps[dep]}"`);
+    // Helper genérico para comparação bidirecional de blocos de dependências
+    function validateBidirectional(sectionName, pkgMap = {}, lockMap = {}) {
+        // pkg -> lock
+        for (const [dep, version] of Object.entries(pkgMap)) {
+            if (!lockMap[dep]) {
+                errors.push(`${sectionName} "${dep}" declarada em package.json ausente no bloco raiz de package-lock.json`);
+            } else if (lockMap[dep] !== version) {
+                errors.push(`Versão de ${sectionName} "${dep}" diverge: package.json declara "${version}", lockfile tem "${lockMap[dep]}"`);
+            }
+        }
+        // lock -> pkg
+        for (const dep of Object.keys(lockMap)) {
+            if (!pkgMap[dep]) {
+                errors.push(`${sectionName} "${dep}" presente no bloco raiz de package-lock.json não está declarada em package.json`);
+            }
         }
     }
 
-    // 2b. Dependências diretas: lockfile -> package.json
-    for (const dep of Object.keys(rootLockDeps)) {
-        if (!pkgDeps[dep]) {
-            errors.push(`Dependência "${dep}" presente no bloco raiz de package-lock.json não está declarada em package.json`);
-        }
-    }
+    // 3a. dependencies
+    validateBidirectional('Dependência direta', pkg.dependencies, rootLockPkg.dependencies);
 
-    // 2c. DevDependencies: package.json -> lockfile
-    for (const [dep, version] of Object.entries(pkgDevDeps)) {
-        if (!rootLockDevDeps[dep]) {
-            errors.push(`DevDependência "${dep}" declarada em package.json ausente no bloco raiz de package-lock.json`);
-        } else if (rootLockDevDeps[dep] !== version) {
-            errors.push(`Versão da devDependência "${dep}" diverge: package.json declara "${version}", lockfile tem "${rootLockDevDeps[dep]}"`);
-        }
-    }
+    // 3b. devDependencies
+    validateBidirectional('DevDependência', pkg.devDependencies, rootLockPkg.devDependencies);
 
-    // 2d. DevDependencies: lockfile -> package.json
-    for (const dep of Object.keys(rootLockDevDeps)) {
-        if (!pkgDevDeps[dep]) {
-            errors.push(`DevDependência "${dep}" presente no bloco raiz de package-lock.json não está declarada em package.json`);
-        }
-    }
+    // 3c. peerDependencies
+    validateBidirectional('PeerDependência', pkg.peerDependencies, rootLockPkg.peerDependencies);
 
-    // 2e. PeerDependencies & OptionalDependencies: package.json -> lockfile
-    const pkgPeerDeps = pkg.peerDependencies || {};
-    const pkgOptionalDeps = pkg.optionalDependencies || {};
-    const rootLockPeerDeps = rootLockPkg.peerDependencies || {};
-    const rootLockOptionalDeps = rootLockPkg.optionalDependencies || {};
+    // 3d. optionalDependencies
+    validateBidirectional('OptionalDependência', pkg.optionalDependencies, rootLockPkg.optionalDependencies);
 
-    for (const [dep, version] of Object.entries(pkgPeerDeps)) {
-        if (!rootLockPeerDeps[dep]) {
-            errors.push(`PeerDependência "${dep}" declarada em package.json ausente no bloco raiz de package-lock.json`);
-        } else if (rootLockPeerDeps[dep] !== version) {
-            errors.push(`Versão da peerDependência "${dep}" diverge: package.json declara "${version}", lockfile tem "${rootLockPeerDeps[dep]}"`);
-        }
-    }
-    for (const dep of Object.keys(rootLockPeerDeps)) {
-        if (!pkgPeerDeps[dep]) {
-            errors.push(`PeerDependência "${dep}" presente no bloco raiz de package-lock.json não está declarada em package.json`);
-        }
-    }
-
-    for (const [dep, version] of Object.entries(pkgOptionalDeps)) {
-        if (!rootLockOptionalDeps[dep]) {
-            errors.push(`OptionalDependência "${dep}" declarada em package.json ausente no bloco raiz de package-lock.json`);
-        } else if (rootLockOptionalDeps[dep] !== version) {
-            errors.push(`Versão da optionalDependência "${dep}" diverge: package.json declara "${version}", lockfile tem "${rootLockOptionalDeps[dep]}"`);
-        }
-    }
-    for (const dep of Object.keys(rootLockOptionalDeps)) {
-        if (!pkgOptionalDeps[dep]) {
-            errors.push(`OptionalDependência "${dep}" presente no bloco raiz de package-lock.json não está declarada em package.json`);
-        }
-    }
-
+    // 3e. peerDependenciesMeta (bidirecional e propriedade por propriedade)
     const pkgPeerDepsMeta = pkg.peerDependenciesMeta || {};
     const rootLockPeerDepsMeta = rootLockPkg.peerDependenciesMeta || {};
-    if (JSON.stringify(pkgPeerDepsMeta) !== JSON.stringify(rootLockPeerDepsMeta)) {
-        errors.push(`peerDependenciesMeta diverge entre package.json e package-lock.json`);
+
+    // pkg -> lock
+    for (const [dep, meta] of Object.entries(pkgPeerDepsMeta)) {
+        if (!rootLockPeerDepsMeta[dep]) {
+            errors.push(`peerDependenciesMeta para "${dep}" declarada em package.json ausente no bloco raiz de package-lock.json`);
+        } else {
+            const lockMeta = rootLockPeerDepsMeta[dep] || {};
+            for (const [prop, val] of Object.entries(meta || {})) {
+                if (lockMeta[prop] !== val) {
+                    errors.push(`peerDependenciesMeta para "${dep}.${prop}" diverge: package.json declara "${val}", lockfile tem "${lockMeta[prop]}"`);
+                }
+            }
+            for (const prop of Object.keys(lockMeta)) {
+                if (!(prop in (meta || {}))) {
+                    errors.push(`Propriedade "${prop}" em peerDependenciesMeta para "${dep}" no lockfile não declarada em package.json`);
+                }
+            }
+        }
+    }
+
+    // lock -> pkg
+    for (const dep of Object.keys(rootLockPeerDepsMeta)) {
+        if (!pkgPeerDepsMeta[dep]) {
+            errors.push(`peerDependenciesMeta para "${dep}" presente no bloco raiz de package-lock.json não está declarada em package.json`);
+        }
     }
 
     return {

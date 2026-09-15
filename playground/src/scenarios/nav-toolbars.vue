@@ -10,17 +10,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxTopToolbar />
+                            <MaxTopToolbar v-bind="scenarioProps"  />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxTopToolbar disabled />
+                            <MaxTopToolbar v-bind="scenarioProps" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxTopToolbar error severity="danger" />
+                            <MaxTopToolbar v-bind="scenarioProps" error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -31,17 +31,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxTopToolbarSubmenu />
+                            <MaxTopToolbarSubmenu v-bind="scenarioProps"  />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxTopToolbarSubmenu disabled />
+                            <MaxTopToolbarSubmenu v-bind="scenarioProps" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxTopToolbarSubmenu error severity="danger" />
+                            <MaxTopToolbarSubmenu v-bind="scenarioProps" error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -51,6 +51,8 @@
 </template>
 
 <script setup lang="ts">
+    // Props neutras permitem exercitar os estados sem omitir contratos obrigatórios.
+    const scenarioProps: any = { modelValue: '', options: [], items: [], route: '/', target: document.body };
     import { MaxTopToolbar } from '@maxvue/max-components-ui';
     import { MaxTopToolbarSubmenu } from '@maxvue/max-components-ui';
 </script>

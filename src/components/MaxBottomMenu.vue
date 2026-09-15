@@ -268,7 +268,8 @@
             }
 
             &:focus-visible {
-                outline: 2px solid var(--max-primary-500);
+                /* Foco canônico: adapta automaticamente em dark mode */
+                outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
                 outline-offset: -2px;
                 border-radius: 10px;
             }
@@ -324,7 +325,8 @@
             }
 
             &:focus-visible {
-                outline: 2px solid var(--max-primary-400);
+                /* Foco canônico: dark mode usa --max-primary-400 via --max-focus-ring-color */
+                outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
                 outline-offset: 3px;
             }
         }

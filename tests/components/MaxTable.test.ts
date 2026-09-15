@@ -275,6 +275,119 @@ describe('MaxTable', () => {
             wrapper.unmount();
         });
 
+        it('impõe rigorosamente scope="col" e aria-label estável em todos os elementos th (incluindo botões e slots)', async () => {
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: [...sampleData],
+                    headerButton: 'Ações da linha'
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome do Usuário', sortable: true }),
+                        h(MaxTableColumn, { field: 'role', header: 'Perfil de Acesso', sortable: false }),
+                        h(MaxTableColumn, { field: 'status' })
+                    ],
+                    buttons: () => h('button', 'Editar')
+                }
+            });
+
+            const thList = wrapper.findAll('thead th');
+            expect(thList.length).toBe(4);
+
+            for (const th of thList) {
+                expect(th.attributes('scope')).toBe('col');
+                expect(th.attributes('aria-label')).toBeTruthy();
+            }
+
+            expect(thList[0].attributes('aria-label')).toBe('Nome do Usuário');
+            expect(thList[1].attributes('aria-label')).toBe('Perfil de Acesso');
+            expect(thList[2].attributes('aria-label')).toBe('status');
+            expect(thList[3].attributes('aria-label')).toBe('Ações da linha');
+        });
+
+        it('garante nome acessível estável mesmo quando o header slot estiver vazio', async () => {
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: [...sampleData]
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome Completo', sortable: true }, {
+                            header: () => []
+                        }),
+                        h(MaxTableColumn, { field: 'role', sortable: false }, {
+                            header: () => null
+                        }),
+                        h(MaxTableColumn, { sortable: false })
+                    ],
+                    buttons: () => h('button', 'Ação')
+                }
+            });
+
+            const thList = wrapper.findAll('thead th');
+            expect(thList.length).toBe(4);
+
+            expect(thList[0].attributes('scope')).toBe('col');
+            expect(thList[0].attributes('aria-label')).toBe('Nome Completo');
+            const sortBtn = thList[0].find('button.max-table-header-button');
+            expect(sortBtn.exists()).toBe(true);
+            expect(sortBtn.attributes('aria-label')).toBe('Nome Completo');
+
+            expect(thList[1].attributes('scope')).toBe('col');
+            expect(thList[1].attributes('aria-label')).toBe('role');
+
+            expect(thList[2].attributes('scope')).toBe('col');
+            expect(thList[2].attributes('aria-label')).toBe('Coluna');
+
+            expect(thList[3].attributes('scope')).toBe('col');
+            expect(thList[3].attributes('aria-label')).toBe('Ações');
+        });
+
+        it('aciona ordenação por teclado via Enter e Espaço reais com exatamente uma emissão e ciclo aria-sort (F20 / R13)', async () => {
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: [...sampleData]
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome', sortable: true })
+                    ]
+                }
+            });
+
+            const header = wrapper.find('thead th.max-table-th-sortable');
+            const button = header.find('button.max-table-header-button');
+
+            expect(header.attributes('aria-sort')).toBe('none');
+            expect(wrapper.emitted('sort')).toBeUndefined();
+
+            // 1. Acionamento por tecla Enter: ordena ascending e emite exatamente 1 vez
+            await button.trigger('keydown', { key: 'Enter' });
+            expect(header.attributes('aria-sort')).toBe('ascending');
+            expect(wrapper.emitted('sort')).toHaveLength(1);
+            expect(wrapper.emitted('sort')![0]).toEqual([{ sortField: 'name', sortOrder: 1 }]);
+            expect(wrapper.findAll('tbody tr.max-table-row')[0].text()).toContain('Ana');
+
+            // 2. Acionamento por tecla Espaço: ordena descending e emite exatamente a 2ª vez
+            await button.trigger('keydown', { key: ' ' });
+            expect(header.attributes('aria-sort')).toBe('descending');
+            expect(wrapper.emitted('sort')).toHaveLength(2);
+            expect(wrapper.emitted('sort')![1]).toEqual([{ sortField: 'name', sortOrder: -1 }]);
+            expect(wrapper.findAll('tbody tr.max-table-row')[0].text()).toContain('Carlos');
+
+            // 3. Terceiro acionamento por Enter: limpa ordenação (none) e emite a 3ª vez
+            await button.trigger('keydown', { key: 'Enter' });
+            expect(header.attributes('aria-sort')).toBe('none');
+            expect(wrapper.emitted('sort')).toHaveLength(3);
+            expect(wrapper.emitted('sort')![2]).toEqual([{ sortField: '', sortOrder: 0 }]);
+
+            // 4. Prevenção de disparo duplo: se keydown for seguido imediatamente por click sintético
+            await button.trigger('keydown', { key: 'Enter' });
+            await button.trigger('click');
+            expect(wrapper.emitted('sort')).toHaveLength(4);
+            expect(header.attributes('aria-sort')).toBe('ascending');
+        });
+
         it('emite evento @sort em modo lazy sem ordenar localmente', async () => {
             const wrapper = mount(MaxTable, {
                 props: {

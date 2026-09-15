@@ -14,7 +14,7 @@ vi.mock('@maxvue/max-use', async (importOriginal) => {
 
 function mountIconButton(props: Record<string, any> = {}, autoAriaLabel = true) {
     const finalProps = { ...props };
-    if (autoAriaLabel && !finalProps.ariaLabel && !finalProps['aria-label'] && !finalProps.label && !finalProps.title && !finalProps.tooltip) finalProps.ariaLabel = 'Botão de ação';
+    if (autoAriaLabel && !finalProps.ariaLabel && !finalProps['aria-label'] && !finalProps.label && !finalProps.title && !finalProps.tooltip) finalProps.ariaLabel = 'Ação contextual';
     return mount(MaxIconButton, {
         props: finalProps,
         global: {
@@ -167,12 +167,33 @@ describe('MaxIconButton (Acessibilidade e Semântica WAI-ARIA)', () => {
             ['mdi:pencil-edit', 'Editar'],
             ['mdi:plus-circle', 'Adicionar'],
             ['tabler:add', 'Adicionar'],
-            ['mdi:unknown-icon', 'Botão de ação']
+            ['mdi:minus-circle', 'Diminuir'],
+            ['mdi:check-bold', 'Confirmar'],
+            ['mdi:reload', 'Recarregar'],
+            ['mdi:filter', 'Filtrar'],
+            ['mdi:cog', 'Configurações']
         ])('calcula o nome acessível contextual para o ícone %s como "%s"', (icon, expectedLabel) => {
-            const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
             const wrapper = mountIconButton({ icon }, false);
             expect(wrapper.attributes('aria-label')).toBe(expectedLabel);
-            expect(warnSpy).toHaveBeenCalled();
+        });
+
+        it('elimina rótulo genérico "Botão de ação" quando o ícone é desconhecido e emite warning', () => {
+            const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+            const wrapper = mountIconButton({ icon: 'mdi:unknown-custom-icon' }, false);
+            expect(wrapper.attributes('aria-label')).toBeUndefined();
+            expect(wrapper.attributes('aria-label')).not.toBe('Botão de ação');
+            expect(warnSpy).toHaveBeenCalledWith(
+                expect.stringContaining('[MaxIconButton] Botão de ícone renderizado sem nome acessível')
+            );
+        });
+
+        it('rejeita repetição de rótulo genérico em coleções de botões', () => {
+            const icons = ['mdi:pencil', 'mdi:trash', 'mdi:download'];
+            const wrappers = icons.map((icon) => mountIconButton({ icon }, false));
+            const labels = wrappers.map((w) => w.attributes('aria-label'));
+
+            expect(labels).not.toContain('Botão de ação');
+            expect(new Set(labels).size).toBe(icons.length);
         });
     });
 

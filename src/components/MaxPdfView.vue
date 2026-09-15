@@ -277,7 +277,7 @@
         width: 100vw;
         height: 100vh;
         height: 100dvh;
-        z-index: var(--max-layer-fullscreen, 1400);
+        z-index: var(--max-z-index-fullscreen, var(--max-layer-fullscreen, 1400));
         box-sizing: border-box;
         background-color: rgb(0 0 0 / 90%);
         transition: opacity 0.6s ease;
@@ -376,6 +376,8 @@
     .pdf-div-bar-tools {
         background-color: var(--background-750);
         width: auto;
+        max-width: calc(100vw - max(16px, env(safe-area-inset-left, 0px)) - max(16px, env(safe-area-inset-right, 0px)) - 16px);
+        box-sizing: border-box;
         min-height: 44px;
         padding: 6px 10px;
         gap: 8px;
@@ -387,7 +389,7 @@
         align-items: center;
         justify-content: center;
         border-radius: 10px;
-        z-index: calc(var(--max-layer-fullscreen, 1400) + 1);
+        z-index: calc(var(--max-z-index-fullscreen, var(--max-layer-fullscreen, 1400)) + 1);
         box-shadow: 0 4px 12px rgb(0 0 0 / 25%);
 
         :deep(.max-button) {

@@ -7,20 +7,20 @@
                 <div class="component-block">
                     <h3>MaxInputCreditCard</h3>
                     <div class="states">
-                        <!-- Default -->
+                        <!-- Normal -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxInputCreditCard />
+                            <MaxInputCreditCard v-model="cardNumber" />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxInputCreditCard disabled />
+                            <MaxInputCreditCard v-model="cardNumberDisabled" disabled />
                         </div>
-                        <!-- Error / Variant -->
+                        <!-- Com erro -->
                         <div class="state-col">
-                            <span>Erro / Secundário</span>
-                            <MaxInputCreditCard error severity="danger" />
+                            <span>Com erro</span>
+                            <MaxInputCreditCard v-model="cardNumberError" :error="'Cartão inválido'" />
                         </div>
                     </div>
                 </div>
@@ -28,20 +28,20 @@
                 <div class="component-block">
                     <h3>MaxInputCreditCardCvv</h3>
                     <div class="states">
-                        <!-- Default -->
+                        <!-- Normal -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxInputCreditCardCvv />
+                            <MaxInputCreditCardCvv v-model="cvv" />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxInputCreditCardCvv disabled />
+                            <MaxInputCreditCardCvv v-model="cvvDisabled" disabled />
                         </div>
-                        <!-- Error / Variant -->
+                        <!-- Preenchido -->
                         <div class="state-col">
-                            <span>Erro / Secundário</span>
-                            <MaxInputCreditCardCvv error severity="danger" />
+                            <span>Preenchido</span>
+                            <MaxInputCreditCardCvv v-model="cvvFilled" />
                         </div>
                     </div>
                 </div>
@@ -49,20 +49,20 @@
                 <div class="component-block">
                     <h3>MaxInputCreditCardDate</h3>
                     <div class="states">
-                        <!-- Default -->
+                        <!-- Normal -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxInputCreditCardDate />
+                            <MaxInputCreditCardDate v-model="cardDate" />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxInputCreditCardDate disabled />
+                            <MaxInputCreditCardDate v-model="cardDateDisabled" disabled />
                         </div>
-                        <!-- Error / Variant -->
+                        <!-- Com erro -->
                         <div class="state-col">
-                            <span>Erro / Secundário</span>
-                            <MaxInputCreditCardDate error severity="danger" />
+                            <span>Com erro</span>
+                            <MaxInputCreditCardDate v-model="cardDateError" :error="'Data expirada'" />
                         </div>
                     </div>
                 </div>
@@ -72,9 +72,20 @@
 </template>
 
 <script setup lang="ts">
-    import { MaxInputCreditCard } from '@maxvue/max-components-ui';
-    import { MaxInputCreditCardCvv } from '@maxvue/max-components-ui';
-    import { MaxInputCreditCardDate } from '@maxvue/max-components-ui';
+    import { ref } from 'vue';
+    import { MaxInputCreditCard, MaxInputCreditCardCvv, MaxInputCreditCardDate } from '@maxvue/max-components-ui';
+
+    const cardNumber = ref('');
+    const cardNumberDisabled = ref('1234 **** **** 5678');
+    const cardNumberError = ref('1234');
+
+    const cvv = ref('');
+    const cvvDisabled = ref('');
+    const cvvFilled = ref('123');
+
+    const cardDate = ref('');
+    const cardDateDisabled = ref('12/28');
+    const cardDateError = ref('01/20');
 </script>
 
 <style lang="scss" scoped>
@@ -104,6 +115,7 @@
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
+        min-width: 220px;
         span {
             font-size: 0.8rem;
             color: #666;

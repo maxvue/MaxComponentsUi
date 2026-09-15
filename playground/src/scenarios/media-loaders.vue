@@ -10,17 +10,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxLoader />
+                            <MaxLoader v-bind="scenarioProps"  />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxLoader disabled />
+                            <MaxLoader v-bind="scenarioProps" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxLoader error severity="danger" />
+                            <MaxLoader v-bind="scenarioProps" error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -31,17 +31,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxLoaderAi />
+                            <MaxLoaderAi v-bind="scenarioProps"  />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxLoaderAi disabled />
+                            <MaxLoaderAi v-bind="scenarioProps" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxLoaderAi error severity="danger" />
+                            <MaxLoaderAi v-bind="scenarioProps" error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -52,17 +52,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxLoaderIcon />
+                            <MaxLoaderIcon v-bind="scenarioProps"  />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxLoaderIcon disabled />
+                            <MaxLoaderIcon v-bind="scenarioProps" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxLoaderIcon error severity="danger" />
+                            <MaxLoaderIcon v-bind="scenarioProps" error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -73,17 +73,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxLoadScreen />
+                            <MaxLoadScreen v-bind="scenarioProps"  />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxLoadScreen disabled />
+                            <MaxLoadScreen v-bind="scenarioProps" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxLoadScreen error severity="danger" />
+                            <MaxLoadScreen v-bind="scenarioProps" error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -94,17 +94,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxLoadScreenTarget />
+                            <MaxLoadScreenTarget v-bind="scenarioProps"  />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxLoadScreenTarget disabled />
+                            <MaxLoadScreenTarget v-bind="scenarioProps" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxLoadScreenTarget error severity="danger" />
+                            <MaxLoadScreenTarget v-bind="scenarioProps" error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -114,6 +114,8 @@
 </template>
 
 <script setup lang="ts">
+    // Props neutras permitem exercitar os estados sem omitir contratos obrigatórios.
+    const scenarioProps: any = { modelValue: '', options: [], items: [], route: '/', target: document.body };
     import { MaxLoader } from '@maxvue/max-components-ui';
     import { MaxLoaderAi } from '@maxvue/max-components-ui';
     import { MaxLoaderIcon } from '@maxvue/max-components-ui';

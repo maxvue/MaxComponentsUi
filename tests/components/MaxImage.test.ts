@@ -593,9 +593,96 @@ describe('MaxImage', () => {
         const errorAlert = wrapper.find('.max-image-crop-error');
         expect(errorAlert.exists()).toBe(true);
         expect(errorAlert.text()).toContain('Falha ao processar imagem para recorte.');
+        expect(consoleErrorSpy).toHaveBeenCalledWith('MaxImage: erro ao desenhar no canvas', expect.any(Error));
 
         getContextSpy.mockRestore();
         consoleErrorSpy.mockRestore();
+    });
+
+    it('calculateTargetCropDimensions garante matematicamente que width * height nunca excede maxPixels e trata entradas inválidas', () => {
+        // Entradas inválidas retornam 0x0
+        expect(calculateTargetCropDimensions(0, 500)).toEqual({ width: 0, height: 0 });
+        expect(calculateTargetCropDimensions(-10, 500)).toEqual({ width: 0, height: 0 });
+        expect(calculateTargetCropDimensions(NaN, 500)).toEqual({ width: 0, height: 0 });
+        expect(calculateTargetCropDimensions(800, Infinity)).toEqual({ width: 0, height: 0 });
+
+        // Cenário em que o arredondamento de escala causaria overshoot de pixels
+        // 8000x6000 com maxPixels 10.000.000
+        const result = calculateTargetCropDimensions(8000, 6000, 10000, 10000, 10000000);
+        expect(result.width * result.height).toBeLessThanOrEqual(10000000);
+        expect(result.width).toBeLessThanOrEqual(10000);
+        expect(result.height).toBeLessThanOrEqual(10000);
+
+        // 48 MP com limite de 16 MP padrão
+        const photo48mp = calculateTargetCropDimensions(8000, 6000, 4096, 4096, 16777216);
+        expect(photo48mp.width).toBeLessThanOrEqual(4096);
+        expect(photo48mp.height).toBeLessThanOrEqual(4096);
+        expect(photo48mp.width * photo48mp.height).toBeLessThanOrEqual(16777216);
+    });
+
+    it('mantém editor aberto e exibe erro ao tentar confirmar recorte com dimensões inválidas (0x0)', async () => {
+        const wrapper = mountImage({ preview: true, allowEdit: true });
+        await wrapper.find('.max-image__preview-trigger').trigger('click');
+
+        const editBtn = wrapper.findAllComponents({ name: 'MaxIconButton' })
+            .find((btn) => btn.attributes('title') === 'Recortar imagem');
+        await editBtn!.trigger('click');
+
+        const cropImg = wrapper.find('.max-image-crop-stage__img');
+        Object.defineProperty(cropImg.element, 'clientWidth', { value: 300, configurable: true });
+        Object.defineProperty(cropImg.element, 'clientHeight', { value: 200, configurable: true });
+        await cropImg.trigger('load');
+
+        // Configura dimensões da crop box como 0 após o load
+        (wrapper.vm as any).cropBox.width = 0;
+        (wrapper.vm as any).cropBox.height = 0;
+
+        const confirmBtn = wrapper.findAllComponents({ name: 'MaxIconButton' })
+            .find((btn) => btn.attributes('title') === 'Confirmar Recorte');
+        await confirmBtn!.trigger('click');
+        await flushPromises();
+
+        expect(wrapper.emitted('crop')).toBeUndefined();
+        expect((wrapper.vm as any).isCropping).toBe(true);
+        const errorAlert = wrapper.find('.max-image-crop-error');
+        expect(errorAlert.exists()).toBe(true);
+        expect(errorAlert.text()).toContain('Área de recorte inválida.');
+    });
+
+    it('garante ZERO chamadas a canvas.toDataURL mesmo quando includeDataUrl for true', async () => {
+        const toDataUrlSpy = vi.spyOn(HTMLCanvasElement.prototype, 'toDataURL');
+        const fakeBlob = new Blob(['mock-binary-data'], { type: 'image/png' });
+        const getContextSpy = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+            drawImage: vi.fn()
+        } as unknown as CanvasRenderingContext2D);
+        const toBlobSpy = vi.spyOn(HTMLCanvasElement.prototype, 'toBlob').mockImplementation((callback) => {
+            callback(fakeBlob);
+        });
+
+        const wrapper = mountImage({ preview: true, allowEdit: true, includeDataUrl: true });
+        await wrapper.find('.max-image__preview-trigger').trigger('click');
+
+        const editBtn = wrapper.findAllComponents({ name: 'MaxIconButton' })
+            .find((btn) => btn.attributes('title') === 'Recortar imagem');
+        await editBtn!.trigger('click');
+
+        const cropImg = wrapper.find('.max-image-crop-stage__img');
+        Object.defineProperty(cropImg.element, 'clientWidth', { value: 300, configurable: true });
+        Object.defineProperty(cropImg.element, 'clientHeight', { value: 200, configurable: true });
+        Object.defineProperty(cropImg.element, 'naturalWidth', { value: 600, configurable: true });
+        Object.defineProperty(cropImg.element, 'naturalHeight', { value: 400, configurable: true });
+        await cropImg.trigger('load');
+
+        const confirmBtn = wrapper.findAllComponents({ name: 'MaxIconButton' })
+            .find((btn) => btn.attributes('title') === 'Confirmar Recorte');
+        await confirmBtn!.trigger('click');
+        await flushPromises();
+
+        expect(toDataUrlSpy).not.toHaveBeenCalled();
+
+        getContextSpy.mockRestore();
+        toBlobSpy.mockRestore();
+        toDataUrlSpy.mockRestore();
     });
 });
 

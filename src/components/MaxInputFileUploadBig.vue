@@ -172,7 +172,7 @@
         transition: outline-color 0.2s, background-color 0.2s;
 
         &:focus-visible {
-            outline: 2px solid var(--max-primary-500, #00768e);
+            outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e)); /* Foco canônico */
             outline-offset: 2px;
         }
 

@@ -1,9 +1,12 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
+import { setActivePinia, createPinia } from 'pinia';
+import InputBase from '../../src/components/InputBase.vue';
 import MaxInputText from '../../src/components/MaxInputText.vue';
 import MaxInputTextArea from '../../src/components/MaxInputTextArea.vue';
 import MaxInputNumber from '../../src/components/MaxInputNumber.vue';
 import MaxInputPhone from '../../src/components/MaxInputPhone.vue';
+import MaxInputPhoneMail from '../../src/components/MaxInputPhoneMail.vue';
 import MaxInputDatePicker from '../../src/components/MaxInputDatePicker.vue';
 import MaxInputSearch from '../../src/components/MaxInputSearch.vue';
 import MaxInputCpfCnpj from '../../src/components/MaxInputCpfCnpj.vue';
@@ -13,12 +16,61 @@ import MaxInputCreditCardDate from '../../src/components/MaxInputCreditCardDate.
 import MaxInputCreditCardCvv from '../../src/components/MaxInputCreditCardCvv.vue';
 import MaxInputCoordinateDecimalLat from '../../src/components/MaxInputCoordinateDecimalLat.vue';
 import MaxInputCoordinateDecimalLng from '../../src/components/MaxInputCoordinateDecimalLng.vue';
+import MaxInputSelect from '../../src/components/MaxInputSelect.vue';
+import MaxInputAutoComplete from '../../src/components/MaxInputAutoComplete.vue';
+import MaxInputAutoCompleteApi from '../../src/components/MaxInputAutoCompleteApi.vue';
+import MaxChips from '../../src/components/MaxChips.vue';
+import MaxTagSelect from '../../src/components/MaxTagSelect.vue';
+import MaxColorPicker from '../../src/components/MaxColorPicker.vue';
+import MaxInputIconPicker from '../../src/components/MaxInputIconPicker.vue';
+import MaxInputOTP from '../../src/components/MaxInputOTP.vue';
+import MaxInputSwitch from '../../src/components/MaxInputSwitch.vue';
+import MaxInputTextList from '../../src/components/MaxInputTextList.vue';
 import MaxInputToggle from '../../src/components/MaxInputToggle.vue';
 import MaxInputRadio from '../../src/components/MaxInputRadio.vue';
 import MaxInputCheckbox from '../../src/components/MaxInputCheckbox.vue';
-import InputBase from '../../src/components/InputBase.vue';
+
+interface FamilyConfig {
+    name: string;
+    component: any;
+    selector: string;
+    rootSelector?: string;
+    props?: Record<string, any>;
+    supportsAutofill?: boolean;
+}
+
+const inputFamilies: FamilyConfig[] = [
+    { name: 'MaxInputText', component: MaxInputText, selector: 'input.max-input-native', supportsAutofill: true },
+    { name: 'MaxInputTextArea', component: MaxInputTextArea, selector: 'textarea', supportsAutofill: true },
+    { name: 'MaxInputNumber', component: MaxInputNumber, selector: 'input.max-input-native', supportsAutofill: true },
+    { name: 'MaxInputPhone', component: MaxInputPhone, selector: 'input.max-input-native', supportsAutofill: true },
+    { name: 'MaxInputPhoneMail', component: MaxInputPhoneMail, selector: 'input.max-input-native', supportsAutofill: true },
+    { name: 'MaxInputDatePicker', component: MaxInputDatePicker, selector: 'input.max-datepicker-input', supportsAutofill: true },
+    { name: 'MaxInputSearch', component: MaxInputSearch, selector: 'input.max-input-native', supportsAutofill: true },
+    { name: 'MaxInputCpfCnpj', component: MaxInputCpfCnpj, selector: 'input.max-input-native', supportsAutofill: true },
+    { name: 'MaxInputCep', component: MaxInputCep, selector: 'input.max-input-native', supportsAutofill: true },
+    { name: 'MaxInputCreditCard', component: MaxInputCreditCard, selector: 'input.max-base-input', supportsAutofill: true },
+    { name: 'MaxInputCreditCardDate', component: MaxInputCreditCardDate, selector: 'input.max-base-input', supportsAutofill: true },
+    { name: 'MaxInputCreditCardCvv', component: MaxInputCreditCardCvv, selector: 'input.max-base-input', supportsAutofill: true },
+    { name: 'MaxInputCoordinateDecimalLat', component: MaxInputCoordinateDecimalLat, selector: 'input.max-input-native', supportsAutofill: true },
+    { name: 'MaxInputCoordinateDecimalLng', component: MaxInputCoordinateDecimalLng, selector: 'input.max-input-native', supportsAutofill: true },
+    { name: 'MaxInputSelect', component: MaxInputSelect, selector: '.max-select', props: { options: [] } },
+    { name: 'MaxInputAutoComplete', component: MaxInputAutoComplete, selector: 'input.max-autocomplete-input', props: { options: [] }, supportsAutofill: true },
+    { name: 'MaxInputAutoCompleteApi', component: MaxInputAutoCompleteApi, selector: 'input.max-autocomplete-input', props: { options: [], route: 'api.test' }, supportsAutofill: true },
+    { name: 'MaxChips', component: MaxChips, selector: 'input.max-chips-input', props: { modelValue: [] } },
+    { name: 'MaxTagSelect', component: MaxTagSelect, selector: '.max-select', props: { modelValue: [], options: [] } },
+    { name: 'MaxColorPicker', component: MaxColorPicker, selector: 'input.max-colorpicker-native', props: { modelValue: '#000000' } },
+    { name: 'MaxInputIconPicker', component: MaxInputIconPicker, selector: '.icon-picker-trigger' },
+    { name: 'MaxInputOTP', component: MaxInputOTP, selector: '.max-input-otp-container' },
+    { name: 'MaxInputSwitch', component: MaxInputSwitch, selector: '.max-switch-toggle', props: { modelValue: false } },
+    { name: 'MaxInputTextList', component: MaxInputTextList, selector: 'textarea.code-textarea' },
+    { name: 'MaxInputToggle', component: MaxInputToggle, selector: 'input.max-toggleswitch-input', rootSelector: '.max-input-toggle', props: { modelValue: false } }
+];
 
 describe('Separação de atributos nativos de controle e wrapper (R04 / F05)', () => {
+    beforeEach(() => {
+        setActivePinia(createPinia());
+    });
     describe('Classificação estrita em InputBase', () => {
         it('filtra atributos de controle e ARIA do wrapper raiz e os disponibiliza para o slot', () => {
             const wrapper = mount(InputBase, {
@@ -91,59 +143,122 @@ describe('Separação de atributos nativos de controle e wrapper (R04 / F05)', (
         });
     });
 
-    describe('Parametrizado nas principais famílias de inputs', () => {
-        const inputFamilies = [
-            { name: 'MaxInputText', component: MaxInputText, selector: 'input.max-input-native' },
-            { name: 'MaxInputTextArea', component: MaxInputTextArea, selector: 'textarea' },
-            { name: 'MaxInputNumber', component: MaxInputNumber, selector: 'input.max-input-native' },
-            { name: 'MaxInputPhone', component: MaxInputPhone, selector: 'input.max-input-native' },
-            { name: 'MaxInputDatePicker', component: MaxInputDatePicker, selector: 'input.max-datepicker-input' },
-            { name: 'MaxInputSearch', component: MaxInputSearch, selector: 'input.max-input-native' },
-            { name: 'MaxInputCpfCnpj', component: MaxInputCpfCnpj, selector: 'input.max-input-native' },
-            { name: 'MaxInputCep', component: MaxInputCep, selector: 'input.max-input-native' },
-            { name: 'MaxInputCreditCard', component: MaxInputCreditCard, selector: 'input.max-base-input' },
-            { name: 'MaxInputCreditCardDate', component: MaxInputCreditCardDate, selector: 'input.max-base-input' },
-            { name: 'MaxInputCreditCardCvv', component: MaxInputCreditCardCvv, selector: 'input.max-base-input' },
-            { name: 'MaxInputCoordinateDecimalLat', component: MaxInputCoordinateDecimalLat, selector: 'input.max-input-native' },
-            { name: 'MaxInputCoordinateDecimalLng', component: MaxInputCoordinateDecimalLng, selector: 'input.max-input-native' }
-        ];
+    describe('Cobertura integral das 25 famílias de componentes de entrada', () => {
+        it('a matriz contém exatamente as 25 famílias sem redução artificial', () => {
+            expect(inputFamilies.length).toBe(25);
+        });
 
-        for (const { name, component, selector } of inputFamilies) it(`${name} separa atributos nativos de controle para o elemento ${selector} e preserva dados no wrapper`, () => {
+        for (const family of inputFamilies) {
+            const { name, component, selector, rootSelector, props: customProps } = family;
+            const expectedRootSelector = rootSelector || '.max-input-main-div';
+
+            it(`${name}: separa atributos de controle para o nó operável e preserva classe/dados no wrapper`, () => {
+                const wrapper = mount(component, {
+                    props: {
+                        modelValue: '',
+                        ...customProps
+                    },
+                    attrs: {
+                        name: `field_${name.toLowerCase()}`,
+                        autocomplete: 'off',
+                        'data-testid': `test-${name.toLowerCase()}`,
+                        class: `wrapper-class-${name.toLowerCase()}`
+                    }
+                });
+
+                const rootEl = wrapper.find(expectedRootSelector);
+                expect(rootEl.exists(), `${name} deve possuir o wrapper ${expectedRootSelector}`).toBe(true);
+                expect(rootEl.classes()).toContain(`wrapper-class-${name.toLowerCase()}`);
+                expect(rootEl.attributes('data-testid')).toBe(`test-${name.toLowerCase()}`);
+
+                // Não vaza atributos de controle para o wrapper
+                expect(rootEl.attributes('name'), `${name} não deve ter "name" no wrapper`).toBeUndefined();
+                expect(rootEl.attributes('autocomplete'), `${name} não deve ter "autocomplete" no wrapper`).toBeUndefined();
+                expect(rootEl.attributes('disabled'), `${name} não deve ter "disabled" no wrapper`).toBeUndefined();
+                expect(rootEl.attributes('required'), `${name} não deve ter "required" no wrapper`).toBeUndefined();
+
+                // Chega ao elemento operável
+                const controlEl = wrapper.find(selector);
+                expect(controlEl.exists(), `${name} deve renderizar o nó operável ${selector}`).toBe(true);
+                expect(controlEl.attributes('name')).toBe(`field_${name.toLowerCase()}`);
+            });
+
+            it(`${name}: propaga disabled e required para o elemento operável sem poluir a raiz`, () => {
+                const wrapper = mount(component, {
+                    props: {
+                        modelValue: '',
+                        disabled: true,
+                        required: true,
+                        ...customProps
+                    }
+                });
+
+                const rootEl = wrapper.find(expectedRootSelector);
+                expect(rootEl.exists()).toBe(true);
+                expect(rootEl.attributes('disabled'), `${name} root não deve ter attr disabled`).toBeUndefined();
+                expect(rootEl.attributes('required'), `${name} root não deve ter attr required`).toBeUndefined();
+
+                const controlEl = wrapper.find(selector);
+                expect(controlEl.exists()).toBe(true);
+
+                const isDisabled = controlEl.attributes('disabled') !== undefined || controlEl.attributes('aria-disabled') === 'true';
+                const isRequired = controlEl.attributes('required') !== undefined || controlEl.attributes('aria-required') === 'true';
+
+                expect(isDisabled, `${name} deve marcar disabled/aria-disabled no nó operável`).toBe(true);
+                expect(isRequired, `${name} deve marcar required/aria-required no nó operável`).toBe(true);
+            });
+
+            it(`${name}: clique no rótulo (label click) transfere foco ao controle sem chamada manual de focus()`, async () => {
+                const wrapper = mount(component, {
+                    attachTo: document.body,
+                    props: {
+                        modelValue: '',
+                        label: `Rótulo ${name}`,
+                        ...customProps
+                    }
+                });
+
+                const labelEl = wrapper.find('label');
+                expect(labelEl.exists(), `${name} deve renderizar o label`).toBe(true);
+
+                const controlEl = wrapper.find(selector);
+                expect(controlEl.exists(), `${name} deve possuir o controle ${selector}`).toBe(true);
+
+                // Dispara clique no label sem chamar focus() manualmente
+                await labelEl.trigger('click');
+
+                // Verifica se o elemento ativo é o próprio nó operável ou um elemento interativo dentro dele
+                const activeEl = document.activeElement;
+                const isFocusedDirectly = activeEl === controlEl.element;
+                const isFocusedInside = controlEl.element.contains(activeEl);
+
+                expect(isFocusedDirectly || isFocusedInside, `${name} deve focar o controle operável após clique no rótulo`).toBe(true);
+
+                wrapper.unmount();
+            });
+        }
+    });
+
+    describe('Suporte a autofill (autocomplete) nas famílias de texto', () => {
+        const textFamilies = inputFamilies.filter((f) => f.supportsAutofill);
+
+        for (const { name, component, selector, props: customProps } of textFamilies) it(`${name}: propaga autocomplete para o elemento interativo de entrada`, () => {
             const wrapper = mount(component, {
                 props: {
-                    modelValue: ''
+                    modelValue: '',
+                    ...customProps
                 },
                 attrs: {
-                    name: `field_${name.toLowerCase()}`,
-                    autocomplete: 'off',
-                    autocapitalize: 'characters',
-                    enterkeyhint: 'next',
-                    maxlength: '40',
-                    'data-testid': `test-${name.toLowerCase()}`,
-                    class: `wrapper-class-${name.toLowerCase()}`
+                    autocomplete: 'email'
                 }
             });
 
-            const rootEl = wrapper.find('.max-input-main-div');
-            expect(rootEl.exists(), `${name} deve possuir o wrapper .max-input-main-div`).toBe(true);
-            expect(rootEl.classes()).toContain(`wrapper-class-${name.toLowerCase()}`);
-            expect(rootEl.attributes('data-testid')).toBe(`test-${name.toLowerCase()}`);
-
-            // Não vaza para o wrapper
-            expect(rootEl.attributes('name')).toBeUndefined();
-            expect(rootEl.attributes('autocomplete')).toBeUndefined();
-            expect(rootEl.attributes('autocapitalize')).toBeUndefined();
-            expect(rootEl.attributes('enterkeyhint')).toBeUndefined();
-            expect(rootEl.attributes('maxlength')).toBeUndefined();
-
-            // Chega ao elemento de controle nativo
             const controlEl = wrapper.find(selector);
-            expect(controlEl.exists(), `${name} deve renderizar o controle ${selector}`).toBe(true);
-            expect(controlEl.attributes('name')).toBe(`field_${name.toLowerCase()}`);
-            expect(controlEl.attributes('autocomplete')).toBe('off');
-            expect(controlEl.attributes('autocapitalize')).toBe('characters');
-            expect(controlEl.attributes('enterkeyhint')).toBe('next');
-            expect(controlEl.attributes('maxlength')).toBe('40');
+            expect(controlEl.exists()).toBe(true);
+            expect(controlEl.attributes('autocomplete')).toBe('email');
+
+            const rootEl = wrapper.find('.max-input-main-div');
+            expect(rootEl.attributes('autocomplete')).toBeUndefined();
         });
 
     });

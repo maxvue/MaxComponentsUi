@@ -44,3 +44,95 @@ export type LoadOptionsResult = {
     /** Total de registros disponíveis no servidor */
     total?: number;
 };
+
+/**
+ * Papéis ARIA suportados no container MaxBaseVirtualScroller.
+ */
+export type VirtualScrollerRole = 'listbox' | 'list' | undefined;
+
+/**
+ * Papéis ARIA suportados nos itens do MaxBaseVirtualScroller.
+ */
+export type VirtualScrollerItemRole = 'option' | 'listitem' | undefined;
+
+/**
+ * Opções passadas ao slot de cada item no MaxBaseVirtualScroller.
+ */
+export interface VirtualScrollerSlotOptions {
+    index: number;
+    count: number;
+    first: boolean;
+    last: boolean;
+    even: boolean;
+    odd: boolean;
+    selected: boolean;
+    focused: boolean;
+    disabled: boolean;
+}
+
+/**
+ * Atributos ARIA passados ao slot de cada item para repasse ou inspeção.
+ */
+export interface VirtualScrollerItemAriaProps {
+    role?: string;
+    id?: string;
+    'aria-setsize'?: number;
+    'aria-posinset'?: number;
+    'aria-selected'?: boolean;
+    'aria-disabled'?: string;
+}
+
+/**
+ * Payload emitido ao selecionar uma opção no MaxBaseVirtualScroller.
+ */
+export interface VirtualScrollerSelectPayload<T = any> {
+    index: number;
+    item: T;
+    value: any;
+}
+
+/**
+ * Props completas do contrato do MaxBaseVirtualScroller.
+ */
+export interface MaxBaseVirtualScrollerProps {
+    /** Coleção completa a virtualizar */
+    items?: any[];
+    /** Altura estimada de cada item, em px */
+    itemSize?: number;
+    /** Estilo aplicado ao container com scroll (ex.: height) */
+    style?: Record<string, string> | string;
+    /** Itens extras renderizados fora da viewport */
+    numToleratedItems?: number;
+    /** Papel ARIA do container com scroll ('listbox', 'list' ou indefinido) */
+    role?: VirtualScrollerRole;
+    /** Papel ARIA atribuído a cada linha/item ('option', 'listitem' ou indefinido) */
+    itemRole?: VirtualScrollerItemRole;
+    /** Rótulo acessível via aria-label */
+    ariaLabel?: string;
+    /** ID do elemento que rotula este container via aria-labelledby */
+    ariaLabelledby?: string;
+    /** ID do item atualmente ativo para foco virtual (aria-activedescendant) */
+    ariaActivedescendant?: string;
+    /** Índice do item com foco ativo */
+    focusedIndex?: number;
+    /** Valor selecionado para controle via v-model */
+    modelValue?: any;
+    /** Habilita seleção de múltiplos itens */
+    multiple?: boolean;
+    /** Desabilita o componente */
+    disabled?: boolean;
+    /** Tabindex do elemento container */
+    tabindex?: number | string;
+    /** Prefixo para os IDs determinísticos dos itens montados */
+    idPrefix?: string;
+    /** Extrai o valor do item para comparação com modelValue */
+    getItemValue?: (item: any, index: number) => any;
+    /** Extrai o ID DOM determinístico de um item */
+    getItemId?: (index: number, item: any) => string;
+    /** Função para indicar se um item específico está desabilitado */
+    isItemDisabled?: (item: any, index: number) => boolean;
+    /** Função customizada para checar se um item está selecionado */
+    isSelected?: (item: any, index: number) => boolean;
+    /** Seleciona automaticamente o item ao navegar pelo teclado */
+    selectOnFocus?: boolean;
+}

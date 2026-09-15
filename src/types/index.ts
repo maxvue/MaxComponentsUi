@@ -64,6 +64,8 @@ export type ButtonVariant = 'outlined' | 'text' | 'link';
  * Propriedades específicas para o componente de botão.
  */
 export interface MaxButtonsType extends /* @vue-ignore */ MaxButtonBaseProps {
+    /** Tipo HTML nativo do botão (button, submit, reset) */
+    type?: 'button' | 'submit' | 'reset';
     /** Rótulo acessível WAI-ARIA */
     'aria-label'?: string;
     /** Alias camelCase para o rótulo acessível WAI-ARIA */
@@ -360,6 +362,8 @@ export type MaxTableColumnDefinition = MaxTableColumn;
 export interface MaxTableColumn {
     /** Texto do cabeçalho da coluna */
     header?: string;
+    /** Alias para o texto do cabeçalho da coluna */
+    label?: string;
     /** Campo do objeto a ser exibido na célula */
     field: string;
     /** Nome do slot customizado para renderizar o conteúdo da célula */

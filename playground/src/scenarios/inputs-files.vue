@@ -7,20 +7,15 @@
                 <div class="component-block">
                     <h3>MaxInputFile</h3>
                     <div class="states">
-                        <!-- Default -->
+                        <!-- Normal -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxInputFile />
+                            <MaxInputFile v-model="files" label="Selecionar arquivo" />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxInputFile disabled />
-                        </div>
-                        <!-- Error / Variant -->
-                        <div class="state-col">
-                            <span>Erro / Secundário</span>
-                            <MaxInputFile error severity="danger" />
+                            <MaxInputFile disabled label="Desabilitado" />
                         </div>
                     </div>
                 </div>
@@ -28,20 +23,10 @@
                 <div class="component-block">
                     <h3>MaxInputFileProject</h3>
                     <div class="states">
-                        <!-- Default -->
+                        <!-- Normal -->
                         <div class="state-col">
-                            <span>Normal</span>
-                            <MaxInputFileProject />
-                        </div>
-                        <!-- Disabled -->
-                        <div class="state-col">
-                            <span>Disabled</span>
-                            <MaxInputFileProject disabled />
-                        </div>
-                        <!-- Error / Variant -->
-                        <div class="state-col">
-                            <span>Erro / Secundário</span>
-                            <MaxInputFileProject error severity="danger" />
+                            <span>Normal (lista vazia)</span>
+                            <MaxInputFileProject :files="projectFiles" />
                         </div>
                     </div>
                 </div>
@@ -49,20 +34,15 @@
                 <div class="component-block">
                     <h3>MaxInputFileUpload</h3>
                     <div class="states">
-                        <!-- Default -->
+                        <!-- Normal -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxInputFileUpload />
+                            <MaxInputFileUpload label="Enviar arquivo" />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxInputFileUpload disabled />
-                        </div>
-                        <!-- Error / Variant -->
-                        <div class="state-col">
-                            <span>Erro / Secundário</span>
-                            <MaxInputFileUpload error severity="danger" />
+                            <MaxInputFileUpload label="Desabilitado" disabled />
                         </div>
                     </div>
                 </div>
@@ -70,7 +50,7 @@
                 <div class="component-block">
                     <h3>MaxInputFileUploadBig</h3>
                     <div class="states">
-                        <!-- Default -->
+                        <!-- Normal -->
                         <div class="state-col">
                             <span>Normal</span>
                             <MaxInputFileUploadBig />
@@ -80,18 +60,13 @@
                             <span>Disabled</span>
                             <MaxInputFileUploadBig disabled />
                         </div>
-                        <!-- Error / Variant -->
-                        <div class="state-col">
-                            <span>Erro / Secundário</span>
-                            <MaxInputFileUploadBig error severity="danger" />
-                        </div>
                     </div>
                 </div>
 
                 <div class="component-block">
                     <h3>MaxInputFileUploadButton</h3>
                     <div class="states">
-                        <!-- Default -->
+                        <!-- Normal -->
                         <div class="state-col">
                             <span>Normal</span>
                             <MaxInputFileUploadButton />
@@ -101,11 +76,6 @@
                             <span>Disabled</span>
                             <MaxInputFileUploadButton disabled />
                         </div>
-                        <!-- Error / Variant -->
-                        <div class="state-col">
-                            <span>Erro / Secundário</span>
-                            <MaxInputFileUploadButton error severity="danger" />
-                        </div>
                     </div>
                 </div>
             </div>
@@ -114,11 +84,17 @@
 </template>
 
 <script setup lang="ts">
-    import { MaxInputFile } from '@maxvue/max-components-ui';
-    import { MaxInputFileProject } from '@maxvue/max-components-ui';
-    import { MaxInputFileUpload } from '@maxvue/max-components-ui';
-    import { MaxInputFileUploadBig } from '@maxvue/max-components-ui';
-    import { MaxInputFileUploadButton } from '@maxvue/max-components-ui';
+    import { ref } from 'vue';
+    import {
+        MaxInputFile,
+        MaxInputFileProject,
+        MaxInputFileUpload,
+        MaxInputFileUploadBig,
+        MaxInputFileUploadButton
+    } from '@maxvue/max-components-ui';
+
+    const files = ref<File[]>([]);
+    const projectFiles = ref<any[]>([]);
 </script>
 
 <style lang="scss" scoped>

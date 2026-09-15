@@ -904,7 +904,7 @@
                 }
 
                 &:focus-visible {
-                    outline: 2px solid var(--max-primary-500, #00768E);
+                    outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e)); /* Foco canônico */
                     outline-offset: 2px;
                 }
             }
@@ -926,7 +926,7 @@
                 }
 
                 &:focus-visible {
-                    outline: 2px solid var(--max-primary-500, #00768E);
+                    outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e)); /* Foco canônico */
                     outline-offset: 2px;
                     border-radius: 4px;
                 }
@@ -967,7 +967,7 @@
                     }
 
                     &:focus-visible {
-                        outline: 2px solid var(--max-primary-500, #00768E);
+                        outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e)); /* Foco canônico */
                         outline-offset: 1px;
                         z-index: 1;
                     }
@@ -1019,7 +1019,7 @@
                 }
 
                 &:focus-visible {
-                    outline: 2px solid var(--max-primary-500, #00768E);
+                    outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e)); /* Foco canônico */
                     outline-offset: 1px;
                 }
 
@@ -1057,7 +1057,7 @@
                 }
 
                 &:focus-visible {
-                    outline: 2px solid var(--max-primary-500, #00768E);
+                    outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e)); /* Foco canônico */
                     outline-offset: 1px;
                 }
 

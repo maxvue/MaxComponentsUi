@@ -443,7 +443,7 @@
                     }
 
                     &:focus-visible {
-                        outline: 2px solid var(--max-primary-500, #00768e);
+                        outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e)); /* Foco canônico */
                         outline-offset: 2px;
                     }
                 }
@@ -591,7 +591,7 @@
             }
 
             &:focus-visible {
-                outline: 2px solid var(--max-primary-500, #00768E);
+                outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e)); /* Foco canônico */
                 outline-offset: -2px;
                 background-color: var(--background-100, #f1f5f9);
                 color: var(--background-775);

@@ -224,7 +224,8 @@
             transition: outline 0.15s ease, box-shadow 0.15s ease;
 
             &:focus-visible {
-                outline: 2px solid var(--max-primary-500, #00768e);
+                /* Foco canônico: --max-focus-ring-color adapta em dark mode */
+                outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
                 outline-offset: 3px;
             }
 

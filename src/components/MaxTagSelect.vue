@@ -25,7 +25,7 @@
                     :aria-expanded="props.isButton ? undefined : isOpen"
                     :aria-controls="props.isButton ? undefined : (isOpen ? listboxId : undefined)"
                     :aria-activedescendant="props.isButton ? undefined : activeDescendantId"
-                    :aria-disabled="props.disabled ? 'true' : undefined"
+                    :aria-disabled="!props.isButton && props.disabled ? 'true' : undefined"
                     @click.stop="toggle"
                     @keydown="onTriggerKeydown"
                 >
@@ -52,11 +52,15 @@
                             </div>
                             <div v-else-if="isButton">
                                 <MaxIconButton
+                                    ref="buttonRef"
                                     :icon="props.i ?? props.icon ?? props.iconLeft"
                                     :size="option_selected?.icon_size ?? 1.8"
                                     :disabled="props.disabled"
-                                    :aria-label="(attrs['aria-label'] as string) ?? (attrs.label as string) ?? 'Selecionar opção'"
-                                    tabindex="-1"
+                                    :aria-label="buttonAriaLabel"
+                                    :aria-haspopup="'listbox'"
+                                    :aria-expanded="isOpen"
+                                    :aria-controls="isOpen ? listboxId : undefined"
+                                    :tabindex="props.disabled ? -1 : 0"
                                 />
                             </div>
                         </slot>
@@ -145,14 +149,15 @@
                                         <slot name="option" :option="entry.item.option" :selected="isOptionSelected(entry.item.option)" :index="entry.item.optionIndex">
                                             <div
                                                 class="label-tag-div"
-                                                :style="getStyleColor(entry.item.option, highlightedIndex === entry.item.selectableIndex, false)"
+                                                :color-string="getColorString(entry.item.option)"
+                                                :style="getStyleColor(entry.item.option, highlightedIndex === entry.item.selectableIndex, false, isOptionSelected(entry.item.option))"
                                             >
                                                 <MaxIcon
                                                     :icon="entry.item.option['icon']"
                                                     v-if="entry.item.option['icon']"
                                                     :size="entry.item.option?.['iconSize'] ?? '1'"
                                                     :style="{ width: '30px' }"
-                                                    :color="getStyleColor(entry.item.option, false, false).color"
+                                                    :color="getStyleColor(entry.item.option, highlightedIndex === entry.item.selectableIndex, false, isOptionSelected(entry.item.option)).color"
                                                 />
                                                 <div class="label-tag">
                                                     <div
@@ -285,9 +290,27 @@
 
     const styleColorCache = new Map<string, any>();
 
-    const getStyleColor = (item: any, hover: boolean = false, is_value: boolean = false) => {
+    const getAccessibleContrastColor = (bgHex: string): string => {
+        try {
+            const clean = bgHex.replace('#', '');
+            const r = parseInt(clean.substring(0, 2), 16) / 255;
+            const g = parseInt(clean.substring(2, 4), 16) / 255;
+            const b = parseInt(clean.substring(4, 6), 16) / 255;
+            const a = [r, g, b].map((v) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)));
+            const lum = a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+            const contrastLight = (1.0 + 0.05) / (lum + 0.05);
+            const contrastDark = (lum + 0.05) / 0.057;
+            if (contrastLight >= 4.5 && contrastLight >= contrastDark) return '#ffffff';
+            if (contrastDark >= 4.5) return '#00152a';
+            return contrastDark > contrastLight ? '#000000' : '#ffffff';
+        } catch {
+            return contrastColor(bgHex);
+        }
+    };
+
+    const getStyleColor = (item: any, hover: boolean = false, is_value: boolean = false, is_selected: boolean = false) => {
         const color_string = getColorString(item);
-        const cacheKey = `${color_string}_${hover}_${is_value}_${props.backgroundColor}`;
+        const cacheKey = `${color_string}_${hover}_${is_value}_${is_selected}_${props.backgroundColor}`;
         const cached = styleColorCache.get(cacheKey);
         if (cached) return cached;
 
@@ -296,11 +319,19 @@
         const color = getColorFromVar(color_string === 'unset' ? default_color : color_string);
 
         let background = hover ? color.darken(0.2).hexa() : color.hexa();
-        let text = contrastColor(background);
-        if (color_string === 'unset' && !is_value) {
-            background = hover ? 'rgba(0,0,0, 0.1)' : 'transparent';
-            text = hover ? 'var(--background-775)' : 'var(--background-700)';
+        let text = getAccessibleContrastColor(background);
+        if (color_string === 'unset' && !is_value) if (is_selected) {
+            background = hover
+                ? 'var(--max-selection-hover-background, var(--max-primary-600, #005F77))'
+                : 'var(--max-selection-background, var(--max-primary-500, #00768E))';
+            text = hover
+                ? 'var(--max-selection-hover-content, #ffffff)'
+                : 'var(--max-selection-content, #ffffff)';
+        } else {
+            background = hover ? 'var(--background-100, #f1f5f9)' : 'transparent';
+            text = hover ? 'var(--background-775, #1c2d3e)' : 'var(--background-700, #294056)';
         }
+
 
         const style = {
             backgroundColor: background,
@@ -357,8 +388,35 @@
     const searchQuery = ref('');
 
     const triggerEl = ref<HTMLElement | null>(null);
+    const buttonRef = ref<any>(null);
     const overlayEl = ref<HTMLElement | null>(null);
     const filterInputEl = ref<HTMLInputElement | null>(null);
+
+    const buttonAriaLabel = computed(() => {
+        const raw = (attrs['aria-label'] as string) || (attrs.ariaLabel as string) || (attrs.label as string) || (attrs.title as string);
+        if (raw && typeof raw === 'string' && raw.trim()) return raw.trim();
+
+        if (props.placeholder && typeof props.placeholder === 'string' && props.placeholder.trim()) return props.placeholder.trim();
+        if (attrs.placeholder && typeof attrs.placeholder === 'string' && attrs.placeholder.trim()) return attrs.placeholder.trim();
+
+        if (hasSelected.value) {
+            const selectedText = option_selected.value?.[props.optionLabel] ?? option_selected.value?.label ?? option_selected.value?.[props.optionName] ?? option_selected.value?.name;
+            if (selectedText) return `Selecionar opção: ${selectedText}`;
+        }
+
+        return 'Selecionar opção';
+    });
+
+    const focusTrigger = () => {
+        if (props.isButton && buttonRef.value) {
+            const el = buttonRef.value.$el ?? buttonRef.value;
+            if (el && typeof el.focus === 'function') {
+                el.focus();
+                return;
+            }
+        }
+        triggerEl.value?.focus();
+    };
 
     const getOverlayContentWidth = (currentWidth: number) => {
         const overlay = overlayEl.value;
@@ -687,7 +745,7 @@
                 if (isOpen.value) {
                     event.preventDefault();
                     hide();
-                    triggerEl.value?.focus();
+                    focusTrigger();
                 }
                 break;
         }
@@ -707,21 +765,21 @@
                 event.preventDefault();
                 if (highlightedIndex.value >= 0 && flatSelectableOptions.value[highlightedIndex.value]) {
                     selectOption(flatSelectableOptions.value[highlightedIndex.value]);
-                    triggerEl.value?.focus();
+                    focusTrigger();
                 }
                 break;
             case 'Escape':
                 event.preventDefault();
                 hide();
-                triggerEl.value?.focus();
+                focusTrigger();
                 break;
         }
     };
 
     useOutsidePointer(isOpen, {
-        elements: () => [triggerEl.value, overlayEl.value],
+        elements: () => [triggerEl.value, buttonRef.value?.$el ?? buttonRef.value, overlayEl.value].filter(Boolean) as HTMLElement[],
         onClose: () => hide(),
-        triggerEl: triggerEl
+        triggerEl: computed(() => (props.isButton && buttonRef.value ? (buttonRef.value.$el ?? buttonRef.value) : triggerEl.value))
     });
 
     watch(isOpen, async (open) => {
@@ -971,10 +1029,16 @@
                 .max-select-filter {
                     width: 100%;
                     padding: 4px 8px;
-                    border: 1px solid var(--surface-border);
+                    border: 1px solid var(--surface-border, #e2e8f0);
                     border-radius: 4px;
                     outline: none;
                     font-size: 0.85rem;
+                    background: var(--background-0, #fff);
+                    color: var(--background-800, #1e293b);
+
+                    &:focus {
+                        border-color: var(--max-primary-500, #00768e);
+                    }
                 }
             }
         }
@@ -1014,16 +1078,60 @@
                     display: flex;
                     align-items: center;
                     box-sizing: border-box;
-                    transition: background-color 0.15s ease;
+                    transition: background-color 0.15s ease, color 0.15s ease;
+                    border-radius: 6px;
+                    color: var(--background-700, #294056);
 
                     &.max-select-option-highlighted,
                     &.is-focused,
                     &:hover {
                         background-color: var(--background-100, #f1f5f9) !important;
+                        color: var(--background-775, #1c2d3e) !important;
                     }
 
-                    &.max-select-option-selected {
-                        background-color: unset !important;
+                    &.max-select-option-selected,
+                    &.is-selected {
+                        border-radius: 6px;
+
+                        &:not(:has(.label-tag-div[color-string]:not([color-string='unset']))) {
+                            background-color: var(--max-selection-background, var(--max-primary-500, #00768e)) !important;
+                            color: var(--max-selection-content, #fff) !important;
+
+                            &.max-select-option-highlighted,
+                            &.is-focused,
+                            &:hover {
+                                background-color: var(--max-selection-hover-background, var(--max-primary-600, #005f77)) !important;
+                                color: var(--max-selection-hover-content, #fff) !important;
+                            }
+
+                            .label-tag-div {
+                                color: inherit !important;
+                            }
+
+                            .max-tag-select-option-label {
+                                color: inherit !important;
+                            }
+
+                            .sub-label-tag {
+                                color: inherit !important;
+                                opacity: 0.85;
+                            }
+                        }
+                    }
+
+                    &:has(.label-tag-div[color-string]:not([color-string='unset'])) {
+                        &.max-select-option-selected,
+                        &.is-selected {
+                            background-color: transparent !important;
+                            outline: 2px solid var(--max-selection-background, var(--max-primary-500, #00768e));
+                            outline-offset: -2px;
+
+                            &.max-select-option-highlighted,
+                            &.is-focused,
+                            &:hover {
+                                background-color: var(--background-100, #f1f5f9) !important;
+                            }
+                        }
                     }
 
                     .category {

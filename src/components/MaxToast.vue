@@ -61,20 +61,18 @@
                     </button>
                 </div>
 
-                <!-- Anúncio de status sutil ao copiar -->
+                <!-- Anúncio de status sutil ao copiar (sem live region aninhada, o item pai é o live owner) -->
                 <span
                     v-if="copyStatus[toast.id] === 'success'"
                     class="toast-copy-status sr-only"
-                    role="status"
                 >
                     Copiado para a área de transferência!
                 </span>
 
-                <!-- Feedback persistente e fallback manual caso a cópia falhe -->
+                <!-- Feedback persistente e fallback manual caso a cópia falhe (sem live region aninhada) -->
                 <div
                     v-if="copyStatus[toast.id] === 'error'"
                     class="toast-copy-fallback"
-                    role="alert"
                 >
                     <span class="toast-copy-error-msg">Não foi possível copiar automaticamente. Copie manualmente abaixo:</span>
                     <textarea
@@ -212,7 +210,7 @@
         max-width: calc(100vw - max(var(--max-toast-viewport-gutter), var(--max-toast-safe-left)) - max(var(--max-toast-viewport-gutter), var(--max-toast-safe-right)));
         max-height: calc(100vh - (var(--max-toast-top-offset) + var(--max-toast-safe-top) + max(var(--max-toast-viewport-gutter), var(--max-toast-safe-bottom))));
         max-height: calc(100dvh - (var(--max-toast-top-offset) + var(--max-toast-safe-top) + max(var(--max-toast-viewport-gutter), var(--max-toast-safe-bottom))));
-        z-index: var(--max-layer-toast, 1500);
+        z-index: var(--max-z-index-toast, var(--max-layer-toast, 1500));
         display: flex;
         flex-direction: column;
         align-items: flex-end;
@@ -345,6 +343,9 @@
                         }
 
                         &:focus-visible {
+                            /* EXCEÇÃO LEGÍTIMA: superfície do toast é sempre colorida/escura.
+                             * outline #fff garante contraste WCAG 1.4.11 ≥ 3:1 sobre fundo
+                             * saturado. Token --max-focus-ring-color (teal) seria invisível aqui. */
                             outline: 2px solid #fff;
                             outline-offset: 2px;
                             border-radius: 2px;
@@ -379,6 +380,7 @@
                         user-select: all;
 
                         &:focus-visible {
+                            /* EXCEÇÃO LEGÍTIMA: fundo colorido do toast — ver comentário em .toast-text-action */
                             outline: 2px solid #fff;
                             outline-offset: 1px;
                         }
@@ -406,6 +408,7 @@
                 }
 
                 &:focus-visible {
+                    /* EXCEÇÃO LEGÍTIMA: fundo colorido do toast — ver comentário em .toast-text-action */
                     outline: 2px solid #fff;
                     outline-offset: 2px;
                 }

@@ -16,9 +16,12 @@
         "noEmit": true,
         "jsx": "preserve",
         "strict": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
         "noFallthroughCasesInSwitch": true,
+        "types": [
+            "node"
+        ],
         // "baseUrl": ".",
         "paths": {
             "@/*": [
@@ -30,12 +33,11 @@
         }
     },
     "include": [
-        "../src/index.ts",
-        "../scripts/**/*",
-        "../src/scripts/**/*",
+        "env.d.ts",
         "./auto-import.d.ts",
         "./auto-import-components.d.ts",
-        "env.d.ts"
+        "src/**/*",
+        "src/**/*.vue"
     ],
     "exclude": [
         "node_modules",

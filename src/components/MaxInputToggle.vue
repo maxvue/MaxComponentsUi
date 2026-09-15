@@ -8,6 +8,7 @@
                 :for="toggleInputId"
                 class="input-toggle-field-label-div"
                 v-if="hasLabel"
+                @click="onLabelClick"
             >
                 {{ resolvedLabel }}
             </label>
@@ -129,6 +130,7 @@
         'name',
         'disabled',
         'required',
+        'autocomplete',
         'tabindex',
         'form',
         'value',
@@ -194,6 +196,13 @@
 
     const on_toggle = (checked: boolean) => {
         modelvalue.value = checked ? trueValue.value : falseValue.value;
+    };
+
+    const onLabelClick = () => {
+        if (typeof document !== 'undefined' && toggleInputId.value) {
+            const target = document.getElementById(toggleInputId.value);
+            if (target && typeof target.focus === 'function') target.focus();
+        }
     };
 
     defineExpose({ update_value, modelvalue });
@@ -308,7 +317,8 @@
                 z-index: 1;
 
                 &:focus-visible + .max-toggleswitch-slider {
-                    outline: 2px solid var(--max-primary-500, var(--blue-600, #00768e));
+                    /* Foco canônico: --max-focus-ring-color adapta em dark mode */
+                    outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
                     outline-offset: 2px;
                 }
             }

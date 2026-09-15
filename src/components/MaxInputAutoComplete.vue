@@ -11,7 +11,7 @@
                     :placeholder="props.placeholder ?? 'SELECIONE'"
                     :disabled="props.disabled"
                     :spellcheck="props.spellcheck"
-                    autocomplete="off"
+                    :autocomplete="inputAttrs?.autocomplete ?? 'off'"
                     role="combobox"
                     aria-autocomplete="list"
                     :aria-expanded="isOpen && filtered_values.length > 0"

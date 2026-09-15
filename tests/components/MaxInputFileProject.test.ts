@@ -461,6 +461,7 @@ describe('MaxInputFileProject', () => {
             expect(wrapper.emitted('upload-error')).toBeTruthy();
             const fileId = wrapper.vm.temp_files[0].id;
             expect(wrapper.vm.fileStatusMap.get(fileId)).toBe('failed');
+            expect(consoleSpy).toHaveBeenCalled();
 
             consoleSpy.mockRestore();
         });
@@ -495,6 +496,96 @@ describe('MaxInputFileProject', () => {
             resolveRetry!({ data: { success: true } });
             await Promise.all([p1, p2]);
             expect(wrapper.vm.fileStatusMap.get(fileId)).toBe('succeeded');
+        });
+    });
+
+    describe('Ações Nativas, Associação Explícita e Operação por Teclado (R12 / F19)', () => {
+        it('associa explicitamente o label :for ao input nativo type="file" com id correspondente', () => {
+            const wrapper = mount(MaxInputFileProject, {
+                props: { files: [] },
+                global: { stubs: ['MaxIconButton', 'MaxIcon', 'MaxLoaderIcon', 'MaxButton'] }
+            });
+
+            const nativeInput = wrapper.find('input[type="file"]');
+            expect(nativeInput.exists()).toBe(true);
+            const inputId = nativeInput.attributes('id');
+            expect(inputId).toBeTruthy();
+
+            const chooseLabel = wrapper.find('.open-files-btn-label');
+            expect(chooseLabel.element.tagName.toLowerCase()).toBe('label');
+            expect(chooseLabel.attributes('for')).toBe(inputId);
+            expect(chooseLabel.attributes('role')).toBe('button');
+            expect(chooseLabel.attributes('tabindex')).toBe('0');
+        });
+
+        it('aciona o seletor nativo ao receber Enter ou Espaço no label com foco', async () => {
+            const wrapper = mount(MaxInputFileProject, {
+                props: { files: [] },
+                global: { stubs: ['MaxIconButton', 'MaxIcon', 'MaxLoaderIcon', 'MaxButton'] }
+            });
+
+            const nativeInput = wrapper.find('input[type="file"]');
+            const clickSpy = vi.spyOn(nativeInput.element as HTMLInputElement, 'click');
+
+            const chooseLabel = wrapper.find('.open-files-btn-label');
+            await chooseLabel.trigger('keydown.enter');
+            expect(clickSpy).toHaveBeenCalledTimes(1);
+
+            await chooseLabel.trigger('keydown.space');
+            expect(clickSpy).toHaveBeenCalledTimes(2);
+
+            clickSpy.mockRestore();
+        });
+
+        it('respeita disabled estritamente no label e input, impedindo acionamento e removendo associação for', async () => {
+            const wrapper = mount(MaxInputFileProject, {
+                props: { files: [], disabled: true },
+                global: { stubs: ['MaxIconButton', 'MaxIcon', 'MaxLoaderIcon', 'MaxButton'] }
+            });
+
+            const nativeInput = wrapper.find('input[type="file"]');
+            expect(nativeInput.attributes('disabled')).toBeDefined();
+            const clickSpy = vi.spyOn(nativeInput.element as HTMLInputElement, 'click');
+
+            const chooseLabel = wrapper.find('.open-files-btn-label');
+            expect(chooseLabel.classes()).toContain('is-disabled');
+            expect(chooseLabel.attributes('tabindex')).toBe('-1');
+            expect(chooseLabel.attributes('aria-disabled')).toBe('true');
+            expect(chooseLabel.attributes('for')).toBeUndefined();
+
+            await chooseLabel.trigger('click');
+            await chooseLabel.trigger('keydown.enter');
+            await chooseLabel.trigger('keydown.space');
+
+            expect(clickSpy).not.toHaveBeenCalled();
+
+            clickSpy.mockRestore();
+        });
+
+        it('suporta múltiplos arquivos e garante emissão única de files-selected ao disparar change', async () => {
+            const wrapper = mount(MaxInputFileProject, {
+                props: { files: [], auto: false },
+                global: { stubs: ['MaxIconButton', 'MaxIcon', 'MaxLoaderIcon', 'MaxButton'] }
+            });
+
+            const nativeInput = wrapper.find('input[type="file"]');
+            expect(nativeInput.attributes('multiple')).toBeDefined();
+
+            const fileA = new File(['a'], 'docA.pdf', { type: 'application/pdf' });
+            const fileB = new File(['b'], 'docB.pdf', { type: 'application/pdf' });
+
+            Object.defineProperty(nativeInput.element, 'files', {
+                value: [fileA, fileB],
+                writable: true,
+                configurable: true
+            });
+
+            await nativeInput.trigger('change');
+
+            expect(wrapper.emitted('files-selected')).toHaveLength(1);
+            expect(wrapper.emitted('files-selected')![0][0]).toEqual([fileA, fileB]);
+            expect(wrapper.vm.temp_files).toHaveLength(2);
+            expect((nativeInput.element as HTMLInputElement).value).toBe('');
         });
     });
 });

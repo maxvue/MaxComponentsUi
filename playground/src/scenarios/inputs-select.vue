@@ -10,17 +10,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxInputSelect />
+                            <MaxInputSelect v-bind="scenarioProps"  />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxInputSelect disabled />
+                            <MaxInputSelect v-bind="scenarioProps" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxInputSelect error severity="danger" />
+                            <MaxInputSelect v-bind="scenarioProps" error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -31,17 +31,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxInputDatePicker />
+                            <MaxInputDatePicker v-bind="scenarioProps"  />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxInputDatePicker disabled />
+                            <MaxInputDatePicker v-bind="scenarioProps" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxInputDatePicker error severity="danger" />
+                            <MaxInputDatePicker v-bind="scenarioProps" error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -52,17 +52,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxInputAutoComplete />
+                            <MaxInputAutoComplete v-bind="scenarioProps"  />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxInputAutoComplete disabled />
+                            <MaxInputAutoComplete v-bind="scenarioProps" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxInputAutoComplete error severity="danger" />
+                            <MaxInputAutoComplete v-bind="scenarioProps" error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -73,17 +73,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxInputAutoCompleteApi />
+                            <MaxInputAutoCompleteApi v-bind="scenarioProps"  />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxInputAutoCompleteApi disabled />
+                            <MaxInputAutoCompleteApi v-bind="scenarioProps" disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxInputAutoCompleteApi error severity="danger" />
+                            <MaxInputAutoCompleteApi v-bind="scenarioProps" error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -93,6 +93,8 @@
 </template>
 
 <script setup lang="ts">
+    // Props neutras permitem exercitar os estados sem omitir contratos obrigatórios.
+    const scenarioProps: any = { modelValue: '', options: [], items: [], route: '/', target: document.body };
     import { MaxInputSelect } from '@maxvue/max-components-ui';
     import { MaxInputDatePicker } from '@maxvue/max-components-ui';
     import { MaxInputAutoComplete } from '@maxvue/max-components-ui';
