@@ -42,9 +42,7 @@ vi.mock('tiptap-markdown', () => ({
     Markdown: { configure: vi.fn(() => ({})) }
 }));
 
-vi.mock('@tiptap/starter-kit', () => ({ default: {} }));
-vi.mock('@tiptap/extension-underline', () => ({ default: {} }));
-vi.mock('@tiptap/extension-link', () => ({ default: { configure: vi.fn(() => ({})) } }));
+vi.mock('@tiptap/starter-kit', () => ({ default: { configure: vi.fn(() => ({})) } }));
 vi.mock('@tiptap/extension-image', () => ({ default: {} }));
 // `@tiptap/extension-table` exporta `Table` de forma nomeada (diferente das
 // extensoes irmas, que usam default). O mock expoe os dois formatos para nao
