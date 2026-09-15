@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import { ref } from 'vue';
 import { useRefCachedApi } from '@maxvue/max-use';
 
 import type { SideMenuItem } from '../types/app';
@@ -19,7 +20,13 @@ export interface ListMenu {
  * cache e a atualização chega em segundo plano.
  */
 export const useListMenusStore = defineStore('menus.list', () => {
-    const list = useRefCachedApi<ListMenu | null | undefined>(getMaxAppConfig().routeMenus as string);
+    const routeMenus = getMaxAppConfig().routeMenus;
+    // Uma aplicação consumidora pode não expor navegação por API. Nesse caso,
+    // não inicie uma requisição relativa ao documento atual apenas porque a
+    // store foi instanciada por um componente de layout.
+    const list = routeMenus
+        ? useRefCachedApi<ListMenu | null | undefined>(routeMenus)
+        : ref<ListMenu | null | undefined>(null);
 
     return { list };
 });

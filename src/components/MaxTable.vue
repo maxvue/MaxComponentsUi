@@ -1161,8 +1161,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .max-table-wrapper .max-table-container table tbody tr.max-table-loading-row .max-table-spinner {
-        animation-duration: 4s;
+    .max-table-main-div .max-table-container table tbody tr.max-table-loading-row .max-table-spinner {
+        animation-duration: 0.01ms;
+        animation-iteration-count: 1;
     }
 }
 </style>

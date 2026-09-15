@@ -220,19 +220,11 @@ describe('MaxBaseVirtualScroller', () => {
     });
 
     describe('Contrato Listbox e Blindagem Semântica (F14 / WCAG 1.3.1 e 4.1.2)', () => {
-        it('emite warning quando role="listbox" nao possui aria-label nem aria-labelledby', async () => {
-            const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-            wrapper = mount(MaxBaseVirtualScroller, {
+        it('rejeita listbox sem nome acessível como erro de contrato', () => {
+            expect(() => mount(MaxBaseVirtualScroller, {
                 props: { items: makeItems(5), role: 'listbox' },
                 slots: { item: '<div class="row-item" />' }
-            });
-            stubViewport(wrapper.element as HTMLElement, 200);
-            await settle();
-
-            expect(warnSpy).toHaveBeenCalledWith(
-                expect.stringContaining('O papel "listbox" exige um nome acessível via aria-label ou aria-labelledby.')
-            );
-            warnSpy.mockRestore();
+            })).toThrow('O papel "listbox" exige um nome acessível via aria-label ou aria-labelledby.');
         });
 
         it('nao emite warning quando aria-label e fornecido para o listbox', async () => {
@@ -284,35 +276,37 @@ describe('MaxBaseVirtualScroller', () => {
             expect(scroller.classes()).toContain('is-disabled');
         });
 
-        it('normaliza effectiveItemRole para "option" em role="listbox", impedindo combinacoes invalidas', async () => {
-            wrapper = mount(MaxBaseVirtualScroller, {
+        it('rejeita combinações incompatíveis de papel no container e nos itens', () => {
+            expect(() => mount(MaxBaseVirtualScroller, {
                 props: {
                     items: makeItems(5),
                     role: 'listbox',
-                    itemRole: 'listitem', // papel invalido para filhos diretos de listbox
-                    ariaLabel: 'Lista normalizada'
+                    itemRole: 'listitem',
+                    ariaLabel: 'Lista inválida'
                 },
                 slots: { item: '<div class="row-item" />' }
-            });
-            stubViewport(wrapper.element as HTMLElement, 200);
-            await settle();
-
-            expect(wrapper.findAll('[role="option"]').length).toBeGreaterThan(0);
-            expect(wrapper.findAll('[role="listitem"]')).toHaveLength(0);
+            })).toThrow('role="listbox" só aceita itemRole="option".');
         });
 
-        it('impede role="option" orfao quando o container e neutro sem role', async () => {
-            wrapper = mount(MaxBaseVirtualScroller, {
+        it('rejeita itemRole sem um papel compatível no container', () => {
+            expect(() => mount(MaxBaseVirtualScroller, {
                 props: {
                     items: makeItems(5),
-                    itemRole: 'option' // nao deve ser renderizado como option sem listbox
+                    itemRole: 'option'
                 },
                 slots: { item: '<div class="row-item" />' }
-            });
-            stubViewport(wrapper.element as HTMLElement, 200);
-            await settle();
+            })).toThrow('itemRole exige role="listbox" ou role="list" compatível.');
+        });
 
-            expect(wrapper.findAll('[role="option"]')).toHaveLength(0);
+        it('rejeita papéis fora do contrato tipado em chamadas JavaScript', () => {
+            expect(() => mount(MaxBaseVirtualScroller, {
+                props: {
+                    items: makeItems(5),
+                    role: 'menu' as any,
+                    ariaLabel: 'Papel inválido'
+                },
+                slots: { item: '<div class="row-item" />' }
+            })).toThrow('role deve ser "listbox" ou "list".');
         });
     });
 

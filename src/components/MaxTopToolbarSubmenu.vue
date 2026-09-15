@@ -61,7 +61,7 @@
                     role="menuitem"
                     :id="getItemId(index)"
                     :tabindex="focusedIndex === index && !item.disabled ? 0 : -1"
-                    :aria-label="item.ariaLabel || item.label || item.title || (typeof item.tooltip === 'string' ? item.tooltip : 'Opção de menu')"
+                    :aria-label="getIconItemAriaLabel(item, index)"
                     :tooltip="typeof item.tooltip === 'string' ? item.tooltip : undefined"
                     :aria-disabled="item.disabled ? 'true' : undefined"
                     :icon="item.icon"
@@ -144,6 +144,12 @@
         'close': [];
         'close-all': [];
     }>();
+
+    /** Nomeia opções por sua posição no submenu quando o dado dinâmico não traz metadados. */
+    const getIconItemAriaLabel = (item: MaxTopToolbarSubmenuItem, index: number): string => {
+        const name = item.ariaLabel || item.label || item.title || (typeof item.tooltip === 'string' ? item.tooltip : undefined);
+        return typeof name === 'string' && name.trim() ? name.trim() : `Item ${index + 1} do submenu`;
+    };
 
     const activeSubmenu = ref<number | null>(null);
     const focusedIndex = ref<number>(0);

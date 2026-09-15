@@ -2,8 +2,7 @@
  * Runner de Benchmarks Temporais — MaxBaseVirtualScroller
  *
  * Execução:
- *   npx tsx tests/benchmarks/run-benchmarks.ts
- *   node --import tsx/esm tests/benchmarks/run-benchmarks.ts
+ *   npm run test:benchmark
  *
  * Produz: tests/benchmarks/benchmark-results.json
  *
@@ -70,7 +69,7 @@ function salvarArtefato(resultado: BenchmarkResult, caminhoSaida: string): void 
 // Ponto de entrada
 // ---------------------------------------------------------------------------
 
-async function main(): Promise<void> {
+export async function executarEGravarBenchmarks(): Promise<void> {
     console.log('🏃  Iniciando benchmarks temporais de MaxBaseVirtualScroller...\n');
 
     await bootstrapDom();
@@ -86,8 +85,3 @@ async function main(): Promise<void> {
     const caminhoSaida = join(__dirname, 'benchmark-results.json');
     salvarArtefato(resultado, caminhoSaida);
 }
-
-main().catch((err) => {
-    console.error('❌  Benchmark falhou:', err);
-    process.exit(1);
-});

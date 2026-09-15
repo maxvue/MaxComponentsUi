@@ -71,7 +71,7 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, computed, watch, onMounted, useId } from 'vue';
+    import { ref, computed, watch, useId } from 'vue';
     import { useVirtualizer } from '@tanstack/vue-virtual';
     import type {
         VirtualScrollerRole,
@@ -90,9 +90,9 @@
             /** itens extras renderizados fora da viewport */
             numToleratedItems?: number;
             /** papel ARIA do container com scroll (opcional; padrão neutro sem role) */
-            role?: VirtualScrollerRole | string;
+            role?: VirtualScrollerRole;
             /** papel ARIA atribuído a cada linha/item (opcional; ex: 'option', 'listitem') */
-            itemRole?: VirtualScrollerItemRole | string;
+            itemRole?: VirtualScrollerItemRole;
             /** rótulo acessível via aria-label */
             ariaLabel?: string;
             /** ID do elemento que rotula este container via aria-labelledby */
@@ -158,23 +158,49 @@
     const autoId = useId();
     const baseId = computed(() => props.idPrefix || `max-vs-${autoId}`);
 
-    // Blindagem de papéis ARIA: impede combinações conflitantes e mantém padrão neutro
-    const effectiveRole = computed<string | undefined>(() => {
-        if (!props.role) return undefined;
-        if (props.role === 'listbox') return 'listbox';
-        if (props.role === 'list') return 'list';
-        return props.role;
-    });
+    /**
+     * O virtualizador possui somente três modos semânticos válidos: neutro,
+     * list e listbox. Embora TypeScript impeça usos inválidos por padrão,
+     * consumidores JavaScript e templates dinâmicos ainda podem violar o
+     * contrato em runtime; nesses casos falhamos cedo, antes de emitir ARIA
+     * estruturalmente inválido para a árvore de acessibilidade.
+     */
+    const validateAccessibilityContract = () => {
+        const role = props.role as unknown;
+        const itemRole = props.itemRole as unknown;
 
-    const effectiveItemRole = computed<string | undefined>(() => {
-        // Em listbox, filhos interativos DEVEM ter papel option
+        if (role !== undefined && role !== 'listbox' && role !== 'list') throw new TypeError('[MaxBaseVirtualScroller] role deve ser "listbox" ou "list".');
+
+
+        if (itemRole !== undefined && itemRole !== 'option' && itemRole !== 'listitem') throw new TypeError('[MaxBaseVirtualScroller] itemRole deve ser "option" ou "listitem".');
+
+
+        if (role === 'listbox') {
+            if (!props.ariaLabel?.trim() && !props.ariaLabelledby?.trim()) throw new TypeError('[MaxBaseVirtualScroller] O papel "listbox" exige um nome acessível via aria-label ou aria-labelledby.');
+
+            if (itemRole !== undefined && itemRole !== 'option') throw new TypeError('[MaxBaseVirtualScroller] role="listbox" só aceita itemRole="option".');
+
+            return;
+        }
+
+        if (role === 'list') {
+            if (itemRole !== undefined && itemRole !== 'listitem') throw new TypeError('[MaxBaseVirtualScroller] role="list" só aceita itemRole="listitem".');
+
+            return;
+        }
+
+        if (itemRole !== undefined) throw new TypeError('[MaxBaseVirtualScroller] itemRole exige role="listbox" ou role="list" compatível.');
+
+    };
+
+    validateAccessibilityContract();
+    watch(() => [props.role, props.itemRole, props.ariaLabel, props.ariaLabelledby], validateAccessibilityContract);
+
+    const effectiveRole = computed<VirtualScrollerRole>(() => props.role);
+
+    const effectiveItemRole = computed<VirtualScrollerItemRole>(() => {
         if (effectiveRole.value === 'listbox') return 'option';
-        // Em list, filhos DEVEM ser listitem
         if (effectiveRole.value === 'list') return 'listitem';
-        // Quando container não tem role (ou é neutro):
-        if (props.itemRole === 'listitem') return 'listitem';
-
-        // Impede 'option' solto sem container listbox
         return undefined;
     });
 
@@ -268,10 +294,6 @@
         const range = virtualizer.value.range;
         if (range) emit('scroll-index-change', { first: range.startIndex, last: range.endIndex });
     };
-
-    onMounted(() => {
-        if (effectiveRole.value === 'listbox' && !effectiveAriaLabel.value && !effectiveAriaLabelledby.value) console.warn('[MaxBaseVirtualScroller] O papel "listbox" exige um nome acessível via aria-label ou aria-labelledby.');
-    });
 
     // Navegação por teclado para Listbox
     const findNextEnabledIndex = (start: number, step: number): number => {

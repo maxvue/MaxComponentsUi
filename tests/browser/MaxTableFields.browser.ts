@@ -2,6 +2,7 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { createApp, h, type App } from 'vue';
 import { createPinia } from 'pinia';
 import MaxTableFields from '../../src/components/MaxTableFields.vue';
+import { installBrowserTestApp } from './bootstrap';
 
 let activeApp: App | null = null;
 let hostElement: HTMLElement | null = null;
@@ -47,6 +48,7 @@ async function mountTableAtWidth(widthPx: number, options: {
     });
 
     app.use(createPinia());
+    installBrowserTestApp(app);
     activeApp = app;
     app.mount(hostElement);
     await nextFrame();

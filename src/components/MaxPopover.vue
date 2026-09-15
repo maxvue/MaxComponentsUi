@@ -68,7 +68,7 @@
     import { usePopoverStore } from '../stores/usePopover.Store';
     import { useFocusTrap } from '../helpers/useFocusTrap';
     import { useActiveOverlayPosition } from '../composables/useActiveOverlayPosition';
-    import { resolveAriaLabelledby } from '../helpers/useAccessibleName';
+    import { getElementAccessibleText, resolveAriaLabelledby } from '../helpers/useAccessibleName';
     import MaxIconButton from './MaxIconButton.vue';
     import MaxIcon from './MaxIcon.vue';
     import MaxTitle1 from './MaxTitle1.vue';
@@ -178,8 +178,25 @@
 
     const resolvedSubTitle = computed(() => props.subTitle ?? props.subtitle);
 
+    // Ver comentário equivalente em MaxModal: referências removidas da árvore
+    // de acessibilidade ou sem texto usam o fallback do diálogo; o helper
+    // canônico continua sendo a fonte de AccName genérica.
+    const resolveDialogLabelledby = (ids: string) => {
+        const resolved = resolveAriaLabelledby(ids);
+        if (!resolved || typeof document === 'undefined') return undefined;
+        const usable = resolved.split(' ').filter((labelId) => {
+            const target = document.getElementById(labelId) as HTMLElement | null;
+            return Boolean(target)
+                && !target!.hasAttribute('hidden')
+                && target!.getAttribute('aria-hidden') !== 'true'
+                && !target!.hasAttribute('inert')
+                && Boolean(getElementAccessibleText(target!));
+        });
+        return usable.length ? usable.join(' ') : undefined;
+    };
+
     const computedAriaLabelledby = computed(() => {
-        if (props.ariaLabelledby) return resolveAriaLabelledby(props.ariaLabelledby);
+        if (props.ariaLabelledby) return resolveDialogLabelledby(props.ariaLabelledby);
         if (props.noHeader) return undefined;
         if (slots.header) {
             const slotText = getSlotText(slots.header);
@@ -198,18 +215,24 @@
     const el = useTemplateRef<HTMLElement>('el');
     const btn_el = useTemplateRef('btn_el');
 
-    const trap = useFocusTrap(el, { onEscape: () => hide() });
+    const trap = useFocusTrap(el, {
+        onEscape: () => hide(),
+        outsideElements: () => [btn_el.value],
+        onOutsidePointer: () => hide()
+    });
 
     const { position, isPositioned } = useActiveOverlayPosition<{
         top: number;
         left: number;
         isTop: boolean;
         isLeft: boolean;
+        maxWidth: number;
+        maxHeight: number;
     }>({
         target: btn_el,
         overlay: el,
         active: isOpen,
-        compute: ({ targetRect, overlayRect, viewportWidth, viewportHeight, safeArea }) => {
+        compute: ({ targetRect, overlayRect, viewportWidth, viewportHeight, safeArea, visualViewport }) => {
             const width_btn = targetRect.width;
             const height_btn = targetRect.height;
             const width_el = overlayRect.width || 300;
@@ -222,11 +245,16 @@
 
             const margin = 8;
             const arrowSpacing = 15;
+            // As coordenadas de `fixed` e de DOMRect pertencem à layout
+            // viewport. Em pinch-zoom, a viewport visual pode começar longe
+            // de zero: sem estes offsets o popover fica fora da área tocável.
+            const viewportLeft = visualViewport?.offsetLeft ?? 0;
+            const viewportTop = visualViewport?.offsetTop ?? 0;
 
-            const minTop = Math.max(margin, safeTop + margin);
-            const maxBottom = Math.max(minTop, viewportHeight - safeBottom - margin);
-            const minLeft = Math.max(margin, safeLeft + margin);
-            const maxRight = Math.max(minLeft, viewportWidth - safeRight - margin);
+            const minTop = viewportTop + Math.max(margin, safeTop + margin);
+            const maxBottom = Math.max(minTop, viewportTop + viewportHeight - safeBottom - margin);
+            const minLeft = viewportLeft + Math.max(margin, safeLeft + margin);
+            const maxRight = Math.max(minLeft, viewportLeft + viewportWidth - safeRight - margin);
 
             const spaceBelow = maxBottom - (targetRect.top + height_btn);
             const spaceAbove = targetRect.top - minTop;
@@ -262,7 +290,9 @@
                 top,
                 left,
                 isTop,
-                isLeft
+                isLeft,
+                maxWidth: maxRight - minLeft,
+                maxHeight: maxBottom - minTop
             };
         }
     });
@@ -271,7 +301,9 @@
         const style: Record<string, string | number> = {
             top: `${position.value.top}px`,
             left: `${position.value.left}px`,
-            opacity: isPositioned.value ? 1 : 0
+            opacity: isPositioned.value ? 1 : 0,
+            maxWidth: `${position.value.maxWidth}px`,
+            maxHeight: `${position.value.maxHeight}px`
         };
 
         if (props.width) {
@@ -291,36 +323,13 @@
         }
     };
 
-    let outsidePointerDown = false;
-    const onDocPointerDown = (e: MouseEvent | TouchEvent | PointerEvent) => {
-        const target = e.target as Node | null;
-        if (el.value && !el.value.contains(target) && btn_el.value && !btn_el.value.contains(target)) outsidePointerDown = true;
-        else outsidePointerDown = false;
-    };
-
-    const onDocClick = (e: MouseEvent) => {
-        const target = e.target as Node | null;
-        if (outsidePointerDown && el.value && !el.value.contains(target) && btn_el.value && !btn_el.value.contains(target)) hide();
-
-        outsidePointerDown = false;
-    };
-
     watch(isOpen, (value) => {
-        if (value) {
-            trap.activate();
-            document.addEventListener('pointerdown', onDocPointerDown, true);
-            document.addEventListener('click', onDocClick, true);
-        } else {
-            trap.deactivate();
-            document.removeEventListener('pointerdown', onDocPointerDown, true);
-            document.removeEventListener('click', onDocClick, true);
-        }
+        if (value) trap.activate();
+        else trap.deactivate();
     });
 
     onBeforeUnmount(() => {
         trap.deactivate();
-        document.removeEventListener('pointerdown', onDocPointerDown, true);
-        document.removeEventListener('click', onDocClick, true);
         if (popover_store.show_id === id.value) popover_store.hide();
     });
 

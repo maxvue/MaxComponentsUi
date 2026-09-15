@@ -13,6 +13,7 @@
                         ref="panel_el"
                         class="max-drawer"
                         :class="[`max-drawer-${props.position}`, { 'max-drawer-no-padding': props.noPadding }, $attrs.class]"
+                        v-bind="$attrs"
                         :role="props.modal ? 'dialog' : 'complementary'"
                         :aria-modal="props.modal ? 'true' : undefined"
                         :aria-labelledby="effectiveAriaLabelledby"

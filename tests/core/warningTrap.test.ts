@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { allowConsoleWarn, allowConsoleError, verifyConsoleClean } from '../helpers/consolePolicy';
 
 describe('Política de console e suíte sem warnings (E12-02)', () => {
@@ -78,5 +78,54 @@ describe('Política de console e suíte sem warnings (E12-02)', () => {
 
         expect(() => verifyConsoleClean()).toThrow(/não consumiu\/assertou todas as chamadas/);
         spy.mockRestore();
+    });
+
+    it('detecta warning tardio emitido depois de uma asserção sob spy', async () => {
+        const spy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+        console.warn('Aviso esperado inicialmente');
+        expect(spy).toHaveBeenCalledWith('Aviso esperado inicialmente');
+
+        await new Promise<void>((resolve) => {
+            setTimeout(() => {
+                console.warn('Aviso tardio não consumido');
+                resolve();
+            }, 0);
+        });
+
+        expect(() => verifyConsoleClean()).toThrow(/Aviso tardio não consumido/);
+        spy.mockRestore();
+    });
+
+    it('detecta error tardio emitido depois de uma asserção sob spy', async () => {
+        const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        console.error('Erro esperado inicialmente');
+        expect(spy).toHaveBeenCalledWith('Erro esperado inicialmente');
+
+        await new Promise<void>((resolve) => {
+            setTimeout(() => {
+                console.error('Erro tardio não consumido');
+                resolve();
+            }, 0);
+        });
+
+        expect(() => verifyConsoleClean()).toThrow(/Erro tardio não consumido/);
+        spy.mockRestore();
+    });
+
+    describe('emissão posterior ao corpo do teste', () => {
+        afterEach(async () => {
+            // Este é o teardown do caso, não o corpo do teste: reproduz uma
+            // emissão que chega quando o componente já devolveu o controle.
+            await new Promise<void>((resolve) => setTimeout(resolve, 0));
+            expect(() => verifyConsoleClean()).toThrow(/tardio no teardown/);
+        });
+
+        it('rejeita warning tardio mesmo quando o spy já foi consumido', () => {
+            const spy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+            console.warn('Aviso consumido antes do teardown');
+            expect(spy).toHaveBeenCalledWith('Aviso consumido antes do teardown');
+
+            setTimeout(() => console.warn('Aviso tardio no teardown'), 0);
+        });
     });
 });

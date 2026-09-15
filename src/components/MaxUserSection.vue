@@ -565,6 +565,9 @@
         display: flex;
         flex-direction: column;
         gap: 2px;
+        opacity: 1;
+        transform: translateY(0);
+        transition: opacity 160ms ease, transform 160ms ease;
 
         .max-user-section-separator {
             border: none;

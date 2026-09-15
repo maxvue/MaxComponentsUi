@@ -1,6 +1,7 @@
 <template>
-    <InputBase v-bind="props" :class="`max-input-switch max-switch ${props.disabled ? 'is-disabled' : ''}`">
-        <template #default="{ inputAttrs }">
+    <InputBase v-bind="props" native-form-proxy :class="`max-input-switch max-switch ${props.disabled ? 'is-disabled' : ''}`">
+        <template #default="{ formAttrs, triggerAttrs }">
+            <input v-bind="formAttrs" class="max-native-form-proxy" type="checkbox" :checked="temp_value === props.trueValue" :value="String(props.trueValue)" tabindex="-1" />
             <div :class="`max-switch-input ${temp_value === props.trueValue ? 'active' : ''} ${props.disabled ? 'is-disabled' : ''}`">
                 <div
                     class="max-switch-label left"
@@ -11,7 +12,7 @@
                     {{ resolvedFalseLabel }}
                 </div>
                 <div
-                    v-bind="inputAttrs"
+                    v-bind="triggerAttrs"
                     class="max-switch-toggle"
                     :class="{
                         'active': temp_value === props.trueValue,

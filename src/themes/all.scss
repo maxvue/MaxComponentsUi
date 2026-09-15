@@ -10,3 +10,11 @@
 *, *::before, *::after {
     box-sizing: border-box;
 }
+// Rede de segurança para alvos nativos e ARIA que não possuem um mixin local.
+// A regra é deliberadamente ligada aos elementos que entram na ordem de Tab;
+// não é um reset genérico de `:focus` e não oculta políticas mais específicas.
+:where(button, input, select, textarea, summary, a[href], [role='button'], [role='link'], [role='menuitem'], [role='option'], [role='tab'], [role='checkbox'], [role='switch'], [role='slider'], [role='combobox'], [role='listbox'], [tabindex]:not([tabindex='-1'])):focus-visible {
+    outline: var(--max-focus-outline);
+    outline-offset: 2px;
+    box-shadow: var(--max-focus-ring);
+}

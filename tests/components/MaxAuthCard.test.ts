@@ -53,13 +53,13 @@ describe('MaxAuthCard', () => {
             expect(emitted[emitted.length - 1]).toEqual(['teste@example.com']);
         });
 
-        it('emite submit com email, password e remember ao chamar onSubmit', async () => {
+        it('emite submit com email, password e remember pelo submit nativo', async () => {
             const wrapper = mountAuthCard({ email: 'a@b.com', password: 'segredo', remember: true });
 
             const button = wrapper.findComponent({ name: 'MaxButton' });
             expect(button.exists()).toBe(true);
 
-            await (button.props('action') as any)?.();
+            await wrapper.find('form').trigger('submit');
 
             expect(wrapper.emitted('submit')).toBeTruthy();
             expect(wrapper.emitted('submit')![0][0]).toMatchObject({
@@ -73,8 +73,7 @@ describe('MaxAuthCard', () => {
         it('não emite submit quando loading=true', async () => {
             const wrapper = mountAuthCard({ loading: true, email: 'a@b.com', password: 'x' });
 
-            const button = wrapper.findComponent({ name: 'MaxButton' });
-            await (button.props('action') as any)?.();
+            await wrapper.find('form').trigger('submit');
 
             expect(wrapper.emitted('submit')).toBeFalsy();
         });
@@ -167,8 +166,7 @@ describe('MaxAuthCard', () => {
             expect(document.activeElement).not.toBe(emailInput!.element);
 
             // Submissão inválida move o foco para o primeiro campo inválido
-            const button = wrapper.findComponent({ name: 'MaxButton' });
-            await (button.props('action') as any)?.();
+            await wrapper.find('form').trigger('submit');
             await wrapper.vm.$nextTick();
 
             expect(document.activeElement).toBe(emailInput!.element);
@@ -264,8 +262,7 @@ describe('MaxAuthCard', () => {
                 phone: '62999999999'
             });
 
-            const button = wrapper.findComponent({ name: 'MaxButton' });
-            await (button.props('action') as any)?.();
+            await wrapper.find('form').trigger('submit');
 
             expect(wrapper.emitted('send-code')).toBeTruthy();
             const sendPayload = wrapper.emitted('send-code')![0][0] as any;
@@ -283,8 +280,7 @@ describe('MaxAuthCard', () => {
                 phone: '62999999999'
             });
 
-            const button = wrapper.findComponent({ name: 'MaxButton' });
-            await (button.props('action') as any)?.();
+            await wrapper.find('form').trigger('submit');
 
             const sessionRaw = window.localStorage.getItem('max_auth_otp_session');
             expect(sessionRaw).toBeTruthy();
@@ -322,8 +318,7 @@ describe('MaxAuthCard', () => {
             });
 
             // Envia código
-            const button = wrapper.findComponent({ name: 'MaxButton' });
-            await (button.props('action') as any)?.();
+            await wrapper.find('form').trigger('submit');
             await wrapper.vm.$nextTick();
 
             // Código com apenas 3 dígitos
@@ -355,8 +350,7 @@ describe('MaxAuthCard', () => {
             });
 
             // Envia código
-            const button = wrapper.findComponent({ name: 'MaxButton' });
-            await (button.props('action') as any)?.();
+            await wrapper.find('form').trigger('submit');
             await wrapper.vm.$nextTick();
 
             // Código completo de 6 dígitos
@@ -381,7 +375,7 @@ describe('MaxAuthCard', () => {
             });
 
             const button = wrapper.findComponent({ name: 'MaxButton' });
-            await (button.props('action') as any)?.();
+            await wrapper.find('form').trigger('submit');
             await wrapper.vm.$nextTick();
 
             // Botão deve mostrar "Solicitar novamente (60s)", estar disabled e associado a role="status"
@@ -394,7 +388,7 @@ describe('MaxAuthCard', () => {
             expect(button.attributes('aria-describedby')).toBe('otp-cooldown-status');
 
             // Clica no botão durante o cooldown com código incompleto
-            await (button.props('action') as any)?.();
+            await wrapper.find('form').trigger('submit');
             // Não dispara novo send-code nem submit
             expect(wrapper.emitted('send-code')?.length).toBe(1);
             expect(wrapper.emitted('resend-code')).toBeFalsy();
@@ -428,7 +422,7 @@ describe('MaxAuthCard', () => {
             });
 
             const button = wrapper.findComponent({ name: 'MaxButton' });
-            await (button.props('action') as any)?.();
+            await wrapper.find('form').trigger('submit');
             await wrapper.vm.$nextTick();
 
             // Preenche o código com 6 dígitos
@@ -439,7 +433,7 @@ describe('MaxAuthCard', () => {
             expect(button.attributes('disabled')).toBeUndefined();
 
             // Ao clicar, efetua login emitindo submit
-            await (button.props('action') as any)?.();
+            await wrapper.find('form').trigger('submit');
 
             expect(wrapper.emitted('submit')).toBeTruthy();
             const submitPayload = wrapper.emitted('submit')![0][0] as any;
@@ -457,7 +451,7 @@ describe('MaxAuthCard', () => {
             });
 
             const button = wrapper.findComponent({ name: 'MaxButton' });
-            await (button.props('action') as any)?.();
+            await wrapper.find('form').trigger('submit');
             await wrapper.vm.$nextTick();
 
             // Avança 60 segundos
@@ -468,7 +462,7 @@ describe('MaxAuthCard', () => {
             expect(button.attributes('disabled')).toBeUndefined();
 
             // Ao clicar, reenvia código para o próximo endpoint (SMS)
-            await (button.props('action') as any)?.();
+            await wrapper.find('form').trigger('submit');
 
             expect(wrapper.emitted('resend-code')).toBeTruthy();
             const resendPayload = wrapper.emitted('resend-code')![0][0] as any;
@@ -489,8 +483,7 @@ describe('MaxAuthCard', () => {
             });
 
             // Envia código
-            const button = wrapper.findComponent({ name: 'MaxButton' });
-            await (button.props('action') as any)?.();
+            await wrapper.find('form').trigger('submit');
             await wrapper.vm.$nextTick();
 
             // Verifica que o cache foi gravado
@@ -502,7 +495,7 @@ describe('MaxAuthCard', () => {
             await wrapper.vm.$nextTick();
 
             // Clica em Entrar
-            await (button.props('action') as any)?.();
+            await wrapper.find('form').trigger('submit');
 
             expect(wrapper.emitted('submit')).toBeTruthy();
             const submitPayload = wrapper.emitted('submit')![0][0] as any;
@@ -527,8 +520,7 @@ describe('MaxAuthCard', () => {
                 cooldown: 60
             });
 
-            const button = wrapper.findComponent({ name: 'MaxButton' });
-            await (button.props('action') as any)?.();
+            await wrapper.find('form').trigger('submit');
             await wrapper.vm.$nextTick();
 
             expect(window.localStorage.getItem('max_auth_otp_session')).toBeTruthy();
@@ -593,20 +585,22 @@ describe('MaxAuthCard', () => {
             });
         });
 
-        it('garante ausência de submissão duplicada quando click no botão de submit e evento submit ocorrem no mesmo ciclo', async () => {
+        it('usa o botão como submit nativo, sem prop action paralela', async () => {
             const wrapper = mountAuthCard({
                 email: 'usuario@teste.com',
                 password: 'minhasenha123',
                 remember: true
             });
 
-            // Dispara click no botão e submit no form no mesmo ciclo de eventos
+            // Um botão submit não deve carregar um segundo callback de ação.
             const btn = wrapper.findComponent({ name: 'MaxButton' });
-            (btn.props('action') as any)?.();
+            expect(btn.props('action')).toBeUndefined();
+            // happy-dom não executa a ação padrão de um botão submit; disparamos
+            // o evento nativo que o navegador produz ao clicar nele.
             await wrapper.find('form').trigger('submit');
             await wrapper.vm.$nextTick();
 
-            // A proteção de coalescência garante EXATAMENTE 1 emissão
+            // O click percorre o único caminho: submit do formulário.
             expect(wrapper.emitted('submit')).toHaveLength(1);
         });
 

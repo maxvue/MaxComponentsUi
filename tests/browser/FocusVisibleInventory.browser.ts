@@ -3,6 +3,7 @@ import { cdp, userEvent } from 'vitest/browser';
 import { createApp, h, type App } from 'vue';
 import { createPinia } from 'pinia';
 import MaxButton from '../../src/components/MaxButton.vue';
+import MaxEmptyDiv from '../../src/components/MaxEmptyDiv.vue';
 import InputBase from '../../src/components/InputBase.vue';
 import MaxLikeButton from '../../src/components/MaxLikeButton.vue';
 import '../../src/themes/all.scss';
@@ -61,6 +62,16 @@ function contrast(foreground: string, background: string) {
     return (light + 0.05) / (dark + 0.05);
 }
 
+function focusableDomTargets() {
+    // Inventário produzido do DOM montado: não usa uma lista de componentes e
+    // não injeta CSS de teste. A mesma lista determina o alvo de cada Tab.
+    return [...host!.querySelectorAll<HTMLElement>([
+        'button:not([disabled])', 'input:not([disabled])', 'select:not([disabled])',
+        'textarea:not([disabled])', 'a[href]', '[role][tabindex]:not([tabindex="-1"])',
+        '[tabindex]:not([tabindex="-1"])'
+    ].join(','))];
+}
+
 async function mountFixture() {
     host = document.createElement('div');
     host.style.cssText = 'padding: 12px; display: flex; gap: 20px; overflow: visible; background: var(--background-0, white);';
@@ -69,6 +80,7 @@ async function mountFixture() {
         render: () => h('div', { style: 'padding: 4px; overflow: visible;' }, [
             h(MaxButton, { label: 'Salvar', 'data-testid': 'button' }),
             h(MaxLikeButton, { label: 'Curtir', 'data-testid': 'like' }),
+            h(MaxEmptyDiv, { label: 'Nenhum resultado', 'data-testid': 'empty' }),
             // Cada família que o inventário de arquitetura encontra é materializada
             // aqui: controle de ação, campo delegado ao InputBase, link e ARIA/tabindex.
             h(InputBase, { label: 'Campo', 'data-testid': 'input-base' }, {
@@ -83,14 +95,7 @@ async function mountFixture() {
                 class: 'r16-focus-family',
                 'data-testid': `role-${role}`
             }, `Role ${role}`)),
-            h('div', { tabindex: 0, class: 'r16-focus-family', 'data-testid': 'tabindex' }, 'Tabindex'),
-            h('style', `.r16-focus-family:focus-visible {
-                outline: var(--max-focus-outline);
-                outline-offset: 2px;
-                box-shadow: var(--max-focus-ring);
-            }
-            .r16-token-probe { color: var(--max-focus-ring-color); background-color: var(--max-focus-ring-offset-color); }`),
-            h('span', { class: 'r16-token-probe', 'data-testid': 'token-probe' }, 'token')
+            h('div', { tabindex: 0, class: 'r16-focus-family', 'data-testid': 'tabindex' }, 'Tabindex')
         ])
     });
     app.directive('tooltip', {});
@@ -113,20 +118,12 @@ describe('R16/F23 — foco computado em Chromium', () => {
         if (dark) document.documentElement.classList.add('dark');
         await mountFixture();
 
-        const expectedTargets = [
-            '.max-button',
-            '.max-like-button',
-            '[data-testid="input"]',
-            '[data-testid="textarea"]',
-            '[data-testid="link"]',
-            '[data-testid="role-button"]',
-            ...ariaFocusFamilies.map((role) => `[data-testid="role-${role}"]`),
-            '[data-testid="tabindex"]'
-        ];
-        for (const selector of expectedTargets) {
+        const expectedTargets = focusableDomTargets();
+        expect(expectedTargets.length).toBeGreaterThan(15);
+        for (const expectedTarget of expectedTargets) {
             await userEvent.keyboard('{Tab}');
             const target = document.activeElement as HTMLElement;
-            expect(target).toBe(host!.querySelector(selector));
+            expect(target).toBe(expectedTarget);
             expectVisibleFocus(target);
         }
     });
@@ -138,14 +135,14 @@ describe('R16/F23 — foco computado em Chromium', () => {
         expectVisibleFocus(document.activeElement as HTMLElement);
     });
 
-    it.each([false, true])('resolve cores dos tokens semânticos no CSSOM no tema %s', async (dark) => {
+    it.each([false, true])('resolve contraste >= 4.5:1 no empty state real no tema %s', async (dark) => {
         if (dark) document.documentElement.classList.add('dark');
         await mountFixture();
-        const style = getComputedStyle(host!.querySelector('[data-testid="token-probe"]')!);
-        // Aceite por valores efetivamente resolvidos pelo Chromium, não por texto do SCSS.
+        const empty = host!.querySelector<HTMLElement>('[data-testid="empty"]')!;
+        const style = getComputedStyle(empty);
         expect(channel(style.color)).toHaveLength(3);
         expect(channel(style.backgroundColor)).toHaveLength(3);
-        expect(contrast(style.color, style.backgroundColor)).toBeGreaterThanOrEqual(3);
+        expect(contrast(style.color, style.backgroundColor)).toBeGreaterThanOrEqual(4.5);
     });
 
     it('aplica o indicador computado em forced-colors', async () => {

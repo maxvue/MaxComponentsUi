@@ -215,8 +215,10 @@
         }
 
         &.max-button-danger {
-            background: var(--max-danger-surface, var(--max-danger-600, #dc2626));
-            border-color: var(--max-danger-surface, var(--max-danger-600, #dc2626));
+            // Mantém a superfície semântica quando disponível, mas preserva a
+            // cadeia de compatibilidade para temas que expõem apenas a rampa.
+            background: var(--max-danger-surface, var(--max-danger-500, var(--danger-500)));
+            border-color: var(--max-danger-surface, var(--max-danger-500, var(--danger-500)));
             color: var(--max-danger-content, #fff);
 
             &:hover {
@@ -279,7 +281,7 @@
         &.max-button-outlined {
             background: transparent;
             border-color: currentcolor;
-            color: var(--max-primary-500);
+            color: var(--max-button-primary-action-content);
 
             &:hover {
                 background: color-mix(in srgb, currentcolor 10%, transparent);
@@ -289,7 +291,7 @@
         &.max-button-text {
             background: transparent;
             border-color: transparent;
-            color: var(--max-primary-500);
+            color: var(--max-button-primary-action-content);
 
             &:hover {
                 background: color-mix(in srgb, currentcolor 10%, transparent);
@@ -299,7 +301,7 @@
         &.max-button-link {
             background: transparent;
             border-color: transparent;
-            color: var(--max-primary-500);
+            color: var(--max-button-primary-action-content);
             text-decoration: underline;
             padding: 0;
         }
@@ -318,7 +320,7 @@
             background: transparent !important;
             border-style: dashed !important;
             border-width: 1px;
-            color: var(--max-primary-500) !important;
+            color: var(--max-button-primary-action-content) !important;
 
             &:hover,
             &:active {
@@ -331,31 +333,35 @@
             }
 
             &.max-button-secondary {
-                color: var(--background-700) !important;
+                color: var(--max-button-secondary-action-content) !important;
             }
 
             &.max-button-success {
-                color: var(--max-success-500, var(--success-500)) !important;
+                color: var(--max-button-success-action-content) !important;
             }
 
             &.max-button-info {
-                color: var(--max-info-500, var(--info-500)) !important;
+                color: var(--max-button-info-action-content) !important;
             }
 
             &.max-button-warning {
-                color: var(--max-warning-500, var(--warn-500)) !important;
+                color: var(--max-button-warning-action-content) !important;
             }
 
             &.max-button-help {
-                color: var(--violet-500) !important;
+                color: var(--max-button-help-action-content) !important;
             }
 
             &.max-button-danger {
-                color: var(--max-danger-500, var(--danger-500)) !important;
+                color: var(--max-button-danger-action-content) !important;
+            }
+
+            &.max-button-whatsapp {
+                color: var(--max-button-whatsapp-action-content) !important;
             }
 
             &.max-button-contrast {
-                color: var(--background-775) !important;
+                color: var(--max-button-contrast-action-content) !important;
             }
 
             :deep(.content-button-icon) {
@@ -374,6 +380,15 @@
         &.max-button-outlined,
         &.max-button-text,
         &.max-button-link {
+            &.max-button-secondary { color: var(--max-button-secondary-action-content); }
+            &.max-button-success { color: var(--max-button-success-action-content); }
+            &.max-button-info { color: var(--max-button-info-action-content); }
+            &.max-button-warning { color: var(--max-button-warning-action-content); }
+            &.max-button-danger { color: var(--max-button-danger-action-content); }
+            &.max-button-whatsapp { color: var(--max-button-whatsapp-action-content); }
+            &.max-button-help { color: var(--max-button-help-action-content); }
+            &.max-button-contrast { color: var(--max-button-contrast-action-content); }
+
             :deep(.content-button-icon) {
                 .max-icon-div,
                 .max-icon {

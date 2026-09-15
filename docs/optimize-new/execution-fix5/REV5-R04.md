@@ -1,0 +1,199 @@
+# REV5-R04 — Refutação independente de E03-02
+
+## Revalidação final com Autofill CDP — 2026-09-15
+
+- Papel: `REV5-R04` (somente leitura no código de produção).
+- Agente: `/root/rev5_r04_chrome151`.
+- Início: `2026-09-15T18:14:00-03:00`.
+- Fim: `2026-09-15T18:15:00-03:00`.
+- HEAD auditado: `d12d4571799e97ca286f86fa716ce29b80709aaf`, com a implementação R04
+  local pendente de commit.
+- Referência adversarial: `aac16bca`.
+
+### Caso adversarial e evidência independente
+
+O runtime Playwright padrão continua inadequado: ele não expõe o domínio CDP
+`Autofill`. A revalidação usa explicitamente o Chrome Selenium 151 em
+`/home/johnattas/.cache/selenium/chrome/linux64/151.0.7922.76/chrome`, cuja
+versão é afirmada pelo próprio teste como `Chrome/151.*`.
+
+```text
+$ MAX_UI_AUTOFILL_EXECUTABLE=/home/johnattas/.cache/selenium/chrome/linux64/151.0.7922.76/chrome \\
+    npx vitest run tests/integration/r04ChromiumAutofill.test.ts --reporter=verbose
+Test Files  1 passed (1)
+Tests  1 passed (1)
+```
+
+O teste não escreve `.value` nem despacha `input` para fabricar autofill. Ele
+executa `Autofill.enable`, `Autofill.setAddresses` e `Autofill.trigger` pelo
+DevTools Protocol, aguarda `Autofill.addressFormFilled` e confirma que o
+evento contém `email=ada@example.test` (`Email address`). Em seguida lê o
+valor do owner nativo e `new FormData(form).get('email')`; ambos são
+`ada@example.test`.
+
+Também foram reproduzidos os casos de anatomia e formulário:
+
+```text
+$ npx vitest run --config vitest.browser.config.ts tests/browser/InputBaseForms.browser.ts --reporter=verbose
+Test Files  1 passed (1)
+Tests  2 passed (2)
+
+$ npm exec vitest run tests/components/inputBaseAttributesSeparation.test.ts -- --reporter=verbose
+Test Files  1 passed (1)
+Tests  99 passed (99)
+```
+
+A matriz Chromium monta as 25 famílias e verifica owner, `label[for]`,
+`required` vazio, exclusão nativa de `disabled` em `FormData` e serialização
+positiva. Os cinco controles compostos usam somente um owner nativo
+`.max-native-form-proxy`; o gatilho visual recebe `triggerAttrs`, dos quais os
+atributos de formulário foram removidos. A política explícita para controles
+sem semântica de perfil é `autocomplete="off"`; portanto não se declara que
+Select, TagSelect, IconPicker, OTP ou Switch aceitam perfil de e-mail.
+
+**Veredito: ACEITO.** O caso antes bloqueador — autofill real — é agora
+reproduzido pelo subsistema do Chrome, e a matriz independente preserva o
+contrato nativo das 25 famílias sem foco manual do wrapper.
+
+## Revalidação nativa — 2026-09-15 (HEAD f02b0b28)
+
+- Papel: `REV5-R04` (somente leitura no código de produção).
+- Agente: `/root/rev5_r04_native`.
+- Início: `2026-09-15T16:24:00-03:00`.
+- Fim: `2026-09-15T16:25:00-03:00`.
+- HEAD auditado: `f02b0b286e01523537a607c80623aef713ea9e9f`.
+- Referência adversarial: `aac16bca`.
+
+### Evidência reproduzida
+
+```text
+$ npx vitest run --config vitest.browser.config.ts tests/browser/InputBaseForms.browser.ts
+Test Files  1 passed (1)
+Tests  2 passed (2)
+```
+
+A implementação e a matriz melhoraram materialmente desde a revalidação anterior:
+
+- para 24 famílias validáveis (a exceção HTML é `MaxColorPicker`), a montagem
+  vazia com `required` prova `form.checkValidity() === false` e
+  `owner.validity.valid === false`;
+- para as 25 famílias, a montagem `disabled` prova a ausência da chave em
+  `new FormData(form)`;
+- `label.htmlFor` aponta para o owner nativo (proxy em Select, TagSelect,
+  IconPicker, OTP e Switch), e `userEvent.click(label)` prova o foco nativo
+  desse owner, sem foco manual do wrapper.
+
+Isso é evidência suficiente para required vazio, disabled excluído e a
+associação label/owner-proxy que a revalidação anterior havia recusado.
+
+Porém, **`userEvent.fill` não é prova de autofill**. Ele gera a sequência de
+interação de digitação simulada pelo usuário; não aciona o gerenciador de
+autofill do Chromium, não seleciona um perfil salvo e não prova a política
+`autocomplete` do navegador. O segundo caso do arquivo continua usando
+`input.value = ...` seguido de `Event('input')`, que é útil para testar a
+sincronização de uma alteração programática, mas também não é autofill real.
+Assim, a afirmação de que as 18 famílias textuais “fazem autofill” deve ser
+rejeitada. Os cinco proxies compostos declaram `autocomplete=off`, uma
+política plausível, mas ela não é validada contra autofill real.
+
+Há ainda cobertura positiva incompleta de submissão: as 18 famílias
+`nativeText` e os cinco proxies verificam a presença em `FormData` depois de
+receber valor, mas `MaxColorPicker` e `MaxInputToggle` não a verificam. Para o
+Toggle inicial desmarcado, tampouco há passo que o marque e prove
+`checkValidity()`/`FormData` positivo. Portanto a matriz não prova o contrato
+de submit/owner completo das 25 famílias.
+
+**Veredito: REJEITADO.** R04 permanece aberto até que: (1) seja definido e
+testado um fluxo de autofill real do Chromium, ou o requisito seja
+explicitamente reescrito como alteração programática/entrada de usuário; e
+(2) ColorPicker e Toggle tenham prova positiva de `FormData`, com Toggle
+marcado e válido. Não é necessário reabrir a correção de required, disabled ou
+label/proxy, que estão aceitos nesta revalidação.
+
+## Revalidação nativa — 2026-09-15
+
+- Papel: `REV5-R04` (somente leitura no código de produção).
+- Agente: `/root/rev5_r04_retry`.
+- Início: `2026-09-15T16:19:00-03:00`.
+- Fim: `2026-09-15T16:21:00-03:00`.
+- HEAD auditado: `bac90d8c85e146fc206405014bba88ce08c6ef1e`.
+- Referência adversarial: `aac16bca`.
+
+O retry introduziu proxies nativos em `MaxInputSelect`, `MaxTagSelect`, `MaxInputIconPicker`, `MaxInputOTP` e `MaxInputSwitch`. A matriz Chromium agora percorre nominalmente as 25 famílias e os comandos focais passam:
+
+```text
+$ npm exec vitest run tests/components/inputBaseAttributesSeparation.test.ts
+Test Files  1 passed (1)
+Tests  99 passed (99)
+
+$ npx vitest run --config vitest.browser.config.ts tests/browser/InputBaseForms.browser.ts
+Test Files  1 passed (1)
+Tests  2 passed (2)
+```
+
+Ainda assim, a prova não satisfaz o contrato integral. Em `InputBaseForms.browser.ts`, para a montagem `disabled`, a matriz só verifica que o owner tem `disabled`; ela não cria `FormData(form)` nem prova a exclusão do campo desabilitado. Para `required`, ela primeiro escreve um valor no owner e só então verifica `form.checkValidity()`, sem provar a invalidez nativa do owner vazio. Portanto, uma mutação que remova a exclusão de `FormData` ou a constraint `required` continuaria sem detecção por este cenário.
+
+Também não há autofill real de navegador: a matriz define `input.value` e dispara manualmente `Event('input')`. Isso é uma escrita programática, não o fluxo de autofill do Chromium. Nos compostos, o proxy oculto recebe o `label[for]`, mas a matriz não prova a interação de rótulo com o trigger visível nem uma política de autofill para cada proxy. O atributo `autocomplete="email"` é aplicado indistintamente, inclusive a owners que não representam e-mail.
+
+**Veredito da revalidação: REJEITADO.** Há avanço estrutural e participação em formulário para os proxies, mas faltam as provas Chromium negativas por família de `required` vazio, exclusão de `disabled` em `FormData`, e um caso de autofill real/documentado que não seja somente `.value` + evento sintético. O aceite de R04 permanece aberto.
+
+## Identidade
+
+- Papel: `REV5-R04` (somente leitura).
+- Agente: `/root/rev5_r04`.
+- Início: `2026-09-15T15:49:00-03:00`.
+- Fim: `2026-09-15T15:52:00-03:00`.
+- HEAD auditado: `ba999e0b`.
+- Referência adversarial: `aac16bca`.
+
+## Escopo e caso adversarial
+
+O contrato de E03-02 exige que **as 25 famílias** executem `submit`, autofill,
+`required`, `disabled`, `label` e owner de forma nativa, incluindo browser e
+autofill real, sem chamar foco manual no wrapper.
+
+O caso adversarial é montar cada família em um `<form>` no Chromium e, para
+cada controle que participa de formulário, verificar `checkValidity()`,
+`FormData`, exclusão de controles disabled, associação nativa `label.htmlFor`
+para o owner e alteração de valor sem foco manual. Para famílias compostas, o
+teste deve demonstrar o owner de formulário documentado ou declarar e testar a
+semântica alternativa. Esse caso falharia em `aac16bca`: `InputBase.vue`
+mantinha `@click.stop="onLabelClick"` e `inputAttrs` só emitia
+`aria-required`, sem o atributo HTML `required`.
+
+## Evidência executada no HEAD
+
+```text
+$ npm exec vitest run tests/components/inputBaseAttributesSeparation.test.ts
+Test Files  1 passed (1)
+Tests  99 passed (99)
+
+$ npx vitest run --config vitest.browser.config.ts tests/browser/InputBaseForms.browser.ts
+Test Files  1 passed (1)
+Tests  1 passed (1)
+```
+
+O primeiro arquivo contém uma matriz de 25 componentes, mas não executa a
+semântica nativa requerida para todos eles:
+
+- `submit`/`FormData` é exercitado somente para `MaxInputText`;
+- o único cenário Chromium monta somente `MaxInputText`;
+- o trecho de autofill também só é Chromium para `MaxInputText` e é uma escrita
+  programática seguida de `input`, não uma matriz de autofill real das famílias;
+- a matriz aceita `aria-required` e `aria-disabled` como substitutos de
+  `required`/`disabled` HTML (`required || aria-required` e
+  `disabled || aria-disabled`). Isso não demonstra restrição/exclusão nativa;
+- vários owners listados são `div` com `role` (`MaxInputSelect`,
+  `MaxInputIconPicker`, `MaxInputSwitch`) e nenhum teste prova a política de
+  submissão/owner nativo desses casos.
+
+Consequentemente, o teste existente pode passar mesmo que 24 das 25 famílias
+nunca sejam submetidas, autofilladas ou validadas pelo navegador.
+
+## Veredito
+
+**REJEITADO.** A correção removeu os handlers manuais e melhora `InputBase`,
+mas não há evidência do contrato integral das 25 famílias em browser/formulário
+nativo. O implementador deve adicionar uma matriz Chromium por família, com
+assertivas de `FormData`/`checkValidity`/disabled/label/owner e um cenário de
+autofill sem foco manual, antes de nova refutação.

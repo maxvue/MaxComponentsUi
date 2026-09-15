@@ -11,7 +11,7 @@ describe('MaxTopToolbarSubmenu', () => {
                 props: ['icon']
             },
             MaxIconButton: {
-                template: '<button class="max-icon-button-stub" :data-icon="icon" />',
+                template: '<button class="max-icon-button-stub" :data-icon="icon" v-bind="$attrs" />',
                 props: ['icon', 'size', 'transparent', 'route', 'action', 'data']
             }
         },
@@ -120,5 +120,6 @@ describe('MaxTopToolbarSubmenu', () => {
         });
 
         expect(wrapper.find('.max-icon-button-stub').exists()).toBe(true);
+        expect(wrapper.find('.max-icon-button-stub').attributes('aria-label')).toBe('Item 1 do submenu');
     });
 });

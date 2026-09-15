@@ -31,17 +31,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxMaps />
+                            <MaxMaps :model-value="mapCoordinates" />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxMaps />
+                            <MaxMaps :model-value="mapCoordinates" />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxMaps />
+                            <MaxMaps :model-value="mapCoordinates" />
                         </div>
                     </div>
                 </div>
@@ -177,16 +177,20 @@
 </template>
 
 <script setup lang="ts">
+    import {
+        MaxAuthCard,
+        MaxCreditCard,
+        MaxLogo,
+        MaxMaps,
+        MaxTitle1,
+        MaxTitle2,
+        MaxUserAvatar,
+        MaxUserSection
+    } from '@maxvue/max-components-ui';
+
     // Props neutras permitem exercitar os estados sem omitir contratos obrigatórios.
     const scenarioProps: any = { modelValue: '', options: [], items: [], route: '/', target: document.body };
-    import { MaxLogo } from '@maxvue/max-components-ui';
-    import { MaxMaps } from '@maxvue/max-components-ui';
-    import { MaxUserAvatar } from '@maxvue/max-components-ui';
-    import { MaxUserSection } from '@maxvue/max-components-ui';
-    import { MaxAuthCard } from '@maxvue/max-components-ui';
-    import { MaxCreditCard } from '@maxvue/max-components-ui';
-    import { MaxTitle1 } from '@maxvue/max-components-ui';
-    import { MaxTitle2 } from '@maxvue/max-components-ui';
+    const mapCoordinates = { latitude: 0, longitude: 0 };
 </script>
 
 <style lang="scss" scoped>

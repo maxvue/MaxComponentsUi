@@ -83,19 +83,28 @@ function defaultCompute(
     ctx: OverlayPositionContext,
     options: { offset: number; align: 'left' | 'right'; matchTargetWidth: boolean }
 ): OverlayPositionResult {
-    const { targetRect: t, overlayRect: p, viewportWidth: vw, viewportHeight: vh, safeArea } = ctx;
-    const pHeight = p.height || 200;
-    const pWidth = p.width || t.width || 200;
+    const { targetRect: t, overlayRect: p, viewportWidth: vw, viewportHeight: vh, safeArea, visualViewport } = ctx;
+    const measuredHeight = p.height || 200;
+    const measuredWidth = p.width || t.width || 200;
 
     const safeTop = safeArea?.top ?? 0;
     const safeRight = safeArea?.right ?? 0;
     const safeBottom = safeArea?.bottom ?? 0;
     const safeLeft = safeArea?.left ?? 0;
 
-    const minTop = Math.max(8, safeTop + 8);
-    const maxBottom = Math.max(minTop, vh - safeBottom - 8);
-    const minLeft = Math.max(8, safeLeft + 8);
-    const maxRight = Math.max(minLeft, vw - safeRight - 8);
+    // getBoundingClientRect() e position: fixed usam o espaço de coordenadas do
+    // layout. Quando há pinch-zoom, a VisualViewport pode estar deslocada dentro
+    // dele; portanto os limites precisam começar nos offsets, não em zero.
+    const viewportLeft = visualViewport?.offsetLeft ?? 0;
+    const viewportTop = visualViewport?.offsetTop ?? 0;
+    const minTop = viewportTop + Math.max(8, safeTop + 8);
+    const maxBottom = Math.max(minTop, viewportTop + vh - safeBottom - 8);
+    const minLeft = viewportLeft + Math.max(8, safeLeft + 8);
+    const maxRight = Math.max(minLeft, viewportLeft + vw - safeRight - 8);
+    // Um painel maior que a área disponível terá scroll no consumidor. Posicionar
+    // usando sua área efetivamente visível evita que ele fique sem alvo de toque.
+    const pHeight = Math.min(measuredHeight, maxBottom - minTop);
+    const pWidth = Math.min(measuredWidth, maxRight - minLeft);
 
     const spaceBelow = maxBottom - t.bottom;
     const spaceAbove = t.top - minTop;

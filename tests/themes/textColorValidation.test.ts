@@ -119,12 +119,12 @@ describe('Matriz Semântica de 4 Níveis de Cor de Texto (background-650/700/750
         it('MaxChips deve usar Texto Normal (700) no token e Texto Fraco (650) no placeholder', () => {
             const style = CHIPS.split('<style')[1] ?? '';
             expect(style).toMatch(/\.max-chip-token\s*\{[^}]*color:\s*var\(--background-700\)/);
-            expect(style).toMatch(/placeholder\s*\{[^}]*color:\s*var\(--background-650\)/);
+            expect(style).toMatch(/placeholder\s*\{[^}]*color:\s*var\(--max-content-placeholder\)/);
         });
 
         it('MaxTableFields deve manter empty-cell em Texto Fraco (650)', () => {
             const style = TABLE_FIELDS.split('<style')[1] ?? '';
-            expect(style).toMatch(/\.max-table-fields-empty-cell\s*\{[^}]*color:\s*var\(--background-650\)/);
+            expect(style).toMatch(/\.max-table-fields-empty-cell\s*\{[^}]*color:\s*var\(--max-content-secondary\)/);
         });
 
         it('MaxInputFileUploadButton deve usar Texto Normal (700) nos labels principais', () => {
@@ -135,7 +135,7 @@ describe('Matriz Semântica de 4 Níveis de Cor de Texto (background-650/700/750
 
         it('MaxBaseInput deve usar Texto Fraco (650) no placeholder', () => {
             const style = BASE_INPUT.split('<style')[1] ?? '';
-            expect(style).toMatch(/placeholder\s*\{[^}]*color:\s*var\(--background-650\)/);
+            expect(style).toMatch(/placeholder\s*\{[^}]*color:\s*var\(--max-content-placeholder\)/);
         });
 
         it('MaxInputAutoComplete e MaxInputAutoCompleteApi devem usar Texto Normal (700) e Texto Fraco (650) para sublabels', () => {
@@ -144,17 +144,17 @@ describe('Matriz Semântica de 4 Níveis de Cor de Texto (background-650/700/750
 
             expect(acStyle).toMatch(/\.max-autocomplete-input\s*\{[^}]*color:\s*var\(--background-700\)/);
             expect(acStyle).toMatch(/\.autocomplete-item-select-label\s*\{[^}]*color:\s*var\(--background-700\)/);
-            expect(acStyle).toMatch(/\.autocomplete-item-select-sub-label\s*\{[^}]*color:\s*var\(--background-650\)/);
+            expect(acStyle).toMatch(/\.autocomplete-item-select-sub-label\s*\{[^}]*color:\s*var\(--max-content-secondary\)/);
 
             expect(apiStyle).toMatch(/\.max-autocomplete-input\s*\{[^}]*color:\s*var\(--background-700\)/);
             expect(apiStyle).toMatch(/\.autocomplete-item-select-label\s*\{[^}]*color:\s*var\(--background-700\)/);
-            expect(apiStyle).toMatch(/\.autocomplete-item-select-sub-label\s*\{[^}]*color:\s*var\(--background-650\)/);
+            expect(apiStyle).toMatch(/\.autocomplete-item-select-sub-label\s*\{[^}]*color:\s*var\(--max-content-secondary\)/);
         });
 
         it('MaxInputDatePicker deve usar 700 para input e dias, 775 para título e 650 para dias da semana', () => {
             const style = DATE_PICKER.split('<style')[1] ?? '';
             expect(style).toMatch(/\.max-datepicker-title\s*\{[^}]*color:\s*var\(--background-775\)/);
-            expect(style).toMatch(/\.max-datepicker-weekdays\s*\{[^}]*color:\s*var\(--background-650\)/);
+            expect(style).toMatch(/\.max-datepicker-weekdays\s*\{[^}]*color:\s*var\(--max-content-secondary\)/);
             expect(style).toMatch(/\.max-datepicker-day\s*\{[^}]*color:\s*var\(--background-700\)/);
         });
 
@@ -168,33 +168,33 @@ describe('Matriz Semântica de 4 Níveis de Cor de Texto (background-650/700/750
 
         it('MaxInputOTP deve usar Texto Fraco (650) para separador, placeholder e disabled, e Texto Levemente Destacado (750) para dígitos', () => {
             const style = OTP.split('<style')[1] ?? '';
-            expect(style).toMatch(/\.max-input-otp-separator\s*\{[^}]*color:\s*var\(--background-650\)/);
+            expect(style).toMatch(/\.max-input-otp-separator\s*\{[^}]*color:\s*var\(--max-content-secondary\)/);
             expect(style).toMatch(/\.max-input-otp-cell\s*\{[^}]*color:\s*var\(--background-750\)/);
-            expect(style).toMatch(/::placeholder\s*\{[^}]*color:\s*var\(--background-650\)/);
+            expect(style).toMatch(/::placeholder\s*\{[^}]*color:\s*var\(--max-content-placeholder\)/);
             expect(style).toMatch(/&:disabled\s*\{[^}]*color:\s*var\(--background-650\)/);
         });
 
         it('MaxListBox deve usar Texto Normal (700) no item regular e Texto Fraco (650) na sublabel', () => {
             const style = LISTBOX.split('<style')[1] ?? '';
             expect(style).toMatch(/\.max-listbox-item\s*\{[\s\S]*?color:\s*var\(--background-700\);/);
-            expect(style).toMatch(/\.max-listbox-item-sublabel\s*\{[^}]*color:\s*var\(--background-650\)/);
+            expect(style).toMatch(/\.max-listbox-item-sublabel\s*\{[^}]*color:\s*var\(--max-content-secondary\)/);
             expect(style).toMatch(/\.max-listbox-filter-input\s*\{[^}]*color:\s*var\(--background-700\)/);
         });
     });
 
     describe('7. Abas e Componentes Auxiliares', () => {
-        it('MaxTabItem deve usar Texto Normal (700) inativo, Texto Forte (775) ativo/hover e Texto Fraco (650) disabled', () => {
+        it('MaxTabItem deve usar Texto Normal (700) inativo e Texto Forte (775) em hover/ativo; disabled é uma exceção não informativa', () => {
             const style = TAB_ITEM.split('<style')[1] ?? '';
             expect(style).toMatch(/\.max-tab-item-title\s*\{[^}]*color:\s*var\(--background-700\)/);
             expect(style).toMatch(/&:hover\s*\{[^}]*color:\s*var\(--background-775\)/);
             expect(style).toMatch(/&\[active='true'\]\s*\{[^}]*color:\s*var\(--background-775\)/);
-            expect(style).toMatch(/&\[disabled\]\s*\{[^}]*color:\s*var\(--background-650\)/);
+            expect(style).toMatch(/&\[disabled\]\s*\{[^}]*opacity:\s*0\.4/);
         });
 
-        it('MaxEmptyDiv deve usar Texto Fraco (650) no container e no ícone', () => {
+        it('MaxEmptyDiv deve usar texto secundário acessível no container e no ícone', () => {
             const style = EMPTY_DIV.split('<style')[1] ?? '';
-            expect(style).toMatch(/\.max-empty-div\s*\{[^}]*color:\s*var\(--background-650\)/);
-            expect(style).toMatch(/\.icon-div\s*\{[^}]*color:\s*var\(--background-650\)/);
+            expect(style).toMatch(/\.max-empty-div\s*\{[^}]*color:\s*var\(--max-content-secondary\)/);
+            expect(style).toMatch(/\.icon-div\s*\{[^}]*color:\s*var\(--max-content-secondary\)/);
         });
 
         it('MaxSideMenuMobile deve usar Texto Normal (700) no item, 750 no título do grupo, layout-shell-text no nome e 650 na versão', () => {

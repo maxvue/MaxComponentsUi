@@ -81,9 +81,11 @@ export function getElementAccessibleText(el: HTMLElement): string {
 }
 
 /**
- * Valida rigorosamente múltiplos IDREFs passados em `aria-labelledby`.
- * Descarta referências inexistentes (órfãs), elementos ocultos (CSS computado ou ancestrais aria-hidden/inert)
- * e nós com texto vazio.
+ * Normaliza múltiplos IDREFs passados em `aria-labelledby` sem alterar a
+ * relação semântica explícita. Pelo algoritmo AccName, o conteúdo de um
+ * elemento referenciado continua contribuindo para o nome mesmo quando está
+ * oculto por CSS ou por um ancestral `aria-hidden`/`inert`; portanto somente
+ * referências inexistentes são removidas.
  *
  * @param ids Cadeia com um ou múltiplos IDs separados por whitespace
  * @param doc Documento no qual os IDs devem ser pesquisados (padrão: document global)
@@ -98,15 +100,7 @@ export function resolveAriaLabelledby(ids: string | undefined, doc?: Document): 
     const parts = ids.trim().split(/\s+/).filter(Boolean);
     if (parts.length === 0) return undefined;
 
-    const validIds = parts.filter((id) => {
-        const el = documentRef.getElementById(id);
-        if (!el) return false;
-
-        if (!isElementAccessible(el)) return false;
-
-        const text = getElementAccessibleText(el);
-        return text.length > 0;
-    });
+    const validIds = parts.filter((id) => documentRef.getElementById(id) !== null);
 
     return validIds.length > 0 ? validIds.join(' ') : undefined;
 }
@@ -194,9 +188,8 @@ export const getSlotText = (slotFn?: ((props?: any) => any) | null): string => {
 };
 
 /**
- * Validador de acessibilidade baseado nas regras do axe-core para elementos com papel `dialog` / `alertdialog`:
- * - `aria-dialog-name`: diálogo deve possuir nome acessível não vazio.
- * - `aria-valid-attr-value`: `aria-labelledby` deve referenciar exclusivamente IDs existentes e válidos.
+ * Validador estrutural local para elementos com papel `dialog` / `alertdialog`.
+ * Ele não substitui uma execução real de axe-core no navegador.
  */
 export function validateDialogA11y(dialogEl: Element): DialogA11yResult {
     const violations: DialogA11yViolation[] = [];
@@ -223,11 +216,6 @@ export function validateDialogA11y(dialogEl: Element): DialogA11yResult {
                     id: 'aria-valid-attr-value',
                     message: `Atributo aria-labelledby referencia ID inexistente ou órfão: "${id}".`
                 });
-                else if (!isElementAccessible(target)) violations.push({
-                    id: 'aria-valid-attr-value',
-                    message: `Elemento referenciado por ID "${id}" está oculto ou inerte.`
-                });
-
             }
         }
     }

@@ -499,6 +499,12 @@ describe('MaxCreditCard', () => {
         });
 
         it('renderiza bandeira JCB como SVG vetorial puro sem imagens raster embutidas', async () => {
+            // O fetch global do ambiente de teste devolve um SVG sentinela para
+            // endpoints genéricos. Injete o asset publicado real para validar
+            // o contrato visual do JCB sem transformar o teste em uma suposição
+            // sobre aquele mock de infraestrutura.
+            const jcbSvg = (await import('../../src/assets/credit-card/card-jcb.svg?raw')).default;
+            _setBrandLoaderForTest('jcb', () => Promise.resolve({ default: jcbSvg }));
             const wrapperJcb = mountCard({ cardType: 'jcb' });
             await flushAsync(() => wrapperJcb.findAll('.flip-card-front svg image').length === 2);
             const images = wrapperJcb.findAll('.flip-card-front svg image');
@@ -611,4 +617,3 @@ describe('MaxCreditCard', () => {
         });
     });
 });
-

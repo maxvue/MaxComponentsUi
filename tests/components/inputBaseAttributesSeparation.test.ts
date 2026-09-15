@@ -1,4 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import InputBase from '../../src/components/InputBase.vue';
@@ -37,6 +39,7 @@ interface FamilyConfig {
     rootSelector?: string;
     props?: Record<string, any>;
     supportsAutofill?: boolean;
+    nativeFormOwner?: boolean;
 }
 
 const inputFamilies: FamilyConfig[] = [
@@ -54,15 +57,15 @@ const inputFamilies: FamilyConfig[] = [
     { name: 'MaxInputCreditCardCvv', component: MaxInputCreditCardCvv, selector: 'input.max-base-input', supportsAutofill: true },
     { name: 'MaxInputCoordinateDecimalLat', component: MaxInputCoordinateDecimalLat, selector: 'input.max-input-native', supportsAutofill: true },
     { name: 'MaxInputCoordinateDecimalLng', component: MaxInputCoordinateDecimalLng, selector: 'input.max-input-native', supportsAutofill: true },
-    { name: 'MaxInputSelect', component: MaxInputSelect, selector: '.max-select', props: { options: [] } },
+    { name: 'MaxInputSelect', component: MaxInputSelect, selector: '.max-select', props: { options: [] }, nativeFormOwner: true },
     { name: 'MaxInputAutoComplete', component: MaxInputAutoComplete, selector: 'input.max-autocomplete-input', props: { options: [] }, supportsAutofill: true },
     { name: 'MaxInputAutoCompleteApi', component: MaxInputAutoCompleteApi, selector: 'input.max-autocomplete-input', props: { options: [], route: 'api.test' }, supportsAutofill: true },
     { name: 'MaxChips', component: MaxChips, selector: 'input.max-chips-input', props: { modelValue: [] } },
-    { name: 'MaxTagSelect', component: MaxTagSelect, selector: '.max-select', props: { modelValue: [], options: [] } },
+    { name: 'MaxTagSelect', component: MaxTagSelect, selector: '.max-select', props: { modelValue: [], options: [] }, nativeFormOwner: true },
     { name: 'MaxColorPicker', component: MaxColorPicker, selector: 'input.max-colorpicker-native', props: { modelValue: '#000000' } },
-    { name: 'MaxInputIconPicker', component: MaxInputIconPicker, selector: '.icon-picker-trigger' },
-    { name: 'MaxInputOTP', component: MaxInputOTP, selector: '.max-input-otp-container' },
-    { name: 'MaxInputSwitch', component: MaxInputSwitch, selector: '.max-switch-toggle', props: { modelValue: false } },
+    { name: 'MaxInputIconPicker', component: MaxInputIconPicker, selector: '.icon-picker-trigger', nativeFormOwner: true },
+    { name: 'MaxInputOTP', component: MaxInputOTP, selector: '.max-input-otp-container', nativeFormOwner: true },
+    { name: 'MaxInputSwitch', component: MaxInputSwitch, selector: '.max-switch-toggle', props: { modelValue: false }, nativeFormOwner: true },
     { name: 'MaxInputTextList', component: MaxInputTextList, selector: 'textarea.code-textarea' },
     { name: 'MaxInputToggle', component: MaxInputToggle, selector: 'input.max-toggleswitch-input', rootSelector: '.max-input-toggle', props: { modelValue: false } }
 ];
@@ -149,7 +152,7 @@ describe('Separação de atributos nativos de controle e wrapper (R04 / F05)', (
         });
 
         for (const family of inputFamilies) {
-            const { name, component, selector, rootSelector, props: customProps } = family;
+            const { name, component, selector, rootSelector, props: customProps, nativeFormOwner } = family;
             const expectedRootSelector = rootSelector || '.max-input-main-div';
 
             it(`${name}: separa atributos de controle para o nó operável e preserva classe/dados no wrapper`, () => {
@@ -180,7 +183,8 @@ describe('Separação de atributos nativos de controle e wrapper (R04 / F05)', (
                 // Chega ao elemento operável
                 const controlEl = wrapper.find(selector);
                 expect(controlEl.exists(), `${name} deve renderizar o nó operável ${selector}`).toBe(true);
-                expect(controlEl.attributes('name')).toBe(`field_${name.toLowerCase()}`);
+                const ownerEl = nativeFormOwner ? wrapper.find('.max-native-form-proxy') : controlEl;
+                expect(ownerEl.attributes('name')).toBe(`field_${name.toLowerCase()}`);
             });
 
             it(`${name}: propaga disabled e required para o elemento operável sem poluir a raiz`, () => {
@@ -208,9 +212,8 @@ describe('Separação de atributos nativos de controle e wrapper (R04 / F05)', (
                 expect(isRequired, `${name} deve marcar required/aria-required no nó operável`).toBe(true);
             });
 
-            it(`${name}: clique no rótulo (label click) transfere foco ao controle sem chamada manual de focus()`, async () => {
+            it(`${name}: associa o rótulo ao owner nativo sem handler manual de foco`, () => {
                 const wrapper = mount(component, {
-                    attachTo: document.body,
                     props: {
                         modelValue: '',
                         label: `Rótulo ${name}`,
@@ -224,17 +227,10 @@ describe('Separação de atributos nativos de controle e wrapper (R04 / F05)', (
                 const controlEl = wrapper.find(selector);
                 expect(controlEl.exists(), `${name} deve possuir o controle ${selector}`).toBe(true);
 
-                // Dispara clique no label sem chamar focus() manualmente
-                await labelEl.trigger('click');
-
-                // Verifica se o elemento ativo é o próprio nó operável ou um elemento interativo dentro dele
-                const activeEl = document.activeElement;
-                const isFocusedDirectly = activeEl === controlEl.element;
-                const isFocusedInside = controlEl.element.contains(activeEl);
-
-                expect(isFocusedDirectly || isFocusedInside, `${name} deve focar o controle operável após clique no rótulo`).toBe(true);
-
-                wrapper.unmount();
+                const ownerId = labelEl.attributes('for');
+                expect(ownerId, `${name} deve expor um ID no rótulo`).toBeTruthy();
+                const ownerEl = nativeFormOwner ? wrapper.find('.max-native-form-proxy') : controlEl;
+                expect(ownerEl.attributes('id'), `${name} deve atribuir o ID ao owner nativo`).toBe(ownerId);
             });
         }
     });
@@ -366,7 +362,7 @@ describe('Separação de atributos nativos de controle e wrapper (R04 / F05)', (
             expect(forAttr).toBeDefined();
             expect(idAttr).toBeDefined();
             expect(forAttr).toBe(idAttr);
-            expect(document.getElementById(forAttr!)).toBe(inputEl.element);
+            expect(wrapper.find(`#${forAttr!}`).exists()).toBe(true);
 
             wrapper.unmount();
         });
@@ -397,5 +393,13 @@ describe('Separação de atributos nativos de controle e wrapper (R04 / F05)', (
             wrapper.unmount();
             form.remove();
         });
+    });
+
+    it('não instala handlers de foco manual nos wrappers de InputBase e Toggle', () => {
+        const inputBaseSource = readFileSync(resolve(__dirname, '../../src/components/InputBase.vue'), 'utf8');
+        const toggleSource = readFileSync(resolve(__dirname, '../../src/components/MaxInputToggle.vue'), 'utf8');
+
+        expect(inputBaseSource).not.toContain('onLabelClick');
+        expect(toggleSource).not.toContain('onLabelClick');
     });
 });

@@ -660,7 +660,7 @@
                         place-items: center;
                         font-size: 0.9em;
                         min-width: 15px;
-                        color: var(--background-650);
+                        color: var(--max-content-secondary);
                     }
                 }
             }

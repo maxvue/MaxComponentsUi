@@ -83,10 +83,30 @@
     import { maxComponentsPtBR, type MaxPdfViewLabels } from '../locales/pt-br';
     import MaxButton from './MaxButton.vue';
 
+    /**
+     * O sufixo `?url` é uma transformação do Vite, não um módulo que o Node
+     * consiga avaliar. Mantê-lo em import estático fazia o simples import do
+     * entrypoint raiz falhar em SSR/consumidores Node, ainda que o PDF jamais
+     * fosse aberto. A resolução dinâmica só ocorre no cliente ao montar o PDF.
+     */
+    const loadPdfWorkerUrl = async (): Promise<string> => {
+        const { default: workerUrl } = await import('pdfjs-dist/build/pdf.worker.min.mjs?url');
+        return workerUrl;
+    };
+
     // Async: vue-pdf-embed pesa ~2,6 MB (814 KB gzip) — só carrega quando um PDF é exibido no cliente
     const VuePdfEmbed = defineAsyncComponent((): Promise<any> => {
         if (typeof window === 'undefined') return Promise.resolve({ render: () => null });
-        return import('vue-pdf-embed');
+        return Promise.all([
+            import('vue-pdf-embed/dist/index.essential.mjs'),
+            loadPdfWorkerUrl()
+        ]).then(([{ default: component, GlobalWorkerOptions }, pdfWorkerUrl]) => {
+            // A build essencial mantém o worker em um asset separado, em vez
+            // de embuti-lo no chunk do componente. O carregamento continua
+            // local e não depende de CDN ou de política CSP permissiva.
+            GlobalWorkerOptions.workerSrc ||= pdfWorkerUrl;
+            return component;
+        });
     });
 
     const { width: screen_width, height: screen_height } = useWindowSize();

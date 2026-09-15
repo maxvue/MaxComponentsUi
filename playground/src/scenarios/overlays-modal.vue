@@ -10,17 +10,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxModal />
+                            <MaxModal label="Abrir diálogo" title="Diálogo padrão" />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxModal disabled />
+                            <MaxModal label="Ação indisponível" disabled title="Diálogo indisponível" />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxModal error severity="danger" />
+                            <MaxModal label="Excluir" severity="danger" title="Confirmar exclusão" />
                         </div>
                     </div>
                 </div>

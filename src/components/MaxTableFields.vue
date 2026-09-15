@@ -104,7 +104,7 @@
                             <!-- Coluna de botões -->
                             <td v-if="hasActionsColumn" class="max-table-fields-td max-table-fields-buttons" :style="buttonsColumnStyle">
                                 <slot name="buttons" :data="row" :index="index">
-                                    <MaxIconButton v-for="btn in props.buttons" v-bind="btn" :key="btn.id" :data="btn.data ? resolveData(row, btn.data) : row" :size="btn.size ?? 1.2" class="table-icon-button" />
+                                    <MaxIconButton v-for="(btn, buttonIndex) in props.buttons" v-bind="btn" :key="btn.id" :data="btn.data ? resolveData(row, btn.data) : row" :size="btn.size ?? 1.2" :aria-label="getButtonAriaLabel(btn, row, index, buttonIndex)" class="table-icon-button" />
                                 </slot>
                             </td>
                         </tr>
@@ -237,6 +237,15 @@
         if (props.dataKey && row?.[props.dataKey] !== undefined) return row[props.dataKey];
 
         return row?.id ?? row?.uuid ?? row?.ulid ?? row?._recordKey ?? index;
+    }
+
+    /** Mantém os botões gerados pela tabela identificáveis, inclusive com dados incompletos. */
+    function getButtonAriaLabel(button: any, row: any, rowIndex: number, buttonIndex: number): string {
+        const name = button?.ariaLabel || button?.['aria-label'] || button?.label || button?.title || (typeof button?.tooltip === 'string' ? button.tooltip : undefined);
+        if (typeof name === 'string' && name.trim()) return name.trim();
+
+        const rowName = row?.name ?? row?.label ?? row?.title ?? row?.id ?? rowIndex + 1;
+        return `Ação ${buttonIndex + 1} da linha ${rowName}`;
     }
 
     /** Acessa o valor de um campo, suportando notação com ponto (ex: 'user.name') */
@@ -462,7 +471,7 @@
                                 gap: 12px;
                                 padding: 32px 16px;
                                 width: 100%;
-                                color: var(--background-650);
+                                color: var(--max-content-secondary);
 
                                 .max-table-loading-text,
                                 .max-table-empty-text {
@@ -513,7 +522,8 @@
 
 @media (prefers-reduced-motion: reduce) {
     .max-table-fields-wrapper .max-table-spinner {
-        animation-duration: 4s;
+        animation-duration: 0.01ms;
+        animation-iteration-count: 1;
     }
 }
 </style>

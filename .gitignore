@@ -63,6 +63,7 @@ playground/.valet-phoenix.json
 # Relatório de cobertura (gerado por npm run test:coverage)
 coverage/
 .vitest-attachments/
+tests/benchmarks/benchmark-results.json
 tests/browser/__screenshots__/
 .agents/
 .worktrees/

@@ -9,6 +9,7 @@
                 v-maska="maskValue"
                 @blur="checkDone()"
                 placeholder="00,000000"
+                pattern="-?\d{1,2}\.\d{1,6}"
                 :disabled="props.disabled"
             />
         </template>
@@ -48,7 +49,10 @@
         'complete': [value: number | string];
     }>();
 
-    const temp_value: Ref = ref(toNumber(props.modelValue) !== 0 ? toNumber(props.modelValue) : '');
+    // Um valor ausente não pode virar a string "NaN": isso satisfaria
+    // indevidamente o `required` nativo do formulário.
+    const initialValue = toNumber(props.modelValue);
+    const temp_value: Ref = ref(isBlank(props.modelValue) || !Number.isFinite(initialValue) || initialValue === 0 ? '' : initialValue);
 
     const only_numbers = computed(() => toNumber(temp_value.value));
 

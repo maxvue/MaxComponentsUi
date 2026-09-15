@@ -8,10 +8,7 @@ vi.mock('axios', () => ({
     default: { post: vi.fn().mockResolvedValue({}) }
 }));
 
-let onChangeCallback: ((files: any) => void) | undefined;
 let onDropCallback: ((files: any) => void) | undefined;
-const openMock = vi.fn();
-const resetMock = vi.fn();
 
 let ulidCounter = 0;
 
@@ -21,13 +18,7 @@ vi.mock('@maxvue/max-use', () => ({
         onDropCallback = opts?.onDrop;
         return { isOverDropZone: { value: false } };
     },
-    useFileDialog: () => ({
-        open: openMock,
-        reset: resetMock,
-        onChange: vi.fn((cb) => { onChangeCallback = cb; })
-    }),
     ulid: vi.fn(() => (ulidCounter === 0 ? (++ulidCounter, '12345') : `id_${++ulidCounter}`)),
-    size: vi.fn((arr) => arr?.length || 0),
     isBlank: vi.fn((val) => !val)
 }));
 
@@ -35,7 +26,6 @@ describe('MaxInputFileProject', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         ulidCounter = 0;
-        onChangeCallback = undefined;
         onDropCallback = undefined;
         // @ts-ignore
         axios.post.mockReset();
@@ -51,9 +41,11 @@ describe('MaxInputFileProject', () => {
         expect(wrapper.exists()).toBe(true);
         expect(wrapper.find('.instruction').text()).toContain('Insira fotos dos documentos');
 
-        // cover click on open files button
-        await wrapper.findComponent({ name: 'MaxIconButton' }).vm.$emit('click', { stopPropagation: vi.fn() });
-        expect(openMock).toHaveBeenCalled();
+        const nativeInput = wrapper.find('input[type="file"]');
+        const clickSpy = vi.spyOn(nativeInput.element as HTMLInputElement, 'click');
+        wrapper.vm.triggerChoose();
+        expect(clickSpy).toHaveBeenCalledTimes(1);
+        clickSpy.mockRestore();
     });
 
     it('deve atualizar a lista de arquivos quando a propriedade files mudar', async () => {
@@ -95,19 +87,18 @@ describe('MaxInputFileProject', () => {
         expect(actionMock).toHaveBeenCalled();
     });
 
-    it('atualiza temp_files e chama reset() ao selecionar arquivos via useFileDialog onChange', async () => {
+    it('atualiza temp_files ao selecionar arquivos pelo input nativo', async () => {
         const wrapper = mount(MaxInputFileProject, {
             props: { files: [], auto: false },
             global: { stubs: ['MaxIconButton', 'MaxIcon', 'MaxLoaderIcon', 'MaxButton'] }
         });
 
-        expect(onChangeCallback).toBeDefined();
-
-        const mockFile = { name: 'documento_novo.png', type: 'image/png' };
-        onChangeCallback!([mockFile]);
+        const mockFile = new File(['conteúdo'], 'documento_novo.png', { type: 'image/png' });
+        const input = wrapper.find('input[type="file"]');
+        Object.defineProperty(input.element, 'files', { configurable: true, value: [mockFile] });
+        await input.trigger('change');
         await wrapper.vm.$nextTick();
 
-        expect(resetMock).toHaveBeenCalledTimes(1);
         expect(wrapper.vm.temp_files).toHaveLength(1);
         expect(wrapper.vm.temp_files[0]).toMatchObject({
             id: '12345',
@@ -119,19 +110,17 @@ describe('MaxInputFileProject', () => {
         });
     });
 
-    it('não altera temp_files nem chama reset() quando onChange recebe lista vazia ou nula', async () => {
+    it('não altera temp_files quando o input nativo não possui arquivos', async () => {
         const wrapper = mount(MaxInputFileProject, {
             props: { files: [], auto: false },
             global: { stubs: ['MaxIconButton', 'MaxIcon', 'MaxLoaderIcon', 'MaxButton'] }
         });
 
-        expect(onChangeCallback).toBeDefined();
-
-        onChangeCallback!([]);
-        onChangeCallback!(null as any);
+        const input = wrapper.find('input[type="file"]');
+        Object.defineProperty(input.element, 'files', { configurable: true, value: [] });
+        await input.trigger('change');
         await wrapper.vm.$nextTick();
 
-        expect(resetMock).not.toHaveBeenCalled();
         expect(wrapper.vm.temp_files).toHaveLength(0);
     });
 

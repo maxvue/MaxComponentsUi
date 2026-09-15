@@ -39,8 +39,6 @@ vi.mock('tiptap-markdown', () => ({
 }));
 
 vi.mock('@tiptap/starter-kit', () => ({ default: { configure: vi.fn(() => ({})) } }));
-vi.mock('@tiptap/extension-underline', () => ({ default: {} }));
-vi.mock('@tiptap/extension-link', () => ({ default: { configure: vi.fn(() => ({})) } }));
 vi.mock('@tiptap/extension-image', () => ({ default: {} }));
 vi.mock('@tiptap/extension-table', () => {
     const Table = { configure: vi.fn(() => ({})) };

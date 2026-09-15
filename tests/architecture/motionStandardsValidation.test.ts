@@ -148,7 +148,7 @@ describe('E10-09: Política Sistêmica de Movimento Reduzido (prefers-reduced-mo
     });
 
     describe('Feedback e Animações Auxiliares', () => {
-        it('MaxLoaderIcon e componentes de tabela desaceleram rotação em prefers-reduced-motion', () => {
+        it('MaxLoaderIcon desacelera e componentes de tabela neutralizam rotação em prefers-reduced-motion', () => {
             const loaderPath = path.resolve(SRC_DIR, 'components/MaxLoaderIcon.vue');
             const loaderContent = fs.readFileSync(loaderPath, 'utf-8');
             expect(loaderContent).toContain('@media (prefers-reduced-motion: reduce)');
@@ -157,7 +157,8 @@ describe('E10-09: Política Sistêmica de Movimento Reduzido (prefers-reduced-mo
             const tablePath = path.resolve(SRC_DIR, 'components/MaxTable.vue');
             const tableContent = fs.readFileSync(tablePath, 'utf-8');
             expect(tableContent).toContain('@media (prefers-reduced-motion: reduce)');
-            expect(tableContent).toContain('animation-duration: 4s');
+            expect(tableContent).toContain('animation-duration: 0.01ms');
+            expect(tableContent).toContain('animation-iteration-count: 1');
         });
 
         it('MaxLikeButton e MaxInputIconPicker removem pop e slide sob prefers-reduced-motion', () => {

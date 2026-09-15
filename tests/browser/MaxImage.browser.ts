@@ -9,6 +9,11 @@ import '../../src/themes/params.scss';
 let activeApp: App | null = null;
 let hostElement: HTMLElement | null = null;
 const objectUrlsToClean: string[] = [];
+const CROP_PERFORMANCE_BUDGET = {
+    durationMs: 1500,
+    longTaskMs: 1500,
+    heapDeltaBytes: 96 * 1024 * 1024
+} as const;
 
 function nextFrame(): Promise<void> {
     return new Promise((resolve) => requestAnimationFrame(() => resolve()));
@@ -18,17 +23,32 @@ async function waitTicks(count = 5): Promise<void> {
     for (let i = 0; i < count; i++) await nextFrame();
 }
 
-/**
- * Cria uma imagem SVG real em alta resolução (48 MP = 8000x6000).
- * O browser decodifica nativamente naturalWidth=8000 e naturalHeight=6000.
- */
-function create48MpImageBlobUrl(): string {
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="8000" height="6000" viewBox="0 0 8000 6000">
-        <rect width="8000" height="6000" fill="#00768E"/>
-        <circle cx="4000" cy="3000" r="1500" fill="#ffffff"/>
-        <rect x="2000" y="1500" width="4000" height="3000" fill="#F59E0B" opacity="0.8"/>
-    </svg>`;
-    const blob = new Blob([svg], { type: 'image/svg+xml' });
+let raster48MpBlob: Promise<Blob> | null = null;
+
+/** Cria uma fotografia raster PNG de 48 MP (8000 × 6000), sem SVG. */
+async function create48MpImageBlobUrl(): Promise<string> {
+    raster48MpBlob ??= new Promise<Blob>((resolve, reject) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 8000;
+        canvas.height = 6000;
+        const context = canvas.getContext('2d');
+        if (!context) return reject(new Error('Canvas 2D indisponível para o fixture raster de 48 MP.'));
+
+        const gradient = context.createLinearGradient(0, 0, canvas.width, canvas.height);
+        gradient.addColorStop(0, '#00768e');
+        gradient.addColorStop(0.5, '#f59e0b');
+        gradient.addColorStop(1, '#ffffff');
+        context.fillStyle = gradient;
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.fillStyle = 'rgba(0, 0, 0, .25)';
+        context.fillRect(2000, 1500, 4000, 3000);
+        canvas.toBlob((blob) => {
+            if (blob) resolve(blob);
+            else reject(new Error('Não foi possível codificar o fixture raster de 48 MP.'));
+        }, 'image/png');
+    });
+
+    const blob = await raster48MpBlob;
     const url = URL.createObjectURL(blob);
     objectUrlsToClean.push(url);
     return url;
@@ -59,7 +79,7 @@ async function mountImage(options: MountOptions = {}) {
     const pinia = createPinia();
     const imageRef = ref<any>(null);
     const reactiveProps = ref({
-        src: create48MpImageBlobUrl(),
+        src: await create48MpImageBlobUrl(),
         preview: true,
         allowEdit: true,
         ...options.props
@@ -164,13 +184,34 @@ describe('MaxImage no Chromium Real — Performance de Recorte em Alta Resoluç�
         toBlobSpy.mockClear();
         toDataUrlSpy.mockClear();
 
+        expect(PerformanceObserver.supportedEntryTypes).toContain('longtask');
+        const longTasks: PerformanceEntry[] = [];
+        const observer = new PerformanceObserver((entries) => longTasks.push(...entries.getEntries()));
+        observer.observe({ type: 'longtask', buffered: false });
+        const memory = performance as Performance & { memory?: { usedJSHeapSize: number } };
+        const heapBefore = memory.memory?.usedJSHeapSize;
+        expect(heapBefore, 'O runner Chromium deve expor performance.memory para medir o heap.').toBeTypeOf('number');
         const startTime = performance.now();
         await imageRef.value.confirmCrop();
         const duration = performance.now() - startTime;
+        const heapAfter = memory.memory?.usedJSHeapSize;
+        observer?.disconnect();
+        expect(heapAfter, 'O runner Chromium deve manter performance.memory após o crop.').toBeTypeOf('number');
 
         // 4. Orçamento de tempo e responsividade da UI (não bloquear main thread excessivamente)
         // O processamento e codificação com downscale deve completar dentro de um orçamento seguro (< 1500ms no Chromium)
-        expect(duration).toBeLessThan(1500);
+        expect(duration).toBeLessThan(CROP_PERFORMANCE_BUDGET.durationMs);
+        const observedLongTaskMs = longTasks.reduce((total, entry) => total + entry.duration, 0);
+        expect(observedLongTaskMs).toBeLessThan(CROP_PERFORMANCE_BUDGET.longTaskMs);
+        const heapDelta = heapAfter! - heapBefore!;
+        expect(heapDelta).toBeLessThan(CROP_PERFORMANCE_BUDGET.heapDeltaBytes);
+        console.info('[IMP5-F18] métricas de crop', {
+            durationMs: Number(duration.toFixed(2)),
+            longTaskMs: Number(observedLongTaskMs.toFixed(2)),
+            heapBefore,
+            heapAfter,
+            heapDelta
+        });
 
         // 5. Verifica que o payload foi emitido e respeita estritamente os limites
         expect(emittedCropPayload).toBeTruthy();

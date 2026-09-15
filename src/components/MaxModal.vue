@@ -59,7 +59,7 @@
     import { useFocusTrap } from '../helpers/useFocusTrap';
     import { useScrollLock } from '../helpers/useScrollLock';
     import { useBrowserEventListener } from '../composables/useBrowserEventListener';
-    import { resolveAriaLabelledby } from '../helpers/useAccessibleName';
+    import { getElementAccessibleText, resolveAriaLabelledby } from '../helpers/useAccessibleName';
     import MaxIconButton from './MaxIconButton.vue';
     import MaxButton from './MaxButton.vue';
     import MaxTitle1 from './MaxTitle1.vue';
@@ -407,8 +407,26 @@
 
     const title_id = computed(() => (!props.noHeader ? 'max-modal-title-' + id.value : undefined));
 
+    // O resolvedor canônico preserva IDREFs por seguir a AccName em nível baixo.
+    // Para o contrato do diálogo, referências explicitamente removidas da árvore
+    // de acessibilidade (hidden/aria-hidden/inert), ou sem texto, recebem o
+    // fallback. Referências CSS-only continuam no helper canônico de R08.
+    const resolveDialogLabelledby = (ids: string) => {
+        const resolved = resolveAriaLabelledby(ids);
+        if (!resolved || typeof document === 'undefined') return undefined;
+        const usable = resolved.split(' ').filter((labelId) => {
+            const target = document.getElementById(labelId) as HTMLElement | null;
+            return Boolean(target)
+                && !target!.hasAttribute('hidden')
+                && target!.getAttribute('aria-hidden') !== 'true'
+                && !target!.hasAttribute('inert')
+                && Boolean(getElementAccessibleText(target!));
+        });
+        return usable.length ? usable.join(' ') : undefined;
+    };
+
     const computedAriaLabelledby = computed(() => {
-        if (props.ariaLabelledby) return resolveAriaLabelledby(props.ariaLabelledby);
+        if (props.ariaLabelledby) return resolveDialogLabelledby(props.ariaLabelledby);
         if (props.noHeader) return undefined;
         if (slots.header) {
             const slotText = getSlotText(slots.header);
