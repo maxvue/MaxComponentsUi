@@ -70,5 +70,35 @@ Esta falha é independente de `src/locales/pt-br.ts` e está fora do manifesto R
 
 Correção R02 concluída no escopo: a causa raiz do lint em `src/locales/pt-br.ts` foi eliminada sem relaxar o ESLint. O gate global permanece bloqueado por `svgo` ausente no type-check de testes e por lint em `src/themes/all.scss`, ambos fora deste ownership.
 
+## Revalidação de estabilidade — E12-02
+
+Em `2026-09-15T15:48:00-03:00`, `/root/imp5_r02_stability` reproduziu a
+poluição tardia: `tests/components/dialogAccessibleNames.test.ts` montava
+`MaxSideMenuMobile`, cuja store de menus iniciava uma requisição real para
+`localhost`. O teardown do happy-dom abortava essa requisição e imprimia
+`DOMException [AbortError]` (e, em algumas execuções, `EPROTO`).
+
+A suíte agora isola a store de menus, pois ela não é objeto do contrato ARIA.
+Também foram adicionadas provas de que `console.warn` e `console.error`
+emitidos depois de uma asserção sob `vi.spyOn` continuam sendo rejeitados por
+`verifyConsoleClean()`.
+
+Evidência:
+
+```text
+npx vitest run tests/core/warningTrap.test.ts
+12 testes passaram; stdout/stderr limpos.
+
+npx vitest run tests/components/dialogAccessibleNames.test.ts
+14 testes passaram; stdout/stderr limpos.
+
+npm run test
+3.689/3.702 testes passaram; sem AbortError, EPROTO, DOMException ou DEBUG.
+As 13 falhas restantes pertencem aos blocos R04, R08, F15, R17, R21 e R24.
+```
+
+Não houve alteração em `package.json`, lockfile ou CI. Não houve commit nesta
+revalidação, conforme solicitado.
+
 - Fim: `2026-09-15T14:21:01-03:00`
 - HEAD de validação: `31bbd8514e98f3ad83221828e192cdbaffd6d90a`

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import { nextTick, defineComponent } from 'vue';
@@ -7,6 +7,12 @@ import MaxPopover from '../../src/components/MaxPopover.vue';
 import MaxBaseOverlay from '../../src/components/base/MaxBaseOverlay.vue';
 import MaxSideMenuMobile from '../../src/components/MaxSideMenuMobile.vue';
 import { useSystemStore } from '../../src/stores/useSystem.Store';
+
+// Esta suíte valida somente o contrato ARIA. Evita que a store de menus inicie
+// uma requisição real em segundo plano ao montar o menu móvel.
+vi.mock('../../src/stores/useListMenus.Store', () => ({
+    useListMenusStore: () => ({ list: null })
+}));
 
 describe('F10 — E04-05: Nomes acessíveis estáveis e prevenção de nós órfãos', () => {
     let pinia: ReturnType<typeof createPinia>;

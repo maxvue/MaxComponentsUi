@@ -98,12 +98,6 @@ export function verifyConsoleClean() {
     console.warn = policyConsoleWarn;
     console.error = policyConsoleError;
 
-    try {
-        vi.unstubAllGlobals();
-    } catch {
-        // no-op
-    }
-
     if (asyncErrors.length > 0) throw new Error(`[tests/setup] Teste disparou erro/rejeição assíncrona não tratada no teardown:\n${asyncErrors.join('\n')}`);
 
 

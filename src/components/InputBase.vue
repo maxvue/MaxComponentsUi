@@ -40,7 +40,6 @@
             :for="input_id"
             :class="inLine ? 'in-line-label' : 'max-input-label'"
             v-if="props.label"
-            @click.stop="onLabelClick"
         >
             {{ props.label }}
         </label>
@@ -314,6 +313,7 @@
             ...controlAttrsFromAttrs.value,
             id: input_id.value,
             'aria-invalid': isError.value ? ('true' as const) : undefined,
+            required: (props.required || attrs.required === '' || attrs.required === true) ? true : undefined,
             'aria-required': (props.required || attrs.required === '' || attrs.required === true) ? ('true' as const) : undefined,
             'aria-describedby': ariaDescribedby.value
         };
@@ -334,21 +334,6 @@
     });
 
     const hasIconRight = computed(() => hasContent(props.iconRight ?? props.icon ?? props.i) && !props.noIcon && Boolean(props.iconRight || props.iconPos === 'right'));
-
-    const onLabelClick = () => {
-        if (typeof document !== 'undefined' && input_id.value) {
-            const target = document.getElementById(input_id.value);
-            if (!target) return;
-            if (typeof (target as HTMLElement).focus === 'function' && target.matches('input, textarea, select, button, [tabindex]')) (target as HTMLElement).focus();
-            else {
-                const focusable = target.querySelector<HTMLElement>(
-                    'input:not([disabled]), textarea:not([disabled]), select:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])'
-                );
-                if (focusable && typeof focusable.focus === 'function') focusable.focus();
-
-            }
-        }
-    };
 
     provideInputBaseContext({
         inputId: input_id,

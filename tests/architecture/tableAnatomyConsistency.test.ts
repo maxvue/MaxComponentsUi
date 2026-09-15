@@ -6,6 +6,8 @@ import { parse as parseSfc } from '@vue/compiler-sfc';
 export interface TableTemplateAstOccurrence {
     tag: string;
     parentTag: string;
+    parentClasses: string[];
+    ancestorClasses: string[];
     path: string;
     className: string;
     isDynamic: boolean;
@@ -14,6 +16,11 @@ export interface TableTemplateAstOccurrence {
 
 export interface TableStructuralRule {
     allowedTags: string[];
+    /** O alias é válido apenas neste pai imediato da anatomia real. */
+    allowedParentTags: string[];
+    requiredParentCanonical?: string;
+    /** Classes que precisam existir em algum ancestral, evitando aliases em divs irmãs plausíveis. */
+    requiredAncestorCanonicals?: string[];
     requiredSiblingCanonical: string;
     expectedCount: number;
 }
@@ -25,46 +32,64 @@ export interface TableStructuralRule {
 export const MAX_TABLE_STRUCTURAL_ALLOWLIST: Record<string, TableStructuralRule> = {
     'p-datatable': {
         allowedTags: ['div'],
+        allowedParentTags: ['div'],
+        requiredParentCanonical: 'max-table-main-div',
         requiredSiblingCanonical: 'max-table',
         expectedCount: 1
     },
     'p-datatable-scrollable': {
         allowedTags: ['div'],
+        allowedParentTags: ['div'],
+        requiredParentCanonical: 'max-table-main-div',
         requiredSiblingCanonical: 'max-table-scrollable',
         expectedCount: 1
     },
     'p-datatable-table-container': {
         allowedTags: ['div'],
+        allowedParentTags: ['div'],
+        requiredParentCanonical: 'max-table',
         requiredSiblingCanonical: 'max-table-container',
         expectedCount: 1
     },
     'p-datatable-cell': {
         allowedTags: ['td'],
+        allowedParentTags: ['tr'],
+        requiredAncestorCanonicals: ['max-table-container'],
         requiredSiblingCanonical: 'max-table-cell',
         expectedCount: 9
     },
     'p-column': {
         allowedTags: ['tr', 'th'],
+        allowedParentTags: ['tbody', 'tr'],
+        requiredAncestorCanonicals: ['max-table-container'],
         requiredSiblingCanonical: 'max-table-column',
         expectedCount: 2
     },
     'p-datatable-column-header-content': {
         allowedTags: ['div'],
+        allowedParentTags: ['button', 'th'],
+        requiredAncestorCanonicals: ['max-table-header-row'],
         requiredSiblingCanonical: 'max-table-column-header-content',
         expectedCount: 3
     },
     'p-datatable-column-title': {
         allowedTags: ['div'],
+        allowedParentTags: ['div'],
+        requiredParentCanonical: 'max-table-column-header-content',
         requiredSiblingCanonical: 'max-table-column-title',
         expectedCount: 3
     },
     'p-row-even': {
         allowedTags: ['tr'],
+        allowedParentTags: ['tbody'],
+        requiredAncestorCanonicals: ['max-table-container'],
         requiredSiblingCanonical: 'max-table-row-even',
         expectedCount: 2
     },
     'p-row-odd': {
         allowedTags: ['tr'],
+        allowedParentTags: ['tbody'],
+        requiredAncestorCanonicals: ['max-table-container'],
         requiredSiblingCanonical: 'max-table-row-odd',
         expectedCount: 2
     }
@@ -89,10 +114,23 @@ export function extractTableTemplateAstOccurrences(content: string): TableTempla
     if (!ast) return [];
 
     const occurrences: TableTemplateAstOccurrence[] = [];
-    function walk(node: any, parent: any, pathParts: string[] = []) {
+    function classesOf(node: any): string[] {
+        if (!node?.props) return [];
+        const classes: string[] = [];
+        for (const prop of node.props) classes.push(...(
+            prop.type === 6 && prop.name === 'class' && prop.value
+                ? prop.value.content.split(/\s+/).filter(Boolean)
+                : prop.type === 7 && prop.name === 'bind' && prop.arg?.content === 'class' && prop.exp
+                    ? extractStringLiterals(prop.exp.content)
+                    : []
+        ));
+        return classes;
+    }
+
+    function walk(node: any, parent: any, pathParts: string[] = [], ancestorClasses: string[] = []) {
         if (!node) return;
         if (node.type !== 1) { // não é ElementNode
-            if (node.children) for (const child of node.children) walk(child, parent, pathParts);
+            if (node.children) for (const child of node.children) walk(child, parent, pathParts, ancestorClasses);
 
             return;
         }
@@ -110,6 +148,8 @@ export function extractTableTemplateAstOccurrences(content: string): TableTempla
         for (const cls of allClasses) if (/^p-[a-z][a-z0-9_-]*$/i.test(cls)) occurrences.push({
             tag,
             parentTag: parent?.tag || 'root',
+            parentClasses: classesOf(parent),
+            ancestorClasses,
             path: currentPath.join(' > '),
             className: cls.toLowerCase(),
             isDynamic: !staticClasses.includes(cls),
@@ -117,7 +157,10 @@ export function extractTableTemplateAstOccurrences(content: string): TableTempla
         });
 
 
-        if (node.children) for (const child of node.children) walk(child, node, currentPath);
+        // `<template>` é um agrupador Vue, não um nó DOM: a localização é
+        // julgada contra o pai que realmente materializa a anatomia.
+        const structuralParent = tag === 'template' ? parent : node;
+        if (node.children) for (const child of node.children) walk(child, structuralParent, currentPath, [...ancestorClasses, ...allClasses]);
 
 
     }
@@ -157,6 +200,10 @@ export function auditTableStructuralAnatomy(content: string, filename = 'MaxTabl
 
         // Validação de Posição / Contexto Estrutural: tag do elemento
         if (!rule.allowedTags.includes(occ.tag)) violations.push(`${filename}: classe '${occ.className}' em posição/tag incorreta <${occ.tag}> (esperado: [${rule.allowedTags.join(', ')}])`);
+
+        if (!rule.allowedParentTags.includes(occ.parentTag)) violations.push(`${filename}: classe '${occ.className}' fora do pai imediato permitido <${occ.parentTag}> (esperado: [${rule.allowedParentTags.join(', ')}])`);
+        if (rule.requiredParentCanonical && !occ.parentClasses.includes(rule.requiredParentCanonical)) violations.push(`${filename}: classe '${occ.className}' fora da localização canônica: pai <${occ.parentTag}> sem '${rule.requiredParentCanonical}'`);
+        if (rule.requiredAncestorCanonicals && !rule.requiredAncestorCanonicals.every((canonical) => occ.ancestorClasses.includes(canonical))) violations.push(`${filename}: classe '${occ.className}' fora do caminho canônico '${rule.requiredAncestorCanonicals.join(' > ')}' (caminho: ${occ.path})`);
 
 
         // Validação de Anatomia Canônica Associada: o elemento com alias DEVE conter a classe canônica .max-*
@@ -308,6 +355,17 @@ describe('Auditoria Arquitetural: Consistência de Anatomia de Tabelas e Desacop
             const violations = auditTableStructuralAnatomy(mutatedContent);
             expect(violations.length).toBeGreaterThan(0);
             expect(violations.some((v) => v.includes('em posição/tag incorreta <table>'))).toBe(true);
+        });
+
+        it('falha ao mover um alias para uma div plausível, mesmo mantendo tag e classe canônica irmã', () => {
+            const content = fs.readFileSync(tableFile, 'utf-8');
+            // A div de container é semanticamente plausível e mantém .max-table, mas não é filha do wrapper correto.
+            const mutatedContent = content
+                .replace('class="max-table p-datatable"', 'class="max-table"')
+                .replace('class="max-table-container max-table-table-container p-datatable-table-container"', 'class="max-table-container max-table-table-container p-datatable-table-container p-datatable max-table"');
+
+            const violations = auditTableStructuralAnatomy(mutatedContent);
+            expect(violations.some((v) => v.includes('p-datatable') && v.includes('fora da localização canônica'))).toBe(true);
         });
 
         it('falha obrigatória quando uma classe de célula p-datatable-cell é movida para um elemento não-td', () => {

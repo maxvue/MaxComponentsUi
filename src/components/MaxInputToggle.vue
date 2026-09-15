@@ -8,7 +8,6 @@
                 :for="toggleInputId"
                 class="input-toggle-field-label-div"
                 v-if="hasLabel"
-                @click="onLabelClick"
             >
                 {{ resolvedLabel }}
             </label>
@@ -196,13 +195,6 @@
 
     const on_toggle = (checked: boolean) => {
         modelvalue.value = checked ? trueValue.value : falseValue.value;
-    };
-
-    const onLabelClick = () => {
-        if (typeof document !== 'undefined' && toggleInputId.value) {
-            const target = document.getElementById(toggleInputId.value);
-            if (target && typeof target.focus === 'function') target.focus();
-        }
     };
 
     defineExpose({ update_value, modelvalue });
