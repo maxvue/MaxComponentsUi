@@ -28,7 +28,7 @@ describe('MaxTopToolbar - Acessibilidade e Teclado (Etapa 10)', () => {
             global: {
                 plugins: [pinia],
                 stubs: {
-                    MaxIconButton: { template: '<button class="max-icon-btn" />' },
+                    MaxIconButton: { template: '<button class="max-icon-btn" v-bind="$attrs" />' },
                     MaxTopToolbarSubmenu: {
                         template: '<div class="max-top-toolbar-submenu" />',
                         props: ['items'],
@@ -148,6 +148,12 @@ describe('MaxTopToolbar - Acessibilidade e Teclado (Etapa 10)', () => {
         await itemLi.trigger('keydown', { key: 'Enter' });
 
         expect(actionMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('atribui nome contextual ao item de ícone dinâmico sem metadados', () => {
+        const wrapper = mountToolbar([{ icon: 'lucide:more-horizontal' }]);
+
+        expect(wrapper.find('.max-icon-btn').attributes('aria-label')).toBe('Item 1 da barra de ferramentas');
     });
 
     it('navega horizontalmente na menubar raiz com ArrowRight e ArrowLeft aplicando roving tabindex', async () => {
