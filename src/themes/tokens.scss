@@ -115,6 +115,18 @@
     --max-help-content: #ffffff;
     --max-contrast-content: #ffffff;
 
+    // Conteúdo de ações transparentes sobre a superfície do tema. Estes pares
+    // não reutilizam os foregrounds de botões sólidos, pois o fundo é a página.
+    --max-button-primary-action-content: #00768e;
+    --max-button-secondary-action-content: #334155;
+    --max-button-success-action-content: #237523;
+    --max-button-info-action-content: #005fa3;
+    --max-button-warning-action-content: #8c4600;
+    --max-button-danger-action-content: #b91c1c;
+    --max-button-whatsapp-action-content: #075e54;
+    --max-button-help-action-content: #620fb1;
+    --max-button-contrast-action-content: #020617;
+
     // Tokens de hierarquia textual por papel semântico (WCAG 1.4.3 >= 4.5:1)
     --max-content-secondary: #334155;
     --max-content-placeholder: #475569;
@@ -165,6 +177,17 @@
 
     // Foreground/conteúdo de alto contraste
     --max-contrast-content: #020617;
+
+    // Pares equivalentes para ações transparentes sobre --background-0 escuro.
+    --max-button-primary-action-content: #8ad6e8;
+    --max-button-secondary-action-content: #cbd5e1;
+    --max-button-success-action-content: #c7f5c7;
+    --max-button-info-action-content: #bde6f9;
+    --max-button-warning-action-content: #fce4bc;
+    --max-button-danger-action-content: #fecaca;
+    --max-button-whatsapp-action-content: #a7f3d0;
+    --max-button-help-action-content: #e7d0fc;
+    --max-button-contrast-action-content: #ffffff;
 
     // Tokens de hierarquia textual por papel semântico - modo escuro
     --max-content-secondary: #cbd5e1;

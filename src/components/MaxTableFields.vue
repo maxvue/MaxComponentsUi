@@ -471,7 +471,7 @@
                                 gap: 12px;
                                 padding: 32px 16px;
                                 width: 100%;
-                                color: var(--background-650);
+                                color: var(--max-content-secondary);
 
                                 .max-table-loading-text,
                                 .max-table-empty-text {

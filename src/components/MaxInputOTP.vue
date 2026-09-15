@@ -422,7 +422,7 @@
             align-items: center;
             justify-content: center;
             padding: 0 4px;
-            color: var(--background-650);
+            color: var(--max-content-secondary);
             font-size: 1.25rem;
             font-weight: 700;
             line-height: 1;
@@ -450,7 +450,7 @@
                 caret-color: var(--max-primary-500);
 
                 &::placeholder {
-                    color: var(--background-650);
+                    color: var(--max-content-placeholder);
                     opacity: 0.5;
                 }
 

@@ -135,10 +135,10 @@ describe('MaxInputTextArea', () => {
         expect(el.style.overflowY).toBe('hidden');
     });
 
-    it('define cor semântica var(--background-700) e placeholder var(--background-650) no estilo do MaxInputTextArea', () => {
+    it('define cor semântica var(--background-700) e placeholder acessível no estilo do MaxInputTextArea', () => {
         const sfc = readFileSync(resolve(__dirname, '../../src/components/MaxInputTextArea.vue'), 'utf-8');
         expect(sfc).toMatch(/textarea\s*\{[^}]*color:\s*var\(--background-700\)/s);
-        expect(sfc).toMatch(/&::placeholder\s*\{[^}]*color:\s*var\(--background-650\)/s);
+        expect(sfc).toMatch(/&::placeholder\s*\{[^}]*color:\s*var\(--max-content-placeholder\)/s);
     });
 
     it('define cor var(--background-700) e placeholder para textarea no InputBase', () => {
