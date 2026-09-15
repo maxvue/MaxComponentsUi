@@ -62,40 +62,66 @@ afterEach(() => {
     }
 });
 
-// ---------------------------------------------------------------------------
-// Constantes do componente (espelham MaxInputTextList.vue para cálculo esperado)
-// ---------------------------------------------------------------------------
-const LINE_HEIGHT = 21;
-const OVERSCAN = 10;
-
 /**
- * Calcula o startIndex esperado para um dado scrollTop, exatamente como o
- * componente faz internamente:
- *   startIndex = clamp(floor(scrollTop / LINE_HEIGHT) - OVERSCAN, 0, lineCount - 1)
+ * Cria uma régua DOM independente das fórmulas do componente. Cada span é a
+ * linha correspondente do textarea, com tipografia/padding copiados do DOM
+ * computado. Assim o teste compara retângulos reais de cada número renderizado
+ * com a sua linha, em vez de repetir translateY/startIndex da implementação.
  */
-function expectedStartIndex(scrollTop: number, lineCount: number): number {
-    const first = Math.floor(scrollTop / LINE_HEIGHT);
-    const maxStart = Math.max(0, lineCount - 1);
-    return Math.min(maxStart, Math.max(0, first - OVERSCAN));
+function createLineReference(textarea: HTMLTextAreaElement, totalLines: number): HTMLElement {
+    const editor = textarea.parentElement as HTMLElement;
+    const textareaStyle = getComputedStyle(textarea);
+    const editorStyle = getComputedStyle(editor);
+    const reference = document.createElement('div');
+    const content = document.createElement('div');
+
+    reference.className = 'text-list-dom-reference';
+    reference.setAttribute('aria-hidden', 'true');
+    Object.assign(reference.style, {
+        position: 'absolute',
+        top: `${textarea.offsetTop}px`,
+        left: `${textarea.offsetLeft}px`,
+        width: `${textarea.offsetWidth}px`,
+        height: `${textarea.offsetHeight}px`,
+        overflow: 'hidden',
+        boxSizing: 'border-box',
+        paddingTop: textareaStyle.paddingTop,
+        paddingRight: textareaStyle.paddingRight,
+        paddingBottom: textareaStyle.paddingBottom,
+        paddingLeft: textareaStyle.paddingLeft,
+        fontFamily: textareaStyle.fontFamily,
+        fontSize: textareaStyle.fontSize,
+        lineHeight: textareaStyle.lineHeight,
+        whiteSpace: 'pre',
+        visibility: 'hidden',
+        pointerEvents: 'none'
+    });
+    content.className = 'text-list-dom-reference-content';
+    reference.appendChild(content);
+
+    for (let line = 1; line <= totalLines; line++) {
+        const row = document.createElement('span');
+        row.dataset.line = String(line);
+        row.textContent = 'M';
+        Object.assign(row.style, {
+            display: 'block',
+            height: textareaStyle.lineHeight,
+            lineHeight: textareaStyle.lineHeight
+        });
+        content.appendChild(row);
+    }
+
+    // O editor não possui posicionamento próprio; torná-lo containing block
+    // somente no fixture mantém a régua no mesmo sistema de coordenadas, mesmo
+    // sob CSS zoom.
+    if (editorStyle.position === 'static') editor.style.position = 'relative';
+    editor.appendChild(reference);
+    return reference;
 }
 
-/**
- * Calcula o offsetY esperado (translate do .line-numbers-window):
- *   offsetY = startIndex * LINE_HEIGHT
- */
-function expectedOffsetY(scrollTop: number, lineCount: number): number {
-    return expectedStartIndex(scrollTop, lineCount) * LINE_HEIGHT;
-}
-
-/**
- * Extrai o valor translateY de um estilo inline "translateY(Xpx)".
- * Retorna null se não encontrado.
- */
-function parseTranslateY(el: HTMLElement): number | null {
-    const transform = el.style.transform;
-    const match = transform.match(/translateY\(([-\d.]+)px\)/);
-    if (!match) return null;
-    return parseFloat(match[1]);
+function syncLineReference(reference: HTMLElement, scrollTop: number): void {
+    const content = reference.querySelector<HTMLElement>('.text-list-dom-reference-content');
+    if (content) content.style.transform = `translateY(${-scrollTop}px)`;
 }
 
 // ---------------------------------------------------------------------------
@@ -118,11 +144,10 @@ describe('MaxInputTextList no Chromium (E11-01) — R22/F28', () => {
 
                 const textarea = host.querySelector('textarea') as HTMLTextAreaElement;
                 const numbersContainer = host.querySelector('.line-numbers') as HTMLElement;
-                const lineNumbersWindow = host.querySelector('.line-numbers-window') as HTMLElement;
 
                 expect(textarea).not.toBeNull();
                 expect(numbersContainer).not.toBeNull();
-                expect(lineNumbersWindow).not.toBeNull();
+                const reference = createLineReference(textarea, TOTAL_LINES);
 
                 // Posições de scroll a testar: início, meio e fim
                 const scrollPositions = [
@@ -135,66 +160,34 @@ describe('MaxInputTextList no Chromium (E11-01) — R22/F28', () => {
                     // Aplica o scroll e dispara o evento para sincronizar o componente
                     textarea.scrollTop = scrollTop;
                     textarea.dispatchEvent(new Event('scroll'));
+                    syncLineReference(reference, scrollTop);
                     await settle();
 
-                    // ----------------------------------------------------------
-                    // 1. Validação do translateY da janela de números (real vs esperado)
-                    // ----------------------------------------------------------
-                    const actualTranslateY = parseTranslateY(lineNumbersWindow);
-                    expect(
-                        actualTranslateY,
-                        `[zoom=${scale * 100}% scroll=${label}] .line-numbers-window deve ter translateY inline`
-                    ).not.toBeNull();
-
-                    const expectedTransY = expectedOffsetY(scrollTop, TOTAL_LINES);
-
-                    // Tolerância de 1px (independente do zoom — o CSS zoom afeta pixels CSS, não px internos)
-                    expect(
-                        Math.abs((actualTranslateY as number) - expectedTransY),
-                        `[zoom=${scale * 100}% scroll=${label}] translateY real (${actualTranslateY}px) deve diferir ≤ 1px do esperado (${expectedTransY}px)`
-                    ).toBeLessThanOrEqual(1);
-
-                    // ----------------------------------------------------------
-                    // 2. Número de linha renderizado corresponde ao índice correto
-                    // ----------------------------------------------------------
                     const renderedNumbers = host.querySelectorAll('.line-number');
                     expect(renderedNumbers.length, `[zoom=${scale * 100}% scroll=${label}] deve haver números de linha renderizados`).toBeGreaterThan(0);
 
-                    const firstRenderedNumber = parseInt(renderedNumbers[0].textContent ?? '0', 10);
-                    const expectedFirstNumber = expectedStartIndex(scrollTop, TOTAL_LINES) + 1; // 1-based
+                    // Cada número visível é confrontado com a linha DOM de mesmo
+                    // número na régua independente. Não há cálculo de offset,
+                    // altura ou índice que replique a implementação.
+                    for (const numberElement of renderedNumbers) {
+                        const line = Number(numberElement.textContent);
+                        const referenceLine = reference.querySelector<HTMLElement>(`[data-line="${line}"]`);
+                        expect(referenceLine, `[zoom=${scale * 100}% scroll=${label}] linha DOM ${line} deve existir`).not.toBeNull();
 
-                    expect(
-                        firstRenderedNumber,
-                        `[zoom=${scale * 100}% scroll=${label}] primeiro número renderizado (${firstRenderedNumber}) deve ser o esperado para o overscan (${expectedFirstNumber})`
-                    ).toBe(expectedFirstNumber);
-
-                    // ----------------------------------------------------------
-                    // 3. Alinhamento visual: o .line-numbers-window deve estar posicionado
-                    //    de forma que o primeiro número visível se alinhe com o topo da viewport
-                    //    considerando o padding de 10px do container.
-                    //
-                    //    Posição esperada do topo da window no viewport:
-                    //      containerRect.top + padding - numbersContainer.scrollTop + offsetY
-                    //
-                    //    Como numbersContainer.scrollTop == scrollTop (sincronizado pelo componente):
-                    //      topEsperado = containerRect.top + padding - scrollTop + offsetY
-                    //
-                    //    A linha "zero" do viewport visível (primeiro número visível) é:
-                    //      topDaPrimeiraLinhaVisivel = containerRect.top + padding + (floor(scrollTop / LINE_HEIGHT) - startIndex) * LINE_HEIGHT
-                    //      = containerRect.top + padding + OVERSCAN * LINE_HEIGHT (quando não no início)
-                    //    Mas como estamos usando getBoundingClientRect da window inteira, verificamos apenas o translateY.
-                    // ----------------------------------------------------------
-
-                    // Verifica que a altura de cada linha renderizada é aproximadamente LINE_HEIGHT * scale
-                    const firstLineEl = renderedNumbers[0] as HTMLElement;
-                    const firstLineRect = firstLineEl.getBoundingClientRect();
-
-                    // A altura da linha em pixels de tela deve ser LINE_HEIGHT * scale (com 2px de folga para subpixel)
-                    expect(
-                        Math.abs(firstLineRect.height - LINE_HEIGHT * scale),
-                        `[zoom=${scale * 100}% scroll=${label}] altura do line-number (${firstLineRect.height}px) deve ser ~${LINE_HEIGHT * scale}px`
-                    ).toBeLessThanOrEqual(2);
+                        const numberRect = (numberElement as HTMLElement).getBoundingClientRect();
+                        const lineRect = referenceLine!.getBoundingClientRect();
+                        expect(
+                            Math.abs(numberRect.top - lineRect.top),
+                            `[zoom=${scale * 100}% scroll=${label}] número ${line} deve alinhar à linha DOM correspondente`
+                        ).toBeLessThanOrEqual(1);
+                        expect(
+                            Math.abs(numberRect.height - lineRect.height),
+                            `[zoom=${scale * 100}% scroll=${label}] número ${line} deve ter a altura da linha DOM correspondente`
+                        ).toBeLessThanOrEqual(1);
+                    }
                 }
+
+                reference.remove();
             }
         }
     );
@@ -225,13 +218,23 @@ describe('MaxInputTextList no Chromium (E11-01) — R22/F28', () => {
         // Após Enter, o valor deve ter crescido (nova linha inserida)
         expect(textarea.value.length).toBeGreaterThan(originalLength);
 
-        // Resize: ResizeObserver deve atualizar viewportHeight sem erros
-        // Verificamos que o componente não quebra ao simular mudança de tamanho
-        hostElement!.style.height = '800px';
+        // Tab continua a indentar e reposiciona o cursor; setas não são
+        // interceptadas pelo editor e permanecem disponíveis nativamente.
+        const beforeTab = textarea.selectionStart;
+        textarea.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }));
+        await settle();
+        expect(textarea.selectionStart).toBe(beforeTab + 4);
+        expect(textarea.selectionEnd).toBe(beforeTab + 4);
+        const arrow = new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true });
+        expect(textarea.dispatchEvent(arrow)).toBe(true);
+        expect(arrow.defaultPrevented).toBe(false);
+
+        // ResizeObserver deve manter a viewport da calha igual à do textarea.
+        textarea.style.height = '120px';
         await settle();
         const numbersContainer = host.querySelector('.line-numbers') as HTMLElement;
         expect(numbersContainer).not.toBeNull();
-        // O container de números ainda existe e continua renderizando
+        expect(numbersContainer.clientHeight).toBe(textarea.clientHeight);
         const renderedAfterResize = host.querySelectorAll('.line-number');
         expect(renderedAfterResize.length).toBeGreaterThan(0);
     });

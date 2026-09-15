@@ -16,7 +16,7 @@ import {
 const ASSETS_DIR = path.resolve(__dirname, '../../src/assets/credit-card');
 const DIST_DIR = path.resolve(__dirname, '../../dist');
 
-const BRAND_CHUNK_PREFIXES = [
+const BRAND_ASSET_PREFIXES = [
     'card-amex',
     'card-diners',
     'card-discovery',
@@ -271,24 +271,23 @@ describe('R21 / F27: Otimização de Assets SVG, Segurança e Isolamento Modular
             expect(fs.existsSync(DIST_DIR), 'O teste de distribuição exige dist gerado por build limpo').toBe(true);
             const distFiles = fs.readdirSync(DIST_DIR);
 
-            for (const brand of BRAND_CHUNK_PREFIXES) {
-                const chunkExists = distFiles.some((f) => f.startsWith(`${brand}-`) && f.endsWith('.js'));
-                expect(chunkExists, `Chunk para bandeira ${brand} deve existir no dist`).toBe(true);
+            for (const brand of BRAND_ASSET_PREFIXES) {
+                expect(fs.existsSync(path.join(DIST_DIR, 'assets/credit-card', `${brand}.svg`)), `Asset publicado para ${brand} deve existir no dist`).toBe(true);
             }
         });
 
-        it('o grafo transitivo de cada bandeira não alcança nenhuma outra bandeira', () => {
+        it('o grafo transitivo do componente MaxCreditCard não alcança bandeiras não solicitadas', () => {
             expect(fs.existsSync(DIST_DIR), 'O teste de distribuição exige dist gerado por build limpo').toBe(true);
             const distFiles = fs.readdirSync(DIST_DIR);
+            const componentChunk = distFiles.find((file) => file.startsWith('MaxCreditCard-') && file.endsWith('.js'));
+            expect(componentChunk, 'O chunk real do componente MaxCreditCard deve existir no dist').toBeDefined();
 
-            for (const brand of BRAND_CHUNK_PREFIXES) {
-                const chunk = distFiles.find((file) => file.startsWith(`${brand}-`) && file.endsWith('.js'));
-                expect(chunk, `Chunk para bandeira ${brand} deve existir no dist`).toBeDefined();
+            const graph = getTransitiveChunkGraph(componentChunk!);
+            const reachableBrandChunks = [...graph].filter((file) => BRAND_ASSET_PREFIXES.some((prefix) => file.startsWith(`${prefix}-`)));
+            expect(reachableBrandChunks, 'Importar MaxCreditCard não pode referenciar chunks de todas as bandeiras').toEqual([]);
 
-                const graph = getTransitiveChunkGraph(chunk!);
-                const reachableBrandChunks = [...graph].filter((file) => BRAND_CHUNK_PREFIXES.some((prefix) => file.startsWith(`${prefix}-`)));
-                expect(reachableBrandChunks, `O grafo de ${brand} não pode alcançar todas as outras bandeiras`).toEqual([chunk]);
-            }
+            const componentSource = fs.readFileSync(path.join(DIST_DIR, componentChunk!), 'utf-8');
+            for (const brand of BRAND_ASSET_PREFIXES) expect(componentSource).not.toContain(`import("./${brand}-`);
         });
     });
 
