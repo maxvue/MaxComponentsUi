@@ -1,5 +1,6 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { createApp, h, ref, type App } from 'vue';
+import { createApp, h, ref, nextTick, type App } from 'vue';
+import { createPinia } from 'pinia';
 import MaxTagSelect from '../../src/components/MaxTagSelect.vue';
 import '../../src/themes/all.scss';
 
@@ -11,6 +12,7 @@ function nextFrame(): Promise<void> {
 }
 
 async function settle() {
+    await nextTick();
     await nextFrame();
     await nextFrame();
 }
@@ -46,6 +48,9 @@ async function mountTagSelect(props: Record<string, any> = {}) {
             });
         }
     });
+
+    app.directive('tooltip', {});
+    app.use(createPinia());
 
     activeApp = app;
     app.mount(hostElement);
@@ -349,5 +354,150 @@ describe('MaxTagSelect no Chromium (R11 / F16)', () => {
         // Possui contorno acessível contrastante distinto do fundo
         expect(compSelected.outlineStyle).not.toBe('none');
         expect(parseFloat(compSelected.outlineWidth)).toBeGreaterThan(0);
+    });
+
+    it('valida modo isButton no Chromium real: Tab, Enter, Espaço, Escape, emissão única e disabled (F15 / E06-03, E08-04)', async () => {
+        let emitUpdateCount = 0;
+        let emitChangeCount = 0;
+        let lastEmittedVal: any = null;
+
+        const options = [
+            { value: 'cat-1', label: 'Categoria 1' },
+            { value: 'cat-2', label: 'Categoria 2' },
+            { value: 'cat-3', label: 'Categoria 3' }
+        ];
+
+        if (activeApp) {
+            activeApp.unmount();
+            activeApp = null;
+        }
+        if (hostElement) {
+            hostElement.remove();
+            hostElement = null;
+        }
+
+        hostElement = document.createElement('div');
+        hostElement.id = 'test-host-btn-mode';
+        document.body.appendChild(hostElement);
+
+        const selectedVal = ref<string | null>(null);
+
+        const app = createApp({
+            render() {
+                return h(MaxTagSelect, {
+                    isButton: true,
+                    icon: 'mdi:tag',
+                    modelValue: selectedVal.value,
+                    options,
+                    'onUpdate:modelValue': (val: any) => {
+                        emitUpdateCount++;
+                        lastEmittedVal = val;
+                        selectedVal.value = val;
+                    },
+                    onChange: (_val: any) => {
+                        emitChangeCount++;
+                    }
+                });
+            }
+        });
+
+        app.directive('tooltip', {});
+        app.use(createPinia());
+
+        activeApp = app;
+        app.mount(hostElement);
+        await settle();
+
+        // 1. Verificação de Semântica e Tab:
+        // O container .max-select não deve ser focável (tabindex="-1")
+        const wrapperEl = hostElement.querySelector('.max-select') as HTMLElement;
+        expect(wrapperEl.getAttribute('tabindex')).toBe('-1');
+
+        // O único elemento focável nativo é o <button> do MaxIconButton
+        const btn = hostElement.querySelector('button.max-icon-button') as HTMLButtonElement;
+        expect(btn).not.toBeNull();
+        expect(btn.tagName.toLowerCase()).toBe('button');
+        expect(btn.getAttribute('tabindex')).toBe('0');
+        expect(btn.getAttribute('aria-haspopup')).toBe('listbox');
+        expect(btn.getAttribute('aria-expanded')).toBe('false');
+
+        // Foca o botão
+        btn.focus();
+        expect(document.activeElement).toBe(btn);
+
+        // 2. Abertura via Tecla Enter no Chromium real
+        btn.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+        await settle();
+
+        let overlay = document.querySelector('.max-select-overlay') as HTMLElement;
+        expect(overlay).not.toBeNull();
+        expect(btn.getAttribute('aria-expanded')).toBe('true');
+
+        // 3. Fechamento via Escape e retorno do foco ao botão
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+        await settle();
+
+        expect(document.querySelector('.max-select-overlay')).toBeNull();
+        expect(btn.getAttribute('aria-expanded')).toBe('false');
+        expect(document.activeElement).toBe(btn);
+
+        // 4. Abertura via Tecla Espaço no Chromium real
+        btn.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true }));
+        await settle();
+
+        overlay = document.querySelector('.max-select-overlay') as HTMLElement;
+        expect(overlay).not.toBeNull();
+        expect(btn.getAttribute('aria-expanded')).toBe('true');
+
+        // 5. Seleção com emissão única
+        const secondOption = overlay.querySelectorAll('.max-select-option')[1] as HTMLElement;
+        expect(secondOption).not.toBeNull();
+
+        secondOption.click();
+        await settle();
+
+        expect(document.querySelector('.max-select-overlay')).toBeNull();
+        expect(selectedVal.value).toBe('cat-2');
+        expect(lastEmittedVal).toBe('cat-2');
+        expect(emitUpdateCount).toBe(1);
+        expect(emitChangeCount).toBe(1);
+
+        // 6. Comportamento com disabled=true no Chromium real
+        const disabledHost = document.createElement('div');
+        disabledHost.id = 'test-host-btn-disabled';
+        document.body.appendChild(disabledHost);
+
+        const disabledApp = createApp({
+            render() {
+                return h(MaxTagSelect, {
+                    isButton: true,
+                    icon: 'mdi:tag',
+                    modelValue: null,
+                    disabled: true,
+                    options
+                });
+            }
+        });
+        disabledApp.directive('tooltip', {});
+        disabledApp.use(createPinia());
+        disabledApp.mount(disabledHost);
+        await settle();
+
+        const disabledBtn = disabledHost.querySelector('button.max-icon-button') as HTMLButtonElement;
+        expect(disabledBtn.disabled).toBe(true);
+        expect(disabledBtn.getAttribute('aria-disabled')).toBe('true');
+        expect(disabledBtn.getAttribute('tabindex')).toBe('-1');
+
+        // Tentativa de clique e teclas em estado desabilitado
+        disabledBtn.click();
+        await settle();
+        expect(document.querySelector('.max-select-overlay')).toBeNull();
+
+        disabledBtn.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+        await settle();
+        expect(document.querySelector('.max-select-overlay')).toBeNull();
+
+        disabledApp.unmount();
+        disabledHost.remove();
     });
 });

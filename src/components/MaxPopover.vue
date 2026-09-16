@@ -67,6 +67,7 @@
     import { useTemplateRef, ref, computed, useId, watch, onBeforeUnmount, useSlots } from 'vue';
     import { usePopoverStore } from '../stores/usePopover.Store';
     import { useFocusTrap } from '../helpers/useFocusTrap';
+    import { useOutsidePointer } from '../helpers/useOutsidePointer';
     import { useActiveOverlayPosition } from '../composables/useActiveOverlayPosition';
     import { resolveAriaLabelledby } from '../helpers/useAccessibleName';
     import MaxIconButton from './MaxIconButton.vue';
@@ -209,7 +210,7 @@
         target: btn_el,
         overlay: el,
         active: isOpen,
-        compute: ({ targetRect, overlayRect, viewportWidth, viewportHeight, safeArea }) => {
+        compute: ({ targetRect, overlayRect, viewportWidth, viewportHeight, safeArea, visualViewport }) => {
             const width_btn = targetRect.width;
             const height_btn = targetRect.height;
             const width_el = overlayRect.width || 300;
@@ -220,13 +221,16 @@
             const safeBottom = safeArea?.bottom ?? 0;
             const safeLeft = safeArea?.left ?? 0;
 
+            const vvOffsetLeft = visualViewport?.offsetLeft ?? 0;
+            const vvOffsetTop = visualViewport?.offsetTop ?? 0;
+
             const margin = 8;
             const arrowSpacing = 15;
 
-            const minTop = Math.max(margin, safeTop + margin);
-            const maxBottom = Math.max(minTop, viewportHeight - safeBottom - margin);
-            const minLeft = Math.max(margin, safeLeft + margin);
-            const maxRight = Math.max(minLeft, viewportWidth - safeRight - margin);
+            const minTop = Math.max(margin, safeTop + margin) + vvOffsetTop;
+            const maxBottom = Math.max(minTop, viewportHeight - safeBottom - margin) + vvOffsetTop;
+            const minLeft = Math.max(margin, safeLeft + margin) + vvOffsetLeft;
+            const maxRight = Math.max(minLeft, viewportWidth - safeRight - margin) + vvOffsetLeft;
 
             const spaceBelow = maxBottom - (targetRect.top + height_btn);
             const spaceAbove = targetRect.top - minTop;
@@ -291,36 +295,21 @@
         }
     };
 
-    let outsidePointerDown = false;
-    const onDocPointerDown = (e: MouseEvent | TouchEvent | PointerEvent) => {
-        const target = e.target as Node | null;
-        if (el.value && !el.value.contains(target) && btn_el.value && !btn_el.value.contains(target)) outsidePointerDown = true;
-        else outsidePointerDown = false;
-    };
-
-    const onDocClick = (e: MouseEvent) => {
-        const target = e.target as Node | null;
-        if (outsidePointerDown && el.value && !el.value.contains(target) && btn_el.value && !btn_el.value.contains(target)) hide();
-
-        outsidePointerDown = false;
-    };
+    useOutsidePointer(isOpen, {
+        elements: () => [el.value, btn_el.value],
+        onClose: () => hide(),
+        triggerEl: () => btn_el.value,
+        closeOnEscape: true,
+        restoreFocus: true
+    });
 
     watch(isOpen, (value) => {
-        if (value) {
-            trap.activate();
-            document.addEventListener('pointerdown', onDocPointerDown, true);
-            document.addEventListener('click', onDocClick, true);
-        } else {
-            trap.deactivate();
-            document.removeEventListener('pointerdown', onDocPointerDown, true);
-            document.removeEventListener('click', onDocClick, true);
-        }
+        if (value) trap.activate();
+        else trap.deactivate();
     });
 
     onBeforeUnmount(() => {
         trap.deactivate();
-        document.removeEventListener('pointerdown', onDocPointerDown, true);
-        document.removeEventListener('click', onDocClick, true);
         if (popover_store.show_id === id.value) popover_store.hide();
     });
 
