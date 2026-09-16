@@ -107,35 +107,57 @@ describe('R25 (E11-05) - Concorrência, Isolamento e Cleanup de Consumidores', (
 
     it('deve realizar limpeza preventiva do diretório temporário em caso de interrupção por sinal SIGTERM', async () => {
         let capturedTempDir: string | null = null;
+        let sigtermSent = false;
+        let stdoutBuffer = '';
 
         const proc = spawn('node', [scriptPath, '--skip-build', '--scenario=1'], {
             cwd: projectRoot,
             env: { ...process.env }
         });
 
-        await new Promise<void>((resolve) => {
-            proc.stdout.on('data', (chunk) => {
-                const text = chunk.toString();
-                const match = text.match(/Diretório temporário exclusivo por PID:\s*([^\r\n]+)/);
-                if (match && !capturedTempDir) {
+        const closePromise = new Promise<{ code: number | null; signal: NodeJS.Signals | null }>((resolve, reject) => {
+            proc.once('error', (err) => {
+                reject(err);
+            });
+            proc.once('close', (code, signal) => {
+                resolve({ code, signal });
+            });
+        });
+
+        await new Promise<void>((resolve, reject) => {
+            const onData = (chunk: Buffer | string) => {
+                stdoutBuffer += chunk.toString();
+                const match = stdoutBuffer.match(/Diretório temporário exclusivo por PID:\s*([^\r\n]+)/);
+                if (match && !sigtermSent) {
+                    sigtermSent = true;
                     capturedTempDir = match[1].trim();
-                    // Envia SIGTERM imediatamente após a criação do diretório
+                    proc.stdout.off('data', onData);
                     proc.kill('SIGTERM');
                     resolve();
+                }
+            };
+
+            proc.stdout.on('data', onData);
+            proc.once('error', (err) => {
+                proc.stdout.off('data', onData);
+                reject(err);
+            });
+            proc.once('close', () => {
+                proc.stdout.off('data', onData);
+                if (!sigtermSent) {
+                    reject(new Error(`Processo encerrou antes de emitir o diretório temporário. stdout: ${stdoutBuffer}`));
                 }
             });
         });
 
-        await new Promise<void>((resolve) => {
-            proc.on('close', () => {
-                resolve();
-            });
-        });
+        const exitResult = await closePromise;
 
+        expect(sigtermSent).toBe(true);
         expect(capturedTempDir).toBeTruthy();
+        expect(exitResult).toBeDefined();
         // O handler de SIGTERM deve ter executado a limpeza
         expect(fs.existsSync(capturedTempDir!)).toBe(false);
-    }, 45000);
+    }, 15000);
 
     it('deve cobrir todos os cenários contratuais de consumidores no script de distribuição', () => {
         const scriptContent = fs.readFileSync(scriptPath, 'utf-8');
