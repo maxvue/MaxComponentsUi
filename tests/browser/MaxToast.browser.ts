@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { createApp, h, type App } from 'vue';
 import { createPinia, setActivePinia } from 'pinia';
-import { page, commands, userEvent } from 'vitest/browser';
+import { page, cdp, userEvent } from 'vitest/browser';
 import MaxToast from '../../src/components/MaxToast.vue';
 import { useToastStore, type ToastItem } from '../../src/stores/useToast.Store';
 
@@ -162,8 +162,9 @@ describe('MaxToast no Chromium real (ui-design/toast-recortado-em-viewport-movel
     });
 
     it('aplica zoom de 200% via CDP validando window.visualViewport?.scale === 2 e resetando em finally', async () => {
+        const session = cdp() as unknown as { send(command: string, params?: unknown): Promise<unknown> };
         try {
-            await (commands as any).setPageScaleFactor(2.0);
+            await session.send('Emulation.setPageScaleFactor', { pageScaleFactor: 2.0 });
             expect(window.visualViewport?.scale).toBe(2);
 
             const { items } = await mountToastAtViewport(360, 640, [
@@ -175,7 +176,7 @@ describe('MaxToast no Chromium real (ui-design/toast-recortado-em-viewport-movel
             expect(rect.width).toBeGreaterThan(0);
             expect(rect.height).toBeGreaterThan(0);
         } finally {
-            await (commands as any).setPageScaleFactor(1.0);
+            await session.send('Emulation.setPageScaleFactor', { pageScaleFactor: 1.0 });
             expect(window.visualViewport?.scale).toBe(1);
         }
     });

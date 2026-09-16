@@ -26,3 +26,9 @@
 ## 2. Conclusão
 
 O **Gate B** foi executado no segundo checkout limpo e aprovado integralmente em todas as verificações sequenciais previstas pelo protocolo, confirmando a estabilidade de instalação, eixos de browser, isolamento concorrente e ausência total de regressões.
+
+---
+
+## 3. Revalidação Delta de Concorrência
+
+O teste de concorrência (`tests/integration/verifyConsumersConcurrency.test.ts`) teve sua causa raiz de corrida de eventos corrigida e o timeout de `SIGTERM` restaurado deterministicamente para 15s. Foi revalidado com sucesso através de 3 execuções focadas consecutivas (todas com código 0) e pelo `npm run verify` integral executado no checkout limpo sob o commit `23f59965` (`23f59965845d7a594bece0ded1c60455aa942725`).
