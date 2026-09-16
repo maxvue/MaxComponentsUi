@@ -30,7 +30,15 @@ export default defineConfig({
             instances: [
                 { browser: 'chromium' }
             ],
-            headless: true
+            headless: true,
+            commands: {
+                async setPageScaleFactor(context: any, scale: number) {
+                    const page = context.provider.getPage(context.sessionId);
+                    const cdp = await page.context().newCDPSession(page);
+                    await cdp.send('Emulation.setPageScaleFactor', { pageScaleFactor: scale });
+                    await cdp.detach();
+                }
+            }
         },
         setupFiles: [path.resolve(import.meta.dirname, './tests/browser.setup.ts')],
         include: ['tests/browser/**/*.browser.ts']
