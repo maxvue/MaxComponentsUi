@@ -144,9 +144,8 @@ describe('R25 (E11-05) - Concorrência, Isolamento e Cleanup de Consumidores', (
             });
             proc.once('close', () => {
                 proc.stdout.off('data', onData);
-                if (!sigtermSent) {
-                    reject(new Error(`Processo encerrou antes de emitir o diretório temporário. stdout: ${stdoutBuffer}`));
-                }
+                if (!sigtermSent) reject(new Error(`Processo encerrou antes de emitir o diretório temporário. stdout: ${stdoutBuffer}`));
+
             });
         });
 
