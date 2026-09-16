@@ -1,8 +1,8 @@
 # Relatório de Homologação Final — GATE7-A
 
 - **Campanha:** FIX7 — Homologação de Independência e Qualidade
-- **Commit Avaliado:** `2240944b`
-- **Ambiente de Execução:** Checkout limpo isolado (`.worktrees/wt-gate7-a`)
+- **Commit Avaliado:** `23f59965` (`23f59965845d7a594bece0ded1c60455aa942725`)
+- **Ambiente de Execução:** Checkout limpo isolado (`.worktrees/wt-fix7-sigterm-race-final`)
 - **Status Geral:** **APROVADO (CÓDIGO 0)**
 
 ---
