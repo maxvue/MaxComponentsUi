@@ -159,130 +159,204 @@ afterEach(() => {
 });
 
 describe('MaxImage no Chromium Real — Performance de Recorte em Alta Resolução (F18)', () => {
-    it('executa recorte de imagem raster real de 48 MP com canvas real, downscale proporcional dentro dos limites, zero toDataURL e dentro dos orçamentos de tempo, heap e Long Tasks', async () => {
-        let emittedCropPayload: MaxImageEditPayload | null = null;
-
-        const toDataUrlSpy = vi.spyOn(HTMLCanvasElement.prototype, 'toDataURL');
-        const toBlobSpy = vi.spyOn(HTMLCanvasElement.prototype, 'toBlob');
-
-        // Configuração de observação de Long Tasks (se suportado no Chromium)
-        const longTasks: PerformanceEntry[] = [];
-        let observer: PerformanceObserver | null = null;
-        try {
-            if (typeof PerformanceObserver !== 'undefined' && PerformanceObserver.supportedEntryTypes?.includes('longtask')) {
-                observer = new PerformanceObserver((list) => {
-                    for (const entry of list.getEntries()) longTasks.push(entry);
-                });
-                observer.observe({ entryTypes: ['longtask'] });
-            }
-        } catch {
-            // Suporte opcional a longtask caso ambiente restrito
+    it('executa 5 amostras de recorte de imagem raster real de 48 MP com canvas real, downscale proporcional, zero toDataURL e orçamentos estritos de tempo, heap e Long Tasks', async () => {
+        interface SampleMetric {
+            sample: number;
+            duration: number;
+            initialHeapMiB: number;
+            finalHeapMiB: number;
+            heapDeltaMiB: number;
+            heapDelta: number;
+            maxLongTask: number;
+            eventLoopTicks: number;
+            width: number;
+            height: number;
+            blobSizeBytes: number;
         }
 
-        const { host, imageRef } = await mountImage({
-            props: {
-                maxCropWidth: 4096,
-                maxCropHeight: 4096,
-                maxCropPixels: 16777216, // 16 MP máximo
-                includeDataUrl: false
-            },
-            onCrop: (payload) => {
-                emittedCropPayload = payload;
+        const samples: SampleMetric[] = [];
+        const TOTAL_SAMPLES = 5;
+
+        for (let s = 1; s <= TOTAL_SAMPLES; s++) {
+            let emittedCropPayload: MaxImageEditPayload | null = null;
+
+            const toDataUrlSpy = vi.spyOn(HTMLCanvasElement.prototype, 'toDataURL');
+            const toBlobSpy = vi.spyOn(HTMLCanvasElement.prototype, 'toBlob');
+
+            // Configuração de observação de Long Tasks (se suportado no Chromium)
+            const longTasks: PerformanceEntry[] = [];
+            let observer: PerformanceObserver | null = null;
+            try {
+                if (typeof PerformanceObserver !== 'undefined' && PerformanceObserver.supportedEntryTypes?.includes('longtask')) {
+                    observer = new PerformanceObserver((list) => {
+                        for (const entry of list.getEntries()) longTasks.push(entry);
+                    });
+                    observer.observe({ entryTypes: ['longtask'] });
+                }
+            } catch {
+                // Ambiente sem longtask nativo
             }
-        });
 
-        // 1. Abre o preview da imagem
-        const triggerImg = host.querySelector('.max-image__preview-trigger') as HTMLImageElement;
-        expect(triggerImg).toBeTruthy();
-        triggerImg.click();
-        await waitTicks(5);
+            const { host, imageRef } = await mountImage({
+                props: {
+                    maxCropWidth: 4096,
+                    maxCropHeight: 4096,
+                    maxCropPixels: 16777216, // 16 MP máximo
+                    includeDataUrl: false
+                },
+                onCrop: (payload) => {
+                    emittedCropPayload = payload;
+                }
+            });
 
-        const modal = document.querySelector('.max-image-modal') as HTMLElement;
-        expect(modal).toBeTruthy();
+            // 1. Abre o preview da imagem
+            const triggerImg = host.querySelector('.max-image__preview-trigger') as HTMLImageElement;
+            expect(triggerImg).toBeTruthy();
+            triggerImg.click();
+            await waitTicks(5);
 
-        // 2. Inicia o modo de recorte
-        imageRef.value.startCrop();
-        await waitTicks(10);
+            const modal = document.querySelector('.max-image-modal') as HTMLElement;
+            expect(modal).toBeTruthy();
 
-        const cropImg = modal.querySelector('.max-image-crop-stage__img') as HTMLImageElement;
-        expect(cropImg).toBeTruthy();
+            // 2. Inicia o modo de recorte
+            imageRef.value.startCrop();
+            await waitTicks(10);
 
-        // Espera a imagem raster carregar completamente e confirmar dimensões reais de 48 MP
-        if (!cropImg.complete) await new Promise((res) => {
-            cropImg.onload = res;
-        });
+            const cropImg = modal.querySelector('.max-image-crop-stage__img') as HTMLImageElement;
+            expect(cropImg).toBeTruthy();
 
-        await waitTicks(5);
+            // Espera a imagem raster carregar completamente e confirmar dimensões reais de 48 MP
+            if (!cropImg.complete) await new Promise((res) => {
+                cropImg.onload = res;
+            });
 
-        // Verifica que o navegador carregou o bitmap raster real de 48 MP (8000x6000)
-        expect(cropImg.naturalWidth).toBe(8000);
-        expect(cropImg.naturalHeight).toBe(6000);
+            await waitTicks(5);
 
-        // 3. Mede o tempo gasto na operação confirmCrop e variação de heap no Chromium
-        toBlobSpy.mockClear();
-        toDataUrlSpy.mockClear();
+            // Verifica que o navegador carregou o bitmap raster real de 48 MP (8000x6000)
+            expect(cropImg.naturalWidth).toBe(8000);
+            expect(cropImg.naturalHeight).toBe(6000);
 
-        const initialHeap = (performance as any).memory?.usedJSHeapSize ?? 0;
-        const startTime = performance.now();
+            // 3. Mede o tempo gasto na operação confirmCrop e variação de heap no Chromium
+            toBlobSpy.mockClear();
+            toDataUrlSpy.mockClear();
 
-        // Monitor de congelamento da thread
-        let eventLoopTicks = 0;
-        const freezeTimer = setInterval(() => {
-            eventLoopTicks++;
-        }, 50);
+            const initialHeap = (performance as any).memory?.usedJSHeapSize ?? 0;
+            // Garante compulsoriamente medição de heap no Chromium (métrica ausente reprova)
+            expect(initialHeap).toBeGreaterThan(0);
 
-        await imageRef.value.confirmCrop();
-        clearInterval(freezeTimer);
-        expect(eventLoopTicks).toBeGreaterThanOrEqual(0);
+            const startTime = performance.now();
 
-        const duration = performance.now() - startTime;
-        const finalHeap = (performance as any).memory?.usedJSHeapSize ?? 0;
-        const heapDelta = finalHeap > initialHeap ? finalHeap - initialHeap : 0;
+            // Monitor de responsividade da main thread (prova NÃO TAUTOLÓGICA)
+            let eventLoopTicks = 0;
+            const freezeTimer = setInterval(() => {
+                eventLoopTicks++;
+            }, 25);
 
-        // Desconecta observador de Long Tasks
-        if (observer) observer.disconnect();
+            await imageRef.value.confirmCrop();
+            clearInterval(freezeTimer);
 
-        // 4. Orçamento de tempo e responsividade da UI (orçamento seguro < 1500ms no Chromium)
-        expect(duration).toBeLessThan(1500);
+            const duration = performance.now() - startTime;
+            const finalHeap = (performance as any).memory?.usedJSHeapSize ?? 0;
+            expect(finalHeap).toBeGreaterThan(0);
 
-        // Orçamento de heap: crescimento adicional de memória JS não deve vazar descomunalmente (< 80 MB)
-        if (initialHeap > 0 && finalHeap > 0) expect(heapDelta).toBeLessThan(80 * 1024 * 1024);
+            const heapDelta = finalHeap > initialHeap ? finalHeap - initialHeap : 0;
 
-        // Congelamento e Long Tasks:
-        // Todas as long tasks registradas individualmente devem ter duração razoável (< 1200ms)
-        for (const task of longTasks) expect(task.duration).toBeLessThan(1200);
+            // Desconecta observador de Long Tasks
+            if (observer) observer.disconnect();
 
-        // 5. Verifica que o payload foi emitido e respeita estritamente os limites
-        expect(emittedCropPayload).toBeTruthy();
-        const payload = emittedCropPayload!;
+            // Prova NÃO TAUTOLÓGICA de responsividade:
+            // A thread principal não esteve congelada durante o processamento assíncrono
+            // O timer de 25ms disparou ao menos 1 vez durante o ciclo
+            expect(eventLoopTicks).toBeGreaterThan(0);
 
-        // Blob e File válidos e não nulos
-        expect(payload.blob).toBeInstanceOf(Blob);
-        expect(payload.blob.size).toBeGreaterThan(0);
-        expect(payload.file).toBeInstanceOf(File);
-        expect(payload.file.size).toBeGreaterThan(0);
+            // 4. Orçamentos individuais por amostra
+            expect(duration).toBeLessThan(1500);
+            expect(heapDelta).toBeLessThan(80 * 1024 * 1024);
 
-        // Dimensões do canvas final: aplicou downscale proporcional
-        // 8000x6000 (proporção 4:3) limitado a maxWidth=4096, maxHeight=4096, maxPixels=16777216
-        expect(payload.width).toBeLessThanOrEqual(4096);
-        expect(payload.height).toBeLessThanOrEqual(4096);
-        expect(payload.width * payload.height).toBeLessThanOrEqual(16777216);
+            let maxLongTask = 0;
+            for (const task of longTasks) {
+                if (task.duration > maxLongTask) maxLongTask = task.duration;
+                expect(task.duration).toBeLessThan(1200);
+            }
 
-        // Proporção preservada
-        const originalRatio = 8000 / 6000;
-        const resultRatio = payload.width / payload.height;
-        expect(Math.abs(resultRatio - originalRatio)).toBeLessThan(0.05);
+            // 5. Verifica que o payload foi emitido e respeita estritamente os limites
+            expect(emittedCropPayload).toBeTruthy();
+            const payload = emittedCropPayload!;
 
-        // 6. Zero chamadas a toDataURL por padrão e exatamente UMA chamada a toBlob
-        expect(toDataUrlSpy).not.toHaveBeenCalled();
-        expect(toBlobSpy).toHaveBeenCalledTimes(1);
+            // Blob e File válidos e não nulos
+            expect(payload.blob).toBeInstanceOf(Blob);
+            expect(payload.blob.size).toBeGreaterThan(0);
+            expect(payload.file).toBeInstanceOf(File);
+            expect(payload.file.size).toBeGreaterThan(0);
 
-        // 7. dataUrl é undefined quando includeDataUrl for false
-        expect(payload.dataUrl).toBeUndefined();
+            // Dimensões do canvas final: aplicou downscale proporcional
+            expect(payload.width).toBeLessThanOrEqual(4096);
+            expect(payload.height).toBeLessThanOrEqual(4096);
+            expect(payload.width * payload.height).toBeLessThanOrEqual(16777216);
 
-        toDataUrlSpy.mockRestore();
-        toBlobSpy.mockRestore();
-    });
+            // Proporção preservada (8000:6000 = 1.3333)
+            const originalRatio = 8000 / 6000;
+            const resultRatio = payload.width / payload.height;
+            expect(Math.abs(resultRatio - originalRatio)).toBeLessThan(0.05);
+
+            // 6. Zero chamadas a toDataURL por padrão e exatamente UMA chamada a toBlob
+            expect(toDataUrlSpy).not.toHaveBeenCalled();
+            expect(toBlobSpy).toHaveBeenCalledTimes(1);
+
+            // 7. dataUrl é undefined quando includeDataUrl for false
+            expect(payload.dataUrl).toBeUndefined();
+
+            samples.push({
+                sample: s,
+                duration,
+                initialHeapMiB: +(initialHeap / 1024 / 1024).toFixed(2),
+                finalHeapMiB: +(finalHeap / 1024 / 1024).toFixed(2),
+                heapDeltaMiB: +(heapDelta / 1024 / 1024).toFixed(2),
+                heapDelta,
+                maxLongTask,
+                eventLoopTicks,
+                width: payload.width,
+                height: payload.height,
+                blobSizeBytes: payload.blob.size
+            });
+
+            toDataUrlSpy.mockRestore();
+            toBlobSpy.mockRestore();
+        }
+
+        // Estatísticas das 5 amostras
+        expect(samples).toHaveLength(TOTAL_SAMPLES);
+
+        const durations = samples.map((s) => s.duration).sort((a, b) => a - b);
+        const heapDeltas = samples.map((s) => s.heapDelta).sort((a, b) => a - b);
+        const longTasksList = samples.map((s) => s.maxLongTask).sort((a, b) => a - b);
+
+        const medianDuration = durations[Math.floor(durations.length / 2)];
+        const worstDuration = durations[durations.length - 1];
+        const medianHeapDelta = heapDeltas[Math.floor(heapDeltas.length / 2)];
+        const worstHeapDelta = heapDeltas[heapDeltas.length - 1];
+        const medianLongTask = longTasksList[Math.floor(longTasksList.length / 2)];
+        const worstLongTask = longTasksList[longTasksList.length - 1];
+
+        console.info('\n================================================================================');
+        console.info('🏆 F18 / E07-06 — METROLOGIA EM CHROMIUM REAL (5 AMOSTRAS RASTER 48MP)');
+        console.info('================================================================================');
+        console.info(JSON.stringify({
+            samples,
+            summary: {
+                totalSamples: TOTAL_SAMPLES,
+                durationMs: { median: +medianDuration.toFixed(2), worst: +worstDuration.toFixed(2), budgetMax: 1500 },
+                heapDeltaMiB: { median: +(medianHeapDelta / 1024 / 1024).toFixed(2), worst: +(worstHeapDelta / 1024 / 1024).toFixed(2), budgetMax: 80 },
+                longTaskMs: { median: +medianLongTask.toFixed(2), worst: +worstLongTask.toFixed(2), budgetMax: 1200 }
+            }
+        }, null, 2));
+        console.info('================================================================================\n');
+
+        // Validação dos orçamentos para mediana e pior caso
+        expect(worstDuration).toBeLessThan(1500);
+        expect(worstLongTask).toBeLessThan(1200);
+        expect(worstHeapDelta).toBeLessThan(80 * 1024 * 1024);
+    }, 60000);
 
     it('gera dataUrl via FileReader quando includeDataUrl for true, mantendo ZERO chamadas a canvas.toDataURL', async () => {
         let emittedCropPayload: MaxImageEditPayload | null = null;

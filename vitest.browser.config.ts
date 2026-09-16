@@ -28,7 +28,12 @@ export default defineConfig({
             enabled: true,
             provider: playwright(),
             instances: [
-                { browser: 'chromium' }
+                {
+                    browser: 'chromium',
+                    launch: {
+                        args: ['--enable-precise-memory-info', '--js-flags=--expose-gc']
+                    }
+                }
             ],
             headless: true
         },
