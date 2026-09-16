@@ -30,6 +30,13 @@
         scroll-behavior: auto !important;
     }
 
+    // Exceções explícitas de rotação segura controlada (loaders/spinners desacelerados para 4s)
+    .max-loader-icon-div,
+    .max-table-spinner {
+        animation-duration: 4s !important;
+        animation-iteration-count: infinite !important;
+    }
+
     // Desativa transformações agressivas decorativas (slide, flip, scale/zoom e shake),
     // preservando alinhamento estático e posicionamentos essenciais de layout.
     [data-motion='aggressive'],

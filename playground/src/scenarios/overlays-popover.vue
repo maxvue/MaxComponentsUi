@@ -10,17 +10,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxPopover label="Mais ações" />
+                            <MaxPopover />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxPopover label="Carregando" loading />
+                            <MaxPopover disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxPopover label="Ajuda" icon="iconoir:help-circle" />
+                            <MaxPopover error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -36,12 +36,12 @@
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxPopoverConfirm />
+                            <MaxPopoverConfirm disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxPopoverConfirm />
+                            <MaxPopoverConfirm error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -52,17 +52,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxPopoverMenu label="Menu" :items="menuItems" />
+                            <MaxPopoverMenu />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxPopoverMenu label="Menu vazio" :items="[]" />
+                            <MaxPopoverMenu disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxPopoverMenu label="Menu com ícone" icon="iconoir:menu" :items="menuItems" />
+                            <MaxPopoverMenu error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -73,17 +73,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxTogglePopover label="Confirmar" />
+                            <MaxTogglePopover />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxTogglePopover label="Carregando" loading />
+                            <MaxTogglePopover disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxTogglePopover label="Atenção" message="Esta ação precisa de confirmação." />
+                            <MaxTogglePopover error severity="danger" />
                         </div>
                     </div>
                 </div>
@@ -97,8 +97,6 @@
     import { MaxPopoverConfirm } from '@maxvue/max-components-ui';
     import { MaxPopoverMenu } from '@maxvue/max-components-ui';
     import { MaxTogglePopover } from '@maxvue/max-components-ui';
-
-    const menuItems = [{ label: 'Editar', icon: 'iconoir:edit-pencil' }];
 </script>
 
 <style lang="scss" scoped>

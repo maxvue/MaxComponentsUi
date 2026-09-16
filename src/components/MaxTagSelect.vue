@@ -7,10 +7,8 @@
         no-dropdown
         :no-icon="props.isButton || (attrs as any)?.noIcon"
         :no-status="props.isButton || (attrs as any)?.noStatus"
-        native-form-proxy
     >
-        <template #default="{ formAttrs, triggerAttrs }">
-            <input v-bind="formAttrs" class="max-native-form-proxy" type="text" :value="temp_value ?? ''" tabindex="-1" />
+        <template #default="{ inputAttrs }">
             <div v-if="showPlaceholder" class="tab-placeholder-select">
                 {{ placeholderText }}
             </div>
@@ -18,7 +16,7 @@
             <div class="max-select-wrapper">
                 <div
                     ref="triggerEl"
-                    v-bind="triggerAttrs"
+                    v-bind="inputAttrs"
                     class="max-select"
                     :class="{ 'is-disabled': props.disabled, 'is-focused': isOpen }"
                     :tabindex="props.disabled || props.isButton ? -1 : 0"
@@ -28,8 +26,8 @@
                     :aria-controls="props.isButton ? undefined : (isOpen ? listboxId : undefined)"
                     :aria-activedescendant="props.isButton ? undefined : activeDescendantId"
                     :aria-disabled="!props.isButton && props.disabled ? 'true' : undefined"
-                    @click.stop="!props.isButton && toggle($event)"
-                    @keydown="!props.isButton && onTriggerKeydown($event)"
+                    @click.stop="toggle"
+                    @keydown="onTriggerKeydown"
                 >
                     <div class="max-select-label">
                         <slot name="value">
@@ -63,8 +61,6 @@
                                     :aria-expanded="isOpen"
                                     :aria-controls="isOpen ? listboxId : undefined"
                                     :tabindex="props.disabled ? -1 : 0"
-                                    @click.stop="toggle"
-                                    @keydown="onTriggerKeydown"
                                 />
                             </div>
                         </slot>
@@ -1013,7 +1009,7 @@
     .max-select-overlay {
         position: fixed;
         box-sizing: border-box;
-        z-index: 9999;
+        z-index: var(--max-z-index-dropdown, var(--max-layer-dropdown, 1000));
         background: var(--background-0, #fff);
         border: 1px solid var(--surface-border);
         border-radius: 6px;

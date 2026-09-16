@@ -37,9 +37,10 @@
             nao um erro funcional.
         -->
         <label
-            :for="label_for"
+            :for="input_id"
             :class="inLine ? 'in-line-label' : 'max-input-label'"
             v-if="props.label"
+            @click.stop="onLabelClick"
         >
             {{ props.label }}
         </label>
@@ -52,14 +53,11 @@
             <div class="input-slot-div">
                 <slot
                     :inputId="input_id"
-                    :formInputId="form_input_id"
                     :messageId="message_id"
                     :ariaDescribedby="ariaDescribedby"
                     :ariaInvalid="isError ? 'true' : undefined"
                     :ariaRequired="Boolean(props.required) ? 'true' : undefined"
                     :inputAttrs="inputAttrs"
-                    :formAttrs="formAttrs"
-                    :triggerAttrs="triggerAttrs"
                     :isError="isError"
                     :isRequired="Boolean(props.required)"
                     :hasMessage="Boolean(displayMessage)"
@@ -198,8 +196,6 @@
         ariaDescribedby?: string;
         /** Mensagem de erro fallback quando o campo está inválido sem mensagem específica */
         errorMessageFallback?: string;
-        /** Usa um owner nativo invisível para controles compostos (combobox, switch etc.). */
-        nativeFormProxy?: boolean;
     }
 
     const props = withDefaults(defineProps<Props>(), {
@@ -226,8 +222,6 @@
     const attrs = useAttrs();
     const generated_id = useId();
     const input_id = computed(() => props.id || generated_id);
-    const form_input_id = computed(() => `${input_id.value}-form-owner`);
-    const label_for = computed(() => props.nativeFormProxy ? form_input_id.value : input_id.value);
     const message_id = computed(() => `${input_id.value}-message`);
 
     const isError = computed(() => (!props.noStatus && typeof props.error === 'string' && hasContent(props.error)) || props.error === true || props.done === false);
@@ -300,17 +294,15 @@
     const rootAttrs = computed(() => {
         const result: Record<string, any> = {};
         for (const [key, value] of Object.entries(attrs)) {
-            if (key === 'class' || key === 'style') continue;
-            if (value === undefined) continue;
+            if (key === 'class' || key === 'style' || value === undefined) continue;
             if (!isControlAttribute(key)) result[key] = value;
-
         }
         return result;
     });
 
     const controlAttrsFromAttrs = computed(() => {
         const result: Record<string, any> = {};
-        for (const [key, value] of Object.entries(attrs)) if (value !== undefined && isControlAttribute(key) && key !== 'id' && key !== 'aria-describedby') result[key] = value;
+        for (const [key, value] of Object.entries(attrs)) if (isControlAttribute(key) && key !== 'id' && key !== 'aria-describedby') result[key] = value;
 
 
         return result;
@@ -321,7 +313,6 @@
             ...controlAttrsFromAttrs.value,
             id: input_id.value,
             'aria-invalid': isError.value ? ('true' as const) : undefined,
-            required: (props.required || attrs.required === '' || attrs.required === true) ? true : undefined,
             'aria-required': (props.required || attrs.required === '' || attrs.required === true) ? ('true' as const) : undefined,
             'aria-describedby': ariaDescribedby.value
         };
@@ -341,19 +332,22 @@
         return base;
     });
 
-    /**
-     * Controles ARIA compostos não participam do algoritmo nativo de formulário.
-     * Estes atributos são aplicados a um input owner sincronizado pelo componente
-     * filho; o trigger preserva apenas a semântica ARIA e a interação visual.
-     */
-    const formAttrs = computed<InputAttrs>(() => ({ ...inputAttrs.value, id: form_input_id.value }));
-    const triggerAttrs = computed<InputAttrs>(() => {
-        const result = { ...inputAttrs.value };
-        for (const key of ['id', 'name', 'disabled', 'required', 'autocomplete', 'autocorrect', 'autocapitalize', 'autofocus', 'enterkeyhint', 'form', 'value']) delete result[key];
-        return result;
-    });
-
     const hasIconRight = computed(() => hasContent(props.iconRight ?? props.icon ?? props.i) && !props.noIcon && Boolean(props.iconRight || props.iconPos === 'right'));
+
+    const onLabelClick = () => {
+        if (typeof document !== 'undefined' && input_id.value) {
+            const target = document.getElementById(input_id.value);
+            if (!target) return;
+            if (typeof (target as HTMLElement).focus === 'function' && target.matches('input, textarea, select, button, [tabindex]')) (target as HTMLElement).focus();
+            else {
+                const focusable = target.querySelector<HTMLElement>(
+                    'input:not([disabled]), textarea:not([disabled]), select:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+                );
+                if (focusable && typeof focusable.focus === 'function') focusable.focus();
+
+            }
+        }
+    };
 
     provideInputBaseContext({
         inputId: input_id,
@@ -384,20 +378,6 @@
                 color: var(--max-content-placeholder, var(--background-700));
             }
         }
-    }
-
-    /* Owner nativo de controles compostos: participa de FormData/validade sem
-       criar um segundo controle visual ou um segundo ponto de tabulação. */
-    :deep(.max-native-form-proxy) {
-        position: absolute !important;
-        width: 1px !important;
-        height: 1px !important;
-        margin: -1px !important;
-        padding: 0 !important;
-        overflow: hidden !important;
-        clip-path: inset(50%) !important;
-        white-space: nowrap !important;
-        border: 0 !important;
     }
 
     .max-input-label {

@@ -165,7 +165,7 @@
 
         &:hover {
             background-color: transparent;
-            color: var(--background-775);
+            color: var(--background-650);
         }
     }
 }

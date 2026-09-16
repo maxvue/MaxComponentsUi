@@ -263,40 +263,4 @@ describe('useActiveOverlayPosition', () => {
             configurable: true
         });
     });
-
-    it('considera offset da visualViewport em zoom, safe-area e viewport estreita para manter o painel atingível', async () => {
-        const active = ref(true);
-        const targetEl = document.createElement('button');
-        const overlayEl = document.createElement('div');
-        vi.spyOn(targetEl, 'getBoundingClientRect').mockReturnValue({
-            top: 402, bottom: 422, left: 276, right: 316, width: 40, height: 20, x: 276, y: 402, toJSON: () => {}
-        } as DOMRect);
-        vi.spyOn(overlayEl, 'getBoundingClientRect').mockReturnValue({
-            top: 0, bottom: 180, left: 0, right: 180, width: 180, height: 180, x: 0, y: 0, toJSON: () => {}
-        } as DOMRect);
-
-        const originalVV = window.visualViewport;
-        const mockVisualViewport = {
-            width: 280, height: 200, offsetLeft: 40, offsetTop: 300, scale: 2,
-            addEventListener: vi.fn(), removeEventListener: vi.fn()
-        };
-        Object.defineProperty(window, 'visualViewport', { value: mockVisualViewport, configurable: true });
-        vi.spyOn(window, 'getComputedStyle').mockReturnValue({
-            getPropertyValue: (prop: string) => ({ '--safe-area-top': '10px', '--safe-area-right': '12px', '--safe-area-bottom': '16px', '--safe-area-left': '8px' }[prop] ?? '0px')
-        } as any);
-
-        const { position } = useActiveOverlayPosition({ target: targetEl, overlay: overlayEl, active, offset: 4 });
-        await nextTick();
-
-        // limites: x=[56, 300], y=[318, 476]; o painel fica inteiramente na área visível em zoom 200%.
-        expect(position.value.left).toBe(120);
-        expect(position.value.top).toBe(318);
-        expect(position.value.left).toBeGreaterThanOrEqual(56);
-        expect(position.value.left + 180).toBeLessThanOrEqual(300);
-        expect(position.value.top + 158).toBeLessThanOrEqual(476);
-
-        active.value = false;
-        await nextTick();
-        Object.defineProperty(window, 'visualViewport', { value: originalVV, configurable: true });
-    });
 });

@@ -940,7 +940,7 @@
                 text-align: center;
                 font-size: 0.75rem;
                 font-weight: 600;
-                color: var(--max-content-secondary);
+                color: var(--background-650);
                 margin-bottom: 6px;
             }
 

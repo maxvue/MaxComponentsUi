@@ -67,9 +67,12 @@ export default defineConfig({
             viteOptimizeDeps: true,
             defaultExportByFilename: false,
             injectAtEnd: true,
-            // Os cenários importam explicitamente a API pública. Varredura do
-            // código-fonte duplicava exports da biblioteca e do MaxUse.
-            dirs: []
+            dirsScanOptions: {
+                types: true
+            },
+            dirs: [
+                '../src/*.ts'
+            ]
         })
     ],
     root: resolve(rootDir),
@@ -99,9 +102,6 @@ export default defineConfig({
     build: {
         // O limite do Vite apenas evita warning redundante; o gate executável está
         // em scripts/check-playground-bundle.mjs e também mede gzip.
-        chunkSizeWarningLimit: 2600,
-        // O playground suporta navegadores ES2022; preservar sintaxe moderna
-        // evita helpers de compatibilidade no chunk assíncrono do PDF.
-        target: 'es2022'
+        chunkSizeWarningLimit: 2600
     }
 });

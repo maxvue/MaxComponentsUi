@@ -9,7 +9,7 @@
                     ref="lineNumbersRef"
                     class="line-numbers"
                     aria-hidden="true"
-                    :style="{ minWidth: lineGutterWidth, height: `${viewportHeight}px` }"
+                    :style="{ minWidth: lineGutterWidth }"
                 >
                     <div class="line-numbers-spacer" :style="{ height: `${totalHeight}px` }">
                         <div class="line-numbers-window" :style="{ transform: `translateY(${offsetY}px)` }">
@@ -281,7 +281,6 @@
                 color: var(--background-700);
                 text-align: right;
                 min-width: 40px;
-                box-sizing: border-box;
                 overflow-y: hidden;
                 user-select: none;
                 border-right: 1px solid var(--background-200, rgb(0 0 0 / 5%));
@@ -309,11 +308,7 @@
 
             .code-textarea {
                 flex-grow: 1;
-
-                // InputBase possui regras globais de padding com !important.
-                // Sem a mesma prioridade, o texto começa 10 px acima da calha
-                // numerada e a virtualização perde o alinhamento visual.
-                padding: 10px !important;
+                padding: 10px;
                 border: none !important;
                 box-shadow: none !important;
                 outline: none;

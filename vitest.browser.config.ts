@@ -14,7 +14,6 @@ export default defineConfig({
         alias: {
             'virtual:uno.css': path.resolve(import.meta.dirname, './tests/browser.setup.ts'),
             '@': path.resolve(import.meta.dirname, './src'),
-            '@maxvue/max-components-ui': path.resolve(import.meta.dirname, './src/index.ts'),
             '@helpers': path.resolve(import.meta.dirname, './src/helpers'),
             '@vueuse/core': path.dirname(require.resolve('@vueuse/core/package.json')),
             vue: path.dirname(require.resolve('vue/package.json'))
@@ -22,7 +21,7 @@ export default defineConfig({
         dedupe: ['vue', '@vueuse/core', 'pinia']
     },
     optimizeDeps: {
-        include: ['vue', 'vue-router', 'pinia', '@maxvue/max-use']
+        include: ['vue', 'vue-router', 'pinia', '@maxvue/max-use', 'axe-core']
     },
     test: {
         browser: {

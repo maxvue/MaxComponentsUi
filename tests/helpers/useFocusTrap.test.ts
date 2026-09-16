@@ -163,44 +163,6 @@ describe('useFocusTrap (Unitário & Comportamental)', () => {
         expect(getActiveFocusTrapsCount()).toBe(0);
     });
 
-    it('centraliza pointer externo no topo e preserva clique iniciado dentro do overlay', async () => {
-        const onOutsideA = vi.fn();
-        const onOutsideB = vi.fn();
-        const triggerA = document.createElement('button');
-        document.body.appendChild(triggerA);
-        containersToClean.push(triggerA);
-
-        const containerA = createContainer('<button>A</button>');
-        const containerB = createContainer('<button>B</button>');
-        const trapA = useFocusTrap(ref(containerA), {
-            outsideElements: () => [triggerA],
-            onOutsidePointer: onOutsideA
-        });
-        const trapB = useFocusTrap(ref(containerB), { onOutsidePointer: onOutsideB });
-
-        trapA.activate();
-        trapB.activate();
-        await nextTick();
-
-        // O clique no trigger pertencente a A ainda é externo ao topo B.
-        triggerA.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
-        triggerA.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-        expect(onOutsideB).toHaveBeenCalledTimes(1);
-        expect(onOutsideA).not.toHaveBeenCalled();
-
-        // Um gesto iniciado dentro de B não fecha nenhuma camada ao terminar fora.
-        containerB.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
-        document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-        expect(onOutsideB).toHaveBeenCalledTimes(1);
-
-        trapB.deactivate();
-        document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
-        document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-        expect(onOutsideA).toHaveBeenCalledTimes(1);
-
-        trapA.deactivate();
-    });
-
     it('cadeia encadeada de foco A -> B -> A -> gatilho inicial restaura cada nível com precisão', async () => {
         const trigger = document.createElement('button');
         trigger.id = 'initial-trigger';

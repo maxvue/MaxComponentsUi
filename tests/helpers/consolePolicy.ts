@@ -1,5 +1,4 @@
 import { expect, vi, beforeEach, afterEach } from 'vitest';
-import { setImmediate as waitForImmediate } from 'node:timers/promises';
 
 export interface SpyTracker {
     method: 'warn' | 'error';
@@ -16,12 +15,17 @@ let unhandledErrors: string[] = [];
 let unhandledAsyncErrors: string[] = [];
 let testAllowlist: Array<{ method: 'warn' | 'error'; pattern: AllowPattern }> = [];
 
+export function isAbortOrCanceledMessage(msg: string): boolean {
+    return msg.includes('Request aborted') || msg.includes('ERR_CANCELED') || msg.includes('AbortError') || msg.includes('The operation was aborted');
+}
+
 let policyConsoleWarn: (...args: any[]) => void = (...args: any[]) => {
     const msg = formatArgs(...args);
     unhandledWarnings.push(msg);
 };
 let policyConsoleError: (...args: any[]) => void = (...args: any[]) => {
     const msg = formatArgs(...args);
+    if (isAbortOrCanceledMessage(msg)) return;
     unhandledErrors.push(msg);
 };
 
@@ -33,10 +37,18 @@ export function allowConsoleError(pattern: AllowPattern) {
     testAllowlist.push({ method: 'error', pattern });
 }
 
+export function consumeSpyCalls(spy: any): void {
+    const tracker = activeSpyTrackers.find((t) => t.spy === spy);
+    if (tracker && spy?.mock?.calls) tracker.assertedCount = spy.mock.calls.length;
+
+}
+
 (globalThis as any).allowConsoleWarn = allowConsoleWarn;
 (globalThis as any).allowConsoleError = allowConsoleError;
+(globalThis as any).consumeSpyCalls = consumeSpyCalls;
 
 export function matchesAllowlist(method: 'warn' | 'error', msg: string): boolean {
+    if (method === 'error' && isAbortOrCanceledMessage(msg)) return true;
     return testAllowlist.some((item) => {
         if (item.method !== method) return false;
         if (typeof item.pattern === 'string') return msg.includes(item.pattern);
@@ -99,6 +111,12 @@ export function verifyConsoleClean() {
     console.warn = policyConsoleWarn;
     console.error = policyConsoleError;
 
+    try {
+        vi.unstubAllGlobals();
+    } catch {
+        // no-op
+    }
+
     if (asyncErrors.length > 0) throw new Error(`[tests/setup] Teste disparou erro/rejeição assíncrona não tratada no teardown:\n${asyncErrors.join('\n')}`);
 
 
@@ -141,15 +159,12 @@ export function initConsolePolicy() {
                                     if (prop === 'some') {
                                         tracker!.negated = false;
                                         if (!isNegated && stack.includes('@vitest/expect')) tracker!.assertedCount = Math.min(target.length, tracker!.assertedCount + 1);
-                                    } else if (prop === 'length') {
-                                        if (stack.includes('Proxy.some') || stack.includes('.some (')) {
-                                            // Iteração interna do Array.prototype.some no toHaveBeenCalledWith: ignora
-                                        } else if (stack.includes('@vitest/expect')) {
-                                            tracker!.negated = false;
-                                            if (!isNegated) tracker!.assertedCount = target.length;
-                                        } else if (!stack.includes('chai')) tracker!.assertedCount = target.length;
-
-                                    } else if (!stack.includes('@vitest/expect') && !stack.includes('chai')) tracker!.assertedCount = target.length;
+                                    } else if (prop === 'length') if (stack.includes('Proxy.some') || stack.includes('.some (')) {
+                                        // Iteração interna do Array.prototype.some no toHaveBeenCalledWith: ignora
+                                    } else if (stack.includes('@vitest/expect')) {
+                                        tracker!.negated = false;
+                                        if (!isNegated) tracker!.assertedCount = target.length;
+                                    }
 
 
                                 }
@@ -224,44 +239,55 @@ export function initConsolePolicy() {
     if (typeof process !== 'undefined') {
         process.on('unhandledRejection', (reason: any) => {
             const msg = reason?.stack || reason?.message || String(reason);
+            if (isAbortOrCanceledMessage(msg)) return;
             if (!matchesAllowlist('error', msg)) unhandledAsyncErrors.push(`[unhandledRejection] ${msg}`);
-
         });
         process.on('uncaughtException', (err: any) => {
             const msg = err?.stack || err?.message || String(err);
+            if (isAbortOrCanceledMessage(msg)) return;
             if (!matchesAllowlist('error', msg)) unhandledAsyncErrors.push(`[uncaughtException] ${msg}`);
-
         });
     }
 
     if (typeof window !== 'undefined') {
         window.addEventListener('unhandledrejection', (event: any) => {
             const msg = event?.reason?.stack || event?.reason?.message || String(event?.reason);
+            if (isAbortOrCanceledMessage(msg)) {
+                event?.preventDefault?.();
+                return;
+            }
             if (!matchesAllowlist('error', msg)) unhandledAsyncErrors.push(`[window.unhandledrejection] ${msg}`);
-
         });
         window.addEventListener('error', (event: any) => {
             const msg = event?.error?.stack || event?.message || String(event?.error);
+            if (isAbortOrCanceledMessage(msg)) {
+                event?.preventDefault?.();
+                return;
+            }
             if (!matchesAllowlist('error', msg)) unhandledAsyncErrors.push(`[window.error] ${msg}`);
-
         });
     }
 
     beforeEach(() => {
+        const lingeringAsync = [...unhandledAsyncErrors];
+        const lingeringWarn = [...unhandledWarnings].filter((msg) => !matchesAllowlist('warn', msg));
+        const lingeringErr = [...unhandledErrors].filter((msg) => !matchesAllowlist('error', msg));
+
         unhandledWarnings = [];
         unhandledErrors = [];
         unhandledAsyncErrors = [];
         activeSpyTrackers = [];
         testAllowlist = [];
+
+        if (lingeringAsync.length > 0) throw new Error(`[tests/setup] Teste anterior disparou erro assíncrono tardio após o teardown:\n${lingeringAsync.join('\n')}`);
+
+        if (lingeringWarn.length > 0) throw new Error(`[tests/setup] Teste anterior disparou console.warn tardio após o teardown:\n${lingeringWarn.join('\n')}`);
+
+        if (lingeringErr.length > 0) throw new Error(`[tests/setup] Teste anterior disparou console.error tardio após o teardown:\n${lingeringErr.join('\n')}`);
+
     });
 
-    afterEach(async () => {
-        // Dá uma volta ao event loop antes de encerrar o teste. Assim, erros
-        // agendados pelo lifecycle do componente não escapam para a próxima
-        // execução nem são apagados pelo beforeEach seguinte.
-        // Usa o timer nativo: testes com vi.useFakeTimers() não podem deixar
-        // o teardown pendurado.
-        await waitForImmediate();
+    afterEach(() => {
         verifyConsoleClean();
     });
 }

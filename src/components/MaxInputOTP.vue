@@ -10,12 +10,10 @@
         :error="props.error ?? error_msg"
         :caution="props.caution"
         :no-status="props.noStatus"
-        native-form-proxy
     >
-        <template #default="{ formAttrs, triggerAttrs, inputId, messageId, hasMessage, isError: slotError, isRequired }">
-            <input v-bind="formAttrs" class="max-native-form-proxy" type="text" :value="values.join('')" tabindex="-1" />
+        <template #default="{ inputAttrs, inputId, messageId, hasMessage, isError: slotError, isRequired }">
             <div
-                v-bind="triggerAttrs"
+                v-bind="inputAttrs"
                 class="max-input-otp-container"
                 :class="{ 'is-disabled': props.disabled }"
                 role="group"
@@ -424,7 +422,7 @@
             align-items: center;
             justify-content: center;
             padding: 0 4px;
-            color: var(--max-content-secondary);
+            color: var(--background-650);
             font-size: 1.25rem;
             font-weight: 700;
             line-height: 1;
@@ -452,7 +450,7 @@
                 caret-color: var(--max-primary-500);
 
                 &::placeholder {
-                    color: var(--max-content-placeholder);
+                    color: var(--background-650);
                     opacity: 0.5;
                 }
 

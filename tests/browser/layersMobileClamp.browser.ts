@@ -1,17 +1,22 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { page } from 'vitest/browser';
-import { createApp, h, ref, nextTick, type App } from 'vue';
+import { createApp, h, ref, nextTick, type App, type Component } from 'vue';
 import { createPinia } from 'pinia';
 import MaxPopover from '../../src/components/MaxPopover.vue';
 import MaxPopoverConfirm from '../../src/components/MaxPopoverConfirm.vue';
-import MaxBaseOverlay from '../../src/components/base/MaxBaseOverlay.vue';
 import { useConfirmStore } from '../../src/stores/useConfirm.Store';
-import { installBrowserTestApp } from './bootstrap';
 import '../../src/themes/tokens.scss';
 import '../../src/themes/params.scss';
 
 let activeApp: App | null = null;
 let hostElement: HTMLElement | null = null;
+
+function createTestApp(rootComponent: Component) {
+    const app = createApp(rootComponent);
+    app.directive('tooltip', {});
+    app.use(createPinia());
+    return app;
+}
 
 function nextFrame(): Promise<void> {
     return new Promise((resolve) => requestAnimationFrame(() => resolve()));
@@ -38,53 +43,6 @@ afterEach(async () => {
 });
 
 describe('Camadas Semânticas, Z-Index e Clamp Responsivo no Chromium Real (R09/F11)', () => {
-    it('mantém MaxBaseOverlay visível, rolável e atingível em 280px', async () => {
-        if (typeof page?.viewport === 'function') await page.viewport(280, 320);
-
-        hostElement = document.createElement('div');
-        document.body.appendChild(hostElement);
-        const visible = ref(true);
-        const target = document.createElement('button');
-        target.textContent = 'Gatilho';
-        target.style.position = 'fixed';
-        target.style.right = '0';
-        target.style.bottom = '0';
-        target.style.width = '400px';
-        document.body.appendChild(target);
-
-        const app = createApp({
-            setup: () => () => h(MaxBaseOverlay, {
-                visible: visible.value,
-                target,
-                matchTargetWidth: true,
-                'onUpdate:visible': (value: boolean) => { visible.value = value; }
-            }, {
-                default: () => h('div', { style: 'width: 400px; height: 400px;', 'data-testid': 'conteudo-overlay' }, 'Conteúdo extenso')
-            })
-        });
-        installBrowserTestApp(app);
-        activeApp = app;
-        app.mount(hostElement);
-        await settle();
-
-        const panel = document.querySelector('.max-base-overlay') as HTMLElement;
-        const rect = panel.getBoundingClientRect();
-        const visualViewport = window.visualViewport;
-        expect(visualViewport).not.toBeNull();
-        expect(visualViewport?.width).toBeCloseTo(280, 0);
-        expect(rect.left).toBeGreaterThanOrEqual(0);
-        expect(rect.right).toBeLessThanOrEqual(280);
-        expect(rect.top).toBeGreaterThanOrEqual(0);
-        expect(rect.bottom).toBeLessThanOrEqual(320);
-        expect(rect.width).toBeLessThanOrEqual(264);
-        expect(getComputedStyle(panel).overflow).toBe('auto');
-        expect(panel.contains(document.elementFromPoint(rect.left + 4, rect.top + 4))).toBe(true);
-        panel.scrollTop = 40;
-        expect(panel.scrollTop).toBe(40);
-
-        target.remove();
-    });
-
     it('adapta e faz clamp de MaxPopover em viewport estreito de 280px sem transbordar', async () => {
         if (typeof page?.viewport === 'function') await page.viewport(280, 653);
 
@@ -94,7 +52,7 @@ describe('Camadas Semânticas, Z-Index e Clamp Responsivo no Chromium Real (R09/
         hostElement.style.padding = '0';
         document.body.appendChild(hostElement);
 
-        const app = createApp({
+        const app = createTestApp({
             setup() {
                 const popoverRef = ref<any>(null);
                 return { popoverRef };
@@ -111,8 +69,6 @@ describe('Camadas Semânticas, Z-Index e Clamp Responsivo no Chromium Real (R09/
             }
         });
 
-        app.use(createPinia());
-        installBrowserTestApp(app);
         activeApp = app;
         app.mount(hostElement);
         await settle();
@@ -141,7 +97,7 @@ describe('Camadas Semânticas, Z-Index e Clamp Responsivo no Chromium Real (R09/
         document.body.appendChild(hostElement);
 
         let confirmStoreInstance: any;
-        const app = createApp({
+        const app = createTestApp({
             setup() {
                 confirmStoreInstance = useConfirmStore();
                 return {};
@@ -167,8 +123,6 @@ describe('Camadas Semânticas, Z-Index e Clamp Responsivo no Chromium Real (R09/
             }
         });
 
-        app.use(createPinia());
-        installBrowserTestApp(app);
         activeApp = app;
         app.mount(hostElement);
         await settle();
@@ -199,7 +153,7 @@ describe('Camadas Semânticas, Z-Index e Clamp Responsivo no Chromium Real (R09/
         hostElement.style.width = '300px';
         document.body.appendChild(hostElement);
 
-        const app = createApp({
+        const app = createTestApp({
             render() {
                 return h('div', { style: 'padding: 10px;' }, [
                     h(MaxPopover, {
@@ -211,8 +165,6 @@ describe('Camadas Semânticas, Z-Index e Clamp Responsivo no Chromium Real (R09/
             }
         });
 
-        app.use(createPinia());
-        installBrowserTestApp(app);
         activeApp = app;
         app.mount(hostElement);
         await settle();

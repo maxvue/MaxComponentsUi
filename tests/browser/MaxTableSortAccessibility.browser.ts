@@ -3,7 +3,6 @@ import { createApp, h, type App } from 'vue';
 import { createPinia } from 'pinia';
 import MaxTable from '../../src/components/MaxTable.vue';
 import MaxTableColumn from '../../src/components/MaxTableColumn.vue';
-import { installBrowserTestApp } from './bootstrap';
 
 let activeApp: App | null = null;
 let hostElement: HTMLElement | null = null;
@@ -69,7 +68,6 @@ describe('MaxTable no Chromium real — Acessibilidade e Ordenação por Teclado
         });
 
         app.use(createPinia());
-        installBrowserTestApp(app);
         activeApp = app;
         app.mount(hostElement);
         await nextFrame();
@@ -127,7 +125,6 @@ describe('MaxTable no Chromium real — Acessibilidade e Ordenação por Teclado
         });
 
         app.use(createPinia());
-        installBrowserTestApp(app);
         activeApp = app;
         app.mount(hostElement);
         await nextFrame();

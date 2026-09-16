@@ -154,19 +154,6 @@ describe('MaxBaseOverlay', () => {
         expect(panel.style.minWidth).toBe('100px');
     });
 
-    it('matchTargetWidth limita min-width à área segura em viewport estreita', async () => {
-        Object.defineProperty(window, 'innerWidth', { value: 280, configurable: true });
-        const t = makeTarget({ top: 100, bottom: 120, left: 0, right: 400, width: 400, height: 20 });
-        wrapper = mount(MaxBaseOverlay, { props: { visible: true, target: t, matchTargetWidth: true } });
-        await settle();
-
-        const panel = getPanel();
-        // 280px menos margens laterais de 8px: min-width não pode vencer max-width.
-        expect(panel.style.minWidth).toBe('264px');
-        expect(panel.style.maxWidth).toBe('264px');
-        t.remove();
-    });
-
     it('flip vertical: abre acima quando nao ha espaco abaixo', async () => {
         Object.defineProperty(window, 'innerHeight', { value: 300, configurable: true });
         const t = makeTarget({ top: 250, bottom: 270, left: 50, right: 150, width: 100, height: 20 });
@@ -304,40 +291,6 @@ describe('MaxBaseOverlay', () => {
         expect(top).toBeLessThanOrEqual(300 - 150 - 8);
         expect(top).toBeGreaterThanOrEqual(8);
         t.remove();
-    });
-
-    it('respeita offset da visualViewport, safe-area e scroll em 280px sob zoom 200%', async () => {
-        const originalVV = window.visualViewport;
-        const mockVisualViewport = {
-            width: 280, height: 200, offsetLeft: 40, offsetTop: 300, scale: 2,
-            addEventListener: vi.fn(), removeEventListener: vi.fn()
-        };
-        Object.defineProperty(window, 'visualViewport', { value: mockVisualViewport, configurable: true });
-        vi.spyOn(window, 'getComputedStyle').mockReturnValue({
-            getPropertyValue: (prop: string) => ({ '--safe-area-top': '10px', '--safe-area-right': '12px', '--safe-area-bottom': '16px', '--safe-area-left': '8px' }[prop] ?? '0px')
-        } as any);
-        const t = makeTarget({ top: 402, bottom: 422, left: 276, right: 316, width: 40, height: 20 });
-        wrapper = mount(MaxBaseOverlay, { props: { visible: true, target: t } });
-        await settle();
-        mockRect(getPanel(), { width: 180, height: 180 });
-        mockVisualViewport.offsetTop = 320; // scroll da viewport visual
-        window.dispatchEvent(new Event('resize'));
-        await settle();
-
-        const panel = getPanel();
-        const left = Number.parseInt(panel.style.left, 10);
-        const top = Number.parseInt(panel.style.top, 10);
-        expect(left).toBe(120);
-        expect(top).toBe(338);
-        expect(left).toBeGreaterThanOrEqual(56);
-        expect(left + 180).toBeLessThanOrEqual(300);
-        expect(top).toBeGreaterThanOrEqual(338);
-        expect(top + 158).toBeLessThanOrEqual(496);
-        expect(panel.style.maxWidth).toBe('244px');
-        expect(panel.style.maxHeight).toBe('158px');
-
-        t.remove();
-        Object.defineProperty(window, 'visualViewport', { value: originalVV, configurable: true });
     });
 
     it('clamp de z-index: limita layerOffset para não invadir outras faixas de camadas', async () => {

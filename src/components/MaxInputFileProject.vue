@@ -28,7 +28,7 @@
                 :disabled="props.disabled"
                 tabindex="-1"
                 aria-label="Carregar documentos"
-                @click.stop.prevent="triggerChoose"
+                @click.stop="triggerChoose"
             >
                 <div class="open-files">
                     <div class="instruction">
@@ -62,7 +62,7 @@
 </template>
 <script setup lang="ts">
     import { type Ref, watch, onBeforeUnmount, ref } from 'vue';
-    import { getRoute, useDropZone, isBlank, ulid } from '@maxvue/max-use';
+    import { getRoute, useDropZone, useFileDialog, isBlank, ulid, size } from '@maxvue/max-use';
     import MaxIcon from './MaxIcon.vue';
     import MaxButton from './MaxButton.vue';
     import type { DBFile, UploadFileStatus, MaxButtonsType } from '../types/index.js';
@@ -251,6 +251,17 @@
         },
         multiple: true,
         preventDefaultForUnhandled: false
+    });
+
+    const { reset, onChange } = useFileDialog({
+        directory: false
+    });
+
+    onChange((files: any) => {
+        if (files && size(files) > 0) {
+            ingestFiles(Array.from(files));
+            reset();
+        }
     });
 
     const sendFile = async (filesArg?: any): Promise<any> => {

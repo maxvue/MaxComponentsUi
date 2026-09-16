@@ -20,19 +20,18 @@ describe('REV-R12 — Testes Adversariais MaxMaps', () => {
      * os controles acessíveis (.map-accessible-controls) também NÃO aparecem.
      * Isso viola o requisito R12 de alternativa sempre perceptível ao foco.
      */
-    it('[ADVERSARIAL MAPS-1] aceita 0,0 e mantém controles acessíveis operáveis', async () => {
-        // Coordenadas nulas/zero — caso típico de "mapa em branco"
+    it('[ADVERSARIAL MAPS-1] controles acessíveis permanecem DISPONÍVEIS quando coordenadas são 0,0 (resolução R12)', async () => {
+        // Coordenadas nulas/zero — resolução de R12 / E07-05
         const wrapper = mount(MaxMaps, {
             props: { modelValue: { latitude: 0, longitude: 0 } }
         });
 
-        // O componente inteiro não renderiza quando lat=0 e lng=0
-        const controls = wrapper.find('.map-accessible-controls');
-
         const componentRendered = wrapper.find('.map-main-div').exists();
         expect(componentRendered).toBe(true);
+
+        const controls = wrapper.find('.map-accessible-controls');
         expect(controls.exists()).toBe(true);
-        expect(wrapper.find('.map-accessible-summary').text()).toContain('Latitude 0.00000, Longitude 0.00000');
+        expect(controls.attributes('role')).toBe('region');
     });
 
     /**

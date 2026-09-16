@@ -177,10 +177,10 @@ describe('MaxIconButton (Acessibilidade e Semântica WAI-ARIA)', () => {
             expect(wrapper.attributes('aria-label')).toBe(expectedLabel);
         });
 
-        it('elimina rótulo genérico "Botão de ação" quando o ícone é desconhecido e emite warning', () => {
+        it('elimina rótulo genérico "Botão de ação" quando o ícone é desconhecido e emite warning gerando nome contextual', () => {
             const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
             const wrapper = mountIconButton({ icon: 'mdi:unknown-custom-icon' }, false);
-            expect(wrapper.attributes('aria-label')).toBeUndefined();
+            expect(wrapper.attributes('aria-label')).toBe('Ação mdi:unknown-custom-icon');
             expect(wrapper.attributes('aria-label')).not.toBe('Botão de ação');
             expect(warnSpy).toHaveBeenCalledWith(
                 expect.stringContaining('[MaxIconButton] Botão de ícone renderizado sem nome acessível')

@@ -65,6 +65,8 @@
     import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, watch } from 'vue';
     import { useEditor, EditorContent } from '@tiptap/vue-3';
     import StarterKit from '@tiptap/starter-kit';
+    import Underline from '@tiptap/extension-underline';
+    import Link from '@tiptap/extension-link';
     import Image from '@tiptap/extension-image';
     import { Table } from '@tiptap/extension-table';
     import TableRow from '@tiptap/extension-table-row';
@@ -309,16 +311,15 @@
         content: '',
         editable: !props.disabled,
         extensions: [
-            // O StarterKit v3 já registra Link e Underline. Configurá-los novamente
-            // aqui cria duas extensões com o mesmo nome e o Tiptap emite warning em
-            // runtime; as opções precisam pertencer à instância do próprio kit.
             StarterKit.configure({
-                underline: {},
-                link: {
-                    openOnClick: false,
-                    protocols: ['http', 'https', 'mailto', 'tel'],
-                    isAllowedUri: (url) => isSafeUrl(url)
-                }
+                link: false,
+                underline: false
+            }),
+            Underline,
+            Link.configure({
+                openOnClick: false,
+                protocols: ['http', 'https', 'mailto', 'tel'],
+                isAllowedUri: (url) => isSafeUrl(url)
             }),
             Image,
             Table.configure({ resizable: false }),

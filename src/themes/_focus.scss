@@ -41,6 +41,11 @@
     outline-offset: 1px;
 }
 
+// Classe utilitária canônica para alvos acessíveis com foco visível
+.max-focus-visible {
+    @include max-focus-visible(2px);
+}
+
 // Preserva um indicador distinguível quando o sistema substitui cores autorais.
 @media (forced-colors: active) {
     :focus-visible {

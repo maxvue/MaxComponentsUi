@@ -31,17 +31,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxMaps :model-value="mapCoordinates" />
+                            <MaxMaps :modelValue="{ latitude: -15.7801, longitude: -47.9292 }" />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxMaps :model-value="mapCoordinates" />
+                            <MaxMaps :modelValue="{ latitude: -15.7801, longitude: -47.9292 }" />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxMaps :model-value="mapCoordinates" />
+                            <MaxMaps :modelValue="{ latitude: -15.7801, longitude: -47.9292 }" />
                         </div>
                     </div>
                 </div>
@@ -177,20 +177,16 @@
 </template>
 
 <script setup lang="ts">
-    import {
-        MaxAuthCard,
-        MaxCreditCard,
-        MaxLogo,
-        MaxMaps,
-        MaxTitle1,
-        MaxTitle2,
-        MaxUserAvatar,
-        MaxUserSection
-    } from '@maxvue/max-components-ui';
-
     // Props neutras permitem exercitar os estados sem omitir contratos obrigatórios.
     const scenarioProps: any = { modelValue: '', options: [], items: [], route: '/', target: document.body };
-    const mapCoordinates = { latitude: 0, longitude: 0 };
+    import { MaxLogo } from '@maxvue/max-components-ui';
+    import { MaxMaps } from '@maxvue/max-components-ui';
+    import { MaxUserAvatar } from '@maxvue/max-components-ui';
+    import { MaxUserSection } from '@maxvue/max-components-ui';
+    import { MaxAuthCard } from '@maxvue/max-components-ui';
+    import { MaxCreditCard } from '@maxvue/max-components-ui';
+    import { MaxTitle1 } from '@maxvue/max-components-ui';
+    import { MaxTitle2 } from '@maxvue/max-components-ui';
 </script>
 
 <style lang="scss" scoped>

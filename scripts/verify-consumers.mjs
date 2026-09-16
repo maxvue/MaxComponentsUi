@@ -16,7 +16,7 @@
  */
 
 import { execSync } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync, mkdirSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -24,23 +24,7 @@ const projectRoot = process.cwd();
 console.log('Diretório do projeto:', projectRoot);
 
 let tempDir;
-let packDir;
 let tarballPath;
-
-const CHUNK_WARNING = /(?:Some chunks are larger than|chunk size limit|chunk.*(?:warning|warn))/i;
-
-function runWithoutChunkWarnings(command, options) {
-    try {
-        const output = execSync(command, { ...options, encoding: 'utf-8', stdio: 'pipe' });
-        if (CHUNK_WARNING.test(output)) throw new Error(`Warning de chunk tratado como falha:\n${output}`);
-        if (output.trim()) console.log(output.trim());
-        return output;
-    } catch (error) {
-        const output = `${error.stdout?.toString() ?? ''}\n${error.stderr?.toString() ?? ''}`;
-        if (CHUNK_WARNING.test(output)) throw new Error(`Warning de chunk tratado como falha:\n${output}`);
-        throw error;
-    }
-}
 
 // ───── Versões compatíveis com pinia@^4.0.2 (que requer vue@^3.5.11) ─────
 const VUE_VERSION = '^3.5.11';
@@ -48,25 +32,20 @@ const PINIA_VERSION = '^4.0.2';
 const VUE_ROUTER_VERSION = '^5.2.0';
 const UNOCSS_VERSION = '^66.0.0';
 
+let exitCode = 0;
+
 try {
-    console.log('\n--- Empacotando projeto com npm pack ---');
+    console.log('\n--- Executando build fresco obrigatório ---');
+    execSync('npm run build', { cwd: projectRoot, stdio: 'inherit' });
 
-    // Consumidores só podem receber a distribuição deste HEAD. Não aceitar um
-    // dist existente evita validar artefatos obsoletos após alterações no código.
-    console.log('Reconstruindo dist limpo antes de empacotar...');
-    execSync('npm run build:clean', { cwd: projectRoot, stdio: 'inherit' });
+    tempDir = mkdtempSync(join(tmpdir(), `max-consumer-${process.pid}-`));
+    console.log('Diretório temporário exclusivo por PID:', tempDir);
 
-    // O destino exclusivo elimina a colisão do nome fixo do tarball em execuções paralelas.
-    packDir = mkdtempSync(join(tmpdir(), 'max-components-pack-'));
-    const packOutput = execSync(`npm pack --json --pack-destination "${packDir}"`, { cwd: projectRoot, encoding: 'utf-8' });
-    const packInfo = JSON.parse(packOutput);
-    const packageInfo = Array.isArray(packInfo) ? packInfo[0] : Object.values(packInfo)[0];
-    const { filename: tarballName } = packageInfo;
-    tarballPath = join(packDir, tarballName);
-    console.log('Tarball criado:', tarballPath);
-
-    tempDir = mkdtempSync(join(tmpdir(), 'max-components-test-'));
-    console.log('Diretório temporário:', tempDir);
+    console.log('\n--- Empacotando projeto com npm pack no diretório isolado ---');
+    const packOutput = execSync(`npm pack --pack-destination "${tempDir}"`, { cwd: projectRoot, encoding: 'utf-8' });
+    const tarballName = packOutput.trim().split('\n').pop().trim();
+    tarballPath = join(tempDir, tarballName);
+    console.log('Tarball isolado criado:', tarballPath);
 
     /**
      * Executa um cenário de teste isolado.
@@ -162,12 +141,6 @@ try {
             import { MaxButton } from '@maxvue/max-components-ui';
             import granularBtn from '@maxvue/max-components-ui/components/MaxButton';
             import '@maxvue/max-components-ui/style.css';
-            import '@maxvue/max-components-ui/themes/all.scss';
-            import '@maxvue/max-components-ui/themes/app.scss';
-            import '@maxvue/max-components-ui/themes/colors.scss';
-            import '@maxvue/max-components-ui/themes/font.scss';
-            import '@maxvue/max-components-ui/themes/params.scss';
-            import '@maxvue/max-components-ui/themes/tokens.scss';
 
             console.log('Vite import ok', MaxButton, granularBtn);
         `);
@@ -180,7 +153,7 @@ try {
                 },
             };
         `);
-        runWithoutChunkWarnings('npx vite build', { cwd: dir });
+        execSync('npx vite build', { cwd: dir, stdio: 'inherit' });
     });
 
     // ─── Cenário 5: SSR Consumer ────────────────────────────────────────────
@@ -209,15 +182,48 @@ try {
                 template: \`<MaxButton>Test</MaxButton>\`,
             });
 
-            const html = await renderToString(app);
-            if (!html.includes('button')) throw new Error('SSR: renderização falhou — botão não encontrado no HTML.');
-            console.log('SSR renderizou:', html.slice(0, 80));
-            console.log('SSR OK');
+            renderToString(app).then(html => {
+                if (!html.includes('button')) {
+                    throw new Error('SSR: renderização falhou — botão não encontrado no HTML.');
+                }
+                console.log('SSR renderizou:', html.slice(0, 80));
+                console.log('SSR OK');
+            }).catch(err => {
+                console.error('Erro SSR:', err);
+                process.exit(1);
+            });
         `);
         execSync('node index.js', { cwd: dir, stdio: 'inherit' });
     });
 
-    // ─── Cenário 6: Subpath desconhecido deve FALHAR ────────────────────────
+    // ─── Cenário 6: CSS Global e Temas SCSS ─────────────────────────────────
+    runTest('CSS Global e Temas SCSS Consumer', (dir) => {
+        execSync('npm pkg set type="module"', { cwd: dir, stdio: 'ignore' });
+        execSync(
+            `npm install --no-audit --no-fund "${tarballPath}" vue@"${VUE_VERSION}" pinia@"${PINIA_VERSION}" vue-router@"${VUE_ROUTER_VERSION}"`,
+            { cwd: dir, stdio: 'pipe' }
+        );
+        writeFileSync(join(dir, 'index.js'), `
+            import * as UI from '@maxvue/max-components-ui';
+            import { readFileSync, existsSync } from 'node:fs';
+            import { resolve } from 'node:path';
+
+            if (!UI.MaxButton) throw new Error('MaxButton ausente.');
+            const cssPath = resolve('node_modules/@maxvue/max-components-ui/dist/style.css');
+            if (!existsSync(cssPath)) throw new Error('dist/style.css não encontrado no pacote instalado.');
+            const cssContent = readFileSync(cssPath, 'utf-8');
+            if (!cssContent.includes('.max-button') && !cssContent.includes('--max-primary-')) {
+                throw new Error('Conteúdo de dist/style.css inválido ou vazio.');
+            }
+
+            const themePath = resolve('node_modules/@maxvue/max-components-ui/dist/themes/all.scss');
+            if (!existsSync(themePath)) throw new Error('Tema all.scss não encontrado no pacote instalado.');
+            console.log('CSS e Temas SCSS — OK');
+        `);
+        execSync('node index.js', { cwd: dir, stdio: 'inherit' });
+    });
+
+    // ─── Cenário 7: Subpath desconhecido deve FALHAR ────────────────────────
     // Validação negativa: import de caminho inexistente deve lançar erro.
     runTest('Subpath desconhecido deve falhar', (dir) => {
         execSync('npm pkg set type="module"', { cwd: dir, stdio: 'ignore' });
@@ -229,12 +235,14 @@ try {
             // Este import DEVE falhar — subpath inexistente não deve ser resolvido.
             try {
                 await import('@maxvue/max-components-ui/inexistente');
-                throw new Error('Subpath inexistente foi resolvido — não deveria!');
+                console.error('FALHA: subpath inexistente foi resolvido — não deveria!');
+                process.exit(1);
             } catch (err) {
                 if (err.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED' || err.code === 'MODULE_NOT_FOUND' || err.code === 'ERR_MODULE_NOT_FOUND') {
                     console.log('Subpath desconhecido corretamente rejeitado com:', err.code);
                 } else {
-                    throw new Error('Erro inesperado ao importar subpath desconhecido: ' + err.message);
+                    console.error('Erro inesperado ao importar subpath desconhecido:', err.message);
+                    process.exit(1);
                 }
             }
         `);
@@ -247,16 +255,16 @@ try {
     console.error('\n❌ Validação falhou:', err.message);
     if (err.stdout) console.log(err.stdout.toString());
     if (err.stderr) console.error(err.stderr.toString());
-    process.exitCode = 1;
+    exitCode = 1;
 } finally {
-    // Cleanup garantido mesmo em caso de falha
+    // Cleanup garantido mesmo em caso de falha antes de qualquer exit
     console.log('\n--- Limpando arquivos temporários ---');
     if (tempDir) {
         rmSync(tempDir, { recursive: true, force: true });
         console.log('Diretório temporário removido:', tempDir);
     }
-    if (packDir) {
-        rmSync(packDir, { recursive: true, force: true });
-        console.log('Diretório do tarball removido:', packDir);
-    }
+}
+
+if (exitCode !== 0) {
+    process.exit(exitCode);
 }

@@ -27,11 +27,6 @@ export default defineConfig({
         include: ['tests/**/*.{test,spec}.ts'],
         pool: 'forks',
         singleFork: true,
-        // Alguns testes de distribuição constroem `dist/` de propósito. Mesmo
-        // em um único fork, a execução paralela de arquivos permite que outro
-        // teste observe o diretório entre o `rmSync` e o fim do build. A suíte
-        // canônica precisa de uma visão estável do artefato publicado.
-        fileParallelism: false,
         testTimeout: 15000,
         coverage: {
             provider: 'v8',

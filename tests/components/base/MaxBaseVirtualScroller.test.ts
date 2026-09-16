@@ -220,11 +220,19 @@ describe('MaxBaseVirtualScroller', () => {
     });
 
     describe('Contrato Listbox e Blindagem Semântica (F14 / WCAG 1.3.1 e 4.1.2)', () => {
-        it('rejeita listbox sem nome acessível como erro de contrato', () => {
-            expect(() => mount(MaxBaseVirtualScroller, {
+        it('emite warning quando role="listbox" nao possui aria-label nem aria-labelledby', async () => {
+            const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+            wrapper = mount(MaxBaseVirtualScroller, {
                 props: { items: makeItems(5), role: 'listbox' },
                 slots: { item: '<div class="row-item" />' }
-            })).toThrow('O papel "listbox" exige um nome acessível via aria-label ou aria-labelledby.');
+            });
+            stubViewport(wrapper.element as HTMLElement, 200);
+            await settle();
+
+            expect(warnSpy).toHaveBeenCalledWith(
+                expect.stringContaining('O papel "listbox" exige um nome acessível via aria-label ou aria-labelledby.')
+            );
+            warnSpy.mockRestore();
         });
 
         it('nao emite warning quando aria-label e fornecido para o listbox', async () => {
@@ -276,37 +284,84 @@ describe('MaxBaseVirtualScroller', () => {
             expect(scroller.classes()).toContain('is-disabled');
         });
 
-        it('rejeita combinações incompatíveis de papel no container e nos itens', () => {
-            expect(() => mount(MaxBaseVirtualScroller, {
+        it('normaliza effectiveItemRole para "option" em role="listbox", impedindo combinacoes invalidas', async () => {
+            wrapper = mount(MaxBaseVirtualScroller, {
                 props: {
                     items: makeItems(5),
                     role: 'listbox',
-                    itemRole: 'listitem',
-                    ariaLabel: 'Lista inválida'
+                    itemRole: 'listitem', // papel invalido para filhos diretos de listbox
+                    ariaLabel: 'Lista normalizada'
                 },
                 slots: { item: '<div class="row-item" />' }
-            })).toThrow('role="listbox" só aceita itemRole="option".');
+            });
+            stubViewport(wrapper.element as HTMLElement, 200);
+            await settle();
+
+            expect(wrapper.findAll('[role="option"]').length).toBeGreaterThan(0);
+            expect(wrapper.findAll('[role="listitem"]')).toHaveLength(0);
         });
 
-        it('rejeita itemRole sem um papel compatível no container', () => {
-            expect(() => mount(MaxBaseVirtualScroller, {
+        it('impede role="option" orfao quando o container e neutro sem role', async () => {
+            wrapper = mount(MaxBaseVirtualScroller, {
                 props: {
                     items: makeItems(5),
-                    itemRole: 'option'
+                    itemRole: 'option' // nao deve ser renderizado como option sem listbox
                 },
                 slots: { item: '<div class="row-item" />' }
-            })).toThrow('itemRole exige role="listbox" ou role="list" compatível.');
+            });
+            stubViewport(wrapper.element as HTMLElement, 200);
+            await settle();
+
+            expect(wrapper.findAll('[role="option"]')).toHaveLength(0);
         });
 
-        it('rejeita papéis fora do contrato tipado em chamadas JavaScript', () => {
-            expect(() => mount(MaxBaseVirtualScroller, {
+        it('rejeita role arbitraria/invalida com console.warn e aplica fallback seguro para undefined', async () => {
+            const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+            wrapper = mount(MaxBaseVirtualScroller, {
                 props: {
                     items: makeItems(5),
-                    role: 'menu' as any,
-                    ariaLabel: 'Papel inválido'
+                    role: 'dialog' as any,
+                    ariaLabel: 'Dialog Inválido'
                 },
                 slots: { item: '<div class="row-item" />' }
-            })).toThrow('role deve ser "listbox" ou "list".');
+            });
+            stubViewport(wrapper.element as HTMLElement, 200);
+            await settle();
+
+            const scroller = wrapper.find('.max-base-virtual-scroller');
+            expect(scroller.attributes('role')).toBeUndefined();
+            expect(warnSpy).toHaveBeenCalledWith(
+                expect.stringContaining('[MaxBaseVirtualScroller] Papel (role) inválido fornecido: "dialog"')
+            );
+            warnSpy.mockRestore();
+        });
+
+        it('aceita estritamente role="listbox", role="list" e role=undefined', async () => {
+            const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+            // Caso 1: undefined (padrão seguro neutro)
+            wrapper = mount(MaxBaseVirtualScroller, {
+                props: { items: makeItems(3), role: undefined },
+                slots: { item: '<div class="row-item" />' }
+            });
+            stubViewport(wrapper.element as HTMLElement, 200);
+            await settle();
+            expect(wrapper.find('.max-base-virtual-scroller').attributes('role')).toBeUndefined();
+            expect(warnSpy).not.toHaveBeenCalled();
+
+            // Caso 2: role="list"
+            await wrapper.setProps({ role: 'list' });
+            await settle();
+            expect(wrapper.find('.max-base-virtual-scroller').attributes('role')).toBe('list');
+            expect(warnSpy).not.toHaveBeenCalled();
+
+            // Caso 3: role="listbox" com aria-label
+            await wrapper.setProps({ role: 'listbox', ariaLabel: 'Lista Válida' });
+            await settle();
+            expect(wrapper.find('.max-base-virtual-scroller').attributes('role')).toBe('listbox');
+            expect(warnSpy).not.toHaveBeenCalled();
+
+            warnSpy.mockRestore();
         });
     });
 
@@ -701,6 +756,50 @@ describe('MaxBaseVirtualScroller', () => {
 
             // 4. aria-activedescendant DEVE ser undefined (removido do DOM), nunca apontando para nó desmontado/fantasma!
             expect(scroller.attributes('aria-activedescendant')).toBeUndefined();
+        });
+
+        it('ariaActivedescendant com seletores malformados ou caracteres invalidos nao causa excecao fatal e retorna undefined se nao montado', async () => {
+            wrapper = mount(MaxBaseVirtualScroller, {
+                props: {
+                    items: makeItems(10),
+                    role: 'listbox',
+                    ariaLabel: 'Proteção Escape',
+                    ariaActivedescendant: 'invalid:::id[with]#bad@chars'
+                },
+                slots: { item: '<div class="row-item" />' }
+            });
+            stubViewport(wrapper.element as HTMLElement, 400);
+            await settle();
+
+            const scroller = wrapper.find('.max-base-virtual-scroller');
+            expect(() => {
+                const attr = scroller.attributes('aria-activedescendant');
+                expect(attr).toBeUndefined();
+            }).not.toThrow();
+        });
+
+        it('ariaActivedescendant aponta corretamente quando o elemento alvo existe no DOM interno', async () => {
+            wrapper = mount(MaxBaseVirtualScroller, {
+                props: {
+                    items: makeItems(5),
+                    role: 'listbox',
+                    ariaLabel: 'Montado Real',
+                    idPrefix: 'custom-mounted'
+                },
+                slots: { item: '<div class="row-item" />' }
+            });
+            stubViewport(wrapper.element as HTMLElement, 400);
+            await settle();
+
+            // Garantimos que o item 2 está montado no DOM
+            expect(wrapper.find('#custom-mounted-option-2').exists()).toBe(true);
+
+            // Passamos a prop após o DOM estar montado para acionar o computed com o elemento presente
+            await wrapper.setProps({ ariaActivedescendant: 'custom-mounted-option-2' });
+            await settle();
+
+            const scroller = wrapper.find('.max-base-virtual-scroller');
+            expect(scroller.attributes('aria-activedescendant')).toBe('custom-mounted-option-2');
         });
     });
 

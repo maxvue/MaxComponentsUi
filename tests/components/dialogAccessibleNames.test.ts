@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import { nextTick, defineComponent } from 'vue';
@@ -7,21 +7,13 @@ import MaxPopover from '../../src/components/MaxPopover.vue';
 import MaxBaseOverlay from '../../src/components/base/MaxBaseOverlay.vue';
 import MaxSideMenuMobile from '../../src/components/MaxSideMenuMobile.vue';
 import { useSystemStore } from '../../src/stores/useSystem.Store';
-import { configureMaxApp, resetMaxAppConfig } from '../../src/helpers/maxAppConfig';
 
 describe('F10 — E04-05: Nomes acessíveis estáveis e prevenção de nós órfãos', () => {
     let pinia: ReturnType<typeof createPinia>;
 
     beforeEach(() => {
-        // Sem endpoint configurado, o lifecycle real da store não deve iniciar
-        // I/O. O contrato ARIA não depende do carregamento de menus.
-        configureMaxApp({ routeMenus: undefined });
         pinia = createPinia();
         setActivePinia(pinia);
-    });
-
-    afterEach(() => {
-        resetMaxAppConfig();
     });
 
     describe('MaxModal', () => {

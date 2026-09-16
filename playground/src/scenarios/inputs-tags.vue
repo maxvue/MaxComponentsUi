@@ -73,7 +73,7 @@
 
 <script setup lang="ts">
     // Props neutras permitem exercitar os estados sem omitir contratos obrigatórios.
-    const scenarioProps: any = { modelValue: [], options: [], items: [], route: '/', target: document.body };
+    const scenarioProps: any = { modelValue: '', options: [], items: [], route: '/', target: document.body };
     import { MaxChips } from '@maxvue/max-components-ui';
     import { MaxTagSelect } from '@maxvue/max-components-ui';
     import { MaxTagsList } from '@maxvue/max-components-ui';

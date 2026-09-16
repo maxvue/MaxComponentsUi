@@ -27,8 +27,8 @@
                 @keydown.space.prevent="onChooserKeydown"
             >
                 <div class="chose-icon-div">
-                    <MaxIcon icon="line-md:loading-loop" size="2" v-if="uploading" />
-                    <MaxIcon icon="quill:folder-open" size="2" v-else />
+                    <Icon icon="line-md:loading-loop" size="2" v-if="uploading" />
+                    <Icon icon="quill:folder-open" size="2" v-else />
                 </div>
             </label>
 
@@ -41,7 +41,7 @@
                 @click.stop="startUpload(files)"
             >
                 <div class="chose-icon-div">
-                    <MaxIcon icon="ic:baseline-file-upload" size="2" />
+                    <Icon icon="ic:baseline-file-upload" size="2" />
                 </div>
             </button>
 
@@ -132,13 +132,13 @@
                             class="file-thumb"
                             v-if="file?.thumbnail || (file?.src && !file.file_name)"
                         />
-                        <MaxIcon
+                        <Icon
                             :icon="resolveFileIcon(getFileName(file))"
                             size="1.8"
                             v-else
                         />
 
-                        <MaxIcon icon="fa:check-circle" class="file-check" size="0.7" />
+                        <Icon icon="fa:check-circle" class="file-check" size="0.7" />
 
                         <div class="file-info-label" v-if="props.showMetadata">
                             <span class="file-name-text">{{ getFileName(file) }}</span>
@@ -153,7 +153,7 @@
                         :aria-label="`Remover arquivo ${getFileName(file)}`"
                         @click.stop="removeFile(index, file)"
                     >
-                        <MaxIcon icon="solar:close-circle-bold" size="0.9" />
+                        <Icon icon="solar:close-circle-bold" size="0.9" />
                     </button>
                 </div>
             </div>

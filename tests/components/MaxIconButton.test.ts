@@ -177,14 +177,15 @@ describe('MaxIconButton', () => {
     });
 
     describe('Eliminação de rótulo genérico e exigência de nome contextual (F15)', () => {
-        it('elimina fallback genérico "Botão de ação" e deixa aria-label undefined para ícone desconhecido', () => {
+        it('elimina fallback genérico e fornece fallback semântico determinístico para ícone desconhecido', () => {
             const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
             const wrapper = mountIconButton({ icon: 'custom:unmapped-icon-xyz' }, false);
-            expect(wrapper.find('button').attributes('aria-label')).toBeUndefined();
+            expect(wrapper.find('button').attributes('aria-label')).toBe('Ação custom:unmapped-icon-xyz');
             expect(wrapper.find('button').attributes('aria-label')).not.toBe('Botão de ação');
             expect(warnSpy).toHaveBeenCalledWith(
                 expect.stringContaining('[MaxIconButton] Botão de ícone renderizado sem nome acessível')
             );
+            warnSpy.mockRestore();
         });
 
         it('respeita nomes contextuais explícitos (ariaLabel, label, title, tooltip)', () => {

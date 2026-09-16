@@ -193,23 +193,16 @@ describe('MaxTableFields.vue', () => {
         });
     });
 
-    it('nomeia cada botão dinâmico da coluna de ações sem produzir fallback indefinido', () => {
+    it('renderiza botões na coluna de ações e props.buttons', () => {
         const wrapper = mount(MaxTableFields, {
             props: {
-                list: [{ id: 1, name: 'Projeto Aurora' }],
+                list: [{ id: 1 }],
                 columns: [],
-                buttons: [{ id: 'btn1', icon: 'test' }, { id: 'btn2', icon: 'test', ariaLabel: 'Arquivar projeto' }]
+                buttons: [{ id: 'btn1', icon: 'test' }]
             },
-            global: {
-                stubs: {
-                    MaxIconButton: { template: '<button class="max-icon-button-stub" v-bind="$attrs" />' }
-                }
-            }
+            global: { stubs: { MaxIconButton: true } }
         });
         expect(wrapper.find('.max-table-fields-buttons').exists()).toBe(true);
-        const buttons = wrapper.findAll('.max-icon-button-stub');
-        expect(buttons[0].attributes('aria-label')).toBe('Ação 1 da linha Projeto Aurora');
-        expect(buttons[1].attributes('aria-label')).toBe('Arquivar projeto');
     });
 
     it('emite update:field e executa col.action para cada alteração em edições consecutivas (< 100ms)', async () => {

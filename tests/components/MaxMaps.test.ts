@@ -38,18 +38,6 @@ describe('MaxMaps.vue', () => {
         expect(wrapper.find('.mapa').exists()).toBe(false);
     });
 
-    it.each([
-        { latitude: 0, longitude: -46.6 },
-        { latitude: -23.5, longitude: 0 },
-        { latitude: 0, longitude: 0 }
-    ])('aceita coordenadas zero e preserva a alternativa acessível: %o', async (modelValue) => {
-        const wrapper = mount(MaxMaps, { props: { modelValue, apiKey: 'chave-de-teste' } });
-
-        expect(wrapper.find('.mapa').exists()).toBe(true);
-        expect(wrapper.find('.map-accessible-controls').exists()).toBe(true);
-        expect(wrapper.find('.map-accessible-summary').text()).toContain(`Latitude ${modelValue.latitude.toFixed(5)}`);
-    });
-
     it('deve atualizar modelValue quando as coordenadas mudam', async () => {
         const wrapper = mount(MaxMaps, {
             props: {
@@ -198,4 +186,22 @@ describe('MaxMaps.vue', () => {
         await eastBtn.trigger('click');
         expect(wrapper.vm.coordinates.longitude).toBeCloseTo(currentLng + 0.0005, 5);
     });
+
+    it('R12: aceita latitude e longitude zero (0, 0) como coordenadas válidas e renderiza o mapa', async () => {
+        const wrapper = mount(MaxMaps, {
+            props: {
+                modelValue: { latitude: 0, longitude: 0 },
+                apiKey: 'TEST_API_KEY'
+            }
+        });
+
+        expect(wrapper.find('.max-maps').exists()).toBe(true);
+        expect(wrapper.vm.coordinates.latitude).toBe(0);
+        expect(wrapper.vm.coordinates.longitude).toBe(0);
+        expect(wrapper.find('.map-accessible-summary').text()).toContain('Latitude 0.00000, Longitude 0.00000');
+
+        await wrapper.setProps({ modelValue: { latitude: 0, longitude: 10 } });
+        expect(wrapper.vm.coordinates.longitude).toBe(10);
+    });
 });
+

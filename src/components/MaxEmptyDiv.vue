@@ -56,7 +56,7 @@
         border-radius: 0.7rem;
         display: grid;
         place-items: center;
-        color: var(--max-content-secondary);
+        color: var(--background-650);
         border: 1px solid var(--background-200);
 
         &[transparent],
@@ -80,7 +80,7 @@
 
             .icon-div {
                 position: relative;
-                color: var(--max-content-secondary);
+                color: var(--background-650);
             }
         }
     }

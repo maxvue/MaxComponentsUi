@@ -46,33 +46,32 @@ describe('Arquitetura - Contrato de Exports e Subpaths Públicos', () => {
     });
 
     it('todos os arquivos referenciados em exports devem existir em dist', () => {
-        // Se dist existir, valida todos os caminhos estáticos
-        if (fs.existsSync(distDir)) {
-            const staticExportPaths = [
-                pkg.exports['.'].types,
-                pkg.exports['.'].import,
-                pkg.exports['./stores'].types,
-                pkg.exports['./stores'].import,
-                pkg.exports['./preset'].types,
-                pkg.exports['./preset'].import,
-                pkg.exports['./resolver'].types,
-                pkg.exports['./resolver'].import,
-                pkg.exports['./styles'].types,
-                pkg.exports['./styles'].import,
-                pkg.exports['./style.css'],
-                pkg.exports['./styles.css']
-            ];
+        expect(fs.existsSync(distDir), 'dist/ deve existir obrigatoriamente (build prévio obrigatório)').toBe(true);
 
-            for (const relPath of staticExportPaths) {
-                const fullPath = path.resolve(__dirname, '../../', relPath);
-                expect(fs.existsSync(fullPath), `Arquivo de export ${relPath} deve existir`).toBe(true);
-            }
+        const staticExportPaths = [
+            pkg.exports['.'].types,
+            pkg.exports['.'].import,
+            pkg.exports['./stores'].types,
+            pkg.exports['./stores'].import,
+            pkg.exports['./preset'].types,
+            pkg.exports['./preset'].import,
+            pkg.exports['./resolver'].types,
+            pkg.exports['./resolver'].import,
+            pkg.exports['./styles'].types,
+            pkg.exports['./styles'].import,
+            pkg.exports['./style.css'],
+            pkg.exports['./styles.css']
+        ];
 
-            // Verifica o diretório copiado de temas
-            const themesDir = path.resolve(distDir, 'themes');
-            expect(fs.existsSync(themesDir), 'dist/themes deve existir').toBe(true);
-            expect(fs.existsSync(path.resolve(themesDir, 'all.scss')), 'dist/themes/all.scss deve existir').toBe(true);
+        for (const relPath of staticExportPaths) {
+            const fullPath = path.resolve(__dirname, '../../', relPath);
+            expect(fs.existsSync(fullPath), `Arquivo de export ${relPath} deve existir`).toBe(true);
         }
+
+        // Verifica o diretório copiado de temas
+        const themesDir = path.resolve(distDir, 'themes');
+        expect(fs.existsSync(themesDir), 'dist/themes deve existir').toBe(true);
+        expect(fs.existsSync(path.resolve(themesDir, 'all.scss')), 'dist/themes/all.scss deve existir').toBe(true);
     });
 
     it('o subpath ./stores deve exportar todas as stores Pinia públicas', async () => {
@@ -118,11 +117,12 @@ describe('Arquitetura - Contrato de Exports e Subpaths Públicos', () => {
         expect(styles.MaxStyle.semantic.primary[500]).toBe('#00768E');
     });
 
-    it('sideEffects deve incluir somente folhas de estilo e poupar todos os entries JavaScript', () => {
+    it('sideEffects deve listar apenas arquivos CSS/SCSS e não conter o bundle raiz index.es.js para permitir tree-shaking', () => {
         const sideEffects = pkg.sideEffects;
         expect(Array.isArray(sideEffects)).toBe(true);
         expect(sideEffects).toContain('**/*.css');
         expect(sideEffects).toContain('**/*.scss');
+        expect(sideEffects).toContain('./dist/style.css');
         expect(sideEffects).not.toContain('./dist/index.es.js');
 
         // Entries modulares livres de side-effect para permitir tree-shaking
@@ -130,6 +130,13 @@ describe('Arquitetura - Contrato de Exports e Subpaths Públicos', () => {
         expect(sideEffects).not.toContain('./dist/preset.es.js');
         expect(sideEffects).not.toContain('./dist/resolver.es.js');
         expect(sideEffects).not.toContain('./dist/styles.es.js');
+    });
+
+    it('deve conter exports explícitos para cada componente além do wildcard', () => {
+        expect(pkg.exports['./components/MaxButton']).toBeDefined();
+        expect(pkg.exports['./components/MaxButton'].import).toBe('./dist/components/MaxButton.es.js');
+        expect(pkg.exports['./components/MaxButton'].types).toBe('./dist/components/MaxButton.vue.d.ts');
+        expect(pkg.exports['./components/*']).toBeDefined();
     });
 
     it('documentação principal não deve recomendar o subpath obsoleto ./prime', () => {

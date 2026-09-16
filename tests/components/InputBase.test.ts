@@ -341,8 +341,7 @@ describe('InputBase.vue', () => {
             id: capturedProps.inputId,
             'aria-invalid': 'true',
             'aria-required': 'true',
-            'aria-describedby': capturedProps.messageId,
-            required: true
+            'aria-describedby': capturedProps.messageId
         });
     });
 

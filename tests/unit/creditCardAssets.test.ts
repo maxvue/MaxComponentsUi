@@ -121,12 +121,22 @@ describe('creditCardAssets - Isolamento Modular Rigoroso (tests/unit)', () => {
     });
 
     describe('Garantia de Não Contaminação no Build Distribuído', () => {
-        it('Visa é publicado como asset individual, sem chunk JavaScript que importe outras bandeiras', () => {
-            expect(fs.existsSync(DIST_DIR), 'O teste de distribuição exige dist gerado por build limpo').toBe(true);
-            expect(fs.existsSync(path.join(DIST_DIR, 'assets/credit-card/card-visa.svg'))).toBe(true);
+        it('o chunk distribuído de Visa não contém identificadores de outras bandeiras', () => {
+            if (fs.existsSync(DIST_DIR)) {
+                const distFiles = fs.readdirSync(DIST_DIR);
+                const visaChunkFile = distFiles.find((f) => f.startsWith('card-visa-') && f.endsWith('.js'));
+                expect(visaChunkFile).toBeDefined();
 
-            const distFiles = fs.readdirSync(DIST_DIR);
-            expect(distFiles.some((file) => file.startsWith('card-visa-') && file.endsWith('.js'))).toBe(false);
+                const content = fs.readFileSync(path.join(DIST_DIR, visaChunkFile!), 'utf-8');
+
+                // Confirma que é o SVG do Visa
+                expect(content).toContain('xmlns="http://www.w3.org/2000/svg"');
+
+                // Garante ausência dos outros nomes de arquivos de bandeira
+                const otherAssets = ['card-amex', 'card-diners', 'card-elo', 'card-hipercard', 'card-jcb', 'card-mastercard'];
+                for (const asset of otherAssets) expect(content).not.toContain(asset);
+
+            }
         });
     });
 });

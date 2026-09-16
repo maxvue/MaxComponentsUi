@@ -74,7 +74,7 @@
         transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
 
         &::placeholder {
-            color: var(--max-content-placeholder);
+            color: var(--background-650);
             opacity: 1;
         }
 
@@ -82,8 +82,10 @@
             border-color: var(--max-primary-400);
         }
 
-        &:enabled:focus {
-            outline: 0 none;
+        &:enabled:focus,
+        &:enabled:focus-visible {
+            outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
+            outline-offset: 1px;
 
             /* Foco canônico: borda + halo suave via --max-focus-ring-color */
             border-color: var(--max-focus-ring-color, var(--max-primary-500));

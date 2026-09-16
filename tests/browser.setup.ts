@@ -1,4 +1,8 @@
 // Setup para execução de testes em Browser real (Chromium)
+import { initConsolePolicy } from './helpers/consolePolicy';
+
+initConsolePolicy();
+
 if (typeof (globalThis as any).Ziggy === 'undefined') (globalThis as any).Ziggy = {
     url: 'http://localhost',
     port: null,

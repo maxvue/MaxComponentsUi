@@ -61,23 +61,23 @@ const CANONICAL_ASSET_KEYS: Record<CanonicalCardBrand, string> = {
     visa: 'card-visa'
 };
 
-/**
- * Assets publicados junto da biblioteca. O caminho é relativo ao módulo para
- * funcionar tanto no servidor Vite quanto após o bundler do consumidor mover
- * o chunk. Usar fetch evita que MaxCreditCard retenha arestas ESM para todas
- * as bandeiras: somente o SVG efetivamente solicitado é transferido.
- */
-const CREDIT_CARD_ASSETS_URL = new URL(/* @vite-ignore */ '../assets/credit-card/', import.meta.url);
+/** Loaders dinâmicos explícitos com caminhos literais para permitir code-splitting em chunks. */
+const BRAND_LOADERS: Record<CanonicalCardBrand, SvgModuleLoader> = {
+    amex: () => import('../assets/credit-card/card-amex.svg?raw'),
+    diners: () => import('../assets/credit-card/card-diners.svg?raw'),
+    discover: () => import('../assets/credit-card/card-discovery.svg?raw'),
+    elo: () => import('../assets/credit-card/card-elo.svg?raw'),
+    hipercard: () => import('../assets/credit-card/card-hipercard.svg?raw'),
+    jcb: () => import('../assets/credit-card/card-jcb.svg?raw'),
+    maestro: () => import('../assets/credit-card/card-maestro.svg?raw'),
+    mastercard: () => import('../assets/credit-card/card-mastercard.svg?raw'),
+    visa: () => import('../assets/credit-card/card-visa.svg?raw')
+};
 
-function loadPublishedSvg(assetKey: string): Promise<{ default: string }> {
-    const assetUrl = new URL(`${assetKey}.svg`, CREDIT_CARD_ASSETS_URL);
-    return fetch(assetUrl)
-        .then((response) => {
-            if (!response.ok) throw new Error(`Não foi possível carregar o asset SVG ${assetKey}`);
-            return response.text();
-        })
-        .then((svg) => ({ default: svg }));
-}
+const BACKGROUND_LOADERS: Record<'front' | 'rear', SvgModuleLoader> = {
+    front: () => import('../assets/credit-card/credit-card.svg?raw'),
+    rear: () => import('../assets/credit-card/credit-card-rear.svg?raw')
+};
 
 const brandUriCache = new Map<CanonicalCardBrand, Promise<string | null>>();
 const backgroundUriCache = new Map<'front' | 'rear', Promise<string | null>>();
@@ -116,7 +116,8 @@ export function loadCardBrandUri(brand: string | null | undefined): Promise<stri
     const cached = brandUriCache.get(canonical);
     if (cached) return cached;
 
-    const loader = customBrandLoaders[canonical] ?? (() => loadPublishedSvg(CANONICAL_ASSET_KEYS[canonical]));
+    const loader = customBrandLoaders[canonical] ?? BRAND_LOADERS[canonical];
+    if (!loader) return Promise.resolve(null);
 
     const promise = loader()
         .then((module) => {
@@ -141,8 +142,7 @@ export function loadCardBackgroundUri(side: CardBackgroundSide = 'front'): Promi
     const cached = backgroundUriCache.get(canonicalSide);
     if (cached) return cached;
 
-    const loader = customBackgroundLoaders[canonicalSide]
-        ?? (() => loadPublishedSvg(canonicalSide === 'front' ? 'credit-card' : 'credit-card-rear'));
+    const loader = customBackgroundLoaders[canonicalSide] ?? BACKGROUND_LOADERS[canonicalSide];
     const promise = loader()
         .then((module) => {
             const rawSvg = module.default;

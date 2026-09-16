@@ -230,6 +230,7 @@ export const useIconStore = defineStore('icons', () => {
                 }
 
             }).catch((error) => {
+                if (error?.name === 'AbortError') return;
                 console.error('Erro na Requisição dos ícones', { 'url': requestUrl, 'error': error });
                 errors.value['fetch'] += 1;
 

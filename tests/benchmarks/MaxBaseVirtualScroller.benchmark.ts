@@ -237,3 +237,23 @@ export async function executarBenchmarks(): Promise<BenchmarkResult> {
         metrics: metricas
     };
 }
+
+import { describe, it, expect } from 'vitest';
+import { writeFileSync, mkdirSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+describe('Benchmark Temporal — MaxBaseVirtualScroller (R23 / E11-02)', () => {
+    it('executa medição de performance em 100, 1000 e 10000 itens gerando benchmark-results.json', async () => {
+        const resultado = await executarBenchmarks();
+        expect(resultado.metrics.length).toBe(12);
+
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = dirname(__filename);
+        const caminhoSaida = join(__dirname, 'benchmark-results.json');
+        mkdirSync(dirname(caminhoSaida), { recursive: true });
+        writeFileSync(caminhoSaida, JSON.stringify(resultado, null, 2), 'utf-8');
+
+        expect(resultado.component).toBe('MaxBaseVirtualScroller');
+    }, 60000);
+});

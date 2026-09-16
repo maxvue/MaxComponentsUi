@@ -1,7 +1,6 @@
 <template>
-    <InputBase v-bind="{ ...props, ...attrsWithoutModelProps }" native-form-proxy class="max-input-select select_input_div">
-        <template #default="{ formAttrs, triggerAttrs }">
-            <input v-bind="formAttrs" class="max-native-form-proxy" type="text" :value="temp_value ?? ''" tabindex="-1" />
+    <InputBase v-bind="{ ...props, ...attrsWithoutModelProps }" class="max-input-select select_input_div">
+        <template #default="{ inputAttrs }">
             <div v-if="showPlaceholder" class="placeholder-select">
                 {{ placeholderText }}
             </div>
@@ -9,7 +8,7 @@
             <div class="max-select-wrapper">
                 <div
                     ref="triggerEl"
-                    v-bind="triggerAttrs"
+                    v-bind="inputAttrs"
                     class="max-select"
                     :class="{ 'is-disabled': props.disabled, 'is-focused': isOpen }"
                     :tabindex="props.disabled ? -1 : 0"
@@ -952,7 +951,7 @@
 
 .max-select-overlay {
     position: fixed;
-    z-index: 9999;
+    z-index: var(--max-z-index-dropdown, var(--max-layer-dropdown, 1000));
     background: var(--background-0, #fff);
     border: 1px solid var(--surface-border);
     border-radius: 6px;

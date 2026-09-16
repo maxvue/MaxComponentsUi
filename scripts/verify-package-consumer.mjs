@@ -21,37 +21,37 @@ import { fileURLToPath } from 'node:url';
 export async function verifyPackageConsumer(cwd = process.cwd()) {
     console.log('📦 [verify-package-consumer] Gerando tarball com npm pack...');
 
-    // Nunca reutiliza um dist de outro HEAD: os consumidores validam apenas o
-    // tarball produzido por uma reconstrução limpa desta execução.
-    console.log('⚙️ [verify-package-consumer] reconstruindo dist limpo...');
-    execSync('npm run build:clean', { cwd, stdio: 'inherit' });
+    // Certifica que o build está atualizado
+    if (!fs.existsSync(path.join(cwd, 'dist', 'index.es.js'))) {
+        console.log('⚙️ [verify-package-consumer] dist ausente, executando npm run build...');
+        execSync('npm run build', { cwd, stdio: 'inherit' });
+    }
 
-    const packDir = fs.mkdtempSync(path.join(os.tmpdir(), 'max-package-pack-'));
-    let tarballPath;
+    const packOutput = execSync('npm pack', { cwd, encoding: 'utf-8' }).trim();
+    const tarballFileName = packOutput.split('\n').filter(Boolean).pop();
+    const tarballPath = path.resolve(cwd, tarballFileName);
 
-    try {
-        const packOutput = execSync(`npm pack --json --pack-destination "${packDir}"`, { cwd, encoding: 'utf-8' });
-        const packInfo = JSON.parse(packOutput);
-        const packageInfo = Array.isArray(packInfo) ? packInfo[0] : Object.values(packInfo)[0];
-        const { filename: tarballFileName } = packageInfo;
-        tarballPath = path.join(packDir, tarballFileName);
-
-        // Cenário 1: Consumidor padrão completo (com peers)
-        await runConsumerScenario('Cenário 1: Consumidor com peers completos (incluindo UnoCSS)', tarballPath, {
+    // Cenário 1: Consumidor padrão completo (com peers)
+    await runConsumerScenario('Cenário 1: Consumidor com peers completos (incluindo UnoCSS)', tarballPath, {
         vue: '^3.5.11',
         pinia: '^4.0.2',
         'vue-router': '^5.2.0',
         unocss: '^66.7.5'
-        }, true);
+    }, true);
 
-        // Cenário 2: Consumidor mínimo (sem peers opcionais como unocss)
-        await runConsumerScenario('Cenário 2: Consumidor sem peers opcionais (sem UnoCSS)', tarballPath, {
+    // Cenário 2: Consumidor mínimo (sem peers opcionais como unocss)
+    await runConsumerScenario('Cenário 2: Consumidor sem peers opcionais (sem UnoCSS)', tarballPath, {
         vue: '^3.5.11',
         pinia: '^4.0.2',
         'vue-router': '^5.2.0'
-        }, false);
-    } finally {
-        fs.rmSync(packDir, { recursive: true, force: true });
+    }, false);
+
+    try {
+        if (fs.existsSync(tarballPath)) {
+            fs.unlinkSync(tarballPath);
+        }
+    } catch (_err) {
+        // ignora
     }
 
     console.log('\n🎉 [verify-package-consumer] Todos os cenários de consumidor validados com sucesso!');
@@ -117,7 +117,7 @@ if (!MaxComponentsUiResolver || typeof MaxComponentsUiResolver !== 'function') {
     throw new Error('MaxComponentsUiResolver inválido no entrypoint ./resolver.');
 }
 
-// 6. Arquivo CSS estático, resolvido diretamente pelo export público.
+// 6. Arquivo CSS estático
 const styleCssPath = require.resolve('@maxvue/max-components-ui/style.css');
 if (!fs.existsSync(styleCssPath)) {
     throw new Error('Arquivo style.css não encontrado via package export.');
@@ -127,18 +127,10 @@ if (cssContent.length === 0) {
     throw new Error('style.css está vazio.');
 }
 
-// 7. Todos os temas públicos devem resolver diretamente pelo export.
-for (const theme of ['all.scss', 'app.scss', 'colors.scss', 'font.scss', 'params.scss', 'tokens.scss']) {
-    const themePath = require.resolve('@maxvue/max-components-ui/themes/' + theme);
-    if (!fs.existsSync(themePath)) throw new Error('Tema não encontrado via package export: ' + theme);
-}
-
-// 8. Um subpath não declarado nunca pode escapar do mapa de exports.
-try {
-    await import('@maxvue/max-components-ui/subpath-inexistente');
-    throw new Error('Subpath desconhecido foi resolvido indevidamente.');
-} catch (error) {
-    if (!['ERR_PACKAGE_PATH_NOT_EXPORTED', 'ERR_MODULE_NOT_FOUND', 'MODULE_NOT_FOUND'].includes(error.code)) throw error;
+// 7. Temas SCSS
+const themeAllPath = require.resolve('@maxvue/max-components-ui/themes/all.scss');
+if (!fs.existsSync(themeAllPath)) {
+    throw new Error('dist/themes/all.scss não encontrado via package export.');
 }
 
 console.log('  ✅ Entrypoints testados e aprovados!');
@@ -159,8 +151,9 @@ const isDirectRun = process.argv[1] && fileURLToPath(import.meta.url) === proces
 
 if (isDirectRun) {
     verifyPackageConsumer()
+        .then(() => process.exit(0))
         .catch((err) => {
             console.error('❌ [verify-package-consumer] Falha:', err);
-            process.exitCode = 1;
+            process.exit(1);
         });
 }

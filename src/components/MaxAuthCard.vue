@@ -68,6 +68,7 @@
                         :label="t.submit"
                         icon="mdi:login"
                         :loading="loading"
+                        :action="onSubmit"
                     />
                 </template>
 
@@ -96,6 +97,7 @@
                             :autofocus="true"
                             :error="codeError"
                             :aria-describedby="error ? errorId : undefined"
+                            @complete="handleFormSubmit"
                         />
                     </slot>
 
@@ -123,6 +125,7 @@
                         :loading="loading"
                         :disabled="isDynamicButtonDisabled"
                         :aria-describedby="isCooldownActive ? 'otp-cooldown-status' : undefined"
+                        :action="handleDynamicSubmit"
                     />
 
                     <span
@@ -616,13 +619,16 @@
         }
     };
 
-    /**
-     * Único ponto de entrada das ações do formulário.
-     *
-     * Os botões são `type="submit"`; não recebem `action` para que um clique,
-     * Enter e o autofill do navegador percorram o mesmo evento submit nativo.
-     */
-    const handleFormSubmit = (): void => {
+    let isHandlingSubmitInTick = false;
+
+    const handleFormSubmit = (payloadOrEvent?: any): void => {
+        if (isHandlingSubmitInTick) return;
+        isHandlingSubmitInTick = true;
+        nextTick(() => {
+            isHandlingSubmitInTick = false;
+        });
+
+        if (payloadOrEvent && payloadOrEvent.event && typeof payloadOrEvent.event.preventDefault === 'function') payloadOrEvent.event.preventDefault();
 
         if (props.loading) return;
 
@@ -666,6 +672,9 @@
             }
         }
     };
+
+    const handleDynamicSubmit = handleFormSubmit;
+    const onSubmit = handleFormSubmit;
 
     watch(
         () => props.error,

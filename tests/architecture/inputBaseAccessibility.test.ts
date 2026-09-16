@@ -26,18 +26,15 @@ function getComponentsUsingInputBase(): string[] {
 }
 
 describe('Auditoria Arquitetural: Acessibilidade de InputBase e Consumidores', () => {
-    it('as 25 famílias de componentes de entrada devem conectar atributos ao controle nativo ou ao proxy de formulário', () => {
+    it('as 26 famílias de componentes de entrada devem conectar atributos de controle e ID aos elementos operáveis', () => {
         const consumers = getComponentsUsingInputBase();
         expect(consumers.length).toBe(25);
 
         const unmigrated: string[] = [];
         for (const file of consumers) {
             const content = fs.readFileSync(path.join(COMPONENTS_DIR, file), 'utf-8');
-            // Controles nativos usam `inputAttrs`; controles ARIA compostos usam
-            // `formAttrs` (owner nativo) e `triggerAttrs` (gatilho operável).
-            const hasNativeControl = /<template\s+#default=["']\{[^}]*inputAttrs[^}]*\}["']/.test(content);
-            const hasCompositeControl = /<template\s+#default=["']\{[^}]*formAttrs[^}]*triggerAttrs[^}]*\}["']/.test(content);
-            if (!hasNativeControl && !hasCompositeControl) unmigrated.push(file);
+            const hasInputAttrs = /<template\s+#default=["']\{[^}]*inputAttrs[^}]*\}["']/.test(content);
+            if (!hasInputAttrs) unmigrated.push(file);
         }
 
         expect(unmigrated).toEqual([]);
@@ -119,7 +116,7 @@ describe('Auditoria Arquitetural: Acessibilidade de InputBase e Consumidores', (
             expect(textarea.attributes('aria-describedby')).toBe(message.attributes('id'));
         });
 
-        it('MaxInputSelect mantém ARIA no combobox e associa label ao owner nativo', () => {
+        it('MaxInputSelect conecta atributos de combobox e inputAttrs no gatilho', () => {
             const wrapper = mount(MaxInputSelect, {
                 props: {
                     modelValue: null,
@@ -131,14 +128,12 @@ describe('Auditoria Arquitetural: Acessibilidade de InputBase e Consumidores', (
             });
 
             const combobox = wrapper.find('.max-select[role="combobox"]');
-            const formOwner = wrapper.find('.max-native-form-proxy');
             const label = wrapper.find('label');
             const message = wrapper.find('.input-message');
 
             expect(combobox.exists()).toBe(true);
-            expect(formOwner.exists()).toBe(true);
-            expect(formOwner.attributes('id')).toBeTruthy();
-            expect(label.attributes('for')).toBe(formOwner.attributes('id'));
+            expect(combobox.attributes('id')).toBeTruthy();
+            expect(label.attributes('for')).toBe(combobox.attributes('id'));
             expect(combobox.attributes('aria-required')).toBe('true');
             expect(combobox.attributes('aria-invalid')).toBe('true');
             expect(combobox.attributes('aria-describedby')).toBe(message.attributes('id'));
@@ -206,7 +201,7 @@ describe('Auditoria Arquitetural: Acessibilidade de InputBase e Consumidores', (
             expect(input.attributes('aria-describedby')).toBe(message.attributes('id'));
         });
 
-        it('MaxInputSwitch mantém ARIA no switch e associa label ao owner nativo', () => {
+        it('MaxInputSwitch conecta inputAttrs no elemento role="switch"', () => {
             const wrapper = mount(MaxInputSwitch, {
                 props: {
                     modelValue: false,
@@ -216,13 +211,11 @@ describe('Auditoria Arquitetural: Acessibilidade de InputBase e Consumidores', (
             });
 
             const toggle = wrapper.find('[role="switch"]');
-            const formOwner = wrapper.find('.max-native-form-proxy');
             const label = wrapper.find('label');
 
             expect(toggle.exists()).toBe(true);
-            expect(formOwner.exists()).toBe(true);
-            expect(formOwner.attributes('id')).toBeTruthy();
-            expect(label.attributes('for')).toBe(formOwner.attributes('id'));
+            expect(toggle.attributes('id')).toBeTruthy();
+            expect(label.attributes('for')).toBe(toggle.attributes('id'));
             expect(toggle.attributes('aria-required')).toBe('true');
         });
 
@@ -318,11 +311,9 @@ describe('Auditoria Arquitetural: Acessibilidade de InputBase e Consumidores', (
             expect(input.exists()).toBe(true);
             expect(label.attributes('for')).toBe(input.attributes('id'));
 
-            // O happy-dom não executa a ação padrão nativa de foco do label.
-            // Aqui verificamos a associação semântica; a interação real é coberta
-            // pela suíte Chromium.
+            // Simula clique no label
             await label.trigger('click');
-            expect(label.attributes('for')).toBe(input.attributes('id'));
+            expect(document.activeElement).toBe(input.element);
 
             wrapper.unmount();
         });

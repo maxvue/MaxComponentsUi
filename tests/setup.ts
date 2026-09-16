@@ -193,6 +193,13 @@ afterEach(() => {
         // no-op
     }
 
+    if (typeof window !== 'undefined' && (window as any).happyDOM) try {
+        (window as any).happyDOM.cancelAsync?.();
+    } catch {
+        // no-op
+    }
+
+
     const freshFetch = createDefaultFetch();
     globalThis.fetch = freshFetch;
     if (typeof window !== 'undefined') window.fetch = freshFetch;

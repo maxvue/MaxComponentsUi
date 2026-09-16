@@ -823,7 +823,7 @@
                     }
 
                     .max-listbox-item-sublabel {
-                        color: var(--max-content-secondary);
+                        color: var(--background-650);
                         font-size: 0.85rem;
                         overflow: hidden;
                         text-overflow: ellipsis;

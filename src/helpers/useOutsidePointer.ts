@@ -32,7 +32,6 @@ export interface UseOutsidePointerResult {
 
 interface OverlayEntry {
     id: number;
-    isActive: Ref<boolean>;
     elements: () => (Node | null | undefined)[];
     onClose: (reason: 'outside' | 'escape') => void;
     closeOnEscape?: boolean | Ref<boolean | undefined>;
@@ -40,6 +39,7 @@ interface OverlayEntry {
     previousActiveElement: HTMLElement | null;
     triggerEl?: Ref<HTMLElement | null | undefined> | (() => HTMLElement | null | undefined);
     restoreFocus?: boolean;
+    closing?: boolean;
     onReposition?: () => void;
     repositionOnScroll?: boolean;
     repositionOnResize?: boolean;
@@ -98,89 +98,66 @@ function isInsideElements(target: Node | null, elements: (Node | null | undefine
     return false;
 }
 
-let lastHandledKeyEvent: KeyboardEvent | null = null;
-
-function restoreOverlayFocus(entry: OverlayEntry, reason: 'outside' | 'escape') {
-    if (entry.restoreFocus === false || typeof document === 'undefined') return;
-
-    const currentActive = document.activeElement;
-    const isFocusOnExternalControl =
-        currentActive &&
-        currentActive !== document.body &&
-        currentActive !== document.documentElement &&
-        !isInsideElements(currentActive, entry.elements());
-
-    // Não rouba foco do controle clicado no clique-through.
-    if (reason !== 'escape' && isFocusOnExternalControl) return;
-
-    const explicitTrigger = typeof entry.triggerEl === 'function' ? entry.triggerEl() : entry.triggerEl?.value;
-    const targetToFocus =
-        explicitTrigger && (explicitTrigger.isConnected ?? document.body.contains(explicitTrigger))
-            ? explicitTrigger
-            : entry.previousActiveElement && (entry.previousActiveElement.isConnected ?? document.body.contains(entry.previousActiveElement))
-                ? entry.previousActiveElement
-                : null;
-
-    if (targetToFocus && typeof targetToFocus.focus === 'function') targetToFocus.focus();
-}
-
-/**
- * Remove a entrada antes de notificar o consumidor. A mudança reativa de
- * `isOpen` só acontece no tick seguinte, portanto ela não pode ser a barreira
- * contra dois eventos globais consecutivos solicitarem o mesmo fechamento.
- */
-function requestClose(entry: OverlayEntry, reason: 'outside' | 'escape') {
-    const idx = overlayStack.findIndex((item) => item.id === entry.id);
-    if (idx < 0) return;
-
-    overlayStack.splice(idx, 1);
-    entry.isActive.value = false;
-    lastCloseReason = reason;
-    restoreOverlayFocus(entry, reason);
-
-    if (overlayStack.length === 0 && isGlobalAttached) {
-        detachGlobalListeners();
-        pointerDownTargetInsideTop = false;
+function getTopActiveOverlay(): OverlayEntry | null {
+    for (let i = overlayStack.length - 1; i >= 0; i--) {
+        const entry = overlayStack[i];
+        if (!entry.closing) return entry;
     }
-
-    entry.onClose(reason);
+    return null;
 }
+
+let lastHandledKeyEvent: KeyboardEvent | null = null;
+let hasPendingCloseMicrotask = false;
 
 const onGlobalKeydown = (e: KeyboardEvent) => {
     if (lastHandledKeyEvent === e) return;
     lastHandledKeyEvent = e;
-    if (e.key !== 'Escape' || overlayStack.length === 0) return;
+    if (e.key !== 'Escape') return;
 
-    // Apenas o overlay no TOPO da pilha fecha com Escape
-    const topOverlay = overlayStack[overlayStack.length - 1];
+    // Se já houver um fechamento solicitado no mesmo ciclo síncrono e aguardando processamento reativo
+    if (hasPendingCloseMicrotask) return;
+
+    // Apenas o overlay ativo no TOPO da pilha fecha com Escape
+    const topOverlay = getTopActiveOverlay();
+    if (!topOverlay) return;
+
     const canClose = topOverlay.closeOnEscape !== undefined ? Boolean(unref(topOverlay.closeOnEscape)) : true;
 
     if (canClose) {
         e.stopPropagation();
         e.preventDefault();
-        requestClose(topOverlay, 'escape');
+        lastCloseReason = 'escape';
+        topOverlay.closing = true;
+        hasPendingCloseMicrotask = true;
+        Promise.resolve().then(() => {
+            hasPendingCloseMicrotask = false;
+        });
+        topOverlay.onClose('escape');
     }
 };
 
 const onGlobalPointerDown = (e: PointerEvent | MouseEvent | TouchEvent) => {
-    if (overlayStack.length === 0) {
+    const topOverlay = getTopActiveOverlay();
+    if (!topOverlay) {
         pointerDownTargetInsideTop = false;
         return;
     }
     const target = e.target as Node | null;
-    const topOverlay = overlayStack[overlayStack.length - 1];
 
-    // Verifica se o pointerdown ocorreu dentro da camada superior (topo da pilha)
+    // Verifica se o pointerdown ocorreu dentro da camada superior (topo da pilha ativa)
     pointerDownTargetInsideTop = isInsideElements(target, topOverlay.elements());
 };
 
 const onGlobalClick = (e: MouseEvent) => {
-    if (overlayStack.length === 0) {
+    // Se já houver um fechamento solicitado no mesmo ciclo síncrono e aguardando processamento reativo
+    if (hasPendingCloseMicrotask) return;
+
+    const topOverlay = getTopActiveOverlay();
+    if (!topOverlay) {
         pointerDownTargetInsideTop = false;
         return;
     }
 
-    const topOverlay = overlayStack[overlayStack.length - 1];
     const target = e.target as Node | null;
 
     const isInsideTop = isInsideElements(target, topOverlay.elements());
@@ -191,7 +168,15 @@ const onGlobalClick = (e: MouseEvent) => {
     if (startedInsideTop || isInsideTop) return;
 
     const canDismiss = topOverlay.dismissable !== undefined ? Boolean(unref(topOverlay.dismissable)) : true;
-    if (canDismiss) requestClose(topOverlay, 'outside');
+    if (canDismiss) {
+        lastCloseReason = 'outside';
+        topOverlay.closing = true;
+        hasPendingCloseMicrotask = true;
+        Promise.resolve().then(() => {
+            hasPendingCloseMicrotask = false;
+        });
+        topOverlay.onClose('outside');
+    }
 };
 
 const handleGlobalReposition = () => {
@@ -202,7 +187,8 @@ const handleGlobalReposition = () => {
             // Se o trigger/âncora foi desconectado do DOM, fecha o overlay em vez de reposicionar erraticamente
             const trigger = typeof overlay.triggerEl === 'function' ? overlay.triggerEl() : overlay.triggerEl?.value;
             if (trigger && !trigger.isConnected) {
-                requestClose(overlay, 'outside');
+                lastCloseReason = 'outside';
+                overlay.onClose('outside');
                 continue;
             }
             overlay.onReposition();
@@ -263,7 +249,6 @@ export function useOutsidePointer(
 
         const entry: OverlayEntry = {
             id,
-            isActive,
             elements: options.elements,
             onClose: options.onClose,
             closeOnEscape: options.closeOnEscape,
@@ -290,7 +275,30 @@ export function useOutsidePointer(
         if (idx >= 0) {
             const entry = overlayStack[idx];
             overlayStack.splice(idx, 1);
-            restoreOverlayFocus(entry, lastCloseReason ?? 'outside');
+
+            if (entry.restoreFocus !== false && typeof document !== 'undefined') {
+                const currentActive = document.activeElement;
+                const isFocusOnExternalControl =
+                    currentActive &&
+                    currentActive !== document.body &&
+                    currentActive !== document.documentElement &&
+                    !isInsideElements(currentActive, entry.elements());
+
+                // Não rouba foco do controle clicado no clique-through
+                const shouldRestore = lastCloseReason === 'escape' || !isFocusOnExternalControl;
+
+                if (shouldRestore) {
+                    const explicitTrigger = typeof entry.triggerEl === 'function' ? entry.triggerEl() : entry.triggerEl?.value;
+                    let targetToFocus: HTMLElement | null = null;
+
+                    if (explicitTrigger && (explicitTrigger.isConnected ?? document.body.contains(explicitTrigger))) targetToFocus = explicitTrigger;
+                    else if (entry.previousActiveElement && (entry.previousActiveElement.isConnected ?? document.body.contains(entry.previousActiveElement))) targetToFocus = entry.previousActiveElement;
+
+
+                    if (targetToFocus && typeof targetToFocus.focus === 'function') targetToFocus.focus();
+
+                }
+            }
         }
 
         if (overlayStack.length === 0 && isGlobalAttached) {
@@ -325,6 +333,7 @@ export function resetOutsidePointerStateForTests() {
     lastHandledKeyEvent = null;
     lastCloseReason = null;
     pointerDownTargetInsideTop = false;
+    hasPendingCloseMicrotask = false;
     if (isGlobalAttached) detachGlobalListeners();
 
 }

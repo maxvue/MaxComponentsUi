@@ -10,17 +10,17 @@
                         <!-- Default -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxListBox aria-label="Opções disponíveis" />
+                            <MaxListBox />
                         </div>
                         <!-- Disabled -->
                         <div class="state-col">
                             <span>Disabled</span>
-                            <MaxListBox aria-label="Opções indisponíveis" disabled />
+                            <MaxListBox disabled />
                         </div>
                         <!-- Error / Variant -->
                         <div class="state-col">
                             <span>Erro / Secundário</span>
-                            <MaxListBox aria-label="Opções com atenção" />
+                            <MaxListBox error severity="danger" />
                         </div>
                     </div>
                 </div>

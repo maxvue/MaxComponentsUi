@@ -522,7 +522,7 @@
                     place-items: center;
                     font-size: 0.8rem;
                     min-width: 15px;
-                    color: var(--max-content-secondary);
+                    color: var(--background-650);
                 }
             }
         }

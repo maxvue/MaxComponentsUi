@@ -1,6 +1,4 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import InputBase from '../../src/components/InputBase.vue';
@@ -39,7 +37,6 @@ interface FamilyConfig {
     rootSelector?: string;
     props?: Record<string, any>;
     supportsAutofill?: boolean;
-    nativeFormOwner?: boolean;
 }
 
 const inputFamilies: FamilyConfig[] = [
@@ -57,15 +54,15 @@ const inputFamilies: FamilyConfig[] = [
     { name: 'MaxInputCreditCardCvv', component: MaxInputCreditCardCvv, selector: 'input.max-base-input', supportsAutofill: true },
     { name: 'MaxInputCoordinateDecimalLat', component: MaxInputCoordinateDecimalLat, selector: 'input.max-input-native', supportsAutofill: true },
     { name: 'MaxInputCoordinateDecimalLng', component: MaxInputCoordinateDecimalLng, selector: 'input.max-input-native', supportsAutofill: true },
-    { name: 'MaxInputSelect', component: MaxInputSelect, selector: '.max-select', props: { options: [] }, nativeFormOwner: true },
+    { name: 'MaxInputSelect', component: MaxInputSelect, selector: '.max-select', props: { options: [] } },
     { name: 'MaxInputAutoComplete', component: MaxInputAutoComplete, selector: 'input.max-autocomplete-input', props: { options: [] }, supportsAutofill: true },
     { name: 'MaxInputAutoCompleteApi', component: MaxInputAutoCompleteApi, selector: 'input.max-autocomplete-input', props: { options: [], route: 'api.test' }, supportsAutofill: true },
     { name: 'MaxChips', component: MaxChips, selector: 'input.max-chips-input', props: { modelValue: [] } },
-    { name: 'MaxTagSelect', component: MaxTagSelect, selector: '.max-select', props: { modelValue: [], options: [] }, nativeFormOwner: true },
+    { name: 'MaxTagSelect', component: MaxTagSelect, selector: '.max-select', props: { modelValue: [], options: [] } },
     { name: 'MaxColorPicker', component: MaxColorPicker, selector: 'input.max-colorpicker-native', props: { modelValue: '#000000' } },
-    { name: 'MaxInputIconPicker', component: MaxInputIconPicker, selector: '.icon-picker-trigger', nativeFormOwner: true },
-    { name: 'MaxInputOTP', component: MaxInputOTP, selector: '.max-input-otp-container', nativeFormOwner: true },
-    { name: 'MaxInputSwitch', component: MaxInputSwitch, selector: '.max-switch-toggle', props: { modelValue: false }, nativeFormOwner: true },
+    { name: 'MaxInputIconPicker', component: MaxInputIconPicker, selector: '.icon-picker-trigger' },
+    { name: 'MaxInputOTP', component: MaxInputOTP, selector: '.max-input-otp-container' },
+    { name: 'MaxInputSwitch', component: MaxInputSwitch, selector: '.max-switch-toggle', props: { modelValue: false } },
     { name: 'MaxInputTextList', component: MaxInputTextList, selector: 'textarea.code-textarea' },
     { name: 'MaxInputToggle', component: MaxInputToggle, selector: 'input.max-toggleswitch-input', rootSelector: '.max-input-toggle', props: { modelValue: false } }
 ];
@@ -152,7 +149,7 @@ describe('Separação de atributos nativos de controle e wrapper (R04 / F05)', (
         });
 
         for (const family of inputFamilies) {
-            const { name, component, selector, rootSelector, props: customProps, nativeFormOwner } = family;
+            const { name, component, selector, rootSelector, props: customProps } = family;
             const expectedRootSelector = rootSelector || '.max-input-main-div';
 
             it(`${name}: separa atributos de controle para o nó operável e preserva classe/dados no wrapper`, () => {
@@ -183,8 +180,7 @@ describe('Separação de atributos nativos de controle e wrapper (R04 / F05)', (
                 // Chega ao elemento operável
                 const controlEl = wrapper.find(selector);
                 expect(controlEl.exists(), `${name} deve renderizar o nó operável ${selector}`).toBe(true);
-                const ownerEl = nativeFormOwner ? wrapper.find('.max-native-form-proxy') : controlEl;
-                expect(ownerEl.attributes('name')).toBe(`field_${name.toLowerCase()}`);
+                expect(controlEl.attributes('name')).toBe(`field_${name.toLowerCase()}`);
             });
 
             it(`${name}: propaga disabled e required para o elemento operável sem poluir a raiz`, () => {
@@ -212,8 +208,9 @@ describe('Separação de atributos nativos de controle e wrapper (R04 / F05)', (
                 expect(isRequired, `${name} deve marcar required/aria-required no nó operável`).toBe(true);
             });
 
-            it(`${name}: associa o rótulo ao owner nativo sem handler manual de foco`, () => {
+            it(`${name}: clique no rótulo (label click) transfere foco ao controle sem chamada manual de focus()`, async () => {
                 const wrapper = mount(component, {
+                    attachTo: document.body,
                     props: {
                         modelValue: '',
                         label: `Rótulo ${name}`,
@@ -227,10 +224,17 @@ describe('Separação de atributos nativos de controle e wrapper (R04 / F05)', (
                 const controlEl = wrapper.find(selector);
                 expect(controlEl.exists(), `${name} deve possuir o controle ${selector}`).toBe(true);
 
-                const ownerId = labelEl.attributes('for');
-                expect(ownerId, `${name} deve expor um ID no rótulo`).toBeTruthy();
-                const ownerEl = nativeFormOwner ? wrapper.find('.max-native-form-proxy') : controlEl;
-                expect(ownerEl.attributes('id'), `${name} deve atribuir o ID ao owner nativo`).toBe(ownerId);
+                // Dispara clique no label sem chamar focus() manualmente
+                await labelEl.trigger('click');
+
+                // Verifica se o elemento ativo é o próprio nó operável ou um elemento interativo dentro dele
+                const activeEl = document.activeElement;
+                const isFocusedDirectly = activeEl === controlEl.element;
+                const isFocusedInside = controlEl.element.contains(activeEl);
+
+                expect(isFocusedDirectly || isFocusedInside, `${name} deve focar o controle operável após clique no rótulo`).toBe(true);
+
+                wrapper.unmount();
             });
         }
     });
@@ -362,44 +366,105 @@ describe('Separação de atributos nativos de controle e wrapper (R04 / F05)', (
             expect(forAttr).toBeDefined();
             expect(idAttr).toBeDefined();
             expect(forAttr).toBe(idAttr);
-            expect(wrapper.find(`#${forAttr!}`).exists()).toBe(true);
+            expect(document.getElementById(forAttr!)).toBe(inputEl.element);
 
             wrapper.unmount();
         });
 
-        it('envia dados através de formulário HTML nativo ao submeter com campos nomeados', () => {
+        it('envia dados através de formulário HTML nativo ao submeter com múltiplos campos nomeados de famílias distintas', () => {
             const form = document.createElement('form');
-            form.id = 'test-form';
+            form.id = 'test-multi-form';
             document.body.appendChild(form);
 
-            const wrapper = mount(MaxInputText, {
-                props: {
-                    modelValue: 'John Doe'
-                },
-                attrs: {
-                    name: 'customer_name',
-                    form: 'test-form'
-                },
+            const wrapperText = mount(MaxInputText, {
+                props: { modelValue: 'John Doe' },
+                attrs: { name: 'customer_name', form: 'test-multi-form' },
                 attachTo: form
             });
 
-            const inputEl = wrapper.find('input.max-input-native');
-            expect(inputEl.attributes('name')).toBe('customer_name');
-            expect(inputEl.attributes('form')).toBe('test-form');
+            const wrapperTextArea = mount(MaxInputTextArea, {
+                props: { modelValue: 'Observações de teste detalhadas' },
+                attrs: { name: 'customer_notes', form: 'test-multi-form' },
+                attachTo: form
+            });
+
+            const wrapperNumber = mount(MaxInputNumber, {
+                props: { modelValue: 42 },
+                attrs: { name: 'customer_age', form: 'test-multi-form' },
+                attachTo: form
+            });
+
+            const wrapperToggle = mount(MaxInputToggle, {
+                props: { modelValue: true },
+                attrs: { name: 'customer_newsletter', form: 'test-multi-form' },
+                attachTo: form
+            });
+
+            const inputNative = wrapperText.find('input.max-input-native');
+            expect(inputNative.attributes('name')).toBe('customer_name');
+            expect(inputNative.attributes('form')).toBe('test-multi-form');
+
+            const textareaNative = wrapperTextArea.find('textarea');
+            expect(textareaNative.attributes('name')).toBe('customer_notes');
+            expect(textareaNative.attributes('form')).toBe('test-multi-form');
+
+            const numberNative = wrapperNumber.find('input.max-input-native');
+            expect(numberNative.attributes('name')).toBe('customer_age');
+            expect(numberNative.attributes('form')).toBe('test-multi-form');
 
             const formData = new FormData(form);
             expect(formData.get('customer_name')).toBe('John Doe');
+            expect(formData.get('customer_notes')).toBe('Observações de teste detalhadas');
+            expect(formData.get('customer_age')).toBe('42');
 
-            wrapper.unmount();
+            wrapperText.unmount();
+            wrapperTextArea.unmount();
+            wrapperNumber.unmount();
+            wrapperToggle.unmount();
             form.remove();
         });
     });
 
-    it('não instala handlers de foco manual nos wrappers de InputBase e Toggle', () => {
-        const inputBaseSource = readFileSync(resolve(__dirname, '../../src/components/InputBase.vue'), 'utf8');
-        const toggleSource = readFileSync(resolve(__dirname, '../../src/components/MaxInputToggle.vue'), 'utf8');
+    describe('MaxInputBirthday: isolamento fora da contagem canônica de 25 famílias', () => {
+        it('mantém a contagem canônica estritamente em 25 famílias sem incluir Birthday', () => {
+            expect(inputFamilies.length).toBe(25);
+            expect(inputFamilies.some((f) => f.name === 'MaxInputBirthday')).toBe(false);
+        });
 
-        expect(inputBaseSource).not.toContain('onLabelClick');
-        expect(toggleSource).not.toContain('onLabelClick');
+        it('MaxInputBirthday separa atributos de controle e preserva wrapper sem vazamento', async () => {
+            const { default: MaxInputBirthday } = await import('../../src/components/MaxInputBirthday.vue');
+
+            const wrapper = mount(MaxInputBirthday, {
+                props: {
+                    modelValue: '1995-05-20',
+                    label: 'Data de Nascimento',
+                    disabled: true,
+                    required: true
+                },
+                attrs: {
+                    name: 'birthday_field',
+                    'data-testid': 'birthday-test-wrapper',
+                    class: 'custom-birthday-class'
+                }
+            });
+
+            const rootEl = wrapper.find('.max-input-birthday');
+            expect(rootEl.exists()).toBe(true);
+            expect(rootEl.classes()).toContain('custom-birthday-class');
+            expect(rootEl.attributes('data-testid')).toBe('birthday-test-wrapper');
+
+            // Wrapper não deve reter atributos operáveis
+            expect(rootEl.attributes('name')).toBeUndefined();
+            expect(rootEl.attributes('disabled')).toBeUndefined();
+            expect(rootEl.attributes('required')).toBeUndefined();
+
+            // Segmentos internos refletem estado desabilitado
+            const dayBtn = wrapper.find('.max-birthday-segment--day');
+            expect(dayBtn.exists()).toBe(true);
+            expect(dayBtn.attributes('disabled')).toBeDefined();
+
+            wrapper.unmount();
+        });
     });
 });
+

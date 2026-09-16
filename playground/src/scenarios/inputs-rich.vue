@@ -95,7 +95,7 @@
 <script setup lang="ts">
     // Os cenários compartilham props neutras para satisfazer os contratos dos
     // componentes sem ocultar a renderização dos estados demonstrados.
-    const scenarioProps: any = { modelValue: '', options: [], items: [], route: '/', target: document.body, editor: null };
+    const scenarioProps: any = { modelValue: '', options: [], items: [], route: '/', target: document.body };
 
     import { MaxInputMarkdown } from '@maxvue/max-components-ui';
     import { MaxInputMarkdownToolbar } from '@maxvue/max-components-ui';

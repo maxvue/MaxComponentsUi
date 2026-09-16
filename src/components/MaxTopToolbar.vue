@@ -48,7 +48,7 @@
                             role="menuitem"
                             :id="`top-toolbar-item-${index}`"
                             :tabindex="focusedIndex === index && !item.disabled ? 0 : -1"
-                            :aria-label="getIconItemAriaLabel(item, index)"
+                            :aria-label="item.ariaLabel || item.label || item.title || (typeof item.tooltip === 'string' ? item.tooltip : undefined) || 'Ação da barra de ferramentas'"
                             :tooltip="typeof item.tooltip === 'string' ? item.tooltip : undefined"
                             :aria-disabled="item.disabled ? 'true' : undefined"
                             :icon="item.icon"
@@ -108,12 +108,6 @@
     let closeTimer: ReturnType<typeof setTimeout> | null = null;
 
     const showed = computed(() => (attrs.plus === true ? true : toolbar.show));
-
-    /** Todo item dinâmico recebe um nome estável e distinto, mesmo sem metadados. */
-    const getIconItemAriaLabel = (item: any, index: number): string => {
-        const name = item.ariaLabel || item.label || item.title || (typeof item.tooltip === 'string' ? item.tooltip : undefined);
-        return typeof name === 'string' && name.trim() ? name.trim() : `Item ${index + 1} da barra de ferramentas`;
-    };
 
     const setItemRef = (el: any, index: number) => {
         if (el) itemRefs.value[index] = el.$el ?? el;

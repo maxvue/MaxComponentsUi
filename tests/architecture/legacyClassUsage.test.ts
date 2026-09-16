@@ -28,6 +28,17 @@ export interface TemplateClassOccurrence {
     allClassesInNode: string[];
 }
 
+export interface StructuralRule {
+    /** Tags HTML/componente permitidas para o nó que contém a classe legada */
+    allowedTags: string[];
+    /** Classe canônica .max-* que obrigatoriamente deve coexistir no mesmo nó */
+    requiredSiblingCanonical?: string;
+    /** Tags do elemento pai imediato permitidas para o nó */
+    allowedParentTags?: string[];
+    /** Padrões regex ou literais permitidos para o caminho de tags ancestrais até o nó */
+    allowedPathPatterns?: (RegExp | string)[];
+}
+
 export interface LegacyExceptionCatalogEntry {
     /** Seletores .p-* com contagem exata de ocorrências no bloco <style> */
     allowedStyleSelectors: Record<string, number>;
@@ -35,8 +46,8 @@ export interface LegacyExceptionCatalogEntry {
     allowedTemplateClasses: Record<string, number>;
     /** Classes canônicas .max-* obrigatórias que devem existir no arquivo */
     requiredCanonicalClasses: string[];
-    /** Mapeamento de tags autorizadas e classes canônicas irmãs por classe legada de template */
-    structuralRules?: Record<string, { allowedTags: string[]; requiredSiblingCanonical?: string }>;
+    /** Mapeamento de tags autorizadas, pais autorizados, caminhos e classes canônicas irmãs por classe legada de template */
+    structuralRules?: Record<string, StructuralRule>;
 }
 
 /**
@@ -74,7 +85,33 @@ export const LEGACY_COMPAT_CATALOG: Record<string, LegacyExceptionCatalogEntry> 
             'max-top-toolbar-item',
             'max-top-toolbar-item-content',
             'max-top-toolbar-submenu-root'
-        ]
+        ],
+        structuralRules: {
+            'p-menubar-root-list': {
+                allowedTags: ['ul'],
+                allowedParentTags: ['nav'],
+                allowedPathPatterns: [/^div > nav > ul$/],
+                requiredSiblingCanonical: 'max-top-toolbar-root-list'
+            },
+            'p-menubar-item': {
+                allowedTags: ['li'],
+                allowedParentTags: ['ul'],
+                allowedPathPatterns: [/^div > nav > ul > li$/],
+                requiredSiblingCanonical: 'max-top-toolbar-item'
+            },
+            'p-menubar-item-content': {
+                allowedTags: ['div'],
+                allowedParentTags: ['li'],
+                allowedPathPatterns: [/^div > nav > ul > li > div$/],
+                requiredSiblingCanonical: 'max-top-toolbar-item-content'
+            },
+            'p-menubar-submenu-root': {
+                allowedTags: ['MaxTopToolbarSubmenu'],
+                allowedParentTags: ['li'],
+                allowedPathPatterns: [/^div > nav > ul > li > MaxTopToolbarSubmenu$/],
+                requiredSiblingCanonical: 'max-top-toolbar-submenu-root'
+            }
+        }
     },
     'MaxTopToolbarSubmenu.vue': {
         allowedStyleSelectors: {},
@@ -89,7 +126,33 @@ export const LEGACY_COMPAT_CATALOG: Record<string, LegacyExceptionCatalogEntry> 
             'max-top-toolbar-item',
             'max-top-toolbar-item-content',
             'max-top-toolbar-submenu-nested'
-        ]
+        ],
+        structuralRules: {
+            'p-menubar-submenu': {
+                allowedTags: ['ul'],
+                allowedParentTags: ['root'],
+                allowedPathPatterns: [/^ul$/],
+                requiredSiblingCanonical: 'max-top-toolbar-submenu'
+            },
+            'p-menubar-item': {
+                allowedTags: ['li'],
+                allowedParentTags: ['ul'],
+                allowedPathPatterns: [/^ul > li$/],
+                requiredSiblingCanonical: 'max-top-toolbar-item'
+            },
+            'p-menubar-item-content': {
+                allowedTags: ['div'],
+                allowedParentTags: ['li'],
+                allowedPathPatterns: [/^ul > li > div$/],
+                requiredSiblingCanonical: 'max-top-toolbar-item-content'
+            },
+            'p-menubar-submenu-nested': {
+                allowedTags: ['MaxTopToolbarSubmenu'],
+                allowedParentTags: ['li'],
+                allowedPathPatterns: [/^ul > li > MaxTopToolbarSubmenu$/],
+                requiredSiblingCanonical: 'max-top-toolbar-submenu-nested'
+            }
+        }
     },
     'MaxTagSelect.vue': {
         allowedStyleSelectors: {
@@ -130,15 +193,69 @@ export const LEGACY_COMPAT_CATALOG: Record<string, LegacyExceptionCatalogEntry> 
             'max-table-cell'
         ],
         structuralRules: {
-            'p-datatable': { allowedTags: ['div'], requiredSiblingCanonical: 'max-table' },
-            'p-datatable-scrollable': { allowedTags: ['div'], requiredSiblingCanonical: 'max-table-scrollable' },
-            'p-datatable-table-container': { allowedTags: ['div'], requiredSiblingCanonical: 'max-table-container' },
-            'p-datatable-cell': { allowedTags: ['td'], requiredSiblingCanonical: 'max-table-cell' },
-            'p-column': { allowedTags: ['tr', 'th'], requiredSiblingCanonical: 'max-table-column' },
-            'p-datatable-column-header-content': { allowedTags: ['div'], requiredSiblingCanonical: 'max-table-column-header-content' },
-            'p-datatable-column-title': { allowedTags: ['div'], requiredSiblingCanonical: 'max-table-column-title' },
-            'p-row-even': { allowedTags: ['tr'], requiredSiblingCanonical: 'max-table-row-even' },
-            'p-row-odd': { allowedTags: ['tr'], requiredSiblingCanonical: 'max-table-row-odd' }
+            'p-datatable': {
+                allowedTags: ['div'],
+                allowedParentTags: ['div'],
+                allowedPathPatterns: [/^div > div$/],
+                requiredSiblingCanonical: 'max-table'
+            },
+            'p-datatable-scrollable': {
+                allowedTags: ['div'],
+                allowedParentTags: ['div'],
+                allowedPathPatterns: [/^div > div$/],
+                requiredSiblingCanonical: 'max-table-scrollable'
+            },
+            'p-datatable-table-container': {
+                allowedTags: ['div'],
+                allowedParentTags: ['div'],
+                allowedPathPatterns: [/^div > div > div$/],
+                requiredSiblingCanonical: 'max-table-container'
+            },
+            'p-datatable-cell': {
+                allowedTags: ['td'],
+                allowedParentTags: ['tr'],
+                allowedPathPatterns: [/^div > div > div > table > template > tbody > (?:template > )*tr > td$/],
+                requiredSiblingCanonical: 'max-table-cell'
+            },
+            'p-column': {
+                allowedTags: ['tr', 'th'],
+                allowedParentTags: ['template', 'tr'],
+                allowedPathPatterns: [
+                    /^div > div > div > table > template > tbody > template > tr$/,
+                    /^div > div > div > table > template > thead > tr > th$/
+                ],
+                requiredSiblingCanonical: 'max-table-column'
+            },
+            'p-datatable-column-header-content': {
+                allowedTags: ['div'],
+                allowedParentTags: ['button', 'th'],
+                allowedPathPatterns: [
+                    /^div > div > div > table > template > thead > tr > th > button > div$/,
+                    /^div > div > div > table > template > thead > tr > th > div$/
+                ],
+                requiredSiblingCanonical: 'max-table-column-header-content'
+            },
+            'p-datatable-column-title': {
+                allowedTags: ['div'],
+                allowedParentTags: ['div'],
+                allowedPathPatterns: [
+                    /^div > div > div > table > template > thead > tr > th > button > div > div$/,
+                    /^div > div > div > table > template > thead > tr > th > div > div$/
+                ],
+                requiredSiblingCanonical: 'max-table-column-title'
+            },
+            'p-row-even': {
+                allowedTags: ['tr'],
+                allowedParentTags: ['template'],
+                allowedPathPatterns: [/^div > div > div > table > template > tbody > template > template > tr$/],
+                requiredSiblingCanonical: 'max-table-row-even'
+            },
+            'p-row-odd': {
+                allowedTags: ['tr'],
+                allowedParentTags: ['template'],
+                allowedPathPatterns: [/^div > div > div > table > template > tbody > template > template > tr$/],
+                requiredSiblingCanonical: 'max-table-row-odd'
+            }
         }
     },
     'MaxInputIconPicker.vue': {
@@ -162,7 +279,39 @@ export const LEGACY_COMPAT_CATALOG: Record<string, LegacyExceptionCatalogEntry> 
             'max-icon-picker-title',
             'max-icon-picker-close-button',
             'max-icon-picker-content'
-        ]
+        ],
+        structuralRules: {
+            'p-drawer-bottom': {
+                allowedTags: ['div'],
+                allowedParentTags: ['div'],
+                allowedPathPatterns: [/Teleport > div > div$/],
+                requiredSiblingCanonical: 'max-icon-picker-drawer'
+            },
+            'p-drawer-header': {
+                allowedTags: ['div'],
+                allowedParentTags: ['div'],
+                allowedPathPatterns: [/Teleport > div > div > div$/],
+                requiredSiblingCanonical: 'max-icon-picker-header'
+            },
+            'p-drawer-title': {
+                allowedTags: ['span'],
+                allowedParentTags: ['div'],
+                allowedPathPatterns: [/Teleport > div > div > div > span$/],
+                requiredSiblingCanonical: 'max-icon-picker-title'
+            },
+            'p-drawer-close-button': {
+                allowedTags: ['button'],
+                allowedParentTags: ['div'],
+                allowedPathPatterns: [/Teleport > div > div > div > button$/],
+                requiredSiblingCanonical: 'max-icon-picker-close-button'
+            },
+            'p-drawer-content': {
+                allowedTags: ['div'],
+                allowedParentTags: ['div'],
+                allowedPathPatterns: [/Teleport > div > div > div$/],
+                requiredSiblingCanonical: 'max-icon-picker-content'
+            }
+        }
     },
     'MaxInputFileUploadButton.vue': {
         allowedStyleSelectors: {
@@ -192,7 +341,36 @@ export const LEGACY_COMPAT_CATALOG: Record<string, LegacyExceptionCatalogEntry> 
         },
         requiredCanonicalClasses: [
             'max-input-file-upload'
-        ]
+        ],
+        structuralRules: {
+            'p-fileupload': {
+                allowedTags: ['div'],
+                allowedParentTags: ['div'],
+                allowedPathPatterns: [/^div > div$/],
+                requiredSiblingCanonical: 'max-fileupload'
+            },
+            'p-button': {
+                allowedTags: ['label', 'button'],
+                allowedParentTags: ['div'],
+                allowedPathPatterns: [
+                    /^div > div > label$/,
+                    /^div > div > button$/
+                ],
+                requiredSiblingCanonical: 'max-fileupload-button'
+            },
+            'p-fileupload-choose': {
+                allowedTags: ['label'],
+                allowedParentTags: ['div'],
+                allowedPathPatterns: [/^div > div > label$/],
+                requiredSiblingCanonical: 'max-fileupload-choose'
+            },
+            'p-fileupload-content': {
+                allowedTags: ['div'],
+                allowedParentTags: ['div'],
+                allowedPathPatterns: [/^div > div > div$/],
+                requiredSiblingCanonical: 'max-fileupload-content'
+            }
+        }
     }
 };
 
@@ -340,7 +518,14 @@ export function auditVueFileForLegacyClasses(filename: string, content: string):
         for (const occ of astOccurrences) {
             const rule = catalogEntry.structuralRules[occ.className];
             if (rule) {
-                if (!rule.allowedTags.includes(occ.tag)) violations.push(`${basename}: classe '${occ.className}' inserida em tag/contexto inválido <${occ.tag}> (esperado: [${rule.allowedTags.join(', ')}])`);
+                if (rule.allowedTags && !rule.allowedTags.includes(occ.tag)) violations.push(`${basename}: classe '${occ.className}' inserida em tag/contexto inválido <${occ.tag}> (esperado: [${rule.allowedTags.join(', ')}])`);
+
+                if (rule.allowedParentTags && !rule.allowedParentTags.includes(occ.parentTag)) violations.push(`${basename}: classe '${occ.className}' no nó <${occ.tag}> possui tag pai inválida <${occ.parentTag}> (esperado: [${rule.allowedParentTags.join(', ')}])`);
+
+                if (rule.allowedPathPatterns && rule.allowedPathPatterns.length > 0) {
+                    const matchesPath = rule.allowedPathPatterns.some((pattern) => typeof pattern === 'string' ? occ.path === pattern : pattern.test(occ.path));
+                    if (!matchesPath) violations.push(`${basename}: classe '${occ.className}' no nó <${occ.tag}> possui caminho estrutural inválido '${occ.path}'`);
+                }
 
                 if (rule.requiredSiblingCanonical && !occ.allClassesInNode.includes(rule.requiredSiblingCanonical)) violations.push(`${basename}: classe '${occ.className}' no nó <${occ.tag}> requer a classe canônica associada '${rule.requiredSiblingCanonical}'`);
 
@@ -480,6 +665,59 @@ describe('Auditoria Arquitetural: Uso de Classes Legadas e Desacoplamento PrimeV
             const violations = auditVueFileForLegacyClasses('MaxUserSection.vue', mutatedContent);
             expect(violations.length).toBeGreaterThan(0);
             expect(violations.some((v) => v.includes('ausência da anatomia canônica obrigatória \'max-user-section\''))).toBe(true);
+        });
+
+        it('falha na auditoria quando classe legada e seu alias canônico são movidos para uma div plausível fora da hierarquia canônica (violação estrutural de parentTag e path)', () => {
+            const filePath = path.join(COMPONENTS_DIR, 'MaxTable.vue');
+            const originalContent = fs.readFileSync(filePath, 'utf-8');
+
+            // Movemos a ocorrência de p-datatable-column-header-content com seu alias canônico de dentro do th
+            // para dentro da <div class="max-table-feedback-box"> (uma div plausível de UI).
+            // Para preservar rigorosamente a cardinalidade (3 ocorrências exatas) e isolar a detecção estrutural,
+            // substituímos uma das ocorrências em th por uma div neutra e inserimos a div na feedback-box:
+            const mutatedContent = originalContent
+                .replace(
+                    '<div class="max-table-column-header-content p-datatable-column-header-content">',
+                    '<div class="neutral-header-wrapper">'
+                )
+                .replace(
+                    '<div class="max-table-feedback-box">',
+                    '<div class="max-table-feedback-box">\n                                            <div class="max-table-column-header-content p-datatable-column-header-content"></div>'
+                );
+
+            const violations = auditVueFileForLegacyClasses('MaxTable.vue', mutatedContent);
+            expect(violations.length).toBeGreaterThan(0);
+            expect(
+                violations.some((v) =>
+                    v.includes('possui tag pai inválida <div> (esperado: [button, th])') ||
+                    v.includes('possui caminho estrutural inválido')
+                )
+            ).toBe(true);
+        });
+
+        it('falha na auditoria quando classe legada de célula (p-datatable-cell) e seu alias canônico são movidos para uma div plausível', () => {
+            const filePath = path.join(COMPONENTS_DIR, 'MaxTable.vue');
+            const originalContent = fs.readFileSync(filePath, 'utf-8');
+
+            // Converte um nó td de célula para uma div plausível com o alias canônico max-table-cell e a classe p-datatable-cell
+            const mutatedContent = originalContent
+                .replace(
+                    '<td class="max-table-td max-table-cell p-datatable-cell state-cell">',
+                    '<div class="max-table-td max-table-cell p-datatable-cell state-cell">'
+                )
+                .replace(
+                    '</td>',
+                    '</div>'
+                );
+
+            const violations = auditVueFileForLegacyClasses('MaxTable.vue', mutatedContent);
+            expect(violations.length).toBeGreaterThan(0);
+            expect(
+                violations.some((v) =>
+                    v.includes('inserida em tag/contexto inválido <div>') ||
+                    v.includes('possui caminho estrutural inválido')
+                )
+            ).toBe(true);
         });
     });
 });

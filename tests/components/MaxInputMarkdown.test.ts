@@ -6,6 +6,9 @@ import { resolve } from 'node:path';
 import MaxInputMarkdown from '../../src/components/MaxInputMarkdown.vue';
 
 let latestEditorOptions: any = null;
+const { starterKitConfigure } = vi.hoisted(() => ({
+    starterKitConfigure: vi.fn(() => ({ name: 'starterKit' }))
+}));
 const mockEditor = {
     chain: () => ({
         focus: () => ({
@@ -42,7 +45,9 @@ vi.mock('tiptap-markdown', () => ({
     Markdown: { configure: vi.fn(() => ({})) }
 }));
 
-vi.mock('@tiptap/starter-kit', () => ({ default: { configure: vi.fn(() => ({})) } }));
+vi.mock('@tiptap/starter-kit', () => ({ default: { configure: starterKitConfigure } }));
+vi.mock('@tiptap/extension-underline', () => ({ default: {} }));
+vi.mock('@tiptap/extension-link', () => ({ default: { configure: vi.fn(() => ({})) } }));
 vi.mock('@tiptap/extension-image', () => ({ default: {} }));
 // `@tiptap/extension-table` exporta `Table` de forma nomeada (diferente das
 // extensoes irmas, que usam default). O mock expoe os dois formatos para nao
@@ -90,6 +95,15 @@ describe('MaxInputMarkdown', () => {
     it('renderiza sem erros', () => {
         const wrapper = mountMarkdown();
         expect(wrapper.exists()).toBe(true);
+    });
+
+    it('desativa do StarterKit as extensões configuradas separadamente', () => {
+        mountMarkdown();
+
+        expect(starterKitConfigure).toHaveBeenCalledWith({
+            link: false,
+            underline: false
+        });
     });
 
     it('renderiza com a classe BEM correta .max-input-markdown no wrapper externo', () => {

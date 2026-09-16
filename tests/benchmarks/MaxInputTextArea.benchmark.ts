@@ -1,10 +1,10 @@
-import { describe, bench } from 'vitest';
+import { describe, it } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxInputTextArea from '../../src/components/MaxInputTextArea.vue';
 
 describe('Benchmark: MaxInputTextArea', () => {
-    bench('monta e renderiza 50 textareas e digita', async () => {
+    it('monta e renderiza 50 textareas e digita', async () => {
         setActivePinia(createPinia());
         const wrappers = [];
         for (let i = 0; i < 50; i++) {

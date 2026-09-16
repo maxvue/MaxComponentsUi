@@ -18,11 +18,6 @@ export default defineConfig({
                 fs.cpSync(srcThemes, distThemes, { recursive: true });
                 if (!fs.existsSync(path.resolve(distThemes, 'all.scss'))) throw new Error('Falha ao copiar dist/themes/all.scss durante o build');
 
-                const srcCreditCardAssets = path.resolve(import.meta.dirname, 'src/assets/credit-card');
-                const distCreditCardAssets = path.resolve(import.meta.dirname, 'dist/assets/credit-card');
-                fs.cpSync(srcCreditCardAssets, distCreditCardAssets, { recursive: true });
-                if (!fs.existsSync(path.resolve(distCreditCardAssets, 'card-visa.svg'))) throw new Error('Falha ao publicar assets SVG do cartão durante o build');
-
             }
         }
     ],
