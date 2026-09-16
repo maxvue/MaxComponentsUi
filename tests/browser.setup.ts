@@ -10,6 +10,22 @@ if (typeof (globalThis as any).Ziggy === 'undefined') (globalThis as any).Ziggy 
     routes: {}
 };
 
+// Em Vitest Browser Mode, o runner executa testes dentro de um iframe.
+// O CDP Emulation.setPageScaleFactor aplica o zoom no top-level document (window.top).
+// Propagamos a escala do visualViewport do top-level para o iframe de teste.
+if (typeof window !== 'undefined' && typeof VisualViewport !== 'undefined' && window.top && window !== window.top) {
+    try {
+        Object.defineProperty(VisualViewport.prototype, 'scale', {
+            get() {
+                return window.top?.visualViewport?.scale ?? 1;
+            },
+            configurable: true
+        });
+    } catch {
+        // Fallback silencioso se não for redefinível
+    }
+}
+
 
 // Mock do fetch para ícones para evitar requisições de rede involuntárias
 const dummySvg = '<svg viewBox="0 0 24 24"><path d="M0 0h24v24H0z"/></svg>';
