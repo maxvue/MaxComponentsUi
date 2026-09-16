@@ -235,6 +235,7 @@
             min-width: 320px;
             max-width: min(420px, 100%);
             width: fit-content;
+            flex-shrink: 0;
             padding: 14px 16px 0;
             border-radius: 10px;
             cursor: default;

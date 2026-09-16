@@ -1,9 +1,10 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { createApp, h, type App } from 'vue';
 import { createPinia, setActivePinia } from 'pinia';
-import { page } from 'vitest/browser';
+import { page, userEvent, cdp } from 'vitest/browser';
 import MaxToast from '../../src/components/MaxToast.vue';
 import { useToastStore, type ToastItem } from '../../src/stores/useToast.Store';
+import '../../src/themes/all.scss';
 
 let activeApp: App | null = null;
 let hostElement: HTMLElement | null = null;
@@ -98,16 +99,34 @@ describe('MaxToast no Chromium real (ui-design/toast-recortado-em-viewport-movel
         expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(320);
     });
 
-    it('mantém gutters e ausência de overflow horizontal em 320, 360, 390, 420 e 560px (#22)', async () => {
+    it('mantém gutters, ausência de overflow horizontal e altura/clamp real ao expandir e recolher em 320, 360, 390, 420 e 560px (#22)', async () => {
+        const longMsg = 'Esta é uma mensagem intencionalmente longa para medição de clamp e expansão vertical real em múltiplos viewports móveis e tablet.';
         for (const width of [320, 360, 390, 420, 560]) {
             const { items } = await mountToastAtViewport(width, 640, [
-                { title: 'Aviso', message: 'Mensagem teste para validação de viewport móvel e tablet', severity: 'warning' }
+                { title: 'Aviso', message: longMsg, severity: 'warning' }
             ]);
             expect(items.length).toBe(1);
-            const rect = items[0].getBoundingClientRect();
+            const item = items[0];
+            const rect = item.getBoundingClientRect();
             expect(rect.left).toBeGreaterThanOrEqual(15);
             expect(rect.right).toBeLessThanOrEqual(width - 15);
-            expectInsideViewport(items[0], width);
+            expectInsideViewport(item, width);
+
+            // Altura / clamp real ao expandir e recolher
+            const expandBtn = item.querySelector('.action-expand') as HTMLButtonElement;
+            expect(expandBtn).not.toBeNull();
+            const hInicial = item.getBoundingClientRect().height;
+
+            expandBtn.click();
+            await nextFrame();
+            const hExpandido = item.getBoundingClientRect().height;
+            expect(hExpandido).toBeGreaterThan(hInicial);
+
+            expandBtn.click();
+            await nextFrame();
+            const hRecolhido = item.getBoundingClientRect().height;
+            expect(hRecolhido).toBeLessThan(hExpandido);
+            expect(Math.abs(hRecolhido - hInicial)).toBeLessThanOrEqual(2);
         }
     });
 
@@ -116,13 +135,20 @@ describe('MaxToast no Chromium real (ui-design/toast-recortado-em-viewport-movel
             { title: 'Zoom 200%', message: 'Texto escalado em alta densidade', severity: 'info' }
         ]);
 
-        document.documentElement.style.fontSize = '32px';
+        // Testa zoom real com CSS zoom do motor Blink do Chromium
+        document.documentElement.style.zoom = '200%';
         await nextFrame();
 
         expect(items.length).toBe(1);
         expectInsideViewport(items[0], 320);
 
+        // Também valida com escala de fonte
+        document.documentElement.style.fontSize = '32px';
+        await nextFrame();
+        expectInsideViewport(items[0], 320);
+
         document.documentElement.style.removeProperty('font-size');
+        document.documentElement.style.removeProperty('zoom');
     });
 
     it('respeita safe-area vertical e horizontal insets determinísticos sem estourar viewport (#22)', async () => {
@@ -143,45 +169,64 @@ describe('MaxToast no Chromium real (ui-design/toast-recortado-em-viewport-movel
         expectInsideViewport(items[0], 360);
     });
 
-    it('gerencia pilha vertical ordenada e expansão/recolhimento com foco/Tab acessível (#22)', async () => {
+    it('gerencia pilha vertical ordenada, overflow com scrollHeight/clientHeight e expansão/recolhimento com foco/Tab acessível (#22)', async () => {
         const longText = 'Esta é uma mensagem intencionalmente longa com mais de 80 caracteres para permitir alternância de expansão e recolhimento sem quebras de layout.';
-        const { items } = await mountToastAtViewport(390, 844, [
-            { id: 'toast-1', title: 'Primeiro', message: 'Mensagem curta', severity: 'info' },
-            { id: 'toast-2', title: 'Segundo', message: longText, severity: 'error' }
+        // Monta 8 toasts em viewport com altura restrita para forçar overflow na pilha vertical
+        const { container, items } = await mountToastAtViewport(390, 480, [
+            { id: 'toast-1', title: 'Primeiro', message: 'Mensagem curta 1', severity: 'info' },
+            { id: 'toast-2', title: 'Segundo', message: longText, severity: 'error' },
+            { id: 'toast-3', title: 'Terceiro', message: 'Mensagem 3', severity: 'warning' },
+            { id: 'toast-4', title: 'Quarto', message: 'Mensagem 4', severity: 'success' },
+            { id: 'toast-5', title: 'Quinto', message: 'Mensagem 5', severity: 'info' },
+            { id: 'toast-6', title: 'Sexto', message: 'Mensagem 6', severity: 'warning' },
+            { id: 'toast-7', title: 'Sétimo', message: 'Mensagem 7', severity: 'error' },
+            { id: 'toast-8', title: 'Oitavo', message: 'Mensagem 8', severity: 'info' }
         ]);
 
-        expect(items.length).toBe(2);
+        expect(items.length).toBe(8);
         const rect1 = items[0].getBoundingClientRect();
         const rect2 = items[1].getBoundingClientRect();
 
         // Pilha vertical: o segundo toast fica abaixo do primeiro
         expect(rect2.top).toBeGreaterThanOrEqual(rect1.bottom);
 
-        // Expansão e recolhimento
+        // Valida overflow e rolagem do container medindo scrollHeight vs clientHeight
+        expect(container.scrollHeight).toBeGreaterThan(container.clientHeight);
+        const scrollInicial = container.scrollTop;
+        container.scrollTop = 50;
+        await nextFrame();
+        expect(container.scrollTop).toBeGreaterThan(scrollInicial);
+
+        // Expansão e recolhimento: medição geométrica real de altura e clamp
         const itemLongo = items[1];
         const expandBtn = itemLongo.querySelector('.action-expand') as HTMLButtonElement;
         expect(expandBtn).not.toBeNull();
         expect(expandBtn.textContent?.trim()).toBe('Ver mais');
 
+        const alturaInicial = itemLongo.getBoundingClientRect().height;
+
         expandBtn.click();
         await nextFrame();
         expect(expandBtn.textContent?.trim()).toBe('Ver menos');
+        const alturaExpandida = itemLongo.getBoundingClientRect().height;
+        expect(alturaExpandida).toBeGreaterThan(alturaInicial);
 
         expandBtn.click();
         await nextFrame();
         expect(expandBtn.textContent?.trim()).toBe('Ver mais');
+        const alturaRecolhida = itemLongo.getBoundingClientRect().height;
+        expect(alturaRecolhida).toBeLessThan(alturaExpandida);
 
-        // Tab e navegação por foco
-        const closeBtn = itemLongo.querySelector('.max-toast-close') as HTMLButtonElement;
-        const copyBtn = itemLongo.querySelector('.action-copy') as HTMLButtonElement;
-
+        // Navegação real sequencial por tecla Tab
         expandBtn.focus();
         expect(document.activeElement).toBe(expandBtn);
 
-        copyBtn.focus();
+        await userEvent.keyboard('{Tab}');
+        const copyBtn = itemLongo.querySelector('.action-copy') as HTMLButtonElement;
         expect(document.activeElement).toBe(copyBtn);
 
-        closeBtn.focus();
+        await userEvent.keyboard('{Tab}');
+        const closeBtn = itemLongo.querySelector('.max-toast-close') as HTMLButtonElement;
         expect(document.activeElement).toBe(closeBtn);
     });
 
