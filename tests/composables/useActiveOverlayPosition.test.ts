@@ -263,4 +263,76 @@ describe('useActiveOverlayPosition', () => {
             configurable: true
         });
     });
+
+    it('R09: aplica offsets de visualViewport (offsetLeft e offsetTop) no clamp do overlay', async () => {
+        const active = ref(true);
+        const targetEl = document.createElement('div');
+        const overlayEl = document.createElement('div');
+
+        vi.spyOn(targetEl, 'getBoundingClientRect').mockReturnValue({
+            x: 10,
+            y: 10,
+            top: 10,
+            bottom: 40,
+            left: 10,
+            right: 150,
+            width: 140,
+            height: 30,
+            toJSON: () => {}
+        } as DOMRect);
+
+        vi.spyOn(overlayEl, 'getBoundingClientRect').mockReturnValue({
+            x: 0,
+            y: 0,
+            top: 0,
+            bottom: 200,
+            left: 0,
+            right: 200,
+            width: 200,
+            height: 200,
+            toJSON: () => {}
+        } as DOMRect);
+
+        const mockVisualViewport = {
+            width: 400,
+            height: 600,
+            offsetLeft: 50,
+            offsetTop: 70,
+            scale: 2,
+            addEventListener: vi.fn(),
+            removeEventListener: vi.fn()
+        };
+
+        const originalVV = window.visualViewport;
+        Object.defineProperty(window, 'visualViewport', {
+            value: mockVisualViewport,
+            writable: true,
+            configurable: true
+        });
+
+        const { position } = useActiveOverlayPosition({
+            target: targetEl,
+            overlay: overlayEl,
+            active
+        });
+
+        await nextTick();
+
+        // Com safeArea.left=16px e offsetLeft=50px, o minLeft é 8 + 16 + 50 = 74px.
+        // Como target.left é 10, o clamp garante left=74.
+        expect(position.value.left).toBe(74);
+
+        // Com safeArea.top=20px e offsetTop=70px, o minTop é 8 + 20 + 70 = 98px.
+        // Como rawTop seria target.bottom(40) + offset(4) = 44, o clamp garante top=98.
+        expect(position.value.top).toBe(98);
+
+        active.value = false;
+        await nextTick();
+
+        Object.defineProperty(window, 'visualViewport', {
+            value: originalVV,
+            writable: true,
+            configurable: true
+        });
+    });
 });
