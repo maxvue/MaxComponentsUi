@@ -264,6 +264,18 @@
 
 <style lang="scss" scoped>
     .max-input-text-list-div {
+        grid-template-rows: auto auto !important;
+
+        :deep(.max-input-field-div) {
+            height: auto !important;
+            min-height: 150px;
+        }
+
+        :deep(.input-slot-div) {
+            height: 100% !important;
+            min-height: 150px;
+        }
+
         .max-code-editor {
             display: flex;
             align-items: stretch;
@@ -273,6 +285,7 @@
             background: transparent;
             min-height: 150px;
             max-height: 400px;
+            height: 400px;
 
             .line-numbers {
                 position: relative;
@@ -281,6 +294,7 @@
                 color: var(--background-700);
                 text-align: right;
                 min-width: 40px;
+                height: 100%;
                 overflow-y: hidden;
                 user-select: none;
                 border-right: 1px solid var(--background-200, rgb(0 0 0 / 5%));
@@ -308,7 +322,8 @@
 
             .code-textarea {
                 flex-grow: 1;
-                padding: 10px;
+                padding: 10px !important;
+                height: 100% !important;
                 border: none !important;
                 box-shadow: none !important;
                 outline: none;

@@ -63,49 +63,14 @@ afterEach(() => {
 });
 
 // ---------------------------------------------------------------------------
-// Constantes do componente (espelham MaxInputTextList.vue para cálculo esperado)
-// ---------------------------------------------------------------------------
-const LINE_HEIGHT = 21;
-const OVERSCAN = 10;
-
-/**
- * Calcula o startIndex esperado para um dado scrollTop, exatamente como o
- * componente faz internamente:
- *   startIndex = clamp(floor(scrollTop / LINE_HEIGHT) - OVERSCAN, 0, lineCount - 1)
- */
-function expectedStartIndex(scrollTop: number, lineCount: number): number {
-    const first = Math.floor(scrollTop / LINE_HEIGHT);
-    const maxStart = Math.max(0, lineCount - 1);
-    return Math.min(maxStart, Math.max(0, first - OVERSCAN));
-}
-
-/**
- * Calcula o offsetY esperado (translate do .line-numbers-window):
- *   offsetY = startIndex * LINE_HEIGHT
- */
-function expectedOffsetY(scrollTop: number, lineCount: number): number {
-    return expectedStartIndex(scrollTop, lineCount) * LINE_HEIGHT;
-}
-
-/**
- * Extrai o valor translateY de um estilo inline "translateY(Xpx)".
- * Retorna null se não encontrado.
- */
-function parseTranslateY(el: HTMLElement): number | null {
-    const transform = el.style.transform;
-    const match = transform.match(/translateY\(([-\d.]+)px\)/);
-    if (!match) return null;
-    return parseFloat(match[1]);
-}
-
-// ---------------------------------------------------------------------------
-// Testes de posicionamento com medida real (R22/F28)
+// Testes de posicionamento com medida real no DOM (R22 / E11-01)
+// Sem espelhar fórmulas internas do componente (startIndex / overscan / translate)
 // ---------------------------------------------------------------------------
 
 describe('MaxInputTextList no Chromium (E11-01) — R22/F28', () => {
     it(
-        'alinha os números de linha à área de texto de 10.000 linhas, verificando o scroll no início, meio e fim ' +
-        '(escala 100% e 200%) com erro <= 1px — medição real substituindo asserção sempre verdadeira',
+        'mede alinhamento físico real no DOM entre números da calha e linhas da textarea para 10.000 itens ' +
+        'no início, meio e fim (escala 100% e 200%) com tolerância subpixel <= 2px sem espelhar fórmula interna',
         async () => {
             const TOTAL_LINES = 10000;
             const lines = Array.from(
@@ -118,16 +83,21 @@ describe('MaxInputTextList no Chromium (E11-01) — R22/F28', () => {
 
                 const textarea = host.querySelector('textarea') as HTMLTextAreaElement;
                 const numbersContainer = host.querySelector('.line-numbers') as HTMLElement;
-                const lineNumbersWindow = host.querySelector('.line-numbers-window') as HTMLElement;
 
                 expect(textarea).not.toBeNull();
                 expect(numbersContainer).not.toBeNull();
-                expect(lineNumbersWindow).not.toBeNull();
+
+                // Obtém métricas reais computadas pelo browser a partir do estilo do DOM
+                const textareaStyle = window.getComputedStyle(textarea);
+                const computedLineHeight = parseFloat(textareaStyle.lineHeight);
+                const computedPaddingTop = parseFloat(textareaStyle.paddingTop);
+
+                expect(computedLineHeight, 'line-height computado deve ser positivo').toBeGreaterThan(0);
 
                 // Posições de scroll a testar: início, meio e fim
                 const scrollPositions = [
                     { label: 'início', value: 0 },
-                    { label: 'meio', value: Math.floor(textarea.scrollHeight / 2) },
+                    { label: 'meio', value: Math.floor((textarea.scrollHeight - textarea.clientHeight) / 2) },
                     { label: 'fim', value: Math.max(0, textarea.scrollHeight - textarea.clientHeight) }
                 ];
 
@@ -138,62 +108,79 @@ describe('MaxInputTextList no Chromium (E11-01) — R22/F28', () => {
                     await settle();
 
                     // ----------------------------------------------------------
-                    // 1. Validação do translateY da janela de números (real vs esperado)
+                    // 1. Cardinalidade e Virtualização real no DOM
                     // ----------------------------------------------------------
-                    const actualTranslateY = parseTranslateY(lineNumbersWindow);
+                    const renderedNumberEls = Array.from(host.querySelectorAll('.line-number')) as HTMLElement[];
                     expect(
-                        actualTranslateY,
-                        `[zoom=${scale * 100}% scroll=${label}] .line-numbers-window deve ter translateY inline`
-                    ).not.toBeNull();
+                        renderedNumberEls.length,
+                        `[zoom=${scale * 100}% scroll=${label}] deve haver nós DOM renderizados na calha`
+                    ).toBeGreaterThan(0);
 
-                    const expectedTransY = expectedOffsetY(scrollTop, TOTAL_LINES);
-
-                    // Tolerância de 1px (independente do zoom — o CSS zoom afeta pixels CSS, não px internos)
+                    // Garante que o DOM está virtualizado: não deve renderizar 10.000 nós
                     expect(
-                        Math.abs((actualTranslateY as number) - expectedTransY),
-                        `[zoom=${scale * 100}% scroll=${label}] translateY real (${actualTranslateY}px) deve diferir ≤ 1px do esperado (${expectedTransY}px)`
-                    ).toBeLessThanOrEqual(1);
+                        renderedNumberEls.length,
+                        `[zoom=${scale * 100}% scroll=${label}] DOM deve ser virtualizado (< 150 nós para 10k linhas, recebido: ${renderedNumberEls.length})`
+                    ).toBeLessThan(150);
 
                     // ----------------------------------------------------------
-                    // 2. Número de linha renderizado corresponde ao índice correto
+                    // 2. Cobertura da calha sobre o viewport visível da textarea
                     // ----------------------------------------------------------
-                    const renderedNumbers = host.querySelectorAll('.line-number');
-                    expect(renderedNumbers.length, `[zoom=${scale * 100}% scroll=${label}] deve haver números de linha renderizados`).toBeGreaterThan(0);
+                    const renderedNumbers = renderedNumberEls.map((el) => parseInt(el.textContent?.trim() ?? '0', 10));
+                    const minRendered = Math.min(...renderedNumbers);
+                    const maxRendered = Math.max(...renderedNumbers);
 
-                    const firstRenderedNumber = parseInt(renderedNumbers[0].textContent ?? '0', 10);
-                    const expectedFirstNumber = expectedStartIndex(scrollTop, TOTAL_LINES) + 1; // 1-based
+                    // Linhas visíveis na janela de exibição da textarea
+                    const visibleTopLine = Math.floor(textarea.scrollTop / computedLineHeight) + 1;
+                    const visibleBottomLine = Math.min(
+                        TOTAL_LINES,
+                        Math.ceil((textarea.scrollTop + textarea.clientHeight) / computedLineHeight)
+                    );
 
                     expect(
-                        firstRenderedNumber,
-                        `[zoom=${scale * 100}% scroll=${label}] primeiro número renderizado (${firstRenderedNumber}) deve ser o esperado para o overscan (${expectedFirstNumber})`
-                    ).toBe(expectedFirstNumber);
+                        minRendered,
+                        `[zoom=${scale * 100}% scroll=${label}] calha deve cobrir o topo visível (linha ${visibleTopLine}, mínimo na calha: ${minRendered})`
+                    ).toBeLessThanOrEqual(visibleTopLine);
 
-                    // ----------------------------------------------------------
-                    // 3. Alinhamento visual: o .line-numbers-window deve estar posicionado
-                    //    de forma que o primeiro número visível se alinhe com o topo da viewport
-                    //    considerando o padding de 10px do container.
-                    //
-                    //    Posição esperada do topo da window no viewport:
-                    //      containerRect.top + padding - numbersContainer.scrollTop + offsetY
-                    //
-                    //    Como numbersContainer.scrollTop == scrollTop (sincronizado pelo componente):
-                    //      topEsperado = containerRect.top + padding - scrollTop + offsetY
-                    //
-                    //    A linha "zero" do viewport visível (primeiro número visível) é:
-                    //      topDaPrimeiraLinhaVisivel = containerRect.top + padding + (floor(scrollTop / LINE_HEIGHT) - startIndex) * LINE_HEIGHT
-                    //      = containerRect.top + padding + OVERSCAN * LINE_HEIGHT (quando não no início)
-                    //    Mas como estamos usando getBoundingClientRect da window inteira, verificamos apenas o translateY.
-                    // ----------------------------------------------------------
-
-                    // Verifica que a altura de cada linha renderizada é aproximadamente LINE_HEIGHT * scale
-                    const firstLineEl = renderedNumbers[0] as HTMLElement;
-                    const firstLineRect = firstLineEl.getBoundingClientRect();
-
-                    // A altura da linha em pixels de tela deve ser LINE_HEIGHT * scale (com 2px de folga para subpixel)
                     expect(
-                        Math.abs(firstLineRect.height - LINE_HEIGHT * scale),
-                        `[zoom=${scale * 100}% scroll=${label}] altura do line-number (${firstLineRect.height}px) deve ser ~${LINE_HEIGHT * scale}px`
-                    ).toBeLessThanOrEqual(2);
+                        maxRendered,
+                        `[zoom=${scale * 100}% scroll=${label}] calha deve cobrir a base visível (linha ${visibleBottomLine}, máximo na calha: ${maxRendered})`
+                    ).toBeGreaterThanOrEqual(visibleBottomLine);
+
+                    // ----------------------------------------------------------
+                    // 3. Medição física do DOM: confronta bounding rect do número
+                    // com a coordenada física esperada da linha na textarea
+                    // ----------------------------------------------------------
+                    const sampleLinesToCheck = [
+                        visibleTopLine,
+                        Math.floor((visibleTopLine + visibleBottomLine) / 2),
+                        Math.min(TOTAL_LINES, visibleBottomLine - 1)
+                    ];
+
+                    const textareaRect = textarea.getBoundingClientRect();
+
+                    for (const sampleLine of sampleLinesToCheck) {
+                        const lineEl = renderedNumberEls.find((el) => el.textContent?.trim() === String(sampleLine));
+                        expect(lineEl, `Elemento DOM do número de linha ${sampleLine} deve estar renderizado`).toBeDefined();
+
+                        const lineRect = lineEl!.getBoundingClientRect();
+
+                        // Posição física esperada da linha no viewport do browser:
+                        // Topo da textarea + (paddingTop + deslocamento da linha - scrollTop) escalado pelo zoom
+                        const lineOffsetY = computedPaddingTop + (sampleLine - 1) * computedLineHeight - textarea.scrollTop;
+                        const expectedPhysicalTop = textareaRect.top + lineOffsetY * scale;
+                        const actualPhysicalTop = lineRect.top;
+
+                        expect(
+                            Math.abs(actualPhysicalTop - expectedPhysicalTop),
+                            `[zoom=${scale * 100}% scroll=${label} linha=${sampleLine}] topo físico no DOM (${actualPhysicalTop.toFixed(2)}px) deve alinhar com a linha da textarea (${expectedPhysicalTop.toFixed(2)}px) dentro de 2px`
+                        ).toBeLessThanOrEqual(2);
+
+                        // Altura física do elemento deve corresponder à altura computada sob a escala
+                        expect(
+                            Math.abs(lineRect.height - computedLineHeight * scale),
+                            `[zoom=${scale * 100}% scroll=${label} linha=${sampleLine}] altura física (${lineRect.height.toFixed(2)}px) deve ser ~${(computedLineHeight * scale).toFixed(2)}px`
+                        ).toBeLessThanOrEqual(2);
+                    }
                 }
             }
         }
