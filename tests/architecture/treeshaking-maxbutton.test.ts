@@ -58,35 +58,58 @@ describe('R24/F29 — Tree-shaking: Grafo Transitivo e Budgets do MaxButton', ()
 
     beforeAll(() => {
         pkg = JSON.parse(fs.readFileSync(PKG_PATH, 'utf-8'));
-        distExiste = fs.existsSync(DIST_DIR);
 
+        if (!fs.existsSync(DIST_DIR)) throw new Error('dist/ deve existir obrigatoriamente (build prévio obrigatório). Execute npm run build antes de rodar os testes de treeshaking.');
+
+
+        const distIndex = path.resolve(DIST_DIR, 'index.es.js');
+        if (!fs.existsSync(distIndex)) throw new Error('dist/index.es.js não existe. Execute \'npm run build\'.');
+
+        const distMtime = fs.statSync(distIndex).mtimeMs;
+
+        const srcDir = path.resolve(__dirname, '../../src');
+        function checkFreshness(dir: string) {
+            const entries = fs.readdirSync(dir, { withFileTypes: true });
+            for (const entry of entries) {
+                const fullPath = path.join(dir, entry.name);
+                if (entry.isDirectory()) checkFreshness(fullPath);
+                else if (/\.(vue|ts|js|scss|css)$/.test(entry.name)) {
+                    const srcMtime = fs.statSync(fullPath).mtimeMs;
+                    if (srcMtime > distMtime) throw new Error(`Build desatualizado: o arquivo fonte ${path.relative(process.cwd(), fullPath)} foi modificado após dist/index.es.js. Execute 'npm run build'.`);
+
+                }
+            }
+        }
+        checkFreshness(srcDir);
+
+        distExiste = true;
         arquivosGrafo = [];
         grafoBytesTotal = 0;
         cssAlheioPresenteNoGrafo = false;
 
-        if (distExiste) {
-            const entradaMaxButton = path.join(DIST_DIR, 'components/MaxButton.es.js');
-            const arquivos = resolveGrafoTransitivo(entradaMaxButton);
+        const entradaMaxButton = path.join(DIST_DIR, 'components/MaxButton.es.js');
+        if (!fs.existsSync(entradaMaxButton)) throw new Error('dist/components/MaxButton.es.js não encontrado. Execute \'npm run build\'.');
 
-            for (const arquivo of arquivos) {
-                if (arquivo.endsWith('.map')) continue;
-                if (!fs.existsSync(arquivo)) continue;
 
-                const bytes = fs.statSync(arquivo).size;
-                const relativo = path.relative(DIST_DIR, arquivo);
+        const arquivos = resolveGrafoTransitivo(entradaMaxButton);
 
-                grafoBytesTotal += bytes;
-                arquivosGrafo.push({ arquivo: relativo, bytes });
+        for (const arquivo of arquivos) {
+            if (arquivo.endsWith('.map')) continue;
+            if (!fs.existsSync(arquivo)) continue;
 
-                // CSS alheio: arquivos style-*.js no grafo do MaxButton
-                // indicam que o CSS global foi puxado pelo subpath granular
-                if (/^style-[^/]+\.js$/.test(relativo)) cssAlheioPresenteNoGrafo = true;
+            const bytes = fs.statSync(arquivo).size;
+            const relativo = path.relative(DIST_DIR, arquivo);
 
-            }
+            grafoBytesTotal += bytes;
+            arquivosGrafo.push({ arquivo: relativo, bytes });
 
-            // Ordenar por tamanho decrescente para facilitar diagnóstico
-            arquivosGrafo.sort((a, b) => b.bytes - a.bytes);
+            // CSS alheio: arquivos style-*.js no grafo do MaxButton
+            // indicam que o CSS global foi puxado pelo subpath granular
+            if (/^style-[^/]+\.js$/.test(relativo)) cssAlheioPresenteNoGrafo = true;
         }
+
+        // Ordenar por tamanho decrescente para facilitar diagnóstico
+        arquivosGrafo.sort((a, b) => b.bytes - a.bytes);
     });
 
     it('deve registrar o baseline de 477.773 bytes como referência histórica', () => {
@@ -106,6 +129,10 @@ describe('R24/F29 — Tree-shaking: Grafo Transitivo e Budgets do MaxButton', ()
             `Grafo transitivo do MaxButton (${grafoBytesTotal} bytes) excede o teto de ${TETO_MAXBUTTON_BYTES} bytes.\n` +
             `Arquivos no grafo:\n${detalhes}`
         ).toBeLessThanOrEqual(TETO_MAXBUTTON_BYTES);
+
+        // O valor real gerado deve estar em torno de ~18.6 KB (18.615 bytes)
+        expect(grafoBytesTotal).toBeGreaterThan(10_000);
+        expect(grafoBytesTotal).toBeLessThan(35_000);
     });
 
     it('grafo transitivo do MaxButton nao deve conter CSS global alheio (style-*.js)', () => {

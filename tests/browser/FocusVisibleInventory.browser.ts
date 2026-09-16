@@ -105,21 +105,22 @@ afterEach(() => {
     document.documentElement.style.zoom = '';
 });
 
+const expectedTargets = [
+    '.max-button',
+    '.max-like-button',
+    '[data-testid="input"]',
+    '[data-testid="textarea"]',
+    '[data-testid="link"]',
+    '[data-testid="role-button"]',
+    ...ariaFocusFamilies.map((role) => `[data-testid="role-${role}"]`),
+    '[data-testid="tabindex"]'
+];
+
 describe('R16/F23 — foco computado em Chromium', () => {
     it.each([false, true])('navega por Tab e preserva indicador computado no tema %s', async (dark) => {
         if (dark) document.documentElement.classList.add('dark');
         await mountFixture();
 
-        const expectedTargets = [
-            '.max-button',
-            '.max-like-button',
-            '[data-testid="input"]',
-            '[data-testid="textarea"]',
-            '[data-testid="link"]',
-            '[data-testid="role-button"]',
-            ...ariaFocusFamilies.map((role) => `[data-testid="role-${role}"]`),
-            '[data-testid="tabindex"]'
-        ];
         for (const selector of expectedTargets) {
             await userEvent.keyboard('{Tab}');
             const target = document.activeElement as HTMLElement;
@@ -131,8 +132,12 @@ describe('R16/F23 — foco computado em Chromium', () => {
     it('mantém foco computado e sem recorte a 200% de zoom', async () => {
         document.documentElement.style.zoom = '200%';
         await mountFixture();
-        await userEvent.keyboard('{Tab}');
-        expectVisibleFocus(document.activeElement as HTMLElement);
+        for (const selector of expectedTargets) {
+            await userEvent.keyboard('{Tab}');
+            const target = document.activeElement as HTMLElement;
+            expect(target).toBe(host!.querySelector(selector));
+            expectVisibleFocus(target);
+        }
     });
 
     it.each([false, true])('resolve cores dos tokens semânticos no CSSOM no tema %s', async (dark) => {
@@ -153,11 +158,24 @@ describe('R16/F23 — foco computado em Chromium', () => {
         try {
             expect(matchMedia('(forced-colors: active)').matches).toBe(true);
             await mountFixture();
-            await userEvent.keyboard('{Tab}');
-            const style = getComputedStyle(document.activeElement as HTMLElement);
-            expect(style.outlineStyle).toBe('solid');
-            expect(parseFloat(style.outlineWidth)).toBeGreaterThanOrEqual(2);
-            expect(style.outlineColor).not.toBe('rgba(0, 0, 0, 0)');
+            for (const selector of expectedTargets) {
+                await userEvent.keyboard('{Tab}');
+                const target = document.activeElement as HTMLElement;
+                expect(target).toBe(host!.querySelector(selector));
+                let focusTarget: HTMLElement | undefined;
+                for (let candidate: HTMLElement | null = target; candidate && candidate !== host; candidate = candidate.parentElement) {
+                    const candidateStyle = getComputedStyle(candidate);
+                    if (candidateStyle.outlineStyle !== 'none') {
+                        focusTarget = candidate;
+                        break;
+                    }
+                }
+                expect(focusTarget, `Seletor ${selector} ou seu owner deve ter outline ativo em forced-colors`).toBeTruthy();
+                const computed = getComputedStyle(focusTarget!);
+                expect(computed.outlineStyle, `Seletor ${selector} deve ter outlineStyle solid em forced-colors`).toBe('solid');
+                expect(parseFloat(computed.outlineWidth)).toBeGreaterThanOrEqual(2);
+                expect(computed.outlineColor).not.toBe('rgba(0, 0, 0, 0)');
+            }
         } finally {
             await session.send('Emulation.setEmulatedMedia', { features: [] });
         }

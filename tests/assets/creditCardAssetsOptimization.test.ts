@@ -219,58 +219,84 @@ describe('R21 / F27: Otimização de Assets SVG, Segurança e Isolamento Modular
         });
     });
 
-    describe('Isolamento Modular do Bundle e Grafo de Dependências', () => {
+    describe('Isolamento Modular do Bundle e Grafo Transitivo de Dependências (R21 / E11-03)', () => {
+        it('exige build fresco: diretório dist e entry principal index.es.js devem existir', () => {
+            expect(fs.existsSync(DIST_DIR), 'dist/ deve existir para auditoria de build fresco (execute npm run build)').toBe(true);
+            const indexPath = path.join(DIST_DIR, 'index.es.js');
+            expect(fs.existsSync(indexPath), 'dist/index.es.js deve existir').toBe(true);
+        });
+
         it('entry principal index.es.js não contém payloads de SVGs de bandeiras de forma eager', () => {
             const indexPath = path.join(DIST_DIR, 'index.es.js');
-            if (fs.existsSync(indexPath)) {
-                const indexContent = fs.readFileSync(indexPath, 'utf-8');
+            const indexContent = fs.readFileSync(indexPath, 'utf-8');
 
-                // Nenhuma das strings características de bandeiras SVG deve estar embutida no entry
-                expect(indexContent).not.toContain('image-rendering:optimizeQuality;fill-rule:evenodd');
-                expect(indexContent).not.toContain('stop-color:#006bb6'); // JCB
-                expect(indexContent).not.toContain('stop-color:#1c1d6a'); // Visa
-            }
+            // Nenhuma das strings características de bandeiras SVG deve estar embutida no entry
+            expect(indexContent).not.toContain('image-rendering:optimizeQuality;fill-rule:evenodd');
+            expect(indexContent).not.toContain('stop-color:#006bb6'); // JCB
+            expect(indexContent).not.toContain('stop-color:#1c1d6a'); // Visa
         });
 
         it('cada bandeira de cartão possui seu próprio chunk isolado no dist', () => {
-            if (fs.existsSync(DIST_DIR)) {
-                const distFiles = fs.readdirSync(DIST_DIR);
+            const distFiles = fs.readdirSync(DIST_DIR);
 
-                const expectedBrandChunks = [
-                    'card-amex',
-                    'card-diners',
-                    'card-discovery',
-                    'card-elo',
-                    'card-hipercard',
-                    'card-jcb',
-                    'card-maestro',
-                    'card-mastercard',
-                    'card-visa'
-                ];
+            const expectedBrandChunks = [
+                'card-amex',
+                'card-diners',
+                'card-discovery',
+                'card-elo',
+                'card-hipercard',
+                'card-jcb',
+                'card-maestro',
+                'card-mastercard',
+                'card-visa'
+            ];
 
-                for (const brand of expectedBrandChunks) {
-                    const chunkExists = distFiles.some((f) => f.startsWith(`${brand}-`) && f.endsWith('.js'));
-                    expect(chunkExists, `Chunk para bandeira ${brand} deve existir no dist`).toBe(true);
-                }
+            for (const brand of expectedBrandChunks) {
+                const chunkExists = distFiles.some((f) => f.startsWith(`${brand}-`) && f.endsWith('.js'));
+                expect(chunkExists, `Chunk para bandeira ${brand} deve existir no dist`).toBe(true);
             }
         });
 
-        it('o chunk de Visa é estritamente isolado e não inclui nem referencia outras bandeiras', () => {
-            if (fs.existsSync(DIST_DIR)) {
-                const distFiles = fs.readdirSync(DIST_DIR);
-                const visaChunk = distFiles.find((f) => f.startsWith('card-visa-') && f.endsWith('.js'));
-                expect(visaChunk).toBeDefined();
+        it('todos os chunks de bandeira no dist são estritamente isolados sem referências cruzadas no grafo transitivo', () => {
+            const distFiles = fs.readdirSync(DIST_DIR);
+            const allBrands = [
+                { key: 'amex', chunkPrefix: 'card-amex-' },
+                { key: 'diners', chunkPrefix: 'card-diners-' },
+                { key: 'discovery', chunkPrefix: 'card-discovery-' },
+                { key: 'elo', chunkPrefix: 'card-elo-' },
+                { key: 'hipercard', chunkPrefix: 'card-hipercard-' },
+                { key: 'jcb', chunkPrefix: 'card-jcb-' },
+                { key: 'maestro', chunkPrefix: 'card-maestro-' },
+                { key: 'mastercard', chunkPrefix: 'card-mastercard-' },
+                { key: 'visa', chunkPrefix: 'card-visa-' }
+            ];
 
-                const chunkContent = fs.readFileSync(path.join(DIST_DIR, visaChunk!), 'utf-8');
+            for (const brand of allBrands) {
+                const chunkFile = distFiles.find((f) => f.startsWith(brand.chunkPrefix) && f.endsWith('.js'));
+                expect(chunkFile, `Chunk para ${brand.key} deve existir`).toBeDefined();
 
-                // Contém a definição do SVG do Visa
+                const chunkPath = path.join(DIST_DIR, chunkFile!);
+                const chunkContent = fs.readFileSync(chunkPath, 'utf-8');
+
+                // Deve conter a marcação SVG de sua própria bandeira
                 expect(chunkContent).toContain('<svg');
-                expect(chunkContent).toContain('viewBox="0 0 354 236"');
 
-                // NÃO contém referências de nenhuma outra bandeira
-                const otherBrands = ['mastercard', 'amex', 'elo', 'hipercard', 'jcb', 'diners', 'discover', 'maestro'];
-                for (const other of otherBrands) expect(chunkContent).not.toContain(`card-${other}`);
+                // Não deve conter referências cruzadas a outras marcas no bundle transitivo
+                const otherBrands = allBrands.filter((b) => b.key !== brand.key);
+                for (const other of otherBrands) expect(
+                    chunkContent,
+                    `Chunk de ${brand.key} (${chunkFile}) não deve conter referência à bandeira ${other.key}`
+                ).not.toContain(`card-${other.key}`);
 
+                // Valida orçamentos estritos do chunk compilado em dist
+                const rawBuffer = Buffer.from(chunkContent, 'utf-8');
+                const rawSize = rawBuffer.length;
+                const gzipSize = zlib.gzipSync(rawBuffer).length;
+                const brotliSize = zlib.brotliCompressSync(rawBuffer).length;
+
+                expect(rawSize, `Chunk ${chunkFile} excedeu teto bruto de 15 KB`).toBeLessThan(15 * 1024);
+                expect(gzipSize, `Chunk ${chunkFile} excedeu teto gzip de 6 KB`).toBeLessThan(6 * 1024);
+                expect(brotliSize, `Chunk ${chunkFile} excedeu teto brotli de 5 KB`).toBeLessThan(5 * 1024);
             }
         });
     });

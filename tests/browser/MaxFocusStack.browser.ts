@@ -249,4 +249,255 @@ describe('Encadeamento de Foco e Escape em Overlays (Chromium Real)', () => {
         expect(document.activeElement?.id).toBe('root-btn');
         expect(getActiveFocusTrapsCount()).toBe(0);
     });
+
+    it('R07: executa cadeia A -> B -> A -> gatilho com IconPicker na pilha de foco/Escape no Chromium real', async () => {
+        hostElement = document.createElement('div');
+        hostElement.id = 'browser-test-iconpicker-stack';
+        document.body.appendChild(hostElement);
+
+        const isPickerOpen = ref(false);
+        const isConfirmOpen = ref(false);
+
+        const pickerContainerRef = ref<HTMLElement | null>(null);
+        const confirmContainerRef = ref<HTMLElement | null>(null);
+
+        const trapPicker = useFocusTrap(pickerContainerRef, {
+            onEscape: () => {
+                isPickerOpen.value = false;
+                trapPicker.deactivate();
+            }
+        });
+
+        const trapConfirm = useFocusTrap(confirmContainerRef, {
+            onEscape: () => {
+                isConfirmOpen.value = false;
+                trapConfirm.deactivate();
+            }
+        });
+
+        const openPicker = () => {
+            isPickerOpen.value = true;
+            trapPicker.activate();
+        };
+
+        const openConfirm = () => {
+            isConfirmOpen.value = true;
+            trapConfirm.activate();
+        };
+
+        const TestPickerStack = defineComponent({
+            setup() {
+                return () => h('div', { style: { padding: '20px' } }, [
+                    h('button', { id: 'btn-open-picker', onClick: openPicker }, 'Selecionar Ícone'),
+                    isPickerOpen.value ? h('div', {
+                        ref: pickerContainerRef,
+                        id: 'icon-picker-drawer',
+                        role: 'dialog',
+                        'aria-label': 'Seletor de Ícones',
+                        tabindex: -1,
+                        style: { position: 'fixed', right: '0', top: '0', width: '300px', height: '100%', background: 'white', zIndex: 1200 }
+                    }, [
+                        h('h3', 'Biblioteca de Ícones'),
+                        h('input', { id: 'picker-search', placeholder: 'Buscar ícone...' }),
+                        h('button', { id: 'btn-picker-submodal', onClick: openConfirm }, 'Adicionar Ícone Customizado'),
+                        h('button', { id: 'btn-picker-close', onClick: () => { isPickerOpen.value = false; trapPicker.deactivate(); } }, 'Fechar')
+                    ]) : null,
+                    isConfirmOpen.value ? h('div', {
+                        ref: confirmContainerRef,
+                        id: 'icon-custom-dialog',
+                        role: 'dialog',
+                        'aria-label': 'Customizar Ícone',
+                        tabindex: -1,
+                        style: { position: 'fixed', left: '100px', top: '100px', width: '250px', background: 'white', zIndex: 1300 }
+                    }, [
+                        h('h4', 'Novo Ícone SVG'),
+                        h('button', { id: 'btn-confirm-save' }, 'Salvar SVG'),
+                        h('button', { id: 'btn-confirm-cancel', onClick: () => { isConfirmOpen.value = false; trapConfirm.deactivate(); } }, 'Cancelar')
+                    ]) : null
+                ]);
+            }
+        });
+
+        const app = createApp({
+            render() {
+                return h(TestPickerStack);
+            }
+        });
+
+        activeApp = app;
+        app.mount(hostElement);
+        await nextFrame();
+        await nextFrame();
+
+        const trigger = document.querySelector<HTMLButtonElement>('#btn-open-picker')!;
+        trigger.focus();
+        expect(document.activeElement?.id).toBe('btn-open-picker');
+
+        // 1. Abre IconPicker (Camada A)
+        trigger.click();
+        await nextFrame();
+        await nextFrame();
+
+        expect(isPickerOpen.value).toBe(true);
+        expect(getActiveFocusTrapsCount()).toBe(1);
+        expect(document.activeElement?.id).toBe('picker-search');
+
+        // 2. Foca e abre Diálogo B de dentro do IconPicker
+        const btnSub = document.querySelector<HTMLButtonElement>('#btn-picker-submodal')!;
+        btnSub.focus();
+        btnSub.click();
+        await nextFrame();
+        await nextFrame();
+
+        expect(isConfirmOpen.value).toBe(true);
+        expect(getActiveFocusTrapsCount()).toBe(2);
+        expect(document.activeElement?.id).toBe('btn-confirm-save');
+
+        // 3. Pressiona Escape: fecha APENAS Diálogo B
+        pressKey('Escape');
+        await nextFrame();
+        await nextFrame();
+
+        expect(isConfirmOpen.value).toBe(false);
+        expect(isPickerOpen.value).toBe(true);
+        expect(getActiveFocusTrapsCount()).toBe(1);
+        // Foco restaurado para o botão dentro de A
+        expect(document.activeElement?.id).toBe('btn-picker-submodal');
+
+        // 4. Pressiona Escape novamente: fecha Camada A (IconPicker)
+        pressKey('Escape');
+        await nextFrame();
+        await nextFrame();
+
+        expect(isPickerOpen.value).toBe(false);
+        expect(getActiveFocusTrapsCount()).toBe(0);
+        // Foco restaurado para o gatilho inicial
+        expect(document.activeElement?.id).toBe('btn-open-picker');
+    });
+
+    it('R07: executa cadeia A -> B -> A -> gatilho com Markdown na pilha de foco/Escape no Chromium real', async () => {
+        hostElement = document.createElement('div');
+        hostElement.id = 'browser-test-markdown-stack';
+        document.body.appendChild(hostElement);
+
+        const isEditorOpen = ref(false);
+        const isLinkDialogOpen = ref(false);
+
+        const editorContainerRef = ref<HTMLElement | null>(null);
+        const linkDialogRef = ref<HTMLElement | null>(null);
+
+        const trapEditor = useFocusTrap(editorContainerRef, {
+            onEscape: () => {
+                isEditorOpen.value = false;
+                trapEditor.deactivate();
+            }
+        });
+
+        const trapLink = useFocusTrap(linkDialogRef, {
+            onEscape: () => {
+                isLinkDialogOpen.value = false;
+                trapLink.deactivate();
+            }
+        });
+
+        const openEditor = () => {
+            isEditorOpen.value = true;
+            trapEditor.activate();
+        };
+
+        const openLinkDialog = () => {
+            isLinkDialogOpen.value = true;
+            trapLink.activate();
+        };
+
+        const TestMarkdownStack = defineComponent({
+            setup() {
+                return () => h('div', { style: { padding: '20px' } }, [
+                    h('button', { id: 'btn-open-editor', onClick: openEditor }, 'Abrir Editor Markdown'),
+                    isEditorOpen.value ? h('div', {
+                        ref: editorContainerRef,
+                        id: 'markdown-editor-modal',
+                        role: 'dialog',
+                        'aria-label': 'Editor Markdown',
+                        tabindex: -1,
+                        style: { position: 'fixed', left: '50px', top: '50px', width: '500px', height: '400px', background: 'white', zIndex: 1200 }
+                    }, [
+                        h('div', { class: 'editor-toolbar' }, [
+                            h('button', { id: 'tb-bold' }, 'Negrito'),
+                            h('button', { id: 'tb-link', onClick: openLinkDialog }, 'Inserir Link')
+                        ]),
+                        h('textarea', { id: 'editor-content' })
+                    ]) : null,
+                    isLinkDialogOpen.value ? h('div', {
+                        ref: linkDialogRef,
+                        id: 'markdown-link-dialog',
+                        role: 'dialog',
+                        'aria-label': 'Inserir Link',
+                        tabindex: -1,
+                        style: { position: 'fixed', left: '150px', top: '150px', width: '300px', background: 'white', zIndex: 1300 }
+                    }, [
+                        h('input', { id: 'link-url', placeholder: 'https://...' }),
+                        h('button', { id: 'link-insert-btn' }, 'Inserir'),
+                        h('button', { id: 'link-cancel-btn', onClick: () => { isLinkDialogOpen.value = false; trapLink.deactivate(); } }, 'Cancelar')
+                    ]) : null
+                ]);
+            }
+        });
+
+        const app = createApp({
+            render() {
+                return h(TestMarkdownStack);
+            }
+        });
+
+        activeApp = app;
+        app.mount(hostElement);
+        await nextFrame();
+        await nextFrame();
+
+        const trigger = document.querySelector<HTMLButtonElement>('#btn-open-editor')!;
+        trigger.focus();
+        expect(document.activeElement?.id).toBe('btn-open-editor');
+
+        // 1. Abre Editor Markdown (Camada A)
+        trigger.click();
+        await nextFrame();
+        await nextFrame();
+
+        expect(isEditorOpen.value).toBe(true);
+        expect(getActiveFocusTrapsCount()).toBe(1);
+        expect(document.activeElement?.id).toBe('tb-bold');
+
+        // 2. Foca no botão de link e abre Diálogo B de dentro do Markdown
+        const btnLink = document.querySelector<HTMLButtonElement>('#tb-link')!;
+        btnLink.focus();
+        btnLink.click();
+        await nextFrame();
+        await nextFrame();
+
+        expect(isLinkDialogOpen.value).toBe(true);
+        expect(getActiveFocusTrapsCount()).toBe(2);
+        expect(document.activeElement?.id).toBe('link-url');
+
+        // 3. Pressiona Escape: fecha APENAS Diálogo B
+        pressKey('Escape');
+        await nextFrame();
+        await nextFrame();
+
+        expect(isLinkDialogOpen.value).toBe(false);
+        expect(isEditorOpen.value).toBe(true);
+        expect(getActiveFocusTrapsCount()).toBe(1);
+        // Foco restaurado para o botão de link em A
+        expect(document.activeElement?.id).toBe('tb-link');
+
+        // 4. Pressiona Escape novamente: fecha Camada A (Editor Markdown)
+        pressKey('Escape');
+        await nextFrame();
+        await nextFrame();
+
+        expect(isEditorOpen.value).toBe(false);
+        expect(getActiveFocusTrapsCount()).toBe(0);
+        // Foco restaurado para o gatilho inicial
+        expect(document.activeElement?.id).toBe('btn-open-editor');
+    });
 });

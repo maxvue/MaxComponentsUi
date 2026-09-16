@@ -1,12 +1,17 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
-import { nextTick, defineComponent } from 'vue';
+import { nextTick, defineComponent, ref } from 'vue';
 import MaxModal from '../../src/components/MaxModal.vue';
 import MaxPopover from '../../src/components/MaxPopover.vue';
 import MaxBaseOverlay from '../../src/components/base/MaxBaseOverlay.vue';
 import MaxSideMenuMobile from '../../src/components/MaxSideMenuMobile.vue';
 import { useSystemStore } from '../../src/stores/useSystem.Store';
+
+vi.mock('@maxvue/max-use', async (importOriginal) => ({
+    ...(await importOriginal<Record<string, any>>()),
+    useRefCachedApi: () => ref(null)
+}));
 
 describe('F10 — E04-05: Nomes acessíveis estáveis e prevenção de nós órfãos', () => {
     let pinia: ReturnType<typeof createPinia>;

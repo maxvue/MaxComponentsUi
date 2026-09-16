@@ -199,4 +199,75 @@ describe('MaxCreditCard no Chromium Real (R21 / F27: Integridade e Regressão Vi
         const href = brandImage.getAttribute('href') || brandImage.getAttribute('xlink:href');
         expect(href).toBeTruthy();
     });
+
+    it('snapshot visual estrutural determinístico: geometrias, viewBox e posicionamento de elementos', async () => {
+        const { host } = await mountCreditCard({
+            cardType: 'visa',
+            number: '4111 2222 3333 4444',
+            name: 'JOAO SILVA',
+            date: '08/30',
+            cvv: '999',
+            side: 'front'
+        });
+
+        const frontSvg = host.querySelector('.flip-card-front svg') as SVGSVGElement;
+        expect(frontSvg).not.toBeNull();
+        expect(frontSvg.getAttribute('viewBox')).toBe('0 0 700 430');
+
+        // Snapshot determinístico das tags e atributos visuais essenciais
+        const images = Array.from(frontSvg.querySelectorAll('image')).map((img) => ({
+            x: img.getAttribute('x'),
+            y: img.getAttribute('y'),
+            width: img.getAttribute('width'),
+            height: img.getAttribute('height')
+        }));
+
+        expect(images).toEqual([
+            { x: '0', y: '0', width: '700', height: '430' }, // fundo ocupa 100% (viewBox 700x430)
+            { x: '540', y: '320', width: '138', height: '92' } // bandeira
+        ]);
+
+        const texts = Array.from(frontSvg.querySelectorAll('text')).map((t) => ({
+            class: t.getAttribute('class'),
+            x: t.getAttribute('x'),
+            y: t.getAttribute('y')
+        }));
+
+        expect(texts).toEqual([
+            { class: 'credit-card-number', x: '105', y: '270' },
+            { class: 'credit-card-name', x: '35', y: '340' },
+            { class: 'credit-card-date', x: '35', y: '380' }
+        ]);
+    });
+
+    it('renderização gráfica real em Canvas: comprova rasterização de pixels válidos no Chromium', async () => {
+        const { host } = await mountCreditCard({
+            cardType: 'visa',
+            number: '4111 2222 3333 4444'
+        });
+
+        const brandImage = host.querySelectorAll('.flip-card-front svg image')[1] as SVGImageElement;
+        const href = brandImage.getAttribute('href') || brandImage.getAttribute('xlink:href');
+        expect(href).toBeTruthy();
+
+        // Carrega a Data URI em uma imagem HTML e renderiza no canvas
+        const img = new Image();
+        img.src = href!;
+        await img.decode();
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 138;
+        canvas.height = 92;
+        const ctx = canvas.getContext('2d');
+        expect(ctx).not.toBeNull();
+
+        ctx!.drawImage(img, 0, 0, 138, 92);
+        const imageData = ctx!.getImageData(0, 0, 138, 92);
+
+        // Comprova que o canvas não está em branco (há pixels com opacidade > 0)
+        let nonZeroPixels = 0;
+        for (let i = 3; i < imageData.data.length; i += 4) if (imageData.data[i] > 0) nonZeroPixels++;
+
+        expect(nonZeroPixels, 'A imagem renderizada da bandeira deve conter pixels não vazios').toBeGreaterThan(100);
+    });
 });

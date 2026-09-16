@@ -1,16 +1,23 @@
 import { gzipSync } from 'node:zlib';
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execSync } from 'node:child_process';
 
 const DIST_DIR = resolve(fileURLToPath(new URL('../playground/dist', import.meta.url)));
 const LIMITS = Object.freeze({
-    // Orçamento congelado a partir do maior chunk medido no R19 (2,507 MB / 823 kB gzip).
-    rawBytes: 2_510_000,
-    gzipBytes: 850_000
+    // Orçamento congelado a partir dos baselines auditados (2.507.440 bytes brutos e 823.120 bytes gzip).
+    rawBytes: 2_507_440,
+    gzipBytes: 823_120
 });
 
+if (!existsSync(DIST_DIR)) {
+    console.log('playground/dist não encontrado. Executando build do playground...');
+    execSync('npx vite build --config playground/vite.config.ts', { stdio: 'inherit' });
+}
+
 function listJavaScriptFiles(directory) {
+    if (!existsSync(directory)) return [];
     return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
         const path = join(directory, entry.name);
         if (entry.isDirectory()) return listJavaScriptFiles(path);

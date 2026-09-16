@@ -1,4 +1,4 @@
-import { expect, vi, beforeEach, afterEach } from 'vitest';
+import { expect, vi, beforeEach, afterEach, afterAll } from 'vitest';
 
 export interface SpyTracker {
     method: 'warn' | 'error';
@@ -15,17 +15,12 @@ let unhandledErrors: string[] = [];
 let unhandledAsyncErrors: string[] = [];
 let testAllowlist: Array<{ method: 'warn' | 'error'; pattern: AllowPattern }> = [];
 
-export function isAbortOrCanceledMessage(msg: string): boolean {
-    return msg.includes('Request aborted') || msg.includes('ERR_CANCELED') || msg.includes('AbortError') || msg.includes('The operation was aborted');
-}
-
 let policyConsoleWarn: (...args: any[]) => void = (...args: any[]) => {
     const msg = formatArgs(...args);
     unhandledWarnings.push(msg);
 };
 let policyConsoleError: (...args: any[]) => void = (...args: any[]) => {
     const msg = formatArgs(...args);
-    if (isAbortOrCanceledMessage(msg)) return;
     unhandledErrors.push(msg);
 };
 
@@ -48,7 +43,6 @@ export function consumeSpyCalls(spy: any): void {
 (globalThis as any).consumeSpyCalls = consumeSpyCalls;
 
 export function matchesAllowlist(method: 'warn' | 'error', msg: string): boolean {
-    if (method === 'error' && isAbortOrCanceledMessage(msg)) return true;
     return testAllowlist.some((item) => {
         if (item.method !== method) return false;
         if (typeof item.pattern === 'string') return msg.includes(item.pattern);
@@ -56,6 +50,17 @@ export function matchesAllowlist(method: 'warn' | 'error', msg: string): boolean
         if (typeof item.pattern === 'function') return item.pattern(msg);
         return false;
     });
+}
+
+// Helpers para testes de detecção de erros tardios e teardown
+export function _simulateLingeringAsyncError(msg: string): void {
+    unhandledAsyncErrors.push(msg);
+}
+export function _simulateLingeringWarning(msg: string): void {
+    unhandledWarnings.push(msg);
+}
+export function _simulateLingeringError(msg: string): void {
+    unhandledErrors.push(msg);
 }
 
 export function formatArgs(...args: any[]): string {
@@ -239,12 +244,10 @@ export function initConsolePolicy() {
     if (typeof process !== 'undefined') {
         process.on('unhandledRejection', (reason: any) => {
             const msg = reason?.stack || reason?.message || String(reason);
-            if (isAbortOrCanceledMessage(msg)) return;
             if (!matchesAllowlist('error', msg)) unhandledAsyncErrors.push(`[unhandledRejection] ${msg}`);
         });
         process.on('uncaughtException', (err: any) => {
             const msg = err?.stack || err?.message || String(err);
-            if (isAbortOrCanceledMessage(msg)) return;
             if (!matchesAllowlist('error', msg)) unhandledAsyncErrors.push(`[uncaughtException] ${msg}`);
         });
     }
@@ -252,18 +255,10 @@ export function initConsolePolicy() {
     if (typeof window !== 'undefined') {
         window.addEventListener('unhandledrejection', (event: any) => {
             const msg = event?.reason?.stack || event?.reason?.message || String(event?.reason);
-            if (isAbortOrCanceledMessage(msg)) {
-                event?.preventDefault?.();
-                return;
-            }
             if (!matchesAllowlist('error', msg)) unhandledAsyncErrors.push(`[window.unhandledrejection] ${msg}`);
         });
         window.addEventListener('error', (event: any) => {
             const msg = event?.error?.stack || event?.message || String(event?.error);
-            if (isAbortOrCanceledMessage(msg)) {
-                event?.preventDefault?.();
-                return;
-            }
             if (!matchesAllowlist('error', msg)) unhandledAsyncErrors.push(`[window.error] ${msg}`);
         });
     }
@@ -289,5 +284,19 @@ export function initConsolePolicy() {
 
     afterEach(() => {
         verifyConsoleClean();
+    });
+
+    afterAll(() => {
+        const lingeringAsync = [...unhandledAsyncErrors];
+        const lingeringWarn = [...unhandledWarnings].filter((msg) => !matchesAllowlist('warn', msg));
+        const lingeringErr = [...unhandledErrors].filter((msg) => !matchesAllowlist('error', msg));
+
+        unhandledWarnings = [];
+        unhandledErrors = [];
+        unhandledAsyncErrors = [];
+
+        if (lingeringAsync.length > 0) throw new Error(`[tests/setup] Teste disparou erro assíncrono tardio no encerramento da suíte:\n${lingeringAsync.join('\n')}`);
+        if (lingeringWarn.length > 0) throw new Error(`[tests/setup] Teste disparou console.warn tardio no encerramento da suíte:\n${lingeringWarn.join('\n')}`);
+        if (lingeringErr.length > 0) throw new Error(`[tests/setup] Teste disparou console.error tardio no encerramento da suíte:\n${lingeringErr.join('\n')}`);
     });
 }

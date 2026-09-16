@@ -83,7 +83,7 @@ function defaultCompute(
     ctx: OverlayPositionContext,
     options: { offset: number; align: 'left' | 'right'; matchTargetWidth: boolean }
 ): OverlayPositionResult {
-    const { targetRect: t, overlayRect: p, viewportWidth: vw, viewportHeight: vh, safeArea } = ctx;
+    const { targetRect: t, overlayRect: p, viewportWidth: vw, viewportHeight: vh, safeArea, visualViewport: vv } = ctx;
     const pHeight = p.height || 200;
     const pWidth = p.width || t.width || 200;
 
@@ -92,10 +92,13 @@ function defaultCompute(
     const safeBottom = safeArea?.bottom ?? 0;
     const safeLeft = safeArea?.left ?? 0;
 
-    const minTop = Math.max(8, safeTop + 8);
-    const maxBottom = Math.max(minTop, vh - safeBottom - 8);
-    const minLeft = Math.max(8, safeLeft + 8);
-    const maxRight = Math.max(minLeft, vw - safeRight - 8);
+    const vvOffsetLeft = vv?.offsetLeft ?? 0;
+    const vvOffsetTop = vv?.offsetTop ?? 0;
+
+    const minTop = Math.max(8, safeTop + 8) + vvOffsetTop;
+    const maxBottom = Math.max(minTop, vh - safeBottom - 8) + vvOffsetTop;
+    const minLeft = Math.max(8, safeLeft + 8) + vvOffsetLeft;
+    const maxRight = Math.max(minLeft, vw - safeRight - 8) + vvOffsetLeft;
 
     const spaceBelow = maxBottom - t.bottom;
     const spaceAbove = t.top - minTop;
