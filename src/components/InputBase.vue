@@ -344,7 +344,6 @@
                     'input:not([disabled]), textarea:not([disabled]), select:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])'
                 );
                 if (focusable && typeof focusable.focus === 'function') focusable.focus();
-
             }
         }
     };

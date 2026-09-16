@@ -14,7 +14,7 @@
         @scroll="onScroll"
         @keydown="onKeydown"
     >
-        <div :style="{ height: `${virtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }">
+        <div role="presentation" :style="{ height: `${virtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }">
             <div
                 v-for="virtualRow in virtualizer.getVirtualItems()"
                 :id="getItemDomId(virtualRow.index)"

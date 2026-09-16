@@ -26,7 +26,7 @@
             :tabindex="props.disabled ? -1 : 0"
             :aria-disabled="props.disabled ? 'true' : undefined"
             :aria-labelledby="hasHeader ? headerId : undefined"
-            :aria-label="!hasHeader ? (props.ariaLabel || undefined) : undefined"
+            :aria-label="effectiveListboxLabel"
             :aria-activedescendant="focusedItemId"
             @scroll="onListScroll"
             @keydown="onKeydown"
@@ -208,6 +208,7 @@
     const slots = useSlots();
     const hasHeader = computed(() => Boolean(slots.header || props.title));
     const effectiveFilterLabel = computed(() => props.filterLabel || (props.title ? `Filtrar ${props.title}` : 'Filtrar opções'));
+    const effectiveListboxLabel = computed(() => (hasHeader.value ? undefined : (props.ariaLabel || (props.title || 'Lista de opções'))));
 
     if (process.env.NODE_ENV !== 'production') if (!hasHeader.value && !props.ariaLabel) console.warn('[MaxListBox] Widget sem nome acessível: forneça title, slot #header ou prop ariaLabel.');
 

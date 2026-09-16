@@ -68,7 +68,6 @@
                         :label="t.submit"
                         icon="mdi:login"
                         :loading="loading"
-                        :action="onSubmit"
                     />
                 </template>
 
@@ -125,7 +124,6 @@
                         :loading="loading"
                         :disabled="isDynamicButtonDisabled"
                         :aria-describedby="isCooldownActive ? 'otp-cooldown-status' : undefined"
-                        :action="handleDynamicSubmit"
                     />
 
                     <span
@@ -619,16 +617,9 @@
         }
     };
 
-    let isHandlingSubmitInTick = false;
-
     const handleFormSubmit = (payloadOrEvent?: any): void => {
-        if (isHandlingSubmitInTick) return;
-        isHandlingSubmitInTick = true;
-        nextTick(() => {
-            isHandlingSubmitInTick = false;
-        });
-
-        if (payloadOrEvent && payloadOrEvent.event && typeof payloadOrEvent.event.preventDefault === 'function') payloadOrEvent.event.preventDefault();
+        if (payloadOrEvent && typeof payloadOrEvent.preventDefault === 'function') payloadOrEvent.preventDefault();
+        else if (payloadOrEvent && payloadOrEvent.event && typeof payloadOrEvent.event.preventDefault === 'function') payloadOrEvent.event.preventDefault();
 
         if (props.loading) return;
 
@@ -673,9 +664,6 @@
         }
     };
 
-    const handleDynamicSubmit = handleFormSubmit;
-    const onSubmit = handleFormSubmit;
-
     watch(
         () => props.error,
         (newError) => {
@@ -689,7 +677,8 @@
     defineExpose({
         clearCache,
         resetSession: clearCache,
-        focusFirstInvalidField
+        focusFirstInvalidField,
+        onSubmit: handleFormSubmit
     });
 
     watch(
