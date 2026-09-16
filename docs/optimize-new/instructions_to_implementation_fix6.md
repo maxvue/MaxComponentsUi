@@ -247,6 +247,30 @@ Execute os 20 `GATE6-*` no mesmo commit final. Exija:
 7. cleanroom reproduzível sem caminhos absolutos ou dependência de ambiente privado;
 8. matriz final dos 72 achados com status, prova, agente, commit, risco e rollback.
 
+## Objetivo operacional obrigatório — executar até a conclusão real
+
+**Você é o coordenador de execução, não um redator de plano. Não encerre, não responda com resumo final e não aguarde nova solicitação enquanto existir qualquer trabalho executável deste arquivo.** O objetivo desta sessão é entregar um único commit final que satisfaça, simultaneamente, todos os critérios abaixo. Relatórios, commits parciais, testes focais verdes, criação da matriz ou a conclusão de uma onda de subagentes são somente marcos intermediários; nenhum deles autoriza encerrar a sessão.
+
+Siga este ciclo até atingir o aceite final:
+
+1. encontre o próximo papel canônico pendente na matriz e dispare-o na próxima vaga disponível;
+2. integre somente o commit focal já revisado, atualize a matriz com evidência verificável e avance imediatamente para o próximo papel dependente;
+3. se um teste, refutador, gate ou preservação reprovar, marque o bloco como `REABERTO`, envie a correção ao **mesmo** `IMP6-*` por follow-up e repita implementação → prova adversarial → refutação;
+4. se uma onda terminar, inicie a próxima onda; não trate ausência momentânea de agentes ativos como conclusão;
+5. ao chegar à Etapa 15, execute todos os gates no mesmo HEAD final; qualquer falha, warning inesperado, flake, artefato velho, worktree suja, relatório ausente ou divergência de contagem reabre o ciclo;
+6. somente após todos os itens do critério de término estarem comprovados no repositório, produza a resposta final com a matriz, comandos, resultados, commit e push.
+
+É proibido encerrar alegando limitação de contexto, tempo, quantidade de ondas, custo de testes, número de arquivos, trabalho ainda em execução ou porque “a maior parte” foi concluída. Nessas situações, compacte o estado no relatório da matriz e **continue a partir do próximo papel pendente**. Se a plataforma realmente impedir uma ação indispensável (por exemplo, runtime externo indisponível), esgote alternativas seguras, registre evidência objetiva no relatório do papel e informe explicitamente que o objetivo continua pendente; nunca declare sucesso parcial como conclusão.
+
+Antes de emitir a resposta final, responda internamente a este checklist. Uma única resposta negativa significa que a sessão deve continuar:
+
+- Os 11 blocos abertos foram aceitos integralmente?
+- Os 16 achados vinculados deixaram de estar pendentes?
+- Há exatamente 72 papéis canônicos, com 72 IDs reais e 72 relatórios completos?
+- Os 20 gates e as 8 preservações passaram no mesmo HEAD imutável?
+- O repositório está limpo, todos os worktrees temporários da execução foram removidos e `git diff --check` passa?
+- O commit final foi enviado para o remoto correto?
+
 ## Critério de término
 
 Somente declare conclusão quando **F07, F15, R01, R02, R04, R07, R09, R16, R18, R21 e R24** forem integralmente aceitos, os **16 achados vinculados** saírem do estado pendente, todas as preservações permanecerem válidas, os 20 gates passarem no mesmo commit e os **72 subagentes canônicos** estiverem comprovados. Caso contrário, informe a contagem estrita restante e não marque o plano como concluído.
