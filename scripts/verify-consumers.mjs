@@ -10,7 +10,13 @@
  *   3. TypeScript (verificação de tipos)
  *   4. Vite consumer (build)
  *   5. SSR — renderização server-side com @vue/server-renderer
- *   6. Subpath desconhecido deve FALHAR (validação negativa)
+ *   6. CSS Global e Temas SCSS compilados via sass
+ *   7. Subpath desconhecido deve FALHAR (validação negativa)
+ *
+ * Suporte a concorrência e testes:
+ *   --skip-build / SKIP_BUILD=1: reutiliza dist existente sem recompilar
+ *   --force-fail / FORCE_FAIL=1: dispara falha controlada após criar tempDir para validar cleanup em finally
+ *   --scenario=<N>: filtra execução por número ordinal ou nome de cenário
  *
  * Integrado ao npm run verify via: npm run verify:consumers
  */
@@ -23,8 +29,15 @@ import { join } from 'node:path';
 const projectRoot = process.cwd();
 console.log('Diretório do projeto:', projectRoot);
 
+const skipBuild = process.argv.includes('--skip-build') || process.env.SKIP_BUILD === '1';
+const forceFail = process.argv.includes('--force-fail') || process.env.FORCE_FAIL === '1';
+const scenarioArg = process.argv.find((a) => a.startsWith('--scenario='));
+const scenarioFilter = scenarioArg ? scenarioArg.split('=')[1] : process.env.SCENARIO;
+const customBaseDir = process.env.CONSUMER_TEMP_DIR || tmpdir();
+
 let tempDir;
 let tarballPath;
+let cleanedUp = false;
 
 // ───── Versões compatíveis com pinia@^4.0.2 (que requer vue@^3.5.11) ─────
 const VUE_VERSION = '^3.5.11';
@@ -34,12 +47,49 @@ const UNOCSS_VERSION = '^66.0.0';
 
 let exitCode = 0;
 
-try {
-    console.log('\n--- Executando build fresco obrigatório ---');
-    execSync('npm run build', { cwd: projectRoot, stdio: 'inherit' });
+const cleanup = () => {
+    if (cleanedUp) return;
+    if (tempDir && existsSync(tempDir)) {
+        try {
+            rmSync(tempDir, { recursive: true, force: true });
+            console.log('Diretório temporário removido:', tempDir);
+        } catch {
+            // Silencioso se já tiver sido removido
+        }
+    }
+    cleanedUp = true;
+};
 
-    tempDir = mkdtempSync(join(tmpdir(), `max-consumer-${process.pid}-`));
+process.on('SIGINT', () => {
+    console.log('\n[verify-consumers] Interrupção SIGINT recebida.');
+    cleanup();
+    process.exit(130);
+});
+
+process.on('SIGTERM', () => {
+    console.log('\n[verify-consumers] Interrupção SIGTERM recebida.');
+    cleanup();
+    process.exit(143);
+});
+
+process.on('exit', () => {
+    cleanup();
+});
+
+try {
+    if (!skipBuild) {
+        console.log('\n--- Executando build fresco obrigatório ---');
+        execSync('npm run build', { cwd: projectRoot, stdio: 'inherit' });
+    } else {
+        console.log('\n--- Reutilizando build fresco existente (--skip-build / SKIP_BUILD=1) ---');
+    }
+
+    tempDir = mkdtempSync(join(customBaseDir, `max-consumer-${process.pid}-`));
     console.log('Diretório temporário exclusivo por PID:', tempDir);
+
+    if (forceFail) {
+        throw new Error('Falha forçada controlada para teste de cleanup (--force-fail / FORCE_FAIL=1)');
+    }
 
     console.log('\n--- Empacotando projeto com npm pack no diretório isolado ---');
     const packOutput = execSync(`npm pack --pack-destination "${tempDir}"`, { cwd: projectRoot, encoding: 'utf-8' });
@@ -51,8 +101,17 @@ try {
      * Executa um cenário de teste isolado.
      * @param {string} name  - Nome descritivo do cenário
      * @param {(dir: string) => void} script - Função de teste
+     * @param {number} [scenarioNum] - Número ordinal do cenário
      */
-    const runTest = (name, script) => {
+    const runTest = (name, script, scenarioNum) => {
+        if (scenarioFilter) {
+            const matchesNum = scenarioNum !== undefined && String(scenarioNum) === String(scenarioFilter);
+            const matchesName = name.toLowerCase().includes(scenarioFilter.toLowerCase());
+            if (!matchesNum && !matchesName) {
+                console.log(`\n--- Pulando cenário [${scenarioNum ?? '-'}] ${name} (filtro ativo: ${scenarioFilter}) ---`);
+                return;
+            }
+        }
         console.log(`\n--- Testando: ${name} ---`);
         const dir = join(tempDir, name.replace(/[/ ]/g, '_'));
         mkdirSync(dir, { recursive: true });
@@ -75,7 +134,7 @@ try {
             console.log('ESM sem deps opcionais — OK');
         `);
         execSync('node index.js', { cwd: dir, stdio: 'inherit' });
-    });
+    }, 1);
 
     // ─── Cenário 2: Node ESM com deps opcionais (unocss) ──────────────────
     runTest('Node ESM com deps opcionais', (dir) => {
@@ -96,7 +155,7 @@ try {
             console.log('ESM com deps opcionais — OK');
         `);
         execSync('node index.js', { cwd: dir, stdio: 'inherit' });
-    });
+    }, 2);
 
     // ─── Cenário 3: TypeScript Consumer ────────────────────────────────────
     runTest('TypeScript Consumer', (dir) => {
@@ -126,7 +185,7 @@ try {
             const _resolver = MaxComponentsUiResolver;
         `);
         execSync('npx tsc --noEmit', { cwd: dir, stdio: 'inherit' });
-    });
+    }, 3);
 
     // ─── Cenário 4: Vite Consumer ───────────────────────────────────────────
     runTest('Vite Consumer', (dir) => {
@@ -154,11 +213,9 @@ try {
             };
         `);
         execSync('npx vite build', { cwd: dir, stdio: 'inherit' });
-    });
+    }, 4);
 
     // ─── Cenário 5: SSR Consumer ────────────────────────────────────────────
-    // CAUSA DA FALHA ANTERIOR: usar vue@^3.6.0-rc.5 que conflita com
-    // pinia@4.0.3 (requer vue@^3.5.11). Corrigido usando vue@^3.5.11.
     runTest('SSR Consumer', (dir) => {
         execSync('npm pkg set type="module"', { cwd: dir, stdio: 'ignore' });
         execSync(
@@ -194,19 +251,20 @@ try {
             });
         `);
         execSync('node index.js', { cwd: dir, stdio: 'inherit' });
-    });
+    }, 5);
 
     // ─── Cenário 6: CSS Global e Temas SCSS ─────────────────────────────────
     runTest('CSS Global e Temas SCSS Consumer', (dir) => {
         execSync('npm pkg set type="module"', { cwd: dir, stdio: 'ignore' });
         execSync(
-            `npm install --no-audit --no-fund "${tarballPath}" vue@"${VUE_VERSION}" pinia@"${PINIA_VERSION}" vue-router@"${VUE_ROUTER_VERSION}"`,
+            `npm install --no-audit --no-fund "${tarballPath}" vue@"${VUE_VERSION}" pinia@"${PINIA_VERSION}" vue-router@"${VUE_ROUTER_VERSION}" sass`,
             { cwd: dir, stdio: 'pipe' }
         );
         writeFileSync(join(dir, 'index.js'), `
             import * as UI from '@maxvue/max-components-ui';
             import { readFileSync, existsSync } from 'node:fs';
-            import { resolve } from 'node:path';
+            import { resolve, dirname } from 'node:path';
+            import * as sass from 'sass';
 
             if (!UI.MaxButton) throw new Error('MaxButton ausente.');
             const cssPath = resolve('node_modules/@maxvue/max-components-ui/dist/style.css');
@@ -218,10 +276,31 @@ try {
 
             const themePath = resolve('node_modules/@maxvue/max-components-ui/dist/themes/all.scss');
             if (!existsSync(themePath)) throw new Error('Tema all.scss não encontrado no pacote instalado.');
-            console.log('CSS e Temas SCSS — OK');
+
+            // Validação compilando o tema SCSS diretamente via sass.compile
+            const compiledTheme = sass.compile(themePath);
+            if (!compiledTheme.css.includes('--max-primary-500') || !compiledTheme.css.includes('--background-0')) {
+                throw new Error('Tema compilado via sass não contém tokens semânticos esperados (--max-primary-500).');
+            }
+
+            // Validação compilando regras SCSS do consumidor que importam all.scss
+            const consumerScss = \`
+                @use "all.scss";
+                .consumer-button {
+                    background-color: var(--max-primary-500);
+                }
+            \`;
+            const compiledConsumer = sass.compileString(consumerScss, {
+                loadPaths: [dirname(themePath)]
+            });
+            if (!compiledConsumer.css.includes('.consumer-button') || !compiledConsumer.css.includes('--max-primary-500')) {
+                throw new Error('Compilação SCSS de regra do consumidor falhou.');
+            }
+
+            console.log('CSS e Temas SCSS (compilados com sucesso via sass) — OK');
         `);
         execSync('node index.js', { cwd: dir, stdio: 'inherit' });
-    });
+    }, 6);
 
     // ─── Cenário 7: Subpath desconhecido deve FALHAR ────────────────────────
     // Validação negativa: import de caminho inexistente deve lançar erro.
@@ -247,7 +326,7 @@ try {
             }
         `);
         execSync('node index.js', { cwd: dir, stdio: 'inherit' });
-    });
+    }, 7);
 
     console.log('\n✅ --- Todos os cenários de validação passaram com sucesso ---\n');
 
@@ -259,10 +338,7 @@ try {
 } finally {
     // Cleanup garantido mesmo em caso de falha antes de qualquer exit
     console.log('\n--- Limpando arquivos temporários ---');
-    if (tempDir) {
-        rmSync(tempDir, { recursive: true, force: true });
-        console.log('Diretório temporário removido:', tempDir);
-    }
+    cleanup();
 }
 
 if (exitCode !== 0) {

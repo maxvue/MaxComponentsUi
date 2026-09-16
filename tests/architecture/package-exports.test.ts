@@ -1,11 +1,36 @@
 import { describe, it, expect } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
+import * as sass from 'sass';
 
 describe('Arquitetura - Contrato de Exports e Subpaths Públicos', () => {
     const pkgPath = path.resolve(__dirname, '../../package.json');
     const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
     const distDir = path.resolve(__dirname, '../../dist');
+    const srcDir = path.resolve(__dirname, '../../src');
+
+    function assertFreshBuild() {
+        expect(fs.existsSync(distDir), 'dist/ deve existir obrigatoriamente (build prévio obrigatório)').toBe(true);
+        const distIndex = path.resolve(distDir, 'index.es.js');
+        expect(fs.existsSync(distIndex), 'dist/index.es.js deve existir obrigatoriamente').toBe(true);
+        const distMtime = fs.statSync(distIndex).mtimeMs;
+
+        function checkFreshness(dir: string) {
+            const entries = fs.readdirSync(dir, { withFileTypes: true });
+            for (const entry of entries) {
+                const fullPath = path.join(dir, entry.name);
+                if (entry.isDirectory()) checkFreshness(fullPath);
+                else if (/\.(vue|ts|js|scss|css)$/.test(entry.name)) {
+                    const srcMtime = fs.statSync(fullPath).mtimeMs;
+                    expect(
+                        srcMtime <= distMtime,
+                        `Build desatualizado: o arquivo fonte ${path.relative(process.cwd(), fullPath)} foi modificado após dist/index.es.js. Execute 'npm run build'.`
+                    ).toBe(true);
+                }
+            }
+        }
+        checkFreshness(srcDir);
+    }
 
     it('deve conter o mapa de exports com os subpaths obrigatórios', () => {
         expect(pkg.exports).toBeDefined();
@@ -45,8 +70,8 @@ describe('Arquitetura - Contrato de Exports e Subpaths Públicos', () => {
         expect(pkg.exports['./prime']).toBeUndefined();
     });
 
-    it('todos os arquivos referenciados em exports devem existir em dist', () => {
-        expect(fs.existsSync(distDir), 'dist/ deve existir obrigatoriamente (build prévio obrigatório)').toBe(true);
+    it('todos os arquivos referenciados em exports estáticos devem existir em dist com build fresco', () => {
+        assertFreshBuild();
 
         const staticExportPaths = [
             pkg.exports['.'].types,
@@ -67,11 +92,37 @@ describe('Arquitetura - Contrato de Exports e Subpaths Públicos', () => {
             const fullPath = path.resolve(__dirname, '../../', relPath);
             expect(fs.existsSync(fullPath), `Arquivo de export ${relPath} deve existir`).toBe(true);
         }
+    });
 
-        // Verifica o diretório copiado de temas
+    it('deve validar e compilar o SCSS de dist/themes/all.scss com sass e inspecionar seu conteúdo', () => {
+        assertFreshBuild();
+
         const themesDir = path.resolve(distDir, 'themes');
+        const allScssPath = path.resolve(themesDir, 'all.scss');
         expect(fs.existsSync(themesDir), 'dist/themes deve existir').toBe(true);
-        expect(fs.existsSync(path.resolve(themesDir, 'all.scss')), 'dist/themes/all.scss deve existir').toBe(true);
+        expect(fs.existsSync(allScssPath), 'dist/themes/all.scss deve existir').toBe(true);
+
+        // Inspeção do conteúdo bruto do arquivo SCSS de entrada de temas
+        const scssContent = fs.readFileSync(allScssPath, 'utf-8');
+        expect(scssContent).toContain('@use \'./app.scss\'');
+        expect(scssContent).toContain('@use \'./colors.scss\'');
+        expect(scssContent).toContain('@forward \'./focus\'');
+        expect(scssContent).toContain('@forward \'./table-anatomy\'');
+        expect(scssContent).toContain('@use \'./tokens.scss\'');
+        expect(scssContent).toContain('box-sizing: border-box');
+
+        // Compilação real com o compilador sass oficial
+        const compiled = sass.compile(allScssPath, {
+            loadPaths: [themesDir]
+        });
+        expect(compiled.css).toBeDefined();
+        expect(compiled.css.length).toBeGreaterThan(10000);
+
+        // Inspeção de tokens centrais e seletores no CSS compilado
+        expect(compiled.css).toContain('--max-primary-500');
+        expect(compiled.css).toContain('--max-focus-ring');
+        expect(compiled.css).toContain('--background-0');
+        expect(compiled.css).toContain('box-sizing: border-box');
     });
 
     it('o subpath ./stores deve exportar todas as stores Pinia públicas', async () => {
@@ -132,11 +183,59 @@ describe('Arquitetura - Contrato de Exports e Subpaths Públicos', () => {
         expect(sideEffects).not.toContain('./dist/styles.es.js');
     });
 
-    it('deve conter exports explícitos para cada componente além do wildcard', () => {
-        expect(pkg.exports['./components/MaxButton']).toBeDefined();
-        expect(pkg.exports['./components/MaxButton'].import).toBe('./dist/components/MaxButton.es.js');
-        expect(pkg.exports['./components/MaxButton'].types).toBe('./dist/components/MaxButton.vue.d.ts');
+    it('deve conter mapa explícito de exports para todos os 115 componentes Vue com types e import apontando para arquivos reais em dist', () => {
+        assertFreshBuild();
+
+        const componentsDir = path.resolve(srcDir, 'components');
+        const vueFiles = fs.readdirSync(componentsDir)
+            .filter((f) => f.endsWith('.vue'))
+            .map((f) => f.replace('.vue', ''));
+
+        // Garantia de catálogo completo dos 115 componentes Vue
+        expect(vueFiles.length).toBe(115);
+
+        for (const componentName of vueFiles) {
+            const subpath = `./components/${componentName}`;
+            const exportEntry = pkg.exports[subpath];
+
+            expect(exportEntry, `Subpath ${subpath} deve estar explicitamente mapeado em package.json exports`).toBeDefined();
+            expect(exportEntry.types).toBe(`./dist/components/${componentName}.vue.d.ts`);
+            expect(exportEntry.import).toBe(`./dist/components/${componentName}.es.js`);
+
+            // Verificação de existência física em dist/
+            const typesFullPath = path.resolve(__dirname, '../../', exportEntry.types);
+            const importFullPath = path.resolve(__dirname, '../../', exportEntry.import);
+
+            expect(fs.existsSync(typesFullPath), `Arquivo de tipos ${exportEntry.types} deve existir fisicamente em dist/`).toBe(true);
+            expect(fs.existsSync(importFullPath), `Arquivo de código ${exportEntry.import} deve existir fisicamente em dist/`).toBe(true);
+        }
+
+        // Wildcard de compatibilidade
         expect(pkg.exports['./components/*']).toBeDefined();
+    });
+
+    it('CSS global deve ser estritamente opt-in (dist/style.css), sem injeção automática em index.es.js', () => {
+        assertFreshBuild();
+
+        const styleCssPath = path.resolve(distDir, 'style.css');
+        expect(fs.existsSync(styleCssPath), 'dist/style.css deve existir como bundle de estilo opt-in').toBe(true);
+        expect(fs.statSync(styleCssPath).size).toBeGreaterThan(50000);
+
+        const indexEsPath = path.resolve(distDir, 'index.es.js');
+        const indexContent = fs.readFileSync(indexEsPath, 'utf-8');
+
+        // index.es.js não deve injetar CSS no DOM automaticamente
+        expect(
+            indexContent.includes('document.createElement("style")') ||
+            indexContent.includes('document.createElement(\'style\')'),
+            'dist/index.es.js não deve injetar CSS via document.createElement'
+        ).toBe(false);
+
+        // index.es.js não deve conter import estático de CSS
+        expect(
+            /import\s+['"][^'"]+\.css['"]/.test(indexContent),
+            'dist/index.es.js não deve importar CSS estaticamente'
+        ).toBe(false);
     });
 
     it('documentação principal não deve recomendar o subpath obsoleto ./prime', () => {
