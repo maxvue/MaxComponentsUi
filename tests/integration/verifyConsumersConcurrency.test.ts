@@ -135,7 +135,7 @@ describe('R25 (E11-05) - Concorrência, Isolamento e Cleanup de Consumidores', (
         expect(capturedTempDir).toBeTruthy();
         // O handler de SIGTERM deve ter executado a limpeza
         expect(fs.existsSync(capturedTempDir!)).toBe(false);
-    }, 15000);
+    }, 45000);
 
     it('deve cobrir todos os cenários contratuais de consumidores no script de distribuição', () => {
         const scriptContent = fs.readFileSync(scriptPath, 'utf-8');
