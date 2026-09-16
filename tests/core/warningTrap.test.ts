@@ -91,4 +91,19 @@ describe('Política de console e suíte sem warnings (E12-02)', () => {
         expect(() => verifyConsoleClean()).not.toThrow();
         spy.mockRestore();
     });
+
+    it('R02 / E01-04: reprova chamada de AbortError ou ERR_CANCELED sem spy ou allowlist explícita (sem bypass global)', () => {
+        console.error('DOMException [AbortError]: The operation was aborted');
+        expect(() => verifyConsoleClean()).toThrow(/Teste emitiu console\.error inesperado/);
+
+        console.error('AxiosError: ERR_CANCELED');
+        expect(() => verifyConsoleClean()).toThrow(/Teste emitiu console\.error inesperado/);
+    });
+
+    it('R02 / E01-04: permite AbortError somente quando autorizado explicitamente via allowConsoleError local', () => {
+        allowConsoleError('AbortError');
+        console.error('DOMException [AbortError]: Operação cancelada intencionalmente');
+
+        expect(() => verifyConsoleClean()).not.toThrow();
+    });
 });

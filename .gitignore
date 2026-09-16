@@ -66,3 +66,4 @@ coverage/
 tests/browser/__screenshots__/
 .agents/
 .worktrees/
+tests/benchmarks/benchmark-results.json
