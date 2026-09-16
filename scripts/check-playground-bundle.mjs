@@ -6,9 +6,9 @@ import { execSync } from 'node:child_process';
 
 const DIST_DIR = resolve(fileURLToPath(new URL('../playground/dist', import.meta.url)));
 const LIMITS = Object.freeze({
-    // Orçamento congelado a partir do maior chunk medido no R19 (2,507 MB / 823 kB gzip).
-    rawBytes: 2_510_000,
-    gzipBytes: 850_000
+    // Orçamento congelado a partir dos baselines auditados (2.507.440 bytes brutos e 823.120 bytes gzip).
+    rawBytes: 2_507_440,
+    gzipBytes: 823_120
 });
 
 if (!existsSync(DIST_DIR)) {
