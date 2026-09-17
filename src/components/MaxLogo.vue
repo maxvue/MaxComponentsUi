@@ -33,8 +33,8 @@
         }>(),
         {
             src: undefined,
-            alt: 'Logo da aplicação',
-            fallbackLabel: 'Aplicação',
+            alt: 'Logo',
+            fallbackLabel: 'Erro<Logo>',
             rounded: false,
             noPadding: false,
             to: '/'
