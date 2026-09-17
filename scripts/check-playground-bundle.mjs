@@ -2,7 +2,7 @@ import { gzipSync } from 'node:zlib';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { execSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 
 const DIST_DIR = resolve(fileURLToPath(new URL('../playground/dist', import.meta.url)));
 const LIMITS = Object.freeze({
@@ -11,9 +11,19 @@ const LIMITS = Object.freeze({
     gzipBytes: 823_120
 });
 
-if (!existsSync(DIST_DIR)) {
-    console.log('playground/dist não encontrado. Executando build do playground...');
-    execSync('npx vite build --config playground/vite.config.ts', { stdio: 'inherit' });
+const npxCommand = process.platform === 'win32' ? 'npx.cmd' : 'npx';
+const build = spawnSync(npxCommand, ['vite', 'build', '--config', 'playground/vite.config.ts'], {
+    encoding: 'utf8'
+});
+process.stdout.write(build.stdout ?? '');
+process.stderr.write(build.stderr ?? '');
+
+if (build.error) throw build.error;
+if (build.status !== 0) {
+    throw new Error(`Build do playground falhou com código ${build.status}.`);
+}
+if (/Duplicated imports/i.test(`${build.stdout}\n${build.stderr}`)) {
+    throw new Error('Build do playground contém imports duplicados. Corrija a configuração de auto-import antes de aceitar o orçamento.');
 }
 
 function listJavaScriptFiles(directory) {
@@ -21,7 +31,7 @@ function listJavaScriptFiles(directory) {
     return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
         const path = join(directory, entry.name);
         if (entry.isDirectory()) return listJavaScriptFiles(path);
-        return entry.name.endsWith('.js') ? [path] : [];
+        return /\.m?js$/.test(entry.name) ? [path] : [];
     });
 }
 
@@ -34,7 +44,7 @@ if (chunks.length === 0) {
     throw new Error(`Nenhum chunk JavaScript encontrado em ${DIST_DIR}. Execute o build antes do orçamento.`);
 }
 
-const failures = chunks.filter(({ rawBytes, gzipBytes }) => rawBytes > LIMITS.rawBytes || gzipBytes > LIMITS.gzipBytes);
+const failures = chunks.filter(({ rawBytes, gzipBytes }) => rawBytes >= LIMITS.rawBytes || gzipBytes >= LIMITS.gzipBytes);
 const largestChunk = chunks.reduce((largest, chunk) => chunk.rawBytes > largest.rawBytes ? chunk : largest);
 console.log(`Maior chunk: ${largestChunk.file} (${largestChunk.rawBytes} bytes brutos, ${largestChunk.gzipBytes} bytes gzip).`);
 

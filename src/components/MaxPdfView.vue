@@ -83,10 +83,16 @@
     import { maxComponentsPtBR, type MaxPdfViewLabels } from '../locales/pt-br';
     import MaxButton from './MaxButton.vue';
 
-    // Async: vue-pdf-embed pesa ~2,6 MB (814 KB gzip) — só carrega quando um PDF é exibido no cliente
+    // Async: o viewer e seu worker só carregam quando um PDF é exibido no cliente.
     const VuePdfEmbed = defineAsyncComponent((): Promise<any> => {
         if (typeof window === 'undefined') return Promise.resolve({ render: () => null });
-        return import('vue-pdf-embed');
+        return Promise.all([
+            import('vue-pdf-embed/dist/index.essential.mjs'),
+            import('pdfjs-dist/legacy/build/pdf.worker.min.mjs?url')
+        ]).then(([{ default: component, GlobalWorkerOptions }, { default: workerSrc }]) => {
+            GlobalWorkerOptions.workerSrc = workerSrc;
+            return component;
+        });
     });
 
     const { width: screen_width, height: screen_height } = useWindowSize();

@@ -11,6 +11,7 @@ export default [
             'playground/dist/**',
             'coverage/**',
             'node_modules/**',
+            '.worktrees/**',
             '**/*.tsbuildinfo',
             'test-tmp.js'
         ]
