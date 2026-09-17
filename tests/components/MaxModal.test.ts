@@ -469,6 +469,58 @@ describe('MaxModal', () => {
         });
     });
 
+    describe('Rolagem vertical do conteúdo', () => {
+        it('declara overflow: hidden auto em .max-modal-content para suportar rolagem vertical com bloqueio horizontal', () => {
+            const sfc = readFileSync(resolve(__dirname, '../../src/components/MaxModal.vue'), 'utf-8');
+            const styleMatch = /<style[^>]*>([\s\S]*?)<\/style>/.exec(sfc);
+            expect(styleMatch).not.toBeNull();
+
+            const compiledCss = sass.compileString(styleMatch![1]).css;
+
+            expect(compiledCss).toMatch(/\.max-modal\s+\.max-modal-content\s*\{[^}]*overflow:\s*hidden\s+auto/);
+        });
+
+        it('renderiza o container de conteúdo .max-modal-content com capacidade de rolagem para múltiplos nós', async () => {
+            const wrapper = mountModal({}, {
+                content: '<div class="tall-content" style="height: 1000px;">Conteúdo longo</div>'
+            });
+            (wrapper.vm as any).open();
+            await wrapper.vm.$nextTick();
+
+            const contentEl = wrapper.find('.max-modal-content');
+            expect(contentEl.exists()).toBe(true);
+            expect(contentEl.find('.tall-content').exists()).toBe(true);
+        });
+
+        it('mantém container de conteúdo rolável quando height específica é fornecida', async () => {
+            const wrapper = mountModal({ height: 400 }, {
+                default: '<div class="tall-items" style="height: 800px;">Lista longa de itens</div>'
+            });
+            (wrapper.vm as any).open();
+            await wrapper.vm.$nextTick();
+
+            const modalEl = wrapper.find('.max-modal');
+            expect(modalEl.attributes('style')).toContain('height: 400px');
+            const contentEl = wrapper.find('.max-modal-content');
+            expect(contentEl.exists()).toBe(true);
+            expect(contentEl.find('.tall-items').exists()).toBe(true);
+        });
+
+        it('mantém container de conteúdo rolável quando noHeader é true', async () => {
+            const wrapper = mountModal({ noHeader: true }, {
+                default: '<div class="tall-no-header" style="height: 1200px;">Conteúdo sem header</div>'
+            });
+            (wrapper.vm as any).open();
+            await wrapper.vm.$nextTick();
+
+            const modalEl = wrapper.find('.max-modal');
+            expect(modalEl.find('.max-modal-header-wrapper').exists()).toBe(false);
+            const contentEl = wrapper.find('.max-modal-content');
+            expect(contentEl.exists()).toBe(true);
+            expect(contentEl.find('.tall-no-header').exists()).toBe(true);
+        });
+    });
+
     describe('Proteção contra fechamento acidental e retenção (Etapa 09)', () => {
         it('com dismissable: false, clicar no backdrop não fecha o modal e aciona a classe is-shaking por 400ms', async () => {
             vi.useFakeTimers();

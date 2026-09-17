@@ -697,7 +697,7 @@
                 position: relative;
                 flex: 1 1 0;
                 min-height: 0;
-                overflow: hidden;
+                overflow: hidden auto;
                 display: flex;
                 flex-direction: column;
             }
