@@ -695,4 +695,156 @@ describe('MaxTableFields.vue', () => {
             expect(sfc).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*?\.max-table-fields-wrapper/);
         });
     });
+
+    describe('Ajustes de coluna de incremento e no-message em inputs', () => {
+        it('aplica largura máxima de 180px e classe max-table-fields-col-increment em coluna com input increment', () => {
+            const columns = [
+                { field: 'qty', header: 'Quantidade', input: 'increment' },
+                { field: 'name', header: 'Nome', input: 'text' }
+            ];
+            const list = [{ qty: 5, name: 'Item 1' }];
+
+            const wrapper = mount(MaxTableFields, {
+                props: { columns, list },
+                global: {
+                    stubs: {
+                        MaxIconButton: true,
+                        MaxInputText: true
+                    }
+                }
+            });
+
+            const ths = wrapper.findAll('.max-table-fields-th');
+            const tds = wrapper.findAll('.max-table-fields-td');
+
+            expect(ths[0].classes()).toContain('max-table-fields-col-increment');
+            expect(ths[0].attributes('style')).toContain('max-width: 180px');
+            expect(ths[0].attributes('style')).toContain('width: 180px');
+
+            expect(tds[0].classes()).toContain('max-table-fields-col-increment');
+            expect(tds[0].attributes('style')).toContain('max-width: 180px');
+            expect(tds[0].attributes('style')).toContain('width: 180px');
+
+            expect(ths[1].classes()).not.toContain('max-table-fields-col-increment');
+            expect(tds[1].classes()).not.toContain('max-table-fields-col-increment');
+        });
+
+        it('respeita col.maxWidth e col.width customizados quando input for increment', () => {
+            const columns = [
+                { field: 'qty', header: 'Qtd', input: 'increment', maxWidth: '150px', width: '120px' }
+            ];
+            const list = [{ qty: 2 }];
+
+            const wrapper = mount(MaxTableFields, {
+                props: { columns, list },
+                global: {
+                    stubs: {
+                        MaxIconButton: true,
+                        MaxInputText: true
+                    }
+                }
+            });
+
+            const th = wrapper.find('.max-table-fields-th');
+            expect(th.attributes('style')).toContain('width: 120px');
+            expect(th.attributes('style')).toContain('max-width: 150px');
+        });
+
+        it('passa noMessage true por padrão em todos os tipos de input', () => {
+            const columns = [
+                { field: 'inc', input: 'increment' },
+                { field: 'txt', input: 'text' },
+                { field: 'num', input: 'number' },
+                { field: 'sel', input: 'select' },
+                { field: 'dat', input: 'date' },
+                { field: 'txta', input: 'textarea' },
+                { field: 'ac', input: 'auto-complete' },
+                { field: 'acApi', input: 'auto-complete-api' },
+                { field: 'phone', input: 'phone-number' }
+            ];
+            const list = [{
+                inc: 1,
+                txt: 'abc',
+                num: 10,
+                sel: 'opt1',
+                dat: '2026-01-01',
+                txta: 'long text',
+                ac: 'item',
+                acApi: 'item2',
+                phone: '11999999999'
+            }];
+
+            const wrapper = mount(MaxTableFields, {
+                props: { columns, list },
+                global: {
+                    stubs: {
+                        MaxIconButton: true,
+                        MaxInputText: true,
+                        MaxInputNumber: true,
+                        MaxInputSelect: true,
+                        MaxInputDatePicker: true,
+                        MaxInputTextArea: true,
+                        MaxInputAutoComplete: true,
+                        MaxInputAutoCompleteApi: true,
+                        MaxInputPhone: true
+                    }
+                }
+            });
+
+            const incInput = wrapper.findComponent('.table-field-increment-input');
+            expect(incInput.props('noMessage')).toBe(true);
+
+            const textInput = wrapper.findComponent({ name: 'MaxInputText' });
+            expect(textInput.props('noMessage')).toBe(true);
+
+            const numberInput = wrapper.findComponent({ name: 'MaxInputNumber' });
+            expect(numberInput.props('noMessage')).toBe(true);
+
+            const selectInput = wrapper.findComponent({ name: 'MaxInputSelect' });
+            expect(selectInput.props('noMessage')).toBe(true);
+
+            const dateInput = wrapper.findComponent({ name: 'MaxInputDatePicker' });
+            expect(dateInput.props('noMessage')).toBe(true);
+
+            const textAreaInput = wrapper.findComponent({ name: 'MaxInputTextArea' });
+            expect(textAreaInput.props('noMessage')).toBe(true);
+
+            const autoCompleteInput = wrapper.findComponent({ name: 'MaxInputAutoComplete' });
+            expect(autoCompleteInput.props('noMessage')).toBe(true);
+
+            const autoCompleteApiInput = wrapper.findComponent({ name: 'MaxInputAutoCompleteApi' });
+            expect(autoCompleteApiInput.props('noMessage')).toBe(true);
+
+            const phoneInput = wrapper.findComponent({ name: 'MaxInputPhone' });
+            expect(phoneInput.props('noMessage')).toBe(true);
+        });
+
+        it('respeita col.noMessage quando explicitamente false', () => {
+            const columns = [
+                { field: 'txt', input: 'text', noMessage: false }
+            ];
+            const list = [{ txt: 'teste' }];
+
+            const wrapper = mount(MaxTableFields, {
+                props: { columns, list },
+                global: {
+                    stubs: {
+                        MaxInputText: true
+                    }
+                }
+            });
+
+            const textInput = wrapper.findComponent({ name: 'MaxInputText' });
+            expect(textInput.props('noMessage')).toBe(false);
+        });
+
+        it('valida regras CSS de coluna e container de incremento no SFC', async () => {
+            const fs = await import('node:fs');
+            const path = await import('node:path');
+            const sfc = fs.readFileSync(path.resolve(__dirname, '../../src/components/MaxTableFields.vue'), 'utf-8');
+
+            expect(sfc).toMatch(/\.max-table-fields-col-increment\s*\{[^}]*max-width:\s*180px/);
+            expect(sfc).toMatch(/\.max-table-fields-increment\s*\{[^}]*max-width:\s*180px/);
+        });
+    });
 });

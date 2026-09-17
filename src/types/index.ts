@@ -398,6 +398,8 @@ export interface MaxTableColumn {
     required?: boolean;
     /** Tooltip a ser exibido ao passar o mouse */
     tooltip?: boolean;
+    /** Oculta a mensagem de feedback e remove a reserva vertical no input */
+    noMessage?: boolean;
     /** Função a ser executada quando o valor do campo mudar */
     action?: ((data: { row: any; field: string; value: any }) => void) | ((...args: any[]) => any);
 };
