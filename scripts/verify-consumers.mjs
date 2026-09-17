@@ -21,7 +21,7 @@
  * Integrado ao npm run verify via: npm run verify:consumers
  */
 
-import { execSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -38,6 +38,51 @@ const customBaseDir = process.env.CONSUMER_TEMP_DIR || tmpdir();
 let tempDir;
 let tarballPath;
 let cleanedUp = false;
+let activeChild;
+
+const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+const npxCommand = process.platform === 'win32' ? 'npx.cmd' : 'npx';
+
+const runCommand = (command, args, { cwd, stdio = 'inherit' } = {}) => new Promise((resolve, reject) => {
+    const child = spawn(command, args, {
+        cwd,
+        detached: process.platform !== 'win32',
+        stdio: stdio === 'pipe' ? ['ignore', 'pipe', 'pipe'] : stdio
+    });
+    activeChild = child;
+
+    let stdout = '';
+    let stderr = '';
+    child.stdout?.on('data', (chunk) => { stdout += chunk.toString(); });
+    child.stderr?.on('data', (chunk) => { stderr += chunk.toString(); });
+
+    child.once('error', (error) => {
+        if (activeChild === child) activeChild = undefined;
+        reject(error);
+    });
+    child.once('close', (code, signal) => {
+        if (activeChild === child) activeChild = undefined;
+        if (code === 0) {
+            resolve(stdout);
+            return;
+        }
+
+        const error = new Error(`Comando ${command} falhou com código ${code ?? 'nulo'}${signal ? ` e sinal ${signal}` : ''}.`);
+        error.stdout = stdout;
+        error.stderr = stderr;
+        reject(error);
+    });
+});
+
+const terminateActiveChild = (signal) => {
+    if (!activeChild?.pid || activeChild.killed) return;
+    try {
+        if (process.platform === 'win32') activeChild.kill(signal);
+        else process.kill(-activeChild.pid, signal);
+    } catch {
+        // O processo pode ter encerrado entre a verificação e o envio do sinal.
+    }
+};
 
 // ───── Versões compatíveis com pinia@^4.0.2 (que requer vue@^3.5.11) ─────
 const VUE_VERSION = '^3.5.11';
@@ -62,12 +107,14 @@ const cleanup = () => {
 
 process.on('SIGINT', () => {
     console.log('\n[verify-consumers] Interrupção SIGINT recebida.');
+    terminateActiveChild('SIGINT');
     cleanup();
     process.exit(130);
 });
 
 process.on('SIGTERM', () => {
     console.log('\n[verify-consumers] Interrupção SIGTERM recebida.');
+    terminateActiveChild('SIGTERM');
     cleanup();
     process.exit(143);
 });
@@ -79,7 +126,7 @@ process.on('exit', () => {
 try {
     if (!skipBuild) {
         console.log('\n--- Executando build fresco obrigatório ---');
-        execSync('npm run build', { cwd: projectRoot, stdio: 'inherit' });
+        await runCommand(npmCommand, ['run', 'build'], { cwd: projectRoot });
     } else {
         console.log('\n--- Reutilizando build fresco existente (--skip-build / SKIP_BUILD=1) ---');
     }
@@ -92,7 +139,7 @@ try {
     }
 
     console.log('\n--- Empacotando projeto com npm pack no diretório isolado ---');
-    const packOutput = execSync(`npm pack --pack-destination "${tempDir}"`, { cwd: projectRoot, encoding: 'utf-8' });
+    const packOutput = await runCommand(npmCommand, ['pack', '--pack-destination', tempDir], { cwd: projectRoot, stdio: 'pipe' });
     const tarballName = packOutput.trim().split('\n').pop().trim();
     tarballPath = join(tempDir, tarballName);
     console.log('Tarball isolado criado:', tarballPath);
@@ -103,7 +150,7 @@ try {
      * @param {(dir: string) => void} script - Função de teste
      * @param {number} [scenarioNum] - Número ordinal do cenário
      */
-    const runTest = (name, script, scenarioNum) => {
+    const runTest = async (name, script, scenarioNum) => {
         if (scenarioFilter) {
             const matchesNum = scenarioNum !== undefined && String(scenarioNum) === String(scenarioFilter);
             const matchesName = name.toLowerCase().includes(scenarioFilter.toLowerCase());
@@ -115,34 +162,34 @@ try {
         console.log(`\n--- Testando: ${name} ---`);
         const dir = join(tempDir, name.replace(/[/ ]/g, '_'));
         mkdirSync(dir, { recursive: true });
-        execSync('npm init -y', { cwd: dir, stdio: 'ignore' });
-        script(dir);
+        await runCommand(npmCommand, ['init', '-y'], { cwd: dir, stdio: 'ignore' });
+        await script(dir);
         console.log(`✅ ${name} — OK\n`);
     };
 
     // ─── Cenário 1: Node ESM sem deps opcionais ────────────────────────────
-    runTest('Node ESM sem deps opcionais', (dir) => {
-        execSync('npm pkg set type="module"', { cwd: dir, stdio: 'ignore' });
-        execSync(
-            `npm install --no-audit --no-fund "${tarballPath}" vue@"${VUE_VERSION}" pinia@"${PINIA_VERSION}" vue-router@"${VUE_ROUTER_VERSION}"`,
-            { cwd: dir, stdio: 'pipe' }
-        );
+    await runTest('Node ESM sem deps opcionais', async (dir) => {
+        await runCommand(npmCommand, ['pkg', 'set', 'type=module'], { cwd: dir, stdio: 'ignore' });
+        await runCommand(npmCommand, [
+            'install', '--no-audit', '--no-fund', tarballPath,
+            `vue@${VUE_VERSION}`, `pinia@${PINIA_VERSION}`, `vue-router@${VUE_ROUTER_VERSION}`
+        ], { cwd: dir, stdio: 'pipe' });
         writeFileSync(join(dir, 'index.js'), `
             import * as UI from '@maxvue/max-components-ui';
             import '@maxvue/max-components-ui/styles';
             if (!UI.MaxButton) throw new Error('MaxButton ausente no entrypoint raiz.');
             console.log('ESM sem deps opcionais — OK');
         `);
-        execSync('node index.js', { cwd: dir, stdio: 'inherit' });
+        await runCommand(process.execPath, ['index.js'], { cwd: dir });
     }, 1);
 
     // ─── Cenário 2: Node ESM com deps opcionais (unocss) ──────────────────
-    runTest('Node ESM com deps opcionais', (dir) => {
-        execSync('npm pkg set type="module"', { cwd: dir, stdio: 'ignore' });
-        execSync(
-            `npm install --no-audit --no-fund "${tarballPath}" vue@"${VUE_VERSION}" pinia@"${PINIA_VERSION}" vue-router@"${VUE_ROUTER_VERSION}" unocss@"${UNOCSS_VERSION}"`,
-            { cwd: dir, stdio: 'pipe' }
-        );
+    await runTest('Node ESM com deps opcionais', async (dir) => {
+        await runCommand(npmCommand, ['pkg', 'set', 'type=module'], { cwd: dir, stdio: 'ignore' });
+        await runCommand(npmCommand, [
+            'install', '--no-audit', '--no-fund', tarballPath,
+            `vue@${VUE_VERSION}`, `pinia@${PINIA_VERSION}`, `vue-router@${VUE_ROUTER_VERSION}`, `unocss@${UNOCSS_VERSION}`
+        ], { cwd: dir, stdio: 'pipe' });
         writeFileSync(join(dir, 'index.js'), `
             import * as UI from '@maxvue/max-components-ui';
             import { presetMaxUno } from '@maxvue/max-components-ui/preset';
@@ -154,15 +201,16 @@ try {
             if (typeof MaxComponentsUiResolver !== 'function') throw new Error('MaxComponentsUiResolver inválido.');
             console.log('ESM com deps opcionais — OK');
         `);
-        execSync('node index.js', { cwd: dir, stdio: 'inherit' });
+        await runCommand(process.execPath, ['index.js'], { cwd: dir });
     }, 2);
 
     // ─── Cenário 3: TypeScript Consumer ────────────────────────────────────
-    runTest('TypeScript Consumer', (dir) => {
-        execSync(
-            `npm install --no-audit --no-fund typescript "${tarballPath}" vue@"${VUE_VERSION}" pinia@"${PINIA_VERSION}" vue-router@"${VUE_ROUTER_VERSION}" unocss@"${UNOCSS_VERSION}" @vueuse/core unplugin-vue-components`,
-            { cwd: dir, stdio: 'pipe' }
-        );
+    await runTest('TypeScript Consumer', async (dir) => {
+        await runCommand(npmCommand, [
+            'install', '--no-audit', '--no-fund', 'typescript', tarballPath,
+            `vue@${VUE_VERSION}`, `pinia@${PINIA_VERSION}`, `vue-router@${VUE_ROUTER_VERSION}`,
+            `unocss@${UNOCSS_VERSION}`, '@vueuse/core', 'unplugin-vue-components'
+        ], { cwd: dir, stdio: 'pipe' });
         writeFileSync(join(dir, 'tsconfig.json'), JSON.stringify({
             compilerOptions: {
                 moduleResolution: 'bundler',
@@ -184,16 +232,17 @@ try {
             const _preset = presetMaxUno;
             const _resolver = MaxComponentsUiResolver;
         `);
-        execSync('npx tsc --noEmit', { cwd: dir, stdio: 'inherit' });
+        await runCommand(npxCommand, ['tsc', '--noEmit'], { cwd: dir });
     }, 3);
 
     // ─── Cenário 4: Vite Consumer ───────────────────────────────────────────
-    runTest('Vite Consumer', (dir) => {
-        execSync('npm pkg set type="module"', { cwd: dir, stdio: 'ignore' });
-        execSync(
-            `npm install --no-audit --no-fund "${tarballPath}" vue@"${VUE_VERSION}" pinia@"${PINIA_VERSION}" vue-router@"${VUE_ROUTER_VERSION}" vite unocss@"${UNOCSS_VERSION}"`,
-            { cwd: dir, stdio: 'pipe' }
-        );
+    await runTest('Vite Consumer', async (dir) => {
+        await runCommand(npmCommand, ['pkg', 'set', 'type=module'], { cwd: dir, stdio: 'ignore' });
+        await runCommand(npmCommand, [
+            'install', '--no-audit', '--no-fund', tarballPath,
+            `vue@${VUE_VERSION}`, `pinia@${PINIA_VERSION}`, `vue-router@${VUE_ROUTER_VERSION}`,
+            'vite', `unocss@${UNOCSS_VERSION}`
+        ], { cwd: dir, stdio: 'pipe' });
         writeFileSync(join(dir, 'index.html'), '<div id="app"></div><script type="module" src="/main.js"></script>');
         writeFileSync(join(dir, 'main.js'), `
             import { createApp } from 'vue';
@@ -212,16 +261,17 @@ try {
                 },
             };
         `);
-        execSync('npx vite build', { cwd: dir, stdio: 'inherit' });
+        await runCommand(npxCommand, ['vite', 'build'], { cwd: dir });
     }, 4);
 
     // ─── Cenário 5: SSR Consumer ────────────────────────────────────────────
-    runTest('SSR Consumer', (dir) => {
-        execSync('npm pkg set type="module"', { cwd: dir, stdio: 'ignore' });
-        execSync(
-            `npm install --no-audit --no-fund "${tarballPath}" vue@"${VUE_VERSION}" pinia@"${PINIA_VERSION}" vue-router@"${VUE_ROUTER_VERSION}" @vue/server-renderer`,
-            { cwd: dir, stdio: 'pipe' }
-        );
+    await runTest('SSR Consumer', async (dir) => {
+        await runCommand(npmCommand, ['pkg', 'set', 'type=module'], { cwd: dir, stdio: 'ignore' });
+        await runCommand(npmCommand, [
+            'install', '--no-audit', '--no-fund', tarballPath,
+            `vue@${VUE_VERSION}`, `pinia@${PINIA_VERSION}`, `vue-router@${VUE_ROUTER_VERSION}`,
+            '@vue/server-renderer'
+        ], { cwd: dir, stdio: 'pipe' });
         writeFileSync(join(dir, 'index.js'), `
             import { createSSRApp } from 'vue';
             import { renderToString } from '@vue/server-renderer';
@@ -250,16 +300,16 @@ try {
                 process.exit(1);
             });
         `);
-        execSync('node index.js', { cwd: dir, stdio: 'inherit' });
+        await runCommand(process.execPath, ['index.js'], { cwd: dir });
     }, 5);
 
     // ─── Cenário 6: CSS Global e Temas SCSS ─────────────────────────────────
-    runTest('CSS Global e Temas SCSS Consumer', (dir) => {
-        execSync('npm pkg set type="module"', { cwd: dir, stdio: 'ignore' });
-        execSync(
-            `npm install --no-audit --no-fund "${tarballPath}" vue@"${VUE_VERSION}" pinia@"${PINIA_VERSION}" vue-router@"${VUE_ROUTER_VERSION}" sass`,
-            { cwd: dir, stdio: 'pipe' }
-        );
+    await runTest('CSS Global e Temas SCSS Consumer', async (dir) => {
+        await runCommand(npmCommand, ['pkg', 'set', 'type=module'], { cwd: dir, stdio: 'ignore' });
+        await runCommand(npmCommand, [
+            'install', '--no-audit', '--no-fund', tarballPath,
+            `vue@${VUE_VERSION}`, `pinia@${PINIA_VERSION}`, `vue-router@${VUE_ROUTER_VERSION}`, 'sass'
+        ], { cwd: dir, stdio: 'pipe' });
         writeFileSync(join(dir, 'index.js'), `
             import * as UI from '@maxvue/max-components-ui';
             import { readFileSync, existsSync } from 'node:fs';
@@ -299,17 +349,17 @@ try {
 
             console.log('CSS e Temas SCSS (compilados com sucesso via sass) — OK');
         `);
-        execSync('node index.js', { cwd: dir, stdio: 'inherit' });
+        await runCommand(process.execPath, ['index.js'], { cwd: dir });
     }, 6);
 
     // ─── Cenário 7: Subpath desconhecido deve FALHAR ────────────────────────
     // Validação negativa: import de caminho inexistente deve lançar erro.
-    runTest('Subpath desconhecido deve falhar', (dir) => {
-        execSync('npm pkg set type="module"', { cwd: dir, stdio: 'ignore' });
-        execSync(
-            `npm install --no-audit --no-fund "${tarballPath}" vue@"${VUE_VERSION}" pinia@"${PINIA_VERSION}" vue-router@"${VUE_ROUTER_VERSION}"`,
-            { cwd: dir, stdio: 'pipe' }
-        );
+    await runTest('Subpath desconhecido deve falhar', async (dir) => {
+        await runCommand(npmCommand, ['pkg', 'set', 'type=module'], { cwd: dir, stdio: 'ignore' });
+        await runCommand(npmCommand, [
+            'install', '--no-audit', '--no-fund', tarballPath,
+            `vue@${VUE_VERSION}`, `pinia@${PINIA_VERSION}`, `vue-router@${VUE_ROUTER_VERSION}`
+        ], { cwd: dir, stdio: 'pipe' });
         writeFileSync(join(dir, 'index.js'), `
             // Este import DEVE falhar — subpath inexistente não deve ser resolvido.
             try {
@@ -325,7 +375,7 @@ try {
                 }
             }
         `);
-        execSync('node index.js', { cwd: dir, stdio: 'inherit' });
+        await runCommand(process.execPath, ['index.js'], { cwd: dir });
     }, 7);
 
     console.log('\n✅ --- Todos os cenários de validação passaram com sucesso ---\n');
