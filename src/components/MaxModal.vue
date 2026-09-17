@@ -23,7 +23,7 @@
                         :inert="!isTopModal ? true : undefined"
                         :aria-labelledby="computedAriaLabelledby"
                         :aria-label="computedAriaLabel"
-                        :style="{ zIndex: dialogZIndex, padding: modal_padding, width: modal_width, height: modal_height }"
+                        :style="{ zIndex: dialogZIndex, padding: modal_padding, width: modal_width, height: modal_height, maxWidth: modal_max_width, maxHeight: modal_max_height }"
                         @click.stop="() => {}"
                         @keydown="isTopModal ? trap.onKeydown($event) : undefined"
                         :class="[{ 'is-shaking': isShaking }, props.class]"
@@ -114,6 +114,10 @@
         width?: string | number;
         /** Altura específica */
         height?: string | number;
+        /** Largura máxima específica */
+        maxWidth?: string | number;
+        /** Altura máxima específica */
+        maxHeight?: string | number;
         /** Icone escuro referente ao fundo */
         dark?: boolean | string | number | undefined;
         /** Icone claro referente ao fundo */
@@ -379,6 +383,18 @@
     const modal_height = computed(() => {
         if (props.height === undefined) return undefined;
         return typeof props.height === 'number' ? `${props.height}px` : props.height;
+    });
+
+    const modal_max_width = computed(() => {
+        if (props.maxWidth === undefined) return undefined;
+        const raw = typeof props.maxWidth === 'number' ? `${props.maxWidth}px` : props.maxWidth;
+        return `min(${raw}, calc(100vw - 40px))`;
+    });
+
+    const modal_max_height = computed(() => {
+        if (props.maxHeight === undefined) return undefined;
+        const raw = typeof props.maxHeight === 'number' ? `${props.maxHeight}px` : props.maxHeight;
+        return `min(${raw}, calc(100vh - 40px))`;
     });
 
     const el = useTemplateRef<HTMLElement>('el');

@@ -445,6 +445,49 @@ describe('MaxModal', () => {
             const modalNumber = wrapperNumber.find('.max-modal');
             expect(modalNumber.attributes('style')).toContain('padding: 16px');
         });
+
+        it('não injeta max-width nem max-height inline quando as props não forem informadas', async () => {
+            const wrapper = mountModal();
+            (wrapper.vm as any).open();
+            await wrapper.vm.$nextTick();
+
+            const modalEl = wrapper.find('.max-modal');
+            const style = modalEl.attributes('style') ?? '';
+            expect(style).not.toMatch(/max-width:/);
+            expect(style).not.toMatch(/max-height:/);
+        });
+
+        it('aplica max-width inline com min(...) quando a prop maxWidth for informada como string ou número', async () => {
+            const wrapperString = mountModal({ maxWidth: '500px' });
+            (wrapperString.vm as any).open();
+            await wrapperString.vm.$nextTick();
+
+            const modalString = wrapperString.find('.max-modal');
+            expect(modalString.attributes('style')).toContain('max-width: min(500px, calc(100vw - 40px))');
+
+            const wrapperNumber = mountModal({ maxWidth: 450 });
+            (wrapperNumber.vm as any).open();
+            await wrapperNumber.vm.$nextTick();
+
+            const modalNumber = wrapperNumber.find('.max-modal');
+            expect(modalNumber.attributes('style')).toContain('max-width: min(450px, calc(100vw - 40px))');
+        });
+
+        it('aplica max-height inline com min(...) quando a prop maxHeight for informada como string ou número', async () => {
+            const wrapperString = mountModal({ maxHeight: '600px' });
+            (wrapperString.vm as any).open();
+            await wrapperString.vm.$nextTick();
+
+            const modalString = wrapperString.find('.max-modal');
+            expect(modalString.attributes('style')).toContain('max-height: min(600px, calc(100vh - 40px))');
+
+            const wrapperNumber = mountModal({ maxHeight: 500 });
+            (wrapperNumber.vm as any).open();
+            await wrapperNumber.vm.$nextTick();
+
+            const modalNumber = wrapperNumber.find('.max-modal');
+            expect(modalNumber.attributes('style')).toContain('max-height: min(500px, calc(100vh - 40px))');
+        });
     });
 
     describe('Barras de rolagem invisíveis (0px de largura)', () => {
