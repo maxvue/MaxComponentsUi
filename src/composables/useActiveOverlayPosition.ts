@@ -7,6 +7,7 @@ import {
     type Ref,
     type ComputedRef
 } from 'vue';
+import { useOverlayZIndex, type OverlayLayer } from './useOverlayZIndex';
 
 export type MaybeRef<T> = Ref<T> | ComputedRef<T> | T;
 export type MaybeRefOrGetter<T> = MaybeRef<T> | (() => T);
@@ -59,6 +60,7 @@ export interface OverlayPositionResult {
     left: number;
     width?: string | number;
     placement?: 'top' | 'bottom';
+    zIndex?: string | number;
     [key: string]: any;
 }
 
@@ -75,6 +77,10 @@ export interface UseActiveOverlayPositionOptions<T extends OverlayPositionResult
     align?: 'left' | 'right';
     /** Forçar largura mínima igual à largura do gatilho (padrão: false) */
     matchTargetWidth?: boolean;
+    /** Tipo da camada do overlay (padrão: 'dropdown') */
+    layer?: OverlayLayer;
+    /** Offset adicional de z-index (-100 a 100) */
+    layerOffset?: number;
     /** Função pura customizada para calcular a posição */
     compute?: (context: OverlayPositionContext) => T;
 }
@@ -125,6 +131,12 @@ function defaultCompute(
 export function useActiveOverlayPosition<T extends OverlayPositionResult = OverlayPositionResult>(
     options: UseActiveOverlayPositionOptions<T>
 ) {
+    const zIndex = useOverlayZIndex({
+        target: options.target,
+        layer: options.layer,
+        layerOffset: options.layerOffset
+    });
+
     const position = ref<OverlayPositionResult>({ top: 0, left: 0 }) as Ref<T>;
     const isPositioned = ref(false);
 
@@ -165,13 +177,15 @@ export function useActiveOverlayPosition<T extends OverlayPositionResult = Overl
                 : undefined
         };
 
-        if (options.compute) position.value = options.compute(ctx);
-        else position.value = defaultCompute(ctx, {
-            offset: options.offset ?? 4,
-            align: options.align ?? 'left',
-            matchTargetWidth: options.matchTargetWidth ?? false
-        }) as T;
+        const computedPos = options.compute
+            ? options.compute(ctx)
+            : defaultCompute(ctx, {
+                offset: options.offset ?? 4,
+                align: options.align ?? 'left',
+                matchTargetWidth: options.matchTargetWidth ?? false
+            }) as T;
 
+        position.value = computedPos;
 
         isPositioned.value = true;
     };
@@ -271,6 +285,7 @@ export function useActiveOverlayPosition<T extends OverlayPositionResult = Overl
 
     return {
         position,
+        zIndex,
         isPositioned,
         updatePosition: measureAndPosition,
         scheduleUpdate

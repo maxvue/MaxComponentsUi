@@ -60,6 +60,7 @@
     import { useScrollLock } from '../helpers/useScrollLock';
     import { useBrowserEventListener } from '../composables/useBrowserEventListener';
     import { resolveAriaLabelledby } from '../helpers/useAccessibleName';
+    import { provideModalContext } from '../helpers/modalContext';
     import MaxIconButton from './MaxIconButton.vue';
     import MaxButton from './MaxButton.vue';
     import MaxTitle1 from './MaxTitle1.vue';
@@ -358,6 +359,11 @@
         if (modalDepth.value > 0) return `calc(var(--max-layer-modal, 1310) + ${modalDepth.value * 20})`;
 
         return 'var(--max-layer-modal, 1310)';
+    });
+
+    provideModalContext({
+        zIndex: dialogZIndex,
+        modalDepth
     });
 
     const modal_padding = computed(() => {

@@ -20,6 +20,7 @@
 <script setup lang="ts">
     import { computed, nextTick, onMounted, ref, toRef, watch } from 'vue';
     import { useOutsidePointer } from '../../helpers/useOutsidePointer';
+    import { useOverlayZIndex } from '../../composables/useOverlayZIndex';
 
     const props = withDefaults(
         defineProps<{
@@ -98,36 +99,10 @@
         return undefined;
     });
 
-    const zIndex = computed(() => {
-        const isInModal = Boolean(props.target?.closest?.('.max-modal, .max-drawer, [role="dialog"]'));
-        const rawOffset = props.layerOffset ?? 0;
-        const offset = Math.max(-100, Math.min(100, rawOffset));
-        let token: string;
-
-        switch (props.layer) {
-            case 'popover':
-                token = 'var(--max-z-index-popover, var(--max-layer-popover, 1200))';
-                break;
-            case 'modal':
-                token = 'var(--max-z-index-modal, var(--max-layer-modal, 1310))';
-                break;
-            case 'fullscreen':
-                token = 'var(--max-z-index-fullscreen, var(--max-layer-fullscreen, 1400))';
-                break;
-            case 'tooltip':
-                token = 'var(--max-z-index-tooltip, var(--max-layer-tooltip, 1600))';
-                break;
-            case 'dropdown':
-            default:
-                token = isInModal
-                    ? 'calc(var(--max-z-index-modal, var(--max-layer-modal, 1310)) + 10)'
-                    : 'var(--max-z-index-dropdown, var(--max-layer-dropdown, 1000))';
-                break;
-        }
-
-        if (offset !== 0) return `calc(${token} + ${offset})`;
-
-        return token;
+    const zIndex = useOverlayZIndex({
+        target: () => props.target,
+        layer: props.layer,
+        layerOffset: props.layerOffset
     });
 
     const position = () => {
@@ -154,7 +129,7 @@
             top: `${top}px`,
             left: `${left}px`,
             minWidth: props.matchTargetWidth ? `${t.width}px` : undefined,
-            zIndex: zIndex.value
+            zIndex: String(zIndex.value)
         };
     };
 
@@ -180,7 +155,7 @@
             position: 'fixed',
             visibility: 'hidden',
             opacity: '0',
-            zIndex: zIndex.value
+            zIndex: String(zIndex.value)
         };
         await nextTick();
         position();

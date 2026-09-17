@@ -31,7 +31,7 @@
             <span v-if="props.label" class="max-popover-label">{{ props.label }}</span>
         </button>
         <Teleport to="body" v-if="isOpen">
-            <div v-tooltip="null" class="popover-item">
+            <div v-tooltip="null" class="popover-item" :style="{ zIndex: popoverZIndex }">
                 <MaxAnimateFade :show="isOpen" :duration="0.3">
                     <div
                         class="max-popover-dialog"
@@ -201,7 +201,7 @@
 
     const trap = useFocusTrap(el, { onEscape: () => hide() });
 
-    const { position, isPositioned } = useActiveOverlayPosition<{
+    const { position, zIndex: popoverZIndex, isPositioned } = useActiveOverlayPosition<{
         top: number;
         left: number;
         isTop: boolean;
@@ -210,6 +210,7 @@
         target: btn_el,
         overlay: el,
         active: isOpen,
+        layer: 'popover',
         compute: ({ targetRect, overlayRect, viewportWidth, viewportHeight, safeArea, visualViewport }) => {
             const width_btn = targetRect.width;
             const height_btn = targetRect.height;
@@ -275,7 +276,8 @@
         const style: Record<string, string | number> = {
             top: `${position.value.top}px`,
             left: `${position.value.left}px`,
-            opacity: isPositioned.value ? 1 : 0
+            opacity: isPositioned.value ? 1 : 0,
+            zIndex: popoverZIndex.value
         };
 
         if (props.width) {

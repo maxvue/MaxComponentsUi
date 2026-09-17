@@ -37,7 +37,7 @@
                     class="max-datepicker-panel"
                     role="dialog"
                     aria-label="Calendário"
-                    :style="{ top: position.top + 'px', left: position.left + 'px' }"
+                    :style="{ top: position.top + 'px', left: position.left + 'px', zIndex: overlayZIndex }"
                     @click.stop
                 >
                     <div class="max-datepicker-header">
@@ -313,7 +313,7 @@
     ];
     const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
-    const { position } = useActiveOverlayPosition({
+    const { position, zIndex: overlayZIndex } = useActiveOverlayPosition({
         target: triggerEl,
         overlay: overlayEl,
         active: isOpen,
