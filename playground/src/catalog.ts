@@ -63,6 +63,8 @@ export const PLAYGROUND_CATALOG: CatalogComponent[] = [
     { name: 'MaxInputIconPicker', family: 'inputs', scenarioId: 'inputs-special', description: 'Seletor interativo de ícones com modal/drawer e busca.' },
     { name: 'MaxInputMarkdown', family: 'inputs', scenarioId: 'inputs-rich', description: 'Editor avançado de Markdown com visualização ao vivo e suporte a imagens.' },
     { name: 'MaxInputMarkdownToolbar', family: 'inputs', scenarioId: 'inputs-rich', description: 'Barra de ferramentas de formatação para o editor de Markdown.' },
+    { name: 'MaxInputHtml', family: 'inputs', scenarioId: 'inputs-rich', description: 'Editor visual WYSIWYG de HTML rico com alinhamento de texto e formatações jurídicas.' },
+    { name: 'MaxInputHtmlToolbar', family: 'inputs', scenarioId: 'inputs-rich', description: 'Barra de ferramentas de formatação e alinhamento para o editor HTML.' },
     { name: 'MaxInputCode', family: 'inputs', scenarioId: 'inputs-rich', description: 'Editor de código-fonte integrado com realce de sintaxe.' },
     { name: 'MaxInputCodeToolbar', family: 'inputs', scenarioId: 'inputs-rich', description: 'Barra de atalhos e utilitários para o editor de código.' },
     { name: 'MaxInputCreditCard', family: 'inputs', scenarioId: 'inputs-cards', description: 'Input para número do cartão de crédito com identificação da bandeira.' },

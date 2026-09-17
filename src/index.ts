@@ -123,6 +123,9 @@ export { default as MaxInputTextList } from './components/MaxInputTextList.vue';
 // Mesmo padrão de MaxPdfView/MaxLoaderAi (deps pesadas sob demanda).
 export const MaxInputMarkdown = defineAsyncComponent(() => import('./components/MaxInputMarkdown.vue'));
 export { default as MaxInputMarkdownToolbar, type MarkdownToolbarTool } from './components/MaxInputMarkdownToolbar.vue';
+// Async: o MaxInputHtml segue o mesmo padrão de carregamento sob demanda do Tiptap
+export const MaxInputHtml = defineAsyncComponent(() => import('./components/MaxInputHtml.vue'));
+export { default as MaxInputHtmlToolbar, type HtmlToolbarTool } from './components/MaxInputHtmlToolbar.vue';
 // Async: o MaxInputCode carrega o Monaco Editor sob demanda via @monaco-editor/loader
 export const MaxInputCode = defineAsyncComponent(() => import('./components/MaxInputCode.vue'));
 export { default as MaxInputCodeToolbar } from './components/MaxInputCodeToolbar.vue';

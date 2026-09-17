@@ -225,6 +225,14 @@
       "types": "./dist/components/MaxInputFileUploadButton.vue.d.ts",
       "import": "./dist/components/MaxInputFileUploadButton.es.js"
     },
+    "./components/MaxInputHtml": {
+      "types": "./dist/components/MaxInputHtml.vue.d.ts",
+      "import": "./dist/components/MaxInputHtml.es.js"
+    },
+    "./components/MaxInputHtmlToolbar": {
+      "types": "./dist/components/MaxInputHtmlToolbar.vue.d.ts",
+      "import": "./dist/components/MaxInputHtmlToolbar.es.js"
+    },
     "./components/MaxInputIconPicker": {
       "types": "./dist/components/MaxInputIconPicker.vue.d.ts",
       "import": "./dist/components/MaxInputIconPicker.es.js"
@@ -550,6 +558,7 @@
     "@tiptap/extension-table-cell": "^3.29.2",
     "@tiptap/extension-table-header": "^3.29.2",
     "@tiptap/extension-table-row": "^3.29.2",
+    "@tiptap/extension-text-align": "^3.31.3",
     "@tiptap/extension-underline": "^3.29.2",
     "@tiptap/starter-kit": "^3.29.2",
     "@tiptap/vue-3": "^3.29.2",
