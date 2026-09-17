@@ -190,6 +190,26 @@
 
     });
 
+    const getOverlayContentWidth = (currentWidth: number) => {
+        const overlay = overlayEl.value;
+        const baseWidth = currentWidth > 0 ? currentWidth : (overlay?.scrollWidth ?? (ac.value as any)?.getBoundingClientRect?.().width ?? 160);
+        if (!overlay) return baseWidth;
+
+        const textElements = overlay.querySelectorAll<HTMLElement>('.autocomplete-item-select-label, .autocomplete-item-select-sub-label');
+        const overflowWidth = Array.from(textElements).reduce(
+            (largest, element) => Math.max(largest, element.scrollWidth - element.clientWidth),
+            0
+        );
+
+        const optionElements = overlay.querySelectorAll<HTMLElement>('.max-autocomplete-item');
+        const itemOverflow = Array.from(optionElements).reduce(
+            (largest, element) => Math.max(largest, element.scrollWidth - element.clientWidth),
+            0
+        );
+
+        return baseWidth + Math.max(0, overflowWidth, itemOverflow);
+    };
+
     const isOverlayActive = computed(() => isOpen.value && filtered_values.value.length > 0);
     const { position, zIndex: overlayZIndex } = useActiveOverlayPosition({
         target: ac,
@@ -202,11 +222,14 @@
             const targetH = targetRect.height;
             const overlayH = overlayRect.height || 200;
 
-            const width = getOverlayWidth({ triggerWidth: targetRect.width, windowWidth: viewportWidth });
+            const width = getOverlayWidth({
+                triggerWidth: targetRect.width,
+                contentWidth: getOverlayContentWidth(overlayRect.width),
+                windowWidth: viewportWidth
+            });
             let top = targetY + targetH + 2;
 
             if (top + overlayH > viewportHeight && targetY - overlayH > 0) top = targetY - overlayH - 2;
-
 
             return {
                 top,
@@ -461,6 +484,9 @@
 
 .max-autocomplete-overlay {
     position: fixed;
+    box-sizing: border-box;
+    width: max-content;
+    max-width: min(500px, calc(100vw - 50px));
     z-index: var(--z-dropdown, 1000);
     background: var(--background-0, #fff);
     border: 1px solid var(--surface-border);

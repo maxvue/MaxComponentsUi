@@ -348,6 +348,26 @@
     const overlayEl = ref<HTMLElement | null>(null);
     const filterInputEl = ref<HTMLInputElement | null>(null);
 
+    const getOverlayContentWidth = (currentWidth: number) => {
+        const overlay = overlayEl.value;
+        const baseWidth = currentWidth > 0 ? currentWidth : (overlay?.scrollWidth ?? triggerEl.value?.getBoundingClientRect().width ?? 160);
+        if (!overlay) return baseWidth;
+
+        const textElements = overlay.querySelectorAll<HTMLElement>('.labelz, .subLabel, .max-select-option-label');
+        const overflowWidth = Array.from(textElements).reduce(
+            (largest, element) => Math.max(largest, element.scrollWidth - element.clientWidth),
+            0
+        );
+
+        const optionElements = overlay.querySelectorAll<HTMLElement>('.max-select-option');
+        const itemOverflow = Array.from(optionElements).reduce(
+            (largest, element) => Math.max(largest, element.scrollWidth - element.clientWidth),
+            0
+        );
+
+        return baseWidth + Math.max(0, overflowWidth, itemOverflow);
+    };
+
     const { position, zIndex: overlayZIndex, updatePosition } = useActiveOverlayPosition({
         target: triggerEl,
         overlay: overlayEl,
@@ -359,11 +379,14 @@
             const targetH = targetRect.height;
             const overlayH = overlayRect.height || 200;
 
-            const width = getOverlayWidth({ triggerWidth: targetRect.width, windowWidth: viewportWidth });
+            const width = getOverlayWidth({
+                triggerWidth: targetRect.width,
+                contentWidth: getOverlayContentWidth(overlayRect.width),
+                windowWidth: viewportWidth
+            });
             let top = targetY + targetH + 2;
 
             if (top + overlayH > viewportHeight && targetY - overlayH > 0) top = targetY - overlayH - 2;
-
 
             return {
                 top,
@@ -951,6 +974,9 @@
 
 .max-select-overlay {
     position: fixed;
+    box-sizing: border-box;
+    width: max-content;
+    max-width: min(500px, calc(100vw - 50px));
     z-index: var(--max-z-index-dropdown, var(--max-layer-dropdown, 1000));
     background: var(--background-0, #fff);
     border: 1px solid var(--surface-border);
@@ -1055,6 +1081,9 @@
             font-size: 0.85rem;
             color: var(--background-700);
             transition: background-color 0.15s ease;
+            min-width: 0;
+            max-width: 100%;
+            overflow: hidden;
 
             &.max-select-option-highlighted,
             &.is-focused,
@@ -1125,8 +1154,11 @@
 
         .label_div {
             display: grid;
-            grid-template-columns: auto 1fr auto;
+            grid-template-columns: auto minmax(0, 1fr) auto;
             width: 100% !important;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
             place-items: center start;
             gap: 10px;
 
@@ -1144,18 +1176,35 @@
                 color: var(--background-700);
                 padding-left: 1rem;
                 text-align: right;
-                width: 100%;
                 font-size: 0.85rem;
+                white-space: nowrap;
+                flex-shrink: 0;
             }
 
             .labelz {
-                display: grid;
-                place-items: center;
+                display: block;
+                width: 100%;
+                min-width: 0;
+                max-width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
                 color: var(--background-775);
+
+                > div {
+                    display: block;
+                    width: 100%;
+                    min-width: 0;
+                    max-width: 100%;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
             }
 
             img {
                 max-height: 20px;
+                flex-shrink: 0;
             }
         }
     }

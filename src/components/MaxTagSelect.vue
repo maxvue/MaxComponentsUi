@@ -162,7 +162,7 @@
                                                 <div class="label-tag">
                                                     <div
                                                         class="max-tag-select-option-label"
-                                                        style="display: grid; min-width: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                                                        style="display: block; width: 100%; min-width: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
                                                         v-text="entry.item.option[props.optionLabel] ?? entry.item.option.label"
                                                         :style="{ color: attrs.color ?? getStyleColor(entry.item.option, highlightedIndex === entry.item.selectableIndex, false, isOptionSelected(entry.item.option)).color }"
                                                     ></div>
@@ -339,7 +339,7 @@
             gap: is_value ? '4px' : '6px',
             width: is_value ? '100%' : undefined,
             height: is_value ? '100%' : undefined,
-            boxSizing: is_value ? 'border-box' : undefined
+            boxSizing: 'border-box'
         };
         styleColorCache.set(cacheKey, style);
         return style;
@@ -418,7 +418,8 @@
 
     const getOverlayContentWidth = (currentWidth: number) => {
         const overlay = overlayEl.value;
-        if (!overlay) return currentWidth;
+        const baseWidth = currentWidth > 0 ? currentWidth : (overlay?.scrollWidth ?? triggerEl.value?.getBoundingClientRect().width ?? 140);
+        if (!overlay) return baseWidth;
 
         const textElements = overlay.querySelectorAll<HTMLElement>('.max-tag-select-option-label');
         const overflowWidth = Array.from(textElements).reduce(
@@ -426,7 +427,13 @@
             0
         );
 
-        return currentWidth + Math.max(0, overflowWidth);
+        const optionElements = overlay.querySelectorAll<HTMLElement>('.max-select-option');
+        const itemOverflow = Array.from(optionElements).reduce(
+            (largest, element) => Math.max(largest, element.scrollWidth - element.clientWidth),
+            0
+        );
+
+        return baseWidth + Math.max(0, overflowWidth, itemOverflow);
     };
 
     const { position, zIndex: overlayZIndex, updatePosition } = useActiveOverlayPosition({
@@ -444,13 +451,11 @@
                 triggerWidth: targetRect.width,
                 contentWidth: getOverlayContentWidth(overlayRect.width),
                 windowWidth: viewportWidth,
-                minWidth: 140,
-                maxWidth: 300
+                minWidth: 140
             });
             let top = targetY + targetH + 2;
 
             if (top + overlayH > viewportHeight && targetY - overlayH > 0) top = targetY - overlayH - 2;
-
 
             return {
                 top,
@@ -1005,6 +1010,8 @@
     .max-select-overlay {
         position: fixed;
         box-sizing: border-box;
+        width: max-content;
+        max-width: min(500px, calc(100vw - 50px));
         z-index: var(--max-z-index-dropdown, var(--max-layer-dropdown, 1000));
         background: var(--background-0, #fff);
         border: 1px solid var(--surface-border);
@@ -1077,6 +1084,9 @@
                     transition: background-color 0.15s ease, color 0.15s ease;
                     border-radius: 6px;
                     color: var(--background-700, #294056);
+                    min-width: 0;
+                    max-width: 100%;
+                    overflow: hidden;
 
                     &.max-select-option-highlighted,
                     &.is-focused,
@@ -1134,12 +1144,15 @@
                     }
 
                     .label-tag-div {
+                        box-sizing: border-box !important;
                         display: flex;
                         align-items: center;
                         width: 100% !important;
+                        max-width: 100% !important;
                         min-width: 0;
                         gap: 6px;
                         height: 30px;
+                        overflow: hidden;
 
                         .label-tag {
                             display: flex;
@@ -1150,10 +1163,13 @@
                             overflow: hidden;
 
                             > div {
+                                display: block;
+                                width: 100%;
                                 min-width: 0;
                                 max-width: 100%;
                                 overflow: hidden;
                                 text-overflow: ellipsis;
+                                white-space: nowrap;
                             }
                         }
 
