@@ -44,6 +44,8 @@
                             <MaxInputMarkdownToolbar v-bind="scenarioProps" error severity="danger" />
                         </div>
                     </div>
+                </div>
+
                 <div class="component-block">
                     <h3>MaxInputHtml</h3>
                     <div class="states">
