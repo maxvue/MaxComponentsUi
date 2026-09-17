@@ -3,7 +3,7 @@
         <div v-for="item in items_array" :key="item.value ?? item.id ?? item.name" class="tag-item-wrapper">
             <MaxTagSelect
                 class="tag-select-item"
-                :modelValue="item.value"
+                :modelValue="item.value ?? item.id ?? item"
                 :options="options_array"
                 no-dropdown
                 @update:modelValue="(val: any) => replaceItem(item, val)"
@@ -12,7 +12,7 @@
                 class="max-tag-remove-action"
                 v-tooltip="'Remover'"
                 i="material-symbols:close-rounded"
-                size-icon="1"
+                size="1.2"
                 :color="getStyleColor(item, false, true).color"
                 :aria-label="`Remover tag ${item.name || item.label || item.value || ''}`"
                 @click.stop="removeItem(item)"
@@ -33,21 +33,23 @@
     const attrs = useAttrs();
 
     const props = withDefaults(defineProps<{
-        options: any[] | Record<string, any>;
+        options?: any;
     }>(), { options: () => [] });
 
-    const model = defineModel<any[] | Record<string, any>>({ default: () => [] });
+    const model = defineModel<any[] | Record<string, any> | null>({ default: () => [] });
 
     const emit = defineEmits<{ change: [value: any[]] }>();
 
     const add_tag = ref<any>(null);
 
     const items_array = computed(() => {
+        if (!model.value) return [];
         const values = Array.isArray(model.value) ? model.value : Object.values(model.value);
         return [...values];
     });
 
     const options_array = computed(() => {
+        if (!props.options) return [];
         const values = Array.isArray(props.options) ? props.options : Object.values(props.options);
         return [...values];
     });
@@ -57,8 +59,9 @@
     defineExpose({ count });
 
     watchTrue(() => add_tag.value, () => {
-        const data: any = options_array.value.find((opt: any) => opt.value === add_tag.value?.value || opt.value === add_tag.value) ?? null;
-        if (data && !items_array.value.some((item: any) => item.value === data.value)) {
+        const targetVal = add_tag.value?.value ?? add_tag.value?.id ?? add_tag.value;
+        const data: any = options_array.value.find((opt: any) => (opt.value ?? opt.id) === targetVal) ?? null;
+        if (data && !items_array.value.some((item: any) => (item.value ?? item.id) === (data.value ?? data.id))) {
             const new_value = [...items_array.value, data];
             model.value = new_value;
             emit('change', new_value);
@@ -67,10 +70,12 @@
     });
 
     const replaceItem = (item: any, value: any) => {
-        const option: any = options_array.value.find((o: any) => o.value === (value?.value ?? value)) ?? null;
-        if (!option || option.value === item.value) return;
+        const targetVal = value?.value ?? value?.id ?? value;
+        const option: any = options_array.value.find((o: any) => (o.value ?? o.id) === targetVal) ?? null;
+        const currentVal = item?.value ?? item?.id ?? item;
+        if (!option || (option.value ?? option.id) === currentVal) return;
         // Evita duplicar uma tag que já está na lista
-        if (items_array.value.some((i: any) => i !== item && i.value === option.value)) return;
+        if (items_array.value.some((i: any) => i !== item && (i.value ?? i.id) === (option.value ?? option.id))) return;
         const new_value = items_array.value.map((i: any) => (i === item ? option : i));
         model.value = new_value;
         emit('change', new_value);

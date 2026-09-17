@@ -1,8 +1,8 @@
 <template>
-    <div class="max-input-markdown" v-bind="props" >
+    <div class="max-input-markdown">
         <div class="max-input-markdown__editor-wrap" :class="{ 'max-input-markdown__editor-wrap--disabled': props.disabled }">
             <MaxInputMarkdownToolbar :editor="editor ?? null" :hide-tools="props.hideTools" :tools="props.tools" />
-            <EditorContent class="max-input-markdown__content" :style="{ minHeight: props.minHeight, maxHeight: props.maxHeight }" :editor="editor" />
+            <EditorContent class="max-input-markdown__content" :style="{ minHeight: props.minHeight, maxHeight: props.maxHeight }" :editor="editor" @click="focusEditor" />
         </div>
 
         <!-- Visualizador Modal de Imagem (Lightbox) -->
@@ -417,8 +417,15 @@
         editor.value?.destroy();
     });
 
+    const focusEditor = (_event?: MouseEvent) => {
+        if (props.disabled || !editor.value) return;
+        // Se o editor ainda não estiver focado, foca a cadeia de comandos do TipTap
+        if (!editor.value.isFocused) editor.value.chain().focus().run();
+    };
+
     defineExpose({
         editor,
+        focusEditor,
         openImage,
         closeImage,
         openPdf,
@@ -473,6 +480,8 @@
         cursor: text;
         width: 100%;
         box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
 
         &:focus-within {
             outline: none;
@@ -482,7 +491,8 @@
             .max-input-markdown__prosemirror {
                 padding: 12px 16px;
                 outline: none;
-                min-height: inherit;
+                min-height: 100%;
+                flex: 1;
                 font-family: inherit;
                 font-size: 0.95rem;
                 line-height: 1.6;

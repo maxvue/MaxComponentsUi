@@ -48,7 +48,7 @@
 
         <!-- INPUT FIELD -->
         <div class="max-input-field-div">
-            <MaxIcon :icon="props.iconLeft ?? props.icon ?? props.i" :size="1.2" :light="light" :dark="dark" v-if="hasContent(props.iconLeft ?? props.icon ?? props.i) && !props.noIcon && (props.iconLeft || props.iconPos === 'left')" class="input-icon-left" />
+            <MaxIcon :icon="props.iconLeft ?? props.icon ?? props.i" :size="1.2" :light="light" :dark="dark" v-if="hasContent(props.iconLeft ?? props.icon ?? props.i) && !props.noIcon && (props.iconLeft || props.iconPos === 'left')" class="input-icon-left" @click.stop="onIconClick" />
             <div v-else></div>
             <div class="input-slot-div">
                 <slot
@@ -64,7 +64,7 @@
                     :displayMessage="displayMessage"
                 ></slot>
             </div>
-            <MaxIcon :icon="props.iconRight ?? props.icon ?? props.i" :size="1.2" :light="light" :dark="dark" v-if="hasContent(props.iconRight ?? props.icon ?? props.i) && !props.noIcon && (props.iconRight || props.iconPos === 'right')" class="input-icon-right" />
+            <MaxIcon :icon="props.iconRight ?? props.icon ?? props.i" :size="1.2" :light="light" :dark="dark" v-if="hasContent(props.iconRight ?? props.icon ?? props.i) && !props.noIcon && (props.iconRight || props.iconPos === 'right')" class="input-icon-right" @click.stop="onIconClick" />
             <div v-else></div>
 
             <!-- INPUT STATUS ICON -->
@@ -199,7 +199,7 @@
     }
 
     const show_message = computed(() => {
-        return !props.noStatus && !props.noMessage && props.message !== undefined;
+        return !props.noStatus && !props.noMessage;
     });
 
     const props = withDefaults(defineProps<Props>(), {
@@ -213,7 +213,7 @@
         iconPos: 'left',
         inLine: false,
         noStatus: false,
-        noMessage: true,
+        noMessage: false,
         truncateMessage: false,
         errorMessageFallback: 'Valor inválido'
     });
@@ -352,6 +352,26 @@
         }
     };
 
+    const onIconClick = () => {
+        if (props.disabled || attrs.disabled) return;
+        if (typeof document !== 'undefined' && input_id.value) {
+            const target = document.getElementById(input_id.value);
+            if (!target) return;
+            if (typeof (target as HTMLElement).focus === 'function' && target.matches('input, textarea, select, button, [tabindex]')) {
+                (target as HTMLElement).focus();
+                (target as HTMLElement).click();
+            } else {
+                const focusable = target.querySelector<HTMLElement>(
+                    'input:not([disabled]), textarea:not([disabled]), select:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+                );
+                if (focusable) {
+                    if (typeof focusable.focus === 'function') focusable.focus();
+                    if (typeof focusable.click === 'function') focusable.click();
+                }
+            }
+        }
+    };
+
     provideInputBaseContext({
         inputId: input_id,
         messageId: message_id,
@@ -429,10 +449,12 @@
 
         .input-icon-left {
             margin-left: 5px;
+            cursor: pointer;
         }
 
         .input-icon-right {
             margin-right: 5px;
+            cursor: pointer;
         }
 
         .input-slot-div {
@@ -926,6 +948,12 @@
     &[disabled='true'],
     &[disabled] {
         background-color: unset !important;
+
+        .input-icon-left,
+        .input-icon-right {
+            cursor: not-allowed !important;
+            pointer-events: none;
+        }
 
         :deep(input),
         :deep(textarea),

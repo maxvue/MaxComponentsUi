@@ -135,6 +135,33 @@ describe('MaxTagSelect', () => {
         expect((wrapper.vm as any).option_selected.name).toBe('Tag B');
     });
 
+    it('option_selected resolve para options com chave id quando optionValue padrão é value', async () => {
+        const options = [
+            { id: 'tag-1', name: 'Tag 1' },
+            { id: 'tag-2', name: 'Tag 2' }
+        ];
+        const wrapper = mountTagSelect({ modelValue: 'tag-2', options });
+        await wrapper.vm.$nextTick();
+
+        expect((wrapper.vm as any).option_selected.name).toBe('Tag 2');
+    });
+
+    it('option_selected resolve para groupOptions com chave id', async () => {
+        const groupOptions = [
+            {
+                label: 'Grupo 1',
+                items: [
+                    { id: 'tag-g1', name: 'Tag G1' },
+                    { id: 'tag-g2', name: 'Tag G2' }
+                ]
+            }
+        ];
+        const wrapper = mountTagSelect({ modelValue: 'tag-g2', groupOptions });
+        await wrapper.vm.$nextTick();
+
+        expect((wrapper.vm as any).option_selected.name).toBe('Tag G2');
+    });
+
     it('option_selected retorna objeto vazio quando o valor não é encontrado', async () => {
         const options = [{ value: 'a', name: 'Tag A' }];
         const wrapper = mountTagSelect({ modelValue: 'nao-existe', options });

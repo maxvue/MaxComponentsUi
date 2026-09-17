@@ -395,4 +395,62 @@ describe('InputBase.vue', () => {
         const container = wrapper.find('.input-status-icon');
         expect(container.attributes('aria-hidden')).toBe('true');
     });
+
+    it('transfere foco e clique ao elemento de input quando o ícone esquerdo é clicado', async () => {
+        const wrapper = mount(InputBase, {
+            props: {
+                id: 'input-icon-left-target',
+                iconLeft: 'solar:calendar-line-duotone'
+            },
+            slots: {
+                default: ({ inputAttrs }: any) => h('input', {
+                    ...inputAttrs,
+                    id: 'input-icon-left-target'
+                })
+            },
+            attachTo: document.body
+        });
+
+        const inputEl = wrapper.find<HTMLInputElement>('#input-icon-left-target');
+        const focusSpy = vi.spyOn(inputEl.element, 'focus');
+        const clickSpy = vi.spyOn(inputEl.element, 'click');
+
+        const iconEl = wrapper.find('.input-icon-left');
+        expect(iconEl.exists()).toBe(true);
+
+        await iconEl.trigger('click');
+
+        expect(focusSpy).toHaveBeenCalled();
+        expect(clickSpy).toHaveBeenCalled();
+        wrapper.unmount();
+    });
+
+    it('transfere foco e clique ao elemento de input quando o ícone direito é clicado', async () => {
+        const wrapper = mount(InputBase, {
+            props: {
+                id: 'input-icon-right-target',
+                iconRight: 'solar:calendar-line-duotone'
+            },
+            slots: {
+                default: ({ inputAttrs }: any) => h('input', {
+                    ...inputAttrs,
+                    id: 'input-icon-right-target'
+                })
+            },
+            attachTo: document.body
+        });
+
+        const inputEl = wrapper.find<HTMLInputElement>('#input-icon-right-target');
+        const focusSpy = vi.spyOn(inputEl.element, 'focus');
+        const clickSpy = vi.spyOn(inputEl.element, 'click');
+
+        const iconEl = wrapper.find('.input-icon-right');
+        expect(iconEl.exists()).toBe(true);
+
+        await iconEl.trigger('click');
+
+        expect(focusSpy).toHaveBeenCalled();
+        expect(clickSpy).toHaveBeenCalled();
+        wrapper.unmount();
+    });
 });

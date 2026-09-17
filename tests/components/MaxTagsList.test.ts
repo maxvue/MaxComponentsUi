@@ -201,4 +201,76 @@ describe('MaxTagsList', () => {
         const wrapper = mountTagsList({ modelValue: [], options });
         expect((wrapper.vm as any).count).toBe(0);
     });
+
+    it('inicializa com modelValue null ou undefined sem lançar erro de runtime', () => {
+        const wrapperNull = mountTagsList({ modelValue: null, options });
+        expect(wrapperNull.exists()).toBe(true);
+        expect((wrapperNull.vm as any).items_array).toEqual([]);
+
+        const wrapperUndefined = mountTagsList({ modelValue: undefined, options });
+        expect(wrapperUndefined.exists()).toBe(true);
+        expect((wrapperUndefined.vm as any).items_array).toEqual([]);
+    });
+
+    it('inicializa com options null ou undefined sem lançar erro de runtime', () => {
+        const wrapperNullOptions = mountTagsList({ modelValue: [], options: null as any });
+        expect(wrapperNullOptions.exists()).toBe(true);
+        expect((wrapperNullOptions.vm as any).options_array).toEqual([]);
+
+        const wrapperUndefinedOptions = mountTagsList({ modelValue: [], options: undefined as any });
+        expect(wrapperUndefinedOptions.exists()).toBe(true);
+        expect((wrapperUndefinedOptions.vm as any).options_array).toEqual([]);
+    });
+
+    it('substitui item corretamente quando os dados utilizam apenas a chave id', async () => {
+        const idOptions = [
+            { id: 'tag-1', label: 'Tag 1' },
+            { id: 'tag-2', label: 'Tag 2' }
+        ];
+        const wrapper = mountTagsList({
+            modelValue: [{ id: 'tag-1', label: 'Tag 1' }],
+            options: idOptions
+        });
+        const vm = wrapper.vm as any;
+
+        vm.replaceItem(vm.items_array[0], 'tag-2');
+        await wrapper.vm.$nextTick();
+
+        expect(vm.model).toEqual([{ id: 'tag-2', label: 'Tag 2' }]);
+        expect(wrapper.emitted('change')?.pop()).toEqual([[{ id: 'tag-2', label: 'Tag 2' }]]);
+    });
+
+    it('adiciona tag quando opções utilizam apenas a chave id', async () => {
+        const idOptions = [
+            { id: 'tag-1', label: 'Tag 1' },
+            { id: 'tag-2', label: 'Tag 2' }
+        ];
+        const wrapper = mountTagsList({
+            modelValue: [{ id: 'tag-1', label: 'Tag 1' }],
+            options: idOptions
+        });
+
+        const tagSelects = wrapper.findAllComponents(TagSelectStub);
+        const addSelect = tagSelects[tagSelects.length - 1];
+        await addSelect.vm.$emit('update:modelValue', idOptions[1]);
+        await wrapper.vm.$nextTick();
+
+        const vm = wrapper.vm as any;
+        expect(vm.model).toEqual([idOptions[0], idOptions[1]]);
+        expect(wrapper.emitted('change')?.pop()).toEqual([[idOptions[0], idOptions[1]]]);
+    });
+
+    it('passa modelValue correto para MaxTagSelect filho mesmo quando o item contém apenas id', () => {
+        const idOptions = [
+            { id: 'tag-1', label: 'Tag 1' }
+        ];
+        const wrapper = mountTagsList({
+            modelValue: [{ id: 'tag-1', label: 'Tag 1' }],
+            options: idOptions
+        });
+
+        const tagSelects = wrapper.findAllComponents(TagSelectStub);
+        expect(tagSelects[0].props('modelValue')).toBe('tag-1');
+    });
 });
+

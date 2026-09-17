@@ -336,4 +336,23 @@ describe('MaxInputDatePicker', () => {
 
         wrapper.unmount();
     });
+
+    it('abre o calendário quando o ícone de calendário é clicado', async () => {
+        const wrapper = mount(MaxInputDatePicker, {
+            props: { modelValue: '2026-09-20' },
+            attachTo: document.body
+        });
+
+        expect((wrapper.vm as any).isOpen).toBe(false);
+
+        const iconEl = wrapper.find('.input-icon-left');
+        expect(iconEl.exists()).toBe(true);
+
+        await iconEl.trigger('click');
+        await wrapper.vm.$nextTick();
+
+        expect((wrapper.vm as any).isOpen).toBe(true);
+
+        wrapper.unmount();
+    });
 });

@@ -475,15 +475,17 @@
     const option_selected = computed(() => {
         const valueKey = props.optionValue;
 
-        if (props.options) return props.options.find((opt: any) => opt[valueKey] === temp_value.value) ?? {};
+        if (props.options) {
+            return props.options.find((opt: any) => (opt[valueKey] ?? opt.id) === temp_value.value) ?? {};
+        }
 
         const groups = Object.values(options.value) as any[];
         for (const group of groups) {
             if (!group || !Array.isArray(group.items)) {
-                if (group?.[valueKey] === temp_value.value) return group;
+                if ((group?.[valueKey] ?? group?.id) === temp_value.value) return group;
                 continue;
             }
-            const found = group.items.find((opt: any) => opt[valueKey] === temp_value.value);
+            const found = group.items.find((opt: any) => (opt[valueKey] ?? opt.id) === temp_value.value);
             if (found) return found;
         }
         return {};
@@ -615,7 +617,7 @@
 
     const isOptionSelected = (opt: any): boolean => {
         if (!opt || temp_value.value === undefined) return false;
-        return opt[props.optionValue] === temp_value.value;
+        return (opt[props.optionValue] ?? opt.id) === temp_value.value;
     };
 
     const getFlattenedIndexForHighlighted = () => {
@@ -700,7 +702,7 @@
     };
 
     const selectOption = (opt: any) => {
-        const val = opt?.[props.optionValue] ?? opt;
+        const val = opt?.[props.optionValue] ?? opt?.id ?? opt;
         temp_value.value = val;
         emit('change', val);
         hide();

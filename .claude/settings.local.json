@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rg -rln \"apiGetRoute\" resources/)",
+      "Bash(xargs rg -l \"export\")",
+      "Bash(rg -rn \"apiGetRoute\" resources/ --type=ts -g'*.ts')",
+      "Bash(rg -rln \"apiGetRoute\\\\b\" resources/)",
+      "Bash(php artisan *)",
+      "Bash(npm run *)",
+      "Bash(sed -n '/public function tools/,/}/p' app/Ai/Agents/AgentInstagramStrategyManager.php)",
+      "Bash(sed -n '/public function __construct/,/{}/p' app/Ai/Agents/AgentInstagramStrategyManager.php)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('DEPS:'\\); [print\\(' ',k,v\\) for k,v in d.get\\('dependencies',{}\\).items\\(\\)]\")",
+      "Bash(npm -v)",
+      "Bash(pnpm -v)",
+      "Bash(yarn -v)",
+      "Bash(nest --version)",
+      "Read(//home/johnattas/GitHub/**)",
+      "Bash(timeout 5 bash -c \"cat < /dev/null > /dev/tcp/192.168.3.31/3306\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('name:',d.get\\('name'\\)\\); print\\('deps:', list\\(d.get\\('dependencies',{}\\).keys\\(\\)\\)[:15]\\)\")",
+      "Bash(npm install *)",
+      "Bash(npx prisma *)",
+      "Bash(echo \"=== LINT DONE \\(exit $?\\) ===\")",
+      "Bash(awk ' *)",
+      "Bash(git checkout *)",
+      "Bash(git add *)",
+      "Bash(git -c 'user.name=Johnattas Santana' -c user.email=johnattas@gmail.com commit -q -m ' *)",
+      "Bash(git -C /home/johnattas/GitHub/EngeAppNode archive nestJS)",
+      "Bash(tar -x -C node-migration)"
+    ]
+  }
+}
