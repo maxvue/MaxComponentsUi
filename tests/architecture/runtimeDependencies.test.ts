@@ -29,6 +29,10 @@ describe('Arquitetura - Dependências de Runtime', () => {
         expect(pkg.peerDependenciesMeta?.['@maxvue/max-pinia']?.optional).toBe(true);
     });
 
+    it('deve declarar pdfjs-dist como dependência direta por ser importado pelo visualizador de PDF', () => {
+        expect(pkg.dependencies?.['pdfjs-dist']).toBeDefined();
+    });
+
     it('toda dependência declarada em dependencies deve possuir import direto em src ou exceção documentada', () => {
         const srcDir = path.resolve(__dirname, '../../src');
         const imports = new Set<string>();
