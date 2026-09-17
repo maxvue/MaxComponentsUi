@@ -10,7 +10,10 @@ import { maxUseAutoImport } from '@maxvue/max-use';
 const rootDir = fileURLToPath(new URL('.', import.meta.url));
 const maxUseImportsWithoutVueDuplicates = maxUseAutoImport.map((preset) => {
     if (!('imports' in preset) || !Array.isArray(preset.imports)) return preset;
-    return { ...preset, imports: preset.imports.filter((name) => name !== 'toRef' && name !== 'toRefs') };
+    return {
+        ...preset,
+        imports: preset.imports.filter((name) => !['toRef', 'toRefs', 'useAsyncState', 'useScrollLock'].includes(name))
+    };
 });
 
 export default defineConfig({
@@ -67,12 +70,11 @@ export default defineConfig({
             viteOptimizeDeps: true,
             defaultExportByFilename: false,
             injectAtEnd: true,
-            dirsScanOptions: {
-                types: true
-            },
-            dirs: [
-                '../src/*.ts'
-            ]
+            // Os cenários importam a API pública da biblioteca explicitamente.
+            // Não varrer `src` evita registrar a mesma exportação pela fachada,
+            // pelos tipos e por módulos internos, que o plugin reporta como
+            // imports duplicados durante o build.
+            ignore: ['toRef', 'toRefs', 'useAsyncState', 'useScrollLock']
         })
     ],
     root: resolve(rootDir),
