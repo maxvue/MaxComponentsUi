@@ -371,7 +371,6 @@
     place-items: center;
     min-height: 55px;
     height: auto;
-
     width: 100%;
 
     :deep(input),
@@ -675,7 +674,7 @@
     }
 
     :deep(.value-div) {
-                width: 100%;
+        width: 100%;
     }
 
     &[input-click],
@@ -735,6 +734,7 @@
         :deep(.max-input-number),
         :deep(.value-div) {
             width: 100%;
+
             &:not(.max-input-otp-cell) {
                 outline: none !important;
                 border: none !important;
@@ -768,7 +768,7 @@
         height: 20px;
         min-height: 20px;
 
-        :deep(.tag-value-text){
+        :deep(.tag-value-text) {
             height: unset !important;
         }
 
