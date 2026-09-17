@@ -1,6 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { ref } from 'vue';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 import MaxTabList from '../../src/components/MaxTabList.vue';
 import { TABS_INJECTION_KEY, type TabsContext } from '../../src/helpers/tabsContext';
 
@@ -80,4 +82,11 @@ describe('MaxTabList', () => {
 
         expect(wrapper.findAll('.max-tab-nav')).toHaveLength(0);
     });
+
+    it('estilo de .max-tab-list-wrapper define flex-shrink: 0 para fixação do cabeçalho', () => {
+        const sfc = readFileSync(resolve(__dirname, '../../src/components/MaxTabList.vue'), 'utf-8');
+        const style = sfc.split('<style')[1] ?? '';
+        expect(style).toMatch(/\.max-tab-list-wrapper\s*\{[^}]*flex-shrink:\s*0/);
+    });
 });
+

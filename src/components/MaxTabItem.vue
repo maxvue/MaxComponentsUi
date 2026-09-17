@@ -184,7 +184,7 @@
     flex: 1 1 0;
     box-sizing: border-box;
     padding: 1rem;
-    overflow: hidden;
+    overflow-y: auto;
 
     &:focus-visible {
         outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e)); /* Foco canônico */

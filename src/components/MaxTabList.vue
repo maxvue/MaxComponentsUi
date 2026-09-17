@@ -198,6 +198,7 @@
         position: relative;
         width: 100%;
         border-bottom: 1px solid var(--background-300);
+        flex-shrink: 0;
 
         .max-tab-list {
             display: flex;
