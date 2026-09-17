@@ -1,8 +1,8 @@
 /** Margem mínima entre o overlay e a borda da viewport. */
 export const VIEWPORT_GUTTER = 10;
 
-/** Teto padrão de largura de overlay de campo (dropdown de select/autocomplete). */
-export const MAX_OVERLAY_WIDTH = 420;
+/** Teto padrão de largura de overlay de campo (dropdown de select/autocomplete): min(500px, calc(100vw - 50px)). */
+export const MAX_OVERLAY_WIDTH = 500;
 
 interface OverlayWidthArgs {
     /** Largura do elemento-gatilho (o campo). */
@@ -20,10 +20,8 @@ interface OverlayWidthArgs {
 /**
  * Largura do overlay de um campo.
  *
- * O overlay acompanha a largura do campo — comportamento herdado do PrimeVue —
- * mas o campo costuma ser `width: 100%` dentro do `InputBase`, então em
- * formulários largos isso gerava dropdowns atravessando a tela. Aqui a largura
- * fica limitada pelo teto e pelo espaço realmente disponível na viewport.
+ * Acompanha a largura do conteúdo interno, respeitando piso mínimo da largura do
+ * próprio campo disparador e teto em min(500px, calc(100vw - 50px)).
  */
 export function getOverlayWidth({
     triggerWidth,
@@ -32,16 +30,15 @@ export function getOverlayWidth({
     minWidth = 160,
     maxWidth = MAX_OVERLAY_WIDTH
 }: OverlayWidthArgs): number {
-    const available = Math.max(minWidth, windowWidth - VIEWPORT_GUTTER * 2);
-    return Math.min(Math.max(triggerWidth, contentWidth, minWidth), maxWidth, available);
+    const available = Math.max(minWidth, windowWidth - 50);
+    const maxAllowed = Math.min(maxWidth, available);
+    const effectiveMin = Math.min(Math.max(triggerWidth, minWidth), maxAllowed);
+    const preferred = Math.max(effectiveMin, contentWidth);
+    return Math.min(preferred, maxAllowed);
 }
 
 /**
- * Posição horizontal do overlay, impedindo que ele vaze pela direita.
- *
- * Recebe a largura já calculada em vez de medir o overlay: `useElementSize`
- * devolve 0 no frame em que o overlay é montado, e o clamp baseado nessa medida
- * não corrigia nada — daí o vazamento ser intermitente.
+ * Posição horizontal do overlay, impedindo que ele vaze pela direita ou esquerda.
  */
 export function getOverlayLeft(triggerX: number, width: number, windowWidth: number): number {
     if (triggerX + width <= windowWidth) return triggerX;

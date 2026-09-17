@@ -113,19 +113,58 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="component-block">
+                    <h3>MaxTagSelect — Largura Dinâmica e Reticências</h3>
+                    <div class="states">
+                        <div class="state-col" style="width: 140px;">
+                            <span>Gatilho Estreito (140px)</span>
+                            <MaxTagSelect
+                                v-model="selectedTag"
+                                :options="energyTags"
+                                filter
+                                option-label="name"
+                                option-value="id"
+                                placeholder="Concessionária"
+                            />
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
+    import { ref } from 'vue';
+    import {
+        MaxInputSelect,
+        MaxInputDatePicker,
+        MaxInputBirthday,
+        MaxInputAutoComplete,
+        MaxInputAutoCompleteApi,
+        MaxTagSelect
+    } from '@maxvue/max-components-ui';
+
     // Props neutras permitem exercitar os estados sem omitir contratos obrigatórios.
     const scenarioProps: any = { modelValue: '', options: [], items: [], route: '/', target: document.body };
-    import { MaxInputSelect } from '@maxvue/max-components-ui';
-    import { MaxInputDatePicker } from '@maxvue/max-components-ui';
-    import { MaxInputBirthday } from '@maxvue/max-components-ui';
-    import { MaxInputAutoComplete } from '@maxvue/max-components-ui';
-    import { MaxInputAutoCompleteApi } from '@maxvue/max-components-ui';
+
+    const selectedTag = ref(null);
+    const energyTags = [
+        { id: 1, name: 'Amazonas Energia', icon: 'lucide:zap', tag_color: '#4ade80' },
+        { id: 2, name: 'Celesc Santa Catarina', icon: 'lucide:zap', tag_color: '#84cc16' },
+        { id: 3, name: 'Cemig', icon: 'lucide:zap', tag_color: '#22c55e' },
+        { id: 4, name: 'Chesp', icon: 'lucide:zap', tag_color: '#10b981' },
+        { id: 5, name: 'Copel', icon: 'lucide:zap', tag_color: '#b45309' },
+        { id: 6, name: 'EDP São Paulo', icon: 'lucide:zap', tag_color: '#84cc16' },
+        { id: 7, name: 'EDP Espírito Santo', icon: 'lucide:zap', tag_color: '#84cc16' },
+        { id: 8, name: 'Enel Ceará', icon: 'lucide:zap', tag_color: '#f472b6' },
+        { id: 9, name: 'Enel São Paulo', icon: 'lucide:zap', tag_color: '#f472b6' },
+        { id: 10, name: 'Enel Rio de Janeiro', icon: 'lucide:zap', tag_color: '#f472b6' },
+        { id: 11, name: 'Energisa Acre', icon: 'lucide:zap', tag_color: '#fb923c' },
+        { id: 12, name: 'Energisa Mato Grosso', icon: 'lucide:zap', tag_color: '#f97316' },
+        { id: 13, name: 'Energisa Mato Grosso do Sul Distribuidora com Nome Muito Longo para Teste de Reticências no Limite', icon: 'lucide:zap', tag_color: '#ea580c' }
+    ];
 </script>
 
 <style lang="scss" scoped>

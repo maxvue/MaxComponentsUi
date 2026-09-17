@@ -77,11 +77,10 @@ describe('MaxInputSelect — largura do overlay', () => {
         expect((wrapper.vm as any).position.width).toBe('260px');
     });
 
-    it('não ultrapassa o teto quando o campo é muito largo', () => {
-        // Caso do bug: campo de 1100px fazia o overlay atravessar a tela.
+    it('não ultrapassa o teto de 500px quando o campo é muito largo', () => {
         triggerWidth.value = 1100;
         const wrapper = mountSelect();
-        expect((wrapper.vm as any).position.width).toBe('420px');
+        expect((wrapper.vm as any).position.width).toBe('500px');
     });
 
     it('respeita um piso mínimo em campos minúsculos', () => {
@@ -90,13 +89,13 @@ describe('MaxInputSelect — largura do overlay', () => {
         expect((wrapper.vm as any).position.width).toBe('160px');
     });
 
-    it('encolhe para caber em viewport estreita', () => {
+    it('encolhe para caber em viewport estreita respeitando calc(100vw - 50px)', () => {
         triggerWidth.value = 1100;
         windowWidth.value = 320;
         const wrapper = mountSelect();
 
         const { width, left } = (wrapper.vm as any).position;
-        expect(width).toBe('300px'); // 320 - 10*2 de margem
+        expect(width).toBe('270px'); // 320 - 50 de margem
         // O que importa é não vazar pela direita da viewport.
         expect(left + parseInt(width, 10)).toBeLessThanOrEqual(320);
     });
@@ -109,5 +108,36 @@ describe('MaxInputSelect — largura do overlay', () => {
         // Campo em x=350 com 300px não cabe; força o cenário de reposicionamento
         const { width, left } = (wrapper.vm as any).position;
         expect(left + parseInt(width, 10)).toBeLessThanOrEqual(400);
+    });
+
+    it('acompanha a largura do conteúdo interno quando maior que o campo', async () => {
+        triggerWidth.value = 180;
+        const wrapper = mountSelect();
+        await wrapper.vm.$nextTick();
+        const overlay = document.body.querySelector('.max-select-overlay') as HTMLElement;
+        expect(overlay).not.toBeNull();
+        const label = overlay.querySelector('.labelz') as HTMLElement;
+        expect(label).not.toBeNull();
+        Object.defineProperties(label, {
+            clientWidth: { configurable: true, value: 100 },
+            scrollWidth: { configurable: true, value: 250 }
+        });
+        Object.defineProperty(overlay, 'getBoundingClientRect', {
+            configurable: true,
+            value: () => ({
+                width: 180,
+                height: 200,
+                top: 48,
+                left: 0,
+                right: 180,
+                bottom: 248,
+                x: 0,
+                y: 48,
+                toJSON: () => ({})
+            })
+        });
+        (wrapper.vm as any).updatePosition();
+        await wrapper.vm.$nextTick();
+        expect(parseInt((wrapper.vm as any).position.width, 10)).toBeGreaterThanOrEqual(250);
     });
 });

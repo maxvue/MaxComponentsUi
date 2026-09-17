@@ -15,24 +15,26 @@ describe('getOverlayWidth', () => {
         expect(getOverlayWidth({ triggerWidth: 1100, windowWidth: 1280 })).toBe(MAX_OVERLAY_WIDTH);
     });
 
-    it('encolhe para caber em viewport estreita', () => {
-        expect(getOverlayWidth({ triggerWidth: 1100, windowWidth: 320 })).toBe(300);
+    it('encolhe para caber em viewport estreita respeitando calc(100vw - 50px)', () => {
+        expect(getOverlayWidth({ triggerWidth: 1100, windowWidth: 320 })).toBe(270);
     });
 
     it('respeita piso e teto customizados', () => {
         expect(getOverlayWidth({ triggerWidth: 50, windowWidth: 1280, minWidth: 140 })).toBe(140);
-        expect(getOverlayWidth({ triggerWidth: 900, windowWidth: 1280, maxWidth: 500 })).toBe(500);
+        expect(getOverlayWidth({ triggerWidth: 900, windowWidth: 1280, maxWidth: 450 })).toBe(450);
     });
 
     it('acompanha a largura intrínseca do conteúdo sem ultrapassar o teto', () => {
         expect(getOverlayWidth({ triggerWidth: 180, contentWidth: 260, windowWidth: 1280, maxWidth: 300 })).toBe(260);
         expect(getOverlayWidth({ triggerWidth: 180, contentWidth: 480, windowWidth: 1280, maxWidth: 300 })).toBe(300);
+        expect(getOverlayWidth({ triggerWidth: 180, contentWidth: 480, windowWidth: 1280 })).toBe(480);
+        expect(getOverlayWidth({ triggerWidth: 180, contentWidth: 700, windowWidth: 1280 })).toBe(500);
     });
 
-    it('nunca devolve largura maior que a viewport útil', () => {
-        for (const w of [320, 768, 1024, 1920]) {
+    it('nunca devolve largura maior que a viewport útil: min(500px, calc(100vw - 50px))', () => {
+        for (const w of [320, 400, 768, 1024, 1920]) {
             const width = getOverlayWidth({ triggerWidth: 5000, windowWidth: w });
-            expect(width).toBeLessThanOrEqual(Math.max(160, w - 20));
+            expect(width).toBeLessThanOrEqual(Math.min(500, Math.max(160, w - 50)));
         }
     });
 });
