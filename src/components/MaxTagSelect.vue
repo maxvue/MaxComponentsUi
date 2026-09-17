@@ -7,6 +7,7 @@
         no-dropdown
         :no-icon="props.isButton || (attrs as any)?.noIcon"
         :no-status="props.isButton || (attrs as any)?.noStatus"
+        no-border
     >
         <template #default="{ inputAttrs }">
             <div v-if="showPlaceholder" class="tab-placeholder-select">
@@ -944,6 +945,13 @@
             border: none !important;
             background: transparent !important;
             padding: 0 !important;
+
+            :deep(.max-icon-div),
+            :deep(.max-icon){
+                max-width: 20px;
+                max-height: 20px;
+
+            }
 
             :deep(.max-input-field-div) {
                 border: none !important;

@@ -12,14 +12,14 @@
                 class="max-tag-remove-action"
                 v-tooltip="'Remover'"
                 i="material-symbols:close-rounded"
-                size="1.2"
+                size-icon="1"
                 :color="getStyleColor(item, false, true).color"
                 :aria-label="`Remover tag ${item.name || item.label || item.value || ''}`"
                 @click.stop="removeItem(item)"
             />
         </div>
         <div class="tag-add-wrapper">
-            <MaxTagSelect v-model="add_tag" :options="options_array" is-button icon="fluent:tag-add-20-regular" icon-size="2" aria-label="Adicionar tag" />
+            <MaxTagSelect v-model="add_tag" :options="options_array" is-button icon="fluent:tag-add-20-regular" size-icon="1" aria-label="Adicionar tag" />
         </div>
     </div>
 </template>
