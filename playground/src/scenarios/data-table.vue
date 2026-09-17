@@ -45,14 +45,39 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="component-block">
+                    <h3>MaxTimeline</h3>
+                    <div class="states">
+                        <div class="state-col">
+                            <span>Normal (Vertical)</span>
+                            <MaxTimeline :value="timelineEvents">
+                                <template #opposite="{ item }">
+                                    <small>{{ item.date }}</small>
+                                </template>
+                                <template #content="{ item }">
+                                    <span>{{ item.status }}</span>
+                                </template>
+                            </MaxTimeline>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
+    import { ref } from 'vue';
     import { MaxTable } from '@maxvue/max-components-ui';
     import { MaxTableFields } from '@maxvue/max-components-ui';
+    import { MaxTimeline } from '@maxvue/max-components-ui';
+
+    const timelineEvents = ref([
+        { status: 'Criado', date: '10:00', severity: 'info' },
+        { status: 'Processando', date: '10:30', severity: 'warning' },
+        { status: 'Concluído', date: '11:00', severity: 'success' }
+    ]);
 </script>
 
 <style lang="scss" scoped>

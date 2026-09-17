@@ -43,7 +43,9 @@ const aliases: Record<string, string> = {
     'MaxBadgeComponent': 'MaxBadge',
     'MaxBadgeButtonGroup': 'MaxBadgeButtonsGroup',
     'Column': 'MaxTableColumn',
-    'MaxColumn': 'MaxTableColumn'
+    'MaxColumn': 'MaxTableColumn',
+    'MaxTimeLine': 'MaxTimeline',
+    'TimeLine': 'MaxTimeline'
 };
 
 for (const k of Object.keys(aliases)) {

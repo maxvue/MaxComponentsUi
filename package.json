@@ -437,6 +437,10 @@
       "types": "./dist/components/MaxTagsList.vue.d.ts",
       "import": "./dist/components/MaxTagsList.es.js"
     },
+    "./components/MaxTimeline": {
+      "types": "./dist/components/MaxTimeline.vue.d.ts",
+      "import": "./dist/components/MaxTimeline.es.js"
+    },
     "./components/MaxTextInputFloatLabel": {
       "types": "./dist/components/MaxTextInputFloatLabel.vue.d.ts",
       "import": "./dist/components/MaxTextInputFloatLabel.es.js"
