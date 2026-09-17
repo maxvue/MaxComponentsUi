@@ -62,7 +62,7 @@
                     class="max-select-overlay"
                     role="listbox"
                     tabindex="-1"
-                    :style="{ top: position.top + 'px', left: position.left + 'px', width: position.width }"
+                    :style="{ top: position.top + 'px', left: position.left + 'px', width: position.width, zIndex: overlayZIndex }"
                     @click.stop
                 >
                     <div v-if="props.filter" class="max-select-header">
@@ -348,7 +348,7 @@
     const overlayEl = ref<HTMLElement | null>(null);
     const filterInputEl = ref<HTMLInputElement | null>(null);
 
-    const { position, updatePosition } = useActiveOverlayPosition({
+    const { position, zIndex: overlayZIndex, updatePosition } = useActiveOverlayPosition({
         target: triggerEl,
         overlay: overlayEl,
         active: isOpen,

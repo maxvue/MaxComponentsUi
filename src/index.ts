@@ -205,6 +205,9 @@ export { default as MaxPopoverConfirm } from './components/MaxPopoverConfirm.vue
 export { default as MaxPopover } from './components/MaxPopover.vue';
 export { default as MaxTogglePopover } from './components/MaxTogglePopover.vue';
 export { default as MaxModal } from './components/MaxModal.vue';
+export { MODAL_CONTEXT_KEY, provideModalContext, useModalContext, resolveModalZIndex, type ModalContext } from './helpers/modalContext';
+export { useOverlayZIndex, type OverlayLayer, type UseOverlayZIndexOptions } from './composables/useOverlayZIndex';
+export { useActiveOverlayPosition, type UseActiveOverlayPositionOptions, type OverlayPositionResult } from './composables/useActiveOverlayPosition';
 export { default as MaxPopoverMenu } from './components/MaxPopoverMenu.vue';
 export { default as MaxToast } from './components/MaxToast.vue';
 export { Toast } from './helpers/Toast';

@@ -62,6 +62,7 @@
     import { useFocusTrap } from '../helpers/useFocusTrap';
     import { useScrollLock } from '../helpers/useScrollLock';
     import { useBrowserEventListener } from '../composables/useBrowserEventListener';
+    import { provideModalContext } from '../helpers/modalContext';
     import { computed, watch, onBeforeUnmount, onMounted, useTemplateRef, useId, useSlots, ref } from 'vue';
     import MaxIcon from './MaxIcon.vue';
 
@@ -179,6 +180,10 @@
         if (props.baseZIndex > 0) return `calc(var(--max-layer-modal, 1310) + ${props.baseZIndex})`;
 
         return 'var(--max-layer-modal, 1310)';
+    });
+
+    provideModalContext({
+        zIndex: z_index
     });
 
     /**

@@ -40,11 +40,11 @@
             </div>
 
             <Teleport to="body" v-if="isOpen">
-                <div class="max-phone-overlay-mask" @click.stop="close"></div>
+                <div class="max-phone-overlay-mask" :style="{ zIndex: maskZIndex }" @click.stop="close"></div>
                 <div
                     ref="overlay_el"
                     class="max-phone-select-overlay"
-                    :style="{ top: position.top + 'px', left: position.left + 'px', width: position.width + 'px' }"
+                    :style="{ top: position.top + 'px', left: position.left + 'px', width: position.width + 'px', zIndex: overlayZIndex }"
                     @click.stop="() => {}"
                 >
                     <div class="max-phone-select-filter">
@@ -107,6 +107,7 @@
     import { vMaska } from 'maska/vue';
     import { country_ddi_flags, type DDIFlag } from '../constants/ddiFlags';
     import { useVirtualList } from '../composables/useVirtualList';
+    import { useOverlayZIndex } from '../composables/useOverlayZIndex';
 
     const props = withDefaults(
         defineProps<{
@@ -285,6 +286,13 @@
     const filter_text = ref('');
     const focused_index = ref(0);
     const position = ref({ top: 0, left: 0, width: 0 });
+
+    const maskZIndex = useOverlayZIndex({ target: select_el, layer: 'dropdown' });
+    const overlayZIndex = computed(() => {
+        const val = maskZIndex.value;
+        if (typeof val === 'number') return val + 1;
+        return `calc(${val} + 1)`;
+    });
 
     // Filtro equivalente ao `:filterFields="['name', 'value']"` do PrimeVue.
     // `value` é numérico, por isso o String() antes de comparar.

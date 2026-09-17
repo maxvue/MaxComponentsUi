@@ -34,7 +34,7 @@
                     class="max-autocomplete-overlay"
                     role="listbox"
                     :aria-label="props.label || props.placeholder || 'Sugestões'"
-                    :style="{ top: position.top + 'px', left: position.left + 'px', width: position.width }"
+                    :style="{ top: position.top + 'px', left: position.left + 'px', width: position.width, zIndex: overlayZIndex }"
                     @click.stop
                     @scroll="onOverlayScroll"
                 >
@@ -209,7 +209,7 @@
         if (!isOpen.value) return false;
         return isLoading.value || hasError.value || filtered_values.value.length > 0 || hasSearched.value;
     });
-    const { position } = useActiveOverlayPosition({
+    const { position, zIndex: overlayZIndex } = useActiveOverlayPosition({
         target: ac,
         overlay: overlayEl,
         active: isOverlayActive,

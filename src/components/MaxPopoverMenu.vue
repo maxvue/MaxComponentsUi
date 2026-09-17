@@ -42,7 +42,7 @@
                 :id="menuId"
                 class="max-popover-menu-overlay"
                 role="menu"
-                :style="{ top: position.top + 'px', left: position.left + 'px' }"
+                :style="{ top: position.top + 'px', left: position.left + 'px', zIndex: overlayZIndex }"
                 @keydown="onMenuKeydown"
             >
                 <div
@@ -147,7 +147,7 @@
 
     const boundingTarget = computed(() => anchorEl.value ?? triggerButtonRef.value ?? btn_el.value);
 
-    const { position } = useActiveOverlayPosition<{ top: number; left: number }>({
+    const { position, zIndex: overlayZIndex } = useActiveOverlayPosition<{ top: number; left: number }>({
         target: boundingTarget,
         overlay: menuEl,
         active: isOpen,
