@@ -314,9 +314,10 @@
 
 <style lang="scss" scoped>
 
-    // :global(*, *::before,*::after ){
-    //     box-sizing: border-box;
-    // }
+    :global(*, *::before,*::after ){
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
 
 
     .max-app {

@@ -4,11 +4,11 @@
         <div class="max-icon" v-html="svgContent" v-bind="attrs" :style="style" />
         <div class="sub-icon checked" v-if="props.checked === true">
             <div class="background-icon"></div>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="m10.6 13.8l-2.15-2.15q-.275-.275-.7-.275t-.7.275t-.275.7t.275.7L9.9 15.9q.3.3.7.3t.7-.3l5.65-5.65q.275-.275.275-.7t-.275-.7t-.7-.275t-.7.275zM12 22q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"><path fill="currentColor" d="m10.6 13.8l-2.15-2.15q-.275-.275-.7-.275t-.7.275t-.275.7t.275.7L9.9 15.9q.3.3.7.3t.7-.3l5.65-5.65q.275-.275.275-.7t-.275-.7t-.7-.275t-.7.275zM12 22q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22" /></svg>
         </div>
         <div class="sub-icon plus" v-if="props.plus === true">
             <div class="background-icon"></div>
-            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 448 512"><path fill="currentColor" d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32v144H48c-17.7 0-32 14.3-32 32s14.3 32 32 32h144v144c0 17.7 14.3 32 32 32s32-14.3 32-32V288h144c17.7 0 32-14.3 32-32s-14.3-32-32-32H256z" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 448 512"><path fill="currentColor" d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32v144H48c-17.7 0-32 14.3-32 32s14.3 32 32 32h144v144c0 17.7 14.3 32 32 32s32-14.3 32-32V288h144c17.7 0 32-14.3 32-32s-14.3-32-32-32H256z" /></svg>
         </div>
     </div>
     <div v-else></div>
@@ -211,9 +211,12 @@
                 right: 0;
 
                 .background-icon {
-                    height: 15px;
-                    width: 15px;
+                    height: 14px;
+                    width: 14px;
                     background-color: var(--blue-750);
+                    position: absolute;
+                    bottom: 0px;
+                    right: 0;
                 }
             }
 
@@ -221,8 +224,8 @@
                 color: var(--green-600);
                 width: 15px;
                 height: 15px;
-                bottom: 0;
-                right: 0;
+                bottom: -5px;
+                right: -5px;
 
                 .background-icon {
                     width: 15px;

@@ -1,24 +1,11 @@
 <template>
     <div class="max-table-fields-wrapper" :id="tableId">
-        <div
-            class="max-table-fields-scroll-region"
-            role="region"
-            tabindex="0"
-            :aria-label="props.ariaLabel"
-        >
+        <div class="max-table-fields-scroll-region" role="region" tabindex="0" :aria-label="props.ariaLabel" >
             <table class="max-table-fields">
                 <!-- Cabeçalho -->
                 <thead class="max-table-fields-head">
                     <tr class="max-table-fields-head-row">
-                        <th
-                            v-for="col in safeColumns"
-                            :key="col.field"
-                            class="max-table-fields-th"
-                            :class="{ 'max-table-fields-col-increment': col.input === 'increment' }"
-                            :style="getColumnStyle(col)"
-                            scope="col"
-                            :aria-label="col.header?.trim() || col.field?.trim() || 'Coluna'"
-                        >
+                        <th v-for="col in safeColumns" :key="col.field" class="max-table-fields-th" :class="{ 'max-table-fields-col-increment': col.input === 'increment' }" :style="getColumnStyle(col)" scope="col" :aria-label="col.header?.trim() || col.field?.trim() || 'Coluna'" >
                             <slot :name="`header-${col.field}`" :column="col">
                                 {{ col.header }}
                             </slot>
@@ -54,14 +41,8 @@
 
                     <!-- 2. Linhas de dados quando houver itens -->
                     <template v-else-if="hasItems">
-                        <tr v-for="(row, index) in normalizedList" :key="rowKey(row, index)" class="max-table-fields-row" :class="{ 'max-table-fields-row-even': index % 2 === 0, 'max-table-fields-row-odd': index % 2 !== 0 }">
-                            <td
-                                v-for="col in safeColumns"
-                                :key="col.field"
-                                class="max-table-fields-td"
-                                :class="{ 'max-table-fields-col-increment': col.input === 'increment' }"
-                                :style="getColumnStyle(col)"
-                            >
+                        <tr v-for="(row, index) in normalizedList" :key="rowKey(row, index)" class="max-table-fields-row" :class="{ 'max-table-fields-row-even': index % 2 === 0, 'max-table-fields-row-odd': index % 2 !== 0 }" >
+                            <td v-for="col in safeColumns" :key="col.field" class="max-table-fields-td" :class="{ 'max-table-fields-col-increment': col.input === 'increment' }" :style="getColumnStyle(col)" >
                                 <!-- Slot customizado tem prioridade -->
                                 <slot v-if="col.slot && !col.input" :name="col.slot ?? col.field" :data="row" :value="getFieldValue(row, col.field)" :index="index" :field="col.field">
                                     <div class="default-slot">
@@ -72,35 +53,35 @@
                                 <!-- Input de incremento (+/-) -->
                                 <div v-else-if="col.input === 'increment'" class="max-table-fields-increment">
                                     <MaxIconButton i="icons8:minus" size="1.3" dark @click.stop="decrementValue(row, col)" :aria-label="`Diminuir ${col.label || col.field || 'valor'}`" />
-                                    <MaxInputText :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-increment-input" :placeholder="col.placeholder" :required="col.required" :no-message="col.noMessage ?? true" />
+                                    <MaxInputText :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-increment-input" :placeholder="col.placeholder" :required="col.required" :no-message="col.noMessage ?? true" slim no-status />
                                     <MaxIconButton i="icons8:plus" size="1.3" dark @click.stop="incrementValue(row, col)" :aria-label="`Aumentar ${col.label || col.field || 'valor'}`" />
                                 </div>
 
                                 <!-- Input de texto -->
-                                <MaxInputText v-else-if="col.input === 'text' || col.input === 'input'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :placeholder="col.placeholder" :required="col.required" :no-message="col.noMessage ?? true" />
+                                <MaxInputText v-else-if="col.input === 'text' || col.input === 'input'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :placeholder="col.placeholder" :required="col.required" :no-message="col.noMessage ?? true" slim no-status />
 
                                 <!-- Input numérico -->
-                                <MaxInputNumber v-else-if="col.input === 'number'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :placeholder="col.placeholder" :required="col.required" :no-message="col.noMessage ?? true" />
+                                <MaxInputNumber v-else-if="col.input === 'number'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :placeholder="col.placeholder" :required="col.required" :no-message="col.noMessage ?? true" slim no-status />
 
                                 <!-- Select -->
-                                <MaxInputSelect v-else-if="col.input === 'select'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :options="col.options ?? []" :placeholder="col.placeholder" :required="col.required" :no-message="col.noMessage ?? true" />
+                                <MaxInputSelect v-else-if="col.input === 'select'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :options="col.options ?? []" :placeholder="col.placeholder" :required="col.required" :no-message="col.noMessage ?? true" slim no-status />
 
                                 <!-- Date Picker -->
-                                <MaxInputDatePicker v-else-if="col.input === 'date'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :placeholder="col.placeholder" :required="col.required" :no-message="col.noMessage ?? true" />
+                                <MaxInputDatePicker v-else-if="col.input === 'date'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :placeholder="col.placeholder" :required="col.required" :no-message="col.noMessage ?? true" slim no-status />
 
                                 <!-- Checkbox -->
-                                <MaxInputCheckbox v-else-if="col.input === 'checkbox'" :modelValue="Boolean(getFieldValue(row, col.field))" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" />
+                                <MaxInputCheckbox v-else-if="col.input === 'checkbox'" :modelValue="Boolean(getFieldValue(row, col.field))" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" slim no-status />
 
                                 <!-- Textarea -->
-                                <MaxInputTextArea v-else-if="col.input === 'textarea'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :placeholder="col.placeholder" :required="col.required" :no-message="col.noMessage ?? true" />
+                                <MaxInputTextArea v-else-if="col.input === 'textarea'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :placeholder="col.placeholder" :required="col.required" :no-message="col.noMessage ?? true" slim no-status />
 
                                 <!-- AutoComplete -->
-                                <MaxInputAutoComplete v-else-if="col.input === 'auto-complete'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :options="col.options ?? []" :placeholder="col.placeholder" :required="col.required" :no-message="col.noMessage ?? true" />
+                                <MaxInputAutoComplete v-else-if="col.input === 'auto-complete'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :options="col.options ?? []" :placeholder="col.placeholder" :required="col.required" :no-message="col.noMessage ?? true" slim no-status />
 
                                 <!-- AutoComplete via API -->
-                                <MaxInputAutoCompleteApi v-else-if="col.input === 'auto-complete-api'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :route="col.route ?? ''" :data="resolveData(row, col.data)" :placeholder="col.placeholder" :required="col.required" :no-message="col.noMessage ?? true" />
+                                <MaxInputAutoCompleteApi v-else-if="col.input === 'auto-complete-api'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :route="col.route ?? ''" :data="resolveData(row, col.data)" :placeholder="col.placeholder" :required="col.required" :no-message="col.noMessage ?? true" slim no-status />
                                 <!-- Phone Number -->
-                                <MaxInputPhone v-else-if="col.input === 'phone-number'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :placeholder="col.placeholder" :required="col.required" :no-message="col.noMessage ?? true" />
+                                <MaxInputPhone v-else-if="col.input === 'phone-number'" :modelValue="getFieldValue(row, col.field)" @update:modelValue="setFieldValue(row, col.field, $event, col)" class="table-field-control" :placeholder="col.placeholder" :required="col.required" :no-message="col.noMessage ?? true" slim no-status />
 
                                 <!-- Sem input: exibe o valor como texto -->
                                 <template v-else>
@@ -363,17 +344,26 @@
             border-collapse: collapse;
             display: table;
 
+
             // CABEÇALHO
             .max-table-fields-head {
                 display: table-header-group;
                 position: sticky;
                 top: 0;
                 z-index: 1;
+                max-height: 30px !important;
+                :deep(th){
+                    min-height: 30px;
+                    max-height: 30px !important;
+                    height: 30px !important;
+                }
 
                 .max-table-fields-head-row {
                     @include table.table-header-row;
 
                     display: table-row;
+                    max-height: 30px !important;
+                    height: 30px !important;
 
                     .max-table-fields-th {
                         @include table.table-header-cell;
@@ -381,6 +371,7 @@
                         display: table-cell;
                         vertical-align: middle;
                         text-align: center;
+                        max-height: 30px !important;
 
                         &.max-table-fields-th-buttons {
                             width: auto;
@@ -405,12 +396,15 @@
 
                     display: table-row;
 
+
                     .max-table-fields-td {
                         @include table.table-cell-base;
 
                         display: table-cell;
                         vertical-align: middle;
                         outline: none;
+                        height: 33px !important;
+                        padding: 0 3px !important;
 
                         &:focus:not(:focus-visible) {
                             outline: none;

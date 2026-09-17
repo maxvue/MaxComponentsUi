@@ -21,7 +21,7 @@
                 'in-line': props.inLine,
                 'is-inline': props.inLine,
                 'no-status': props.noStatus,
-                'no-message': props.noMessage
+                'no-message': ! show_message
             },
             props.class,
             attrs.class
@@ -70,13 +70,13 @@
             <!-- INPUT STATUS ICON -->
             <div class="input-status-icon" :class="{ 'with-icon-right': hasIconRight }" aria-hidden="true">
                 <div class="is-done" v-if="done && !noDone && !noStatus">
-                    <MaxIcon icon="lets-icons:check-fill" :size="0.8" :light="light" :dark="dark" />
+                    <MaxIcon icon="lets-icons:check-fill" :size="0.8" color="green" />
                 </div>
                 <div class="is-caution" v-else-if="caution && !noCaution && !noStatus">
-                    <MaxIcon icon="humbleicons:exclamation" :size="0.8" :light="light" :dark="dark" />
+                    <MaxIcon icon="humbleicons:exclamation" :size="0.8" color="red" />
                 </div>
                 <div class="is-error" v-else-if="error && !noError && !noStatus">
-                    <MaxIcon icon="humbleicons:exclamation" :size="0.8" :light="light" :dark="dark" />
+                    <MaxIcon icon="humbleicons:exclamation" :size="0.8" color="red" />
                 </div>
                 <!--
                     `aria-hidden` porque este asterisco e apenas um indicador visual
@@ -88,7 +88,7 @@
         </div>
 
         <!-- INPUT MESSAGE -->
-        <div class="input-message" :class="{ 'is-truncated': props.truncateMessage }" :id="message_id" aria-live="polite" :role="isError ? 'alert' : undefined" v-if="!props.noStatus && !props.noMessage" >
+        <div class="input-message" :class="{ 'is-truncated': props.truncateMessage }" :id="message_id" aria-live="polite" :role="isError ? 'alert' : undefined" v-if="show_message" >
             <MaxIcon :icon="props.iconMessage" v-if="props.iconMessage && displayMessage" :size="0.85" :light="light" :dark="dark" class="message-icon" />
             <span class="message-text" :title="props.truncateMessage && displayMessage ? displayMessage : undefined" v-if="displayMessage" >{{ displayMessage }}</span>
         </div>
@@ -198,6 +198,10 @@
         errorMessageFallback?: string;
     }
 
+    const show_message = computed(() => {
+        return !props.noStatus && !props.noMessage && props.message !== undefined;
+    });
+
     const props = withDefaults(defineProps<Props>(), {
         value: '',
         textCenter: false,
@@ -209,7 +213,7 @@
         iconPos: 'left',
         inLine: false,
         noStatus: false,
-        noMessage: false,
+        noMessage: true,
         truncateMessage: false,
         errorMessageFallback: 'Valor inválido'
     });
@@ -368,6 +372,15 @@
     place-items: center;
     min-height: 55px;
     height: auto;
+
+    width: 100%;
+
+    :deep(input),
+    :deep(.max-input-native) {
+        width: 100%;
+        max-width: 100%;
+        padding: 0 10px;
+    }
 
     :deep() {
         input, textarea {
@@ -662,6 +675,10 @@
         }
     }
 
+    :deep(.value-div) {
+                width: 100%;
+    }
+
     &[input-click],
     &[input-click-auto] {
         &:not([input-click='false']) {
@@ -718,6 +735,7 @@
         :deep(.max-input-native),
         :deep(.max-input-number),
         :deep(.value-div) {
+            width: 100%;
             &:not(.max-input-otp-cell) {
                 outline: none !important;
                 border: none !important;
@@ -743,12 +761,18 @@
         }
     }
 
+
     &.is-slim,
     &[slim],
     &[input-click] {
         grid-template-rows: 20px !important;
         height: 20px;
         min-height: 20px;
+
+        :deep(.tag-value-text){
+            height: unset !important;
+        }
+
 
         :deep(div),
         :deep(span),
@@ -847,10 +871,14 @@
         }
 
         &.text-center,
+        &[text-center],
         &.is-text-center {
             :deep(.value-div),
+            :deep(.value-text),
             :deep(.max-select-label) {
                 padding: 0 !important;
+                text-align: center !important;
+                width: 100% !important;
             }
         }
     }
@@ -862,12 +890,15 @@
             width: 100%;
         }
 
+        :deep(.value-div),
         :deep(.value-text),
         :deep(.max-select-label) {
             padding-left: 2.5rem;
+            width: 100%;
         }
 
         &.no-dropdown {
+            :deep(.value-div),
             :deep(.value-div),
             :deep(.max-select-label) {
                 padding-left: 0 !important;
