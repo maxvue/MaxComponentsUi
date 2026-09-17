@@ -1,19 +1,16 @@
 <template>
     <div class="max-logo logo" :rounded="props.rounded ? true : undefined" :no-padding="props.noPadding ? true : undefined">
 
-        <RouterLink :to="props.noClick ? '' : props.to">
-            <img
-                v-if="props.src && !hasLoadError"
-                :src="`${props.src}`"
-                :alt="props.alt"
-                @error="handleImageError"
-            />
-            <span
-                v-else-if="hasLoadError"
-                class="max-logo-fallback"
-                role="img"
-                :aria-label="props.alt"
-            >
+        <div v-if="props.noClick">
+            <img v-if="props.src && !hasLoadError" :src="`${props.src}`" :alt="props.alt" @error="handleImageError" />
+            <span v-else-if="hasLoadError" class="max-logo-fallback" role="img" :aria-label="props.alt" >
+                {{ props.fallbackLabel }}
+            </span>
+        </div>
+
+        <RouterLink :to="props.to" v-else>
+            <img v-if="props.src && !hasLoadError" :src="`${props.src}`" :alt="props.alt" @error="handleImageError" />
+            <span v-else-if="hasLoadError" class="max-logo-fallback" role="img" :aria-label="props.alt" >
                 {{ props.fallbackLabel }}
             </span>
         </RouterLink>
