@@ -164,10 +164,9 @@
                                                         class="max-tag-select-option-label"
                                                         style="display: grid; min-width: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
                                                         v-text="entry.item.option[props.optionLabel] ?? entry.item.option.label"
-                                                        :style="{ color: attrs.color }"
+                                                        :style="{ color: attrs.color ?? getStyleColor(entry.item.option, highlightedIndex === entry.item.selectableIndex, false, isOptionSelected(entry.item.option)).color }"
                                                     ></div>
                                                 </div>
-                                                <div class="sub-label-tag" v-text="entry.item.option?.sub_label ?? entry.item.option?.sub ?? entry.item.option?.subLabel"></div>
                                                 <img v-if="entry.item.option['img']" :src="`/media/images/${entry.item.option['img']}`" alt="Image" class="img-label" />
                                             </div>
                                         </slot>
@@ -193,11 +192,16 @@
     import { ref, computed, watch, useAttrs, nextTick, type Ref } from 'vue';
     import InputBase from './InputBase.vue';
     import { SelectGroupOptions } from '../types';
-    import { getColorFromVar, contrastColor, isBlank, watchDebounced } from '@maxvue/max-use';
+    import { getColorFromVar, isBlank, watchDebounced } from '@maxvue/max-use';
     import { useActiveOverlayPosition } from '../composables/useActiveOverlayPosition';
     import { getOverlayWidth, getOverlayLeft } from '../helpers/useOverlayWidth';
     import { useOutsidePointer } from '../helpers/useOutsidePointer';
     import { useVirtualList } from '../composables/useVirtualList';
+    import {
+        parseColorToRgb,
+        getWcagRelativeLuminance,
+        adjustToWcagLuminance
+    } from '../helpers/colorLuminance';
     import MaxIcon from './MaxIcon.vue';
     import MaxIconButton from './MaxIconButton.vue';
 
@@ -243,7 +247,7 @@
             iconMessage?: string | undefined;
             /** Default Value */
             default?: string | number | boolean | null | undefined;
-            /** Lista de opções simples [{ name, value, icon, sub_label }] */
+            /** Lista de opções simples [{ name, value, icon, background_color }] */
             options?: any[];
             /** Lista de opções agrupadas [{ label, items: [] }] */
             groupOptions?: SelectGroupOptions;
@@ -290,22 +294,16 @@
 
     const styleColorCache = new Map<string, any>();
 
-    const getAccessibleContrastColor = (bgHex: string): string => {
-        try {
-            const clean = bgHex.replace('#', '');
-            const r = parseInt(clean.substring(0, 2), 16) / 255;
-            const g = parseInt(clean.substring(2, 4), 16) / 255;
-            const b = parseInt(clean.substring(4, 6), 16) / 255;
-            const a = [r, g, b].map((v) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)));
-            const lum = a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
-            const contrastLight = (1.0 + 0.05) / (lum + 0.05);
-            const contrastDark = (lum + 0.05) / 0.057;
-            if (contrastLight >= 4.5 && contrastLight >= contrastDark) return '#ffffff';
-            if (contrastDark >= 4.5) return '#00152a';
-            return contrastDark > contrastLight ? '#000000' : '#ffffff';
-        } catch {
-            return contrastColor(bgHex);
-        }
+    /**
+     * Resolve a cor do texto e do ícone de acordo com o padrão MaxBadge:
+     * - Se a cor do item for escura: mesma cor do item só que mais clara (WCAG ~88%).
+     * - Se a cor do item for clara: mesma cor do item só que mais escura (WCAG ~6%).
+     */
+    const resolveTagTextColor = (itemColor: string): string => {
+        const [r, g, b] = parseColorToRgb(itemColor);
+        const lum = getWcagRelativeLuminance(r, g, b);
+        const isDark = lum < 0.40;
+        return adjustToWcagLuminance(itemColor, isDark ? 0.88 : 0.06);
     };
 
     const getStyleColor = (item: any, hover: boolean = false, is_value: boolean = false, is_selected: boolean = false) => {
@@ -319,7 +317,7 @@
         const color = getColorFromVar(color_string === 'unset' ? default_color : color_string);
 
         let background = hover ? color.darken(0.2).hexa() : color.hexa();
-        let text = getAccessibleContrastColor(background);
+        let text = resolveTagTextColor(background);
         if (color_string === 'unset' && !is_value) if (is_selected) {
             background = hover
                 ? 'var(--max-selection-hover-background, var(--max-primary-600, #005F77))'
@@ -338,7 +336,7 @@
             color: text,
             borderRadius: '6px',
             padding: is_value ? '0 8px 0 6px !important' : '0 10px 0 6px !important',
-            gap: is_value ? '4px' : 0,
+            gap: is_value ? '4px' : '6px',
             width: is_value ? '100%' : undefined,
             height: is_value ? '100%' : undefined,
             boxSizing: is_value ? 'border-box' : undefined
@@ -422,7 +420,7 @@
         const overlay = overlayEl.value;
         if (!overlay) return currentWidth;
 
-        const textElements = overlay.querySelectorAll<HTMLElement>('.max-tag-select-option-label, .sub-label-tag');
+        const textElements = overlay.querySelectorAll<HTMLElement>('.max-tag-select-option-label');
         const overflowWidth = Array.from(textElements).reduce(
             (largest, element) => Math.max(largest, element.scrollWidth - element.clientWidth),
             0
@@ -503,8 +501,7 @@
                 if (!group || !Array.isArray(group.items)) return group;
                 const items = group.items.filter((item: any) => {
                     const txt = String(item[labelKey] ?? item.label ?? item.name ?? '').toLowerCase();
-                    const sub = String(item.sub_label ?? item.sub ?? item.subLabel ?? '').toLowerCase();
-                    return txt.includes(q) || sub.includes(q);
+                    return txt.includes(q);
                 });
                 return items.length > 0 ? { ...group, items } : null;
             })
@@ -512,8 +509,7 @@
 
         return (raw as any[]).filter((opt: any) => {
             const txt = String(opt[labelKey] ?? opt.label ?? opt.name ?? '').toLowerCase();
-            const sub = String(opt.sub_label ?? opt.sub ?? opt.subLabel ?? '').toLowerCase();
-            return txt.includes(q) || sub.includes(q);
+            return txt.includes(q);
         });
     });
 
@@ -1111,11 +1107,6 @@
                             .max-tag-select-option-label {
                                 color: inherit !important;
                             }
-
-                            .sub-label-tag {
-                                color: inherit !important;
-                                opacity: 0.85;
-                            }
                         }
                     }
 
@@ -1143,20 +1134,19 @@
                     }
 
                     .label-tag-div {
-                        display: grid;
-                        grid-template-columns: auto 1fr auto;
+                        display: flex;
+                        align-items: center;
                         width: 100% !important;
                         min-width: 0;
-                        place-items: center start;
-                        gap: 10px;
+                        gap: 6px;
                         height: 30px;
-                        background-color: none !important;
 
                         .label-tag {
-                            place-items: center;
                             display: flex;
+                            align-items: center;
                             flex-flow: row nowrap;
                             min-width: 0;
+                            flex: 1;
                             overflow: hidden;
 
                             > div {
@@ -1167,19 +1157,9 @@
                             }
                         }
 
-                        .sub-label-tag {
-                            padding-left: 1rem;
-                            text-align: right;
-                            width: 100%;
-                            min-width: 0;
-                            overflow: hidden;
-                            text-overflow: ellipsis;
-                            white-space: nowrap;
-                            font-size: 0.85rem;
-                        }
-
                         img {
                             max-height: 20px;
+                            flex-shrink: 0;
                         }
                     }
                 }

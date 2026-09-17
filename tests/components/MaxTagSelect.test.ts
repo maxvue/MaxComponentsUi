@@ -3,6 +3,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import { watch } from 'vue';
+import { getWcagRelativeLuminance, parseColorToRgb, adjustToWcagLuminance } from '../../src/helpers/colorLuminance';
 
 vi.mock('@maxvue/max-use', async (importOriginal) => {
     const actual = await importOriginal<typeof import('@maxvue/max-use')>();
@@ -231,6 +232,70 @@ describe('MaxTagSelect', () => {
                 expect(style.backgroundColor).toBeTruthy();
             }
         });
+
+        it('se a cor do item for escura, texto e icone tem a mesma cor só que mais clara (estilo MaxBadge)', () => {
+            const wrapper = mountTagSelect();
+            const vm = wrapper.vm as any;
+            const darkColor = '#00768E'; // Luminância ~0.147 (escura)
+            const style = vm.getStyleColor({ background_color: darkColor }, false, false);
+
+            const [bgR, bgG, bgB] = parseColorToRgb(style.backgroundColor);
+            const [textR, textG, textB] = parseColorToRgb(style.color);
+            const bgLum = getWcagRelativeLuminance(bgR, bgG, bgB);
+            const textLum = getWcagRelativeLuminance(textR, textG, textB);
+
+            expect(bgLum).toBeLessThan(0.40);
+            expect(textLum).toBeGreaterThan(bgLum);
+            expect(textLum).toBeCloseTo(0.88, 1);
+            expect(style.color.toLowerCase()).toBe(adjustToWcagLuminance(style.backgroundColor, 0.88).toLowerCase());
+        });
+
+        it('se a cor do item for clara, texto e icone tem a mesma cor só que mais escura (estilo MaxBadge)', () => {
+            const wrapper = mountTagSelect();
+            const vm = wrapper.vm as any;
+            const lightColor = '#FEF08A'; // Luminância ~0.85 (clara)
+            const style = vm.getStyleColor({ background_color: lightColor }, false, false);
+
+            const [bgR, bgG, bgB] = parseColorToRgb(style.backgroundColor);
+            const [textR, textG, textB] = parseColorToRgb(style.color);
+            const bgLum = getWcagRelativeLuminance(bgR, bgG, bgB);
+            const textLum = getWcagRelativeLuminance(textR, textG, textB);
+
+            expect(bgLum).toBeGreaterThanOrEqual(0.40);
+            expect(textLum).toBeLessThan(bgLum);
+            expect(textLum).toBeCloseTo(0.06, 1);
+            expect(style.color.toLowerCase()).toBe(adjustToWcagLuminance(style.backgroundColor, 0.06).toLowerCase());
+        });
+    });
+
+    it('não exibe sublabels no dropdown de opções (apenas a própria tag)', async () => {
+        const options = [
+            {
+                value: 'tag1',
+                label: 'Tag Primária',
+                sub_label: 'Sublabel Não Deve Aparecer',
+                sub: 'Sub Indesejada',
+                subLabel: 'Outra Sub'
+            }
+        ];
+        const wrapper = mountTagSelect({ options });
+        await wrapper.find('.max-select').trigger('click');
+        await wrapper.vm.$nextTick();
+
+        const overlay = document.body.querySelector('.max-select-overlay') as HTMLElement;
+        expect(overlay).not.toBeNull();
+
+        // Não deve existir nenhum elemento com a classe .sub-label-tag
+        const subLabelEl = overlay.querySelector('.sub-label-tag');
+        expect(subLabelEl).toBeNull();
+
+        // O conteúdo de texto deve conter a tag e não o sublabel
+        const optionEl = overlay.querySelector('.max-select-option') as HTMLElement;
+        expect(optionEl.textContent).toContain('Tag Primária');
+        expect(optionEl.textContent).not.toContain('Sublabel Não Deve Aparecer');
+        expect(optionEl.textContent).not.toContain('Sub Indesejada');
+
+        wrapper.unmount();
     });
 
     it('modo isButton: renderiza MaxIconButton em vez do valor selecionado', async () => {
