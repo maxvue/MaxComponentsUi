@@ -196,7 +196,7 @@ export { default as MaxColumn } from './components/MaxTableColumn.vue';
 export { default as MaxTimeline } from './components/MaxTimeline.vue';
 export { default as MaxTimeLine } from './components/MaxTimeline.vue';
 export { default as Timeline } from './components/MaxTimeline.vue';
-export type { MaxTimelineProps, MaxTimelineAlign, MaxTimelineLayout } from './components/MaxTimeline.vue';
+export type { MaxTimelineProps, MaxTimelineAlign, MaxTimelineLayout, MaxTimelineIconPosition } from './components/MaxTimeline.vue';
 
 // Utils / Others
 export { default as MaxMsgLabels } from './components/MaxMsgLabels.vue';

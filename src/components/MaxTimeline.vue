@@ -3,7 +3,8 @@
         class="max-timeline"
         :class="[
             `max-timeline--${props.layout}`,
-            `max-timeline--${resolvedAlign}`
+            `max-timeline--${resolvedAlign}`,
+            `max-timeline--icon-${props.iconPosition}`
         ]"
     >
         <div
@@ -11,7 +12,38 @@
             :key="getKey(item, index)"
             class="max-timeline-event"
         >
-            <div class="max-timeline-event-opposite">
+            <!-- iconPosition right: textos antes do separador -->
+            <div
+                v-if="effectiveIconPosition === 'right'"
+                class="max-timeline-event-body"
+            >
+                <div
+                    v-if="$slots.opposite"
+                    class="max-timeline-event-opposite"
+                >
+                    <slot
+                        name="opposite"
+                        :item="item"
+                        :index="index"
+                    />
+                </div>
+
+                <div class="max-timeline-event-content">
+                    <slot
+                        name="content"
+                        :item="item"
+                        :index="index"
+                    >
+                        <span v-if="typeof item === 'string' || typeof item === 'number'">{{ item }}</span>
+                    </slot>
+                </div>
+            </div>
+
+            <!-- iconPosition center: opposite antes do separador -->
+            <div
+                v-else-if="effectiveIconPosition === 'center'"
+                class="max-timeline-event-opposite"
+            >
                 <slot
                     name="opposite"
                     :item="item"
@@ -40,7 +72,38 @@
                 </slot>
             </div>
 
-            <div class="max-timeline-event-content">
+            <!-- iconPosition left: textos após o separador -->
+            <div
+                v-if="effectiveIconPosition === 'left'"
+                class="max-timeline-event-body"
+            >
+                <div
+                    v-if="$slots.opposite"
+                    class="max-timeline-event-opposite"
+                >
+                    <slot
+                        name="opposite"
+                        :item="item"
+                        :index="index"
+                    />
+                </div>
+
+                <div class="max-timeline-event-content">
+                    <slot
+                        name="content"
+                        :item="item"
+                        :index="index"
+                    >
+                        <span v-if="typeof item === 'string' || typeof item === 'number'">{{ item }}</span>
+                    </slot>
+                </div>
+            </div>
+
+            <!-- iconPosition center: content após o separador -->
+            <div
+                v-else-if="effectiveIconPosition === 'center'"
+                class="max-timeline-event-content"
+            >
                 <slot
                     name="content"
                     :item="item"
@@ -58,6 +121,7 @@
 
     export type MaxTimelineAlign = 'left' | 'right' | 'top' | 'bottom' | 'alternate';
     export type MaxTimelineLayout = 'vertical' | 'horizontal';
+    export type MaxTimelineIconPosition = 'left' | 'right' | 'center';
 
     export interface MaxTimelineProps<T = any> {
         /**
@@ -76,6 +140,13 @@
          */
         layout?: MaxTimelineLayout;
         /**
+         * Posição do ícone/marcador em relação aos textos no layout vertical.
+         * 'center' (padrão) | 'left' | 'right'.
+         * Se 'left', o ícone fica à esquerda e os textos à direita.
+         * Se 'right', o ícone fica à direita e os textos à esquerda.
+         */
+        iconPosition?: MaxTimelineIconPosition;
+        /**
          * Propriedade usada como chave única no v-for. Se omitida, utiliza o índice.
          */
         dataKey?: string;
@@ -85,7 +156,13 @@
         value: () => [],
         align: undefined,
         layout: 'vertical',
+        iconPosition: 'center',
         dataKey: undefined
+    });
+
+    const effectiveIconPosition = computed<MaxTimelineIconPosition>(() => {
+        if (props.layout === 'horizontal') return 'center';
+        return props.iconPosition;
     });
 
     const resolvedAlign = computed<MaxTimelineAlign>(() => {
@@ -196,6 +273,62 @@
                     .max-timeline-event-content {
                         text-align: right;
                     }
+                }
+            }
+
+            // Ícone à esquerda
+            &.max-timeline--icon-left {
+                .max-timeline-event {
+                    justify-content: flex-start;
+                }
+
+                .max-timeline-event-body {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    padding: 0 0 1.5rem 1rem;
+                    text-align: left;
+                }
+
+                .max-timeline-event-opposite {
+                    text-align: left;
+                    padding: 0;
+                    margin-bottom: 0.25rem;
+                    font-size: 0.875rem;
+                    color: var(--background-500);
+                }
+
+                .max-timeline-event-content {
+                    text-align: left;
+                    padding: 0;
+                }
+            }
+
+            // Ícone à direita
+            &.max-timeline--icon-right {
+                .max-timeline-event {
+                    justify-content: flex-end;
+                }
+
+                .max-timeline-event-body {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    padding: 0 1rem 1.5rem 0;
+                    text-align: right;
+                }
+
+                .max-timeline-event-opposite {
+                    text-align: right;
+                    padding: 0;
+                    margin-bottom: 0.25rem;
+                    font-size: 0.875rem;
+                    color: var(--background-500);
+                }
+
+                .max-timeline-event-content {
+                    text-align: right;
+                    padding: 0;
                 }
             }
         }

@@ -155,4 +155,102 @@ describe('MaxTimeline', () => {
         expect(wrapper.find('.max-timeline').exists()).toBe(true);
         expect(wrapper.findAll('.max-timeline-event').length).toBe(0);
     });
+
+    it('aplica classe max-timeline--icon-center por padrão e mantém estrutura padrão de 3 colunas', () => {
+        const wrapper = mount(MaxTimeline, {
+            props: { value: sampleEvents }
+        });
+
+        const root = wrapper.find('.max-timeline');
+        expect(root.classes()).toContain('max-timeline--icon-center');
+
+        const event = wrapper.find('.max-timeline-event');
+        expect(event.find('.max-timeline-event-opposite').exists()).toBe(true);
+        expect(event.find('.max-timeline-event-separator').exists()).toBe(true);
+        expect(event.find('.max-timeline-event-content').exists()).toBe(true);
+        expect(event.find('.max-timeline-event-body').exists()).toBe(false);
+    });
+
+    it('renderiza corretamente com iconPosition="left" (ícone à esquerda e textos à direita)', () => {
+        const wrapper = mount(MaxTimeline, {
+            props: {
+                value: sampleEvents,
+                iconPosition: 'left'
+            },
+            slots: {
+                opposite: '<template #opposite="{ item }"><span class="opp">{{ item.date }}</span></template>',
+                content: '<template #content="{ item }"><span class="cnt">{{ item.title }}</span></template>'
+            }
+        });
+
+        const root = wrapper.find('.max-timeline');
+        expect(root.classes()).toContain('max-timeline--icon-left');
+
+        const event = wrapper.find('.max-timeline-event');
+        const children = event.element.children;
+        // Primeiro filho é o separador, segundo é o body com os textos
+        expect(children[0].classList.contains('max-timeline-event-separator')).toBe(true);
+        expect(children[1].classList.contains('max-timeline-event-body')).toBe(true);
+
+        const body = event.find('.max-timeline-event-body');
+        expect(body.find('.max-timeline-event-opposite').exists()).toBe(true);
+        expect(body.find('.opp').text()).toBe('10:00');
+        expect(body.find('.max-timeline-event-content').exists()).toBe(true);
+        expect(body.find('.cnt').text()).toBe('Passo 1');
+    });
+
+    it('não renderiza .max-timeline-event-opposite no modo left quando o slot opposite não for fornecido', () => {
+        const wrapper = mount(MaxTimeline, {
+            props: {
+                value: sampleEvents,
+                iconPosition: 'left'
+            }
+        });
+
+        const body = wrapper.find('.max-timeline-event-body');
+        expect(body.find('.max-timeline-event-opposite').exists()).toBe(false);
+        expect(body.find('.max-timeline-event-content').exists()).toBe(true);
+    });
+
+    it('renderiza corretamente com iconPosition="right" (textos à esquerda e ícone à direita)', () => {
+        const wrapper = mount(MaxTimeline, {
+            props: {
+                value: sampleEvents,
+                iconPosition: 'right'
+            },
+            slots: {
+                opposite: '<template #opposite="{ item }"><span class="opp">{{ item.date }}</span></template>',
+                content: '<template #content="{ item }"><span class="cnt">{{ item.title }}</span></template>'
+            }
+        });
+
+        const root = wrapper.find('.max-timeline');
+        expect(root.classes()).toContain('max-timeline--icon-right');
+
+        const event = wrapper.find('.max-timeline-event');
+        const children = event.element.children;
+        // Primeiro filho é o body com textos, segundo é o separador
+        expect(children[0].classList.contains('max-timeline-event-body')).toBe(true);
+        expect(children[1].classList.contains('max-timeline-event-separator')).toBe(true);
+
+        const body = event.find('.max-timeline-event-body');
+        expect(body.find('.max-timeline-event-opposite').exists()).toBe(true);
+        expect(body.find('.max-timeline-event-content').exists()).toBe(true);
+    });
+
+    it('mantém comportamento horizontal inalterado com layout="horizontal" mesmo com iconPosition', () => {
+        const wrapper = mount(MaxTimeline, {
+            props: {
+                value: sampleEvents,
+                layout: 'horizontal',
+                iconPosition: 'left'
+            }
+        });
+
+        const event = wrapper.find('.max-timeline-event');
+        expect(event.find('.max-timeline-event-body').exists()).toBe(false);
+        expect(event.find('.max-timeline-event-opposite').exists()).toBe(true);
+        expect(event.find('.max-timeline-event-separator').exists()).toBe(true);
+        expect(event.find('.max-timeline-event-content').exists()).toBe(true);
+    });
 });

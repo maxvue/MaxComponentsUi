@@ -50,8 +50,36 @@
                     <h3>MaxTimeline</h3>
                     <div class="states">
                         <div class="state-col">
-                            <span>Normal (Vertical)</span>
+                            <span>Center (Padrão)</span>
                             <MaxTimeline :value="timelineEvents">
+                                <template #opposite="{ item }">
+                                    <small>{{ item.date }}</small>
+                                </template>
+                                <template #content="{ item }">
+                                    <span>{{ item.status }}</span>
+                                </template>
+                            </MaxTimeline>
+                        </div>
+                        <div class="state-col">
+                            <span>Icon Left (Ícone à Esquerda)</span>
+                            <MaxTimeline
+                                :value="timelineEvents"
+                                icon-position="left"
+                            >
+                                <template #opposite="{ item }">
+                                    <small>{{ item.date }}</small>
+                                </template>
+                                <template #content="{ item }">
+                                    <span>{{ item.status }}</span>
+                                </template>
+                            </MaxTimeline>
+                        </div>
+                        <div class="state-col">
+                            <span>Icon Right (Ícone à Direita)</span>
+                            <MaxTimeline
+                                :value="timelineEvents"
+                                icon-position="right"
+                            >
                                 <template #opposite="{ item }">
                                     <small>{{ item.date }}</small>
                                 </template>
