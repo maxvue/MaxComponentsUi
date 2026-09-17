@@ -1,6 +1,7 @@
 <template>
     <div class="max-logo logo" :rounded="props.rounded ? true : undefined" :no-padding="props.noPadding ? true : undefined">
-        <RouterLink :to="props.to">
+
+        <RouterLink :to="props.noClick ? '' : props.to">
             <img
                 v-if="props.src && !hasLoadError"
                 :src="`${props.src}`"
@@ -31,6 +32,7 @@
             rounded?: boolean;
             noPadding?: boolean;
             to?: string;
+            noClick?: boolean;
         }>(),
         {
             src: undefined,
