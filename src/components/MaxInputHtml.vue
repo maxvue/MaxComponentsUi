@@ -307,13 +307,13 @@
                     attributes: {
                         textAlign: {
                             default: this.options.defaultAlignment,
-                            parseHTML: (element) => {
+                            parseHTML: (element: HTMLElement) => {
                                 if (element.classList.contains('ql-align-justify')) return 'justify';
                                 if (element.classList.contains('ql-align-center')) return 'center';
                                 if (element.classList.contains('ql-align-right')) return 'right';
                                 return element.style.textAlign || this.options.defaultAlignment;
                             },
-                            renderHTML: (attributes) => {
+                            renderHTML: (attributes: Record<string, any>) => {
                                 if (!attributes.textAlign || attributes.textAlign === this.options.defaultAlignment) return {};
                                 return {
                                     style: `text-align: ${attributes.textAlign}`
@@ -857,6 +857,15 @@
         box-shadow: 0 8px 32px rgb(0 0 0 / 50%);
         transition: transform 0.2s ease-out;
         user-select: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .max-input-html,
+    .max-input-html * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
     }
 }
 </style>

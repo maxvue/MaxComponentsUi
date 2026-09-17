@@ -74,7 +74,7 @@
                 :aria-pressed="Boolean(editor?.isActive({ textAlign: 'left' }))"
                 title="Alinhar à esquerda"
                 :disabled="!editor || editor.isEditable === false"
-                @click="editor?.chain().focus().setTextAlign('left').run()"
+                @click="(editor?.chain().focus() as any)?.setTextAlign('left').run()"
             >
                 <MaxIcon icon="mdi:format-align-left" :size="1.1" color="currentColor" />
             </button>
@@ -86,7 +86,7 @@
                 :aria-pressed="Boolean(editor?.isActive({ textAlign: 'center' }))"
                 title="Centralizar"
                 :disabled="!editor || editor.isEditable === false"
-                @click="editor?.chain().focus().setTextAlign('center').run()"
+                @click="(editor?.chain().focus() as any)?.setTextAlign('center').run()"
             >
                 <MaxIcon icon="mdi:format-align-center" :size="1.1" color="currentColor" />
             </button>
@@ -98,7 +98,7 @@
                 :aria-pressed="Boolean(editor?.isActive({ textAlign: 'right' }))"
                 title="Alinhar à direita"
                 :disabled="!editor || editor.isEditable === false"
-                @click="editor?.chain().focus().setTextAlign('right').run()"
+                @click="(editor?.chain().focus() as any)?.setTextAlign('right').run()"
             >
                 <MaxIcon icon="mdi:format-align-right" :size="1.1" color="currentColor" />
             </button>
@@ -110,7 +110,7 @@
                 :aria-pressed="Boolean(editor?.isActive({ textAlign: 'justify' }))"
                 title="Justificar"
                 :disabled="!editor || editor.isEditable === false"
-                @click="editor?.chain().focus().setTextAlign('justify').run()"
+                @click="(editor?.chain().focus() as any)?.setTextAlign('justify').run()"
             >
                 <MaxIcon icon="mdi:format-align-justify" :size="1.1" color="currentColor" />
             </button>
@@ -393,7 +393,7 @@
 
 <script setup lang="ts">
     import { nextTick, onBeforeUnmount, ref, watch } from 'vue';
-    import { onClickOutside } from '@vueuse/core';
+    import { useOutsidePointer } from '../helpers/useOutsidePointer';
     import type { Editor } from '@tiptap/core';
     import MaxIcon from './MaxIcon.vue';
     import { isSafeUrl } from '../helpers/isSafeUrl';
@@ -556,12 +556,20 @@
         if (restoreFocus) imageTriggerRef.value?.focus();
     };
 
-    onClickOutside(linkPopoverRef, () => {
-        closeLinkPopover(false);
+    useOutsidePointer(showLinkPopover, {
+        elements: () => [linkPopoverRef.value],
+        triggerEl: linkTriggerRef,
+        onClose: () => {
+            closeLinkPopover(false);
+        }
     });
 
-    onClickOutside(imagePopoverRef, () => {
-        closeImagePopover(false);
+    useOutsidePointer(showImagePopover, {
+        elements: () => [imagePopoverRef.value],
+        triggerEl: imageTriggerRef,
+        onClose: () => {
+            closeImagePopover(false);
+        }
     });
 
     const openLinkPopover = () => {

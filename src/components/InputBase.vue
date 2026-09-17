@@ -21,7 +21,7 @@
                 'in-line': props.inLine,
                 'is-inline': props.inLine,
                 'no-status': props.noStatus,
-                'no-message': ! show_message
+                'no-message': props.noMessage
             },
             props.class,
             attrs.class
@@ -88,7 +88,7 @@
         </div>
 
         <!-- INPUT MESSAGE -->
-        <div class="input-message" :class="{ 'is-truncated': props.truncateMessage }" :id="message_id" aria-live="polite" :role="isError ? 'alert' : undefined" v-if="show_message" >
+        <div class="input-message" :class="{ 'is-truncated': props.truncateMessage }" :id="message_id" aria-live="polite" :role="isError ? 'alert' : undefined" v-if="!props.noStatus && !props.noMessage" >
             <MaxIcon :icon="props.iconMessage" v-if="props.iconMessage && displayMessage" :size="0.85" :light="light" :dark="dark" class="message-icon" />
             <span class="message-text" :title="props.truncateMessage && displayMessage ? displayMessage : undefined" v-if="displayMessage" >{{ displayMessage }}</span>
         </div>
@@ -198,10 +198,6 @@
         errorMessageFallback?: string;
     }
 
-    const show_message = computed(() => {
-        return !props.noStatus && !props.noMessage && props.message !== undefined;
-    });
-
     const props = withDefaults(defineProps<Props>(), {
         value: '',
         textCenter: false,
@@ -213,7 +209,7 @@
         iconPos: 'left',
         inLine: false,
         noStatus: false,
-        noMessage: true,
+        noMessage: false,
         truncateMessage: false,
         errorMessageFallback: 'Valor inválido'
     });
@@ -239,13 +235,16 @@
         return '';
     });
 
+    const show_message = computed(() => {
+        return !props.noStatus && !props.noMessage && Boolean(displayMessage.value);
+    });
+
     const ariaDescribedby = computed(() => {
         const tokens: string[] = [];
         const external = (props.ariaDescribedby ?? attrs['aria-describedby']) as string | undefined;
         if (external && typeof external === 'string') for (const t of external.trim().split(/\s+/)) if (t && !tokens.includes(t)) tokens.push(t);
 
-
-        if (!props.noStatus && !props.noMessage && displayMessage.value) if (!tokens.includes(message_id.value)) tokens.push(message_id.value);
+        if (show_message.value) if (!tokens.includes(message_id.value)) tokens.push(message_id.value);
 
         return tokens.length > 0 ? tokens.join(' ') : undefined;
     });
@@ -372,7 +371,6 @@
     place-items: center;
     min-height: 55px;
     height: auto;
-
     width: 100%;
 
     :deep(input),
@@ -676,7 +674,7 @@
     }
 
     :deep(.value-div) {
-                width: 100%;
+        width: 100%;
     }
 
     &[input-click],
@@ -736,6 +734,7 @@
         :deep(.max-input-number),
         :deep(.value-div) {
             width: 100%;
+
             &:not(.max-input-otp-cell) {
                 outline: none !important;
                 border: none !important;
@@ -769,7 +768,7 @@
         height: 20px;
         min-height: 20px;
 
-        :deep(.tag-value-text){
+        :deep(.tag-value-text) {
             height: unset !important;
         }
 

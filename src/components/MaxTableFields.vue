@@ -352,7 +352,8 @@
                 top: 0;
                 z-index: 1;
                 max-height: 30px !important;
-                :deep(th){
+
+                :deep(th) {
                     min-height: 30px;
                     max-height: 30px !important;
                     height: 30px !important;

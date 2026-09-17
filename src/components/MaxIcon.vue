@@ -215,7 +215,7 @@
                     width: 14px;
                     background-color: var(--blue-750);
                     position: absolute;
-                    bottom: 0px;
+                    bottom: 0;
                     right: 0;
                 }
             }

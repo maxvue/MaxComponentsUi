@@ -792,7 +792,7 @@ describe('MaxTableFields.vue', () => {
             });
 
             const incInput = wrapper.findComponent('.table-field-increment-input');
-            expect(incInput.props('noMessage')).toBe(true);
+            expect((incInput as any).props('noMessage')).toBe(true);
 
             const textInput = wrapper.findComponent({ name: 'MaxInputText' });
             expect(textInput.props('noMessage')).toBe(true);
