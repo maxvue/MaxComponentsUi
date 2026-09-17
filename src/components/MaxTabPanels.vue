@@ -14,5 +14,9 @@
 <style lang="scss" scoped>
     .max-tab-panels {
         padding: 1rem 0;
+        flex: 1 1 0;
+        min-height: 0;
+        overflow-y: auto;
+        box-sizing: border-box;
     }
 </style>

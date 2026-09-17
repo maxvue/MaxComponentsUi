@@ -51,6 +51,29 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="component-block">
+                    <h3>Dimensões Máximas (maxWidth & maxHeight)</h3>
+                    <div class="states">
+                        <div class="state-col">
+                            <span>MaxModal (maxWidth: 420px, maxHeight: 300px)</span>
+                            <MaxModal
+                                title="Modal Compacto"
+                                sub-title="Limites explícitos com maxWidth e maxHeight"
+                                max-width="420px"
+                                max-height="300px"
+                            >
+                                <template #button>
+                                    <MaxButton label="Abrir Modal Compacto" />
+                                </template>
+                                <template #default>
+                                    <p>Este modal possui <code>maxWidth="420px"</code> e <code>maxHeight="300px"</code>.</p>
+                                    <p>Preserva a proteção de viewport em telas menores e rolagem vertical se o conteúdo for longo.</p>
+                                </template>
+                            </MaxModal>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

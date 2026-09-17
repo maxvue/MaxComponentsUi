@@ -119,7 +119,7 @@ export const PLAYGROUND_CATALOG: CatalogComponent[] = [
     { name: 'MaxDividers', family: 'layout', scenarioId: 'layout-dividers', description: 'Divisores horizontais e verticais com rótulo ou drill-down.' },
     { name: 'MaxEmptyDiv', family: 'layout', scenarioId: 'layout-grid', description: 'Espaçador flexível para ajuste de alinhamento em grids.' },
 
-    // Data (7)
+    // Data (8)
     { name: 'MaxTable', family: 'data', scenarioId: 'data-table', description: 'Tabela de dados avançada com ordenação, paginação e seleções.' },
     { name: 'MaxTableColumn', family: 'data', scenarioId: 'data-table', description: 'Definição de coluna estruturada para MaxTable.' },
     { name: 'MaxTableFields', family: 'data', scenarioId: 'data-table', description: 'Configurador e organizador visual de colunas visíveis.' },
@@ -127,6 +127,7 @@ export const PLAYGROUND_CATALOG: CatalogComponent[] = [
     { name: 'MaxChart', family: 'data', scenarioId: 'data-chart', description: 'Renderizador de gráficos analíticos e métricas visuais.' },
     { name: 'MaxStats', family: 'data', scenarioId: 'data-stats', description: 'Card de estatísticas e indicadores com ícone e variação percentual.' },
     { name: 'MaxPdfView', family: 'data', scenarioId: 'data-pdf', description: 'Visualizador integrado de documentos PDF com controles.' },
+    { name: 'MaxTimeline', family: 'data', scenarioId: 'data-table', description: 'Linha do tempo vertical ou horizontal para exibição de eventos sequenciais.' },
 
     // Overlays (8)
     { name: 'MaxModal', family: 'overlays', scenarioId: 'overlays-modal', description: 'Janela modal acessível com backdrop, foco controlado e fechar por Escape.' },

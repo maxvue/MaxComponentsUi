@@ -1,6 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { defineComponent } from 'vue';
 import { mount } from '@vue/test-utils';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 import MaxTabs from '../../src/components/MaxTabs.vue';
 import MaxTabItem from '../../src/components/MaxTabItem.vue';
 
@@ -172,4 +174,27 @@ describe('MaxTabItem — actionButton', () => {
         wrapper.unmount();
     });
 });
+
+describe('MaxTabItem — rolagem vertical interna', () => {
+    it('o container de conteúdo da aba ativa possui classe max-tab-item-content com suporte a rolagem interna', async () => {
+        const wrapper = mountTabs(`
+            <MaxTabItem value="a" title="Aba Longa">
+                <div style="height: 1200px">Conteúdo Extenso</div>
+            </MaxTabItem>
+        `);
+        await settle();
+        const content = wrapper.find('.max-tab-item-content');
+        expect(content.exists()).toBe(true);
+        expect(content.attributes('role')).toBe('tabpanel');
+        wrapper.unmount();
+    });
+
+    it('estilo de .max-tab-item-content define overflow-y: auto e não overflow: hidden', () => {
+        const sfc = readFileSync(resolve(__dirname, '../../src/components/MaxTabItem.vue'), 'utf-8');
+        const style = sfc.split('<style')[1] ?? '';
+        expect(style).toMatch(/\.max-tab-item-content\s*\{[^}]*overflow-y:\s*auto/);
+        expect(style).not.toMatch(/\.max-tab-item-content\s*\{[^}]*overflow:\s*hidden/);
+    });
+});
+
 

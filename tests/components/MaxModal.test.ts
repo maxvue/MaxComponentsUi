@@ -445,6 +445,49 @@ describe('MaxModal', () => {
             const modalNumber = wrapperNumber.find('.max-modal');
             expect(modalNumber.attributes('style')).toContain('padding: 16px');
         });
+
+        it('não injeta max-width nem max-height inline quando as props não forem informadas', async () => {
+            const wrapper = mountModal();
+            (wrapper.vm as any).open();
+            await wrapper.vm.$nextTick();
+
+            const modalEl = wrapper.find('.max-modal');
+            const style = modalEl.attributes('style') ?? '';
+            expect(style).not.toMatch(/max-width:/);
+            expect(style).not.toMatch(/max-height:/);
+        });
+
+        it('aplica max-width inline com min(...) quando a prop maxWidth for informada como string ou número', async () => {
+            const wrapperString = mountModal({ maxWidth: '500px' });
+            (wrapperString.vm as any).open();
+            await wrapperString.vm.$nextTick();
+
+            const modalString = wrapperString.find('.max-modal');
+            expect(modalString.attributes('style')).toContain('max-width: min(500px, calc(100vw - 40px))');
+
+            const wrapperNumber = mountModal({ maxWidth: 450 });
+            (wrapperNumber.vm as any).open();
+            await wrapperNumber.vm.$nextTick();
+
+            const modalNumber = wrapperNumber.find('.max-modal');
+            expect(modalNumber.attributes('style')).toContain('max-width: min(450px, calc(100vw - 40px))');
+        });
+
+        it('aplica max-height inline com min(...) quando a prop maxHeight for informada como string ou número', async () => {
+            const wrapperString = mountModal({ maxHeight: '600px' });
+            (wrapperString.vm as any).open();
+            await wrapperString.vm.$nextTick();
+
+            const modalString = wrapperString.find('.max-modal');
+            expect(modalString.attributes('style')).toContain('max-height: min(600px, calc(100vh - 40px))');
+
+            const wrapperNumber = mountModal({ maxHeight: 500 });
+            (wrapperNumber.vm as any).open();
+            await wrapperNumber.vm.$nextTick();
+
+            const modalNumber = wrapperNumber.find('.max-modal');
+            expect(modalNumber.attributes('style')).toContain('max-height: min(500px, calc(100vh - 40px))');
+        });
     });
 
     describe('Barras de rolagem invisíveis (0px de largura)', () => {
@@ -466,6 +509,58 @@ describe('MaxModal', () => {
             expect(compiledCss).toMatch(/\.max-modal\s+\*\s*\{[^}]*-ms-overflow-style:\s*none/);
             expect(compiledCss).toMatch(/\.max-modal\s+\*::-webkit-scrollbar\s*\{[^}]*width:\s*0/);
             expect(compiledCss).toMatch(/\.max-modal\s+\*::-webkit-scrollbar\s*\{[^}]*height:\s*0/);
+        });
+    });
+
+    describe('Rolagem vertical do conteúdo', () => {
+        it('declara overflow: hidden auto em .max-modal-content para suportar rolagem vertical com bloqueio horizontal', () => {
+            const sfc = readFileSync(resolve(__dirname, '../../src/components/MaxModal.vue'), 'utf-8');
+            const styleMatch = /<style[^>]*>([\s\S]*?)<\/style>/.exec(sfc);
+            expect(styleMatch).not.toBeNull();
+
+            const compiledCss = sass.compileString(styleMatch![1]).css;
+
+            expect(compiledCss).toMatch(/\.max-modal\s+\.max-modal-content\s*\{[^}]*overflow:\s*hidden\s+auto/);
+        });
+
+        it('renderiza o container de conteúdo .max-modal-content com capacidade de rolagem para múltiplos nós', async () => {
+            const wrapper = mountModal({}, {
+                content: '<div class="tall-content" style="height: 1000px;">Conteúdo longo</div>'
+            });
+            (wrapper.vm as any).open();
+            await wrapper.vm.$nextTick();
+
+            const contentEl = wrapper.find('.max-modal-content');
+            expect(contentEl.exists()).toBe(true);
+            expect(contentEl.find('.tall-content').exists()).toBe(true);
+        });
+
+        it('mantém container de conteúdo rolável quando height específica é fornecida', async () => {
+            const wrapper = mountModal({ height: 400 }, {
+                default: '<div class="tall-items" style="height: 800px;">Lista longa de itens</div>'
+            });
+            (wrapper.vm as any).open();
+            await wrapper.vm.$nextTick();
+
+            const modalEl = wrapper.find('.max-modal');
+            expect(modalEl.attributes('style')).toContain('height: 400px');
+            const contentEl = wrapper.find('.max-modal-content');
+            expect(contentEl.exists()).toBe(true);
+            expect(contentEl.find('.tall-items').exists()).toBe(true);
+        });
+
+        it('mantém container de conteúdo rolável quando noHeader é true', async () => {
+            const wrapper = mountModal({ noHeader: true }, {
+                default: '<div class="tall-no-header" style="height: 1200px;">Conteúdo sem header</div>'
+            });
+            (wrapper.vm as any).open();
+            await wrapper.vm.$nextTick();
+
+            const modalEl = wrapper.find('.max-modal');
+            expect(modalEl.find('.max-modal-header-wrapper').exists()).toBe(false);
+            const contentEl = wrapper.find('.max-modal-content');
+            expect(contentEl.exists()).toBe(true);
+            expect(contentEl.find('.tall-no-header').exists()).toBe(true);
         });
     });
 

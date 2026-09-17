@@ -1,6 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { ref } from 'vue';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 import MaxTabPanels from '../../src/components/MaxTabPanels.vue';
 import { TABS_INJECTION_KEY, type TabsContext } from '../../src/helpers/tabsContext';
 
@@ -46,4 +48,13 @@ describe('MaxTabPanels', () => {
         expect(wrapper.find('.max-tab-panels').exists()).toBe(true);
         expect(wrapper.find('.custom-panel').text()).toBe('Painel A');
     });
+
+    it('estilo de .max-tab-panels define flex: 1 1 0, min-height: 0 e overflow-y: auto para rolagem interna', () => {
+        const sfc = readFileSync(resolve(__dirname, '../../src/components/MaxTabPanels.vue'), 'utf-8');
+        const style = sfc.split('<style')[1] ?? '';
+        expect(style).toMatch(/\.max-tab-panels\s*\{[^}]*flex:\s*1\s+1\s+0/);
+        expect(style).toMatch(/\.max-tab-panels\s*\{[^}]*min-height:\s*0/);
+        expect(style).toMatch(/\.max-tab-panels\s*\{[^}]*overflow-y:\s*auto/);
+    });
 });
+
