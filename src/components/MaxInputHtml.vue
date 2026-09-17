@@ -307,13 +307,13 @@
                     attributes: {
                         textAlign: {
                             default: this.options.defaultAlignment,
-                            parseHTML: (element) => {
+                            parseHTML: (element: HTMLElement) => {
                                 if (element.classList.contains('ql-align-justify')) return 'justify';
                                 if (element.classList.contains('ql-align-center')) return 'center';
                                 if (element.classList.contains('ql-align-right')) return 'right';
                                 return element.style.textAlign || this.options.defaultAlignment;
                             },
-                            renderHTML: (attributes) => {
+                            renderHTML: (attributes: Record<string, any>) => {
                                 if (!attributes.textAlign || attributes.textAlign === this.options.defaultAlignment) return {};
                                 return {
                                     style: `text-align: ${attributes.textAlign}`

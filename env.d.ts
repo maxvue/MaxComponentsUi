@@ -11,3 +11,9 @@ declare module 'vitest/browser' {
     export const cdp: any;
     export const userEvent: any;
 }
+
+declare module '@tiptap/extension-text-align' {
+    import { Extension } from '@tiptap/core';
+    const TextAlign: Extension<any, any>;
+    export default TextAlign;
+}
