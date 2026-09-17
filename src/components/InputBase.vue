@@ -198,10 +198,6 @@
         errorMessageFallback?: string;
     }
 
-    const show_message = computed(() => {
-        return !props.noStatus && !props.noMessage && props.message !== undefined;
-    });
-
     const props = withDefaults(defineProps<Props>(), {
         value: '',
         textCenter: false,
@@ -213,7 +209,7 @@
         iconPos: 'left',
         inLine: false,
         noStatus: false,
-        noMessage: true,
+        noMessage: false,
         truncateMessage: false,
         errorMessageFallback: 'Valor inválido'
     });
@@ -239,13 +235,16 @@
         return '';
     });
 
+    const show_message = computed(() => {
+        return !props.noStatus && !props.noMessage && Boolean(displayMessage.value);
+    });
+
     const ariaDescribedby = computed(() => {
         const tokens: string[] = [];
         const external = (props.ariaDescribedby ?? attrs['aria-describedby']) as string | undefined;
         if (external && typeof external === 'string') for (const t of external.trim().split(/\s+/)) if (t && !tokens.includes(t)) tokens.push(t);
 
-
-        if (!props.noStatus && !props.noMessage && displayMessage.value) if (!tokens.includes(message_id.value)) tokens.push(message_id.value);
+        if (show_message.value) if (!tokens.includes(message_id.value)) tokens.push(message_id.value);
 
         return tokens.length > 0 ? tokens.join(' ') : undefined;
     });
