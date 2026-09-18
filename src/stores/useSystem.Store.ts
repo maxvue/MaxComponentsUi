@@ -135,6 +135,60 @@ export const useSystemStore = defineStore('system', () => {
         else finish();
     }
 
+    // INDICADOR DE SALVAMENTO (MAXPINIA)
+    /** Estado atual do salvamento: idle (apagado), success (verde 3s), error (vermelho 20s). */
+    const save_status: Ref<'idle' | 'success' | 'error'> = ref('idle');
+
+    /** Mensagem descritiva do status de salvamento para tooltip e acessibilidade. */
+    const save_message: Ref<string> = ref('');
+
+    let saveTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const clearSaveTimer = () => {
+        if (saveTimer !== null) {
+            clearTimeout(saveTimer);
+            saveTimer = null;
+        }
+    };
+
+    /** Limpa imediatamente o indicador de salvamento. */
+    function clearSaveStatus(): void {
+        clearSaveTimer();
+        save_status.value = 'idle';
+        save_message.value = '';
+    }
+
+    /**
+     * Notifica salvamento bem-sucedido de uma store.
+     * Se houver um erro ativo, ele não é mascarado (o erro tem prioridade).
+     */
+    function notifySaveSuccess(options?: { message?: string }): void {
+        if (save_status.value === 'error') return;
+
+        clearSaveTimer();
+        save_status.value = 'success';
+        save_message.value = options?.message || 'Salvo com sucesso';
+
+        saveTimer = setTimeout(() => {
+            clearSaveStatus();
+        }, 3000);
+    }
+
+    /**
+     * Notifica erro no salvamento de uma store.
+     * Erro tem prioridade e permanece ativo por 20 segundos.
+     * Se já estiver em erro, renova o timer de 20s.
+     */
+    function notifySaveError(options?: { message?: string }): void {
+        clearSaveTimer();
+        save_status.value = 'error';
+        save_message.value = options?.message || 'Erro ao salvar alterações';
+
+        saveTimer = setTimeout(() => {
+            clearSaveStatus();
+        }, 20000);
+    }
+
     return {
         user,
         loading,
@@ -157,6 +211,11 @@ export const useSystemStore = defineStore('system', () => {
         side_menu_open,
         top_menu_title,
         started,
-        reloadAll
+        reloadAll,
+        save_status,
+        save_message,
+        notifySaveSuccess,
+        notifySaveError,
+        clearSaveStatus
     };
 });

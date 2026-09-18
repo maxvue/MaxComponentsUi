@@ -237,6 +237,7 @@ export { clearMaxCache, registerMaxCacheKey, isMaxCacheKey, ICON_CACHE_KEY } fro
 export { useScrollLock, forceReset } from './helpers/useScrollLock';
 export type { ScrollLock } from './helpers/useScrollLock';
 export { useAsyncState } from './composables/useAsyncState';
+export { useMaxPiniaSaveTracker } from './composables/useMaxPiniaSaveTracker';
 
 
 import Tooltip from './directives/tooltip';

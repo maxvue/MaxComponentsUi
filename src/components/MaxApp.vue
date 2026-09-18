@@ -79,6 +79,7 @@
     import { useSystemStore } from '../stores/useSystem.Store';
     import { useUserStore } from '../stores/useUser.Store';
     import { useLoginStore } from '../stores/useLogin.Store';
+    import { useMaxPiniaSaveTracker } from '../composables/useMaxPiniaSaveTracker';
     import { configureMaxApp, getMaxAppConfig } from '../helpers/maxAppConfig';
     import type { BottomTab } from './MaxBottomMenu.vue';
     import type { MenuGroup } from './MaxSideMenuMobile.vue';
@@ -206,6 +207,8 @@
     const system = useSystemStore();
     const user = useUserStore();
     const login = useLoginStore();
+
+    useMaxPiniaSaveTracker();
 
     const slots = useSlots();
 

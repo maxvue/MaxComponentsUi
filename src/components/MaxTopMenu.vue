@@ -14,6 +14,16 @@
             </div>
 
             <div id="top_menu_mobile_center" class="top-menu-mobile-center">
+                <transition name="max-save-fade">
+                    <span
+                        v-if="system.save_status !== 'idle'"
+                        class="max-save-indicator is-mobile"
+                        :class="`is-${system.save_status}`"
+                        role="status"
+                        :aria-label="saveStatusLabel"
+                        v-tooltip.bottom="saveStatusLabel"
+                    />
+                </transition>
                 <slot name="mobile-center">
                     <span v-if="system.top_menu_title" class="mobile-header-title">{{ system.top_menu_title }}</span>
                     <slot v-else name="status"></slot>
@@ -56,6 +66,16 @@
         <!-- Estrutura Desktop: Fluxo Completo -->
         <div v-else class="top-menu-elementos" v-bind="attrs">
             <div class="icons-save-div">
+                <transition name="max-save-fade">
+                    <span
+                        v-if="system.save_status !== 'idle'"
+                        class="max-save-indicator"
+                        :class="`is-${system.save_status}`"
+                        role="status"
+                        :aria-label="saveStatusLabel"
+                        v-tooltip.bottom="saveStatusLabel"
+                    />
+                </transition>
                 <slot name="status"></slot>
             </div>
 
@@ -174,6 +194,15 @@
         }
     };
 
+    /** Rótulo textual descritivo para tooltip e acessibilidade (role="status"). */
+    const saveStatusLabel = computed<string>(() => {
+        if (system.save_message) return system.save_message;
+        if (system.save_status === 'success') return 'Salvo com sucesso';
+        if (system.save_status === 'error') return 'Erro ao salvar alterações';
+        return '';
+    });
+
+
 </script>
 
 <style lang="scss" scoped>
@@ -230,6 +259,7 @@
             min-width: 0;
             width: 100%;
             overflow: hidden;
+            gap: 6px;
 
             .mobile-header-title {
                 font-size: 0.95rem;
@@ -315,10 +345,11 @@
             }
 
             .icons-save-div {
-                display: grid;
+                display: flex;
+                align-items: center;
+                gap: 8px;
                 height: 100%;
                 padding-left: 20px;
-                place-items: center;
             }
 
             :deep(.tool-bar-plus),
@@ -333,6 +364,42 @@
             .top-menu-user-section {
                 margin-left: 20px;
             }
+        }
+
+        .max-save-indicator {
+            width: 10px;
+            height: 10px;
+            min-width: 10px;
+            min-height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+            cursor: default;
+
+            &.is-success {
+                background-color: var(--max-success-500, #10b981);
+                box-shadow: 0 0 6px rgb(16 185 129 / 45%);
+            }
+
+            &.is-error {
+                background-color: var(--max-danger-500, #ef4444);
+                box-shadow: 0 0 6px rgb(239 68 68 / 45%);
+            }
+
+            &.is-mobile {
+                margin-right: 2px;
+            }
+        }
+
+        .max-save-fade-enter-active,
+        .max-save-fade-leave-active {
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .max-save-fade-enter-from,
+        .max-save-fade-leave-to {
+            opacity: 0;
+            transform: scale(0.6);
         }
     }
 
