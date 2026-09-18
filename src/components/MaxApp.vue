@@ -317,7 +317,7 @@
 
 <style lang="scss" scoped>
 
-    :global(*, *::before,*::after ){
+    :global(*, *::before,*::after ) {
         scrollbar-width: none;
         -ms-overflow-style: none;
     }
