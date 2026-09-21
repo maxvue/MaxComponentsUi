@@ -1,5 +1,5 @@
 <template>
-    <div class="max-popover-menu" ref="btn_el" v-tooltip="null" :style="{ width: size_icon, height: size_icon }">
+    <div class="max-popover-menu" ref="btn_el" :style="{ width: size_icon, height: size_icon }">
         <slot
             v-if="$slots.trigger || $slots.button"
             :name="$slots.trigger ? 'trigger' : 'button'"
@@ -17,7 +17,6 @@
             :aria-controls="menuId"
             :aria-label="props.ariaLabel || props.label || 'Menu de opções'"
             :style="{ width: size_icon, height: size_icon }"
-            v-tooltip="null"
             @click.stop="toggle"
             @keydown.enter.prevent="toggle"
             @keydown.space.prevent="toggle"

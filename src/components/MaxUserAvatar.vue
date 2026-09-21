@@ -174,15 +174,17 @@
     const triggerConfirm = (target?: HTMLElement) => {
         if (props.noClick || !props.remove) return;
         const rect = target?.getBoundingClientRect ? target.getBoundingClientRect() : { x: 0, y: 0, height: 0, width: 0 };
-        confirm_store.x = rect?.x ?? 0;
-        confirm_store.y = rect?.y ?? 0;
-        confirm_store.height = rect?.height ?? 0;
-        confirm_store.width = rect?.width ?? 0;
-        confirm_store.message = props.labelRemove ?? 'Remover responsável?';
-        confirm_store.messageIcon = 'mingcute:user-remove-fill';
-        confirm_store.rejectProps = { label: 'Voltar', icon: 'weui:back-filled', action: () => {} };
-        confirm_store.acceptProps = { label: 'Remover', icon: 'trash', action: () => emit('remove') };
-        confirm_store.show = true;
+        confirm_store.confirm({
+            message: props.labelRemove ?? 'Remover responsável?',
+            messageIcon: 'mingcute:user-remove-fill',
+            rejectProps: { label: 'Voltar', icon: 'weui:back-filled', action: () => {} },
+            acceptProps: { label: 'Remover', icon: 'trash', action: () => emit('remove') },
+            x: rect?.x ?? 0,
+            y: rect?.y ?? 0,
+            width: rect?.width ?? 0,
+            height: rect?.height ?? 0,
+            target: target ?? null
+        });
     };
 
     const onAvatarClick = (event: MouseEvent) => {
