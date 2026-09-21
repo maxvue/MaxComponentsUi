@@ -168,4 +168,139 @@ describe('MaxStats Component', () => {
             }).not.toThrow();
         });
     });
+
+    describe('Prefix e Suffix', () => {
+        it('renderiza prefixo e sufixo no modo cards', () => {
+            const wrapper = mountStats({
+                layout: 'cards',
+                items: [
+                    {
+                        label: 'Faturamento',
+                        value: '1.250',
+                        prefix: 'R$',
+                        suffix: 'mil',
+                        icon: 'mdi:cash',
+                        color: '#10b981'
+                    }
+                ]
+            });
+
+            const card = wrapper.find('.max-stat-card');
+            expect(card.find('.max-stat-prefix').exists()).toBe(true);
+            expect(card.find('.max-stat-prefix').text()).toBe('R$');
+            expect(card.find('.max-stat-value').text()).toBe('1.250');
+            expect(card.find('.max-stat-suffix').exists()).toBe(true);
+            expect(card.find('.max-stat-suffix').text()).toBe('mil');
+        });
+
+        it('renderiza sufixo com alias sufix no modo cards', () => {
+            const wrapper = mountStats({
+                layout: 'cards',
+                items: [
+                    {
+                        label: 'Conversão',
+                        value: 85,
+                        sufix: '%',
+                        icon: 'mdi:percent',
+                        color: '#3b82f6'
+                    }
+                ]
+            });
+
+            const card = wrapper.find('.max-stat-card');
+            expect(card.find('.max-stat-prefix').exists()).toBe(false);
+            expect(card.find('.max-stat-suffix').exists()).toBe(true);
+            expect(card.find('.max-stat-suffix').text()).toBe('%');
+        });
+
+        it('renderiza prefixo e sufixo no modo pills', () => {
+            const wrapper = mountStats({
+                layout: 'pills',
+                items: [
+                    {
+                        label: 'Temperatura',
+                        value: 36.5,
+                        prefix: '+',
+                        suffix: '°C',
+                        icon: 'mdi:thermometer',
+                        color: '#f59e0b'
+                    }
+                ]
+            });
+
+            const pill = wrapper.find('.max-stat-pill');
+            expect(pill.find('.max-stat-pill-prefix').exists()).toBe(true);
+            expect(pill.find('.max-stat-pill-prefix').text()).toBe('+');
+            expect(pill.find('.max-stat-pill-value').text()).toBe('36.5');
+            expect(pill.find('.max-stat-pill-suffix').exists()).toBe(true);
+            expect(pill.find('.max-stat-pill-suffix').text()).toBe('°C');
+        });
+
+        it('permite customização rica via slots #prefix e #suffix', () => {
+            const wrapper = mount(MaxStats, {
+                props: {
+                    layout: 'cards',
+                    items: [
+                        {
+                            label: 'Meta',
+                            value: 100,
+                            icon: 'mdi:flag',
+                            color: '#06b6d4'
+                        }
+                    ]
+                },
+                slots: {
+                    prefix: '<span class="custom-prefix">Pre-</span>',
+                    suffix: '<span class="custom-suffix">-Pos</span>'
+                }
+            });
+
+            expect(wrapper.find('.custom-prefix').exists()).toBe(true);
+            expect(wrapper.find('.custom-prefix').text()).toBe('Pre-');
+            expect(wrapper.find('.custom-suffix').exists()).toBe(true);
+            expect(wrapper.find('.custom-suffix').text()).toBe('-Pos');
+        });
+
+        it('permite customização rica via slots no modo pills com escopo item e index', () => {
+            const wrapper = mount(MaxStats, {
+                props: {
+                    layout: 'pills',
+                    items: [
+                        {
+                            label: 'Taxa',
+                            value: 12,
+                            icon: 'mdi:percent',
+                            color: '#10b981'
+                        }
+                    ]
+                },
+                slots: {
+                    prefix: (scope: any) => `[#${scope.index}:${scope.item.label}]`,
+                    suffix: '% a.m.'
+                }
+            });
+
+            expect(wrapper.find('.max-stat-pill-prefix').text()).toBe('[#0:Taxa]');
+            expect(wrapper.find('.max-stat-pill-suffix').text()).toBe('% a.m.');
+        });
+
+        it('não renderiza elementos de prefix ou suffix quando não definidos', () => {
+            const wrapper = mountStats({
+                layout: 'cards',
+                items: [
+                    {
+                        label: 'Simples',
+                        value: 10,
+                        icon: 'mdi:check',
+                        color: '#10b981'
+                    }
+                ]
+            });
+
+            const card = wrapper.find('.max-stat-card');
+            expect(card.find('.max-stat-prefix').exists()).toBe(false);
+            expect(card.find('.max-stat-suffix').exists()).toBe(false);
+        });
+    });
 });
+

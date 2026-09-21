@@ -18,9 +18,25 @@
                         {{ item.label }}
                     </span>
 
-                    <span class="max-stat-value">
-                        {{ item.value }}
-                    </span>
+                    <div class="max-stat-value-wrapper">
+                        <span
+                            v-if="$slots.prefix || getItemPrefix(item) !== undefined"
+                            class="max-stat-prefix"
+                        >
+                            <slot name="prefix" :item="item" :index="index">{{ getItemPrefix(item) }}</slot>
+                        </span>
+
+                        <span class="max-stat-value">
+                            {{ item.value }}
+                        </span>
+
+                        <span
+                            v-if="$slots.suffix || getItemSuffix(item) !== undefined"
+                            class="max-stat-suffix"
+                        >
+                            <slot name="suffix" :item="item" :index="index">{{ getItemSuffix(item) }}</slot>
+                        </span>
+                    </div>
 
                     <span v-if="item.sublabel" class="max-stat-sublabel">
                         {{ item.sublabel }}
@@ -52,9 +68,25 @@
                     />
                 </div>
 
-                <span class="max-stat-pill-value">
-                    {{ item.value }}
-                </span>
+                <div class="max-stat-pill-value-wrapper">
+                    <span
+                        v-if="$slots.prefix || getItemPrefix(item) !== undefined"
+                        class="max-stat-pill-prefix"
+                    >
+                        <slot name="prefix" :item="item" :index="index">{{ getItemPrefix(item) }}</slot>
+                    </span>
+
+                    <span class="max-stat-pill-value">
+                        {{ item.value }}
+                    </span>
+
+                    <span
+                        v-if="$slots.suffix || getItemSuffix(item) !== undefined"
+                        class="max-stat-pill-suffix"
+                    >
+                        <slot name="suffix" :item="item" :index="index">{{ getItemSuffix(item) }}</slot>
+                    </span>
+                </div>
             </div>
         </template>
     </div>
@@ -84,6 +116,12 @@
         color: string;
         /** Valor em destaque exibido no card ou pílula */
         value: string | number;
+        /** Prefixo exibido na parte superior esquerda do número (ex: 'R$', '+') */
+        prefix?: string | number;
+        /** Sufixo exibido na parte superior direita do número (ex: '%', 'un', 'km') */
+        suffix?: string | number;
+        /** Alias alternativo para suffix */
+        sufix?: string | number;
     }
 
     export interface MaxStatsProps {
@@ -103,6 +141,13 @@
          */
         layout?: 'auto' | 'cards' | 'pills';
     }
+
+    defineSlots<{
+        /** Slot customizado para prefixo do valor */
+        prefix?: (props: { item: MaxStatsItem; index: number }) => any;
+        /** Slot customizado para sufixo do valor */
+        suffix?: (props: { item: MaxStatsItem; index: number }) => any;
+    }>();
 
     const attrs: any = useAttrs();
 
@@ -132,6 +177,16 @@
         if (props.layout === 'pills') return 'pills';
         return isMobile.value ? 'pills' : 'cards';
     });
+
+    /** Retorna o prefixo do item caso definido */
+    const getItemPrefix = (item: MaxStatsItem): string | number | undefined => {
+        return item?.prefix;
+    };
+
+    /** Retorna o sufixo do item considerando 'suffix' e o alias 'sufix' */
+    const getItemSuffix = (item: MaxStatsItem): string | number | undefined => {
+        return item?.suffix ?? item?.sufix;
+    };
 
     /** Retorna a paleta de cores calculada por luminância WCAG */
     const getItemColors = (item: MaxStatsItem): StatItemColors => {
@@ -227,16 +282,33 @@
                     text-overflow: ellipsis;
                 }
 
-                .max-stat-value {
-                    font-size: 1.875rem;
-                    font-weight: 800;
-                    line-height: 1.1;
+                .max-stat-value-wrapper {
+                    display: inline-flex;
+                    align-items: flex-start;
+                    gap: 0.125rem;
                     margin-top: 0.25rem;
                     margin-bottom: 0.25rem;
-                    color: var(--stat-accent);
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
+                    min-width: 0;
+
+                    .max-stat-prefix,
+                    .max-stat-suffix {
+                        font-size: 0.875rem;
+                        font-weight: 600;
+                        line-height: 1.2;
+                        color: var(--stat-accent);
+                        align-self: flex-start;
+                        margin-top: 0.15rem;
+                    }
+
+                    .max-stat-value {
+                        font-size: 1.875rem;
+                        font-weight: 800;
+                        line-height: 1.1;
+                        color: var(--stat-accent);
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
                 }
 
                 .max-stat-sublabel {
@@ -290,12 +362,28 @@
                 flex-shrink: 0;
             }
 
-            .max-stat-pill-value {
-                font-size: 0.9375rem;
-                font-weight: 800;
-                line-height: 1;
+            .max-stat-pill-value-wrapper {
+                display: inline-flex;
+                align-items: flex-start;
+                gap: 0.1rem;
                 margin-left: 0.625rem;
-                color: var(--stat-accent);
+
+                .max-stat-pill-prefix,
+                .max-stat-pill-suffix {
+                    font-size: 0.625rem;
+                    font-weight: 600;
+                    line-height: 1;
+                    color: var(--stat-accent);
+                    align-self: flex-start;
+                    margin-top: 0.05rem;
+                }
+
+                .max-stat-pill-value {
+                    font-size: 0.9375rem;
+                    font-weight: 800;
+                    line-height: 1;
+                    color: var(--stat-accent);
+                }
             }
         }
     }
