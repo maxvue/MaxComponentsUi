@@ -110,6 +110,8 @@ export { default as MaxInputFileUpload } from './components/MaxInputFileUpload.v
 export { default as MaxInputFileUploadBig } from './components/MaxInputFileUploadBig.vue';
 export { default as MaxInputFileUploadButton } from './components/MaxInputFileUploadButton.vue';
 export { default as MaxInputNumber } from './components/MaxInputNumber.vue';
+export { default as MaxInputMoney } from './components/MaxInputMoney.vue';
+export { default as InputMoney } from './components/MaxInputMoney.vue';
 export { default as MaxInputOTP } from './components/MaxInputOTP.vue';
 export { default as MaxInputOtp } from './components/MaxInputOTP.vue';
 export { default as InputOTP } from './components/MaxInputOTP.vue';
