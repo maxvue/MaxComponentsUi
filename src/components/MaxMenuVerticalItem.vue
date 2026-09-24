@@ -3,7 +3,7 @@
         v-for="(item, index) in props.items"
         :key="item.id ?? index"
         v-tooltip.right="item.details.tooltip"
-        :class="`max-menu-vertical-item item_menu ${isActive(item) ? 'active' : ''} ${hasSubItems(item) ? 'has-subitems' : ''}`"
+        :class="`max-menu-vertical-item item_menu ${isActive(item) ? 'active' : ''} ${isFlyoutActive(item) ? 'flyout-active' : ''} ${hasSubItems(item) ? 'has-subitems' : ''}`"
         :page_component="item.details.page_component"
         role="link"
         tabindex="0"
@@ -19,8 +19,8 @@
             :icon="item.details.icon"
             :i="item.details.icon"
             size="1.5"
-            :light="!isActive(item)"
-            :color="isActive(item) ? 'var(--blue-750)' : undefined"
+            :light="isFlyoutActive(item) ? true : !isActive(item)"
+            :color="isFlyoutActive(item) ? 'var(--layout-shell-text, #ffffff)' : (isActive(item) ? 'var(--blue-750)' : undefined)"
             aria-hidden="true"
             tabindex="-1"
             class="max-menu-vertical-item-icon"
@@ -80,9 +80,11 @@
 
     /** Verifica se o flyout para este item específico está aberto. */
     const isFlyoutActive = (item: SideMenuItem): boolean => {
-        if (!props.activeFlyoutId) return false;
+        const activeSubmenu = system.active_side_submenu;
+        const activeId = props.activeFlyoutId || (activeSubmenu ? (activeSubmenu.id || activeSubmenu.details?.page_component || activeSubmenu.details?.route) : null);
+        if (!activeId) return false;
         const id = item.id || item.details?.page_component || item.details?.route;
-        return id === props.activeFlyoutId;
+        return id === activeId;
     };
 
     /** Marca o item cujo componente de página ou rotas filhas correspondem à rota atual. */
@@ -161,6 +163,7 @@
 
             .item-text {
                 display: none;
+                color: var(--layout-shell-text, #fff);
             }
         }
 
@@ -185,6 +188,10 @@
         &.active {
             position: relative;
 
+            a {
+                color: var(--layout-shell-text, #fff);
+            }
+
             :deep(.max-icon-div),
             :deep(.max-icon) {
                 z-index: 1;
@@ -196,10 +203,10 @@
                 }
 
                 &:hover {
-                    color: var(--blue-0) !important;
+                    color: var(--blue-0, #fff) !important;
 
                     svg {
-                        color: var(--blue-0) !important;
+                        color: var(--blue-0, #fff) !important;
                     }
                 }
             }
@@ -207,20 +214,20 @@
             .curva {
                 display: block;
                 position: absolute;
-                fill: var(--blue-800);
+                fill: var(--layout-content-frame-bg, #004860);
 
                 &.cima {
                     top: -20px;
                     right: 0;
                     transform: rotate(180deg);
-                    fill: var(--blue-800);
+                    fill: var(--layout-content-frame-bg, #004860);
                 }
 
                 &.baixo {
                     right: 0;
                     bottom: -20px;
                     transform: rotate(90deg);
-                    fill: var(--blue-800);
+                    fill: var(--layout-content-frame-bg, #004860);
                 }
 
                 &.baixo2 {
@@ -236,8 +243,42 @@
                 width: calc(100% - 5px);
                 height: 100%;
                 border-radius: 10px 0 0 10px;
-                background-color: var(--blue-800);
+                background-color: var(--layout-content-frame-bg, #004860);
                 z-index: 0;
+            }
+        }
+
+        &.flyout-active {
+            a {
+                color: var(--layout-shell-text, #fff) !important;
+            }
+
+            .item-text {
+                color: var(--layout-shell-text, #fff) !important;
+            }
+
+            :deep(.max-icon-div),
+            :deep(.max-icon) {
+                z-index: 1;
+                color: var(--layout-shell-text, #fff) !important;
+
+                svg {
+                    color: var(--layout-shell-text, #fff) !important;
+                    fill: currentcolor;
+                }
+
+                &:hover {
+                    color: var(--blue-0, #fff) !important;
+
+                    svg {
+                        color: var(--blue-0, #fff) !important;
+                    }
+                }
+            }
+
+            .subitem-indicator {
+                background-color: var(--blue-0, #fff);
+                opacity: 1;
             }
         }
 

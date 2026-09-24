@@ -54,24 +54,26 @@ describe('MaxSideMenuFlyout', () => {
         expect(wrapper.find('.max-side-menu-flyout-backdrop').exists()).toBe(false);
     });
 
-    it('renderiza backdrop, cabeçalho e opções quando visible é true', () => {
+    it('renderiza o painel panel0, cabeçalho e opções sem backdrop por padrão quando visible é true', () => {
         const wrapper = mount(MaxSideMenuFlyout, {
             props: { visible: true, item: mockItem },
             global: { stubs: { MaxIcon: true } }
         });
 
-        expect(wrapper.find('.max-side-menu-flyout-backdrop').exists()).toBe(true);
+        expect(wrapper.find('.max-side-menu-flyout-backdrop').exists()).toBe(false);
         expect(wrapper.find('.max-side-menu-flyout').exists()).toBe(true);
+        expect(wrapper.find('.max-side-menu-flyout').classes()).toContain('panel0');
         expect(wrapper.find('.flyout-title').text()).toBe('Clientes');
         expect(wrapper.findAll('.flyout-item')).toHaveLength(3); // 1 visão geral + 2 subitens
     });
 
-    it('emite close ao clicar no backdrop', async () => {
+    it('renderiza backdrop e emite close ao clicar nele quando backdrop é true', async () => {
         const wrapper = mount(MaxSideMenuFlyout, {
-            props: { visible: true, item: mockItem },
+            props: { visible: true, item: mockItem, backdrop: true },
             global: { stubs: { MaxIcon: true } }
         });
 
+        expect(wrapper.find('.max-side-menu-flyout-backdrop').exists()).toBe(true);
         await wrapper.find('.max-side-menu-flyout-backdrop').trigger('click');
         expect(wrapper.emitted('close')).toHaveLength(1);
     });
@@ -83,6 +85,16 @@ describe('MaxSideMenuFlyout', () => {
         });
 
         await wrapper.find('.flyout-close-btn').trigger('click');
+        expect(wrapper.emitted('close')).toHaveLength(1);
+    });
+
+    it('emite close ao pressionar a tecla Escape', async () => {
+        const wrapper = mount(MaxSideMenuFlyout, {
+            props: { visible: true, item: mockItem },
+            global: { stubs: { MaxIcon: true } }
+        });
+
+        await wrapper.find('.max-side-menu-flyout').trigger('keydown.esc');
         expect(wrapper.emitted('close')).toHaveLength(1);
     });
 
@@ -111,5 +123,13 @@ describe('MaxSideMenuFlyout', () => {
         const items = wrapper.findAll('.flyout-item');
         expect(items[1].classes()).toContain('active');
         expect(items[0].classes()).not.toContain('active');
+    });
+
+    it('utiliza background-color var(--layout-content-frame-bg, #004860)', async () => {
+        const fs = await import('node:fs');
+        const path = await import('node:path');
+        const sfc = fs.readFileSync(path.resolve(__dirname, '../../src/components/MaxSideMenuFlyout.vue'), 'utf-8');
+
+        expect(sfc).toMatch(/background-color:\s*var\(--layout-content-frame-bg/);
     });
 });

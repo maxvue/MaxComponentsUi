@@ -1,6 +1,6 @@
 <template>
     <div
-        v-if="props.visible"
+        v-if="props.visible && props.backdrop"
         class="max-side-menu-flyout-backdrop"
         tabindex="-1"
         aria-hidden="true"
@@ -11,7 +11,7 @@
         <aside
             v-if="props.visible && props.item"
             ref="flyoutRef"
-            class="max-side-menu-flyout"
+            class="max-side-menu-flyout panel0"
             role="dialog"
             aria-modal="true"
             :aria-label="title"
@@ -104,14 +104,18 @@
     import { isMenuRouteActive } from '../helpers/menuRouteMatches';
     import type { SideMenuItem, SideMenuSubItem } from '../types/app';
 
-    const props = defineProps<{
+    const props = withDefaults(defineProps<{
         /** Controla a visibilidade do painel. */
         visible: boolean;
         /** Item pai selecionado na barra principal. */
         item: SideMenuItem | null;
         /** Rota atual para marcação do item ativo. */
         currentRoute?: string;
-    }>();
+        /** Exibe backdrop escuro de tela cheia (opcional, padrão false para layout panel0). */
+        backdrop?: boolean;
+    }>(), {
+        backdrop: false
+    });
 
     const emit = defineEmits<{
         close: [];
@@ -196,20 +200,20 @@
     }
 
     .max-side-menu-flyout {
-        position: fixed;
-        top: 0;
-        left: 55px;
-        z-index: 35;
+        position: relative;
+        z-index: 5;
         display: flex;
         flex-direction: column;
-        width: 250px;
-        height: 100vh;
-        height: 100dvh;
-        background-color: var(--layout-shell-bg, #003048);
-        border-right: 1px solid var(--layout-border, #004860);
-        box-shadow: 6px 0 20px rgb(0 0 0 / 25%);
+        width: 240px;
+        min-width: 240px;
+        max-width: 240px;
+        height: 100%;
+        max-height: 100%;
+        background-color: var(--layout-content-frame-bg, #004860);
+        border-radius: 8px;
         box-sizing: border-box;
         outline: none;
+        overflow: hidden;
 
         .flyout-header {
             display: flex;
@@ -289,14 +293,14 @@
                 min-height: 38px;
                 padding: 0.45rem 0.75rem;
                 border-radius: 6px;
-                color: var(--layout-shell-text-muted, rgb(255 255 255 / 85%));
+                color: var(--layout-shell-text, #fff);
                 cursor: pointer;
                 text-decoration: none;
                 transition: background-color 0.15s ease, color 0.15s ease;
 
                 .flyout-item-icon {
                     flex-shrink: 0;
-                    color: rgb(255 255 255 / 75%);
+                    color: var(--layout-shell-text, #fff);
                 }
 
                 .flyout-item-label {

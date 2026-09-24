@@ -25,6 +25,7 @@ vi.mock('@maxvue/max-use', async (importOriginal) => ({
 }));
 
 import MaxSideMenu from '../../src/components/MaxSideMenu.vue';
+import { useSystemStore } from '../../src/stores/useSystem.Store';
 
 let pinia: Pinia;
 
@@ -77,100 +78,66 @@ describe('MaxSideMenu com subitems (Modo Desktop)', () => {
         ]
     };
 
-    it('abre o flyout lateral sobreposto ao clicar em um item com subitems', async () => {
+    it('aciona a abertura do submenu na store ao clicar em um item com subitems', async () => {
         menusRef.value = menuWithSubitems;
         const wrapper = mountWithPinia(MaxSideMenu, { props: { screen: 'desktop' } });
+        const system = useSystemStore();
 
-        // Inicialmente o flyout não é visível
-        expect(wrapper.find('.max-side-menu-flyout').exists()).toBe(false);
+        expect(system.active_side_submenu).toBeNull();
 
         // Clica no primeiro item (que tem subitems)
         const verticalItems = wrapper.findAll('.max-menu-vertical-item');
         await verticalItems[0].trigger('click');
 
-        // Agora o flyout está renderizado e visível
-        const flyout = wrapper.find('.max-side-menu-flyout');
-        expect(flyout.exists()).toBe(true);
-        expect(flyout.text()).toContain('Projetos');
-        expect(flyout.text()).toContain('Propostas');
-        expect(flyout.text()).toContain('Contratos');
+        // Agora o submenu na store está preenchido
+        expect(system.active_side_submenu).not.toBeNull();
+        expect(system.active_side_submenu?.details?.title).toBe('Projetos');
+        expect(verticalItems[0].classes()).toContain('active');
     });
 
-    it('exibe a opção de Visão Geral quando o item pai possui rota cadastrada', async () => {
+    it('alterna (toggle) fechando o submenu ao clicar novamente no mesmo item pai', async () => {
         menusRef.value = menuWithSubitems;
         const wrapper = mountWithPinia(MaxSideMenu, { props: { screen: 'desktop' } });
-
-        const verticalItems = wrapper.findAll('.max-menu-vertical-item');
-        await verticalItems[0].trigger('click');
-
-        const flyout = wrapper.find('.max-side-menu-flyout');
-        expect(flyout.find('.parent-overview').exists()).toBe(true);
-        expect(flyout.find('.parent-overview').text()).toContain('Projetos (Visão Geral)');
-    });
-
-    it('alterna (toggle) fechando o flyout ao clicar novamente no mesmo item pai', async () => {
-        menusRef.value = menuWithSubitems;
-        const wrapper = mountWithPinia(MaxSideMenu, { props: { screen: 'desktop' } });
+        const system = useSystemStore();
 
         const verticalItems = wrapper.findAll('.max-menu-vertical-item');
 
         // Abre
         await verticalItems[0].trigger('click');
-        expect(wrapper.find('.max-side-menu-flyout').exists()).toBe(true);
+        expect(system.active_side_submenu).not.toBeNull();
+        expect(verticalItems[0].classes()).toContain('active');
 
         // Fecha ao clicar de novo
         await verticalItems[0].trigger('click');
-        expect(wrapper.find('.max-side-menu-flyout').exists()).toBe(false);
+        expect(system.active_side_submenu).toBeNull();
     });
 
-    it('fecha o flyout ao clicar no botão fechar (X)', async () => {
+    it('fecha o submenu na store ao clicar na logo', async () => {
         menusRef.value = menuWithSubitems;
         const wrapper = mountWithPinia(MaxSideMenu, { props: { screen: 'desktop' } });
+        const system = useSystemStore();
 
         await wrapper.findAll('.max-menu-vertical-item')[0].trigger('click');
-        expect(wrapper.find('.max-side-menu-flyout').exists()).toBe(true);
+        expect(system.active_side_submenu).not.toBeNull();
 
-        const closeBtn = wrapper.find('.flyout-close-btn');
-        await closeBtn.trigger('click');
+        const logo = wrapper.find('.space-logo');
+        await logo.trigger('click');
 
-        expect(wrapper.find('.max-side-menu-flyout').exists()).toBe(false);
+        expect(system.active_side_submenu).toBeNull();
     });
 
-    it('fecha o flyout ao clicar no backdrop', async () => {
+    it('fecha o submenu na store ao alterar a rota atual', async () => {
         menusRef.value = menuWithSubitems;
         const wrapper = mountWithPinia(MaxSideMenu, { props: { screen: 'desktop' } });
+        const system = useSystemStore();
 
         await wrapper.findAll('.max-menu-vertical-item')[0].trigger('click');
-        expect(wrapper.find('.max-side-menu-flyout-backdrop').exists()).toBe(true);
+        expect(system.active_side_submenu).not.toBeNull();
 
-        await wrapper.find('.max-side-menu-flyout-backdrop').trigger('click');
-        expect(wrapper.find('.max-side-menu-flyout').exists()).toBe(false);
-    });
+        route.path = '/nova-rota';
+        await wrapper.vm.$nextTick();
 
-    it('fecha o flyout ao pressionar a tecla Escape', async () => {
-        menusRef.value = menuWithSubitems;
-        const wrapper = mountWithPinia(MaxSideMenu, { props: { screen: 'desktop' } });
-
-        await wrapper.findAll('.max-menu-vertical-item')[0].trigger('click');
-        const flyout = wrapper.find('.max-side-menu-flyout');
-        expect(flyout.exists()).toBe(true);
-
-        await flyout.trigger('keydown.esc');
-        expect(wrapper.find('.max-side-menu-flyout').exists()).toBe(false);
-    });
-
-    it('navega e fecha o flyout ao clicar em um subitem', async () => {
-        menusRef.value = menuWithSubitems;
-        const wrapper = mountWithPinia(MaxSideMenu, { props: { screen: 'desktop' } });
-
-        await wrapper.findAll('.max-menu-vertical-item')[0].trigger('click');
-        const flyoutItems = wrapper.findAll('.flyout-item');
-
-        // Subitem 1: Propostas (índice 1 pois índice 0 é Visão Geral)
-        await flyoutItems[1].trigger('click');
-
-        expect(mockGoToRoute).toHaveBeenCalledWith('proposals_list');
-        expect(wrapper.find('.max-side-menu-flyout').exists()).toBe(false);
+        expect(system.active_side_submenu).toBeNull();
     });
 
     it('mantém o item pai ativo visualmente quando a rota atual é um dos subitens', async () => {
@@ -196,13 +163,12 @@ describe('MaxSideMenu com subitems (Modo Desktop)', () => {
         const wrapper = mountWithPinia(MaxSideMenu, {
             props: { screen: 'desktop', items: customItems }
         });
+        const system = useSystemStore();
 
         const verticalItems = wrapper.findAll('.max-menu-vertical-item');
         expect(verticalItems).toHaveLength(1);
 
         await verticalItems[0].trigger('click');
-        const flyout = wrapper.find('.max-side-menu-flyout');
-        expect(flyout.exists()).toBe(true);
-        expect(flyout.text()).toContain('Sub Módulo');
+        expect(system.active_side_submenu?.details?.title).toBe('Módulos');
     });
 });

@@ -138,4 +138,40 @@ describe('MaxMenuVerticalItem com subitems', () => {
         const items = wrapper.findAll('.max-menu-vertical-item');
         expect(items[0].classes()).toContain('active');
     });
+
+    it('marca o item como active quando o submenu está aberto na store useSystemStore', async () => {
+        const { useSystemStore } = await import('../../src/stores/useSystem.Store');
+        const system = useSystemStore();
+
+        const wrapper = mount(MaxMenuVerticalItem, {
+            props: { items: mockItems },
+            global: {
+                plugins: [pinia],
+                directives: { tooltip: () => {} },
+                stubs: { MaxIcon: true }
+            }
+        });
+
+        const items = wrapper.findAll('.max-menu-vertical-item');
+        expect(items[0].classes()).not.toContain('active');
+
+        system.openSideSubmenu(mockItems[0]);
+        await wrapper.vm.$nextTick();
+
+        expect(items[0].classes()).toContain('active');
+    });
+
+    it('aplica cores claras e vincula a curva a --layout-content-frame-bg', async () => {
+        const fs = await import('node:fs');
+        const path = await import('node:path');
+        const sfc = fs.readFileSync(path.resolve(__dirname, '../../src/components/MaxMenuVerticalItem.vue'), 'utf-8');
+
+        // Curvas e fundo da aba usam --layout-content-frame-bg
+        expect(sfc).toContain('var(--layout-content-frame-bg');
+        expect(sfc).not.toContain('var(--blue-800)');
+
+        // Ícone com flyout/submenu aberto usa layout-shell-text (claro)
+        expect(sfc).toContain('var(--layout-shell-text');
+        expect(sfc).toMatch(/&.flyout-active\s*\{[\s\S]*color:\s*var\(--layout-shell-text,\s*#fff\)\s*!important/);
+    });
 });

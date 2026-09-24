@@ -29,24 +29,15 @@
                 </div>
             </div>
         </div>
-
-        <!-- Submenu lateral sobreposto em Desktop -->
-        <MaxSideMenuFlyout
-            v-if="!isMobile"
-            :visible="isFlyoutOpen"
-            :item="activeFlyoutItem"
-            @close="closeFlyout"
-        />
     </div>
 </template>
 
 <script setup lang="ts">
-    import { computed, ref, watch, useAttrs } from 'vue';
+    import { computed, watch, useAttrs } from 'vue';
     import { useRouter, useRoute } from 'vue-router';
     import { getRoute } from '@maxvue/max-use';
     import MaxLogo from './MaxLogo.vue';
     import MaxMenuVerticalItem from './MaxMenuVerticalItem.vue';
-    import MaxSideMenuFlyout from './MaxSideMenuFlyout.vue';
     import { useSystemStore } from '../stores/useSystem.Store';
     import { useSearchBarStore } from '../stores/useSearchBar.Store';
     import { useListMenusStore } from '../stores/useListMenus.Store';
@@ -86,29 +77,19 @@
     const menus = useListMenusStore();
     const system = useSystemStore();
 
-    /** Item atualmente aberto no submenu flyout. */
-    const activeFlyoutItem = ref<SideMenuItem | null>(null);
-
-    const isFlyoutOpen = computed<boolean>(() => activeFlyoutItem.value !== null);
-
     const getItemIdentifier = (item: SideMenuItem | null): string | null => {
         if (!item) return null;
         return item.id || item.details?.page_component || item.details?.route || null;
     };
 
-    const activeFlyoutId = computed<string | null>(() => getItemIdentifier(activeFlyoutItem.value));
+    const activeFlyoutId = computed<string | null>(() => getItemIdentifier(system.active_side_submenu));
 
     const handleOpenSubmenu = (item: SideMenuItem): void => {
-        const targetId = getItemIdentifier(item);
-        const currentId = getItemIdentifier(activeFlyoutItem.value);
-
-        if (currentId && targetId === currentId) activeFlyoutItem.value = null;
-        else activeFlyoutItem.value = item;
-
+        system.toggleSideSubmenu(item);
     };
 
     const closeFlyout = (): void => {
-        activeFlyoutItem.value = null;
+        system.closeSideSubmenu();
     };
 
     watch(() => route?.path, () => {

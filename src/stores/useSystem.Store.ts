@@ -8,6 +8,7 @@ import { useUserStore } from './useUser.Store';
 import { useLoadingStore } from './useLoading.Store';
 import { getMaxAppConfig } from '../helpers/maxAppConfig';
 import { clearMaxCache } from '../helpers/maxCacheKeys';
+import type { SideMenuItem } from '../types/app';
 
 /**
  * Store central do app shell.
@@ -94,6 +95,27 @@ export const useSystemStore = defineStore('system', () => {
 
     /** Controla a abertura do menu lateral (gaveta off-canvas) no mobile. */
     const side_menu_open: Ref<boolean> = ref(false);
+
+    /** Item do menu lateral com subitens atualmente aberto no desktop (painel panel0). */
+    const active_side_submenu: Ref<SideMenuItem | null> = ref(null);
+
+    function openSideSubmenu(item: SideMenuItem): void {
+        active_side_submenu.value = item;
+    }
+
+    function closeSideSubmenu(): void {
+        active_side_submenu.value = null;
+    }
+
+    function toggleSideSubmenu(item: SideMenuItem): void {
+        const current = active_side_submenu.value;
+        const currentId = current?.id || current?.details?.page_component || current?.details?.route;
+        const targetId = item?.id || item?.details?.page_component || item?.details?.route;
+
+        if (currentId && targetId && currentId === targetId) closeSideSubmenu();
+        else openSideSubmenu(item);
+
+    }
 
     /** Título opcional exibido no cabeçalho do menu superior (útil no mobile). */
     const top_menu_title: Ref<string> = ref('');
@@ -209,6 +231,10 @@ export const useSystemStore = defineStore('system', () => {
         type_device,
         content_page_size,
         side_menu_open,
+        active_side_submenu,
+        openSideSubmenu,
+        closeSideSubmenu,
+        toggleSideSubmenu,
         top_menu_title,
         started,
         reloadAll,
