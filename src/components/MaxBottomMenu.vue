@@ -295,11 +295,19 @@
             place-items: center;
             width: 64px;
             height: 100%;
+
+            :deep(.menu-plus-bottom) {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
         }
 
         .fab {
             position: absolute;
             top: -24px;
+            left: 50%;
+            transform: translateX(-50%);
             width: 52px;
             height: 52px;
             display: grid;
@@ -315,13 +323,13 @@
             transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
 
             &:hover {
-                transform: translateY(-2px);
+                transform: translate(-50%, -2px);
                 background: var(--max-primary-600);
                 box-shadow: 0 10px 22px rgb(0 32 58 / 34%);
             }
 
             &:active {
-                transform: translateY(0);
+                transform: translate(-50%, 0);
             }
 
             &:focus-visible {
