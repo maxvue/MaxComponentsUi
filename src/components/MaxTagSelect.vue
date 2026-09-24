@@ -475,9 +475,8 @@
     const option_selected = computed(() => {
         const valueKey = props.optionValue;
 
-        if (props.options) {
-            return props.options.find((opt: any) => (opt[valueKey] ?? opt.id) === temp_value.value) ?? {};
-        }
+        if (props.options) return props.options.find((opt: any) => (opt[valueKey] ?? opt.id) === temp_value.value) ?? {};
+
 
         const groups = Object.values(options.value) as any[];
         for (const group of groups) {
@@ -949,7 +948,7 @@
             padding: 0 !important;
 
             :deep(.max-icon-div),
-            :deep(.max-icon){
+            :deep(.max-icon) {
                 max-width: 20px;
                 max-height: 20px;
 

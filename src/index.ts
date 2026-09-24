@@ -132,6 +132,12 @@ export { default as MaxInputCodeToolbar } from './components/MaxInputCodeToolbar
 export { useToolbarNavigation, type UseToolbarNavigationOptions } from './helpers/useToolbarNavigation';
 export { default as MaxInputToggle } from './components/MaxInputToggle.vue';
 export { default as MaxInputTypeAddress } from './components/MaxInputTypeAddress.vue';
+export { default as MaxInputUF } from './components/MaxInputUF.vue';
+export { default as MaxInputUf } from './components/MaxInputUF.vue';
+export { default as InputUF } from './components/MaxInputUF.vue';
+export { default as InputUf } from './components/MaxInputUF.vue';
+export type { MaxInputUFProps, MaxInputUFValueMode } from './components/MaxInputUF.vue';
+export { BRAZIL_STATES, BRAZIL_NATIONAL_STATE, type BrazilState } from './constants/brazilStates';
 export { default as MaxGridCols } from './components/MaxGridCols.vue';
 
 // Loaders
