@@ -129,9 +129,9 @@ describe('MaxBottomMenu', () => {
         expect(fabWrapper.exists()).toBe(true);
         expect(fabWrapper.find('.menu-plus-bottom').exists()).toBe(true);
         expect(fabWrapper.find('.fab').exists()).toBe(true);
-        expect(wrapper.find('.img-background').exists()).toBe(true);
+        expect(wrapper.find('.img-background path').attributes('d')).toContain('M300 66');
         expect(wrapper.classes()).toContain('is-curved');
-        expect(wrapper.find('.bottom-menu-bar').attributes('style')).toContain('64px');
+        expect(wrapper.find('.bottom-menu-bar').attributes('style')).toContain('72px');
     });
 
     it('emite o evento fabClick quando o FAB simples é clicado', async () => {

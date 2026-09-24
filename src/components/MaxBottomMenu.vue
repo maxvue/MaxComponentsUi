@@ -9,7 +9,7 @@
             preserveAspectRatio="none"
             aria-hidden="true"
         >
-            <path d="M300 60c-13,0 -22,-11 -28,-25 -6,-14 -13,-25 -24,-25l-248 0 0 110 600 0 0 -110 -248 0c-11,0 -18,11 -24,25 -6,14 -15,25 -28,25z" />
+            <path d="M300 66 C281.2 66.0 264.0 53.7 256.5 38.0 C249.0 22.3 238.5 10.0 225.0 10.0 L0 10 L0 120 L600 120 L600 10 L375.0 10.0 C361.5 10.0 351.0 22.3 343.5 38.0 C336.0 53.7 318.8 66.0 300 66 Z" />
         </svg>
 
         <div class="bottom-menu-bar" :style="gridStyle">
@@ -175,7 +175,7 @@
             const rightCount = rightTabs.value.length;
 
             return {
-                gridTemplateColumns: `repeat(${leftCount}, 1fr) 64px repeat(${rightCount}, 1fr)`
+                gridTemplateColumns: `repeat(${leftCount}, 1fr) 72px repeat(${rightCount}, 1fr)`
             };
         }
 
@@ -293,49 +293,55 @@
             position: relative;
             display: grid;
             place-items: center;
-            width: 64px;
+            width: 72px;
             height: 100%;
 
             :deep(.menu-plus-bottom) {
+                position: relative;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-            }
-        }
-
-        .fab {
-            position: absolute;
-            top: -24px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 52px;
-            height: 52px;
-            display: grid;
-            place-items: center;
-            border: 0;
-            padding: 0;
-            appearance: none;
-            border-radius: 999px;
-            background: var(--max-primary-500);
-            color: var(--background-0);
-            cursor: pointer;
-            box-shadow: 0 6px 16px rgb(0 32 58 / 28%);
-            transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
-
-            &:hover {
-                transform: translate(-50%, -2px);
-                background: var(--max-primary-600);
-                box-shadow: 0 10px 22px rgb(0 32 58 / 34%);
+                width: 100% !important;
+                height: 100% !important;
+                max-width: none !important;
+                max-height: none !important;
             }
 
-            &:active {
-                transform: translate(-50%, 0);
-            }
+            :deep(.fab),
+            .fab {
+                position: absolute;
+                top: -22px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 47px;
+                height: 47px;
+                display: grid;
+                place-items: center;
+                border: 0;
+                padding: 0;
+                appearance: none;
+                border-radius: 999px;
+                background: var(--max-primary-500);
+                color: var(--background-0);
+                cursor: pointer;
+                box-shadow: 0 6px 16px rgb(0 32 58 / 28%);
+                transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
 
-            &:focus-visible {
-                /* Foco canônico: dark mode usa --max-primary-400 via --max-focus-ring-color */
-                outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
-                outline-offset: 3px;
+                &:hover {
+                    transform: translate(-50%, -2px);
+                    background: var(--max-primary-600);
+                    box-shadow: 0 10px 22px rgb(0 32 58 / 34%);
+                }
+
+                &:active {
+                    transform: translate(-50%, 0);
+                }
+
+                &:focus-visible {
+                    /* Foco canônico: dark mode usa --max-primary-400 via --max-focus-ring-color */
+                    outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
+                    outline-offset: 3px;
+                }
             }
         }
     }
