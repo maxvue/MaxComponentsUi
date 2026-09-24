@@ -10,6 +10,8 @@ export interface StepItemData {
     index: number;
     /** Título textual do step. */
     title?: string;
+    /** Título ou label alternativo do step exibido em visualizações mobile. */
+    labelMobile?: string;
     /** Ícone opcional do step. */
     icon?: string;
     /** Indica se o step está desabilitado. */
