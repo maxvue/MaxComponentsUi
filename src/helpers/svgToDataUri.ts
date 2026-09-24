@@ -22,10 +22,13 @@ export function svgToDataUri(svg: string): string {
 
     if (!cleanedSvg) return '';
 
-    const base64 =
-        typeof window !== 'undefined' && typeof window.btoa === 'function'
-            ? window.btoa(unescape(encodeURIComponent(cleanedSvg)))
-            : Buffer.from(cleanedSvg, 'utf-8').toString('base64');
+    let base64 = '';
+    if (typeof window !== 'undefined' && typeof window.btoa === 'function') {
+        const bytes = new TextEncoder().encode(cleanedSvg);
+        const binString = Array.from(bytes, (byte) => String.fromCharCode(byte)).join('');
+        base64 = window.btoa(binString);
+    } else base64 = Buffer.from(cleanedSvg, 'utf-8').toString('base64');
+
 
     return `data:image/svg+xml;base64,${base64}`;
 }

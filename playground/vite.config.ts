@@ -89,7 +89,10 @@ export default defineConfig({
         strictPort: true,
         open: false,
         cors: true,
-        origin: 'https://maxcomponents.test'
+        origin: 'https://maxcomponents.test',
+        fs: {
+            allow: [resolve(rootDir, '..')]
+        }
     },
     resolve: {
         alias: {

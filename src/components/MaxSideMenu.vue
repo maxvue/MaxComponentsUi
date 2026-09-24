@@ -14,22 +14,39 @@
             </div>
             <div class="menu">
                 <div v-if="items" class="grupo items">
-                    <MaxMenuVerticalItem :items="items" />
+                    <MaxMenuVerticalItem
+                        :items="items"
+                        :active-flyout-id="activeFlyoutId"
+                        @open-submenu="handleOpenSubmenu"
+                    />
                 </div>
                 <div v-if="settings" class="grupo settings">
-                    <MaxMenuVerticalItem :items="settings" />
+                    <MaxMenuVerticalItem
+                        :items="settings"
+                        :active-flyout-id="activeFlyoutId"
+                        @open-submenu="handleOpenSubmenu"
+                    />
                 </div>
             </div>
         </div>
+
+        <!-- Submenu lateral sobreposto em Desktop -->
+        <MaxSideMenuFlyout
+            v-if="!isMobile"
+            :visible="isFlyoutOpen"
+            :item="activeFlyoutItem"
+            @close="closeFlyout"
+        />
     </div>
 </template>
 
 <script setup lang="ts">
-    import { computed, useAttrs } from 'vue';
+    import { computed, ref, watch, useAttrs } from 'vue';
     import { useRouter, useRoute } from 'vue-router';
     import { getRoute } from '@maxvue/max-use';
     import MaxLogo from './MaxLogo.vue';
     import MaxMenuVerticalItem from './MaxMenuVerticalItem.vue';
+    import MaxSideMenuFlyout from './MaxSideMenuFlyout.vue';
     import { useSystemStore } from '../stores/useSystem.Store';
     import { useSearchBarStore } from '../stores/useSearchBar.Store';
     import { useListMenusStore } from '../stores/useListMenus.Store';
@@ -53,6 +70,10 @@
         logoFallbackLabel?: string;
         /** Dispositivo atual ('desktop' | 'mobile'). Quando omitido, consulta useSystemStore(). */
         screen?: string;
+        /** Itens de navegação customizados (opcional, fallback na store useListMenusStore). */
+        items?: SideMenuItem[];
+        /** Grupos de navegação customizados (opcional). */
+        groups?: any[];
     }>();
 
     const emit = defineEmits<{
@@ -64,6 +85,35 @@
     const route = useRoute();
     const menus = useListMenusStore();
     const system = useSystemStore();
+
+    /** Item atualmente aberto no submenu flyout. */
+    const activeFlyoutItem = ref<SideMenuItem | null>(null);
+
+    const isFlyoutOpen = computed<boolean>(() => activeFlyoutItem.value !== null);
+
+    const getItemIdentifier = (item: SideMenuItem | null): string | null => {
+        if (!item) return null;
+        return item.id || item.details?.page_component || item.details?.route || null;
+    };
+
+    const activeFlyoutId = computed<string | null>(() => getItemIdentifier(activeFlyoutItem.value));
+
+    const handleOpenSubmenu = (item: SideMenuItem): void => {
+        const targetId = getItemIdentifier(item);
+        const currentId = getItemIdentifier(activeFlyoutItem.value);
+
+        if (currentId && targetId === currentId) activeFlyoutItem.value = null;
+        else activeFlyoutItem.value = item;
+
+    };
+
+    const closeFlyout = (): void => {
+        activeFlyoutItem.value = null;
+    };
+
+    watch(() => route?.path, () => {
+        closeFlyout();
+    });
 
     /** Determina se o menu lateral está em modo mobile. */
     const isMobile = computed<boolean>(() => {
@@ -103,7 +153,16 @@
      * `=== null`: com a comparação estrita, salvar `hide = false` pela tela de
      * administração escondia o menu.
      */
-    const visible = computed<SideMenuItem[]>(() => ((menus.list as any)?.side ?? []).filter((item: SideMenuItem) => !item.details?.hide));
+    const visible = computed<SideMenuItem[]>(() => {
+        let source: SideMenuItem[] = [];
+
+        if (props.items?.length) source = props.items;
+        else if (props.groups?.length) source = props.groups.flatMap((g) => g.items ?? []);
+        else source = (menus.list as any)?.side ?? [];
+
+
+        return source.filter((item: SideMenuItem) => !item.details?.hide && !item.hide);
+    });
 
     /** Itens da seção inferior (configurações). */
     const settings = computed<SideMenuItem[] | null>(() => {
@@ -124,6 +183,7 @@
     };
 
     const onLogoClick = (): void => {
+        closeFlyout();
         clearSearch();
         emit('logoClick');
 

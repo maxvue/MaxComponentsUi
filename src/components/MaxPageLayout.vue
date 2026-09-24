@@ -45,7 +45,17 @@
             </template>
         </MaxTopMenu>
 
-        <MaxSideMenu v-bind="attrs" :screen="props.screen" :logo="props.logo" :route-logo="props.routeLogo" :logo-alt="props.logoAlt" :logo-fallback-label="props.logoFallbackLabel" @logo-click="emit('logoClick')" />
+        <MaxSideMenu
+            v-bind="attrs"
+            :screen="props.screen"
+            :items="props.sideMenuItems"
+            :groups="props.sideMenuGroups"
+            :logo="props.logo"
+            :route-logo="props.routeLogo"
+            :logo-alt="props.logoAlt"
+            :logo-fallback-label="props.logoFallbackLabel"
+            @logo-click="emit('logoClick')"
+        />
 
         <MaxPageContent v-bind="attrs">
             <slot></slot>

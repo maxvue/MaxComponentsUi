@@ -99,6 +99,8 @@ export { default as MaxInputCreditCard } from './components/MaxInputCreditCard.v
 export { default as MaxInputCreditCardCvv } from './components/MaxInputCreditCardCvv.vue';
 export { default as MaxInputCreditCardDate } from './components/MaxInputCreditCardDate.vue';
 export { default as MaxInputDatePicker } from './components/MaxInputDatePicker.vue';
+export { default as MaxInputDiscount } from './components/MaxInputDiscount.vue';
+export { default as InputDiscount } from './components/MaxInputDiscount.vue';
 export { default as MaxInputBirthday } from './components/MaxInputBirthday.vue';
 export { default as InputBirthday } from './components/MaxInputBirthday.vue';
 export { default as MaxInputField } from './components/MaxInputText.vue';
@@ -108,6 +110,8 @@ export { default as MaxInputFileUpload } from './components/MaxInputFileUpload.v
 export { default as MaxInputFileUploadBig } from './components/MaxInputFileUploadBig.vue';
 export { default as MaxInputFileUploadButton } from './components/MaxInputFileUploadButton.vue';
 export { default as MaxInputNumber } from './components/MaxInputNumber.vue';
+export { default as MaxInputMoney } from './components/MaxInputMoney.vue';
+export { default as InputMoney } from './components/MaxInputMoney.vue';
 export { default as MaxInputOTP } from './components/MaxInputOTP.vue';
 export { default as MaxInputOtp } from './components/MaxInputOTP.vue';
 export { default as InputOTP } from './components/MaxInputOTP.vue';
@@ -123,6 +127,8 @@ export { default as MaxSelectTag } from './components/MaxTagSelect.vue';
 export { default as MaxChips } from './components/MaxChips.vue';
 export { default as Chips } from './components/MaxChips.vue';
 export { default as MaxInputSwitch } from './components/MaxInputSwitch.vue';
+export { default as MaxSwitch } from './components/MaxInputSwitch.vue';
+export { default as InputSwitch } from './components/MaxInputSwitch.vue';
 export { default as MaxInputTextArea } from './components/MaxInputTextArea.vue';
 export { default as MaxInputTextList } from './components/MaxInputTextList.vue';
 // Async: o MaxInputMarkdown arrasta o tiptap inteiro (starter-kit + 8 extensões, ~350 KB);
@@ -158,6 +164,7 @@ export { default as MaxLoadScreenTarget } from './components/MaxLoadScreenTarget
 export { default as MaxContainerApp } from './components/MaxContainerApp.vue';
 export { default as MaxBottomMenu } from './components/MaxBottomMenu.vue';
 export { default as MaxSideMenu } from './components/MaxSideMenu.vue';
+export { default as MaxSideMenuFlyout } from './components/MaxSideMenuFlyout.vue';
 export { default as MaxSideMenuMobile } from './components/MaxSideMenuMobile.vue';
 export { default as MaxMenuVerticalItem } from './components/MaxMenuVerticalItem.vue';
 export { default as MaxTopMenu } from './components/MaxTopMenu.vue';

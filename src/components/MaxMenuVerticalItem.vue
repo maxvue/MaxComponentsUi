@@ -3,12 +3,14 @@
         v-for="(item, index) in props.items"
         :key="item.id ?? index"
         v-tooltip.right="item.details.tooltip"
-        :class="`max-menu-vertical-item item_menu ${isActive(item) ? 'active' : ''}`"
+        :class="`max-menu-vertical-item item_menu ${isActive(item) ? 'active' : ''} ${hasSubItems(item) ? 'has-subitems' : ''}`"
         :page_component="item.details.page_component"
         role="link"
         tabindex="0"
         :aria-label="item.details.tooltip || item.details.label || item.details.title || item.details.route || 'Item de menu'"
         :aria-current="isActive(item) ? 'page' : undefined"
+        :aria-haspopup="hasSubItems(item) ? 'true' : undefined"
+        :aria-expanded="hasSubItems(item) ? isFlyoutActive(item) : undefined"
         @click="(event) => handleItemClick(item, event)"
         @keydown.enter="(event) => handleItemClick(item, event)"
     >
@@ -23,6 +25,7 @@
             tabindex="-1"
             class="max-menu-vertical-item-icon"
         />
+        <span v-if="hasSubItems(item)" class="subitem-indicator" aria-hidden="true" />
         <svg class="curva cima" xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 3000 3000" aria-hidden="true" tabindex="-1">
             <path d="M-7.07 3007.07c0,-1656.85 1343.15,-3000 3000,-3000l-3000 0 0 3000z" />
         </svg>
@@ -39,6 +42,7 @@
     import MaxIcon from './MaxIcon.vue';
     import { useSystemStore } from '../stores/useSystem.Store';
     import { useSearchBarStore } from '../stores/useSearchBar.Store';
+    import { hasSubItems, hasActiveSubItem } from '../helpers/menuHelpers';
     import type { SideMenuItem } from '../types/app';
 
     const props = withDefaults(defineProps<{
@@ -46,9 +50,17 @@
         items: SideMenuItem[];
         /** Centraliza o texto do item. */
         textCenter?: boolean;
+        /** Identificador do item atualmente aberto no flyout. */
+        activeFlyoutId?: string | null;
     }>(), {
-        textCenter: false
+        textCenter: false,
+        activeFlyoutId: null
     });
+
+    const emit = defineEmits<{
+        itemClick: [item: SideMenuItem, event?: MouseEvent | KeyboardEvent];
+        openSubmenu: [item: SideMenuItem];
+    }>();
 
     const system = useSystemStore();
     const route = useRoute();
@@ -66,8 +78,17 @@
         return String(route?.name || system.page || '');
     });
 
+    /** Verifica se o flyout para este item específico está aberto. */
+    const isFlyoutActive = (item: SideMenuItem): boolean => {
+        if (!props.activeFlyoutId) return false;
+        const id = item.id || item.details?.page_component || item.details?.route;
+        return id === props.activeFlyoutId;
+    };
+
     /** Marca o item cujo componente de página ou rotas filhas correspondem à rota atual. */
     const isActive = (item: SideMenuItem): boolean => {
+        if (isFlyoutActive(item)) return true;
+
         const current = currentPage.value;
         if (!current) return false;
 
@@ -85,10 +106,20 @@
         const knownMatches = ROUTE_MATCHES[pageComponent] || ROUTE_MATCHES[itemRoute];
         if (knownMatches?.includes(current)) return true;
 
+        // 4. Correspondência se algum subitem estiver ativo
+        if (hasActiveSubItem(item, current)) return true;
+
         return false;
     };
 
-    const handleItemClick = (item: SideMenuItem, _event?: MouseEvent | KeyboardEvent): void => {
+    const handleItemClick = (item: SideMenuItem, event?: MouseEvent | KeyboardEvent): void => {
+        emit('itemClick', item, event);
+
+        if (hasSubItems(item)) {
+            emit('openSubmenu', item);
+            return;
+        }
+
         useSearchBarStore().input_value = '';
 
         const targetRoute = item.details.route?.trim();
@@ -137,6 +168,19 @@
             display: none;
         }
 
+        .subitem-indicator {
+            position: absolute;
+            right: 3px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 10px;
+            border-radius: 2px;
+            background-color: var(--blue-200);
+            opacity: 0.6;
+            transition: opacity 0.2s ease, background-color 0.2s ease;
+            z-index: 2;
+        }
 
         &.active {
             position: relative;
