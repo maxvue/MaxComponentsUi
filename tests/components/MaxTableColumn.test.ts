@@ -46,4 +46,29 @@ describe('MaxTableColumn.vue', () => {
         expect(wrapper.props('sortable')).toBe(true);
         expect(wrapper.find('.inner-slot').text()).toBe('Conteúdo');
     });
+
+    it('aceita props declarativas de filtro e slot #filter', () => {
+        const wrapper = mount(MaxTableColumn, {
+            props: {
+                field: 'email',
+                header: 'E-mail',
+                filter: true,
+                filterField: 'user.email',
+                filterPlaceholder: 'Digite o e-mail...',
+                filterMatchMode: 'startsWith',
+                showClearButton: true,
+                showFilterMenu: true
+            },
+            slots: {
+                filter: '<input class="custom-filter-input" />'
+            }
+        });
+
+        expect(wrapper.props('filter')).toBe(true);
+        expect(wrapper.props('filterField')).toBe('user.email');
+        expect(wrapper.props('filterPlaceholder')).toBe('Digite o e-mail...');
+        expect(wrapper.props('filterMatchMode')).toBe('startsWith');
+        expect(wrapper.props('showClearButton')).toBe(true);
+        expect(wrapper.props('showFilterMenu')).toBe(true);
+    });
 });

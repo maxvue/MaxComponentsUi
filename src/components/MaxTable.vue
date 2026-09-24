@@ -110,6 +110,20 @@
                                             </template>
                                         </div>
                                     </div>
+                                    <button
+                                        v-if="props.filterDisplay === 'menu' && (col.filter || col.filterSlot)"
+                                        type="button"
+                                        class="max-table-filter-menu-button"
+                                        :class="{ 'is-filtered': hasFilterValue(col.field) }"
+                                        @click.stop="toggleFilterMenu(col, $event)"
+                                        :aria-label="'Filtrar ' + getHeaderAriaLabel(col)"
+                                        aria-haspopup="dialog"
+                                        :aria-expanded="activeMenuCol === col.field"
+                                    >
+                                        <svg class="filter-icon-svg" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none" aria-hidden="true">
+                                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                                        </svg>
+                                    </button>
                                 </th>
                                 <th
                                     v-if="slots.buttons"
@@ -124,6 +138,58 @@
                                         </div>
                                     </div>
                                 </th>
+                            </tr>
+
+                            <!-- LINHA DE FILTROS DE COLUNA (MODO ROW) -->
+                            <tr v-if="props.filterDisplay !== 'menu' && hasRowFilters" class="max-table-filter-row">
+                                <th
+                                    v-for="col in resolvedColumns"
+                                    :key="'filter-' + (col.field || col.header || 'col')"
+                                    class="max-table-th max-table-filter-cell"
+                                    :style="getColumnStyle(col)"
+                                    scope="col"
+                                    :aria-label="'Filtro de ' + getHeaderAriaLabel(col)"
+                                >
+                                    <template v-if="col.filterSlot">
+                                        <component
+                                            :is="col.filterSlot"
+                                            :field="col.field"
+                                            :filterModel="getFilterModel(col.field)"
+                                            :filterCallback="(val: any) => onFilterInputChange(col.field, val)"
+                                        />
+                                    </template>
+                                    <template v-else-if="col.filter && col.field">
+                                        <div class="max-table-filter-input-wrapper">
+                                            <input
+                                                type="text"
+                                                class="max-table-filter-input"
+                                                :value="getFilterInputValue(col.field)"
+                                                @input="onFilterInput(col.field, $event)"
+                                                :placeholder="col.filterPlaceholder || props.filterPlaceholder"
+                                                :aria-label="'Filtrar por ' + getHeaderAriaLabel(col)"
+                                            />
+                                            <button
+                                                v-if="col.showClearButton !== false && hasFilterValue(col.field)"
+                                                type="button"
+                                                class="max-table-filter-clear-button"
+                                                @click.stop="clearColumnFilter(col.field)"
+                                                :aria-label="'Limpar filtro de ' + getHeaderAriaLabel(col)"
+                                            >
+                                                <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" aria-hidden="true">
+                                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </template>
+                                </th>
+                                <th
+                                    v-if="slots.buttons"
+                                    class="max-table-th max-table-filter-cell max-table-filter-buttons-cell"
+                                    :style="buttonsColumnStyle"
+                                    scope="col"
+                                    aria-label="Ações"
+                                ></th>
                             </tr>
                         </thead>
 
@@ -322,6 +388,53 @@
                     </button>
                 </div>
             </div>
+
+            <!-- POPOVER DE FILTRO (MODO MENU) -->
+            <div
+                v-if="activeMenuCol"
+                class="max-table-filter-popover"
+                :style="menuPopoverStyle"
+                @click.stop
+            >
+                <div class="filter-popover-header">
+                    <span>Filtrar {{ getMenuColHeader() }}</span>
+                    <button type="button" class="filter-popover-close" @click.stop="closeFilterMenu" aria-label="Fechar">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="filter-popover-body">
+                    <div class="filter-popover-operator">
+                        <label>Condição</label>
+                        <select v-model="menuMatchMode" class="filter-popover-select">
+                            <option value="contains">Contém</option>
+                            <option value="startsWith">Começa com</option>
+                            <option value="endsWith">Termina com</option>
+                            <option value="equals">Igual</option>
+                            <option value="notEquals">Diferente</option>
+                            <option value="gt">Maior que</option>
+                            <option value="gte">Maior ou igual</option>
+                            <option value="lt">Menor que</option>
+                            <option value="lte">Menor ou igual</option>
+                        </select>
+                    </div>
+                    <div class="filter-popover-input-box">
+                        <input
+                            type="text"
+                            v-model="menuFilterValue"
+                            class="max-table-filter-menu-input"
+                            placeholder="Valor do filtro..."
+                            @keydown.enter.prevent="applyMenuFilter"
+                        />
+                    </div>
+                    <div class="filter-popover-actions">
+                        <button type="button" class="max-table-filter-clear-btn" @click.stop="clearMenuFilter">Limpar</button>
+                        <button type="button" class="max-table-filter-apply-btn" @click.stop="applyMenuFilter">Aplicar</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -374,6 +487,11 @@
             overscan?: number;
         };
         onRowClick?: any;
+        filters?: Record<string, any>;
+        filterDisplay?: 'row' | 'menu';
+        globalFilterFields?: string[];
+        filterDebounce?: number;
+        filterPlaceholder?: string;
     }
 
     interface ResolvedColumn {
@@ -389,8 +507,16 @@
         align?: 'left' | 'center' | 'right';
         expander?: boolean;
         selectionMode?: 'single' | 'multiple';
+        filter?: boolean;
+        filterField?: string;
+        filterPlaceholder?: string;
+        filterMatchMode?: string;
+        showClearButton?: boolean;
+        showFilterMenu?: boolean;
         bodySlot?: any;
         headerSlot?: any;
+        filterSlot?: any;
+        filterHeaderSlot?: any;
     }
 
     defineOptions({
@@ -413,7 +539,10 @@
         emptyMessage: 'Nenhum registro encontrado',
         loadingMessage: 'Carregando dados...',
         virtualScroll: false,
-        itemHeight: undefined
+        itemHeight: undefined,
+        filterDisplay: 'row',
+        filterDebounce: 300,
+        filterPlaceholder: 'Filtrar...'
     });
 
     const emit = defineEmits<{
@@ -421,9 +550,11 @@
         'update:rows': [rows: number];
         'update:selection': [selection: any];
         'update:modelValue': [value: any];
+        'update:filters': [filters: Record<string, any>];
         'page': [event: { page: number; first: number; rows: number; pageCount: number }];
         'row-click': [event: { originalEvent: MouseEvent; data: any; index: number }];
         'sort': [event: { sortField: string; sortOrder: 1 | -1 | 0 }];
+        'filter': [event: { filters: Record<string, any>; filteredValue?: any[] }];
     }>();
 
     defineSlots<{
@@ -493,12 +624,15 @@
 
             let bodySlot: any = null;
             let headerSlot: any = null;
+            let filterSlot: any = null;
+            let filterHeaderSlot: any = null;
             if (children && typeof children === 'object') {
                 if (typeof children.body === 'function') bodySlot = children.body;
                 else if (typeof children.default === 'function') bodySlot = children.default;
 
                 if (typeof children.header === 'function') headerSlot = children.header;
-
+                if (typeof children.filter === 'function') filterSlot = children.filter;
+                if (typeof children.filterHeader === 'function') filterHeaderSlot = children.filterHeader;
             }
 
             columns.push({
@@ -514,23 +648,42 @@
                 align: colProps.align,
                 expander: colProps.expander !== undefined && colProps.expander !== false,
                 selectionMode: colProps.selectionMode || colProps['selection-mode'],
+                filter: colProps.filter !== undefined && colProps.filter !== false,
+                filterField: colProps.filterField || colProps['filter-field'],
+                filterPlaceholder: colProps.filterPlaceholder || colProps['filter-placeholder'],
+                filterMatchMode: colProps.filterMatchMode || colProps['filter-match-mode'],
+                showClearButton: colProps.showClearButton !== false && colProps['show-clear-button'] !== false,
+                showFilterMenu: colProps.showFilterMenu !== false && colProps['show-filter-menu'] !== false,
                 bodySlot,
-                headerSlot
+                headerSlot,
+                filterSlot,
+                filterHeaderSlot
             });
         }
         return columns;
     }
 
+    let cachedColumns: ResolvedColumn[] = [];
+
     /** Colunas resolvidas a partir de props ou do default slot */
     const resolvedColumns = computed<ResolvedColumn[]>(() => {
-        if (Array.isArray(props.columns) && props.columns.length > 0) return props.columns.map((col) => ({
-            ...col,
-            sortable: col.sortable !== undefined && col.sortable !== false,
-            bodySlot: (slots as any)[col.slot ?? col.field ?? '']
-        }));
+        if (Array.isArray(props.columns) && props.columns.length > 0) {
+            cachedColumns = props.columns.map((col) => ({
+                ...col,
+                sortable: col.sortable !== undefined && col.sortable !== false,
+                filter: col.filter !== undefined && col.filter !== false,
+                bodySlot: (slots as any)[col.slot ?? col.field ?? ''],
+                filterSlot: (slots as any)[`filter-${col.field}`] ?? (slots as any)[col.filterSlot ?? '']
+            }));
+            return cachedColumns;
+        }
 
-        if (!slots.default) return [];
-        return extractColumnsFromVNodes(slots.default());
+        if (!slots.default) {
+            cachedColumns = [];
+            return [];
+        }
+        cachedColumns = extractColumnsFromVNodes(slots.default());
+        return cachedColumns;
     });
 
     /** Detecta se o componente está operando em Modo Template-Driven */
@@ -643,9 +796,278 @@
         return 'none';
     };
 
+    /** Estado e Reatividade de Filtros */
+    const localFilters = ref<Record<string, any>>({ ...(props.filters ?? {}) });
+    watch(() => props.filters, (newFilters) => {
+        if (newFilters) localFilters.value = { ...newFilters };
+        else localFilters.value = {};
+
+    }, { deep: true });
+
+    const hasRowFilters = computed<boolean>(() => {
+        return resolvedColumns.value.some((col) => col.filter || col.filterSlot);
+    });
+
+    const activeMenuCol = ref<string | null>(null);
+    const menuMatchMode = ref<string>('contains');
+    const menuFilterValue = ref<any>('');
+    const menuPopoverStyle = ref<Record<string, string>>({});
+
+    function normalizeString(val: any): string {
+        if (val === null || val === undefined) return '';
+        return String(val)
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+    }
+
+    function testFilterMatch(rowValue: any, filterValue: any, matchMode: string = 'contains'): boolean {
+        if (filterValue === null || filterValue === undefined || filterValue === '') return true;
+
+        if (rowValue === null || rowValue === undefined) return matchMode === 'notEquals';
+
+
+        const normRow = normalizeString(rowValue);
+        const normFilter = normalizeString(filterValue);
+
+        switch (matchMode) {
+            case 'startsWith':
+                return normRow.startsWith(normFilter);
+            case 'endsWith':
+                return normRow.endsWith(normFilter);
+            case 'equals':
+                if (typeof rowValue === 'number' && !isNaN(Number(filterValue))) return rowValue === Number(filterValue);
+
+                return normRow === normFilter;
+            case 'notEquals':
+                if (typeof rowValue === 'number' && !isNaN(Number(filterValue))) return rowValue !== Number(filterValue);
+
+                return normRow !== normFilter;
+            case 'in':
+                if (Array.isArray(filterValue)) return filterValue.some((item) => normalizeString(item) === normRow || item === rowValue);
+
+                return normRow.includes(normFilter);
+            case 'gt':
+                return Number(rowValue) > Number(filterValue);
+            case 'gte':
+                return Number(rowValue) >= Number(filterValue);
+            case 'lt':
+                return Number(rowValue) < Number(filterValue);
+            case 'lte':
+                return Number(rowValue) <= Number(filterValue);
+            case 'contains':
+            default:
+                return normRow.includes(normFilter);
+        }
+    }
+
+    function getFilterEntry(field?: string): { value: any; matchMode: string } {
+        if (!field) return { value: null, matchMode: 'contains' };
+        const raw = localFilters.value[field];
+        if (raw !== null && typeof raw === 'object' && 'value' in raw) return {
+            value: raw.value,
+            matchMode: raw.matchMode || 'contains'
+        };
+
+        return {
+            value: raw,
+            matchMode: 'contains'
+        };
+    }
+
+    function hasFilterValue(field?: string): boolean {
+        if (!field) return false;
+        const entry = getFilterEntry(field);
+        return entry.value !== null && entry.value !== undefined && entry.value !== '';
+    }
+
+    function getFilterInputValue(field?: string): string {
+        if (!field) return '';
+        const entry = getFilterEntry(field);
+        if (entry.value === null || entry.value === undefined) return '';
+        return String(entry.value);
+    }
+
+    function getFilterModel(field?: string) {
+        if (!field) return { value: null, matchMode: 'contains' };
+        const entry = getFilterEntry(field);
+        return {
+            value: entry.value,
+            matchMode: entry.matchMode
+        };
+    }
+
+    const debounceTimers: Record<string, any> = {};
+
+    function triggerFilterUpdate() {
+        const updatedFilters = { ...localFilters.value };
+        emit('update:filters', updatedFilters);
+
+        if (props.lazy) emit('filter', {
+            filters: updatedFilters,
+            filteredValue: rawData.value
+        });
+        else {
+            emit('filter', {
+                filters: updatedFilters,
+                filteredValue: filteredData.value
+            });
+            if (first.value > 0 && currentPage.value >= pageCount.value) {
+                first.value = 0;
+                emit('update:first', 0);
+            }
+        }
+    }
+
+    function setFilterValue(field: string | undefined, val: any, matchMode?: string) {
+        if (!field) return;
+        const current = localFilters.value[field];
+        const mode = matchMode || (current && typeof current === 'object' && current.matchMode ? current.matchMode : 'contains');
+
+        localFilters.value[field] = {
+            value: val,
+            matchMode: mode
+        };
+
+        triggerFilterUpdate();
+    }
+
+    function onFilterInputChange(field: string | undefined, val: any, matchMode?: string) {
+        setFilterValue(field, val, matchMode);
+    }
+
+    function onFilterInput(field: string | undefined, event: Event) {
+        if (!field) return;
+        const target = event.target as HTMLInputElement;
+        const val = target.value;
+        const debounceMs = props.filterDebounce ?? 300;
+
+        if (debounceMs <= 0) setFilterValue(field, val);
+        else {
+            if (debounceTimers[field]) clearTimeout(debounceTimers[field]);
+            debounceTimers[field] = setTimeout(() => {
+                setFilterValue(field, val);
+            }, debounceMs);
+        }
+    }
+
+    function clearColumnFilter(field?: string) {
+        if (!field) return;
+        if (debounceTimers[field]) clearTimeout(debounceTimers[field]);
+        const current = localFilters.value[field];
+        if (typeof current === 'object' && current !== null && 'value' in current) localFilters.value[field] = {
+            ...current,
+            value: null
+        };
+        else localFilters.value[field] = null;
+
+        triggerFilterUpdate();
+    }
+
+    function toggleFilterMenu(col: ResolvedColumn, event: MouseEvent) {
+        if (!col.field) return;
+        if (activeMenuCol.value === col.field) {
+            closeFilterMenu();
+            return;
+        }
+
+        activeMenuCol.value = col.field;
+        const entry = getFilterEntry(col.field);
+        menuFilterValue.value = entry.value ?? '';
+        menuMatchMode.value = entry.matchMode || col.filterMatchMode || 'contains';
+
+        const target = event.currentTarget as HTMLElement;
+        if (target) {
+            const rect = target.getBoundingClientRect();
+            menuPopoverStyle.value = {
+                position: 'fixed',
+                top: `${rect.bottom + 4}px`,
+                left: `${Math.max(10, rect.left - 100)}px`,
+                zIndex: '1000'
+            };
+        }
+    }
+
+    function getMenuColHeader(): string {
+        if (!activeMenuCol.value) return '';
+        const col = resolvedColumns.value.find((c) => c.field === activeMenuCol.value);
+        return col ? getHeaderAriaLabel(col) : '';
+    }
+
+    function closeFilterMenu() {
+        activeMenuCol.value = null;
+    }
+
+    function applyMenuFilter() {
+        if (activeMenuCol.value) {
+            setFilterValue(activeMenuCol.value, menuFilterValue.value, menuMatchMode.value);
+            closeFilterMenu();
+        }
+    }
+
+    function clearMenuFilter() {
+        if (activeMenuCol.value) {
+            menuFilterValue.value = '';
+            clearColumnFilter(activeMenuCol.value);
+            closeFilterMenu();
+        }
+    }
+
+    /** Dados filtrados */
+    const filteredData = computed<any[]>(() => {
+        const list = Array.isArray(rawData.value) ? [...rawData.value] : [];
+        if (props.lazy) return list;
+
+        const activeFilterEntries = Object.entries(localFilters.value).filter(([_, val]) => {
+            if (val === null || val === undefined || val === '') return false;
+            if (typeof val === 'object' && (val.value === null || val.value === undefined || val.value === '')) return false;
+            return true;
+        });
+
+        if (activeFilterEntries.length === 0) return list;
+
+        let globalTerm: any = null;
+        if (localFilters.value.global !== undefined) {
+            const g = localFilters.value.global;
+            globalTerm = typeof g === 'object' && g !== null && 'value' in g ? g.value : g;
+        }
+
+        const hasGlobalFilter = globalTerm !== null && globalTerm !== undefined && globalTerm !== '';
+        let globalFields: string[] = [];
+        if (hasGlobalFilter) if (Array.isArray(props.globalFilterFields) && props.globalFilterFields.length > 0) globalFields = props.globalFilterFields;
+        else if (cachedColumns.length > 0) globalFields = cachedColumns.map((c) => c.filterField || c.field).filter(Boolean) as string[];
+        else if (list.length > 0) globalFields = Object.keys(list[0]);
+
+
+        return list.filter((row) => {
+            if (hasGlobalFilter) {
+                const matchesGlobal = globalFields.some((field) => {
+                    const val = getFieldValue(row, field);
+                    return testFilterMatch(val, globalTerm, 'contains');
+                });
+                if (!matchesGlobal) return false;
+            }
+
+            for (const [key, filterRaw] of activeFilterEntries) {
+                if (key === 'global') continue;
+
+                const filterVal = typeof filterRaw === 'object' && filterRaw !== null && 'value' in filterRaw ? filterRaw.value : filterRaw;
+                if (filterVal === null || filterVal === undefined || filterVal === '') continue;
+
+                const matchMode = typeof filterRaw === 'object' && filterRaw !== null && filterRaw.matchMode ? filterRaw.matchMode : 'contains';
+                const rowVal = getFieldValue(row, key);
+
+                if (!testFilterMatch(rowVal, filterVal, matchMode)) return false;
+
+            }
+
+            return true;
+        });
+    });
+
     /** Dados ordenados */
     const sortedData = computed<any[]>(() => {
-        const list = Array.isArray(rawData.value) ? [...rawData.value] : [];
+        const list = Array.isArray(filteredData.value) ? [...filteredData.value] : [];
         if (props.lazy || !sortField.value) return list;
 
         const field = sortField.value;
@@ -672,6 +1094,13 @@
     const rows = ref<number>(props.rows ?? 10);
     watch(() => props.first, (v) => { if (v !== undefined) first.value = v; });
     watch(() => props.rows, (v) => { if (v !== undefined) rows.value = v; });
+
+    watch(filteredData, () => {
+        if (!props.lazy && first.value > 0 && currentPage.value >= pageCount.value) {
+            first.value = 0;
+            emit('update:first', 0);
+        }
+    });
 
     const total = computed(() => props.lazy ? (props.totalRecords ?? 0) : sortedData.value.length);
     const pageCount = computed(() => Math.max(1, Math.ceil(total.value / (rows.value || 10))));
@@ -997,6 +1426,91 @@
                                         }
                                     }
                                 }
+
+                                .max-table-filter-menu-button {
+                                    display: inline-flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    width: 20px;
+                                    height: 20px;
+                                    padding: 0;
+                                    margin-left: 4px;
+                                    border: none;
+                                    background: transparent;
+                                    border-radius: 4px;
+                                    cursor: pointer;
+                                    color: var(--background-500, #64748b);
+                                    transition: color 0.15s ease, background-color 0.15s ease;
+
+                                    &:hover {
+                                        background-color: var(--background-100, #f1f5f9);
+                                        color: var(--max-primary-500, #00768e);
+                                    }
+
+                                    &.is-filtered {
+                                        color: var(--max-primary-500, #00768e);
+                                    }
+                                }
+                            }
+                        }
+
+                        &.max-table-filter-row {
+                            border-top: 1px solid var(--background-200, #e2e8f0);
+                            background-color: var(--background-50, #f8fafc);
+
+                            th.max-table-filter-cell {
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                padding: 4px 6px;
+                                box-sizing: border-box;
+
+                                .max-table-filter-input-wrapper {
+                                    position: relative;
+                                    display: flex;
+                                    align-items: center;
+                                    width: 100%;
+
+                                    .max-table-filter-input {
+                                        width: 100%;
+                                        height: 26px;
+                                        padding: 2px 22px 2px 8px;
+                                        font-size: 0.8rem;
+                                        border-radius: 4px;
+                                        border: 1px solid var(--background-300, #cbd5e1);
+                                        background-color: var(--background-0, #fff);
+                                        color: var(--background-900, #0f172a);
+                                        outline: none;
+                                        box-sizing: border-box;
+                                        transition: border-color 0.15s ease;
+
+                                        &:focus {
+                                            outline: var(--max-focus-outline, 2px solid var(--max-primary-500, #00768e));
+                                            border-color: var(--max-primary-500, #00768e);
+                                        }
+                                    }
+
+                                    .max-table-filter-clear-button {
+                                        position: absolute;
+                                        right: 4px;
+                                        display: inline-flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        width: 16px;
+                                        height: 16px;
+                                        padding: 0;
+                                        border: none;
+                                        background: transparent;
+                                        color: var(--background-500, #64748b);
+                                        cursor: pointer;
+                                        border-radius: 50%;
+
+                                        &:hover {
+                                            color: var(--max-danger-500, #ef4444);
+                                            background-color: var(--background-100, #f1f5f9);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -1144,6 +1658,131 @@
                     font-size: 0.85rem;
                     color: var(--background-700);
                     padding: 0 8px;
+                }
+            }
+        }
+
+        .max-table-filter-popover {
+            position: fixed;
+            z-index: 1000;
+            min-width: 220px;
+            padding: 12px;
+            border-radius: 6px;
+            background-color: var(--background-0, #fff);
+            border: 1px solid var(--background-300, #cbd5e1);
+            box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+
+            .filter-popover-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 8px;
+                font-weight: 600;
+                font-size: 0.85rem;
+                color: var(--background-800, #1e293b);
+
+                .filter-popover-close {
+                    background: transparent;
+                    border: none;
+                    cursor: pointer;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: var(--background-500, #64748b);
+                    padding: 2px;
+                    border-radius: 4px;
+
+                    &:hover {
+                        color: var(--background-800, #1e293b);
+                        background-color: var(--background-100, #f1f5f9);
+                    }
+                }
+            }
+
+            .filter-popover-body {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+
+                .filter-popover-operator {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+
+                    label {
+                        font-size: 0.75rem;
+                        color: var(--background-600, #475569);
+                    }
+
+                    .filter-popover-select {
+                        width: 100%;
+                        height: 28px;
+                        padding: 2px 6px;
+                        font-size: 0.8rem;
+                        border-radius: 4px;
+                        border: 1px solid var(--background-300, #cbd5e1);
+                        background-color: var(--background-0, #fff);
+                        color: var(--background-900, #0f172a);
+                        outline: none;
+
+                        &:focus {
+                            outline: var(--max-focus-outline, 2px solid var(--max-primary-500, #00768e));
+                        }
+                    }
+                }
+
+                .filter-popover-input-box {
+                    .max-table-filter-menu-input {
+                        width: 100%;
+                        height: 28px;
+                        padding: 2px 8px;
+                        font-size: 0.8rem;
+                        border-radius: 4px;
+                        border: 1px solid var(--background-300, #cbd5e1);
+                        background-color: var(--background-0, #fff);
+                        color: var(--background-900, #0f172a);
+                        outline: none;
+                        box-sizing: border-box;
+
+                        &:focus {
+                            outline: var(--max-focus-outline, 2px solid var(--max-primary-500, #00768e));
+                        }
+                    }
+                }
+
+                .filter-popover-actions {
+                    display: flex;
+                    justify-content: flex-end;
+                    gap: 8px;
+                    margin-top: 4px;
+
+                    .max-table-filter-clear-btn {
+                        padding: 4px 10px;
+                        font-size: 0.8rem;
+                        border-radius: 4px;
+                        border: 1px solid var(--background-300, #cbd5e1);
+                        background-color: var(--background-100, #f1f5f9);
+                        color: var(--background-700, #334155);
+                        cursor: pointer;
+
+                        &:hover {
+                            background-color: var(--background-200, #e2e8f0);
+                        }
+                    }
+
+                    .max-table-filter-apply-btn {
+                        padding: 4px 10px;
+                        font-size: 0.8rem;
+                        border-radius: 4px;
+                        border: none;
+                        background-color: var(--max-primary-500, #00768e);
+                        color: #fff;
+                        cursor: pointer;
+
+                        &:hover {
+                            background-color: var(--max-primary-600, #005f77);
+                        }
+                    }
                 }
             }
         }

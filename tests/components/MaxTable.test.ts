@@ -1029,4 +1029,316 @@ describe('MaxTable', () => {
             expect(sfc).toContain('@include table.table-cell-input-feedback');
         });
     });
+
+    describe('Filtragem de Colunas e Filtro Global', () => {
+        const filterSample = [
+            { id: 1, name: 'Carlos Eduardo', info: { role: 'Admin' }, age: 30, city: 'São Paulo' },
+            { id: 2, name: 'Ana Carolina', info: { role: 'User' }, age: 25, city: 'Curitiba' },
+            { id: 3, name: 'Bruno Dias', info: { role: 'Editor' }, age: 35, city: 'Belo Horizonte' },
+            { id: 4, name: 'Mariana Lima', info: { role: 'User' }, age: 28, city: 'São Paulo' }
+        ];
+
+        it('renderiza a linha de filtros tr.max-table-filter-row quando ao menos uma coluna tiver filter: true', () => {
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: filterSample
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome', filter: true }),
+                        h(MaxTableColumn, { field: 'city', header: 'Cidade' })
+                    ]
+                }
+            });
+
+            const filterRow = wrapper.find('thead tr.max-table-filter-row');
+            expect(filterRow.exists()).toBe(true);
+
+            const filterInputs = filterRow.findAll('input.max-table-filter-input');
+            expect(filterInputs.length).toBe(1);
+        });
+
+        it('filtra registros client-side em tempo real através do input de coluna', async () => {
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: filterSample,
+                    filterDebounce: 0
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome', filter: true }),
+                        h(MaxTableColumn, { field: 'city', header: 'Cidade' })
+                    ]
+                }
+            });
+
+            const input = wrapper.find('thead tr.max-table-filter-row input.max-table-filter-input');
+            await input.setValue('ana');
+            await wrapper.vm.$nextTick();
+
+            const rows = wrapper.findAll('tbody tr.max-table-row');
+            expect(rows.length).toBe(2);
+            expect(rows[0].text()).toContain('Ana Carolina');
+            expect(rows[1].text()).toContain('Mariana Lima');
+        });
+
+        it('limpa o filtro e restaura as linhas ao clicar no botão Clear', async () => {
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: filterSample,
+                    filterDebounce: 0
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome', filter: true, showClearButton: true })
+                    ]
+                }
+            });
+
+            const input = wrapper.find('thead tr.max-table-filter-row input.max-table-filter-input');
+            await input.setValue('Carlos');
+            await wrapper.vm.$nextTick();
+
+            let rows = wrapper.findAll('tbody tr.max-table-row');
+            expect(rows.length).toBe(1);
+
+            const clearBtn = wrapper.find('button.max-table-filter-clear-button');
+            expect(clearBtn.exists()).toBe(true);
+
+            await clearBtn.trigger('click');
+            await wrapper.vm.$nextTick();
+
+            rows = wrapper.findAll('tbody tr.max-table-row');
+            expect(rows.length).toBe(4);
+        });
+
+        it('suporta formato híbrido em v-model:filters (objeto estruturado ou valor primitivo direto)', async () => {
+            const filters = ref<Record<string, any>>({
+                name: 'Bruno'
+            });
+
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: filterSample,
+                    filters: filters.value,
+                    'onUpdate:filters': (val: any) => { filters.value = val; }
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome', filter: true })
+                    ]
+                }
+            });
+
+            let rows = wrapper.findAll('tbody tr.max-table-row');
+            expect(rows.length).toBe(1);
+            expect(rows[0].text()).toContain('Bruno Dias');
+
+            // Alterar para formato estruturado com matchMode startsWith
+            await wrapper.setProps({
+                filters: {
+                    name: { value: 'Car', matchMode: 'startsWith' }
+                }
+            });
+            await wrapper.vm.$nextTick();
+
+            rows = wrapper.findAll('tbody tr.max-table-row');
+            expect(rows.length).toBe(1);
+            expect(rows[0].text()).toContain('Carlos Eduardo');
+        });
+
+        it('suporta matchModes numéricos (gt, lte, equals) e notação aninhada de campos', async () => {
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: filterSample,
+                    filters: {
+                        age: { value: 28, matchMode: 'gt' },
+                        'info.role': { value: 'Admin', matchMode: 'equals' }
+                    }
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome' }),
+                        h(MaxTableColumn, { field: 'age', header: 'Idade', filter: true }),
+                        h(MaxTableColumn, { field: 'info.role', header: 'Cargo', filter: true })
+                    ]
+                }
+            });
+
+            const rows = wrapper.findAll('tbody tr.max-table-row');
+            expect(rows.length).toBe(1);
+            expect(rows[0].text()).toContain('Carlos Eduardo');
+        });
+
+        it('suporta scoped slot #filter customizado recebendo filterModel e filterCallback', async () => {
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: filterSample,
+                    filterDebounce: 0
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome' }),
+                        h(MaxTableColumn, { field: 'city', header: 'Cidade', filter: true }, {
+                            filter: ({ filterCallback }: any) => h('button', {
+                                class: 'custom-filter-curitiba',
+                                onClick: () => filterCallback('Curitiba')
+                            }, 'Filtrar Curitiba')
+                        })
+                    ]
+                }
+            });
+
+            const btn = wrapper.find('.custom-filter-curitiba');
+            expect(btn.exists()).toBe(true);
+
+            await btn.trigger('click');
+            await wrapper.vm.$nextTick();
+
+            const rows = wrapper.findAll('tbody tr.max-table-row');
+            expect(rows.length).toBe(1);
+            expect(rows[0].text()).toContain('Ana Carolina');
+        });
+
+        it('suporta Filtro Global cruzando múltiplos campos (globalFilterFields)', async () => {
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: filterSample,
+                    globalFilterFields: ['name', 'city', 'info.role'],
+                    filters: {
+                        global: { value: 'Paulo' }
+                    }
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome' }),
+                        h(MaxTableColumn, { field: 'city', header: 'Cidade' })
+                    ]
+                }
+            });
+
+            let rows = wrapper.findAll('tbody tr.max-table-row');
+            // 'São Paulo' corresponde a Carlos Eduardo e Mariana Lima
+            expect(rows.length).toBe(2);
+
+            // Buscar por cargo através do filtro global
+            await wrapper.setProps({
+                filters: {
+                    global: 'Editor'
+                }
+            });
+            await wrapper.vm.$nextTick();
+
+            rows = wrapper.findAll('tbody tr.max-table-row');
+            expect(rows.length).toBe(1);
+            expect(rows[0].text()).toContain('Bruno Dias');
+        });
+
+        it('emite eventos @update:filters e @filter e ajusta paginação', async () => {
+            const onFilter = vi.fn();
+            const onUpdateFilters = vi.fn();
+
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: filterSample,
+                    paginator: true,
+                    rows: 2,
+                    first: 2, // Segunda página
+                    filterDebounce: 0,
+                    onFilter,
+                    'onUpdate:filters': onUpdateFilters
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome', filter: true })
+                    ]
+                }
+            });
+
+            const input = wrapper.find('thead tr.max-table-filter-row input.max-table-filter-input');
+            await input.setValue('Carlos');
+            await wrapper.vm.$nextTick();
+
+            expect(onUpdateFilters).toHaveBeenCalled();
+            expect(onFilter).toHaveBeenCalled();
+
+            // Deve ter resetado a página para first = 0 pois restou apenas 1 item
+            expect((wrapper.vm as any).first).toBe(0);
+        });
+
+        it('em modo lazy: true não filtra dados localmente e emite evento @filter', async () => {
+            const onFilter = vi.fn();
+
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: filterSample,
+                    lazy: true,
+                    filterDebounce: 0,
+                    onFilter
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome', filter: true })
+                    ]
+                }
+            });
+
+            const input = wrapper.find('thead tr.max-table-filter-row input.max-table-filter-input');
+            await input.setValue('Inexistente');
+            await wrapper.vm.$nextTick();
+
+            // Em modo lazy, os 4 registros continuam renderizados na tabela
+            const rows = wrapper.findAll('tbody tr.max-table-row');
+            expect(rows.length).toBe(4);
+            expect(onFilter).toHaveBeenCalledWith(expect.objectContaining({
+                filters: expect.objectContaining({
+                    name: expect.objectContaining({ value: 'Inexistente' })
+                })
+            }));
+        });
+
+        it('suporta filterDisplay="menu" com botão no cabeçalho e popover de filtro', async () => {
+            const wrapper = mount(MaxTable, {
+                props: {
+                    value: filterSample,
+                    filterDisplay: 'menu',
+                    filterDebounce: 0
+                },
+                slots: {
+                    default: () => [
+                        h(MaxTableColumn, { field: 'name', header: 'Nome', filter: true })
+                    ]
+                }
+            });
+
+            // No modo menu, não renderiza tr.max-table-filter-row
+            expect(wrapper.find('thead tr.max-table-filter-row').exists()).toBe(false);
+
+            // Renderiza botão de filtro no cabeçalho da coluna
+            const menuBtn = wrapper.find('thead th .max-table-filter-menu-button');
+            expect(menuBtn.exists()).toBe(true);
+
+            // Clicar abre o popover de menu de filtro
+            await menuBtn.trigger('click');
+            await wrapper.vm.$nextTick();
+
+            const popover = wrapper.find('.max-table-filter-popover');
+            expect(popover.exists()).toBe(true);
+
+            // Selecionar startsWith, digitar no input dentro do popover e aplicar
+            const modeSelect = popover.find('select.filter-popover-select');
+            await modeSelect.setValue('startsWith');
+
+            const menuInput = popover.find('input.max-table-filter-menu-input');
+            await menuInput.setValue('Ana');
+
+            const applyBtn = popover.find('button.max-table-filter-apply-btn');
+            await applyBtn.trigger('click');
+            await wrapper.vm.$nextTick();
+
+            const rows = wrapper.findAll('tbody tr.max-table-row');
+            expect(rows.length).toBe(1);
+            expect(rows[0].text()).toContain('Ana Carolina');
+        });
+    });
 });

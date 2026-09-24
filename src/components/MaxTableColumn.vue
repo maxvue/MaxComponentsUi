@@ -27,13 +27,20 @@
         align?: 'left' | 'center' | 'right';
         expander?: boolean;
         selectionMode?: 'single' | 'multiple';
+        filter?: boolean;
+        filterField?: string;
+        filterPlaceholder?: string;
+        filterMatchMode?: 'contains' | 'startsWith' | 'endsWith' | 'equals' | 'notEquals' | 'in' | 'lt' | 'lte' | 'gt' | 'gte' | string;
+        showClearButton?: boolean;
+        showFilterMenu?: boolean;
     }>();
 
     defineSlots<{
         default?(): any;
         body?(props: { data: any; field?: string; index?: number }): any;
         header?(props: { field?: string }): any;
-        filter?(props: { field?: string }): any;
+        filter?(props: { field?: string; filterModel: any; filterCallback: (val: any) => void }): any;
+        filterHeader?(props: { field?: string }): any;
         editor?(props: { data: any; field?: string }): any;
     }>();
 </script>
