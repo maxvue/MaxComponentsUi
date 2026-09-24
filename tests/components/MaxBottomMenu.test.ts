@@ -125,7 +125,10 @@ describe('MaxBottomMenu', () => {
             }
         });
 
-        expect(wrapper.find('.fab').exists()).toBe(true);
+        const fabWrapper = wrapper.find('.bottom-menu-fab-wrapper');
+        expect(fabWrapper.exists()).toBe(true);
+        expect(fabWrapper.find('.menu-plus-bottom').exists()).toBe(true);
+        expect(fabWrapper.find('.fab').exists()).toBe(true);
         expect(wrapper.find('.img-background').exists()).toBe(true);
         expect(wrapper.classes()).toContain('is-curved');
         expect(wrapper.find('.bottom-menu-bar').attributes('style')).toContain('64px');

@@ -59,6 +59,8 @@ describe('MaxPageMobileLayout', () => {
         expect(wrapper.find('.mobile-page-content').exists()).toBe(true);
         expect(wrapper.findComponent(MaxBottomMenu).exists()).toBe(true);
         expect(wrapper.findComponent(MaxSideMenuMobile).exists()).toBe(true);
+        expect(wrapper.find('.mobile-space.top').exists()).toBe(true);
+        expect(wrapper.find('.mobile-space.bottom').exists()).toBe(false);
     });
 
     it('renderiza o conteúdo padrão no slot do miolo', () => {

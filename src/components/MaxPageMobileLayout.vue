@@ -24,8 +24,6 @@
             <div class="mobile-page-body">
                 <slot></slot>
             </div>
-            <div class="mobile-space bottom">
-            </div>
         </main>
 
         <!-- Slot bugs flutuante e arrastável fora da barra de navegação -->
@@ -173,17 +171,11 @@
                     position: fixed;
                     background: linear-gradient(to bottom, var(--background-25, #f8fafc), transparent);
                 }
-
-                &.bottom {
-                    bottom: 57px;
-                    position: fixed;
-                    background: linear-gradient(to bottom, transparent, var(--background-25, #f8fafc));
-                }
             }
 
             .mobile-page-body {
                 padding-top: 20px;
-                padding-bottom: 30px;
+                padding-bottom: 48px;
             }
 
             &::before {
