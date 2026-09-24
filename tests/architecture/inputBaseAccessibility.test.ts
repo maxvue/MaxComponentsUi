@@ -26,9 +26,9 @@ function getComponentsUsingInputBase(): string[] {
 }
 
 describe('Auditoria Arquitetural: Acessibilidade de InputBase e Consumidores', () => {
-    it('as 26 famílias de componentes de entrada devem conectar atributos de controle e ID aos elementos operáveis', () => {
+    it('as 27 famílias de componentes de entrada devem conectar atributos de controle e ID aos elementos operáveis', () => {
         const consumers = getComponentsUsingInputBase();
-        expect(consumers.length).toBe(25);
+        expect(consumers.length).toBe(26);
 
         const unmigrated: string[] = [];
         for (const file of consumers) {
@@ -46,7 +46,7 @@ describe('Auditoria Arquitetural: Acessibilidade de InputBase e Consumidores', (
         expect(toggleContent).toMatch(/:id="toggleInputId"/);
 
         const allFamilies = [...consumers, 'MaxInputToggle.vue'];
-        expect(allFamilies.length).toBe(26);
+        expect(allFamilies.length).toBe(27);
     });
 
     describe('Conexão acessível de controles representativos', () => {

@@ -205,6 +205,10 @@
       "types": "./dist/components/MaxInputDatePicker.vue.d.ts",
       "import": "./dist/components/MaxInputDatePicker.es.js"
     },
+    "./components/MaxInputDiscount": {
+      "types": "./dist/components/MaxInputDiscount.vue.d.ts",
+      "import": "./dist/components/MaxInputDiscount.es.js"
+    },
     "./components/MaxInputFile": {
       "types": "./dist/components/MaxInputFile.vue.d.ts",
       "import": "./dist/components/MaxInputFile.es.js"
