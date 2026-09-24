@@ -24,7 +24,7 @@
                     <MaxIcon
                         v-if="parentIcon"
                         :icon="parentIcon"
-                        size="1.2"
+                        size="1.5"
                         light
                         class="flyout-header-icon"
                     />
@@ -32,7 +32,7 @@
                 </div>
                 <MaxIconButton
                     icon="material-symbols:close-rounded"
-                    size="1.2"
+                    size="1.4"
                     light
                     class="flyout-close-btn"
                     aria-label="Fechar submenu"
@@ -57,7 +57,7 @@
                     <MaxIcon
                         v-if="parentIcon"
                         :icon="parentIcon"
-                        size="1.1"
+                        size="1.4"
                         light
                         class="flyout-item-icon"
                     />
@@ -80,7 +80,7 @@
                     <MaxIcon
                         v-if="getMenuItemIcon(sub)"
                         :icon="getMenuItemIcon(sub)!"
-                        size="1.1"
+                        size="1.4"
                         light
                         class="flyout-item-icon"
                     />
@@ -258,8 +258,8 @@
             .flyout-close-btn {
                 display: grid;
                 place-items: center;
-                width: 28px;
-                height: 28px;
+                width: 30px;
+                height: 30px;
                 padding: 0;
                 border: none;
                 border-radius: 6px;
@@ -298,9 +298,9 @@
             .flyout-item {
                 display: flex;
                 align-items: center;
-                gap: 0.7rem;
-                min-height: 38px;
-                padding: 0.45rem 0.75rem;
+                gap: 0.75rem;
+                min-height: 40px;
+                padding: 0.5rem 0.75rem;
                 border-radius: 6px;
                 color: var(--blue-200);
                 cursor: pointer;
@@ -365,12 +365,12 @@
     }
 
     .max-flyout-slide-leave-active {
-        transition: transform 0.24s cubic-bezier(0.4, 0, 1, 1), opacity 0.2s ease-in;
+        transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease-in;
     }
 
     .max-flyout-slide-enter-from,
     .max-flyout-slide-leave-to {
-        transform: translateX(-16px);
+        transform: translateX(-100%);
         opacity: 0;
     }
 

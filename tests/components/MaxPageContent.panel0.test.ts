@@ -114,4 +114,14 @@ describe('MaxPageContent com panel0 (Submenu lateral desktop)', () => {
         expect(sfc).toMatch(/&\.has-panel0\s*\{[^}]*grid-template-columns:\s*240px 1fr;/);
         expect(sfc).toMatch(/&\.has-panel0\s*\{[^}]*gap:\s*8px;/);
     });
+
+    it('possui grid base interpolável de 0 1fr com pane1 na coluna 2', async () => {
+        const fs = await import('node:fs');
+        const path = await import('node:path');
+        const sfc = fs.readFileSync(path.resolve(__dirname, '../../src/components/MaxPageContent.vue'), 'utf-8');
+
+        expect(sfc).toMatch(/grid-template-columns:\s*0 1fr;/);
+        expect(sfc).toMatch(/\.pane1\s*\{[^}]*grid-column:\s*2;/);
+        expect(sfc).toMatch(/\.pane1\s*\{[^}]*grid-row:\s*1;/);
+    });
 });

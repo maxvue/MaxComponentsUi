@@ -145,14 +145,34 @@ describe('MaxSideMenuFlyout', () => {
         expect(closeBtn.props('light')).toBe(true);
     });
 
-    it('aplica propriedade light e cor clara nos ícones internos do submenu', () => {
+    it('aplica propriedade light e define tamanho de ícones compatível com o menu principal', () => {
+        const itemWithIcons: SideMenuItem = {
+            id: 'crm',
+            details: {
+                title: 'Clientes',
+                icon: 'mdi:account-group',
+                route: 'clients_index'
+            },
+            subitems: [
+                { id: 'sub-1', label: 'Lista de Clientes', icon: 'mdi:format-list-bulleted', route: 'clients_list' },
+                { id: 'sub-2', label: 'Novo Cliente', icon: 'mdi:plus-circle', route: 'clients_create' }
+            ]
+        };
+
         const wrapper = mount(MaxSideMenuFlyout, {
-            props: { visible: true, item: mockItem },
+            props: { visible: true, item: itemWithIcons },
             global: { stubs: { MaxIcon: true } }
         });
 
+        const headerIcon = wrapper.findComponent('.flyout-header-icon');
+        expect(headerIcon.props('size')).toBe('1.5');
+
+        const itemIcons = wrapper.findAllComponents('.flyout-item-icon');
+        expect(itemIcons.length).toBe(3); // 1 overview + 2 subitems
+        for (const icon of itemIcons) expect(icon.props('size')).toBe('1.4');
+
         const icons = wrapper.findAllComponents({ name: 'MaxIcon' });
-        expect(icons.length).toBeGreaterThanOrEqual(3);
+        expect(icons.length).toBe(5); // 1 header + 1 close button + 1 overview + 2 subitems
         for (const icon of icons) expect(icon.props('light')).toBe(true);
     });
 
@@ -167,12 +187,13 @@ describe('MaxSideMenuFlyout', () => {
         expect(sfc).toMatch(/\.flyout-item-icon\s*\{[^}]*color:\s*var\(--blue-100/);
     });
 
-    it('possui transição suave de entrada e saída (0.28s e 0.24s com cubic-bezier)', async () => {
+    it('possui transição suave de entrada e saída (0.28s com cubic-bezier e translateX(-100%))', async () => {
         const fs = await import('node:fs');
         const path = await import('node:path');
         const sfc = fs.readFileSync(path.resolve(__dirname, '../../src/components/MaxSideMenuFlyout.vue'), 'utf-8');
 
         expect(sfc).toMatch(/\.max-flyout-slide-enter-active\s*\{[^}]*transition:\s*transform\s+0\.28s\s+cubic-bezier\(0\.16,\s*1,\s*0\.3,\s*1\)/);
-        expect(sfc).toMatch(/\.max-flyout-slide-leave-active\s*\{[^}]*transition:\s*transform\s+0\.24s\s+cubic-bezier\(0\.4,\s*0,\s*1,\s*1\)/);
+        expect(sfc).toMatch(/\.max-flyout-slide-leave-active\s*\{[^}]*transition:\s*transform\s+0\.28s\s+cubic-bezier\(0\.16,\s*1,\s*0\.3,\s*1\)/);
+        expect(sfc).toMatch(/\.max-flyout-slide-enter-from,\s*\.max-flyout-slide-leave-to\s*\{[^}]*transform:\s*translateX\(-100%\);/);
     });
 });

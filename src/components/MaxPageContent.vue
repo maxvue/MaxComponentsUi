@@ -60,7 +60,9 @@
         padding: 8px;
         box-sizing: border-box;
         border-radius: 1rem;
-        grid-template-columns: 1fr;
+        overflow: hidden;
+        grid-template-columns: 0 1fr;
+        gap: 0;
         background-color: var(--layout-content-frame-bg, #004860);
         transition: grid-template-columns 0.28s cubic-bezier(0.16, 1, 0.3, 1), gap 0.28s ease;
 
@@ -73,14 +75,26 @@
             width: 100%;
             height: calc(100dvh - var(--top-menu-height, 60px) - var(--bottom-menu-height, 58px) - env(safe-area-inset-bottom, 0px));
             border-radius: 0;
+            grid-template-columns: 1fr;
 
             &.has-panel0 {
                 grid-template-columns: 1fr;
                 gap: 0;
             }
+
+            .pane1 {
+                grid-column: 1;
+            }
+        }
+
+        :deep(.max-side-menu-flyout) {
+            grid-column: 1;
+            grid-row: 1;
         }
 
         .pane1 {
+            grid-column: 2;
+            grid-row: 1;
             overflow: hidden auto;
             -webkit-overflow-scrolling: touch;
             overscroll-behavior-y: contain;

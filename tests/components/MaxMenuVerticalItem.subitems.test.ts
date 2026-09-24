@@ -161,6 +161,43 @@ describe('MaxMenuVerticalItem com subitems', () => {
         expect(items[0].classes()).toContain('active');
     });
 
+    it('suprime temporariamente o active da rota atual quando um submenu de outro item é aberto', async () => {
+        const { useSystemStore } = await import('../../src/stores/useSystem.Store');
+        const system = useSystemStore();
+
+        // Rota atual corresponde a 'settings' (items[1])
+        currentRoute = { name: 'settings', path: '/settings' };
+
+        const wrapper = mount(MaxMenuVerticalItem, {
+            props: { items: mockItems },
+            global: {
+                plugins: [pinia],
+                directives: { tooltip: () => {} },
+                stubs: { MaxIcon: true }
+            }
+        });
+
+        const items = wrapper.findAll('.max-menu-vertical-item');
+        // Inicialmente, 'settings' está ativo e 'projects' não está
+        expect(items[1].classes()).toContain('active');
+        expect(items[0].classes()).not.toContain('active');
+
+        // Abre o submenu de 'projects' (items[0])
+        system.openSideSubmenu(mockItems[0]);
+        await wrapper.vm.$nextTick();
+
+        // O item 'projects' deve ficar ativo e 'settings' deve ter o active suprimido temporariamente
+        expect(items[0].classes()).toContain('active');
+        expect(items[1].classes()).not.toContain('active');
+
+        // Ao fechar o submenu, 'settings' recupera o estilo active
+        system.closeSideSubmenu();
+        await wrapper.vm.$nextTick();
+
+        expect(items[0].classes()).not.toContain('active');
+        expect(items[1].classes()).toContain('active');
+    });
+
     it('aplica cores claras e vincula a curva a --layout-content-frame-bg', async () => {
         const fs = await import('node:fs');
         const path = await import('node:path');

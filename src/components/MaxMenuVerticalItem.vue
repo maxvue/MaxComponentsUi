@@ -91,6 +91,10 @@
     const isActive = (item: SideMenuItem): boolean => {
         if (isFlyoutActive(item)) return true;
 
+        // Quando o submenu abre, o estilo "Active" do item da página atual é temporariamente ignorado
+        const hasAnyFlyoutOpen = Boolean(system.active_side_submenu || props.activeFlyoutId);
+        if (hasAnyFlyoutOpen) return false;
+
         const current = currentPage.value;
         if (!current) return false;
 
