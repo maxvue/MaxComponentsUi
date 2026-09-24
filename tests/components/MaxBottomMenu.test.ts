@@ -129,18 +129,22 @@ describe('MaxBottomMenu', () => {
         expect(fabWrapper.exists()).toBe(true);
         expect(fabWrapper.find('.menu-plus-bottom').exists()).toBe(true);
         expect(fabWrapper.find('.fab').exists()).toBe(true);
-        expect(wrapper.find('.img-background path').attributes('d')).toContain('M300 66');
+        expect(wrapper.find('.img-background path').attributes('d')).toContain('M300 78');
         expect(wrapper.classes()).toContain('is-curved');
-        expect(wrapper.find('.bottom-menu-bar').attributes('style')).toContain('72px');
+        expect(wrapper.find('.bottom-menu-bar').attributes('style')).toContain('76px');
+        const fabIcon = fabWrapper.find('.fab').findComponent({ name: 'MaxIcon' });
+        expect(fabIcon.props('color')).toBe('var(--blue-200)');
     });
 
-    it('emite o evento fabClick quando o FAB simples é clicado', async () => {
+    it('emite o evento fabClick quando o FAB simples é clicado e usa cor var(--blue-200) no ícone', async () => {
         const wrapper = mount(MaxBottomMenu, {
             props: { showFab: true }
         });
 
         const fabBtn = wrapper.find('.fab');
         expect(fabBtn.exists()).toBe(true);
+        const fabIcon = fabBtn.findComponent({ name: 'MaxIcon' });
+        expect(fabIcon.props('color')).toBe('var(--blue-200)');
 
         await fabBtn.trigger('click');
         expect(wrapper.emitted('fabClick')).toHaveLength(1);

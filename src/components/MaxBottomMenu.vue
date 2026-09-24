@@ -9,7 +9,7 @@
             preserveAspectRatio="none"
             aria-hidden="true"
         >
-            <path d="M300 66 C281.2 66.0 264.0 53.7 256.5 38.0 C249.0 22.3 238.5 10.0 225.0 10.0 L0 10 L0 120 L600 120 L600 10 L375.0 10.0 C361.5 10.0 351.0 22.3 343.5 38.0 C336.0 53.7 318.8 66.0 300 66 Z" />
+            <path d="M300 78.0 C273.6 78.0 268.8 60.3 252.0 45.4 C243.5 30.4 236.7 10.0 218.0 10.0 L0 10 L0 120 L600 120 L600 10 L382.0 10.0 C363.3 10.0 356.5 30.4 348.0 45.4 C331.2 60.3 326.4 78.0 300 78.0 Z" />
         </svg>
 
         <div class="bottom-menu-bar" :style="gridStyle">
@@ -47,7 +47,7 @@
                                     @keydown.enter.prevent="toggle"
                                     @keydown.space.prevent="toggle"
                                 >
-                                    <MaxIcon icon="ic:round-plus" size="1.5" />
+                                    <MaxIcon icon="ic:round-plus" size="1.5" color="var(--blue-200)" />
                                 </button>
                             </template>
                         </MaxPopoverMenu>
@@ -58,7 +58,7 @@
                             aria-label="Adicionar novo"
                             @click="emit('fabClick')"
                         >
-                            <MaxIcon icon="ic:round-plus" size="1.5" />
+                            <MaxIcon icon="ic:round-plus" size="1.5" color="var(--blue-200)" />
                         </button>
                     </slot>
                 </div>
@@ -175,7 +175,7 @@
             const rightCount = rightTabs.value.length;
 
             return {
-                gridTemplateColumns: `repeat(${leftCount}, 1fr) 72px repeat(${rightCount}, 1fr)`
+                gridTemplateColumns: `repeat(${leftCount}, 1fr) 76px repeat(${rightCount}, 1fr)`
             };
         }
 
@@ -293,7 +293,7 @@
             position: relative;
             display: grid;
             place-items: center;
-            width: 72px;
+            width: 76px;
             height: 100%;
 
             :deep(.menu-plus-bottom) {
@@ -310,7 +310,7 @@
             :deep(.fab),
             .fab {
                 position: absolute;
-                top: -22px;
+                top: -14px;
                 left: 50%;
                 transform: translateX(-50%);
                 width: 47px;
@@ -322,7 +322,7 @@
                 appearance: none;
                 border-radius: 999px;
                 background: var(--max-primary-500);
-                color: var(--background-0);
+                color: var(--blue-200);
                 cursor: pointer;
                 box-shadow: 0 6px 16px rgb(0 32 58 / 28%);
                 transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
