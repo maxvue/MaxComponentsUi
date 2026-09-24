@@ -654,7 +654,7 @@
         margin: 0;
         font-family: inherit;
         font-size: 0.875rem;
-        color: var(--background-800, #1e293b);
+        color: var(--background-750);
         border-radius: 4px;
         cursor: pointer;
         outline: none;
@@ -678,7 +678,7 @@
         }
 
         &.is-empty {
-            color: var(--background-400, #94a3b8);
+            color: var(--background-500);
         }
 
         &:disabled {
@@ -740,7 +740,7 @@
         padding: 10px;
         box-sizing: border-box;
         user-select: none;
-        color: var(--background-800, #1e293b);
+        color: var(--background-750);
     }
 
     .max-birthday-panel-header {
@@ -763,7 +763,7 @@
         border-radius: 6px;
         font-family: inherit;
         font-size: 0.8125rem;
-        color: var(--background-700, #334155);
+        color: var(--background-750);
         cursor: pointer;
         transition: background-color 0.12s ease, color 0.12s ease;
 

@@ -205,11 +205,11 @@
             outline: none;
             resize: none;
             overflow-y: auto;
-            color: var(--background-700);
+            color: var(--background-750);
             font-family: inherit;
 
             &::placeholder {
-                color: var(--max-content-placeholder, var(--background-500));
+                color: var(--background-500);
             }
 
             &[no-border] {

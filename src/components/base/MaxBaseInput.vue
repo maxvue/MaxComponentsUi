@@ -68,13 +68,13 @@
         border: 1px solid var(--background-400);
         border-radius: 6px;
         background: var(--background-100);
-        color: var(--background-700);
+        color: var(--background-750);
         font-family: inherit;
         font-size: 1rem;
         transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
 
         &::placeholder {
-            color: var(--max-content-placeholder, var(--background-500));
+            color: var(--background-500);
             opacity: 1;
         }
 

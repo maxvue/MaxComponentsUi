@@ -251,7 +251,7 @@
 
     .max-uf-trigger-value {
         font-size: 0.875rem;
-        color: var(--background-800, #1e293b);
+        color: var(--background-750);
         font-weight: 500;
     }
 
@@ -274,7 +274,7 @@
         .max-uf-code {
             font-weight: 600;
             font-size: 0.875rem;
-            color: var(--background-800, #1e293b);
+            color: var(--background-750);
             min-width: 24px;
         }
 
@@ -286,7 +286,7 @@
 
         .max-uf-name {
             font-size: 0.875rem;
-            color: var(--background-700, #334155);
+            color: var(--background-750);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;

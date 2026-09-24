@@ -135,16 +135,16 @@ describe('MaxInputTextArea', () => {
         expect(el.style.overflowY).toBe('hidden');
     });
 
-    it('define cor semântica var(--background-700) e placeholder var(--background-650) ou var(--max-content-placeholder) no estilo do MaxInputTextArea', () => {
+    it('define cor semântica var(--background-750) e placeholder var(--background-500) no estilo do MaxInputTextArea', () => {
         const sfc = readFileSync(resolve(__dirname, '../../src/components/MaxInputTextArea.vue'), 'utf-8');
-        expect(sfc).toMatch(/textarea\s*\{[^}]*color:\s*var\(--background-700\)/s);
-        expect(sfc).toMatch(/&::placeholder\s*\{[^}]*color:\s*var\(--(?:max-content-placeholder|background-650)/s);
+        expect(sfc).toMatch(/textarea\s*\{[^}]*color:\s*var\(--background-750\)/s);
+        expect(sfc).toMatch(/&::placeholder\s*\{[^}]*color:\s*var\(--(?:max-content-placeholder|background-500)/s);
     });
 
-    it('define cor var(--background-700) e placeholder para textarea no InputBase', () => {
+    it('define cor var(--background-750) e placeholder para textarea no InputBase', () => {
         const sfc = readFileSync(resolve(__dirname, '../../src/components/InputBase.vue'), 'utf-8');
-        expect(sfc).toMatch(/input,\s*textarea\s*\{[^}]*color:\s*var\(--background-700\)/s);
-        expect(sfc).toMatch(/input,\s*textarea\s*\{[^}]*&::placeholder\s*\{[^}]*color:\s*var\(--max-content-placeholder/s);
+        expect(sfc).toMatch(/input,\s*textarea\s*\{[^}]*color:\s*var\(--background-750\)/s);
+        expect(sfc).toMatch(/input,\s*textarea\s*\{[^}]*&::placeholder\s*\{[^}]*color:\s*var\(--(?:max-content-placeholder|background-500)/s);
     });
 
     describe('Redimensionamento único e prevenção de layout thrashing (E11-02)', () => {

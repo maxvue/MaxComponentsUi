@@ -545,7 +545,7 @@
 
                     .label-flag {
                         height: 16px !important;
-                        color: var(--background-700);
+                        color: var(--background-750);
                     }
                 }
             }
@@ -606,6 +606,11 @@
             border: 1px solid var(--background-300);
             border-radius: 4px;
             background-color: transparent;
+            color: var(--background-750);
+
+            &::placeholder {
+                color: var(--background-500);
+            }
 
             &:focus {
                 border-color: var(--max-inputtext-focus-border-color);
@@ -653,17 +658,17 @@
                 gap: 10px;
 
                 .icon-div {
-                    color: var(--background-700) !important;
+                    color: var(--background-750) !important;
                 }
 
                 &:hover {
                     .icon-div {
-                        color: var(--background-700) !important;
+                        color: var(--background-750) !important;
                     }
                 }
 
                 .subLabel {
-                    color: var(--background-700);
+                    color: var(--background-750);
                     padding-left: 1rem;
                     text-align: right;
                     width: 100%;
@@ -673,7 +678,7 @@
                 .labelz {
                     display: grid;
                     place-items: center;
-                    color: var(--background-775);
+                    color: var(--background-750);
 
                     .phone-option-label {
                         padding-top: 2px;

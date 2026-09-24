@@ -676,12 +676,12 @@
             border: 1px solid var(--background-300);
             border-radius: 4px;
             background-color: var(--background-0);
-            color: var(--background-700);
+            color: var(--background-750);
             font-size: 0.9rem;
             outline: none;
 
             &::placeholder {
-                color: var(--max-content-placeholder, var(--background-500));
+                color: var(--background-500);
             }
 
             &:focus {
@@ -756,7 +756,7 @@
                 // totalHeight/offsetY/startIndex.
                 min-height: v-bind('`${props.itemHeight}px`');
                 cursor: pointer;
-                color: var(--background-700);
+                color: var(--background-750);
 
                 &:hover {
                     background-color: var(--background-100);
@@ -862,7 +862,7 @@
         justify-content: center;
         gap: 8px;
         padding: 14px 12px;
-        color: var(--background-700);
+        color: var(--background-750);
         font-size: 0.9rem;
 
         .max-listbox-retry {

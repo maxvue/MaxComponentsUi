@@ -1479,10 +1479,14 @@
                                         border-radius: 4px;
                                         border: 1px solid var(--background-300, #cbd5e1);
                                         background-color: var(--background-0, #fff);
-                                        color: var(--background-900, #0f172a);
+                                        color: var(--background-750);
                                         outline: none;
                                         box-sizing: border-box;
                                         transition: border-color 0.15s ease;
+
+                                        &::placeholder {
+                                            color: var(--background-500);
+                                        }
 
                                         &:focus {
                                             outline: var(--max-focus-outline, 2px solid var(--max-primary-500, #00768e));
@@ -1722,7 +1726,7 @@
                         border-radius: 4px;
                         border: 1px solid var(--background-300, #cbd5e1);
                         background-color: var(--background-0, #fff);
-                        color: var(--background-900, #0f172a);
+                        color: var(--background-750);
                         outline: none;
 
                         &:focus {
@@ -1740,9 +1744,13 @@
                         border-radius: 4px;
                         border: 1px solid var(--background-300, #cbd5e1);
                         background-color: var(--background-0, #fff);
-                        color: var(--background-900, #0f172a);
+                        color: var(--background-750);
                         outline: none;
                         box-sizing: border-box;
+
+                        &::placeholder {
+                            color: var(--background-500);
+                        }
 
                         &:focus {
                             outline: var(--max-focus-outline, 2px solid var(--max-primary-500, #00768e));

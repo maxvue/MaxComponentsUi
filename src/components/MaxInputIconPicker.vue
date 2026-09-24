@@ -27,7 +27,7 @@
                     :color="modelValue && props.color ? props.color : undefined"
                     :dark="!modelValue ? 0.3 : 0.5"
                 />
-                <span class="trigger-label">{{ modelValue || props.placeholder || 'Escolha um ícone' }}</span>
+                <span :class="['trigger-label', { 'is-placeholder': !modelValue }]">{{ modelValue || props.placeholder || 'Escolha um ícone' }}</span>
                 <MaxIcon i="mdi:chevron-down" size="0.9" :dark="0.4" />
             </div>
         </template>
@@ -547,6 +547,11 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            color: var(--background-750);
+
+            &.is-placeholder {
+                color: var(--background-500);
+            }
         }
     }
 }
@@ -624,10 +629,10 @@
                     border-radius: 8px;
                     outline: none;
                     font-size: 0.9rem;
-                    color: var(--background-700);
+                    color: var(--background-750);
 
                     &::placeholder {
-                        color: var(--max-content-placeholder, var(--background-500));
+                        color: var(--background-500);
                     }
                 }
             }
@@ -638,7 +643,7 @@
                 align-items: center;
                 justify-content: center;
                 height: calc(90dvh - 140px);
-                color: var(--background-700);
+                color: var(--background-750);
                 font-size: 0.9rem;
                 gap: 0.5rem;
 
@@ -724,7 +729,7 @@
                                 place-items: center;
                                 width: 1.5rem;
                                 height: 1.5rem;
-                                color: var(--background-700, rgb(0 0 0 / 50%));
+                                color: var(--background-750, rgb(0 0 0 / 50%));
 
                                 svg {
                                     min-width: 100% !important;

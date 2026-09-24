@@ -104,9 +104,9 @@ describe('Matriz Semântica de 4 Níveis de Cor de Texto (background-650/700/750
     });
 
     describe('6. Formulários e Inputs', () => {
-        it('InputBase deve unificar desabilitados em token disabled e placeholder em token próprio', () => {
+        it('InputBase deve unificar desabilitados em token disabled e placeholder em token próprio ou background-500', () => {
             const style = INPUT_BASE.split('<style')[1] ?? '';
-            expect(style).toMatch(/placeholder\s*\{[^}]*color:\s*var\(--max-content-placeholder/);
+            expect(style).toMatch(/placeholder\s*\{[^}]*color:\s*var\(--(?:max-content-placeholder|background-500)/);
             expect(style).toMatch(/\[disabled\][^}]*color:\s*var\(--max-content-disabled/);
         });
 
@@ -116,9 +116,9 @@ describe('Matriz Semântica de 4 Níveis de Cor de Texto (background-650/700/750
             expect(style).toMatch(/\.input-toggle-field-label\s*\{[^}]*color:\s*var\(--background-700\)/);
         });
 
-        it('MaxChips deve usar Texto Normal (700) no token e var(--background-500) ou token no placeholder', () => {
+        it('MaxChips deve usar Texto Levemente Destacado (750) no token e var(--background-500) ou token no placeholder', () => {
             const style = CHIPS.split('<style')[1] ?? '';
-            expect(style).toMatch(/\.max-chip-token\s*\{[^}]*color:\s*var\(--background-700\)/);
+            expect(style).toMatch(/\.max-chip-token\s*\{[^}]*color:\s*var\(--background-750\)/);
             expect(style).toMatch(/placeholder\s*\{[^}]*color:\s*var\(--(?:max-content-placeholder|background-500)/);
         });
 
@@ -138,30 +138,30 @@ describe('Matriz Semântica de 4 Níveis de Cor de Texto (background-650/700/750
             expect(style).toMatch(/placeholder\s*\{[^}]*color:\s*var\(--(?:max-content-placeholder|background-500)/);
         });
 
-        it('MaxInputAutoComplete e MaxInputAutoCompleteApi devem usar Texto Normal (700) e Texto Fraco (650) para sublabels', () => {
+        it('MaxInputAutoComplete e MaxInputAutoCompleteApi devem usar Texto Levemente Destacado (750) e Texto Fraco (650) para sublabels', () => {
             const acStyle = AUTOCOMPLETE.split('<style')[1] ?? '';
             const apiStyle = AUTOCOMPLETE_API.split('<style')[1] ?? '';
 
-            expect(acStyle).toMatch(/\.max-autocomplete-input\s*\{[^}]*color:\s*var\(--background-700\)/);
-            expect(acStyle).toMatch(/\.autocomplete-item-select-label\s*\{[^}]*color:\s*var\(--background-700\)/);
+            expect(acStyle).toMatch(/\.max-autocomplete-input\s*\{[^}]*color:\s*var\(--background-750\)/);
+            expect(acStyle).toMatch(/\.autocomplete-item-select-label\s*\{[^}]*color:\s*var\(--background-750\)/);
             expect(acStyle).toMatch(/\.autocomplete-item-select-sub-label\s*\{[^}]*color:\s*var\(--background-650\)/);
 
-            expect(apiStyle).toMatch(/\.max-autocomplete-input\s*\{[^}]*color:\s*var\(--background-700\)/);
-            expect(apiStyle).toMatch(/\.autocomplete-item-select-label\s*\{[^}]*color:\s*var\(--background-700\)/);
+            expect(apiStyle).toMatch(/\.max-autocomplete-input\s*\{[^}]*color:\s*var\(--background-750\)/);
+            expect(apiStyle).toMatch(/\.autocomplete-item-select-label\s*\{[^}]*color:\s*var\(--background-750\)/);
             expect(apiStyle).toMatch(/\.autocomplete-item-select-sub-label\s*\{[^}]*color:\s*var\(--background-650\)/);
         });
 
-        it('MaxInputDatePicker deve usar 700 para input e dias, 775 para título e 650 para dias da semana', () => {
+        it('MaxInputDatePicker deve usar 750 para input e dias, 775 para título e 650 para dias da semana', () => {
             const style = DATE_PICKER.split('<style')[1] ?? '';
             expect(style).toMatch(/\.max-datepicker-title\s*\{[^}]*color:\s*var\(--background-775\)/);
             expect(style).toMatch(/\.max-datepicker-weekdays\s*\{[^}]*color:\s*var\(--background-650\)/);
-            expect(style).toMatch(/\.max-datepicker-day\s*\{[^}]*color:\s*var\(--background-700\)/);
+            expect(style).toMatch(/\.max-datepicker-day\s*\{[^}]*color:\s*var\(--background-750\)/);
         });
 
-        it('MaxInputMarkdown deve usar 700 para texto normal, placeholder com token próprio, 775 para headings e 750 para th', () => {
+        it('MaxInputMarkdown deve usar 750 para texto normal, placeholder com token ou 500, 775 para headings e 750 para th', () => {
             const style = MARKDOWN.split('<style')[1] ?? '';
-            expect(style).toMatch(/\.max-input-markdown__prosemirror\s*\{[^}]*color:\s*var\(--background-700\)/);
-            expect(style).toMatch(/color:\s*var\(--max-content-placeholder/);
+            expect(style).toMatch(/\.max-input-markdown__prosemirror\s*\{[^}]*color:\s*var\(--background-750\)/);
+            expect(style).toMatch(/color:\s*var\(--(?:max-content-placeholder|background-500)/);
             expect(style).toMatch(/h1,\s*h2,\s*h3,\s*h4,\s*h5,\s*h6\s*\{[^}]*color:\s*var\(--background-775\)/);
             expect(style).toMatch(/th\s*\{[^}]*color:\s*var\(--background-750\)/);
         });
@@ -174,11 +174,11 @@ describe('Matriz Semântica de 4 Níveis de Cor de Texto (background-650/700/750
             expect(style).toMatch(/&:disabled\s*\{[^}]*color:\s*var\(--background-650\)/);
         });
 
-        it('MaxListBox deve usar Texto Normal (700) no item regular e Texto Fraco (650) na sublabel', () => {
+        it('MaxListBox deve usar Texto Levemente Destacado (750) no item regular e Texto Fraco (650) na sublabel', () => {
             const style = LISTBOX.split('<style')[1] ?? '';
-            expect(style).toMatch(/\.max-listbox-item\s*\{[\s\S]*?color:\s*var\(--background-700\);/);
+            expect(style).toMatch(/\.max-listbox-item\s*\{[\s\S]*?color:\s*var\(--background-750\);/);
             expect(style).toMatch(/\.max-listbox-item-sublabel\s*\{[^}]*color:\s*var\(--background-650\)/);
-            expect(style).toMatch(/\.max-listbox-filter-input\s*\{[^}]*color:\s*var\(--background-700\)/);
+            expect(style).toMatch(/\.max-listbox-filter-input\s*\{[^}]*color:\s*var\(--background-750\)/);
         });
     });
 
@@ -264,7 +264,7 @@ describe('Matriz Semântica de 4 Níveis de Cor de Texto (background-650/700/750
 
         it('InputBase consome tokens semânticos dedicados para placeholder, help e disabled', () => {
             const style = INPUT_BASE.split('<style')[1] ?? '';
-            expect(style).toMatch(/color:\s*var\(--max-content-placeholder/);
+            expect(style).toMatch(/color:\s*var\(--(?:max-content-placeholder|background-500)/);
             expect(style).toMatch(/color:\s*var\(--max-content-help/);
             expect(style).toMatch(/color:\s*var\(--max-content-disabled/);
         });

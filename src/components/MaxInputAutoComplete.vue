@@ -470,7 +470,7 @@
             outline: none;
             background: transparent;
             font-size: 0.9rem;
-            color: var(--background-700);
+            color: var(--background-750);
             padding: 0 10px;
         }
     }
@@ -540,7 +540,7 @@
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;
-                    color: var(--background-700);
+                    color: var(--background-750);
                 }
 
                 .autocomplete-item-select-sub-label {

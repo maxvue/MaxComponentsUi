@@ -859,7 +859,7 @@
     .placeholder-select {
         position: absolute;
         padding-left: 7px !important;
-        color: var(--max-content-placeholder, var(--background-500));
+        color: var(--background-500);
         font-size: 0.9rem;
     }
 
@@ -921,7 +921,7 @@
                 place-items: center;
 
                 .value-text {
-                    color: var(--background-775);
+                    color: var(--background-750);
                     white-space: nowrap;
                     text-overflow: ellipsis;
                     max-width: 100%;
@@ -1004,9 +1004,10 @@
                 outline: none;
                 font-size: 0.85rem;
                 background: var(--background-50, #f8fafc);
+                color: var(--background-750);
 
                 &::placeholder {
-                    color: var(--max-content-placeholder, var(--background-500));
+                    color: var(--background-500);
                 }
 
                 &:focus {
@@ -1042,7 +1043,7 @@
 
         .max-select-empty-message {
             padding: 8px 12px;
-            color: var(--background-700);
+            color: var(--background-750);
             font-size: 0.85rem;
 
             &.is-error {
@@ -1083,7 +1084,7 @@
             box-sizing: border-box;
             cursor: pointer;
             font-size: 0.85rem;
-            color: var(--background-700);
+            color: var(--background-750);
             transition: background-color 0.15s ease;
             min-width: 0;
             max-width: 100%;
@@ -1134,7 +1135,7 @@
 
             .labelz,
             .subLabel {
-                color: var(--background-700);
+                color: var(--background-750);
             }
 
             .category {
@@ -1167,17 +1168,17 @@
             gap: 10px;
 
             .icon-div {
-                color: var(--background-700) !important;
+                color: var(--background-750) !important;
             }
 
             &:hover {
                 .icon-div {
-                    color: var(--background-700) !important;
+                    color: var(--background-750) !important;
                 }
             }
 
             .subLabel {
-                color: var(--background-700);
+                color: var(--background-750);
                 padding-left: 1rem;
                 text-align: right;
                 font-size: 0.85rem;
@@ -1193,7 +1194,7 @@
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
-                color: var(--background-775);
+                color: var(--background-750);
 
                 > div {
                     display: block;

@@ -75,12 +75,12 @@
         gap: 10px;
 
         .icon-div {
-            color: var(--background-700) !important;
+            color: var(--background-750) !important;
         }
 
         &:hover {
             .icon-div {
-                color: var(--background-700) !important;
+                color: var(--background-750) !important;
             }
         }
 

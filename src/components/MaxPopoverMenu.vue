@@ -408,6 +408,7 @@
             height: 2rem;
             cursor: pointer;
             padding: 0 8px;
+            color: var(--background-750);
 
             &:hover {
                 background: var(--background-100, #f1f5f9);

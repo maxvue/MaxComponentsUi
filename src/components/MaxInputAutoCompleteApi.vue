@@ -555,7 +555,7 @@
             outline: none;
             background: transparent;
             font-size: 0.9rem;
-            color: var(--background-700);
+            color: var(--background-750);
             padding: 0 10px;
         }
     }
@@ -578,7 +578,7 @@
     .max-autocomplete-status {
         padding: 12px 16px;
         font-size: 0.875rem;
-        color: var(--background-700, #64748b);
+        color: var(--background-750, #64748b);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -678,7 +678,7 @@
                         white-space: nowrap;
                         overflow: hidden;
                         text-overflow: ellipsis;
-                        color: var(--background-700);
+                        color: var(--background-750);
                     }
 
                     .autocomplete-item-select-sub-label {

@@ -402,10 +402,10 @@
 
     :deep() {
         input, textarea {
-            color: var(--background-700);
+            color: var(--background-750);
 
             &::placeholder {
-                color: var(--max-content-placeholder, var(--background-500));
+                color: var(--background-500);
             }
         }
     }

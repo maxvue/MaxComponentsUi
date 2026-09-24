@@ -503,7 +503,7 @@
                 font-family: inherit;
                 font-size: 0.95rem;
                 line-height: 1.6;
-                color: var(--background-700);
+                color: var(--background-750);
                 box-sizing: border-box;
                 position: relative;
 
@@ -518,7 +518,7 @@
                     > p:first-child:empty::before,
                     &:has(> p:only-child > br:only-child)::before {
                         content: attr(data-placeholder);
-                        color: var(--max-content-placeholder, var(--background-500));
+                        color: var(--background-500);
                         pointer-events: none;
                         position: absolute;
                         float: left;

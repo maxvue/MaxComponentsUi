@@ -328,7 +328,7 @@
                 : 'var(--max-selection-content, #ffffff)';
         } else {
             background = hover ? 'var(--background-100, #f1f5f9)' : 'transparent';
-            text = hover ? 'var(--background-775, #1c2d3e)' : 'var(--background-700, #294056)';
+            text = hover ? 'var(--background-775, #1c2d3e)' : 'var(--background-750, #294056)';
         }
 
 
@@ -848,7 +848,7 @@
 
         .tab-placeholder-select {
             position: absolute;
-            color: var(--max-content-placeholder, var(--background-500));
+            color: var(--background-500);
             font-size: 0.9rem;
             z-index: 1;
             display: grid;
@@ -1046,10 +1046,10 @@
                     outline: none;
                     font-size: 0.85rem;
                     background: var(--background-0, #fff);
-                    color: var(--background-800, #1e293b);
+                    color: var(--background-750);
 
                     &::placeholder {
-                        color: var(--max-content-placeholder, var(--background-500));
+                        color: var(--background-500);
                     }
 
                     &:focus {
@@ -1096,7 +1096,7 @@
                     box-sizing: border-box;
                     transition: background-color 0.15s ease, color 0.15s ease;
                     border-radius: 6px;
-                    color: var(--background-700, #294056);
+                    color: var(--background-750, #294056);
                     min-width: 0;
                     max-width: 100%;
                     overflow: hidden;

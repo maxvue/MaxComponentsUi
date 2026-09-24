@@ -860,7 +860,7 @@
                 outline: none;
                 background: transparent;
                 font-size: 0.9rem;
-                color: var(--background-700);
+                color: var(--background-750);
                 padding: 0 10px;
                 cursor: pointer;
             }
@@ -956,7 +956,7 @@
                     border-radius: 50%;
                     cursor: pointer;
                     font-size: 0.85rem;
-                    color: var(--background-700);
+                    color: var(--background-750);
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -1010,7 +1010,7 @@
                 background: transparent;
                 border-radius: 6px;
                 font-size: 0.85rem;
-                color: var(--background-700);
+                color: var(--background-750);
                 cursor: pointer;
                 transition: all 0.15s ease;
 

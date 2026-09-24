@@ -760,12 +760,12 @@
             font-size: 13px;
             outline: none;
             background: var(--background-0, #fff);
-            color: var(--background-700);
+            color: var(--background-750);
             transition: border-color 0.15s;
             box-sizing: border-box;
 
             &::placeholder {
-                color: var(--max-content-placeholder, var(--background-500));
+                color: var(--background-500);
             }
 
             &:focus {
