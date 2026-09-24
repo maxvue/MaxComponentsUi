@@ -51,6 +51,13 @@ export { default as TabPanel } from './components/MaxTabPanel.vue';
 export { default as MaxTabItem } from './components/MaxTabItem.vue';
 export { default as TabItem } from './components/MaxTabItem.vue';
 
+// Steps
+export { default as MaxSteps } from './components/MaxSteps.vue';
+export { default as Steps } from './components/MaxSteps.vue';
+export { default as MaxStepItem } from './components/MaxStepItem.vue';
+export { default as StepItem } from './components/MaxStepItem.vue';
+export { STEPS_INJECTION_KEY, injectStepsContext, type StepsContext, type StepItemData } from './helpers/stepsContext';
+
 // Accordion
 export { default as MaxAccordion } from './components/MaxAccordion.vue';
 export { default as Accordion } from './components/MaxAccordion.vue';
@@ -132,6 +139,12 @@ export { default as MaxInputCodeToolbar } from './components/MaxInputCodeToolbar
 export { useToolbarNavigation, type UseToolbarNavigationOptions } from './helpers/useToolbarNavigation';
 export { default as MaxInputToggle } from './components/MaxInputToggle.vue';
 export { default as MaxInputTypeAddress } from './components/MaxInputTypeAddress.vue';
+export { default as MaxInputUF } from './components/MaxInputUF.vue';
+export { default as MaxInputUf } from './components/MaxInputUF.vue';
+export { default as InputUF } from './components/MaxInputUF.vue';
+export { default as InputUf } from './components/MaxInputUF.vue';
+export type { MaxInputUFProps, MaxInputUFValueMode } from './components/MaxInputUF.vue';
+export { BRAZIL_STATES, BRAZIL_NATIONAL_STATE, type BrazilState } from './constants/brazilStates';
 export { default as MaxGridCols } from './components/MaxGridCols.vue';
 
 // Loaders

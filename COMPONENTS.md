@@ -891,6 +891,53 @@ Ao receber um endereço via prop `street`, identifica automaticamente o tipo pel
 
 ---
 
+### MaxInputUF
+
+Select especializado para **Unidades Federativas (UF) e estados do Brasil** com **bandeiras vetoriais locais embutidas** (100% offline).
+No dropdown exibe a bandeira, a sigla em destaque e o nome do estado. Ao selecionar, exibe apenas a sigla no campo (ou o formato configurado em `value`).
+
+**Arquivo:** [`src/components/MaxInputUF.vue`](src/components/MaxInputUF.vue)
+**Aliases:** `MaxInputUf`, `InputUF`, `InputUf`
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `modelValue` | `string` | `''` | Sigla ou valor do estado selecionado (v-model) |
+| `value` | `'uf' \| 'state' \| 'estado' \| 'min' \| 'abbreviated'` | `'uf'` | Formato do valor retornado no v-model: `'uf'` (apenas sigla), `'state'` (nome completo) ou `'min'` (abreviado, ex: "R. G. do Sul") |
+| `label` | `string` | `'uf'` | Rótulo do campo: `'uf'` ("UF"), `'state'` ("Estado"), `'min'` ("Estado (Abrev.)") ou texto customizado |
+| `showBr` | `boolean` | `false` | Se `true`, inclui a opção 'BR' (Brasil / Nacional) no topo da lista. Aliases: `showBrasil`, `showBrazil`, `brazil`, `allowBrazil`, `brasil` |
+| `filter` | `boolean` | `true` | Habilita campo de busca no dropdown (pesquisa simultaneamente por UF, nome e abreviação sem acentos) |
+| `noLabel` | `boolean` | `false` | Oculta o rótulo do campo |
+| `clearable` | `boolean` | `false` | Exibe botão para limpar a seleção |
+| `disabled` | `boolean` | `false` | Desabilita o controle |
+| `required` | `boolean` | `false` | Marca o campo como obrigatório |
+| `placeholder` | `string` | — | Placeholder quando nenhum estado estiver selecionado |
+
+**Eventos:**
+- `update:modelValue` (`value: string`)
+- `change` (`value: string, state?: BrazilState`)
+
+**Slots:**
+- `#value="{ value, state }"` — Customização do valor exibido no campo fechado
+- `#option="{ option }"` — Customização de cada item dentro do dropdown
+
+**Exemplo:**
+```vue
+<MaxInputUF
+  v-model="uf"
+  placeholder="Selecione o estado"
+  clearable
+/>
+
+<!-- Com opção Brasil / Nacional -->
+<MaxInputUF
+  v-model="uf"
+  show-br
+  label="estado"
+/>
+```
+
+---
+
 ## Telefone
 
 ### MaxInputPhone

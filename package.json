@@ -297,6 +297,10 @@
       "types": "./dist/components/MaxInputTypeAddress.vue.d.ts",
       "import": "./dist/components/MaxInputTypeAddress.es.js"
     },
+    "./components/MaxInputUF": {
+      "types": "./dist/components/MaxInputUF.vue.d.ts",
+      "import": "./dist/components/MaxInputUF.es.js"
+    },
     "./components/MaxLikeButton": {
       "types": "./dist/components/MaxLikeButton.vue.d.ts",
       "import": "./dist/components/MaxLikeButton.es.js"
@@ -388,6 +392,14 @@
     "./components/MaxStats": {
       "types": "./dist/components/MaxStats.vue.d.ts",
       "import": "./dist/components/MaxStats.es.js"
+    },
+    "./components/MaxStepItem": {
+      "types": "./dist/components/MaxStepItem.vue.d.ts",
+      "import": "./dist/components/MaxStepItem.es.js"
+    },
+    "./components/MaxSteps": {
+      "types": "./dist/components/MaxSteps.vue.d.ts",
+      "import": "./dist/components/MaxSteps.es.js"
     },
     "./components/MaxTab": {
       "types": "./dist/components/MaxTab.vue.d.ts",

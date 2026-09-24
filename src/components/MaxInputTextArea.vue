@@ -209,7 +209,7 @@
             font-family: inherit;
 
             &::placeholder {
-                color: var(--max-content-placeholder, var(--background-650));
+                color: var(--max-content-placeholder, var(--background-500));
             }
 
             &[no-border] {

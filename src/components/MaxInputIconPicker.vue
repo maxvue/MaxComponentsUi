@@ -627,7 +627,7 @@
                     color: var(--background-700);
 
                     &::placeholder {
-                        color: var(--background-700);
+                        color: var(--max-content-placeholder, var(--background-500));
                     }
                 }
             }

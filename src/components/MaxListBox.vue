@@ -681,7 +681,7 @@
             outline: none;
 
             &::placeholder {
-                color: var(--background-700);
+                color: var(--max-content-placeholder, var(--background-500));
             }
 
             &:focus {
