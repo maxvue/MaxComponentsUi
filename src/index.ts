@@ -123,6 +123,8 @@ export { default as MaxSelectTag } from './components/MaxTagSelect.vue';
 export { default as MaxChips } from './components/MaxChips.vue';
 export { default as Chips } from './components/MaxChips.vue';
 export { default as MaxInputSwitch } from './components/MaxInputSwitch.vue';
+export { default as MaxSwitch } from './components/MaxInputSwitch.vue';
+export { default as InputSwitch } from './components/MaxInputSwitch.vue';
 export { default as MaxInputTextArea } from './components/MaxInputTextArea.vue';
 export { default as MaxInputTextList } from './components/MaxInputTextList.vue';
 // Async: o MaxInputMarkdown arrasta o tiptap inteiro (starter-kit + 8 extensões, ~350 KB);
