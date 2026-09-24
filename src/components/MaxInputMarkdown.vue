@@ -511,7 +511,7 @@
                     > p:first-child:empty::before,
                     &:has(> p:only-child > br:only-child)::before {
                         content: attr(data-placeholder);
-                        color: var(--max-content-placeholder, var(--background-700));
+                        color: var(--max-content-placeholder, var(--background-500));
                         pointer-events: none;
                         position: absolute;
                         float: left;

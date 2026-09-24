@@ -450,7 +450,7 @@
                 caret-color: var(--max-primary-500);
 
                 &::placeholder {
-                    color: var(--background-650);
+                    color: var(--max-content-placeholder, var(--background-500));
                     opacity: 0.5;
                 }
 

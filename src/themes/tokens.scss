@@ -117,7 +117,7 @@
 
     // Tokens de hierarquia textual por papel semântico (WCAG 1.4.3 >= 4.5:1)
     --max-content-secondary: #334155;
-    --max-content-placeholder: #475569;
+    --max-content-placeholder: var(--background-500);
     --max-content-help: #475569;
     --max-content-disabled: var(--background-650, #94a3b8);
 
@@ -168,7 +168,7 @@
 
     // Tokens de hierarquia textual por papel semântico - modo escuro
     --max-content-secondary: #cbd5e1;
-    --max-content-placeholder: #94a3b8;
+    --max-content-placeholder: var(--background-500);
     --max-content-help: #94a3b8;
     --max-content-disabled: var(--background-650, #52525b);
 

@@ -694,6 +694,10 @@
             transition: border-color 0.15s;
             box-sizing: border-box;
 
+            &::placeholder {
+                color: var(--max-content-placeholder, var(--background-500));
+            }
+
             &:focus {
                 border-color: var(--max-primary-500, #00768E);
             }
