@@ -9,7 +9,7 @@
 
     <transition name="max-flyout-slide">
         <aside
-            v-if="props.visible && props.item"
+            v-if="props.visible && activeItem"
             ref="flyoutRef"
             class="max-side-menu-flyout panel0"
             role="dialog"
@@ -25,18 +25,19 @@
                         v-if="parentIcon"
                         :icon="parentIcon"
                         size="1.2"
+                        light
                         class="flyout-header-icon"
                     />
                     <span class="flyout-title">{{ title }}</span>
                 </div>
-                <button
-                    type="button"
+                <MaxIconButton
+                    icon="material-symbols:close-rounded"
+                    size="1.2"
+                    light
                     class="flyout-close-btn"
                     aria-label="Fechar submenu"
                     @click="emit('close')"
-                >
-                    <MaxIcon icon="material-symbols:close-rounded" size="1.2" />
-                </button>
+                />
             </div>
 
             <!-- Lista de opções -->
@@ -57,6 +58,7 @@
                         v-if="parentIcon"
                         :icon="parentIcon"
                         size="1.1"
+                        light
                         class="flyout-item-icon"
                     />
                     <span class="flyout-item-label">{{ title }} (Visão Geral)</span>
@@ -79,6 +81,7 @@
                         v-if="getMenuItemIcon(sub)"
                         :icon="getMenuItemIcon(sub)!"
                         size="1.1"
+                        light
                         class="flyout-item-icon"
                     />
                     <span class="flyout-item-label">{{ getMenuItemLabel(sub) }}</span>
@@ -93,6 +96,7 @@
     import { useRouter, useRoute } from 'vue-router';
     import { goToRoute } from '@maxvue/max-use';
     import MaxIcon from './MaxIcon.vue';
+    import MaxIconButton from './MaxIconButton.vue';
     import { useSearchBarStore } from '../stores/useSearchBar.Store';
     import {
         getSubItems,
@@ -126,28 +130,35 @@
     const router = useRouter();
     const route = useRoute();
 
+    // Cache do último item válido para manter conteúdo visível durante a animação de fechamento
+    const activeItem = ref<SideMenuItem | null>(props.item);
+
+    watch(() => props.item, (newItem) => {
+        if (newItem) activeItem.value = newItem;
+    }, { immediate: true });
+
     const currentRouteName = computed<string>(() => {
         return String(props.currentRoute || route?.name || '');
     });
 
     const title = computed<string>(() => {
-        return props.item ? getMenuItemLabel(props.item) : '';
+        return activeItem.value ? getMenuItemLabel(activeItem.value) : '';
     });
 
     const parentIcon = computed<string | null>(() => {
-        return props.item ? getMenuItemIcon(props.item) : null;
+        return activeItem.value ? getMenuItemIcon(activeItem.value) : null;
     });
 
     const parentRoute = computed<string | null>(() => {
-        return props.item ? getMenuItemRoute(props.item) : null;
+        return activeItem.value ? getMenuItemRoute(activeItem.value) : null;
     });
 
     const isParentActive = computed<boolean>(() => {
-        return Boolean(props.item && isMenuRouteActive(props.item, currentRouteName.value));
+        return Boolean(activeItem.value && isMenuRouteActive(activeItem.value, currentRouteName.value));
     });
 
     const subitems = computed<SideMenuSubItem[]>(() => {
-        return props.item ? getSubItems(props.item) : [];
+        return activeItem.value ? getSubItems(activeItem.value) : [];
     });
 
     // Foca o flyout quando aberto para suporte a acessibilidade e Escape
@@ -230,14 +241,14 @@
                 min-width: 0;
 
                 .flyout-header-icon {
-                    color: var(--layout-shell-text, #fff);
+                    color: var(--blue-100, #bfe7ef);
                     flex-shrink: 0;
                 }
 
                 .flyout-title {
                     font-size: 0.95rem;
                     font-weight: 600;
-                    color: var(--layout-shell-text, #fff);
+                    color: var(--blue-200);
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
@@ -253,13 +264,11 @@
                 border: none;
                 border-radius: 6px;
                 background: transparent;
-                color: var(--layout-shell-text-muted, rgb(255 255 255 / 70%));
                 cursor: pointer;
-                transition: background-color 0.15s ease, color 0.15s ease;
+                transition: background-color 0.15s ease, opacity 0.15s ease;
 
                 &:hover {
                     background-color: rgb(255 255 255 / 12%);
-                    color: #fff;
                 }
 
                 &:focus-visible {
@@ -293,31 +302,38 @@
                 min-height: 38px;
                 padding: 0.45rem 0.75rem;
                 border-radius: 6px;
-                color: var(--layout-shell-text, #fff);
+                color: var(--blue-200);
                 cursor: pointer;
                 text-decoration: none;
                 transition: background-color 0.15s ease, color 0.15s ease;
 
                 .flyout-item-icon {
                     flex-shrink: 0;
-                    color: var(--layout-shell-text, #fff);
+                    color: var(--blue-100, #bfe7ef);
+                    transition: color 0.15s ease;
                 }
 
                 .flyout-item-label {
                     font-size: 0.88rem;
                     font-weight: 500;
                     line-height: 1.3;
+                    color: var(--blue-200);
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
+                    transition: color 0.15s ease;
                 }
 
                 &:hover {
                     background-color: rgb(255 255 255 / 12%);
-                    color: #fff;
+                    color: var(--blue-0, #fff);
 
                     .flyout-item-icon {
-                        color: #fff;
+                        color: var(--blue-0, #fff);
+                    }
+
+                    .flyout-item-label {
+                        color: var(--blue-0, #fff);
                     }
                 }
 
@@ -331,6 +347,7 @@
 
                     .flyout-item-label {
                         font-weight: 600;
+                        color: #fff;
                     }
                 }
 
@@ -343,14 +360,17 @@
     }
 
     /* Animações de entrada e saída do flyout */
-    .max-flyout-slide-enter-active,
+    .max-flyout-slide-enter-active {
+        transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease-out;
+    }
+
     .max-flyout-slide-leave-active {
-        transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease;
+        transition: transform 0.24s cubic-bezier(0.4, 0, 1, 1), opacity 0.2s ease-in;
     }
 
     .max-flyout-slide-enter-from,
     .max-flyout-slide-leave-to {
-        transform: translateX(-15px);
+        transform: translateX(-16px);
         opacity: 0;
     }
 

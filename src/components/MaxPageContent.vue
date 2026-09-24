@@ -6,7 +6,7 @@
     >
         <!-- panel0: submenu lateral aberto no desktop -->
         <MaxSideMenuFlyout
-            v-if="!isMobile && isSubmenuOpen"
+            v-if="!isMobile"
             :visible="isSubmenuOpen"
             :item="system.active_side_submenu"
             @close="system.closeSideSubmenu"
@@ -62,7 +62,7 @@
         border-radius: 1rem;
         grid-template-columns: 1fr;
         background-color: var(--layout-content-frame-bg, #004860);
-        transition: grid-template-columns 0.22s cubic-bezier(0.16, 1, 0.3, 1), gap 0.22s ease;
+        transition: grid-template-columns 0.28s cubic-bezier(0.16, 1, 0.3, 1), gap 0.28s ease;
 
         &.has-panel0 {
             grid-template-columns: 240px 1fr;

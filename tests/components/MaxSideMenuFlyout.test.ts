@@ -132,4 +132,47 @@ describe('MaxSideMenuFlyout', () => {
 
         expect(sfc).toMatch(/background-color:\s*var\(--layout-content-frame-bg/);
     });
+
+    it('utiliza MaxIconButton com propriedade light para fechar o submenu', () => {
+        const wrapper = mount(MaxSideMenuFlyout, {
+            props: { visible: true, item: mockItem },
+            global: { stubs: { MaxIcon: true } }
+        });
+
+        const closeBtn = wrapper.findComponent({ name: 'MaxIconButton' });
+        expect(closeBtn.exists()).toBe(true);
+        expect(closeBtn.classes()).toContain('flyout-close-btn');
+        expect(closeBtn.props('light')).toBe(true);
+    });
+
+    it('aplica propriedade light e cor clara nos ícones internos do submenu', () => {
+        const wrapper = mount(MaxSideMenuFlyout, {
+            props: { visible: true, item: mockItem },
+            global: { stubs: { MaxIcon: true } }
+        });
+
+        const icons = wrapper.findAllComponents({ name: 'MaxIcon' });
+        expect(icons.length).toBeGreaterThanOrEqual(3);
+        for (const icon of icons) expect(icon.props('light')).toBe(true);
+    });
+
+    it('estiliza textos e labels dos itens com a cor var(--blue-200)', async () => {
+        const fs = await import('node:fs');
+        const path = await import('node:path');
+        const sfc = fs.readFileSync(path.resolve(__dirname, '../../src/components/MaxSideMenuFlyout.vue'), 'utf-8');
+
+        expect(sfc).toMatch(/\.flyout-title\s*\{[^}]*color:\s*var\(--blue-200\);/);
+        expect(sfc).toMatch(/\.flyout-item\s*\{[^}]*color:\s*var\(--blue-200\);/);
+        expect(sfc).toMatch(/\.flyout-item-label\s*\{[^}]*color:\s*var\(--blue-200\);/);
+        expect(sfc).toMatch(/\.flyout-item-icon\s*\{[^}]*color:\s*var\(--blue-100/);
+    });
+
+    it('possui transição suave de entrada e saída (0.28s e 0.24s com cubic-bezier)', async () => {
+        const fs = await import('node:fs');
+        const path = await import('node:path');
+        const sfc = fs.readFileSync(path.resolve(__dirname, '../../src/components/MaxSideMenuFlyout.vue'), 'utf-8');
+
+        expect(sfc).toMatch(/\.max-flyout-slide-enter-active\s*\{[^}]*transition:\s*transform\s+0\.28s\s+cubic-bezier\(0\.16,\s*1,\s*0\.3,\s*1\)/);
+        expect(sfc).toMatch(/\.max-flyout-slide-leave-active\s*\{[^}]*transition:\s*transform\s+0\.24s\s+cubic-bezier\(0\.4,\s*0,\s*1,\s*1\)/);
+    });
 });
