@@ -96,6 +96,26 @@ export interface MaxAppUser {
     [key: string]: any;
 }
 
+/** Subitem de um item de menu lateral. */
+export interface SideMenuSubItem {
+    id?: string;
+    label?: string;
+    title?: string;
+    tooltip?: string;
+    route?: string;
+    rota?: string;
+    page_component?: string;
+    icon?: string;
+    icone?: string;
+    action?: () => void;
+    matches?: string[];
+    hide?: boolean;
+    subitems?: SideMenuSubItem[];
+    items?: SideMenuSubItem[];
+    children?: SideMenuSubItem[];
+    [key: string]: any;
+}
+
 /** Detalhes de um item de menu, como devolvidos pelo backend. */
 export interface SideMenuDetails {
     /** Ícone exibido no botão. */
@@ -112,6 +132,12 @@ export interface SideMenuDetails {
     tooltip?: string | null;
     /** Título do item. */
     title?: string | null;
+    /** Subitens do menu. */
+    subitems?: SideMenuSubItem[];
+    /** Lista alternativa de subitens. */
+    items?: SideMenuSubItem[];
+    /** Lista de subitens (children). */
+    children?: SideMenuSubItem[];
     [key: string]: any;
 }
 
@@ -119,6 +145,9 @@ export interface SideMenuDetails {
 export interface SideMenuItem {
     id?: string;
     details: SideMenuDetails;
+    subitems?: SideMenuSubItem[];
+    items?: SideMenuSubItem[];
+    children?: SideMenuSubItem[];
     [key: string]: any;
 }
 

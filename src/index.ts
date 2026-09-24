@@ -164,6 +164,7 @@ export { default as MaxLoadScreenTarget } from './components/MaxLoadScreenTarget
 export { default as MaxContainerApp } from './components/MaxContainerApp.vue';
 export { default as MaxBottomMenu } from './components/MaxBottomMenu.vue';
 export { default as MaxSideMenu } from './components/MaxSideMenu.vue';
+export { default as MaxSideMenuFlyout } from './components/MaxSideMenuFlyout.vue';
 export { default as MaxSideMenuMobile } from './components/MaxSideMenuMobile.vue';
 export { default as MaxMenuVerticalItem } from './components/MaxMenuVerticalItem.vue';
 export { default as MaxTopMenu } from './components/MaxTopMenu.vue';

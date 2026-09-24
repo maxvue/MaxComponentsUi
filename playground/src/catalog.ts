@@ -108,6 +108,7 @@ export const PLAYGROUND_CATALOG: CatalogComponent[] = [
     { name: 'MaxTopToolbarSubmenu', family: 'navigation', scenarioId: 'nav-toolbars', description: 'Menu desdobrável de ações para ferramentas de topo.' },
     { name: 'MaxBottomMenu', family: 'navigation', scenarioId: 'nav-menus', description: 'Barra de navegação inferior otimizada para dispositivos móveis.' },
     { name: 'MaxSideMenu', family: 'navigation', scenarioId: 'nav-side', description: 'Menu lateral expansível da aplicação desktop.' },
+    { name: 'MaxSideMenuFlyout', family: 'navigation', scenarioId: 'nav-side', description: 'Submenu lateral flutuante desdobrável da aplicação desktop.' },
     { name: 'MaxSideMenuMobile', family: 'navigation', scenarioId: 'nav-side', description: 'Versão gaveta do menu lateral para telas menores.' },
     { name: 'MaxMenuVerticalItem', family: 'navigation', scenarioId: 'nav-side', description: 'Item semântico para listas de navegação vertical.' },
 

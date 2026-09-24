@@ -393,6 +393,10 @@
       "types": "./dist/components/MaxSideMenu.vue.d.ts",
       "import": "./dist/components/MaxSideMenu.es.js"
     },
+    "./components/MaxSideMenuFlyout": {
+      "types": "./dist/components/MaxSideMenuFlyout.vue.d.ts",
+      "import": "./dist/components/MaxSideMenuFlyout.es.js"
+    },
     "./components/MaxSideMenuMobile": {
       "types": "./dist/components/MaxSideMenuMobile.vue.d.ts",
       "import": "./dist/components/MaxSideMenuMobile.es.js"

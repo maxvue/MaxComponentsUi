@@ -40,18 +40,78 @@
                     <div v-if="group.title" class="mobile-group-title">{{ group.title }}</div>
                     <div
                         v-for="item in group.items"
-                        :key="item.route ?? item.id ?? item.label"
-                        class="mobile-menu-item"
-                        :class="{ active: isItemActive(item) }"
-                        role="link"
-                        tabindex="0"
-                        :aria-label="getItemLabel(item)"
-                        :aria-current="isItemActive(item) ? 'page' : undefined"
-                        @click.stop="openItem(item)"
-                        @keydown.enter.stop="openItem(item)"
+                        :key="item.route ?? item.id ?? getItemLabel(item)"
+                        class="mobile-menu-item-wrapper"
                     >
-                        <MaxIcon :icon="getItemIcon(item)" size="1.2" />
-                        <span class="mobile-item-label">{{ getItemLabel(item) }}</span>
+                        <div
+                            class="mobile-menu-item"
+                            :class="{ active: isItemActive(item), 'has-subitems': hasSubItems(item), expanded: isExpanded(item) }"
+                            :role="hasSubItems(item) ? 'button' : 'link'"
+                            tabindex="0"
+                            :aria-label="getItemLabel(item)"
+                            :aria-current="!hasSubItems(item) && isItemActive(item) ? 'page' : undefined"
+                            :aria-expanded="hasSubItems(item) ? isExpanded(item) : undefined"
+                            @click.stop="handleItemClick(item)"
+                            @keydown.enter.stop="handleItemClick(item)"
+                        >
+                            <MaxIcon :icon="getItemIcon(item)" size="1.2" class="mobile-item-icon" />
+                            <span class="mobile-item-label">{{ getItemLabel(item) }}</span>
+                            <MaxIcon
+                                v-if="hasSubItems(item)"
+                                icon="material-symbols:keyboard-arrow-down-rounded"
+                                size="1.3"
+                                class="mobile-accordion-chevron"
+                                :class="{ 'is-expanded': isExpanded(item) }"
+                            />
+                        </div>
+
+                        <!-- Painel Accordion de Subitens -->
+                        <transition name="mobile-accordion">
+                            <div
+                                v-if="hasSubItems(item) && isExpanded(item)"
+                                class="mobile-subitems-panel"
+                                role="region"
+                                :aria-label="`Submenu de ${getItemLabel(item)}`"
+                            >
+                                <!-- Se o item pai possui rota própria cadastrada, exibe como Visão Geral -->
+                                <div
+                                    v-if="getItemRoute(item)"
+                                    class="mobile-subitem parent-overview"
+                                    :class="{ active: isParentDirectRouteActive(item) }"
+                                    role="link"
+                                    tabindex="0"
+                                    :aria-label="`${getItemLabel(item)} - Visão Geral`"
+                                    :aria-current="isParentDirectRouteActive(item) ? 'page' : undefined"
+                                    @click.stop="openItem(item)"
+                                    @keydown.enter.stop="openItem(item)"
+                                >
+                                    <span class="mobile-subitem-dot" aria-hidden="true" />
+                                    <span class="mobile-subitem-label">{{ getItemLabel(item) }} (Visão Geral)</span>
+                                </div>
+
+                                <div
+                                    v-for="(sub, sIdx) in getSubItems(item)"
+                                    :key="sub.id ?? getItemRoute(sub) ?? sIdx"
+                                    class="mobile-subitem"
+                                    :class="{ active: isSubItemActive(sub, String(route?.name ?? '')) }"
+                                    role="link"
+                                    tabindex="0"
+                                    :aria-label="getMenuItemLabel(sub)"
+                                    :aria-current="isSubItemActive(sub, String(route?.name ?? '')) ? 'page' : undefined"
+                                    @click.stop="openSubItem(sub)"
+                                    @keydown.enter.stop="openSubItem(sub)"
+                                >
+                                    <MaxIcon
+                                        v-if="getMenuItemIcon(sub)"
+                                        :icon="getMenuItemIcon(sub)!"
+                                        size="1.0"
+                                        class="mobile-subitem-icon"
+                                    />
+                                    <span v-else class="mobile-subitem-dot" aria-hidden="true" />
+                                    <span class="mobile-subitem-label">{{ getMenuItemLabel(sub) }}</span>
+                                </div>
+                            </div>
+                        </transition>
                     </div>
                 </div>
             </div>
@@ -82,7 +142,7 @@
 </template>
 
 <script setup lang="ts">
-    import { computed } from 'vue';
+    import { computed, ref } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
     import MaxDrawer from './MaxDrawer.vue';
     import MaxIcon from './MaxIcon.vue';
@@ -90,6 +150,15 @@
     import { useSystemStore } from '../stores/useSystem.Store';
     import { useUserStore } from '../stores/useUser.Store';
     import { useListMenusStore } from '../stores/useListMenus.Store';
+    import {
+        getSubItems,
+        hasSubItems,
+        getMenuItemLabel,
+        getMenuItemIcon,
+        getMenuItemRoute,
+        isSubItemActive,
+        hasActiveSubItem
+    } from '../helpers/menuHelpers';
     import type { SideMenuItem } from '../types/app';
 
     export interface MenuGroup {
@@ -124,6 +193,9 @@
     const router = useRouter();
     const route = useRoute();
 
+    /** ID do item atualmente expandido no accordion mobile (exclusivo). */
+    const expandedItemId = ref<string | null>(null);
+
     const userName = computed<string>(() => user.data?.name ?? 'Minha Conta');
     const userSubtext = computed<string>(() => user.data?.email || user.data?.solar_company_name || '');
     const avatarUrl = computed<string | undefined>(() => (user.data?.id ? `${props.avatarPath ?? '/avatar/'}${user.data.id}` : undefined));
@@ -134,7 +206,6 @@
         if (props.groups?.length) return props.groups;
 
         if (props.items?.length) return [{ title: 'Navegação', items: props.items }];
-
 
         const sideItems: SideMenuItem[] = ((menus.list as any)?.side ?? []).filter((item: SideMenuItem) => !item.details?.hide);
 
@@ -149,24 +220,54 @@
     });
 
     function getItemLabel(item: any): string {
-        return item.label || item.title || item.details?.title || item.details?.tooltip || item.name || '';
+        return getMenuItemLabel(item);
     }
 
     function getItemIcon(item: any): string {
-        return item.icon || item.icone || item.details?.icon || 'mdi:circle-medium';
+        return getMenuItemIcon(item) || 'mdi:circle-medium';
     }
 
     function getItemRoute(item: any): string | null {
-        return item.route || item.rota || item.details?.route || item.details?.page_component || null;
+        return getMenuItemRoute(item);
+    }
+
+    function getItemId(item: any): string {
+        return String(item.id ?? getItemRoute(item) ?? getItemLabel(item));
+    }
+
+    function isExpanded(item: any): boolean {
+        return expandedItemId.value === getItemId(item);
+    }
+
+    function isParentDirectRouteActive(item: any): boolean {
+        const routeName = getItemRoute(item);
+        if (!routeName) return false;
+        const currentName = String(route?.name ?? '');
+
+        return currentName === routeName;
     }
 
     function isItemActive(item: any): boolean {
         const routeName = getItemRoute(item);
-        if (!routeName) return false;
-
         const currentName = String(route?.name ?? '');
 
-        return currentName === routeName || (item.matches?.includes(currentName) ?? false);
+        if (routeName && (currentName === routeName || (item.matches?.includes(currentName) ?? false))) return true;
+
+
+        if (hasActiveSubItem(item, currentName)) return true;
+
+
+        return false;
+    }
+
+    function handleItemClick(item: any): void {
+        if (hasSubItems(item)) {
+            const id = getItemId(item);
+            expandedItemId.value = expandedItemId.value === id ? null : id;
+            return;
+        }
+
+        openItem(item);
     }
 
     function openItem(item: any): void {
@@ -178,7 +279,26 @@
         }
 
         const targetRoute = getItemRoute(item);
-        if (targetRoute && route?.name !== targetRoute) router.push({ name: targetRoute });
+        if (targetRoute) if (targetRoute.startsWith('/')) {
+            if (route?.path !== targetRoute) router.push(targetRoute);
+        } else if (route?.name !== targetRoute) router.push({ name: targetRoute });
+
+
+    }
+
+    function openSubItem(subitem: any): void {
+        system.side_menu_open = false;
+
+        if (typeof subitem.action === 'function') {
+            subitem.action();
+            return;
+        }
+
+        const targetRoute = getMenuItemRoute(subitem);
+        if (targetRoute) if (targetRoute.startsWith('/')) {
+            if (route?.path !== targetRoute) router.push(targetRoute);
+        } else if (route?.name !== targetRoute) router.push({ name: targetRoute });
+
 
     }
 
@@ -311,9 +431,15 @@
             }
         }
 
+        .mobile-menu-item-wrapper {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
         .mobile-menu-item {
             display: grid;
-            grid-template-columns: 24px 1fr;
+            grid-template-columns: 24px 1fr auto;
             align-items: center;
             gap: 0.75rem;
             min-height: 44px;
@@ -326,6 +452,16 @@
             .mobile-item-label {
                 font-size: 0.9rem;
                 font-weight: 500;
+            }
+
+            .mobile-accordion-chevron {
+                color: var(--background-500);
+                transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+
+                &.is-expanded {
+                    transform: rotate(180deg);
+                    color: var(--max-primary-500, #00768e);
+                }
             }
 
             &:hover {
@@ -346,6 +482,99 @@
                 outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
                 outline-offset: -2px;
             }
+        }
+
+        .mobile-subitems-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem 0.5rem 2.25rem;
+            position: relative;
+
+            &::before {
+                content: '';
+                position: absolute;
+                left: 1.6rem;
+                top: 0.25rem;
+                bottom: 0.5rem;
+                width: 2px;
+                background-color: var(--background-200, #e2e8f0);
+                border-radius: 1px;
+            }
+
+            .mobile-subitem {
+                display: flex;
+                align-items: center;
+                gap: 0.6rem;
+                min-height: 38px;
+                padding: 0 0.65rem;
+                border-radius: 8px;
+                color: var(--background-700);
+                cursor: pointer;
+                transition: background-color 0.15s ease, color 0.15s ease;
+
+                .mobile-subitem-dot {
+                    width: 6px;
+                    height: 6px;
+                    border-radius: 50%;
+                    background-color: var(--background-400);
+                    flex-shrink: 0;
+                }
+
+                .mobile-subitem-icon {
+                    flex-shrink: 0;
+                    color: var(--background-550);
+                }
+
+                .mobile-subitem-label {
+                    font-size: 0.85rem;
+                    font-weight: 500;
+                }
+
+                &:hover {
+                    background-color: var(--background-100, #f1f5f9);
+                }
+
+                &.active {
+                    background-color: var(--blue-100, #e0f2fe);
+                    color: var(--blue-800, #0369a1);
+
+                    .mobile-subitem-dot {
+                        background-color: var(--max-primary-500, #00768e);
+                    }
+
+                    .mobile-subitem-icon {
+                        color: var(--blue-800, #0369a1);
+                    }
+
+                    .mobile-subitem-label {
+                        font-weight: 600;
+                    }
+                }
+
+                &:focus-visible {
+                    outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
+                    outline-offset: -2px;
+                }
+            }
+        }
+
+        .mobile-accordion-enter-active,
+        .mobile-accordion-leave-active {
+            transition: max-height 0.25s ease-out, opacity 0.2s ease;
+            overflow: hidden;
+        }
+
+        .mobile-accordion-enter-from,
+        .mobile-accordion-leave-to {
+            max-height: 0;
+            opacity: 0;
+        }
+
+        .mobile-accordion-enter-to,
+        .mobile-accordion-leave-from {
+            max-height: 500px;
+            opacity: 1;
         }
 
         .mobile-menu-footer {
@@ -411,6 +640,8 @@
         }
 
         .mobile-menu-item,
+        .mobile-subitem,
+        .mobile-accordion-chevron,
         .mobile-footer-btn {
             transition: none !important;
         }
