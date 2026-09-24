@@ -46,6 +46,7 @@ export const PLAYGROUND_CATALOG: CatalogComponent[] = [
     { name: 'MaxInputTextArea', family: 'inputs', scenarioId: 'inputs-text', description: 'Área de texto multilinha com auto-resize ou dimensões fixas.' },
     { name: 'MaxTextInputFloatLabel', family: 'inputs', scenarioId: 'inputs-text', description: 'Campo textual com rótulo flutuante estilizado.', isAlias: true, aliasOf: 'MaxInputText' },
     { name: 'MaxInputSelect', family: 'inputs', scenarioId: 'inputs-select', description: 'Seletor dropdown estilizado com busca e ícones opcionais.' },
+    { name: 'MaxInputUF', family: 'inputs', scenarioId: 'inputs-select', description: 'Seletor de Unidades Federativas do Brasil com bandeiras vetoriais e busca integrada.' },
     { name: 'MaxInputPhone', family: 'inputs', scenarioId: 'inputs-masks', description: 'Input telefônico com máscara nacional e internacional automática.' },
     { name: 'MaxInputPhoneMail', family: 'inputs', scenarioId: 'inputs-masks', description: 'Input dinâmico para telefone ou e-mail com alternância de máscara.' },
     { name: 'MaxInputCep', family: 'inputs', scenarioId: 'inputs-masks', description: 'Input de CEP brasileiro com máscara e validação de 8 dígitos.' },

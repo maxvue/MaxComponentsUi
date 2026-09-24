@@ -84,4 +84,28 @@ describe('svgToDataUri', () => {
 
         expect(decoded).toContain('Cartão de Crédito');
     });
+
+    it('funciona corretamente no ambiente de navegador com window.btoa e TextEncoder', () => {
+        // Simula ambiente de navegador com window e window.btoa
+        const originalWindow = (globalThis as any).window;
+        try {
+            (globalThis as any).window = {
+                btoa: (str: string) => Buffer.from(str, 'binary').toString('base64')
+            };
+
+            const svg = '<svg xmlns="http://www.w3.org/2000/svg"><text>São Paulo & Maranhão</text></svg>';
+            const uri = svgToDataUri(svg);
+
+            expect(uri).toMatch(/^data:image\/svg\+xml;base64,/);
+            const base64Data = uri.replace('data:image/svg+xml;base64,', '');
+            const decoded = Buffer.from(base64Data, 'base64').toString('utf-8');
+
+            expect(decoded).toBe(svg);
+            expect(decoded.startsWith('%3C')).toBe(false);
+        } finally {
+            if (originalWindow === undefined) delete (globalThis as any).window;
+            else (globalThis as any).window = originalWindow;
+
+        }
+    });
 });

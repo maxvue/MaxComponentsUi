@@ -185,4 +185,10 @@ describe('MaxInputSwitch', () => {
             );
         });
     });
+
+    it('exporta MaxSwitch como alias idêntico a MaxInputSwitch no index', async () => {
+        const { MaxSwitch, MaxInputSwitch: ExportedMaxInputSwitch } = await import('../../src/index');
+        expect(MaxSwitch).toBeDefined();
+        expect(MaxSwitch).toBe(ExportedMaxInputSwitch);
+    });
 });

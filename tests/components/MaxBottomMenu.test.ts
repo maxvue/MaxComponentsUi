@@ -129,7 +129,7 @@ describe('MaxBottomMenu', () => {
         expect(fabWrapper.exists()).toBe(true);
         expect(fabWrapper.find('.menu-plus-bottom').exists()).toBe(true);
         expect(fabWrapper.find('.fab').exists()).toBe(true);
-        expect(wrapper.find('.img-background path').attributes('d')).toContain('M300 78');
+        expect(wrapper.find('.img-background path').attributes('d')).toContain('M300 82');
         expect(wrapper.classes()).toContain('is-curved');
         expect(wrapper.find('.bottom-menu-bar').attributes('style')).toContain('76px');
         const fabIcon = fabWrapper.find('.fab').findComponent({ name: 'MaxIcon' });

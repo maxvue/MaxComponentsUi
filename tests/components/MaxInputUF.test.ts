@@ -4,6 +4,7 @@ import { setActivePinia, createPinia } from 'pinia';
 import MaxInputUF from '../../src/components/MaxInputUF.vue';
 import MaxInputSelect from '../../src/components/MaxInputSelect.vue';
 import InputBase from '../../src/components/InputBase.vue';
+import { BRAZIL_STATES, BRAZIL_NATIONAL_STATE } from '../../src/constants/brazilStates';
 
 function mountUF(props: Record<string, any> = {}, attrs: Record<string, any> = {}) {
     return mount(MaxInputUF, {
@@ -219,5 +220,31 @@ describe('MaxInputUF', () => {
 
         expect(wrapper.emitted('update:modelValue')).toBeTruthy();
         expect(wrapper.emitted('update:modelValue')?.[0][0]).toBe('');
+    });
+
+    it('garante que todas as 28 bandeiras possuem Data URIs base64 válidas decodificáveis como SVG', () => {
+        const allStates = [...BRAZIL_STATES, BRAZIL_NATIONAL_STATE];
+        expect(allStates.length).toBe(28);
+
+        for (const state of allStates) {
+            expect(state.flag).toMatch(/^data:image\/svg\+xml;base64,/);
+            const base64Data = state.flag.replace(/^data:image\/svg\+xml;base64,/, '');
+            const decoded = Buffer.from(base64Data, 'base64').toString('utf-8');
+
+            expect(decoded).toMatch(/^<svg/);
+            expect(decoded).toContain('xmlns="http://www.w3.org/2000/svg"');
+            expect(decoded.startsWith('%3C')).toBe(false);
+        }
+    });
+
+    it('renderiza o slot de opção com a bandeira Data URI sem loading=lazy', () => {
+        const wrapper = mountUF();
+        const select = wrapper.findComponent(MaxInputSelect);
+        const options = select.props('options') as BrazilState[];
+        expect(options.length).toBe(27);
+
+        const spOption = options.find((o) => o.uf === 'SP');
+        expect(spOption).toBeDefined();
+        expect(spOption?.flag).toMatch(/^data:image\/svg\+xml;base64,/);
     });
 });

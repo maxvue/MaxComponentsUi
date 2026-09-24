@@ -191,8 +191,8 @@ describe('Arquitetura - Contrato de Exports e Subpaths Públicos', () => {
             .filter((f) => f.endsWith('.vue'))
             .map((f) => f.replace('.vue', ''));
 
-        // Garantia de catálogo completo dos 120 componentes Vue
-        expect(vueFiles.length).toBe(120);
+        // Garantia de catálogo completo dos 121 componentes Vue
+        expect(vueFiles.length).toBe(121);
 
         for (const componentName of vueFiles) {
             const subpath = `./components/${componentName}`;

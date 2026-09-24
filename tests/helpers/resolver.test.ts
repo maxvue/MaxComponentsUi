@@ -73,6 +73,29 @@ describe('MaxComponentsUiResolver', () => {
         });
     });
 
+    it('resolve MaxInputSwitch e seu alias MaxSwitch (e formatos kebab/snake)', () => {
+        expect(resolver.resolve('MaxInputSwitch')).toEqual({
+            name: 'MaxInputSwitch',
+            from: '@maxvue/max-components-ui'
+        });
+        expect(resolver.resolve('MaxSwitch')).toEqual({
+            name: 'MaxInputSwitch',
+            from: '@maxvue/max-components-ui'
+        });
+        expect(resolver.resolve('Switch')).toEqual({
+            name: 'MaxInputSwitch',
+            from: '@maxvue/max-components-ui'
+        });
+        expect(resolver.resolve('max-switch')).toEqual({
+            name: 'MaxInputSwitch',
+            from: '@maxvue/max-components-ui'
+        });
+        expect(resolver.resolve('max_switch')).toEqual({
+            name: 'MaxInputSwitch',
+            from: '@maxvue/max-components-ui'
+        });
+    });
+
     it('manifest contém todos os aliases esperados', () => {
         const aliases = manifest.aliases as Record<string, string>;
         // Verifica alguns aliases-chave
@@ -82,6 +105,8 @@ describe('MaxComponentsUiResolver', () => {
         expect(aliases['MaxPhoneField']).toBe('MaxInputPhone');
         expect(aliases['PhoneField']).toBe('MaxInputPhone');
         expect(aliases['InputPhone']).toBe('MaxInputPhone');
+        expect(aliases['MaxSwitch']).toBe('MaxInputSwitch');
+        expect(aliases['Switch']).toBe('MaxInputSwitch');
         expect(aliases['T1']).toBe('MaxTitle1');
         expect(aliases['T2']).toBe('MaxTitle2');
     });
