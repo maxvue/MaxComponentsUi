@@ -51,6 +51,13 @@ export { default as TabPanel } from './components/MaxTabPanel.vue';
 export { default as MaxTabItem } from './components/MaxTabItem.vue';
 export { default as TabItem } from './components/MaxTabItem.vue';
 
+// Steps
+export { default as MaxSteps } from './components/MaxSteps.vue';
+export { default as Steps } from './components/MaxSteps.vue';
+export { default as MaxStepItem } from './components/MaxStepItem.vue';
+export { default as StepItem } from './components/MaxStepItem.vue';
+export { STEPS_INJECTION_KEY, injectStepsContext, type StepsContext, type StepItemData } from './helpers/stepsContext';
+
 // Accordion
 export { default as MaxAccordion } from './components/MaxAccordion.vue';
 export { default as Accordion } from './components/MaxAccordion.vue';

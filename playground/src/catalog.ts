@@ -148,6 +148,8 @@ export const PLAYGROUND_CATALOG: CatalogComponent[] = [
     { name: 'MaxTabPanels', family: 'panels', scenarioId: 'panels-tabs', description: 'Container de exibição dos corpos de conteúdo das abas.' },
     { name: 'MaxTabPanel', family: 'panels', scenarioId: 'panels-tabs', description: 'Painel de conteúdo correspondente a uma aba.' },
     { name: 'MaxTabItem', family: 'panels', scenarioId: 'panels-tabs', description: 'Abstração consolidada de aba e conteúdo integrado.' },
+    { name: 'MaxSteps', family: 'panels', scenarioId: 'panels-tabs', description: 'Container raiz para navegação linear e assistente passo a passo (wizard/steps).' },
+    { name: 'MaxStepItem', family: 'panels', scenarioId: 'panels-tabs', description: 'Item individual de etapa para o componente MaxSteps.' },
 
     // Media & Identity (18)
     { name: 'MaxImage', family: 'media', scenarioId: 'media-image', description: 'Visualizador de imagem com zoom, fallback e lightbox integrado.' },
