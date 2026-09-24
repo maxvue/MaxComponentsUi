@@ -393,6 +393,14 @@
       "types": "./dist/components/MaxStats.vue.d.ts",
       "import": "./dist/components/MaxStats.es.js"
     },
+    "./components/MaxStepItem": {
+      "types": "./dist/components/MaxStepItem.vue.d.ts",
+      "import": "./dist/components/MaxStepItem.es.js"
+    },
+    "./components/MaxSteps": {
+      "types": "./dist/components/MaxSteps.vue.d.ts",
+      "import": "./dist/components/MaxSteps.es.js"
+    },
     "./components/MaxTab": {
       "types": "./dist/components/MaxTab.vue.d.ts",
       "import": "./dist/components/MaxTab.es.js"

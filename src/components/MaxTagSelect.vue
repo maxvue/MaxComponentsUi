@@ -848,7 +848,7 @@
 
         .tab-placeholder-select {
             position: absolute;
-            color: var(--background-700);
+            color: var(--max-content-placeholder, var(--background-500));
             font-size: 0.9rem;
             z-index: 1;
             display: grid;
@@ -1047,6 +1047,10 @@
                     font-size: 0.85rem;
                     background: var(--background-0, #fff);
                     color: var(--background-800, #1e293b);
+
+                    &::placeholder {
+                        color: var(--max-content-placeholder, var(--background-500));
+                    }
 
                     &:focus {
                         border-color: var(--max-primary-500, #00768e);
