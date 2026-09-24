@@ -3,7 +3,8 @@
         class="max-steps"
         :class="{
             'has-border': props.showBorder,
-            'is-scrollable': props.scrollable
+            'is-scrollable': props.scrollable,
+            'is-mobile': isMobile
         }"
         :id="`max-steps-${steps_id}`"
     >
@@ -19,6 +20,7 @@
             />
 
             <div
+                ref="headerRef"
                 class="max-steps-header"
                 role="tablist"
                 aria-orientation="horizontal"
@@ -86,7 +88,7 @@
                             <div class="step-label-wrapper">
                                 <span class="step-label">
                                     <span class="step-prefix">{{ index + 1 }}. </span>
-                                    <span class="step-title-text">{{ step.title }}</span>
+                                    <span class="step-title-text">{{ getStepTitle(step) }}</span>
                                 </span>
                             </div>
                         </div>
@@ -112,8 +114,8 @@
 </template>
 
 <script setup lang="ts">
-    import { computed, provide, ref, watch, toRef } from 'vue';
-    import { isValid, Random, useRefCached } from '@maxvue/max-use';
+    import { computed, nextTick, provide, ref, watch, toRef } from 'vue';
+    import { isValid, Random, useRefCached, useBreakpoints } from '@maxvue/max-use';
     import MaxIcon from './MaxIcon.vue';
     import MaxIconButton from './MaxIconButton.vue';
     import { STEPS_INJECTION_KEY, type StepItemData, type StepsContext } from '../helpers/stepsContext';
@@ -144,6 +146,8 @@
         onFinish?: () => void | Promise<void>;
         showBorder?: boolean;
         scrollable?: boolean;
+        isMobile?: boolean;
+        mobile?: boolean;
     };
 
     const props = withDefaults(defineProps<Props>(), {
@@ -160,7 +164,9 @@
         finishLabel: 'Concluir',
         onFinish: undefined,
         showBorder: false,
-        scrollable: false
+        scrollable: false,
+        isMobile: undefined,
+        mobile: undefined
     });
 
     const emit = defineEmits<{
@@ -171,6 +177,30 @@
         'finish': [];
         'change': [step: StepItemData];
     }>();
+
+    // Sistema de detecção de viewport / mobile
+    const breakpoints = useBreakpoints({ sm: 640, md: 768, lg: 1024, xl: 1280 });
+    const isMobileBreakpoint = breakpoints.smaller('md');
+
+    const isMobile = computed<boolean>(() => {
+        if (props.isMobile !== undefined) return props.isMobile;
+        if (props.mobile !== undefined) return props.mobile;
+        return isMobileBreakpoint.value;
+    });
+
+    const headerRef = ref<HTMLElement | null>(null);
+
+    const getStepTitle = (step: StepItemData): string => {
+        if (isMobile.value && step.labelMobile) return step.labelMobile;
+        return step.title ?? '';
+    };
+
+    const scrollActiveStepIntoView = async () => {
+        await nextTick();
+        if (!headerRef.value) return;
+        const activeEl = headerRef.value.querySelector('.max-step-header-item.is-active') as HTMLElement | null;
+        if (activeEl) activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    };
 
     const steps_id = computed(() => props.id ?? Random());
 
@@ -192,6 +222,7 @@
         active_model_modelValue.value = val;
         emit('update:value', val);
         emit('update:modelValue', val);
+        if (isMobile.value) scrollActiveStepIntoView();
     };
 
     // Cache no localStorage se cached === true
@@ -464,7 +495,8 @@
         goTo,
         finish,
         active_step,
-        steps
+        steps,
+        isMobile
     });
 </script>
 
@@ -473,6 +505,7 @@
     display: flex;
     flex-direction: column;
     width: 100%;
+    max-width: 100%;
     height: 100%;
     min-height: 0;
     max-height: 100%;
@@ -491,11 +524,13 @@
         align-items: center;
         justify-content: space-between;
         width: 100%;
+        max-width: 100vw;
         padding: 1.25rem 1.5rem;
         box-sizing: border-box;
         border-bottom: 1px solid var(--background-200);
-        background-color: var(--background-50);
+        background-color: transparent;
         gap: 16px;
+        overflow: hidden;
 
         .step-nav-btn {
             flex-shrink: 0;
@@ -514,9 +549,13 @@
             justify-content: center;
             flex: 1 1 auto;
             position: relative;
-            overflow-x: auto;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            overflow: auto hidden;
             scrollbar-width: none;
             user-select: none;
+            -webkit-overflow-scrolling: touch;
 
             &::-webkit-scrollbar {
                 display: none;
@@ -613,6 +652,16 @@
                 text-align: center;
                 white-space: nowrap;
                 transition: color 0.2s ease;
+                max-width: 100%;
+                overflow: hidden;
+
+                .step-label {
+                    display: inline-block;
+                    max-width: 100%;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
             }
         }
 
@@ -699,6 +748,79 @@
         overflow-y: auto;
         padding: 1.5rem;
         box-sizing: border-box;
+    }
+
+    @mixin mobile-steps-header {
+        .max-steps-header-wrapper {
+            padding: 0.75rem 0.5rem;
+            gap: 8px;
+            max-width: 100vw;
+
+            .step-nav-btn {
+                transform: scale(0.85);
+            }
+
+            .max-steps-header {
+                justify-content: flex-start;
+                scroll-snap-type: x proximity;
+                padding: 2px 0;
+            }
+        }
+
+        .max-step-header-item {
+            min-width: 68px;
+            flex: 1 0 auto;
+            scroll-snap-align: center;
+
+            .step-connector {
+                top: 20px;
+                height: 2px;
+            }
+
+            .step-marker-card {
+                padding: 4px 6px;
+                border-radius: 8px;
+
+                .step-circle {
+                    width: 28px;
+                    height: 28px;
+                    font-size: 0.8rem;
+                    border-width: 1.5px;
+
+                    .step-icon {
+                        transform: scale(0.85);
+                    }
+                }
+
+                .step-label-wrapper {
+                    margin-top: 4px;
+                    font-size: 0.72rem;
+                    max-width: 76px;
+
+                    .step-label {
+                        display: block;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                        max-width: 100%;
+                    }
+                }
+            }
+
+            &.is-active {
+                .step-marker-card {
+                    transform: translateY(-1px);
+                }
+            }
+        }
+    }
+
+    &.is-mobile {
+        @include mobile-steps-header;
+    }
+
+    @media (width <= 768px) {
+        @include mobile-steps-header;
     }
 }
 

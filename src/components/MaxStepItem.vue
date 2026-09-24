@@ -68,6 +68,8 @@
     type Props = {
         value?: string | number;
         title?: string;
+        labelMobile?: string;
+        LabelMobile?: string;
         icon?: string;
         i?: string;
         disabled?: boolean;
@@ -118,6 +120,8 @@
     const isError = computed(() => Boolean(props.error || props.Error));
     const isCaution = computed(() => Boolean(props.caution || props.Caution));
 
+    const resolvedLabelMobile = computed(() => props.labelMobile || props.LabelMobile);
+
     const resolvedNextLabel = computed(() => {
         return props.nextLabel
             || props.NextLabel
@@ -162,6 +166,7 @@
         id: step_id.value,
         index: 0,
         title: props.title,
+        labelMobile: resolvedLabelMobile.value,
         icon: props.icon || props.i,
         disabled: props.disabled,
         done: isDone.value,
@@ -186,6 +191,7 @@
 
     watch([
         () => props.title,
+        resolvedLabelMobile,
         () => props.icon,
         () => props.i,
         () => props.disabled,

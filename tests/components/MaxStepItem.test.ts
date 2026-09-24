@@ -160,3 +160,47 @@ describe('MaxStepItem — Aliases de Props e Labels', () => {
         expect(wrapper.find('.c2').exists()).toBe(true);
     });
 });
+
+describe('MaxStepItem — Suporte a labelMobile e LabelMobile', () => {
+    it('exibe labelMobile quando em modo mobile e title quando desktop', async () => {
+        const wrapper = mount(defineComponent({
+            components: { MaxSteps, MaxStepItem },
+            template: `
+                <MaxSteps id="item-mobile-1" :cached="false" :isMobile="false">
+                    <MaxStepItem value="1" title="Informações Pessoais Longas" labelMobile="Dados"><div class="c1">C1</div></MaxStepItem>
+                    <MaxStepItem value="2" title="Endereço de Entrega"><div class="c2">C2</div></MaxStepItem>
+                </MaxSteps>
+            `
+        }));
+
+        await settle();
+
+        const headers = wrapper.findAll('.max-step-header-item');
+        expect(headers[0].find('.step-title-text').text()).toBe('Informações Pessoais Longas');
+
+        // Alterna para mobile
+        await wrapper.setProps({ isMobile: true });
+        await settle();
+
+        expect(headers[0].find('.step-title-text').text()).toBe('Dados');
+        // O segundo step não tem labelMobile, então deve manter o title
+        expect(headers[1].find('.step-title-text').text()).toBe('Endereço de Entrega');
+    });
+
+    it('suporta o alias PascalCase LabelMobile', async () => {
+        const wrapper = mount(defineComponent({
+            components: { MaxSteps, MaxStepItem },
+            template: `
+                <MaxSteps id="item-mobile-2" :cached="false" :isMobile="true">
+                    <MaxStepItem value="1" title="Configurações Avançadas" LabelMobile="Config"><div class="c1">C1</div></MaxStepItem>
+                </MaxSteps>
+            `
+        }));
+
+        await settle();
+
+        const headers = wrapper.findAll('.max-step-header-item');
+        expect(headers[0].find('.step-title-text').text()).toBe('Config');
+    });
+});
+

@@ -321,3 +321,39 @@ describe('MaxSteps — Callbacks onEnter e onLeave', () => {
         expect(onEnter2).toHaveBeenCalled();
     });
 });
+
+describe('MaxSteps — Layout Mobile e Responsividade das Tabs', () => {
+    it('aplica a classe is-mobile quando a prop isMobile ou mobile é true', async () => {
+        const wrapper = mount(MaxSteps, {
+            props: { id: 'steps-mob-1', cached: false, isMobile: true }
+        });
+        expect(wrapper.find('.max-steps').classes()).toContain('is-mobile');
+
+        const wrapper2 = mount(MaxSteps, {
+            props: { id: 'steps-mob-2', cached: false, mobile: true }
+        });
+        expect(wrapper2.find('.max-steps').classes()).toContain('is-mobile');
+    });
+
+    it('renderiza o header com estrutura com largura máxima delimitada à tela', () => {
+        const wrapper = mount(defineComponent({
+            components: { MaxSteps, MaxStepItem },
+            template: `
+                <MaxSteps id="steps-mob-header" :cached="false" :isMobile="true">
+                    <MaxStepItem value="1" title="Passo 1" labelMobile="P1"><div class="c1">C1</div></MaxStepItem>
+                    <MaxStepItem value="2" title="Passo 2" labelMobile="P2"><div class="c2">C2</div></MaxStepItem>
+                    <MaxStepItem value="3" title="Passo 3" labelMobile="P3"><div class="c3">C3</div></MaxStepItem>
+                    <MaxStepItem value="4" title="Passo 4" labelMobile="P4"><div class="c4">C4</div></MaxStepItem>
+                </MaxSteps>
+            `
+        }));
+
+        const headerWrapper = wrapper.find('.max-steps-header-wrapper');
+        expect(headerWrapper.exists()).toBe(true);
+
+        const header = wrapper.find('.max-steps-header');
+        expect(header.exists()).toBe(true);
+        expect(header.attributes('role')).toBe('tablist');
+    });
+});
+
