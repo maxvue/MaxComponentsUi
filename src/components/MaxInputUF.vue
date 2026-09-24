@@ -27,7 +27,7 @@
         <template #option="{ option }">
             <slot name="option" :option="option">
                 <div class="max-uf-option-item">
-                    <img :src="option.flag" :alt="option.uf" class="max-uf-flag" loading="lazy" />
+                    <img :src="option.flag" :alt="option.uf" class="max-uf-flag" />
                     <span class="max-uf-code">{{ option.uf }}</span>
                     <span class="max-uf-dash">-</span>
                     <span class="max-uf-name">{{ option.name }}</span>
