@@ -245,6 +245,10 @@
       "types": "./dist/components/MaxInputMarkdownToolbar.vue.d.ts",
       "import": "./dist/components/MaxInputMarkdownToolbar.es.js"
     },
+    "./components/MaxInputMoney": {
+      "types": "./dist/components/MaxInputMoney.vue.d.ts",
+      "import": "./dist/components/MaxInputMoney.es.js"
+    },
     "./components/MaxInputNumber": {
       "types": "./dist/components/MaxInputNumber.vue.d.ts",
       "import": "./dist/components/MaxInputNumber.es.js"
