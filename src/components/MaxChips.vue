@@ -520,7 +520,7 @@
                         color: inherit;
 
                         &::placeholder {
-                            color: var(--background-650);
+                            color: var(--max-content-placeholder, var(--background-500));
                         }
 
                         &:disabled {

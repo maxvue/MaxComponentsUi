@@ -116,10 +116,10 @@ describe('Matriz Semântica de 4 Níveis de Cor de Texto (background-650/700/750
             expect(style).toMatch(/\.input-toggle-field-label\s*\{[^}]*color:\s*var\(--background-700\)/);
         });
 
-        it('MaxChips deve usar Texto Normal (700) no token e Texto Fraco (650) no placeholder', () => {
+        it('MaxChips deve usar Texto Normal (700) no token e var(--background-500) ou token no placeholder', () => {
             const style = CHIPS.split('<style')[1] ?? '';
             expect(style).toMatch(/\.max-chip-token\s*\{[^}]*color:\s*var\(--background-700\)/);
-            expect(style).toMatch(/placeholder\s*\{[^}]*color:\s*var\(--background-650\)/);
+            expect(style).toMatch(/placeholder\s*\{[^}]*color:\s*var\(--(?:max-content-placeholder|background-500)/);
         });
 
         it('MaxTableFields deve manter empty-cell em Texto Fraco (650)', () => {
@@ -133,9 +133,9 @@ describe('Matriz Semântica de 4 Níveis de Cor de Texto (background-650/700/750
             expect(style).toMatch(/\.label-file-upload\s*\{[^}]*color:\s*var\(--background-700\)/);
         });
 
-        it('MaxBaseInput deve usar Texto Fraco (650) no placeholder', () => {
+        it('MaxBaseInput deve usar var(--background-500) ou token no placeholder', () => {
             const style = BASE_INPUT.split('<style')[1] ?? '';
-            expect(style).toMatch(/placeholder\s*\{[^}]*color:\s*var\(--background-650\)/);
+            expect(style).toMatch(/placeholder\s*\{[^}]*color:\s*var\(--(?:max-content-placeholder|background-500)/);
         });
 
         it('MaxInputAutoComplete e MaxInputAutoCompleteApi devem usar Texto Normal (700) e Texto Fraco (650) para sublabels', () => {
@@ -166,11 +166,11 @@ describe('Matriz Semântica de 4 Níveis de Cor de Texto (background-650/700/750
             expect(style).toMatch(/th\s*\{[^}]*color:\s*var\(--background-750\)/);
         });
 
-        it('MaxInputOTP deve usar Texto Fraco (650) para separador, placeholder e disabled, e Texto Levemente Destacado (750) para dígitos', () => {
+        it('MaxInputOTP deve usar Texto Fraco (650) para separador e disabled, placeholder com 500/token, e Texto Levemente Destacado (750) para dígitos', () => {
             const style = OTP.split('<style')[1] ?? '';
             expect(style).toMatch(/\.max-input-otp-separator\s*\{[^}]*color:\s*var\(--background-650\)/);
             expect(style).toMatch(/\.max-input-otp-cell\s*\{[^}]*color:\s*var\(--background-750\)/);
-            expect(style).toMatch(/::placeholder\s*\{[^}]*color:\s*var\(--background-650\)/);
+            expect(style).toMatch(/::placeholder\s*\{[^}]*color:\s*var\(--(?:max-content-placeholder|background-500)/);
             expect(style).toMatch(/&:disabled\s*\{[^}]*color:\s*var\(--background-650\)/);
         });
 
@@ -232,34 +232,34 @@ describe('Matriz Semântica de 4 Níveis de Cor de Texto (background-650/700/750
             return match ? match[1] : '';
         };
 
-        it('tokens dedicados de texto secundário, placeholder e ajuda atingem contraste >= 4.5:1 no tema claro', () => {
+        it('token de placeholder conecta a var(--background-500) e textos de ajuda e secundário atingem contraste >= 4.5:1 no tema claro', () => {
             const lightBg = '#ffffff';
             const secondaryLight = extractHexFallback('--max-content-secondary', 'light');
-            const placeholderLight = extractHexFallback('--max-content-placeholder', 'light');
             const helpLight = extractHexFallback('--max-content-help', 'light');
 
             expect(secondaryLight).toBeTruthy();
-            expect(placeholderLight).toBeTruthy();
             expect(helpLight).toBeTruthy();
 
             expect(getContrast(lightBg, secondaryLight)).toBeGreaterThanOrEqual(4.5);
-            expect(getContrast(lightBg, placeholderLight)).toBeGreaterThanOrEqual(4.5);
             expect(getContrast(lightBg, helpLight)).toBeGreaterThanOrEqual(4.5);
+
+            expect(tokensContent).toMatch(/--max-content-placeholder:\s*var\(--background-500\);/);
         });
 
-        it('tokens dedicados de texto secundário, placeholder e ajuda atingem contraste >= 4.5:1 no tema escuro', () => {
+        it('token de placeholder conecta a var(--background-500) e textos de ajuda e secundário atingem contraste >= 4.5:1 no tema escuro', () => {
             const darkBg = '#09090b';
             const secondaryDark = extractHexFallback('--max-content-secondary', 'dark');
-            const placeholderDark = extractHexFallback('--max-content-placeholder', 'dark');
             const helpDark = extractHexFallback('--max-content-help', 'dark');
 
             expect(secondaryDark).toBeTruthy();
-            expect(placeholderDark).toBeTruthy();
             expect(helpDark).toBeTruthy();
 
             expect(getContrast(darkBg, secondaryDark)).toBeGreaterThanOrEqual(4.5);
-            expect(getContrast(darkBg, placeholderDark)).toBeGreaterThanOrEqual(4.5);
             expect(getContrast(darkBg, helpDark)).toBeGreaterThanOrEqual(4.5);
+
+            const darkIdx = tokensContent.indexOf('.dark');
+            const darkSection = tokensContent.slice(darkIdx);
+            expect(darkSection).toMatch(/--max-content-placeholder:\s*var\(--background-500\);/);
         });
 
         it('InputBase consome tokens semânticos dedicados para placeholder, help e disabled', () => {

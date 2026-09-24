@@ -859,7 +859,7 @@
     .placeholder-select {
         position: absolute;
         padding-left: 7px !important;
-        color: var(--background-700);
+        color: var(--max-content-placeholder, var(--background-500));
         font-size: 0.9rem;
     }
 
@@ -1004,6 +1004,10 @@
                 outline: none;
                 font-size: 0.85rem;
                 background: var(--background-50, #f8fafc);
+
+                &::placeholder {
+                    color: var(--max-content-placeholder, var(--background-500));
+                }
 
                 &:focus {
                     border-color: var(--max-primary-500, #00768E);

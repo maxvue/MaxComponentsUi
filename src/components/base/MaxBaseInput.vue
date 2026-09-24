@@ -74,7 +74,7 @@
         transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
 
         &::placeholder {
-            color: var(--background-650);
+            color: var(--max-content-placeholder, var(--background-500));
             opacity: 1;
         }
 
