@@ -32,9 +32,10 @@
                     class="max-step-header-item"
                     :class="{
                         'is-active': isStepActive(step),
-                        'is-done': step.done && !isStepActive(step),
-                        'is-error': step.error && !isStepActive(step),
-                        'is-caution': step.caution && !isStepActive(step),
+                        'is-done': isStepDone(step),
+                        'is-error': isStepError(step),
+                        'is-caution': isStepCaution(step),
+                        'is-pending': isStepCaution(step),
                         'is-disabled': step.disabled || isStepClickBlocked(step),
                         'is-clickable': props.allowManual && !step.disabled && !isStepClickBlocked(step)
                     }"
@@ -57,32 +58,51 @@
                     <!-- Card / Marcador do Step -->
                     <div class="step-marker-container">
                         <div class="step-marker-card">
-                            <div class="step-circle">
-                                <MaxIcon
-                                    v-if="step.done && !isStepActive(step)"
-                                    icon="lets-icons:check-fill"
-                                    class="step-icon status-done"
-                                    size="1.2"
-                                />
-                                <MaxIcon
-                                    v-else-if="step.error && !isStepActive(step)"
-                                    icon="material-symbols:close-rounded"
-                                    class="step-icon status-error"
-                                    size="1.2"
-                                />
-                                <MaxIcon
-                                    v-else-if="step.caution && !isStepActive(step)"
-                                    icon="humbleicons:exclamation"
-                                    class="step-icon status-caution"
-                                    size="1.1"
-                                />
-                                <MaxIcon
-                                    v-else-if="step.icon"
-                                    :icon="step.icon"
-                                    class="step-icon custom-icon"
-                                    size="1.1"
-                                />
-                                <span v-else class="step-number">{{ index + 1 }}</span>
+                            <div class="step-circle-wrapper">
+                                <div class="step-circle">
+                                    <MaxIcon
+                                        v-if="step.icon"
+                                        :icon="step.icon"
+                                        class="step-icon custom-icon"
+                                        size="1.1"
+                                    />
+                                    <span v-else class="step-number">{{ index + 1 }}</span>
+                                </div>
+
+                                <!-- Ícone secundário como badge na parte inferior direita -->
+                                <div
+                                    v-if="isStepDone(step)"
+                                    class="step-badge status-done badge-done"
+                                    title="Concluído"
+                                >
+                                    <MaxIcon
+                                        icon="boxicons:check-circle-filled"
+                                        class="badge-icon"
+                                        size="0.95"
+                                    />
+                                </div>
+                                <div
+                                    v-else-if="isStepError(step)"
+                                    class="step-badge status-error badge-error"
+                                    title="Erro"
+                                >
+                                    <MaxIcon
+                                        icon="bi:exclamation-circle-fill"
+                                        class="badge-icon"
+                                        size="0.95"
+                                    />
+                                </div>
+                                <div
+                                    v-else-if="isStepCaution(step)"
+                                    class="step-badge status-caution status-pending badge-pending"
+                                    title="Pendência"
+                                >
+                                    <MaxIcon
+                                        icon="bxs:help-circle"
+                                        class="badge-icon"
+                                        size="0.95"
+                                    />
+                                </div>
                             </div>
 
                             <div class="step-label-wrapper">
@@ -90,6 +110,7 @@
                                     <span class="step-prefix">{{ index + 1 }}. </span>
                                     <span class="step-title-text">{{ getStepTitle(step) }}</span>
                                 </span>
+                                <span class="step-active-line" aria-hidden="true" />
                             </div>
                         </div>
                     </div>
@@ -273,6 +294,28 @@
         return String(active_step.value) === String(step.id);
     };
 
+    const isStepDone = (step: StepItemData): boolean => {
+        const s = step.status?.toLowerCase();
+        return Boolean(step.done || s === 'done' || s === 'completed' || s === 'concluido');
+    };
+
+    const isStepError = (step: StepItemData): boolean => {
+        const s = step.status?.toLowerCase();
+        return Boolean(step.error || s === 'error' || s === 'erro');
+    };
+
+    const isStepCaution = (step: StepItemData): boolean => {
+        const s = step.status?.toLowerCase();
+        return Boolean(
+            step.caution
+                || step.pending
+                || s === 'pending'
+                || s === 'pendencia'
+                || s === 'caution'
+                || s === 'alerta'
+        );
+    };
+
     const currentIndex = computed(() => {
         return steps.value.findIndex((s) => String(s.id) === String(active_step.value));
     });
@@ -288,7 +331,7 @@
     const canGoNext = computed(() => {
         if (!props.nextOnlyDone) return true;
         const current = currentStep.value;
-        return Boolean(current?.done);
+        return Boolean(current && isStepDone(current));
     });
 
     const resolvedNextLabel = computed(() => {
@@ -319,7 +362,7 @@
 
     const isConnectorCompleted = (index: number): boolean => {
         const previousStep = steps.value[index - 1];
-        return Boolean(previousStep?.done);
+        return Boolean(previousStep && isStepDone(previousStep));
     };
 
     const isStepClickBlocked = (targetStep: StepItemData): boolean => {
@@ -329,7 +372,7 @@
         if (targetIdx <= currIdx) return false;
 
         // Se o destino estiver à frente, todos os intermediários a partir do atual devem ser done
-        for (let i = currIdx; i < targetIdx; i++) if (!steps.value[i]?.done) return true;
+        for (let i = currIdx; i < targetIdx; i++) if (!isStepDone(steps.value[i])) return true;
 
         return false;
     };
@@ -625,22 +668,64 @@
             background: transparent;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
-            .step-circle {
-                width: 36px;
-                height: 36px;
-                border-radius: 50%;
-                display: flex;
+            .step-circle-wrapper {
+                position: relative;
+                display: inline-flex;
                 align-items: center;
                 justify-content: center;
-                font-weight: 600;
-                font-size: 0.95rem;
-                background-color: var(--background-100);
-                border: 2px solid var(--background-300);
-                color: var(--background-500);
-                transition: all 0.25s ease;
 
-                .step-icon {
-                    color: #fff;
+                .step-circle {
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: 600;
+                    font-size: 0.95rem;
+                    background-color: var(--background-100);
+                    border: 2px solid var(--background-300);
+                    color: var(--background-500);
+                    transition: all 0.25s ease;
+
+                    .step-icon,
+                    .step-number {
+                        color: var(--background-500);
+                        transition: color 0.25s ease;
+                    }
+                }
+
+                .step-badge {
+                    position: absolute;
+                    right: -3px;
+                    bottom: -3px;
+                    z-index: 3;
+                    width: 16px;
+                    height: 16px;
+                    border-radius: 50%;
+                    background-color: var(--background-0);
+                    box-shadow: 0 1px 3px rgb(0 0 0 / 22%);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    line-height: 1;
+                    pointer-events: none;
+
+                    &.badge-done,
+                    &.status-done {
+                        color: var(--emerald-600);
+                    }
+
+                    &.badge-error,
+                    &.status-error {
+                        color: var(--red-b-600);
+                    }
+
+                    &.badge-pending,
+                    &.status-pending,
+                    &.status-caution {
+                        color: var(--yellow-600);
+                    }
                 }
             }
 
@@ -654,6 +739,9 @@
                 transition: color 0.2s ease;
                 max-width: 100%;
                 overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
 
                 .step-label {
                     display: inline-block;
@@ -662,40 +750,67 @@
                     text-overflow: ellipsis;
                     white-space: nowrap;
                 }
+
+                .step-active-line {
+                    display: block;
+                    width: 0;
+                    height: 2.5px;
+                    border-radius: 2px;
+                    background-color: var(--max-primary-500, #00768e);
+                    margin-top: 4px;
+                    transition: width 0.25s ease;
+                }
             }
         }
 
-        /* ESTADO: ATIVO (Card elevado flutuante com destaque visual azul-petróleo) */
+        /* ESTADO: ATIVO (Sem quadrado/card em volta; caracterizado por linha abaixo da descrição) */
         &.is-active {
             .step-marker-card {
-                background-color: var(--background-0);
-                box-shadow: 0 10px 25px -3px rgb(0 118 142 / 18%), 0 4px 10px -2px rgb(0 118 142 / 12%);
-                border: 1px solid rgb(0 118 142 / 18%);
-                transform: translateY(-2px);
-
-                .step-circle {
-                    background-color: var(--max-primary-500, #00768e);
-                    border-color: var(--max-primary-500, #00768e);
-                    color: #fff;
-                    box-shadow: 0 0 12px rgb(0 118 142 / 35%);
-                }
+                background: transparent;
+                box-shadow: none;
+                border: none;
+                transform: none;
 
                 .step-label-wrapper {
                     font-weight: 700;
                     color: var(--max-primary-500, #00768e);
+
+                    .step-active-line {
+                        width: 100%;
+                        min-width: 24px;
+                    }
+                }
+            }
+
+            /* Quando ativo sem status específico, ícone com cor var(--blue-200) sobre fundo var(--max-primary-500) */
+            &:not(.is-done, .is-error, .is-caution, .is-pending) {
+                .step-circle {
+                    background-color: var(--max-primary-500, #00768e);
+                    border-color: var(--max-primary-500, #00768e);
+                    color: var(--blue-200);
+
+                    .step-icon,
+                    .step-number {
+                        color: var(--blue-200);
+                    }
                 }
             }
         }
 
         /* ESTADO: CONCLUÍDO (DONE) */
         &.is-done {
-            .step-marker-card {
-                .step-circle {
-                    background-color: var(--emerald-600);
-                    border-color: var(--emerald-600);
-                    color: #fff;
-                }
+            .step-circle {
+                background-color: var(--emerald-300);
+                border-color: var(--emerald-600);
+                color: var(--emerald-600);
 
+                .step-icon,
+                .step-number {
+                    color: var(--emerald-600);
+                }
+            }
+
+            &:not(.is-active) {
                 .step-label-wrapper {
                     color: var(--background-800);
                 }
@@ -704,30 +819,41 @@
 
         /* ESTADO: ERRO (ERROR) */
         &.is-error {
-            .step-marker-card {
-                .step-circle {
-                    background-color: var(--red-600);
-                    border-color: var(--red-600);
-                    color: #fff;
-                }
+            .step-circle {
+                background-color: var(--red-b-300);
+                border-color: var(--red-b-600);
+                color: var(--red-b-600);
 
+                .step-icon,
+                .step-number {
+                    color: var(--red-b-600);
+                }
+            }
+
+            &:not(.is-active) {
                 .step-label-wrapper {
-                    color: var(--red-600);
+                    color: var(--red-b-600);
                 }
             }
         }
 
-        /* ESTADO: ALERTA (CAUTION) */
-        &.is-caution {
-            .step-marker-card {
-                .step-circle {
-                    background-color: var(--orange-600);
-                    border-color: var(--orange-600);
-                    color: #fff;
-                }
+        /* ESTADO: PENDÊNCIA (CAUTION / PENDING) */
+        &.is-caution,
+        &.is-pending {
+            .step-circle {
+                background-color: var(--yellow-300);
+                border-color: var(--yellow-600);
+                color: var(--yellow-600);
 
+                .step-icon,
+                .step-number {
+                    color: var(--yellow-600);
+                }
+            }
+
+            &:not(.is-active) {
                 .step-label-wrapper {
-                    color: var(--orange-600);
+                    color: var(--yellow-600);
                 }
             }
         }
@@ -781,14 +907,27 @@
                 padding: 4px 6px;
                 border-radius: 8px;
 
-                .step-circle {
-                    width: 28px;
-                    height: 28px;
-                    font-size: 0.8rem;
-                    border-width: 1.5px;
+                .step-circle-wrapper {
+                    .step-circle {
+                        width: 28px;
+                        height: 28px;
+                        font-size: 0.8rem;
+                        border-width: 1.5px;
 
-                    .step-icon {
-                        transform: scale(0.85);
+                        .step-icon {
+                            transform: scale(0.85);
+                        }
+                    }
+
+                    .step-badge {
+                        width: 13px;
+                        height: 13px;
+                        right: -2px;
+                        bottom: -2px;
+
+                        .badge-icon {
+                            transform: scale(0.8);
+                        }
                     }
                 }
 
@@ -804,12 +943,24 @@
                         white-space: nowrap;
                         max-width: 100%;
                     }
+
+                    .step-active-line {
+                        height: 2px;
+                        margin-top: 2px;
+                    }
                 }
             }
 
             &.is-active {
                 .step-marker-card {
-                    transform: translateY(-1px);
+                    transform: none;
+
+                    .step-label-wrapper {
+                        .step-active-line {
+                            width: 100%;
+                            min-width: 16px;
+                        }
+                    }
                 }
             }
         }

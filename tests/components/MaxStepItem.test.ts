@@ -204,3 +204,95 @@ describe('MaxStepItem — Suporte a labelMobile e LabelMobile', () => {
     });
 });
 
+describe('MaxStepItem — Prop status Unificada e Badges Secundários', () => {
+    it('suporta status="concluido" e status="done", exibindo badge boxicons:check-circle-filled', async () => {
+        const wrapper = mount(defineComponent({
+            components: { MaxSteps, MaxStepItem },
+            template: `
+                <MaxSteps id="item-status-unif-1" :cached="false" value="2">
+                    <MaxStepItem value="1" title="P1" status="concluido"><div class="c1">C1</div></MaxStepItem>
+                    <MaxStepItem value="2" title="P2" status="done"><div class="c2">C2</div></MaxStepItem>
+                </MaxSteps>
+            `
+        }));
+
+        await settle();
+
+        const headers = wrapper.findAll('.max-step-header-item');
+        expect(headers[0].classes()).toContain('is-done');
+        const badge1 = headers[0].find('.badge-done');
+        expect(badge1.exists()).toBe(true);
+        expect(badge1.findComponent({ name: 'MaxIcon' }).props('icon')).toBe('boxicons:check-circle-filled');
+
+        expect(headers[1].classes()).toContain('is-done');
+        expect(headers[1].classes()).toContain('is-active');
+        const badge2 = headers[1].find('.badge-done');
+        expect(badge2.exists()).toBe(true);
+        expect(badge2.findComponent({ name: 'MaxIcon' }).props('icon')).toBe('boxicons:check-circle-filled');
+    });
+
+    it('suporta status="erro" e status="error", exibindo badge bi:exclamation-circle-fill', async () => {
+        const wrapper = mount(defineComponent({
+            components: { MaxSteps, MaxStepItem },
+            template: `
+                <MaxSteps id="item-status-unif-2" :cached="false" value="2">
+                    <MaxStepItem value="1" title="P1" status="erro"><div class="c1">C1</div></MaxStepItem>
+                    <MaxStepItem value="2" title="P2"><div class="c2">C2</div></MaxStepItem>
+                </MaxSteps>
+            `
+        }));
+
+        await settle();
+
+        const headers = wrapper.findAll('.max-step-header-item');
+        expect(headers[0].classes()).toContain('is-error');
+        const badge = headers[0].find('.badge-error');
+        expect(badge.exists()).toBe(true);
+        expect(badge.findComponent({ name: 'MaxIcon' }).props('icon')).toBe('bi:exclamation-circle-fill');
+    });
+
+    it('suporta status="pendencia", status="pending" e :pending="true", exibindo badge bxs:help-circle', async () => {
+        const wrapper = mount(defineComponent({
+            components: { MaxSteps, MaxStepItem },
+            template: `
+                <MaxSteps id="item-status-unif-3" :cached="false" value="1">
+                    <MaxStepItem value="1" title="P1" status="pendencia"><div class="c1">C1</div></MaxStepItem>
+                    <MaxStepItem value="2" title="P2" :pending="true"><div class="c2">C2</div></MaxStepItem>
+                </MaxSteps>
+            `
+        }));
+
+        await settle();
+
+        const headers = wrapper.findAll('.max-step-header-item');
+        expect(headers[0].classes()).toContain('is-pending');
+        const badge1 = headers[0].find('.badge-pending');
+        expect(badge1.exists()).toBe(true);
+        expect(badge1.findComponent({ name: 'MaxIcon' }).props('icon')).toBe('bxs:help-circle');
+
+        expect(headers[1].classes()).toContain('is-pending');
+        const badge2 = headers[1].find('.badge-pending');
+        expect(badge2.exists()).toBe(true);
+        expect(badge2.findComponent({ name: 'MaxIcon' }).props('icon')).toBe('bxs:help-circle');
+    });
+
+    it('step ativo renderiza linha indicadora de step aberto .step-active-line', async () => {
+        const wrapper = mount(defineComponent({
+            components: { MaxSteps, MaxStepItem },
+            template: `
+                <MaxSteps id="item-active-line" :cached="false" value="1">
+                    <MaxStepItem value="1" title="Passo Aberto"><div class="c1">C1</div></MaxStepItem>
+                    <MaxStepItem value="2" title="Passo Fechado"><div class="c2">C2</div></MaxStepItem>
+                </MaxSteps>
+            `
+        }));
+
+        await settle();
+
+        const headers = wrapper.findAll('.max-step-header-item');
+        expect(headers[0].classes()).toContain('is-active');
+        expect(headers[0].find('.step-active-line').exists()).toBe(true);
+        expect(headers[1].classes()).not.toContain('is-active');
+    });
+});
+

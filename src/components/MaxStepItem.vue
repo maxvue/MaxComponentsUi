@@ -63,7 +63,7 @@
     import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
     import { Random } from '@maxvue/max-use';
     import MaxButton from './MaxButton.vue';
-    import { injectStepsContext, type StepItemData } from '../helpers/stepsContext';
+    import { injectStepsContext, type StepItemData, type StepStatus } from '../helpers/stepsContext';
 
     type Props = {
         value?: string | number;
@@ -73,12 +73,18 @@
         icon?: string;
         i?: string;
         disabled?: boolean;
+        status?: StepStatus;
+        Status?: StepStatus;
         done?: boolean;
         Done?: boolean;
         error?: boolean;
         Error?: boolean;
         caution?: boolean;
         Caution?: boolean;
+        pending?: boolean;
+        Pending?: boolean;
+        pendencia?: boolean;
+        Pendencia?: boolean;
         nextLabel?: string;
         NextLabel?: string;
         forwardLabel?: string;
@@ -102,12 +108,18 @@
     const props = withDefaults(defineProps<Props>(), {
         title: '',
         disabled: false,
+        status: undefined,
+        Status: undefined,
         done: undefined,
         Done: undefined,
         error: undefined,
         Error: undefined,
         caution: undefined,
-        Caution: undefined
+        Caution: undefined,
+        pending: undefined,
+        Pending: undefined,
+        pendencia: undefined,
+        Pendencia: undefined
     });
 
     const context = injectStepsContext('MaxStepItem');
@@ -116,9 +128,29 @@
     const step_id = ref<string | number>(props.value ?? generatedId);
     const uniqueStepId = computed(() => String(step_id.value));
 
-    const isDone = computed(() => Boolean(props.done || props.Done));
-    const isError = computed(() => Boolean(props.error || props.Error));
-    const isCaution = computed(() => Boolean(props.caution || props.Caution));
+    const resolvedStatus = computed<StepStatus | undefined>(() => {
+        const s = (props.status || props.Status)?.toLowerCase();
+        if (s) return s as StepStatus;
+        if (props.done || props.Done) return 'done';
+        if (props.error || props.Error) return 'error';
+        if (props.caution || props.Caution || props.pending || props.Pending || props.pendencia || props.Pendencia) return 'pending';
+        return undefined;
+    });
+
+    const isDone = computed(() => {
+        const s = resolvedStatus.value;
+        return s === 'done' || s === 'completed' || s === 'concluido';
+    });
+
+    const isError = computed(() => {
+        const s = resolvedStatus.value;
+        return s === 'error' || s === 'erro';
+    });
+
+    const isCaution = computed(() => {
+        const s = resolvedStatus.value;
+        return s === 'pending' || s === 'pendencia' || s === 'caution' || s === 'alerta';
+    });
 
     const resolvedLabelMobile = computed(() => props.labelMobile || props.LabelMobile);
 
@@ -169,9 +201,11 @@
         labelMobile: resolvedLabelMobile.value,
         icon: props.icon || props.i,
         disabled: props.disabled,
+        status: resolvedStatus.value,
         done: isDone.value,
         error: isError.value,
         caution: isCaution.value,
+        pending: isCaution.value,
         nextLabel: resolvedNextLabel.value,
         previousLabel: resolvedPreviousLabel.value,
         onNext: resolvedOnNext.value,
@@ -195,6 +229,7 @@
         () => props.icon,
         () => props.i,
         () => props.disabled,
+        resolvedStatus,
         isDone,
         isError,
         isCaution,

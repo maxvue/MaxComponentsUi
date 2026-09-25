@@ -1,5 +1,16 @@
 import { inject, type InjectionKey, type Ref, type ComputedRef } from 'vue';
 
+export type StepStatus =
+    | 'done'
+    | 'completed'
+    | 'concluido'
+    | 'error'
+    | 'erro'
+    | 'pending'
+    | 'pendencia'
+    | 'caution'
+    | 'alerta';
+
 /**
  * Metadados de um item de step registrado no componente container MaxSteps.
  */
@@ -16,12 +27,16 @@ export interface StepItemData {
     icon?: string;
     /** Indica se o step está desabilitado. */
     disabled?: boolean;
+    /** Status do step: concluído, erro ou pendência. */
+    status?: StepStatus;
     /** Indica se o step está concluído com sucesso (ícone de Check verde). */
     done?: boolean;
     /** Indica se o step possui erro (ícone de Erro vermelho). */
     error?: boolean;
     /** Indica se o step possui alerta/aviso (ícone de Alerta laranja). */
     caution?: boolean;
+    /** Indica se o step possui pendência (alias para caution). */
+    pending?: boolean;
     /** Label customizado do botão Avançar deste step específico. */
     nextLabel?: string;
     /** Label customizado do botão Voltar deste step específico. */

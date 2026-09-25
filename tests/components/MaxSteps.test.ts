@@ -357,3 +357,80 @@ describe('MaxSteps — Layout Mobile e Responsividade das Tabs', () => {
     });
 });
 
+describe('MaxSteps — Visual de Step Ativo e Integração com Status', () => {
+    it('renderiza a linha indicadora ativa .step-active-line no step ativo e não no inativo', async () => {
+        const wrapper = mount(defineComponent({
+            components: { MaxSteps, MaxStepItem },
+            template: `
+                <MaxSteps id="steps-active-line-test" :cached="false" value="1">
+                    <MaxStepItem value="1" title="Passo 1"><div class="c1">C1</div></MaxStepItem>
+                    <MaxStepItem value="2" title="Passo 2"><div class="c2">C2</div></MaxStepItem>
+                </MaxSteps>
+            `
+        }));
+
+        await settle();
+
+        const headers = wrapper.findAll('.max-step-header-item');
+        expect(headers[0].classes()).toContain('is-active');
+        expect(headers[0].find('.step-active-line').exists()).toBe(true);
+
+        // Ao navegar para o passo 2
+        await wrapper.find('.btn-step-next').trigger('click');
+        await settle();
+
+        expect(headers[0].classes()).not.toContain('is-active');
+        expect(headers[1].classes()).toContain('is-active');
+        expect(headers[1].find('.step-active-line').exists()).toBe(true);
+    });
+
+    it('mantém cores e badge de status quando o step com status também for o step ativo', async () => {
+        const wrapper = mount(defineComponent({
+            components: { MaxSteps, MaxStepItem },
+            template: `
+                <MaxSteps id="steps-active-status" :cached="false" value="1">
+                    <MaxStepItem value="1" title="P1" status="concluido"><div class="c1">C1</div></MaxStepItem>
+                    <MaxStepItem value="2" title="P2" status="erro"><div class="c2">C2</div></MaxStepItem>
+                    <MaxStepItem value="3" title="P3" status="pendencia"><div class="c3">C3</div></MaxStepItem>
+                </MaxSteps>
+            `
+        }));
+
+        await settle();
+
+        const headers = wrapper.findAll('.max-step-header-item');
+        // Passo 1 está ativo E concluído
+        expect(headers[0].classes()).toContain('is-active');
+        expect(headers[0].classes()).toContain('is-done');
+        expect(headers[0].find('.badge-done').exists()).toBe(true);
+        expect(headers[0].find('.step-active-line').exists()).toBe(true);
+
+        // Passo 2 é erro
+        expect(headers[1].classes()).toContain('is-error');
+        expect(headers[1].find('.badge-error').exists()).toBe(true);
+
+        // Passo 3 é pendência
+        expect(headers[2].classes()).toContain('is-pending');
+        expect(headers[2].find('.badge-pending').exists()).toBe(true);
+    });
+
+    it('conector é marcado como completado quando o passo anterior tiver status concluído', async () => {
+        const wrapper = mount(defineComponent({
+            components: { MaxSteps, MaxStepItem },
+            template: `
+                <MaxSteps id="steps-connector-test" :cached="false" value="2">
+                    <MaxStepItem value="1" title="P1" status="concluido"><div class="c1">C1</div></MaxStepItem>
+                    <MaxStepItem value="2" title="P2"><div class="c2">C2</div></MaxStepItem>
+                </MaxSteps>
+            `
+        }));
+
+        await settle();
+
+        const connector = wrapper.find('.step-connector');
+        expect(connector.exists()).toBe(true);
+        expect(connector.classes()).toContain('is-completed');
+    });
+});
+
+
