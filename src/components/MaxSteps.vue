@@ -525,7 +525,7 @@
         justify-content: space-between;
         width: 100%;
         max-width: 100vw;
-        padding: 1.25rem 1.5rem;
+        padding: 1.25rem 0;
         box-sizing: border-box;
         border-bottom: 1px solid var(--background-200);
         background-color: transparent;
@@ -746,13 +746,13 @@
         min-height: 0;
         width: 100%;
         overflow-y: auto;
-        padding: 1.5rem;
+        padding: 1.5rem 0 0;
         box-sizing: border-box;
     }
 
     @mixin mobile-steps-header {
         .max-steps-header-wrapper {
-            padding: 0.75rem 0.5rem;
+            padding: 0.75rem 0;
             gap: 8px;
             max-width: 100vw;
 
