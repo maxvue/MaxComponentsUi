@@ -283,7 +283,21 @@
                         >
                             Inserir imagem
                         </button>
+                        <button
+                            type="button"
+                            class="md-popover__btn"
+                            @click="triggerFileInput"
+                        >
+                            Escolher do computador
+                        </button>
                     </div>
+                    <input
+                        ref="fileInputRef"
+                        type="file"
+                        accept="image/*"
+                        style="display: none;"
+                        @change="onFileSelected"
+                    />
                 </div>
             </div>
 
@@ -558,6 +572,26 @@
 
         props.editor?.chain().focus().setImage({ src: trimmed }).run();
         closeImagePopover();
+    };
+
+    const emit = defineEmits<{
+        (e: 'select-image-file', file: File): void;
+    }>();
+
+    const fileInputRef = ref<HTMLInputElement | null>(null);
+
+    const triggerFileInput = () => {
+        fileInputRef.value?.click();
+    };
+
+    const onFileSelected = (event: Event) => {
+        const target = event.target as HTMLInputElement | null;
+        const file = target?.files?.[0];
+        if (file) {
+            emit('select-image-file', file);
+            closeImagePopover();
+        }
+        if (target) target.value = '';
     };
 </script>
 

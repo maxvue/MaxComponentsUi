@@ -1,7 +1,12 @@
 <template>
     <div class="max-input-markdown">
         <div class="max-input-markdown__editor-wrap" :class="{ 'max-input-markdown__editor-wrap--disabled': props.disabled }">
-            <MaxInputMarkdownToolbar :editor="editor ?? null" :hide-tools="props.hideTools" :tools="props.tools" />
+            <MaxInputMarkdownToolbar
+                :editor="editor ?? null"
+                :hide-tools="props.hideTools"
+                :tools="props.tools"
+                @select-image-file="insertImageFile"
+            />
             <EditorContent class="max-input-markdown__content" :style="{ minHeight: props.minHeight, maxHeight: props.maxHeight }" :editor="editor" @click="focusEditor" />
         </div>
 
