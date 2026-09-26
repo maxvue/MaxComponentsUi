@@ -467,3 +467,6 @@ export interface AsyncState<T = any> {
 
 // Tipos do MaxImage (recorte e props).
 export type * from './image';
+
+// Tipos do MaxCard e MaxSubCard.
+export type * from './card';

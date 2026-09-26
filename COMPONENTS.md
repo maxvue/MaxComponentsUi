@@ -21,6 +21,7 @@ Todos os componentes utilizam `<script setup lang="ts">` e suportam v-model quan
 - [Loaders](#loaders)
 - [Transições e Animações](#transições-e-animações)
 - [Display e Outros](#display-e-outros)
+- [Cards e Listas](#cards-e-listas)
 
 ---
 
@@ -1640,3 +1641,225 @@ Mantido apenas para compatibilidade retroativa.
 **Aliases:** `TextInputFloatLabel`
 
 Sem props. Use `InputBase` com `float` no lugar.
+
+---
+
+## Cards e Listas
+
+### MaxCard
+
+Card estruturado de superfície para agrupamento de conteúdo visual e semântico. Suporta variantes visuais (`default`, `add`), slots modulares para mídias, cabeçalho, conteúdo, ações e rodapé, além de suporte nativo a estados interativo, desabilitado e carregamento (`loading`).
+
+**Arquivo:** [`src/components/MaxCard.vue`](src/components/MaxCard.vue)  
+**Aliases:** `Card`
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `variant` | `'default' \| 'add'` | `'default'` | Variante visual do card |
+| `title` | `string` | — | Título principal exibido no cabeçalho |
+| `subtitle` | `string` | — | Subtítulo descritivo exibido abaixo do título |
+| `loading` | `boolean` | `false` | Exibe overlay bloqueante de carregamento com spinner |
+| `disabled` | `boolean` | `false` | Desabilita o card e bloqueia eventos de clique e foco |
+| `clickable` | `boolean` | `false` | Torna o card interativo e focável via teclado com estilo hover |
+| `icon` | `string` | — | Identificador Iconify exibido no cabeçalho |
+
+**Slots:**
+- `#header` — Cabeçalho personalizado do card
+- `#actions` — Ações ou botões no canto direito do cabeçalho
+- `#media` — Área de mídia (imagem, banner ou vídeo) no topo do card
+- `#content` / `#default` — Conteúdo principal do card
+- `#footer` — Rodapé do card
+
+**Eventos:** `click`
+
+**Exemplo de uso:**
+```vue
+<template>
+  <MaxCard
+    title="Serviço de Autenticação"
+    subtitle="Microsserviço de segurança e tokens JWT"
+    icon="mdi:shield-check"
+    clickable
+    @click="openDetails"
+  >
+    <p>Status: Operacional com 99.9% de uptime.</p>
+    <template #actions>
+      <MaxButton icon="mdi:cog" variant="text" />
+    </template>
+  </MaxCard>
+</template>
+```
+
+---
+
+### MaxSubCard
+
+Subcard compacto ideal para itens e blocos aninhados dentro de outros cards, painéis ou visualizações mestres-detalhe. Suporta status semântico, interatividade e customização via slots.
+
+**Arquivo:** [`src/components/MaxSubCard.vue`](src/components/MaxSubCard.vue)  
+**Aliases:** `SubCard`
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `title` | `string` | — | Título do item aninhado |
+| `subtitle` | `string` | — | Subtítulo ou detalhes adicionais |
+| `status` | `string` | — | Rótulo de status semântico exibido em badge |
+| `icon` | `string` | — | Ícone compacto no cabeçalho |
+| `clickable` | `boolean` | `false` | Torna o subcard interativo e com feedback hover |
+| `disabled` | `boolean` | `false` | Desabilita o subcard |
+
+**Slots:**
+- `#header` — Cabeçalho compacto customizado
+- `#actions` — Ações no topo do subcard
+- `#content` / `#default` — Conteúdo interno do item
+
+**Eventos:** `click`
+
+**Exemplo de uso:**
+```vue
+<template>
+  <MaxSubCard
+    title="Chave de API #1"
+    subtitle="Criada em 12/05/2026"
+    status="active"
+    icon="mdi:key"
+    clickable
+  />
+</template>
+```
+
+---
+
+### MaxCardList
+
+Container orquestrador de cards de alta performance com **scroll virtual** integrado via `@tanstack/vue-virtual` (`useVirtualizer`) com medição dinâmica de altura (`measureElement`). Suporta **grid responsivo dinâmico** com auto-cálculo de colunas, slot dedicado `#add-card` (sem desalinhar os índices da virtualização), filtros reativos de busca e categorias, integração semântica com `MaxStats` via slot `#header`, e estados de carregamento (`#loading`) e vazio (`#empty`) pré-estilizados.
+
+**Arquivo:** [`src/components/MaxCardList.vue`](src/components/MaxCardList.vue)  
+**Aliases:** `CardList`
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `items` | `any[]` | `[]` | Lista de itens a serem renderizados |
+| `itemKey` | `string \| ((item: any, index: number) => string \| number)` | — | Propriedade ou função geradora de chave única para cada item |
+| `minCardWidth` | `number` | `320` | Largura mínima de cada card em pixels para o auto-cálculo do grid responsivo |
+| `columns` | `number` | — | Número fixo de colunas (quando fornecido, sobrescreve o auto-cálculo dinâmico) |
+| `gap` | `number` | `16` | Espaçamento em pixels entre os cards do grid |
+| `estimateSize` | `number` | `240` | Altura estimada inicial em pixels de cada linha virtual para o virtualizador |
+| `height` | `string \| number` | `'600px'` | Altura do container com scroll (ex.: `'600px'`, `'100%'`) |
+| `maxHeight` | `string \| number` | — | Altura máxima do container com scroll |
+| `overscan` | `number` | `3` | Linhas extras pré-renderizadas fora da viewport |
+| `virtualScroll` | `boolean` | `true` | Ativa o modo de virtual scroll ou fallback para grid estático |
+| `loading` | `boolean` | `false` | Indica estado de carregamento exibindo o slot ou loader padrão |
+| `loadingLabel` | `string` | `'Carregando cards...'` | Rótulo do componente `MaxLoader` padrão |
+| `emptyLabel` | `string` | `'Nenhum card encontrado'` | Rótulo do componente `MaxEmptyDiv` padrão |
+| `filterable` | `boolean` | `true` | Exibe a barra de controles e filtros |
+| `searchQuery` | `string` | `''` | Valor do termo de busca (suporta `v-model:searchQuery` ou `v-model:search`) |
+| `searchPlaceholder` | `string` | `'Pesquisar cards...'` | Placeholder do campo de pesquisa |
+| `category` | `any` | `''` | Categoria selecionada (suporta `v-model:category`) |
+| `categories` | `(MaxCardListCategoryOption \| string)[]` | `[]` | Lista de opções para filtro de categorias |
+| `categoryPlaceholder` | `string` | `'Todas as categorias'` | Placeholder da opção neutra de categoria |
+| `addCardPosition` | `'top' \| 'header' \| 'inline'` | `'top'` | Posição de renderização do slot `#add-card` |
+| `title` | `string` | — | Título da lista exibido no cabeçalho |
+| `subtitle` | `string` | — | Subtítulo da lista |
+| `stats` | `any[]` | `[]` | Lista de métricas para integração automática com `MaxStats` no header |
+| `filterFn` | `(item: any, search: string, category: any) => boolean` | — | Função personalizada de filtragem no cliente |
+| `customFilter` | `boolean` | `false` | Desativa filtragem interna quando o consumidor gerencia dados externamente |
+| `defaultColumns` | `number` | `3` | Quantidade de colunas padrão antes da medição inicial de largura do container |
+
+**Slots:**
+- `#header` — Cabeçalho customizado. Fornece no escopo `{ total, filteredCount, items }` para integração com `MaxStats`
+- `#actions` — Ações adicionais no cabeçalho
+- `#filters` — Substituição customizada da barra de filtros. Fornece no escopo `{ search, category, categories, setSearch, setCategory }`
+- `#add-card` — Card ou ação de adição. Renderizado isoladamente sem desalinhar os índices dos itens virtualizados
+- `#card` / `#item` — Renderização do card individual. Fornece no escopo `{ item, index }`
+- `#loading` — Estado de carregamento customizado (fallback: `MaxLoader`)
+- `#empty` — Estado vazio customizado (fallback: `MaxEmptyDiv`)
+
+**Eventos:**
+- `search` — Disparado ao pesquisar (`[query: string]`)
+- `update:search` / `update:searchQuery` — Sincronização da busca (`[query: string]`)
+- `update:category` — Sincronização da categoria (`[category: any]`)
+- `update:filter` — Disparado na alteração de qualquer filtro (`[{ search, category }]`)
+- `scroll` — Evento de scroll nativo do container (`[event: Event]`)
+
+**Métodos expostos (`defineExpose`):**
+- `scrollToIndex(index, options)` — Rola a visualização virtual até o índice do item especificado
+- `scrollToOffset(offset, options)` — Rola a visualização virtual até o deslocamento em pixels informado
+- `setSearch(query)` — Atualiza a busca programaticamente
+- `setCategory(category)` — Atualiza a categoria programaticamente
+- `virtualizer` — Instância do TanStack Virtualizer
+- `computedColumns` — Número de colunas calculado dinamicamente
+- `filteredItems` — Coleção de itens após aplicação dos filtros
+- `totalItems` — Contagem total de itens recebidos
+
+**Exemplo de uso completo:**
+```vue
+<template>
+  <MaxCardList
+    :items="servicos"
+    title="Serviços e APIs"
+    subtitle="Monitore e gerencie os serviços da plataforma"
+    :stats="[
+      { label: 'Total', value: servicos.length },
+      { label: 'Online', value: onlineCount }
+    ]"
+    :categories="['Backend', 'Frontend', 'Infraestrutura']"
+    :min-card-width="300"
+    height="650px"
+    @search="onSearch"
+    @update:filter="onFilterChange"
+  >
+    <!-- Slot de Adição isolado -->
+    <template #add-card>
+      <MaxCard
+        variant="add"
+        title="Cadastrar Novo Serviço"
+        @click="cadastrarNovoServico"
+      />
+    </template>
+
+    <!-- Slot para cada Card -->
+    <template #card="{ item, index }">
+      <MaxCard
+        :title="item.nome"
+        :subtitle="item.descricao"
+        icon="mdi:server"
+        clickable
+        @click="abrirServico(item)"
+      >
+        <p>Ambiente: {{ item.ambiente }} (Índice: {{ index }})</p>
+      </MaxCard>
+    </template>
+  </MaxCardList>
+</template>
+
+<script setup lang="ts">
+  import { ref, computed } from 'vue';
+  import { MaxCard, MaxCardList } from '@maxvue/max-components-ui';
+
+  const servicos = ref([
+    { id: 1, nome: 'Auth Server', descricao: 'Servidor OAuth2/JWT', ambiente: 'Produção', category: 'Backend' },
+    { id: 2, nome: 'WebApp Hub', descricao: 'Frontend em Vue 3', ambiente: 'Produção', category: 'Frontend' },
+    { id: 3, nome: 'Cluster K8s', descricao: 'Orquestração de pods', ambiente: 'Cloud', category: 'Infraestrutura' }
+  ]);
+
+  const onlineCount = computed(() => servicos.value.length);
+
+  function cadastrarNovoServico() {
+    console.log('Novo serviço');
+  }
+
+  function abrirServico(item: any) {
+    console.log('Abrir:', item);
+  }
+
+  function onSearch(query: string) {
+    console.log('Pesquisa:', query);
+  }
+
+  function onFilterChange(filters: any) {
+    console.log('Filtros ativos:', filters);
+  }
+</script>
+```
+

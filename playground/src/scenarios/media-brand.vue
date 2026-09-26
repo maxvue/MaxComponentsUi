@@ -171,6 +171,64 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="component-block">
+                    <h3>MaxCard</h3>
+                    <div class="states">
+                        <div class="state-col">
+                            <span>Normal</span>
+                            <MaxCard title="Card Padrão" subtitle="Exemplo de conteúdo estruturado" />
+                        </div>
+                        <div class="state-col">
+                            <span>Disabled</span>
+                            <MaxCard title="Card Desabilitado" disabled />
+                        </div>
+                        <div class="state-col">
+                            <span>Variante Add</span>
+                            <MaxCard variant="add" title="Adicionar Novo Item" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="component-block">
+                    <h3>MaxSubCard</h3>
+                    <div class="states">
+                        <div class="state-col">
+                            <span>Normal</span>
+                            <MaxSubCard title="SubCard Padrão" subtitle="Item aninhado compacto" />
+                        </div>
+                        <div class="state-col">
+                            <span>Com Status</span>
+                            <MaxSubCard title="SubCard com Status" status="active" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="component-block">
+                    <h3>MaxCardList</h3>
+                    <div class="states">
+                        <div class="state-col" style="width: 100%;">
+                            <span>Orquestrador com Virtual Scroll e Grid Responsivo</span>
+                            <MaxCardList
+                                :items="[
+                                    { id: 1, title: 'Serviço Alpha', subtitle: 'Microsserviço de autenticação', category: 'Backend' },
+                                    { id: 2, title: 'Portal Web', subtitle: 'Interface de usuário principal', category: 'Frontend' },
+                                    { id: 3, title: 'Worker Analytics', subtitle: 'Processador de filas assíncronas', category: 'Backend' },
+                                    { id: 4, title: 'Design System', subtitle: 'Biblioteca de componentes Vue', category: 'Design' }
+                                ]"
+                                title="Catálogo de Projetos"
+                                subtitle="Gerenciamento e orquestração de serviços da aplicação"
+                                :height="320"
+                                :min-card-width="260"
+                                :categories="['Backend', 'Frontend', 'Design']"
+                            >
+                                <template #add-card>
+                                    <MaxCard variant="add" title="Adicionar Novo Projeto" />
+                                </template>
+                            </MaxCardList>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -187,6 +245,9 @@
     import { MaxCreditCard } from '@maxvue/max-components-ui';
     import { MaxTitle1 } from '@maxvue/max-components-ui';
     import { MaxTitle2 } from '@maxvue/max-components-ui';
+    import { MaxCard } from '@maxvue/max-components-ui';
+    import { MaxSubCard } from '@maxvue/max-components-ui';
+    import { MaxCardList } from '@maxvue/max-components-ui';
 </script>
 
 <style lang="scss" scoped>

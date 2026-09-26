@@ -175,6 +175,9 @@ export const PLAYGROUND_CATALOG: CatalogComponent[] = [
     { name: 'MaxCreditCard', family: 'media', scenarioId: 'media-brand', description: 'Representação visual de cartão de crédito com flip frente e verso.' },
     { name: 'MaxTitle1', family: 'media', scenarioId: 'media-brand', description: 'Título de nível 1 com tipografia canônica compacta.' },
     { name: 'MaxTitle2', family: 'media', scenarioId: 'media-brand', description: 'Título de nível 2 com contraste e hierarquia harmoniosa.' },
+    { name: 'MaxCard', family: 'media', scenarioId: 'media-brand', description: 'Card estruturado de superfície para agrupamento de conteúdo com variantes, slots e estados.' },
+    { name: 'MaxSubCard', family: 'media', scenarioId: 'media-brand', description: 'Subcard compacto para itens e blocos aninhados com status semântico.' },
+    { name: 'MaxCardList', family: 'media', scenarioId: 'media-brand', description: 'Container orquestrador de cards com virtual scroll via TanStack Virtual, grid responsivo, filtros e slots.' },
 
     // Transitions (4)
     { name: 'MaxAnimateFade', family: 'transitions', scenarioId: 'trans-fade', description: 'Transição suave de entrada e saída por opacidade.' },

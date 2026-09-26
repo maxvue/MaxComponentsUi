@@ -37,6 +37,23 @@ export { default as AuthCard } from './components/MaxAuthCard.vue';
 export { clearAuthOtpCache } from './helpers/clearAuthOtpCache';
 export type { AuthProvider, AuthOtpEndpoint, AuthMode, AuthStep, AuthLabels } from './components/MaxAuthCard.vue';
 
+// Cards
+export { default as MaxCard } from './components/MaxCard.vue';
+export { default as Card } from './components/MaxCard.vue';
+export { default as MaxSubCard } from './components/MaxSubCard.vue';
+export { default as SubCard } from './components/MaxSubCard.vue';
+export { default as MaxCardList } from './components/MaxCardList.vue';
+export { default as CardList } from './components/MaxCardList.vue';
+export type {
+    MaxCardProps,
+    MaxCardVariant,
+    MaxSubCardProps,
+    MaxCardListProps,
+    MaxCardListFilterPayload,
+    MaxCardListCategoryOption
+} from './types/card';
+
+
 // Tabs
 export { default as MaxTabs } from './components/MaxTabs.vue';
 export { default as Tabs } from './components/MaxTabs.vue';

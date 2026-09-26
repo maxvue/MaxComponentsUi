@@ -85,6 +85,14 @@
       "types": "./dist/components/MaxButtonConfirm.vue.d.ts",
       "import": "./dist/components/MaxButtonConfirm.es.js"
     },
+    "./components/MaxCard": {
+      "types": "./dist/components/MaxCard.vue.d.ts",
+      "import": "./dist/components/MaxCard.es.js"
+    },
+    "./components/MaxCardList": {
+      "types": "./dist/components/MaxCardList.vue.d.ts",
+      "import": "./dist/components/MaxCardList.es.js"
+    },
     "./components/MaxChart": {
       "types": "./dist/components/MaxChart.vue.d.ts",
       "import": "./dist/components/MaxChart.es.js"
@@ -412,6 +420,10 @@
     "./components/MaxSteps": {
       "types": "./dist/components/MaxSteps.vue.d.ts",
       "import": "./dist/components/MaxSteps.es.js"
+    },
+    "./components/MaxSubCard": {
+      "types": "./dist/components/MaxSubCard.vue.d.ts",
+      "import": "./dist/components/MaxSubCard.es.js"
     },
     "./components/MaxTab": {
       "types": "./dist/components/MaxTab.vue.d.ts",
