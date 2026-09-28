@@ -4,7 +4,7 @@ import { setActivePinia, createPinia } from 'pinia';
 import MaxInputUF from '../../src/components/MaxInputUF.vue';
 import MaxInputSelect from '../../src/components/MaxInputSelect.vue';
 import InputBase from '../../src/components/InputBase.vue';
-import { BRAZIL_STATES, BRAZIL_NATIONAL_STATE } from '../../src/constants/brazilStates';
+import { BRAZIL_STATES, BRAZIL_NATIONAL_STATE, type BrazilState } from '../../src/constants/brazilStates';
 
 function mountUF(props: Record<string, any> = {}, attrs: Record<string, any> = {}) {
     return mount(MaxInputUF, {

@@ -164,10 +164,10 @@ describe('MaxSideMenuFlyout', () => {
             global: { stubs: { MaxIcon: true } }
         });
 
-        const headerIcon = wrapper.findComponent('.flyout-header-icon');
+        const headerIcon = wrapper.findComponent('.flyout-header-icon') as any;
         expect(headerIcon.props('size')).toBe('1.5');
 
-        const itemIcons = wrapper.findAllComponents('.flyout-item-icon');
+        const itemIcons = wrapper.findAllComponents('.flyout-item-icon') as any[];
         expect(itemIcons.length).toBe(3); // 1 overview + 2 subitems
         for (const icon of itemIcons) expect(icon.props('size')).toBe('1.4');
 

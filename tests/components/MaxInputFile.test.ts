@@ -12,6 +12,9 @@ if (typeof window.DragEvent === 'undefined') {
 describe('MaxInputFile', () => {
     beforeEach(() => {
         vi.restoreAllMocks();
+        let counter = 0;
+        vi.spyOn(URL, 'createObjectURL').mockImplementation(() => `blob:mock-url-${++counter}`);
+        vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
     });
 
     it('renderiza os elementos estruturais documentados', () => {
