@@ -608,13 +608,14 @@
         background-color: var(--background-50, #f8fafc);
         color: var(--text-color, #0f172a);
         font-size: 0.875rem;
-        outline: none;
         cursor: pointer;
         transition: border-color 0.2s ease, box-shadow 0.2s ease;
 
-        &:focus {
-            border-color: var(--max-primary-500, #3b82f6);
-            box-shadow: 0 0 0 2px var(--max-primary-100, rgb(59 130 246 / 20%));
+        &:focus-visible {
+            outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
+            outline-offset: 2px;
+            border-color: var(--max-primary-500, #00768E);
+            box-shadow: var(--max-focus-ring);
         }
     }
 
@@ -674,5 +675,11 @@
     .max-card-list-static-grid {
         width: 100%;
         box-sizing: border-box;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .max-card-list-category-select {
+            transition: none;
+        }
     }
 </style>
