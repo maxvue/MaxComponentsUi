@@ -126,7 +126,7 @@
         transition: border-color 0.15s ease, background-color 0.15s ease;
         color: var(--background-900);
         box-sizing: border-box;
-        width: fit-content;
+        width: 100%;
         max-width: 100%;
 
         &.is-clickable {

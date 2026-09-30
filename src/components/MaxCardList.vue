@@ -376,11 +376,15 @@
 
     // Auto-cálculo dinâmico de colunas baseado na largura e minCardWidth
     const effectiveColumns = computed<number>(() => {
+        const width = measuredWidth.value || (containerRef.value?.clientWidth ?? 0);
+
+        // Breakpoint mobile: <= 768px força sempre 1 coluna (1 card por linha), inclusive com prop columns
+        if (width > 0 && width <= 768) return 1;
+
         if (props.columns && props.columns > 0) return Math.floor(props.columns);
 
         const minW = props.minCardWidth && props.minCardWidth > 0 ? props.minCardWidth : 320;
         const g = props.gap !== undefined ? props.gap : 16;
-        const width = measuredWidth.value || (containerRef.value?.clientWidth ?? 0);
 
         if (width > 0) {
             const calculated = Math.floor((width + g) / (minW + g));
@@ -693,34 +697,6 @@
     .max-card-list-static-grid {
         width: 100%;
         box-sizing: border-box;
-
-        &:has(.max-subcard) {
-            display: flex !important;
-            flex-wrap: wrap;
-            align-items: stretch;
-
-            .max-card-list-col {
-                width: fit-content;
-                flex: 0 0 auto;
-                max-width: 100%;
-
-                > * {
-                    width: fit-content;
-                    max-width: 100%;
-                    flex: none;
-                }
-
-                &--add {
-                    width: fit-content;
-                    min-width: var(--max-card-min-width, 280px);
-
-                    > * {
-                        width: 100%;
-                        min-width: var(--max-card-min-width, 280px);
-                    }
-                }
-            }
-        }
     }
 
     .max-card-list-col {
@@ -737,18 +713,6 @@
             flex: 1;
         }
 
-        &:has(.max-subcard) {
-            width: fit-content;
-            flex: 0 0 auto;
-            max-width: 100%;
-
-            > * {
-                width: fit-content;
-                max-width: 100%;
-                flex: none;
-            }
-        }
-
         &--add {
             display: flex;
             flex-direction: column;
@@ -758,6 +722,21 @@
                 height: 100%;
                 width: 100%;
                 flex: 1;
+            }
+        }
+    }
+
+    @media (width <= 768px) {
+        .max-card-list-grid,
+        .max-card-list-static-grid {
+            grid-template-columns: 1fr !important;
+        }
+
+        .max-card-list-col {
+            width: 100%;
+
+            > * {
+                width: 100%;
             }
         }
     }

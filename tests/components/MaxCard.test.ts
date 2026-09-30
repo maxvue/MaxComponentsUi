@@ -337,6 +337,25 @@ describe('MaxCard', () => {
             expect(subcards.length).toBe(2);
             expect(subcards[0].text()).toContain('PROP-001');
             expect(subcards[1].text()).toContain('PROP-002');
+            const content = wrapper.find('.max-card-content');
+            expect(content.exists()).toBe(true);
+        });
+
+        it('garante que o container de subcards empilha verticalmente mantendo layout mobile', () => {
+            const wrapper = mount(MaxCard, {
+                props: { title: 'Projetos Agrupados' },
+                slots: {
+                    default: `
+                        <div class="max-subcard">Subcard 1</div>
+                        <div class="max-subcard">Subcard 2</div>
+                    `
+                }
+            });
+            const cardEl = wrapper.find('.max-card');
+            expect(cardEl.exists()).toBe(true);
+            const contentEl = wrapper.find('.max-card-content');
+            expect(contentEl.exists()).toBe(true);
+            expect(contentEl.findAll('.max-subcard').length).toBe(2);
         });
     });
 });

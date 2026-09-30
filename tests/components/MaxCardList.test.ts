@@ -161,6 +161,44 @@ describe('MaxCardList', () => {
             const grid = wrapper.find('.max-card-list-static-grid');
             expect(grid.attributes('style')).toContain('grid-auto-rows: 1fr');
         });
+
+        it('força 1 coluna em layout mobile (largura <= 768px) mesmo com prop columns definida', async () => {
+            const wrapper = mountCardList({
+                props: {
+                    items: makeDataset(6),
+                    columns: 4
+                }
+            });
+
+            const container = wrapper.find('.max-card-list').element as HTMLElement;
+            Object.defineProperty(container, 'clientWidth', {
+                value: 600,
+                configurable: true
+            });
+
+            await nextTick();
+            const vm = wrapper.vm as any;
+            expect(vm.computedColumns).toBe(1);
+        });
+
+        it('mantém columns definida quando largura for superior a 768px', async () => {
+            const wrapper = mountCardList({
+                props: {
+                    items: makeDataset(6),
+                    columns: 3
+                }
+            });
+
+            const container = wrapper.find('.max-card-list').element as HTMLElement;
+            Object.defineProperty(container, 'clientWidth', {
+                value: 1024,
+                configurable: true
+            });
+
+            await nextTick();
+            const vm = wrapper.vm as any;
+            expect(vm.computedColumns).toBe(3);
+        });
     });
 
     describe('Slot #add-card no Grid e Não-desalinhamento de Índices', () => {
