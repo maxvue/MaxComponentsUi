@@ -2,12 +2,12 @@
     <div
         v-for="(item, index) in props.items"
         :key="item.id ?? index"
-        v-tooltip.right="item.details.tooltip"
+        v-tooltip.right="item.details?.tooltip || (item as any).tooltip"
         :class="`max-menu-vertical-item item_menu ${isActive(item) ? 'active' : ''} ${isFlyoutActive(item) ? 'flyout-active' : ''} ${hasSubItems(item) ? 'has-subitems' : ''}`"
-        :page_component="item.details.page_component"
+        :page_component="item.details?.page_component || (item as any).page_component"
         role="link"
         tabindex="0"
-        :aria-label="item.details.tooltip || item.details.label || item.details.title || item.details.route || 'Item de menu'"
+        :aria-label="item.details?.tooltip || item.details?.label || item.details?.title || item.details?.route || (item as any).tooltip || (item as any).label || (item as any).title || (item as any).route || 'Item de menu'"
         :aria-current="isActive(item) ? 'page' : undefined"
         :aria-haspopup="hasSubItems(item) ? 'true' : undefined"
         :aria-expanded="hasSubItems(item) ? isFlyoutActive(item) : undefined"
@@ -15,9 +15,9 @@
         @keydown.enter="(event) => handleItemClick(item, event)"
     >
         <MaxIcon
-            v-if="item.details.icon"
-            :icon="item.details.icon"
-            :i="item.details.icon"
+            v-if="item.details?.icon || (item as any).icon"
+            :icon="item.details?.icon || (item as any).icon"
+            :i="item.details?.icon || (item as any).icon"
             size="1.5"
             :light="isFlyoutActive(item) ? true : !isActive(item)"
             :color="isFlyoutActive(item) ? 'var(--layout-shell-text, #ffffff)' : (isActive(item) ? 'var(--blue-750)' : undefined)"
@@ -98,8 +98,8 @@
         const current = currentPage.value;
         if (!current) return false;
 
-        const pageComponent = snakeCase(item.details.page_component ?? '');
-        const itemRoute = snakeCase(item.details.route ?? '');
+        const pageComponent = snakeCase(item.details?.page_component ?? (item as any).page_component ?? '');
+        const itemRoute = snakeCase(item.details?.route ?? (item as any).route ?? '');
 
         // 1. Correspondência exata pelo page_component ou pela route
         if (pageComponent === current || itemRoute === current) return true;
@@ -109,7 +109,7 @@
         if (customMatches.includes(current)) return true;
 
         // 3. Correspondência pelo mapa padrão de rotas filhas
-        const knownMatches = ROUTE_MATCHES[pageComponent] || ROUTE_MATCHES[itemRoute];
+        const knownMatches = (pageComponent ? ROUTE_MATCHES[pageComponent] : null) || (itemRoute ? ROUTE_MATCHES[itemRoute] : null);
         if (knownMatches?.includes(current)) return true;
 
         // 4. Correspondência se algum subitem estiver ativo
@@ -128,7 +128,7 @@
 
         useSearchBarStore().input_value = '';
 
-        const targetRoute = item.details.route?.trim();
+        const targetRoute = (item.details?.route ?? (item as any).route)?.trim();
         if (targetRoute) goToRoute(targetRoute);
     };
 </script>
