@@ -40,23 +40,36 @@
                         <div v-if="props.subtitle" class="max-card-subtitle">{{ props.subtitle }}</div>
                     </div>
                 </div>
-                <div v-if="$slots.actions" class="max-card-header-actions">
+                <div v-if="props.status || $slots.status || $slots.actions" class="max-card-header-actions">
+                    <slot name="status">
+                        <span
+                            v-if="props.status"
+                            class="max-card-status"
+                            :class="statusClass"
+                            :style="statusStyle"
+                        >
+                            <span class="max-card-status-dot" />
+                            <span class="max-card-status-text">{{ props.status }}</span>
+                        </span>
+                    </slot>
                     <slot name="actions" />
                 </div>
             </slot>
         </div>
 
         <!-- Conteúdo do Card -->
-        <div v-if="$slots.content || $slots.default || isAddVariantPlaceholder" class="max-card-content">
-            <slot name="content">
-                <slot>
-                    <div v-if="isAddVariantPlaceholder" class="max-card-add-placeholder">
-                        <div class="max-card-add-icon-wrapper">
-                            <MaxIcon :icon="props.icon || 'mdi:plus'" class="max-card-add-icon" />
+        <div v-if="$slots.body || $slots.content || $slots.default || isAddVariantPlaceholder" class="max-card-content">
+            <slot name="body">
+                <slot name="content">
+                    <slot>
+                        <div v-if="isAddVariantPlaceholder" class="max-card-add-placeholder">
+                            <div class="max-card-add-icon-wrapper">
+                                <MaxIcon :icon="props.icon || 'mdi:plus'" class="max-card-add-icon" />
+                            </div>
+                            <span v-if="props.addLabel || props.title" class="max-card-add-title">{{ props.addLabel || props.title }}</span>
+                            <span v-if="props.subtitle" class="max-card-add-subtitle">{{ props.subtitle }}</span>
                         </div>
-                        <span v-if="props.title" class="max-card-add-title">{{ props.title }}</span>
-                        <span v-if="props.subtitle" class="max-card-add-subtitle">{{ props.subtitle }}</span>
-                    </div>
+                    </slot>
                 </slot>
             </slot>
         </div>
@@ -85,6 +98,9 @@
         variant: 'default',
         title: undefined,
         subtitle: undefined,
+        status: undefined,
+        statusColor: undefined,
+        addLabel: undefined,
         loading: false,
         disabled: false,
         clickable: false,
@@ -97,15 +113,30 @@
 
     const isInteractive = computed(() => props.clickable || props.variant === 'add');
 
+    const statusClass = computed(() => {
+        if (!props.status) return '';
+        const s = props.status.toLowerCase().trim();
+        if (s === 'done' || s === 'success' || s === 'concluído' || s === 'concluido' || s === 'ativo' || s === 'aprovado' || s === 'online') return 'max-card-status--success';
+        if (s === 'error' || s === 'danger' || s === 'erro' || s === 'falha' || s === 'rejeitado' || s === 'cancelado' || s === 'offline') return 'max-card-status--danger';
+        if (s === 'warn' || s === 'warning' || s === 'caution' || s === 'atenção' || s === 'atencao' || s === 'pendente' || s === 'em homologação' || s === 'em homologacao') return 'max-card-status--warning';
+        if (s === 'info' || s === 'informação' || s === 'informacao' || s === 'em andamento' || s === 'processando') return 'max-card-status--info';
+        return '';
+    });
+
+    const statusStyle = computed(() => {
+        if (!props.statusColor) return undefined;
+        return { '--card-status-color': props.statusColor };
+    });
+
     const isAddVariantPlaceholder = computed(() => {
         if (props.variant !== 'add') return false;
-        if (slots.default || slots.content) return false;
+        if (slots.default || slots.content || slots.body) return false;
         return true;
     });
 
     const hasHeaderContent = computed(() => {
-        if (props.variant === 'add' && isAddVariantPlaceholder.value && !slots.actions) return false;
-        return Boolean(props.title || props.subtitle || props.icon || slots.actions);
+        if (props.variant === 'add' && isAddVariantPlaceholder.value && !slots.actions && !slots.status) return false;
+        return Boolean(props.title || props.subtitle || props.icon || props.status || slots.actions || slots.status);
     });
 
     const handleClick = (event: MouseEvent) => {
@@ -313,6 +344,46 @@
                 align-items: center;
                 gap: 0.5rem;
                 flex-shrink: 0;
+            }
+
+            .max-card-status {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.375rem;
+                font-size: 0.75rem;
+                font-weight: 600;
+                line-height: 1;
+                padding: 0.25rem 0.5rem;
+                border-radius: 9999px;
+                background-color: var(--card-status-color, var(--background-100));
+                color: var(--background-700);
+
+                &-dot {
+                    width: 6px;
+                    height: 6px;
+                    border-radius: 50%;
+                    background-color: currentcolor;
+                }
+
+                &--success {
+                    background-color: rgb(16 185 129 / 12%);
+                    color: var(--max-success-600, #059669);
+                }
+
+                &--danger {
+                    background-color: rgb(239 68 68 / 12%);
+                    color: var(--max-danger-600, #dc2626);
+                }
+
+                &--warning {
+                    background-color: rgb(245 158 11 / 12%);
+                    color: var(--max-warning-600, #d97706);
+                }
+
+                &--info {
+                    background-color: rgb(14 165 233 / 12%);
+                    color: var(--max-info-600, #0284c7);
+                }
             }
         }
 

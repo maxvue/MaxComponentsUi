@@ -302,5 +302,63 @@ describe('MaxStats Component', () => {
             expect(card.find('.max-stat-suffix').exists()).toBe(false);
         });
     });
+
+    describe('Largura Mínima e Responsividade (minWidth)', () => {
+        it('injeta a variável CSS --stat-card-min-width com 120px por padrão', () => {
+            const wrapper = mountStats({ layout: 'cards' });
+            const firstCard = wrapper.findAll('.max-stat-card')[0];
+
+            expect(firstCard.attributes('style')).toContain('--stat-card-min-width: 120px');
+        });
+
+        it('permite customizar minWidth globalmente via prop como string ou number', () => {
+            const wrapperString = mountStats({
+                layout: 'cards',
+                minWidth: '140px'
+            });
+            const cardString = wrapperString.findAll('.max-stat-card')[0];
+            expect(cardString.attributes('style')).toContain('--stat-card-min-width: 140px');
+
+            const wrapperNumber = mountStats({
+                layout: 'cards',
+                minWidth: 150
+            });
+            const cardNumber = wrapperNumber.findAll('.max-stat-card')[0];
+            expect(cardNumber.attributes('style')).toContain('--stat-card-min-width: 150px');
+        });
+
+        it('permite customizar minWidth individualmente por item', () => {
+            const wrapper = mountStats({
+                layout: 'cards',
+                items: [
+                    {
+                        label: 'Item Normal',
+                        value: 10,
+                        icon: 'mdi:check',
+                        color: '#10b981'
+                    },
+                    {
+                        label: 'Item Estreito',
+                        value: 5,
+                        icon: 'mdi:star',
+                        color: '#3b82f6',
+                        minWidth: '90px'
+                    }
+                ]
+            });
+
+            const cards = wrapper.findAll('.max-stat-card');
+            expect(cards[0].attributes('style')).toContain('--stat-card-min-width: 120px');
+            expect(cards[1].attributes('style')).toContain('--stat-card-min-width: 90px');
+        });
+
+        it('inclui atributo title no label do card para acessibilidade contra truncamento', () => {
+            const wrapper = mountStats({ layout: 'cards' });
+            const label = wrapper.find('.max-stat-label');
+
+            expect(label.attributes('title')).toBe('Total de Alunos');
+        });
+    });
 });
+
 

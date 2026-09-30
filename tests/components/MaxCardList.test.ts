@@ -439,4 +439,41 @@ describe('MaxCardList', () => {
             expect(() => vm.scrollToOffset(300)).not.toThrow();
         });
     });
+
+    describe('Compatibilidade com keyField e showAddCard', () => {
+        it('utiliza keyField como chave identificadora quando informado', () => {
+            const customItems = [
+                { custom_id: 'a1', title: 'Item 1' },
+                { custom_id: 'b2', title: 'Item 2' }
+            ];
+            const wrapper = mountCardList({
+                props: {
+                    items: customItems,
+                    keyField: 'custom_id',
+                    virtualScroll: false
+                }
+            });
+            expect(wrapper.findAll('.max-card-list-col').length).toBe(2);
+        });
+
+        it('renderiza card de adicionar automático com showAddCard e dispara evento add ao clicar', async () => {
+            const wrapper = mountCardList({
+                props: {
+                    items: makeDataset(2),
+                    showAddCard: true,
+                    addCardLabel: 'Adicionar Homologação de Projeto',
+                    virtualScroll: false
+                }
+            });
+
+            const addCol = wrapper.find('.max-card-list-col--add');
+            expect(addCol.exists()).toBe(true);
+            expect(addCol.text()).toContain('Adicionar Homologação de Projeto');
+
+            const addCard = addCol.findComponent({ name: 'MaxCard' });
+            expect(addCard.exists()).toBe(true);
+            await addCard.trigger('click');
+            expect(wrapper.emitted('add')).toBeTruthy();
+        });
+    });
 });

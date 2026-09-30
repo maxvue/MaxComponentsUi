@@ -1658,6 +1658,9 @@ Card estruturado de superfície para agrupamento de conteúdo visual e semântic
 | `variant` | `'default' \| 'add'` | `'default'` | Variante visual do card |
 | `title` | `string` | — | Título principal exibido no cabeçalho |
 | `subtitle` | `string` | — | Subtítulo descritivo exibido abaixo do título |
+| `status` | `string` | — | Rótulo de status semântico exibido em badge no cabeçalho |
+| `statusColor` | `string` | — | Cor personalizada do status (CSS color ou token) |
+| `addLabel` | `string` | — | Rótulo customizado do placeholder de adição na variante `add` |
 | `loading` | `boolean` | `false` | Exibe overlay bloqueante de carregamento com spinner |
 | `disabled` | `boolean` | `false` | Desabilita o card e bloqueia eventos de clique e foco |
 | `clickable` | `boolean` | `false` | Torna o card interativo e focável via teclado com estilo hover |
@@ -1665,9 +1668,10 @@ Card estruturado de superfície para agrupamento de conteúdo visual e semântic
 
 **Slots:**
 - `#header` — Cabeçalho personalizado do card
+- `#status` — Badge ou indicador de status no cabeçalho
 - `#actions` — Ações ou botões no canto direito do cabeçalho
 - `#media` — Área de mídia (imagem, banner ou vídeo) no topo do card
-- `#content` / `#default` — Conteúdo principal do card
+- `#body` / `#content` / `#default` — Conteúdo principal do card (suporta `#body` como alias direto)
 - `#footer` — Rodapé do card
 
 **Eventos:** `click`
@@ -1741,6 +1745,9 @@ Container orquestrador de cards de alta performance com **scroll virtual** integ
 |------|------|--------|-----------|
 | `items` | `any[]` | `[]` | Lista de itens a serem renderizados |
 | `itemKey` | `string \| ((item: any, index: number) => string \| number)` | — | Propriedade ou função geradora de chave única para cada item |
+| `keyField` | `string` | — | Alias alternativo para `itemKey` |
+| `showAddCard` | `boolean` | `false` | Exibe o card de adição automaticamente no grid (usa `addCardLabel`) |
+| `addCardLabel` | `string` | — | Rótulo customizado do card de adição automático |
 | `minCardWidth` | `number` | `320` | Largura mínima de cada card em pixels para o auto-cálculo do grid responsivo |
 | `columns` | `number` | — | Número fixo de colunas (quando fornecido, sobrescreve o auto-cálculo dinâmico) |
 | `gap` | `number` | `16` | Espaçamento em pixels entre os cards do grid |
@@ -1777,6 +1784,7 @@ Container orquestrador de cards de alta performance com **scroll virtual** integ
 - `#empty` — Estado vazio customizado (fallback: `MaxEmptyDiv`)
 
 **Eventos:**
+- `add` — Disparado ao clicar no card de adição padrão (`[]`)
 - `search` — Disparado ao pesquisar (`[query: string]`)
 - `update:search` / `update:searchQuery` — Sincronização da busca (`[query: string]`)
 - `update:category` — Sincronização da categoria (`[category: any]`)

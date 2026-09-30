@@ -55,8 +55,15 @@
                     </select>
                 </div>
 
-                <div v-if="$slots['add-card'] && props.addCardPosition === 'header'" class="max-card-list-header-add">
-                    <slot name="add-card" />
+                <div v-if="(slots['add-card'] || props.showAddCard) && props.addCardPosition === 'header'" class="max-card-list-header-add">
+                    <slot name="add-card">
+                        <MaxCard
+                            variant="add"
+                            :title="props.addCardLabel || 'Adicionar item'"
+                            :add-label="props.addCardLabel"
+                            @click="emit('add')"
+                        />
+                    </slot>
                 </div>
                 <slot name="actions" />
             </div>
@@ -134,7 +141,14 @@
                             :class="{ 'max-card-list-col--add': cellItem?.__isAddSlot }"
                         >
                             <template v-if="cellItem?.__isAddSlot">
-                                <slot name="add-card" />
+                                <slot name="add-card">
+                                    <MaxCard
+                                        variant="add"
+                                        :title="props.addCardLabel || 'Adicionar item'"
+                                        :add-label="props.addCardLabel"
+                                        @click="emit('add')"
+                                    />
+                                </slot>
                             </template>
                             <template v-else>
                                 <slot
@@ -174,7 +188,14 @@
                 v-if="hasGridAddCard"
                 class="max-card-list-col max-card-list-col--add"
             >
-                <slot name="add-card" />
+                <slot name="add-card">
+                    <MaxCard
+                        variant="add"
+                        :title="props.addCardLabel || 'Adicionar item'"
+                        :add-label="props.addCardLabel"
+                        @click="emit('add')"
+                    />
+                </slot>
             </div>
 
             <div
@@ -232,6 +253,9 @@
     const props = withDefaults(defineProps<MaxCardListProps>(), {
         items: () => [],
         itemKey: undefined,
+        keyField: undefined,
+        showAddCard: false,
+        addCardLabel: undefined,
         minCardWidth: 320,
         columns: undefined,
         gap: 16,
@@ -266,6 +290,7 @@
         'update:filter': [filter: MaxCardListFilterPayload];
         'search': [query: string];
         'scroll': [event: Event];
+        'add': [];
     }>();
 
     const slots = useSlots();
@@ -341,9 +366,9 @@
 
     const hasCategories = computed(() => normalizedCategories.value.length > 0);
     const hasHeaderContent = computed(() => Boolean(props.title || props.subtitle || (props.stats && props.stats.length > 0)));
-    const hasHeaderActions = computed(() => Boolean(slots.actions || hasCategories.value || (slots['add-card'] && props.addCardPosition === 'header')));
+    const hasHeaderActions = computed(() => Boolean(slots.actions || hasCategories.value || ((slots['add-card'] || props.showAddCard) && props.addCardPosition === 'header')));
     const hasHeader = computed(() => Boolean(slots.header || hasHeaderContent.value || hasHeaderActions.value));
-    const hasGridAddCard = computed(() => Boolean(slots['add-card'] && props.addCardPosition !== 'header'));
+    const hasGridAddCard = computed(() => Boolean((slots['add-card'] || props.showAddCard) && props.addCardPosition !== 'header'));
 
     // Elemento container para medição de largura responsiva
     const containerRef = ref<HTMLElement | null>(null);
@@ -476,9 +501,10 @@
     });
 
     function getItemKey(item: any, fallbackIndex: number): string | number {
-        if (props.itemKey) {
-            if (typeof props.itemKey === 'function') return props.itemKey(item, fallbackIndex);
-            if (typeof props.itemKey === 'string' && item && typeof item === 'object') return item[props.itemKey] ?? fallbackIndex;
+        const keyProp = props.keyField || props.itemKey;
+        if (keyProp) {
+            if (typeof keyProp === 'function') return keyProp(item, fallbackIndex);
+            if (typeof keyProp === 'string' && item && typeof item === 'object') return item[keyProp] ?? fallbackIndex;
         }
         if (item && typeof item === 'object' && ('id' in item || 'key' in item)) return item.id ?? item.key ?? fallbackIndex;
 
