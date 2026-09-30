@@ -355,6 +355,69 @@ describe('MaxSteps — Layout Mobile e Responsividade das Tabs', () => {
         expect(header.exists()).toBe(true);
         expect(header.attributes('role')).toBe('tablist');
     });
+
+    it('oculta labels no mobile por padrão (mobileShowLabel: false) e mantém acessibilidade via aria-label e title', async () => {
+        const wrapper = mount(defineComponent({
+            components: { MaxSteps, MaxStepItem },
+            template: `
+                <MaxSteps id="steps-mob-no-labels" :cached="false" :isMobile="true">
+                    <MaxStepItem value="1" title="Passo 1" labelMobile="P1"><div class="c1">C1</div></MaxStepItem>
+                    <MaxStepItem value="2" title="Passo 2"><div class="c2">C2</div></MaxStepItem>
+                </MaxSteps>
+            `
+        }));
+
+        await settle();
+
+        const headers = wrapper.findAll('.max-step-header-item');
+        expect(headers.length).toBe(2);
+
+        // Labels textuais removidos no mobile por padrão
+        expect(wrapper.findAll('.step-label-wrapper').length).toBe(0);
+
+        // Acessibilidade preservada através de aria-label e title no item
+        expect(headers[0].attributes('aria-label')).toBe('P1');
+        expect(headers[0].attributes('title')).toBe('P1');
+        expect(headers[1].attributes('aria-label')).toBe('Passo 2');
+        expect(headers[1].attributes('title')).toBe('Passo 2');
+    });
+
+    it('exibe labels no mobile quando mobileShowLabel é true', async () => {
+        const wrapper = mount(defineComponent({
+            components: { MaxSteps, MaxStepItem },
+            template: `
+                <MaxSteps id="steps-mob-with-labels" :cached="false" :isMobile="true" :mobile-show-label="true">
+                    <MaxStepItem value="1" title="Passo 1" labelMobile="P1"><div class="c1">C1</div></MaxStepItem>
+                    <MaxStepItem value="2" title="Passo 2"><div class="c2">C2</div></MaxStepItem>
+                </MaxSteps>
+            `
+        }));
+
+        await settle();
+
+        const labelWrappers = wrapper.findAll('.step-label-wrapper');
+        expect(labelWrappers.length).toBe(2);
+        expect(labelWrappers[0].text()).toContain('P1');
+        expect(labelWrappers[1].text()).toContain('Passo 2');
+    });
+
+    it('mantém labels visíveis no desktop mesmo com mobileShowLabel false', async () => {
+        const wrapper = mount(defineComponent({
+            components: { MaxSteps, MaxStepItem },
+            template: `
+                <MaxSteps id="steps-desktop-labels" :cached="false" :isMobile="false" :mobile-show-label="false">
+                    <MaxStepItem value="1" title="Passo 1"><div class="c1">C1</div></MaxStepItem>
+                    <MaxStepItem value="2" title="Passo 2"><div class="c2">C2</div></MaxStepItem>
+                </MaxSteps>
+            `
+        }));
+
+        await settle();
+
+        const labelWrappers = wrapper.findAll('.step-label-wrapper');
+        expect(labelWrappers.length).toBe(2);
+        expect(labelWrappers[0].text()).toContain('Passo 1');
+    });
 });
 
 describe('MaxSteps — Visual de Step Ativo e Integração com Status', () => {

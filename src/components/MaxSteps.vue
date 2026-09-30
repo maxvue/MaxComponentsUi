@@ -4,7 +4,8 @@
         :class="{
             'has-border': props.showBorder,
             'is-scrollable': props.scrollable,
-            'is-mobile': isMobile
+            'is-mobile': isMobile,
+            'has-mobile-label': props.mobileShowLabel
         }"
         :id="`max-steps-${steps_id}`"
     >
@@ -43,6 +44,8 @@
                     :id="`max-step-header-${step.id}`"
                     :aria-selected="isStepActive(step) ? 'true' : 'false'"
                     :aria-controls="`max-step-panel-${step.id}`"
+                    :aria-label="getStepTitle(step)"
+                    :title="getStepTitle(step)"
                     :tabindex="isStepActive(step) ? 0 : -1"
                     @click="onStepHeaderClick(step)"
                 >
@@ -105,7 +108,10 @@
                                 </div>
                             </div>
 
-                            <div class="step-label-wrapper">
+                            <div
+                                v-if="shouldShowStepLabel"
+                                class="step-label-wrapper"
+                            >
                                 <span class="step-label">
                                     <span class="step-prefix">{{ index + 1 }}. </span>
                                     <span class="step-title-text">{{ getStepTitle(step) }}</span>
@@ -169,6 +175,7 @@
         scrollable?: boolean;
         isMobile?: boolean;
         mobile?: boolean;
+        mobileShowLabel?: boolean;
     };
 
     const props = withDefaults(defineProps<Props>(), {
@@ -187,7 +194,8 @@
         showBorder: false,
         scrollable: false,
         isMobile: undefined,
-        mobile: undefined
+        mobile: undefined,
+        mobileShowLabel: false
     });
 
     const emit = defineEmits<{
@@ -208,6 +216,8 @@
         if (props.mobile !== undefined) return props.mobile;
         return isMobileBreakpoint.value;
     });
+
+    const shouldShowStepLabel = computed<boolean>(() => !isMobile.value || props.mobileShowLabel);
 
     const headerRef = ref<HTMLElement | null>(null);
 
@@ -878,8 +888,8 @@
 
     @mixin mobile-steps-header {
         .max-steps-header-wrapper {
-            padding: 0.75rem 0;
-            gap: 8px;
+            padding: 0.5rem 0;
+            gap: 4px;
             max-width: 100vw;
 
             .step-nav-btn {
@@ -968,10 +978,22 @@
 
     &.is-mobile {
         @include mobile-steps-header;
+
+        &:not(.has-mobile-label) {
+            .step-label-wrapper {
+                display: none !important;
+            }
+        }
     }
 
     @media (width <= 768px) {
         @include mobile-steps-header;
+
+        &:not(.has-mobile-label) {
+            .step-label-wrapper {
+                display: none !important;
+            }
+        }
     }
 }
 
