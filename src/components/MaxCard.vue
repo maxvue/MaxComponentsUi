@@ -416,6 +416,48 @@
             font-size: 0.8125rem;
             color: var(--background-600);
         }
+
+        &:has(.max-subcard) {
+            width: fit-content;
+            max-width: 100%;
+
+            .max-card-header {
+                min-width: 0;
+                max-width: 100%;
+                width: 100%;
+
+                &-main {
+                    min-width: 0;
+                    flex: 1;
+                }
+
+                &-titles {
+                    min-width: 0;
+                    flex: 1;
+                    width: 0;
+                }
+
+                .max-card-title,
+                .max-card-subtitle {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    max-width: 100%;
+                }
+            }
+
+            .max-card-content {
+                width: fit-content;
+                max-width: 100%;
+                display: flex;
+                flex-direction: column;
+
+                &:has(> .max-subcard + .max-subcard) {
+                    flex-flow: row wrap;
+                    gap: 0.75rem;
+                }
+            }
+        }
     }
 
     @media (prefers-reduced-motion: reduce) {

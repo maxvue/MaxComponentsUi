@@ -485,7 +485,9 @@
         display: 'grid',
         gridTemplateColumns: `repeat(${effectiveColumns.value}, minmax(0, 1fr))`,
         gridAutoRows: '1fr',
-        gap: `${props.gap ?? 16}px`
+        gap: `${props.gap ?? 16}px`,
+        '--max-card-gap': `${props.gap ?? 16}px`,
+        '--max-card-min-width': `${props.minCardWidth ?? 280}px`
     }));
 
     const scrollContainerStyle = computed<CSSProperties>(() => {
@@ -687,9 +689,38 @@
         padding-bottom: 16px;
     }
 
-    .max-card-list-grid {
+    .max-card-list-grid,
+    .max-card-list-static-grid {
         width: 100%;
         box-sizing: border-box;
+
+        &:has(.max-subcard) {
+            display: flex !important;
+            flex-wrap: wrap;
+            align-items: stretch;
+
+            .max-card-list-col {
+                width: fit-content;
+                flex: 0 0 auto;
+                max-width: 100%;
+
+                > * {
+                    width: fit-content;
+                    max-width: 100%;
+                    flex: none;
+                }
+
+                &--add {
+                    width: fit-content;
+                    min-width: var(--max-card-min-width, 280px);
+
+                    > * {
+                        width: 100%;
+                        min-width: var(--max-card-min-width, 280px);
+                    }
+                }
+            }
+        }
     }
 
     .max-card-list-col {
@@ -706,6 +737,18 @@
             flex: 1;
         }
 
+        &:has(.max-subcard) {
+            width: fit-content;
+            flex: 0 0 auto;
+            max-width: 100%;
+
+            > * {
+                width: fit-content;
+                max-width: 100%;
+                flex: none;
+            }
+        }
+
         &--add {
             display: flex;
             flex-direction: column;
@@ -717,11 +760,6 @@
                 flex: 1;
             }
         }
-    }
-
-    .max-card-list-static-grid {
-        width: 100%;
-        box-sizing: border-box;
     }
 
     @media (prefers-reduced-motion: reduce) {
