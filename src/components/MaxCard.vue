@@ -47,16 +47,18 @@
         </div>
 
         <!-- Conteúdo do Card -->
-        <div v-if="$slots.content || $slots.default || isAddVariantPlaceholder" class="max-card-content">
+        <div v-if="$slots.content || $slots.body || $slots.default || isAddVariantPlaceholder" class="max-card-content">
             <slot name="content">
-                <slot>
-                    <div v-if="isAddVariantPlaceholder" class="max-card-add-placeholder">
-                        <div class="max-card-add-icon-wrapper">
-                            <MaxIcon :icon="props.icon || 'mdi:plus'" class="max-card-add-icon" />
+                <slot name="body">
+                    <slot>
+                        <div v-if="isAddVariantPlaceholder" class="max-card-add-placeholder">
+                            <div class="max-card-add-icon-wrapper">
+                                <MaxIcon :icon="props.icon || 'mdi:plus'" class="max-card-add-icon" />
+                            </div>
+                            <span v-if="props.title" class="max-card-add-title">{{ props.title }}</span>
+                            <span v-if="props.subtitle" class="max-card-add-subtitle">{{ props.subtitle }}</span>
                         </div>
-                        <span v-if="props.title" class="max-card-add-title">{{ props.title }}</span>
-                        <span v-if="props.subtitle" class="max-card-add-subtitle">{{ props.subtitle }}</span>
-                    </div>
+                    </slot>
                 </slot>
             </slot>
         </div>
@@ -99,7 +101,7 @@
 
     const isAddVariantPlaceholder = computed(() => {
         if (props.variant !== 'add') return false;
-        if (slots.default || slots.content) return false;
+        if (slots.default || slots.content || slots.body) return false;
         return true;
     });
 
