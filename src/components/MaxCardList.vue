@@ -459,6 +459,7 @@
     const gridLayoutStyle = computed<CSSProperties>(() => ({
         display: 'grid',
         gridTemplateColumns: `repeat(${effectiveColumns.value}, minmax(0, 1fr))`,
+        gridAutoRows: '1fr',
         gap: `${props.gap ?? 16}px`
     }));
 
@@ -668,7 +669,16 @@
     .max-card-list-col {
         min-width: 0;
         width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
         box-sizing: border-box;
+
+        > * {
+            height: 100%;
+            width: 100%;
+            flex: 1;
+        }
 
         &--add {
             display: flex;
@@ -678,6 +688,7 @@
             > * {
                 height: 100%;
                 width: 100%;
+                flex: 1;
             }
         }
     }

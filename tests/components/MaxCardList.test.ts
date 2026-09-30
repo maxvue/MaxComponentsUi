@@ -149,6 +149,18 @@ describe('MaxCardList', () => {
             // (940 + 20) / (300 + 20) = 960 / 320 = 3 colunas
             expect(vm.computedColumns).toBe(3);
         });
+
+        it('aplica gridAutoRows: 1fr no estilo do grid para garantir altura uniforme dos cards', () => {
+            const wrapper = mountCardList({
+                props: {
+                    items: makeDataset(4),
+                    virtualScroll: false
+                }
+            });
+
+            const grid = wrapper.find('.max-card-list-static-grid');
+            expect(grid.attributes('style')).toContain('grid-auto-rows: 1fr');
+        });
     });
 
     describe('Slot #add-card no Grid e Não-desalinhamento de Índices', () => {

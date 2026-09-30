@@ -135,6 +135,8 @@
         overflow: hidden;
         color: var(--background-900);
         box-sizing: border-box;
+        height: 100%;
+        min-height: 160px;
 
         &.is-clickable {
             cursor: pointer;
@@ -166,7 +168,7 @@
             background-color: var(--background-50);
             box-shadow: none;
             height: 100%;
-            min-height: 140px;
+            min-height: 160px;
             justify-content: center;
 
             &:hover {
@@ -218,7 +220,7 @@
                 .max-card-add-title {
                     font-weight: 600;
                     font-size: 0.875rem;
-                    color: var(--background-800);
+                    color: var(--background-650);
                     line-height: 1.3;
                 }
 
@@ -289,7 +291,7 @@
             .max-card-title {
                 font-size: 0.9375rem;
                 font-weight: 600;
-                color: var(--background-900);
+                color: var(--background-650);
                 line-height: 1.3;
                 overflow: hidden;
                 text-overflow: ellipsis;
