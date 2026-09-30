@@ -166,6 +166,7 @@
         overflow: hidden;
         color: var(--background-900);
         box-sizing: border-box;
+        width: 100%;
         height: 100%;
         min-height: 160px;
 
@@ -418,8 +419,9 @@
         }
 
         &:has(.max-subcard) {
-            width: fit-content;
+            width: 100%;
             max-width: 100%;
+            min-height: auto;
 
             .max-card-header {
                 min-width: 0;
@@ -447,13 +449,14 @@
             }
 
             .max-card-content {
-                width: fit-content;
+                width: 100%;
                 max-width: 100%;
                 display: flex;
                 flex-direction: column;
+                gap: 0.75rem;
 
                 &:has(> .max-subcard + .max-subcard) {
-                    flex-flow: row wrap;
+                    flex-direction: column;
                     gap: 0.75rem;
                 }
             }

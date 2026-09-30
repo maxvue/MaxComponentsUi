@@ -52,6 +52,16 @@ describe('MaxSubCard', () => {
             expect(icon.exists()).toBe(true);
             expect(icon.attributes('data-icon')).toBe('mdi:file-document');
         });
+
+        it('renderiza como bloco completo de linha inteira com classe max-subcard', () => {
+            const wrapper = mountSubCard({
+                props: {
+                    title: 'Subcard de Linha Inteira'
+                }
+            });
+            expect(wrapper.classes()).toContain('max-subcard');
+            expect(wrapper.find('.max-subcard').exists()).toBe(true);
+        });
     });
 
     describe('Status', () => {
