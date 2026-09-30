@@ -111,4 +111,28 @@ describe('MaxMenuVerticalItem', () => {
 
         expect(goToRoute).toHaveBeenCalledWith('settings');
     });
+
+    it('renderiza curvas decorativas sem tabindex e com focusable="false" para não receber foco', () => {
+        const wrapper = mount(MaxMenuVerticalItem, {
+            props: { items: mockItems },
+            global: {
+                plugins: [pinia],
+                directives: {
+                    tooltip: () => {}
+                },
+                stubs: {
+                    MaxIconButton: true
+                }
+            }
+        });
+
+        const curvas = wrapper.findAll('svg.curva');
+        expect(curvas.length).toBeGreaterThan(0);
+        for (const curva of curvas) {
+            expect(curva.attributes('tabindex')).toBeUndefined();
+            expect(curva.attributes('focusable')).toBe('false');
+            expect(curva.attributes('aria-hidden')).toBe('true');
+        }
+    });
 });
+

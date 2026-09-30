@@ -26,10 +26,10 @@
             class="max-menu-vertical-item-icon"
         />
         <span v-if="hasSubItems(item)" class="subitem-indicator" aria-hidden="true" />
-        <svg class="curva cima" xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 3000 3000" aria-hidden="true" tabindex="-1">
+        <svg class="curva cima" xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 3000 3000" aria-hidden="true" focusable="false">
             <path d="M-7.07 3007.07c0,-1656.85 1343.15,-3000 3000,-3000l-3000 0 0 3000z" />
         </svg>
-        <svg class="curva baixo" xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 3000 3000" aria-hidden="true" tabindex="-1">
+        <svg class="curva baixo" xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 3000 3000" aria-hidden="true" focusable="false">
             <path d="M-7.07 3007.07c0,-1656.85 1343.15,-3000 3000,-3000l-3000 0 0 3000z" />
         </svg>
     </div>
@@ -141,6 +141,15 @@
         cursor: pointer;
         place-items: center;
 
+        &:focus:not(:focus-visible) {
+            outline: none;
+        }
+
+        &:focus-visible {
+            outline: var(--max-focus-outline, 2px solid var(--max-primary-500, #00768e));
+            outline-offset: -2px;
+        }
+
         a {
             position: relative;
             display: grid;
@@ -173,6 +182,9 @@
 
         .curva {
             display: none;
+            pointer-events: none;
+            user-select: none;
+            outline: none;
         }
 
         .subitem-indicator {
@@ -199,6 +211,7 @@
             :deep(.max-icon-div),
             :deep(.max-icon) {
                 z-index: 1;
+                pointer-events: none;
                 color: var(--blue-750) !important;
 
                 svg {
@@ -218,6 +231,9 @@
             .curva {
                 display: block;
                 position: absolute;
+                pointer-events: none;
+                user-select: none;
+                outline: none;
                 fill: var(--layout-content-frame-bg, #004860);
 
                 &.cima {
