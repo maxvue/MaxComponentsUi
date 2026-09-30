@@ -619,7 +619,7 @@
     "@stylistic/stylelint-plugin": "^5.2.1",
     "@types/node": "^26.6.3",
     "@typescript/native-preview": "^7.0.0-dev.20260707.2",
-    "@vitejs/plugin-vue": "^6.0.8",
+    "@vitejs/plugin-vue": "^6.0.9",
     "@vitest/browser": "^4.1.11",
     "@vitest/browser-playwright": "^4.1.11",
     "@vitest/coverage-v8": "^4.1.10",
@@ -654,7 +654,7 @@
     "vite-plugin-css-injected-by-js": "^5.0.2",
     "vite-plugin-dts": "^5.1.1",
     "vitest": "^4.1.10",
-    "vue": "^3.6.0-rc.9",
+    "vue": "^3.6.0-rc.10",
     "vue-eslint-parser": "^10.4.1",
     "vue-router": "^5.2.0",
     "vue-tsc": "^3.3.11"
@@ -676,7 +676,7 @@
     "@maxvue/max-pinia": "^0.2.0",
     "pinia": "^4.0.0",
     "unocss": "^66.0.0",
-    "vue": "^3.5.11 || ^3.6.0 || ^3.6.0-rc.9",
+    "vue": "^3.5.11 || ^3.6.0 || ^3.6.0-rc.10",
     "vue-router": "^5.2.0"
   },
   "peerDependenciesMeta": {
