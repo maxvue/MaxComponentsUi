@@ -275,6 +275,8 @@ export { useScrollLock, forceReset } from './helpers/useScrollLock';
 export type { ScrollLock } from './helpers/useScrollLock';
 export { useAsyncState } from './composables/useAsyncState';
 export { useMaxPiniaSaveTracker } from './composables/useMaxPiniaSaveTracker';
+export { useHtmlFontSize, applyHtmlFontSize, DEFAULT_FONT_SIZE, MIN_FONT_SIZE, MAX_FONT_SIZE } from './helpers/useHtmlFontSize';
+export { useHtmlDark } from './helpers/useHtmlDark';
 
 
 import Tooltip from './directives/tooltip';

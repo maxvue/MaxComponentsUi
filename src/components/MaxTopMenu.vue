@@ -47,6 +47,7 @@
                             :user-id="user.data?.id ?? undefined"
                             :avatar-url="avatarUrl"
                             :dark-mode="user.data?.settings?.darkMode === true"
+                            :font-size="props.fontSize ?? user.data?.settings?.fontSize"
                             :is-impersonated="isImpersonated"
                             :version="system.version || undefined"
                             only-avatar
@@ -55,6 +56,7 @@
                             @settings="emit('settings')"
                             @support="emit('support')"
                             @toggle-dark-mode="emit('toggleDarkMode')"
+                            @change-font-size="emit('changeFontSize', $event)"
                             @logout="emit('logout')"
                             @end-impersonate="emit('endImpersonate')"
                         />
@@ -111,12 +113,14 @@
                     :user-id="user.data?.id ?? undefined"
                     :avatar-url="avatarUrl"
                     :dark-mode="user.data?.settings?.darkMode === true"
+                    :font-size="props.fontSize ?? user.data?.settings?.fontSize"
                     :is-impersonated="isImpersonated"
                     :version="system.version || undefined"
                     @profile="emit('profile')"
                     @settings="emit('settings')"
                     @support="emit('support')"
                     @toggle-dark-mode="emit('toggleDarkMode')"
+                    @change-font-size="emit('changeFontSize', $event)"
                     @logout="emit('logout')"
                     @end-impersonate="emit('endImpersonate')"
                 />
@@ -145,6 +149,8 @@
         addItems?: Array<Record<string, any>>;
         /** Caminho base do avatar. Padrão: `/avatar/{id}`. */
         avatarPath?: string;
+        /** Tamanho da fonte (em px) */
+        fontSize?: number;
     }>();
 
     /** Eventos repassados do `MaxUserSection` para a aplicação. */
@@ -153,6 +159,7 @@
         settings: [];
         support: [];
         toggleDarkMode: [];
+        changeFontSize: [size: number];
         logout: [];
         endImpersonate: [];
     }>();

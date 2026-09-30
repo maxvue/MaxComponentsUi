@@ -183,11 +183,17 @@ describe('MaxTopMenu → MaxUserSection', () => {
         expect(mountWithPinia(MaxTopMenu).findComponent(MaxUserSection).props('version')).toBe('2.5.0');
     });
 
-    it.each(['logout', 'profile', 'settings', 'support'])('repassa o evento %s', async (evento) => {
+    it('repassa o tamanho da fonte da store ou prop', () => {
+        useUserStore().data = { id: 1, name: 'Maria', settings: { fontSize: 18 } };
+
+        expect(mountWithPinia(MaxTopMenu).findComponent(MaxUserSection).props('fontSize')).toBe(18);
+    });
+
+    it.each(['logout', 'profile', 'settings', 'support', 'changeFontSize'])('repassa o evento %s', async (evento) => {
         useUserStore().data = { id: 1, name: 'Maria' };
 
         const wrapper = mountWithPinia(MaxTopMenu);
-        wrapper.findComponent(MaxUserSection).vm.$emit(evento);
+        wrapper.findComponent(MaxUserSection).vm.$emit(evento, 18);
         await wrapper.vm.$nextTick();
 
         expect(wrapper.emitted(evento)).toBeTruthy();

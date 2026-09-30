@@ -29,10 +29,12 @@
                     :route-logo="effectiveRouteLogo"
                     :logo-alt="effectiveLogoAlt"
                     :logo-fallback-label="effectiveLogoFallbackLabel"
+                    :font-size="props.fontSize ?? user.data?.settings?.fontSize"
                     @profile="emit('profile')"
                     @settings="emit('settings')"
                     @support="emit('support')"
                     @toggle-dark-mode="handleToggleDarkMode"
+                    @change-font-size="handleChangeFontSize"
                     @logout="emit('logout')"
                     @end-impersonate="emit('endImpersonate')"
                     @fab-click="emit('fabClick')"
@@ -81,6 +83,7 @@
     import { useLoginStore } from '../stores/useLogin.Store';
     import { useMaxPiniaSaveTracker } from '../composables/useMaxPiniaSaveTracker';
     import { configureMaxApp, getMaxAppConfig } from '../helpers/maxAppConfig';
+    import { applyHtmlFontSize } from '../helpers/useHtmlFontSize';
     import type { BottomTab } from './MaxBottomMenu.vue';
     import type { MenuGroup } from './MaxSideMenuMobile.vue';
 
@@ -133,6 +136,8 @@
         logoFallbackLabel?: string;
         /** Se verdadeiro, a aplicação hospedeira controla a classe dark e o tema de forma autônoma. */
         controlledTheme?: boolean;
+        /** Tamanho da fonte da aplicação (em px). */
+        fontSize?: number;
     }>(), {
         allowUserName: true,
         allowEmail: true,
@@ -152,6 +157,7 @@
         settings: [];
         support: [];
         toggleDarkMode: [isDark?: boolean];
+        changeFontSize: [size: number];
         logout: [];
         endImpersonate: [];
         fabClick: [];
@@ -309,6 +315,35 @@
         ([loaded, darkModeSetting, controlled]) => {
             if (controlled) return;
             if (loaded) applyDarkMode(Boolean(darkModeSetting));
+        },
+        { immediate: true }
+    );
+
+    /**
+     * Atualiza o tamanho da fonte globalmente no sistema:
+     * 1. Atualiza fontSize no DOM (document.documentElement) e localStorage
+     * 2. Atualiza a configuração reativa do usuário (user.data.settings.fontSize)
+     * 3. Dispara a persistência assíncrona se user.save() existir (@maxvue/max-pinia)
+     * 4. Emite o evento changeFontSize para compatibilidade com ouvintes externos
+     */
+    const handleChangeFontSize = (size: number): void => {
+        applyHtmlFontSize(size);
+
+        if (user.data) {
+            if (!user.data.settings || typeof user.data.settings !== 'object') user.data.settings = {};
+            user.data.settings.fontSize = size;
+            if (typeof (user as any).save === 'function') (user as any).save();
+        }
+
+        emit('changeFontSize', size);
+    };
+
+    // Sincroniza o tamanho da fonte com a preferência persistida do usuário ao carregar
+    watch(
+        () => [isLoaded.value, user.data?.settings?.fontSize, props.fontSize],
+        ([loaded, fontSizeSetting, propFontSize]) => {
+            if (propFontSize !== undefined) applyHtmlFontSize(Number(propFontSize));
+            else if (loaded && fontSizeSetting) applyHtmlFontSize(Number(fontSizeSetting));
         },
         { immediate: true }
     );

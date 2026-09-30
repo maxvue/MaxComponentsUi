@@ -505,4 +505,45 @@ describe('MaxApp', () => {
             expect(saveSpy).toHaveBeenCalledTimes(2);
         });
     });
+
+    describe('gerenciamento de tamanho da fonte', () => {
+        beforeEach(() => {
+            document.documentElement.style.fontSize = '';
+            document.documentElement.style.removeProperty('--max-font-size-base');
+            if (typeof localStorage !== 'undefined') localStorage.clear();
+        });
+
+        afterEach(() => {
+            document.documentElement.style.fontSize = '';
+            document.documentElement.style.removeProperty('--max-font-size-base');
+            if (typeof localStorage !== 'undefined') localStorage.clear();
+        });
+
+        it('aplica fontSize quando o usuário já tem fontSize configurado ao carregar', async () => {
+            loadUser({ id: 1, name: 'Maria', settings: { fontSize: 18 } });
+
+            mountApp();
+            await new Promise((r) => setTimeout(r, 10));
+
+            expect(document.documentElement.style.fontSize).toBe('18px');
+            expect(document.documentElement.style.getPropertyValue('--max-font-size-base')).toBe('18px');
+        });
+
+        it('atualiza fontSize ao receber changeFontSize do layout e persiste na store', async () => {
+            const user = loadUser({ id: 1, name: 'Maria', settings: { fontSize: 16 } });
+            const saveSpy = vi.fn();
+            (user as any).save = saveSpy;
+
+            const wrapper = mountApp();
+            const layout = wrapper.findComponent(MaxPageLayout);
+
+            layout.vm.$emit('changeFontSize', 19);
+            await wrapper.vm.$nextTick();
+
+            expect(document.documentElement.style.fontSize).toBe('19px');
+            expect(user.data?.settings?.fontSize).toBe(19);
+            expect(saveSpy).toHaveBeenCalledTimes(1);
+            expect(wrapper.emitted('changeFontSize')).toEqual([[19]]);
+        });
+    });
 });

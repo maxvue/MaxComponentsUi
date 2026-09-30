@@ -15,6 +15,7 @@
         @settings="emit('settings')"
         @support="emit('support')"
         @toggle-dark-mode="emit('toggleDarkMode')"
+        @change-font-size="emit('changeFontSize', $event)"
         @logout="emit('logout')"
         @end-impersonate="emit('endImpersonate')"
         @fab-click="emit('fabClick')"
@@ -31,10 +32,12 @@
             v-bind="attrs"
             :add-items="props.addItems"
             :avatar-path="props.avatarPath"
+            :font-size="props.fontSize"
             @profile="emit('profile')"
             @settings="emit('settings')"
             @support="emit('support')"
             @toggle-dark-mode="emit('toggleDarkMode')"
+            @change-font-size="emit('changeFontSize', $event)"
             @logout="emit('logout')"
             @end-impersonate="emit('endImpersonate')"
         >
@@ -100,6 +103,8 @@
         logoAlt?: string;
         /** Texto do fallback da logo caso falhe o carregamento. */
         logoFallbackLabel?: string;
+        /** Tamanho da fonte em pixels */
+        fontSize?: number;
     }>(), {
         routeLogo: '/'
     });
@@ -114,6 +119,7 @@
         settings: [];
         support: [];
         toggleDarkMode: [];
+        changeFontSize: [size: number];
         logout: [];
         endImpersonate: [];
         fabClick: [];

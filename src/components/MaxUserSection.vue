@@ -72,6 +72,49 @@
                 <template v-for="(item, index) in menuItems" :key="index">
                     <hr v-if="item.separator" class="max-user-section-separator" role="separator" />
                     <div
+                        v-else-if="item.isFontSize"
+                        class="main-item-menu-div font-size-item-div"
+                        role="menuitem"
+                        :tabindex="focusedUserMenuIdx === index ? 0 : -1"
+                        :ref="(el) => setUserMenuItemRef(el, index)"
+                        @mouseenter="focusedUserMenuIdx = index"
+                        @click.stop
+                    >
+                        <div class="font-size-left">
+                            <MaxIcon icon="material-symbols-light:format-size-rounded" />
+                            <span>{{ props.labelFontSize }}</span>
+                        </div>
+                        <div class="font-size-stepper" @click.stop>
+                            <button
+                                type="button"
+                                class="font-size-btn"
+                                :disabled="currentFontSize <= props.minFontSize"
+                                aria-label="Diminuir tamanho da fonte"
+                                @click.stop.prevent="decrementFontSize"
+                            >
+                                <MaxIcon icon="lucide:minus" size="0.75" />
+                            </button>
+                            <button
+                                type="button"
+                                class="font-size-value-btn"
+                                title="Clique para restaurar 16px"
+                                aria-label="Restaurar tamanho da fonte para 16px"
+                                @click.stop.prevent="resetFontSize"
+                            >
+                                {{ currentFontSize }}
+                            </button>
+                            <button
+                                type="button"
+                                class="font-size-btn"
+                                :disabled="currentFontSize >= props.maxFontSize"
+                                aria-label="Aumentar tamanho da fonte"
+                                @click.stop.prevent="incrementFontSize"
+                            >
+                                <MaxIcon icon="lucide:plus" size="0.75" />
+                            </button>
+                        </div>
+                    </div>
+                    <div
                         v-else-if="item.label"
                         class="main-item-menu-div"
                         role="menuitem"
@@ -97,6 +140,7 @@
     import MaxUserAvatar from './MaxUserAvatar.vue';
     import { useActiveOverlayPosition } from '../composables/useActiveOverlayPosition';
     import { useOutsidePointer } from '../helpers/useOutsidePointer';
+    import { useHtmlFontSize, DEFAULT_FONT_SIZE, clampFontSize } from '../helpers/useHtmlFontSize';
 
     const props = withDefaults(defineProps<{
         /** Nome do usuário */
@@ -124,6 +168,14 @@
         labelLogout?: string;
         labelEndImpersonate?: string;
         labelEndImpersonateSub?: string;
+        /** Tamanho atual da fonte em pixels */
+        fontSize?: number;
+        /** Tamanho mínimo permitido para a fonte */
+        minFontSize?: number;
+        /** Tamanho máximo permitido para a fonte */
+        maxFontSize?: number;
+        /** Rótulo da opção de tamanho da fonte */
+        labelFontSize?: string;
         /** Exibe apenas o avatar (modo compacto/mobile) */
         onlyAvatar?: boolean;
         /** Tipo de tela: 'desktop' | 'mobile' */
@@ -137,6 +189,9 @@
         labelLogout: 'Sair',
         labelEndImpersonate: 'SAIR',
         labelEndImpersonateSub: '(RETORNAR)',
+        minFontSize: 10,
+        maxFontSize: 24,
+        labelFontSize: 'Tamanho da fonte',
         onlyAvatar: false,
         screen: 'desktop'
     });
@@ -150,6 +205,7 @@
         support: [];
         logout: [];
         endImpersonate: [];
+        changeFontSize: [size: number];
     }>();
 
     const userMenuId = `max-user-menu-${Math.random().toString(36).slice(2, 9)}`;
@@ -176,7 +232,7 @@
             const targetY = targetRect.top;
             const targetW = targetRect.width;
             const targetH = targetRect.height;
-            const width_el = overlayRect.width || 180;
+            const width_el = overlayRect.width || 220;
             const height_el = overlayRect.height || 200;
 
             let top = targetY + targetH + 4;
@@ -194,6 +250,39 @@
             return { top, left };
         }
     });
+
+    const { fontSize: globalFontSize, setFontSize: setGlobalFontSize } = useHtmlFontSize();
+
+    const localFontSize = ref(props.fontSize ?? globalFontSize.value ?? DEFAULT_FONT_SIZE);
+
+    watch(() => props.fontSize, (val) => {
+        if (val !== undefined) localFontSize.value = clampFontSize(val);
+    });
+
+    watch(globalFontSize, (val) => {
+        if (props.fontSize === undefined) localFontSize.value = val;
+    });
+
+    const currentFontSize = computed(() => localFontSize.value);
+
+    const updateFontSize = (newSize: number) => {
+        const clamped = clampFontSize(Math.min(props.maxFontSize, Math.max(props.minFontSize, newSize)));
+        localFontSize.value = clamped;
+        setGlobalFontSize(clamped);
+        emit('changeFontSize', clamped);
+    };
+
+    const decrementFontSize = () => {
+        if (currentFontSize.value > props.minFontSize) updateFontSize(currentFontSize.value - 1);
+    };
+
+    const incrementFontSize = () => {
+        if (currentFontSize.value < props.maxFontSize) updateFontSize(currentFontSize.value + 1);
+    };
+
+    const resetFontSize = () => {
+        updateFontSize(DEFAULT_FONT_SIZE);
+    };
 
     const defaultItems = computed(() => {
         const list: any[] = [
@@ -214,6 +303,9 @@
                 label: props.darkMode === true ? props.labelDarkModeOff : props.labelDarkModeOn,
                 icon: 'material-symbols-light:dark-mode-rounded',
                 exec: () => emit('toggleDarkMode')
+            },
+            {
+                isFontSize: true
             },
             {
                 label: props.labelSupport,
@@ -237,7 +329,7 @@
     const getNavigableIndices = (): number[] => {
         const indices: number[] = [];
         menuItems.value.forEach((it, idx) => {
-            if (it.label && !it.separator) indices.push(idx);
+            if ((it.label || it.isFontSize) && !it.separator) indices.push(idx);
         });
         return indices;
     };
@@ -337,10 +429,30 @@
                 menuItemRefs.value[focusedUserMenuIdx.value]?.focus();
                 break;
             }
+            case 'ArrowLeft': {
+                const item = menuItems.value[focusedUserMenuIdx.value];
+                if (item?.isFontSize) {
+                    event.preventDefault();
+                    decrementFontSize();
+                }
+                break;
+            }
+            case 'ArrowRight': {
+                const item = menuItems.value[focusedUserMenuIdx.value];
+                if (item?.isFontSize) {
+                    event.preventDefault();
+                    incrementFontSize();
+                }
+                break;
+            }
             case 'Enter':
             case ' ': {
-                event.preventDefault();
                 const item = menuItems.value[focusedUserMenuIdx.value];
+                if (item?.isFontSize) {
+                    event.preventDefault();
+                    break;
+                }
+                event.preventDefault();
                 if (item) handleItemClick(item);
 
                 break;
@@ -556,7 +668,7 @@
         border: 1px solid var(--surface-border);
         border-radius: 0.5rem;
         box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
-        min-width: 180px;
+        min-width: 220px;
         max-width: calc(100vw - 16px);
         box-sizing: border-box;
         max-height: calc(100dvh - 32px);
@@ -601,6 +713,103 @@
                 background-color: var(--background-100, #f1f5f9);
                 color: var(--background-775);
                 cursor: pointer;
+            }
+
+            &.font-size-item-div {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 8px;
+                cursor: default;
+
+                &:hover {
+                    cursor: default;
+                }
+
+                .font-size-left {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    min-width: 0;
+                    flex: 1;
+
+                    span {
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
+                }
+
+                .font-size-stepper {
+                    display: inline-flex;
+                    align-items: center;
+                    background-color: var(--background-100, #f1f5f9);
+                    border: 1px solid var(--surface-border, var(--background-300, #cbd5e1));
+                    border-radius: 6px;
+                    padding: 1px;
+                    gap: 1px;
+
+                    .font-size-btn {
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        width: 22px;
+                        height: 22px;
+                        padding: 0;
+                        margin: 0;
+                        background: transparent;
+                        border: none;
+                        border-radius: 4px;
+                        color: var(--background-700, #334155);
+                        cursor: pointer;
+                        transition: background-color 0.15s ease, color 0.15s ease;
+
+                        &:hover:not(:disabled) {
+                            background-color: var(--background-0, #fff);
+                            color: var(--max-primary-500, #00768e);
+                        }
+
+                        &:focus-visible {
+                            outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
+                            outline-offset: 1px;
+                        }
+
+                        &:disabled {
+                            opacity: 0.35;
+                            cursor: not-allowed;
+                        }
+                    }
+
+                    .font-size-value-btn {
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        min-width: 28px;
+                        height: 22px;
+                        padding: 0 4px;
+                        margin: 0;
+                        font-size: 0.75rem;
+                        font-weight: 600;
+                        font-family: inherit;
+                        color: var(--background-800, #1e293b);
+                        background: transparent;
+                        border: none;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        user-select: none;
+                        transition: background-color 0.15s ease, color 0.15s ease;
+
+                        &:hover {
+                            background-color: var(--background-0, #fff);
+                            color: var(--max-primary-500, #00768e);
+                        }
+
+                        &:focus-visible {
+                            outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
+                            outline-offset: 1px;
+                        }
+                    }
+                }
             }
         }
     }

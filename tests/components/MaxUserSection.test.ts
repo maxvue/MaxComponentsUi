@@ -179,4 +179,80 @@ describe('MaxUserSection', () => {
         expect(wrapper.emitted('endImpersonate')).toHaveLength(3);
         expect(document.body.querySelector('.max-user-section-overlay')).toBeNull();
     });
+
+    it('renderiza o item de tamanho da fonte logo abaixo do botão de modo noturno/escuro', async () => {
+        const _wrapper = mountSection({ name: 'João', userId: 1, darkMode: false });
+        await _wrapper.vm.$nextTick();
+
+        const items = Array.from(document.body.querySelectorAll('.main-item-menu-div'));
+        const labels = items.map((d) => d.textContent?.trim() || '');
+
+        const darkModeIndex = labels.findIndex((l) => l.includes('Ativar Modo escuro'));
+        const fontSizeIndex = items.findIndex((d) => d.classList.contains('font-size-item-div'));
+
+        expect(darkModeIndex).toBeGreaterThan(-1);
+        expect(fontSizeIndex).toBe(darkModeIndex + 1);
+        expect(document.body.querySelector('.font-size-item-div')).not.toBeNull();
+        expect(document.body.querySelector('.font-size-value-btn')?.textContent?.trim()).toBe('16');
+    });
+
+    it('incrementa e decrementa a fonte ao clicar em + e -, mantendo o menu aberto', async () => {
+        const wrapper = mountSection({ name: 'João', userId: 1 });
+        await wrapper.vm.$nextTick();
+
+        const plusBtn = document.body.querySelector('button[aria-label="Aumentar tamanho da fonte"]') as HTMLButtonElement;
+        const minusBtn = document.body.querySelector('button[aria-label="Diminuir tamanho da fonte"]') as HTMLButtonElement;
+        const valueBtn = document.body.querySelector('.font-size-value-btn') as HTMLButtonElement;
+
+        expect(plusBtn).not.toBeNull();
+        expect(minusBtn).not.toBeNull();
+        expect(valueBtn.textContent?.trim()).toBe('16');
+
+        plusBtn.click();
+        await wrapper.vm.$nextTick();
+
+        expect(valueBtn.textContent?.trim()).toBe('17');
+        expect(wrapper.emitted('changeFontSize')).toEqual([[17]]);
+        expect(document.body.querySelector('.max-user-section-overlay')).not.toBeNull();
+
+        minusBtn.click();
+        await wrapper.vm.$nextTick();
+
+        expect(valueBtn.textContent?.trim()).toBe('16');
+        expect(wrapper.emitted('changeFontSize')).toEqual([[17], [16]]);
+        expect(document.body.querySelector('.max-user-section-overlay')).not.toBeNull();
+    });
+
+    it('restaura o tamanho padrão (16px) ao clicar no visor de valor', async () => {
+        const wrapper = mountSection({ name: 'João', userId: 1, fontSize: 20 });
+        await wrapper.vm.$nextTick();
+
+        const valueBtn = document.body.querySelector('.font-size-value-btn') as HTMLButtonElement;
+        expect(valueBtn.textContent?.trim()).toBe('20');
+
+        valueBtn.click();
+        await wrapper.vm.$nextTick();
+
+        expect(valueBtn.textContent?.trim()).toBe('16');
+        expect(wrapper.emitted('changeFontSize')).toContainEqual([16]);
+    });
+
+    it('respeita os limites minFontSize e maxFontSize desabilitando os botões', async () => {
+        const wrapper = mountSection({ name: 'João', userId: 1, fontSize: 10, minFontSize: 10, maxFontSize: 24 });
+        await wrapper.vm.$nextTick();
+
+        const minusBtn = document.body.querySelector('button[aria-label="Diminuir tamanho da fonte"]') as HTMLButtonElement;
+        const plusBtn = document.body.querySelector('button[aria-label="Aumentar tamanho da fonte"]') as HTMLButtonElement;
+
+        expect(minusBtn.disabled).toBe(true);
+        expect(plusBtn.disabled).toBe(false);
+    });
+
+    it('permite sobrescrever o rótulo da fonte via prop labelFontSize', async () => {
+        const _wrapper = mountSection({ name: 'João', userId: 1, labelFontSize: 'Zoom da interface' });
+        await _wrapper.vm.$nextTick();
+
+        const fontItem = document.body.querySelector('.font-size-item-div');
+        expect(fontItem?.textContent).toContain('Zoom da interface');
+    });
 });

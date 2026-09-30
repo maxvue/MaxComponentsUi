@@ -5,10 +5,12 @@
             screen="mobile"
             :add-items="props.addItems"
             :avatar-path="props.avatarPath"
+            :font-size="props.fontSize"
             @profile="emit('profile')"
             @settings="emit('settings')"
             @support="emit('support')"
             @toggle-dark-mode="emit('toggleDarkMode')"
+            @change-font-size="emit('changeFontSize', $event)"
             @logout="emit('logout')"
             @end-impersonate="emit('endImpersonate')"
         >
@@ -102,6 +104,8 @@
         avatarPath?: string;
         /** Logo do cabeçalho / menu. */
         logo?: string;
+        /** Tamanho da fonte em pixels */
+        fontSize?: number;
     }>();
 
     const emit = defineEmits<{
@@ -109,6 +113,7 @@
         settings: [];
         support: [];
         toggleDarkMode: [];
+        changeFontSize: [size: number];
         logout: [];
         endImpersonate: [];
         fabClick: [];
