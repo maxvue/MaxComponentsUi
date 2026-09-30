@@ -16,13 +16,13 @@ export const presetMaxUno = () => {
         // SHORTCUTS: Classes que precisam de !important ou são atalhos complexos
         shortcuts: [
             [/^h[-_]?[fF](?:ull|lex)$/, () => ({ height: '100% !important' })],
-            [/^font-size-(.+)$/, ([, s]) => ({ 'font-size': `${s}rem !important` })],
+            [/^font-size-([0-9.]+)$/, ([, s]) => ({ 'font-size': `${s}rem !important` })],
             // Padding/margin: os eixos `w`/`h` são aliases de `x`/`y` (largura = esquerda+direita,
             // altura = topo+baixo) nesta regra específica — NÃO se referem a width/height do elemento.
             // Ex.: `pw-10` = padding horizontal, `mh-10` = margin vertical. Ver src/helpers/paddingMargin.ts.
             [/^[pm][tblrwhyx]?-?(\d+)$/, (params) => paddingMargin(params)],
             [/^w[-_]?[fF](?:ull|lex)$/, () => ({ width: '100% !important' })],
-            [/^fs-(.+)$/, ([, s]) => ({ 'font-size': `${s}rem !important` })],
+            [/^fs-([0-9.]+)$/, ([, s]) => ({ 'font-size': `${s}rem !important` })],
             // O captura precisa excluir parênteses: com `(.+)`, a função CSS
             // `color-mix(in srgb, ...)` — escrita dentro de blocos <style> — era
             // lida como utilitário e gerava `var(--mix(in)`, um bracket sem
