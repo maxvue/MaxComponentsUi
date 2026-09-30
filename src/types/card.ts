@@ -13,6 +13,12 @@ export interface MaxCardProps {
     title?: string;
     /** Subtítulo descritivo exibido abaixo do título */
     subtitle?: string;
+    /** Rótulo ou identificador de status semântico */
+    status?: string;
+    /** Cor personalizada do status (CSS color ou token) */
+    statusColor?: string;
+    /** Rótulo customizado do placeholder de adição na variante 'add' */
+    addLabel?: string;
     /** Indica se o card está em estado de carregamento com overlay bloqueante */
     loading?: boolean;
     /** Desabilita o card e impede interações de clique e foco */
@@ -66,6 +72,12 @@ export interface MaxCardListProps {
     items?: any[];
     /** Chave identificadora única do item (propriedade do objeto ou função extratora) */
     itemKey?: string | ((item: any, index: number) => string | number);
+    /** Alias alternativo para itemKey */
+    keyField?: string;
+    /** Indica se deve exibir o card de adição automaticamente no grid */
+    showAddCard?: boolean;
+    /** Rótulo do card de adição automático */
+    addCardLabel?: string;
     /** Largura mínima de cada card em pixels para o auto-cálculo do grid responsivo */
     minCardWidth?: number;
     /** Número fixo de colunas (quando fornecido, sobrescreve o cálculo dinâmico) */

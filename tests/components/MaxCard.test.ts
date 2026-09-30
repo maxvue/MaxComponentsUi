@@ -79,6 +79,18 @@ describe('MaxCard', () => {
             expect(wrapper.text()).toContain('Adicionar novo item');
         });
 
+        it('renderiza addLabel na variante add com precedência sobre title', () => {
+            const wrapper = mountCard({
+                props: {
+                    variant: 'add',
+                    addLabel: 'Adicionar Homologação de Projeto',
+                    title: 'Título Secundário'
+                }
+            });
+            expect(wrapper.find('.max-card-add-placeholder').exists()).toBe(true);
+            expect(wrapper.find('.max-card-add-title').text()).toBe('Adicionar Homologação de Projeto');
+        });
+
         it('é interativo por padrão na variante add', () => {
             const wrapper = mountCard({
                 props: {
@@ -127,6 +139,38 @@ describe('MaxCard', () => {
             expect(wrapperDefault.find('.slot-default').text()).toBe('Conteúdo Default');
         });
 
+        it('renderiza slot body como alias de content e default', () => {
+            const wrapperBody = mountCard({
+                slots: {
+                    body: '<div class="solar-body">Conteúdo no Body</div>'
+                }
+            });
+            expect(wrapperBody.find('.max-card-content').exists()).toBe(true);
+            expect(wrapperBody.find('.solar-body').text()).toBe('Conteúdo no Body');
+
+            const wrapperPrecedence = mountCard({
+                slots: {
+                    body: '<div class="body-slot">Prioridade Body</div>',
+                    content: '<div class="content-slot">Ignorado</div>'
+                }
+            });
+            expect(wrapperPrecedence.find('.body-slot').text()).toBe('Prioridade Body');
+            expect(wrapperPrecedence.find('.content-slot').exists()).toBe(false);
+        });
+
+        it('renderiza slot status no cabeçalho', () => {
+            const wrapper = mountCard({
+                props: {
+                    title: 'Card com Status Customizado'
+                },
+                slots: {
+                    status: '<span class="custom-status-tag">Em Produção</span>'
+                }
+            });
+            expect(wrapper.find('.custom-status-tag').exists()).toBe(true);
+            expect(wrapper.find('.custom-status-tag').text()).toBe('Em Produção');
+        });
+
         it('renderiza slot actions no cabeçalho padrão', () => {
             const wrapper = mountCard({
                 props: {
@@ -147,6 +191,41 @@ describe('MaxCard', () => {
             });
             expect(wrapper.find('.max-card-footer').exists()).toBe(true);
             expect(wrapper.find('.custom-footer').text()).toBe('Rodapé do Card');
+        });
+    });
+
+    describe('Status e Badges no Cabeçalho', () => {
+        it('renderiza status semântico e classes adequadas', () => {
+            const wrapperSuccess = mountCard({
+                props: { title: 'Projeto Solar', status: 'Ativo' }
+            });
+            const statusSuccess = wrapperSuccess.find('.max-card-status');
+            expect(statusSuccess.exists()).toBe(true);
+            expect(statusSuccess.classes()).toContain('max-card-status--success');
+            expect(statusSuccess.text()).toBe('Ativo');
+
+            const wrapperWarning = mountCard({
+                props: { title: 'Projeto Solar', status: 'Em Homologação' }
+            });
+            expect(wrapperWarning.find('.max-card-status').classes()).toContain('max-card-status--warning');
+
+            const wrapperDanger = mountCard({
+                props: { title: 'Projeto Solar', status: 'Offline' }
+            });
+            expect(wrapperDanger.find('.max-card-status').classes()).toContain('max-card-status--danger');
+
+            const wrapperInfo = mountCard({
+                props: { title: 'Projeto Solar', status: 'Em Andamento' }
+            });
+            expect(wrapperInfo.find('.max-card-status').classes()).toContain('max-card-status--info');
+        });
+
+        it('aplica cor customizada via statusColor', () => {
+            const wrapper = mountCard({
+                props: { title: 'Projeto Solar', status: 'Custom', statusColor: '#ff00aa' }
+            });
+            const statusEl = wrapper.find('.max-card-status');
+            expect(statusEl.attributes('style')).toContain('--card-status-color: #ff00aa');
         });
     });
 
