@@ -51,7 +51,9 @@
             <slot name="content">
                 <slot>
                     <div v-if="isAddVariantPlaceholder" class="max-card-add-placeholder">
-                        <MaxIcon :icon="props.icon || 'mdi:plus'" class="max-card-add-icon" />
+                        <div class="max-card-add-icon-wrapper">
+                            <MaxIcon :icon="props.icon || 'mdi:plus'" class="max-card-add-icon" />
+                        </div>
                         <span v-if="props.title" class="max-card-add-title">{{ props.title }}</span>
                         <span v-if="props.subtitle" class="max-card-add-subtitle">{{ props.subtitle }}</span>
                     </div>
@@ -127,19 +129,19 @@
         flex-direction: column;
         background-color: var(--background-0);
         border: 1px solid var(--background-200);
-        border-radius: 8px;
-        box-shadow: 0 1px 3px rgb(0 0 0 / 5%), 0 1px 2px rgb(0 0 0 / 4%);
-        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+        border-radius: 6px;
+        box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+        transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
         overflow: hidden;
         color: var(--background-900);
+        box-sizing: border-box;
 
         &.is-clickable {
             cursor: pointer;
 
             &:hover {
                 border-color: var(--max-primary-400);
-                box-shadow: 0 4px 12px rgb(0 0 0 / 8%);
-                transform: translateY(-1px);
+                box-shadow: 0 2px 6px rgb(0 0 0 / 6%);
             }
 
             &:focus-visible {
@@ -160,14 +162,31 @@
         }
 
         &--add {
-            border: 1.5px dashed var(--background-300);
-            background-color: var(--background-25, var(--background-0));
+            border: 1px dashed var(--background-300);
+            background-color: var(--background-50);
             box-shadow: none;
+            height: 100%;
+            min-height: 140px;
+            justify-content: center;
 
             &:hover {
                 border-color: var(--max-primary-500);
-                background-color: var(--background-50);
-                box-shadow: 0 2px 8px rgb(0 0 0 / 5%);
+                background-color: var(--background-0);
+                box-shadow: 0 2px 6px rgb(0 0 0 / 5%);
+
+                .max-card-add-icon-wrapper {
+                    background-color: var(--max-primary-50, rgb(0 118 142 / 8%));
+                    color: var(--max-primary-500);
+                    border-color: var(--max-primary-300, var(--max-primary-500));
+                }
+            }
+
+            .max-card-content {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                height: 100%;
+                padding: 1rem;
             }
 
             .max-card-add-placeholder {
@@ -176,30 +195,38 @@
                 align-items: center;
                 justify-content: center;
                 text-align: center;
-                padding: 1.5rem 1rem;
                 gap: 0.5rem;
                 color: var(--background-600);
 
+                .max-card-add-icon-wrapper {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 50%;
+                    background-color: var(--background-100);
+                    border: 1px solid var(--background-200);
+                    color: var(--background-600);
+                    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+                }
+
                 .max-card-add-icon {
-                    font-size: 2rem;
-                    color: var(--max-primary-500);
-                    transition: transform 0.2s ease;
+                    font-size: 1.25rem;
                 }
 
                 .max-card-add-title {
                     font-weight: 600;
-                    font-size: 0.95rem;
+                    font-size: 0.875rem;
                     color: var(--background-800);
+                    line-height: 1.3;
                 }
 
                 .max-card-add-subtitle {
-                    font-size: 0.8rem;
+                    font-size: 0.75rem;
                     color: var(--background-500);
+                    line-height: 1.3;
                 }
-            }
-
-            &:hover .max-card-add-icon {
-                transform: scale(1.1);
             }
         }
 
@@ -236,19 +263,19 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 1rem 1.25rem;
+            padding: 0.75rem 1rem;
             gap: 0.75rem;
 
             &-main {
                 display: flex;
                 align-items: center;
-                gap: 0.75rem;
+                gap: 0.625rem;
                 flex: 1;
                 min-width: 0;
             }
 
             &-icon {
-                font-size: 1.5rem;
+                font-size: 1.25rem;
                 color: var(--max-primary-500);
                 flex-shrink: 0;
             }
@@ -260,7 +287,7 @@
             }
 
             .max-card-title {
-                font-size: 1rem;
+                font-size: 0.9375rem;
                 font-weight: 600;
                 color: var(--background-900);
                 line-height: 1.3;
@@ -270,10 +297,10 @@
             }
 
             .max-card-subtitle {
-                font-size: 0.85rem;
+                font-size: 0.8125rem;
                 color: var(--background-600);
-                line-height: 1.4;
-                margin-top: 2px;
+                line-height: 1.35;
+                margin-top: 1px;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
@@ -288,14 +315,14 @@
         }
 
         .max-card-content {
-            padding: 0 1.25rem 1rem;
-            font-size: 0.9rem;
+            padding: 0 1rem 0.75rem;
+            font-size: 0.875rem;
             color: var(--background-700);
-            line-height: 1.5;
+            line-height: 1.45;
             flex: 1;
 
             &:first-child {
-                padding-top: 1.25rem;
+                padding-top: 1rem;
             }
         }
 
@@ -303,17 +330,17 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 0 1.25rem 1rem;
+            padding: 0 1rem 0.75rem;
         }
 
         .max-card-footer {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0.75rem 1.25rem;
+            padding: 0.5rem 1rem;
             background-color: var(--background-50);
             border-top: 1px solid var(--background-100);
-            font-size: 0.85rem;
+            font-size: 0.8125rem;
             color: var(--background-600);
         }
     }

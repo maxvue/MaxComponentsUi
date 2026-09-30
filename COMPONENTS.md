@@ -1753,6 +1753,7 @@ Container orquestrador de cards de alta performance com **scroll virtual** integ
 | `loadingLabel` | `string` | `'Carregando cards...'` | Rótulo do componente `MaxLoader` padrão |
 | `emptyLabel` | `string` | `'Nenhum card encontrado'` | Rótulo do componente `MaxEmptyDiv` padrão |
 | `filterable` | `boolean` | `true` | Exibe a barra de controles e filtros |
+| `useGlobalSearch` | `boolean` | `true` | Sincroniza e ativa automaticamente a barra de pesquisa global do MaxApp via `useSearchBarStore` |
 | `searchQuery` | `string` | `''` | Valor do termo de busca (suporta `v-model:searchQuery` ou `v-model:search`) |
 | `searchPlaceholder` | `string` | `'Pesquisar cards...'` | Placeholder do campo de pesquisa |
 | `category` | `any` | `''` | Categoria selecionada (suporta `v-model:category`) |
@@ -1770,7 +1771,7 @@ Container orquestrador de cards de alta performance com **scroll virtual** integ
 - `#header` — Cabeçalho customizado. Fornece no escopo `{ total, filteredCount, items }` para integração com `MaxStats`
 - `#actions` — Ações adicionais no cabeçalho
 - `#filters` — Substituição customizada da barra de filtros. Fornece no escopo `{ search, category, categories, setSearch, setCategory }`
-- `#add-card` — Card ou ação de adição. Renderizado isoladamente sem desalinhar os índices dos itens virtualizados
+- `#add-card` — Card ou ação de adição integrado na 1ª célula da grade junto com os demais cards (ou no cabeçalho se `addCardPosition="header"`), sem desalinhar os índices dos itens de dados
 - `#card` / `#item` — Renderização do card individual. Fornece no escopo `{ item, index }`
 - `#loading` — Estado de carregamento customizado (fallback: `MaxLoader`)
 - `#empty` — Estado vazio customizado (fallback: `MaxEmptyDiv`)

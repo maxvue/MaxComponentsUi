@@ -4,11 +4,11 @@
         class="max-card-list"
         :class="{
             'is-loading': props.loading,
-            'is-empty': !props.loading && displayItems.length === 0,
+            'is-empty': !props.loading && displayItems.length === 0 && !hasGridAddCard,
             'is-virtual': isVirtualActive
         }"
     >
-        <!-- Cabeçalho (Header, Títulos, MaxStats e Ações) -->
+        <!-- Cabeçalho (Header, Títulos, MaxStats, Categorias e Ações) -->
         <header v-if="hasHeader" class="max-card-list-header">
             <div class="max-card-list-header-main">
                 <slot
@@ -31,11 +31,30 @@
                 </slot>
             </div>
 
-            <!-- Ações e Add Card no cabeçalho quando posicionado como header -->
+            <!-- Ações, Seletor de Categoria e Add Card no cabeçalho -->
             <div
-                v-if="$slots.actions || ($slots['add-card'] && props.addCardPosition === 'header')"
+                v-if="hasHeaderActions"
                 class="max-card-list-header-actions"
             >
+                <!-- Seletor de Categoria Compacto Integrado -->
+                <div v-if="hasCategories" class="max-card-list-category-wrapper">
+                    <select
+                        :value="internalCategory"
+                        class="max-card-list-category-select"
+                        :aria-label="props.categoryPlaceholder || 'Filtrar por categoria'"
+                        @change="onCategoryChange"
+                    >
+                        <option value="">{{ props.categoryPlaceholder || 'Todas as categorias' }}</option>
+                        <option
+                            v-for="cat in normalizedCategories"
+                            :key="String(cat.value)"
+                            :value="cat.value"
+                        >
+                            {{ cat.label }}
+                        </option>
+                    </select>
+                </div>
+
                 <div v-if="$slots['add-card'] && props.addCardPosition === 'header'" class="max-card-list-header-add">
                     <slot name="add-card" />
                 </div>
@@ -43,58 +62,16 @@
             </div>
         </header>
 
-        <!-- Barra de Controles e Filtros -->
-        <div v-if="props.filterable !== false && hasControls" class="max-card-list-controls">
+        <!-- Slot de Filtros Customizados (quando fornecido explicitamente) -->
+        <div v-if="$slots.filters" class="max-card-list-controls">
             <slot
                 name="filters"
-                :search="internalSearch"
+                :search="effectiveSearchQuery"
                 :category="internalCategory"
                 :categories="normalizedCategories"
                 :set-search="setSearch"
                 :set-category="setCategory"
-            >
-                <div class="max-card-list-filters">
-                    <!-- Campo de Busca -->
-                    <div v-if="showSearch" class="max-card-list-search-wrapper">
-                        <MaxInputSearch
-                            :model-value="internalSearch"
-                            :placeholder="props.searchPlaceholder || 'Pesquisar cards...'"
-                            class="max-card-list-search"
-                            @update:model-value="onSearchInput"
-                            @search="onSearchSubmit"
-                        />
-                    </div>
-
-                    <!-- Seletor de Categoria -->
-                    <div v-if="hasCategories" class="max-card-list-category-wrapper">
-                        <select
-                            :value="internalCategory"
-                            class="max-card-list-category-select"
-                            :aria-label="props.categoryPlaceholder || 'Filtrar por categoria'"
-                            @change="onCategoryChange"
-                        >
-                            <option value="">{{ props.categoryPlaceholder || 'Todas as categorias' }}</option>
-                            <option
-                                v-for="cat in normalizedCategories"
-                                :key="String(cat.value)"
-                                :value="cat.value"
-                            >
-                                {{ cat.label }}
-                            </option>
-                        </select>
-                    </div>
-                </div>
-            </slot>
-        </div>
-
-        <!-- Slot de Adição isolado para não desalinhar índices de virtualização -->
-        <div
-            v-if="$slots['add-card'] && props.addCardPosition !== 'header'"
-            class="max-card-list-add-section"
-        >
-            <div class="max-card-list-add-item" :style="addItemStyle">
-                <slot name="add-card" />
-            </div>
+            />
         </div>
 
         <!-- Estado de Carregamento Pré-estilizado com MaxLoader -->
@@ -106,12 +83,12 @@
 
         <!-- Estado Vazio Pré-estilizado com MaxEmptyDiv -->
         <div
-            v-else-if="displayItems.length === 0"
+            v-else-if="displayItems.length === 0 && !hasGridAddCard"
             class="max-card-list-status max-card-list-empty"
             role="region"
             aria-live="polite"
         >
-            <slot name="empty" :search="internalSearch" :category="internalCategory">
+            <slot name="empty" :search="effectiveSearchQuery" :category="internalCategory">
                 <MaxEmptyDiv :label="props.emptyLabel || 'Nenhum card encontrado'" />
             </slot>
         </div>
@@ -151,29 +128,35 @@
                         :style="gridLayoutStyle"
                     >
                         <div
-                            v-for="(item, colIdx) in rows[virtualRow.index]"
-                            :key="getItemKey(item, virtualRow.index * effectiveColumns + colIdx)"
+                            v-for="(cellItem, colIdx) in rows[virtualRow.index]"
+                            :key="cellItem?.__isAddSlot ? '__add_slot__' : getItemKey(cellItem, getActualItemIndex(virtualRow.index, colIdx))"
                             class="max-card-list-col"
+                            :class="{ 'max-card-list-col--add': cellItem?.__isAddSlot }"
                         >
-                            <slot
-                                name="card"
-                                :item="item"
-                                :index="virtualRow.index * effectiveColumns + colIdx"
-                            >
+                            <template v-if="cellItem?.__isAddSlot">
+                                <slot name="add-card" />
+                            </template>
+                            <template v-else>
                                 <slot
-                                    name="item"
-                                    :item="item"
-                                    :index="virtualRow.index * effectiveColumns + colIdx"
+                                    name="card"
+                                    :item="cellItem"
+                                    :index="getActualItemIndex(virtualRow.index, colIdx)"
                                 >
-                                    <MaxCard
-                                        :title="item.title"
-                                        :subtitle="item.subtitle"
-                                        :icon="item.icon"
-                                        :disabled="item.disabled"
-                                        :loading="item.loading"
-                                    />
+                                    <slot
+                                        name="item"
+                                        :item="cellItem"
+                                        :index="getActualItemIndex(virtualRow.index, colIdx)"
+                                    >
+                                        <MaxCard
+                                            :title="cellItem.title"
+                                            :subtitle="cellItem.subtitle"
+                                            :icon="cellItem.icon"
+                                            :disabled="cellItem.disabled"
+                                            :loading="cellItem.loading"
+                                        />
+                                    </slot>
                                 </slot>
-                            </slot>
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -186,6 +169,14 @@
             class="max-card-list-static-grid"
             :style="gridLayoutStyle"
         >
+            <!-- Card de Adicionar junto com os demais cards no grid -->
+            <div
+                v-if="hasGridAddCard"
+                class="max-card-list-col max-card-list-col--add"
+            >
+                <slot name="add-card" />
+            </div>
+
             <div
                 v-for="(item, index) in displayItems"
                 :key="getItemKey(item, index)"
@@ -220,6 +211,8 @@
         ref,
         computed,
         watch,
+        onMounted,
+        onUnmounted,
         useSlots,
         type CSSProperties
     } from 'vue';
@@ -229,7 +222,7 @@
     import MaxStats from './MaxStats.vue';
     import MaxLoader from './MaxLoader.vue';
     import MaxEmptyDiv from './MaxEmptyDiv.vue';
-    import MaxInputSearch from './MaxInputSearch.vue';
+    import { useSearchBarStore } from '../stores/useSearchBar.Store';
     import type {
         MaxCardListProps,
         MaxCardListFilterPayload,
@@ -251,6 +244,7 @@
         loadingLabel: 'Carregando cards...',
         emptyLabel: 'Nenhum card encontrado',
         filterable: true,
+        useGlobalSearch: true,
         searchQuery: '',
         searchPlaceholder: 'Pesquisar cards...',
         category: '',
@@ -275,10 +269,25 @@
     }>();
 
     const slots = useSlots();
+    const searchBar = useSearchBarStore();
 
     // Estado interno reativo de busca e categoria
     const internalSearch = ref<string>(props.searchQuery ?? '');
     const internalCategory = ref<any>(props.category ?? '');
+
+    let previousSearchBarVisibility = false;
+
+    onMounted(() => {
+        if (props.useGlobalSearch !== false) {
+            previousSearchBarVisibility = searchBar.is_visible;
+            searchBar.is_visible = true;
+        }
+    });
+
+    onUnmounted(() => {
+        if (props.useGlobalSearch !== false) searchBar.is_visible = previousSearchBarVisibility;
+
+    });
 
     watch(
         () => props.searchQuery,
@@ -296,22 +305,45 @@
         }
     );
 
+    // Texto de busca efetivo (prioriza prop direta, depois store global se habilitada, depois estado interno)
+    const effectiveSearchQuery = computed<string>(() => {
+        if (props.searchQuery !== undefined && props.searchQuery !== '') return props.searchQuery;
+
+        if (props.useGlobalSearch !== false) return searchBar.search_value || searchBar.input_value || '';
+
+        return internalSearch.value || '';
+    });
+
+    watch(
+        () => searchBar.search_value,
+        (val) => {
+            if (props.useGlobalSearch !== false && !props.searchQuery) {
+                internalSearch.value = val;
+                emit('update:searchQuery', val);
+                emit('update:search', val);
+                emit('search', val);
+                emit('update:filter', {
+                    search: val,
+                    category: internalCategory.value
+                });
+            }
+        }
+    );
+
     // Normalização das categorias
     const normalizedCategories = computed<MaxCardListCategoryOption[]>(() => {
         if (!props.categories || !props.categories.length) return [];
         return props.categories.map((cat) => {
             if (typeof cat === 'string') return { label: cat, value: cat };
-
             return cat;
         });
     });
 
     const hasCategories = computed(() => normalizedCategories.value.length > 0);
-    const showSearch = computed(() => props.filterable !== false);
-    const hasControls = computed(() => showSearch.value || hasCategories.value || Boolean(slots.filters));
     const hasHeaderContent = computed(() => Boolean(props.title || props.subtitle || (props.stats && props.stats.length > 0)));
-    const hasHeader = computed(() => Boolean(slots.header || hasHeaderContent.value || slots.actions || (slots['add-card'] && props.addCardPosition === 'header')));
-
+    const hasHeaderActions = computed(() => Boolean(slots.actions || hasCategories.value || (slots['add-card'] && props.addCardPosition === 'header')));
+    const hasHeader = computed(() => Boolean(slots.header || hasHeaderContent.value || hasHeaderActions.value));
+    const hasGridAddCard = computed(() => Boolean(slots['add-card'] && props.addCardPosition !== 'header'));
 
     // Elemento container para medição de largura responsiva
     const containerRef = ref<HTMLElement | null>(null);
@@ -320,7 +352,6 @@
     // Auto-cálculo dinâmico de colunas baseado na largura e minCardWidth
     const effectiveColumns = computed<number>(() => {
         if (props.columns && props.columns > 0) return Math.floor(props.columns);
-
 
         const minW = props.minCardWidth && props.minCardWidth > 0 ? props.minCardWidth : 320;
         const g = props.gap !== undefined ? props.gap : 16;
@@ -339,14 +370,13 @@
         const rawItems = props.items ?? [];
         if (props.customFilter) return rawItems;
 
-        const searchTrimmed = internalSearch.value?.trim().toLowerCase() ?? '';
+        const searchTrimmed = effectiveSearchQuery.value?.trim().toLowerCase() ?? '';
         const currentCat = internalCategory.value;
 
         return rawItems.filter((item) => {
             if (!item) return false;
 
-            if (props.filterFn) return props.filterFn(item, internalSearch.value, internalCategory.value);
-
+            if (props.filterFn) return props.filterFn(item, effectiveSearchQuery.value, internalCategory.value);
 
             // Filtro por texto de busca
             if (searchTrimmed) if (!matchesSearchQuery(item, searchTrimmed)) return false;
@@ -356,7 +386,6 @@
             if (currentCat !== undefined && currentCat !== '' && currentCat !== null && currentCat !== 'all') {
                 const itemCat = item.category ?? item.type ?? item.status;
                 if (itemCat !== currentCat) return false;
-
             }
 
             return true;
@@ -374,25 +403,32 @@
             for (const key of Object.keys(item)) {
                 const val = item[key];
                 if (typeof val === 'string' && val.toLowerCase().includes(query)) return true;
-
                 if (typeof val === 'number' && String(val).includes(query)) return true;
-
             }
         }
         return false;
     }
 
-    // Agrupamento em linhas para virtualização de grid responsivo
+    // Agrupamento em linhas para virtualização de grid responsivo com Add Card integrado
     const rows = computed<any[][]>(() => {
         const list = displayItems.value;
         const cols = effectiveColumns.value;
-        if (!list || list.length === 0) return [];
+        const hasAdd = hasGridAddCard.value;
 
+        if (!list || (list.length === 0 && !hasAdd)) return [];
+
+        const gridItems: any[] = hasAdd ? [{ __isAddSlot: true }, ...list] : list;
         const result: any[][] = [];
-        for (let i = 0; i < list.length; i += cols) result.push(list.slice(i, i + cols));
+        for (let i = 0; i < gridItems.length; i += cols) result.push(gridItems.slice(i, i + cols));
+
 
         return result;
     });
+
+    function getActualItemIndex(rowIndex: number, colIndex: number): number {
+        const flatIndex = rowIndex * effectiveColumns.value + colIndex;
+        return hasGridAddCard.value ? flatIndex - 1 : flatIndex;
+    }
 
     const isVirtualActive = computed(() => props.virtualScroll !== false);
 
@@ -438,20 +474,10 @@
         return style;
     });
 
-    const addItemStyle = computed<CSSProperties>(() => {
-        const minW = props.minCardWidth ?? 320;
-        return {
-            maxWidth: `${minW}px`,
-            width: '100%'
-        };
-    });
-
     function getItemKey(item: any, fallbackIndex: number): string | number {
         if (props.itemKey) {
             if (typeof props.itemKey === 'function') return props.itemKey(item, fallbackIndex);
-
             if (typeof props.itemKey === 'string' && item && typeof item === 'object') return item[props.itemKey] ?? fallbackIndex;
-
         }
         if (item && typeof item === 'object' && ('id' in item || 'key' in item)) return item.id ?? item.key ?? fallbackIndex;
 
@@ -459,41 +485,37 @@
     }
 
     // Handlers de interação e eventos reativos
-    function onSearchInput(val: string) {
-        internalSearch.value = val;
-        emit('update:searchQuery', val);
-        emit('update:search', val);
-        emit('search', val);
-        emit('update:filter', {
-            search: val,
-            category: internalCategory.value
-        });
-    }
-
-    function onSearchSubmit(val: string) {
-        emit('search', val);
-    }
-
     function onCategoryChange(event: Event) {
         const target = event.target as HTMLSelectElement;
         const val = target.value;
         internalCategory.value = val;
         emit('update:category', val);
         emit('update:filter', {
-            search: internalSearch.value,
+            search: effectiveSearchQuery.value,
             category: val
         });
     }
 
     function setSearch(query: string) {
-        onSearchInput(query);
+        internalSearch.value = query;
+        if (props.useGlobalSearch !== false) {
+            searchBar.input_value = query;
+            searchBar.search_value = query;
+        }
+        emit('update:searchQuery', query);
+        emit('update:search', query);
+        emit('search', query);
+        emit('update:filter', {
+            search: query,
+            category: internalCategory.value
+        });
     }
 
     function setCategory(cat: any) {
         internalCategory.value = cat;
         emit('update:category', cat);
         emit('update:filter', {
-            search: internalSearch.value,
+            search: effectiveSearchQuery.value,
             category: cat
         });
     }
@@ -528,7 +550,7 @@
         width: 100%;
         position: relative;
         box-sizing: border-box;
-        gap: 1rem;
+        gap: 0.875rem;
     }
 
     .max-card-list-header {
@@ -536,80 +558,61 @@
         align-items: center;
         justify-content: space-between;
         flex-wrap: wrap;
-        gap: 1rem;
-        padding-bottom: 0.5rem;
+        gap: 0.875rem;
+        padding-bottom: 0.25rem;
     }
 
     .max-card-list-header-main {
         display: flex;
         flex-direction: column;
-        gap: 0.75rem;
+        gap: 0.5rem;
         flex: 1;
-        min-width: 250px;
+        min-width: 240px;
     }
 
     .max-card-list-titles {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
+        gap: 0.125rem;
     }
 
     .max-card-list-title {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: var(--text-color, #1e293b);
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--background-900, #0f172a);
         margin: 0;
         line-height: 1.3;
     }
 
     .max-card-list-subtitle {
-        font-size: 0.875rem;
-        color: var(--background-500, #64748b);
+        font-size: 0.8125rem;
+        color: var(--background-600, #64748b);
         margin: 0;
+        line-height: 1.35;
     }
 
     .max-card-list-header-actions {
         display: flex;
         align-items: center;
-        gap: 0.75rem;
+        gap: 0.625rem;
         flex-wrap: wrap;
-    }
-
-    .max-card-list-controls {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        width: 100%;
-    }
-
-    .max-card-list-filters {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 0.75rem;
-        width: 100%;
-    }
-
-    .max-card-list-search-wrapper {
-        flex: 1;
-        min-width: 220px;
     }
 
     .max-card-list-category-wrapper {
-        min-width: 180px;
+        min-width: 150px;
     }
 
     .max-card-list-category-select {
         width: 100%;
-        height: 38px;
-        padding: 0 0.75rem;
-        border-radius: 0.5rem;
+        height: 32px;
+        padding: 0 0.625rem;
+        border-radius: 6px;
         border: 1px solid var(--background-200, #cbd5e1);
-        background-color: var(--background-50, #f8fafc);
-        color: var(--text-color, #0f172a);
-        font-size: 0.875rem;
+        background-color: var(--background-0, #fff);
+        color: var(--background-900, #0f172a);
+        font-size: 0.8125rem;
         cursor: pointer;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
 
         &:focus-visible {
             outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
@@ -619,20 +622,16 @@
         }
     }
 
-    .max-card-list-add-section {
+    .max-card-list-controls {
         display: flex;
+        align-items: center;
+        gap: 0.75rem;
         width: 100%;
-        margin-bottom: 0.25rem;
-    }
-
-    .max-card-list-add-item {
-        display: flex;
-        flex-direction: column;
     }
 
     .max-card-list-status {
         width: 100%;
-        min-height: 240px;
+        min-height: 200px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -670,6 +669,17 @@
         min-width: 0;
         width: 100%;
         box-sizing: border-box;
+
+        &--add {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+
+            > * {
+                height: 100%;
+                width: 100%;
+            }
+        }
     }
 
     .max-card-list-static-grid {

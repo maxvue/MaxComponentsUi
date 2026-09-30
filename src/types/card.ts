@@ -90,6 +90,8 @@ export interface MaxCardListProps {
     emptyLabel?: string;
     /** Habilita a barra de filtros (busca e categoria) */
     filterable?: boolean;
+    /** Sincroniza e ativa automaticamente a barra de pesquisa global do MaxApp via useSearchBarStore (padrão true) */
+    useGlobalSearch?: boolean;
     /** Valor da busca para v-model:searchQuery ou v-model:search */
     searchQuery?: string;
     /** Placeholder do campo de pesquisa */

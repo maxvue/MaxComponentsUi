@@ -3,6 +3,7 @@ import { mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxCardList from '../../src/components/MaxCardList.vue';
+import { useSearchBarStore } from '../../src/stores/useSearchBar.Store';
 
 function makeDataset(count: number) {
     return Array.from({ length: count }, (_, i) => ({
@@ -150,8 +151,8 @@ describe('MaxCardList', () => {
         });
     });
 
-    describe('Slot #add-card e Não-desalinhamento de Índices', () => {
-        it('renderiza o slot #add-card na seção de adição sem desalinhar os índices dos itens de dados', () => {
+    describe('Slot #add-card no Grid e Não-desalinhamento de Índices', () => {
+        it('renderiza o slot #add-card na grade junto com os demais cards sem desalinhar os índices dos itens de dados', () => {
             const dataset = makeDataset(3);
             const receivedIndices: number[] = [];
 
@@ -170,7 +171,7 @@ describe('MaxCardList', () => {
             });
 
             expect(wrapper.find('.btn-add-card').exists()).toBe(true);
-            expect(wrapper.find('.max-card-list-add-section').exists()).toBe(true);
+            expect(wrapper.find('.max-card-list-col--add').exists()).toBe(true);
 
             // Índices dos itens de dados devem ser rigorosamente 0, 1 e 2
             expect(receivedIndices).toEqual([0, 1, 2]);
@@ -188,12 +189,31 @@ describe('MaxCardList', () => {
             });
 
             expect(wrapper.find('.max-card-list-header-add .header-add-btn').exists()).toBe(true);
-            expect(wrapper.find('.max-card-list-add-section').exists()).toBe(false);
+            expect(wrapper.find('.max-card-list-col--add').exists()).toBe(false);
+        });
+
+        it('inclui o slot #add-card no cálculo de linhas da virtualização', async () => {
+            const dataset = makeDataset(4);
+
+            const wrapper = mount(MaxCardList, {
+                props: {
+                    items: dataset,
+                    virtualScroll: true,
+                    columns: 3
+                },
+                slots: {
+                    'add-card': '<div class="virtual-add-card">+ Novo</div>'
+                }
+            });
+
+            const vm = wrapper.vm as any;
+            // Com 4 itens + 1 card de add em 3 colunas: linha 0 tem 3 itens (1 add + 2 dados), linha 1 tem 2 itens (2 dados)
+            expect(vm.virtualizer.options.count).toBe(2);
         });
     });
 
-    describe('Filtros Reativos e Emissões de Eventos', () => {
-        it('emite update:searchQuery, update:search, search e update:filter ao digitar na busca', async () => {
+    describe('Filtros Reativos e Emissões de Eventos com useSearchBarStore', () => {
+        it('não renderiza barra de busca interna no template padrão', () => {
             const wrapper = mountCardList({
                 props: {
                     items: makeDataset(5),
@@ -201,10 +221,28 @@ describe('MaxCardList', () => {
                 }
             });
 
-            const searchInput = wrapper.findComponent({ name: 'MaxInputSearch' });
-            expect(searchInput.exists()).toBe(true);
+            expect(wrapper.findComponent({ name: 'MaxInputSearch' }).exists()).toBe(false);
+            expect(wrapper.find('.max-card-list-search-wrapper').exists()).toBe(false);
+        });
 
-            await searchInput.vm.$emit('update:modelValue', 'Card 2');
+        it('ativa a busca na useSearchBarStore ao montar e sincroniza valores e eventos', async () => {
+            const searchBar = useSearchBarStore();
+            searchBar.is_visible = false;
+            searchBar.search_value = '';
+
+            const wrapper = mountCardList({
+                props: {
+                    items: makeDataset(5),
+                    filterable: true
+                }
+            });
+
+            // Deve tornar a barra global visível
+            expect(searchBar.is_visible).toBe(true);
+
+            // Simula digitação / atualização na store global
+            searchBar.search_value = 'Card 2';
+            await nextTick();
 
             expect(wrapper.emitted('update:searchQuery')?.[0]).toEqual(['Card 2']);
             expect(wrapper.emitted('update:search')?.[0]).toEqual(['Card 2']);
@@ -213,6 +251,27 @@ describe('MaxCardList', () => {
                 search: 'Card 2',
                 category: ''
             }]);
+
+            const vm = wrapper.vm as any;
+            expect(vm.filteredItems.length).toBe(1);
+            expect(vm.filteredItems[0].title).toBe('Card 2');
+        });
+
+        it('restaura o estado de visibilidade da useSearchBarStore ao desmontar', () => {
+            const searchBar = useSearchBarStore();
+            searchBar.is_visible = false;
+
+            const wrapper = mountCardList({
+                props: {
+                    items: makeDataset(3),
+                    useGlobalSearch: true
+                }
+            });
+
+            expect(searchBar.is_visible).toBe(true);
+
+            wrapper.unmount();
+            expect(searchBar.is_visible).toBe(false);
         });
 
         it('filtra itens dinamicamente pelo texto de busca', async () => {
