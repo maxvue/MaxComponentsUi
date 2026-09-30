@@ -476,4 +476,26 @@ describe('MaxCardList', () => {
             expect(wrapper.emitted('add')).toBeTruthy();
         });
     });
+
+    describe('Integração com Cards e Subcards Aninhados', () => {
+        it('renderiza cards pai com subcards dentro do MaxCardList', () => {
+            const wrapper = mountCardList({
+                props: {
+                    items: [
+                        { id: 1, name: 'Cliente A' },
+                        { id: 2, name: 'Cliente B' }
+                    ],
+                    virtualScroll: false
+                },
+                slots: {
+                    card: '<div class="max-card"><div class="max-card-header"><span class="max-card-title">Cliente</span></div><div class="max-card-content"><div class="max-subcard"><span class="max-subcard-title">PROP-01</span></div></div></div>'
+                }
+            });
+
+            expect(wrapper.findAll('.max-card').length).toBe(2);
+            expect(wrapper.findAll('.max-subcard').length).toBe(2);
+            const cols = wrapper.findAll('.max-card-list-col');
+            expect(cols.length).toBe(2);
+        });
+    });
 });

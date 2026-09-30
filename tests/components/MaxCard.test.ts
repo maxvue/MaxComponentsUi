@@ -308,4 +308,35 @@ describe('MaxCard', () => {
             expect(wrapper.emitted('click')!.length).toBe(2);
         });
     });
+
+    describe('Integração com MaxSubCard (Cards dentro de Cards)', () => {
+        it('renderiza MaxSubCard aninhado dentro do MaxCard', () => {
+            const wrapper = mount(MaxCard, {
+                props: { title: 'Cliente Sem Nome' },
+                slots: {
+                    default: '<div class="max-subcard"><span class="max-subcard-title">PROP-2026-0001</span></div>'
+                }
+            });
+            expect(wrapper.classes()).toContain('max-card');
+            expect(wrapper.find('.max-subcard').exists()).toBe(true);
+            expect(wrapper.find('.max-subcard-title').text()).toBe('PROP-2026-0001');
+            expect(wrapper.find('.max-card-title').text()).toBe('Cliente Sem Nome');
+        });
+
+        it('renderiza múltiplos subcards dentro do MaxCard', () => {
+            const wrapper = mount(MaxCard, {
+                props: { title: 'Alice Dionisio' },
+                slots: {
+                    default: `
+                        <div class="max-subcard" id="sub1"><span class="max-subcard-title">PROP-001</span></div>
+                        <div class="max-subcard" id="sub2"><span class="max-subcard-title">PROP-002</span></div>
+                    `
+                }
+            });
+            const subcards = wrapper.findAll('.max-subcard');
+            expect(subcards.length).toBe(2);
+            expect(subcards[0].text()).toContain('PROP-001');
+            expect(subcards[1].text()).toContain('PROP-002');
+        });
+    });
 });

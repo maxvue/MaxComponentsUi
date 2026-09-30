@@ -125,6 +125,9 @@
         gap: 0.5rem;
         transition: border-color 0.15s ease, background-color 0.15s ease;
         color: var(--background-900);
+        box-sizing: border-box;
+        width: fit-content;
+        max-width: 100%;
 
         &.is-clickable {
             cursor: pointer;
