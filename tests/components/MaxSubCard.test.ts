@@ -113,7 +113,7 @@ describe('MaxSubCard', () => {
             expect(wrapper.text()).toContain('Header Customizado');
         });
 
-        it('renderiza slot content ou default', () => {
+        it('renderiza slot content, metrics ou default', () => {
             const wrapper = mountSubCard({
                 slots: {
                     content: '<div class="sub-content">Conteúdo do SubCard</div>'
@@ -121,12 +121,36 @@ describe('MaxSubCard', () => {
             });
             expect(wrapper.find('.sub-content').text()).toBe('Conteúdo do SubCard');
 
+            const wrapperMetrics = mountSubCard({
+                slots: {
+                    metrics: '<div class="sub-metrics">Métricas</div>'
+                }
+            });
+            expect(wrapperMetrics.find('.sub-metrics').text()).toBe('Métricas');
+
             const wrapperDef = mountSubCard({
                 slots: {
                     default: '<div class="sub-default">Conteúdo Default</div>'
                 }
             });
             expect(wrapperDef.find('.sub-default').text()).toBe('Conteúdo Default');
+        });
+
+        it('renderiza slot actions e footer no rodapé quando header customizado for informado', () => {
+            const wrapperWithFooter = mountSubCard({
+                slots: {
+                    footer: '<div class="sub-footer">Rodapé Customizado</div>'
+                }
+            });
+            expect(wrapperWithFooter.find('.max-subcard-footer .sub-footer').exists()).toBe(true);
+
+            const wrapperHeaderActions = mountSubCard({
+                slots: {
+                    header: '<div class="custom-header">Header</div>',
+                    actions: '<button class="act-btn">Ação Rodapé</button>'
+                }
+            });
+            expect(wrapperHeaderActions.find('.max-subcard-footer .act-btn').exists()).toBe(true);
         });
 
         it('renderiza slot actions', () => {

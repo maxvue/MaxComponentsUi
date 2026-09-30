@@ -39,15 +39,26 @@
         </div>
 
         <!-- Conteúdo do SubCard -->
-        <div v-if="$slots.content || $slots.default" class="max-subcard-content">
+        <div v-if="$slots.content || $slots.metrics || $slots.body || $slots.default" class="max-subcard-content">
             <slot name="content">
-                <slot />
+                <slot name="metrics">
+                    <slot name="body">
+                        <slot />
+                    </slot>
+                </slot>
             </slot>
         </div>
 
         <!-- Ações no corpo quando não houver cabeçalho -->
         <div v-if="!$slots.header && !hasHeaderContent && $slots.actions" class="max-subcard-actions">
             <slot name="actions" />
+        </div>
+
+        <!-- Rodapé do SubCard (ou ações quando header customizado for informado) -->
+        <div v-if="$slots.footer || ($slots.header && $slots.actions)" class="max-subcard-footer">
+            <slot name="footer">
+                <slot name="actions" />
+            </slot>
         </div>
     </div>
 </template>
@@ -238,6 +249,16 @@
             display: inline-flex;
             align-items: center;
             gap: 0.35rem;
+        }
+
+        .max-subcard-footer {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-top: 0.25rem;
+            padding-top: 0.375rem;
+            border-top: 1px solid var(--background-200);
         }
     }
 

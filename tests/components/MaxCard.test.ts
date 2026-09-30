@@ -123,13 +123,20 @@ describe('MaxCard', () => {
             expect(wrapper.find('img.banner').exists()).toBe(true);
         });
 
-        it('renderiza slot content ou default', () => {
+        it('renderiza slot content, body ou default', () => {
             const wrapperContent = mountCard({
                 slots: {
                     content: '<p class="slot-content">Conteúdo Nomeado</p>'
                 }
             });
             expect(wrapperContent.find('.slot-content').text()).toBe('Conteúdo Nomeado');
+
+            const wrapperBody = mountCard({
+                slots: {
+                    body: '<p class="slot-body">Conteúdo Body</p>'
+                }
+            });
+            expect(wrapperBody.find('.slot-body').text()).toBe('Conteúdo Body');
 
             const wrapperDefault = mountCard({
                 slots: {

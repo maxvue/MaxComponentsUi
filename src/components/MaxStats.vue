@@ -14,7 +14,7 @@
                 :style="getItemStyles(item)"
             >
                 <div class="max-stat-card-content">
-                    <span class="max-stat-label">
+                    <span class="max-stat-label" :title="item.label">
                         {{ item.label }}
                     </span>
 
@@ -122,6 +122,8 @@
         suffix?: string | number;
         /** Alias alternativo para suffix */
         sufix?: string | number;
+        /** Largura mínima customizada do item (ex: '120px', 120, '140px') */
+        minWidth?: string | number;
     }
 
     export interface MaxStatsProps {
@@ -140,6 +142,11 @@
          * - 'pills': força formato de pílulas compactas.
          */
         layout?: 'auto' | 'cards' | 'pills';
+        /**
+         * Largura mínima padrão dos cards no modo desktop (ex: '120px', 120).
+         * Padrão: '120px'.
+         */
+        minWidth?: string | number;
     }
 
     defineSlots<{
@@ -154,7 +161,8 @@
     const props = withDefaults(defineProps<MaxStatsProps>(), {
         items: () => [],
         allowLineBreak: false,
-        layout: 'auto'
+        layout: 'auto',
+        minWidth: '120px'
     });
 
     // Sistema de detecção de viewport
@@ -178,6 +186,12 @@
         return isMobile.value ? 'pills' : 'cards';
     });
 
+    /** Formata valor de dimensão numérico para px se aplicável */
+    const formatDimension = (val?: string | number): string | undefined => {
+        if (val === undefined || val === null || val === '') return undefined;
+        return typeof val === 'number' ? `${val}px` : String(val);
+    };
+
     /** Retorna o prefixo do item caso definido */
     const getItemPrefix = (item: MaxStatsItem): string | number | undefined => {
         return item?.prefix;
@@ -196,11 +210,13 @@
     /** Retorna as propriedades CSS personalizadas injetadas no estilo do elemento */
     const getItemStyles = (item: MaxStatsItem) => {
         const colors = getItemColors(item);
+        const itemMinWidth = formatDimension(item?.minWidth) ?? formatDimension(props.minWidth) ?? '120px';
         return {
             '--stat-bg': colors.background,
             '--stat-icon-bg': colors.iconBackground,
             '--stat-text': colors.textColor,
-            '--stat-accent': colors.accentColor
+            '--stat-accent': colors.accentColor,
+            '--stat-card-min-width': itemMinWidth
         };
     };
 
@@ -215,7 +231,7 @@
     .max-stats-container {
         display: flex;
         width: 100%;
-        gap: 1rem;
+        gap: 0.75rem;
         align-items: center;
 
         &.is-wrap {
@@ -249,11 +265,11 @@
         // Modo Desktop: Card Retangular com Cantos Arredondados
         .max-stat-card {
             display: flex;
-            flex: 1 1 0%;
-            min-width: 200px;
+            flex: 1 1 auto;
+            min-width: var(--stat-card-min-width, 120px);
             align-items: center;
             justify-content: space-between;
-            padding: 1rem 1.25rem;
+            padding: 0.75rem 1rem;
             background-color: var(--stat-bg);
             border-radius: 1rem;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -268,7 +284,7 @@
                 justify-content: center;
                 min-width: 0;
                 flex: 1;
-                margin-right: 0.75rem;
+                margin-right: 0.5rem;
 
                 .max-stat-label {
                     font-size: 0.75rem;
@@ -327,9 +343,9 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                width: 3.25rem;
-                height: 3.25rem;
-                border-radius: 1rem;
+                width: 2.75rem;
+                height: 2.75rem;
+                border-radius: 0.75rem;
                 background-color: var(--stat-icon-bg);
                 flex-shrink: 0;
             }
