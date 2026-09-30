@@ -2,7 +2,7 @@
     <InputBase
         v-bind="{...props, ...attrs}"
         class="max-input-text"
-        :done="props.done ?? validation.done.value"
+        :done="props.done"
         :error="props.error ?? (typeof props.caution === 'string' ? null : validation.error.value)"
         :caution="props.caution ?? validation.caution.value"
     >

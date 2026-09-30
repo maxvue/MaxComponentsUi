@@ -42,8 +42,16 @@ describe('MaxColorPicker', () => {
         expect((input.element as HTMLInputElement).value).toBe('#abcdef');
     });
 
-    it('marca done=true quando required e preenchido', async () => {
+    it('não marca done=true automaticamente quando required e preenchido', async () => {
         const wrapper = mountColorPicker({ required: true, modelValue: '#ff0000' });
+        await wrapper.vm.$nextTick();
+
+        const inputBase = wrapper.findComponent(InputBase);
+        expect(inputBase.props('done')).toBeUndefined();
+    });
+
+    it('respeita prop done explícita no MaxColorPicker', async () => {
+        const wrapper = mountColorPicker({ required: true, modelValue: '#ff0000', done: true });
         await wrapper.vm.$nextTick();
 
         const inputBase = wrapper.findComponent(InputBase);

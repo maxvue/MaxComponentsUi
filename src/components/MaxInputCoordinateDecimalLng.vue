@@ -55,7 +55,9 @@
     const isDone: Ref = ref(props.done ?? null);
 
     const checkDone = () => {
-        isDone.value = done.value;
+        if (props.done !== undefined) isDone.value = props.done;
+        else if (!done.value && temp_value.value !== '') isDone.value = false;
+        else isDone.value = null;
     };
 
     const done = computed(() => {

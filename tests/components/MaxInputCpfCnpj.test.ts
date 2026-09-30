@@ -50,11 +50,11 @@ describe('MaxInputCpfCnpj', () => {
 
     // `done` e um computed derivado de temp_value — nao existe metodo
     // imperativo de validacao. Basta atribuir o valor e aguardar o ciclo.
-    it('valida CPF correto e marca done=true', async () => {
+    it('valida CPF correto sem marcar done=true automaticamente', async () => {
         const wrapper = mountCpfCnpj({ cpf: true, modelValue: '52998224725' });
         (wrapper.vm as any).temp_value = '52998224725';
         await wrapper.vm.$nextTick();
-        expect((wrapper.vm as any).done).toBe(true);
+        expect((wrapper.vm as any).done).toBeNull();
     });
 
     it('valida CPF inválido e não marca done=true', async () => {
@@ -64,11 +64,11 @@ describe('MaxInputCpfCnpj', () => {
         expect((wrapper.vm as any).done).toBe(false);
     });
 
-    it('valida CNPJ correto e marca done=true', async () => {
+    it('valida CNPJ correto sem marcar done=true automaticamente', async () => {
         const wrapper = mountCpfCnpj({ cnpj: true, modelValue: '11222333000181' });
         (wrapper.vm as any).temp_value = '11222333000181';
         await wrapper.vm.$nextTick();
-        expect((wrapper.vm as any).done).toBe(true);
+        expect((wrapper.vm as any).done).toBeNull();
     });
 
     it('rejeita CPF com comprimento correto mas dígito verificador errado', async () => {
@@ -246,20 +246,20 @@ describe('MaxInputCpfCnpj', () => {
         expect((wrapper.vm as any).caution).toBe(false);
     });
 
-    it('valida CPF com zeros à esquerda corretamente e marca done=true', async () => {
+    it('valida CPF com zeros à esquerda corretamente e não marca done=true automaticamente', async () => {
         const wrapper = mountCpfCnpj({ modelValue: '00793746973' });
         (wrapper.vm as any).temp_value = '00793746973';
         await wrapper.vm.$nextTick();
-        expect((wrapper.vm as any).done).toBe(true);
+        expect((wrapper.vm as any).done).toBeNull();
         expect((wrapper.vm as any).caution).toBe(false);
         expect((wrapper.vm as any).error_msg).toBeNull();
     });
 
-    it('valida CNPJ com zeros à esquerda corretamente e marca done=true', async () => {
+    it('valida CNPJ com zeros à esquerda corretamente e não marca done=true automaticamente', async () => {
         const wrapper = mountCpfCnpj({ modelValue: '00000000000191' });
         (wrapper.vm as any).temp_value = '00000000000191';
         await wrapper.vm.$nextTick();
-        expect((wrapper.vm as any).done).toBe(true);
+        expect((wrapper.vm as any).done).toBeNull();
         expect((wrapper.vm as any).caution).toBe(false);
         expect((wrapper.vm as any).error_msg).toBeNull();
     });
@@ -281,7 +281,7 @@ describe('MaxInputCpfCnpj', () => {
         const input = wrapper.find('input');
         await input.setValue('11222333000181');
         expect(input.element.value).toBe('11.222.333/0001-81');
-        expect((wrapper.vm as any).done).toBe(true);
+        expect((wrapper.vm as any).done).toBeNull();
         expect((wrapper.vm as any).error_msg).toBeNull();
     });
 
@@ -290,7 +290,7 @@ describe('MaxInputCpfCnpj', () => {
         await wrapper.setProps({ modelValue: '11.222.333/0001-81' });
         await wrapper.vm.$nextTick();
         expect(wrapper.find('input').element.value).toBe('11.222.333/0001-81');
-        expect((wrapper.vm as any).done).toBe(true);
+        expect((wrapper.vm as any).done).toBeNull();
     });
 
     it('formata adequadamente ao receber CPF formatado via modelValue', async () => {
@@ -298,7 +298,7 @@ describe('MaxInputCpfCnpj', () => {
         await wrapper.setProps({ modelValue: '007.937.469-73' });
         await wrapper.vm.$nextTick();
         expect(wrapper.find('input').element.value).toBe('007.937.469-73');
-        expect((wrapper.vm as any).done).toBe(true);
+        expect((wrapper.vm as any).done).toBeNull();
         expect((wrapper.vm as any).caution).toBe(false);
         expect((wrapper.vm as any).error_msg).toBeNull();
     });

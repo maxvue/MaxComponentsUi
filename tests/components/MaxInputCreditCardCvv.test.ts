@@ -47,8 +47,18 @@ describe('MaxInputCreditCardCvv', () => {
         expect(wrapper.emitted('update:modelValue')?.pop()).toEqual(['123']);
     });
 
-    it('CVV com tamanho correto marca done=true ao perder o foco', async () => {
+    it('CVV com tamanho correto não marca done=true automaticamente ao perder o foco', async () => {
         const wrapper = mountCvv();
+        (wrapper.vm as any).unmaskedValue = '123';
+        await wrapper.vm.$nextTick();
+        (wrapper.vm as any).checkDone();
+        await wrapper.vm.$nextTick();
+
+        expect((wrapper.vm as any).done).toBe(null);
+    });
+
+    it('CVV respeita prop done explícita ao perder o foco', async () => {
+        const wrapper = mountCvv({ done: true });
         (wrapper.vm as any).unmaskedValue = '123';
         await wrapper.vm.$nextTick();
         (wrapper.vm as any).checkDone();

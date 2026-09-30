@@ -44,8 +44,18 @@ describe('MaxInputCreditCard', () => {
         expect(wrapper.emitted('update:modelValue')?.pop()).toEqual([VALID_CARD]);
     });
 
-    it('cartão válido marca done=true ao perder o foco', async () => {
+    it('cartão válido não marca done=true automaticamente ao perder o foco', async () => {
         const wrapper = mountCreditCard();
+        (wrapper.vm as any).unmaskedValue = VALID_CARD;
+        await wrapper.vm.$nextTick();
+        (wrapper.vm as any).checkDone();
+        await wrapper.vm.$nextTick();
+
+        expect((wrapper.vm as any).done).toBe(null);
+    });
+
+    it('respeita prop done explícita no cartão', async () => {
+        const wrapper = mountCreditCard({ done: true });
         (wrapper.vm as any).unmaskedValue = VALID_CARD;
         await wrapper.vm.$nextTick();
         (wrapper.vm as any).checkDone();

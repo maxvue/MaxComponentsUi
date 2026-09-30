@@ -373,9 +373,23 @@ describe('MaxCreditCard', () => {
             expect(ib.props('error')).toBe('Validade inválida');
         });
 
-        it('valida CVV com comprimento exigido pela prop len', async () => {
+        it('valida CVV com comprimento exigido pela prop len sem marcar done=true automaticamente', async () => {
             const wrapper = mount(MaxInputCreditCardCvv, {
                 props: { modelValue: '', len: 3 },
+                global: {
+                    directives: { maska: vMaska }
+                }
+            });
+            const input = wrapper.find('input');
+            await input.setValue('123');
+            await input.trigger('blur');
+            const ib = wrapper.findComponent(InputBase);
+            expect(ib.props('done')).not.toBe(true);
+        });
+
+        it('respeita prop done explícita no CVV montado pelo trio', async () => {
+            const wrapper = mount(MaxInputCreditCardCvv, {
+                props: { modelValue: '', len: 3, done: true },
                 global: {
                     directives: { maska: vMaska }
                 }

@@ -281,11 +281,17 @@ describe('MaxChips', () => {
     });
 
     describe('Integração com InputBase e Validação required', () => {
-        it('valida done=true ao blur quando required e possui itens', async () => {
+        it('não marca done=true automaticamente ao blur quando required e possui itens', async () => {
             const wrapper = mountChips({ required: true, modelValue: ['Tag 1'] });
             const input = wrapper.find('input.max-chips-input');
             await input.trigger('blur');
 
+            const inputBase = wrapper.findComponent(InputBase);
+            expect(inputBase.props('done')).toBeUndefined();
+        });
+
+        it('respeita prop done explícita no MaxChips', async () => {
+            const wrapper = mountChips({ required: true, modelValue: ['Tag 1'], done: true });
             const inputBase = wrapper.findComponent(InputBase);
             expect(inputBase.props('done')).toBe(true);
         });

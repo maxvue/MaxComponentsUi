@@ -48,13 +48,17 @@ describe('MaxInputText', () => {
         expect((input.element as HTMLInputElement).value).toBe('atualizado');
     });
 
-    it('valida done=true ao blur quando required e preenchido', async () => {
+    it('não infere done=true automaticamente ao blur quando required e preenchido', async () => {
         const wrapper = mountInputText({ required: true, modelValue: 'preenchido' });
         const input = wrapper.find('input');
         await input.trigger('blur');
 
         const inputBase = wrapper.findComponent(InputBase);
-        expect(inputBase.props('done')).toBe(true);
+        expect(inputBase.props('done')).toBeUndefined();
+        expect(inputBase.props('error')).toBeFalsy();
+
+        const wrapperWithDone = mountInputText({ done: true, modelValue: 'preenchido' });
+        expect(wrapperWithDone.findComponent(InputBase).props('done')).toBe(true);
     });
 
     it('valida erro de campo obrigatório ao blur quando vazio', async () => {

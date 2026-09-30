@@ -10,8 +10,8 @@
                 'is-floating': props.float !== undefined,
                 'done': Boolean(props.done),
                 'is-done': Boolean(props.done),
-                'caution': !props.noStatus && Boolean(props.caution),
-                'is-caution': !props.noStatus && Boolean(props.caution),
+                'caution': !props.noStatus && (Boolean(props.caution) || Boolean(resolvedCautionMessage)),
+                'is-caution': !props.noStatus && (Boolean(props.caution) || Boolean(resolvedCautionMessage)),
                 'error': !props.noStatus && isError,
                 'is-error': !props.noStatus && isError,
                 'text-center': props.textCenter,
@@ -21,7 +21,8 @@
                 'in-line': props.inLine,
                 'is-inline': props.inLine,
                 'no-status': props.noStatus,
-                'no-message': props.noMessage
+                'no-message': !hasMessage,
+                'has-message': hasMessage
             },
             props.class,
             attrs.class
@@ -69,13 +70,13 @@
 
             <!-- INPUT STATUS ICON -->
             <div class="input-status-icon" :class="{ 'with-icon-right': hasIconRight }" aria-hidden="true">
-                <div class="is-done" v-if="done && !noDone && !noStatus">
+                <div class="is-done" v-if="Boolean(done) && !noDone && !noStatus">
                     <MaxIcon icon="lets-icons:check-fill" :size="0.8" color="green" />
                 </div>
-                <div class="is-caution" v-else-if="caution && !noCaution && !noStatus">
+                <div class="is-caution" v-else-if="(Boolean(caution) || Boolean(resolvedCautionMessage)) && !noCaution && !noStatus">
                     <MaxIcon icon="humbleicons:exclamation" :size="0.8" color="red" />
                 </div>
-                <div class="is-error" v-else-if="error && !noError && !noStatus">
+                <div class="is-error" v-else-if="isError && !noError && !noStatus">
                     <MaxIcon icon="humbleicons:exclamation" :size="0.8" color="red" />
                 </div>
                 <!--
@@ -83,12 +84,12 @@
                     redundante. O `aria-required` "de verdade" precisaria estar no
                     `<input>` real dentro do slot, fora de alcance direto do InputBase.
                 -->
-                <div class="required" v-else-if="required && !noStatus" aria-hidden="true">*</div>
+                <div class="required" v-else-if="Boolean(required) && !noStatus" aria-hidden="true">*</div>
             </div>
         </div>
 
         <!-- INPUT MESSAGE -->
-        <div class="input-message" :class="{ 'is-truncated': props.truncateMessage }" :id="message_id" aria-live="polite" :role="isError ? 'alert' : undefined" v-if="!props.noStatus && !props.noMessage" >
+        <div class="input-message" :class="{ 'is-truncated': props.truncateMessage }" :id="message_id" aria-live="polite" :role="isError ? 'alert' : undefined" v-if="!props.noStatus && hasMessage" >
             <MaxIcon :icon="props.iconMessage" v-if="props.iconMessage && displayMessage" :size="0.85" :light="light" :dark="dark" class="message-icon" />
             <span class="message-text" :title="props.truncateMessage && displayMessage ? displayMessage : undefined" v-if="displayMessage" >{{ displayMessage }}</span>
         </div>
@@ -211,7 +212,7 @@
         noStatus: false,
         noMessage: false,
         truncateMessage: false,
-        errorMessageFallback: 'Valor inválido'
+        errorMessageFallback: undefined
     });
 
     /**
@@ -224,19 +225,42 @@
     const input_id = computed(() => props.id || generated_id);
     const message_id = computed(() => `${input_id.value}-message`);
 
-    const isError = computed(() => (!props.noStatus && typeof props.error === 'string' && hasContent(props.error)) || props.error === true || props.done === false);
+    const resolvedErrorMessage = computed(() => {
+        if (typeof props.error === 'string' && hasContent(props.error)) return props.error;
+        const attrError = (attrs as any)['error-message'] ?? (attrs as any)['errorMessage'] ?? (attrs as any)['error_message'] ?? (attrs as any)['error_msg'] ?? (attrs as any)['message-error'] ?? (attrs as any)['messageError'];
+        if (typeof attrError === 'string' && hasContent(attrError)) return attrError;
+        if (isError.value && typeof props.errorMessageFallback === 'string' && hasContent(props.errorMessageFallback)) return props.errorMessageFallback;
+        return undefined;
+    });
+
+    const resolvedCautionMessage = computed(() => {
+        if (typeof props.caution === 'string' && hasContent(props.caution)) return props.caution;
+        const attrCaution = (attrs as any)['caution-message'] ?? (attrs as any)['cautionMessage'] ?? (attrs as any)['caution_message'] ?? (attrs as any)['message-caution'] ?? (attrs as any)['messageCaution'];
+        if (typeof attrCaution === 'string' && hasContent(attrCaution)) return attrCaution;
+        return undefined;
+    });
+
+    const resolvedGeneralMessage = computed(() => {
+        const mainMsg = props.message ?? props.msg ?? (attrs as any)['message'];
+        if (typeof mainMsg === 'string' && hasContent(mainMsg)) return mainMsg;
+        return undefined;
+    });
+
+    const isError = computed(() => (!props.noStatus && typeof props.error === 'string' && hasContent(props.error)) || props.error === true || props.done === false || (!props.noStatus && Boolean(resolvedErrorMessage.value)));
 
     const displayMessage = computed(() => {
-        if (typeof props.error === 'string' && hasContent(props.error)) return props.error;
-        if (typeof props.caution === 'string' && hasContent(props.caution)) return props.caution;
-        const mainMsg = props.message ?? props.msg;
-        if (hasContent(mainMsg)) return mainMsg;
-        if (isError.value) return props.errorMessageFallback || 'Valor inválido';
+        if (resolvedErrorMessage.value) return resolvedErrorMessage.value;
+        if (resolvedCautionMessage.value) return resolvedCautionMessage.value;
+        if (resolvedGeneralMessage.value) return resolvedGeneralMessage.value;
         return '';
     });
 
+    const hasMessage = computed(() => {
+        return !props.noMessage && Boolean(displayMessage.value && hasContent(displayMessage.value));
+    });
+
     const show_message = computed(() => {
-        return !props.noStatus && !props.noMessage && Boolean(displayMessage.value);
+        return !props.noStatus && hasMessage.value;
     });
 
     const ariaDescribedby = computed(() => {
@@ -374,7 +398,7 @@
     provideInputBaseContext({
         inputId: input_id,
         messageId: message_id,
-        hasMessage: computed(() => Boolean(displayMessage.value)),
+        hasMessage,
         isError,
         isRequired: computed(() => Boolean(props.required)),
         displayMessage,
@@ -386,12 +410,17 @@
 <style lang="scss" scoped>
 .max-input-main-div {
     display: grid !important;
-    grid-template-rows: 36px minmax(19px, auto);
+    grid-template-rows: 36px;
     position: relative;
     place-items: center;
-    min-height: 55px;
+    min-height: 36px;
     height: auto;
     width: 100%;
+
+    &.has-message {
+        grid-template-rows: 36px minmax(19px, auto) !important;
+        min-height: 55px;
+    }
 
     :deep(input),
     :deep(.max-input-native) {
@@ -627,7 +656,8 @@
     &.no-status,
     &.no-message,
     &[no-message],
-    &[no-messages] {
+    &[no-messages],
+    &:not(.has-message) {
         grid-template-rows: 36px !important;
         min-height: 36px;
 

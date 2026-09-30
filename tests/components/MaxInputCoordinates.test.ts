@@ -21,8 +21,17 @@ describe('MaxInputCoordinateDecimalLat', () => {
         expect(wrapper.exists()).toBe(true);
     });
 
-    it('valida latitude dentro do território brasileiro (-23.5) após blur', async () => {
+    it('valida latitude dentro do território brasileiro (-23.5) após blur sem marcar done=true automaticamente', async () => {
         const wrapper = mountCoord(MaxInputCoordinateDecimalLat, { modelValue: -23.550520 });
+        const input = wrapper.find('input');
+        await input.trigger('blur');
+
+        const ib = wrapper.findComponent(InputBase);
+        expect(ib.props('done')).toBe(null);
+    });
+
+    it('respeita prop done explícita na latitude', async () => {
+        const wrapper = mountCoord(MaxInputCoordinateDecimalLat, { modelValue: -23.550520, done: true });
         const input = wrapper.find('input');
         await input.trigger('blur');
 
@@ -30,13 +39,13 @@ describe('MaxInputCoordinateDecimalLat', () => {
         expect(ib.props('done')).toBe(true);
     });
 
-    it('valida latitude no limite norte do Brasil (5.0) após blur', async () => {
+    it('valida latitude no limite norte do Brasil (5.0) após blur sem marcar done=true automaticamente', async () => {
         const wrapper = mountCoord(MaxInputCoordinateDecimalLat, { modelValue: 5.0 });
         const input = wrapper.find('input');
         await input.trigger('blur');
 
         const ib = wrapper.findComponent(InputBase);
-        expect(ib.props('done')).toBe(true);
+        expect(ib.props('done')).toBe(null);
     });
 
     it('invalida latitude fora do Brasil (positiva alta: 10.0) após blur', async () => {
@@ -80,8 +89,17 @@ describe('MaxInputCoordinateDecimalLng', () => {
         expect(wrapper.exists()).toBe(true);
     });
 
-    it('valida longitude dentro do território brasileiro (-46.6) após blur', async () => {
+    it('valida longitude dentro do território brasileiro (-46.6) após blur sem marcar done=true automaticamente', async () => {
         const wrapper = mountCoord(MaxInputCoordinateDecimalLng, { modelValue: -46.633309 });
+        const input = wrapper.find('input');
+        await input.trigger('blur');
+
+        const ib = wrapper.findComponent(InputBase);
+        expect(ib.props('done')).toBe(null);
+    });
+
+    it('respeita prop done explícita na longitude', async () => {
+        const wrapper = mountCoord(MaxInputCoordinateDecimalLng, { modelValue: -46.633309, done: true });
         const input = wrapper.find('input');
         await input.trigger('blur');
 

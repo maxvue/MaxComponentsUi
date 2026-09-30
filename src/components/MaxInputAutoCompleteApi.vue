@@ -418,7 +418,7 @@
 
     const testIsDone = () => {
         if (props.done !== undefined) return props.done;
-        if (isRequiredDone.value !== null) return isRequiredDone.value;
+        if (isRequiredDone.value === false) return false;
         if (props.caution !== undefined) return !props.caution;
         return null;
     };

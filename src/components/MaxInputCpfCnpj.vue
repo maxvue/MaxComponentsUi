@@ -159,7 +159,7 @@
 
     watch(temp_value, () => {
         const only_numbers: string = onlyNumbers(temp_value.value);
-        if ((only_numbers.length === 11 || only_numbers.length === 14) && done.value) emit('complete', only_numbers);
+        if ((only_numbers.length === 11 || only_numbers.length === 14) && isDocumentValid(only_numbers)) emit('complete', only_numbers);
     }, { immediate: true });
 
     defineExpose({

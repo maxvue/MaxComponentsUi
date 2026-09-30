@@ -175,12 +175,16 @@ describe('MaxInputMoney', () => {
         expect(wrapper.emitted('update:modelValue')?.slice(-1)[0]).toEqual([1250.75]);
     });
 
-    it('valida done=true após blur quando required e preenchido', async () => {
+    it('não infere done=true automaticamente após blur quando required e preenchido', async () => {
         const wrapper = mountInputMoney({ required: true, modelValue: 14.3 });
         const input = wrapper.find('input');
         await input.trigger('blur');
         const ib = wrapper.findComponent(InputBase);
-        expect(ib.props('done')).toBe(true);
+        expect(ib.props('done')).toBeUndefined();
+        expect(ib.props('error')).toBeFalsy();
+
+        const wrapperWithDone = mountInputMoney({ done: true, modelValue: 14.3 });
+        expect(wrapperWithDone.findComponent(InputBase).props('done')).toBe(true);
     });
 
     it('valida erro de campo obrigatório quando blur e vazio', async () => {

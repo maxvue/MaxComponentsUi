@@ -768,7 +768,7 @@
     const isDone = computed(() => {
         if (props.noDone || props.noStatus) return null;
         if (props.done !== undefined) return props.done;
-        return internalDate.value !== null;
+        return null;
     });
 
     const isCaution = computed(() => {

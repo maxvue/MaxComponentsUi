@@ -99,7 +99,7 @@ describe('Matriz Compartilhada de Validação de Adaptadores de Entrada (R05 / F
             await wrapper.vm.$nextTick();
 
             expect(inputBase.props('error')).toBeUndefined();
-            expect(inputBase.props('done')).toBe(true);
+            expect(inputBase.props('done')).toBeUndefined();
             expect(input.attributes('aria-invalid')).toBeUndefined();
         });
 
@@ -228,7 +228,7 @@ describe('Matriz Compartilhada de Validação de Adaptadores de Entrada (R05 / F
             await wrapper.vm.$nextTick();
 
             expect(inputBase.props('error')).toBeUndefined();
-            expect(inputBase.props('done')).toBe(true);
+            expect(inputBase.props('done')).toBeUndefined();
         });
 
         it('contrato booleano: error=true repassa true para InputBase e marca aria-invalid', () => {
@@ -342,7 +342,7 @@ describe('Matriz Compartilhada de Validação de Adaptadores de Entrada (R05 / F
             await wrapper.vm.$nextTick();
 
             expect(inputBase.props('error')).toBeUndefined();
-            expect(inputBase.props('done')).toBe(true);
+            expect(inputBase.props('done')).toBeUndefined();
         });
 
         it('contrato booleano: error=true repassa true para InputBase e marca aria-invalid', () => {
@@ -458,7 +458,7 @@ describe('Matriz Compartilhada de Validação de Adaptadores de Entrada (R05 / F
             await wrapper.vm.$nextTick();
 
             expect(inputBase.props('error')).toBeUndefined();
-            expect(inputBase.props('done')).toBe(true);
+            expect(inputBase.props('done')).toBeUndefined();
         });
 
         it('contrato booleano: error=true repassa true para InputBase e marca aria-invalid', () => {

@@ -77,13 +77,14 @@ describe('InputBase.vue', () => {
     // A linha de mensagem e sempre renderizada (reservando o espaco), ficando
     // vazia quando nao ha mensagem. O antigo `.message-spacer` deixou de existir
     // na migracao que removeu FloatLabel/IconField do PrimeVue.
-    it('keeps an empty message line when there is no message', () => {
+    it('does not render message line or reserve message space when there is no message', () => {
         const wrapper = mount(InputBase, {
             props: { label: 'Only label' }
         });
-        expect(wrapper.find('.input-message').exists()).toBe(true);
-        expect(wrapper.find('.input-message').text()).toBe('');
-        expect(wrapper.find('.input-message .message-text').exists()).toBe(false);
+        expect(wrapper.find('.input-message').exists()).toBe(false);
+        const root = wrapper.find('.max-input-main-div');
+        expect(root.classes()).toContain('no-message');
+        expect(root.classes()).not.toContain('has-message');
     });
 
     it('renders both left and right icons with the slot between them', () => {
@@ -158,9 +159,9 @@ describe('InputBase.vue', () => {
         expect(wrapper.find('.input-message').attributes('aria-live')).toBe('polite');
     });
 
-    it('sets role="alert" on .input-message when error is truthy, and not otherwise', () => {
+    it('sets role="alert" on .input-message when error has a message, and not otherwise', () => {
         const errorWrapper = mount(InputBase, {
-            props: { error: true }
+            props: { error: 'Invalid value' }
         });
         expect(errorWrapper.find('.input-message').attributes('role')).toBe('alert');
 
@@ -302,13 +303,14 @@ describe('InputBase.vue', () => {
         expect(messageEl.text()).toContain(longMessage);
     });
 
-    it('exibe mensagem fallback quando done=false e nenhuma mensagem for fornecida', () => {
+    it('não exibe mensagem quando done=false e nenhuma mensagem for fornecida', () => {
         const wrapper = mount(InputBase, {
             props: { done: false }
         });
-        const textSpan = wrapper.find('.input-message .message-text');
-        expect(textSpan.exists()).toBe(true);
-        expect(textSpan.text()).toBe('Valor inválido');
+        expect(wrapper.find('.input-message').exists()).toBe(false);
+        const root = wrapper.find('.max-input-main-div');
+        expect(root.classes()).toContain('error');
+        expect(root.classes()).toContain('no-message');
     });
 
     it('aplica truncamento somente se truncateMessage=true', () => {
@@ -452,5 +454,98 @@ describe('InputBase.vue', () => {
         expect(focusSpy).toHaveBeenCalled();
         expect(clickSpy).toHaveBeenCalled();
         wrapper.unmount();
+    });
+
+    describe('Padrão no-status e espaçamento de mensagens', () => {
+        it('não exibe ícone de status nem mensagem no estado padrão', () => {
+            const wrapper = mount(InputBase, {
+                props: { value: 'Texto preenchido' }
+            });
+            expect(wrapper.find('.input-message').exists()).toBe(false);
+            expect(wrapper.find('.is-done').exists()).toBe(false);
+            expect(wrapper.find('.is-caution').exists()).toBe(false);
+            expect(wrapper.find('.is-error').exists()).toBe(false);
+            expect(wrapper.find('.required').exists()).toBe(false);
+            const root = wrapper.find('.max-input-main-div');
+            expect(root.classes()).toContain('no-message');
+            expect(root.classes()).not.toContain('has-message');
+        });
+
+        it('exibe mensagem e aplica has-message quando error for string', () => {
+            const wrapper = mount(InputBase, {
+                props: { error: 'E-mail inválido' }
+            });
+            expect(wrapper.find('.input-message').exists()).toBe(true);
+            expect(wrapper.find('.input-message').text()).toContain('E-mail inválido');
+            expect(wrapper.find('.is-error').exists()).toBe(true);
+            const root = wrapper.find('.max-input-main-div');
+            expect(root.classes()).toContain('has-message');
+            expect(root.classes()).not.toContain('no-message');
+        });
+
+        it('exibe ícone de erro mas NÃO exibe mensagem quando error for booleano true', () => {
+            const wrapper = mount(InputBase, {
+                props: { error: true }
+            });
+            expect(wrapper.find('.input-message').exists()).toBe(false);
+            expect(wrapper.find('.is-error').exists()).toBe(true);
+            const root = wrapper.find('.max-input-main-div');
+            expect(root.classes()).toContain('no-message');
+            expect(root.classes()).not.toContain('has-message');
+        });
+
+        it('exibe mensagem quando passada via error-message nos attrs', () => {
+            const wrapper = mount(InputBase, {
+                attrs: { 'error-message': 'CPF obrigatório' }
+            });
+            expect(wrapper.find('.input-message').exists()).toBe(true);
+            expect(wrapper.find('.input-message').text()).toContain('CPF obrigatório');
+            expect(wrapper.find('.is-error').exists()).toBe(true);
+            const root = wrapper.find('.max-input-main-div');
+            expect(root.classes()).toContain('has-message');
+        });
+
+        it('exibe mensagem quando passada via message-error nos attrs', () => {
+            const wrapper = mount(InputBase, {
+                attrs: { 'message-error': 'Erro via attr' }
+            });
+            expect(wrapper.find('.input-message').exists()).toBe(true);
+            expect(wrapper.find('.input-message').text()).toContain('Erro via attr');
+            expect(wrapper.find('.is-error').exists()).toBe(true);
+        });
+
+        it('exibe mensagem de caution quando passada via caution-message nos attrs', () => {
+            const wrapper = mount(InputBase, {
+                attrs: { 'caution-message': 'Atenção aos dados' }
+            });
+            expect(wrapper.find('.input-message').exists()).toBe(true);
+            expect(wrapper.find('.input-message').text()).toContain('Atenção aos dados');
+            expect(wrapper.find('.is-caution').exists()).toBe(true);
+        });
+
+        it('exibe checkmark verde apenas quando done for explicitamente true', () => {
+            const wrapperWithDone = mount(InputBase, {
+                props: { done: true }
+            });
+            expect(wrapperWithDone.find('.is-done').exists()).toBe(true);
+
+            const wrapperWithoutDone = mount(InputBase, {
+                props: { done: undefined }
+            });
+            expect(wrapperWithoutDone.find('.is-done').exists()).toBe(false);
+        });
+
+        it('exibe asterisco apenas quando required for explicitamente true', () => {
+            const wrapperReq = mount(InputBase, {
+                props: { required: true }
+            });
+            expect(wrapperReq.find('.required').exists()).toBe(true);
+            expect(wrapperReq.find('.required').text()).toBe('*');
+
+            const wrapperNotReq = mount(InputBase, {
+                props: { required: false }
+            });
+            expect(wrapperNotReq.find('.required').exists()).toBe(false);
+        });
     });
 });

@@ -27,20 +27,20 @@ describe('MaxInputDatePicker', () => {
 
     it('converte string YYYY-MM-DD para Date internamente', async () => {
         const wrapper = mountDatePicker({ modelValue: '2024-06-15' });
-        const ib = wrapper.findComponent(InputBase);
-        expect(ib.props('done')).toBe(true);
+        expect((wrapper.vm as any).internalDate).not.toBeNull();
+        expect((wrapper.vm as any).internalDate.getFullYear()).toBe(2024);
     });
 
     it('converte string YYYY-MM-DD HH:mm:ss para Date', async () => {
         const wrapper = mountDatePicker({ modelValue: '2024-06-15 14:30:00' });
-        const ib = wrapper.findComponent(InputBase);
-        expect(ib.props('done')).toBe(true);
+        expect((wrapper.vm as any).internalDate).not.toBeNull();
+        expect((wrapper.vm as any).internalDate.getFullYear()).toBe(2024);
     });
 
-    it('done=false quando data é nula e done não é definido', () => {
+    it('done=null quando data é nula e done não é definido', () => {
         const wrapper = mountDatePicker({ modelValue: '' });
         const ib = wrapper.findComponent(InputBase);
-        expect(ib.props('done')).toBe(false);
+        expect(ib.props('done')).toBeNull();
     });
 
     it('emite update:modelValue no formato YYYY-MM-DD HH:mm:ss', async () => {
@@ -56,14 +56,14 @@ describe('MaxInputDatePicker', () => {
     });
 
     it('aceita prop done para controle manual', () => {
-        const wrapper = mountDatePicker({ modelValue: '' });
-        expect(wrapper.exists()).toBe(true);
+        const wrapper = mountDatePicker({ modelValue: '', done: true });
+        const ib = wrapper.findComponent(InputBase);
+        expect(ib.props('done')).toBe(true);
     });
 
     it('define internalDate como null ao passar data invalida', async () => {
         const wrapper = mountDatePicker({ modelValue: 'invalid-date' });
-        const ib = wrapper.findComponent(InputBase);
-        expect(ib.props('done')).toBe(false);
+        expect((wrapper.vm as any).internalDate).toBeNull();
     });
 
     it('sincroniza internalDate para modelValue e vice-versa', async () => {
@@ -192,7 +192,7 @@ describe('MaxInputDatePicker', () => {
         const ib = wrapper.findComponent(InputBase);
         const input = wrapper.find('input');
 
-        expect(ib.props('done')).toBe(true);
+        expect(ib.props('done')).toBeNull();
         expect((wrapper.vm as any).internalDate).not.toBeNull();
         expect((wrapper.vm as any).internalDate.getFullYear()).toBe(2026);
         expect((wrapper.vm as any).internalDate.getMonth()).toBe(4); // Maio = 4 (0-indexed)
@@ -206,7 +206,7 @@ describe('MaxInputDatePicker', () => {
         const ib = wrapper.findComponent(InputBase);
         const input = wrapper.find('input');
 
-        expect(ib.props('done')).toBe(true);
+        expect(ib.props('done')).toBeNull();
         expect((wrapper.vm as any).internalDate).not.toBeNull();
         expect((wrapper.vm as any).internalDate.getHours()).toBe(14);
         expect((wrapper.vm as any).internalDate.getMinutes()).toBe(30);
@@ -227,7 +227,7 @@ describe('MaxInputDatePicker', () => {
         const ib = wrapper.findComponent(InputBase);
         const input = wrapper.find('input');
 
-        expect(ib.props('done')).toBe(false);
+        expect(ib.props('done')).toBeNull();
         expect((wrapper.vm as any).internalDate).toBeNull();
         expect(input.element.value).toBe('');
     });

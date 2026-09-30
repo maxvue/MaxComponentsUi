@@ -224,9 +224,13 @@
     };
 
     const checkDone = () => {
+        if (props.done !== undefined) {
+            isDone.value = props.done;
+            return;
+        }
         const val = values.value.join('');
         const len = totalLength.value;
-        if (val.length === len) isDone.value = true;
+        if (val.length === len) isDone.value = null;
         else if (val.length > 0) isDone.value = false;
         else if (props.required) isDone.value = false;
         else isDone.value = null;
@@ -248,7 +252,7 @@
 
         if (joined.length === totalLength.value && !newValues.includes('')) {
             emit('complete', joined);
-            isDone.value = true;
+            isDone.value = props.done ?? null;
         } else if (isDone.value !== null) checkDone();
 
     };

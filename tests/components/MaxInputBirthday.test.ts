@@ -55,7 +55,10 @@ describe('MaxInputBirthday', () => {
         expect(yearBtn.text()).toBe('2024');
 
         const ib = wrapper.findComponent(InputBase);
-        expect(ib.props('done')).toBe(true);
+        expect(ib.props('done')).toBeNull();
+
+        const wrapperWithDone = mountBirthday({ modelValue: '2024-05-09', done: true });
+        expect(wrapperWithDone.findComponent(InputBase).props('done')).toBe(true);
     });
 
     it('abre o overlay do dia ao clicar no gatilho de dia', async () => {

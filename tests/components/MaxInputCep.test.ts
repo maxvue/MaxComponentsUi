@@ -21,10 +21,10 @@ describe('MaxInputCep', () => {
         expect(wrapper.exists()).toBe(true);
     });
 
-    it('valida CEP com 8 dígitos corretos', () => {
+    it('não define done=true automaticamente para CEP com 8 dígitos corretos', () => {
         const wrapper = mountCep({ modelValue: '01001000' });
         const ib = wrapper.findComponent(InputBase);
-        expect(ib.props('done')).toBe(true);
+        expect(ib.props('done')).toBeUndefined();
     });
 
     it('invalida CEP com menos de 8 dígitos', () => {

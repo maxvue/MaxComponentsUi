@@ -73,13 +73,17 @@ describe('MaxInputNumber', () => {
         expect((input.element as HTMLInputElement).value).toBe('42');
     });
 
-    it('valida done=true após blur quando required e preenchido', async () => {
+    it('não infere done=true automaticamente após blur quando required e preenchido', async () => {
         const wrapper = mountInputNumber({ required: true, modelValue: 42 });
         const inputs = wrapper.findAll('input');
         expect(inputs.length).toBeGreaterThan(0);
         await inputs[0].trigger('blur');
         const ib = wrapper.findComponent(InputBase);
-        expect(ib.props('done')).toBe(true);
+        expect(ib.props('done')).toBeUndefined();
+        expect(ib.props('error')).toBeFalsy();
+
+        const wrapperWithDone = mountInputNumber({ done: true, modelValue: 42 });
+        expect(wrapperWithDone.findComponent(InputBase).props('done')).toBe(true);
     });
 
     it('valida erro de campo obrigatório quando vazio', async () => {

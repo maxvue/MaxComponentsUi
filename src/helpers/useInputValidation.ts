@@ -117,12 +117,11 @@ export function useInputValidation(options: UseInputValidationOptions): UseInput
             return touched.value || submitted.value ? false : null;
         }
 
-        if (isValid.value) return true;
+        if (isValid.value) return null;
 
         if (options.isComplete) {
             const complete = options.isComplete(options.value.value);
             if (!complete && !touched.value && !submitted.value && !hadError.value) return null;
-
         }
 
         return false;

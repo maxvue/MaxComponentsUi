@@ -3,13 +3,14 @@ import { ref } from 'vue';
 import { useInputValidation } from '../../src/helpers/useInputValidation';
 
 describe('useInputValidation', () => {
-    it('chama o validator com o valor atual e reflete o resultado em done', () => {
+    it('chama o validator com o valor atual e reflete o resultado em isValid e done', () => {
         const validator = vi.fn((v: string) => v === 'ok');
         const value = ref('ok');
 
-        const { done } = useInputValidation({ validator, value });
+        const { done, isValid } = useInputValidation({ validator, value });
 
-        expect(done.value).toBe(true);
+        expect(isValid.value).toBe(true);
+        expect(done.value).toBe(null);
         expect(validator).toHaveBeenCalledWith('ok');
     });
 
@@ -129,7 +130,7 @@ describe('useInputValidation', () => {
         expect(done.value).toBe(false);
 
         value.value = 'ok';
-        expect(done.value).toBe(true);
+        expect(done.value).toBe(null);
     });
 
     it('submit valida todos os campos e retorna false se invalido, true se valido', () => {
@@ -156,7 +157,7 @@ describe('useInputValidation', () => {
         value.value = 'correto';
         validation.onInput();
         expect(validation.error.value).toBeNull();
-        expect(validation.done.value).toBe(true);
+        expect(validation.done.value).toBe(null);
         expect(validation.caution.value).toBe(false);
     });
 
@@ -192,7 +193,7 @@ describe('useInputValidation', () => {
             required: true
         });
         expect(validation.isValid.value).toBe(true);
-        expect(validation.done.value).toBe(true);
+        expect(validation.done.value).toBe(null);
         expect(validation.error.value).toBeNull();
     });
 
@@ -263,7 +264,7 @@ describe('useInputValidation', () => {
         // Correção para válido limpa o erro
         value.value = '12345';
         validation.onInput();
-        expect(validation.done.value).toBe(true);
+        expect(validation.done.value).toBe(null);
         expect(validation.caution.value).toBe(false);
         expect(validation.error.value).toBeNull();
     });

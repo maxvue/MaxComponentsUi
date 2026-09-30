@@ -1,7 +1,7 @@
 <template>
     <InputBase
         v-bind="props"
-        :done="props.done ?? validation.done.value"
+        :done="props.done"
         :error="props.error ?? (typeof props.caution === 'string' ? null : validation.error.value)"
         :caution="props.caution ?? validation.caution.value"
         class="max-color-picker max-input-color"

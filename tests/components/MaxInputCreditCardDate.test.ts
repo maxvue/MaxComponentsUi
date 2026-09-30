@@ -41,9 +41,19 @@ describe('MaxInputCreditCardDate', () => {
         expect(wrapper.emitted('update:modelValue')?.pop()).toEqual(['1230']);
     });
 
-    it('data com mês válido (01-12) marca done=true ao perder o foco', async () => {
+    it('data com mês válido (01-12) não marca done=true automaticamente ao perder o foco', async () => {
         const wrapper = mountDate();
         (wrapper.vm as any).unmaskedValue = '1230'; // mes 12
+        await wrapper.vm.$nextTick();
+        (wrapper.vm as any).checkDone();
+        await wrapper.vm.$nextTick();
+
+        expect((wrapper.vm as any).done).toBe(null);
+    });
+
+    it('respeita prop done explícita na data de validade', async () => {
+        const wrapper = mountDate({ done: true });
+        (wrapper.vm as any).unmaskedValue = '1230';
         await wrapper.vm.$nextTick();
         (wrapper.vm as any).checkDone();
         await wrapper.vm.$nextTick();

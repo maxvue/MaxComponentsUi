@@ -76,10 +76,10 @@ describe('MaxInputAutoComplete.vue', () => {
         expect((wrapper.vm as any).caution).toBe(true);
     });
 
-    it('calcula isDone = true quando required e tem valor no blur', async () => {
+    it('não calcula isDone = true automaticamente quando required e tem valor no blur', async () => {
         const wrapper = mountAutoComplete({ required: true, modelValue: 'algum valor' });
         await wrapper.find('input').trigger('blur');
-        expect((wrapper.vm as any).isDone).toBe(true);
+        expect((wrapper.vm as any).isDone).toBe(null);
     });
 
     it('respeita prop done explícita', async () => {

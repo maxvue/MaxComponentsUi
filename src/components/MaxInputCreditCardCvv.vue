@@ -28,9 +28,10 @@
             label?: string | undefined;
             len?: number;
             required?: boolean;
+            done?: boolean | null | undefined;
             noMessage?: boolean;
         }>(),
-        { modelValue: '', label: 'CVV', len: 3, required: false }
+        { modelValue: '', label: 'CVV', len: 3, required: false, done: undefined }
     );
 
     const emit = defineEmits<{
@@ -44,7 +45,10 @@
 
     const isDone = ref<boolean | null>(null);
 
-    const done = computed(() => isDone.value ?? (unmaskedValue.value.length > 0 ? unmaskedValue.value.length === props.len : null));
+    const done = computed(() => {
+        if (props.done !== undefined) return props.done;
+        return isDone.value === false ? false : null;
+    });
 
     const checkDone = () => {
         isDone.value = unmaskedValue.value.length > 0 ? unmaskedValue.value.length === props.len : (props.required ? false : null);
@@ -79,7 +83,7 @@
         }
     );
 
-    defineExpose({ unmaskedValue });
+    defineExpose({ unmaskedValue, done, checkDone });
 </script>
 
 <style lang="scss" scoped>
