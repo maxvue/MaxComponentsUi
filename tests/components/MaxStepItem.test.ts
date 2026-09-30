@@ -172,7 +172,7 @@ describe('MaxStepItem — Suporte a labelMobile e LabelMobile', () => {
                 }
             },
             template: `
-                <MaxSteps id="item-mobile-1" :cached="false" :isMobile="isMobile">
+                <MaxSteps id="item-mobile-1" :cached="false" :isMobile="isMobile" :mobile-show-label="true">
                     <MaxStepItem value="1" title="Informações Pessoais Longas" labelMobile="Dados"><div class="c1">C1</div></MaxStepItem>
                     <MaxStepItem value="2" title="Endereço de Entrega"><div class="c2">C2</div></MaxStepItem>
                 </MaxSteps>
@@ -197,7 +197,7 @@ describe('MaxStepItem — Suporte a labelMobile e LabelMobile', () => {
         const wrapper = mount(defineComponent({
             components: { MaxSteps, MaxStepItem },
             template: `
-                <MaxSteps id="item-mobile-2" :cached="false" :isMobile="true">
+                <MaxSteps id="item-mobile-2" :cached="false" :isMobile="true" :mobile-show-label="true">
                     <MaxStepItem value="1" title="Configurações Avançadas" LabelMobile="Config"><div class="c1">C1</div></MaxStepItem>
                 </MaxSteps>
             `
