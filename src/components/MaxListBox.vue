@@ -160,6 +160,8 @@
             virtualScrollThreshold?: number;
             /** Altura fixa de cada linha, em pixels (exigida pela virtualização) */
             itemHeight?: number;
+            /** Quantidade de itens extras renderizados antes e depois da viewport na virtualização; padrão: 5 */
+            overscan?: number;
             /** Carrega páginas do servidor; quando definido, `options` é ignorado */
             loadOptions?: (ctx: LoadOptionsContext) => Promise<LoadOptionsResult>;
             /** Itens por página enviados ao loadOptions */
@@ -191,6 +193,7 @@
             virtualScroll: undefined,
             virtualScrollThreshold: 500,
             itemHeight: 44,
+            overscan: 5,
             loadOptions: undefined,
             pageSize: 50,
             loading: false
@@ -410,7 +413,8 @@
 
     const { visibleItems, offsetY, totalHeight, setViewport } = useVirtualList(visibleOptions, {
         itemHeight: computed(() => props.itemHeight),
-        enabled: isVirtual
+        enabled: isVirtual,
+        overscan: computed(() => props.overscan)
     });
 
     setViewport(0, DEFAULT_VIEWPORT_HEIGHT);

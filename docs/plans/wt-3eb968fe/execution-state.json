@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "planRevision": "d9e318807fc40c8757398663fa705ca226dce0e1c27db622116e25ecf27a8d1a",
+  "tasks": [
+    {
+      "id": "T0",
+      "status": "completed",
+      "files": [],
+      "revision": "67a658dd35dc2af3dd92f0ebb060d43122f5faba",
+      "validations": [
+        {
+          "command": "node scripts/check-lockfile.mjs",
+          "revision": "67a658dd35dc2af3dd92f0ebb060d43122f5faba",
+          "result": "passed"
+        }
+      ],
+      "nextAction": "Ambiente preparado e revalidado com sucesso."
+    },
+    {
+      "id": "T1",
+      "status": "completed",
+      "files": [
+        "src/composables/useVirtualList.ts",
+        "tests/composables/useVirtualList.test.ts"
+      ],
+      "revision": "4fe901cf828b7b77db1fe83cb7bfe2333b86d94bbb31b78c2c4ce1288ae08276",
+      "validations": [
+        {
+          "command": "npm run test -- tests/composables/useVirtualList.test.ts",
+          "revision": "4fe901cf828b7b77db1fe83cb7bfe2333b86d94bbb31b78c2c4ce1288ae08276",
+          "result": "passed"
+        },
+        {
+          "command": "npx eslint src/composables/useVirtualList.ts tests/composables/useVirtualList.test.ts",
+          "revision": "4fe901cf828b7b77db1fe83cb7bfe2333b86d94bbb31b78c2c4ce1288ae08276",
+          "result": "passed"
+        }
+      ],
+      "nextAction": "Tarefa concluída com sucesso."
+    },
+    {
+      "id": "T2",
+      "status": "completed",
+      "files": [
+        "src/components/MaxListBox.vue",
+        "tests/components/MaxListBox.test.ts"
+      ],
+      "revision": "23b9bd2d9b0203a298fe6f1460b5d74c318c630d99e003ef6f5fdb340005574c",
+      "validations": [
+        {
+          "command": "npm run test -- tests/components/MaxListBox.test.ts",
+          "revision": "23b9bd2d9b0203a298fe6f1460b5d74c318c630d99e003ef6f5fdb340005574c",
+          "result": "passed"
+        },
+        {
+          "command": "npx eslint src/components/MaxListBox.vue tests/components/MaxListBox.test.ts",
+          "revision": "23b9bd2d9b0203a298fe6f1460b5d74c318c630d99e003ef6f5fdb340005574c",
+          "result": "passed"
+        },
+        {
+          "command": "npx stylelint src/components/MaxListBox.vue",
+          "revision": "23b9bd2d9b0203a298fe6f1460b5d74c318c630d99e003ef6f5fdb340005574c",
+          "result": "passed"
+        }
+      ],
+      "nextAction": "Tarefa concluída com sucesso."
+    },
+    {
+      "id": "T3",
+      "status": "completed",
+      "files": [
+        "COMPONENTS.md"
+      ],
+      "revision": "aeadcb78a6dd3c2d7b329bb1ad7cd409b12bc1fc56192868225c32f4cf1bb9c7",
+      "validations": [
+        {
+          "command": "Revisão de conteúdo contra R1-R9 e assinatura implementada",
+          "revision": "aeadcb78a6dd3c2d7b329bb1ad7cd409b12bc1fc56192868225c32f4cf1bb9c7",
+          "result": "passed"
+        }
+      ],
+      "nextAction": "Tarefa concluída com sucesso."
+    },
+    {
+      "id": "T4",
+      "status": "completed",
+      "files": [],
+      "validations": [
+        {
+          "command": "npm run test -- tests/composables/useVirtualList.test.ts tests/components/MaxListBox.test.ts tests/components/MaxInputAutoComplete.test.ts tests/components/MaxInputAutoCompleteApi.test.ts tests/components/MaxInputSelect.test.ts tests/components/MaxTagSelect.test.ts tests/components/MaxInputPhone.test.ts tests/components/MaxInputIconPicker.test.ts",
+          "revision": "4fe901cf828b7b77db1fe83cb7bfe2333b86d94bbb31b78c2c4ce1288ae08276",
+          "result": "passed"
+        },
+        {
+          "command": "npm run type-check",
+          "revision": "4fe901cf828b7b77db1fe83cb7bfe2333b86d94bbb31b78c2c4ce1288ae08276",
+          "result": "passed"
+        },
+        {
+          "command": "npm run type-check:test",
+          "revision": "4fe901cf828b7b77db1fe83cb7bfe2333b86d94bbb31b78c2c4ce1288ae08276",
+          "result": "passed"
+        },
+        {
+          "command": "npm run lint",
+          "revision": "4fe901cf828b7b77db1fe83cb7bfe2333b86d94bbb31b78c2c4ce1288ae08276",
+          "result": "passed"
+        },
+        {
+          "command": "npm run build",
+          "revision": "4fe901cf828b7b77db1fe83cb7bfe2333b86d94bbb31b78c2c4ce1288ae08276",
+          "result": "passed"
+        }
+      ],
+      "nextAction": "Regressão geral, validações estáticas, tipagem e build concluídos com 100% de sucesso."
+    }
+  ],
+  "updatedAt": 1791223600000,
+  "nextAction": "Plano totalmente implementado e validado. Aguardando comando de integração Git/painel pelo usuário."
+}

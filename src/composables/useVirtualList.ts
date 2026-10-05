@@ -13,7 +13,7 @@ export type UseVirtualListOptions = {
     /** Quando false, a lista inteira é retornada sem virtualizar */
     enabled: MaybeRef<boolean>;
     /** Itens extras renderizados acima e abaixo da janela visível */
-    overscan?: number;
+    overscan?: MaybeRef<number | undefined>;
     /** Altura padrão da viewport quando não mensurada (ex: JSDOM/inicial) */
     defaultViewportHeight?: number;
 };
@@ -24,10 +24,16 @@ export type UseVirtualListOptions = {
  * apenas visibleItems, deslocados por offsetY dentro de um container de totalHeight.
  */
 export function useVirtualList<T>(items: MaybeRef<T[]>, options: UseVirtualListOptions) {
-    const overscan = options.overscan ?? 5;
     const defaultViewportHeight = options.defaultViewportHeight ?? 200;
     const scrollTop = ref(0);
     const viewportHeight = ref(0);
+
+    const normalizedOverscan = computed(() => {
+        const raw = unref(options.overscan);
+        if (typeof raw !== 'number' || !Number.isFinite(raw)) return 5;
+        if (raw < 0) return 0;
+        return Math.floor(raw);
+    });
 
     const resolvedItems = computed<T[]>(() => {
         const val = unref(items);
@@ -55,14 +61,13 @@ export function useVirtualList<T>(items: MaybeRef<T[]>, options: UseVirtualListO
 
         const first = Math.floor(scrollTop.value / itemHeight.value);
         const maxIndex = Math.max(0, resolvedItems.value.length - 1);
-        return Math.min(maxIndex, Math.max(0, first - overscan));
+        return Math.min(maxIndex, Math.max(0, first - normalizedOverscan.value));
     });
 
     const endIndex = computed(() => {
         if (!isEnabled.value) return resolvedItems.value.length;
 
-        const visibleCount = Math.ceil(effectiveViewportHeight.value / itemHeight.value);
-        const last = Math.floor(scrollTop.value / itemHeight.value) + visibleCount + overscan;
+        const last = Math.ceil((scrollTop.value + effectiveViewportHeight.value) / itemHeight.value) + normalizedOverscan.value;
         return Math.min(resolvedItems.value.length, last);
     });
 

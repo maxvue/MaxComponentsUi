@@ -1872,3 +1872,65 @@ Container orquestrador de cards de alta performance com **scroll virtual** integ
 </script>
 ```
 
+---
+
+### MaxListBox
+
+Componente de lista vertical selecionável de alta performance para opções locais ou remotas paginadas via API. Suporta **virtual scroll** integrado via `useVirtualList`, navegação completa por teclado (`ArrowDown`, `ArrowUp`, `Home`, `End`), filtro instantâneo local com destaque e seleção única via `v-model`.
+
+**Arquivo:** [`src/components/MaxListBox.vue`](src/components/MaxListBox.vue)  
+**Aliases:** `ListBox`, `Listbox`
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `modelValue` | `any` | `null` | Valor da opção selecionada (`v-model`) |
+| `options` | `any[]` | `undefined` | Lista de opções locais a serem renderizadas |
+| `virtualScroll` | `boolean` | `undefined` | Força a virtualização da lista; quando `undefined`, ativa automaticamente se o total de itens exceder `virtualScrollThreshold` |
+| `virtualScrollThreshold` | `number` | `500` | Limite de itens acima do qual a virtualização liga automaticamente |
+| `itemHeight` | `number` | `44` | Altura fixa de cada linha em pixels (exigida para o cálculo da virtualização) |
+| `overscan` | `number` | `5` | Quantidade de itens extras renderizados antes e depois da viewport visível (itens adicionais por lado) |
+| `loadOptions` | `(ctx: LoadOptionsContext) => Promise<LoadOptionsResult>` | `undefined` | Função assíncrona para carregamento de páginas sob demanda do servidor (ignora `options`) |
+| `pageSize` | `number` | `50` | Quantidade de itens por página solicitados ao `loadOptions` |
+| `filter` | `boolean` | `false` | Habilita campo de busca no topo da lista |
+| `title` | `string` | `undefined` | Título da lista exibido no cabeçalho |
+| `height` | `string \| number` | `undefined` | Altura do container de rolagem |
+| `disabled` | `boolean` | `false` | Desabilita a interação com a lista |
+
+#### Buffer de Renderização (`overscan`)
+
+- **Unidade:** itens adicionais renderizados fora da viewport em cada lado (acima e abaixo).
+- **Padrão:** `5` itens por lado (renderiza os itens visíveis mais até 5 acima e até 5 abaixo).
+- **Reatividade:** a alteração do valor da prop recalcula a janela virtual imediatamente de forma reativa, sem necessidade de remontagem do componente ou rolagem adicional.
+- **Normalização defensiva:** valores negativos são normalizados para `0`; valores fracionários aplicam piso (`Math.floor`); valores ausentes, não numéricos ou não finitos (`NaN`, `Infinity`, `-Infinity`) utilizam o padrão `5`. O valor `0` é estritamente válido e renderiza apenas a área visível (incluindo linhas parcialmente visíveis).
+- **Distinção entre buffer e paginação:** `overscan` controla exclusivamente o **buffer de renderização no DOM**, atuando apenas sobre os registros que já estão em memória. Ele não executa pré-carregamento de dados (pré-fetch) nem altera o `pageSize` ou a frequência de chamadas do `loadOptions`.
+- **Trade-off de desempenho:** valores muito altos de `overscan` aumentam a quantidade de nós DOM na árvore, o que pode impactar o consumo de memória e a taxa de quadros (FPS). Recomenda-se ajustar o buffer de acordo com a velocidade de rolagem desejada e a complexidade visual de cada item.
+
+**Exemplo de uso com buffer configurado:**
+```vue
+<template>
+  <MaxListBox
+    v-model="selecionado"
+    :options="listaDeItens"
+    aria-label="Registros disponíveis"
+    virtual-scroll
+    :overscan="20"
+    :item-height="44"
+  />
+</template>
+
+<script setup lang="ts">
+  import { ref } from 'vue';
+  import { MaxListBox } from '@maxvue/max-components-ui';
+
+  const selecionado = ref<number | null>(null);
+  const listaDeItens = ref(
+    Array.from({ length: 5000 }, (_, i) => ({
+      value: i + 1,
+      label: `Registro #${i + 1}`,
+      sub_label: `Detalhes adicionais do item ${i + 1}`
+    }))
+  );
+</script>
+```
+
+

@@ -330,6 +330,121 @@ describe('MaxListBox - virtual scroll', () => {
         const firstItem = wrapper.findAll('.max-listbox-item')[0];
         expect(firstItem.attributes('style')).toContain('height: 32px');
     });
+
+    it('renderiza contagem esperada no DOM com default (overscan=5), overscan=20 e overscan=0', () => {
+        // Viewport inicial de 400px com itemHeight=50 -> 8 itens visíveis
+        // Default (5 de overscan): 8 + 5 = 13 itens renderizados
+        const wrapperDefault = mountListBox({ options: manyOptions(1000), itemHeight: 50 });
+        expect(wrapperDefault.findAll('.max-listbox-item')).toHaveLength(13);
+
+        // Com overscan: 20 -> 8 + 20 = 28 itens renderizados
+        const wrapperTwenty = mountListBox({ options: manyOptions(1000), itemHeight: 50, overscan: 20 });
+        expect(wrapperTwenty.findAll('.max-listbox-item')).toHaveLength(28);
+
+        // Com overscan: 0 -> exatamente 8 itens renderizados
+        const wrapperZero = mountListBox({ options: manyOptions(1000), itemHeight: 50, overscan: 0 });
+        expect(wrapperZero.findAll('.max-listbox-item')).toHaveLength(8);
+    });
+
+    it('recalcula a janela reativamente ao alterar prop overscan via setProps sem remontagem nem scroll adicional', async () => {
+        const wrapper = mountListBox({ options: manyOptions(1000), itemHeight: 50 });
+        expect(wrapper.findAll('.max-listbox-item')).toHaveLength(13);
+
+        // Altera para 20
+        await wrapper.setProps({ overscan: 20 });
+        expect(wrapper.findAll('.max-listbox-item')).toHaveLength(28);
+
+        // Altera para 0
+        await wrapper.setProps({ overscan: 0 });
+        expect(wrapper.findAll('.max-listbox-item')).toHaveLength(8);
+
+        // Altera para valor inválido/negativo -> normalização defensiva (negativo -> 0, inválido -> 5)
+        await wrapper.setProps({ overscan: -5 });
+        expect(wrapper.findAll('.max-listbox-item')).toHaveLength(8);
+
+        await wrapper.setProps({ overscan: undefined });
+        expect(wrapper.findAll('.max-listbox-item')).toHaveLength(13);
+    });
+
+    it('cobre linha parcialmente visível em scroll desalinhado com buffer zero (R4)', async () => {
+        const wrapper = mountListBox({ options: manyOptions(1000), itemHeight: 50, overscan: 0 });
+        const listEl = wrapper.find('.max-listbox-list').element as HTMLElement;
+
+        Object.defineProperty(listEl, 'scrollTop', { value: 25, writable: true });
+        Object.defineProperty(listEl, 'clientHeight', { value: 400, writable: true });
+        Object.defineProperty(listEl, 'scrollHeight', { value: 50000, writable: true });
+
+        await wrapper.find('.max-listbox-list').trigger('scroll');
+        await wrapper.vm.$nextTick();
+
+        // Com scrollTop 25, itens 0 a 8 são visíveis (9 linhas no DOM)
+        const items = wrapper.findAll('.max-listbox-item');
+        expect(items).toHaveLength(9);
+        expect(items[0].text()).toContain('Item 0');
+        expect(items[8].text()).toContain('Item 8');
+
+        // translateY deve ser 0px porque item 0 começa em 0
+        const windowEl = wrapper.find('.max-listbox-window');
+        expect(windowEl.attributes('style')).toContain('translateY(0px)');
+    });
+
+    it('ignora overscan quando virtualização está desligada ou abaixo do threshold', () => {
+        // Com virtualScroll=false explícito, renderiza tudo
+        const wrapperNoVirtual = mountListBox({ options: manyOptions(100), virtualScroll: false, overscan: 2 });
+        expect(wrapperNoVirtual.findAll('.max-listbox-item')).toHaveLength(100);
+
+        // Abaixo do threshold (50 itens < 500) sem virtualScroll forçado
+        const wrapperBelowThreshold = mountListBox({ options: manyOptions(50), overscan: 2 });
+        expect(wrapperBelowThreshold.findAll('.max-listbox-item')).toHaveLength(50);
+    });
+
+    it('alterar overscan não dispara chamadas adicionais a loadOptions no modo API (R7)', async () => {
+        const loadOptions = vi.fn().mockResolvedValue({
+            items: Array.from({ length: 100 }, (_, i) => ({ value: i, label: `Item ${i}` })),
+            hasMore: true
+        });
+
+        const wrapper = mountListBox({
+            options: undefined,
+            loadOptions,
+            virtualScroll: true,
+            itemHeight: 50,
+            pageSize: 50,
+            overscan: 5
+        });
+
+        // Aguarda a montagem e carregamento inicial
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        await wrapper.vm.$nextTick();
+        const callCountAfterMount = loadOptions.mock.calls.length;
+
+        // Altera overscan dinamicamente
+        await wrapper.setProps({ overscan: 20 });
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        await wrapper.vm.$nextTick();
+
+        // O número de chamadas para loadOptions deve permanecer idêntico
+        expect(loadOptions.mock.calls.length).toBe(callCountAfterMount);
+    });
+
+    it('preserva foco acessível e aria-activedescendant ao navegar com buffer zero', async () => {
+        const wrapper = mountListBox({ options: manyOptions(100), itemHeight: 50, overscan: 0 });
+        const list = wrapper.find('.max-listbox-list');
+
+        // Navega para baixo
+        await list.trigger('keydown', { key: 'ArrowDown' });
+        await wrapper.vm.$nextTick();
+
+        const activeId = list.attributes('aria-activedescendant');
+        expect(activeId).toBeTruthy();
+        expect(wrapper.find(`#${activeId}`).exists()).toBe(true);
+
+        // Navega para o início via Home
+        await list.trigger('keydown', { key: 'Home' });
+        await wrapper.vm.$nextTick();
+        const homeActiveId = list.attributes('aria-activedescendant');
+        expect(wrapper.find(`#${homeActiveId}`).exists()).toBe(true);
+    });
 });
 
 describe('MaxListBox - modo API', () => {
