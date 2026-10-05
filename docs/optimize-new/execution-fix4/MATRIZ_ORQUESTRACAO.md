@@ -1,7 +1,7 @@
 # Matriz de Orquestração dos 55 Subagentes — Fix 4
 
 Coordenador: Conversation ID `97db74f2-d994-4291-b55b-2b4eff908ba2`
-Worktree Canônica: `/home/johnattas/GitHub/MaxComponentsUi/.worktrees/wt-fix4`
+Worktree Canônica: `/home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-fix4`
 
 | # | Subagente ID Real | Role / Nome | Bloco | Timestamp Início | Timestamp Fim | Status | Relatório |
 |---|---|---|---|---|---|---|---|

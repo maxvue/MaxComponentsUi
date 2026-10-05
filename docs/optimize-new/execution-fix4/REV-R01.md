@@ -6,7 +6,7 @@
 - **Parent ID:** `97db74f2-d994-4291-b55b-2b4eff908ba2`
 - **Horário de Início (Rodada 1):** 2026-09-15T05:04:04-03:00
 - **Horário de Conclusão (Rodada 2):** 2026-09-15T05:31:00-03:00
-- **Worktree Auditado:** `/home/johnattas/GitHub/MaxComponentsUi/.worktrees/wt-fix4`
+- **Worktree Auditado:** `/home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-fix4`
 - **Veredito Final:** **ACEITO**
 
 ---
@@ -58,7 +58,7 @@ const forbiddenPatterns = [
     /\/\.\.\//,                                  // Traversal relativo embutido (/../)
     /^(file|link|portal|workspace|git\+file):/i, // Protocolos locais ou workspace
     /\.max-code-worktrees/i,
-    /\.worktrees[\\/]/i
+    /\.max-code-worktrees[\\/]/i
 ];
 ```
 **Eficácia:** Cobre qualquer especificação de caminho relativo (`./`, `../`), caminho absoluto Linux/macOS/Windows, compartilhamento de rede UNC e protocolos locais ou de monorepo.

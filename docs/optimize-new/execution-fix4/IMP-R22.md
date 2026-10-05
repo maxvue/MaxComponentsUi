@@ -7,7 +7,7 @@
 | **ID Subagente**| IMP-R22                                                       |
 | **Parent ID**   | 97db74f2-d994-4291-b55b-2b4eff908ba2                          |
 | **Bloco**       | R22/F28                                                       |
-| **Worktree**    | `/home/johnattas/GitHub/MaxComponentsUi/.worktrees/wt-fix4`  |
+| **Worktree**    | `/home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-fix4`  |
 | **Início**      | 2026-09-15T13:15:01-03:00                                     |
 | **Fim**         | 2026-09-15T13:23:35-03:00                                     |
 | **Status**      | CONCLUÍDO                                                     |
@@ -98,7 +98,7 @@ Adicionado teste dedicado que verifica:
 ### 1. Exploração inicial
 
 ```bash
-ls /home/johnattas/GitHub/MaxComponentsUi/.worktrees/wt-fix4/tests/browser/
+ls /home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-fix4/tests/browser/
 grep -r 'virtual|scroll|10000|10k|benchmark' tests/ -l
 ```
 

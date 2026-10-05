@@ -3,7 +3,7 @@
 - **ID do Papel:** TEST6-R12
 - **UUID:** `251232eb-4272-40e7-8284-9d2e59e476bd`
 - **Requisito / Bloco:** R12 / E07-04, E07-05 (Picker nativo único em MaxInputFileProject, coordenadas válidas (0, 0) em MaxMaps e alternativas gráficas acessíveis)
-- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Branch:** `fix/fix6-implementation`
 - **Relatório de Implementação Base:** `docs/optimize-new/execution-fix6/IMP6-R12.md`
 - **Status Geral:** APROVADO COM 100% DE SUCESSO
@@ -39,7 +39,7 @@ Log de saída:
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run tests/components/MaxMaps.test.ts tests/components/MaxInputFileProject.test.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/components/MaxMaps.test.ts (12 tests) 94ms
  ✓ tests/components/MaxInputFileProject.test.ts (23 tests) 195ms
@@ -64,7 +64,7 @@ Log de saída:
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run --config vitest.browser.config.ts tests/browser/fileChooserAndGraphAlternatives.browser.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ |chromium| tests/browser/fileChooserAndGraphAlternatives.browser.ts (5 tests) 373ms
    ✓ File Chooser e Alternativas Acessíveis no Chromium Real (R12 / F19) (5)

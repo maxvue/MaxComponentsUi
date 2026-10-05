@@ -5,7 +5,7 @@
 - **UUID:** `bb49dfb3-7640-410a-86c4-b498f3c7ec37`
 - **Parent ID:** `da986479-bddd-4162-bd27-8952f0c5a526`
 - **Horário de Conclusão:** 2026-09-15T20:15:30-03:00
-- **Worktree Isolado:** `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Worktree Isolado:** `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Branch:** `fix/fix6-implementation`
 - **Componente Foco:** `src/components/MaxAuthCard.vue`
 - **Suíte de Testes:** `tests/components/MaxAuthCard.test.ts`
@@ -77,7 +77,7 @@ $ npx vitest run tests/components/MaxAuthCard.test.ts
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run tests/components/MaxAuthCard.test.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/components/MaxAuthCard.test.ts (36 tests) 505ms
    ✓ MaxAuthCard (36)

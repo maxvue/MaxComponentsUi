@@ -12,7 +12,7 @@
 ## 1. Escopo Auditado e Requisitos
 
 A auditoria adversária foi conduzida estritamente dentro da worktree isolada:
-`/home/johnattas/GitHub/MaxComponentsUi/.worktrees/wt-fix4`
+`/home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-fix4`
 
 Requisitos auditados para o Bloco **R13 / F20** (conforme `docs/optimize-new/instructions_to_implementation_fix4.md`, `IMP-R13.md` e achado de usabilidade):
 1. Imposição irrestrita e explícita de `scope="col"` em **todos** os elementos `<th>` de `MaxTable` e `MaxTableFields` (incluindo colunas sem campo, cabeçalho de botões `#buttons` e cabeçalhos customizados).

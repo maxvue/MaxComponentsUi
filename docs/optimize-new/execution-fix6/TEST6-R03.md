@@ -4,7 +4,7 @@
 - **Bloco:** R03 / E03-01 (Validação estrutural canônica de parentTag/path em legacyClassUsage.test.ts)
 - **UUID:** `be5bceca-a5f6-4d43-8ae6-345a8843c4ed`
 - **Parent ID:** `da986479-bddd-4162-bd27-8952f0c5a526`
-- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Branch:** `fix/fix6-implementation`
 - **Status:** APROVADO COM SUCESSO
 
@@ -29,7 +29,7 @@ Os objetivos específicos de validação incluíram:
 ```bash
 $ npx vitest run tests/architecture/legacyClassUsage.test.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/architecture/legacyClassUsage.test.ts (11 tests) 283ms
    ✓ Auditoria Arquitetural: Uso de Classes Legadas e Desacoplamento PrimeVue (R03 / F04) (11)

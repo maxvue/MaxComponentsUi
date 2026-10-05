@@ -4,7 +4,7 @@
 - **Bloco:** R14 / E09-01 (MaxAuthCard submit nativo, Enter/autofill Chromium e exatamente uma live region)
 - **UUID:** `800409dd-fcbe-4fbf-b503-6775b8ad9d1e`
 - **Parent ID:** `da986479-bddd-4162-bd27-8952f0c5a526`
-- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Branch:** `fix/fix6-implementation`
 - **Status:** CONCLUÍDO COM SUCESSO
 
@@ -43,7 +43,7 @@ $ npx vitest run tests/components/MaxAuthCard.test.ts
 ```
 **Saída:**
 ```
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/components/MaxAuthCard.test.ts (36 tests) 502ms
    ✓ MaxAuthCard (36)

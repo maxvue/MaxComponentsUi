@@ -2,7 +2,7 @@
 
 **Data**: 15 de Setembro de 2026
 **UUID**: 32fdd0cf-0d47-46e2-9382-4bd99f05dd26
-**Diretório de Trabalho**: `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+**Diretório de Trabalho**: `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 
 ## Objetivo
 1. Corrigir o literal `z-index: 9999` em `src/components/MaxTagSelect.vue` (linha 1012) e em `src/components/MaxInputSelect.vue` (linha 954).
@@ -58,7 +58,7 @@ npx vitest run tests/themes/layers.test.ts
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run tests/themes/layers.test.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
 
  ✓ tests/themes/layers.test.ts (6 tests) 25ms

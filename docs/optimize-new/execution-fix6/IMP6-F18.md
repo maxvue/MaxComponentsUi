@@ -3,7 +3,7 @@
 - **ID do Papel:** IMP6-F18
 - **Bloco:** F18 / E07-06 (MaxImage: recorte de 48 MP mensurável com raster real, orçamentos, Long Tasks, heap e freeze)
 - **UUID:** `f81b4049-5f9d-4dfc-8e8b-ae8f21e8fc2a`
-- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Branch:** `fix/fix6-implementation`
 - **Status:** CONCLUÍDO COM SUCESSO
 
@@ -54,7 +54,7 @@ O requisito F18 / E07-06 exigia solucionar a limitação identificada na auditor
 ```bash
 $ npx vitest run tests/components/MaxImage.test.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/components/MaxImage.test.ts (28 tests) 328ms
    ✓ MaxImage (28)
@@ -96,7 +96,7 @@ $ npx vitest run tests/components/MaxImage.test.ts
 ```bash
 $ npx vitest run --config vitest.browser.config.ts --browser.headless=true tests/browser/MaxImage.browser.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ |chromium| tests/browser/MaxImage.browser.ts (5 tests) 4882ms
    ✓ MaxImage no Chromium Real — Performance de Recorte em Alta Resolução (F18) (5)

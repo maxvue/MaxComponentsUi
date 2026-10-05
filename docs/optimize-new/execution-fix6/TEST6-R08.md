@@ -4,7 +4,7 @@
 - **Papel**: `TEST6-R08`
 - **Subagente UUID**: `12f43d09-491c-4b53-a3d5-e51c890069cf`
 - **Requisito**: `R08` / `E04-05`
-- **Worktree**: `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Worktree**: `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Data/Hora**: 2026-09-15T20:15:20-03:00
 - **Status Geral**: APROVADO COM DISTINÇÃO (100% PASS, 0 VIOLAÇÕES REGREDIDAS)
 
@@ -41,7 +41,7 @@ Log real de saída:
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run tests/helpers/useAccessibleName.test.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/helpers/useAccessibleName.test.ts (40 tests) 118ms
    ✓ useAccessibleName (R08) (40)
@@ -110,7 +110,7 @@ Log real de saída:
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run --config vitest.browser.config.ts tests/browser/useAccessibleName.browser.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ |chromium| tests/browser/useAccessibleName.browser.ts (7 tests) 32ms
    ✓ useAccessibleName no Chromium Real com axe-core (R08) (7)

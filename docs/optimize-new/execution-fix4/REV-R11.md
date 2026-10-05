@@ -3,7 +3,7 @@
 - **Subagente:** `REV-R11` (Grupo B — Refutador Independente, 3ª tentativa)
 - **ID da Plataforma:** `e650fae6-d211-4e39-a8c2-0c265e8edbe6`
 - **Parent ID:** `97db74f2-d994-4291-b55b-2b4eff908ba2`
-- **Worktree auditado:** `/home/johnattas/GitHub/MaxComponentsUi/.worktrees/wt-fix4`
+- **Worktree auditado:** `/home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-fix4`
 - **Horário de Início:** 2026-09-15T13:17:18-03:00
 - **Horário de Término:** 2026-09-15T13:30:00-03:00
 - **Modo:** Somente leitura e execução de testes — nenhum arquivo alterado
@@ -59,7 +59,7 @@ Todos os critérios adversariais foram verificados de forma independente com suc
 ### 3.1 Testes Unitários de Componente
 
 ```bash
-cd /home/johnattas/GitHub/MaxComponentsUi/.worktrees/wt-fix4
+cd /home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-fix4
 npx vitest run tests/components/MaxTagSelect.test.ts
 ```
 

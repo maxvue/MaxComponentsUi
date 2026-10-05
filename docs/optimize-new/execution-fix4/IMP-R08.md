@@ -4,7 +4,7 @@
 - **ID da Conversa/Plataforma**: `b3be6347-c0bf-4dc3-91b8-89120dd76e2f`
 - **Parent ID**: `97db74f2-d994-4291-b55b-2b4eff908ba2`
 - **Data/Hora**: `2026-09-15T07:55:00-03:00`
-- **Worktree**: `/home/johnattas/GitHub/MaxComponentsUi/.worktrees/wt-fix4`
+- **Worktree**: `/home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-fix4`
 - **Status**: Concluído com Sucesso
 
 ---

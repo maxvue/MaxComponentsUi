@@ -1,4 +1,4 @@
-Nova tentativa após a reprovação, **reaproveitando a branch** `fix/gh-7` (`git worktree add .worktrees/wt-fix-gh-7 fix/gh-7`). A revisão foi explícita: a abordagem estava correta na raiz, o defeito era a *natureza* da guarda, e mandou preservar todo o resto. Recomeçar do zero descartaria trabalho já aprovado pela própria revisão.
+Nova tentativa após a reprovação, **reaproveitando a branch** `fix/gh-7` (`git worktree add .max-code-worktrees/wt-fix-gh-7 fix/gh-7`). A revisão foi explícita: a abordagem estava correta na raiz, o defeito era a *natureza* da guarda, e mandou preservar todo o resto. Recomeçar do zero descartaria trabalho já aprovado pela própria revisão.
 
 Correção implementada em `fix/gh-7` (`486cace816978547d468e3f2ff895cd327bb3191`), aguardando revisão do /bugs-check.
 

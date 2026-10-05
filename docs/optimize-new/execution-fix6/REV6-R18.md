@@ -4,7 +4,7 @@
 **Revisor**: `REV6-R18`  
 **UUID**: `b9dd8c62-d655-44a7-9db1-c3812771b062`  
 **Parent ID**: `da986479-bddd-4162-bd27-8952f0c5a526`  
-**Worktree**: `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`  
+**Worktree**: `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`  
 **Escopo**: Auditoria adversarial estrita de `src/themes/_motion.scss`, testes em Chromium real (`tests/browser/motionStandardsReducedMotion.browser.ts`), suíte arquitetural (`tests/architecture/motionStandardsValidation.test.ts`) e relatório `docs/optimize-new/execution-fix6/IMP6-R18.md`.
 
 ---
@@ -50,7 +50,7 @@ npx vitest run tests/architecture/motionStandardsValidation.test.ts
 ```
 **Saída**:
 ```text
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/architecture/motionStandardsValidation.test.ts (20 tests) 92ms
    ✓ E10-09: Política Sistêmica de Movimento Reduzido (prefers-reduced-motion) (20)
@@ -95,7 +95,7 @@ npx vitest run --config vitest.browser.config.ts tests/browser/motionStandardsRe
 ```
 **Saída**:
 ```text
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
 Port 63315 is in use, trying another one...
 

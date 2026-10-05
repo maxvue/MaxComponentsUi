@@ -2,7 +2,7 @@
 
 ## 1. Identificação e Metadados
 - **Subagente:** `IMP-R02` (Grupo A de Implementação)
-- **Worktree:** `/home/johnattas/GitHub/MaxComponentsUi/.worktrees/wt-fix4`
+- **Worktree:** `/home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-fix4`
 - **Branch:** `fix/instructions-fix4`
 - **Parent ID:** `97db74f2-d994-4291-b55b-2b4eff908ba2`
 - **Status:** Concluído com Resolução da Refutação Adversarial (REV-R02)

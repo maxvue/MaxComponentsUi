@@ -6,7 +6,7 @@
 - **Parent ID:** `97db74f2-d994-4291-b55b-2b4eff908ba2`
 - **Horário de Início:** 2026-09-15T09:48:16-03:00
 - **Horário de Término:** 2026-09-15T09:55:30-03:00
-- **Worktree Auditado:** `/home/johnattas/GitHub/MaxComponentsUi/.worktrees/wt-fix4`
+- **Worktree Auditado:** `/home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-fix4`
 - **Veredito:** **ACEITO**
 
 ---

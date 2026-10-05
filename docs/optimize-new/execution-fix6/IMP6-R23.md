@@ -47,7 +47,7 @@
 $ npm run test:benchmark
 npm notice run vitest run --config vitest.benchmark.config.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/benchmarks/MaxBaseVirtualScroller.benchmark.ts (1 test) 267ms
  ✓ tests/benchmarks/MaxInputTextArea.benchmark.ts (1 test) 129ms

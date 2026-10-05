@@ -2,7 +2,7 @@
 
 - **ID do Subagente:** IMP-R24 (Grupo A — Implementador)
 - **Parent ID:** 97db74f2-d994-4291-b55b-2b4eff908ba2
-- **Worktree:** `/home/johnattas/GitHub/MaxComponentsUi/.worktrees/wt-fix4`
+- **Worktree:** `/home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-fix4`
 - **Branch:** fix/instructions-fix4
 - **Início:** 2026-09-15T13:15:01-03:00
 - **Fim:** 2026-09-15T13:25:30-03:00

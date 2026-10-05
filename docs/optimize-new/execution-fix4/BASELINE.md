@@ -2,7 +2,7 @@
 
 - Data de Coleta: 2026-09-15T07:47:00Z
 - Commit Base: ea9c6869 merge: integra quarta auditoria do Antigravity
-- Worktree Isolada: .worktrees/wt-fix4 (Branch fix/instructions-fix4)
+- Worktree Isolada: .max-code-worktrees/wt-fix4 (Branch fix/instructions-fix4)
 
 ## Tabela de Gates Iniciais
 

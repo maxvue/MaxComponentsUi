@@ -6,7 +6,7 @@
 - **Parent ID:** `97db74f2-d994-4291-b55b-2b4eff908ba2`
 - **Horário de Início (Rodada 1):** 2026-09-15T11:19:43-03:00
 - **Horário de Conclusão (Rodada 2):** 2026-09-15T11:44:00-03:00
-- **Worktree Isolado:** `/home/johnattas/GitHub/MaxComponentsUi/.worktrees/wt-fix4`
+- **Worktree Isolado:** `/home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-fix4`
 - **Veredito da Rodada 1:** REJEITADO
 - **Veredito Final da Rodada 2:** **ACEITO**
 

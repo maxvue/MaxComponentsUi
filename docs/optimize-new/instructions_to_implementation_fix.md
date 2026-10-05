@@ -6,7 +6,7 @@ Corrija exclusivamente os desvios confirmados nesta revisão da execução de `d
 
 Use subagentes especializados em Vue/TypeScript, testes/toolchain, acessibilidade/UX, UI/design system e performance/distribuição. Antes de editar cada bloco, leia o `description.md` e o `plan.md` original dos IDs citados, reproduza o desvio e preserve os comportamentos que já passaram. Cada bloco tem um único owner; serialize blocos que compartilhem SFC, helper, manifesto ou configuração.
 
-Trabalhe em worktree isolada sob `.worktrees/`. Não altere a árvore principal, não publique e não faça commit, merge ou push sem autorização. Todo defeito deve ganhar teste que falhe pela razão correta antes da correção. Não marque um item como concluído sem anexar comando, resultado e evidência contra todos os critérios de aceite do plano.
+Trabalhe em worktree isolada sob `.max-code-worktrees/`. Não altere a árvore principal, não publique e não faça commit, merge ou push sem autorização. Todo defeito deve ganhar teste que falhe pela razão correta antes da correção. Não marque um item como concluído sem anexar comando, resultado e evidência contra todos os critérios de aceite do plano.
 
 ## Estado auditado e gates bloqueadores
 

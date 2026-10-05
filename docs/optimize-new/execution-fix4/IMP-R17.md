@@ -3,7 +3,7 @@
 **ID do Subagente:** IMP-R17 (Grupo A — Implementador)
 **Parent ID:** 97db74f2-d994-4291-b55b-2b4eff908ba2
 **Bloco:** R17/F23A
-**Worktree:** `/home/johnattas/GitHub/MaxComponentsUi/.worktrees/wt-fix4`
+**Worktree:** `/home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-fix4`
 
 ---
 

@@ -3,7 +3,7 @@
 - **Subagente:** `TEST6-R07`
 - **UUID:** `b22fe9d3-a1a0-4eac-a879-63bc3b82ba96`
 - **Parent ID:** `da986479-bddd-4162-bd27-8952f0c5a526`
-- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Branch:** `fix/fix6-implementation`
 - **Status:** APROVADO COM SUCESSO (100% de conformidade)
 
@@ -50,7 +50,7 @@ npx vitest run tests/helpers/useFocusTrap.test.ts tests/components/MaxInputIconP
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run tests/helpers/useFocusTrap.test.ts tests/components/MaxInputIconPicker.test.ts tests/components/MaxPopover.test.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/helpers/useFocusTrap.test.ts (9 tests) 27ms
    ✓ useFocusTrap (Unitário & Comportamental) (9)
@@ -88,7 +88,7 @@ npx vitest run --config vitest.browser.config.ts tests/browser/MaxFocusStack.bro
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run --config vitest.browser.config.ts tests/browser/MaxFocusStack.browser.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ |chromium| tests/browser/MaxFocusStack.browser.ts (2 tests) 268ms
    ✓ Encadeamento de Foco e Escape em Overlays (Chromium Real) (2)
@@ -133,5 +133,5 @@ npm run type-check:test
 
 ## 4. Conclusão da Validação
 
-Todas as implementações do requisito **R07 (E04-04)** foram auditadas, executadas e validadas com sucesso na worktree `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`.
+Todas as implementações do requisito **R07 (E04-04)** foram auditadas, executadas e validadas com sucesso na worktree `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`.
 O comportamento de confinamento e restauração de foco em overlays atende a todos os critérios de acessibilidade (WCAG 2.1 AA) e estabilidade de estado reativo, sem provocar regressões nos módulos adjacentes.

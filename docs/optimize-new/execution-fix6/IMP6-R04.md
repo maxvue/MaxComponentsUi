@@ -4,7 +4,7 @@
 **Subagente**: `IMP6-R04`  
 **UUID**: `8cb1a5e5-d7cc-4724-8955-d1f95566c737`  
 **Parent ID**: `da986479-bddd-4162-bd27-8952f0c5a526`  
-**Diretório de Trabalho**: `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`  
+**Diretório de Trabalho**: `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`  
 
 ---
 
@@ -166,7 +166,7 @@ npx vitest run tests/components/inputBaseAttributesSeparation.test.ts
 ```
 **Log Real:**
 ```text
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/components/inputBaseAttributesSeparation.test.ts (100 tests) 466ms
    ✓ Separação de atributos nativos de controle e wrapper (R04 / F05) (100)
@@ -193,7 +193,7 @@ npx vitest run --config vitest.browser.config.ts tests/browser/inputBaseMatrix.b
 ```
 **Log Real:**
 ```text
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ |chromium| tests/browser/inputBaseMatrix.browser.ts (4 tests) 188ms
    ✓ R04 / E03-02 — Matriz Chromium de Formulário: label, owner, submit, autofill, required e disabled (4)

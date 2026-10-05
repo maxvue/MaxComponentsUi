@@ -2,7 +2,7 @@
 
 - **Campanha:** FIX7 — Homologação de Independência e Qualidade
 - **Commit Avaliado:** `2240944b`
-- **Ambiente de Execução:** Segundo checkout limpo isolado (`.worktrees/wt-gate7-b`)
+- **Ambiente de Execução:** Segundo checkout limpo isolado (`.max-code-worktrees/wt-gate7-b`)
 - **Status Geral:** **APROVADO (CÓDIGO 0)**
 
 ---

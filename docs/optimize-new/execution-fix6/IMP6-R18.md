@@ -4,7 +4,7 @@
 **Subagente**: `IMP6-R18`  
 **UUID**: `8150b855-8705-4a2b-abeb-d175d9f5206a`  
 **Parent ID**: `da986479-bddd-4162-bd27-8952f0c5a526`  
-**Diretório de Trabalho**: `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`  
+**Diretório de Trabalho**: `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`  
 
 ---
 

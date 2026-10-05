@@ -5,7 +5,7 @@
 - **Subagente UUID**: `140a6482-29a3-4b66-9458-bb0cd848201a`
 - **Requisito**: `R16` / `E10-03, E10-04`
 - **Data/Hora**: 2026-09-15T20:22:05-03:00
-- **Worktree**: `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Worktree**: `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Status**: APROVADO COM LOUVOR (100% PASS, 0 FALHAS, 0 REGRESSÕES)
 
 ---
@@ -40,7 +40,7 @@ Conforme as especificações de `R16` e achados originais `E10-03` / `E10-04`:
   ```
 - **Log Real**:
   ```text
-  RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+  RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
   ✓ tests/architecture/focusVisibleInventory.test.ts (4 tests) 8ms
     ✓ R16/F23 — inventário de foco derivado dos fontes (4)
@@ -65,7 +65,7 @@ Conforme as especificações de `R16` e achados originais `E10-03` / `E10-04`:
   ```
 - **Log Real**:
   ```text
-  RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+  RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
   ✓ |chromium| tests/browser/FocusVisibleInventory.browser.ts (6 tests) 676ms
     ✓ R16/F23 — foco computado em Chromium (6)
@@ -92,7 +92,7 @@ Conforme as especificações de `R16` e achados originais `E10-03` / `E10-04`:
   ```
 - **Log Real**:
   ```text
-  RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+  RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
   ✓ tests/themes/textColorValidation.test.ts (27 tests) 92ms
     ✓ Matriz Semântica de 4 Níveis de Cor de Texto (background-650/700/750/775) (27)

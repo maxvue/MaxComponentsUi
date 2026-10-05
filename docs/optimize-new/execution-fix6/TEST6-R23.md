@@ -4,7 +4,7 @@
 - **Subagente**: `TEST6-R23`
 - **UUID**: `89f41a02-bca4-4f01-8ee4-2a623190df01`
 - **Requisito**: `R23` / `E11-02`
-- **Worktree**: `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Worktree**: `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Data/Hora**: 2026-09-15T20:27:10-03:00
 - **Veredito**: **APROVADO COM ÊXITO (PASS)**
 
@@ -30,7 +30,7 @@ $ npm run test:benchmark
 npm notice run @maxvue/max-components-ui@1.1.2 test:benchmark
 npm notice run vitest run --config vitest.benchmark.config.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/benchmarks/MaxBaseVirtualScroller.benchmark.ts (1 test) 265ms
  ✓ tests/benchmarks/MaxInputTextArea.benchmark.ts (1 test) 127ms

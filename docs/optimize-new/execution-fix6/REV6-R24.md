@@ -4,7 +4,7 @@
 - **Papel**: `REV6-R24`
 - **UUID**: `f250a210-9851-460d-8521-7290c01a91e5`
 - **Requisito / Achado**: `R24` / `E11-04` / `F29`
-- **Worktree**: `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Worktree**: `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Data/Hora**: 2026-09-15T20:34:50-03:00
 - **Status da Auditoria**: **APROVADO SEM RESSALVAS (100% CONFORME)**
 
@@ -118,7 +118,7 @@ npx vitest run tests/architecture/package-exports.test.ts tests/architecture/tre
 
 Saída real:
 ```text
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/architecture/treeshaking-maxbutton.test.ts (8 tests) 13ms
  ✓ tests/architecture/package-exports.test.ts (9 tests) 2476ms

@@ -3,7 +3,7 @@
 - **Subagente:** `REV6-R07`
 - **UUID:** `bea4bf32-b4ab-4cac-8d96-3f6a38cc977d`
 - **Parent ID:** `da986479-bddd-4162-bd27-8952f0c5a526`
-- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Branch:** `fix/fix6-implementation`
 - **Data/Hora Local:** 2026-09-15T18:54:48-03:00
 - **Modo:** Auditoria Adversarial Estrita (sem alteração de arquivos canônicos)
@@ -71,7 +71,7 @@ npx vitest run tests/helpers/useFocusTrap.test.ts tests/components/MaxInputIconP
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run tests/helpers/useFocusTrap.test.ts tests/components/MaxInputIconPicker.test.ts tests/components/MaxPopover.test.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/helpers/useFocusTrap.test.ts (9 tests) 35ms
  ✓ tests/components/MaxPopover.test.ts (24 tests) 372ms
@@ -95,7 +95,7 @@ npx vitest run --config vitest.browser.config.ts tests/browser/MaxFocusStack.bro
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run --config vitest.browser.config.ts tests/browser/MaxFocusStack.browser.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ |chromium| tests/browser/MaxFocusStack.browser.ts (2 tests) 301ms
    ✓ Encadeamento de Foco e Escape em Overlays (Chromium Real) (2)

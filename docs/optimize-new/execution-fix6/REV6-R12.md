@@ -4,7 +4,7 @@
 - **Papel:** Auditor Técnico / Revisor Adversarial
 - **UUID:** `115548da-2be3-44b3-9112-2d91a72836d9`
 - **Parent ID:** `da986479-bddd-4162-bd27-8952f0c5a526`
-- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Branch:** `fix/fix6-implementation`
 - **Data da Auditoria:** 2026-09-15
 - **Status:** **APROVADO (SEM RESSALVAS)**

@@ -4,7 +4,7 @@
 - **Papel**: `REV6-R25` (Refutador Adversarial Independente)
 - **Subagente UUID**: `2b8813a1-ef94-4d22-9011-89304a01c3d1`
 - **Parent ID (Coordenador)**: `da986479-bddd-4162-bd27-8952f0c5a526`
-- **Worktree Canônica**: `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Worktree Canônica**: `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Requisito Auditado**: `R25` / `E11-05` (Validação de consumidores com diretório/tarball exclusivo por PID, cleanup garantido em `finally`, build limpo prévio e cobertura completa de cenários consumidores sem flags permissivas).
 - **Data e Hora da Auditoria**: 2026-09-15T20:38:30-03:00
 - **Modo**: Auditoria estritamente adversarial (zero mutação em código-fonte de produção; geração exclusiva de relatório formal).
@@ -12,9 +12,9 @@
 ---
 
 ## 2. Documentos e Códigos Analisados
-1. [IMP6-R25.md](file:///home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6/docs/optimize-new/execution-fix6/IMP6-R25.md)
-2. [scripts/verify-consumers.mjs](file:///home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6/scripts/verify-consumers.mjs)
-3. [MATRIZ_ORQUESTRACAO.md](file:///home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6/docs/optimize-new/execution-fix6/MATRIZ_ORQUESTRACAO.md)
+1. [IMP6-R25.md](file:///home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6/docs/optimize-new/execution-fix6/IMP6-R25.md)
+2. [scripts/verify-consumers.mjs](file:///home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6/scripts/verify-consumers.mjs)
+3. [MATRIZ_ORQUESTRACAO.md](file:///home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6/docs/optimize-new/execution-fix6/MATRIZ_ORQUESTRACAO.md)
 
 *Nota de auditoria*: O arquivo `TEST6-R25.md` encontrava-se em estado `PLANEJADO` na matriz quando do início desta revisão técnica. O escopo adversarial foi validado diretamente sobre a implementação e execução integral do comando canônico `npm run verify:consumers`.
 
@@ -92,7 +92,7 @@ npm run verify:consumers
 ```text
 npm notice run @maxvue/max-components-ui@1.1.2 verify:consumers
 npm notice run node scripts/verify-consumers.mjs
-Diretório do projeto: /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+Diretório do projeto: /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
 --- Executando build fresco obrigatório ---
 npm notice run @maxvue/max-components-ui@1.1.2 build

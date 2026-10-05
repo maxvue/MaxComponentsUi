@@ -2,7 +2,7 @@
 
 ## Identificação
 - **Subagente**: REV6-R19 (UUID: `82e53987-d63b-46a3-8e0d-67aa6632b286`)
-- **Worktree**: `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Worktree**: `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Data/Hora**: 2026-09-15T18:49:00-03:00
 - **Papel**: Auditoria independente / tentativa de refutação adversarial (sem alteração no código canônico)
 
@@ -48,7 +48,7 @@ npm --prefix playground run build && node scripts/check-playground-bundle.mjs
 ```text
 dist/assets/dist-DsfaJ0NX.js                      2,507.44 kB │ gzip: 823.12 kB
 ✓ built in 4.51s
-Maior chunk: /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6/playground/dist/assets/dist-DsfaJ0NX.js (2507440 bytes brutos, 814514 bytes gzip).
+Maior chunk: /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6/playground/dist/assets/dist-DsfaJ0NX.js (2507440 bytes brutos, 814514 bytes gzip).
 ```
 - **Exit Code**: `0`
 

@@ -3,7 +3,7 @@
 ## Identificação do Papel
 - **Papel**: `TEST6-R17` (UUID: `fad998e6-c37b-46fc-a601-0a3c0c9147b7`)
 - **Requisito**: `R17` / `E10-02`
-- **Worktree**: `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Worktree**: `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Data/Hora de Execução**: 2026-09-15T20:22:00-03:00
 - **Status da Validação**: APROVADO COM DISTINÇÃO (100% PASS, 0 FALHAS, 0 REGRESSÕES)
 
@@ -40,7 +40,7 @@ Log de saída:
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run tests/themes/tokensMutationReal.test.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/themes/tokensMutationReal.test.ts (49 tests) 37ms
    ✓ R17/F23A — CSS compilado de tokens: foco, seleção e severidades (46)
@@ -117,7 +117,7 @@ Log de saída:
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run tests/themes/tokens.test.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/themes/tokens.test.ts (149 tests) 28ms
    ✓ themes/tokens.scss (149)

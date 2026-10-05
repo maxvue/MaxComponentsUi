@@ -4,7 +4,7 @@
 - **Papel**: `REV6-R23` (Auditoria Adversarial)
 - **UUID**: `c59db210-e711-477d-bb92-91f13b1940a2`
 - **Requisito**: `R23` / `E11-02`
-- **Worktree**: `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Worktree**: `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Data/Hora**: 2026-09-15T20:27:30-03:00
 - **Status**: **APROVADO COM RESSALVA DE DOCUMENTAÇÃO LEGADA** (Refutação adversarial concluída)
 
@@ -56,7 +56,7 @@ A auditoria teve como missão tentar refutar a solução apresentada no relatór
     ```
     Saída real obtida:
     ```text
-     RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+     RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
      ✓ tests/benchmarks/MaxBaseVirtualScroller.benchmark.ts (1 test) 279ms
      ✓ tests/benchmarks/MaxInputTextArea.benchmark.ts (1 test) 126ms

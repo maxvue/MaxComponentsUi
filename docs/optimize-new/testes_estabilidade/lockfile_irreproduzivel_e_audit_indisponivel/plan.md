@@ -32,7 +32,7 @@ Restabelecer `package.json`/`package-lock.json` como fonte instalável em qualqu
 2. Alinhar dependências/peers com o manifesto final e remover entradas antigas de PrimeVue/PrimeUI que já não pertencem a `package.json`.
 3. Fixar runtime de geração por `.nvmrc`, `engines` e `packageManager`; documentar comando exato.
 4. Em diretório temporário/clonado, sem `node_modules` herdado, executar `npm install --package-lock-only` e depois `npm ci` usando o runtime fixado.
-5. O validador deve comparar requisitos diretos do bloco raiz do lock com `package.json` e rejeitar chaves/resolved contendo `../`, caminho absoluto, `.worktrees` ou localização externa ao pacote.
+5. O validador deve comparar requisitos diretos do bloco raiz do lock com `package.json` e rejeitar chaves/resolved contendo `../`, caminho absoluto, `.max-code-worktrees` ou localização externa ao pacote.
 6. Executar `npm ls --all`; investigar todo `invalid`, `extraneous`, `missing` ou peer inválido.
 7. Executar `npm audit --omit=dev --json`; classificar cada advisory por alcançabilidade/mitigação/prazo em documentação. Não usar `--force` automaticamente.
 8. Gerar `npm pack`, instalar o `.tgz` num consumidor temporário e importar `.`, `./preset` e `./resolver`.

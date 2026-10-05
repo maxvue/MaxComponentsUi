@@ -1,7 +1,7 @@
 # Relatório de Execução - IMP6-F15
 
 **UUID do Subagente:** `035805d6-18a3-4afc-940e-1f98798dcf82`  
-**Diretório de Trabalho:** `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+**Diretório de Trabalho:** `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 
 ## 1. Contexto e Objetivos
 1. Corrigir os erros de ESLint em `src/components/MaxIconButton.vue` (linhas 153 e 155 - indentação e curly braces desnecessárias).
@@ -52,7 +52,7 @@ npm notice run 'eslint' src/components/MaxIconButton.vue
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run tests/components/MaxIconButton.test.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/components/MaxIconButton.test.ts (23 tests) 106ms
    ✓ MaxIconButton (23)

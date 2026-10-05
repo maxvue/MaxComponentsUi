@@ -4,7 +4,7 @@
 - **Subagente:** `REV-R02` (Grupo B de Refutação Independente)
 - **ID da Conversa na Plataforma:** `738c09f2-3a7a-4006-a657-83031a9be243`
 - **Parent ID:** `97db74f2-d994-4291-b55b-2b4eff908ba2`
-- **Worktree:** `/home/johnattas/GitHub/MaxComponentsUi/.worktrees/wt-fix4`
+- **Worktree:** `/home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-fix4`
 - **Branch:** `fix/instructions-fix4`
 - **Início:** 2026-09-15T06:08:43-03:00
 - **Término:** 2026-09-15T07:15:00-03:00

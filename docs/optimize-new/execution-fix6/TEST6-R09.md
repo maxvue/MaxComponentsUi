@@ -2,14 +2,14 @@
 
 **Data**: 15 de Setembro de 2026  
 **UUID**: 2e162e99-827f-43cb-8b61-31ad9efb5248  
-**Diretório de Trabalho**: `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`  
+**Diretório de Trabalho**: `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`  
 **Relatório Base de Implementação**: `docs/optimize-new/execution-fix6/IMP6-R09.md`
 
 ---
 
 ## 1. Objetivo da Validação
-1. Validar as alterações descritas em [IMP6-R09.md](file:///home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6/docs/optimize-new/execution-fix6/IMP6-R09.md).
-2. Auditar os arquivos [MaxTagSelect.vue](file:///home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6/src/components/MaxTagSelect.vue) e [MaxInputSelect.vue](file:///home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6/src/components/MaxInputSelect.vue).
+1. Validar as alterações descritas em [IMP6-R09.md](file:///home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6/docs/optimize-new/execution-fix6/IMP6-R09.md).
+2. Auditar os arquivos [MaxTagSelect.vue](file:///home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6/src/components/MaxTagSelect.vue) e [MaxInputSelect.vue](file:///home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6/src/components/MaxInputSelect.vue).
 3. Comprovar ausência total de literais arbitrários de `z-index` legados (`9999`, `99999`, `100000`, `999999`).
 4. Comprovar a presença e aplicação do token canônico:
    ```css
@@ -61,7 +61,7 @@ npx vitest run tests/themes/layers.test.ts
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run tests/themes/layers.test.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
 
  ✓ tests/themes/layers.test.ts (6 tests) 22ms

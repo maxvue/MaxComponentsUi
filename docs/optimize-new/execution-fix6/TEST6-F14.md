@@ -2,7 +2,7 @@
 
 **Subagente:** TEST6-F14 (UUID: `7d344eee-ea2e-495a-9aea-a5bb6c85469a`)  
 **Data:** 15/09/2026  
-**Worktree:** `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`  
+**Worktree:** `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`  
 
 ---
 
@@ -53,7 +53,7 @@ npx vitest run tests/components/base/MaxBaseVirtualScroller.test.ts
 
 Saída real:
 ```text
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/components/base/MaxBaseVirtualScroller.test.ts (41 tests) 335ms
    ✓ MaxBaseVirtualScroller (41)

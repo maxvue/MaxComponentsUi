@@ -6,7 +6,7 @@
 - **Auditando:** `IMP-R12` (ID: `d25bcb86-4d20-4dc5-a3fd-dd2b964f6f74`)
 - **Horário de Início:** 2026-09-15T13:15:01-03:00
 - **Horário de Término:** 2026-09-15T13:35:00-03:00
-- **Worktree auditado:** `/home/johnattas/GitHub/MaxComponentsUi/.worktrees/wt-fix4`
+- **Worktree auditado:** `/home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-fix4`
 
 ---
 

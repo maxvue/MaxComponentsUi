@@ -3,7 +3,7 @@
 - **ID do Papel:** TEST6-F07
 - **Bloco:** F07 / E04-02 (Validação de useOutsidePointer.ts e Fechamento de Pilha de Overlays)
 - **UUID:** `542d6f18-b3fd-4df3-90e7-6477df14d1e9`
-- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Branch:** `fix/fix6-implementation`
 - **Status:** APROVADO COM SUCESSO
 
@@ -29,7 +29,7 @@ Os objetivos específicos de validação incluíram:
 ```bash
 $ npx vitest run tests/helpers/useOutsidePointer.test.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/helpers/useOutsidePointer.test.ts (14 tests) 50ms
    ✓ useOutsidePointer (14)

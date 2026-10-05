@@ -3,7 +3,7 @@
 - **Subagente:** `IMP6-R07`
 - **UUID:** `4782c358-a1fb-4c07-ab22-455ef2ca9f33`
 - **Parent ID:** `da986479-bddd-4162-bd27-8952f0c5a526`
-- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Branch:** `fix/fix6-implementation`
 - **Status:** CONCLUÍDO COM SUCESSO
 
@@ -58,7 +58,7 @@ npx vitest run tests/helpers/useFocusTrap.test.ts tests/components/MaxInputIconP
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run tests/helpers/useFocusTrap.test.ts tests/components/MaxInputIconPicker.test.ts tests/components/MaxInputMarkdown.test.ts tests/components/MaxPopover.test.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/helpers/useFocusTrap.test.ts (9 tests) 30ms
    ✓ useFocusTrap (Unitário & Comportamental) (9)
@@ -94,7 +94,7 @@ npx vitest run --config vitest.browser.config.ts tests/browser/MaxFocusStack.bro
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run --config vitest.browser.config.ts tests/browser/MaxFocusStack.browser.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ |chromium| tests/browser/MaxFocusStack.browser.ts (2 tests) 266ms
    ✓ Encadeamento de Foco e Escape em Overlays (Chromium Real) (2)
@@ -119,7 +119,7 @@ npx vitest run tests/helpers/useOutsidePointer.test.ts
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run tests/helpers/useOutsidePointer.test.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/helpers/useOutsidePointer.test.ts (14 tests) 54ms
    ✓ useOutsidePointer (14)

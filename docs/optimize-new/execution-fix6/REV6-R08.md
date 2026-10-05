@@ -3,7 +3,7 @@
 - **Subagente:** `REV6-R08`
 - **UUID:** `cd167389-7cf1-4560-bf64-3fa0e72bd583`
 - **Parent ID:** `da986479-bddd-4162-bd27-8952f0c5a526`
-- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Branch:** `fix/fix6-implementation`
 - **Data/Hora Local:** 2026-09-15T20:15:30-03:00
 - **Modo:** Auditoria Adversarial Estrita (sem alteração de arquivos canônicos)
@@ -91,7 +91,7 @@ npx vitest run tests/helpers/useAccessibleName.test.ts
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run tests/helpers/useAccessibleName.test.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/helpers/useAccessibleName.test.ts (40 tests) 110ms
    ✓ useAccessibleName (R08) (40)
@@ -161,7 +161,7 @@ npx vitest run --config vitest.browser.config.ts tests/browser/useAccessibleName
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run --config vitest.browser.config.ts tests/browser/useAccessibleName.browser.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ |chromium| tests/browser/useAccessibleName.browser.ts (7 tests) 34ms
    ✓ useAccessibleName no Chromium Real com axe-core (R08) (7)

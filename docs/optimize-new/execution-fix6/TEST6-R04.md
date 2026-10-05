@@ -4,14 +4,14 @@
 **Subagente**: `TEST6-R04`  
 **UUID**: `0a3c4881-14b9-4265-9342-d22a209dd32f`  
 **Parent ID**: `da986479-bddd-4162-bd27-8952f0c5a526`  
-**Worktree**: `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`  
+**Worktree**: `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`  
 **Alvo / Requisito**: R04 / E03-02 (Separação e propagação de atributos em InputBase, submissão FormData, label focus e isolamento de Birthday)  
 
 ---
 
 ## 1. Escopo e Objetivos da Validação
 
-Validar rigorosamente a entrega técnica documentada em [IMP6-R04.md](file:///home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6/docs/optimize-new/execution-fix6/IMP6-R04.md), confirmando o cumprimento dos seguintes critérios observáveis:
+Validar rigorosamente a entrega técnica documentada em [IMP6-R04.md](file:///home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6/docs/optimize-new/execution-fix6/IMP6-R04.md), confirmando o cumprimento dos seguintes critérios observáveis:
 1. **Separação de atributos nas 25 famílias canônicas**: Atributos operáveis (`name`, `form`, `disabled`, `required`, `autocomplete`, etc.) direcionados exclusivamente ao nó interativo, enquanto `class`, `style` e atributos contextuais/dados (`data-*`) permanecem na casca (`wrapper`).
 2. **Submissão nativa multifamília em `FormData`**: Validação de múltiplos controles distintos associados a um mesmo formulário (`MaxInputText`, `MaxInputTextArea`, `MaxInputNumber`, `MaxInputToggle`) com extração de valores consistente.
 3. **Foco nativo via label (`<label for="...">`)**: Transferência nativa de foco para o controle ao clicar no rótulo, sem dependência de trigger manual (`element.focus()`).
@@ -23,7 +23,7 @@ Validar rigorosamente a entrega técnica documentada em [IMP6-R04.md](file:///ho
 ## 2. Auditoria dos Arquivos e Critérios Observáveis
 
 ### 2.1. Cardinalidade das Famílias e Isolamento de Birthday
-- O arquivo [inputBaseAttributesSeparation.test.ts](file:///home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6/tests/components/inputBaseAttributesSeparation.test.ts) mantém `inputFamilies` com exatamente **25 famílias canônicas**.
+- O arquivo [inputBaseAttributesSeparation.test.ts](file:///home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6/tests/components/inputBaseAttributesSeparation.test.ts) mantém `inputFamilies` com exatamente **25 famílias canônicas**.
 - O componente `MaxInputBirthday` possui anatomia segmentada especializada e está isolado em um bloco `describe('MaxInputBirthday: isolamento fora da contagem canônica de 25 famílias')`.
 - O teste garante:
   ```ts
@@ -56,7 +56,7 @@ npx vitest run tests/components/inputBaseAttributesSeparation.test.ts
 
 **Log Real:**
 ```text
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/components/inputBaseAttributesSeparation.test.ts (100 tests) 459ms
    ✓ Separação de atributos nativos de controle e wrapper (R04 / F05) (100)
@@ -85,7 +85,7 @@ npx vitest run --config vitest.browser.config.ts tests/browser/inputBaseMatrix.b
 
 **Log Real:**
 ```text
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ |chromium| tests/browser/inputBaseMatrix.browser.ts (4 tests) 188ms
    ✓ R04 / E03-02 — Matriz Chromium de Formulário: label, owner, submit, autofill, required e disabled (4)

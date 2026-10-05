@@ -3,7 +3,7 @@
 - **ID do Papel:** IMP6-F07
 - **Bloco:** F07 / E04-02 (useOutsidePointer.ts e fechamento de pilha de overlays)
 - **UUID:** `4a04d537-eb4c-42cb-b700-1c0ea5b5f782`
-- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Branch:** `fix/fix6-implementation`
 - **Status:** CONCLUÍDO
 

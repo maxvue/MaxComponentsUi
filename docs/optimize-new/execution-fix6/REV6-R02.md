@@ -5,7 +5,7 @@
 - **UUID**: `c04ef901-b51e-450e-bcbb-781e05d76d41`
 - **Requisito Auditado**: `R02` / `E01-04` + `E12-02` transversal (Política de Console, Consumo Explícito de Spy, Janelas Teardown e Eliminação de AbortError)
 - **Data/Hora**: 2026-09-15T20:30:00-03:00
-- **Worktree**: `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Worktree**: `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Status do Parecer**: **APROVADO COM LOUVOR (100% PASS / ZERO REGRESSÕES)**
 
 ---
@@ -62,7 +62,7 @@
 ```bash
 $ npx vitest run tests/core/warningTrap.test.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/core/warningTrap.test.ts (11 tests) 22ms
    ✓ Política de console e suíte sem warnings (E12-02) (11)
@@ -88,7 +88,7 @@ $ npx vitest run tests/core/warningTrap.test.ts
 ```bash
 $ npx vitest run --config vitest.browser.config.ts tests/browser/MaxCreditCard.browser.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ |chromium| tests/browser/MaxCreditCard.browser.ts (6 tests) 2241ms
    ✓ MaxCreditCard no Chromium Real (R21 / F27: Integridade e Regressão Visual) (6)

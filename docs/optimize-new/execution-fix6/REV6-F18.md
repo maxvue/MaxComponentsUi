@@ -3,7 +3,7 @@
 - **Subagente:** REV6-F18
 - **UUID:** `ab2957a4-bdad-47ce-9b2d-d78e502cad9a`
 - **Papel:** Auditor Adversarial Independente do Bloco F18 / E07-06
-- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Data:** 15/09/2026
 - **Status da Auditoria:** **APROVADO (SEM RESSALVAS)**
 
@@ -166,7 +166,7 @@ $ npx vitest run tests/components/MaxImage.test.ts
 ```
 **Saída real obtida:**
 ```text
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/components/MaxImage.test.ts (28 tests) 290ms
    ✓ MaxImage (28)
@@ -210,7 +210,7 @@ $ npx vitest run --config vitest.browser.config.ts tests/browser/MaxImage.browse
 ```
 **Saída real obtida:**
 ```text
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ |chromium| tests/browser/MaxImage.browser.ts (5 tests) 4715ms
    ✓ MaxImage no Chromium Real — Performance de Recorte em Alta Resolução (F18) (5)

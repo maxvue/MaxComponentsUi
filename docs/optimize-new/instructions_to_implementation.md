@@ -9,7 +9,7 @@ Antes de editar, leia integralmente `GEMINI.md`, o `description.md` e o `plan.md
 ## Ambiente e Git
 
 1. Inspecione raiz, branch, `git status --short` e worktrees. Alterações preexistentes pertencem ao usuário: não as reverta, formate nem inclua incidentalmente.
-2. Crie branch com prefixo `fixes/` e worktree isolada sob `.worktrees/`, após confirmar que a pasta está ignorada. Toda edição, instalação, geração e teste ocorre nessa worktree; nunca edite a working tree principal.
+2. Crie branch com prefixo `fixes/` e worktree isolada sob `.max-code-worktrees/`, após confirmar que a pasta está ignorada. Toda edição, instalação, geração e teste ocorre nessa worktree; nunca edite a working tree principal.
 3. Não use comandos destrutivos ou limpeza ampla. Confirme alvos exatos antes das remoções previstas.
 4. Não faça commit, merge, rebase, push, publicação ou PR sem autorização explícita. Se autorizado, use commits pequenos e mensagens em pt-BR, sem misturar mudanças preexistentes.
 5. Ao fim de cada etapa, entregue arquivos/API alterados, testes e resultados, desvios justificados, métricas e riscos remanescentes.
@@ -21,7 +21,7 @@ Use subagentes especializados, no mínimo, em: Vue/TypeScript e fundações; tes
 - Cada item da matriz tem exatamente um owner final. Um owner pode receber itens relacionados.
 - Calcule previamente interseções de arquivos. Dois agentes não editam simultaneamente o mesmo SFC/helper/teste, fonte e artefato gerado, manifesto, configuração, snapshot, `package.json` ou `package-lock.json`.
 - Paralelize apenas arquivos comprovadamente disjuntos. Sobreposições ficam com o mesmo owner ou são serializadas; o owner seguinte relê o diff e os testes já integrados.
-- Subagentes podem compartilhar a worktree de execução apenas com ownership disjunto. Se usarem worktrees próprias sob `.worktrees/`, entregam diff/patch ao coordenador; não exija commit quando ele não estiver autorizado.
+- Subagentes podem compartilhar a worktree de execução apenas com ownership disjunto. Se usarem worktrees próprias sob `.max-code-worktrees/`, entregam diff/patch ao coordenador; não exija commit quando ele não estiver autorizado.
 - Cada subagente investiga, reproduz, implementa, testa e relata. O coordenador revisa o diff e impede helpers, estados e contratos concorrentes.
 - Falhas não permitem pular itens. Registre comando, saída, causa, impacto e trabalho restante quando houver bloqueio externo real.
 

@@ -4,7 +4,7 @@
 - **Papel**: `TEST6-R21` (UUID: `38de3932-d3a7-4921-b878-5737350feba6`)
 - **Requisito**: `R21` / `E11-03`
 - **Data/Hora**: 2026-09-15T20:21:40-03:00
-- **Diretório de Trabalho**: `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Diretório de Trabalho**: `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Status Geral**: **APROVADO (100% PASS)**
 
 ---
@@ -56,7 +56,7 @@ npx vitest run --config vitest.browser.config.ts tests/browser/MaxCreditCard.bro
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run --config vitest.browser.config.ts tests/browser/MaxCreditCard.browser.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
 Port 63315 is in use, trying another one...
 

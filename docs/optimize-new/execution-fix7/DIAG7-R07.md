@@ -8,7 +8,7 @@
 - **HEAD Final:** `f216d014ee6535689f409649f43f79a0cff2657b`
 - **Horário Início:** 2026-09-16 14:45
 - **Horário Fim:** 2026-09-16 14:55
-- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/storage/libs/MaxComponentsUi/.worktrees/sub-fix7`
+- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/storage/libs/MaxComponentsUi/.max-code-worktrees/sub-fix7`
 - **Manifest de Arquivos:** `src/helpers/useFocusTrap.ts, src/components/MaxInputIconPicker.vue, src/components/MaxPopover.vue, src/components/MaxInputMarkdown.vue`
 - **Status:** CONCLUÍDO
 - **Commit:** `f216d014ee6535689f409649f43f79a0cff2657b`

@@ -6,7 +6,7 @@
 - **Parent ID:** `97db74f2-d994-4291-b55b-2b4eff908ba2`
 - **Horário de Início:** 2026-09-15T09:27:57-03:00
 - **Horário de Término:** 2026-09-15T09:45:00-03:00
-- **Worktree Isolado:** `/home/johnattas/GitHub/MaxComponentsUi/.worktrees/wt-fix4`
+- **Worktree Isolado:** `/home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-fix4`
 - **Status:** CONCLUÍDO COM SUCESSO (36/36 testes passando, zero erros de lint e zero erros de tipo)
 
 ---

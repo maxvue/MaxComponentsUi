@@ -3,7 +3,7 @@
 **Subagente:** TEST6-F15  
 **UUID:** `42be3985-6d95-452f-a352-ac03c8ca8fb9`  
 **Data:** 2026-09-15  
-**Diretório de Trabalho:** `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+**Diretório de Trabalho:** `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 
 ---
 
@@ -44,7 +44,7 @@ npx vitest run tests/components/MaxIconButton.test.ts
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run tests/components/MaxIconButton.test.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/components/MaxIconButton.test.ts (23 tests) 107ms
    ✓ MaxIconButton (23)
@@ -92,7 +92,7 @@ npx vitest run tests/components/MaxTagSelect.test.ts
 ```
 **Resultado:**
 ```
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/components/MaxTagSelect.test.ts (48 tests) 1537ms
    ✓ MaxTagSelect (48)

@@ -4,7 +4,7 @@
 - **Bloco:** R12 / E07-04, E07-05 (Picker nativo único em MaxInputFileProject e coordenadas válidas (0, 0) em MaxMaps)
 - **UUID:** `311beb2d-8e94-45fc-b2e5-c6ea71418e14`
 - **Parent ID:** `da986479-bddd-4162-bd27-8952f0c5a526`
-- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Branch:** `fix/fix6-implementation`
 - **Status:** CONCLUÍDO COM SUCESSO
 

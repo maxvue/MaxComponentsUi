@@ -8,7 +8,7 @@
 - **HEAD Final:** `f216d014ee6535689f409649f43f79a0cff2657b`
 - **Horário Início:** 2026-09-16 14:56
 - **Horário Fim:** 2026-09-16 15:08
-- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/storage/libs/MaxComponentsUi/.worktrees/sub-fix7`
+- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/storage/libs/MaxComponentsUi/.max-code-worktrees/sub-fix7`
 - **Manifest de Arquivos:** `tests/themes/tokensMutationReal.test.ts, src/themes/tokens.scss`
 - **Status:** CONCLUÍDO
 - **Commit:** `f216d014ee6535689f409649f43f79a0cff2657b`

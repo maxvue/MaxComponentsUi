@@ -3,7 +3,7 @@
 - **Subagente:** `REV6-R03`
 - **UUID:** `2ea21d7a-4143-4d07-a885-661bdade70ad`
 - **Parent ID:** `da986479-bddd-4162-bd27-8952f0c5a526`
-- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Branch:** `fix/fix6-implementation`
 - **Data/Hora Local:** 2026-09-15T18:57:30-03:00
 - **Modo:** Auditoria Adversarial Estrita (não alterar arquivos canônicos da worktree)
@@ -96,7 +96,7 @@ $ npx vitest run tests/architecture/legacyClassUsage.test.ts
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run tests/architecture/legacyClassUsage.test.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/architecture/legacyClassUsage.test.ts (11 tests) 279ms
    ✓ Auditoria Arquitetural: Uso de Classes Legadas e Desacoplamento PrimeVue (R03 / F04) (11)
@@ -146,7 +146,7 @@ $ npx vitest run tests/architecture/legacyClassUsage.test.ts -t "violação estr
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run tests/architecture/legacyClassUsage.test.ts -t violação estrutural de parentTag e path
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/architecture/legacyClassUsage.test.ts (11 tests | 10 skipped) 42ms
    ✓ Auditoria Arquitetural: Uso de Classes Legadas e Desacoplamento PrimeVue (R03 / F04) (11)

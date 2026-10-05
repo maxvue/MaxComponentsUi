@@ -5,7 +5,7 @@
 - **Requisito**: `R02` / `E01-04` + `E12-02` transversal
 - **Subagente**: TEST6-R02 (UUID: `da0119ec-eb5c-4f81-8178-5743b17a5be1`)
 - **Data/Hora**: 2026-09-15T20:29:55-03:00
-- **Diretório de Trabalho**: `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Diretório de Trabalho**: `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Status Final**: **APROVADO COM SUCESSO (100% PASS)**
 
 ---
@@ -29,7 +29,7 @@ npx vitest run tests/core/warningTrap.test.ts
 ```
 **Saída Real**:
 ```text
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/core/warningTrap.test.ts (11 tests) 21ms
    ✓ Política de console e suíte sem warnings (E12-02) (11)
@@ -61,7 +61,7 @@ npx vitest run tests/stores/useIcon.Store.test.ts
 ```
 **Saída Real**:
 ```text
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/stores/useIcon.Store.test.ts (19 tests) 5367ms
    ✓ useIconStore (19)
@@ -101,7 +101,7 @@ npx vitest run --config vitest.browser.config.ts tests/browser/MaxCreditCard.bro
 ```
 **Saída Real**:
 ```text
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ |chromium| tests/browser/MaxCreditCard.browser.ts (6 tests) 2233ms
    ✓ MaxCreditCard no Chromium Real (R21 / F27: Integridade e Regressão Visual) (6)

@@ -4,7 +4,7 @@
 **Nome/caminho canônico:** `/root/rev_r17_final`
 **Parent ID:** `/root`
 **Bloco:** R17/F23A
-**Worktree:** `/home/johnattas/GitHub/MaxComponentsUi/.worktrees/wt-fix4`
+**Worktree:** `/home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-fix4`
 **Início:** 2026-09-15T13:47:00-03:00
 **Fim:** 2026-09-15T13:49:00-03:00
 **Modo:** revisão independente, somente leitura, exceto atualização deste relatório

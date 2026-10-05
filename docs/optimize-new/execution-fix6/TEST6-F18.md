@@ -3,7 +3,7 @@
 **Subagente:** TEST6-F18  
 **UUID:** `74c07f9b-dce6-4056-9532-fbd5796b76b0`  
 **Data:** 2026-09-15  
-**Worktree:** `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`  
+**Worktree:** `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`  
 **Branch:** `fix/fix6-implementation`  
 **Status:** APROVADO COM SUCESSO
 
@@ -46,7 +46,7 @@ npx vitest run tests/components/MaxImage.test.ts
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run tests/components/MaxImage.test.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/components/MaxImage.test.ts (28 tests) 277ms
    ✓ MaxImage (28)
@@ -99,7 +99,7 @@ npx vitest run --config vitest.browser.config.ts tests/browser/MaxImage.browser.
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run --config vitest.browser.config.ts tests/browser/MaxImage.browser.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ |chromium| tests/browser/MaxImage.browser.ts (5 tests) 4760ms
    ✓ MaxImage no Chromium Real — Performance de Recorte em Alta Resolução (F18) (5)

@@ -3,7 +3,7 @@
 ## Identificação do Papel
 - **Papel**: `REV6-R17` (UUID: `b3a0a4c2-9e96-419b-a3d8-19e4822fb142`)
 - **Requisito**: `R17` / `E10-02`
-- **Worktree**: `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Worktree**: `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Data/Hora**: 2026-09-15T20:22:15-03:00
 - **Parecer Técnico**: **APROVADO COM LOUVOR (ZERO DEFECTS)**
 
@@ -81,7 +81,7 @@ npx vitest run tests/themes/tokensMutationReal.test.ts tests/themes/tokens.test.
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run tests/themes/tokensMutationReal.test.ts tests/themes/tokens.test.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/themes/tokens.test.ts (149 tests) 28ms
  ✓ tests/themes/tokensMutationReal.test.ts (49 tests) 31ms

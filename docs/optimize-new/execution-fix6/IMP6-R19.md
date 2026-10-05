@@ -20,7 +20,7 @@ Log de Saída:
 ```
 dist/assets/dist-DsfaJ0NX.js                      2,507.44 kB │ gzip: 823.12 kB
 ✓ built in 5.91s
-Maior chunk: /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6/playground/dist/assets/dist-DsfaJ0NX.js (2507440 bytes brutos, 814514 bytes gzip).
+Maior chunk: /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6/playground/dist/assets/dist-DsfaJ0NX.js (2507440 bytes brutos, 814514 bytes gzip).
 ```
 
 ## Diffs

@@ -4,7 +4,7 @@
 **Subagente**: `REV6-R04`  
 **UUID**: `c01a009c-e36c-4263-b4c3-4bb87632662c`  
 **Parent ID**: `da986479-bddd-4162-bd27-8952f0c5a526`  
-**Diretório de Trabalho**: `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`  
+**Diretório de Trabalho**: `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`  
 **Modo de Operação**: Auditoria Adversarial Estrita (Zero alterações em arquivos canônicos da worktree)  
 **Requisito Auditado**: R04 / E03-02 (Separação e propagação de atributos em `InputBase`, submissão `FormData`, foco por rótulo e segregação de `MaxInputBirthday`)
 
@@ -60,7 +60,7 @@ npx vitest run tests/components/inputBaseAttributesSeparation.test.ts
 
 **Saída Real Obtida:**
 ```text
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/components/inputBaseAttributesSeparation.test.ts (100 tests) 449ms
    ✓ Separação de atributos nativos de controle e wrapper (R04 / F05) (100)
@@ -89,7 +89,7 @@ npx vitest run --config vitest.browser.config.ts tests/browser/inputBaseMatrix.b
 
 **Saída Real Obtida:**
 ```text
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ |chromium| tests/browser/inputBaseMatrix.browser.ts (4 tests) 180ms
    ✓ R04 / E03-02 — Matriz Chromium de Formulário: label, owner, submit, autofill, required e disabled (4)

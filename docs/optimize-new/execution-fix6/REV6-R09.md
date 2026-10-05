@@ -3,7 +3,7 @@
 **Data**: 15 de Setembro de 2026  
 **Auditor**: Subagente REV6-R09  
 **UUID**: `cc4b375b-d908-4af1-8968-9cb8f9fd35cf`  
-**Diretório de Trabalho**: `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6` (modo estrito de auditoria/leitura)  
+**Diretório de Trabalho**: `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6` (modo estrito de auditoria/leitura)  
 **Status**: **APROVADO** (Sem refutações, regressões ou bypasses)
 
 ---
@@ -88,7 +88,7 @@ npx vitest run tests/themes/layers.test.ts
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run tests/themes/layers.test.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/themes/layers.test.ts (6 tests) 22ms
    ✓ Escala Semântica de Camadas (Stacking Layers) (6)
@@ -116,7 +116,7 @@ npx vitest run tests/components/MaxTagSelect.test.ts tests/components/MaxInputSe
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run tests/components/MaxTagSelect.test.ts tests/components/MaxInputSelect.test.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/components/MaxInputSelect.test.ts (45 tests) 572ms
  ✓ tests/components/MaxTagSelect.test.ts (48 tests) 1429ms

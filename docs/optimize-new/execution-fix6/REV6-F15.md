@@ -2,7 +2,7 @@
 
 **Subagente Revisor:** REV6-F15 (UUID: `353d7644-ba3a-4295-be3a-d2bbe8d5a680`)  
 **Data:** 2026-09-15  
-**Diretório de Trabalho:** `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`  
+**Diretório de Trabalho:** `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`  
 **Modo:** Auditoria adversarial estrita (sem modificação de arquivos canônicos)
 
 ---
@@ -112,7 +112,7 @@ npx vitest run tests/components/MaxIconButton.test.ts tests/components/MaxTagSel
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run tests/components/MaxIconButton.test.ts tests/components/MaxTagSelect.test.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/components/MaxIconButton.test.ts (23 tests) 99ms
  ✓ tests/components/MaxTagSelect.test.ts (48 tests) 1377ms

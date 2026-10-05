@@ -3,7 +3,7 @@
 ## Identificação do Papel
 - **Papel**: `TEST6-R22` (UUID: `43ca0307-38c0-4a33-9ff8-57ab822fb64a`)
 - **Requisito Avaliado**: `R22` / `E11-01`
-- **Worktree**: `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Worktree**: `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Relatório de Implementação Base**: `docs/optimize-new/execution-fix6/IMP6-R22.md`
 - **Data/Hora**: 2026-09-15T20:22:30-03:00
 - **Veredito**: **APROVADO COM ÊXITO (100% PASS)**
@@ -29,7 +29,7 @@ $ npx vitest run --config vitest.browser.config.ts tests/browser/MaxInputTextLis
 
 **Saída real capturada:**
 ```
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
 Port 63315 is in use, trying another one...
 Port 63316 is in use, trying another one...

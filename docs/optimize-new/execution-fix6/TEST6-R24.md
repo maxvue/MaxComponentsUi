@@ -5,7 +5,7 @@
 - **Requisito**: `R24` / `E11-04`
 - **Responsável**: Subagente TEST6-R24 (UUID: `e140df03-4927-463d-88f1-39659b85a3c1`)
 - **Data/Hora**: 2026-09-15T20:33:30-03:00
-- **Diretório de Trabalho**: `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Diretório de Trabalho**: `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Status Geral**: **APROVADO (100% PASS)**
 
 ---
@@ -49,7 +49,7 @@ npx vitest run tests/architecture/package-exports.test.ts tests/architecture/tre
 ```
 Log real de saída:
 ```text
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/architecture/treeshaking-maxbutton.test.ts (8 tests) 13ms
  ✓ tests/architecture/package-exports.test.ts (9 tests) 2533ms

@@ -5,7 +5,7 @@
 - **Papel**: Auditoria Adversarial (Auditoria de Estresse e Refutação)
 - **Requisito Auditado**: `R22` / `E11-01`
 - **Data/Hora**: 2026-09-15T20:22:00-03:00
-- **Worktree**: `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Worktree**: `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Parecer Final**: **APROVADO COM RESSALVA TÉCNICA (CONFORME)**
 
 ---
@@ -64,7 +64,7 @@ Saída real obtida:
 npm notice run @maxvue/max-components-ui@1.1.2 npx
 npm notice run 'vitest' run --config vitest.browser.config.ts tests/browser/MaxInputTextList.browser.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
 Port 63315 is in use, trying another one...
 Port 63316 is in use, trying another one...

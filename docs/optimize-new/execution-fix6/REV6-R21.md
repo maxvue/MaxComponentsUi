@@ -78,7 +78,7 @@ npm notice run node scripts/optimize-svgs.mjs --check
 ```bash
 $ npx vitest run --config vitest.browser.config.ts tests/browser/MaxCreditCard.browser.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ |chromium| tests/browser/MaxCreditCard.browser.ts (6 tests) 2234ms
    ✓ MaxCreditCard no Chromium Real (R21 / F27: Integridade e Regressão Visual) (6)

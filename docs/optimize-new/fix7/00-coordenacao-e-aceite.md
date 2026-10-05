@@ -24,7 +24,7 @@ Os sete líderes compartilham um orçamento global de até seis auxiliares. Um l
 
 Cada líder trabalha em worktree/branch própria. Auxiliar que edita usa worktree própria derivada da branch do líder; auxiliar na mesma worktree é somente leitura. O líder integra commits auxiliares e entrega um commit consolidado. Somente o coordenador escreve `status.md`; agentes devolvem resultados ao coordenador e não editam a matriz em paralelo.
 
-Revisores são independentes: não podem ter sido auxiliares do lote revisado, não editam código e devolvem achados ao líder original. Logs completos ficam em diretório temporário ignorado, `.worktrees/.fix7-logs/<ID>/`; relatórios versionados guardam somente comando, duração, código de saída e hash/caminho do log.
+Revisores são independentes: não podem ter sido auxiliares do lote revisado, não editam código e devolvem achados ao líder original. Logs completos ficam em diretório temporário ignorado, `.max-code-worktrees/.fix7-logs/<ID>/`; relatórios versionados guardam somente comando, duração, código de saída e hash/caminho do log.
 
 O Antigravity pode executar muitos agentes simultâneos; ainda assim, serialize alterações em `package.json`, `package-lock.json`, CI, configurações Vitest/Vite, scripts de build e exports. O coordenador pode resolver integração pequena, mas não reimplementar silenciosamente um lote.
 

@@ -4,7 +4,7 @@
 **Subagente**: `TEST6-R18`  
 **UUID**: `d9e5f782-fcc6-47e0-8d05-25fdde61be90`  
 **Parent ID**: `da986479-bddd-4162-bd27-8952f0c5a526`  
-**Diretório de Trabalho**: `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`  
+**Diretório de Trabalho**: `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`  
 
 ---
 
@@ -35,7 +35,7 @@ Critérios observáveis validados:
   ```
 - **Log real obtido**:
   ```text
-  RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+  RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
   ✓ tests/architecture/motionStandardsValidation.test.ts (20 tests) 86ms
     ✓ E10-09: Política Sistêmica de Movimento Reduzido (prefers-reduced-motion) (20)
@@ -83,7 +83,7 @@ Critérios observáveis validados:
   ```
 - **Log real obtido**:
   ```text
-  RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+  RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
   ✓ |chromium| tests/browser/motionStandardsReducedMotion.browser.ts (8 tests) 2442ms
     ✓ R18 / E10-09 — Emulação Real Chromium (Blink): prefers-reduced-motion (reduce vs no-preference) (8)

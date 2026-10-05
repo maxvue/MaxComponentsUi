@@ -5,7 +5,7 @@
 - **Subagente ID**: `c4beec56-658a-4d7e-ab22-3bb006f15cb6`
 - **Parent ID**: `da986479-bddd-4162-bd27-8952f0c5a526`
 - **Data/Hora**: 2026-09-15T20:22:30-03:00
-- **Worktree**: `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Worktree**: `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Modo**: Auditoria Adversarial Estrita (Zero modificações nos arquivos canônicos do código-fonte)
 - **Parecer Final**: **APROVADO COM RESSALVA DE AUDITORIA SUPERADA (CONFORMIDADE TOTAL ATINGIDA)**
 
@@ -80,7 +80,7 @@
 ```bash
 $ npx vitest run tests/architecture/focusVisibleInventory.test.ts tests/themes/textColorValidation.test.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ tests/architecture/focusVisibleInventory.test.ts (4 tests) 9ms
  ✓ tests/themes/textColorValidation.test.ts (27 tests) 79ms
@@ -95,7 +95,7 @@ $ npx vitest run tests/architecture/focusVisibleInventory.test.ts tests/themes/t
 ```bash
 $ npx vitest run --config vitest.browser.config.ts tests/browser/FocusVisibleInventory.browser.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
  ✓ |chromium| tests/browser/FocusVisibleInventory.browser.ts (6 tests) 686ms
    ✓ R16/F23 — foco computado em Chromium (6)

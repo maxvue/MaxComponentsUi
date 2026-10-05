@@ -5,7 +5,7 @@
 - **Subagente:** `IMP-R16`
 - **ID da plataforma registrado na matriz:** `ed00d45e-b5f4-4d23-a0f8-912320f87ef4`
 - **Parent ID registrado:** `97db74f2-d994-4291-b55b-2b4eff908ba2`
-- **Worktree auditada:** `/home/johnattas/GitHub/MaxComponentsUi/.worktrees/wt-fix4`
+- **Worktree auditada:** `/home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-fix4`
 - **Início da auditoria complementar:** 2026-09-15T13:39:00-03:00
 - **Término da implementação complementar:** 2026-09-15T13:48:00-03:00
 - **Status:** **IMPLEMENTADO — reparo pós-REV-R16 aplicado; evidências focais verdes.**

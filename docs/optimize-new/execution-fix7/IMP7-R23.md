@@ -8,7 +8,7 @@
 - **HEAD Final:** `f216d014ee6535689f409649f43f79a0cff2657b`
 - **Horário Início:** 2026-09-16 14:56
 - **Horário Fim:** 2026-09-16 15:08
-- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/storage/libs/MaxComponentsUi/.worktrees/sub-fix7`
+- **Worktree:** `/home/johnattas/GitHub/MaxAiManager/storage/libs/MaxComponentsUi/.max-code-worktrees/sub-fix7`
 - **Manifest de Arquivos:** `tests/benchmarks/run-benchmarks.ts, tests/benchmarks/MaxBaseVirtualScroller.benchmark.ts, vitest.benchmark.config.ts`
 - **Status:** CONCLUÍDO
 - **Commit:** `f216d014ee6535689f409649f43f79a0cff2657b`

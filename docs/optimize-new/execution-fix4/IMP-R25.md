@@ -7,7 +7,7 @@
 | **ID do Subagente** | IMP-R25 (Grupo A — Implementador) |
 | **Parent ID** | `97db74f2-d994-4291-b55b-2b4eff908ba2` |
 | **Bloco** | R25/F30 |
-| **Worktree** | `/home/johnattas/GitHub/MaxComponentsUi/.worktrees/wt-fix4` |
+| **Worktree** | `/home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-fix4` |
 | **Início** | 2026-09-15T13:15:01-03:00 |
 | **Fim** | 2026-09-15T13:23:00-03:00 |
 | **Status Final** | ✅ **CONCLUÍDO** |
@@ -85,7 +85,7 @@ grep -c "  *$" docs/THEME.md   # resultado: 0
 ### 4. Execução do script corrigido (exit code 0)
 
 ```
-Diretório do projeto: /home/johnattas/GitHub/MaxComponentsUi/.worktrees/wt-fix4
+Diretório do projeto: /home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-fix4
 
 --- Empacotando projeto com npm pack ---
 Tarball criado: .../maxvue-max-components-ui-1.1.2.tgz

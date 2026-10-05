@@ -6,7 +6,7 @@
 - **Parent ID:** `97db74f2-d994-4291-b55b-2b4eff908ba2`
 - **Horário de Início:** 2026-09-15T10:04:17-03:00
 - **Horário de Término:** 2026-09-15T10:21:00-03:00
-- **Worktree Auditado:** `/home/johnattas/GitHub/MaxComponentsUi/.worktrees/wt-fix4`
+- **Worktree Auditado:** `/home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-fix4`
 - **Implementador Avaliado:** `IMP-R04` (ID: `79e40dac-7da9-48b8-a8d2-e14292b320f3`)
 - **Veredito:** **ACEITO**
 
@@ -58,7 +58,7 @@ Foi formulada uma suíte adversarial independente com **54 casos de teste** sem 
 ```bash
 $ npx vitest run tests/components/inputBaseAttributesSeparation.test.ts tests/architecture/inputBaseAccessibility.test.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxComponentsUi/.worktrees/wt-fix4
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-fix4
 
  ✓ tests/architecture/inputBaseAccessibility.test.ts (13 tests) 132ms
  ✓ tests/components/inputBaseAttributesSeparation.test.ts (98 tests) 365ms
@@ -73,7 +73,7 @@ $ npx vitest run tests/components/inputBaseAttributesSeparation.test.ts tests/ar
 ```bash
 $ npx vitest run tests/components/InputBase.test.ts tests/components/inputSharedValidationMatrix.test.ts
 
- RUN  v4.1.11 /home/johnattas/GitHub/MaxComponentsUi/.worktrees/wt-fix4
+ RUN  v4.1.11 /home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-fix4
 
  ✓ tests/components/InputBase.test.ts (33 tests) 128ms
  ✓ tests/components/inputSharedValidationMatrix.test.ts (33 tests) 188ms

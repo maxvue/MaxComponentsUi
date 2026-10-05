@@ -4,7 +4,7 @@
 - **Papel**: `TEST6-R25` (Subagente Validador)
 - **UUID**: `1f08e420-5c3b-4899-8d77-6f81a7b45c22`
 - **Requisito**: `R25` / `E11-05`
-- **Diretório de Trabalho**: `/home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6`
+- **Diretório de Trabalho**: `/home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6`
 - **Data/Hora**: 2026-09-15T20:38:00-03:00
 - **Status da Validação**: ✅ APROVADO COM 100% DE ÊXITO
 
@@ -12,7 +12,7 @@
 
 ## 1. Contexto e Objetivos
 
-Validar a implementação realizada pelo subagente `IMP6-R25` documentada em [IMP6-R25.md](file:///home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6/docs/optimize-new/execution-fix6/IMP6-R25.md) e contida em [scripts/verify-consumers.mjs](file:///home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6/scripts/verify-consumers.mjs).
+Validar a implementação realizada pelo subagente `IMP6-R25` documentada em [IMP6-R25.md](file:///home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6/docs/optimize-new/execution-fix6/IMP6-R25.md) e contida em [scripts/verify-consumers.mjs](file:///home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6/scripts/verify-consumers.mjs).
 
 ### Critérios Observáveis de Validação:
 1. **Tarball em diretório temporário exclusivo por PID**: O tarball `.tgz` não deve ser criado na raiz do repositório/worktree, sendo empacotado estritamente dentro de `/tmp/max-consumer-<PID>-<random>/`.
@@ -31,7 +31,7 @@ Validar a implementação realizada pelo subagente `IMP6-R25` documentada em [IM
 
 ## 2. Análise Estática do Código (`scripts/verify-consumers.mjs`)
 
-A análise estática do arquivo [scripts/verify-consumers.mjs](file:///home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6/scripts/verify-consumers.mjs) comprovou:
+A análise estática do arquivo [scripts/verify-consumers.mjs](file:///home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6/scripts/verify-consumers.mjs) comprovou:
 - **Criação do diretório com PID**:
   ```javascript
   tempDir = mkdtempSync(join(tmpdir(), `max-consumer-${process.pid}-`));
@@ -66,7 +66,7 @@ npm run verify:consumers
 > @maxvue/max-components-ui@1.1.2 verify:consumers
 > node scripts/verify-consumers.mjs
 
-Diretório do projeto: /home/johnattas/GitHub/MaxAiManager/.worktrees/maxcomponentsui-fix6
+Diretório do projeto: /home/johnattas/GitHub/MaxAiManager/.max-code-worktrees/maxcomponentsui-fix6
 
 --- Executando build fresco obrigatório ---
 
