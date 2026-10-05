@@ -15,8 +15,8 @@
     },
     "worktreeSetup": {
         "notes": [
-            "O projeto depende do pacote local irmao @maxvue/max-use (file:../MaxUse). Ao criar um worktree fora de /home/johnattas/GitHub, o caminho relativo ../MaxUse quebra — crie o worktree em um diretorio irmao de MaxUse ou faca symlink de node_modules/@maxvue/max-use.",
-            "node_modules nao e versionado; rode npm install dentro do worktree ou faca symlink de node_modules antes de rodar a suite."
+            "@maxvue/max-use e distribuido via npm (^1.1.x); nunca utilize caminhos relativos ou file:../MaxUse.",
+            "node_modules nao e versionado; crie symlink de node_modules a partir da raiz (ln -s ../../node_modules ./node_modules) ou rode npm install dentro do worktree antes de rodar testes."
         ]
     }
 }
