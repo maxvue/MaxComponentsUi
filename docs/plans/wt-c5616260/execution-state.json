@@ -1,0 +1,130 @@
+{
+  "version": 1,
+  "planRevision": "67e0ba9009bd6969d28d08320a8c09ccf477ef4afd75b13757ead4d8ff404515",
+  "tasks": [
+    {
+      "id": "T1",
+      "status": "completed",
+      "files": [
+        "package.json",
+        "package-lock.json",
+        "docs/plans/wt-c5616260/plan.md"
+      ],
+      "revision": "67a658dd35dc2af3dd92f0ebb060d43122f5faba",
+      "validations": [
+        {
+          "command": "git rev-parse --show-toplevel && git branch --show-current && git rev-parse HEAD && git status --short",
+          "revision": "67a658dd35dc2af3dd92f0ebb060d43122f5faba",
+          "result": "passed"
+        },
+        {
+          "command": "npm ping",
+          "revision": "67a658dd35dc2af3dd92f0ebb060d43122f5faba",
+          "result": "passed"
+        }
+      ],
+      "nextAction": "Concluída"
+    },
+    {
+      "id": "T2",
+      "status": "completed",
+      "files": [
+        "node_modules"
+      ],
+      "revision": "unlinked-node-modules-wt-c5616260",
+      "validations": [
+        {
+          "command": "node check-unlink (fs.unlinkSync e verificação de integridade do diretório compartilhado)",
+          "revision": "unlinked-node-modules-wt-c5616260",
+          "result": "passed"
+        }
+      ],
+      "nextAction": "Concluída"
+    },
+    {
+      "id": "T3",
+      "status": "completed",
+      "files": [
+        "node_modules"
+      ],
+      "revision": "installed-node-modules-wt-c5616260",
+      "validations": [
+        {
+          "command": "TMPDIR=\"$(pwd)/.execution-tmp\" npm ci --cache=\"$(pwd)/.cache/npm\"",
+          "revision": "installed-node-modules-wt-c5616260",
+          "result": "passed"
+        },
+        {
+          "command": "node verify-manifest-lock-hashes-and-node-modules-dir",
+          "revision": "installed-node-modules-wt-c5616260",
+          "result": "passed"
+        }
+      ],
+      "nextAction": "Concluída"
+    },
+    {
+      "id": "T4",
+      "status": "completed",
+      "files": [
+        "node_modules"
+      ],
+      "revision": "verified-dependencies-wt-c5616260",
+      "validations": [
+        {
+          "command": "node probe-entities-and-compiler-chains",
+          "revision": "verified-dependencies-wt-c5616260",
+          "result": "passed"
+        },
+        {
+          "command": "npm run check:lockfile",
+          "revision": "verified-dependencies-wt-c5616260",
+          "result": "passed"
+        },
+        {
+          "command": "npm run check:npm-tree",
+          "revision": "verified-dependencies-wt-c5616260",
+          "result": "passed"
+        }
+      ],
+      "nextAction": "Concluída"
+    },
+    {
+      "id": "T5",
+      "status": "completed",
+      "files": [
+        "dist"
+      ],
+      "revision": "build-verified-wt-c5616260",
+      "validations": [
+        {
+          "command": "npm run build",
+          "revision": "build-verified-wt-c5616260",
+          "result": "passed"
+        },
+        {
+          "command": "node check-dist-artifacts",
+          "revision": "build-verified-wt-c5616260",
+          "result": "passed"
+        },
+        {
+          "command": "npm run test -- tests/architecture/lockfileValidation.test.ts tests/architecture/package-exports.test.ts",
+          "revision": "build-verified-wt-c5616260",
+          "result": "passed"
+        },
+        {
+          "command": "git diff --check",
+          "revision": "build-verified-wt-c5616260",
+          "result": "passed"
+        },
+        {
+          "command": "git status --short",
+          "revision": "build-verified-wt-c5616260",
+          "result": "passed"
+        }
+      ],
+      "nextAction": "Handoff e relatório final"
+    }
+  ],
+  "updatedAt": 1791223600000,
+  "nextAction": "Handoff e relatório final"
+}

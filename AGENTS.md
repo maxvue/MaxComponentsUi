@@ -17,12 +17,12 @@ Este documento fornece as diretrizes canônicas e mandatórias para todos os ass
 
 1. **Uso Obrigatório de Git Worktrees**:
    - **Toda e qualquer alteração de código ou arquivos** DEVE ser realizada obrigatoriamente dentro de um **git worktree separado**, isolado da branch principal (`dev`/`main`).
-   - O worktree DEVE ser criado na pasta `.worktrees/` na raiz do projeto (`.worktrees/wt-<nome-da-tarefa>`).
+   - No MaxCode, use a worktree pré-alocada sem criar outra ou trocar sua branch. Fora do MaxCode, use worktree dedicada em `.worktrees/wt-<nome-da-tarefa>`.
    - É **terminantemente proibido** alterar arquivos diretamente na working tree principal / raiz do repositório.
    - **Outros Worktrees**: Se houver outros worktrees em `.worktrees/`, não os investigue ou altere: pertencem a sessões ou agentes paralelos.
-   - **Limpeza**: Após finalizar o trabalho e receber a confirmação de commit/merge pelo usuário, remova a worktree criada (`git worktree remove`).
+   - **Limpeza**: Preserve worktree com alterações ou integração pendentes. No MaxCode, limpeza é do painel/usuário; fora dele, remova após integração e autorização, sem perder trabalho.
 2. **Plano Prévio Obrigatório**:
-   - Não execute modificações no código sem autorização. Apresente sempre um plano detalhado para aprovação antes de qualquer alteração.
+   - Não execute modificações sem autorização. Apresente plano para o escopo quando necessário; reutilize plano e autorização já concedidos sem nova aprovação a cada alteração.
    - Workflows de Commit, Push, Deploy e NPM Update só devem ser executados quando explicitamente solicitados pelo usuário.
 
 ---
@@ -130,3 +130,14 @@ npx vitest run tests/components/MaxButton.test.ts
 npm run dev:playground    # Inicia o playground Vite para teste manual de componentes
 npx tsx src/scripts/generateResolver.ts # Regenera manifesto de componentes e auto-imports
 ```
+
+
+## Execução e validação em lote
+
+- Implemente todo o bloco autorizado e seus testes antes de executar validações. Depois, valide o conjunto, corrija falhas em lote e revalide após concluir as correções. Não execute testes, tipos ou builds após cada microedição.
+- Leia diretrizes na primeira admissão e consulte trechos necessários nas retomadas. Preserve decisões e autorização já concedidas; peça nova decisão somente para ampliação de escopo ou ambiguidade relevante.
+- Comandos agregados já executam suas etapas: não repita testes, tipos, lint ou build sobre a mesma revisão sem mudança relevante, falha ou dúvida concreta.
+- Preserve asserções, regressões, revisão final e gates de segurança/release. Falhas persistentes exigem diagnóstico; não amplie o escopo para corrigir baseline sem estabelecer causalidade e autorização.
+- Informe progresso e limitações, sem segredos ou conclusão verde com verificações falhando/pendentes. Este fluxo não autoriza publicação, deploy ou integração Git.
+
+`npm run verify` é o gate completo de pré-release, não rotina por microedição. Preserve consumidores, navegador, benchmarks, integridade e segurança quando a entrega exigir esse gate. Ele agrega tipos/build e runtime/cobertura; não repita seus componentes isolados sobre o mesmo conteúdo. Dimensione o fechamento do lote aos contratos afetados, sem substituir gate de release por validação parcial.
