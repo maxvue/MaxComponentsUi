@@ -1,0 +1,112 @@
+{
+  "version": 1,
+  "planRevision": "fd932849a3e911ead1236c4c69dc24340940a5889ebf22a8401b113889d75321",
+  "updatedAt": 1759693150000,
+  "nextAction": "Recuperação do build concluída com sucesso na worktree isolada wt-e84f0bff",
+  "tasks": [
+    {
+      "id": "T1",
+      "status": "completed",
+      "files": [
+        "package.json",
+        "package-lock.json",
+        "docs/plans/wt-e84f0bff/plan.md"
+      ],
+      "revision": "d1039d515e06bd47cf48be116b0771b9cba8450b",
+      "validations": [
+        {
+          "command": "git status -s && git branch --show-current && node -v && npm -v",
+          "revision": "d1039d515e06bd47cf48be116b0771b9cba8450b",
+          "result": "passed"
+        },
+        {
+          "command": "node check-compiler-resolution",
+          "revision": "d1039d515e06bd47cf48be116b0771b9cba8450b",
+          "result": "passed"
+        }
+      ],
+      "nextAction": "T2: desvincular somente a entrada simbólica local node_modules"
+    },
+    {
+      "id": "T2",
+      "status": "completed",
+      "files": [
+        "node_modules"
+      ],
+      "revision": "d1039d515e06bd47cf48be116b0771b9cba8450b",
+      "validations": [
+        {
+          "command": "node (inspeção do link simbólico e fs.unlinkSync exclusivo)",
+          "revision": "d1039d515e06bd47cf48be116b0771b9cba8450b",
+          "result": "passed"
+        }
+      ],
+      "nextAction": "T3: instalar dependências congeladas via npm ci"
+    },
+    {
+      "id": "T3",
+      "status": "completed",
+      "files": [
+        "node_modules"
+      ],
+      "revision": "d1039d515e06bd47cf48be116b0771b9cba8450b",
+      "validations": [
+        {
+          "command": "TMPDIR=\"$(pwd)/.tmp.cache\" npm ci --cache=\"$(pwd)/.npm.cache\" --include=dev",
+          "revision": "d1039d515e06bd47cf48be116b0771b9cba8450b",
+          "result": "passed"
+        }
+      ],
+      "nextAction": "T4: validar resolução, integridade e invariantes"
+    },
+    {
+      "id": "T4",
+      "status": "completed",
+      "files": [
+        "node_modules",
+        "package.json",
+        "package-lock.json"
+      ],
+      "revision": "d1039d515e06bd47cf48be116b0771b9cba8450b",
+      "validations": [
+        {
+          "command": "node (inspeção de realpath, entities/decode e hashes)",
+          "revision": "d1039d515e06bd47cf48be116b0771b9cba8450b",
+          "result": "passed"
+        },
+        {
+          "command": "npm run check:lockfile && npm run check:npm-tree",
+          "revision": "d1039d515e06bd47cf48be116b0771b9cba8450b",
+          "result": "passed"
+        }
+      ],
+      "nextAction": "T5: comprovar build e executar testes unitários"
+    },
+    {
+      "id": "T5",
+      "status": "completed",
+      "files": [
+        "dist"
+      ],
+      "revision": "d1039d515e06bd47cf48be116b0771b9cba8450b",
+      "validations": [
+        {
+          "command": "npm run build",
+          "revision": "d1039d515e06bd47cf48be116b0771b9cba8450b",
+          "result": "passed"
+        },
+        {
+          "command": "node (verificação de artefatos dist)",
+          "revision": "d1039d515e06bd47cf48be116b0771b9cba8450b",
+          "result": "passed"
+        },
+        {
+          "command": "npm run test",
+          "revision": "d1039d515e06bd47cf48be116b0771b9cba8450b",
+          "result": "passed"
+        }
+      ],
+      "nextAction": "Nenhuma. Todas as etapas do plano foram concluídas."
+    }
+  ]
+}
