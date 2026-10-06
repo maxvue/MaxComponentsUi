@@ -445,8 +445,8 @@
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    width: calc(100% - 2px) !important;
-    margin: 1px;
+    width: calc(100% - 4px) !important;
+    margin: 2px;
     height: 100%;
     min-height: 0;
     position: relative;
@@ -457,9 +457,7 @@
     transition: outline 0.15s ease-in-out;
 
     &:focus-within {
-        outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
-        outline-offset: 2px;
-        box-shadow: var(--max-focus-ring);
+        outline: 2px solid var(--max-focus-ring-color);
     }
 
     .max-input-markdown__editor-wrap {
