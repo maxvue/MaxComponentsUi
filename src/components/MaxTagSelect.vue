@@ -1,14 +1,5 @@
 <template>
-    <InputBase
-        v-bind="{ ...props, ...attrs }"
-        class="max-tag-select max-select-tag"
-        :class="{ 'is-button-mode': props.isButton }"
-        input-click-auto
-        no-dropdown
-        :no-icon="props.isButton || (attrs as any)?.noIcon"
-        :no-status="props.isButton || (attrs as any)?.noStatus"
-        no-border
-    >
+    <InputBase v-bind="{ ...props, ...attrs }" class="max-tag-select max-select-tag" :class="{ 'is-button-mode': props.isButton }" input-click-auto no-dropdown :no-icon="props.isButton || (attrs as any)?.noIcon" :no-status="props.isButton || (attrs as any)?.noStatus" no-border >
         <template #default="{ inputAttrs }">
             <div v-if="showPlaceholder" class="tab-placeholder-select">
                 {{ placeholderText }}
@@ -38,31 +29,13 @@
                                 :color-string="getColorString(option_selected)"
                                 v-if="!isButton && hasSelected"
                             >
-                                <MaxIcon
-                                    :icon="option_selected?.icon ?? null"
-                                    :size="option_selected?.icon_size ?? 1"
-                                    v-if="option_selected.icon"
-                                    :color="getStyleColor(option_selected, false, true).color"
-                                />
-                                <div
-                                    class="tag-value-text"
-                                    :style="{ color: getStyleColor(option_selected, false, true).color }"
-                                >
+                                <MaxIcon :icon="option_selected?.icon ?? null" :size="option_selected?.icon_size ?? 1" v-if="option_selected.icon" :color="getStyleColor(option_selected, false, true).color" />
+                                <div class="tag-value-text" :style="{ color: getStyleColor(option_selected, false, true).color }" >
                                     {{ option_selected?.[props.optionName] ?? option_selected?.name ?? option_selected?.label }}
                                 </div>
                             </div>
                             <div v-else-if="isButton">
-                                <MaxIconButton
-                                    ref="buttonRef"
-                                    :icon="props.i ?? props.icon ?? props.iconLeft"
-                                    :size="option_selected?.icon_size ?? 1.8"
-                                    :disabled="props.disabled"
-                                    :aria-label="buttonAriaLabel"
-                                    :aria-haspopup="'listbox'"
-                                    :aria-expanded="isOpen"
-                                    :aria-controls="isOpen ? listboxId : undefined"
-                                    :tabindex="props.disabled ? -1 : 0"
-                                />
+                                <MaxIconButton ref="buttonRef" :icon="props.i ?? props.icon ?? props.iconLeft" :size="option_selected?.icon_size ?? 1.8" :disabled="props.disabled" :aria-label="buttonAriaLabel" :aria-haspopup="'listbox'" :aria-expanded="isOpen" :aria-controls="isOpen ? listboxId : undefined" :tabindex="props.disabled ? -1 : 0" full />
                             </div>
                         </slot>
                     </div>
