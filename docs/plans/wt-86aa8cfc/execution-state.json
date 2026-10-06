@@ -1,0 +1,165 @@
+{
+  "version": 2,
+  "planRevision": "b5a7fabf20e16ef9263549f29f8e5eb1e07a4d90ee88233f5ca49e0a9eac803f",
+  "updatedAt": 1791300850000,
+  "tasks": [
+    {
+      "id": "T1",
+      "status": "completed",
+      "files": [
+        "package.json",
+        "package-lock.json",
+        "docs/plans/wt-86aa8cfc/plan.md",
+        "docs/plans/wt-86aa8cfc/spec.md"
+      ],
+      "nextAction": "Preflight concluído e isolamento verificado"
+    },
+    {
+      "id": "T2",
+      "status": "completed",
+      "revision": "5d6233deea0d09c3eda868aaa3db14f815e769fb615ee42b4d332bbc53e8000d",
+      "files": [
+        "package.json",
+        "package-lock.json"
+      ],
+      "validations": [
+        {
+          "command": "node scripts/check-lockfile.mjs",
+          "revision": "5d6233deea0d09c3eda868aaa3db14f815e769fb615ee42b4d332bbc53e8000d",
+          "result": "passed"
+        }
+      ],
+      "nextAction": "11 requisitos Tiptap fixados em 3.31.3 e sincronizados no bloco raiz do lockfile"
+    },
+    {
+      "id": "T3",
+      "status": "completed",
+      "revision": "ed4af2e49027c8afd1160655bcd6036fac91b2fc53c5a88eacef7eba9d62d41b",
+      "files": [
+        "tests/architecture/runtimeDependencies.test.ts",
+        "tests/browser/tiptapEditorsCompatibility.browser.ts"
+      ],
+      "validations": [
+        {
+          "command": "npx vitest run tests/architecture/runtimeDependencies.test.ts",
+          "revision": "ed4af2e49027c8afd1160655bcd6036fac91b2fc53c5a88eacef7eba9d62d41b",
+          "result": "passed"
+        },
+        {
+          "command": "PLAYWRIGHT_BROWSERS_PATH=/home/johnattas/.cache/ms-playwright npx vitest run --config vitest.browser.config.ts tests/browser/tiptapEditorsCompatibility.browser.ts",
+          "revision": "ed4af2e49027c8afd1160655bcd6036fac91b2fc53c5a88eacef7eba9d62d41b",
+          "result": "passed"
+        },
+        {
+          "command": "npx eslint tests/architecture/runtimeDependencies.test.ts tests/browser/tiptapEditorsCompatibility.browser.ts",
+          "revision": "ed4af2e49027c8afd1160655bcd6036fac91b2fc53c5a88eacef7eba9d62d41b",
+          "result": "passed"
+        }
+      ],
+      "nextAction": "Testes arquiteturais e teste de navegador real aprovados"
+    },
+    {
+      "id": "T4",
+      "status": "validationFailed",
+      "files": [],
+      "validations": [
+        {
+          "command": "CONSUMER_TEMP_DIR=\"$(pwd)/.tmp-consumers\" npm run verify",
+          "revision": "6990d36683b7997fe1a0c363b3bb5de3ca4b20160bb8d2989b4117ed511ede48",
+          "result": "failed"
+        }
+      ],
+      "nextAction": "Diagnosticar e registrar falha preexistente de baseline no script check:filenames (arquivo -l rastreado no git) e stylelint em InputBase.vue"
+    },
+    {
+      "id": "T5",
+      "status": "manualPending",
+      "files": [],
+      "nextAction": "Após integração da worktree pelo MaxCode, executar no consumidor ENGEAPP: npm run verify:local-libs && npm run verify:tiptap"
+    }
+  ],
+  "verification": {
+    "revision": "6990d36683b7997fe1a0c363b3bb5de3ca4b20160bb8d2989b4117ed511ede48",
+    "checks": [
+      {
+        "command": "CONSUMER_TEMP_DIR=\"$(pwd)/.tmp-consumers\" npm run verify",
+        "revision": "6990d36683b7997fe1a0c363b3bb5de3ca4b20160bb8d2989b4117ed511ede48",
+        "result": "failed",
+        "exitCode": 1
+      },
+      {
+        "command": "node scripts/check-lockfile.mjs",
+        "revision": "6990d36683b7997fe1a0c363b3bb5de3ca4b20160bb8d2989b4117ed511ede48",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npx vitest run tests/architecture/runtimeDependencies.test.ts",
+        "revision": "6990d36683b7997fe1a0c363b3bb5de3ca4b20160bb8d2989b4117ed511ede48",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "PLAYWRIGHT_BROWSERS_PATH=/home/johnattas/.cache/ms-playwright npx vitest run --config vitest.browser.config.ts tests/browser/tiptapEditorsCompatibility.browser.ts",
+        "revision": "6990d36683b7997fe1a0c363b3bb5de3ca4b20160bb8d2989b4117ed511ede48",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run optimize:svg:check",
+        "revision": "6990d36683b7997fe1a0c363b3bb5de3ca4b20160bb8d2989b4117ed511ede48",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check",
+        "revision": "6990d36683b7997fe1a0c363b3bb5de3ca4b20160bb8d2989b4117ed511ede48",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check:test",
+        "revision": "6990d36683b7997fe1a0c363b3bb5de3ca4b20160bb8d2989b4117ed511ede48",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run build",
+        "revision": "6990d36683b7997fe1a0c363b3bb5de3ca4b20160bb8d2989b4117ed511ede48",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "CONSUMER_TEMP_DIR=\"$(pwd)/.tmp-consumers\" SKIP_BUILD=1 npm run verify:consumers",
+        "revision": "6990d36683b7997fe1a0c363b3bb5de3ca4b20160bb8d2989b4117ed511ede48",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run test:benchmark",
+        "revision": "6990d36683b7997fe1a0c363b3bb5de3ca4b20160bb8d2989b4117ed511ede48",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run check:playground:bundle",
+        "revision": "6990d36683b7997fe1a0c363b3bb5de3ca4b20160bb8d2989b4117ed511ede48",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run check:filenames",
+        "revision": "6990d36683b7997fe1a0c363b3bb5de3ca4b20160bb8d2989b4117ed511ede48",
+        "result": "failed",
+        "exitCode": 1
+      },
+      {
+        "command": "npm run lint:check",
+        "revision": "6990d36683b7997fe1a0c363b3bb5de3ca4b20160bb8d2989b4117ed511ede48",
+        "result": "failed",
+        "exitCode": 2
+      }
+    ]
+  },
+  "nextAction": "Apresentar síntese da execução, evidências dos cheques e diagnóstico das limitações de baseline"
+}

@@ -79,4 +79,87 @@ describe('Arquitetura - Dependências de Runtime', () => {
             ).toBe(true);
         }
     });
+
+    const EXPECTED_TIPTAP_PACKAGES = [
+        '@tiptap/core',
+        '@tiptap/extension-image',
+        '@tiptap/extension-link',
+        '@tiptap/extension-table',
+        '@tiptap/extension-table-cell',
+        '@tiptap/extension-table-header',
+        '@tiptap/extension-table-row',
+        '@tiptap/extension-text-align',
+        '@tiptap/extension-underline',
+        '@tiptap/starter-kit',
+        '@tiptap/vue-3'
+    ];
+    const TIPTAP_PINNED_VERSION = '3.31.3';
+
+    it('deve exigir exatamente os 11 pacotes diretos @tiptap/* com versão literal 3.31.3 em package.json', () => {
+        for (const pkgName of EXPECTED_TIPTAP_PACKAGES) {
+            const currentVersion = pkg.dependencies?.[pkgName];
+            expect(
+                currentVersion,
+                `Dependência ${pkgName} deve estar presente em dependencies e fixada em ${TIPTAP_PINNED_VERSION}`
+            ).toBe(TIPTAP_PINNED_VERSION);
+        }
+
+        // Garante que nenhuma futura adição @tiptap/* passe com versão flutuante
+        for (const [dep, version] of Object.entries(pkg.dependencies || {})) {
+            if (!dep.startsWith('@tiptap/')) continue;
+            expect(
+                EXPECTED_TIPTAP_PACKAGES.includes(dep),
+                `Pacote @tiptap inesperado em dependencies: "${dep}"`
+            ).toBe(true);
+            expect(
+                version,
+                `Pacote "${dep}" em package.json não deve possuir versão flutuante`
+            ).toBe(TIPTAP_PINNED_VERSION);
+        }
+    });
+
+    it('deve sincronizar os 11 pacotes @tiptap/* no bloco raiz de package-lock.json', () => {
+        const lockPath = path.resolve(__dirname, '../../package-lock.json');
+        const lock = JSON.parse(fs.readFileSync(lockPath, 'utf-8'));
+        const rootDeps = lock.packages?.['']?.dependencies || {};
+
+        for (const pkgName of EXPECTED_TIPTAP_PACKAGES) {
+            const currentVersion = rootDeps[pkgName];
+            expect(
+                currentVersion,
+                `Pacote ${pkgName} no bloco raiz do lockfile deve estar sincronizado em ${TIPTAP_PINNED_VERSION}`
+            ).toBe(TIPTAP_PINNED_VERSION);
+        }
+
+        for (const [dep, version] of Object.entries(rootDeps)) {
+            if (!dep.startsWith('@tiptap/')) continue;
+            expect(
+                version,
+                `Pacote "${dep}" no bloco raiz de package-lock.json deve ser versão literal ${TIPTAP_PINNED_VERSION}`
+            ).toBe(TIPTAP_PINNED_VERSION);
+        }
+    });
+
+    it('todas as entradas resolvidas @tiptap/* no grafo do lockfile devem ser 3.31.3 sem deriva', () => {
+        const lockPath = path.resolve(__dirname, '../../package-lock.json');
+        const lock = JSON.parse(fs.readFileSync(lockPath, 'utf-8'));
+        const packages = lock.packages || {};
+
+        const tiptapResolvedEntries = Object.entries(packages).filter(([key]) => key.includes('node_modules/@tiptap/'));
+        expect(tiptapResolvedEntries.length, 'Grafo do lockfile deve conter entradas resolvidas de @tiptap/*').toBeGreaterThanOrEqual(11);
+
+        for (const [key, entry] of tiptapResolvedEntries) {
+            const typedEntry = entry as { version?: string };
+            expect(
+                typedEntry.version,
+                `Pacote resolvido "${key}" deve ter versão exata ${TIPTAP_PINNED_VERSION}`
+            ).toBe(TIPTAP_PINNED_VERSION);
+        }
+
+        // Garante que @tiptap/pm existe de forma transitiva na versão correta
+        expect(
+            packages['node_modules/@tiptap/pm']?.version,
+            `@tiptap/pm deve existir como dependência transitiva resolvida em ${TIPTAP_PINNED_VERSION}`
+        ).toBe(TIPTAP_PINNED_VERSION);
+    });
 });
