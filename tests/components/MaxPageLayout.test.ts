@@ -86,6 +86,12 @@ describe('MaxPageLayout', () => {
             expect(wrapper.findComponent(MaxSideMenu).props('logo')).toBe('/get_file?file=logo.svg');
         });
 
+        it('repassa fontSize ao menu superior desktop', () => {
+            const wrapper = mountLayout({ props: { fontSize: 19 } });
+
+            expect(wrapper.findComponent(MaxTopMenu).props('fontSize')).toBe(19);
+        });
+
         it.each(['status', 'chat', 'bugs', 'notifications', 'voip', 'live'])('repassa o slot %s ao menu superior', (slot) => {
             const wrapper = mountLayout({ slots: { [slot]: `<div class="slot-${slot}">x</div>` } });
 
@@ -157,6 +163,22 @@ describe('MaxPageLayout', () => {
             });
 
             expect(wrapper.findComponent(MaxPageMobileLayout).props('bottomShowLabels')).toBe(true);
+        });
+
+        it('repassa fontSize ao layout mobile', () => {
+            const wrapper = mountLayout({
+                props: { screen: 'mobile', fontSize: 18 }
+            });
+
+            expect(wrapper.findComponent(MaxPageMobileLayout).props('fontSize')).toBe(18);
+        });
+
+        it('propaga o evento changeFontSize do layout mobile', async () => {
+            const wrapper = mountLayout({ props: { screen: 'mobile' } });
+            wrapper.findComponent(MaxPageMobileLayout).vm.$emit('changeFontSize', 18);
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.emitted('changeFontSize')).toEqual([[18]]);
         });
 
         it.each(['mobile-center', 'mobile-actions', 'switcher'])('repassa o slot mobile %s ao layout mobile', (slot) => {

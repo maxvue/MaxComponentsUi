@@ -62,7 +62,14 @@ export function useHtmlFontSize(): {
     decrementFontSize: (step?: number) => number;
     resetFontSize: () => number;
 } {
-    if (!sharedFontSizeRef) sharedFontSizeRef = ref(getStoredFontSize());
+    if (!sharedFontSizeRef) {
+        const stored = getStoredFontSize();
+        sharedFontSizeRef = ref(stored);
+        if (typeof document !== 'undefined') {
+            document.documentElement.style.fontSize = `${stored}px`;
+            document.documentElement.style.setProperty('--max-font-size-base', `${stored}px`);
+        }
+    }
 
     const setFontSize = (size: number): number => {
         return applyHtmlFontSize(size);

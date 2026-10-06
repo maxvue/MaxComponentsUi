@@ -3,11 +3,29 @@ import { initConsolePolicy } from './helpers/consolePolicy';
 
 initConsolePolicy();
 
+import axios from 'axios';
+import { beforeEach } from 'vitest';
+import { createPinia, setActivePinia } from 'pinia';
+
+beforeEach(() => {
+    setActivePinia(createPinia());
+});
+
+axios.defaults.adapter = async (config) => ({
+    data: { side: [] },
+    status: 200,
+    statusText: 'OK',
+    headers: {},
+    config
+});
+
 if (typeof (globalThis as any).Ziggy === 'undefined') (globalThis as any).Ziggy = {
     url: 'http://localhost',
     port: null,
     defaults: {},
-    routes: {}
+    routes: {
+        menus: { uri: 'api/menus', methods: ['GET'] }
+    }
 };
 
 // Em Vitest Browser Mode, o runner executa testes dentro de um iframe.

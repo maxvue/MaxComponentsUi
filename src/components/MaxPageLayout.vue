@@ -11,6 +11,7 @@
         :side-menu-items="props.sideMenuItems"
         :avatar-path="props.avatarPath"
         :logo="props.logo"
+        :font-size="props.fontSize"
         @profile="emit('profile')"
         @settings="emit('settings')"
         @support="emit('support')"

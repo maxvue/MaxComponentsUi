@@ -256,13 +256,13 @@ describe('presetMaxUno', () => {
         });
 
         it('font-size-X formata valor em rem com !important', () => {
-            const shortcut = findShortcut(/^font-size-(.+)$/);
+            const shortcut = findShortcut(/^font-size-([0-9.]+)$/);
             expect(shortcut).toBeTruthy();
             expect(shortcut[1]([, '1.5'])).toEqual({ 'font-size': '1.5rem !important' });
         });
 
         it('fs-X formata valor em rem com !important', () => {
-            const shortcut = findShortcut(/^fs-(.+)$/);
+            const shortcut = findShortcut(/^fs-([0-9.]+)$/);
             expect(shortcut).toBeTruthy();
             expect(shortcut[1]([, '0.875'])).toEqual({ 'font-size': '0.875rem !important' });
         });

@@ -34,10 +34,12 @@ describe('useHtmlFontSize', () => {
         expect(DEFAULT_FONT_SIZE).toBe(16);
     });
 
-    it('carrega valor salvo do localStorage se válido', () => {
+    it('carrega valor salvo do localStorage se válido e sincroniza DOM', () => {
         localStorage.setItem(FONT_SIZE_STORAGE_KEY, '18');
         const { fontSize } = useHtmlFontSize();
         expect(fontSize.value).toBe(18);
+        expect(document.documentElement.style.fontSize).toBe('18px');
+        expect(document.documentElement.style.getPropertyValue('--max-font-size-base')).toBe('18px');
     });
 
     it('aplica fontSize e CSS variable no documentElement', () => {

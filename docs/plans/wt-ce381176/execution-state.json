@@ -1,0 +1,125 @@
+{
+  "version": 2,
+  "planRevision": "03b39e68d29587548b9bc2ce903dae80bcbf2864a355b278f48de9580fdaae8d",
+  "tasks": [
+    {
+      "id": "T1",
+      "status": "completed",
+      "files": [],
+      "validations": []
+    },
+    {
+      "id": "T2",
+      "status": "completed",
+      "files": [
+        "src/helpers/useHtmlFontSize.ts",
+        "src/components/MaxPageLayout.vue",
+        "tests/helpers/useHtmlFontSize.test.ts",
+        "tests/components/MaxPageLayout.test.ts",
+        "tests/browser.setup.ts",
+        "tests/preset/presetMaxUno.test.ts",
+        "tests/browser/fontSizePreference.browser.ts"
+      ],
+      "revision": "f3f2f5edafde75795e7d6963033c3b785cab6d5ac0b7e2a41e52b72b68a24ae3",
+      "validations": []
+    },
+    {
+      "id": "T3",
+      "status": "completed",
+      "files": [],
+      "validations": [
+        {
+          "command": "npm run check:lockfile",
+          "revision": "f3f2f5edafde75795e7d6963033c3b785cab6d5ac0b7e2a41e52b72b68a24ae3",
+          "result": "passed"
+        },
+        {
+          "command": "npm run test",
+          "revision": "f3f2f5edafde75795e7d6963033c3b785cab6d5ac0b7e2a41e52b72b68a24ae3",
+          "result": "failed"
+        },
+        {
+          "command": "npm run type-check:test",
+          "revision": "f3f2f5edafde75795e7d6963033c3b785cab6d5ac0b7e2a41e52b72b68a24ae3",
+          "result": "passed"
+        },
+        {
+          "command": "npm run lint",
+          "revision": "f3f2f5edafde75795e7d6963033c3b785cab6d5ac0b7e2a41e52b72b68a24ae3",
+          "result": "passed"
+        },
+        {
+          "command": "npm run build",
+          "revision": "f3f2f5edafde75795e7d6963033c3b785cab6d5ac0b7e2a41e52b72b68a24ae3",
+          "result": "passed"
+        },
+        {
+          "command": "PLAYWRIGHT_BROWSERS_PATH=/home/johnattas/.cache/ms-playwright npm run test:browser",
+          "revision": "f3f2f5edafde75795e7d6963033c3b785cab6d5ac0b7e2a41e52b72b68a24ae3",
+          "result": "failed"
+        },
+        {
+          "command": "PLAYWRIGHT_BROWSERS_PATH=/home/johnattas/.cache/ms-playwright npx vitest run --config vitest.browser.config.ts tests/browser/fontSizePreference.browser.ts",
+          "revision": "f3f2f5edafde75795e7d6963033c3b785cab6d5ac0b7e2a41e52b72b68a24ae3",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "T4",
+      "status": "manualPending",
+      "files": [],
+      "validations": [],
+      "nextAction": "Servir a revisão corrigida da biblioteca em ambiente isolado no MaxCode e executar o roteiro manual de aceite na conta de teste"
+    }
+  ],
+  "verification": {
+    "revision": "f3f2f5edafde75795e7d6963033c3b785cab6d5ac0b7e2a41e52b72b68a24ae3",
+    "checks": [
+      {
+        "command": "npm run check:lockfile",
+        "revision": "f3f2f5edafde75795e7d6963033c3b785cab6d5ac0b7e2a41e52b72b68a24ae3",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run test",
+        "revision": "f3f2f5edafde75795e7d6963033c3b785cab6d5ac0b7e2a41e52b72b68a24ae3",
+        "result": "failed",
+        "exitCode": 1
+      },
+      {
+        "command": "npm run type-check:test",
+        "revision": "f3f2f5edafde75795e7d6963033c3b785cab6d5ac0b7e2a41e52b72b68a24ae3",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run lint",
+        "revision": "f3f2f5edafde75795e7d6963033c3b785cab6d5ac0b7e2a41e52b72b68a24ae3",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run build",
+        "revision": "f3f2f5edafde75795e7d6963033c3b785cab6d5ac0b7e2a41e52b72b68a24ae3",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "PLAYWRIGHT_BROWSERS_PATH=/home/johnattas/.cache/ms-playwright npm run test:browser",
+        "revision": "f3f2f5edafde75795e7d6963033c3b785cab6d5ac0b7e2a41e52b72b68a24ae3",
+        "result": "failed",
+        "exitCode": 1
+      },
+      {
+        "command": "PLAYWRIGHT_BROWSERS_PATH=/home/johnattas/.cache/ms-playwright npx vitest run --config vitest.browser.config.ts tests/browser/fontSizePreference.browser.ts",
+        "revision": "f3f2f5edafde75795e7d6963033c3b785cab6d5ac0b7e2a41e52b72b68a24ae3",
+        "result": "passed",
+        "exitCode": 0
+      }
+    ]
+  },
+  "updatedAt": 1791295900000,
+  "nextAction": "Aguardar disponibilização da revisão no MaxCode em ambiente isolado para validação manual de aceite (T4)"
+}
