@@ -445,7 +445,8 @@
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    width: 100%;
+    width: calc(100% - 2px) !important;
+    margin: 1px;
     height: 100%;
     min-height: 0;
     position: relative;
