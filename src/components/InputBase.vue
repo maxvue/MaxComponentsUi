@@ -439,6 +439,14 @@
         }
     }
 
+    &[no-margin], &[text-center]{
+        .input-slot-div {
+            margin-right: 0 !important;
+            margin-left: 0 !important;
+            width: 100%;
+        }
+    }
+
     .max-input-label {
         position: absolute;
         pointer-events: auto;
@@ -489,6 +497,7 @@
             margin-left: 3px;
             width: 100%;
         }
+
 
         :deep(input),
         :deep(textarea),
