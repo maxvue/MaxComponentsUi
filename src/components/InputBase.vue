@@ -439,7 +439,7 @@
         }
     }
 
-    &[no-margin], &[text-center]{
+    &[no-margin], &[text-center] {
         .input-slot-div {
             margin-right: 0 !important;
             margin-left: 0 !important;
