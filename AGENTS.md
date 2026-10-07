@@ -67,6 +67,39 @@ A assinatura visual do Max Components UI é **operacional, compacta e azul-petr�
   3. `<style lang="scss" scoped>`
 - Use exclusivamente **Composition API** com `<script setup lang="ts">`. Options API é proibida.
 - Tipagem estrita em `defineProps<Interface>()` e `defineEmits<{...}>()`.
+- **Tags de abertura em uma única linha no frontend**: mantenha o nome da tag, todos os atributos, props, diretivas e eventos e o fechamento `>` ou `/>` na mesma linha, tanto em componentes Vue quanto em elementos HTML. Não distribua os atributos ou seus valores/expressões em várias linhas, mesmo quando a tag ficar longa. Essa regra vale para a tag de abertura; o conteúdo interno, os filhos e a tag de fechamento podem permanecer em linhas separadas, respeitando a indentação do projeto.
+
+**Não usar:**
+
+```html
+<NomeDoComponente
+    class="add"
+    title="titulo"
+>
+    <div
+        class="classe-do-conteudo"
+        number="2"
+    >
+        Conteúdo
+    </div>
+</NomeDoComponente>
+```
+
+**Usar:**
+
+```html
+<NomeDoComponente class="add" title="titulo">
+    <div class="classe-do-conteudo" number="2">
+        Conteúdo
+    </div>
+</NomeDoComponente>
+```
+
+**Tags sem conteúdo também ficam em uma única linha:**
+
+```html
+<NomeDoComponente class="add" title="titulo" />
+```
 
 ### 5.2. Regras Críticas do ESLint (evitam falhas no CI)
 - **Indentação em arquivos `.vue`**: O ESLint impõe `vue/script-indent` com `baseIndent: 1`. Todo código dentro da tag `<script setup>` **deve ter recuo base de 4 espaços** (1 nível de tabulação). Em arquivos `.ts` e `.js` puros, usa-se 4 espaços via `@stylistic/indent`.

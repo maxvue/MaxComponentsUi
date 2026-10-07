@@ -1,0 +1,75 @@
+{
+  "version": 2,
+  "planRevision": "563ca40d0058ab20296f7e871c03bbd8e0d6cb8ccb7b70206ca5cfaeddf1ce41",
+  "tasks": [
+    {
+      "id": "T1",
+      "status": "completed",
+      "files": [
+        "AGENTS.md"
+      ],
+      "revision": "21ffdb8e9d284575c24f9cb54ebacd901ae5989011c44eecd5fca508d622d15b",
+      "validations": [
+        {
+          "command": "git diff -- AGENTS.md CLAUDE.md",
+          "revision": "21ffdb8e9d284575c24f9cb54ebacd901ae5989011c44eecd5fca508d622d15b",
+          "result": "passed"
+        },
+        {
+          "command": "git diff --check",
+          "revision": "21ffdb8e9d284575c24f9cb54ebacd901ae5989011c44eecd5fca508d622d15b",
+          "result": "passed"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "revision": "21ffdb8e9d284575c24f9cb54ebacd901ae5989011c44eecd5fca508d622d15b",
+    "checks": [
+      {
+        "command": "git rev-parse --show-toplevel",
+        "revision": "21ffdb8e9d284575c24f9cb54ebacd901ae5989011c44eecd5fca508d622d15b",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "git branch --show-current",
+        "revision": "21ffdb8e9d284575c24f9cb54ebacd901ae5989011c44eecd5fca508d622d15b",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "git ls-files -s CLAUDE.md AGENTS.md",
+        "revision": "21ffdb8e9d284575c24f9cb54ebacd901ae5989011c44eecd5fca508d622d15b",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "ls -l CLAUDE.md AGENTS.md",
+        "revision": "21ffdb8e9d284575c24f9cb54ebacd901ae5989011c44eecd5fca508d622d15b",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "git diff -- AGENTS.md CLAUDE.md",
+        "revision": "21ffdb8e9d284575c24f9cb54ebacd901ae5989011c44eecd5fca508d622d15b",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "git diff --check",
+        "revision": "21ffdb8e9d284575c24f9cb54ebacd901ae5989011c44eecd5fca508d622d15b",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "git status --short",
+        "revision": "21ffdb8e9d284575c24f9cb54ebacd901ae5989011c44eecd5fca508d622d15b",
+        "result": "passed",
+        "exitCode": 0
+      }
+    ]
+  },
+  "updatedAt": 1791377050422,
+  "nextAction": "Nenhuma ação pendente; alteração documental concluída e validada integralmente."
+}
