@@ -583,11 +583,27 @@
         }
     }
 
+    &.text-left,
+    &.is-text-left {
+        :deep(input),
+        :deep(.max-input-native) {
+            text-align: left !important;
+        }
+    }
+
     &.text-center,
     &.is-text-center {
         :deep(input),
         :deep(.max-input-native) {
             text-align: center !important;
+        }
+    }
+
+    &.text-left,
+    &.is-text-left {
+        :deep(input),
+        :deep(.max-input-native) {
+            text-align: left !important;
         }
     }
 
