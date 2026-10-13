@@ -136,9 +136,83 @@ Padrão: `{p|m}{t|b|l|r|w|h|x|y}-{valor}` — valor em pixels.
 | Classe | CSS |
 |--------|-----|
 | `elipsis` | `white-space: nowrap; text-overflow: ellipsis; overflow: hidden` |
-| `s50` | `flex: 1 0 calc(50% - 8px)` |
+| `s50` | Ver [Dimensionamento flexível: s1, s2 e variantes](#dimensionamento-flexível-s1-s2-e-variantes) (`flex: 1 1 0%`, mín. `1000px`, máx. `1200px`) |
 | `opacity-50` | `opacity: 0.5` |
 | `noClick` | `pointer-events: none` |
+
+#### Dimensionamento flexível: s1, s2 e variantes
+
+A família de regras `s` do `presetMaxUno` fornece utilitários para dimensionamento fluído de itens flexíveis (`flex items`).
+
+> [!NOTE]
+> **Nota de disponibilidade (2026-10-13):** O contrato documentado abaixo reflete a implementação consolidada na raiz do repositório (`src/presetMaxUno.ts`). Na revisão da branch atual (`wt-b7ccd219`), a regra implementada ainda corresponde à semântica percentual legada (`flex: 1 0 calc(n% - 8px)`). Certifique-se de que o pacote consumido inclua a nova regra antes de aplicar os novos multiplicadores em pixels e sufixos.
+
+##### Sintaxe e Expressão Regular
+
+A regra atende ao padrão:
+```regex
+/^s-?(\d+)(?:-(full|max|\d+))?$/
+```
+
+- **Prefixo:** `s` ou `s-` (hífen opcional).
+- **Base `n`:** sequência de dígitos inteiros não negativos (`Number(d)`).
+- **Sufixo opcional:** precedido por hífen, podendo ser `full`, `max` ou um valor numérico inteiro `m`.
+
+##### Fórmulas CSS Geradas
+
+Todas as variantes geram:
+- `flex: 1 1 0%`
+- `min-width: calc(n * 20px)`
+
+E a propriedade `max-width` varia de acordo com o sufixo:
+- **Sem sufixo (padrão):** `max-width: calc(n * 24px)`
+- **Com sufixo `-full` ou `-max`:** `max-width: 100%` (são aliases equivalentes; definem teto de largura em 100%, sem impor `width: 100%`)
+- **Com sufixo numérico `-m`:** `max-width: calc(m * 20px)` (o multiplicador do sufixo numérico é sempre **20px**, não 24px)
+
+##### Tabela de Classes e Resoluções
+
+| Classe / alias | flex | min-width | max-width |
+|---|---|---|---|
+| `s1` / `s-1` | `1 1 0%` | `20px` | `24px` |
+| `s2` / `s-2` | `1 1 0%` | `40px` | `48px` |
+| `s10` | `1 1 0%` | `200px` | `240px` |
+| `s10-full` / `s-10-full` | `1 1 0%` | `200px` | `100%` |
+| `s10-max` | `1 1 0%` | `200px` | `100%` |
+| `s10-20` / `s-10-20` | `1 1 0%` | `200px` | `400px` |
+| `s50` / `s-50` | `1 1 0%` | `1000px` | `1200px` |
+
+##### Comportamento Flexbox e Contêiner Pai
+
+- **Contexto Flex:** Nenhuma das declarações geradas inclui `!important`. A regra aplica estilos estritamente ao elemento filho (`flex item`). Ela **não** define `display: flex`, `flex-wrap` ou `gap` no elemento pai. Para que o comportamento funcione como esperado, o elemento que usa a classe deve ser filho direto de um contêiner flex (`display: flex`).
+- **Fator de Crescimento:** O valor de `flex-grow` é fixo em `1` para todos os itens. O número `n` não representa peso de proporção nem porcentagem direta: todos os itens com classe `s*` competem igualmente pelo espaço livre até atingirem seus respectivos `max-width` ou serem limitados por `min-width`.
+- **Prevenção de Quebra/Overflow:** A regra não define `flex-wrap`. Se a soma dos `min-width` dos itens filhos exceder a largura disponível do contêiner pai, ocorrerá overflow horizontal, a menos que o contêiner possua quebra ativada (ex.: `flex-wrap: wrap`).
+
+##### Diferença em Relação à Regra Legada
+
+Na regra percentual anterior, o número indicava porcentagem (ex.: `s50` gerava `calc(50% - 8px)`). Na nova especificação:
+- `s50` (ou `s-50`) agora representa largura mínima de **1000px** (`50 * 20px`) e máxima de **1200px** (`50 * 24px`), e **não** 50% do contêiner.
+- Usos existentes de classes como `s-50` ou `s-100` em layouts legados devem passar por revisão visual de layout em tarefa específica, e nunca por substituição indiscriminada sem conferência.
+
+##### Casos Extremos e Limitações
+
+- **Zero (`s0`, `s0-full`):** `s0` produz `min-width: 0px` e `max-width: 0px`. `s0-full` produz `min-width: 0px` e `max-width: 100%`.
+- **Máximo menor que mínimo (`s10-0`):** gera `min-width: 200px` e `max-width: 0px`. Pelas regras de renderização do CSS standard, quando `min-width` é maior que `max-width`, o valor de `min-width` prevalece. Para evitar conflitos visuais, utilize sempre `m >= n`.
+- **Padrões inválidos:** Decimais (`s1.5`), números negativos (`s--10`) ou maiúsculas (`s10-FULL`, `s10-MAX`) não são capturados pela expressão regular e não geram classes utilitárias.
+
+##### Exemplo de Uso
+
+O exemplo a seguir ilustra a distribuição de itens com classes estáticas dentro de um contêiner flex. Note que a declaração do contêiner (`flex gap-4 flex-wrap`) pertence à estrutura do pai, enquanto as classes `s*` atuam nos itens filhos:
+
+```html
+<div class="flex gap-4 flex-wrap">
+    <div class="s10-full">
+        Conteúdo principal flexível (mín. 200px, máx. 100%)
+    </div>
+    <div class="s10-20">
+        Barra lateral com limite estendido (mín. 200px, máx. 400px)
+    </div>
+</div>
+```
 
 #### Cores predefinidas
 

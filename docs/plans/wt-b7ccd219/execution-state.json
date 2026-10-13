@@ -1,0 +1,67 @@
+{
+  "version": 2,
+  "planRevision": "22d99617481737deacd9f7d983aaa3379630ecee1f642672d9b409fd36498ac2",
+  "tasks": [
+    {
+      "id": "T1",
+      "status": "completed",
+      "files": [
+        "docs/plans/wt-b7ccd219/plan.md",
+        "docs/plans/wt-b7ccd219/spec.md",
+        "src/presetMaxUno.ts"
+      ],
+      "revision": "1c4cfc0391e89a18b6ab993be092e4aa9f8e7bd01803f88f6aaa2fb925fe9dad",
+      "validations": []
+    },
+    {
+      "id": "T2",
+      "status": "completed",
+      "files": [
+        "docs/THEME.md"
+      ],
+      "revision": "28daefb783abca1ea24fe9ba7619d7d0dd71a324125460ca2a86ab0c5b097cb7",
+      "validations": [
+        {
+          "command": "git diff --check",
+          "revision": "28daefb783abca1ea24fe9ba7619d7d0dd71a324125460ca2a86ab0c5b097cb7",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "T3",
+      "status": "manualPending",
+      "files": [],
+      "validations": [],
+      "nextAction": "Aguardar autorização e execução da atualização documental em worktree dedicada do repositório MaxCode pelo responsável."
+    },
+    {
+      "id": "T4",
+      "status": "completed",
+      "files": [
+        "docs/THEME.md"
+      ],
+      "revision": "28daefb783abca1ea24fe9ba7619d7d0dd71a324125460ca2a86ab0c5b097cb7",
+      "validations": [
+        {
+          "command": "git diff --check",
+          "revision": "28daefb783abca1ea24fe9ba7619d7d0dd71a324125460ca2a86ab0c5b097cb7",
+          "result": "passed"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "revision": "28daefb783abca1ea24fe9ba7619d7d0dd71a324125460ca2a86ab0c5b097cb7",
+    "checks": [
+      {
+        "command": "git diff --check",
+        "revision": "28daefb783abca1ea24fe9ba7619d7d0dd71a324125460ca2a86ab0c5b097cb7",
+        "result": "passed",
+        "exitCode": 0
+      }
+    ]
+  },
+  "updatedAt": 1791898190000,
+  "nextAction": "Handoff para execução e validação da etapa externa T3 no repositório MaxCode."
+}
