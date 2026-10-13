@@ -1167,24 +1167,102 @@ Sem props próprias — funciona como container de estilos CSS.
 
 ### MaxGrid
 
-Sistema de **grid flexível** (flexbox com wrap) para organizar componentes lado a lado.
-Gap padrão de 13px vertical × 8px horizontal.
+Sistema de **grid flexível** baseado em Flexbox com quebra automática de linha (`display: flex; flex-wrap: wrap;`) para organizar componentes e campos de formulário lado a lado. Não deve ser confundido com CSS Grid nem com grids rígidos de 12 colunas.
+
+Gap padrão de **13px vertical × 8px horizontal** (`gap: 13px 8px;`) e padding superior de **14px** (`padding-top: 14px;`).
 
 **Arquivo:** [`src/components/MaxGrid.vue`](src/components/MaxGrid.vue)
 **Aliases:** `Grid`
 
+> [!NOTE]
+> **MaxGrid vs. MaxGridCols:** O `<MaxGrid>` utiliza Flexbox fluído onde os filhos controlam sua largura através da família de tokens `s-*` do `presetMaxUno`. Para layouts baseados em CSS Grid com 24 colunas e classes `grid-column: span N`, utilize o [`MaxGridCols`](#maxgridcols).
+
+#### Props
+
 | Prop | Tipo | Descrição |
 |------|------|-----------|
-| `label` | `string` | Label exibido acima do grid (estilo fieldset, posicionado absolute) |
-| `labelCenter` | `boolean` | Centraliza o label horizontalmente |
+| `label` | `string \| null` | Rótulo textual exibido acima do grid (estilo fieldset, posicionado relativamente no topo). Renderizado apenas quando verdadeiro. |
+| `labelCenter` | `boolean` | Centraliza visualmente o `label` horizontalmente via classe `.label-center`. |
 
-**Uso com shortcuts de tamanho:**
+O componente não declara valores padrão (`defaults`) nem emite eventos próprios (`emits`).
+
+#### Slots e Atributos de Raiz
+
+- **Slot `default`:** Recebe os elementos filhos e componentes de formulário a serem distribuídos no grid.
+- **Atributos adicionais:** Atributos HTML padrão (`id`, `class`, `style`, etc.) são repassados diretamente à `div.max-grid` raiz.
+- **Flags `no-message` e `no-messages`:** Quando presentes na raiz (ex.: `<MaxGrid no-message>`), ativam regras CSS internas que colapsam a área de mensagens de erro/ajuda (`.message-spacer`) de todos os componentes de entrada internos (`MaxInput*`).
+  > [!WARNING]
+  > O seletor CSS verifica a **presença física do atributo** no DOM (`&[no-message], &[no-messages]`). O binding `:no-message="false"` ainda renderiza o atributo e acionará o colapso. Para desativar a flag, omita o atributo.
+- **Estados inexistentes:** `disabled`, `error` e `severity` **não são suportados** pelo `<MaxGrid>`. Cada campo filho gerencia seu próprio estado.
+
+#### Dimensionamento com a Família `s-*`
+
+Os filhos diretos de `<MaxGrid>` têm suas dimensões controladas pelas classes utilitárias ou atributos da família `s` do `presetMaxUno`:
+- **Base `sN`:** Define largura mínima de `N × 20px` e máxima de `N × 24px` (ex.: `s10` define mín. 200px e máx. 240px).
+- **Teto `-full` / `-max`:** `s10-full` ou `s10-max` define mín. `200px` e teto máximo de `100%` (`max-width: 100%`). Não força ocupação de 100% nem largura exclusiva se houver espaço compartilhado.
+- **Extensão numérica `-m`:** `s10-20` define mín. `200px` e máx. `400px` (`20 × 20px`).
+- **Aviso sobre semântica em pixels:** Os números **não representam porcentagens**. `s50` equivale a **1000px/1200px** e `s100` a **2000px/2400px**. Para ocupar linhas com elasticidade, utilize `s10-full`.
+
+Para especificações matemáticas completas, breakpoints e regex, consulte o guia de tema em [docs/THEME.md#dimensionamento-flexível-s1-s2-e-variantes](docs/THEME.md#dimensionamento-flexível-s1-s2-e-variantes).
+
+#### Quebras Explícitas de Linha (`start` e `end`)
+
+O `<MaxGrid>` inspeciona seus filhos lógicos diretos (expandindo recursivamente Fragments como `v-for` e `<template>`) através de `GridSlotRows`:
+- **`end` (ex.: `s7-end`):** Encerra a linha atual imediatamente após o item. O próximo item começará em uma nova linha.
+- **`start` (ex.: `s3-10-start`):** Inicia uma nova linha imediatamente antes do item, separando-o dos anteriores.
+- **Pares redundantes:** Um item com `end` seguido diretamente por outro com `start` compartilham uma única quebra (não criam linhas vazias intermediárias).
+- **Sem marcadores ativos:** Quando nenhum filho utiliza marcadores de quebra, os nós são renderizados diretamente sem elementos intermediários, preservando seletores diretos e desempenho.
+- **Com marcadores ativos:** Os itens são organizados em segmentos `div.max-grid-row` (`flex: 0 0 100%; width: 100%; display: flex; flex-wrap: wrap; gap: inherit;`).
+- **Atributos válidos:** Atributos valueless (`s7-end`) ou booleanos verdadeiros (`:s7-end="true"`, `'true'`) ativam a quebra. Valores como `false`, `null` ou `undefined` não ativam quebras.
+- **Limitação de Dispositivos:** O organizador de linhas do `<MaxGrid>` **não suporta sufixos de dispositivo** (`desktop`, `mobile`, `tablet`). Tokens como `s7-end-mobile` emitem CSS condicional de fragmentação, mas não provocam quebra estrutural no `<MaxGrid>`.
+
+#### Exemplos de Uso
+
+**Formulário completo com quebra de linha e tokens elásticos:**
+
 ```vue
-<MaxGrid>
-  <MaxInputText s50 v-model="nome" label="Nome" />     <!-- 50% da largura -->
-  <MaxInputText s50 v-model="email" label="Email" />    <!-- 50% da largura -->
-  <MaxInputText s100 v-model="obs" label="Observação" /> <!-- 100% da largura -->
-</MaxGrid>
+<template>
+    <MaxGrid label="Dados Cadastrais">
+        <!-- Primeira linha: Nome (mín 200px, teto 100%) e CPF (mín 140px, máx 168px, quebra ao final) -->
+        <MaxInputText class="s10-full" label="Nome Completo" v-model="form.nome" />
+        <MaxInputText s7-end label="CPF" v-model="form.cpf" />
+
+        <!-- Segunda linha iniciada explicitamente por s3-10-start -->
+        <MaxInputText class="s3-10-start" label="Telefone" v-model="form.telefone" />
+        <MaxInputText class="s10-full" label="E-mail" v-model="form.email" />
+    </MaxGrid>
+</template>
+
+<script setup lang="ts">
+    import { ref } from 'vue';
+    import { MaxGrid, MaxInputText } from '@maxvue/max-components-ui';
+
+    const form = ref({
+        nome: '',
+        cpf: '',
+        telefone: '',
+        email: ''
+    });
+</script>
+```
+
+**Compactação vertical com a flag `no-message`:**
+
+```vue
+<template>
+    <MaxGrid no-message label="Filtros Rápidos">
+        <MaxInputText class="s10-full" label="Buscar" v-model="termo" />
+        <MaxInputText class="s10-20" label="Código" v-model="codigo" />
+    </MaxGrid>
+</template>
+
+<script setup lang="ts">
+    import { ref } from 'vue';
+    import { MaxGrid, MaxInputText } from '@maxvue/max-components-ui';
+
+    const termo = ref('');
+    const codigo = ref('');
+</script>
 ```
 
 ---

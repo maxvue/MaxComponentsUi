@@ -66,8 +66,8 @@ Após configurar, basta usar os componentes no template:
 <template>
   <Grid>
     <!-- Todos auto-importados, sem declarar import -->
-    <MaxInputText v-model="nome" label="Nome" />
-    <MaxInputSelect v-model="tipo" label="Tipo" :options="opcoes" />
+    <MaxInputText class="s10-full" v-model="nome" label="Nome" />
+    <MaxInputSelect class="s10-20" v-model="tipo" label="Tipo" :options="opcoes" />
     <MaxButton label="Salvar" icon="mdi:check" @click="salvar" />
 
     <!-- Modais e tabelas Max nativos também são auto-importados -->
@@ -80,6 +80,11 @@ Após configurar, basta usar os componentes no template:
 </template>
 ```
 
+> [!NOTE]
+> **Separação entre Resolução de Componentes e Geração de CSS:**<br>
+> O alias `Grid` resolve automaticamente o componente [`MaxGrid`](../COMPONENTS.md#maxgrid). No entanto, o `MaxComponentsUiResolver` cuida exclusivamente do registro e injeção do componente Vue no template. Ele **não habilita o UnoCSS, não injeta o `presetMaxUno` nem processa os atributos `s-*`**.<br>
+> Para que os utilitários de largura e quebras de linha funcionem, configure o preset em seu `uno.config.ts` e importe `virtual:uno.css` na entrada da aplicação, conforme detalhado no guia de tema em [docs/THEME.md](THEME.md).
+
 ---
 
 ## Notas Importantes
@@ -87,3 +92,4 @@ Após configurar, basta usar os componentes no template:
 - O resolver é **gerado automaticamente** pelo script `src/scripts/generateResolver.ts`. Não modifique o `MaxComponentsUiResolver.ts` manualmente.
 - Componentes de bibliotecas externas (ex: PrimeVue) não são resolvidos por este resolver e devem ser importados diretamente de seus pacotes oficiais (`primevue/*`).
 - Os aliases suportam formatos `PascalCase`, `kebab-case` e `snake_case`.
+- A resolução automática de componentes é independente da compilação de CSS utilitário do UnoCSS. Ambos os plugins devem coexistir no seu `vite.config.ts`.

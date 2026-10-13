@@ -123,4 +123,34 @@ describe('E10-10: Cobertura do Playground e Identidade Canônica', () => {
         expect(stats.coveredCount).toBe(stats.total);
         expect(stats.coveragePercentage).toBe(100);
     });
+
+    it('registro do MaxGrid no catálogo descreve flexbox com wrap e dimensionamento fluído s', () => {
+        const gridItem = PLAYGROUND_CATALOG.find((item) => item.name === 'MaxGrid');
+        expect(gridItem).toBeDefined();
+        expect(gridItem!.description).not.toContain('12 colunas');
+        expect(gridItem!.description).not.toContain('s10 a s100');
+        expect(gridItem!.description.toLowerCase()).toContain('flex');
+    });
+
+    it('bloco MaxGrid em layout-grid.vue utiliza contratos reais sem estados fictícios', () => {
+        const scenarioPath = path.resolve(PLAYGROUND_DIR, 'src/scenarios/layout-grid.vue');
+        const scenarioContent = fs.readFileSync(scenarioPath, 'utf-8');
+
+        // Isola exclusivamente o bloco do MaxGrid no template para não avaliar blocos vizinhos
+        const maxGridBlockMatch = scenarioContent.match(/<h3>MaxGrid<\/h3>[\s\S]*?<\/div>\s*<\/div>\s*<div class="component-block">\s*<h3>MaxGridCols<\/h3>/);
+        expect(maxGridBlockMatch).not.toBeNull();
+        const maxGridBlock = maxGridBlockMatch![0];
+
+        // Não deve conter props/atributos fictícios de estado no MaxGrid
+        expect(maxGridBlock).not.toMatch(/<MaxGrid[^>]*\bdisabled\b/);
+        expect(maxGridBlock).not.toMatch(/<MaxGrid[^>]*\berror\b/);
+        expect(maxGridBlock).not.toMatch(/<MaxGrid[^>]*\bseverity\b/);
+
+        // Exemplos identificáveis com filhos reais e tokens da família s
+        expect(maxGridBlock).toContain('<MaxInputText');
+        expect(maxGridBlock).toContain('s10-full');
+        expect(maxGridBlock).toContain('s7-end');
+        expect(maxGridBlock).toContain('s3-10-start');
+        expect(maxGridBlock).not.toContain('s7-end-mobile');
+    });
 });

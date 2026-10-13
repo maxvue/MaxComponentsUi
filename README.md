@@ -164,19 +164,29 @@ A biblioteca contém **59 componentes** organizados em categorias:
 A biblioteca fornece:
 
 - **MaxStyle** — Preset PrimeVue baseado no tema Aura com paleta de cores personalizada (primary, success, info, warning, danger)
-- **presetMaxUno** — Preset UnoCSS com shortcuts e rules customizados para padding, margin, grid, cores, hover e mais
+- **presetMaxUno** — Preset UnoCSS com shortcuts e rules customizados para padding, margin, dimensionamento fluído de grid (`s-*`), cores, hover e preflight global
 - **Tipografia Canônica** — Stack baseada em `--font-sans` (`Quicksand` com fallback para fontes do sistema operacional). A biblioteca não embute arquivos binários de fontes; o carregamento de `Quicksand` é responsabilidade da aplicação consumidora.
 
 ```typescript
 // uno.config.ts
-import { presetMaxUno } from "@maxvue/max-components-ui/preset";
+import { defineConfig, presetAttributify, presetWind3 } from 'unocss';
+import { presetMaxUno } from '@maxvue/max-components-ui/preset';
 
 export default defineConfig({
-  presets: [presetMaxUno()],
+    presets: [
+        presetMaxUno(),
+        presetWind3(),
+        presetAttributify({
+            ignoreAttributes: ['style', 'color', 'background', 'hover']
+        })
+    ]
 });
 ```
 
-> Veja todas as classes utilitárias e paleta de cores em [docs/THEME.md](docs/THEME.md).
+> [!TIP]
+> - O `presetAttributify()` permite o uso direto de tokens fluídos como atributos nos componentes (ex.: `<MaxInputText s10-full />` ou quebras com `s7-end`).
+> - Para organizar componentes com flexbox fluído e quebra de linhas, veja o componente **[MaxGrid](COMPONENTS.md#maxgrid)**.
+> - A especificação matemática completa dos multiplicadores em pixels, regex e classes `s-*` está documentada em **[docs/THEME.md (Dimensionamento Flexível)](docs/THEME.md#dimensionamento-flexível-s1-s2-e-variantes)**.
 
 ---
 

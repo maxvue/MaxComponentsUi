@@ -1,0 +1,110 @@
+{
+  "version": 2,
+  "planRevision": "22cd9cae9149ae42a9002ae4ee8782384c467ded9724fc10959291701f20d07f",
+  "tasks": [
+    {
+      "id": "T0",
+      "status": "completed",
+      "files": [],
+      "validations": []
+    },
+    {
+      "id": "T1",
+      "status": "completed",
+      "files": [
+        "docs/THEME.md",
+        "COMPONENTS.md"
+      ],
+      "revision": "dce3e85be3eaa4cd4adaf08850c94b65f1b7489913af38ad995dd815a77cc80b",
+      "validations": []
+    },
+    {
+      "id": "T2",
+      "status": "completed",
+      "files": [
+        "README.md",
+        "docs/AUTO-IMPORT.md"
+      ],
+      "revision": "5d0452c1b06bd3021ce8aa4c38a8120afc7909edd62584bd7b2db799ba2aec5a",
+      "validations": []
+    },
+    {
+      "id": "T3",
+      "status": "completed",
+      "files": [
+        "playground/src/catalog.ts",
+        "playground/src/scenarios/layout-grid.vue",
+        "tests/architecture/playgroundCoverage.test.ts"
+      ],
+      "revision": "6336805852b54b75c007af1dc8e02ef74e3b68065b5633b76fd2b51361a4d295",
+      "validations": []
+    },
+    {
+      "id": "T4",
+      "status": "completed",
+      "files": [],
+      "validations": []
+    }
+  ],
+  "verification": {
+    "revision": "17277d3ed5e020d55d3ab6cb028973e6f3875fdc7f66d78d197876c452cdf7ed",
+    "checks": [
+      {
+        "command": "npm run check:lockfile",
+        "revision": "17277d3ed5e020d55d3ab6cb028973e6f3875fdc7f66d78d197876c452cdf7ed",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "git diff --check",
+        "revision": "17277d3ed5e020d55d3ab6cb028973e6f3875fdc7f66d78d197876c452cdf7ed",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run check:playground:bundle",
+        "revision": "17277d3ed5e020d55d3ab6cb028973e6f3875fdc7f66d78d197876c452cdf7ed",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run test",
+        "revision": "34efed9ff96cecc06537b98959164fb8f38da78c01725bc7adb70389eb61fd33",
+        "result": "failed",
+        "exitCode": 1
+      },
+      {
+        "command": "npm run test:browser",
+        "revision": "34efed9ff96cecc06537b98959164fb8f38da78c01725bc7adb70389eb61fd33",
+        "result": "failed",
+        "exitCode": 1
+      },
+      {
+        "command": "npm run type-check",
+        "revision": "34efed9ff96cecc06537b98959164fb8f38da78c01725bc7adb70389eb61fd33",
+        "result": "failed",
+        "exitCode": 2
+      },
+      {
+        "command": "npm run type-check:test",
+        "revision": "34efed9ff96cecc06537b98959164fb8f38da78c01725bc7adb70389eb61fd33",
+        "result": "failed",
+        "exitCode": 2
+      },
+      {
+        "command": "npm run lint",
+        "revision": "34efed9ff96cecc06537b98959164fb8f38da78c01725bc7adb70389eb61fd33",
+        "result": "failed",
+        "exitCode": 2
+      },
+      {
+        "command": "npm run build",
+        "revision": "34efed9ff96cecc06537b98959164fb8f38da78c01725bc7adb70389eb61fd33",
+        "result": "failed",
+        "exitCode": 2
+      }
+    ]
+  },
+  "updatedAt": 1791913000000,
+  "nextAction": "Apresentar síntese das entregas ao usuário para auditoria e aguardar autorização de commit/merge pelo painel."
+}

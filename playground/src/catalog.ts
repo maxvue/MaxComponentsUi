@@ -118,7 +118,7 @@ export const PLAYGROUND_CATALOG: CatalogComponent[] = [
     { name: 'MaxPageLayout', family: 'layout', scenarioId: 'layout-shell', description: 'Layout estruturado de página desktop com áreas de cabeçalho e corpo.' },
     { name: 'MaxPageMobileLayout', family: 'layout', scenarioId: 'layout-shell', description: 'Layout de página responsivo ajustado para viewports mobile.' },
     { name: 'MaxPageContent', family: 'layout', scenarioId: 'layout-shell', description: 'Área principal de conteúdo com moldura canônica e contraste.' },
-    { name: 'MaxGrid', family: 'layout', scenarioId: 'layout-grid', description: 'Grid responsivo de 12 colunas com classes de largura s10 a s100.' },
+    { name: 'MaxGrid', family: 'layout', scenarioId: 'layout-grid', description: 'Grid flexível baseado em flexbox com wrap e dimensionamento fluído via tokens s.' },
     { name: 'MaxGridCols', family: 'layout', scenarioId: 'layout-grid', description: 'Container de colunas automáticas para layouts flexíveis.' },
     { name: 'MaxDividers', family: 'layout', scenarioId: 'layout-dividers', description: 'Divisores horizontais e verticais com rótulo ou drill-down.' },
     { name: 'MaxEmptyDiv', family: 'layout', scenarioId: 'layout-grid', description: 'Espaçador flexível para ajuste de alinhamento em grids.' },

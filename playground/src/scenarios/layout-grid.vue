@@ -6,21 +6,36 @@
 
                 <div class="component-block">
                     <h3>MaxGrid</h3>
+                    <p class="max-grid-doc-note">
+                        Contêiner flexbox com quebra natural (flex-wrap) e suporte a quebras explícitas com marcadores start e end. Tokens com sufixo de dispositivo (mobile, tablet, desktop) geram regras CSS de fragmentação, mas não quebram linhas estruturais no MaxGrid atual.
+                    </p>
                     <div class="states">
-                        <!-- Default -->
+                        <!-- 1. Flex-wrap natural sem marcadores -->
                         <div class="state-col">
-                            <span>Normal</span>
-                            <MaxGrid />
+                            <span>Flex-wrap natural (sem marcadores)</span>
+                            <MaxGrid label="Campos Cadastrais">
+                                <MaxInputText class="s10-full" label="Nome do Cliente" v-model="formExemplo.nome" />
+                                <MaxInputText class="s10-20" label="Código do Registro" v-model="formExemplo.codigo" />
+                            </MaxGrid>
                         </div>
-                        <!-- Disabled -->
+
+                        <!-- 2. Quebras explícitas de linha (start/end) -->
                         <div class="state-col">
-                            <span>Disabled</span>
-                            <MaxGrid disabled />
+                            <span>Quebras explícitas (s7-end e s3-10-start)</span>
+                            <MaxGrid label="Linhas Explícitas">
+                                <MaxInputText s7-end label="Item 1 (s7-end encerra linha)" v-model="formExemplo.item1" />
+                                <MaxInputText class="s3-10-start" label="Item 2 (s3-10-start inicia linha)" v-model="formExemplo.item2" />
+                                <MaxInputText class="s10-full" label="Item 3 (elástico na linha)" v-model="formExemplo.item3" />
+                            </MaxGrid>
                         </div>
-                        <!-- Error / Variant -->
+
+                        <!-- 3. Label centralizado e flag no-message -->
                         <div class="state-col">
-                            <span>Erro / Secundário</span>
-                            <MaxGrid error severity="danger" />
+                            <span>Label centralizado e flag no-message</span>
+                            <MaxGrid no-message label="Filtros Compactos" :labelCenter="true">
+                                <MaxInputText s10-full label="Pesquisa Rápida" v-model="formExemplo.pesquisa" />
+                                <MaxInputText class="s10-20" label="Status" v-model="formExemplo.status" />
+                            </MaxGrid>
                         </div>
                     </div>
                 </div>
@@ -72,9 +87,21 @@
 </template>
 
 <script setup lang="ts">
+    import { ref } from 'vue';
     import { MaxGrid } from '@maxvue/max-components-ui';
     import { MaxGridCols } from '@maxvue/max-components-ui';
     import { MaxEmptyDiv } from '@maxvue/max-components-ui';
+    import { MaxInputText } from '@maxvue/max-components-ui';
+
+    const formExemplo = ref({
+        nome: 'João Silva',
+        codigo: 'ENG-2026',
+        item1: 'Valor 1',
+        item2: 'Valor 2',
+        item3: 'Valor 3',
+        pesquisa: '',
+        status: 'Ativo'
+    });
 </script>
 
 <style lang="scss" scoped>
@@ -93,6 +120,12 @@
         border: 1px solid var(--layout-border, #ccc);
         padding: 1rem;
         border-radius: 8px;
+    }
+    .max-grid-doc-note {
+        font-size: 0.85rem;
+        color: var(--background-750, #555);
+        margin-top: 0.5rem;
+        line-height: 1.4;
     }
     .states {
         display: flex;
