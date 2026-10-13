@@ -1,23 +1,5 @@
 <template>
-    <MaxInputSelect
-        class="max-input-uf"
-        v-bind="forwardedAttrs"
-        :options="optionsList"
-        optionValue="value"
-        optionLabel="label"
-        :filter="props.filter"
-        :label="resolvedLabel"
-        :noLabel="props.noLabel"
-        :placeholder="props.placeholder"
-        :disabled="props.disabled"
-        :clearable="isClearable"
-        :done="props.done"
-        :error="props.error"
-        :caution="props.caution"
-        :required="props.required"
-        :noMessage="props.noMessage"
-        v-model="internalValue"
-    >
+    <MaxInputSelect s6-7 class="max-input-uf" v-bind="forwardedAttrs" :options="optionsList" optionValue="value" optionLabel="label" :filter="props.filter" :label="resolvedLabel" :noLabel="props.noLabel" :placeholder="props.placeholder" :disabled="props.disabled" :clearable="isClearable" :done="props.done" :error="props.error" :caution="props.caution" :required="props.required" :noMessage="props.noMessage" v-model="internalValue" >
         <template #value="{ value }">
             <slot name="value" :value="value" :state="selectedState">
                 <span v-if="selectedState" class="max-uf-trigger-value">{{ displayTriggerValue }}</span>
