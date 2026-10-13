@@ -101,4 +101,58 @@ describe('presetMaxUno — CSS gerado', () => {
         expect(css).toContain('padding-left:20px !important');
         expect(css).toContain('padding-right:20px !important');
     });
+
+    describe('dimensionamento s- no CSS gerado', () => {
+        const declarationsFor = async (token: string) => {
+            const css = await generate(`<div class="${token}"></div>`);
+            const declarations: Record<string, string> = {};
+
+            postcss.parse(css).walkDecls((declaration) => {
+                declarations[declaration.prop] = declaration.value;
+            });
+            return declarations;
+        };
+
+        it.each([
+            ['s-50', '1000px', '1200px'],
+            ['s100', '2000px', '2400px'],
+            ['s-50-full', '1000px', '100%'],
+            ['s-50-max', '1000px', '100%'],
+            ['s-50-80', '1000px', '1600px']
+        ])('%s gera CSS válido sem propriedades de quebra', async (token, minWidth, maxWidth) => {
+            expect(await declarationsFor(token)).toEqual({
+                flex: '1 1 0%',
+                'min-width': minWidth,
+                'max-width': maxWidth
+            });
+        });
+
+        it.each([
+            ['s50-start', '1200px'],
+            ['s-50-full-start', '100%'],
+            ['s-50-max-start', '100%'],
+            ['s-50-80-start', '1600px']
+        ])('%s gera somente break-before', async (token, maxWidth) => {
+            expect(await declarationsFor(token)).toEqual({
+                flex: '1 1 0%',
+                'min-width': '1000px',
+                'max-width': maxWidth,
+                'break-before': 'always'
+            });
+        });
+
+        it.each([
+            ['s-50-end', '1200px'],
+            ['s-50-full-end', '100%'],
+            ['s-50-max-end', '100%'],
+            ['s-50-80-end', '1600px']
+        ])('%s gera somente break-after', async (token, maxWidth) => {
+            expect(await declarationsFor(token)).toEqual({
+                flex: '1 1 0%',
+                'min-width': '1000px',
+                'max-width': maxWidth,
+                'break-after': 'always'
+            });
+        });
+    });
 });

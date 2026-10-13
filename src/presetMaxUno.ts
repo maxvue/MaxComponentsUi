@@ -80,18 +80,24 @@ export const presetMaxUno = () => {
             [/^ellipsis$/, () => ({ 'white-space': 'nowrap', 'text-overflow': 'ellipsis', 'max-width': '100%', overflow: 'hidden' })],
             // Restrita ao prefixo `s-` (ex.: `s-50`, `s100`) para não colidir com `w-*`,
             // que deve ser resolvido pelo presetWind3 com a semântica padrão de `width`.
-            [/^s-?(\d+)(?:-(full|max|\d+))?$/, ([, d, max]) => {
+            [/^s-?(\d+)(?:-(full|max|\d+))?(?:-(start|end))?$/, ([, d, max, position]) => {
                 const n = Number(d);
 
                 let maxWidth = `${n * 24}px`; // fallback padrão
 
                 if (max === 'full' || max === 'max') maxWidth = '100%';
                 else if (max) maxWidth = `${Number(max) * 20}px`;
-                return {
+                const styles: Record<string, string> = {
                     flex: '1 1 0%',
                     'min-width': `${n * 20}px`,
                     'max-width': maxWidth
                 };
+
+                // Declarações de fragmentação; não garantem quebra de linha em flexbox comum.
+                if (position === 'start') styles['break-before'] = 'always';
+                if (position === 'end') styles['break-after'] = 'always';
+
+                return styles;
             }],
             [/^opacity-?(\d+(?:\.\d+)?)$/, ([, d]) => {
                 const raw = Number(d);

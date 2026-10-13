@@ -430,16 +430,61 @@ describe('presetMaxUno', () => {
             });
         });
 
-        it('s-(\\d+) calcula fórmula flexbox e restringe prefixo s-', () => {
-            const rule = findRule(/^s-?(\d+)$/);
-            expect(rule).toBeTruthy();
+        describe('regra de dimensionamento s-', () => {
+            const rule = preset.rules.find((entry: [RegExp]) => entry[0] instanceof RegExp && entry[0].test('s-50'));
+            const stylesFor = (token: string) => {
+                expect(rule).toBeDefined();
+                const match = token.match(rule[0]);
 
-            expect(rule[1]([, '50'])).toEqual({ flex: '1 0 calc(50% - 8px)' });
-            expect(rule[1]([, '100'])).toEqual({ flex: '1 0 calc(100% - 8px)' });
+                expect(match).not.toBeNull();
+                return rule[1](match);
+            };
 
-            expect(rule[0].test('w-100')).toBe(false);
-            expect(rule[0].test('s-100')).toBe(true);
-            expect(rule[0].test('s100')).toBe(true);
+            it.each([
+                ['s-50', '1000px', '1200px'],
+                ['s100', '2000px', '2400px'],
+                ['s-50-full', '1000px', '100%'],
+                ['s-50-max', '1000px', '100%'],
+                ['s-50-80', '1000px', '1600px']
+            ])('%s preserva dimensões sem emitir propriedades de quebra', (token, minWidth, maxWidth) => {
+                expect(stylesFor(token)).toEqual({
+                    flex: '1 1 0%',
+                    'min-width': minWidth,
+                    'max-width': maxWidth
+                });
+            });
+
+            it.each([
+                ['s50-start', '1200px'],
+                ['s-50-full-start', '100%'],
+                ['s-50-max-start', '100%'],
+                ['s-50-80-start', '1600px']
+            ])('%s emite somente break-before e preserva as dimensões', (token, maxWidth) => {
+                expect(stylesFor(token)).toEqual({
+                    flex: '1 1 0%',
+                    'min-width': '1000px',
+                    'max-width': maxWidth,
+                    'break-before': 'always'
+                });
+            });
+
+            it.each([
+                ['s-50-end', '1200px'],
+                ['s-50-full-end', '100%'],
+                ['s-50-max-end', '100%'],
+                ['s-50-80-end', '1600px']
+            ])('%s emite somente break-after e preserva as dimensões', (token, maxWidth) => {
+                expect(stylesFor(token)).toEqual({
+                    flex: '1 1 0%',
+                    'min-width': '1000px',
+                    'max-width': maxWidth,
+                    'break-after': 'always'
+                });
+            });
+
+            it.each(['w-100', 'w-100-start', 's-50-middle', 's-50-start-end'])('não reconhece %s', (token) => {
+                expect(rule[0].test(token)).toBe(false);
+            });
         });
 
         it('opacity-X normaliza porcentagens, decimais, limites de clamp e NaN', () => {
