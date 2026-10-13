@@ -80,27 +80,41 @@ export const presetMaxUno = () => {
             [/^ellipsis$/, () => ({ 'white-space': 'nowrap', 'text-overflow': 'ellipsis', 'max-width': '100%', overflow: 'hidden' })],
             // Restrita ao prefixo `s-` (ex.: `s-50`, `s100`) para não colidir com `w-*`,
             // que deve ser resolvido pelo presetWind3 com a semântica padrão de `width`.
-            [/^s-?(\d+)(?:-(full|max|\d+))?(?:-(start|end))?$/, ([, d, max, position]) => {
-                const n = Number(d);
+            // Aceita uma posição e um dispositivo em qualquer ordem, sem modificadores conflitantes.
+            [/^s-?(\d+)(?:-(full|max|\d+))?(?:-(start|end)(?:-(desktop|mobile|tablet))?|-(desktop|mobile|tablet)(?:-(start|end))?)?$/,
+                function* (match, { symbols }) {
+                    const [, d, max] = match;
+                    const rest = match[0].split('-').slice(1);
 
-                let maxWidth = `${n * 24}px`; // fallback padrão
+                    const position = rest.find((p) => p === 'start' || p === 'end');
+                    const device = rest.find((d) => d === 'desktop' || d === 'mobile' || d === 'tablet');
 
-                if (max === 'full' || max === 'max') maxWidth = '100%';
-                else if (max) maxWidth = `${Number(max) * 20}px`;
-                const styles: Record<string, string> = {
-                    flex: '1 1 0%',
-                    'min-width': `${n * 20}px`,
-                    'max-width': maxWidth
-                };
+                    const n = Number(d);
+                    let maxWidth = `${n * 24}px`;
 
-                // Declarações de fragmentação CSS padrão preservadas para compatibilidade.
-                // Em flexbox comum elas não produzem quebra de linha; no ecossistema Max,
-                // a organização explícita de linhas por fronteiras start/end é coordenada pelo MaxGrid.
-                if (position === 'start') styles['break-before'] = 'always';
-                if (position === 'end') styles['break-after'] = 'always';
+                    if (max === 'full' || max === 'max') maxWidth = '100%';
+                    else if (max && !isNaN(Number(max))) maxWidth = `${Number(max) * 20}px`;
 
-                return styles;
-            }],
+                    // Dimensões base aplicadas em qualquer tela.
+                    yield {
+                        flex: '1 1 0%',
+                        'min-width': `${n * 20}px`,
+                        'max-width': maxWidth
+                    };
+
+                    // Preserva as declarações de fragmentação CSS; elas não quebram linhas em flexbox comum.
+                    // A organização explícita das linhas no ecossistema Max é coordenada pelo MaxGrid.
+                    if (position) {
+                        const breakProp = position === 'start' ? 'break-before' : 'break-after';
+                        const breakStyles: Record<string, string> = { [breakProp]: 'always' };
+
+                        if (device === 'mobile') yield { [symbols.parent]: '@media (max-width: 767.98px)', ...breakStyles };
+                        else if (device === 'tablet') yield { [symbols.parent]: '@media (max-width: 1000.98px)', ...breakStyles };
+                        else if (device === 'desktop') yield { [symbols.parent]: '@media (min-width: 1001px)', ...breakStyles };
+                        else yield breakStyles;
+                    }
+                }
+            ],
             [/^opacity-?(\d+(?:\.\d+)?)$/, ([, d]) => {
                 const raw = Number(d);
                 if (!Number.isFinite(raw)) return undefined;

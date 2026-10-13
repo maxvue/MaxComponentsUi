@@ -432,13 +432,18 @@ describe('presetMaxUno', () => {
 
         describe('regra de dimensionamento s-', () => {
             const rule = preset.rules.find((entry: [RegExp]) => entry[0] instanceof RegExp && entry[0].test('s-50'));
-            const stylesFor = (token: string) => {
+            const parentSymbol = Symbol('parent');
+            const resultsFor = (token: string, omitInput = false) => {
                 expect(rule).toBeDefined();
                 const match = token.match(rule[0]);
 
                 expect(match).not.toBeNull();
-                return rule[1](match);
+                if (!match) throw new Error(`Token não reconhecido: ${token}`);
+                if (omitInput) delete match.input;
+
+                return Array.from<Record<string | symbol, string>>(rule[1](match, { symbols: { parent: parentSymbol } }));
             };
+            const stylesFor = (token: string) => Object.assign({}, ...resultsFor(token));
 
             it.each([
                 ['s-50', '1000px', '1200px'],
@@ -486,7 +491,34 @@ describe('presetMaxUno', () => {
                 });
             });
 
-            it.each(['w-100', 'w-100-start', 's-50-middle', 's-50-start-end'])('não reconhece %s', (token) => {
+            it('resolve o token reconhecido mesmo sem a propriedade input', () => {
+                expect(resultsFor('s3-10-start-desktop', true)).toEqual([
+                    { flex: '1 1 0%', 'min-width': '60px', 'max-width': '200px' },
+                    { [parentSymbol]: '@media (min-width: 1001px)', 'break-before': 'always' }
+                ]);
+            });
+
+            it.each([
+                ['s-50-start-mobile', '@media (max-width: 767.98px)', 'break-before'],
+                ['s50-mobile-end', '@media (max-width: 767.98px)', 'break-after'],
+                ['s-50-start-tablet', '@media (max-width: 1000.98px)', 'break-before'],
+                ['s50-tablet-end', '@media (max-width: 1000.98px)', 'break-after'],
+                ['s-50-start-desktop', '@media (min-width: 1001px)', 'break-before'],
+                ['s50-desktop-end', '@media (min-width: 1001px)', 'break-after']
+            ])('%s restringe a quebra ao dispositivo e mantém dimensões globais', (token, media, property) => {
+                expect(resultsFor(token)).toEqual([
+                    { flex: '1 1 0%', 'min-width': '1000px', 'max-width': '1200px' },
+                    { [parentSymbol]: media, [property]: 'always' }
+                ]);
+            });
+
+            it.each(['s-50-mobile', 's50-tablet', 's-50-desktop'])('%s sem posição não emite quebra nem media query', (token) => {
+                expect(resultsFor(token)).toEqual([
+                    { flex: '1 1 0%', 'min-width': '1000px', 'max-width': '1200px' }
+                ]);
+            });
+
+            it.each(['w-100', 'w-100-start', 's-50-middle', 's-50-start-end', 's-50-end-start', 's-50-start-start', 's-50-end-end', 's-50-mobile-desktop', 's-50-tablet-tablet', 's-50-start-mobile-end'])('não reconhece %s', (token) => {
                 expect(rule[0].test(token)).toBe(false);
             });
         });
