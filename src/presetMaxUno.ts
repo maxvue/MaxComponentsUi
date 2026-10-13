@@ -80,18 +80,35 @@ export const presetMaxUno = () => {
             [/^ellipsis$/, () => ({ 'white-space': 'nowrap', 'text-overflow': 'ellipsis', 'max-width': '100%', overflow: 'hidden' })],
             // Restrita ao prefixo `s-` (ex.: `s-50`, `s100`) para não colidir com `w-*`,
             // que deve ser resolvido pelo presetWind3 com a semântica padrão de `width`.
-            [/^s-?(\d+)(?:-(full|max|\d+))?$/, ([, d, max]) => {
+            [/^s-?(\d+)(?:-(full|max|\d+))?(?:-(start|end))?$/, ([, d, max, position]) => {
                 const n = Number(d);
 
                 let maxWidth = `${n * 24}px`; // fallback padrão
 
                 if (max === 'full' || max === 'max') maxWidth = '100%';
                 else if (max) maxWidth = `${Number(max) * 20}px`;
-                return {
+
+
+                const styles = {
                     flex: '1 1 0%',
                     'min-width': `${n * 20}px`,
                     'max-width': maxWidth
                 };
+
+                if (position === 'start')
+                // Força o item a iniciar uma linha nova
+                    styles['break-before'] = 'always';
+                // Se o navegador não suportar break-before em flexbox,
+                // a margem esquerda com largura da linha garante a descida:
+                // styles['margin-left'] = '100%'; // use caso necessário
+
+
+                if (position === 'end')
+                // Força o próximo item a pular para a linha de baixo
+                    styles['break-after'] = 'always';
+
+
+                return styles;
             }],
             [/^opacity-?(\d+(?:\.\d+)?)$/, ([, d]) => {
                 const raw = Number(d);
