@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { createGenerator } from 'unocss';
 import postcss from 'postcss';
-
+import presetWind3 from '@unocss/preset-wind3';
+import presetAttributify from '@unocss/preset-attributify';
 import { presetMaxUno } from '../../src/presetMaxUno';
 
 /**
@@ -128,30 +129,82 @@ describe('presetMaxUno — CSS gerado', () => {
         });
 
         it.each([
-            ['s50-start', '1200px'],
-            ['s-50-full-start', '100%'],
-            ['s-50-max-start', '100%'],
-            ['s-50-80-start', '1600px']
-        ])('%s gera somente break-before', async (token, maxWidth) => {
+            ['s3-start', '60px', '72px'],
+            ['s3-10-start', '60px', '200px'],
+            ['s50-start', '1000px', '1200px'],
+            ['s-50-full-start', '1000px', '100%'],
+            ['s-50-max-start', '1000px', '100%'],
+            ['s-50-80-start', '1000px', '1600px']
+        ])('%s gera somente break-before', async (token, minWidth, maxWidth) => {
             expect(await declarationsFor(token)).toEqual({
                 flex: '1 1 0%',
-                'min-width': '1000px',
+                'min-width': minWidth,
                 'max-width': maxWidth,
                 'break-before': 'always'
             });
         });
 
         it.each([
-            ['s-50-end', '1200px'],
-            ['s-50-full-end', '100%'],
-            ['s-50-max-end', '100%'],
-            ['s-50-80-end', '1600px']
-        ])('%s gera somente break-after', async (token, maxWidth) => {
+            ['s7-end', '140px', '168px'],
+            ['s7-10-end', '140px', '200px'],
+            ['s-50-end', '1000px', '1200px'],
+            ['s-50-full-end', '1000px', '100%'],
+            ['s-50-max-end', '1000px', '100%'],
+            ['s-50-80-end', '1000px', '1600px']
+        ])('%s gera somente break-after', async (token, minWidth, maxWidth) => {
             expect(await declarationsFor(token)).toEqual({
                 flex: '1 1 0%',
-                'min-width': '1000px',
+                'min-width': minWidth,
                 'max-width': maxWidth,
                 'break-after': 'always'
+            });
+        });
+    });
+
+    describe('attributify e gerador integrado', () => {
+        const generateFull = async (code: string) => {
+            const uno = await createGenerator({
+                presets: [presetMaxUno(), presetWind3(), presetAttributify()]
+            });
+            const { css } = await uno.generate(code, { preflights: false });
+            return css;
+        };
+
+        const ruleDeclarations = (css: string) => {
+            const result: Record<string, Record<string, string>> = {};
+            postcss.parse(css).walkRules((rule) => {
+                const decls: Record<string, string> = {};
+                rule.walkDecls((d) => {
+                    decls[d.prop] = d.value;
+                });
+                result[rule.selector] = decls;
+            });
+            return result;
+        };
+
+        it('gera CSS para atributos sem valor com attributify', async () => {
+            const css = await generateFull('<div s7-end s3-10-start></div>');
+            expectParsavel(css);
+
+            const rules = ruleDeclarations(css);
+            const s7EndSelector = Object.keys(rules).find((sel) => sel.includes('s7-end'));
+            const s3StartSelector = Object.keys(rules).find((sel) => sel.includes('s3-10-start'));
+
+            expect(s7EndSelector).toBeDefined();
+            expect(s3StartSelector).toBeDefined();
+
+            expect(rules[s7EndSelector!]).toEqual({
+                flex: '1 1 0%',
+                'min-width': '140px',
+                'max-width': '168px',
+                'break-after': 'always'
+            });
+
+            expect(rules[s3StartSelector!]).toEqual({
+                flex: '1 1 0%',
+                'min-width': '60px',
+                'max-width': '200px',
+                'break-before': 'always'
             });
         });
     });

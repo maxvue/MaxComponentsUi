@@ -1,0 +1,142 @@
+{
+  "version": 2,
+  "planRevision": "ed81fcd2160b5f56c34b9a54d0024ee60e8b1f0acee81d77e214f772505216b7",
+  "tasks": [
+    {
+      "id": "T0",
+      "status": "completed",
+      "files": [],
+      "validations": []
+    },
+    {
+      "id": "T1",
+      "status": "completed",
+      "files": [
+        "src/components/base/gridSlotRows.ts",
+        "src/components/MaxGrid.vue",
+        "src/presetMaxUno.ts"
+      ],
+      "revision": "2d019fbc39e4341c2965d19764c829791b875066a6c2ab6eab6471826befcea3",
+      "validations": [
+        {
+          "command": "npx vitest run tests/components/MaxGrid.test.ts",
+          "revision": "2d019fbc39e4341c2965d19764c829791b875066a6c2ab6eab6471826befcea3",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "T2",
+      "status": "completed",
+      "files": [
+        "tests/components/MaxGrid.test.ts",
+        "tests/preset/presetMaxUno.test.ts",
+        "tests/preset/presetMaxUno.generate.test.ts",
+        "tests/browser/maxGridLineBreaks.browser.ts",
+        "tests/browser/fixtures/maxGridPresetCss.d.ts",
+        "vitest.browser.config.ts"
+      ],
+      "revision": "2d019fbc39e4341c2965d19764c829791b875066a6c2ab6eab6471826befcea3",
+      "validations": [
+        {
+          "command": "npx vitest run tests/preset/presetMaxUno.test.ts tests/preset/presetMaxUno.generate.test.ts",
+          "revision": "2d019fbc39e4341c2965d19764c829791b875066a6c2ab6eab6471826befcea3",
+          "result": "passed"
+        },
+        {
+          "command": "PLAYWRIGHT_BROWSERS_PATH=/home/johnattas/.cache/ms-playwright npx vitest run tests/browser/maxGridLineBreaks.browser.ts --config vitest.browser.config.ts",
+          "revision": "2d019fbc39e4341c2965d19764c829791b875066a6c2ab6eab6471826befcea3",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "T3",
+      "status": "completed",
+      "files": [
+        "docs/THEME.md"
+      ],
+      "revision": "2d019fbc39e4341c2965d19764c829791b875066a6c2ab6eab6471826befcea3",
+      "validations": []
+    },
+    {
+      "id": "T4",
+      "status": "completed",
+      "files": [],
+      "revision": "2d019fbc39e4341c2965d19764c829791b875066a6c2ab6eab6471826befcea3",
+      "validations": [
+        {
+          "command": "npm run type-check",
+          "revision": "2d019fbc39e4341c2965d19764c829791b875066a6c2ab6eab6471826befcea3",
+          "result": "passed"
+        },
+        {
+          "command": "npm run type-check:test",
+          "revision": "2d019fbc39e4341c2965d19764c829791b875066a6c2ab6eab6471826befcea3",
+          "result": "passed"
+        },
+        {
+          "command": "npm run build",
+          "revision": "2d019fbc39e4341c2965d19764c829791b875066a6c2ab6eab6471826befcea3",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "T5",
+      "status": "manualPending",
+      "files": [],
+      "validations": [],
+      "nextAction": "Aguardar autorização do responsável para disponibilização da integração no Engeapp e inspeção visual da aba de consumo da proposta comercial"
+    }
+  ],
+  "verification": {
+    "revision": "2d019fbc39e4341c2965d19764c829791b875066a6c2ab6eab6471826befcea3",
+    "checks": [
+      {
+        "command": "npx vitest run tests/components/MaxGrid.test.ts tests/preset/presetMaxUno.test.ts tests/preset/presetMaxUno.generate.test.ts",
+        "revision": "2d019fbc39e4341c2965d19764c829791b875066a6c2ab6eab6471826befcea3",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "PLAYWRIGHT_BROWSERS_PATH=/home/johnattas/.cache/ms-playwright npx vitest run tests/browser/maxGridLineBreaks.browser.ts --config vitest.browser.config.ts",
+        "revision": "2d019fbc39e4341c2965d19764c829791b875066a6c2ab6eab6471826befcea3",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check",
+        "revision": "2d019fbc39e4341c2965d19764c829791b875066a6c2ab6eab6471826befcea3",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check:test",
+        "revision": "2d019fbc39e4341c2965d19764c829791b875066a6c2ab6eab6471826befcea3",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run build",
+        "revision": "2d019fbc39e4341c2965d19764c829791b875066a6c2ab6eab6471826befcea3",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run test",
+        "revision": "2d019fbc39e4341c2965d19764c829791b875066a6c2ab6eab6471826befcea3",
+        "result": "failed",
+        "exitCode": 1
+      },
+      {
+        "command": "npm run lint",
+        "revision": "2d019fbc39e4341c2965d19764c829791b875066a6c2ab6eab6471826befcea3",
+        "result": "failed",
+        "exitCode": 2
+      }
+    ]
+  },
+  "updatedAt": 1791904503108,
+  "nextAction": "Aguardar autorização do responsável para disponibilização da integração no Engeapp e inspeção visual da aba de consumo da proposta comercial"
+}

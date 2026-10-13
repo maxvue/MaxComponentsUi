@@ -1,17 +1,17 @@
 <template>
-    <div class="max-grid" >
-        <div class="label-grid" v-if="props.label" :class="props.labelCenter ? 'label-center' : ''">
-            {{ props.label }}
-        </div>
-        <slot></slot>
+    <div class="max-grid">
+        <div class="label-grid" v-if="props.label" :class="props.labelCenter ? 'label-center' : ''">{{ props.label }}</div>
+        <GridSlotRows><slot></slot></GridSlotRows>
     </div>
 </template>
 
 /**
  * Sistema de grid flexível para organizar componentes.
- * Utiliza flexbox com wrap e gap padronizado.
+ * Utiliza flexbox com wrap e gap padronizado, organizando linhas
+ * explícitas sob demanda através de marcadores start e end.
  */
 <script setup lang="ts">
+    import { GridSlotRows } from './base/gridSlotRows';
 
     const props = defineProps<{
         label?: string | null;
@@ -27,6 +27,23 @@
     gap: 13px 8px;
     padding-top: 14px;
     position: relative;
+
+    > :deep(.max-grid-row),
+    > .max-grid-row {
+        display: flex;
+        flex-wrap: wrap;
+        flex: 0 0 100%;
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
+        padding: 0;
+        margin: 0;
+        border: none;
+        gap: inherit;
+        align-items: inherit;
+        justify-content: inherit;
+    }
 
     /* Quando o grid recebe a flag no-message, força o colapso da linha de
        mensagem em todos os inputs internos (MaxInput*). */
@@ -57,3 +74,4 @@
     }
 }
 </style>
+

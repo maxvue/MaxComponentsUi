@@ -455,28 +455,32 @@ describe('presetMaxUno', () => {
             });
 
             it.each([
-                ['s50-start', '1200px'],
-                ['s-50-full-start', '100%'],
-                ['s-50-max-start', '100%'],
-                ['s-50-80-start', '1600px']
-            ])('%s emite somente break-before e preserva as dimensões', (token, maxWidth) => {
+                ['s3-start', '60px', '72px'],
+                ['s3-10-start', '60px', '200px'],
+                ['s50-start', '1000px', '1200px'],
+                ['s-50-full-start', '1000px', '100%'],
+                ['s-50-max-start', '1000px', '100%'],
+                ['s-50-80-start', '1000px', '1600px']
+            ])('%s emite somente break-before e preserva as dimensões', (token, minWidth, maxWidth) => {
                 expect(stylesFor(token)).toEqual({
                     flex: '1 1 0%',
-                    'min-width': '1000px',
+                    'min-width': minWidth,
                     'max-width': maxWidth,
                     'break-before': 'always'
                 });
             });
 
             it.each([
-                ['s-50-end', '1200px'],
-                ['s-50-full-end', '100%'],
-                ['s-50-max-end', '100%'],
-                ['s-50-80-end', '1600px']
-            ])('%s emite somente break-after e preserva as dimensões', (token, maxWidth) => {
+                ['s7-end', '140px', '168px'],
+                ['s7-10-end', '140px', '200px'],
+                ['s-50-end', '1000px', '1200px'],
+                ['s-50-full-end', '1000px', '100%'],
+                ['s-50-max-end', '1000px', '100%'],
+                ['s-50-80-end', '1000px', '1600px']
+            ])('%s emite somente break-after e preserva as dimensões', (token, minWidth, maxWidth) => {
                 expect(stylesFor(token)).toEqual({
                     flex: '1 1 0%',
-                    'min-width': '1000px',
+                    'min-width': minWidth,
                     'max-width': maxWidth,
                     'break-after': 'always'
                 });

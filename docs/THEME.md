@@ -151,12 +151,13 @@ A família de regras `s` do `presetMaxUno` fornece utilitários para dimensionam
 
 A regra atende ao padrão:
 ```regex
-/^s-?(\d+)(?:-(full|max|\d+))?$/
+/^s-?(\d+)(?:-(full|max|\d+))?(?:-(start|end))?$/
 ```
 
 - **Prefixo:** `s` ou `s-` (hífen opcional).
 - **Base `n`:** sequência de dígitos inteiros não negativos (`Number(d)`).
-- **Sufixo opcional:** precedido por hífen, podendo ser `full`, `max` ou um valor numérico inteiro `m`.
+- **Sufixo de extensão (opcional):** precedido por hífen, podendo ser `full`, `max` ou um valor numérico inteiro `m`.
+- **Sufixo de quebra de linha (opcional):** precedido por hífen, podendo ser `start` ou `end`.
 
 ##### Fórmulas CSS Geradas
 
@@ -169,17 +170,39 @@ E a propriedade `max-width` varia de acordo com o sufixo:
 - **Com sufixo `-full` ou `-max`:** `max-width: 100%` (são aliases equivalentes; definem teto de largura em 100%, sem impor `width: 100%`)
 - **Com sufixo numérico `-m`:** `max-width: calc(m * 20px)` (o multiplicador do sufixo numérico é sempre **20px**, não 24px)
 
+Propriedades de fragmentação emitidas no CSS do preset:
+- **Com sufixo `-start`:** `break-before: always`
+- **Com sufixo `-end`:** `break-after: always`
+
+##### Quebras Explícitas de Linha no MaxGrid
+
+> [!IMPORTANT]
+> **Suporte restrito ao MaxGrid:** Em conformidade com as especificações da arquitetura do Max Components UI, a organização de quebras explícitas de linha antes (`-start`) ou depois (`-end`) de um item **é suportada exclusivamente dentro de `<MaxGrid>`**. Em contêineres `div` flex comuns, as propriedades `break-before` e `break-after` do CSS standard aplicam-se a contextos de fragmentação (páginas, colunas e regiões multicelulares) e não comandam quebra de linha em flexbox CSS standard.
+
+Dentro do `<MaxGrid>`, o componente inspeciona os filhos lógicos diretos do seu slot (expandindo Fragments como `v-for` e `<template>`) e organiza os itens em segmentos de linha (`div.max-grid-row`) quando detecta marcadores `start` ou `end` ativos:
+- **`-end`:** Encerra o segmento atual imediatamente após o item, fazendo com que o próximo item vá para uma nova linha.
+- **`-start`:** Inicia um novo segmento de linha imediatamente antes do item, separando-o dos elementos anteriores.
+- **Pares redundantes:** Quando um item com `-end` é seguido por um item com `-start`, eles definem uma única fronteira de quebra (não criam linha intermediária vazia).
+- **Sem marcadores:** Quando o `<MaxGrid>` não contém nenhum marcador ativo, os VNodes originais são renderizados diretamente sem qualquer wrapper `div.max-grid-row`, preservando total retrocompatibilidade e seletores diretos.
+- **Fronteiras e Largura:** A quebra de linha não altera o `max-width` do item. Um item com `s3-10-start`, por exemplo, mantém teto máximo de 200px (`10 * 20px`), não passando a ocupar 100% da tela. Caso o conteúdo necessite de largura maior, utilize `full` ou `max` (ex.: `s3-full-start`).
+
 ##### Tabela de Classes e Resoluções
 
-| Classe / alias | flex | min-width | max-width |
-|---|---|---|---|
-| `s1` / `s-1` | `1 1 0%` | `20px` | `24px` |
-| `s2` / `s-2` | `1 1 0%` | `40px` | `48px` |
-| `s10` | `1 1 0%` | `200px` | `240px` |
-| `s10-full` / `s-10-full` | `1 1 0%` | `200px` | `100%` |
-| `s10-max` | `1 1 0%` | `200px` | `100%` |
-| `s10-20` / `s-10-20` | `1 1 0%` | `200px` | `400px` |
-| `s50` / `s-50` | `1 1 0%` | `1000px` | `1200px` |
+| Classe / Atributo | flex | min-width | max-width | Quebra no MaxGrid |
+|---|---|---|---|---|
+| `s1` / `s-1` | `1 1 0%` | `20px` | `24px` | Nenhuma |
+| `s2` / `s-2` | `1 1 0%` | `40px` | `48px` | Nenhuma |
+| `s3-start` | `1 1 0%` | `60px` | `72px` | Inicia nova linha antes do item |
+| `s3-10-start` | `1 1 0%` | `60px` | `200px` | Inicia nova linha antes do item |
+| `s7-end` | `1 1 0%` | `140px` | `168px` | Encerra a linha após o item |
+| `s7-10-end` | `1 1 0%` | `140px` | `200px` | Encerra a linha após o item |
+| `s10` | `1 1 0%` | `200px` | `240px` | Nenhuma |
+| `s10-full` / `s-10-full` | `1 1 0%` | `200px` | `100%` | Nenhuma |
+| `s10-max` | `1 1 0%` | `200px` | `100%` | Nenhuma |
+| `s-50-full-start` | `1 1 0%` | `1000px` | `100%` | Inicia nova linha antes do item |
+| `s-50-max-end` | `1 1 0%` | `1000px` | `100%` | Encerra a linha após o item |
+| `s10-20` / `s-10-20` | `1 1 0%` | `200px` | `400px` | Nenhuma |
+| `s50` / `s-50` | `1 1 0%` | `1000px` | `1200px` | Nenhuma |
 
 ##### Comportamento Flexbox e Contêiner Pai
 
@@ -199,19 +222,17 @@ Na regra percentual anterior, o número indicava porcentagem (ex.: `s50` gerava 
 - **Máximo menor que mínimo (`s10-0`):** gera `min-width: 200px` e `max-width: 0px`. Pelas regras de renderização do CSS standard, quando `min-width` é maior que `max-width`, o valor de `min-width` prevalece. Para evitar conflitos visuais, utilize sempre `m >= n`.
 - **Padrões inválidos:** Decimais (`s1.5`), números negativos (`s--10`) ou maiúsculas (`s10-FULL`, `s10-MAX`) não são capturados pela expressão regular e não geram classes utilitárias.
 
-##### Exemplo de Uso
+##### Exemplo de Uso no MaxGrid (Vue 3)
 
-O exemplo a seguir ilustra a distribuição de itens com classes estáticas dentro de um contêiner flex. Note que a declaração do contêiner (`flex gap-4 flex-wrap`) pertence à estrutura do pai, enquanto as classes `s*` atuam nos itens filhos:
+O exemplo a seguir ilustra o uso de marcadores de linha explícita em um formulário com `<MaxGrid>`, utilizando atributos valueless e classes equivalentes com tags de abertura em linha única:
 
 ```html
-<div class="flex gap-4 flex-wrap">
-    <div class="s10-full">
-        Conteúdo principal flexível (mín. 200px, máx. 100%)
+<MaxGrid label="Formulário de Proposta">
+    <MaxInputNumber s7-end label="Consumo Médio (kWh)" v-model="form.consumo" />
+    <div class="s3-10-start" id="painel-historico">
+        <span>Histórico de faturas dos últimos 12 meses</span>
     </div>
-    <div class="s10-20">
-        Barra lateral com limite estendido (mín. 200px, máx. 400px)
-    </div>
-</div>
+</MaxGrid>
 ```
 
 #### Cores predefinidas

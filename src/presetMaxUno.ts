@@ -93,7 +93,9 @@ export const presetMaxUno = () => {
                     'max-width': maxWidth
                 };
 
-                // Declarações de fragmentação; não garantem quebra de linha em flexbox comum.
+                // Declarações de fragmentação CSS padrão preservadas para compatibilidade.
+                // Em flexbox comum elas não produzem quebra de linha; no ecossistema Max,
+                // a organização explícita de linhas por fronteiras start/end é coordenada pelo MaxGrid.
                 if (position === 'start') styles['break-before'] = 'always';
                 if (position === 'end') styles['break-after'] = 'always';
 

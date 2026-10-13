@@ -6,9 +6,40 @@ import { playwright } from '@vitest/browser-playwright';
 
 const require = createRequire(import.meta.url);
 
+function virtualMaxGridPresetPlugin() {
+    const virtualModuleId = 'virtual:maxgrid-preset.js';
+    const resolvedVirtualModuleId = '\0' + virtualModuleId;
+
+    return {
+        name: 'virtual-maxgrid-preset-css',
+        resolveId(id: string) {
+            if (id === virtualModuleId) return resolvedVirtualModuleId;
+
+        },
+        async load(id: string) {
+            if (id === resolvedVirtualModuleId) {
+                const { createGenerator } = await import('unocss');
+                const { presetMaxUno } = await import('./src/presetMaxUno.ts');
+                const uno = await createGenerator({
+                    presets: [presetMaxUno()]
+                });
+                const tokens = [
+                    's7-end', 's7-10-end', 's3-start', 's3-10-start',
+                    's-50-full-start', 's-50-max-end', 's-10', 's-15', 's-20',
+                    's-30', 's-40', 's-50', 's3', 's7'
+                ];
+                const content = tokens.map((t) => `<div class="${t}" ${t}></div>`).join('\n');
+                const { css } = await uno.generate(content, { preflights: false });
+                return `export default ${JSON.stringify(css)};`;
+            }
+        }
+    };
+}
+
 export default defineConfig({
     plugins: [
-        vue()
+        vue(),
+        virtualMaxGridPresetPlugin()
     ],
     resolve: {
         alias: {
