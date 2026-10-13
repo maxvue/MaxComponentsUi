@@ -1,0 +1,103 @@
+{
+  "version": 2,
+  "planRevision": "025977145e9c09de9295c12d14a406d0d51abfa8755a252d8f52940f0654b62d",
+  "tasks": [
+    {
+      "id": "T0",
+      "status": "completed",
+      "files": [],
+      "validations": [
+        {
+          "command": "npm run check:lockfile",
+          "revision": "025977145e9c09de9295c12d14a406d0d51abfa8755a252d8f52940f0654b62d",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "T1",
+      "status": "completed",
+      "files": [
+        "src/types/index.ts",
+        "src/components/MaxButton.vue"
+      ],
+      "revision": "6de3a25fa39c1418f9787765c0fb26cdb0cd2f500a9173227ed9cc2ca7487e46",
+      "validations": []
+    },
+    {
+      "id": "T2",
+      "status": "completed",
+      "files": [
+        "tests/components/MaxButton.test.ts",
+        "tests/browser/MaxButtonSlim.browser.ts"
+      ],
+      "revision": "8fd69779a1962855ef2749ac3d349be8f6a744ada3300584b6bc645db16b821f",
+      "validations": [
+        {
+          "command": "npx vitest run tests/components/MaxButton.test.ts",
+          "revision": "8fd69779a1962855ef2749ac3d349be8f6a744ada3300584b6bc645db16b821f",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "T3",
+      "status": "completed",
+      "files": [
+        "COMPONENTS.md",
+        "playground/src/scenarios/buttons-main.vue"
+      ],
+      "revision": "7c46da4e8a56b6e250d15c181a0338799590bd2db63bcc5a063168e523ea36d0",
+      "validations": []
+    },
+    {
+      "id": "T4",
+      "status": "completed",
+      "files": [],
+      "validations": []
+    }
+  ],
+  "verification": {
+    "revision": "a9047515f253c17bfbedaa30ec40229ff805cfa65ec52a5157b7a5ac84e3f7fa",
+    "checks": [
+      {
+        "command": "npm run build",
+        "revision": "a9047515f253c17bfbedaa30ec40229ff805cfa65ec52a5157b7a5ac84e3f7fa",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check:test",
+        "revision": "a9047515f253c17bfbedaa30ec40229ff805cfa65ec52a5157b7a5ac84e3f7fa",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run check:playground:bundle",
+        "revision": "a9047515f253c17bfbedaa30ec40229ff805cfa65ec52a5157b7a5ac84e3f7fa",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run test",
+        "revision": "a9047515f253c17bfbedaa30ec40229ff805cfa65ec52a5157b7a5ac84e3f7fa",
+        "result": "failed",
+        "exitCode": 1
+      },
+      {
+        "command": "npm run lint",
+        "revision": "a9047515f253c17bfbedaa30ec40229ff805cfa65ec52a5157b7a5ac84e3f7fa",
+        "result": "failed",
+        "exitCode": 2
+      },
+      {
+        "command": "npm run test:browser",
+        "revision": "a9047515f253c17bfbedaa30ec40229ff805cfa65ec52a5157b7a5ac84e3f7fa",
+        "result": "failed",
+        "exitCode": 1
+      }
+    ]
+  },
+  "updatedAt": 1791900360000,
+  "nextAction": "Instalar binários do Chromium via Playwright e validar testes de navegador e baseline alheio quando autorizado."
+}

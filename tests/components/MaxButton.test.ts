@@ -148,4 +148,127 @@ describe('MaxButton', () => {
         const wrapper = mountButton({ label: 'Enviar' });
         expect(wrapper.find('button').attributes('type')).toBe('button');
     });
+
+    describe('prop slim', () => {
+        it('não aplica classe max-button-slim por padrão quando ausente ou false', () => {
+            const wrapperDefault = mountButton({ label: 'Salvar' });
+            expect(wrapperDefault.find('button').classes()).not.toContain('max-button-slim');
+
+            const wrapperFalse = mountButton({ label: 'Salvar', slim: false });
+            expect(wrapperFalse.find('button').classes()).not.toContain('max-button-slim');
+        });
+
+        it('aplica classe max-button-slim quando slim=true e não vaza atributo slim no DOM', () => {
+            const wrapper = mountButton({ label: 'Salvar', slim: true });
+            expect(wrapper.find('button').classes()).toContain('max-button-slim');
+            expect(wrapper.find('button').attributes('slim')).toBeUndefined();
+        });
+
+        it('alterna classe reativamente via setProps', async () => {
+            const wrapper = mountButton({ label: 'Salvar', slim: false });
+            expect(wrapper.find('button').classes()).not.toContain('max-button-slim');
+
+            await wrapper.setProps({ slim: true });
+            expect(wrapper.find('button').classes()).toContain('max-button-slim');
+
+            await wrapper.setProps({ slim: false });
+            expect(wrapper.find('button').classes()).not.toContain('max-button-slim');
+        });
+
+        it('reconhece presença da prop no template como booleano true', () => {
+            const wrapper = mount({
+                components: { MaxButton },
+                template: '<MaxButton label="Salvar" slim />'
+            }, {
+                global: {
+                    stubs: {
+                        MaxIcon: true,
+                        MaxIconButton: true
+                    }
+                }
+            });
+            expect(wrapper.find('button').classes()).toContain('max-button-slim');
+        });
+
+        it('aplica compactação quando o texto vem exclusivamente do slot default', () => {
+            const wrapper = mount(MaxButton, {
+                props: { slim: true },
+                slots: {
+                    default: 'Salvar Alterações'
+                }
+            });
+            expect(wrapper.find('button.max-button').exists()).toBe(true);
+            expect(wrapper.find('button').classes()).toContain('max-button-slim');
+            expect(wrapper.text()).toContain('Salvar Alterações');
+        });
+
+        it('compõe com tamanhos small/sm e large/lg preservando classes e dimensão do ícone', () => {
+            const wrapperSmall = mountButton({ label: 'Pequeno', size: 'small', slim: true, icon: 'mdi:check' });
+            expect(wrapperSmall.find('button').classes()).toContain('max-button-sm');
+            expect(wrapperSmall.find('button').classes()).toContain('max-button-slim');
+            expect(wrapperSmall.find('.max-icon-stub').attributes('data-size')).toBe('1.4');
+
+            const wrapperSm = mountButton({ label: 'Pequeno Alias', size: 'sm', slim: true });
+            expect(wrapperSm.find('button').classes()).toContain('max-button-sm');
+            expect(wrapperSm.find('button').classes()).toContain('max-button-slim');
+
+            const wrapperLarge = mountButton({ label: 'Grande', size: 'large', slim: true });
+            expect(wrapperLarge.find('button').classes()).toContain('max-button-lg');
+            expect(wrapperLarge.find('button').classes()).toContain('max-button-slim');
+
+            const wrapperLg = mountButton({ label: 'Grande Alias', size: 'lg', slim: true });
+            expect(wrapperLg.find('button').classes()).toContain('max-button-lg');
+            expect(wrapperLg.find('button').classes()).toContain('max-button-slim');
+        });
+
+        it('preserva tamanho legado numérico do ícone quando combinado com slim', () => {
+            const wrapper = mountButton({ label: 'Salvar', icon: 'mdi:check', size: 2, slim: true });
+            expect(wrapper.find('button').classes()).toContain('max-button-slim');
+            expect(wrapper.find('.max-icon-stub').attributes('data-size')).toBe('2');
+        });
+
+        it('preserva desabilitado e carregamento quando slim=true', () => {
+            const wrapperDisabled = mountButton({ label: 'Salvar', disabled: true, slim: true });
+            expect(wrapperDisabled.find('button').attributes('disabled')).toBeDefined();
+
+            const wrapperLoading = mountButton({ label: 'Salvar', loading: true, slim: true });
+            expect(wrapperLoading.find('button').attributes('disabled')).toBeDefined();
+            expect(wrapperLoading.find('button').classes()).toContain('max-button-loading');
+        });
+
+        it('preserva click, action, rota e type nativo quando slim=true', async () => {
+            const wrapperClick = mountButton({ label: 'Click', slim: true });
+            await wrapperClick.find('button').trigger('click');
+            expect(wrapperClick.emitted('click')).toBeTruthy();
+
+            const actionMock = vi.fn();
+            const wrapperAction = mountButton({ label: 'Action', slim: true, action: actionMock, data: { id: 10 } });
+            (wrapperAction.vm as any).onClick(new MouseEvent('click'));
+            expect(actionMock).toHaveBeenCalled();
+
+            const wrapperRoute = mountButton({ label: 'Route', slim: true, route: 'dashboard', params: { tab: 'main' } });
+            (wrapperRoute.vm as any).onClick(new MouseEvent('click'));
+            expect(maxUse.goToRoute).toHaveBeenCalledWith('dashboard', { tab: 'main' });
+
+            const wrapperSubmit = mountButton({ label: 'Enviar', slim: true, type: 'submit' });
+            expect(wrapperSubmit.find('button').attributes('type')).toBe('submit');
+        });
+
+        it('preserva fallback para MaxIconButton sem label nem slot, sem classe compacta textual', () => {
+            const wrapper = mount(MaxButton, {
+                props: { icon: 'mdi:pencil', slim: true },
+                global: {
+                    stubs: {
+                        MaxIcon: {
+                            template: '<div class="max-icon-stub" :data-size="String(size)"></div>',
+                            props: ['icon', 'size']
+                        }
+                    }
+                }
+            });
+            expect(wrapper.find('button.max-icon-button').exists()).toBe(true);
+            expect(wrapper.find('button.max-button').exists()).toBe(false);
+            expect(wrapper.find('button.max-icon-button').classes()).not.toContain('max-button-slim');
+        });
+    });
 });

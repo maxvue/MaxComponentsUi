@@ -68,15 +68,15 @@ Gerencia labels flutuantes (FloatLabel), ícones, mensagens de erro/atenção/su
 
 ### MaxButton
 
-Botão estendido do PrimeVue com suporte a ícones Iconify, navegação por rota e callback de ação.
-Quando usado **sem `label`**, renderiza automaticamente como `MaxIconButton`.
+Botão nativo Vue com suporte a ícones Iconify, navegação por rota e callback de ação.
+Quando usado **sem `label` e sem slot padrão**, renderiza automaticamente como `MaxIconButton`.
 
 **Arquivo:** [`src/components/MaxButton.vue`](src/components/MaxButton.vue)
 **Aliases:** `Button`, `Botao`
 
 | Prop | Tipo | Padrão | Descrição |
 |------|------|--------|-----------|
-| `label` | `string` | — | Texto do botão (se ausente, renderiza como IconButton) |
+| `label` | `string` | — | Texto do botão (se ausente e sem slot padrão, renderiza como IconButton) |
 | `icon` / `i` | `string` | — | Ícone Iconify |
 | `iconLeft` | `string` | — | Ícone à esquerda |
 | `iconRight` | `string` | — | Ícone à direita |
@@ -85,6 +85,7 @@ Quando usado **sem `label`**, renderiza automaticamente como `MaxIconButton`.
 | `disabled` | `boolean` | `false` | Desabilita |
 | `loading` | `boolean` | `false` | Exibe ícone de carregamento |
 | `variant` | `'outlined' \| 'text' \| 'link'` | — | Variante visual |
+| `slim` | `boolean` | `false` | Reduz exclusivamente o espaçamento vertical do botão textual (`padding-block: 0.25rem`) |
 | `route` | `string` | `null` | Rota de navegação ao clicar |
 | `params` / `data` / `query` | `any` | `null` | Parâmetros para a rota |
 | `action` | `() => void` | — | Callback ao clicar |
@@ -92,6 +93,31 @@ Quando usado **sem `label`**, renderiza automaticamente como `MaxIconButton`.
 | `sizeIcon` / `iconSize` | `number \| string` | `1.4` | Tamanho do ícone |
 
 **Eventos:** `click`
+
+#### Compactação Vertical (`slim`)
+
+A prop `slim` permite compactar a altura do botão com texto reduzindo exclusivamente o seu padding vertical para `0.25rem`.
+
+- **Diferença para `size`:** A prop `size` (`'small'`/`'large'`, com aliases `'sm'`/`'lg'`) altera fonte, padding horizontal e padding vertical. A prop `slim` atua apenas no espaçamento vertical e pode ser combinada com qualquer tamanho (ex: `size="small" slim`).
+- **Exclusões:** Não altera a variante `link` (que preserva seu espaçamento zerado) nem o fallback apenas com ícone `MaxIconButton` (que mantém suas dimensões quadradas e área de toque calculadas).
+- **Sem altura fixa:** O componente não força altura fixa em pixels; o dimensionamento final depende de fonte, ícones, texto e estilos do consumidor. Estilos externos com altura forçada pelo consumidor têm precedência sobre a redução de padding.
+
+```html
+<!-- Ativação por presença de atributo -->
+<MaxButton label="Salvar" slim />
+
+<!-- Ativação com binding booleano -->
+<MaxButton label="Salvar" :slim="true" />
+
+<!-- Desativação explícita (atenção: 'slim="false"' sem binding é string preenchida, avaliada como true) -->
+<MaxButton label="Salvar" :slim="false" />
+
+<!-- Combinação de tamanho e compactação vertical -->
+<MaxButton label="Salvar" size="small" slim />
+
+<!-- Uso com slot de conteúdo padrão -->
+<MaxButton slim>Salvar Alterações</MaxButton>
+```
 
 ---
 

@@ -1,31 +1,8 @@
 <template>
-    <button
-        v-if="props.label || Boolean($slots.default)"
-        :type="resolvedType"
-        class="max-button"
-        :class="buttonClasses"
-        :disabled="props.disabled || props.loading"
-        @click="onClick"
-    >
-        <MaxIcon
-            v-if="showIcon && iconPos === 'left'"
-            :icon="loading ? 'eos-icons:loading' : (props.icon ?? props.i)"
-            :size="resolvedIconSize"
-            class="content-button-icon"
-            :dark="props.dark"
-            :light="light"
-            :color="iconColor"
-        />
+    <button v-if="props.label || Boolean($slots.default)" :type="resolvedType" class="max-button" :class="buttonClasses" :disabled="props.disabled || props.loading" @click="onClick">
+        <MaxIcon v-if="showIcon && iconPos === 'left'" :icon="loading ? 'eos-icons:loading' : (props.icon ?? props.i)" :size="resolvedIconSize" class="content-button-icon" :dark="props.dark" :light="light" :color="iconColor" />
         <span class="max-button-label"><slot>{{ props.label }}</slot></span>
-        <MaxIcon
-            v-if="showIcon && iconPos === 'right'"
-            :icon="loading ? 'eos-icons:loading' : (props.icon ?? props.i)"
-            :size="resolvedIconSize"
-            class="content-button-icon"
-            :dark="props.dark"
-            :light="light"
-            :color="iconColor"
-        />
+        <MaxIcon v-if="showIcon && iconPos === 'right'" :icon="loading ? 'eos-icons:loading' : (props.icon ?? props.i)" :size="resolvedIconSize" class="content-button-icon" :dark="props.dark" :light="light" :color="iconColor" />
     </button>
     <MaxIconButton v-bind="props" v-else />
 </template>
@@ -47,7 +24,8 @@
         params: () => ({}),
         data: () => ({}),
         query: () => ({}),
-        uppercase: false
+        uppercase: false,
+        slim: false
     });
 
     const _isTransparentVariant = computed(() => props.variant === 'outlined' || props.variant === 'text' || props.variant === 'link' || props.dashed === true);
@@ -84,7 +62,8 @@
         'max-button-uppercase': props.uppercase,
         'max-button-loading': props.loading,
         'max-button-sm': props.size === 'small' || props.size === 'sm',
-        'max-button-lg': props.size === 'large' || props.size === 'lg'
+        'max-button-lg': props.size === 'large' || props.size === 'lg',
+        'max-button-slim': props.slim
     }));
 
     const data = computed(() => ({ ...(props.data ?? {}), ...(props.query ?? {}), ...(props.params ?? {}) }));
@@ -312,6 +291,10 @@
         &.max-button-lg {
             padding: 0.65rem 1.25rem;
             font-size: 1.05rem;
+        }
+
+        &.max-button-slim:not(.max-button-link) {
+            padding-block: 0.25rem;
         }
 
         &.max-button-dashed {

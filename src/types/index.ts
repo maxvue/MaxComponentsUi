@@ -142,6 +142,8 @@ export interface MaxButtonsType extends /* @vue-ignore */ MaxButtonBaseProps {
     uppercase?: boolean;
     /** Borda tracejada com fundo transparente */
     dashed?: boolean;
+    /** Reduz o espaçamento vertical do MaxButton textual (sem efeito no fallback de ícone) */
+    slim?: boolean;
 }
 
 /**
