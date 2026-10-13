@@ -159,6 +159,56 @@ describe('presetMaxUno — CSS gerado', () => {
                 'break-after': 'always'
             });
         });
+
+        it.each([
+            ['s3-10-start-mobile', '(max-width: 767.98px)', 'break-before', '60px', '200px'],
+            ['s-50-mobile-end', '(max-width: 767.98px)', 'break-after', '1000px', '1200px'],
+            ['s50-start-tablet', '(max-width: 1000.98px)', 'break-before', '1000px', '1200px'],
+            ['s-50-full-tablet-end', '(max-width: 1000.98px)', 'break-after', '1000px', '100%'],
+            ['s50-max-start-desktop', '(min-width: 1001px)', 'break-before', '1000px', '100%'],
+            ['s7-desktop-end', '(min-width: 1001px)', 'break-after', '140px', '168px']
+        ])('%s gera a quebra dentro da media query e dimensões fora dela', async (token, media, property, minWidth, maxWidth) => {
+            const css = await generate(`<div class="${token}"></div>`);
+
+            expectParsavel(css);
+            const baseDeclarations: Record<string, string> = {};
+            const breakDeclarations: Record<string, string> = {};
+            const mediaQueries: string[] = [];
+            const root = postcss.parse(css);
+
+            root.walkDecls((declaration) => {
+                const wrapper = declaration.parent?.parent;
+
+                if (wrapper?.type === 'atrule') {
+                    expect(wrapper.name).toBe('media');
+                    expect(wrapper.params).toBe(media);
+                    breakDeclarations[declaration.prop] = declaration.value;
+                } else baseDeclarations[declaration.prop] = declaration.value;
+            });
+            root.walkAtRules('media', (atRule) => {
+                mediaQueries.push(atRule.params);
+            });
+
+            expect(baseDeclarations).toEqual({ flex: '1 1 0%', 'min-width': minWidth, 'max-width': maxWidth });
+            expect(breakDeclarations).toEqual({ [property]: 'always' });
+            expect(mediaQueries).toEqual([media]);
+        });
+
+        it.each(['s-50-mobile', 's50-tablet', 's-50-desktop'])('%s sem posição gera somente dimensões globais', async (token) => {
+            const css = await generate(`<div class="${token}"></div>`);
+
+            expectParsavel(css);
+            expect(css).not.toContain('@media');
+            expect(await declarationsFor(token)).toEqual({
+                flex: '1 1 0%',
+                'min-width': '1000px',
+                'max-width': '1200px'
+            });
+        });
+
+        it.each(['s-50-start-end', 's-50-mobile-desktop', 's-50-start-mobile-end'])('%s não gera CSS para modificadores conflitantes', async (token) => {
+            expect(await generate(`<div class="${token}"></div>`)).toBe('');
+        });
     });
 
     describe('attributify e gerador integrado', () => {
@@ -177,7 +227,7 @@ describe('presetMaxUno — CSS gerado', () => {
                 rule.walkDecls((d) => {
                     decls[d.prop] = d.value;
                 });
-                result[rule.selector] = decls;
+                result[rule.selector] = { ...result[rule.selector], ...decls };
             });
             return result;
         };
@@ -206,6 +256,31 @@ describe('presetMaxUno — CSS gerado', () => {
                 'max-width': '200px',
                 'break-before': 'always'
             });
+        });
+
+        it('preserva modificadores de dispositivo com attributify e presetWind3', async () => {
+            const css = await generateFull('<div s3-10-start-desktop w-100></div>');
+
+            expectParsavel(css);
+            const rules = ruleDeclarations(css);
+            const dimensionSelector = Object.keys(rules).find((selector) => selector.includes('s3-10-start-desktop'));
+            const widthSelector = Object.keys(rules).find((selector) => selector.includes('w-100'));
+            const mediaQueries: string[] = [];
+
+            expect(dimensionSelector).toBeDefined();
+            expect(widthSelector).toBeDefined();
+            expect(rules[dimensionSelector!]).toEqual({
+                flex: '1 1 0%',
+                'min-width': '60px',
+                'max-width': '200px',
+                'break-before': 'always'
+            });
+            expect(rules[widthSelector!]).toHaveProperty('width');
+            expect(rules[widthSelector!]).not.toHaveProperty('flex');
+            postcss.parse(css).walkAtRules('media', (atRule) => {
+                mediaQueries.push(atRule.params);
+            });
+            expect(mediaQueries).toEqual(['(min-width: 1001px)']);
         });
     });
 });
