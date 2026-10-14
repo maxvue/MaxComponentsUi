@@ -182,6 +182,8 @@ export interface BadgeColors {
     overlayBg: string;
     /** Cor do texto dentro do overlay */
     overlayText: string;
+    /** Cor de outline mais escura que o background para estado ativo */
+    activeOutline: string;
     /** Borda opcional (estilo neon) */
     border?: string;
     /** Sombra com brilho opcional (estilo neon) */
@@ -239,11 +241,13 @@ export function resolveBadgeColors(
     const textLum = hasLightBackground ? 0.18 : 0.83;
     const overlayBgLum = 0.50;
     const overlayTextLum = hasLightBackground ? 0.83 : 0.18;
+    const activeOutlineLum = bgLum > 0.5 ? bgLum * 0.48 : bgLum * 0.45;
 
     const background = adjustToWcagLuminance(baseColor, bgLum);
     const text = adjustToWcagLuminance(baseColor, textLum);
     const overlayBg = adjustToWcagLuminance(baseColor, overlayBgLum);
     const overlayText = adjustToWcagLuminance(baseColor, overlayTextLum);
+    const activeOutline = adjustToWcagLuminance(baseColor, activeOutlineLum);
 
     let result: BadgeColors;
 
@@ -254,6 +258,7 @@ export function resolveBadgeColors(
             text,
             overlayBg,
             overlayText,
+            activeOutline,
             border: `1px solid ${text}`,
             boxShadow: `0 0 8px rgba(${tr}, ${tg}, ${tb}, 0.35)`
         };
@@ -261,11 +266,43 @@ export function resolveBadgeColors(
         background,
         text,
         overlayBg,
-        overlayText
+        overlayText,
+        activeOutline
     };
 
-
     badgeColorCache.set(key, result);
+    return result;
+}
+
+const activeOutlineCache = new Map<string, string>();
+
+/**
+ * Resolve a cor do outline ativo para o MaxBadgeButton e MaxBadge,
+ * garantindo luminância relativa WCAG estritamente menor que o background do item.
+ *
+ * @param baseColor - Cor base do botão/badge (padrão: 'var(--blue-600)')
+ * @param isDark - Indica se o tema ativo é escuro
+ * @param customBackground - Cor de fundo personalizada sobrescrita
+ * @returns Cor de contorno em formato hexadecimal #rrggbb
+ */
+export function resolveBadgeActiveOutlineColor(
+    baseColor: string = 'var(--blue-600)',
+    isDark: boolean = false,
+    customBackground?: string
+): string {
+    const key = `${baseColor || 'var(--blue-600)'}_${isDark ? 'dark' : 'light'}_${customBackground || ''}`;
+    const cached = activeOutlineCache.get(key);
+    if (cached) return cached;
+
+    let result: string;
+    if (customBackground && typeof customBackground === 'string' && customBackground.trim() !== '') {
+        const [r, g, b] = parseColorToRgb(customBackground);
+        const bgLum = getWcagRelativeLuminance(r, g, b);
+        const targetLum = bgLum > 0.5 ? bgLum * 0.48 : bgLum * 0.45;
+        result = adjustToWcagLuminance(customBackground, targetLum);
+    } else result = resolveBadgeColors(baseColor, isDark, false).activeOutline;
+
+    activeOutlineCache.set(key, result);
     return result;
 }
 

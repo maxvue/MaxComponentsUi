@@ -41,6 +41,8 @@ const aliases: Record<string, string> = {
     'T2': 'MaxTitle2',
     'Tag': 'MaxTag',
     'MaxBadgeComponent': 'MaxBadge',
+    'MaxBadgeButtons': 'MaxBadgeButton',
+    'BadgeButtons': 'MaxBadgeButton',
     'MaxBadgeButtonGroup': 'MaxBadgeButtonsGroup',
     'Column': 'MaxTableColumn',
     'MaxColumn': 'MaxTableColumn',

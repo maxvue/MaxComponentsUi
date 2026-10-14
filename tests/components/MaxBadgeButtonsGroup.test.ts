@@ -3,6 +3,7 @@ import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxBadgeButtonsGroup from '../../src/components/MaxBadgeButtonsGroup.vue';
 import type { MaxBadgeButtonsGroupItem } from '../../src/components/MaxBadgeButtonsGroup.vue';
+import { getWcagRelativeLuminance, parseColorToRgb } from '../../src/helpers/colorLuminance';
 
 function mountBadgeButtonsGroup(props: Record<string, any> = {}) {
     return mount(MaxBadgeButtonsGroup, {
@@ -254,6 +255,78 @@ describe('MaxBadgeButtonsGroup', () => {
         expect(overlays).toHaveLength(2);
         expect(overlays[0].text()).toBe('12');
         expect(overlays[1].text()).toBe('99+');
+    });
+
+    it('aplica outline ativo com luminância menor que o background para itens selecionados e ausente para itens inativos', async () => {
+        const wrapper = mountBadgeButtonsGroup({
+            items: mockItems,
+            modelValue: ['pending']
+        });
+
+        const buttons = wrapper.findAllComponents({ name: 'MaxBadgeButton' });
+        expect(buttons).toHaveLength(3);
+
+        // O segundo botão ('pending') está ativo
+        expect(buttons[0].classes()).not.toContain('is-active');
+        expect(buttons[1].classes()).toContain('is-active');
+        expect(buttons[2].classes()).not.toContain('is-active');
+
+        // Botões inativos não devem ter outline ativo no MaxBadge interno
+        const badge0 = buttons[0].findComponent({ name: 'MaxBadge' });
+        const badge1 = buttons[1].findComponent({ name: 'MaxBadge' });
+        const badge2 = buttons[2].findComponent({ name: 'MaxBadge' });
+
+        expect(badge0.props('outlineColor')).toBeUndefined();
+        expect(badge2.props('outlineColor')).toBeUndefined();
+
+        // Botão ativo deve ter outlineColor
+        const activeOutline = badge1.props('outlineColor') as string;
+        expect(activeOutline).toBeDefined();
+        expect(activeOutline.startsWith('#')).toBe(true);
+
+        const badgeEl1 = buttons[1].find('.max-badge');
+        const badgeStyle = badgeEl1.attributes('style') ?? '';
+        const bgMatch = badgeStyle.match(/background(?:-color)?:\s*([^;]+)/i);
+        expect(bgMatch).toBeTruthy();
+        const bgValue = bgMatch![1].trim();
+
+        const [bgR, bgG, bgB] = parseColorToRgb(bgValue);
+        const [outR, outG, outB] = parseColorToRgb(activeOutline);
+
+        const bgLum = getWcagRelativeLuminance(bgR, bgG, bgB);
+        const outLum = getWcagRelativeLuminance(outR, outG, outB);
+
+        expect(outLum).toBeLessThan(bgLum);
+
+        // Ao alterar a seleção para 'completed', o outline deve acompanhar o novo item ativo
+        await wrapper.setProps({ modelValue: ['completed'] });
+
+        expect(buttons[1].classes()).not.toContain('is-active');
+        expect(buttons[2].classes()).toContain('is-active');
+        expect(buttons[1].findComponent({ name: 'MaxBadge' }).props('outlineColor')).toBeUndefined();
+
+        const newActiveBadge = buttons[2].findComponent({ name: 'MaxBadge' });
+        expect(newActiveBadge.props('outlineColor')).toBeDefined();
+    });
+
+    it('respeita props color e dark fornecidas no nível do grupo como fallback', () => {
+        const itemsWithoutColor: MaxBadgeButtonsGroupItem[] = [
+            { label: 'Item 1', value: '1' },
+            { label: 'Item 2', value: '2' }
+        ];
+
+        const wrapper = mountBadgeButtonsGroup({
+            items: itemsWithoutColor,
+            color: 'var(--red-b-650)',
+            dark: true,
+            modelValue: ['1']
+        });
+
+        const buttons = wrapper.findAllComponents({ name: 'MaxBadgeButton' });
+        expect(buttons[0].props('color')).toBe('var(--red-b-650)');
+        expect(buttons[0].props('dark')).toBe(true);
+        expect(buttons[1].props('color')).toBe('var(--red-b-650)');
+        expect(buttons[1].props('dark')).toBe(true);
     });
 });
 

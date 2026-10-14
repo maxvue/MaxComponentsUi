@@ -1,27 +1,6 @@
 <template>
-    <div
-        class="max-badge-buttons-group"
-        :class="props.class"
-        :style="resolvedStyle"
-        role="group"
-    >
-        <MaxBadgeButton
-            v-for="item in safeItems"
-            :key="item.value ?? item.label"
-            :label="item.label"
-            :icon="item.icon"
-            :color="item.color"
-            :neon="item.neon"
-            :status="item.status"
-            :overlay="item.overlay"
-            :uppercase="item.uppercase"
-            :size="item.size"
-            :background="item.background"
-            :text-color="item.textColor"
-            :model-value="isItemSelected(item)"
-            :disabled="props.disabled || item.disabled"
-            @click.stop="(event: MouseEvent) => handleItemClick(item, event)"
-        />
+    <div class="max-badge-buttons-group" :class="props.class" :style="resolvedStyle" role="group">
+        <MaxBadgeButton v-for="item in safeItems" :key="item.value ?? item.label" :label="item.label" :icon="item.icon" :color="item.color ?? props.color" :dark="item.dark ?? props.dark" :neon="item.neon" :status="item.status" :overlay="item.overlay" :uppercase="item.uppercase" :size="item.size" :background="item.background" :text-color="item.textColor" :model-value="isItemSelected(item)" :disabled="props.disabled || item.disabled" @click.stop="(event: MouseEvent) => handleItemClick(item, event)" />
     </div>
 </template>
 
@@ -44,6 +23,10 @@
         modelValue?: any[];
         /** Lista de itens a serem renderizados no grupo */
         items?: MaxBadgeButtonsGroupItem[];
+        /** Cor ativa padrão para os badges do grupo */
+        color?: string;
+        /** Força o modo escuro nos badges do grupo (opcional) */
+        dark?: boolean;
         /** Permite selecionar apenas 1 item por vez (padrão: true) */
         onlyOne?: boolean;
         /** Se true, o v-model retorna o array de objetos completos em vez de apenas os values (padrão: false) */
@@ -69,6 +52,8 @@
     const props = withDefaults(defineProps<MaxBadgeButtonsGroupProps>(), {
         modelValue: undefined,
         items: () => [],
+        color: undefined,
+        dark: undefined,
         onlyOne: true,
         returnObject: false,
         returnValue: 'value',

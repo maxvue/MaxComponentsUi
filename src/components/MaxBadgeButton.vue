@@ -1,27 +1,6 @@
 <template>
-    <button
-        type="button"
-        class="max-badge-button"
-        :class="{
-            'is-active': isActive,
-            'is-disabled': props.disabled
-        }"
-        :disabled="props.disabled"
-        :aria-pressed="isActive"
-        @click="handleClick"
-    >
-        <MaxBadge
-            :label="props.label"
-            :icon="props.icon"
-            :color="currentColor"
-            :neon="props.neon"
-            :status="props.status"
-            :overlay="props.overlay"
-            :uppercase="props.uppercase"
-            :size="props.size"
-            :background="props.background"
-            :text-color="props.textColor"
-        />
+    <button type="button" class="max-badge-button" :class="{ 'is-active': isActive, 'is-disabled': props.disabled }" :style="buttonStyles" :disabled="props.disabled" :aria-pressed="isActive" @click="handleClick">
+        <MaxBadge :label="props.label" :icon="props.icon" :color="currentColor" :neon="props.neon" :status="props.status" :overlay="props.overlay" :uppercase="props.uppercase" :size="props.size" :background="props.background" :text-color="props.textColor" :dark="props.dark" :outline-color="activeOutlineColor" />
     </button>
 </template>
 
@@ -29,6 +8,8 @@
     import { ref, computed } from 'vue';
     import MaxBadge from './MaxBadge.vue';
     import type { MaxBadgeStatus } from './MaxBadge.vue';
+    import { useHtmlDark } from '../helpers/useHtmlDark';
+    import { resolveBadgeActiveOutlineColor } from '../helpers/colorLuminance';
 
     export interface MaxBadgeButtonProps {
         /** Texto do badge (obrigatório) */
@@ -51,6 +32,8 @@
         background?: string;
         /** Sobrescrita de cor de texto */
         textColor?: string;
+        /** Força o modo escuro no badge (opcional, por padrão detecta passivamente a classe .dark) */
+        dark?: boolean;
         /** Estado de alternância controlado por v-model (true/false ou 1/0) */
         modelValue?: boolean | number;
         /** Desabilita a interação com o botão */
@@ -79,6 +62,7 @@
         size: undefined,
         background: undefined,
         textColor: undefined,
+        dark: undefined,
         onClick: undefined,
         onActive: undefined,
         onTrue: undefined,
@@ -115,6 +99,26 @@
         return 'var(--background-400)';
     });
 
+    const isHtmlDark = useHtmlDark();
+    const isDark = computed<boolean>(() => (props.dark !== undefined ? Boolean(props.dark) : isHtmlDark.value));
+
+    const activeOutlineColor = computed<string | undefined>(() => {
+        if (!isActive.value) return undefined;
+
+        return resolveBadgeActiveOutlineColor(currentColor.value, isDark.value, props.background);
+    });
+
+    const buttonStyles = computed<Record<string, string>>(() => {
+        const styles: Record<string, string> = {};
+        if (activeOutlineColor.value) {
+            styles.outline = `1.5px solid ${activeOutlineColor.value}`;
+            styles.outlineOffset = '-1px';
+            styles['--max-badge-active-outline'] = activeOutlineColor.value;
+        }
+
+        return styles;
+    });
+
     function handleClick(event: MouseEvent) {
         if (props.disabled) return;
 
@@ -147,6 +151,7 @@
         padding: 0;
         margin: 0;
         border: none;
+        border-radius: 6px;
         background: transparent;
         cursor: pointer;
         outline: none;
@@ -158,8 +163,8 @@
             border-radius: 6px;
 
             /* Foco canônico: --max-focus-ring garante contraste em light/dark/forced-colors */
-            outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
-            outline-offset: 2px;
+            outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e)) !important;
+            outline-offset: 2px !important;
         }
 
         &:hover:not(:disabled) {

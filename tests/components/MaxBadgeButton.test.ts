@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxBadgeButton from '../../src/components/MaxBadgeButton.vue';
+import { getWcagRelativeLuminance, parseColorToRgb } from '../../src/helpers/colorLuminance';
 
 function mountBadgeButton(props: Record<string, any> = {}) {
     return mount(MaxBadgeButton, {
@@ -152,5 +153,81 @@ describe('MaxBadgeButton', () => {
         const overlayEl = wrapper.find('.max-badge-overlay');
         expect(overlayEl.exists()).toBe(true);
         expect(overlayEl.text()).toBe('7');
+    });
+
+    it('aplica outline ativo com luminância menor que o background quando ativo e ausente quando inativo', async () => {
+        const wrapper = mountBadgeButton({
+            label: 'Ativo Teste',
+            color: 'var(--blue-600)',
+            modelValue: true
+        });
+
+        const badgeComponent = wrapper.findComponent({ name: 'MaxBadge' });
+        expect(badgeComponent.exists()).toBe(true);
+
+        const outlineColor = badgeComponent.props('outlineColor') as string;
+        expect(outlineColor).toBeDefined();
+        expect(typeof outlineColor).toBe('string');
+        expect(outlineColor.startsWith('#')).toBe(true);
+
+        const badgeEl = wrapper.find('.max-badge');
+        expect(badgeEl.attributes('style')).toMatch(/outline(?:-width)?:\s*1\.5px/i);
+        expect(badgeEl.attributes('style')).toMatch(/outline(?:-style)?:\s*solid/i);
+
+        const badgeStyle = badgeEl.attributes('style') ?? '';
+        const bgMatch = badgeStyle.match(/background(?:-color)?:\s*([^;]+)/i);
+        expect(bgMatch).toBeTruthy();
+        const bgValue = bgMatch![1].trim();
+
+        const [bgR, bgG, bgB] = parseColorToRgb(bgValue);
+        const [outR, outG, outB] = parseColorToRgb(outlineColor);
+
+        const bgLum = getWcagRelativeLuminance(bgR, bgG, bgB);
+        const outLum = getWcagRelativeLuminance(outR, outG, outB);
+
+        expect(outLum).toBeLessThan(bgLum);
+
+        // Quando inativo, outline ativo deve ser removido
+        await wrapper.setProps({ modelValue: false });
+        expect(badgeComponent.props('outlineColor')).toBeUndefined();
+        expect(wrapper.find('.max-badge').attributes('style') ?? '').not.toMatch(/outline/i);
+    });
+
+    it('calcula outline ativo mais escuro mesmo com background customizado', () => {
+        const customBg = '#93c5fd';
+        const wrapper = mountBadgeButton({
+            label: 'Custom Bg',
+            background: customBg,
+            modelValue: true
+        });
+
+        const badgeComponent = wrapper.findComponent({ name: 'MaxBadge' });
+        const outlineColor = badgeComponent.props('outlineColor') as string;
+        expect(outlineColor).toBeDefined();
+
+        const [bgR, bgG, bgB] = parseColorToRgb(customBg);
+        const [outR, outG, outB] = parseColorToRgb(outlineColor);
+
+        const bgLum = getWcagRelativeLuminance(bgR, bgG, bgB);
+        const outLum = getWcagRelativeLuminance(outR, outG, outB);
+
+        expect(outLum).toBeLessThan(bgLum);
+    });
+
+    it('aplica outline ativo dinamicamente em toggle autônomo por clique', async () => {
+        const wrapper = mountBadgeButton({
+            label: 'Toggle Autônomo'
+        });
+
+        const badgeComponent = wrapper.findComponent({ name: 'MaxBadge' });
+        expect(badgeComponent.props('outlineColor')).toBeUndefined();
+
+        await wrapper.trigger('click');
+        expect(wrapper.classes()).toContain('is-active');
+        expect(badgeComponent.props('outlineColor')).toBeDefined();
+
+        await wrapper.trigger('click');
+        expect(wrapper.classes()).not.toContain('is-active');
+        expect(badgeComponent.props('outlineColor')).toBeUndefined();
     });
 });

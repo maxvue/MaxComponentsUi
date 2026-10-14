@@ -1,39 +1,16 @@
 <template>
-    <div
-        class="max-badge"
-        :class="[
-            badgeSizeClass,
-            {
-                'is-neon': props.neon,
-                'no-uppercase': !isUppercase
-            }
-        ]"
-        :style="badgeStyles"
-    >
+    <div class="max-badge" :class="[badgeSizeClass, { 'is-neon': props.neon, 'no-uppercase': !isUppercase }]" :style="badgeStyles">
         <!-- Ponto indicador de status -->
-        <span
-            v-if="statusColor"
-            class="max-badge-status-dot"
-            :style="{ backgroundColor: statusColor }"
-        ></span>
+        <span v-if="statusColor" class="max-badge-status-dot" :style="{ backgroundColor: statusColor }"></span>
 
         <!-- Ícone à esquerda -->
-        <MaxIcon
-            v-if="props.icon"
-            :icon="props.icon"
-            class="max-badge-icon"
-            :color="colors.text"
-        />
+        <MaxIcon v-if="props.icon" :icon="props.icon" class="max-badge-icon" :color="colors.text" />
 
         <!-- Texto principal do badge -->
         <span class="max-badge-label">{{ props.label }}</span>
 
         <!-- Overlay de notificação (número ou string) -->
-        <span
-            v-if="hasOverlayValue"
-            class="max-badge-overlay"
-            :style="overlayStyles"
-        >
+        <span v-if="hasOverlayValue" class="max-badge-overlay" :style="overlayStyles">
             {{ overlayValue }}
         </span>
     </div>
@@ -92,6 +69,8 @@
         textColor?: string;
         /** Força o modo escuro no badge (opcional, por padrão detecta passivamente a classe .dark) */
         dark?: boolean;
+        /** Cor opcional de outline (utilizada pelo MaxBadgeButton quando ativo) */
+        outlineColor?: string;
     }
 
     const attrs = useAttrs();
@@ -113,7 +92,8 @@
         size: undefined,
         background: undefined,
         textColor: undefined,
-        dark: undefined
+        dark: undefined,
+        outlineColor: undefined
     });
 
     /** Detecta no-uppercase passado via prop ou atributo sem valor */
@@ -181,6 +161,12 @@
         if (colors.value.boxShadow) styles.boxShadow = colors.value.boxShadow;
 
 
+        if (props.outlineColor) {
+            styles.outline = `1.5px solid ${props.outlineColor}`;
+            styles.outlineOffset = '-1px';
+        }
+
+
         if (!isUppercase.value) styles.textTransform = 'none';
 
 
@@ -211,7 +197,7 @@
         padding: 0 8px;
         text-transform: uppercase;
         box-sizing: border-box;
-        transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, outline-color 0.2s ease;
         user-select: none;
         white-space: nowrap;
 

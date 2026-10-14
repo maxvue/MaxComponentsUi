@@ -203,6 +203,8 @@ export { default as Badge } from './components/MaxBadge.vue';
 export { default as Tag } from './components/MaxTag.vue';
 export { default as MaxBadgeButton } from './components/MaxBadgeButton.vue';
 export { default as BadgeButton } from './components/MaxBadgeButton.vue';
+export { default as MaxBadgeButtons } from './components/MaxBadgeButton.vue';
+export { default as BadgeButtons } from './components/MaxBadgeButton.vue';
 export { default as MaxBadgeButtonsGroup } from './components/MaxBadgeButtonsGroup.vue';
 export { default as MaxBadgeButtonGroup } from './components/MaxBadgeButtonsGroup.vue';
 export { default as BadgeButtonsGroup } from './components/MaxBadgeButtonsGroup.vue';
@@ -264,6 +266,7 @@ export {
     getWcagRelativeLuminance,
     resolveStatItemColors,
     resolveBadgeColors,
+    resolveBadgeActiveOutlineColor,
     BADGE_STATUS_COLORS
 } from './helpers/colorLuminance';
 export type { StatItemColors, BadgeColors } from './helpers/colorLuminance';

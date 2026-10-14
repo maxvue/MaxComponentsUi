@@ -1,0 +1,153 @@
+{
+  "version": 2,
+  "planRevision": "a3c40e5b7b78351b4c72b2424683731ee958846888ac397a64d5a3ad73b01dfb",
+  "tasks": [
+    {
+      "id": "T1",
+      "status": "completed",
+      "files": [
+        "src/helpers/colorLuminance.ts",
+        "src/index.ts"
+      ],
+      "revision": "3ce1ccfea9b781703a3afdc9775a40b490c129ec50c84b35feb471f84afee512",
+      "validations": [
+        {
+          "command": "npm run type-check",
+          "revision": "3ce1ccfea9b781703a3afdc9775a40b490c129ec50c84b35feb471f84afee512",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "T2",
+      "status": "completed",
+      "files": [
+        "src/components/MaxBadge.vue",
+        "src/components/MaxBadgeButton.vue",
+        "src/components/MaxBadgeButtonsGroup.vue"
+      ],
+      "revision": "1adb80d022f15c1e0879dc1d8c1f1f791a90cb3435c5a6c847b57f5823a88f77",
+      "validations": [
+        {
+          "command": "npm run type-check",
+          "revision": "1adb80d022f15c1e0879dc1d8c1f1f791a90cb3435c5a6c847b57f5823a88f77",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "T3",
+      "status": "completed",
+      "files": [
+        "src/scripts/generateResolver.ts",
+        "src/components-manifest.json"
+      ],
+      "revision": "1cb70a2b4e12b0c3c6bd246e6f67305fd02c92c7496e9e2b2eb1670bd95694ec",
+      "validations": [
+        {
+          "command": "node src/scripts/generateResolver.ts",
+          "revision": "1cb70a2b4e12b0c3c6bd246e6f67305fd02c92c7496e9e2b2eb1670bd95694ec",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "T4",
+      "status": "completed",
+      "files": [
+        "tests/components/MaxBadgeButton.test.ts",
+        "tests/components/MaxBadgeButtonsGroup.test.ts"
+      ],
+      "revision": "eade84fbba4ee2e476ca349b62bfd16ef34287156a65440bd4f654679794e1e5",
+      "validations": [
+        {
+          "command": "npx vitest run tests/components/MaxBadgeButton.test.ts tests/components/MaxBadgeButtonsGroup.test.ts tests/components/MaxBadge.test.ts",
+          "revision": "eade84fbba4ee2e476ca349b62bfd16ef34287156a65440bd4f654679794e1e5",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "T5",
+      "status": "completed",
+      "files": [
+        "src/components-manifest.json",
+        "src/components/MaxBadge.vue",
+        "src/components/MaxBadgeButton.vue",
+        "src/components/MaxBadgeButtonsGroup.vue",
+        "src/helpers/colorLuminance.ts",
+        "src/index.ts",
+        "src/scripts/generateResolver.ts",
+        "tests/components/MaxBadgeButton.test.ts",
+        "tests/components/MaxBadgeButtonsGroup.test.ts"
+      ],
+      "revision": "d494a2e3e1c1013c5c3d6cb4f848cdaf55afa521534eb99533b732542b0a2857",
+      "validations": [
+        {
+          "command": "npm run type-check",
+          "revision": "d494a2e3e1c1013c5c3d6cb4f848cdaf55afa521534eb99533b732542b0a2857",
+          "result": "passed"
+        },
+        {
+          "command": "npm run type-check:test",
+          "revision": "d494a2e3e1c1013c5c3d6cb4f848cdaf55afa521534eb99533b732542b0a2857",
+          "result": "passed"
+        },
+        {
+          "command": "npm run build",
+          "revision": "d494a2e3e1c1013c5c3d6cb4f848cdaf55afa521534eb99533b732542b0a2857",
+          "result": "passed"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "revision": "d494a2e3e1c1013c5c3d6cb4f848cdaf55afa521534eb99533b732542b0a2857",
+    "checks": [
+      {
+        "command": "npx vitest run tests/components/MaxBadgeButton.test.ts tests/components/MaxBadgeButtonsGroup.test.ts tests/components/MaxBadge.test.ts",
+        "revision": "d494a2e3e1c1013c5c3d6cb4f848cdaf55afa521534eb99533b732542b0a2857",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check",
+        "revision": "d494a2e3e1c1013c5c3d6cb4f848cdaf55afa521534eb99533b732542b0a2857",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check:test",
+        "revision": "d494a2e3e1c1013c5c3d6cb4f848cdaf55afa521534eb99533b732542b0a2857",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npx stylelint \"src/components/MaxBadge*.vue\" && npx eslint src/components/MaxBadge*.vue src/helpers/colorLuminance.ts src/index.ts tests/components/MaxBadge*.ts",
+        "revision": "d494a2e3e1c1013c5c3d6cb4f848cdaf55afa521534eb99533b732542b0a2857",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run build",
+        "revision": "d494a2e3e1c1013c5c3d6cb4f848cdaf55afa521534eb99533b732542b0a2857",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run lint",
+        "revision": "d494a2e3e1c1013c5c3d6cb4f848cdaf55afa521534eb99533b732542b0a2857",
+        "result": "failed",
+        "exitCode": 2
+      },
+      {
+        "command": "npm run test",
+        "revision": "d494a2e3e1c1013c5c3d6cb4f848cdaf55afa521534eb99533b732542b0a2857",
+        "result": "failed",
+        "exitCode": 1
+      }
+    ]
+  },
+  "updatedAt": 1791977660000,
+  "nextAction": "Aguardar autorizacao do usuario para commit e integracao via painel."
+}
