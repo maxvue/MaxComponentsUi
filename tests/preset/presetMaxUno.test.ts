@@ -493,7 +493,7 @@ describe('presetMaxUno', () => {
 
             it('resolve o token reconhecido mesmo sem a propriedade input', () => {
                 expect(resultsFor('s3-10-start-desktop', true)).toEqual([
-                    { flex: '1 1 0%', 'min-width': '60px', 'max-width': '200px' },
+                    { [parentSymbol]: '@media (min-width: 1001px)', flex: '1 1 0%', 'min-width': '60px', 'max-width': '200px' },
                     { [parentSymbol]: '@media (min-width: 1001px)', 'break-before': 'always' }
                 ]);
             });
@@ -505,16 +505,21 @@ describe('presetMaxUno', () => {
                 ['s50-tablet-end', '@media (max-width: 1000.98px)', 'break-after'],
                 ['s-50-start-desktop', '@media (min-width: 1001px)', 'break-before'],
                 ['s50-desktop-end', '@media (min-width: 1001px)', 'break-after']
-            ])('%s restringe a quebra ao dispositivo e mantém dimensões globais', (token, media, property) => {
+            ])('%s restringe dimensões e quebra ao dispositivo', (token, media, property) => {
                 expect(resultsFor(token)).toEqual([
-                    { flex: '1 1 0%', 'min-width': '1000px', 'max-width': '1200px' },
+                    { [parentSymbol]: media, flex: '1 1 0%', 'min-width': '1000px', 'max-width': '1200px' },
                     { [parentSymbol]: media, [property]: 'always' }
                 ]);
             });
 
-            it.each(['s-50-mobile', 's50-tablet', 's-50-desktop'])('%s sem posição não emite quebra nem media query', (token) => {
+            it.each([
+                ['s-50-mobile', '@media (max-width: 767.98px)', '1000px', '1200px'],
+                ['s50-tablet', '@media (max-width: 1000.98px)', '1000px', '1200px'],
+                ['s-50-desktop', '@media (min-width: 1001px)', '1000px', '1200px'],
+                ['s20-full-mobile', '@media (max-width: 767.98px)', '400px', '100%']
+            ])('%s sem posição emite dimensões sob media query do dispositivo', (token, media, minWidth, maxWidth) => {
                 expect(resultsFor(token)).toEqual([
-                    { flex: '1 1 0%', 'min-width': '1000px', 'max-width': '1200px' }
+                    { [parentSymbol]: media, flex: '1 1 0%', 'min-width': minWidth, 'max-width': maxWidth }
                 ]);
             });
 

@@ -7,7 +7,7 @@
                 <div class="component-block">
                     <h3>MaxGrid</h3>
                     <p class="max-grid-doc-note">
-                        Contêiner flexbox com quebra natural (flex-wrap) e suporte a quebras explícitas com marcadores start e end. Tokens com sufixo de dispositivo (mobile, tablet, desktop) geram regras CSS de fragmentação, mas não quebram linhas estruturais no MaxGrid atual.
+                        Contêiner flexbox com quebra natural (flex-wrap) e suporte a quebras explícitas com marcadores start e end. Tokens com sufixo de dispositivo (mobile, tablet, desktop) aplicam dimensionamento e fragmentação responsivos via @media CSS (ex.: s11-11 s20-full-mobile), mas o particionamento estrutural de linhas no VDOM permanece exclusivo de marcadores sem dispositivo.
                     </p>
                     <div class="states">
                         <!-- 1. Flex-wrap natural sem marcadores -->
@@ -35,6 +35,15 @@
                             <MaxGrid no-message label="Filtros Compactos" :labelCenter="true">
                                 <MaxInputText s10-full label="Pesquisa Rápida" v-model="formExemplo.pesquisa" />
                                 <MaxInputText class="s10-20" label="Status" v-model="formExemplo.status" />
+                            </MaxGrid>
+                        </div>
+
+                        <!-- 4. Override responsivo de dispositivo (s11-11 desktop, s20-full no mobile) -->
+                        <div class="state-col">
+                            <span>Composição responsiva (s11-11 s20-full-mobile)</span>
+                            <MaxGrid label="Responsividade por Dispositivo">
+                                <MaxInputText s11-11 s20-full-mobile label="Documento (s11-11 desktop / full mobile)" v-model="formExemplo.doc" />
+                                <MaxInputText s10-full label="Complemento" v-model="formExemplo.complemento" />
                             </MaxGrid>
                         </div>
                     </div>
@@ -100,7 +109,9 @@
         item2: 'Valor 2',
         item3: 'Valor 3',
         pesquisa: '',
-        status: 'Ativo'
+        status: 'Ativo',
+        doc: '123.456.789-00',
+        complemento: ''
     });
 </script>
 

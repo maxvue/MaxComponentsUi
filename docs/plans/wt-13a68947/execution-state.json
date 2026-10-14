@@ -1,0 +1,90 @@
+{
+  "version": 2,
+  "planRevision": "e2d22ec8139b734ca050b3a30314772a3dac518efbcfa9aaa8a81344b3430977",
+  "tasks": [
+    {
+      "id": "T1",
+      "status": "completed",
+      "files": [
+        "src/presetMaxUno.ts"
+      ],
+      "validations": [],
+      "revision": "e61c8946bf85ae1dede6d7a1707310ff6bcac32ab347908367f6243ff4141544"
+    },
+    {
+      "id": "T2",
+      "status": "completed",
+      "files": [
+        "tests/preset/presetMaxUno.test.ts",
+        "tests/preset/presetMaxUno.generate.test.ts"
+      ],
+      "validations": [],
+      "revision": "e61c8946bf85ae1dede6d7a1707310ff6bcac32ab347908367f6243ff4141544"
+    },
+    {
+      "id": "T3",
+      "status": "completed",
+      "files": [
+        "tests/browser/maxGridLineBreaks.browser.ts",
+        "vitest.browser.config.ts"
+      ],
+      "validations": [],
+      "revision": "e61c8946bf85ae1dede6d7a1707310ff6bcac32ab347908367f6243ff4141544"
+    },
+    {
+      "id": "T4",
+      "status": "completed",
+      "files": [
+        "docs/THEME.md",
+        "COMPONENTS.md",
+        "playground/src/scenarios/layout-grid.vue",
+        "src/components/MaxInputCpfCnpj.vue"
+      ],
+      "validations": [],
+      "revision": "e61c8946bf85ae1dede6d7a1707310ff6bcac32ab347908367f6243ff4141544"
+    },
+    {
+      "id": "T5",
+      "status": "completed",
+      "files": [],
+      "validations": [],
+      "revision": "e61c8946bf85ae1dede6d7a1707310ff6bcac32ab347908367f6243ff4141544"
+    }
+  ],
+  "verification": {
+    "revision": "e61c8946bf85ae1dede6d7a1707310ff6bcac32ab347908367f6243ff4141544",
+    "checks": [
+      {
+        "command": "npx vitest run tests/preset/presetMaxUno.test.ts tests/preset/presetMaxUno.generate.test.ts tests/components/MaxGrid.test.ts",
+        "revision": "e61c8946bf85ae1dede6d7a1707310ff6bcac32ab347908367f6243ff4141544",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "PLAYWRIGHT_BROWSERS_PATH=/home/johnattas/.cache/ms-playwright npx vitest run --config vitest.browser.config.ts tests/browser/maxGridLineBreaks.browser.ts",
+        "revision": "e61c8946bf85ae1dede6d7a1707310ff6bcac32ab347908367f6243ff4141544",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check",
+        "revision": "e61c8946bf85ae1dede6d7a1707310ff6bcac32ab347908367f6243ff4141544",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check:test",
+        "revision": "e61c8946bf85ae1dede6d7a1707310ff6bcac32ab347908367f6243ff4141544",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run lint",
+        "revision": "e61c8946bf85ae1dede6d7a1707310ff6bcac32ab347908367f6243ff4141544",
+        "result": "passed",
+        "exitCode": 0
+      }
+    ]
+  },
+  "updatedAt": 1791982850000
+}

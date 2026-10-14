@@ -164,7 +164,8 @@
     :deep(.max-cpf-cnpj-input) {
         letter-spacing: 2.5px;
     }
-    input{
+
+    input {
         text-align: center;
     }
 }

@@ -1,8 +1,10 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest';
+import { page } from 'vitest/browser';
 import { createApp, h, ref, type App } from 'vue';
 import presetCss from 'virtual:maxgrid-preset.js';
 import MaxGrid from '../../src/components/MaxGrid.vue';
 import MaxInputNumber from '../../src/components/MaxInputNumber.vue';
+import MaxInputCpfCnpj from '../../src/components/MaxInputCpfCnpj.vue';
 
 let styleElement: HTMLStyleElement | null = null;
 let hostElement: HTMLDivElement | null = null;
@@ -284,4 +286,64 @@ describe('MaxGrid — Quebras explícitas de linha no Chromium', () => {
         const nativeInput = hostElement.querySelector('input.max-input-native') as HTMLInputElement;
         expect(nativeInput).toBeDefined();
     });
+
+    it('combina token base s11-11 com s20-full-mobile respeitando viewport desktop vs mobile', async () => {
+        if (typeof page?.viewport === 'function') await page.viewport(1280, 800);
+
+        hostElement = document.createElement('div');
+        hostElement.style.width = '1280px';
+        document.body.appendChild(hostElement);
+
+        const docValue = ref('12345678901');
+
+        const app = createApp({
+            render() {
+                return h(MaxGrid, null, {
+                    default: () => [
+                        h(MaxInputCpfCnpj, {
+                            's11-11': '',
+                            's20-full-mobile': '',
+                            class: 's11-11 s20-full-mobile',
+                            modelValue: docValue.value,
+                            label: 'CPF ou CNPJ',
+                            'onUpdate:modelValue': (v: string) => {
+                                docValue.value = v;
+                            }
+                        })
+                    ]
+                });
+            }
+        });
+        app.directive('tooltip', {});
+
+        activeApp = app;
+        app.mount(hostElement);
+        await settle();
+
+        const inputEl = hostElement.querySelector('.max-input-cpf-cnpj') as HTMLElement;
+        expect(inputEl).toBeDefined();
+
+        // 1. Em viewport desktop (1280x800): s11-11 prevalece no desktop
+        const desktopComputed = window.getComputedStyle(inputEl);
+        expect(desktopComputed.minWidth).toBe('220px');
+        expect(desktopComputed.maxWidth).toBe('220px');
+        expect(Math.round(inputEl.getBoundingClientRect().width)).toBe(220);
+
+        // 2. Em viewport mobile (375x667): s20-full-mobile ativa a media query
+        if (typeof page?.viewport === 'function') {
+            hostElement.style.width = '375px';
+            await page.viewport(375, 667);
+            await settle();
+
+            const mobileComputed = window.getComputedStyle(inputEl);
+            expect(mobileComputed.minWidth).toBe('400px');
+            expect(mobileComputed.maxWidth).toBe('100%');
+
+            // Restaura o viewport padrão para os próximos testes
+            hostElement.style.width = '1280px';
+            await page.viewport(1280, 800);
+            await settle();
+        }
+    });
 });
+

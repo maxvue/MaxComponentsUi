@@ -167,12 +167,12 @@ describe('presetMaxUno — CSS gerado', () => {
             ['s-50-full-tablet-end', '(max-width: 1000.98px)', 'break-after', '1000px', '100%'],
             ['s50-max-start-desktop', '(min-width: 1001px)', 'break-before', '1000px', '100%'],
             ['s7-desktop-end', '(min-width: 1001px)', 'break-after', '140px', '168px']
-        ])('%s gera a quebra dentro da media query e dimensões fora dela', async (token, media, property, minWidth, maxWidth) => {
+        ])('%s gera a quebra e dimensões dentro da media query', async (token, media, property, minWidth, maxWidth) => {
             const css = await generate(`<div class="${token}"></div>`);
 
             expectParsavel(css);
             const baseDeclarations: Record<string, string> = {};
-            const breakDeclarations: Record<string, string> = {};
+            const mediaDeclarations: Record<string, string> = {};
             const mediaQueries: string[] = [];
             const root = postcss.parse(css);
 
@@ -182,27 +182,52 @@ describe('presetMaxUno — CSS gerado', () => {
                 if (wrapper?.type === 'atrule') {
                     expect(wrapper.name).toBe('media');
                     expect(wrapper.params).toBe(media);
-                    breakDeclarations[declaration.prop] = declaration.value;
+                    mediaDeclarations[declaration.prop] = declaration.value;
                 } else baseDeclarations[declaration.prop] = declaration.value;
             });
             root.walkAtRules('media', (atRule) => {
                 mediaQueries.push(atRule.params);
             });
 
-            expect(baseDeclarations).toEqual({ flex: '1 1 0%', 'min-width': minWidth, 'max-width': maxWidth });
-            expect(breakDeclarations).toEqual({ [property]: 'always' });
+            expect(baseDeclarations).toEqual({});
+            expect(mediaDeclarations).toEqual({
+                flex: '1 1 0%',
+                'min-width': minWidth,
+                'max-width': maxWidth,
+                [property]: 'always'
+            });
             expect(mediaQueries).toEqual([media]);
         });
 
-        it.each(['s-50-mobile', 's50-tablet', 's-50-desktop'])('%s sem posição gera somente dimensões globais', async (token) => {
+        it.each([
+            ['s-50-mobile', '(max-width: 767.98px)', '1000px', '1200px'],
+            ['s50-tablet', '(max-width: 1000.98px)', '1000px', '1200px'],
+            ['s-50-desktop', '(min-width: 1001px)', '1000px', '1200px'],
+            ['s20-full-mobile', '(max-width: 767.98px)', '400px', '100%']
+        ])('%s sem posição gera dimensões dentro da media query', async (token, media, minWidth, maxWidth) => {
             const css = await generate(`<div class="${token}"></div>`);
 
             expectParsavel(css);
-            expect(css).not.toContain('@media');
-            expect(await declarationsFor(token)).toEqual({
+            expect(css).toContain(`@media ${media}`);
+            const baseDeclarations: Record<string, string> = {};
+            const mediaDeclarations: Record<string, string> = {};
+            const root = postcss.parse(css);
+
+            root.walkDecls((declaration) => {
+                const wrapper = declaration.parent?.parent;
+
+                if (wrapper?.type === 'atrule') {
+                    expect(wrapper.name).toBe('media');
+                    expect(wrapper.params).toBe(media);
+                    mediaDeclarations[declaration.prop] = declaration.value;
+                } else baseDeclarations[declaration.prop] = declaration.value;
+            });
+
+            expect(baseDeclarations).toEqual({});
+            expect(mediaDeclarations).toEqual({
                 flex: '1 1 0%',
-                'min-width': '1000px',
-                'max-width': '1200px'
+                'min-width': minWidth,
+                'max-width': maxWidth
             });
         });
 
@@ -282,5 +307,56 @@ describe('presetMaxUno — CSS gerado', () => {
             });
             expect(mediaQueries).toEqual(['(min-width: 1001px)']);
         });
+
+        it('combina token base com override por dispositivo em attributify respeitando a ordem da cascata', async () => {
+            const css = await generateFull('<MaxInputCpfCnpj s11-11 s20-full-mobile label="CPF ou CNPJ" />');
+
+            expectParsavel(css);
+            const root = postcss.parse(css);
+
+            let baseRule: any;
+            let mediaRule: any;
+
+            root.walkRules((rule) => {
+                if (rule.selector.includes('s11-11')) {
+                    expect(rule.parent?.type).toBe('root');
+                    baseRule = rule;
+                } else if (rule.selector.includes('s20-full-mobile')) {
+                    expect(rule.parent?.type).toBe('atrule');
+                    expect((rule.parent as any).name).toBe('media');
+                    expect((rule.parent as any).params).toBe('(max-width: 767.98px)');
+                    mediaRule = rule;
+                }
+            });
+
+            expect(baseRule).toBeDefined();
+            expect(mediaRule).toBeDefined();
+
+            const baseDecls: Record<string, string> = {};
+            baseRule.walkDecls((d: any) => {
+                baseDecls[d.prop] = d.value;
+            });
+            expect(baseDecls).toEqual({
+                flex: '1 1 0%',
+                'min-width': '220px',
+                'max-width': '220px'
+            });
+
+            const mediaDecls: Record<string, string> = {};
+            mediaRule.walkDecls((d: any) => {
+                mediaDecls[d.prop] = d.value;
+            });
+            expect(mediaDecls).toEqual({
+                flex: '1 1 0%',
+                'min-width': '400px',
+                'max-width': '100%'
+            });
+
+            // Ordem na folha de estilos: regra base precede a @media query
+            const basePos = root.nodes.indexOf(baseRule);
+            const mediaAtRulePos = root.nodes.indexOf(mediaRule.parent);
+            expect(basePos).toBeLessThan(mediaAtRulePos);
+        });
     });
 });
+

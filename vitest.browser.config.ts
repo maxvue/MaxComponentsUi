@@ -19,14 +19,16 @@ function virtualMaxGridPresetPlugin() {
         async load(id: string) {
             if (id === resolvedVirtualModuleId) {
                 const { createGenerator } = await import('unocss');
+                const presetAttributify = (await import('@unocss/preset-attributify')).default;
                 const { presetMaxUno } = await import('./src/presetMaxUno.ts');
                 const uno = await createGenerator({
-                    presets: [presetMaxUno()]
+                    presets: [presetMaxUno(), presetAttributify()]
                 });
                 const tokens = [
                     's7-end', 's7-10-end', 's3-start', 's3-10-start',
                     's-50-full-start', 's-50-max-end', 's-10', 's-15', 's-20',
-                    's-30', 's-40', 's-50', 's3', 's7'
+                    's-30', 's-40', 's-50', 's3', 's7',
+                    's11-11', 's20-full-mobile'
                 ];
                 const content = tokens.map((t) => `<div class="${t}" ${t}></div>`).join('\n');
                 const { css } = await uno.generate(content, { preflights: false });

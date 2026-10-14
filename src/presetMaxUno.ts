@@ -95,23 +95,25 @@ export const presetMaxUno = () => {
                     if (max === 'full' || max === 'max') maxWidth = '100%';
                     else if (max && !isNaN(Number(max))) maxWidth = `${Number(max) * 20}px`;
 
-                    // Dimensões base aplicadas em qualquer tela.
-                    yield {
+                    let media: string | undefined;
+                    if (device === 'mobile') media = '@media (max-width: 767.98px)';
+                    else if (device === 'tablet') media = '@media (max-width: 1000.98px)';
+                    else if (device === 'desktop') media = '@media (min-width: 1001px)';
+
+                    const styles: Record<string | symbol, string> = {
                         flex: '1 1 0%',
                         'min-width': `${n * 20}px`,
                         'max-width': maxWidth
                     };
+                    if (media) styles[symbols.parent] = media;
+                    yield styles;
 
                     // Preserva as declarações de fragmentação CSS; elas não quebram linhas em flexbox comum.
                     // A organização explícita das linhas no ecossistema Max é coordenada pelo MaxGrid.
                     if (position) {
                         const breakProp = position === 'start' ? 'break-before' : 'break-after';
-                        const breakStyles: Record<string, string> = { [breakProp]: 'always' };
-
-                        if (device === 'mobile') yield { [symbols.parent]: '@media (max-width: 767.98px)', ...breakStyles };
-                        else if (device === 'tablet') yield { [symbols.parent]: '@media (max-width: 1000.98px)', ...breakStyles };
-                        else if (device === 'desktop') yield { [symbols.parent]: '@media (min-width: 1001px)', ...breakStyles };
-                        else yield breakStyles;
+                        if (media) yield { [symbols.parent]: media, [breakProp]: 'always' };
+                        else yield { [breakProp]: 'always' };
                     }
                 }
             ],

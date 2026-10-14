@@ -1214,18 +1214,18 @@ O `<MaxGrid>` inspeciona seus filhos lógicos diretos (expandindo recursivamente
 - **Sem marcadores ativos:** Quando nenhum filho utiliza marcadores de quebra, os nós são renderizados diretamente sem elementos intermediários, preservando seletores diretos e desempenho.
 - **Com marcadores ativos:** Os itens são organizados em segmentos `div.max-grid-row` (`flex: 0 0 100%; width: 100%; display: flex; flex-wrap: wrap; gap: inherit;`).
 - **Atributos válidos:** Atributos valueless (`s7-end`) ou booleanos verdadeiros (`:s7-end="true"`, `'true'`) ativam a quebra. Valores como `false`, `null` ou `undefined` não ativam quebras.
-- **Limitação de Dispositivos:** O organizador de linhas do `<MaxGrid>` **não suporta sufixos de dispositivo** (`desktop`, `mobile`, `tablet`). Tokens como `s7-end-mobile` emitem CSS condicional de fragmentação, mas não provocam quebra estrutural no `<MaxGrid>`.
+- **Tokens com Sufixo de Dispositivo:** Tokens como `s20-full-mobile`, `s10-tablet` e `s-50-desktop` aplicam suas dimensões (`flex`, `min-width`, `max-width`) e fragmentação sob `@media` query no CSS, permitindo compor dimensões base e responsivas (ex.: `<MaxInputText s11-11 s20-full-mobile />`). No entanto, o organizador de linhas `GridSlotRows` do `<MaxGrid>` no VDOM **não interpreta sufixos de dispositivo** para particionamento de `.max-grid-row`, de modo que quebras estruturais continuam exclusivas de marcadores sem dispositivo (`start` e `end`).
 
 #### Exemplos de Uso
 
-**Formulário completo com quebra de linha e tokens elásticos:**
+**Formulário completo com quebra de linha, tokens elásticos e composição responsiva:**
 
 ```vue
 <template>
     <MaxGrid label="Dados Cadastrais">
-        <!-- Primeira linha: Nome (mín 200px, teto 100%) e CPF (mín 140px, máx 168px, quebra ao final) -->
+        <!-- Primeira linha: Nome (mín 200px, teto 100%) e CPF com override mobile (220px desktop, full mobile) com quebra -->
         <MaxInputText class="s10-full" label="Nome Completo" v-model="form.nome" />
-        <MaxInputText s7-end label="CPF" v-model="form.cpf" />
+        <MaxInputText s11-11 s20-full-mobile s7-end label="CPF" v-model="form.cpf" />
 
         <!-- Segunda linha iniciada explicitamente por s3-10-start -->
         <MaxInputText class="s3-10-start" label="Telefone" v-model="form.telefone" />

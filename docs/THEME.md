@@ -218,19 +218,22 @@ Propriedades de fragmentação emitidas no CSS do preset:
 - **Com sufixo `-end`:** `break-after: always`
 
 Condicionamento por dispositivo no preset (largura de viewport CSS):
-- **`mobile`:** emitido sob media query `@media (max-width: 767.98px)`.
-- **`tablet`:** emitido sob media query `@media (max-width: 1000.98px)` (inclui larguras mobile).
-- **`desktop`:** emitido sob media query `@media (min-width: 1001px)`.
-- **Sem dispositivo:** emitido sem media query (incondicional).
-- **Dispositivo sem direção (ex.: `s10-mobile`):** não emite nenhuma propriedade `break-*` adicional.
+- **`mobile`:** dimensões e eventual propriedade `break-*` emitidas sob media query `@media (max-width: 767.98px)`.
+- **`tablet`:** dimensões e eventual propriedade `break-*` emitidas sob media query `@media (max-width: 1000.98px)` (inclui larguras mobile).
+- **`desktop`:** dimensões e eventual propriedade `break-*` emitidas sob media query `@media (min-width: 1001px)`.
+- **Sem dispositivo:** emitido sem media query (incondicional no escopo global).
 
-| Dispositivo no token | Condição CSS emitida para `break-*` | Dimensões (`min`/`max-width`) | Quebra real no MaxGrid atual |
-|---|---|---|---|
-| `mobile` | `@media (max-width: 767.98px)` | Sempre ativas | Não |
-| `tablet` | `@media (max-width: 1000.98px)` (inclui mobile) | Sempre ativas | Não |
-| `desktop` | `@media (min-width: 1001px)` | Sempre ativas | Não |
-| Sem dispositivo, com `start`/`end` | Sem media query (incondicional) | Sempre ativas | Sim, nos filhos diretos |
-| Dispositivo sem direção | Nenhum `break-*` emitido | Sempre ativas | Não |
+| Dispositivo no token | Condição CSS emitida (`flex`, `min`/`max-width` e `break-*`) | Quebra real no MaxGrid atual |
+|---|---|---|
+| `mobile` | `@media (max-width: 767.98px)` | Não (apenas CSS responsivo) |
+| `tablet` | `@media (max-width: 1000.98px)` (inclui mobile) | Não (apenas CSS responsivo) |
+| `desktop` | `@media (min-width: 1001px)` | Não (apenas CSS responsivo) |
+| Sem dispositivo, com `start`/`end` | Sem media query (incondicional no escopo global) | Sim, nos filhos diretos |
+| Sem dispositivo, sem direção | Sem media query (incondicional no escopo global) | Não |
+
+> [!TIP]
+> **Composição Responsiva (`s11-11 s20-full-mobile`):**
+> Como tokens com sufixo de dispositivo têm suas dimensões encapsuladas em `@media`, é possível compor um dimensionamento base para desktop com um override para dispositivos móveis no mesmo elemento (ex.: `<MaxInputCpfCnpj s11-11 s20-full-mobile ... />`). No desktop (`> 767.98px`), vigoram os `220px` do `s11-11`; no mobile (`<= 767.98px`), a regra `@media` de `s20-full-mobile` prevalece na cascata CSS.
 
 > [!IMPORTANT]
 > **Diferença crucial entre Parsers e Suporte no MaxGrid:**
@@ -258,7 +261,8 @@ Dentro do `<MaxGrid>`, o componente inspeciona os filhos lógicos diretos do seu
 | `s3-10-start` | `1 1 0%` | `60px` | `200px` | Inicia nova linha antes do item |
 | `s7-end` | `1 1 0%` | `140px` | `168px` | Encerra a linha após o item |
 | `s7-10-end` | `1 1 0%` | `140px` | `200px` | Encerra a linha após o item |
-| `s7-end-mobile` | `1 1 0%` | `140px` | `168px` | Apenas CSS condicional; sem quebra no MaxGrid |
+| `s7-end-mobile` | `1 1 0%` | `140px` | `168px` | Apenas sob `@media (max-width: 767.98px)`; sem quebra no MaxGrid |
+| `s20-full-mobile` | `1 1 0%` | `400px` | `100%` | Apenas sob `@media (max-width: 767.98px)`; sem quebra no MaxGrid |
 | `s10` | `1 1 0%` | `200px` | `240px` | Nenhuma (não significa 10%) |
 | `s10-20` / `s-10-20` | `1 1 0%` | `200px` | `400px` | Nenhuma (extensão usa multiplicador 20px) |
 | `s10-full` / `s-10-full` | `1 1 0%` | `200px` | `100%` | Nenhuma (teto máximo, não largura forçada) |
