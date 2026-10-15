@@ -1,0 +1,134 @@
+{
+  "version": 2,
+  "planRevision": "0f1d2bee89cd4b0fb76e7993b9d601df4299dae7a6c9358d3e7e28f1a2332c43",
+  "tasks": [
+    {
+      "id": "T1",
+      "status": "completed",
+      "files": [],
+      "validations": [
+        {
+          "command": "node scripts/check-tracked-filenames.mjs && node scripts/check-lockfile.mjs",
+          "revision": "7ddfdd47a6e580789008e7721fffd69f1ac57b775a2e417c0f76db401ce7fd4a",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "T2",
+      "status": "completed",
+      "files": [
+        "src/components/MaxSteps.vue",
+        "tests/components/MaxSteps.test.ts",
+        "tests/browser/MaxSteps.browser.ts"
+      ],
+      "revision": "aad21bc99c47e7415e8db96814ffd090fed8c3e5c5123bf97e8e7d1f0fa1c6e2",
+      "validations": [
+        {
+          "command": "npx vitest run tests/components/MaxSteps.test.ts",
+          "revision": "aad21bc99c47e7415e8db96814ffd090fed8c3e5c5123bf97e8e7d1f0fa1c6e2",
+          "result": "passed"
+        },
+        {
+          "command": "npx vitest run tests/browser/MaxSteps.browser.ts --config vitest.browser.config.ts",
+          "revision": "aad21bc99c47e7415e8db96814ffd090fed8c3e5c5123bf97e8e7d1f0fa1c6e2",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "T3",
+      "status": "completed",
+      "files": [
+        "src/components/MaxSteps.vue",
+        "tests/components/MaxSteps.test.ts",
+        "tests/browser/MaxSteps.browser.ts"
+      ],
+      "revision": "aad21bc99c47e7415e8db96814ffd090fed8c3e5c5123bf97e8e7d1f0fa1c6e2",
+      "validations": [
+        {
+          "command": "node scripts/check-tracked-filenames.mjs && node scripts/check-lockfile.mjs",
+          "revision": "aad21bc99c47e7415e8db96814ffd090fed8c3e5c5123bf97e8e7d1f0fa1c6e2",
+          "result": "passed"
+        },
+        {
+          "command": "npm run lint",
+          "revision": "aad21bc99c47e7415e8db96814ffd090fed8c3e5c5123bf97e8e7d1f0fa1c6e2",
+          "result": "passed"
+        },
+        {
+          "command": "npm run type-check:test",
+          "revision": "aad21bc99c47e7415e8db96814ffd090fed8c3e5c5123bf97e8e7d1f0fa1c6e2",
+          "result": "passed"
+        },
+        {
+          "command": "npm run build",
+          "revision": "aad21bc99c47e7415e8db96814ffd090fed8c3e5c5123bf97e8e7d1f0fa1c6e2",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "T4",
+      "status": "manualPending",
+      "files": [],
+      "validations": [],
+      "nextAction": "Verificar comportamento interativo no playground (npm run dev:playground) e em navegadores móveis reais (iOS Safari)."
+    }
+  ],
+  "verification": {
+    "revision": "aad21bc99c47e7415e8db96814ffd090fed8c3e5c5123bf97e8e7d1f0fa1c6e2",
+    "checks": [
+      {
+        "command": "node scripts/check-tracked-filenames.mjs && node scripts/check-lockfile.mjs",
+        "revision": "aad21bc99c47e7415e8db96814ffd090fed8c3e5c5123bf97e8e7d1f0fa1c6e2",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run lint",
+        "revision": "aad21bc99c47e7415e8db96814ffd090fed8c3e5c5123bf97e8e7d1f0fa1c6e2",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check:test",
+        "revision": "aad21bc99c47e7415e8db96814ffd090fed8c3e5c5123bf97e8e7d1f0fa1c6e2",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run build",
+        "revision": "aad21bc99c47e7415e8db96814ffd090fed8c3e5c5123bf97e8e7d1f0fa1c6e2",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npx vitest run tests/components/MaxSteps.test.ts",
+        "revision": "aad21bc99c47e7415e8db96814ffd090fed8c3e5c5123bf97e8e7d1f0fa1c6e2",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npx vitest run tests/browser/MaxSteps.browser.ts --config vitest.browser.config.ts",
+        "revision": "aad21bc99c47e7415e8db96814ffd090fed8c3e5c5123bf97e8e7d1f0fa1c6e2",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run test",
+        "revision": "aad21bc99c47e7415e8db96814ffd090fed8c3e5c5123bf97e8e7d1f0fa1c6e2",
+        "result": "failed",
+        "exitCode": 1
+      },
+      {
+        "command": "npm run test:browser",
+        "revision": "aad21bc99c47e7415e8db96814ffd090fed8c3e5c5123bf97e8e7d1f0fa1c6e2",
+        "result": "failed",
+        "exitCode": 1
+      }
+    ]
+  },
+  "updatedAt": 1792079250000,
+  "nextAction": "Realizar verificação visual/interativa no playground em ambiente de desenvolvimento."
+}

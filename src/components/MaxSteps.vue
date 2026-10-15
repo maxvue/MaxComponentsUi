@@ -243,8 +243,10 @@
 
     watch([active_model_value, active_model_modelValue], ([val, modelVal]) => {
         const newVal = val ?? modelVal;
-        if (newVal !== undefined && newVal !== active_step.value) active_step.value = newVal;
-
+        if (newVal !== undefined && newVal !== active_step.value) {
+            active_step.value = newVal;
+            if (isMobile.value) scrollActiveStepIntoView();
+        }
     });
 
     const updateActiveStep = (val: string | number) => {
@@ -558,7 +560,8 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    max-width: 100%;
+    max-width: min(100%, 100vw);
+    min-width: 0;
     height: 100%;
     min-height: 0;
     max-height: 100%;
@@ -577,7 +580,8 @@
         align-items: center;
         justify-content: space-between;
         width: 100%;
-        max-width: 100vw;
+        max-width: 100%;
+        min-width: 0;
         padding: 1.25rem 0;
         box-sizing: border-box;
         border-bottom: 1px solid var(--background-200);
@@ -600,9 +604,8 @@
             flex-direction: row;
             align-items: center;
             justify-content: center;
-            flex: 1 1 auto;
+            flex: 1 1 0;
             position: relative;
-            width: 100%;
             max-width: 100%;
             min-width: 0;
             overflow: auto hidden;
@@ -890,7 +893,8 @@
         .max-steps-header-wrapper {
             padding: 0.5rem 0;
             gap: 4px;
-            max-width: 100vw;
+            max-width: 100%;
+            min-width: 0;
 
             .step-nav-btn {
                 transform: scale(0.85);
@@ -900,12 +904,14 @@
                 justify-content: flex-start;
                 scroll-snap-type: x proximity;
                 padding: 2px 0;
+                min-width: 0;
+                max-width: 100%;
             }
         }
 
         .max-step-header-item {
-            min-width: 68px;
-            flex: 1 0 auto;
+            min-width: 40px;
+            flex: 1 1 0;
             scroll-snap-align: center;
 
             .step-connector {
@@ -913,9 +919,18 @@
                 height: 2px;
             }
 
+            .step-marker-container {
+                min-width: 0;
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+
             .step-marker-card {
-                padding: 4px 6px;
+                padding: 4px;
                 border-radius: 8px;
+                min-width: 0;
+                max-width: 100%;
+                box-sizing: border-box;
 
                 .step-circle-wrapper {
                     .step-circle {
@@ -944,7 +959,10 @@
                 .step-label-wrapper {
                     margin-top: 4px;
                     font-size: 0.72rem;
-                    max-width: 76px;
+                    max-width: min(76px, 100%);
+                    min-width: 0;
+                    width: 100%;
+                    box-sizing: border-box;
 
                     .step-label {
                         display: block;
@@ -952,11 +970,13 @@
                         text-overflow: ellipsis;
                         white-space: nowrap;
                         max-width: 100%;
+                        min-width: 0;
                     }
 
                     .step-active-line {
                         height: 2px;
                         margin-top: 2px;
+                        max-width: 100%;
                     }
                 }
             }

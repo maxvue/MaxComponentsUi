@@ -335,7 +335,7 @@ describe('MaxSteps — Layout Mobile e Responsividade das Tabs', () => {
         expect(wrapper2.find('.max-steps').classes()).toContain('is-mobile');
     });
 
-    it('renderiza o header com estrutura com largura máxima delimitada à tela', () => {
+    it('renderiza a estrutura semântica do header e do wrapper', () => {
         const wrapper = mount(defineComponent({
             components: { MaxSteps, MaxStepItem },
             template: `
@@ -354,6 +354,26 @@ describe('MaxSteps — Layout Mobile e Responsividade das Tabs', () => {
         const header = wrapper.find('.max-steps-header');
         expect(header.exists()).toBe(true);
         expect(header.attributes('role')).toBe('tablist');
+    });
+
+    it('controla a presença dos botões superiores com showTopButtons', () => {
+        const withButtons = mount(MaxSteps, {
+            props: { id: 'steps-with-btn', cached: false, showTopButtons: true }
+        });
+        expect(withButtons.findAll('.step-nav-btn').length).toBe(2);
+
+        const withoutButtons = mount(MaxSteps, {
+            props: { id: 'steps-without-btn', cached: false, showTopButtons: false }
+        });
+        expect(withoutButtons.findAll('.step-nav-btn').length).toBe(0);
+    });
+
+    it('aplica classes has-border e is-scrollable conforme as props', () => {
+        const wrapper = mount(MaxSteps, {
+            props: { id: 'steps-border-scroll', cached: false, showBorder: true, scrollable: true }
+        });
+        expect(wrapper.find('.max-steps').classes()).toContain('has-border');
+        expect(wrapper.find('.max-steps').classes()).toContain('is-scrollable');
     });
 
     it('oculta labels no mobile por padrão (mobileShowLabel: false) e mantém acessibilidade via aria-label e title', async () => {
