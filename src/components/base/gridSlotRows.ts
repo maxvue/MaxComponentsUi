@@ -17,6 +17,12 @@ import {
 const S_TOKEN_REGEX = /^s-?(\d+)(?:-(full|max|\d+))?(?:-(start|end))?$/;
 
 /**
+ * Expressão regular estrita para identificação de encerramento mobile (end-mobile e mobile-end).
+ * Padrão: s-?(\d+)(?:-(full|max|\d+))?-(?:end-mobile|mobile-end)
+ */
+const S_MOBILE_END_REGEX = /^s-?(\d+)(?:-(full|max|\d+))?-(?:end-mobile|mobile-end)$/;
+
+/**
  * Identifica se um nó VNode possui conteúdo visível (elementos, componentes ou texto não-vazio).
  * Comentários e strings vazias/espaços em branco não são considerados conteúdo visível.
  */
@@ -65,8 +71,9 @@ function flattenFragments(nodes: VNode[], parentKeyPrefix = ''): VNode[] {
 
 /**
  * Extrai marcadores de quebra explícita (`start` e/ou `end`) presentes em classes e atributos do nó.
+ * O encerramento mobile (`end-mobile` ou `mobile-end`) só é ativado se isMobile for verdadeiro.
  */
-function extractMarkers(node: VNode): { hasStart: boolean; hasEnd: boolean } {
+function extractMarkers(node: VNode, isMobile = false): { hasStart: boolean; hasEnd: boolean } {
     let hasStart = false;
     let hasEnd = false;
 
@@ -85,6 +92,7 @@ function extractMarkers(node: VNode): { hasStart: boolean; hasEnd: boolean } {
                     if (match[3] === 'start') hasStart = true;
                     if (match[3] === 'end') hasEnd = true;
                 }
+                if (isMobile && S_MOBILE_END_REGEX.test(cls)) hasEnd = true;
             }
         }
     }
@@ -94,15 +102,17 @@ function extractMarkers(node: VNode): { hasStart: boolean; hasEnd: boolean } {
         if (key === 'class' || key === 'style' || key === 'key' || key === 'ref') continue;
         if (key.startsWith('on')) continue;
 
+        const val = props[key];
+        const isActive = val === '' || val === true || val === 'true';
+        if (!isActive) continue;
+
         const match = key.match(S_TOKEN_REGEX);
         if (match && match[3]) {
-            const val = props[key];
-            const isActive = val === '' || val === true || val === 'true';
-            if (isActive) {
-                if (match[3] === 'start') hasStart = true;
-                if (match[3] === 'end') hasEnd = true;
-            }
+            if (match[3] === 'start') hasStart = true;
+            if (match[3] === 'end') hasEnd = true;
         }
+
+        if (isMobile && S_MOBILE_END_REGEX.test(key)) hasEnd = true;
     }
 
     return { hasStart, hasEnd };
@@ -113,15 +123,15 @@ function extractMarkers(node: VNode): { hasStart: boolean; hasEnd: boolean } {
  * somente quando houver marcadores de quebra explícita ativos.
  * Grids sem marcadores retornam os nós originais sem nenhuma div intermediária.
  */
-export function renderGridSlotRows(nodes: VNode[] | undefined): VNodeChild {
+export function renderGridSlotRows(nodes: VNode[] | undefined, context?: { isMobile?: boolean }): VNodeChild {
     if (!nodes || nodes.length === 0) return nodes;
 
-
+    const isMobile = Boolean(context?.isMobile);
     const flatNodes = flattenFragments(nodes);
 
     let hasAnyMarker = false;
     for (const node of flatNodes) {
-        const { hasStart, hasEnd } = extractMarkers(node);
+        const { hasStart, hasEnd } = extractMarkers(node, isMobile);
         if (hasStart || hasEnd) {
             hasAnyMarker = true;
             break;
@@ -136,9 +146,9 @@ export function renderGridSlotRows(nodes: VNode[] | undefined): VNodeChild {
     let currentSegment: VNode[] = [];
 
     for (const node of flatNodes) {
-        const { hasStart, hasEnd } = extractMarkers(node);
+        const { hasStart, hasEnd } = extractMarkers(node, isMobile);
 
-        if (hasStart) if (hasVisibleContent(currentSegment)) {
+        if (hasStart && hasVisibleContent(currentSegment)) {
             segments.push(currentSegment);
             currentSegment = [];
         }
@@ -146,7 +156,7 @@ export function renderGridSlotRows(nodes: VNode[] | undefined): VNodeChild {
 
         currentSegment.push(node);
 
-        if (hasEnd) if (hasVisibleContent(currentSegment)) {
+        if (hasEnd && hasVisibleContent(currentSegment)) {
             segments.push(currentSegment);
             currentSegment = [];
         }
@@ -164,10 +174,22 @@ export function renderGridSlotRows(nodes: VNode[] | undefined): VNodeChild {
     }, segment));
 }
 
+export interface GridSlotRowsProps {
+    isMobile?: boolean;
+}
+
 /**
  * Componente funcional interno para organizar linhas do slot default do MaxGrid.
  */
-export const GridSlotRows: FunctionalComponent = (_props, { slots }) => {
+export const GridSlotRows: FunctionalComponent<GridSlotRowsProps> = (props, { slots }) => {
     const rawNodes = slots.default ? slots.default() : [];
-    return renderGridSlotRows(rawNodes);
+    return renderGridSlotRows(rawNodes, { isMobile: props.isMobile });
 };
+
+GridSlotRows.props = {
+    isMobile: {
+        type: Boolean,
+        default: false
+    }
+};
+GridSlotRows.inheritAttrs = false;

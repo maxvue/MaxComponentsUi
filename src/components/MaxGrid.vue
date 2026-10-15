@@ -1,23 +1,25 @@
 <template>
     <div class="max-grid">
         <div class="label-grid" v-if="props.label" :class="props.labelCenter ? 'label-center' : ''">{{ props.label }}</div>
-        <GridSlotRows><slot></slot></GridSlotRows>
+        <GridSlotRows :isMobile="isMobile"><slot></slot></GridSlotRows>
     </div>
 </template>
 
-/**
- * Sistema de grid flexível para organizar componentes.
- * Utiliza flexbox com wrap e gap padronizado, organizando linhas
- * explícitas sob demanda através de marcadores start e end.
- */
 <script setup lang="ts">
+    import { useMediaQuery } from '@maxvue/max-use';
     import { GridSlotRows } from './base/gridSlotRows';
 
+    /**
+     * Sistema de grid flexível para organizar componentes.
+     * Utiliza flexbox com wrap e gap padronizado, organizando linhas
+     * explícitas sob demanda através de marcadores start e end.
+     */
     const props = defineProps<{
         label?: string | null;
         labelCenter?: boolean;
     }>();
 
+    const isMobile = useMediaQuery('(max-width: 767.98px)');
 </script>
 
 <style lang="scss" scoped>

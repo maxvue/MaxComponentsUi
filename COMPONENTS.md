@@ -1214,7 +1214,8 @@ O `<MaxGrid>` inspeciona seus filhos lógicos diretos (expandindo recursivamente
 - **Sem marcadores ativos:** Quando nenhum filho utiliza marcadores de quebra, os nós são renderizados diretamente sem elementos intermediários, preservando seletores diretos e desempenho.
 - **Com marcadores ativos:** Os itens são organizados em segmentos `div.max-grid-row` (`flex: 0 0 100%; width: 100%; display: flex; flex-wrap: wrap; gap: inherit;`).
 - **Atributos válidos:** Atributos valueless (`s7-end`) ou booleanos verdadeiros (`:s7-end="true"`, `'true'`) ativam a quebra. Valores como `false`, `null` ou `undefined` não ativam quebras.
-- **Tokens com Sufixo de Dispositivo:** Tokens como `s20-full-mobile`, `s10-tablet` e `s-50-desktop` aplicam suas dimensões (`flex`, `min-width`, `max-width`) e fragmentação sob `@media` query no CSS, permitindo compor dimensões base e responsivas (ex.: `<MaxInputText s11-11 s20-full-mobile />`). No entanto, o organizador de linhas `GridSlotRows` do `<MaxGrid>` no VDOM **não interpreta sufixos de dispositivo** para particionamento de `.max-grid-row`, de modo que quebras estruturais continuam exclusivas de marcadores sem dispositivo (`start` e `end`).
+- **Encerramento Mobile (`end-mobile` e `mobile-end`):** Tokens com sufixo `end-mobile` ou `mobile-end` (ex.: `s4-max-end-mobile`, `s4-max-mobile-end`) encerram a linha após o item exclusivamente quando a viewport do navegador satisfaz `(max-width: 767.98px)`, avaliada via `matchMedia`. Em viewports maiores (`> 767.98px`), o marcador permanece inativo e os itens compartilham a linha normalmente caso haja espaço.
+- **Tokens com Outros Sufixos de Dispositivo:** Tokens como `s20-full-mobile`, `s3-10-start-mobile`, `s10-tablet` e `s-50-desktop` aplicam suas dimensões (`flex`, `min-width`, `max-width`) e fragmentação CSS sob `@media` query no CSS, permitindo compor dimensões base e responsivas (ex.: `<MaxInputText s11-11 s20-full-mobile />`). No entanto, o organizador de linhas `GridSlotRows` do `<MaxGrid>` no VDOM **não interpreta quebras estruturais para `start-mobile`, `tablet` ou `desktop`**, nem para tokens responsivos sem direção; tais quebras estruturais continuam restritas aos marcadores sem dispositivo (`start` e `end`) e ao encerramento mobile (`end-mobile`/`mobile-end`).
 
 #### Exemplos de Uso
 
@@ -1262,6 +1263,26 @@ O `<MaxGrid>` inspeciona seus filhos lógicos diretos (expandindo recursivamente
 
     const termo = ref('');
     const codigo = ref('');
+</script>
+```
+
+**Encerramento de linha no mobile (`end-mobile` / `mobile-end`):**
+
+```vue
+<template>
+    <MaxGrid label="Responsividade Mobile">
+        <!-- Campo A encerra a linha no mobile (<= 767.98px), forçando Campo B para a próxima linha -->
+        <MaxInputText class="s4-max-end-mobile" label="Campo A" v-model="campoA" />
+        <MaxInputText class="s4" label="Campo B" v-model="campoB" />
+    </MaxGrid>
+</template>
+
+<script setup lang="ts">
+    import { ref } from 'vue';
+    import { MaxGrid, MaxInputText } from '@maxvue/max-components-ui';
+
+    const campoA = ref('');
+    const campoB = ref('');
 </script>
 ```
 

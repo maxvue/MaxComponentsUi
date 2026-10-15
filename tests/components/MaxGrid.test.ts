@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { h, ref, nextTick } from 'vue';
 import MaxGrid from '../../src/components/MaxGrid.vue';
@@ -312,6 +312,306 @@ describe('MaxGrid', () => {
             await nextTick();
 
             expect(inputComp.props('modelValue')).toBe(100);
+            expect(wrapper.findAll('.max-grid-row')).toHaveLength(2);
+        });
+    });
+
+    describe('quebra explícita mobile com end-mobile e mobile-end', () => {
+        let mockMedia: ReturnType<typeof createMockMatchMedia> | null = null;
+
+        function createMockMatchMedia(initialMatches = false) {
+            let matches = initialMatches;
+            const listeners = new Set<(e: { matches: boolean }) => void>();
+            const originalMatchMedia = window.matchMedia;
+            let requestedQuery = '';
+
+            const mql = {
+                get matches() { return matches; },
+                media: '(max-width: 767.98px)',
+                onchange: null,
+                addEventListener: (_event: string, cb: (e: { matches: boolean }) => void) => {
+                    listeners.add(cb);
+                },
+                removeEventListener: (_event: string, cb: (e: { matches: boolean }) => void) => {
+                    listeners.delete(cb);
+                },
+                addListener: (cb: (e: { matches: boolean }) => void) => {
+                    listeners.add(cb);
+                },
+                removeListener: (cb: (e: { matches: boolean }) => void) => {
+                    listeners.delete(cb);
+                },
+                dispatchEvent: () => true
+            };
+
+            window.matchMedia = (query: string) => {
+                requestedQuery = query;
+                return mql as unknown as MediaQueryList;
+            };
+
+            return {
+                setMatches(newVal: boolean) {
+                    matches = newVal;
+                    listeners.forEach((cb) => cb({ matches: newVal }));
+                },
+                getListenerCount() {
+                    return listeners.size;
+                },
+                getRequestedQuery() {
+                    return requestedQuery;
+                },
+                restore() {
+                    window.matchMedia = originalMatchMedia;
+                }
+            };
+        }
+
+        afterEach(() => {
+            if (mockMedia) {
+                mockMedia.restore();
+                mockMedia = null;
+            }
+        });
+
+        it('consulta a query literal (max-width: 767.98px) no matchMedia', () => {
+            mockMedia = createMockMatchMedia(false);
+            mount(MaxGrid, {
+                slots: {
+                    default: () => [h('div', 'Item')]
+                }
+            });
+            expect(mockMedia.getRequestedQuery()).toBe('(max-width: 767.98px)');
+        });
+
+        it.each(['s4-max-end-mobile', 's4-max-mobile-end'])('não cria linhas com %s quando mobile está inativo', (token) => {
+            mockMedia = createMockMatchMedia(false);
+            const wrapper = mount(MaxGrid, {
+                slots: {
+                    default: () => [
+                        h('div', { class: `item-1 ${token}` }, 'Item 1'),
+                        h('div', { class: 'item-2' }, 'Item 2')
+                    ]
+                }
+            });
+            expect(wrapper.findAll('.max-grid-row')).toHaveLength(0);
+        });
+
+        it.each(['s4-max-end-mobile', 's4-max-mobile-end'])('organiza em segmentos de linha com %s no mobile', (token) => {
+            mockMedia = createMockMatchMedia(true);
+            const wrapper = mount(MaxGrid, {
+                slots: {
+                    default: () => [
+                        h('div', { class: `item-1 ${token}` }, 'Item 1'),
+                        h('div', { class: 'item-2' }, 'Item 2')
+                    ]
+                }
+            });
+            const rows = wrapper.findAll('.max-grid-row');
+            expect(rows).toHaveLength(2);
+            expect(rows[0].text()).toBe('Item 1');
+            expect(rows[1].text()).toBe('Item 2');
+        });
+
+        it.each([
+            's-4-end-mobile',
+            's4-10-end-mobile',
+            's4-full-end-mobile',
+            's4-max-end-mobile',
+            's-4-mobile-end',
+            's4-10-mobile-end',
+            's4-full-mobile-end',
+            's4-max-mobile-end'
+        ])('suporta token %s no mobile', (token) => {
+            mockMedia = createMockMatchMedia(true);
+            const wrapper = mount(MaxGrid, {
+                slots: {
+                    default: () => [
+                        h('div', { class: token }, 'A'),
+                        h('div', 'B')
+                    ]
+                }
+            });
+            expect(wrapper.findAll('.max-grid-row')).toHaveLength(2);
+        });
+
+        it.each(['s4-max-end-mobile', 's4-max-mobile-end'])('reconhece atributo %s valueless e booleano no mobile', (attr) => {
+            mockMedia = createMockMatchMedia(true);
+            const wrapper = mount(MaxGrid, {
+                slots: {
+                    default: () => [
+                        h('div', { [attr]: '' }, 'Item 1'),
+                        h('div', { [attr]: true }, 'Item 2'),
+                        h('div', 'Item 3')
+                    ]
+                }
+            });
+            const rows = wrapper.findAll('.max-grid-row');
+            expect(rows).toHaveLength(3);
+        });
+
+        it.each(['s4-max-end-mobile', 's4-max-mobile-end'])('ignora atributo %s inativo mesmo no mobile', (attr) => {
+            mockMedia = createMockMatchMedia(true);
+            const wrapper = mount(MaxGrid, {
+                slots: {
+                    default: () => [
+                        h('div', { [attr]: false }, 'Item 1'),
+                        h('div', { [attr]: null }, 'Item 2'),
+                        h('div', { [attr]: undefined }, 'Item 3'),
+                        h('div', { [attr]: 'invalid' }, 'Item 4')
+                    ]
+                }
+            });
+            expect(wrapper.findAll('.max-grid-row')).toHaveLength(0);
+        });
+
+        it('atualiza reativamente ao cruzar a faixa mobile desktop -> mobile -> desktop', async () => {
+            mockMedia = createMockMatchMedia(false);
+            const wrapper = mount(MaxGrid, {
+                slots: {
+                    default: () => [
+                        h('div', { class: 'item-1 s4-max-end-mobile' }, 'Item 1'),
+                        h('div', { class: 'item-2' }, 'Item 2')
+                    ]
+                }
+            });
+
+            // 1. Desktop: sem quebra
+            expect(wrapper.findAll('.max-grid-row')).toHaveLength(0);
+
+            // 2. Cruza para mobile
+            mockMedia.setMatches(true);
+            await nextTick();
+            expect(wrapper.findAll('.max-grid-row')).toHaveLength(2);
+
+            // 3. Retorna para desktop
+            mockMedia.setMatches(false);
+            await nextTick();
+            expect(wrapper.findAll('.max-grid-row')).toHaveLength(0);
+        });
+
+        it.each([
+            's20-full-mobile',
+            's3-10-start-mobile',
+            's4-end-tablet',
+            's4-end-desktop'
+        ])('não cria quebra no VDOM para token não incluído: %s', (token) => {
+            mockMedia = createMockMatchMedia(true);
+            const wrapper = mount(MaxGrid, {
+                slots: {
+                    default: () => [
+                        h('div', { class: token }, 'Item 1'),
+                        h('div', 'Item 2')
+                    ]
+                }
+            });
+            expect(wrapper.findAll('.max-grid-row')).toHaveLength(0);
+        });
+
+        it('preserva marcador legado quando marcador mobile está inativo', () => {
+            mockMedia = createMockMatchMedia(false);
+            const wrapper = mount(MaxGrid, {
+                slots: {
+                    default: () => [
+                        h('div', { class: 'item-1 s7-end' }, 'Item 1'),
+                        h('div', { class: 'item-2 s4-max-end-mobile' }, 'Item 2'),
+                        h('div', { class: 'item-3' }, 'Item 3')
+                    ]
+                }
+            });
+
+            const rows = wrapper.findAll('.max-grid-row');
+            expect(rows).toHaveLength(2);
+            expect(rows[0].text()).toBe('Item 1');
+            expect(rows[1].text()).toContain('Item 2');
+            expect(rows[1].text()).toContain('Item 3');
+        });
+
+        it('trata end-mobile seguido de start como uma única fronteira no mobile', () => {
+            mockMedia = createMockMatchMedia(true);
+            const wrapper = mount(MaxGrid, {
+                slots: {
+                    default: () => [
+                        h('div', { class: 'item-1 s4-max-end-mobile' }, 'Item 1'),
+                        h('div', { class: 'item-2 s3-10-start' }, 'Item 2')
+                    ]
+                }
+            });
+            const rows = wrapper.findAll('.max-grid-row');
+            expect(rows).toHaveLength(2);
+            expect(rows[0].text()).toBe('Item 1');
+            expect(rows[1].text()).toBe('Item 2');
+        });
+
+        it('normaliza classes com array e objeto condicional para end-mobile', () => {
+            mockMedia = createMockMatchMedia(true);
+            const wrapper = mount(MaxGrid, {
+                slots: {
+                    default: () => [
+                        h('div', { class: ['item-1', { 's4-max-end-mobile': true }] }, 'Item 1'),
+                        h('div', { class: { 's4-max-mobile-end': true } }, 'Item 2'),
+                        h('div', 'Item 3')
+                    ]
+                }
+            });
+            expect(wrapper.findAll('.max-grid-row')).toHaveLength(3);
+        });
+
+        it('comporta-se de forma segura na ausência de matchMedia', () => {
+            const originalMatchMedia = window.matchMedia;
+            // @ts-expect-error simula ausência da API
+            delete window.matchMedia;
+
+            try {
+                const wrapper = mount(MaxGrid, {
+                    slots: {
+                        default: () => [
+                            h('div', { class: 's4-max-end-mobile' }, 'Item 1'),
+                            h('div', 'Item 2')
+                        ]
+                    }
+                });
+                expect(wrapper.findAll('.max-grid-row')).toHaveLength(0);
+            } finally {
+                window.matchMedia = originalMatchMedia;
+            }
+        });
+
+        it('remove listeners de media query ao desmontar o componente', () => {
+            mockMedia = createMockMatchMedia(false);
+            const wrapper = mount(MaxGrid, {
+                slots: {
+                    default: () => [h('div', 'Item')]
+                }
+            });
+            expect(mockMedia.getListenerCount()).toBeGreaterThan(0);
+
+            wrapper.unmount();
+            expect(mockMedia.getListenerCount()).toBe(0);
+        });
+
+        it('preserva reatividade de modelValue com MaxInputNumber e end-mobile no mobile', async () => {
+            mockMedia = createMockMatchMedia(true);
+            const modelVal = ref(50);
+            const wrapper = mount(MaxGrid, {
+                slots: {
+                    default: () => [
+                        h(MaxInputNumber, {
+                            modelValue: modelVal.value,
+                            'onUpdate:modelValue': (v: number | null | undefined) => { modelVal.value = v ?? 0; },
+                            class: 's4-max-end-mobile'
+                        }),
+                        h('div', { class: 'item-2' }, 'Painel')
+                    ]
+                }
+            });
+
+            expect(wrapper.findAll('.max-grid-row')).toHaveLength(2);
+            const inputComp = wrapper.findComponent(MaxInputNumber);
+            expect(inputComp.props('modelValue')).toBe(50);
+
+            modelVal.value = 75;
+            await nextTick();
+            expect(inputComp.props('modelValue')).toBe(75);
             expect(wrapper.findAll('.max-grid-row')).toHaveLength(2);
         });
     });

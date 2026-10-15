@@ -192,7 +192,7 @@ A família de regras `s` do `presetMaxUno` fornece utilitários para dimensionam
 
 A regra atende ao padrão:
 ```regex
-/^s-?(\d+)(?:-(full|max|\d+))?(?:-(start|end|desktop|mobile|tablet)){0,2}$/
+/^s-?(\d+)(?:-(full|max|\d+))?(?:-(start|end)(?:-(desktop|mobile|tablet))?|-(desktop|mobile|tablet)(?:-(start|end))?)?$/
 ```
 
 - **Prefixo:** `s` ou `s-` (hífen opcional).
@@ -225,7 +225,8 @@ Condicionamento por dispositivo no preset (largura de viewport CSS):
 
 | Dispositivo no token | Condição CSS emitida (`flex`, `min`/`max-width` e `break-*`) | Quebra real no MaxGrid atual |
 |---|---|---|
-| `mobile` | `@media (max-width: 767.98px)` | Não (apenas CSS responsivo) |
+| `mobile` com `end-mobile` ou `mobile-end` | `@media (max-width: 767.98px)` | Sim, encerra a linha após o item em viewport <= 767.98px |
+| `mobile` com `start` ou sem direção | `@media (max-width: 767.98px)` | Não (apenas CSS responsivo) |
 | `tablet` | `@media (max-width: 1000.98px)` (inclui mobile) | Não (apenas CSS responsivo) |
 | `desktop` | `@media (min-width: 1001px)` | Não (apenas CSS responsivo) |
 | Sem dispositivo, com `start`/`end` | Sem media query (incondicional no escopo global) | Sim, nos filhos diretos |
@@ -237,17 +238,20 @@ Condicionamento por dispositivo no preset (largura de viewport CSS):
 
 > [!IMPORTANT]
 > **Diferença crucial entre Parsers e Suporte no MaxGrid:**
-> 1. O organizador de linhas de `<MaxGrid>` (`src/components/base/gridSlotRows.ts`) opera com a expressão regular:
+> 1. O organizador de linhas de `<MaxGrid>` (`src/components/base/gridSlotRows.ts`) opera com as expressões regulares:
 >    ```regex
 >    /^s-?(\d+)(?:-(full|max|\d+))?(?:-(start|end))?$/
+>    /^s-?(\d+)(?:-(full|max|\d+))?-(?:end-mobile|mobile-end)$/
 >    ```
->    Isso significa que o `<MaxGrid>` atual **não interpreta sufixos de dispositivo** (`desktop`, `mobile`, `tablet`). Tokens com dispositivo geram as media queries CSS de fragmentação descritas acima, mas NÃO produzem quebras estruturais de linha no `<MaxGrid>`. Quebras estruturais no `<MaxGrid>` funcionam exclusivamente com tokens sem dispositivo (`start` ou `end`).
+>    Isso significa que o `<MaxGrid>` interpreta quebras estruturais incondicionais (`start` e `end` sem dispositivo) em qualquer viewport, e **exclusivamente encerramentos mobile (`end-mobile` e `mobile-end`)** sob a viewport `@media (max-width: 767.98px)`.
+>    Marcadores como `start-mobile`, qualquer variação de `tablet` ou `desktop`, ou tokens sem direção (ex.: `s20-full-mobile`) NÃO produzem quebras estruturais de linha no `<MaxGrid>` (apenas aplicam suas dimensões CSS sob `@media`). A checagem mobile utiliza a viewport do navegador via `matchMedia('(max-width: 767.98px)')`, e não a largura do contêiner do `<MaxGrid>`.
 > 2. Em contêineres `div` flex comuns fora de `<MaxGrid>`, as propriedades CSS `break-before` e `break-after` do standard aplicam-se a contextos de fragmentação (páginas impressas, colunas CSS multicol) e não comandam quebra de linha em flexbox CSS comum.
 
 Dentro do `<MaxGrid>`, o componente inspeciona os filhos lógicos diretos do seu slot (expandindo Fragments como `v-for` e `<template>`) e organiza os itens em segmentos de linha (`div.max-grid-row`) quando detecta marcadores `start` ou `end` ativos:
 - **`-end`:** Encerra o segmento atual imediatamente após o item, fazendo com que o próximo item vá para uma nova linha.
+- **`-end-mobile` / `-mobile-end`:** Encerra o segmento atual imediatamente após o item quando a viewport satisfaz `(max-width: 767.98px)`.
 - **`-start`:** Inicia um novo segmento de linha imediatamente antes do item, separando-o dos elementos anteriores.
-- **Pares redundantes:** Quando um item com `-end` é seguido por um item com `-start`, eles definem uma única fronteira de quebra (não criam linha intermediária vazia).
+- **Pares redundantes:** Quando um item com `-end` (ou `-end-mobile` ativo) é seguido por um item com `-start`, eles definem uma única fronteira de quebra (não criam linha intermediária vazia).
 - **Sem marcadores:** Quando o `<MaxGrid>` não contém nenhum marcador ativo, os VNodes originais são renderizados diretamente sem qualquer wrapper `div.max-grid-row`, preservando total retrocompatibilidade e seletores diretos.
 - **Fronteiras e Largura:** A quebra de linha não altera o `max-width` do item. Um item com `s3-10-start`, por exemplo, mantém teto máximo de 200px (`10 * 20px`), não passando a ocupar 100% da tela. Caso o conteúdo necessite de largura maior, utilize `full` ou `max` (ex.: `s3-full-start`).
 
@@ -261,7 +265,7 @@ Dentro do `<MaxGrid>`, o componente inspeciona os filhos lógicos diretos do seu
 | `s3-10-start` | `1 1 0%` | `60px` | `200px` | Inicia nova linha antes do item |
 | `s7-end` | `1 1 0%` | `140px` | `168px` | Encerra a linha após o item |
 | `s7-10-end` | `1 1 0%` | `140px` | `200px` | Encerra a linha após o item |
-| `s7-end-mobile` | `1 1 0%` | `140px` | `168px` | Apenas sob `@media (max-width: 767.98px)`; sem quebra no MaxGrid |
+| `s7-end-mobile` / `s7-mobile-end` | `1 1 0%` | `140px` | `168px` | Encerra a linha após o item sob `@media (max-width: 767.98px)` |
 | `s20-full-mobile` | `1 1 0%` | `400px` | `100%` | Apenas sob `@media (max-width: 767.98px)`; sem quebra no MaxGrid |
 | `s10` | `1 1 0%` | `200px` | `240px` | Nenhuma (não significa 10%) |
 | `s10-20` / `s-10-20` | `1 1 0%` | `200px` | `400px` | Nenhuma (extensão usa multiplicador 20px) |
@@ -274,6 +278,22 @@ Dentro do `<MaxGrid>`, o componente inspeciona os filhos lógicos diretos do seu
 | `s0` | `1 1 0%` | `0px` | `0px` | Nenhuma (pode colapsar) |
 | `s0-full` | `1 1 0%` | `0px` | `100%` | Nenhuma (permite mínimo zero) |
 | `s10-0` | `1 1 0%` | `200px` | `0px` | Nenhuma (conflito: min-width prevalece no CSS) |
+
+##### Encerramento Mobile no MaxGrid
+
+Para que um campo encerre a linha exclusivamente em dispositivos móveis, utilize os sufixos equivalentes `end-mobile` ou `mobile-end` (como classe ou atributo):
+
+```vue
+<MaxGrid label="Responsividade Mobile">
+    <MaxInputText class="s4-max-end-mobile" label="Campo A" v-model="form.campoA" />
+    <MaxInputText class="s4" label="Campo B" v-model="form.campoB" />
+</MaxGrid>
+```
+
+- **Comportamento no Mobile (`(max-width: 767.98px)`):** `Campo A` encerra a linha atual e posiciona `Campo B` na linha seguinte, mesmo quando houver espaço remanescente.
+- **Comportamento no Desktop (`> 767.98px`):** O marcador mobile permanece inativo; `Campo A` e `Campo B` compartilham a mesma linha horizontal.
+- **Elasticidade (`-max` / `-full`):** O modificador `-max` define teto de largura em 100% sob a media query mobile, mas **não força ocupação integral**. A quebra estrutural é garantida pelo particionamento interno do `MaxGrid`, não por expansão forçada de largura.
+- **Tags de abertura:** Mantenha sempre a tag de abertura em uma única linha.
 
 ##### Comportamento Flexbox e Contêiner Pai
 

@@ -7,7 +7,7 @@
                 <div class="component-block">
                     <h3>MaxGrid</h3>
                     <p class="max-grid-doc-note">
-                        Contêiner flexbox com quebra natural (flex-wrap) e suporte a quebras explícitas com marcadores start e end. Tokens com sufixo de dispositivo (mobile, tablet, desktop) aplicam dimensionamento e fragmentação responsivos via @media CSS (ex.: s11-11 s20-full-mobile), mas o particionamento estrutural de linhas no VDOM permanece exclusivo de marcadores sem dispositivo.
+                        Contêiner flexbox com quebra natural (flex-wrap) e suporte a quebras explícitas com marcadores start e end. Tokens com sufixo de dispositivo (mobile, tablet, desktop) aplicam dimensionamento e fragmentação responsivos via @media CSS (ex.: s11-11 s20-full-mobile), sendo o particionamento estrutural de linhas no VDOM exclusivo de marcadores sem dispositivo e do encerramento mobile (end-mobile e mobile-end sob viewport até 767.98px).
                     </p>
                     <div class="states">
                         <!-- 1. Flex-wrap natural sem marcadores -->

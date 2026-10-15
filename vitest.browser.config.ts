@@ -28,7 +28,8 @@ function virtualMaxGridPresetPlugin() {
                     's7-end', 's7-10-end', 's3-start', 's3-10-start',
                     's-50-full-start', 's-50-max-end', 's-10', 's-15', 's-20',
                     's-30', 's-40', 's-50', 's3', 's7',
-                    's11-11', 's20-full-mobile'
+                    's11-11', 's20-full-mobile',
+                    's4', 's-4', 's4-max-end-mobile', 's4-max-mobile-end'
                 ];
                 const content = tokens.map((t) => `<div class="${t}" ${t}></div>`).join('\n');
                 const { css } = await uno.generate(content, { preflights: false });

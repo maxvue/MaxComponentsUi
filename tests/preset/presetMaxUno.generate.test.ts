@@ -161,6 +161,8 @@ describe('presetMaxUno — CSS gerado', () => {
         });
 
         it.each([
+            ['s4-max-end-mobile', '(max-width: 767.98px)', 'break-after', '80px', '100%'],
+            ['s4-max-mobile-end', '(max-width: 767.98px)', 'break-after', '80px', '100%'],
             ['s3-10-start-mobile', '(max-width: 767.98px)', 'break-before', '60px', '200px'],
             ['s-50-mobile-end', '(max-width: 767.98px)', 'break-after', '1000px', '1200px'],
             ['s50-start-tablet', '(max-width: 1000.98px)', 'break-before', '1000px', '1200px'],
@@ -281,6 +283,38 @@ describe('presetMaxUno — CSS gerado', () => {
                 'max-width': '200px',
                 'break-before': 'always'
             });
+        });
+
+        it('gera CSS para atributos s4-max-end-mobile e s4-max-mobile-end dentro da media query mobile com attributify', async () => {
+            const css = await generateFull('<div s4-max-end-mobile s4-max-mobile-end></div>');
+            expectParsavel(css);
+
+            const rules = ruleDeclarations(css);
+            const endMobileSelector = Object.keys(rules).find((sel) => sel.includes('s4-max-end-mobile'));
+            const mobileEndSelector = Object.keys(rules).find((sel) => sel.includes('s4-max-mobile-end'));
+
+            expect(endMobileSelector).toBeDefined();
+            expect(mobileEndSelector).toBeDefined();
+
+            expect(rules[endMobileSelector!]).toEqual({
+                flex: '1 1 0%',
+                'min-width': '80px',
+                'max-width': '100%',
+                'break-after': 'always'
+            });
+
+            expect(rules[mobileEndSelector!]).toEqual({
+                flex: '1 1 0%',
+                'min-width': '80px',
+                'max-width': '100%',
+                'break-after': 'always'
+            });
+
+            const mediaQueries: string[] = [];
+            postcss.parse(css).walkAtRules('media', (atRule) => {
+                mediaQueries.push(atRule.params);
+            });
+            expect(mediaQueries).toContain('(max-width: 767.98px)');
         });
 
         it('preserva modificadores de dispositivo com attributify e presetWind3', async () => {

@@ -345,5 +345,254 @@ describe('MaxGrid — Quebras explícitas de linha no Chromium', () => {
             await settle();
         }
     });
+
+    describe('s4-max-end-mobile e s4-max-mobile-end no Chromium', () => {
+        it.each([
+            's4-max-end-mobile',
+            's4-max-mobile-end'
+        ])('encerra linha após o item B (%s) somente no mobile e respeita sequência 1280 -> 375 -> 1280 na mesma montagem', async (token) => {
+            expect(typeof page?.viewport).toBe('function');
+
+            try {
+                await page.viewport(1280, 800);
+
+                hostElement = document.createElement('div');
+                hostElement.style.width = '1280px';
+                document.body.appendChild(hostElement);
+
+                const app = createApp({
+                    render() {
+                        return h(MaxGrid, null, {
+                            default: () => [
+                                h('div', { id: 'box-a', class: 's4', style: 'height: 40px;' }, 'A'),
+                                h('div', { id: 'box-b', class: token, style: 'height: 40px;' }, 'B'),
+                                h('div', { id: 'box-c', class: 's4', style: 'height: 40px;' }, 'C')
+                            ]
+                        });
+                    }
+                });
+
+                activeApp = app;
+                app.mount(hostElement);
+                await settle();
+
+                const boxA = hostElement.querySelector('#box-a') as HTMLElement;
+                const boxB = hostElement.querySelector('#box-b') as HTMLElement;
+                const boxC = hostElement.querySelector('#box-c') as HTMLElement;
+
+                // 1. Desktop (1280px): todos na mesma linha
+                let rectA = boxA.getBoundingClientRect();
+                let rectB = boxB.getBoundingClientRect();
+                let rectC = boxC.getBoundingClientRect();
+
+                expect(Math.abs(rectA.top - rectB.top)).toBeLessThanOrEqual(1);
+                expect(Math.abs(rectB.top - rectC.top)).toBeLessThanOrEqual(1);
+
+                // 2. Mobile (375px): B encerra a linha, C vai para a próxima linha
+                hostElement.style.width = '375px';
+                await page.viewport(375, 667);
+                await settle();
+
+                const mobileBoxA = hostElement.querySelector('#box-a') as HTMLElement;
+                const mobileBoxB = hostElement.querySelector('#box-b') as HTMLElement;
+                const mobileBoxC = hostElement.querySelector('#box-c') as HTMLElement;
+
+                rectA = mobileBoxA.getBoundingClientRect();
+                rectB = mobileBoxB.getBoundingClientRect();
+                rectC = mobileBoxC.getBoundingClientRect();
+
+                // A e B continuam compartilhando a primeira linha
+                expect(Math.abs(rectA.top - rectB.top)).toBeLessThanOrEqual(1);
+                // C é forçado para a próxima linha abaixo de B
+                expect(rectC.top).toBeGreaterThanOrEqual(rectB.bottom - 1);
+                // O gap vertical respeita 13px (tolerância 1px)
+                const verticalGap = rectC.top - rectB.bottom;
+                expect(Math.abs(verticalGap - 13)).toBeLessThanOrEqual(1);
+
+                // 3. Retorno ao Desktop (1280px) na mesma montagem
+                hostElement.style.width = '1280px';
+                await page.viewport(1280, 800);
+                await settle();
+
+                const desktopBoxA = hostElement.querySelector('#box-a') as HTMLElement;
+                const desktopBoxB = hostElement.querySelector('#box-b') as HTMLElement;
+                const desktopBoxC = hostElement.querySelector('#box-c') as HTMLElement;
+
+                rectA = desktopBoxA.getBoundingClientRect();
+                rectB = desktopBoxB.getBoundingClientRect();
+                rectC = desktopBoxC.getBoundingClientRect();
+
+                expect(Math.abs(rectA.top - rectB.top)).toBeLessThanOrEqual(1);
+                expect(Math.abs(rectB.top - rectC.top)).toBeLessThanOrEqual(1);
+            } finally {
+                await page.viewport(1280, 800);
+            }
+        });
+
+        it('testa fronteiras exatas de breakpoint 767px (mobile) vs 768px (desktop)', async () => {
+            expect(typeof page?.viewport).toBe('function');
+
+            try {
+                hostElement = document.createElement('div');
+                hostElement.style.width = '767px';
+                document.body.appendChild(hostElement);
+
+                await page.viewport(767, 800);
+
+                const app = createApp({
+                    render() {
+                        return h(MaxGrid, null, {
+                            default: () => [
+                                h('div', { id: 'bf-a', class: 's4', style: 'height: 40px;' }, 'A'),
+                                h('div', { id: 'bf-b', class: 's4-max-end-mobile', style: 'height: 40px;' }, 'B'),
+                                h('div', { id: 'bf-c', class: 's4', style: 'height: 40px;' }, 'C')
+                            ]
+                        });
+                    }
+                });
+
+                activeApp = app;
+                app.mount(hostElement);
+                await settle();
+
+                let boxB = hostElement.querySelector('#bf-b') as HTMLElement;
+                let boxC = hostElement.querySelector('#bf-c') as HTMLElement;
+
+                // 1. Em 767px (mobile ativo): C fica abaixo de B
+                let rectB = boxB.getBoundingClientRect();
+                let rectC = boxC.getBoundingClientRect();
+                expect(rectC.top).toBeGreaterThanOrEqual(rectB.bottom - 1);
+
+                // 2. Em 768px (desktop inativo): B e C compartilham a linha
+                hostElement.style.width = '768px';
+                await page.viewport(768, 800);
+                await settle();
+
+                boxB = hostElement.querySelector('#bf-b') as HTMLElement;
+                boxC = hostElement.querySelector('#bf-c') as HTMLElement;
+
+                rectB = boxB.getBoundingClientRect();
+                rectC = boxC.getBoundingClientRect();
+                expect(Math.abs(rectB.top - rectC.top)).toBeLessThanOrEqual(1);
+            } finally {
+                await page.viewport(1280, 800);
+            }
+        });
+
+        it('funciona com atributos attributify valueless no mobile', async () => {
+            expect(typeof page?.viewport).toBe('function');
+
+            try {
+                await page.viewport(375, 667);
+
+                hostElement = document.createElement('div');
+                hostElement.style.width = '375px';
+                document.body.appendChild(hostElement);
+
+                const app = createApp({
+                    render() {
+                        return h(MaxGrid, null, {
+                            default: () => [
+                                h('div', { id: 'attr-a', class: 's4', style: 'height: 40px;' }, 'A'),
+                                h('div', {
+                                    id: 'attr-b',
+                                    class: 's4',
+                                    's4-max-end-mobile': '',
+                                    style: 'height: 40px;'
+                                }, 'B'),
+                                h('div', { id: 'attr-c', class: 's4', style: 'height: 40px;' }, 'C')
+                            ]
+                        });
+                    }
+                });
+
+                activeApp = app;
+                app.mount(hostElement);
+                await settle();
+
+                const boxB = hostElement.querySelector('#attr-b') as HTMLElement;
+                const boxC = hostElement.querySelector('#attr-c') as HTMLElement;
+
+                const rectB = boxB.getBoundingClientRect();
+                const rectC = boxC.getBoundingClientRect();
+
+                expect(rectC.top).toBeGreaterThanOrEqual(rectB.bottom - 1);
+            } finally {
+                await page.viewport(1280, 800);
+            }
+        });
+
+        it('preserva v-model reativo com MaxInputNumber e avalia estabilidade de estado ao cruzar breakpoint', async () => {
+            expect(typeof page?.viewport).toBe('function');
+
+            try {
+                await page.viewport(1280, 800);
+
+                hostElement = document.createElement('div');
+                hostElement.style.width = '1280px';
+                document.body.appendChild(hostElement);
+
+                const numVal = ref(250);
+                let unmountCounter = 0;
+
+                const app = createApp({
+                    render() {
+                        return h(MaxGrid, null, {
+                            default: () => [
+                                h(MaxInputNumber, {
+                                    id: 'input-resp',
+                                    class: 's4-max-end-mobile',
+                                    modelValue: numVal.value,
+                                    'onUpdate:modelValue': (v: number | null | undefined) => { numVal.value = v ?? 0; }
+                                }),
+                                h('div', {
+                                    id: 'resp-painel',
+                                    class: 's4',
+                                    style: 'height: 40px;',
+                                    onVnodeUnmounted: () => { unmountCounter++; }
+                                }, 'Painel')
+                            ]
+                        });
+                    }
+                });
+
+                activeApp = app;
+                app.mount(hostElement);
+                await settle();
+
+                const nativeInput = hostElement.querySelector('input.max-input-native') as HTMLInputElement;
+                expect(nativeInput).toBeDefined();
+                nativeInput.focus();
+                expect(document.activeElement).toBe(nativeInput);
+
+                // Resize dentro da mesma faixa (1280 -> 1000) não remonta
+                const unmountsBefore = unmountCounter;
+                await page.viewport(1000, 800);
+                await settle();
+                expect(unmountCounter).toBe(unmountsBefore);
+
+                // Cruza o breakpoint para mobile (375px)
+                hostElement.style.width = '375px';
+                await page.viewport(375, 667);
+                await settle();
+
+                // Valor reativo v-model é mantido
+                expect(numVal.value).toBe(250);
+
+                // Modifica o valor no mobile
+                numVal.value = 500;
+                await settle();
+                expect(numVal.value).toBe(500);
+
+                // Retorna para desktop
+                hostElement.style.width = '1280px';
+                await page.viewport(1280, 800);
+                await settle();
+                expect(numVal.value).toBe(500);
+            } finally {
+                await page.viewport(1280, 800);
+            }
+        });
+    });
 });
 
