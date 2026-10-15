@@ -15,7 +15,7 @@
         </div>
 
         <!-- Usuário autenticado: aplicação completa. -->
-        <div v-else-if="isLoaded && isLogged" class="max-app-view max-app-authenticated">
+        <div v-else-if="isLoaded && isLogged" class="max-app-view max-app-authenticated" :class="{ 'is-page-unavailable': isUnavailable }">
             <slot name="authenticated">
                 <MaxPageLayout
                     :screen="props.screen ?? system.type_device"
@@ -40,7 +40,10 @@
                     @fab-click="emit('fabClick')"
                     @logo-click="emit('logoClick')"
                 >
-                    <RouterView />
+                    <MaxEmptyDiv v-if="isUnavailable" class="max-app-unavailable" transparent role="status" aria-live="polite">
+                        Recurso em desenvolvimento. Este recurso estará disponível em breve
+                    </MaxEmptyDiv>
+                    <RouterView v-else />
                     <template v-for="(_, name) in forwardedSlots" #[name]="slotProps" :key="name">
                         <slot :name="name" v-bind="slotProps ?? {}"></slot>
                     </template>
@@ -81,14 +84,18 @@
     import MaxLoadScreen from './MaxLoadScreen.vue';
     import MaxPopoverConfirm from './MaxPopoverConfirm.vue';
     import MaxToast from './MaxToast.vue';
+    import MaxEmptyDiv from './MaxEmptyDiv.vue';
     import { useSystemStore } from '../stores/useSystem.Store';
     import { useUserStore } from '../stores/useUser.Store';
     import { useLoginStore } from '../stores/useLogin.Store';
+    import { useListMenusStore } from '../stores/useListMenus.Store';
     import { useMaxPiniaSaveTracker } from '../composables/useMaxPiniaSaveTracker';
     import { configureMaxApp, getMaxAppConfig } from '../helpers/maxAppConfig';
     import { applyHtmlFontSize } from '../helpers/useHtmlFontSize';
+    import { isCurrentMenuUnavailable } from '../helpers/menuAvailability';
     import type { BottomTab } from './MaxBottomMenu.vue';
     import type { MenuGroup } from './MaxSideMenuMobile.vue';
+    import type { SideMenuItem } from '../types/app';
 
     /** Slots repassados ao `MaxPageLayout`. */
     const LAYOUT_SLOTS = ['status', 'search', 'add', 'chat', 'bugs', 'notifications', 'voip', 'live', 'user', 'mobile-center', 'mobile-actions', 'switcher'] as const;
@@ -216,6 +223,49 @@
     const system = useSystemStore();
     const user = useUserStore();
     const login = useLoginStore();
+    const menus = useListMenusStore();
+
+    /** Dispositivo efetivo (prop ou system.type_device). */
+    const effectiveScreen = computed<string>(() => props.screen ?? system.type_device);
+
+    /** Lista de menus lateral efetivamente exibida pelo dispositivo atual. */
+    const effectiveMenuItems = computed<any[]>(() => {
+        const isMobile = effectiveScreen.value === 'mobile';
+
+        if (isMobile) {
+            let lateralItems: any[] = [];
+            const storeSide = (menus.list as any)?.value?.side ?? (menus.list as any)?.side ?? [];
+            if (props.sideMenuGroups?.length) lateralItems = props.sideMenuGroups.flatMap((g) => g.items ?? []);
+            else if (props.sideMenuItems?.length) lateralItems = props.sideMenuItems;
+            else lateralItems = storeSide.filter((item: SideMenuItem) => !item.details?.hide);
+
+            if (props.bottomTabs?.length) {
+                const bottomTabsAdapted = props.bottomTabs.map((tab) => ({
+                    route: tab.name,
+                    matches: tab.matches,
+                    is_disponible: tab.is_disponible
+                }));
+                return [...lateralItems, ...bottomTabsAdapted];
+            }
+
+            return lateralItems;
+        }
+
+        let source: SideMenuItem[] = [];
+        if (props.sideMenuItems?.length) source = props.sideMenuItems;
+        else if (props.sideMenuGroups?.length) source = props.sideMenuGroups.flatMap((g) => g.items ?? []);
+        else source = (menus.list as any)?.value?.side ?? (menus.list as any)?.side ?? [];
+
+        return source.filter((item: SideMenuItem) => !item.details?.hide && !item.hide);
+    });
+
+    /** Indica se o menu correspondente à rota atual está indisponível (`is_disponible === false`). */
+    const isUnavailable = computed<boolean>(() => {
+        return isCurrentMenuUnavailable(effectiveMenuItems.value, {
+            name: route?.name,
+            path: route?.path
+        });
+    });
 
     useMaxPiniaSaveTracker();
 
@@ -393,6 +443,36 @@
             display: flex;
             flex-direction: column;
             box-sizing: border-box;
+
+            &.is-page-unavailable {
+                :deep(.mobile-page-content) {
+                    height: 100%;
+                }
+
+                :deep(.mobile-page-body) {
+                    display: flex;
+                    flex-direction: column;
+                    height: 100%;
+                    min-height: 100%;
+                    box-sizing: border-box;
+                }
+            }
+        }
+
+        .max-app-unavailable {
+            width: 100%;
+            height: 100%;
+            min-height: 100%;
+            flex: 1 1 auto;
+            display: grid;
+            place-items: center;
+            text-align: center;
+            box-sizing: border-box;
+            padding: 1rem;
+            color: var(--background-700, #334155);
+            font-size: 1rem;
+            line-height: 1.5;
+            overflow-wrap: break-word;
         }
 
         .fade-enter-active,

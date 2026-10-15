@@ -57,12 +57,15 @@ describe('MaxApp', () => {
         pinia = createPinia();
         setActivePinia(pinia);
         resetMaxAppConfig();
-        Object.assign(route, { name: 'board', meta: {}, query: {}, params: {} });
+        menusRef.value = null;
+        Object.assign(route, { name: 'board', path: undefined, meta: {}, query: {}, params: {} });
         localStorage.clear();
     });
 
     afterEach(() => {
         resetMaxAppConfig();
+        menusRef.value = null;
+        Object.assign(route, { name: 'board', path: undefined, meta: {}, query: {}, params: {} });
         while (mountedWrappers.length > 0) {
             const w = mountedWrappers.pop();
             try { w.unmount(); } catch {}
@@ -544,6 +547,244 @@ describe('MaxApp', () => {
             expect(user.data?.settings?.fontSize).toBe(19);
             expect(saveSpy).toHaveBeenCalledTimes(1);
             expect(wrapper.emitted('changeFontSize')).toEqual([[19]]);
+        });
+    });
+
+    describe('disponibilidade de recursos (is_disponible)', () => {
+        it('renderiza o aviso em desenvolvimento e não monta RouterView quando rota atual é is_disponible: false', () => {
+            loadUser();
+            menusRef.value = {
+                side: [
+                    { route: 'board', is_disponible: false, details: { title: 'Quadro' } }
+                ]
+            };
+
+            const wrapper = mountApp();
+
+            expect(wrapper.find('.max-app-unavailable').exists()).toBe(true);
+            expect(wrapper.text()).toContain('Recurso em desenvolvimento. Este recurso estará disponível em breve');
+            expect(wrapper.find('.router-view-stub').exists()).toBe(false);
+            expect(wrapper.findComponent(MaxPageLayout).exists()).toBe(true);
+        });
+
+        it('mantém quantidade de itens e botões de menu inalterados quando is_disponible é false', () => {
+            loadUser();
+            const menusTrue = {
+                side: [
+                    { id: '1', route: 'board', is_disponible: true, details: { title: 'Quadro' } },
+                    { id: '2', route: 'clientes', is_disponible: true, details: { title: 'Clientes' } }
+                ]
+            };
+            const menusFalse = {
+                side: [
+                    { id: '1', route: 'board', is_disponible: false, details: { title: 'Quadro' } },
+                    { id: '2', route: 'clientes', is_disponible: false, details: { title: 'Clientes' } }
+                ]
+            };
+
+            menusRef.value = menusTrue;
+            const wrapperTrue = mountApp();
+            const countTrue = wrapperTrue.findComponent(MaxPageLayout).props('sideMenuItems')?.length
+                ?? wrapperTrue.findAll('.side-menu-item').length;
+
+            wrapperTrue.unmount();
+
+            menusRef.value = menusFalse;
+            const wrapperFalse = mountApp();
+            const countFalse = wrapperFalse.findComponent(MaxPageLayout).props('sideMenuItems')?.length
+                ?? wrapperFalse.findAll('.side-menu-item').length;
+
+            expect(countFalse).toBe(countTrue);
+        });
+
+        it('renderiza RouterView normalmente quando is_disponible é true ou ausente', () => {
+            loadUser();
+            menusRef.value = {
+                side: [
+                    { route: 'board', is_disponible: true, details: { title: 'Quadro' } },
+                    { route: 'clientes', details: { title: 'Clientes' } }
+                ]
+            };
+
+            const wrapper = mountApp();
+
+            expect(wrapper.find('.max-app-unavailable').exists()).toBe(false);
+            expect(wrapper.find('.router-view-stub').exists()).toBe(true);
+        });
+
+        it('resolve disponibilidade a partir de props.sideMenuItems', () => {
+            loadUser();
+            const wrapper = mountApp({
+                props: {
+                    sideMenuItems: [
+                        { route: 'board', is_disponible: false, details: { title: 'Quadro' } }
+                    ]
+                }
+            });
+
+            expect(wrapper.find('.max-app-unavailable').exists()).toBe(true);
+            expect(wrapper.find('.router-view-stub').exists()).toBe(false);
+        });
+
+        it('resolve disponibilidade a partir de props.sideMenuGroups', () => {
+            loadUser();
+            const wrapper = mountApp({
+                props: {
+                    sideMenuGroups: [
+                        {
+                            title: 'Módulo Principal',
+                            items: [
+                                { route: 'board', is_disponible: false, details: { title: 'Quadro' } }
+                            ]
+                        }
+                    ]
+                }
+            });
+
+            expect(wrapper.find('.max-app-unavailable').exists()).toBe(true);
+            expect(wrapper.find('.router-view-stub').exists()).toBe(false);
+        });
+
+        it('respeita precedência desktop: sideMenuItems sobrepõe sideMenuGroups e store', () => {
+            loadUser();
+            menusRef.value = { side: [{ route: 'board', is_disponible: false }] };
+            const wrapper = mountApp({
+                props: {
+                    screen: 'desktop',
+                    sideMenuGroups: [{ title: 'G', items: [{ route: 'board', is_disponible: false }] }],
+                    sideMenuItems: [{ route: 'board', is_disponible: true }]
+                }
+            });
+
+            expect(wrapper.find('.max-app-unavailable').exists()).toBe(false);
+            expect(wrapper.find('.router-view-stub').exists()).toBe(true);
+        });
+
+        it('respeita precedência mobile: sideMenuGroups sobrepõe sideMenuItems e store', () => {
+            loadUser();
+            menusRef.value = { side: [{ route: 'board', is_disponible: true }] };
+            const wrapper = mountApp({
+                props: {
+                    screen: 'mobile',
+                    sideMenuItems: [{ route: 'board', is_disponible: true }],
+                    sideMenuGroups: [{ title: 'G', items: [{ route: 'board', is_disponible: false }] }]
+                }
+            });
+
+            expect(wrapper.find('.max-app-unavailable').exists()).toBe(true);
+            expect(wrapper.find('.router-view-stub').exists()).toBe(false);
+        });
+
+        it('considera bottomTabs para indisponibilidade no mobile', () => {
+            loadUser();
+            const wrapper = mountApp({
+                props: {
+                    screen: 'mobile',
+                    bottomTabs: [
+                        { name: 'board', label: 'Quadro', icon: 'mdi:view-dashboard', is_disponible: false }
+                    ]
+                }
+            });
+
+            expect(wrapper.find('.max-app-unavailable').exists()).toBe(true);
+            expect(wrapper.find('.router-view-stub').exists()).toBe(false);
+        });
+
+        it('NÃO considera bottomTabs para indisponibilidade no desktop', () => {
+            loadUser();
+            const wrapper = mountApp({
+                props: {
+                    screen: 'desktop',
+                    bottomTabs: [
+                        { name: 'board', label: 'Quadro', icon: 'mdi:view-dashboard', is_disponible: false }
+                    ]
+                }
+            });
+
+            expect(wrapper.find('.max-app-unavailable').exists()).toBe(false);
+            expect(wrapper.find('.router-view-stub').exists()).toBe(true);
+        });
+
+        it('reage a navegação entre rota disponível e rota indisponível sem reload', async () => {
+            loadUser();
+            menusRef.value = {
+                side: [
+                    { route: 'board', is_disponible: true },
+                    { route: 'relatorios', is_disponible: false }
+                ]
+            };
+
+            const wrapper = mountApp();
+            expect(wrapper.find('.router-view-stub').exists()).toBe(true);
+            expect(wrapper.find('.max-app-unavailable').exists()).toBe(false);
+
+            route.name = 'relatorios';
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.find('.max-app-unavailable').exists()).toBe(true);
+            expect(wrapper.find('.router-view-stub').exists()).toBe(false);
+
+            route.name = 'board';
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.find('.router-view-stub').exists()).toBe(true);
+            expect(wrapper.find('.max-app-unavailable').exists()).toBe(false);
+        });
+
+        it('reage a atualização tardia de menusRef da store', async () => {
+            loadUser();
+            menusRef.value = null;
+
+            const wrapper = mountApp();
+            expect(wrapper.find('.router-view-stub').exists()).toBe(true);
+
+            menusRef.value = {
+                side: [{ route: 'board', is_disponible: false }]
+            };
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.find('.max-app-unavailable').exists()).toBe(true);
+            expect(wrapper.find('.router-view-stub').exists()).toBe(false);
+        });
+
+        it('reage a alteração no valor do campo is_disponible de false para true', async () => {
+            loadUser();
+            const item = reactive({ route: 'board', is_disponible: false });
+            menusRef.value = { side: [item] };
+
+            const wrapper = mountApp();
+            expect(wrapper.find('.max-app-unavailable').exists()).toBe(true);
+
+            item.is_disponible = true;
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.find('.max-app-unavailable').exists()).toBe(false);
+            expect(wrapper.find('.router-view-stub').exists()).toBe(true);
+        });
+
+        it('preserva integridade de slot authenticated customizado sem injetar aviso automático', () => {
+            loadUser();
+            menusRef.value = { side: [{ route: 'board', is_disponible: false }] };
+
+            const wrapper = mountApp({
+                slots: {
+                    authenticated: '<div class="custom-authenticated-layout">Layout Customizado</div>'
+                }
+            });
+
+            expect(wrapper.find('.custom-authenticated-layout').exists()).toBe(true);
+            expect(wrapper.find('.max-app-unavailable').exists()).toBe(false);
+        });
+
+        it('não afeta rotas públicas ou login mesmo se houver menu correspondente indisponível', () => {
+            route.name = 'login';
+            route.meta = { layout: 'guest' };
+            menusRef.value = { side: [{ route: 'login', is_disponible: false }] };
+
+            const wrapper = mountApp();
+
+            expect(wrapper.find('.max-app-login').exists()).toBe(true);
+            expect(wrapper.find('.max-app-unavailable').exists()).toBe(false);
         });
     });
 });

@@ -4,7 +4,7 @@
         {
             "label": "NPM RUN BUILD",
             "type": "shell",
-            "command": "npm run build && notify-send 'VS Code' '✅ MAX COMPONENTS UI - Build, Commit e Push realizados!' -i software-update-available && paplay /usr/share/sounds/freedesktop/stereo/service-login.oga",
+            "command": "npm version patch --no-git-tag-version --ignore-scripts && npm run build && notify-send 'VS Code' '✅ MAX COMPONENTS UI - Build, Commit e Push realizados!' -i software-update-available && paplay /usr/share/sounds/freedesktop/stereo/service-login.oga",
             "isBackground": false,
             "presentation": {
                 "reveal": "silent",

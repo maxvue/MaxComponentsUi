@@ -1,0 +1,148 @@
+{
+  "version": 2,
+  "planRevision": "223bdaaf350b78514b9e6524694a6e0f641ff683d028622bad57a0dfa3ff3bd2",
+  "tasks": [
+    {
+      "id": "T1",
+      "status": "completed",
+      "files": [],
+      "validations": [],
+      "revision": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "T2",
+      "status": "completed",
+      "files": [
+        "src/types/app.ts",
+        "src/components/MaxBottomMenu.vue",
+        "src/helpers/menuAvailability.ts"
+      ],
+      "validations": [],
+      "revision": "b1bece70cb50c48c8039a89464c64eeed88f5bfccf2d786051571d886c22ff9e"
+    },
+    {
+      "id": "T3",
+      "status": "completed",
+      "files": [
+        "src/components/MaxApp.vue"
+      ],
+      "validations": [],
+      "revision": "b1bece70cb50c48c8039a89464c64eeed88f5bfccf2d786051571d886c22ff9e"
+    },
+    {
+      "id": "T4",
+      "status": "completed",
+      "files": [
+        "tests/helpers/menuAvailability.test.ts",
+        "tests/components/MaxApp.test.ts",
+        "tests/browser/maxAppAvailability.browser.ts"
+      ],
+      "validations": [],
+      "revision": "b1bece70cb50c48c8039a89464c64eeed88f5bfccf2d786051571d886c22ff9e"
+    },
+    {
+      "id": "T5",
+      "status": "completed",
+      "files": [],
+      "validations": [
+        {
+          "command": "npm run check:filenames",
+          "revision": "b1bece70cb50c48c8039a89464c64eeed88f5bfccf2d786051571d886c22ff9e",
+          "result": "passed"
+        },
+        {
+          "command": "npm run check:lockfile",
+          "revision": "b1bece70cb50c48c8039a89464c64eeed88f5bfccf2d786051571d886c22ff9e",
+          "result": "passed"
+        },
+        {
+          "command": "npm run type-check:test",
+          "revision": "b1bece70cb50c48c8039a89464c64eeed88f5bfccf2d786051571d886c22ff9e",
+          "result": "passed"
+        },
+        {
+          "command": "npm run lint",
+          "revision": "b1bece70cb50c48c8039a89464c64eeed88f5bfccf2d786051571d886c22ff9e",
+          "result": "passed"
+        },
+        {
+          "command": "npm run build",
+          "revision": "b1bece70cb50c48c8039a89464c64eeed88f5bfccf2d786051571d886c22ff9e",
+          "result": "passed"
+        },
+        {
+          "command": "npx vitest run tests/helpers/menuAvailability.test.ts tests/components/MaxApp.test.ts",
+          "revision": "b1bece70cb50c48c8039a89464c64eeed88f5bfccf2d786051571d886c22ff9e",
+          "result": "passed"
+        },
+        {
+          "command": "PLAYWRIGHT_BROWSERS_PATH=/home/johnattas/.cache/ms-playwright npx vitest run --config vitest.browser.config.ts tests/browser/maxAppAvailability.browser.ts",
+          "revision": "b1bece70cb50c48c8039a89464c64eeed88f5bfccf2d786051571d886c22ff9e",
+          "result": "passed"
+        },
+        {
+          "command": "npm run test:coverage",
+          "revision": "b1bece70cb50c48c8039a89464c64eeed88f5bfccf2d786051571d886c22ff9e",
+          "result": "failed"
+        }
+      ],
+      "revision": "b1bece70cb50c48c8039a89464c64eeed88f5bfccf2d786051571d886c22ff9e",
+      "nextAction": "Validação concluída. Falha em test:coverage é pré-existente no baseline (MaxImage / happy-dom)."
+    }
+  ],
+  "verification": {
+    "revision": "b1bece70cb50c48c8039a89464c64eeed88f5bfccf2d786051571d886c22ff9e",
+    "checks": [
+      {
+        "command": "npm run check:filenames",
+        "revision": "b1bece70cb50c48c8039a89464c64eeed88f5bfccf2d786051571d886c22ff9e",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run check:lockfile",
+        "revision": "b1bece70cb50c48c8039a89464c64eeed88f5bfccf2d786051571d886c22ff9e",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check:test",
+        "revision": "b1bece70cb50c48c8039a89464c64eeed88f5bfccf2d786051571d886c22ff9e",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run lint",
+        "revision": "b1bece70cb50c48c8039a89464c64eeed88f5bfccf2d786051571d886c22ff9e",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run build",
+        "revision": "b1bece70cb50c48c8039a89464c64eeed88f5bfccf2d786051571d886c22ff9e",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npx vitest run tests/helpers/menuAvailability.test.ts tests/components/MaxApp.test.ts",
+        "revision": "b1bece70cb50c48c8039a89464c64eeed88f5bfccf2d786051571d886c22ff9e",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "PLAYWRIGHT_BROWSERS_PATH=/home/johnattas/.cache/ms-playwright npx vitest run --config vitest.browser.config.ts tests/browser/maxAppAvailability.browser.ts",
+        "revision": "b1bece70cb50c48c8039a89464c64eeed88f5bfccf2d786051571d886c22ff9e",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run test:coverage",
+        "revision": "b1bece70cb50c48c8039a89464c64eeed88f5bfccf2d786051571d886c22ff9e",
+        "result": "failed",
+        "exitCode": 1
+      }
+    ]
+  },
+  "updatedAt": 1792071850000,
+  "nextAction": "Apresentar relatório final ao usuário e aguardar confirmação para integração Git."
+}

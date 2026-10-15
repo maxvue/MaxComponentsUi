@@ -1,0 +1,106 @@
+{
+  "version": 2,
+  "planRevision": "e2c7f74371c1338f347f5667b6b290c288ddf6283bf793a9117ca70eeee89089",
+  "tasks": [
+    {
+      "id": "T1",
+      "status": "completed",
+      "files": [],
+      "validations": []
+    },
+    {
+      "id": "T2",
+      "status": "completed",
+      "files": [
+        ".vscode/tasks.json",
+        "README.md",
+        "tests/architecture/npmBuildTask.test.ts"
+      ],
+      "revision": "c2457cca19d06addb9189e439afaf0023148d04072a5e1fdabefbcc651e2a66d",
+      "validations": []
+    },
+    {
+      "id": "T3",
+      "status": "completed",
+      "files": [],
+      "validations": [
+        {
+          "command": "npm run check:lockfile",
+          "revision": "c2457cca19d06addb9189e439afaf0023148d04072a5e1fdabefbcc651e2a66d",
+          "result": "passed"
+        },
+        {
+          "command": "npm run type-check:test",
+          "revision": "c2457cca19d06addb9189e439afaf0023148d04072a5e1fdabefbcc651e2a66d",
+          "result": "passed"
+        },
+        {
+          "command": "npm run lint",
+          "revision": "c2457cca19d06addb9189e439afaf0023148d04072a5e1fdabefbcc651e2a66d",
+          "result": "passed"
+        },
+        {
+          "command": "npm run build",
+          "revision": "c2457cca19d06addb9189e439afaf0023148d04072a5e1fdabefbcc651e2a66d",
+          "result": "passed"
+        },
+        {
+          "command": "npx vitest run tests/architecture/npmBuildTask.test.ts",
+          "revision": "c2457cca19d06addb9189e439afaf0023148d04072a5e1fdabefbcc651e2a66d",
+          "result": "passed"
+        }
+      ],
+      "nextAction": "Validações da tarefa T3 aprovadas. Suíte global npm run test possui falha preexistente em MaxImage."
+    },
+    {
+      "id": "T4",
+      "status": "manualPending",
+      "files": [],
+      "validations": [],
+      "nextAction": "Abrir worktree wt-91c313d0 no MaxCode, acionar o botão de build uma vez e confirmar V -> patch(V) sem commits/tags Git."
+    }
+  ],
+  "verification": {
+    "revision": "c2457cca19d06addb9189e439afaf0023148d04072a5e1fdabefbcc651e2a66d",
+    "checks": [
+      {
+        "command": "npm run check:lockfile",
+        "revision": "c2457cca19d06addb9189e439afaf0023148d04072a5e1fdabefbcc651e2a66d",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check:test",
+        "revision": "c2457cca19d06addb9189e439afaf0023148d04072a5e1fdabefbcc651e2a66d",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run lint",
+        "revision": "c2457cca19d06addb9189e439afaf0023148d04072a5e1fdabefbcc651e2a66d",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run build",
+        "revision": "c2457cca19d06addb9189e439afaf0023148d04072a5e1fdabefbcc651e2a66d",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npx vitest run tests/architecture/npmBuildTask.test.ts",
+        "revision": "c2457cca19d06addb9189e439afaf0023148d04072a5e1fdabefbcc651e2a66d",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run test",
+        "revision": "c2457cca19d06addb9189e439afaf0023148d04072a5e1fdabefbcc651e2a66d",
+        "result": "failed",
+        "exitCode": 1
+      }
+    ]
+  },
+  "updatedAt": 1792074420000,
+  "nextAction": "Aceite manual pendente no editor MaxCode (T4). A implementação das tarefas T1-T3 está concluída."
+}

@@ -232,6 +232,9 @@ npm run build
 npm run release
 ```
 
+> **Nota sobre o botão de build no MaxCode (`NPM RUN BUILD`):**  
+> O acionamento da tarefa de build pelo editor executa `npm version patch --no-git-tag-version --ignore-scripts && npm run build`, incrementando a versão patch uma vez antes da compilação. Os campos `version` em `package.json` e `package-lock.json` (tanto no topo quanto em `packages['']`) permanecem sincronizados. Essa ação não cria commit, tag, push ou publicação. Em caso de falha durante o build, a versão incrementada é mantida e uma nova execução avançará novamente. O comando de terminal `npm run build` comum não incrementa a versão.
+
 ---
 
 ## 📂 Estrutura do Projeto

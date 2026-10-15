@@ -121,6 +121,11 @@
          * telas de detalhe que pertencem à mesma seção.
          */
         matches?: string[];
+        /**
+         * Indica se o recurso está disponível no sistema.
+         * Se explicitamente `false` no mobile, o MaxApp substitui a página pelo aviso de recurso em desenvolvimento.
+         */
+        is_disponible?: boolean | null;
     }
 
     const props = withDefaults(defineProps<{
