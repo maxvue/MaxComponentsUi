@@ -110,6 +110,11 @@ export interface SideMenuSubItem {
     action?: () => void;
     matches?: string[];
     hide?: boolean;
+    /**
+     * Indica se o recurso está disponível no sistema.
+     * Quando explicitamente `false`, o MaxApp substitui a página pelo aviso de recurso em desenvolvimento.
+     */
+    is_disponible?: boolean | null;
     subitems?: SideMenuSubItem[];
     items?: SideMenuSubItem[];
     children?: SideMenuSubItem[];
@@ -132,6 +137,12 @@ export interface SideMenuDetails {
     tooltip?: string | null;
     /** Título do item. */
     title?: string | null;
+    /**
+     * Indica se o recurso está disponível no sistema (formato backend).
+     * Usado como fallback quando a raiz do item não declarar `is_disponible`.
+     * Quando explicitamente `false`, o MaxApp substitui a página pelo aviso de recurso em desenvolvimento.
+     */
+    is_disponible?: boolean | null;
     /** Subitens do menu. */
     subitems?: SideMenuSubItem[];
     /** Lista alternativa de subitens. */
@@ -144,6 +155,12 @@ export interface SideMenuDetails {
 /** Item do menu lateral. */
 export interface SideMenuItem {
     id?: string;
+    /**
+     * Indica se o recurso está disponível no sistema.
+     * Prevalece sobre `details.is_disponible` quando definido (não-nulo).
+     * Quando explicitamente `false`, o MaxApp substitui a página pelo aviso de recurso em desenvolvimento.
+     */
+    is_disponible?: boolean | null;
     details: SideMenuDetails;
     subitems?: SideMenuSubItem[];
     items?: SideMenuSubItem[];
