@@ -1,0 +1,113 @@
+{
+  "version": 2,
+  "planRevision": "283e2571e96cd09944f24720efc75863ff6e44b36c3a8608faa0f00dd8a1c603",
+  "tasks": [
+    {
+      "id": "T1",
+      "status": "completed",
+      "files": [
+        "src/components/MaxCardList.vue",
+        "tests/components/MaxCardList.test.ts"
+      ],
+      "revision": "c0f1c8a156cbb226ca6a0207c64ad898196945d0fa91ab3635bfd6f51c8f34df",
+      "validations": []
+    },
+    {
+      "id": "T2",
+      "status": "completed",
+      "files": [
+        "src/helpers/cardListLayout.ts",
+        "tests/helpers/cardListLayout.test.ts"
+      ],
+      "revision": "c0f1c8a156cbb226ca6a0207c64ad898196945d0fa91ab3635bfd6f51c8f34df",
+      "validations": []
+    },
+    {
+      "id": "T3",
+      "status": "completed",
+      "files": [
+        "src/helpers/useCardListLayout.ts",
+        "tests/components/useCardListLayout.test.ts",
+        "src/components/MaxCardList.vue"
+      ],
+      "revision": "c0f1c8a156cbb226ca6a0207c64ad898196945d0fa91ab3635bfd6f51c8f34df",
+      "validations": []
+    },
+    {
+      "id": "T4",
+      "status": "completed",
+      "files": [
+        "src/components/MaxCardList.vue"
+      ],
+      "revision": "c0f1c8a156cbb226ca6a0207c64ad898196945d0fa91ab3635bfd6f51c8f34df",
+      "validations": []
+    },
+    {
+      "id": "T5",
+      "status": "manualPending",
+      "files": [
+        "tests/browser/MaxCardList.browser.ts",
+        "playground/src/scenarios/media-brand.vue"
+      ],
+      "revision": "c0f1c8a156cbb226ca6a0207c64ad898196945d0fa91ab3635bfd6f51c8f34df",
+      "validations": [],
+      "nextAction": "Executar testes no Chromium apos instalacao do binario Playwright e inspecionar playground."
+    },
+    {
+      "id": "T6",
+      "status": "completed",
+      "files": [],
+      "revision": "c0f1c8a156cbb226ca6a0207c64ad898196945d0fa91ab3635bfd6f51c8f34df",
+      "validations": []
+    }
+  ],
+  "verification": {
+    "revision": "c0f1c8a156cbb226ca6a0207c64ad898196945d0fa91ab3635bfd6f51c8f34df",
+    "checks": [
+      {
+        "command": "npm run check:lockfile",
+        "revision": "c0f1c8a156cbb226ca6a0207c64ad898196945d0fa91ab3635bfd6f51c8f34df",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run test",
+        "revision": "c0f1c8a156cbb226ca6a0207c64ad898196945d0fa91ab3635bfd6f51c8f34df",
+        "result": "failed",
+        "exitCode": 1
+      },
+      {
+        "command": "npm run type-check:test",
+        "revision": "c0f1c8a156cbb226ca6a0207c64ad898196945d0fa91ab3635bfd6f51c8f34df",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run lint",
+        "revision": "c0f1c8a156cbb226ca6a0207c64ad898196945d0fa91ab3635bfd6f51c8f34df",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run build",
+        "revision": "c0f1c8a156cbb226ca6a0207c64ad898196945d0fa91ab3635bfd6f51c8f34df",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run test:browser",
+        "revision": "c0f1c8a156cbb226ca6a0207c64ad898196945d0fa91ab3635bfd6f51c8f34df",
+        "result": "failed",
+        "exitCode": 1
+      },
+      {
+        "command": "npm run test:benchmark",
+        "revision": "c0f1c8a156cbb226ca6a0207c64ad898196945d0fa91ab3635bfd6f51c8f34df",
+        "result": "passed",
+        "exitCode": 0
+      }
+    ]
+  },
+  "updatedAt": 1792076138431,
+  "nextAction": "Validar aplicacao consumidora externa e executar testes de browser com Playwright instalado."
+}
