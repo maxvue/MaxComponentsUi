@@ -209,21 +209,30 @@
                     <div class="states">
                         <div class="state-col" style="width: 100%;">
                             <span>Orquestrador com Virtual Scroll e Grid Responsivo</span>
-                            <MaxCardList
-                                :items="[
-                                    { id: 1, title: 'Serviço Alpha', subtitle: 'Microsserviço de autenticação', category: 'Backend' },
-                                    { id: 2, title: 'Portal Web', subtitle: 'Interface de usuário principal', category: 'Frontend' },
-                                    { id: 3, title: 'Worker Analytics', subtitle: 'Processador de filas assíncronas', category: 'Backend' },
-                                    { id: 4, title: 'Design System', subtitle: 'Biblioteca de componentes Vue', category: 'Design' }
-                                ]"
-                                title="Catálogo de Projetos"
-                                subtitle="Gerenciamento e orquestração de serviços da aplicação"
-                                :height="320"
-                                :min-card-width="260"
-                                :categories="['Backend', 'Frontend', 'Design']"
-                            >
+                            <MaxCardList :items="[{ id: 1, title: 'Serviço Alpha', subtitle: 'Microsserviço de autenticação', category: 'Backend' }, { id: 2, title: 'Portal Web', subtitle: 'Interface de usuário principal', category: 'Frontend' }, { id: 3, title: 'Worker Analytics', subtitle: 'Processador de filas assíncronas', category: 'Backend' }, { id: 4, title: 'Design System', subtitle: 'Biblioteca de componentes Vue', category: 'Design' }]" title="Catálogo de Projetos" subtitle="Gerenciamento e orquestração de serviços da aplicação" :height="320" :min-card-width="260" :categories="['Backend', 'Frontend', 'Design']">
                                 <template #add-card>
                                     <MaxCard variant="add" title="Adicionar Novo Projeto" />
+                                </template>
+                            </MaxCardList>
+                        </div>
+                        <div class="state-col" style="width: 100%; margin-top: 1rem;">
+                            <span>Vazio com Ação de Adicionar Centralizada (R1)</span>
+                            <MaxCardList :items="[]" title="Lista Vazia" subtitle="Centralização horizontal e vertical da ação" show-add-card add-card-label="Adicionar Primeiro Registro" :height="260" />
+                        </div>
+                        <div class="state-col" style="width: 100%; margin-top: 1rem;">
+                            <span>Grupos de SubCards: Ajustado e Multilinha (R2 / R3)</span>
+                            <MaxCardList :items="[{ id: 'g1', title: 'Grupo 1 Subcard' }, { id: 'g2', title: 'Grupo Multilinha' }]" title="Composições de Subcards" :height="420" :min-card-width="260">
+                                <template #card="{ item }">
+                                    <MaxCard v-if="item.id === 'g1'" title="Grupo Ajustado (1 SubCard)">
+                                        <MaxSubCard title="SubCard Único" subtitle="Acompanha a largura necessária" />
+                                    </MaxCard>
+                                    <MaxCard v-else title="Grupo Multilinha (Quebra no Teto da Lista)">
+                                        <MaxSubCard title="Sub 1" subtitle="Item de fila" />
+                                        <MaxSubCard title="Sub 2" subtitle="Item de fila" />
+                                        <MaxSubCard title="Sub 3" subtitle="Item de fila" />
+                                        <MaxSubCard title="Sub 4" subtitle="Item de fila" />
+                                        <MaxSubCard title="Sub 5" subtitle="Item de fila" />
+                                    </MaxCard>
                                 </template>
                             </MaxCardList>
                         </div>

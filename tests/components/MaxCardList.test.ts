@@ -260,6 +260,60 @@ describe('MaxCardList', () => {
             // Com 4 itens + 1 card de add em 3 colunas: linha 0 tem 3 itens (1 add + 2 dados), linha 1 tem 2 itens (2 dados)
             expect(vm.virtualizer.options.count).toBe(2);
         });
+
+        it('centraliza a ação de adicionar no corpo quando não houver itens visíveis (R1)', async () => {
+            const wrapper = mountCardList({
+                props: {
+                    items: [],
+                    showAddCard: true,
+                    addCardLabel: 'Criar Novo Registro',
+                    virtualScroll: false
+                }
+            });
+
+            expect(wrapper.find('.max-card-list-empty-add').exists()).toBe(true);
+            expect(wrapper.find('.max-card-list-empty').exists()).toBe(false);
+            expect(wrapper.find('.max-card-list-header-add').exists()).toBe(false);
+
+            const addCard = wrapper.findComponent({ name: 'MaxCard' });
+            expect(addCard.exists()).toBe(true);
+            await addCard.trigger('click');
+            expect(wrapper.emitted('add')).toBeTruthy();
+        });
+
+        it('remove temporariamente o adicionar do header quando vazio e restaura quando houver itens', async () => {
+            const wrapper = mountCardList({
+                props: {
+                    items: [],
+                    showAddCard: true,
+                    addCardPosition: 'header'
+                }
+            });
+
+            // Vazio: deve estar no centro do corpo e NÃO no header
+            expect(wrapper.find('.max-card-list-empty-add').exists()).toBe(true);
+            expect(wrapper.find('.max-card-list-header-add').exists()).toBe(false);
+
+            // Atualiza para lista preenchida
+            await wrapper.setProps({ items: makeDataset(3) });
+
+            // Preenchido: deve restaurar no header e sair do corpo
+            expect(wrapper.find('.max-card-list-empty-add').exists()).toBe(false);
+            expect(wrapper.find('.max-card-list-header-add').exists()).toBe(true);
+        });
+
+        it('preserva a precedência de loading sobre o vazio com adicionar', () => {
+            const wrapper = mountCardList({
+                props: {
+                    items: [],
+                    showAddCard: true,
+                    loading: true
+                }
+            });
+
+            expect(wrapper.find('.max-loader-stub').exists()).toBe(true);
+            expect(wrapper.find('.max-card-list-empty-add').exists()).toBe(false);
+        });
     });
 
     describe('Filtros Reativos e Emissões de Eventos com useSearchBarStore', () => {
@@ -535,5 +589,31 @@ describe('MaxCardList', () => {
             const cols = wrapper.findAll('.max-card-list-col');
             expect(cols.length).toBe(2);
         });
+
+        it('mapeia a navegação de scrollToIndex para o índice da linha correspondente', () => {
+            const dataset = makeDataset(10);
+            const wrapper = mountCardList({
+                props: {
+                    items: dataset,
+                    virtualScroll: true,
+                    columns: 3,
+                    showAddCard: true,
+                    addCardPosition: 'top'
+                }
+            });
+
+            const vm = wrapper.vm as any;
+            const scrollSpy = vi.spyOn(vm.virtualizer, 'scrollToIndex');
+
+            // Item 0 com add no topo está na linha 0 (célula 1 da linha 0)
+            vm.scrollToIndex(0);
+            expect(scrollSpy).toHaveBeenCalledWith(0, undefined);
+
+            // Item 4: com add no topo (1 célula) + 4 itens = 5 células no total.
+            // 3 por linha: índice da linha = 1.
+            vm.scrollToIndex(4);
+            expect(scrollSpy).toHaveBeenCalledWith(1, undefined);
+        });
     });
 });
+

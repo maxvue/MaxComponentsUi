@@ -1,68 +1,32 @@
 <template>
-    <div
-        ref="containerRef"
-        class="max-card-list"
-        :class="{
-            'is-loading': props.loading,
-            'is-empty': !props.loading && displayItems.length === 0 && !hasGridAddCard,
-            'is-virtual': isVirtualActive
-        }"
-    >
+    <div ref="containerRef" class="max-card-list" :class="{ 'is-loading': props.loading, 'is-empty': !props.loading && displayItems.length === 0, 'is-virtual': isVirtualActive, 'is-mobile': isMobileWidth }" :style="containerCustomProperties">
         <!-- Cabeçalho (Header, Títulos, MaxStats, Categorias e Ações) -->
         <header v-if="hasHeader" class="max-card-list-header">
             <div class="max-card-list-header-main">
-                <slot
-                    name="header"
-                    :total="props.items?.length ?? 0"
-                    :filtered-count="displayItems.length"
-                    :items="displayItems"
-                >
+                <slot name="header" :total="props.items?.length ?? 0" :filtered-count="displayItems.length" :items="displayItems">
                     <div v-if="props.title || props.subtitle" class="max-card-list-titles">
                         <h2 v-if="props.title" class="max-card-list-title">{{ props.title }}</h2>
                         <p v-if="props.subtitle" class="max-card-list-subtitle">{{ props.subtitle }}</p>
                     </div>
 
                     <!-- Integração semântica com MaxStats -->
-                    <MaxStats
-                        v-if="props.stats && props.stats.length > 0"
-                        :items="props.stats"
-                        class="max-card-list-stats"
-                    />
+                    <MaxStats v-if="props.stats && props.stats.length > 0" :items="props.stats" class="max-card-list-stats" />
                 </slot>
             </div>
 
             <!-- Ações, Seletor de Categoria e Add Card no cabeçalho -->
-            <div
-                v-if="hasHeaderActions"
-                class="max-card-list-header-actions"
-            >
+            <div v-if="hasHeaderActions" class="max-card-list-header-actions">
                 <!-- Seletor de Categoria Compacto Integrado -->
                 <div v-if="hasCategories" class="max-card-list-category-wrapper">
-                    <select
-                        :value="internalCategory"
-                        class="max-card-list-category-select"
-                        :aria-label="props.categoryPlaceholder || 'Filtrar por categoria'"
-                        @change="onCategoryChange"
-                    >
+                    <select :value="internalCategory" class="max-card-list-category-select" :aria-label="props.categoryPlaceholder || 'Filtrar por categoria'" @change="onCategoryChange">
                         <option value="">{{ props.categoryPlaceholder || 'Todas as categorias' }}</option>
-                        <option
-                            v-for="cat in normalizedCategories"
-                            :key="String(cat.value)"
-                            :value="cat.value"
-                        >
-                            {{ cat.label }}
-                        </option>
+                        <option v-for="cat in normalizedCategories" :key="String(cat.value)" :value="cat.value">{{ cat.label }}</option>
                     </select>
                 </div>
 
-                <div v-if="(slots['add-card'] || props.showAddCard) && props.addCardPosition === 'header'" class="max-card-list-header-add">
+                <div v-if="hasHeaderAdd" class="max-card-list-header-add">
                     <slot name="add-card">
-                        <MaxCard
-                            variant="add"
-                            :title="props.addCardLabel || 'Adicionar item'"
-                            :add-label="props.addCardLabel"
-                            @click="emit('add')"
-                        />
+                        <MaxCard variant="add" :title="props.addCardLabel || 'Adicionar item'" :add-label="props.addCardLabel" @click="emit('add')" />
                     </slot>
                 </div>
                 <slot name="actions" />
@@ -71,14 +35,7 @@
 
         <!-- Slot de Filtros Customizados (quando fornecido explicitamente) -->
         <div v-if="$slots.filters" class="max-card-list-controls">
-            <slot
-                name="filters"
-                :search="effectiveSearchQuery"
-                :category="internalCategory"
-                :categories="normalizedCategories"
-                :set-search="setSearch"
-                :set-category="setCategory"
-            />
+            <slot name="filters" :search="effectiveSearchQuery" :category="internalCategory" :categories="normalizedCategories" :set-search="setSearch" :set-category="setCategory" />
         </div>
 
         <!-- Estado de Carregamento Pré-estilizado com MaxLoader -->
@@ -88,86 +45,37 @@
             </slot>
         </div>
 
+        <!-- Estado Vazio com Adicionar Centralizado nos Dois Eixos (R1) -->
+        <div v-else-if="displayItems.length === 0 && hasAnyAddCard" class="max-card-list-status max-card-list-empty-add" :style="emptyStatusStyle" role="region" aria-live="polite">
+            <div class="max-card-list-empty-add-action">
+                <slot name="add-card">
+                    <MaxCard variant="add" :title="props.addCardLabel || 'Adicionar item'" :add-label="props.addCardLabel" @click="emit('add')" />
+                </slot>
+            </div>
+        </div>
+
         <!-- Estado Vazio Pré-estilizado com MaxEmptyDiv -->
-        <div
-            v-else-if="displayItems.length === 0 && !hasGridAddCard"
-            class="max-card-list-status max-card-list-empty"
-            role="region"
-            aria-live="polite"
-        >
+        <div v-else-if="displayItems.length === 0" class="max-card-list-status max-card-list-empty" :style="emptyStatusStyle" role="region" aria-live="polite">
             <slot name="empty" :search="effectiveSearchQuery" :category="internalCategory">
                 <MaxEmptyDiv :label="props.emptyLabel || 'Nenhum card encontrado'" />
             </slot>
         </div>
 
-        <!-- Grid Virtualizado via @tanstack/vue-virtual com medição dinâmica -->
-        <div
-            v-else-if="isVirtualActive"
-            ref="scrollContainerRef"
-            class="max-card-list-scroll"
-            :style="scrollContainerStyle"
-            @scroll="onScroll"
-        >
-            <div
-                class="max-card-list-viewport"
-                :style="{
-                    height: `${virtualizer.getTotalSize()}px`,
-                    width: '100%',
-                    position: 'relative'
-                }"
-            >
-                <div
-                    v-for="virtualRow in virtualizer.getVirtualItems()"
-                    :key="String(virtualRow.key)"
-                    :ref="(el) => measureRow(el as Element)"
-                    :data-index="virtualRow.index"
-                    class="max-card-list-row"
-                    :style="{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        transform: `translateY(${virtualRow.start}px)`
-                    }"
-                >
-                    <div
-                        class="max-card-list-grid"
-                        :style="gridLayoutStyle"
-                    >
-                        <div
-                            v-for="(cellItem, colIdx) in rows[virtualRow.index]"
-                            :key="cellItem?.__isAddSlot ? '__add_slot__' : getItemKey(cellItem, getActualItemIndex(virtualRow.index, colIdx))"
-                            class="max-card-list-col"
-                            :class="{ 'max-card-list-col--add': cellItem?.__isAddSlot }"
-                        >
-                            <template v-if="cellItem?.__isAddSlot">
+        <!-- Grid Virtualizado via @tanstack/vue-virtual com medição dinâmica de linhas -->
+        <div v-else-if="isVirtualActive" ref="scrollContainerRef" class="max-card-list-scroll" :style="scrollContainerStyle" @scroll="onScroll">
+            <div class="max-card-list-viewport" :style="{ height: `${virtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }">
+                <div v-for="virtualRow in virtualizer.getVirtualItems()" :key="String(virtualRow.key)" :ref="(el) => measureRow(el as Element)" :data-index="virtualRow.index" class="max-card-list-row" :style="{ position: 'absolute', top: 0, left: 0, width: '100%', transform: `translateY(${virtualRow.start}px)` }">
+                    <div class="max-card-list-grid" :style="rowLayoutStyle">
+                        <div v-for="cell in rows[virtualRow.index]?.cells ?? []" :key="String(cell.key)" :ref="(el) => registerCellElement(cell.key, el as HTMLElement)" class="max-card-list-col" :class="{ 'max-card-list-col--add': cell.type === 'add', 'max-card-list-col--group': cell.isGroup }" :style="getCellStyle(cell)">
+                            <template v-if="cell.type === 'add'">
                                 <slot name="add-card">
-                                    <MaxCard
-                                        variant="add"
-                                        :title="props.addCardLabel || 'Adicionar item'"
-                                        :add-label="props.addCardLabel"
-                                        @click="emit('add')"
-                                    />
+                                    <MaxCard variant="add" :title="props.addCardLabel || 'Adicionar item'" :add-label="props.addCardLabel" @click="emit('add')" />
                                 </slot>
                             </template>
                             <template v-else>
-                                <slot
-                                    name="card"
-                                    :item="cellItem"
-                                    :index="getActualItemIndex(virtualRow.index, colIdx)"
-                                >
-                                    <slot
-                                        name="item"
-                                        :item="cellItem"
-                                        :index="getActualItemIndex(virtualRow.index, colIdx)"
-                                    >
-                                        <MaxCard
-                                            :title="cellItem.title"
-                                            :subtitle="cellItem.subtitle"
-                                            :icon="cellItem.icon"
-                                            :disabled="cellItem.disabled"
-                                            :loading="cellItem.loading"
-                                        />
+                                <slot name="card" :item="cell.item" :index="cell.originalIndex!">
+                                    <slot name="item" :item="cell.item" :index="cell.originalIndex!">
+                                        <MaxCard :title="cell.item.title" :subtitle="cell.item.subtitle" :icon="cell.item.icon" :disabled="cell.item.disabled" :loading="cell.item.loading" />
                                     </slot>
                                 </slot>
                             </template>
@@ -178,50 +86,24 @@
         </div>
 
         <!-- Grid Estático (fallback quando virtualScroll === false) -->
-        <div
-            v-else
-            class="max-card-list-static-grid"
-            :style="gridLayoutStyle"
-        >
-            <!-- Card de Adicionar junto com os demais cards no grid -->
-            <div
-                v-if="hasGridAddCard"
-                class="max-card-list-col max-card-list-col--add"
-            >
-                <slot name="add-card">
-                    <MaxCard
-                        variant="add"
-                        :title="props.addCardLabel || 'Adicionar item'"
-                        :add-label="props.addCardLabel"
-                        @click="emit('add')"
-                    />
-                </slot>
-            </div>
-
-            <div
-                v-for="(item, index) in displayItems"
-                :key="getItemKey(item, index)"
-                class="max-card-list-col"
-            >
-                <slot
-                    name="card"
-                    :item="item"
-                    :index="index"
-                >
-                    <slot
-                        name="item"
-                        :item="item"
-                        :index="index"
-                    >
-                        <MaxCard
-                            :title="item.title"
-                            :subtitle="item.subtitle"
-                            :icon="item.icon"
-                            :disabled="item.disabled"
-                            :loading="item.loading"
-                        />
-                    </slot>
-                </slot>
+        <div v-else class="max-card-list-static-grid" :style="staticGridContainerStyle">
+            <div v-for="row in rows" :key="row.key" class="max-card-list-row">
+                <div class="max-card-list-grid" :style="rowLayoutStyle">
+                    <div v-for="cell in row.cells" :key="String(cell.key)" :ref="(el) => registerCellElement(cell.key, el as HTMLElement)" class="max-card-list-col" :class="{ 'max-card-list-col--add': cell.type === 'add', 'max-card-list-col--group': cell.isGroup }" :style="getCellStyle(cell)">
+                        <template v-if="cell.type === 'add'">
+                            <slot name="add-card">
+                                <MaxCard variant="add" :title="props.addCardLabel || 'Adicionar item'" :add-label="props.addCardLabel" @click="emit('add')" />
+                            </slot>
+                        </template>
+                        <template v-else>
+                            <slot name="card" :item="cell.item" :index="cell.originalIndex!">
+                                <slot name="item" :item="cell.item" :index="cell.originalIndex!">
+                                    <MaxCard :title="cell.item.title" :subtitle="cell.item.subtitle" :icon="cell.item.icon" :disabled="cell.item.disabled" :loading="cell.item.loading" />
+                                </slot>
+                            </slot>
+                        </template>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -244,6 +126,12 @@
     import MaxLoader from './MaxLoader.vue';
     import MaxEmptyDiv from './MaxEmptyDiv.vue';
     import { useSearchBarStore } from '../stores/useSearchBar.Store';
+    import {
+        calculateCardListLayout,
+        type CardListRow,
+        type CardListCell
+    } from '../helpers/cardListLayout';
+    import { useCardListLayout } from '../helpers/useCardListLayout';
     import type {
         MaxCardListProps,
         MaxCardListFilterPayload,
@@ -366,17 +254,30 @@
 
     const hasCategories = computed(() => normalizedCategories.value.length > 0);
     const hasHeaderContent = computed(() => Boolean(props.title || props.subtitle || (props.stats && props.stats.length > 0)));
-    const hasHeaderActions = computed(() => Boolean(slots.actions || hasCategories.value || ((slots['add-card'] || props.showAddCard) && props.addCardPosition === 'header')));
+
+    const hasAnyAddCard = computed(() => Boolean(slots['add-card'] || props.showAddCard));
+    const hasHeaderAdd = computed(() => Boolean(hasAnyAddCard.value && props.addCardPosition === 'header' && displayItems.value.length > 0));
+    const hasGridAddCard = computed(() => Boolean(hasAnyAddCard.value && props.addCardPosition !== 'header' && displayItems.value.length > 0));
+
+    const hasHeaderActions = computed(() => Boolean(slots.actions || hasCategories.value || hasHeaderAdd.value));
     const hasHeader = computed(() => Boolean(slots.header || hasHeaderContent.value || hasHeaderActions.value));
-    const hasGridAddCard = computed(() => Boolean((slots['add-card'] || props.showAddCard) && props.addCardPosition !== 'header'));
 
     // Elemento container para medição de largura responsiva
     const containerRef = ref<HTMLElement | null>(null);
     const { width: measuredWidth } = useElementSize(containerRef);
 
+    const effectiveAvailableWidth = computed<number>(() => {
+        const width = measuredWidth.value || (containerRef.value?.clientWidth ?? 0);
+        return width > 0 ? width : 0;
+    });
+
+    const isMobileWidth = computed<boolean>(() => {
+        return effectiveAvailableWidth.value > 0 && effectiveAvailableWidth.value <= 768;
+    });
+
     // Auto-cálculo dinâmico de colunas baseado na largura e minCardWidth
     const effectiveColumns = computed<number>(() => {
-        const width = measuredWidth.value || (containerRef.value?.clientWidth ?? 0);
+        const width = effectiveAvailableWidth.value;
 
         // Breakpoint mobile: <= 768px força sempre 1 coluna (1 card por linha), inclusive com prop columns
         if (width > 0 && width <= 768) return 1;
@@ -438,30 +339,59 @@
         return false;
     }
 
-    // Agrupamento em linhas para virtualização de grid responsivo com Add Card integrado
-    const rows = computed<any[][]>(() => {
-        const list = displayItems.value;
-        const cols = effectiveColumns.value;
-        const hasAdd = hasGridAddCard.value;
+    function getItemKey(item: any, fallbackIndex: number): string | number {
+        const keyProp = props.keyField || props.itemKey;
+        if (keyProp) {
+            if (typeof keyProp === 'function') return keyProp(item, fallbackIndex);
+            if (typeof keyProp === 'string' && item && typeof item === 'object') return item[keyProp] ?? fallbackIndex;
+        }
+        if (item && typeof item === 'object' && ('id' in item || 'key' in item)) return item.id ?? item.key ?? fallbackIndex;
 
-        if (!list || (list.length === 0 && !hasAdd)) return [];
+        return fallbackIndex;
+    }
 
-        const gridItems: any[] = hasAdd ? [{ __isAddSlot: true }, ...list] : list;
-        const result: any[][] = [];
-        for (let i = 0; i < gridItems.length; i += cols) result.push(gridItems.slice(i, i + cols));
-
-
-        return result;
+    // Composable de medição e layout contextual dos grupos
+    const {
+        preferredWidths,
+        isGroupMap,
+        registerCellElement,
+        cleanRemovedKeys
+    } = useCardListLayout({
+        fallbackSubcardWidth: computed(() => props.minCardWidth ?? 320)
     });
 
-    function getActualItemIndex(rowIndex: number, colIndex: number): number {
-        const flatIndex = rowIndex * effectiveColumns.value + colIndex;
-        return hasGridAddCard.value ? flatIndex - 1 : flatIndex;
-    }
+    watch(
+        displayItems,
+        (items) => {
+            const currentKeys = new Set<string | number>();
+            for (let i = 0; i < items.length; i++) currentKeys.add(getItemKey(items[i], i));
+
+            cleanRemovedKeys(currentKeys);
+        },
+        { deep: false }
+    );
+
+    // Agrupamento em linhas compartilhadas via helper puro
+    const layoutModel = computed(() => {
+        return calculateCardListLayout({
+            items: displayItems.value,
+            hasAddCard: hasGridAddCard.value,
+            addCardPosition: props.addCardPosition,
+            availableWidth: effectiveAvailableWidth.value,
+            columns: effectiveColumns.value,
+            gap: props.gap ?? 16,
+            minCardWidth: props.minCardWidth ?? 320,
+            getItemKey: (item, idx) => getItemKey(item, idx),
+            getPreferredWidth: (key) => preferredWidths.value.get(key),
+            getIsGroup: (key) => Boolean(isGroupMap.value.get(key))
+        });
+    });
+
+    const rows = computed<CardListRow[]>(() => layoutModel.value.rows);
 
     const isVirtualActive = computed(() => props.virtualScroll !== false);
 
-    // Instância do virtual scroller do TanStack Virtual com medição dinâmica
+    // Instância do virtual scroller do TanStack Virtual com medição dinâmica de linhas
     const scrollContainerRef = ref<HTMLElement | null>(null);
 
     const virtualizer = useVirtualizer(
@@ -471,6 +401,10 @@
             estimateSize: () => props.estimateSize ?? 240,
             overscan: props.overscan ?? 3,
             enabled: isVirtualActive.value,
+            getItemKey: (index: number) => {
+                const row = rows.value[index];
+                return row ? row.key : index;
+            },
             measureElement: (element: HTMLElement) => {
                 if (!element) return props.estimateSize ?? 240;
                 const height = Math.round(element.getBoundingClientRect().height);
@@ -484,15 +418,64 @@
 
     }
 
-    // Estilos do layout de grade e container de scroll
-    const gridLayoutStyle = computed<CSSProperties>(() => ({
-        display: 'grid',
-        gridTemplateColumns: `repeat(${effectiveColumns.value}, minmax(0, 1fr))`,
-        gridAutoRows: '1fr',
-        gap: `${props.gap ?? 16}px`,
+    const containerCustomProperties = computed<CSSProperties>(() => ({
         '--max-card-gap': `${props.gap ?? 16}px`,
-        '--max-card-min-width': `${props.minCardWidth ?? 280}px`
+        '--max-card-min-width': `${props.minCardWidth ?? 320}px`,
+        '--max-card-list-subcard-width': `${props.minCardWidth ?? 320}px`
     }));
+
+    // Estilos de container e linhas
+    const rowLayoutStyle = computed<CSSProperties>(() => ({
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'stretch',
+        gap: `${props.gap ?? 16}px`,
+        width: '100%',
+        boxSizing: 'border-box'
+    }));
+
+    const staticGridContainerStyle = computed<CSSProperties>(() => ({
+        display: 'flex',
+        flexDirection: 'column',
+        gap: `${props.gap ?? 16}px`,
+        width: '100%',
+        gridAutoRows: '1fr',
+        '--max-card-gap': `${props.gap ?? 16}px`,
+        '--max-card-min-width': `${props.minCardWidth ?? 320}px`
+    }));
+
+    function getCellStyle(cell: CardListCell): CSSProperties {
+        const isMobile = isMobileWidth.value || effectiveColumns.value === 1;
+        if (isMobile) return {
+            width: '100%',
+            flex: '0 0 100%',
+            maxWidth: '100%',
+            boxSizing: 'border-box'
+        };
+
+
+        if (cell.appliedWidth > 0) return {
+            width: `${cell.appliedWidth}px`,
+            flex: `0 0 ${cell.appliedWidth}px`,
+            maxWidth: '100%',
+            boxSizing: 'border-box'
+        };
+
+
+        return {
+            flex: '1 1 0%',
+            minWidth: 0,
+            boxSizing: 'border-box'
+        };
+    }
+
+    const emptyStatusStyle = computed<CSSProperties>(() => {
+        if (!isVirtualActive.value) return {};
+        const style: CSSProperties = {};
+        if (props.height) style.minHeight = typeof props.height === 'number' ? `${props.height}px` : props.height;
+        if (props.maxHeight) style.maxHeight = typeof props.maxHeight === 'number' ? `${props.maxHeight}px` : props.maxHeight;
+        return style;
+    });
 
     const scrollContainerStyle = computed<CSSProperties>(() => {
         const style: CSSProperties = {
@@ -505,17 +488,6 @@
 
         return style;
     });
-
-    function getItemKey(item: any, fallbackIndex: number): string | number {
-        const keyProp = props.keyField || props.itemKey;
-        if (keyProp) {
-            if (typeof keyProp === 'function') return keyProp(item, fallbackIndex);
-            if (typeof keyProp === 'string' && item && typeof item === 'object') return item[keyProp] ?? fallbackIndex;
-        }
-        if (item && typeof item === 'object' && ('id' in item || 'key' in item)) return item.id ?? item.key ?? fallbackIndex;
-
-        return fallbackIndex;
-    }
 
     // Handlers de interação e eventos reativos
     function onCategoryChange(event: Event) {
@@ -563,9 +535,10 @@
         computedColumns: effectiveColumns,
         filteredItems: displayItems,
         totalItems: computed(() => props.items?.length ?? 0),
+        rows,
         scrollToIndex: (index: number, options?: { align?: 'start' | 'center' | 'end' | 'auto'; behavior?: 'auto' | 'smooth' }) => {
             if (!virtualizer.value) return;
-            const rowIndex = Math.floor(index / effectiveColumns.value);
+            const rowIndex = layoutModel.value.originalIndexToRow.get(index) ?? Math.floor(index / effectiveColumns.value);
             virtualizer.value.scrollToIndex(rowIndex, options);
         },
         scrollToOffset: (offset: number, options?: { align?: 'start' | 'center' | 'end' | 'auto'; behavior?: 'auto' | 'smooth' }) => {
@@ -650,7 +623,7 @@
         &:focus-visible {
             outline: var(--max-focus-outline, 2px solid var(--max-focus-ring-color, #00768e));
             outline-offset: 2px;
-            border-color: var(--max-primary-500, #00768E);
+            border-color: var(--max-primary-500, #00768e);
             box-shadow: var(--max-focus-ring);
         }
     }
@@ -668,6 +641,30 @@
         display: flex;
         align-items: center;
         justify-content: center;
+    }
+
+    .max-card-list-empty-add {
+        width: 100%;
+        min-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        padding: 1.5rem;
+
+        .max-card-list-empty-add-action {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: auto;
+            max-width: 100%;
+
+            > :deep(.max-card--add) {
+                width: min(var(--max-card-min-width, 320px), 100%);
+                min-height: 160px;
+                height: auto;
+            }
+        }
     }
 
     .max-card-list-scroll {
@@ -701,7 +698,6 @@
 
     .max-card-list-col {
         min-width: 0;
-        width: 100%;
         height: 100%;
         display: flex;
         flex-direction: column;
@@ -726,17 +722,77 @@
         }
     }
 
+    // Regras contextuais para grupos de subcards no desktop
+    :deep(.max-card:has(.max-subcard)) {
+        width: 100%;
+        max-width: 100%;
+
+        .max-card-content {
+            display: flex;
+            flex-flow: row wrap;
+            align-items: stretch;
+            gap: 0.75rem;
+
+            > .max-subcard,
+            > * > .max-subcard {
+                flex: 0 0 auto;
+                width: var(--max-card-list-subcard-width, var(--max-card-subcard-width, 320px));
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+        }
+    }
+
     @media (width <= 768px) {
-        .max-card-list-grid,
-        .max-card-list-static-grid {
-            grid-template-columns: 1fr !important;
+        .max-card-list-grid {
+            flex-direction: column !important;
         }
 
         .max-card-list-col {
-            width: 100%;
+            width: 100% !important;
+            flex: 0 0 100% !important;
 
             > * {
                 width: 100%;
+            }
+        }
+
+        :deep(.max-card:has(.max-subcard)) {
+            .max-card-content {
+                flex-direction: column !important;
+
+                > .max-subcard,
+                > * > .max-subcard {
+                    width: 100% !important;
+                    flex: 1 1 auto !important;
+                }
+            }
+        }
+    }
+
+    .max-card-list.is-mobile {
+        .max-card-list-grid {
+            flex-direction: column !important;
+        }
+
+        .max-card-list-col {
+            width: 100% !important;
+            flex: 0 0 100% !important;
+
+            > * {
+                width: 100%;
+            }
+        }
+
+        :deep(.max-card:has(.max-subcard)) {
+            .max-card-content {
+                flex-direction: column !important;
+
+                > .max-subcard,
+                > * > .max-subcard {
+                    width: 100% !important;
+                    flex: 1 1 auto !important;
+                }
             }
         }
     }
