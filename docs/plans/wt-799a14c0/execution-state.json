@@ -1,0 +1,80 @@
+{
+  "version": 2,
+  "planRevision": "6cda7856748428760d1960f9b559d6486784f00eb1d94f597a61b4e49779e9f6",
+  "tasks": [
+    {
+      "id": "T1",
+      "status": "completed",
+      "files": [],
+      "validations": []
+    },
+    {
+      "id": "T2",
+      "status": "completed",
+      "files": [
+        "src/components/MaxModal.vue",
+        "src/components/MaxDrawer.vue",
+        "tests/components/MaxModal.test.ts",
+        "tests/components/MaxDrawer.test.ts",
+        "tests/browser/MaxOverlayWidth.browser.ts"
+      ],
+      "revision": "8f4c7062111e76f32cf0ba0dbc17704a92b5194b6402a11f03519e78bd4677fc",
+      "validations": []
+    },
+    {
+      "id": "T3",
+      "status": "completed",
+      "files": [],
+      "validations": []
+    }
+  ],
+  "verification": {
+    "revision": "8f4c7062111e76f32cf0ba0dbc17704a92b5194b6402a11f03519e78bd4677fc",
+    "checks": [
+      {
+        "command": "npm run check:lockfile",
+        "revision": "8f4c7062111e76f32cf0ba0dbc17704a92b5194b6402a11f03519e78bd4677fc",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check:test",
+        "revision": "8f4c7062111e76f32cf0ba0dbc17704a92b5194b6402a11f03519e78bd4677fc",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run lint",
+        "revision": "8f4c7062111e76f32cf0ba0dbc17704a92b5194b6402a11f03519e78bd4677fc",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run build",
+        "revision": "8f4c7062111e76f32cf0ba0dbc17704a92b5194b6402a11f03519e78bd4677fc",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npx vitest run tests/components/MaxModal.test.ts tests/components/MaxDrawer.test.ts",
+        "revision": "8f4c7062111e76f32cf0ba0dbc17704a92b5194b6402a11f03519e78bd4677fc",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npx vitest run --config vitest.browser.config.ts tests/browser/MaxOverlayWidth.browser.ts",
+        "revision": "8f4c7062111e76f32cf0ba0dbc17704a92b5194b6402a11f03519e78bd4677fc",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run test",
+        "revision": "8f4c7062111e76f32cf0ba0dbc17704a92b5194b6402a11f03519e78bd4677fc",
+        "result": "failed",
+        "exitCode": 1
+      }
+    ]
+  },
+  "updatedAt": 1792151280000,
+  "nextAction": "Aguardar autorização explícita do usuário para commit/merge pelo painel."
+}

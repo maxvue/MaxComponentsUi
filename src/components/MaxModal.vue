@@ -8,20 +8,7 @@
         <teleport to="body">
             <Transition name="max-modal-fade" @after-leave="emit('after-hide')">
                 <div class="background-modal" @pointerdown.capture="onBackdropPointerDown" @pointerup.capture="onBackdropPointerUp" @pointercancel="onBackdropPointerCancel" @click.stop="onBackdropClick" v-if="is_show" :style="{ zIndex: backdropZIndex }" :data-html2canvas-ignore="props.ignoreCanvas">
-                    <div
-                        class="max-modal"
-                        ref="el"
-                        role="dialog"
-                        :aria-modal="isTopModal ? 'true' : undefined"
-                        :aria-hidden="!isTopModal ? 'true' : undefined"
-                        :inert="!isTopModal ? true : undefined"
-                        :aria-labelledby="computedAriaLabelledby"
-                        :aria-label="computedAriaLabel"
-                        :style="{ zIndex: dialogZIndex, padding: modal_padding, width: modal_width, height: modal_height, maxWidth: modal_max_width, maxHeight: modal_max_height }"
-                        @click.stop="() => {}"
-                        @keydown="isTopModal ? trap.onKeydown($event) : undefined"
-                        :class="[{ 'is-shaking': isShaking }, props.class]"
-                    >
+                    <div class="max-modal" ref="el" role="dialog" :aria-modal="isTopModal ? 'true' : undefined" :aria-hidden="!isTopModal ? 'true' : undefined" :inert="!isTopModal ? true : undefined" :aria-labelledby="computedAriaLabelledby" :aria-label="computedAriaLabel" :style="{ zIndex: dialogZIndex, padding: modal_padding, width: modal_width, height: modal_height, minWidth: modal_min_width, maxWidth: modal_max_width, maxHeight: modal_max_height }" @click.stop="() => {}" @keydown="isTopModal ? trap.onKeydown($event) : undefined" :class="[{ 'is-shaking': isShaking }, props.class]">
                         <header v-if="!props.noHeader" :id="title_id" class="max-modal-header-wrapper">
                             <slot name="header" :title-id="title_id">
                                 <MaxGrid class="max-modal-header">
@@ -109,6 +96,8 @@
         width?: string | number;
         /** Altura específica */
         height?: string | number;
+        /** Largura mínima específica */
+        minWidth?: string | number;
         /** Largura máxima específica */
         maxWidth?: string | number;
         /** Altura máxima específica */
@@ -411,6 +400,11 @@
     const modal_width = computed(() => {
         if (props.width === undefined) return undefined;
         return typeof props.width === 'number' ? `${props.width}px` : props.width;
+    });
+
+    const modal_min_width = computed(() => {
+        if (props.minWidth === undefined) return undefined;
+        return typeof props.minWidth === 'number' ? `${props.minWidth}px` : props.minWidth;
     });
 
     const modal_height = computed(() => {

@@ -855,4 +855,210 @@ describe('MaxDrawer', () => {
             wrapper.unmount();
         });
     });
+
+    describe('Dimensões do painel (width, maxWidth, minWidth)', () => {
+        it('não injeta width, max-width nem min-width inline quando as props não forem informadas', async () => {
+            const wrapper = mountDrawer();
+            await nextTick();
+            const drawerEl = document.querySelector('.max-drawer');
+            expect(drawerEl).not.toBeNull();
+            const style = drawerEl?.getAttribute('style') ?? '';
+            expect(style).not.toMatch(/\bwidth:/);
+            expect(style).not.toMatch(/\bmax-width:/);
+            expect(style).not.toMatch(/\bmin-width:/);
+            wrapper.unmount();
+        });
+
+        it('aplica width inline quando informada como número, zero ou string CSS', async () => {
+            const wrapperNumber = mountDrawer({ width: 350 });
+            await nextTick();
+            expect(document.querySelector('.max-drawer')?.getAttribute('style')).toContain('width: 350px');
+            wrapperNumber.unmount();
+
+            const wrapperZero = mountDrawer({ width: 0 });
+            await nextTick();
+            expect(document.querySelector('.max-drawer')?.getAttribute('style')).toContain('width: 0px');
+            wrapperZero.unmount();
+
+            const testCases = ['25rem', '75%', '60vw', 'calc(100vw - 32px)', 'var(--drawer-custom-width)'];
+            for (const val of testCases) {
+                const w = mountDrawer({ width: val });
+                await nextTick();
+                expect(document.querySelector('.max-drawer')?.getAttribute('style')).toContain(`width: ${val}`);
+                w.unmount();
+            }
+        });
+
+        it('aplica maxWidth inline com teto de 100vw quando informada como número, zero ou string CSS', async () => {
+            const wrapperNumber = mountDrawer({ maxWidth: 480 });
+            await nextTick();
+            expect(document.querySelector('.max-drawer')?.getAttribute('style')).toContain('max-width: min(480px, 100vw)');
+            wrapperNumber.unmount();
+
+            const wrapperZero = mountDrawer({ maxWidth: 0 });
+            await nextTick();
+            expect(document.querySelector('.max-drawer')?.getAttribute('style')).toContain('max-width: min(0px, 100vw)');
+            wrapperZero.unmount();
+
+            const testCases = ['30rem', '90%', '80vw', 'calc(100vw - 40px)', 'var(--drawer-max)'];
+            for (const val of testCases) {
+                const w = mountDrawer({ maxWidth: val });
+                await nextTick();
+                expect(document.querySelector('.max-drawer')?.getAttribute('style')).toContain(`max-width: min(${val}, 100vw)`);
+                w.unmount();
+            }
+        });
+
+        it('aplica minWidth inline quando informada como número, zero ou string CSS', async () => {
+            const wrapperNumber = mountDrawer({ minWidth: 280 });
+            await nextTick();
+            expect(document.querySelector('.max-drawer')?.getAttribute('style')).toContain('min-width: 280px');
+            wrapperNumber.unmount();
+
+            const wrapperZero = mountDrawer({ minWidth: 0 });
+            await nextTick();
+            expect(document.querySelector('.max-drawer')?.getAttribute('style')).toContain('min-width: 0px');
+            wrapperZero.unmount();
+
+            const testCases = ['18rem', '40%', '30vw', 'calc(50vw - 10px)', 'var(--drawer-min)'];
+            for (const val of testCases) {
+                const w = mountDrawer({ minWidth: val });
+                await nextTick();
+                expect(document.querySelector('.max-drawer')?.getAttribute('style')).toContain(`min-width: ${val}`);
+                w.unmount();
+            }
+        });
+
+        it('combina width, maxWidth e minWidth simultaneamente no painel', async () => {
+            const wrapper = mountDrawer({
+                width: 400,
+                maxWidth: 600,
+                minWidth: 250
+            });
+            await nextTick();
+            const style = document.querySelector('.max-drawer')?.getAttribute('style') ?? '';
+            expect(style).toContain('width: 400px');
+            expect(style).toContain('max-width: min(600px, 100vw)');
+            expect(style).toContain('min-width: 250px');
+            wrapper.unmount();
+        });
+
+        it('aplica dimensões apenas ao painel .max-drawer e nunca à máscara .max-drawer-mask', async () => {
+            const wrapper = mountDrawer({
+                width: '30rem',
+                maxWidth: '40rem',
+                minWidth: '20rem'
+            });
+            await nextTick();
+            const maskEl = document.querySelector('.max-drawer-mask');
+            const drawerEl = document.querySelector('.max-drawer');
+            expect(maskEl).not.toBeNull();
+            expect(drawerEl).not.toBeNull();
+
+            const maskStyle = maskEl?.getAttribute('style') ?? '';
+            expect(maskStyle).not.toMatch(/\bwidth:/);
+            expect(maskStyle).not.toMatch(/\bmax-width:/);
+            expect(maskStyle).not.toMatch(/\bmin-width:/);
+
+            const drawerStyle = drawerEl?.getAttribute('style') ?? '';
+            expect(drawerStyle).toContain('width: 30rem');
+            expect(drawerStyle).toContain('max-width: min(40rem, 100vw)');
+            expect(drawerStyle).toContain('min-width: 20rem');
+            wrapper.unmount();
+        });
+
+        it('não aplica estilos de dimensão quando o slot container substitui o painel padrão', async () => {
+            const wrapper = mount(MaxDrawer, {
+                props: {
+                    visible: true,
+                    width: 500,
+                    maxWidth: 700,
+                    minWidth: 300
+                },
+                slots: {
+                    container: '<aside class="meu-container-customizado">Custom</aside>'
+                },
+                attachTo: document.body
+            });
+            await nextTick();
+
+            expect(document.querySelector('.max-drawer')).toBeNull();
+            expect(document.querySelector('.meu-container-customizado')).not.toBeNull();
+
+            const maskStyle = document.querySelector('.max-drawer-mask')?.getAttribute('style') ?? '';
+            expect(maskStyle).not.toMatch(/\bwidth:/);
+            expect(maskStyle).not.toMatch(/\bmax-width:/);
+            expect(maskStyle).not.toMatch(/\bmin-width:/);
+            wrapper.unmount();
+        });
+
+        it('atualiza e remove reativamente width, maxWidth e minWidth via setProps', async () => {
+            const wrapper = mountDrawer({
+                width: 300,
+                maxWidth: 500,
+                minWidth: 200
+            });
+            await nextTick();
+            let style = document.querySelector('.max-drawer')?.getAttribute('style') ?? '';
+            expect(style).toContain('width: 300px');
+            expect(style).toContain('max-width: min(500px, 100vw)');
+            expect(style).toContain('min-width: 200px');
+
+            await wrapper.setProps({
+                width: '35rem',
+                maxWidth: '50rem',
+                minWidth: '22rem'
+            });
+            await nextTick();
+            style = document.querySelector('.max-drawer')?.getAttribute('style') ?? '';
+            expect(style).toContain('width: 35rem');
+            expect(style).toContain('max-width: min(50rem, 100vw)');
+            expect(style).toContain('min-width: 22rem');
+
+            await wrapper.setProps({
+                width: undefined,
+                maxWidth: undefined,
+                minWidth: undefined
+            });
+            await nextTick();
+            style = document.querySelector('.max-drawer')?.getAttribute('style') ?? '';
+            expect(style).not.toMatch(/\bwidth:/);
+            expect(style).not.toMatch(/\bmax-width:/);
+            expect(style).not.toMatch(/\bmin-width:/);
+            wrapper.unmount();
+        });
+
+        it('mantém as classes de posição nas cinco posições junto aos estilos inline', async () => {
+            const positions = ['left', 'right', 'top', 'bottom', 'full'] as const;
+            for (const pos of positions) {
+                const wrapper = mountDrawer({ position: pos, width: 320 });
+                await nextTick();
+                const el = document.querySelector('.max-drawer');
+                expect(el?.classList.contains(`max-drawer-${pos}`)).toBe(true);
+                expect(el?.getAttribute('style')).toContain('width: 320px');
+                wrapper.unmount();
+            }
+        });
+
+        it('preserva classes extras via attrs e classe max-drawer-no-padding com props de dimensão', async () => {
+            const wrapper = mount(MaxDrawer, {
+                props: {
+                    visible: true,
+                    noPadding: true,
+                    width: 400
+                },
+                attrs: {
+                    class: 'drawer-custom-class'
+                },
+                attachTo: document.body
+            });
+            await nextTick();
+
+            const el = document.querySelector('.max-drawer');
+            expect(el?.classList.contains('max-drawer-no-padding')).toBe(true);
+            expect(el?.classList.contains('drawer-custom-class')).toBe(true);
+            expect(el?.getAttribute('style')).toContain('width: 400px');
+            wrapper.unmount();
+        });
+    });
 });

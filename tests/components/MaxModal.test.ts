@@ -488,6 +488,50 @@ describe('MaxModal', () => {
             const modalNumber = wrapperNumber.find('.max-modal');
             expect(modalNumber.attributes('style')).toContain('max-height: min(500px, calc(100vh - 40px))');
         });
+
+        it('não injeta min-width inline quando a prop minWidth não for informada', async () => {
+            const wrapper = mountModal();
+            (wrapper.vm as any).open();
+            await wrapper.vm.$nextTick();
+
+            const modalEl = wrapper.find('.max-modal');
+            const style = modalEl.attributes('style') ?? '';
+            expect(style).not.toMatch(/min-width:/);
+        });
+
+        it('aplica min-width inline quando a prop minWidth for informada como número, zero ou string CSS', async () => {
+            const wrapperNumber = mountModal({ minWidth: 320 });
+            (wrapperNumber.vm as any).open();
+            await wrapperNumber.vm.$nextTick();
+            expect(wrapperNumber.find('.max-modal').attributes('style')).toContain('min-width: 320px');
+
+            const wrapperZero = mountModal({ minWidth: 0 });
+            (wrapperZero.vm as any).open();
+            await wrapperZero.vm.$nextTick();
+            expect(wrapperZero.find('.max-modal').attributes('style')).toContain('min-width: 0px');
+
+            const testCases = ['20rem', '80%', '50vw', 'calc(100vw - 60px)', 'var(--custom-min-width)'];
+            for (const val of testCases) {
+                const wrapper = mountModal({ minWidth: val });
+                (wrapper.vm as any).open();
+                await wrapper.vm.$nextTick();
+                expect(wrapper.find('.max-modal').attributes('style')).toContain(`min-width: ${val}`);
+            }
+        });
+
+        it('atualiza e remove min-width de forma reativa quando a prop for alterada', async () => {
+            const wrapper = mountModal({ minWidth: 300 });
+            (wrapper.vm as any).open();
+            await wrapper.vm.$nextTick();
+            expect(wrapper.find('.max-modal').attributes('style')).toContain('min-width: 300px');
+
+            await wrapper.setProps({ minWidth: '400px' });
+            expect(wrapper.find('.max-modal').attributes('style')).toContain('min-width: 400px');
+
+            await wrapper.setProps({ minWidth: undefined });
+            const style = wrapper.find('.max-modal').attributes('style') ?? '';
+            expect(style).not.toMatch(/min-width:/);
+        });
     });
 
     describe('Barras de rolagem invisíveis (0px de largura)', () => {

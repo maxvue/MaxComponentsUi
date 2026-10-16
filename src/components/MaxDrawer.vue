@@ -3,17 +3,7 @@
         <transition name="max-drawer-fade" @after-leave="emit('after-hide')">
             <div v-if="props.visible" class="max-drawer-mask" :class="{ 'max-drawer-mask-modal': props.modal }" :style="{ zIndex: z_index }" @pointerdown.capture="onMaskPointerDown" @pointerup.capture="onMaskPointerUp" @pointercancel="onMaskPointerCancel" @click.self="onMaskClick">
                 <slot name="container" :close-callback="close">
-                    <div
-                        ref="panel_el"
-                        class="max-drawer"
-                        :class="[`max-drawer-${props.position}`, { 'max-drawer-no-padding': props.noPadding }, $attrs.class]"
-                        :role="props.modal ? 'dialog' : 'complementary'"
-                        :aria-modal="props.modal ? 'true' : undefined"
-                        :aria-labelledby="effectiveAriaLabelledby"
-                        :aria-label="effectiveAriaLabel"
-                        tabindex="-1"
-                        @keydown="trap.onKeydown"
-                    >
+                    <div ref="panel_el" class="max-drawer" :class="[`max-drawer-${props.position}`, { 'max-drawer-no-padding': props.noPadding }, $attrs.class]" :style="{ width: drawer_width, maxWidth: drawer_max_width, minWidth: drawer_min_width }" :role="props.modal ? 'dialog' : 'complementary'" :aria-modal="props.modal ? 'true' : undefined" :aria-labelledby="effectiveAriaLabelledby" :aria-label="effectiveAriaLabel" tabindex="-1" @keydown="trap.onKeydown">
                         <div v-if="hasHeader || props.showCloseIcon" class="max-drawer-header">
                             <slot name="header" :header-id="headerId">
                                 <span :id="headerId" class="max-drawer-title">{{ props.header }}</span>
@@ -92,6 +82,12 @@
         autoZIndex?: boolean;
         /** Desativa o padding padrão (1rem) de .max-drawer-content. */
         noPadding?: boolean;
+        /** Largura específica do painel (em px se for número, ou string CSS válida). */
+        width?: string | number;
+        /** Largura máxima específica do painel (em px se for número, ou string CSS válida), limitada ao teto de 100vw. */
+        maxWidth?: string | number;
+        /** Largura mínima específica do painel (em px se for número, ou string CSS válida). */
+        minWidth?: string | number;
         /** Rótulo acessível WAI-ARIA quando não houver header. */
         ariaLabel?: string;
         /** ID do elemento que rotula o diálogo. */
@@ -151,6 +147,22 @@
     const scroll_lock = useScrollLock();
 
     const is_show = computed(() => props.visible);
+
+    const drawer_width = computed(() => {
+        if (props.width === undefined) return undefined;
+        return typeof props.width === 'number' ? `${props.width}px` : props.width;
+    });
+
+    const drawer_max_width = computed(() => {
+        if (props.maxWidth === undefined) return undefined;
+        const raw = typeof props.maxWidth === 'number' ? `${props.maxWidth}px` : props.maxWidth;
+        return `min(${raw}, 100vw)`;
+    });
+
+    const drawer_min_width = computed(() => {
+        if (props.minWidth === undefined) return undefined;
+        return typeof props.minWidth === 'number' ? `${props.minWidth}px` : props.minWidth;
+    });
 
     /**
      * As chaves do default de closeButtonProps (severity/text/rounded) sao
