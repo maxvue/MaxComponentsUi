@@ -178,6 +178,15 @@ try {
             import * as UI from '@maxvue/max-components-ui';
             import '@maxvue/max-components-ui/styles';
             if (!UI.MaxButton) throw new Error('MaxButton ausente no entrypoint raiz.');
+            const domainInputs = [
+                'MaxInputPhase', 'MaxInputWireSize', 'MaxInputWireType',
+                'MaxInputAiExecutionType', 'MaxInputAiBillingMode', 'MaxInputAiBillingUnit',
+                'MaxInputPaymentMethod', 'MaxInputScheduleType', 'MaxInputMonthOccurrence',
+                'MaxInputContentType'
+            ];
+            for (const name of domainInputs) {
+                if (!UI[name]) throw new Error('Input de domínio ausente no entrypoint raiz: ' + name);
+            }
             console.log('ESM sem deps opcionais — OK');
         `);
         await runCommand(process.execPath, ['index.js'], { cwd: dir });
@@ -221,13 +230,44 @@ try {
             },
         }, null, 2));
         writeFileSync(join(dir, 'index.ts'), `
-            import { MaxButton } from '@maxvue/max-components-ui';
+            import {
+                MaxButton,
+                MaxInputPhase,
+                MaxInputWireSize,
+                MaxInputPaymentMethod,
+                type PhaseValue,
+                type WireSizeValue,
+                type PaymentMethodValue
+            } from '@maxvue/max-components-ui';
+            import GranularPhase from '@maxvue/max-components-ui/components/MaxInputPhase';
+            import GranularWireSize from '@maxvue/max-components-ui/components/MaxInputWireSize';
+            import GranularWireType from '@maxvue/max-components-ui/components/MaxInputWireType';
+            import GranularAiExecution from '@maxvue/max-components-ui/components/MaxInputAiExecutionType';
+            import GranularAiBillingMode from '@maxvue/max-components-ui/components/MaxInputAiBillingMode';
+            import GranularAiBillingUnit from '@maxvue/max-components-ui/components/MaxInputAiBillingUnit';
+            import GranularPayment from '@maxvue/max-components-ui/components/MaxInputPaymentMethod';
+            import GranularSchedule from '@maxvue/max-components-ui/components/MaxInputScheduleType';
+            import GranularOccurrence from '@maxvue/max-components-ui/components/MaxInputMonthOccurrence';
+            import GranularContent from '@maxvue/max-components-ui/components/MaxInputContentType';
             import { useModalStore } from '@maxvue/max-components-ui/stores';
             import { presetMaxUno } from '@maxvue/max-components-ui/preset';
             import { MaxComponentsUiResolver } from '@maxvue/max-components-ui/resolver';
 
             // Garante que os tipos estão presentes
             const _btn: typeof MaxButton = MaxButton;
+            const _pVal: PhaseValue = 1;
+            const _wVal: WireSizeValue = 2.5;
+            const _payVal: PaymentMethodValue = 'pix';
+            const _g1: typeof MaxInputPhase = GranularPhase;
+            const _g2 = GranularWireSize;
+            const _g3 = GranularWireType;
+            const _g4 = GranularAiExecution;
+            const _g5 = GranularAiBillingMode;
+            const _g6 = GranularAiBillingUnit;
+            const _g7 = GranularPayment;
+            const _g8 = GranularSchedule;
+            const _g9 = GranularOccurrence;
+            const _g10 = GranularContent;
             const _store = useModalStore;
             const _preset = presetMaxUno;
             const _resolver = MaxComponentsUiResolver;
@@ -246,11 +286,13 @@ try {
         writeFileSync(join(dir, 'index.html'), '<div id="app"></div><script type="module" src="/main.js"></script>');
         writeFileSync(join(dir, 'main.js'), `
             import { createApp } from 'vue';
-            import { MaxButton } from '@maxvue/max-components-ui';
+            import { MaxButton, MaxInputPhase } from '@maxvue/max-components-ui';
             import granularBtn from '@maxvue/max-components-ui/components/MaxButton';
+            import granularPhase from '@maxvue/max-components-ui/components/MaxInputPhase';
+            import granularPayment from '@maxvue/max-components-ui/components/MaxInputPaymentMethod';
             import '@maxvue/max-components-ui/style.css';
 
-            console.log('Vite import ok', MaxButton, granularBtn);
+            console.log('Vite import ok', MaxButton, granularBtn, MaxInputPhase, granularPhase, granularPayment);
         `);
         writeFileSync(join(dir, 'vite.config.js'), `
             export default {
@@ -274,20 +316,38 @@ try {
         ], { cwd: dir, stdio: 'pipe' });
         writeFileSync(join(dir, 'index.js'), `
             import { createSSRApp } from 'vue';
+            import { createPinia } from 'pinia';
             import { renderToString } from '@vue/server-renderer';
-            import { MaxButton } from '@maxvue/max-components-ui';
+            import {
+                MaxButton,
+                MaxInputPhase,
+                MaxInputAiExecutionType,
+                MaxInputPaymentMethod,
+                MaxInputContentType
+            } from '@maxvue/max-components-ui';
             import * as Stores from '@maxvue/max-components-ui/stores';
             import * as Styles from '@maxvue/max-components-ui/styles';
 
             // Valida que os módulos são importáveis em contexto SSR (Node.js puro)
             if (!MaxButton) throw new Error('SSR: MaxButton ausente.');
+            if (!MaxInputPhase) throw new Error('SSR: MaxInputPhase ausente.');
+            if (!MaxInputAiExecutionType) throw new Error('SSR: MaxInputAiExecutionType ausente.');
+            if (!MaxInputPaymentMethod) throw new Error('SSR: MaxInputPaymentMethod ausente.');
+            if (!MaxInputContentType) throw new Error('SSR: MaxInputContentType ausente.');
             if (!Stores.useToastStore) throw new Error('SSR: Stores ausentes.');
             if (!Styles.MaxStyle) throw new Error('SSR: MaxStyle ausente.');
 
             const app = createSSRApp({
-                components: { MaxButton },
-                template: \`<MaxButton>Test</MaxButton>\`,
+                components: {
+                    MaxButton,
+                    MaxInputPhase,
+                    MaxInputAiExecutionType,
+                    MaxInputPaymentMethod,
+                    MaxInputContentType
+                },
+                template: \`<div><MaxButton>Test</MaxButton><MaxInputPhase :modelValue="1" /><MaxInputAiExecutionType modelValue="cloud" /><MaxInputPaymentMethod modelValue="pix" /><MaxInputContentType modelValue="image" /></div>\`,
             });
+            app.use(createPinia());
 
             renderToString(app).then(html => {
                 if (!html.includes('button')) {

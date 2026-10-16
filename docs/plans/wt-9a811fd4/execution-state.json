@@ -1,0 +1,280 @@
+{
+  "version": 2,
+  "planRevision": "9bdc432d015bcf1ee9f4da509bb3d0ee2bff793bd7614faf9aba1b71ac24043c",
+  "tasks": [
+    {
+      "id": "P00",
+      "status": "completed",
+      "files": [],
+      "validations": []
+    },
+    {
+      "id": "P01",
+      "status": "completed",
+      "files": [
+        "src/types/domainInputs.ts",
+        "src/constants/electricalInputs.ts",
+        "src/constants/aiInputs.ts",
+        "src/constants/paymentMethods.ts",
+        "src/constants/editorialInputs.ts",
+        "src/components/base/MaxDomainSelect.vue",
+        "tests/components/MaxDomainSelect.test.ts"
+      ],
+      "validations": [
+        {
+          "command": "npx vitest run tests/components/MaxDomainSelect.test.ts",
+          "revision": "current",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "D01",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputPhase.vue",
+        "tests/components/MaxInputPhase.test.ts"
+      ],
+      "validations": [
+        {
+          "command": "npx vitest run tests/components/MaxInputPhase.test.ts",
+          "revision": "current",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "D02",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputWireSize.vue",
+        "tests/components/MaxInputWireSize.test.ts"
+      ],
+      "validations": [
+        {
+          "command": "npx vitest run tests/components/MaxInputWireSize.test.ts",
+          "revision": "current",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "D03",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputWireType.vue",
+        "tests/components/MaxInputWireType.test.ts"
+      ],
+      "validations": [
+        {
+          "command": "npx vitest run tests/components/MaxInputWireType.test.ts",
+          "revision": "current",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "D04",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputAiExecutionType.vue",
+        "tests/components/MaxInputAiExecutionType.test.ts"
+      ],
+      "validations": [
+        {
+          "command": "npx vitest run tests/components/MaxInputAiExecutionType.test.ts",
+          "revision": "current",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "D05",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputAiBillingMode.vue",
+        "tests/components/MaxInputAiBillingMode.test.ts"
+      ],
+      "validations": [
+        {
+          "command": "npx vitest run tests/components/MaxInputAiBillingMode.test.ts",
+          "revision": "current",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "D06",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputAiBillingUnit.vue",
+        "tests/components/MaxInputAiBillingUnit.test.ts"
+      ],
+      "validations": [
+        {
+          "command": "npx vitest run tests/components/MaxInputAiBillingUnit.test.ts",
+          "revision": "current",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "D07",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputPaymentMethod.vue",
+        "tests/components/MaxInputPaymentMethod.test.ts"
+      ],
+      "validations": [
+        {
+          "command": "npx vitest run tests/components/MaxInputPaymentMethod.test.ts",
+          "revision": "current",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "D08",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputScheduleType.vue",
+        "tests/components/MaxInputScheduleType.test.ts"
+      ],
+      "validations": [
+        {
+          "command": "npx vitest run tests/components/MaxInputScheduleType.test.ts",
+          "revision": "current",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "D09",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputMonthOccurrence.vue",
+        "tests/components/MaxInputMonthOccurrence.test.ts"
+      ],
+      "validations": [
+        {
+          "command": "npx vitest run tests/components/MaxInputMonthOccurrence.test.ts",
+          "revision": "current",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "D10",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputContentType.vue",
+        "tests/components/MaxInputContentType.test.ts"
+      ],
+      "validations": [
+        {
+          "command": "npx vitest run tests/components/MaxInputContentType.test.ts",
+          "revision": "current",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "P03",
+      "status": "completed",
+      "files": [
+        "src/index.ts",
+        "package.json",
+        "src/components-manifest.json",
+        "tests/index.test.ts",
+        "tests/helpers/resolver.test.ts",
+        "tests/architecture/package-exports.test.ts",
+        "scripts/verify-consumers.mjs"
+      ],
+      "validations": [
+        {
+          "command": "node scripts/verify-consumers.mjs",
+          "revision": "current",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "P04",
+      "status": "completed",
+      "files": [
+        "playground/src/catalog.ts",
+        "playground/src/scenarios/inputs-select.vue",
+        "docs/INPUTS-DOMAIN.md",
+        "tests/types/domainInputs.test.ts",
+        "tests/browser/MaxDomainInputs.browser.ts"
+      ],
+      "validations": [
+        {
+          "command": "npx vitest run --config vitest.browser.config.ts tests/browser/MaxDomainInputs.browser.ts",
+          "revision": "current",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "P05",
+      "status": "completed",
+      "files": [],
+      "validations": [
+        {
+          "command": "npm run type-check && npm run type-check:test",
+          "revision": "current",
+          "result": "passed"
+        },
+        {
+          "command": "npm run lint:check",
+          "revision": "current",
+          "result": "passed"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "revision": "current",
+    "checks": [
+      {
+        "command": "npm run type-check && npm run type-check:test",
+        "revision": "current",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run lint:check",
+        "revision": "current",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run build",
+        "revision": "current",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npx vitest run tests/components/MaxDomainSelect.test.ts tests/components/MaxInputPhase.test.ts tests/components/MaxInputWireSize.test.ts tests/components/MaxInputWireType.test.ts tests/components/MaxInputAiExecutionType.test.ts tests/components/MaxInputAiBillingMode.test.ts tests/components/MaxInputAiBillingUnit.test.ts tests/components/MaxInputPaymentMethod.test.ts tests/components/MaxInputScheduleType.test.ts tests/components/MaxInputMonthOccurrence.test.ts tests/components/MaxInputContentType.test.ts tests/types/domainInputs.test.ts tests/index.test.ts tests/helpers/resolver.test.ts tests/architecture/package-exports.test.ts tests/architecture/playgroundCoverage.test.ts",
+        "revision": "current",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npx vitest run --config vitest.browser.config.ts tests/browser/MaxDomainInputs.browser.ts",
+        "revision": "current",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "node scripts/verify-consumers.mjs",
+        "revision": "current",
+        "result": "passed",
+        "exitCode": 0
+      }
+    ]
+  },
+  "updatedAt": 1792164470000,
+  "nextAction": "Aguardando confirmação do usuário para commit e merge no painel."
+}

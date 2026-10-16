@@ -168,6 +168,20 @@ export { default as InputUF } from './components/MaxInputUF.vue';
 export { default as InputUf } from './components/MaxInputUF.vue';
 export type { MaxInputUFProps, MaxInputUFValueMode } from './components/MaxInputUF.vue';
 export { BRAZIL_STATES, BRAZIL_NATIONAL_STATE, type BrazilState } from './constants/brazilStates';
+export { default as MaxInputPhase } from './components/MaxInputPhase.vue';
+export { default as MaxInputWireSize } from './components/MaxInputWireSize.vue';
+export { default as MaxInputWireType } from './components/MaxInputWireType.vue';
+export { default as MaxInputAiExecutionType } from './components/MaxInputAiExecutionType.vue';
+export { default as MaxInputAiBillingMode } from './components/MaxInputAiBillingMode.vue';
+export { default as MaxInputAiBillingUnit } from './components/MaxInputAiBillingUnit.vue';
+export { default as MaxInputPaymentMethod } from './components/MaxInputPaymentMethod.vue';
+export { default as MaxInputScheduleType } from './components/MaxInputScheduleType.vue';
+export { default as MaxInputMonthOccurrence } from './components/MaxInputMonthOccurrence.vue';
+export { default as MaxInputContentType } from './components/MaxInputContentType.vue';
+export { PHASE_OPTIONS, WIRE_SIZE_OPTIONS, WIRE_TYPE_OPTIONS } from './constants/electricalInputs';
+export { AI_EXECUTION_TYPE_OPTIONS, AI_BILLING_MODE_OPTIONS, AI_BILLING_UNIT_OPTIONS } from './constants/aiInputs';
+export { PAYMENT_METHOD_OPTIONS } from './constants/paymentMethods';
+export { SCHEDULE_TYPE_OPTIONS, MONTH_OCCURRENCE_OPTIONS, CONTENT_TYPE_OPTIONS } from './constants/editorialInputs';
 export { default as MaxGridCols } from './components/MaxGridCols.vue';
 
 // Loaders
