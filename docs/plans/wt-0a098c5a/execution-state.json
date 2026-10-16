@@ -1,0 +1,38 @@
+{
+  "version": 2,
+  "planRevision": "eb147add16ec5e8dbdd44ce95ac7bfdad7bc5444fd840becfb0a45294d73d15b",
+  "tasks": [
+    {
+      "id": "T00",
+      "status": "blocked",
+      "files": [],
+      "validations": [],
+      "nextAction": "Preparar dependências e caches isolados nesta worktree sem usar o node_modules compartilhado; então repetir o preflight."
+    },
+    { "id": "T01", "status": "pending", "files": [], "validations": [] },
+    { "id": "T02", "status": "pending", "files": [], "validations": [] },
+    { "id": "T03", "status": "pending", "files": [], "validations": [] },
+    { "id": "T04", "status": "pending", "files": [], "validations": [] },
+    { "id": "T05", "status": "pending", "files": [], "validations": [] },
+    { "id": "T06", "status": "pending", "files": [], "validations": [] },
+    { "id": "T07", "status": "pending", "files": [], "validations": [] },
+    { "id": "T08", "status": "pending", "files": [], "validations": [] },
+    { "id": "T09", "status": "pending", "files": [], "validations": [] },
+    { "id": "T10", "status": "pending", "files": [], "validations": [] },
+    { "id": "T11", "status": "pending", "files": [], "validations": [] },
+    { "id": "T12", "status": "pending", "files": [], "validations": [] },
+    { "id": "T13", "status": "pending", "files": [], "validations": [] },
+    { "id": "T14", "status": "pending", "files": [], "validations": [] },
+    { "id": "T15", "status": "pending", "files": [], "validations": [] },
+    { "id": "T16", "status": "pending", "files": [], "validations": [] },
+    { "id": "T17", "status": "pending", "files": [], "validations": [] },
+    { "id": "T18", "status": "pending", "files": [], "validations": [] },
+    { "id": "T19", "status": "pending", "files": [], "validations": [] }
+  ],
+  "verification": {
+    "revision": "9208228d7d226b270e48a4162c47bf75060c21726846ba8f68809a26f8833ffb",
+    "checks": []
+  },
+  "updatedAt": 1792173092725,
+  "nextAction": "Aguardar ambiente de dependências isoladas; nenhuma implementação ou validação de código foi iniciada."
+}
