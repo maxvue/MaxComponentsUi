@@ -157,6 +157,18 @@
       "types": "./dist/components/MaxImage.vue.d.ts",
       "import": "./dist/components/MaxImage.es.js"
     },
+    "./components/MaxInputAiBillingMode": {
+      "types": "./dist/components/MaxInputAiBillingMode.vue.d.ts",
+      "import": "./dist/components/MaxInputAiBillingMode.es.js"
+    },
+    "./components/MaxInputAiBillingUnit": {
+      "types": "./dist/components/MaxInputAiBillingUnit.vue.d.ts",
+      "import": "./dist/components/MaxInputAiBillingUnit.es.js"
+    },
+    "./components/MaxInputAiExecutionType": {
+      "types": "./dist/components/MaxInputAiExecutionType.vue.d.ts",
+      "import": "./dist/components/MaxInputAiExecutionType.es.js"
+    },
     "./components/MaxInputAutoComplete": {
       "types": "./dist/components/MaxInputAutoComplete.vue.d.ts",
       "import": "./dist/components/MaxInputAutoComplete.es.js"
@@ -184,6 +196,10 @@
     "./components/MaxInputCodeToolbar": {
       "types": "./dist/components/MaxInputCodeToolbar.vue.d.ts",
       "import": "./dist/components/MaxInputCodeToolbar.es.js"
+    },
+    "./components/MaxInputContentType": {
+      "types": "./dist/components/MaxInputContentType.vue.d.ts",
+      "import": "./dist/components/MaxInputContentType.es.js"
     },
     "./components/MaxInputCoordinateDecimalLat": {
       "types": "./dist/components/MaxInputCoordinateDecimalLat.vue.d.ts",
@@ -293,6 +309,10 @@
       "types": "./dist/components/MaxInputMonthDays.vue.d.ts",
       "import": "./dist/components/MaxInputMonthDays.es.js"
     },
+    "./components/MaxInputMonthOccurrence": {
+      "types": "./dist/components/MaxInputMonthOccurrence.vue.d.ts",
+      "import": "./dist/components/MaxInputMonthOccurrence.es.js"
+    },
     "./components/MaxInputNumber": {
       "types": "./dist/components/MaxInputNumber.vue.d.ts",
       "import": "./dist/components/MaxInputNumber.es.js"
@@ -305,9 +325,17 @@
       "types": "./dist/components/MaxInputPassword.vue.d.ts",
       "import": "./dist/components/MaxInputPassword.es.js"
     },
+    "./components/MaxInputPaymentMethod": {
+      "types": "./dist/components/MaxInputPaymentMethod.vue.d.ts",
+      "import": "./dist/components/MaxInputPaymentMethod.es.js"
+    },
     "./components/MaxInputPercent": {
       "types": "./dist/components/MaxInputPercent.vue.d.ts",
       "import": "./dist/components/MaxInputPercent.es.js"
+    },
+    "./components/MaxInputPhase": {
+      "types": "./dist/components/MaxInputPhase.vue.d.ts",
+      "import": "./dist/components/MaxInputPhase.es.js"
     },
     "./components/MaxInputPhone": {
       "types": "./dist/components/MaxInputPhone.vue.d.ts",
@@ -324,6 +352,10 @@
     "./components/MaxInputRadio": {
       "types": "./dist/components/MaxInputRadio.vue.d.ts",
       "import": "./dist/components/MaxInputRadio.es.js"
+    },
+    "./components/MaxInputScheduleType": {
+      "types": "./dist/components/MaxInputScheduleType.vue.d.ts",
+      "import": "./dist/components/MaxInputScheduleType.es.js"
     },
     "./components/MaxInputSearch": {
       "types": "./dist/components/MaxInputSearch.vue.d.ts",
@@ -432,6 +464,14 @@
     "./components/MaxInputWeekInterval": {
       "types": "./dist/components/MaxInputWeekInterval.vue.d.ts",
       "import": "./dist/components/MaxInputWeekInterval.es.js"
+    },
+    "./components/MaxInputWireSize": {
+      "types": "./dist/components/MaxInputWireSize.vue.d.ts",
+      "import": "./dist/components/MaxInputWireSize.es.js"
+    },
+    "./components/MaxInputWireType": {
+      "types": "./dist/components/MaxInputWireType.vue.d.ts",
+      "import": "./dist/components/MaxInputWireType.es.js"
     },
     "./components/MaxInputYear": {
       "types": "./dist/components/MaxInputYear.vue.d.ts",

@@ -475,3 +475,6 @@ export type * from './card';
 
 // Tipos dos inputs semânticos.
 export type * from './semanticInputs';
+
+// Tipos dos dez inputs de domínio especializados.
+export type * from './domainInputs';

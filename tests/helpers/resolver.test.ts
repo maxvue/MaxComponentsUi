@@ -110,4 +110,31 @@ describe('MaxComponentsUiResolver', () => {
         expect(aliases['T1']).toBe('MaxTitle1');
         expect(aliases['T2']).toBe('MaxTitle2');
     });
+
+    it('resolve os novos inputs de domínio e seus aliases sem prefixo e kebab-case', () => {
+        expect(resolver.resolve('MaxInputPhase')).toEqual({
+            name: 'MaxInputPhase',
+            from: '@maxvue/max-components-ui'
+        });
+        expect(resolver.resolve('InputPhase')).toEqual({
+            name: 'MaxInputPhase',
+            from: '@maxvue/max-components-ui'
+        });
+        expect(resolver.resolve('max-input-phase')).toEqual({
+            name: 'MaxInputPhase',
+            from: '@maxvue/max-components-ui'
+        });
+        expect(resolver.resolve('MaxInputWireSize')).toEqual({
+            name: 'MaxInputWireSize',
+            from: '@maxvue/max-components-ui'
+        });
+        expect(resolver.resolve('max-input-wire-size')).toEqual({
+            name: 'MaxInputWireSize',
+            from: '@maxvue/max-components-ui'
+        });
+        expect(resolver.resolve('MaxInputPaymentMethod')).toEqual({
+            name: 'MaxInputPaymentMethod',
+            from: '@maxvue/max-components-ui'
+        });
+    });
 });
