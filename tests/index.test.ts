@@ -63,5 +63,26 @@ describe('index install', () => {
         expect(indexExports.MONTH_OCCURRENCE_OPTIONS).toHaveLength(5);
         expect(indexExports.CONTENT_TYPE_OPTIONS).toHaveLength(5);
     });
+
+    it('exporta os 10 novos inputs semânticos e seus aliases', async () => {
+        const indexExports = await import('../src/index');
+        const components = [
+            ['MaxInputPercent', 'InputPercent'],
+            ['MaxInputPower', 'InputPower'],
+            ['MaxInputCurrent', 'InputCurrent'],
+            ['MaxInputVoltage', 'InputVoltage'],
+            ['MaxInputDistance', 'InputDistance'],
+            ['MaxInputDuration', 'InputDuration'],
+            ['MaxInputTokenLimit', 'InputTokenLimit'],
+            ['MaxInputMonthDays', 'InputMonthDays'],
+            ['MaxInputWeekInterval', 'InputWeekInterval'],
+            ['MaxInputSocialPlatform', 'InputSocialPlatform']
+        ];
+        for (const [canonical, alias] of components) {
+            expect((indexExports as any)[canonical]).toBeDefined();
+            expect((indexExports as any)[alias]).toBeDefined();
+            expect((indexExports as any)[canonical]).toBe((indexExports as any)[alias]);
+        }
+    });
 });
 

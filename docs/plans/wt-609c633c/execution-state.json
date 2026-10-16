@@ -1,0 +1,191 @@
+{
+  "version": 2,
+  "planRevision": "5c5a0056adaf51c93c023b2f98ab04d7cfd6a0cfc7eda295716070670805af47",
+  "tasks": [
+    {
+      "id": "T0",
+      "status": "completed",
+      "files": [],
+      "validations": []
+    },
+    {
+      "id": "T1",
+      "status": "completed",
+      "files": [
+        "src/types/semanticInputs.ts",
+        "src/constants/semanticInputOptions.ts",
+        "src/types/index.ts",
+        "tests/types/semantic-inputs.test.ts"
+      ],
+      "revision": "5e5a2b0bbe385fb3bec2498378c992ebe648d2cecbfe83875492351b777c2202",
+      "validations": []
+    },
+    {
+      "id": "T2",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputEntity.vue",
+        "src/components/MaxInputGender.vue",
+        "src/components/MaxInputWeekday.vue",
+        "src/components/MaxInputMonth.vue",
+        "src/components/MaxInputTime.vue",
+        "src/components/MaxInputYear.vue",
+        "tests/components/MaxInputEntity.test.ts",
+        "tests/components/MaxInputGender.test.ts",
+        "tests/components/MaxInputWeekday.test.ts",
+        "tests/components/MaxInputMonth.test.ts",
+        "tests/components/MaxInputTime.test.ts",
+        "tests/components/MaxInputYear.test.ts"
+      ],
+      "revision": "53df6495ec73fc9ca6f930a82e14598d4b5395c4044081d7a3c34a6e9983e9be",
+      "validations": []
+    },
+    {
+      "id": "T3",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputEmail.vue",
+        "src/components/MaxInputUrl.vue",
+        "src/components/MaxInputPassword.vue",
+        "src/components/MaxInputSlug.vue",
+        "tests/components/MaxInputEmail.test.ts",
+        "tests/components/MaxInputUrl.test.ts",
+        "tests/components/MaxInputPassword.test.ts",
+        "tests/components/MaxInputSlug.test.ts"
+      ],
+      "revision": "ff6335ab98fb9766da6c736d197666980d38857b9f1c4d1a20686023bc81f9d6",
+      "validations": []
+    },
+    {
+      "id": "T4",
+      "status": "completed",
+      "files": [
+        "docs/INPUTS-SEMANTICOS.md",
+        "package.json",
+        "playground/src/catalog.ts",
+        "playground/src/scenarios/inputs-select.vue",
+        "playground/src/scenarios/inputs-text.vue",
+        "scripts/verify-consumers.mjs",
+        "src/components-manifest.json",
+        "src/index.ts",
+        "tests/architecture/inputBaseAccessibility.test.ts",
+        "tests/architecture/package-exports.test.ts",
+        "tests/browser/SemanticInputs.browser.ts",
+        "tests/helpers/MaxComponentsUiResolver.test.ts"
+      ],
+      "revision": "85d4758b2b8f3f47d53220af5fc006705da287e2abfe339164a86faa8f2a6ca8",
+      "validations": []
+    },
+    {
+      "id": "T5",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputEmail.vue",
+        "src/components/MaxInputPassword.vue",
+        "src/components/MaxInputSlug.vue",
+        "src/components/MaxInputUrl.vue",
+        "playground/src/scenarios/inputs-select.vue",
+        "tests/browser/SemanticInputs.browser.ts",
+        "tests/components/MaxInputEntity.test.ts",
+        "tests/components/MaxInputGender.test.ts",
+        "tests/components/MaxInputMonth.test.ts",
+        "tests/components/MaxInputTime.test.ts",
+        "tests/components/MaxInputWeekday.test.ts",
+        "tests/components/MaxInputYear.test.ts"
+      ],
+      "revision": "39d48c1b43c17c7378a8bdc80a614162e9762b9ed8f36f12cef39c0e24749d9a",
+      "validations": [
+        {
+          "command": "npm run type-check",
+          "revision": "39d48c1b43c17c7378a8bdc80a614162e9762b9ed8f36f12cef39c0e24749d9a",
+          "result": "passed"
+        },
+        {
+          "command": "npm run type-check:test",
+          "revision": "39d48c1b43c17c7378a8bdc80a614162e9762b9ed8f36f12cef39c0e24749d9a",
+          "result": "passed"
+        },
+        {
+          "command": "npm run lint",
+          "revision": "39d48c1b43c17c7378a8bdc80a614162e9762b9ed8f36f12cef39c0e24749d9a",
+          "result": "passed"
+        },
+        {
+          "command": "npm run build",
+          "revision": "39d48c1b43c17c7378a8bdc80a614162e9762b9ed8f36f12cef39c0e24749d9a",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "T6",
+      "status": "completed",
+      "files": [
+        "docs/INPUTS-SEMANTICOS.md"
+      ],
+      "revision": "39d48c1b43c17c7378a8bdc80a614162e9762b9ed8f36f12cef39c0e24749d9a",
+      "validations": []
+    }
+  ],
+  "verification": {
+    "revision": "39d48c1b43c17c7378a8bdc80a614162e9762b9ed8f36f12cef39c0e24749d9a",
+    "checks": [
+      {
+        "command": "npm run type-check",
+        "revision": "39d48c1b43c17c7378a8bdc80a614162e9762b9ed8f36f12cef39c0e24749d9a",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check:test",
+        "revision": "39d48c1b43c17c7378a8bdc80a614162e9762b9ed8f36f12cef39c0e24749d9a",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run lint",
+        "revision": "39d48c1b43c17c7378a8bdc80a614162e9762b9ed8f36f12cef39c0e24749d9a",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run build",
+        "revision": "39d48c1b43c17c7378a8bdc80a614162e9762b9ed8f36f12cef39c0e24749d9a",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npx vitest run tests/components/MaxInputEntity.test.ts tests/components/MaxInputGender.test.ts tests/components/MaxInputWeekday.test.ts tests/components/MaxInputMonth.test.ts tests/components/MaxInputTime.test.ts tests/components/MaxInputYear.test.ts tests/components/MaxInputEmail.test.ts tests/components/MaxInputUrl.test.ts tests/components/MaxInputPassword.test.ts tests/components/MaxInputSlug.test.ts tests/types/ tests/helpers/ tests/architecture/",
+        "revision": "39d48c1b43c17c7378a8bdc80a614162e9762b9ed8f36f12cef39c0e24749d9a",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npx vitest run --config vitest.browser.config.ts tests/browser/SemanticInputs.browser.ts",
+        "revision": "39d48c1b43c17c7378a8bdc80a614162e9762b9ed8f36f12cef39c0e24749d9a",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run check:playground:bundle",
+        "revision": "39d48c1b43c17c7378a8bdc80a614162e9762b9ed8f36f12cef39c0e24749d9a",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "node scripts/verify-consumers.mjs",
+        "revision": "39d48c1b43c17c7378a8bdc80a614162e9762b9ed8f36f12cef39c0e24749d9a",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "node scripts/check-tracked-filenames.mjs && node scripts/check-lockfile.mjs && node scripts/optimize-svgs.mjs --check && npm run verify:package && npm run check:audit",
+        "revision": "39d48c1b43c17c7378a8bdc80a614162e9762b9ed8f36f12cef39c0e24749d9a",
+        "result": "passed",
+        "exitCode": 0
+      }
+    ]
+  },
+  "updatedAt": 1792162800000,
+  "nextAction": "Aguardar confirmação do usuário para commit/merge pelo painel."
+}

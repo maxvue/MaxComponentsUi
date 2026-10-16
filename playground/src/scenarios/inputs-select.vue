@@ -339,6 +339,98 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="component-block">
+                    <h3>MaxInputEntity</h3>
+                    <div class="states">
+                        <div class="state-col" style="min-width: 180px;">
+                            <span>Normal (v-model: {{ entityVal || 'vazio' }})</span>
+                            <MaxInputEntity v-model="entityVal" clearable />
+                        </div>
+                        <div class="state-col" style="min-width: 180px;">
+                            <span>Disabled</span>
+                            <MaxInputEntity model-value="PJ" disabled />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="component-block">
+                    <h3>MaxInputGender</h3>
+                    <div class="states">
+                        <div class="state-col" style="min-width: 180px;">
+                            <span>Normal (v-model: {{ genderVal || 'vazio' }})</span>
+                            <MaxInputGender v-model="genderVal" clearable />
+                        </div>
+                        <div class="state-col" style="min-width: 180px;">
+                            <span>Disabled</span>
+                            <MaxInputGender model-value="F" disabled />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="component-block">
+                    <h3>MaxInputWeekday</h3>
+                    <div class="states">
+                        <div class="state-col" style="min-width: 180px;">
+                            <span>Normal (v-model: {{ weekdayVal || 'vazio' }})</span>
+                            <MaxInputWeekday v-model="weekdayVal" clearable />
+                        </div>
+                        <div class="state-col" style="min-width: 180px;">
+                            <span>Disabled</span>
+                            <MaxInputWeekday model-value="friday" disabled />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="component-block">
+                    <h3>MaxInputMonth</h3>
+                    <div class="states">
+                        <div class="state-col" style="min-width: 180px;">
+                            <span>Normal (v-model: {{ monthVal || 'vazio' }})</span>
+                            <MaxInputMonth v-model="monthVal" clearable />
+                        </div>
+                        <div class="state-col" style="min-width: 180px;">
+                            <span>Disabled</span>
+                            <MaxInputMonth :model-value="12" disabled />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="component-block">
+                    <h3>MaxInputTime</h3>
+                    <div class="states">
+                        <div class="state-col" style="min-width: 180px;">
+                            <span>Padrão 30m (v-model: {{ timeVal || 'vazio' }})</span>
+                            <MaxInputTime v-model="timeVal" clearable />
+                        </div>
+                        <div class="state-col" style="min-width: 180px;">
+                            <span>Expediente 08:00–18:00 (15m)</span>
+                            <MaxInputTime min-time="08:00" max-time="18:00" :step-minutes="15" clearable />
+                        </div>
+                        <div class="state-col" style="min-width: 180px;">
+                            <span>Disabled</span>
+                            <MaxInputTime model-value="09:00" disabled />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="component-block">
+                    <h3>MaxInputYear</h3>
+                    <div class="states">
+                        <div class="state-col" style="min-width: 180px;">
+                            <span>Normal (v-model: {{ yearVal || 'vazio' }})</span>
+                            <MaxInputYear v-model="yearVal" clearable />
+                        </div>
+                        <div class="state-col" style="min-width: 180px;">
+                            <span>Faixa 2020–2030</span>
+                            <MaxInputYear :min-year="2020" :max-year="2030" clearable />
+                        </div>
+                        <div class="state-col" style="min-width: 180px;">
+                            <span>Disabled</span>
+                            <MaxInputYear :model-value="2024" disabled />
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -354,6 +446,12 @@
         MaxInputAutoComplete,
         MaxInputAutoCompleteApi,
         MaxTagSelect,
+        MaxInputEntity,
+        MaxInputGender,
+        MaxInputWeekday,
+        MaxInputMonth,
+        MaxInputTime,
+        MaxInputYear,
         MaxInputPhase,
         MaxInputWireSize,
         MaxInputWireType,
@@ -383,6 +481,13 @@
     const ufWithBr = ref('BR');
     const ufState = ref('Rio de Janeiro');
     const ufMin = ref('R. G. do Sul');
+
+    const entityVal = ref('PF');
+    const genderVal = ref('M');
+    const weekdayVal = ref('monday');
+    const monthVal = ref(1);
+    const timeVal = ref('12:00');
+    const yearVal = ref(2025);
 
     const phaseVal = ref<PhaseValue | null>(1);
     const wireSizeVal = ref<WireSizeValue | null>(2.5);

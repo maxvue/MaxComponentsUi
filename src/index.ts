@@ -148,6 +148,28 @@ export { default as MaxSwitch } from './components/MaxInputSwitch.vue';
 export { default as InputSwitch } from './components/MaxInputSwitch.vue';
 export { default as MaxInputTextArea } from './components/MaxInputTextArea.vue';
 export { default as MaxInputTextList } from './components/MaxInputTextList.vue';
+
+// Inputs semânticos especializados
+export { default as MaxInputPercent } from './components/MaxInputPercent.vue';
+export { default as InputPercent } from './components/MaxInputPercent.vue';
+export { default as MaxInputPower } from './components/MaxInputPower.vue';
+export { default as InputPower } from './components/MaxInputPower.vue';
+export { default as MaxInputCurrent } from './components/MaxInputCurrent.vue';
+export { default as InputCurrent } from './components/MaxInputCurrent.vue';
+export { default as MaxInputVoltage } from './components/MaxInputVoltage.vue';
+export { default as InputVoltage } from './components/MaxInputVoltage.vue';
+export { default as MaxInputDistance } from './components/MaxInputDistance.vue';
+export { default as InputDistance } from './components/MaxInputDistance.vue';
+export { default as MaxInputDuration } from './components/MaxInputDuration.vue';
+export { default as InputDuration } from './components/MaxInputDuration.vue';
+export { default as MaxInputTokenLimit } from './components/MaxInputTokenLimit.vue';
+export { default as InputTokenLimit } from './components/MaxInputTokenLimit.vue';
+export { default as MaxInputMonthDays } from './components/MaxInputMonthDays.vue';
+export { default as InputMonthDays } from './components/MaxInputMonthDays.vue';
+export { default as MaxInputWeekInterval } from './components/MaxInputWeekInterval.vue';
+export { default as InputWeekInterval } from './components/MaxInputWeekInterval.vue';
+export { default as MaxInputSocialPlatform } from './components/MaxInputSocialPlatform.vue';
+export { default as InputSocialPlatform } from './components/MaxInputSocialPlatform.vue';
 // Async: o MaxInputMarkdown arrasta o tiptap inteiro (starter-kit + 8 extensões, ~350 KB);
 // como export estático ele entraria no bundle eager de TODOS os apps consumidores, mesmo sem uso.
 // Mesmo padrão de MaxPdfView/MaxLoaderAi (deps pesadas sob demanda).
@@ -295,6 +317,37 @@ export { useMaxPiniaSaveTracker } from './composables/useMaxPiniaSaveTracker';
 export { useHtmlFontSize, applyHtmlFontSize, DEFAULT_FONT_SIZE, MIN_FONT_SIZE, MAX_FONT_SIZE } from './helpers/useHtmlFontSize';
 export { useHtmlDark } from './helpers/useHtmlDark';
 
+// Inputs Semânticos
+export { default as MaxInputEntity } from './components/MaxInputEntity.vue';
+export { default as InputEntity } from './components/MaxInputEntity.vue';
+export { default as MaxInputGender } from './components/MaxInputGender.vue';
+export { default as InputGender } from './components/MaxInputGender.vue';
+export { default as MaxInputWeekday } from './components/MaxInputWeekday.vue';
+export { default as InputWeekday } from './components/MaxInputWeekday.vue';
+export { default as MaxInputMonth } from './components/MaxInputMonth.vue';
+export { default as InputMonth } from './components/MaxInputMonth.vue';
+export { default as MaxInputTime } from './components/MaxInputTime.vue';
+export { default as InputTime } from './components/MaxInputTime.vue';
+export { default as MaxInputYear } from './components/MaxInputYear.vue';
+export { default as InputYear } from './components/MaxInputYear.vue';
+export { default as MaxInputEmail } from './components/MaxInputEmail.vue';
+export { default as InputEmail } from './components/MaxInputEmail.vue';
+export { default as MaxInputUrl } from './components/MaxInputUrl.vue';
+export { default as InputUrl } from './components/MaxInputUrl.vue';
+export { default as MaxInputPassword } from './components/MaxInputPassword.vue';
+export { default as InputPassword } from './components/MaxInputPassword.vue';
+export { default as MaxInputSlug } from './components/MaxInputSlug.vue';
+export { default as InputSlug } from './components/MaxInputSlug.vue';
+export {
+    ENTITY_OPTIONS,
+    GENDER_OPTIONS,
+    WEEKDAY_OPTIONS,
+    MONTH_OPTIONS,
+    generateTimeOptions,
+    generateYearOptions,
+    parseTimeToMinutes,
+    formatMinutesToTime
+} from './constants/semanticInputOptions';
 
 import Tooltip from './directives/tooltip';
 

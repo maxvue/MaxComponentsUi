@@ -187,6 +187,14 @@ try {
             for (const name of domainInputs) {
                 if (!UI[name]) throw new Error('Input de domínio ausente no entrypoint raiz: ' + name);
             }
+            const semanticNames = [
+                'MaxInputEntity', 'MaxInputGender', 'MaxInputEmail', 'MaxInputUrl',
+                'MaxInputPassword', 'MaxInputTime', 'MaxInputWeekday', 'MaxInputMonth',
+                'MaxInputYear', 'MaxInputSlug'
+            ];
+            for (const name of semanticNames) {
+                if (!UI[name]) throw new Error(name + ' ausente no entrypoint raiz.');
+            }
             console.log('ESM sem deps opcionais — OK');
         `);
         await runCommand(process.execPath, ['index.js'], { cwd: dir });
@@ -237,7 +245,12 @@ try {
                 MaxInputPaymentMethod,
                 type PhaseValue,
                 type WireSizeValue,
-                type PaymentMethodValue
+                type PaymentMethodValue,
+                MaxInputEntity,
+                MaxInputEmail,
+                MaxInputPassword,
+                type MaxInputEntityProps,
+                type MaxInputEmailProps
             } from '@maxvue/max-components-ui';
             import GranularPhase from '@maxvue/max-components-ui/components/MaxInputPhase';
             import GranularWireSize from '@maxvue/max-components-ui/components/MaxInputWireSize';
@@ -268,6 +281,11 @@ try {
             const _g8 = GranularSchedule;
             const _g9 = GranularOccurrence;
             const _g10 = GranularContent;
+            const _entity: typeof MaxInputEntity = MaxInputEntity;
+            const _email: typeof MaxInputEmail = MaxInputEmail;
+            const _pwd: typeof MaxInputPassword = MaxInputPassword;
+            const _entityProps: MaxInputEntityProps = { modelValue: 'PF' };
+            const _emailProps: MaxInputEmailProps = { modelValue: 'user@test.com' };
             const _store = useModalStore;
             const _preset = presetMaxUno;
             const _resolver = MaxComponentsUiResolver;
@@ -286,13 +304,14 @@ try {
         writeFileSync(join(dir, 'index.html'), '<div id="app"></div><script type="module" src="/main.js"></script>');
         writeFileSync(join(dir, 'main.js'), `
             import { createApp } from 'vue';
-            import { MaxButton, MaxInputPhase } from '@maxvue/max-components-ui';
+            import { MaxButton, MaxInputPhase, MaxInputEmail } from '@maxvue/max-components-ui';
             import granularBtn from '@maxvue/max-components-ui/components/MaxButton';
             import granularPhase from '@maxvue/max-components-ui/components/MaxInputPhase';
             import granularPayment from '@maxvue/max-components-ui/components/MaxInputPaymentMethod';
+            import granularEmail from '@maxvue/max-components-ui/components/MaxInputEmail';
             import '@maxvue/max-components-ui/style.css';
 
-            console.log('Vite import ok', MaxButton, granularBtn, MaxInputPhase, granularPhase, granularPayment);
+            console.log('Vite import ok', MaxButton, granularBtn, MaxInputPhase, granularPhase, granularPayment, MaxInputEmail, granularEmail);
         `);
         writeFileSync(join(dir, 'vite.config.js'), `
             export default {
@@ -323,7 +342,8 @@ try {
                 MaxInputPhase,
                 MaxInputAiExecutionType,
                 MaxInputPaymentMethod,
-                MaxInputContentType
+                MaxInputContentType,
+                MaxInputEmail
             } from '@maxvue/max-components-ui';
             import * as Stores from '@maxvue/max-components-ui/stores';
             import * as Styles from '@maxvue/max-components-ui/styles';
@@ -334,6 +354,7 @@ try {
             if (!MaxInputAiExecutionType) throw new Error('SSR: MaxInputAiExecutionType ausente.');
             if (!MaxInputPaymentMethod) throw new Error('SSR: MaxInputPaymentMethod ausente.');
             if (!MaxInputContentType) throw new Error('SSR: MaxInputContentType ausente.');
+            if (!MaxInputEmail) throw new Error('SSR: MaxInputEmail ausente.');
             if (!Stores.useToastStore) throw new Error('SSR: Stores ausentes.');
             if (!Styles.MaxStyle) throw new Error('SSR: MaxStyle ausente.');
 
@@ -343,9 +364,10 @@ try {
                     MaxInputPhase,
                     MaxInputAiExecutionType,
                     MaxInputPaymentMethod,
-                    MaxInputContentType
+                    MaxInputContentType,
+                    MaxInputEmail
                 },
-                template: \`<div><MaxButton>Test</MaxButton><MaxInputPhase :modelValue="1" /><MaxInputAiExecutionType modelValue="cloud" /><MaxInputPaymentMethod modelValue="pix" /><MaxInputContentType modelValue="image" /></div>\`,
+                template: \`<div><MaxButton>Test</MaxButton><MaxInputPhase :modelValue="1" /><MaxInputAiExecutionType modelValue="cloud" /><MaxInputPaymentMethod modelValue="pix" /><MaxInputContentType modelValue="image" /><MaxInputEmail modelValue="test@example.com" /></div>\`,
             });
             app.use(createPinia());
 
