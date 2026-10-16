@@ -193,8 +193,21 @@ export const PLAYGROUND_CATALOG: CatalogComponent[] = [
     { name: 'MaxAnimateFade', family: 'transitions', scenarioId: 'trans-fade', description: 'Transição suave de entrada e saída por opacidade.' },
     { name: 'MaxTransitionFadeLight', family: 'transitions', scenarioId: 'trans-fade', description: 'Transição leve de fade para elementos secundários.' },
     { name: 'MaxTransitionUp', family: 'transitions', scenarioId: 'trans-motion', description: 'Transição com deslizamento vertical e suporte a movimento reduzido.' },
-    { name: 'TransitionFade', family: 'transitions', scenarioId: 'trans-fade', description: 'Primitiva pública de fade para transições de componentes.', isAlias: true, aliasOf: 'MaxAnimateFade' }
+    { name: 'TransitionFade', family: 'transitions', scenarioId: 'trans-fade', description: 'Primitiva pública de fade para transições de componentes.', isAlias: true, aliasOf: 'MaxAnimateFade' },
+
+    // Reusable Components (C01–C10)
+    { name: 'MaxAlert', family: 'overlays', scenarioId: 'reusable-components', description: 'Avisos inline persistentes, acessíveis e consistentes.' },
+    { name: 'MaxQueryState', family: 'data', scenarioId: 'reusable-components', description: 'Apresentação de estados de consulta (loading, erro, vazio, stale).' },
+    { name: 'MaxFormValidationSummary', family: 'inputs', scenarioId: 'reusable-components', description: 'Resumo navegável de erros de formulário com foco no campo.' },
+    { name: 'MaxSegmentedControl', family: 'inputs', scenarioId: 'reusable-components', description: 'Controle de seleção exclusiva por rádio acessível com botões.' },
+    { name: 'MaxPeriodNavigator', family: 'navigation', scenarioId: 'reusable-components', description: 'Navegação temporal por períodos mensais.' },
+    { name: 'MaxProgressBar', family: 'data', scenarioId: 'reusable-components', description: 'Barra de progresso e medidor de consumo acessível com limite visual.' },
+    { name: 'MaxFilterBar', family: 'data', scenarioId: 'reusable-components', description: 'Barra estrutural e composição de campos e ações de filtro.' },
+    { name: 'MaxFilePreview', family: 'media', scenarioId: 'reusable-components', description: 'Miniatura e metadados de arquivos locais e remotos.' },
+    { name: 'MaxMarkdownViewer', family: 'media', scenarioId: 'reusable-components', description: 'Visualizador seguro de conteúdo Markdown com sanitização estrita.' },
+    { name: 'MaxCalendar', family: 'data', scenarioId: 'reusable-components', description: 'Grade mensal de calendário com eventos e slots de domínio.' }
 ];
+
 
 export function getComponentsByFamily(family: ComponentFamily): CatalogComponent[] {
     return PLAYGROUND_CATALOG.filter((item) => item.family === family);

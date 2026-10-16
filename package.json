@@ -577,6 +577,46 @@
       "types": "./dist/components/TransitionFade.vue.d.ts",
       "import": "./dist/components/TransitionFade.es.js"
     },
+    "./components/MaxAlert": {
+      "types": "./dist/components/MaxAlert.vue.d.ts",
+      "import": "./dist/components/MaxAlert.es.js"
+    },
+    "./components/MaxCalendar": {
+      "types": "./dist/components/MaxCalendar.vue.d.ts",
+      "import": "./dist/components/MaxCalendar.es.js"
+    },
+    "./components/MaxFilePreview": {
+      "types": "./dist/components/MaxFilePreview.vue.d.ts",
+      "import": "./dist/components/MaxFilePreview.es.js"
+    },
+    "./components/MaxFilterBar": {
+      "types": "./dist/components/MaxFilterBar.vue.d.ts",
+      "import": "./dist/components/MaxFilterBar.es.js"
+    },
+    "./components/MaxFormValidationSummary": {
+      "types": "./dist/components/MaxFormValidationSummary.vue.d.ts",
+      "import": "./dist/components/MaxFormValidationSummary.es.js"
+    },
+    "./components/MaxMarkdownViewer": {
+      "types": "./dist/components/MaxMarkdownViewer.vue.d.ts",
+      "import": "./dist/components/MaxMarkdownViewer.es.js"
+    },
+    "./components/MaxPeriodNavigator": {
+      "types": "./dist/components/MaxPeriodNavigator.vue.d.ts",
+      "import": "./dist/components/MaxPeriodNavigator.es.js"
+    },
+    "./components/MaxProgressBar": {
+      "types": "./dist/components/MaxProgressBar.vue.d.ts",
+      "import": "./dist/components/MaxProgressBar.es.js"
+    },
+    "./components/MaxQueryState": {
+      "types": "./dist/components/MaxQueryState.vue.d.ts",
+      "import": "./dist/components/MaxQueryState.es.js"
+    },
+    "./components/MaxSegmentedControl": {
+      "types": "./dist/components/MaxSegmentedControl.vue.d.ts",
+      "import": "./dist/components/MaxSegmentedControl.es.js"
+    },
     "./components/*": {
       "types": "./dist/components/*.vue.d.ts",
       "import": "./dist/components/*.es.js"

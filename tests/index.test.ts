@@ -38,5 +38,33 @@ describe('index install', () => {
         expect(indexExports.BadgeButtonsGroup).toBe(indexExports.MaxBadgeButtonsGroup);
         expect(indexExports.BadgeButtonGroup).toBe(indexExports.MaxBadgeButtonsGroup);
     });
+
+    it('exporta os dez novos componentes reutilizáveis e seus aliases canônicos', async () => {
+        const indexExports = await import('../src/index');
+
+        const pairs: [string, string][] = [
+            ['MaxAlert', 'Alert'],
+            ['MaxQueryState', 'QueryState'],
+            ['MaxFormValidationSummary', 'FormValidationSummary'],
+            ['MaxSegmentedControl', 'SegmentedControl'],
+            ['MaxPeriodNavigator', 'PeriodNavigator'],
+            ['MaxProgressBar', 'ProgressBar'],
+            ['MaxFilterBar', 'FilterBar'],
+            ['MaxFilePreview', 'FilePreview'],
+            ['MaxMarkdownViewer', 'MarkdownViewer'],
+            ['MaxCalendar', 'Calendar']
+        ];
+
+        for (const [canonical, alias] of pairs) {
+            expect((indexExports as any)[canonical]).toBeDefined();
+            expect((indexExports as any)[alias]).toBeDefined();
+            expect((indexExports as any)[alias]).toBe((indexExports as any)[canonical]);
+        }
+
+        expect(indexExports.sanitizeMarkdownHtml).toBeDefined();
+        expect(indexExports.isSafeMarkdownUrl).toBeDefined();
+        expect(indexExports.escapeHtml).toBeDefined();
+    });
 });
+
 

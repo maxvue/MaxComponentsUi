@@ -475,3 +475,15 @@ export type * from './card';
 
 // Tipos dos inputs semânticos.
 export type * from './semanticInputs';
+
+// Tipos dos componentes reutilizáveis (C01-C10).
+export type * from './feedback';
+export type * from './validation';
+export type * from './selection';
+export type * from './period';
+export type * from './progress';
+export type * from './filters';
+export type * from './filePreview';
+export type * from './markdownViewer';
+export type * from './calendar';
+

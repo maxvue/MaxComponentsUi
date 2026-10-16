@@ -483,38 +483,52 @@ describe('MaxImage', () => {
             callback(fakeBlob);
         });
 
-        const wrapper = mountImage({ preview: true, allowEdit: true, includeDataUrl: true });
-        await wrapper.find('.max-image__preview-trigger').trigger('click');
-
-        const editBtn = wrapper.findAllComponents({ name: 'MaxIconButton' })
-            .find((btn) => btn.attributes('title') === 'Recortar imagem');
-        await editBtn!.trigger('click');
-
-        const cropImg = wrapper.find('.max-image-crop-stage__img');
-        Object.defineProperty(cropImg.element, 'clientWidth', { value: 300, configurable: true });
-        Object.defineProperty(cropImg.element, 'clientHeight', { value: 200, configurable: true });
-        Object.defineProperty(cropImg.element, 'naturalWidth', { value: 600, configurable: true });
-        Object.defineProperty(cropImg.element, 'naturalHeight', { value: 400, configurable: true });
-        await cropImg.trigger('load');
-
-        const confirmBtn = wrapper.findAllComponents({ name: 'MaxIconButton' })
-            .find((btn) => btn.attributes('title') === 'Confirmar Recorte');
-        await confirmBtn!.trigger('click');
-        await flushPromises();
-        if (!wrapper.emitted('crop')) {
-            await new Promise((resolve) => setTimeout(resolve, 50));
-            await flushPromises();
+        const originalFileReader = globalThis.FileReader;
+        class MockWorkingFileReader {
+            onloadend: any = null;
+            onerror: any = null;
+            result = 'data:image/png;base64,mockBinaryDataUrl';
+            readAsDataURL() {
+                if (this.onloadend) this.onloadend(new ProgressEvent('loadend'));
+            }
         }
+        (globalThis as any).FileReader = MockWorkingFileReader;
 
-        const emittedCrop = wrapper.emitted('crop');
-        expect(emittedCrop).toBeTruthy();
-        const payload = emittedCrop![0][0] as any;
-        expect(payload.blob).toBe(fakeBlob);
-        expect(typeof payload.dataUrl).toBe('string');
-        expect(payload.dataUrl.length).toBeGreaterThan(0);
+        try {
+            const wrapper = mountImage({ preview: true, allowEdit: true, includeDataUrl: true });
+            await wrapper.find('.max-image__preview-trigger').trigger('click');
 
-        getContextSpy.mockRestore();
-        toBlobSpy.mockRestore();
+            const editBtn = wrapper.findAllComponents({ name: 'MaxIconButton' })
+                .find((btn) => btn.attributes('title') === 'Recortar imagem');
+            await editBtn!.trigger('click');
+
+            const cropImg = wrapper.find('.max-image-crop-stage__img');
+            Object.defineProperty(cropImg.element, 'clientWidth', { value: 300, configurable: true });
+            Object.defineProperty(cropImg.element, 'clientHeight', { value: 200, configurable: true });
+            Object.defineProperty(cropImg.element, 'naturalWidth', { value: 600, configurable: true });
+            Object.defineProperty(cropImg.element, 'naturalHeight', { value: 400, configurable: true });
+            await cropImg.trigger('load');
+
+            const confirmBtn = wrapper.findAllComponents({ name: 'MaxIconButton' })
+                .find((btn) => btn.attributes('title') === 'Confirmar Recorte');
+            await confirmBtn!.trigger('click');
+            await flushPromises();
+            if (!wrapper.emitted('crop')) {
+                await new Promise((resolve) => setTimeout(resolve, 50));
+                await flushPromises();
+            }
+
+            const emittedCrop = wrapper.emitted('crop');
+            expect(emittedCrop).toBeTruthy();
+            const payload = emittedCrop![0][0] as any;
+            expect(payload.blob).toBe(fakeBlob);
+            expect(typeof payload.dataUrl).toBe('string');
+            expect(payload.dataUrl.length).toBeGreaterThan(0);
+        } finally {
+            (globalThis as any).FileReader = originalFileReader;
+            getContextSpy.mockRestore();
+            toBlobSpy.mockRestore();
+        }
     });
 
     it('mantém editor aberto e exibe erro recuperável com zero emissões quando toBlob retorna null', async () => {

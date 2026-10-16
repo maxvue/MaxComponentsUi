@@ -186,6 +186,14 @@ try {
             for (const name of semanticNames) {
                 if (!UI[name]) throw new Error(name + ' ausente no entrypoint raiz.');
             }
+            const reusableNames = [
+                'MaxAlert', 'MaxQueryState', 'MaxFormValidationSummary', 'MaxSegmentedControl',
+                'MaxPeriodNavigator', 'MaxProgressBar', 'MaxFilterBar', 'MaxFilePreview',
+                'MaxMarkdownViewer', 'MaxCalendar'
+            ];
+            for (const name of reusableNames) {
+                if (!UI[name]) throw new Error(name + ' ausente no entrypoint raiz.');
+            }
             console.log('ESM sem deps opcionais — OK');
         `);
         await runCommand(process.execPath, ['index.js'], { cwd: dir });
@@ -234,6 +242,10 @@ try {
                 MaxInputEntity,
                 MaxInputEmail,
                 MaxInputPassword,
+                MaxAlert,
+                MaxCalendar,
+                type MaxAlertProps,
+                type MaxCalendarProps,
                 type MaxInputEntityProps,
                 type MaxInputEmailProps
             } from '@maxvue/max-components-ui';
@@ -246,6 +258,10 @@ try {
             const _entity: typeof MaxInputEntity = MaxInputEntity;
             const _email: typeof MaxInputEmail = MaxInputEmail;
             const _pwd: typeof MaxInputPassword = MaxInputPassword;
+            const _alert: typeof MaxAlert = MaxAlert;
+            const _calendar: typeof MaxCalendar = MaxCalendar;
+            const _alertProps: MaxAlertProps = { severity: 'info', title: 'Teste' };
+            const _calendarProps: MaxCalendarProps = { period: { year: 2026, month: 10 } };
             const _entityProps: MaxInputEntityProps = { modelValue: 'PF' };
             const _emailProps: MaxInputEmailProps = { modelValue: 'user@test.com' };
             const _store = useModalStore;

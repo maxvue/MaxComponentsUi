@@ -313,6 +313,30 @@ export {
     formatMinutesToTime
 } from './constants/semanticInputOptions';
 
+// Componentes Reutilizáveis (C01-C10)
+export { default as MaxAlert } from './components/MaxAlert.vue';
+export { default as Alert } from './components/MaxAlert.vue';
+export { default as MaxQueryState } from './components/MaxQueryState.vue';
+export { default as QueryState } from './components/MaxQueryState.vue';
+export { default as MaxFormValidationSummary } from './components/MaxFormValidationSummary.vue';
+export { default as FormValidationSummary } from './components/MaxFormValidationSummary.vue';
+export { default as MaxSegmentedControl } from './components/MaxSegmentedControl.vue';
+export { default as SegmentedControl } from './components/MaxSegmentedControl.vue';
+export { default as MaxPeriodNavigator } from './components/MaxPeriodNavigator.vue';
+export { default as PeriodNavigator } from './components/MaxPeriodNavigator.vue';
+export { default as MaxProgressBar } from './components/MaxProgressBar.vue';
+export { default as ProgressBar } from './components/MaxProgressBar.vue';
+export { default as MaxFilterBar } from './components/MaxFilterBar.vue';
+export { default as FilterBar } from './components/MaxFilterBar.vue';
+export { default as MaxFilePreview } from './components/MaxFilePreview.vue';
+export { default as FilePreview } from './components/MaxFilePreview.vue';
+export { default as MaxMarkdownViewer } from './components/MaxMarkdownViewer.vue';
+export { default as MarkdownViewer } from './components/MaxMarkdownViewer.vue';
+export { default as MaxCalendar } from './components/MaxCalendar.vue';
+export { default as Calendar } from './components/MaxCalendar.vue';
+export { sanitizeMarkdownHtml, isSafeMarkdownUrl, escapeHtml } from './helpers/sanitizeMarkdownHtml';
+
+
 import Tooltip from './directives/tooltip';
 
 export interface MaxPluginOptions {

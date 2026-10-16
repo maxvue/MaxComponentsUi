@@ -1,0 +1,288 @@
+{
+  "version": 2,
+  "planRevision": "5fdca81184153fa92b4025fdaa1c5c9d6077f5feff62f003b6dacbc4e5c72c17",
+  "tasks": [
+    {
+      "id": "T00",
+      "status": "completed",
+      "files": [
+        "docs/plans/wt-e923d8b6/plan.md",
+        "docs/plans/wt-e923d8b6/spec.md"
+      ],
+      "validations": [
+        {
+          "command": "npm run check:filenames && npm run check:lockfile",
+          "revision": "6fc17b7890b25d9da708ad17565a21bbe6e5e193667b0ae7d7520faf70a5fc1e",
+          "result": "passed"
+        }
+      ],
+      "nextAction": "Preflight concluído com sucesso e ambiente seguro confirmado."
+    },
+    {
+      "id": "T01",
+      "status": "completed",
+      "files": [
+        "src/components/MaxAlert.vue",
+        "src/components/MaxQueryState.vue",
+        "src/types/feedback.ts",
+        "tests/components/MaxAlert.test.ts",
+        "tests/components/MaxQueryState.test.ts"
+      ],
+      "validations": [
+        {
+          "command": "npx vitest run tests/components/MaxAlert.test.ts tests/components/MaxQueryState.test.ts",
+          "revision": "e1eab7fcbf086b00fe77988731d9e4f9a90254c77254c7a1763dbdb611e8fd4f",
+          "result": "passed"
+        }
+      ],
+      "revision": "e1eab7fcbf086b00fe77988731d9e4f9a90254c77254c7a1763dbdb611e8fd4f",
+      "nextAction": "Alertas e apresentação de consulta implementados e validados."
+    },
+    {
+      "id": "T02",
+      "status": "completed",
+      "files": [
+        "src/components/MaxFormValidationSummary.vue",
+        "src/types/validation.ts",
+        "tests/components/MaxFormValidationSummary.test.ts"
+      ],
+      "validations": [
+        {
+          "command": "npx vitest run tests/components/MaxFormValidationSummary.test.ts",
+          "revision": "6f76393830f364a3d030e5563b44fa08488cb80cd49f32296cf32ff90d92b2db",
+          "result": "passed"
+        }
+      ],
+      "revision": "6f76393830f364a3d030e5563b44fa08488cb80cd49f32296cf32ff90d92b2db",
+      "nextAction": "Resumo de validação com links e rolagem suave implementado e validado."
+    },
+    {
+      "id": "T03",
+      "status": "completed",
+      "files": [
+        "src/components/MaxSegmentedControl.vue",
+        "src/components/MaxPeriodNavigator.vue",
+        "src/types/selection.ts",
+        "src/types/period.ts",
+        "tests/components/MaxSegmentedControl.test.ts",
+        "tests/components/MaxPeriodNavigator.test.ts"
+      ],
+      "validations": [
+        {
+          "command": "npx vitest run tests/components/MaxSegmentedControl.test.ts tests/components/MaxPeriodNavigator.test.ts",
+          "revision": "82241e606b16e8af21cd21903fd26cedf12e2ed4a1fd59a0d57325f48a05e0ac",
+          "result": "passed"
+        }
+      ],
+      "revision": "82241e606b16e8af21cd21903fd26cedf12e2ed4a1fd59a0d57325f48a05e0ac",
+      "nextAction": "Controle segmentado e navegador de período temporal implementados e validados."
+    },
+    {
+      "id": "T04",
+      "status": "completed",
+      "files": [
+        "src/components/MaxProgressBar.vue",
+        "src/components/MaxFilterBar.vue",
+        "src/types/progress.ts",
+        "src/types/filters.ts",
+        "tests/components/MaxProgressBar.test.ts",
+        "tests/components/MaxFilterBar.test.ts"
+      ],
+      "validations": [
+        {
+          "command": "npx vitest run tests/components/MaxProgressBar.test.ts tests/components/MaxFilterBar.test.ts",
+          "revision": "be5215bbd084a586553ffe2d8a92166901f25abfa3e51ca309f6a35e92944b46",
+          "result": "passed"
+        }
+      ],
+      "revision": "be5215bbd084a586553ffe2d8a92166901f25abfa3e51ca309f6a35e92944b46",
+      "nextAction": "Barra de progresso e barra de filtros implementadas e validadas."
+    },
+    {
+      "id": "T05",
+      "status": "completed",
+      "files": [
+        "src/components/MaxFilePreview.vue",
+        "src/types/filePreview.ts",
+        "tests/components/MaxFilePreview.test.ts"
+      ],
+      "validations": [
+        {
+          "command": "npx vitest run tests/components/MaxFilePreview.test.ts",
+          "revision": "36131aeee7fa1765638746e95b5df5448f67bdf14fec8f1209343c24380d7323",
+          "result": "passed"
+        }
+      ],
+      "revision": "36131aeee7fa1765638746e95b5df5448f67bdf14fec8f1209343c24380d7323",
+      "nextAction": "Prévia de arquivo com miniaturas e metadados implementada e validada."
+    },
+    {
+      "id": "T06",
+      "status": "completed",
+      "files": [
+        "src/components/MaxMarkdownViewer.vue",
+        "src/types/markdownViewer.ts",
+        "src/helpers/sanitizeMarkdownHtml.ts",
+        "tests/components/MaxMarkdownViewer.test.ts",
+        "tests/helpers/sanitizeMarkdownHtml.test.ts"
+      ],
+      "validations": [
+        {
+          "command": "npx vitest run tests/components/MaxMarkdownViewer.test.ts tests/helpers/sanitizeMarkdownHtml.test.ts",
+          "revision": "ee81dfc8e8d7986296b181ba6544f118ba35ef332bc241a90dc4da6489ef8b70",
+          "result": "passed"
+        }
+      ],
+      "revision": "ee81dfc8e8d7986296b181ba6544f118ba35ef332bc241a90dc4da6489ef8b70",
+      "nextAction": "Visualizador Markdown e sanitizador HTML seguro implementados e validados."
+    },
+    {
+      "id": "T07",
+      "status": "completed",
+      "files": [
+        "src/components/MaxCalendar.vue",
+        "src/types/calendar.ts",
+        "tests/components/MaxCalendar.test.ts"
+      ],
+      "validations": [
+        {
+          "command": "npx vitest run tests/components/MaxCalendar.test.ts",
+          "revision": "ee97fbdb2f5725e68e57903e09b0229769835cf4378ee0967e519ef4e466165c",
+          "result": "passed"
+        }
+      ],
+      "revision": "ee97fbdb2f5725e68e57903e09b0229769835cf4378ee0967e519ef4e466165c",
+      "nextAction": "Grade mensal de calendário com dias, eventos e slots implementada e validada."
+    },
+    {
+      "id": "T08",
+      "status": "completed",
+      "files": [
+        "package.json",
+        "playground/src/catalog.ts",
+        "playground/src/scenarios/index.ts",
+        "playground/src/scenarios/reusable-components.vue",
+        "scripts/verify-consumers.mjs",
+        "src/components-manifest.json",
+        "src/index.ts",
+        "src/types/index.ts",
+        "tests/benchmarks/reusableComponents.benchmark.ts",
+        "tests/browser/ReusableComponents.browser.ts",
+        "tests/index.test.ts",
+        "tests/ssr/reusableComponents.hydration.test.ts",
+        "tests/ssr/reusableComponents.ssr.test.ts",
+        "tests/types/reusableComponents.test.ts"
+      ],
+      "validations": [
+        {
+          "command": "npm run check:playground:bundle && npm run verify:consumers",
+          "revision": "4cf00446b91c9a5bb7ee139e8f7af6d567da3e73e99b767d4f075bd6d2a7c59b",
+          "result": "passed"
+        }
+      ],
+      "revision": "4cf00446b91c9a5bb7ee139e8f7af6d567da3e73e99b767d4f075bd6d2a7c59b",
+      "nextAction": "Contratos públicos, exports, manifesto, playground e testes integrados validados."
+    },
+    {
+      "id": "T09",
+      "status": "completed",
+      "files": [
+        "docs/plans/wt-e923d8b6/execution-state.json"
+      ],
+      "validations": [
+        {
+          "command": "npm run type-check && npm run type-check:test && npm run lint && npm run build && npm run test && npm run test:coverage && npm run verify:consumers",
+          "revision": "6fc17b7890b25d9da708ad17565a21bbe6e5e193667b0ae7d7520faf70a5fc1e",
+          "result": "passed"
+        }
+      ],
+      "revision": "6fc17b7890b25d9da708ad17565a21bbe6e5e193667b0ae7d7520faf70a5fc1e",
+      "nextAction": "Validação completa concluída com êxito em todos os gates do projeto."
+    }
+  ],
+  "verification": {
+    "revision": "6fc17b7890b25d9da708ad17565a21bbe6e5e193667b0ae7d7520faf70a5fc1e",
+    "checks": [
+      {
+        "command": "npm run check:filenames",
+        "revision": "6fc17b7890b25d9da708ad17565a21bbe6e5e193667b0ae7d7520faf70a5fc1e",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run check:lockfile",
+        "revision": "6fc17b7890b25d9da708ad17565a21bbe6e5e193667b0ae7d7520faf70a5fc1e",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run optimize:svg:check",
+        "revision": "6fc17b7890b25d9da708ad17565a21bbe6e5e193667b0ae7d7520faf70a5fc1e",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check",
+        "revision": "6fc17b7890b25d9da708ad17565a21bbe6e5e193667b0ae7d7520faf70a5fc1e",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check:test",
+        "revision": "6fc17b7890b25d9da708ad17565a21bbe6e5e193667b0ae7d7520faf70a5fc1e",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run lint",
+        "revision": "6fc17b7890b25d9da708ad17565a21bbe6e5e193667b0ae7d7520faf70a5fc1e",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run build",
+        "revision": "6fc17b7890b25d9da708ad17565a21bbe6e5e193667b0ae7d7520faf70a5fc1e",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run test",
+        "revision": "6fc17b7890b25d9da708ad17565a21bbe6e5e193667b0ae7d7520faf70a5fc1e",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run test:coverage",
+        "revision": "6fc17b7890b25d9da708ad17565a21bbe6e5e193667b0ae7d7520faf70a5fc1e",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run check:playground:bundle",
+        "revision": "6fc17b7890b25d9da708ad17565a21bbe6e5e193667b0ae7d7520faf70a5fc1e",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run test:benchmark",
+        "revision": "6fc17b7890b25d9da708ad17565a21bbe6e5e193667b0ae7d7520faf70a5fc1e",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run verify:consumers",
+        "revision": "6fc17b7890b25d9da708ad17565a21bbe6e5e193667b0ae7d7520faf70a5fc1e",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run check:audit",
+        "revision": "6fc17b7890b25d9da708ad17565a21bbe6e5e193667b0ae7d7520faf70a5fc1e",
+        "result": "passed",
+        "exitCode": 0
+      }
+    ]
+  },
+  "updatedAt": 1729094500000,
+  "nextAction": "Plano executado e validado integralmente. Pronto para handoff."
+}
