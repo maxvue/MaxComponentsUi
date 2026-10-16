@@ -1,0 +1,139 @@
+{
+  "version": 2,
+  "planRevision": "e168794f704cf3f64d0e8ce5f40989988e9d4a9acadbaa899a3b23b08c312785",
+  "tasks": [
+    {
+      "id": "T0",
+      "status": "completed",
+      "files": [
+        "package.json"
+      ],
+      "revision": "f67fa671f5045aa834398ce5f5614e2f9c4e71473ea0b41d4bd5fbc24d5411f3",
+      "validations": []
+    },
+    {
+      "id": "T1",
+      "status": "completed",
+      "files": [
+        "src/types/semanticInputs.ts",
+        "src/components/base/MaxBaseQuantity.vue",
+        "tests/components/MaxBaseQuantity.test.ts"
+      ],
+      "revision": "b87a95df6c7d2edf3fb2ddb93183a49342c7e0f469208b75a3dd39b83d505052",
+      "validations": []
+    },
+    {
+      "id": "T2",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputPercent.vue",
+        "src/components/MaxInputPower.vue",
+        "src/components/MaxInputCurrent.vue",
+        "src/components/MaxInputVoltage.vue",
+        "src/components/MaxInputDistance.vue",
+        "src/components/MaxInputDuration.vue",
+        "src/components/MaxInputTokenLimit.vue",
+        "tests/components/MaxInputPercent.test.ts",
+        "tests/components/MaxInputPower.test.ts",
+        "tests/components/MaxInputCurrent.test.ts",
+        "tests/components/MaxInputVoltage.test.ts",
+        "tests/components/MaxInputDistance.test.ts",
+        "tests/components/MaxInputDuration.test.ts",
+        "tests/components/MaxInputTokenLimit.test.ts"
+      ],
+      "revision": "2d0ea74c4ca834827a128b38106639e974225c93ec9b3499ea6f2fb92249d5fd",
+      "validations": []
+    },
+    {
+      "id": "T3",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputMonthDays.vue",
+        "src/components/MaxInputWeekInterval.vue",
+        "src/components/MaxInputSocialPlatform.vue",
+        "tests/components/MaxInputMonthDays.test.ts",
+        "tests/components/MaxInputWeekInterval.test.ts",
+        "tests/components/MaxInputSocialPlatform.test.ts"
+      ],
+      "revision": "92cdfdb84aeb792eb71bbde21a49544d0bf05db41b82e7eac90494f98dd20eb2",
+      "validations": []
+    },
+    {
+      "id": "T4",
+      "status": "completed",
+      "files": [
+        "src/index.ts",
+        "src/types/index.ts",
+        "package.json",
+        "src/components-manifest.json",
+        "tests/helpers/MaxComponentsUiResolver.test.ts",
+        "tests/index.test.ts",
+        "playground/src/scenarios/inputs-special.vue",
+        "playground/src/catalog.ts",
+        "COMPONENTS.md"
+      ],
+      "revision": "6cc00847be36a864e9eb3b734331497546103b54d5e2226321ee5752b429408f",
+      "validations": []
+    },
+    {
+      "id": "T5",
+      "status": "completed",
+      "files": [
+        "tests/architecture/package-exports.test.ts",
+        "tests/architecture/inputBaseAccessibility.test.ts",
+        "tests/architecture/playgroundCoverage.test.ts"
+      ],
+      "revision": "058eaa2634ae68e00bfc718f22d2ddfe71a19d5f35f6ca5fbf77e55051d830e7",
+      "validations": []
+    }
+  ],
+  "verification": {
+    "revision": "9653f5e1ff6319ec7e29e4a38c7d34a9466c09f6c71d4abe68326299175c80d1",
+    "checks": [
+      {
+        "command": "npm run lint:check",
+        "revision": "9653f5e1ff6319ec7e29e4a38c7d34a9466c09f6c71d4abe68326299175c80d1",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check",
+        "revision": "9653f5e1ff6319ec7e29e4a38c7d34a9466c09f6c71d4abe68326299175c80d1",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check:test",
+        "revision": "9653f5e1ff6319ec7e29e4a38c7d34a9466c09f6c71d4abe68326299175c80d1",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run build",
+        "revision": "9653f5e1ff6319ec7e29e4a38c7d34a9466c09f6c71d4abe68326299175c80d1",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npx vitest run tests/components/MaxInputPercent.test.ts tests/components/MaxInputPower.test.ts tests/components/MaxInputCurrent.test.ts tests/components/MaxInputVoltage.test.ts tests/components/MaxInputDistance.test.ts tests/components/MaxInputDuration.test.ts tests/components/MaxInputTokenLimit.test.ts tests/components/MaxInputMonthDays.test.ts tests/components/MaxInputWeekInterval.test.ts tests/components/MaxInputSocialPlatform.test.ts tests/components/MaxBaseQuantity.test.ts tests/helpers/MaxComponentsUiResolver.test.ts tests/index.test.ts tests/architecture/package-exports.test.ts tests/architecture/inputBaseAccessibility.test.ts tests/architecture/playgroundCoverage.test.ts",
+        "revision": "9653f5e1ff6319ec7e29e4a38c7d34a9466c09f6c71d4abe68326299175c80d1",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run check:filenames && npm run check:lockfile && npm run optimize:svg:check && npm run check:playground:bundle && npm run verify:consumers",
+        "revision": "9653f5e1ff6319ec7e29e4a38c7d34a9466c09f6c71d4abe68326299175c80d1",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run check:audit",
+        "revision": "9653f5e1ff6319ec7e29e4a38c7d34a9466c09f6c71d4abe68326299175c80d1",
+        "result": "passed",
+        "exitCode": 0
+      }
+    ]
+  },
+  "updatedAt": 1792163730000,
+  "nextAction": "Aguardando confirmação do usuário para integração"
+}
