@@ -148,6 +148,28 @@ export { default as MaxSwitch } from './components/MaxInputSwitch.vue';
 export { default as InputSwitch } from './components/MaxInputSwitch.vue';
 export { default as MaxInputTextArea } from './components/MaxInputTextArea.vue';
 export { default as MaxInputTextList } from './components/MaxInputTextList.vue';
+
+// Inputs semânticos especializados
+export { default as MaxInputPercent } from './components/MaxInputPercent.vue';
+export { default as InputPercent } from './components/MaxInputPercent.vue';
+export { default as MaxInputPower } from './components/MaxInputPower.vue';
+export { default as InputPower } from './components/MaxInputPower.vue';
+export { default as MaxInputCurrent } from './components/MaxInputCurrent.vue';
+export { default as InputCurrent } from './components/MaxInputCurrent.vue';
+export { default as MaxInputVoltage } from './components/MaxInputVoltage.vue';
+export { default as InputVoltage } from './components/MaxInputVoltage.vue';
+export { default as MaxInputDistance } from './components/MaxInputDistance.vue';
+export { default as InputDistance } from './components/MaxInputDistance.vue';
+export { default as MaxInputDuration } from './components/MaxInputDuration.vue';
+export { default as InputDuration } from './components/MaxInputDuration.vue';
+export { default as MaxInputTokenLimit } from './components/MaxInputTokenLimit.vue';
+export { default as InputTokenLimit } from './components/MaxInputTokenLimit.vue';
+export { default as MaxInputMonthDays } from './components/MaxInputMonthDays.vue';
+export { default as InputMonthDays } from './components/MaxInputMonthDays.vue';
+export { default as MaxInputWeekInterval } from './components/MaxInputWeekInterval.vue';
+export { default as InputWeekInterval } from './components/MaxInputWeekInterval.vue';
+export { default as MaxInputSocialPlatform } from './components/MaxInputSocialPlatform.vue';
+export { default as InputSocialPlatform } from './components/MaxInputSocialPlatform.vue';
 // Async: o MaxInputMarkdown arrasta o tiptap inteiro (starter-kit + 8 extensões, ~350 KB);
 // como export estático ele entraria no bundle eager de TODOS os apps consumidores, mesmo sem uso.
 // Mesmo padrão de MaxPdfView/MaxLoaderAi (deps pesadas sob demanda).
@@ -168,7 +190,34 @@ export { default as InputUF } from './components/MaxInputUF.vue';
 export { default as InputUf } from './components/MaxInputUF.vue';
 export type { MaxInputUFProps, MaxInputUFValueMode } from './components/MaxInputUF.vue';
 export { BRAZIL_STATES, BRAZIL_NATIONAL_STATE, type BrazilState } from './constants/brazilStates';
+export { default as MaxInputPhase } from './components/MaxInputPhase.vue';
+export { default as MaxInputWireSize } from './components/MaxInputWireSize.vue';
+export { default as MaxInputWireType } from './components/MaxInputWireType.vue';
+export { default as MaxInputAiExecutionType } from './components/MaxInputAiExecutionType.vue';
+export { default as MaxInputAiBillingMode } from './components/MaxInputAiBillingMode.vue';
+export { default as MaxInputAiBillingUnit } from './components/MaxInputAiBillingUnit.vue';
+export { default as MaxInputPaymentMethod } from './components/MaxInputPaymentMethod.vue';
+export { default as MaxInputScheduleType } from './components/MaxInputScheduleType.vue';
+export { default as MaxInputMonthOccurrence } from './components/MaxInputMonthOccurrence.vue';
+export { default as MaxInputContentType } from './components/MaxInputContentType.vue';
+export { PHASE_OPTIONS, WIRE_SIZE_OPTIONS, WIRE_TYPE_OPTIONS } from './constants/electricalInputs';
+export { AI_EXECUTION_TYPE_OPTIONS, AI_BILLING_MODE_OPTIONS, AI_BILLING_UNIT_OPTIONS } from './constants/aiInputs';
+export { PAYMENT_METHOD_OPTIONS } from './constants/paymentMethods';
+export { SCHEDULE_TYPE_OPTIONS, MONTH_OCCURRENCE_OPTIONS, CONTENT_TYPE_OPTIONS } from './constants/editorialInputs';
 export { default as MaxGridCols } from './components/MaxGridCols.vue';
+
+// Dez novos inputs especializados
+export { default as MaxInputMultiSelect, type MaxInputMultiSelectProps } from './components/MaxInputMultiSelect.vue';
+export { default as MaxInputDateRange, type MaxInputDateRangeProps } from './components/MaxInputDateRange.vue';
+export { default as MaxInputDateReference, type MaxInputDateReferenceProps, type DateReferenceOption } from './components/MaxInputDateReference.vue';
+export { default as MaxInputStatusGroup, type MaxInputStatusGroupProps, type StatusGroupOption } from './components/MaxInputStatusGroup.vue';
+export { default as MaxInputRG, type MaxInputRGProps, type RGObjectValue } from './components/MaxInputRG.vue';
+export { default as MaxInputAddress, type MaxInputAddressProps, type AddressValue } from './components/MaxInputAddress.vue';
+export { default as MaxInputDateTimeLocal, type MaxInputDateTimeLocalProps } from './components/MaxInputDateTimeLocal.vue';
+export { default as MaxInputCurrencyCode, type MaxInputCurrencyCodeProps, type CurrencyOption } from './components/MaxInputCurrencyCode.vue';
+export { DEFAULT_CURRENCIES } from './constants/currencies';
+export { default as MaxInputSocialHandle, type MaxInputSocialHandleProps } from './components/MaxInputSocialHandle.vue';
+export { default as MaxInputCredential, type MaxInputCredentialProps } from './components/MaxInputCredential.vue';
 
 // Loaders
 export { default as MaxLoader } from './components/MaxLoader.vue';

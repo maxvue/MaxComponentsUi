@@ -155,14 +155,187 @@
                     <div class="states">
                         <div class="state-col" style="width: 140px;">
                             <span>Gatilho Estreito (140px)</span>
-                            <MaxTagSelect
-                                v-model="selectedTag"
-                                :options="energyTags"
-                                filter
-                                option-label="name"
-                                option-value="id"
-                                placeholder="Concessionária"
-                            />
+                            <MaxTagSelect v-model="selectedTag" :options="energyTags" filter option-label="name" option-value="id" placeholder="Concessionária" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="component-block">
+                    <h3>MaxInputPhase (D01)</h3>
+                    <div class="states">
+                        <div class="state-col" style="min-width: 180px;">
+                            <span>Interativo (v-model: {{ phaseVal ?? 'vazio' }})</span>
+                            <MaxInputPhase v-model="phaseVal" clearable />
+                        </div>
+                        <div class="state-col" style="min-width: 160px;">
+                            <span>Disabled</span>
+                            <MaxInputPhase :model-value="2" disabled />
+                        </div>
+                        <div class="state-col" style="min-width: 160px;">
+                            <span>Com Erro</span>
+                            <MaxInputPhase error="Fase obrigatória" required />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="component-block">
+                    <h3>MaxInputWireSize (D02)</h3>
+                    <div class="states">
+                        <div class="state-col" style="min-width: 200px;">
+                            <span>Interativo (v-model: {{ wireSizeVal ?? 'vazio' }})</span>
+                            <MaxInputWireSize v-model="wireSizeVal" clearable />
+                        </div>
+                        <div class="state-col" style="min-width: 160px;">
+                            <span>Disabled</span>
+                            <MaxInputWireSize :model-value="10" disabled />
+                        </div>
+                        <div class="state-col" style="min-width: 160px;">
+                            <span>Com Erro</span>
+                            <MaxInputWireSize error="Seção obrigatória" required />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="component-block">
+                    <h3>MaxInputWireType (D03)</h3>
+                    <div class="states">
+                        <div class="state-col" style="min-width: 220px;">
+                            <span>Interativo (v-model: {{ wireTypeVal ?? 'vazio' }})</span>
+                            <MaxInputWireType v-model="wireTypeVal" clearable />
+                        </div>
+                        <div class="state-col" style="min-width: 160px;">
+                            <span>Disabled</span>
+                            <MaxInputWireType model-value="copper-90" disabled />
+                        </div>
+                        <div class="state-col" style="min-width: 160px;">
+                            <span>Com Erro</span>
+                            <MaxInputWireType error="Tipo obrigatório" required />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="component-block">
+                    <h3>MaxInputAiExecutionType (D04)</h3>
+                    <div class="states">
+                        <div class="state-col" style="min-width: 180px;">
+                            <span>Interativo (v-model: {{ aiExecVal ?? 'vazio' }})</span>
+                            <MaxInputAiExecutionType v-model="aiExecVal" clearable />
+                        </div>
+                        <div class="state-col" style="min-width: 160px;">
+                            <span>Disabled</span>
+                            <MaxInputAiExecutionType model-value="local" disabled />
+                        </div>
+                        <div class="state-col" style="min-width: 160px;">
+                            <span>Com Erro</span>
+                            <MaxInputAiExecutionType error="Execução obrigatória" required />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="component-block">
+                    <h3>MaxInputAiBillingMode (D05)</h3>
+                    <div class="states">
+                        <div class="state-col" style="min-width: 190px;">
+                            <span>Interativo (v-model: {{ aiBillingModeVal ?? 'vazio' }})</span>
+                            <MaxInputAiBillingMode v-model="aiBillingModeVal" clearable />
+                        </div>
+                        <div class="state-col" style="min-width: 160px;">
+                            <span>Disabled</span>
+                            <MaxInputAiBillingMode model-value="free" disabled />
+                        </div>
+                        <div class="state-col" style="min-width: 160px;">
+                            <span>Com Erro</span>
+                            <MaxInputAiBillingMode error="Cobrança obrigatória" required />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="component-block">
+                    <h3>MaxInputAiBillingUnit (D06)</h3>
+                    <div class="states">
+                        <div class="state-col" style="min-width: 210px;">
+                            <span>Interativo (v-model: {{ aiBillingUnitVal ?? 'vazio' }})</span>
+                            <MaxInputAiBillingUnit v-model="aiBillingUnitVal" clearable />
+                        </div>
+                        <div class="state-col" style="min-width: 160px;">
+                            <span>Disabled</span>
+                            <MaxInputAiBillingUnit model-value="tokens" disabled />
+                        </div>
+                        <div class="state-col" style="min-width: 160px;">
+                            <span>Com Erro</span>
+                            <MaxInputAiBillingUnit error="Unidade obrigatória" required />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="component-block">
+                    <h3>MaxInputPaymentMethod (D07)</h3>
+                    <div class="states">
+                        <div class="state-col" style="min-width: 180px;">
+                            <span>Interativo (v-model: {{ paymentVal ?? 'vazio' }})</span>
+                            <MaxInputPaymentMethod v-model="paymentVal" clearable />
+                        </div>
+                        <div class="state-col" style="min-width: 160px;">
+                            <span>Disabled</span>
+                            <MaxInputPaymentMethod model-value="credit_card" disabled />
+                        </div>
+                        <div class="state-col" style="min-width: 160px;">
+                            <span>Com Erro</span>
+                            <MaxInputPaymentMethod error="Método obrigatório" required />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="component-block">
+                    <h3>MaxInputScheduleType (D08)</h3>
+                    <div class="states">
+                        <div class="state-col" style="min-width: 210px;">
+                            <span>Interativo (v-model: {{ scheduleVal ?? 'vazio' }})</span>
+                            <MaxInputScheduleType v-model="scheduleVal" clearable />
+                        </div>
+                        <div class="state-col" style="min-width: 160px;">
+                            <span>Disabled</span>
+                            <MaxInputScheduleType model-value="monthly_days" disabled />
+                        </div>
+                        <div class="state-col" style="min-width: 160px;">
+                            <span>Com Erro</span>
+                            <MaxInputScheduleType error="Agendamento obrigatório" required />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="component-block">
+                    <h3>MaxInputMonthOccurrence (D09)</h3>
+                    <div class="states">
+                        <div class="state-col" style="min-width: 180px;">
+                            <span>Interativo (v-model: {{ occurrenceVal ?? 'vazio' }})</span>
+                            <MaxInputMonthOccurrence v-model="occurrenceVal" clearable />
+                        </div>
+                        <div class="state-col" style="min-width: 160px;">
+                            <span>Disabled</span>
+                            <MaxInputMonthOccurrence :model-value="5" disabled />
+                        </div>
+                        <div class="state-col" style="min-width: 160px;">
+                            <span>Com Erro</span>
+                            <MaxInputMonthOccurrence error="Ocorrência obrigatória" required />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="component-block">
+                    <h3>MaxInputContentType (D10)</h3>
+                    <div class="states">
+                        <div class="state-col" style="min-width: 180px;">
+                            <span>Interativo (v-model: {{ contentVal ?? 'vazio' }})</span>
+                            <MaxInputContentType v-model="contentVal" clearable />
+                        </div>
+                        <div class="state-col" style="min-width: 160px;">
+                            <span>Disabled</span>
+                            <MaxInputContentType model-value="url" disabled />
+                        </div>
+                        <div class="state-col" style="min-width: 160px;">
+                            <span>Com Erro</span>
+                            <MaxInputContentType error="Tipo obrigatório" required />
                         </div>
                     </div>
                 </div>
@@ -278,7 +451,27 @@
         MaxInputWeekday,
         MaxInputMonth,
         MaxInputTime,
-        MaxInputYear
+        MaxInputYear,
+        MaxInputPhase,
+        MaxInputWireSize,
+        MaxInputWireType,
+        MaxInputAiExecutionType,
+        MaxInputAiBillingMode,
+        MaxInputAiBillingUnit,
+        MaxInputPaymentMethod,
+        MaxInputScheduleType,
+        MaxInputMonthOccurrence,
+        MaxInputContentType,
+        type PhaseValue,
+        type WireSizeValue,
+        type WireTypeValue,
+        type AiExecutionTypeValue,
+        type AiBillingModeValue,
+        type AiBillingUnitValue,
+        type PaymentMethodValue,
+        type ScheduleTypeValue,
+        type MonthOccurrenceValue,
+        type ContentTypeValue
     } from '@maxvue/max-components-ui';
 
     // Props neutras permitem exercitar os estados sem omitir contratos obrigatórios.
@@ -288,6 +481,24 @@
     const ufWithBr = ref('BR');
     const ufState = ref('Rio de Janeiro');
     const ufMin = ref('R. G. do Sul');
+
+    const entityVal = ref('PF');
+    const genderVal = ref('M');
+    const weekdayVal = ref('monday');
+    const monthVal = ref(1);
+    const timeVal = ref('12:00');
+    const yearVal = ref(2025);
+
+    const phaseVal = ref<PhaseValue | null>(1);
+    const wireSizeVal = ref<WireSizeValue | null>(2.5);
+    const wireTypeVal = ref<WireTypeValue | null>('copper-70');
+    const aiExecVal = ref<AiExecutionTypeValue | null>('cloud');
+    const aiBillingModeVal = ref<AiBillingModeValue | null>('dollar');
+    const aiBillingUnitVal = ref<AiBillingUnitValue | null>('m_tokens');
+    const paymentVal = ref<PaymentMethodValue | null>('pix');
+    const scheduleVal = ref<ScheduleTypeValue | null>('weekly');
+    const occurrenceVal = ref<MonthOccurrenceValue | null>(1);
+    const contentVal = ref<ContentTypeValue | null>('image');
 
     const selectedTag = ref(null);
     const energyTags = [

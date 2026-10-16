@@ -1,0 +1,171 @@
+{
+  "version": 2,
+  "planRevision": "d6871e287a18c2b36dd67672a867320ca00ef54e88f8c8748047ec1e49164d89",
+  "tasks": [
+    {
+      "id": "T1",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputMultiSelect.vue",
+        "tests/components/MaxInputMultiSelect.test.ts"
+      ],
+      "revision": "1c517b56988a4f4ad1e12d39be4249d17759ea5efafec3e25153d2aa3be2fee0",
+      "validations": []
+    },
+    {
+      "id": "T2",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputDateRange.vue",
+        "tests/components/MaxInputDateRange.test.ts"
+      ],
+      "revision": "7b6e459277a57bf3a392bd98c64b0814fdc6f37f0ab0889f18c70915c9251292",
+      "validations": []
+    },
+    {
+      "id": "T3",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputDateReference.vue",
+        "tests/components/MaxInputDateReference.test.ts"
+      ],
+      "revision": "8f13ebf4339ac53888e77abc06c3867c4fd5e9523d73b88195f0ddf7b99359b3",
+      "validations": []
+    },
+    {
+      "id": "T4",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputStatusGroup.vue",
+        "tests/components/MaxInputStatusGroup.test.ts"
+      ],
+      "revision": "dde0d86aca071d671fff6f116986a771fb6866390256428449e714258b4ec73b",
+      "validations": []
+    },
+    {
+      "id": "T5",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputRG.vue",
+        "tests/components/MaxInputRG.test.ts"
+      ],
+      "revision": "69c0caeeedd4e70e0b8cea9627de781413eb416b147b217cb863ad276409e908",
+      "validations": []
+    },
+    {
+      "id": "T6",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputAddress.vue",
+        "tests/components/MaxInputAddress.test.ts"
+      ],
+      "revision": "7a586acfc0cfadaca4bc9af84e8ec5445a82d029742a9c8a13b908cdca70a5b0",
+      "validations": []
+    },
+    {
+      "id": "T7",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputDateTimeLocal.vue",
+        "tests/components/MaxInputDateTimeLocal.test.ts"
+      ],
+      "revision": "0d8fdc4dff338551158d67016b4aa19a3f4b1f88699eab2fcb57ee864f415ba1",
+      "validations": []
+    },
+    {
+      "id": "T8",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputCurrencyCode.vue",
+        "src/constants/currencies.ts",
+        "tests/components/MaxInputCurrencyCode.test.ts"
+      ],
+      "revision": "ffa2fda501889c35b36caaa093af8efe7fd76b132293caad30b02d04222c8328",
+      "validations": []
+    },
+    {
+      "id": "T9",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputSocialHandle.vue",
+        "tests/components/MaxInputSocialHandle.test.ts"
+      ],
+      "revision": "fa27c8c75f473c2954e8cf9746a2c94e0a639c3fdfb0979bf0bc72037d654804",
+      "validations": []
+    },
+    {
+      "id": "T10",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputCredential.vue",
+        "tests/components/MaxInputCredential.test.ts"
+      ],
+      "revision": "0dbd4360608494e0276bef1683d91d5088877cae2f236c41b64330e3cf257e16",
+      "validations": []
+    },
+    {
+      "id": "T11",
+      "status": "completed",
+      "files": [
+        "package.json",
+        "playground/src/catalog.ts",
+        "src/components-manifest.json",
+        "src/index.ts",
+        "tests/architecture/package-exports.test.ts"
+      ],
+      "revision": "aa4af8e55f84535e44c21be64d4adb5affe9c58f885263116343df409005edc3",
+      "validations": []
+    },
+    {
+      "id": "T12",
+      "status": "completed",
+      "files": [],
+      "revision": "65351521f4e33aa32ecced90a77dfd21e3d28a0f4c287f7330c0f89badcb297c",
+      "validations": [],
+      "nextAction": "Plano integralmente executado e validado. Aguardando confirmação do usuário para integração Git."
+    }
+  ],
+  "verification": {
+    "revision": "65351521f4e33aa32ecced90a77dfd21e3d28a0f4c287f7330c0f89badcb297c",
+    "checks": [
+      {
+        "command": "npm run type-check",
+        "revision": "65351521f4e33aa32ecced90a77dfd21e3d28a0f4c287f7330c0f89badcb297c",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check:test",
+        "revision": "65351521f4e33aa32ecced90a77dfd21e3d28a0f4c287f7330c0f89badcb297c",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run lint",
+        "revision": "65351521f4e33aa32ecced90a77dfd21e3d28a0f4c287f7330c0f89badcb297c",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run build",
+        "revision": "65351521f4e33aa32ecced90a77dfd21e3d28a0f4c287f7330c0f89badcb297c",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npx --no-install vitest run tests/components/MaxInputMultiSelect.test.ts tests/components/MaxInputDateRange.test.ts tests/components/MaxInputDateReference.test.ts tests/components/MaxInputStatusGroup.test.ts tests/components/MaxInputRG.test.ts tests/components/MaxInputAddress.test.ts tests/components/MaxInputDateTimeLocal.test.ts tests/components/MaxInputCurrencyCode.test.ts tests/components/MaxInputSocialHandle.test.ts tests/components/MaxInputCredential.test.ts",
+        "revision": "65351521f4e33aa32ecced90a77dfd21e3d28a0f4c287f7330c0f89badcb297c",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npx --no-install vitest run tests/architecture/package-exports.test.ts tests/architecture/playgroundCoverage.test.ts tests/architecture/motionStandardsValidation.test.ts tests/themes/primaryTokenContract.test.ts tests/unit/FocusVisible.spec.ts",
+        "revision": "65351521f4e33aa32ecced90a77dfd21e3d28a0f4c287f7330c0f89badcb297c",
+        "result": "passed",
+        "exitCode": 0
+      }
+    ]
+  },
+  "updatedAt": 1792164720000,
+  "nextAction": "Plano integralmente executado e validado. Aguardando confirmação do usuário para integração Git."
+}

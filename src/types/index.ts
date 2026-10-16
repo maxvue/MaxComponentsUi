@@ -487,3 +487,6 @@ export type * from './filePreview';
 export type * from './markdownViewer';
 export type * from './calendar';
 
+// Tipos dos dez inputs de domínio especializados.
+export type * from './domainInputs';
+
