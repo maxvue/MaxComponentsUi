@@ -37,6 +37,7 @@ export const SCENARIO_LOADERS: Record<string, () => Promise<{ default: Component
     'media-brand': () => import('./media-brand.vue'),
     'trans-fade': () => import('./trans-fade.vue'),
     'trans-motion': () => import('./trans-motion.vue'),
-    'reusable-components': () => import('./reusable-components.vue')
+    'reusable-components': () => import('./reusable-components.vue'),
+    'inputs-specialized': () => import('./inputs-specialized.vue')
 };
 

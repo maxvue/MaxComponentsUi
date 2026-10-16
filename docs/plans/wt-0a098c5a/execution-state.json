@@ -4,35 +4,292 @@
   "tasks": [
     {
       "id": "T00",
-      "status": "blocked",
+      "status": "completed",
       "files": [],
-      "validations": [],
-      "nextAction": "Preparar dependências e caches isolados nesta worktree sem usar o node_modules compartilhado; então repetir o preflight."
+      "validations": []
     },
-    { "id": "T01", "status": "pending", "files": [], "validations": [] },
-    { "id": "T02", "status": "pending", "files": [], "validations": [] },
-    { "id": "T03", "status": "pending", "files": [], "validations": [] },
-    { "id": "T04", "status": "pending", "files": [], "validations": [] },
-    { "id": "T05", "status": "pending", "files": [], "validations": [] },
-    { "id": "T06", "status": "pending", "files": [], "validations": [] },
-    { "id": "T07", "status": "pending", "files": [], "validations": [] },
-    { "id": "T08", "status": "pending", "files": [], "validations": [] },
-    { "id": "T09", "status": "pending", "files": [], "validations": [] },
-    { "id": "T10", "status": "pending", "files": [], "validations": [] },
-    { "id": "T11", "status": "pending", "files": [], "validations": [] },
-    { "id": "T12", "status": "pending", "files": [], "validations": [] },
-    { "id": "T13", "status": "pending", "files": [], "validations": [] },
-    { "id": "T14", "status": "pending", "files": [], "validations": [] },
-    { "id": "T15", "status": "pending", "files": [], "validations": [] },
-    { "id": "T16", "status": "pending", "files": [], "validations": [] },
-    { "id": "T17", "status": "pending", "files": [], "validations": [] },
-    { "id": "T18", "status": "pending", "files": [], "validations": [] },
-    { "id": "T19", "status": "pending", "files": [], "validations": [] }
+    {
+      "id": "T01",
+      "status": "completed",
+      "files": [
+        "src/constants/aiInputs.ts",
+        "src/constants/electricalInputs.ts",
+        "src/constants/financingInputs.ts",
+        "src/constants/monitoringInputs.ts",
+        "src/constants/serviceInputs.ts",
+        "src/types/index.ts",
+        "src/types/specializedInputs.ts"
+      ],
+      "validations": [],
+      "revision": "83aca15565fad9df39efe2d69dfa9c0d3a9fc4662fd800a074ee1b61bc3dec90"
+    },
+    {
+      "id": "T02",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputOccupation.vue",
+        "tests/components/MaxInputOccupation.test.ts"
+      ],
+      "validations": [],
+      "revision": "64610761859cd98eb12abb1cf5aa2af058f45b759f60f13ce66b852178d5b811"
+    },
+    {
+      "id": "T03",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputFinancingTerm.vue",
+        "tests/components/MaxInputFinancingTerm.test.ts"
+      ],
+      "validations": [],
+      "revision": "2f66780697ec33378802c67f7b9494f0b78555113e3f39f75b739ba6557df1f1"
+    },
+    {
+      "id": "T04",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputFinancingGracePeriod.vue",
+        "tests/components/MaxInputFinancingGracePeriod.test.ts"
+      ],
+      "validations": [],
+      "revision": "ec3e011f810f2e8733e1822282837eb284e553094697e321794bd68f55a50dce"
+    },
+    {
+      "id": "T05",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputServicePricingUnit.vue",
+        "tests/components/MaxInputServicePricingUnit.test.ts"
+      ],
+      "validations": [],
+      "revision": "794ba55b04f9f792d735db20d28ee7ddfe733a196ec015a61b7ad0d1a8b5fc56"
+    },
+    {
+      "id": "T06",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputServiceAudience.vue",
+        "tests/components/MaxInputServiceAudience.test.ts"
+      ],
+      "validations": [],
+      "revision": "a069355596070c974820166363f41d4cb873c5a2093eaba646b47c8668985349"
+    },
+    {
+      "id": "T07",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputInverterType.vue",
+        "tests/components/MaxInputInverterType.test.ts"
+      ],
+      "validations": [],
+      "revision": "131a9e42fc510c519f9e1765f144f5c3f3d0bcf29ddd6ea4d7812e075e95956c"
+    },
+    {
+      "id": "T08",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputMonitoringAuthType.vue",
+        "tests/components/MaxInputMonitoringAuthType.test.ts"
+      ],
+      "validations": [],
+      "revision": "0c430610b7246d5cbdf939265a222b017db27f7876ccbfd9e6075d8da827cabe"
+    },
+    {
+      "id": "T09",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputMonitoringCredentialFlow.vue",
+        "tests/components/MaxInputMonitoringCredentialFlow.test.ts"
+      ],
+      "validations": [],
+      "revision": "6c58f32fc3306ba6ac2b2c22a1a398c040929dc05dadd6dc27be02ed6922e0ad"
+    },
+    {
+      "id": "T10",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputConsumerUnit.vue",
+        "tests/components/MaxInputConsumerUnit.test.ts"
+      ],
+      "validations": [],
+      "revision": "5a73adde81ab16b54cee9133cc7395ddfd3d859f28b85fbb3ba567940ac1bdd8"
+    },
+    {
+      "id": "T11",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputAiModelStatus.vue",
+        "tests/components/MaxInputAiModelStatus.test.ts"
+      ],
+      "validations": [],
+      "revision": "f80286b21917628a0c33dce35e31bcfa9cd646ffe4276eced4a06aa5b1134970"
+    },
+    {
+      "id": "T12",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputAiPriceItemType.vue",
+        "tests/components/MaxInputAiPriceItemType.test.ts"
+      ],
+      "validations": [],
+      "revision": "e5eadee5a037f5d3aa04d93787e1c6aa4c2aa17e2378967f49dd05e9667e7072"
+    },
+    {
+      "id": "T13",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputAiCacheOperation.vue",
+        "tests/components/MaxInputAiCacheOperation.test.ts"
+      ],
+      "validations": [],
+      "revision": "3da97470f5abcdf060c53922d9586d928eabead4a37eae949b1372d86983fceb"
+    },
+    {
+      "id": "T14",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputRagSourceType.vue",
+        "tests/components/MaxInputRagSourceType.test.ts"
+      ],
+      "validations": [],
+      "revision": "569d9c749c9f69af59d2883b1bace23dd711b74a7df168b98ea98808e060629f"
+    },
+    {
+      "id": "T15",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputColorPalette.vue",
+        "tests/components/MaxInputColorPalette.test.ts"
+      ],
+      "validations": [],
+      "revision": "ce5da98d5b8d32392f2d67bdd9175bba4f3c1d5cdb1692ac6daa72a278e81e25"
+    },
+    {
+      "id": "T16",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputScheduleRules.vue",
+        "src/helpers/scheduleRules.ts",
+        "tests/components/MaxInputScheduleRules.test.ts",
+        "tests/helpers/scheduleRules.test.ts"
+      ],
+      "validations": [],
+      "revision": "7c0683868f06e9618bbe7dc9105fd0590ce815018c21230a508dd8f9247d0994"
+    },
+    {
+      "id": "T17",
+      "status": "completed",
+      "files": [
+        "docs/INPUTS-DOMAIN.md",
+        "package.json",
+        "playground/src/catalog.ts",
+        "playground/src/scenarios/index.ts",
+        "playground/src/scenarios/inputs-specialized.vue",
+        "scripts/verify-consumers.mjs",
+        "src/components-manifest.json",
+        "src/index.ts",
+        "tests/browser/SpecializedInputs.browser.ts",
+        "tests/index.test.ts"
+      ],
+      "validations": [],
+      "revision": "0b3934c1849a33cc461827bd9db408c89975821721e40843ad6a6309af43f84a"
+    },
+    {
+      "id": "T18",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputDateReference.vue",
+        "src/components/MaxInputStatusGroup.vue",
+        "tests/architecture/inputBaseAccessibility.test.ts",
+        "tests/architecture/package-exports.test.ts",
+        "tests/architecture/playgroundCoverage.test.ts"
+      ],
+      "validations": [],
+      "revision": "314c5cdc8217a6195ba23a729da10093395f3b2b425b3d35d9f0d83bee2962d1"
+    },
+    {
+      "id": "T19",
+      "status": "completed",
+      "files": [],
+      "validations": []
+    }
   ],
   "verification": {
-    "revision": "9208228d7d226b270e48a4162c47bf75060c21726846ba8f68809a26f8833ffb",
-    "checks": []
+    "revision": "ec194684834268e126a4f8821b62920a61613af6656ca66872544e12898a0e46",
+    "checks": [
+      {
+        "command": "npm run check:filenames",
+        "revision": "ec194684834268e126a4f8821b62920a61613af6656ca66872544e12898a0e46",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run check:lockfile",
+        "revision": "ec194684834268e126a4f8821b62920a61613af6656ca66872544e12898a0e46",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run optimize:svg:check",
+        "revision": "ec194684834268e126a4f8821b62920a61613af6656ca66872544e12898a0e46",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check",
+        "revision": "ec194684834268e126a4f8821b62920a61613af6656ca66872544e12898a0e46",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check:test",
+        "revision": "ec194684834268e126a4f8821b62920a61613af6656ca66872544e12898a0e46",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run lint",
+        "revision": "ec194684834268e126a4f8821b62920a61613af6656ca66872544e12898a0e46",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run build",
+        "revision": "ec194684834268e126a4f8821b62920a61613af6656ca66872544e12898a0e46",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run test",
+        "revision": "ec194684834268e126a4f8821b62920a61613af6656ca66872544e12898a0e46",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run check:playground:bundle",
+        "revision": "ec194684834268e126a4f8821b62920a61613af6656ca66872544e12898a0e46",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npx vitest run --config vitest.browser.config.ts tests/browser/SpecializedInputs.browser.ts",
+        "revision": "ec194684834268e126a4f8821b62920a61613af6656ca66872544e12898a0e46",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "node scripts/verify-consumers.mjs",
+        "revision": "ec194684834268e126a4f8821b62920a61613af6656ca66872544e12898a0e46",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run test:benchmark",
+        "revision": "ec194684834268e126a4f8821b62920a61613af6656ca66872544e12898a0e46",
+        "result": "passed",
+        "exitCode": 0
+      }
+    ]
   },
-  "updatedAt": 1792173092725,
-  "nextAction": "Aguardar ambiente de dependências isoladas; nenhuma implementação ou validação de código foi iniciada."
+  "updatedAt": 1792187814974,
+  "nextAction": "Plano 100% implementado e validado. Aguardar confirmação do usuário para integração Git."
 }

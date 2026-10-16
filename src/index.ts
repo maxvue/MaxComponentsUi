@@ -219,6 +219,42 @@ export { DEFAULT_CURRENCIES } from './constants/currencies';
 export { default as MaxInputSocialHandle, type MaxInputSocialHandleProps } from './components/MaxInputSocialHandle.vue';
 export { default as MaxInputCredential, type MaxInputCredentialProps } from './components/MaxInputCredential.vue';
 
+// Quinze novos inputs especializados
+export { default as MaxInputOccupation } from './components/MaxInputOccupation.vue';
+export { default as MaxInputFinancingTerm } from './components/MaxInputFinancingTerm.vue';
+export { default as MaxInputFinancingGracePeriod } from './components/MaxInputFinancingGracePeriod.vue';
+export { default as MaxInputServicePricingUnit } from './components/MaxInputServicePricingUnit.vue';
+export { default as MaxInputServiceAudience } from './components/MaxInputServiceAudience.vue';
+export { default as MaxInputInverterType } from './components/MaxInputInverterType.vue';
+export { default as MaxInputMonitoringAuthType } from './components/MaxInputMonitoringAuthType.vue';
+export { default as MaxInputMonitoringCredentialFlow } from './components/MaxInputMonitoringCredentialFlow.vue';
+export { default as MaxInputConsumerUnit } from './components/MaxInputConsumerUnit.vue';
+export { default as MaxInputAiModelStatus } from './components/MaxInputAiModelStatus.vue';
+export { default as MaxInputAiPriceItemType } from './components/MaxInputAiPriceItemType.vue';
+export { default as MaxInputAiCacheOperation } from './components/MaxInputAiCacheOperation.vue';
+export { default as MaxInputRagSourceType } from './components/MaxInputRagSourceType.vue';
+export { default as MaxInputColorPalette } from './components/MaxInputColorPalette.vue';
+export { default as MaxInputScheduleRules } from './components/MaxInputScheduleRules.vue';
+export { OCCUPATION_OPTIONS, FINANCING_TERM_OPTIONS, FINANCING_GRACE_PERIOD_OPTIONS } from './constants/financingInputs';
+export { SERVICE_PRICING_UNIT_OPTIONS, SERVICE_AUDIENCE_OPTIONS } from './constants/serviceInputs';
+export { MONITORING_AUTH_TYPE_OPTIONS, MONITORING_CREDENTIAL_FLOW_OPTIONS } from './constants/monitoringInputs';
+export { INVERTER_TYPE_OPTIONS } from './constants/electricalInputs';
+export {
+    AI_MODEL_STATUS_OPTIONS,
+    AI_PRICE_ITEM_TYPE_OPTIONS,
+    AI_CACHE_OPERATION_OPTIONS,
+    RAG_SOURCE_TYPE_OPTIONS
+} from './constants/aiInputs';
+export {
+    VALID_WEEKDAYS,
+    isValidDateString,
+    isValidTimeString,
+    isValidScheduleRule,
+    createDefaultScheduleRule,
+    changeRuleType
+} from './helpers/scheduleRules';
+
+
 // Loaders
 export { default as MaxLoader } from './components/MaxLoader.vue';
 export { default as MaxLoaderAi } from './components/MaxLoaderAi.vue';

@@ -1,7 +1,7 @@
 <template>
     <InputBase v-bind="{ ...inputBaseProps, ...attrsWithoutModelProps }" class="max-input-status-group-base">
-        <template #default>
-            <div class="max-status-group" :class="{ 'is-disabled': props.disabled, [`size-${props.size}`]: true }" :role="props.multiple ? 'group' : 'radiogroup'" :aria-label="props.label ?? 'Grupo de status'">
+        <template #default="{ inputAttrs }">
+            <div class="max-status-group" v-bind="inputAttrs" :class="{ 'is-disabled': props.disabled, [`size-${props.size}`]: true }" :role="props.multiple ? 'group' : 'radiogroup'" :aria-label="props.label ?? 'Grupo de status'">
                 <button v-for="opt in normalizedOptions" :key="String(opt.value)" type="button" class="max-status-pill" :class="[getPillClasses(opt)]" :style="getPillStyle(opt)" :disabled="props.disabled || opt.disabled" :role="props.multiple ? 'checkbox' : 'radio'" :aria-checked="isOptionSelected(opt)" @click="toggleOption(opt)">
                     <MaxIcon v-if="opt.icon" :icon="opt.icon" size="0.85" class="status-pill-icon" />
                     <span class="status-pill-text">{{ opt.label }}</span>

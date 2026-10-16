@@ -490,3 +490,7 @@ export type * from './calendar';
 // Tipos dos dez inputs de domínio especializados.
 export type * from './domainInputs';
 
+// Tipos dos quinze novos inputs especializados.
+export type * from './specializedInputs';
+
+
