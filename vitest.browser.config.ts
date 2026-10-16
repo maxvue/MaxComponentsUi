@@ -4,6 +4,17 @@ import { defineConfig } from 'vitest/config';
 import vue from '@vitejs/plugin-vue';
 import { playwright } from '@vitest/browser-playwright';
 
+import fs from 'node:fs';
+
+if (!process.env.PLAYWRIGHT_BROWSERS_PATH) {
+    const candidate = [
+        '/home/johnattas/.cache/ms-playwright',
+        path.join(process.env.HOME || '', '.cache/ms-playwright')
+    ].find((p) => Boolean(p && fs.existsSync(p)));
+
+    if (candidate) process.env.PLAYWRIGHT_BROWSERS_PATH = candidate;
+}
+
 const require = createRequire(import.meta.url);
 
 function virtualMaxGridPresetPlugin() {
@@ -76,6 +87,74 @@ export default defineConfig({
                     const cdp = await page.context().newCDPSession(page);
                     await cdp.send('Emulation.setPageScaleFactor', { pageScaleFactor: scale });
                     await cdp.detach();
+                },
+                async dragOverlaySelection(context: any, options: {
+                    fromSelector: string;
+                    toSelector: string;
+                    steps?: number;
+                    reverse?: boolean;
+                    toSide?: 'left' | 'right';
+                }) {
+                    const page = context.provider.getPage(context.sessionId);
+                    const frame = page.mainFrame().childFrames()[0] || page.frames().find((f: any) => f !== page.mainFrame());
+                    if (!frame) throw new Error('Frame de teste não encontrado');
+
+                    const fromElement = await frame.$(options.fromSelector);
+                    const toElement = await frame.$(options.toSelector);
+                    if (!fromElement) throw new Error(`Elemento de origem não encontrado: ${options.fromSelector}`);
+                    if (!toElement) throw new Error(`Elemento de destino não encontrado: ${options.toSelector}`);
+
+                    const fromBox = await fromElement.boundingBox();
+                    const toBox = await toElement.boundingBox();
+                    if (!fromBox || !toBox) throw new Error('BoundingBox não encontrado para elementos');
+
+                    const startX = fromBox.x + fromBox.width / 2;
+                    const startY = fromBox.y + fromBox.height / 2;
+                    let endX = toBox.x + Math.min(25, toBox.width / 4);
+                    let endY = toBox.y + Math.min(25, toBox.height / 4);
+
+                    if (options.toSide === 'right') {
+                        endX = toBox.x + toBox.width - 30;
+                        endY = toBox.y + toBox.height / 2;
+                    }
+
+                    const p1 = options.reverse ? { x: endX, y: endY } : { x: startX, y: startY };
+                    const p2 = options.reverse ? { x: startX, y: startY } : { x: endX, y: endY };
+
+                    try {
+                        await page.mouse.move(p1.x, p1.y);
+                        await page.mouse.down({ button: 'left' });
+                        await page.mouse.move(p2.x, p2.y, { steps: options.steps ?? 12 });
+                        await page.mouse.up({ button: 'left' });
+                    } finally {
+                        await page.mouse.up({ button: 'left' }).catch(() => {});
+                    }
+                },
+                async clickOverlayDirect(context: any, options: {
+                    selector: string;
+                    offsetX?: number;
+                    offsetY?: number;
+                    side?: 'left' | 'right';
+                }) {
+                    const page = context.provider.getPage(context.sessionId);
+                    const frame = page.mainFrame().childFrames()[0] || page.frames().find((f: any) => f !== page.mainFrame());
+                    if (!frame) throw new Error('Frame de teste não encontrado');
+
+                    const element = await frame.$(options.selector);
+                    if (!element) throw new Error(`Elemento não encontrado: ${options.selector}`);
+
+                    const box = await element.boundingBox();
+                    if (!box) throw new Error('BoundingBox não encontrado');
+
+                    let x = box.x + (options.offsetX ?? Math.min(25, box.width / 4));
+                    let y = box.y + (options.offsetY ?? Math.min(25, box.height / 4));
+
+                    if (options.side === 'right') {
+                        x = box.x + box.width - 30;
+                        y = box.y + box.height / 2;
+                    }
+
+                    await page.mouse.click(x, y, { button: 'left' });
                 }
             }
         },

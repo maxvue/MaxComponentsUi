@@ -1062,4 +1062,301 @@ describe('MaxModal', () => {
             titleEl.remove();
         });
     });
+
+    describe('Proteção contra fechamento por arraste no backdrop (R1-R8)', () => {
+        function simulateDrag(fromEl: Element, toEl: Element, clickEl: Element = toEl) {
+            fromEl.dispatchEvent(new PointerEvent('pointerdown', {
+                bubbles: true,
+                cancelable: true,
+                pointerId: 1,
+                isPrimary: true,
+                button: 0
+            }));
+            toEl.dispatchEvent(new PointerEvent('pointerup', {
+                bubbles: true,
+                cancelable: true,
+                pointerId: 1,
+                isPrimary: true,
+                button: 0
+            }));
+            clickEl.dispatchEvent(new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                button: 0,
+                detail: 1
+            }));
+        }
+
+        function simulateDirectClick(el: Element) {
+            el.dispatchEvent(new PointerEvent('pointerdown', {
+                bubbles: true,
+                cancelable: true,
+                pointerId: 1,
+                isPrimary: true,
+                button: 0
+            }));
+            el.dispatchEvent(new PointerEvent('pointerup', {
+                bubbles: true,
+                cancelable: true,
+                pointerId: 1,
+                isPrimary: true,
+                button: 0
+            }));
+            el.dispatchEvent(new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                button: 0,
+                detail: 1
+            }));
+        }
+
+        it('R1: arraste iniciado dentro do painel e terminado na máscara não fecha o modal', async () => {
+            const wrapper = mountModal({}, {
+                content: '<input id="input-arraste" value="Texto selecionável">'
+            }, { attachTo: document.body });
+            const vm = wrapper.vm as any;
+            const store = useModalStore();
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+
+            const backdropEl = wrapper.find('.background-modal').element;
+            const inputEl = document.getElementById('input-arraste')!;
+            expect(inputEl).toBeTruthy();
+
+            const closedCount = wrapper.emitted('closed')?.length ?? 0;
+            simulateDrag(inputEl, backdropEl, backdropEl);
+            await wrapper.vm.$nextTick();
+
+            expect(vm.is_show).toBe(true);
+            expect(store.show_id).toBe(vm.id);
+            expect(wrapper.emitted('closed')?.length ?? 0).toBe(closedCount);
+
+            wrapper.unmount();
+        });
+
+        it('R2: arraste ignorado não aciona beforeClose nem tremor quando dismissable é false', async () => {
+            const beforeCloseMock = vi.fn();
+            const wrapper = mountModal({
+                dismissable: false,
+                beforeClose: beforeCloseMock
+            }, {
+                content: '<div id="conteudo-texto">Texto dentro do modal</div>'
+            }, { attachTo: document.body });
+            const vm = wrapper.vm as any;
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+
+            const backdropEl = wrapper.find('.background-modal').element;
+            const textEl = document.getElementById('conteudo-texto')!;
+
+            simulateDrag(textEl, backdropEl, backdropEl);
+            await wrapper.vm.$nextTick();
+
+            expect(vm.is_show).toBe(true);
+            expect(beforeCloseMock).not.toHaveBeenCalled();
+            expect(vm.isShaking).toBe(false);
+
+            wrapper.unmount();
+        });
+
+        it('R3: clique direto iniciado e terminado na máscara fecha o modal', async () => {
+            const wrapper = mountModal({}, {}, { attachTo: document.body });
+            const vm = wrapper.vm as any;
+            const store = useModalStore();
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+            expect(vm.is_show).toBe(true);
+
+            const backdropEl = wrapper.find('.background-modal').element;
+            simulateDirectClick(backdropEl);
+            await wrapper.vm.$nextTick();
+
+            expect(vm.is_show).toBe(false);
+            expect(store.show_id).toBeNull();
+
+            wrapper.unmount();
+        });
+
+        it('R3: próximo clique direto na máscara fecha o modal após um arraste ignorado', async () => {
+            const wrapper = mountModal({}, {
+                content: '<span id="item-interno">Conteúdo interno</span>'
+            }, { attachTo: document.body });
+            const vm = wrapper.vm as any;
+            const store = useModalStore();
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+
+            const backdropEl = wrapper.find('.background-modal').element;
+            const itemEl = document.getElementById('item-interno')!;
+
+            // 1. Arraste do conteúdo para a máscara -> deve ignorar
+            simulateDrag(itemEl, backdropEl, backdropEl);
+            await wrapper.vm.$nextTick();
+            expect(vm.is_show).toBe(true);
+
+            // 2. Clique direto na máscara -> deve fechar com sucesso
+            simulateDirectClick(backdropEl);
+            await wrapper.vm.$nextTick();
+
+            expect(vm.is_show).toBe(false);
+            expect(store.show_id).toBeNull();
+
+            wrapper.unmount();
+        });
+
+        it('R4: arraste inverso iniciado na máscara e terminado dentro do conteúdo não fecha', async () => {
+            const wrapper = mountModal({}, {
+                content: '<div id="area-drop">Alvo do drop</div>'
+            }, { attachTo: document.body });
+            const vm = wrapper.vm as any;
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+
+            const backdropEl = wrapper.find('.background-modal').element;
+            const dropEl = document.getElementById('area-drop')!;
+
+            // Pressiona na máscara, solta no conteúdo, clique pode disparar no ancestral
+            simulateDrag(backdropEl, dropEl, backdropEl);
+            await wrapper.vm.$nextTick();
+
+            expect(vm.is_show).toBe(true);
+
+            wrapper.unmount();
+        });
+
+        it('R6: pointercancel invalida o fechamento por clique', async () => {
+            const wrapper = mountModal({}, {}, { attachTo: document.body });
+            const vm = wrapper.vm as any;
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+
+            const backdropEl = wrapper.find('.background-modal').element;
+
+            // Inicia na máscara
+            backdropEl.dispatchEvent(new PointerEvent('pointerdown', {
+                bubbles: true,
+                cancelable: true,
+                pointerId: 1,
+                isPrimary: true,
+                button: 0
+            }));
+
+            // Cancelamento do ponteiro
+            backdropEl.dispatchEvent(new PointerEvent('pointercancel', {
+                bubbles: true,
+                cancelable: true,
+                pointerId: 1,
+                isPrimary: true
+            }));
+
+            // Solta e clica
+            backdropEl.dispatchEvent(new PointerEvent('pointerup', {
+                bubbles: true,
+                cancelable: true,
+                pointerId: 1,
+                isPrimary: true,
+                button: 0
+            }));
+            backdropEl.dispatchEvent(new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                button: 0,
+                detail: 1
+            }));
+            await wrapper.vm.$nextTick();
+
+            expect(vm.is_show).toBe(true);
+
+            wrapper.unmount();
+        });
+
+        it('R6: evento de blur na janela reseta a guarda de gesto', async () => {
+            const wrapper = mountModal({}, {}, { attachTo: document.body });
+            const vm = wrapper.vm as any;
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+
+            const backdropEl = wrapper.find('.background-modal').element;
+
+            backdropEl.dispatchEvent(new PointerEvent('pointerdown', {
+                bubbles: true,
+                cancelable: true,
+                pointerId: 1,
+                isPrimary: true,
+                button: 0
+            }));
+
+            window.dispatchEvent(new Event('blur'));
+
+            backdropEl.dispatchEvent(new PointerEvent('pointerup', {
+                bubbles: true,
+                cancelable: true,
+                pointerId: 1,
+                isPrimary: true,
+                button: 0
+            }));
+            backdropEl.dispatchEvent(new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                button: 0,
+                detail: 1
+            }));
+            await wrapper.vm.$nextTick();
+
+            expect(vm.is_show).toBe(true);
+
+            wrapper.unmount();
+        });
+
+        it('R8: preserva clique programático neutro com detail === 0', async () => {
+            const wrapper = mountModal({}, {}, { attachTo: document.body });
+            const vm = wrapper.vm as any;
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+
+            const backdropEl = wrapper.find('.background-modal').element;
+
+            // Dispara clique programático sem ponteiro anterior e com detail 0
+            backdropEl.dispatchEvent(new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                detail: 0
+            }));
+            await wrapper.vm.$nextTick();
+
+            expect(vm.is_show).toBe(false);
+
+            wrapper.unmount();
+        });
+
+        it('R8: rejeita clique físico isolado com detail > 0 sem sequência válida de ponteiro', async () => {
+            const wrapper = mountModal({}, {}, { attachTo: document.body });
+            const vm = wrapper.vm as any;
+
+            vm.open();
+            await wrapper.vm.$nextTick();
+
+            const backdropEl = wrapper.find('.background-modal').element;
+
+            // Clique com detail > 0 sem pointerdown/pointerup
+            backdropEl.dispatchEvent(new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                detail: 1
+            }));
+            await wrapper.vm.$nextTick();
+
+            expect(vm.is_show).toBe(true);
+
+            wrapper.unmount();
+        });
+    });
 });

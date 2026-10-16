@@ -582,4 +582,277 @@ describe('MaxDrawer', () => {
             wrapper.unmount();
         });
     });
+
+    describe('Proteção contra fechamento por arraste na máscara (R1-R8)', () => {
+        function simulateDrag(fromEl: Element, toEl: Element, clickEl: Element = toEl) {
+            fromEl.dispatchEvent(new PointerEvent('pointerdown', {
+                bubbles: true,
+                cancelable: true,
+                pointerId: 1,
+                isPrimary: true,
+                button: 0
+            }));
+            toEl.dispatchEvent(new PointerEvent('pointerup', {
+                bubbles: true,
+                cancelable: true,
+                pointerId: 1,
+                isPrimary: true,
+                button: 0
+            }));
+            clickEl.dispatchEvent(new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                button: 0,
+                detail: 1
+            }));
+        }
+
+        function simulateDirectClick(el: Element) {
+            el.dispatchEvent(new PointerEvent('pointerdown', {
+                bubbles: true,
+                cancelable: true,
+                pointerId: 1,
+                isPrimary: true,
+                button: 0
+            }));
+            el.dispatchEvent(new PointerEvent('pointerup', {
+                bubbles: true,
+                cancelable: true,
+                pointerId: 1,
+                isPrimary: true,
+                button: 0
+            }));
+            el.dispatchEvent(new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                button: 0,
+                detail: 1
+            }));
+        }
+
+        it('R1: arraste iniciado dentro do painel e terminado na máscara não fecha o drawer', async () => {
+            const wrapper = mount(MaxDrawer, {
+                props: { visible: true },
+                slots: { default: '<input id="drawer-input" value="Texto de teste">' },
+                attachTo: document.body
+            });
+            await nextTick();
+
+            const maskEl = document.querySelector('.max-drawer-mask')!;
+            const inputEl = document.getElementById('drawer-input')!;
+            expect(maskEl).toBeTruthy();
+            expect(inputEl).toBeTruthy();
+
+            simulateDrag(inputEl, maskEl, maskEl);
+            await nextTick();
+
+            expect(wrapper.emitted('update:visible')).toBeUndefined();
+            wrapper.unmount();
+        });
+
+        it('R3: clique direto iniciado e terminado na máscara fecha quando dismissable é true', async () => {
+            const wrapper = mount(MaxDrawer, {
+                props: { visible: true, dismissable: true },
+                slots: { default: '<div>Conteúdo</div>' },
+                attachTo: document.body
+            });
+            await nextTick();
+
+            const maskEl = document.querySelector('.max-drawer-mask')!;
+            simulateDirectClick(maskEl);
+            await nextTick();
+
+            expect(wrapper.emitted('update:visible')?.[0]).toEqual([false]);
+            wrapper.unmount();
+        });
+
+        it('R3: próximo clique direto na máscara fecha o drawer após um arraste ignorado', async () => {
+            const wrapper = mount(MaxDrawer, {
+                props: { visible: true, dismissable: true },
+                slots: { default: '<button id="btn-interno">Ação</button>' },
+                attachTo: document.body
+            });
+            await nextTick();
+
+            const maskEl = document.querySelector('.max-drawer-mask')!;
+            const btnEl = document.getElementById('btn-interno')!;
+
+            // 1. Arraste ignorado
+            simulateDrag(btnEl, maskEl, maskEl);
+            await nextTick();
+            expect(wrapper.emitted('update:visible')).toBeUndefined();
+
+            // 2. Clique direto na máscara
+            simulateDirectClick(maskEl);
+            await nextTick();
+            expect(wrapper.emitted('update:visible')?.[0]).toEqual([false]);
+
+            wrapper.unmount();
+        });
+
+        it('R4: arraste inverso iniciado na máscara e terminado no conteúdo não fecha o drawer', async () => {
+            const wrapper = mount(MaxDrawer, {
+                props: { visible: true, dismissable: true },
+                slots: { default: '<div id="conteudo-drawer">Painel</div>' },
+                attachTo: document.body
+            });
+            await nextTick();
+
+            const maskEl = document.querySelector('.max-drawer-mask')!;
+            const contentEl = document.getElementById('conteudo-drawer')!;
+
+            simulateDrag(maskEl, contentEl, maskEl);
+            await nextTick();
+
+            expect(wrapper.emitted('update:visible')).toBeUndefined();
+            wrapper.unmount();
+        });
+
+        it('R6: suporta slot container customizado sem painel padrão', async () => {
+            const wrapper = mount(MaxDrawer, {
+                props: { visible: true, dismissable: true },
+                slots: {
+                    container: '<div id="custom-container"><input id="custom-input" value="Custom"></div>'
+                },
+                attachTo: document.body
+            });
+            await nextTick();
+
+            const maskEl = document.querySelector('.max-drawer-mask')!;
+            const customInput = document.getElementById('custom-input')!;
+
+            // Arraste de dentro do custom container para a máscara
+            simulateDrag(customInput, maskEl, maskEl);
+            await nextTick();
+            expect(wrapper.emitted('update:visible')).toBeUndefined();
+
+            // Clique direto fecha
+            simulateDirectClick(maskEl);
+            await nextTick();
+            expect(wrapper.emitted('update:visible')?.[0]).toEqual([false]);
+
+            wrapper.unmount();
+        });
+
+        it('R6: pointercancel invalida o fechamento por clique', async () => {
+            const wrapper = mount(MaxDrawer, {
+                props: { visible: true, dismissable: true },
+                attachTo: document.body
+            });
+            await nextTick();
+
+            const maskEl = document.querySelector('.max-drawer-mask')!;
+
+            maskEl.dispatchEvent(new PointerEvent('pointerdown', {
+                bubbles: true,
+                cancelable: true,
+                pointerId: 1,
+                isPrimary: true,
+                button: 0
+            }));
+
+            maskEl.dispatchEvent(new PointerEvent('pointercancel', {
+                bubbles: true,
+                cancelable: true,
+                pointerId: 1,
+                isPrimary: true
+            }));
+
+            maskEl.dispatchEvent(new PointerEvent('pointerup', {
+                bubbles: true,
+                cancelable: true,
+                pointerId: 1,
+                isPrimary: true,
+                button: 0
+            }));
+            maskEl.dispatchEvent(new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                button: 0,
+                detail: 1
+            }));
+            await nextTick();
+
+            expect(wrapper.emitted('update:visible')).toBeUndefined();
+            wrapper.unmount();
+        });
+
+        it('R6: evento de blur na janela reseta a guarda de gesto', async () => {
+            const wrapper = mount(MaxDrawer, {
+                props: { visible: true, dismissable: true },
+                attachTo: document.body
+            });
+            await nextTick();
+
+            const maskEl = document.querySelector('.max-drawer-mask')!;
+
+            maskEl.dispatchEvent(new PointerEvent('pointerdown', {
+                bubbles: true,
+                cancelable: true,
+                pointerId: 1,
+                isPrimary: true,
+                button: 0
+            }));
+
+            window.dispatchEvent(new Event('blur'));
+
+            maskEl.dispatchEvent(new PointerEvent('pointerup', {
+                bubbles: true,
+                cancelable: true,
+                pointerId: 1,
+                isPrimary: true,
+                button: 0
+            }));
+            maskEl.dispatchEvent(new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                button: 0,
+                detail: 1
+            }));
+            await nextTick();
+
+            expect(wrapper.emitted('update:visible')).toBeUndefined();
+            wrapper.unmount();
+        });
+
+        it('R8: preserva clique programático neutro com detail === 0', async () => {
+            const wrapper = mount(MaxDrawer, {
+                props: { visible: true, dismissable: true },
+                attachTo: document.body
+            });
+            await nextTick();
+
+            const maskEl = document.querySelector('.max-drawer-mask')!;
+
+            maskEl.dispatchEvent(new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                detail: 0
+            }));
+            await nextTick();
+
+            expect(wrapper.emitted('update:visible')?.[0]).toEqual([false]);
+            wrapper.unmount();
+        });
+
+        it('R8: rejeita clique físico isolado com detail > 0 sem sequência de ponteiro', async () => {
+            const wrapper = mount(MaxDrawer, {
+                props: { visible: true, dismissable: true },
+                attachTo: document.body
+            });
+            await nextTick();
+
+            const maskEl = document.querySelector('.max-drawer-mask')!;
+
+            maskEl.dispatchEvent(new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                detail: 1
+            }));
+            await nextTick();
+
+            expect(wrapper.emitted('update:visible')).toBeUndefined();
+            wrapper.unmount();
+        });
+    });
 });

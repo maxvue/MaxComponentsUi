@@ -7,13 +7,7 @@
         </div>
         <teleport to="body">
             <Transition name="max-modal-fade" @after-leave="emit('after-hide')">
-                <div
-                    class="background-modal"
-                    @click.stop="onBackdropClick"
-                    v-if="is_show"
-                    :style="{ zIndex: backdropZIndex }"
-                    :data-html2canvas-ignore="props.ignoreCanvas"
-                >
+                <div class="background-modal" @pointerdown.capture="onBackdropPointerDown" @pointerup.capture="onBackdropPointerUp" @pointercancel="onBackdropPointerCancel" @click.stop="onBackdropClick" v-if="is_show" :style="{ zIndex: backdropZIndex }" :data-html2canvas-ignore="props.ignoreCanvas">
                     <div
                         class="max-modal"
                         ref="el"
@@ -61,6 +55,7 @@
     import { useBrowserEventListener } from '../composables/useBrowserEventListener';
     import { resolveAriaLabelledby } from '../helpers/useAccessibleName';
     import { provideModalContext } from '../helpers/modalContext';
+    import { useEventListener } from '@maxvue/max-use';
     import MaxIconButton from './MaxIconButton.vue';
     import MaxButton from './MaxButton.vue';
     import MaxTitle1 from './MaxTitle1.vue';
@@ -328,7 +323,43 @@
         requestClose('button');
     };
 
-    const onBackdropClick = () => {
+    type BackdropGestureState = 'idle' | 'eligible' | 'invalid';
+    let activeBackdropPointerId: number | null = null;
+    let backdropGestureState: BackdropGestureState = 'idle';
+
+    const resetBackdropGesture = () => {
+        activeBackdropPointerId = null;
+        backdropGestureState = 'idle';
+    };
+
+    const onBackdropPointerDown = (event: PointerEvent) => {
+        if (!event.isPrimary || (event.button !== 0 && event.pointerType === 'mouse')) {
+            backdropGestureState = 'invalid';
+            return;
+        }
+        activeBackdropPointerId = event.pointerId;
+        if (event.target === event.currentTarget) backdropGestureState = 'eligible';
+        else backdropGestureState = 'invalid';
+    };
+
+    const onBackdropPointerUp = (event: PointerEvent) => {
+        if (activeBackdropPointerId !== null && event.pointerId === activeBackdropPointerId && event.target !== event.currentTarget) backdropGestureState = 'invalid';
+    };
+
+    const onBackdropPointerCancel = (event: PointerEvent) => {
+        if (activeBackdropPointerId !== null && event.pointerId === activeBackdropPointerId) resetBackdropGesture();
+    };
+
+    const onBackdropClick = (event: MouseEvent) => {
+        if (event.target !== event.currentTarget) return;
+
+        const currentGesture = backdropGestureState;
+        resetBackdropGesture();
+
+        if (currentGesture === 'invalid') return;
+
+        if (currentGesture === 'idle' && event.detail > 0) return;
+
         if (!isTopModal.value) return;
         if (!props.dismissable) {
             triggerShake();
@@ -336,6 +367,8 @@
         }
         requestClose('backdrop');
     };
+
+    useEventListener('blur', resetBackdropGesture);
 
     const modal_store = useModalStore();
     const generatedId = useId();
@@ -533,6 +566,7 @@
                     }
                     restoreCallerFocus();
                 }
+                resetBackdropGesture();
                 emit('closed');
             }
         },
@@ -540,6 +574,7 @@
     );
 
     onBeforeUnmount(() => {
+        resetBackdropGesture();
         trap.deactivate();
         if (has_scroll_lock) {
             scroll_lock.unlock();

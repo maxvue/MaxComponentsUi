@@ -1,13 +1,7 @@
 <template>
     <teleport to="body">
         <transition name="max-drawer-fade" @after-leave="emit('after-hide')">
-            <div
-                v-if="props.visible"
-                class="max-drawer-mask"
-                :class="{ 'max-drawer-mask-modal': props.modal }"
-                :style="{ zIndex: z_index }"
-                @click.self="onMaskClick"
-            >
+            <div v-if="props.visible" class="max-drawer-mask" :class="{ 'max-drawer-mask-modal': props.modal }" :style="{ zIndex: z_index }" @pointerdown.capture="onMaskPointerDown" @pointerup.capture="onMaskPointerUp" @pointercancel="onMaskPointerCancel" @click.self="onMaskClick">
                 <slot name="container" :close-callback="close">
                     <div
                         ref="panel_el"
@@ -63,6 +57,7 @@
     import { useScrollLock } from '../helpers/useScrollLock';
     import { useBrowserEventListener } from '../composables/useBrowserEventListener';
     import { provideModalContext } from '../helpers/modalContext';
+    import { useEventListener } from '@maxvue/max-use';
     import { computed, watch, onBeforeUnmount, onMounted, useTemplateRef, useId, useSlots, ref } from 'vue';
     import MaxIcon from './MaxIcon.vue';
 
@@ -197,9 +192,47 @@
 
     const toggle = () => emit('update:visible', ! props.visible);
 
-    const onMaskClick = () => {
+    type MaskGestureState = 'idle' | 'eligible' | 'invalid';
+    let activeMaskPointerId: number | null = null;
+    let maskGestureState: MaskGestureState = 'idle';
+
+    const resetMaskGesture = () => {
+        activeMaskPointerId = null;
+        maskGestureState = 'idle';
+    };
+
+    const onMaskPointerDown = (event: PointerEvent) => {
+        if (!event.isPrimary || (event.button !== 0 && event.pointerType === 'mouse')) {
+            maskGestureState = 'invalid';
+            return;
+        }
+        activeMaskPointerId = event.pointerId;
+        if (event.target === event.currentTarget) maskGestureState = 'eligible';
+        else maskGestureState = 'invalid';
+    };
+
+    const onMaskPointerUp = (event: PointerEvent) => {
+        if (activeMaskPointerId !== null && event.pointerId === activeMaskPointerId && event.target !== event.currentTarget) maskGestureState = 'invalid';
+    };
+
+    const onMaskPointerCancel = (event: PointerEvent) => {
+        if (activeMaskPointerId !== null && event.pointerId === activeMaskPointerId) resetMaskGesture();
+    };
+
+    const onMaskClick = (event: MouseEvent) => {
+        if (event.target !== event.currentTarget) return;
+
+        const currentGesture = maskGestureState;
+        resetMaskGesture();
+
+        if (currentGesture === 'invalid') return;
+
+        if (currentGesture === 'idle' && event.detail > 0) return;
+
         if (props.dismissable) close();
     };
+
+    useEventListener('blur', resetMaskGesture);
 
     const onEscape = (event: KeyboardEvent) => {
         if (event.key === 'Escape' && props.closeOnEscape) close();
@@ -246,6 +279,7 @@
             return;
         }
 
+        resetMaskGesture();
         if (! first_run) emit('hide');
         if (is_mounted.value) {
             trap.deactivate();
@@ -258,6 +292,7 @@
     }, { immediate: true });
 
     onBeforeUnmount(() => {
+        resetMaskGesture();
         trap.deactivate();
         if (has_scroll_lock) {
             scroll_lock.unlock();

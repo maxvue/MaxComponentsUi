@@ -1,0 +1,139 @@
+{
+  "version": 2,
+  "planRevision": "b4188ca7d346a470edab31f25d03193b21ad11159bde66b511c95e61ca00b4a5",
+  "tasks": [
+    {
+      "id": "T1",
+      "status": "completed",
+      "files": [
+        "docs/plans/wt-4edd89d1/plan.md",
+        "docs/plans/wt-4edd89d1/spec.md",
+        "package.json"
+      ],
+      "validations": []
+    },
+    {
+      "id": "T2",
+      "status": "completed",
+      "files": [
+        "src/components/MaxModal.vue",
+        "src/components/MaxDrawer.vue",
+        "tests/components/MaxModal.test.ts",
+        "tests/components/MaxDrawer.test.ts"
+      ],
+      "revision": "d3043b76d12fcd6f73460c8cd285fa514b5b1fda05446736b6dcd9119c102b57",
+      "validations": [
+        {
+          "command": "npx vitest run tests/components/MaxModal.test.ts tests/components/MaxDrawer.test.ts",
+          "revision": "d3043b76d12fcd6f73460c8cd285fa514b5b1fda05446736b6dcd9119c102b57",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "T3",
+      "status": "completed",
+      "files": [
+        "vitest.browser.config.ts",
+        "tests/browser/MaxOverlayBackdropGesture.browser.ts"
+      ],
+      "revision": "d3043b76d12fcd6f73460c8cd285fa514b5b1fda05446736b6dcd9119c102b57",
+      "validations": [
+        {
+          "command": "npx vitest run --config vitest.browser.config.ts tests/browser/MaxOverlayBackdropGesture.browser.ts",
+          "revision": "d3043b76d12fcd6f73460c8cd285fa514b5b1fda05446736b6dcd9119c102b57",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "T4",
+      "status": "completed",
+      "files": [],
+      "revision": "d3043b76d12fcd6f73460c8cd285fa514b5b1fda05446736b6dcd9119c102b57",
+      "validations": [
+        {
+          "command": "npm run check:filenames",
+          "revision": "d3043b76d12fcd6f73460c8cd285fa514b5b1fda05446736b6dcd9119c102b57",
+          "result": "passed"
+        },
+        {
+          "command": "npm run check:lockfile",
+          "revision": "d3043b76d12fcd6f73460c8cd285fa514b5b1fda05446736b6dcd9119c102b57",
+          "result": "passed"
+        },
+        {
+          "command": "npm run type-check:test",
+          "revision": "d3043b76d12fcd6f73460c8cd285fa514b5b1fda05446736b6dcd9119c102b57",
+          "result": "passed"
+        },
+        {
+          "command": "npm run lint",
+          "revision": "d3043b76d12fcd6f73460c8cd285fa514b5b1fda05446736b6dcd9119c102b57",
+          "result": "passed"
+        },
+        {
+          "command": "npm run build",
+          "revision": "d3043b76d12fcd6f73460c8cd285fa514b5b1fda05446736b6dcd9119c102b57",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "T5",
+      "status": "completed",
+      "files": [],
+      "validations": [],
+      "nextAction": "Aguardar autorizacao do usuario no painel para integracao Git."
+    }
+  ],
+  "verification": {
+    "revision": "d3043b76d12fcd6f73460c8cd285fa514b5b1fda05446736b6dcd9119c102b57",
+    "checks": [
+      {
+        "command": "npm run check:filenames",
+        "revision": "d3043b76d12fcd6f73460c8cd285fa514b5b1fda05446736b6dcd9119c102b57",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run check:lockfile",
+        "revision": "d3043b76d12fcd6f73460c8cd285fa514b5b1fda05446736b6dcd9119c102b57",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check:test",
+        "revision": "d3043b76d12fcd6f73460c8cd285fa514b5b1fda05446736b6dcd9119c102b57",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run lint",
+        "revision": "d3043b76d12fcd6f73460c8cd285fa514b5b1fda05446736b6dcd9119c102b57",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run build",
+        "revision": "d3043b76d12fcd6f73460c8cd285fa514b5b1fda05446736b6dcd9119c102b57",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npx vitest run tests/components/MaxModal.test.ts tests/components/MaxDrawer.test.ts",
+        "revision": "d3043b76d12fcd6f73460c8cd285fa514b5b1fda05446736b6dcd9119c102b57",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npx vitest run --config vitest.browser.config.ts tests/browser/MaxOverlayBackdropGesture.browser.ts",
+        "revision": "d3043b76d12fcd6f73460c8cd285fa514b5b1fda05446736b6dcd9119c102b57",
+        "result": "passed",
+        "exitCode": 0
+      }
+    ]
+  },
+  "updatedAt": 1760570750000,
+  "nextAction": "Aguardar autorizacao do usuario no painel para integracao Git."
+}
