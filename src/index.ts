@@ -170,6 +170,19 @@ export type { MaxInputUFProps, MaxInputUFValueMode } from './components/MaxInput
 export { BRAZIL_STATES, BRAZIL_NATIONAL_STATE, type BrazilState } from './constants/brazilStates';
 export { default as MaxGridCols } from './components/MaxGridCols.vue';
 
+// Dez novos inputs especializados
+export { default as MaxInputMultiSelect, type MaxInputMultiSelectProps } from './components/MaxInputMultiSelect.vue';
+export { default as MaxInputDateRange, type MaxInputDateRangeProps } from './components/MaxInputDateRange.vue';
+export { default as MaxInputDateReference, type MaxInputDateReferenceProps, type DateReferenceOption } from './components/MaxInputDateReference.vue';
+export { default as MaxInputStatusGroup, type MaxInputStatusGroupProps, type StatusGroupOption } from './components/MaxInputStatusGroup.vue';
+export { default as MaxInputRG, type MaxInputRGProps, type RGObjectValue } from './components/MaxInputRG.vue';
+export { default as MaxInputAddress, type MaxInputAddressProps, type AddressValue } from './components/MaxInputAddress.vue';
+export { default as MaxInputDateTimeLocal, type MaxInputDateTimeLocalProps } from './components/MaxInputDateTimeLocal.vue';
+export { default as MaxInputCurrencyCode, type MaxInputCurrencyCodeProps, type CurrencyOption } from './components/MaxInputCurrencyCode.vue';
+export { DEFAULT_CURRENCIES } from './constants/currencies';
+export { default as MaxInputSocialHandle, type MaxInputSocialHandleProps } from './components/MaxInputSocialHandle.vue';
+export { default as MaxInputCredential, type MaxInputCredentialProps } from './components/MaxInputCredential.vue';
+
 // Loaders
 export { default as MaxLoader } from './components/MaxLoader.vue';
 export { default as MaxLoaderAi } from './components/MaxLoaderAi.vue';

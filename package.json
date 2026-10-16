@@ -317,6 +317,46 @@
       "types": "./dist/components/MaxInputUF.vue.d.ts",
       "import": "./dist/components/MaxInputUF.es.js"
     },
+    "./components/MaxInputMultiSelect": {
+      "types": "./dist/components/MaxInputMultiSelect.vue.d.ts",
+      "import": "./dist/components/MaxInputMultiSelect.es.js"
+    },
+    "./components/MaxInputDateRange": {
+      "types": "./dist/components/MaxInputDateRange.vue.d.ts",
+      "import": "./dist/components/MaxInputDateRange.es.js"
+    },
+    "./components/MaxInputDateReference": {
+      "types": "./dist/components/MaxInputDateReference.vue.d.ts",
+      "import": "./dist/components/MaxInputDateReference.es.js"
+    },
+    "./components/MaxInputStatusGroup": {
+      "types": "./dist/components/MaxInputStatusGroup.vue.d.ts",
+      "import": "./dist/components/MaxInputStatusGroup.es.js"
+    },
+    "./components/MaxInputRG": {
+      "types": "./dist/components/MaxInputRG.vue.d.ts",
+      "import": "./dist/components/MaxInputRG.es.js"
+    },
+    "./components/MaxInputAddress": {
+      "types": "./dist/components/MaxInputAddress.vue.d.ts",
+      "import": "./dist/components/MaxInputAddress.es.js"
+    },
+    "./components/MaxInputDateTimeLocal": {
+      "types": "./dist/components/MaxInputDateTimeLocal.vue.d.ts",
+      "import": "./dist/components/MaxInputDateTimeLocal.es.js"
+    },
+    "./components/MaxInputCurrencyCode": {
+      "types": "./dist/components/MaxInputCurrencyCode.vue.d.ts",
+      "import": "./dist/components/MaxInputCurrencyCode.es.js"
+    },
+    "./components/MaxInputSocialHandle": {
+      "types": "./dist/components/MaxInputSocialHandle.vue.d.ts",
+      "import": "./dist/components/MaxInputSocialHandle.es.js"
+    },
+    "./components/MaxInputCredential": {
+      "types": "./dist/components/MaxInputCredential.vue.d.ts",
+      "import": "./dist/components/MaxInputCredential.es.js"
+    },
     "./components/MaxLikeButton": {
       "types": "./dist/components/MaxLikeButton.vue.d.ts",
       "import": "./dist/components/MaxLikeButton.es.js"

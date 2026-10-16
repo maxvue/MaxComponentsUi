@@ -87,6 +87,16 @@ export const PLAYGROUND_CATALOG: CatalogComponent[] = [
     { name: 'MaxColorPicker', family: 'inputs', scenarioId: 'inputs-special', description: 'Seletor de cor hexadecimal com paleta e amostra visual.' },
     { name: 'MaxTagSelect', family: 'inputs', scenarioId: 'inputs-tags', description: 'Seletor múltiplo estilizado de tags com remoção rápida.' },
     { name: 'MaxTagsList', family: 'inputs', scenarioId: 'inputs-tags', description: 'Exibição de coleção de tags com variantes semânticas de cor.' },
+    { name: 'MaxInputMultiSelect', family: 'inputs', scenarioId: 'inputs-select', description: 'Seletor de múltiplos valores com chips, contagem e filtro integrado.' },
+    { name: 'MaxInputDateRange', family: 'inputs', scenarioId: 'inputs-select', description: 'Controle de intervalo de datas (início e fim) com validação cronológica.' },
+    { name: 'MaxInputDateReference', family: 'inputs', scenarioId: 'inputs-select', description: 'Seletor de regime e referência de data em modos dropdown e segmented.' },
+    { name: 'MaxInputStatusGroup', family: 'inputs', scenarioId: 'inputs-tags', description: 'Grupo de seleção de status em chips acessíveis com cores semânticas.' },
+    { name: 'MaxInputRG', family: 'inputs', scenarioId: 'inputs-masks', description: 'Campo de RG com máscara flexível e suporte a emissor e UF.' },
+    { name: 'MaxInputAddress', family: 'inputs', scenarioId: 'inputs-masks', description: 'Composição coordenada de campos de endereço com CEP, logradouro e UF.' },
+    { name: 'MaxInputDateTimeLocal', family: 'inputs', scenarioId: 'inputs-select', description: 'Entrada combinada para data e hora local com serialização ISO.' },
+    { name: 'MaxInputCurrencyCode', family: 'inputs', scenarioId: 'inputs-select', description: 'Seletor de moedas internacionais e nacionais com código ISO e símbolo.' },
+    { name: 'MaxInputSocialHandle', family: 'inputs', scenarioId: 'inputs-text', description: 'Entrada para perfis sociais com prefixo automático e limpeza de URLs.' },
+    { name: 'MaxInputCredential', family: 'inputs', scenarioId: 'inputs-text', description: 'Campo seguro de credencial com alternância de visibilidade e cópia.' },
 
     // Buttons (10)
     { name: 'MaxButton', family: 'buttons', scenarioId: 'buttons-main', description: 'Botão primário, secundário e variantes de severidade da marca Max.' },
