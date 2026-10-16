@@ -148,6 +148,28 @@ export { default as MaxSwitch } from './components/MaxInputSwitch.vue';
 export { default as InputSwitch } from './components/MaxInputSwitch.vue';
 export { default as MaxInputTextArea } from './components/MaxInputTextArea.vue';
 export { default as MaxInputTextList } from './components/MaxInputTextList.vue';
+
+// Inputs semânticos especializados
+export { default as MaxInputPercent } from './components/MaxInputPercent.vue';
+export { default as InputPercent } from './components/MaxInputPercent.vue';
+export { default as MaxInputPower } from './components/MaxInputPower.vue';
+export { default as InputPower } from './components/MaxInputPower.vue';
+export { default as MaxInputCurrent } from './components/MaxInputCurrent.vue';
+export { default as InputCurrent } from './components/MaxInputCurrent.vue';
+export { default as MaxInputVoltage } from './components/MaxInputVoltage.vue';
+export { default as InputVoltage } from './components/MaxInputVoltage.vue';
+export { default as MaxInputDistance } from './components/MaxInputDistance.vue';
+export { default as InputDistance } from './components/MaxInputDistance.vue';
+export { default as MaxInputDuration } from './components/MaxInputDuration.vue';
+export { default as InputDuration } from './components/MaxInputDuration.vue';
+export { default as MaxInputTokenLimit } from './components/MaxInputTokenLimit.vue';
+export { default as InputTokenLimit } from './components/MaxInputTokenLimit.vue';
+export { default as MaxInputMonthDays } from './components/MaxInputMonthDays.vue';
+export { default as InputMonthDays } from './components/MaxInputMonthDays.vue';
+export { default as MaxInputWeekInterval } from './components/MaxInputWeekInterval.vue';
+export { default as InputWeekInterval } from './components/MaxInputWeekInterval.vue';
+export { default as MaxInputSocialPlatform } from './components/MaxInputSocialPlatform.vue';
+export { default as InputSocialPlatform } from './components/MaxInputSocialPlatform.vue';
 // Async: o MaxInputMarkdown arrasta o tiptap inteiro (starter-kit + 8 extensões, ~350 KB);
 // como export estático ele entraria no bundle eager de TODOS os apps consumidores, mesmo sem uso.
 // Mesmo padrão de MaxPdfView/MaxLoaderAi (deps pesadas sob demanda).

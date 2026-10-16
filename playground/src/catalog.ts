@@ -87,6 +87,16 @@ export const PLAYGROUND_CATALOG: CatalogComponent[] = [
     { name: 'MaxColorPicker', family: 'inputs', scenarioId: 'inputs-special', description: 'Seletor de cor hexadecimal com paleta e amostra visual.' },
     { name: 'MaxTagSelect', family: 'inputs', scenarioId: 'inputs-tags', description: 'Seletor múltiplo estilizado de tags com remoção rápida.' },
     { name: 'MaxTagsList', family: 'inputs', scenarioId: 'inputs-tags', description: 'Exibição de coleção de tags com variantes semânticas de cor.' },
+    { name: 'MaxInputPercent', family: 'inputs', scenarioId: 'inputs-special', description: 'Input especializado para percentuais com sufixo e limites declarados.' },
+    { name: 'MaxInputPower', family: 'inputs', scenarioId: 'inputs-special', description: 'Input para potência com unidade selecionável (W, kW, kWp).' },
+    { name: 'MaxInputCurrent', family: 'inputs', scenarioId: 'inputs-special', description: 'Input para corrente elétrica em ampères (A) com suporte a sinal.' },
+    { name: 'MaxInputVoltage', family: 'inputs', scenarioId: 'inputs-special', description: 'Input para tensão elétrica (V) com suporte a modo numérico e modo select.' },
+    { name: 'MaxInputDistance', family: 'inputs', scenarioId: 'inputs-special', description: 'Input para distâncias físicas (mm, cm, m, km).' },
+    { name: 'MaxInputDuration', family: 'inputs', scenarioId: 'inputs-special', description: 'Input para duração inteira em segundos com limites dinâmicos.' },
+    { name: 'MaxInputTokenLimit', family: 'inputs', scenarioId: 'inputs-special', description: 'Input inteiro para limite de tokens de modelos de IA.' },
+    { name: 'MaxInputMonthDays', family: 'inputs', scenarioId: 'inputs-special', description: 'Input para seleção textual de múltiplos dias do mês (1 a 31).' },
+    { name: 'MaxInputWeekInterval', family: 'inputs', scenarioId: 'inputs-special', description: 'Seletor de frequência e repetição em semanas.' },
+    { name: 'MaxInputSocialPlatform', family: 'inputs', scenarioId: 'inputs-special', description: 'Seletor de redes sociais e plataformas com opção Outra.' },
 
     // Buttons (10)
     { name: 'MaxButton', family: 'buttons', scenarioId: 'buttons-main', description: 'Botão primário, secundário e variantes de severidade da marca Max.' },

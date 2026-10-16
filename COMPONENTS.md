@@ -965,6 +965,188 @@ No dropdown exibe a bandeira, a sigla em destaque e o nome do estado. Ao selecio
 
 ---
 
+### MaxInputPercent
+
+Input numérico especializado para **percentuais** com sufixo `%` e limites padrão de 0 a 100%. Preserva o valor em pontos percentuais (ex: 15 representa 15%, não 0,15).
+
+**Arquivo:** [`src/components/MaxInputPercent.vue`](src/components/MaxInputPercent.vue)
+**Aliases:** `InputPercent`
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `modelValue` | `number \| null` | `null` | Valor percentual |
+| `min` | `number` | `0` | Valor mínimo permitido |
+| `max` | `number` | `100` | Valor máximo permitido |
+| `minFractionDigits` | `number` | `0` | Mínimo de casas decimais |
+| `maxFractionDigits` | `number` | `2` | Máximo de casas decimais |
+| `suffix` | `string` | `'%'` | Sufixo visual |
+| + todas as props do `InputBase` | | |
+
+**Eventos:** `update:modelValue`
+
+---
+
+### MaxInputPower
+
+Input numérico especializado para **potência** com unidade configurável (W, kW, kWp).
+
+**Arquivo:** [`src/components/MaxInputPower.vue`](src/components/MaxInputPower.vue)
+**Aliases:** `InputPower`
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `modelValue` | `number \| null` | `null` | Valor da potência |
+| `unit` | `'W' \| 'kW' \| 'kWp' \| string` | `'kW'` | Unidade de exibição declarada |
+| `min` | `number` | `0` | Valor mínimo permitido |
+| `minFractionDigits` | `number` | `0` | Mínimo de casas decimais |
+| `maxFractionDigits` | `number` | `2` | Máximo de casas decimais |
+| + todas as props do `InputBase` | | |
+
+**Eventos:** `update:modelValue`
+
+---
+
+### MaxInputCurrent
+
+Input numérico especializado para **corrente elétrica** em ampères (A) com suporte a medições com sinal.
+
+**Arquivo:** [`src/components/MaxInputCurrent.vue`](src/components/MaxInputCurrent.vue)
+**Aliases:** `InputCurrent`
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `modelValue` | `number \| null` | `null` | Valor da corrente em ampères |
+| `min` | `number` | `0` | Valor mínimo permitido (substituível para valores negativos) |
+| `minFractionDigits` | `number` | `0` | Mínimo de casas decimais |
+| `maxFractionDigits` | `number` | `2` | Máximo de casas decimais |
+| + todas as props do `InputBase` | | |
+
+**Eventos:** `update:modelValue`
+
+---
+
+### MaxInputVoltage
+
+Input para **tensão elétrica** com suporte a modo numérico padrão (V) e modo select quando a lista de `options` é fornecida.
+
+**Arquivo:** [`src/components/MaxInputVoltage.vue`](src/components/MaxInputVoltage.vue)
+**Aliases:** `InputVoltage`
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `modelValue` | `number \| null` | `null` | Valor da tensão em volts |
+| `options` | `VoltageOption[]` | — | Opções nominais que ativam o modo select |
+| `min` | `number` | `0` | Valor mínimo permitido |
+| + todas as props do `InputBase` | | |
+
+**Eventos:** `update:modelValue`
+
+---
+
+### MaxInputDistance
+
+Input numérico especializado para **distâncias físicas** (mm, cm, m, km).
+
+**Arquivo:** [`src/components/MaxInputDistance.vue`](src/components/MaxInputDistance.vue)
+**Aliases:** `InputDistance`
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `modelValue` | `number \| null` | `null` | Valor da distância |
+| `unit` | `'mm' \| 'cm' \| 'm' \| 'km' \| string` | `'m'` | Unidade de distância declarada |
+| `min` | `number` | `0` | Valor mínimo permitido |
+| + todas as props do `InputBase` | | |
+
+**Eventos:** `update:modelValue`
+
+---
+
+### MaxInputDuration
+
+Input numérico para **duração em segundos**, aceitando apenas inteiros seguros com limites dinâmicos.
+
+**Arquivo:** [`src/components/MaxInputDuration.vue`](src/components/MaxInputDuration.vue)
+**Aliases:** `InputDuration`
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `modelValue` | `number \| null` | `null` | Duração inteira em segundos |
+| `min` | `number` | `0` | Valor mínimo de duração |
+| `max` | `number` | — | Valor máximo de duração |
+| + todas as props do `InputBase` | | |
+
+**Eventos:** `update:modelValue`
+
+---
+
+### MaxInputTokenLimit
+
+Input numérico inteiro para **limites de tokens** em configurações de IA.
+
+**Arquivo:** [`src/components/MaxInputTokenLimit.vue`](src/components/MaxInputTokenLimit.vue)
+**Aliases:** `InputTokenLimit`
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `modelValue` | `number \| null` | `null` | Quantidade inteira de tokens |
+| `min` | `number` | `1` | Mínimo permitido |
+| `max` | `number` | `Number.MAX_SAFE_INTEGER` | Máximo permitido |
+| + todas as props do `InputBase` | | |
+
+**Eventos:** `update:modelValue`
+
+---
+
+### MaxInputMonthDays
+
+Input especializado para seleção e edição textual de **dias do mês** (1 a 31 separados por vírgula), com deduplicação automática e validação estrita.
+
+**Arquivo:** [`src/components/MaxInputMonthDays.vue`](src/components/MaxInputMonthDays.vue)
+**Aliases:** `InputMonthDays`
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `modelValue` | `number[]` | `[]` | Lista de dias selecionados (1 a 31) |
+| + todas as props do `InputBase` | | |
+
+**Eventos:** `update:modelValue`
+
+---
+
+### MaxInputWeekInterval
+
+Seletor dropdown especializado para **intervalos de repetição em semanas** (quinzenal, semanal etc.).
+
+**Arquivo:** [`src/components/MaxInputWeekInterval.vue`](src/components/MaxInputWeekInterval.vue)
+**Aliases:** `InputWeekInterval`
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `modelValue` | `number \| null` | `null` | Quantidade de semanas |
+| `options` | `WeekIntervalOption[]` | — | Opções customizadas de intervalos |
+| + todas as props do `InputBase` | | |
+
+**Eventos:** `update:modelValue`
+
+---
+
+### MaxInputSocialPlatform
+
+Seletor especializado para **redes sociais e plataformas digitais** com suporte à opção legítima "Outra" (`''`) e preservação de valores externos desconhecidos.
+
+**Arquivo:** [`src/components/MaxInputSocialPlatform.vue`](src/components/MaxInputSocialPlatform.vue)
+**Aliases:** `InputSocialPlatform`
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `modelValue` | `string \| null` | `null` | Plataforma selecionada |
+| `options` | `SocialPlatformOption[]` | — | Lista customizada de plataformas |
+| + todas as props do `InputBase` | | |
+
+**Eventos:** `update:modelValue`
+
+---
+
 ## Telefone
 
 ### MaxInputPhone

@@ -48,4 +48,32 @@ describe('MaxComponentsUiResolver', () => {
         const result = resolveFn('NonExistentComponent');
         expect(result).toBeUndefined();
     });
+
+    it('deve resolver os dez novos inputs semânticos e suas variantes', () => {
+        const names = [
+            'MaxInputPercent',
+            'MaxInputPower',
+            'MaxInputCurrent',
+            'MaxInputVoltage',
+            'MaxInputDistance',
+            'MaxInputDuration',
+            'MaxInputTokenLimit',
+            'MaxInputMonthDays',
+            'MaxInputWeekInterval',
+            'MaxInputSocialPlatform'
+        ];
+
+        for (const name of names) {
+            expect(resolveFn(name)).toEqual({
+                name,
+                from: '@maxvue/max-components-ui'
+            });
+
+            const alias = name.replace(/^Max/, '');
+            expect(resolveFn(alias)).toEqual({
+                name,
+                from: '@maxvue/max-components-ui'
+            });
+        }
+    });
 });
