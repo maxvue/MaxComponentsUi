@@ -217,6 +217,14 @@
       "types": "./dist/components/MaxInputDiscount.vue.d.ts",
       "import": "./dist/components/MaxInputDiscount.es.js"
     },
+    "./components/MaxInputEmail": {
+      "types": "./dist/components/MaxInputEmail.vue.d.ts",
+      "import": "./dist/components/MaxInputEmail.es.js"
+    },
+    "./components/MaxInputEntity": {
+      "types": "./dist/components/MaxInputEntity.vue.d.ts",
+      "import": "./dist/components/MaxInputEntity.es.js"
+    },
     "./components/MaxInputFile": {
       "types": "./dist/components/MaxInputFile.vue.d.ts",
       "import": "./dist/components/MaxInputFile.es.js"
@@ -236,6 +244,10 @@
     "./components/MaxInputFileUploadButton": {
       "types": "./dist/components/MaxInputFileUploadButton.vue.d.ts",
       "import": "./dist/components/MaxInputFileUploadButton.es.js"
+    },
+    "./components/MaxInputGender": {
+      "types": "./dist/components/MaxInputGender.vue.d.ts",
+      "import": "./dist/components/MaxInputGender.es.js"
     },
     "./components/MaxInputHtml": {
       "types": "./dist/components/MaxInputHtml.vue.d.ts",
@@ -261,6 +273,10 @@
       "types": "./dist/components/MaxInputMoney.vue.d.ts",
       "import": "./dist/components/MaxInputMoney.es.js"
     },
+    "./components/MaxInputMonth": {
+      "types": "./dist/components/MaxInputMonth.vue.d.ts",
+      "import": "./dist/components/MaxInputMonth.es.js"
+    },
     "./components/MaxInputNumber": {
       "types": "./dist/components/MaxInputNumber.vue.d.ts",
       "import": "./dist/components/MaxInputNumber.es.js"
@@ -268,6 +284,10 @@
     "./components/MaxInputOTP": {
       "types": "./dist/components/MaxInputOTP.vue.d.ts",
       "import": "./dist/components/MaxInputOTP.es.js"
+    },
+    "./components/MaxInputPassword": {
+      "types": "./dist/components/MaxInputPassword.vue.d.ts",
+      "import": "./dist/components/MaxInputPassword.es.js"
     },
     "./components/MaxInputPhone": {
       "types": "./dist/components/MaxInputPhone.vue.d.ts",
@@ -289,6 +309,10 @@
       "types": "./dist/components/MaxInputSelect.vue.d.ts",
       "import": "./dist/components/MaxInputSelect.es.js"
     },
+    "./components/MaxInputSlug": {
+      "types": "./dist/components/MaxInputSlug.vue.d.ts",
+      "import": "./dist/components/MaxInputSlug.es.js"
+    },
     "./components/MaxInputSwitch": {
       "types": "./dist/components/MaxInputSwitch.vue.d.ts",
       "import": "./dist/components/MaxInputSwitch.es.js"
@@ -305,6 +329,10 @@
       "types": "./dist/components/MaxInputTextList.vue.d.ts",
       "import": "./dist/components/MaxInputTextList.es.js"
     },
+    "./components/MaxInputTime": {
+      "types": "./dist/components/MaxInputTime.vue.d.ts",
+      "import": "./dist/components/MaxInputTime.es.js"
+    },
     "./components/MaxInputToggle": {
       "types": "./dist/components/MaxInputToggle.vue.d.ts",
       "import": "./dist/components/MaxInputToggle.es.js"
@@ -316,6 +344,18 @@
     "./components/MaxInputUF": {
       "types": "./dist/components/MaxInputUF.vue.d.ts",
       "import": "./dist/components/MaxInputUF.es.js"
+    },
+    "./components/MaxInputUrl": {
+      "types": "./dist/components/MaxInputUrl.vue.d.ts",
+      "import": "./dist/components/MaxInputUrl.es.js"
+    },
+    "./components/MaxInputWeekday": {
+      "types": "./dist/components/MaxInputWeekday.vue.d.ts",
+      "import": "./dist/components/MaxInputWeekday.es.js"
+    },
+    "./components/MaxInputYear": {
+      "types": "./dist/components/MaxInputYear.vue.d.ts",
+      "import": "./dist/components/MaxInputYear.es.js"
     },
     "./components/MaxLikeButton": {
       "types": "./dist/components/MaxLikeButton.vue.d.ts",

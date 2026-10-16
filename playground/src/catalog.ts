@@ -87,6 +87,16 @@ export const PLAYGROUND_CATALOG: CatalogComponent[] = [
     { name: 'MaxColorPicker', family: 'inputs', scenarioId: 'inputs-special', description: 'Seletor de cor hexadecimal com paleta e amostra visual.' },
     { name: 'MaxTagSelect', family: 'inputs', scenarioId: 'inputs-tags', description: 'Seletor múltiplo estilizado de tags com remoção rápida.' },
     { name: 'MaxTagsList', family: 'inputs', scenarioId: 'inputs-tags', description: 'Exibição de coleção de tags com variantes semânticas de cor.' },
+    { name: 'MaxInputEntity', family: 'inputs', scenarioId: 'inputs-select', description: 'Seletor semântico de tipo de entidade (Pessoa Física ou Pessoa Jurídica).' },
+    { name: 'MaxInputGender', family: 'inputs', scenarioId: 'inputs-select', description: 'Seletor semântico de gênero (Masculino ou Feminino).' },
+    { name: 'MaxInputWeekday', family: 'inputs', scenarioId: 'inputs-select', description: 'Seletor semântico de dia da semana com rótulos em pt-BR.' },
+    { name: 'MaxInputMonth', family: 'inputs', scenarioId: 'inputs-select', description: 'Seletor semântico de mês com valor numérico de 1 a 12.' },
+    { name: 'MaxInputTime', family: 'inputs', scenarioId: 'inputs-select', description: 'Seletor de horário independente com intervalos e limites customizáveis.' },
+    { name: 'MaxInputYear', family: 'inputs', scenarioId: 'inputs-select', description: 'Seletor de ano com faixa controlada e limite de intervalo.' },
+    { name: 'MaxInputEmail', family: 'inputs', scenarioId: 'inputs-text', description: 'Campo especializado de e-mail com validação e suporte a plus addressing.' },
+    { name: 'MaxInputUrl', family: 'inputs', scenarioId: 'inputs-text', description: 'Campo de URL http/https com validação local de protocolo e domínio.' },
+    { name: 'MaxInputPassword', family: 'inputs', scenarioId: 'inputs-text', description: 'Campo de senha com alternância de visibilidade e confirmação segura.' },
+    { name: 'MaxInputSlug', family: 'inputs', scenarioId: 'inputs-text', description: 'Identificador kebab-case com validação estrita e normalização opcional.' },
 
     // Buttons (10)
     { name: 'MaxButton', family: 'buttons', scenarioId: 'buttons-main', description: 'Botão primário, secundário e variantes de severidade da marca Max.' },

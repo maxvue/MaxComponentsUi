@@ -183,7 +183,7 @@ describe('Arquitetura - Contrato de Exports e Subpaths Públicos', () => {
         expect(sideEffects).not.toContain('./dist/styles.es.js');
     });
 
-    it('deve conter mapa explícito de exports para todos os 118 componentes Vue com types e import apontando para arquivos reais em dist', () => {
+    it('deve conter mapa explícito de exports para todos os 137 componentes Vue com types e import apontando para arquivos reais em dist', () => {
         assertFreshBuild();
 
         const componentsDir = path.resolve(srcDir, 'components');
@@ -191,8 +191,8 @@ describe('Arquitetura - Contrato de Exports e Subpaths Públicos', () => {
             .filter((f) => f.endsWith('.vue'))
             .map((f) => f.replace('.vue', ''));
 
-        // Garantia de catálogo completo dos 127 componentes Vue
-        expect(vueFiles.length).toBe(127);
+        // Garantia de catálogo completo dos 137 componentes Vue
+        expect(vueFiles.length).toBe(137);
 
         for (const componentName of vueFiles) {
             const subpath = `./components/${componentName}`;
