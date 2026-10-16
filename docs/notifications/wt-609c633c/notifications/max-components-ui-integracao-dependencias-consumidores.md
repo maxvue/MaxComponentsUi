@@ -1,0 +1,8 @@
+# Achado — divergência de dependências limita integração real
+
+- Data: 2026-10-16. Constatação estática; nenhum gate ou runtime foi executado.
+- Localizações: `package.json` e `package-lock.json` da biblioteca ativa e das raízes `/home/johnattas/GitHub/engeapp`, `/home/johnattas/GitHub/MaxAiManager` e `/home/johnattas/GitHub/SocialMedia`; resolução de `node_modules/@maxvue/max-use` e `@maxvue/max-pinia`.
+- Evidência: biblioteca declara peer `pinia: ^4.0.0`; Engeapp declara `^3.0.4` com lock 3.0.4. MaxAiManager e SocialMedia têm lock Pinia 4.0.3. Os três consumidores declaram pacotes Max via `file:./storage/libs/...`; MaxUse e MaxPinia efetivos resolvem por symlink para repositórios irmãos. Biblioteca usa MaxUse npm 1.1.47 e mantém MaxPinia como peer opcional.
+- Impacto: não é correto tratar testes de consumidor sintético em Pinia 4 como comprovação de compatibilidade real do Engeapp. Repositório irmão e versão npm podem divergir. Editar ou instalar em destinos compartilhados pode afetar outras sessões/projetos.
+- Limitação: links locais dos consumidores podem ser configuração intencional de desenvolvimento. Não se afirma que um gate deles falhou nem que os links são, isoladamente, defeito funcional. O contrato de distribuição da biblioteca proíbe adotá-los como sua dependência publicada.
+- Encaminhamento: manter biblioteca e consumidores inalterados nesta sessão. Adoção futura dos dez inputs exige preflight de dependências e autorização própria para alinhar a incompatibilidade Pinia e validar consumidores isolados. Não mudar peers, lockfiles ou resolver o problema com legacy-peer-deps/atalhos nesta entrega.

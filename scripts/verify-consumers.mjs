@@ -178,6 +178,14 @@ try {
             import * as UI from '@maxvue/max-components-ui';
             import '@maxvue/max-components-ui/styles';
             if (!UI.MaxButton) throw new Error('MaxButton ausente no entrypoint raiz.');
+            const semanticNames = [
+                'MaxInputEntity', 'MaxInputGender', 'MaxInputEmail', 'MaxInputUrl',
+                'MaxInputPassword', 'MaxInputTime', 'MaxInputWeekday', 'MaxInputMonth',
+                'MaxInputYear', 'MaxInputSlug'
+            ];
+            for (const name of semanticNames) {
+                if (!UI[name]) throw new Error(name + ' ausente no entrypoint raiz.');
+            }
             console.log('ESM sem deps opcionais — OK');
         `);
         await runCommand(process.execPath, ['index.js'], { cwd: dir });
@@ -221,13 +229,25 @@ try {
             },
         }, null, 2));
         writeFileSync(join(dir, 'index.ts'), `
-            import { MaxButton } from '@maxvue/max-components-ui';
+            import {
+                MaxButton,
+                MaxInputEntity,
+                MaxInputEmail,
+                MaxInputPassword,
+                type MaxInputEntityProps,
+                type MaxInputEmailProps
+            } from '@maxvue/max-components-ui';
             import { useModalStore } from '@maxvue/max-components-ui/stores';
             import { presetMaxUno } from '@maxvue/max-components-ui/preset';
             import { MaxComponentsUiResolver } from '@maxvue/max-components-ui/resolver';
 
             // Garante que os tipos estão presentes
             const _btn: typeof MaxButton = MaxButton;
+            const _entity: typeof MaxInputEntity = MaxInputEntity;
+            const _email: typeof MaxInputEmail = MaxInputEmail;
+            const _pwd: typeof MaxInputPassword = MaxInputPassword;
+            const _entityProps: MaxInputEntityProps = { modelValue: 'PF' };
+            const _emailProps: MaxInputEmailProps = { modelValue: 'user@test.com' };
             const _store = useModalStore;
             const _preset = presetMaxUno;
             const _resolver = MaxComponentsUiResolver;
@@ -246,11 +266,12 @@ try {
         writeFileSync(join(dir, 'index.html'), '<div id="app"></div><script type="module" src="/main.js"></script>');
         writeFileSync(join(dir, 'main.js'), `
             import { createApp } from 'vue';
-            import { MaxButton } from '@maxvue/max-components-ui';
+            import { MaxButton, MaxInputEmail } from '@maxvue/max-components-ui';
             import granularBtn from '@maxvue/max-components-ui/components/MaxButton';
+            import granularEmail from '@maxvue/max-components-ui/components/MaxInputEmail';
             import '@maxvue/max-components-ui/style.css';
 
-            console.log('Vite import ok', MaxButton, granularBtn);
+            console.log('Vite import ok', MaxButton, granularBtn, MaxInputEmail, granularEmail);
         `);
         writeFileSync(join(dir, 'vite.config.js'), `
             export default {
@@ -275,18 +296,19 @@ try {
         writeFileSync(join(dir, 'index.js'), `
             import { createSSRApp } from 'vue';
             import { renderToString } from '@vue/server-renderer';
-            import { MaxButton } from '@maxvue/max-components-ui';
+            import { MaxButton, MaxInputEmail } from '@maxvue/max-components-ui';
             import * as Stores from '@maxvue/max-components-ui/stores';
             import * as Styles from '@maxvue/max-components-ui/styles';
 
             // Valida que os módulos são importáveis em contexto SSR (Node.js puro)
             if (!MaxButton) throw new Error('SSR: MaxButton ausente.');
+            if (!MaxInputEmail) throw new Error('SSR: MaxInputEmail ausente.');
             if (!Stores.useToastStore) throw new Error('SSR: Stores ausentes.');
             if (!Styles.MaxStyle) throw new Error('SSR: MaxStyle ausente.');
 
             const app = createSSRApp({
-                components: { MaxButton },
-                template: \`<MaxButton>Test</MaxButton>\`,
+                components: { MaxButton, MaxInputEmail },
+                template: \`<div><MaxButton>Test</MaxButton><MaxInputEmail modelValue="test@example.com" /></div>\`,
             });
 
             renderToString(app).then(html => {

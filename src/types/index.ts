@@ -473,5 +473,5 @@ export type * from './image';
 // Tipos do MaxCard e MaxSubCard.
 export type * from './card';
 
-// Tipos de inputs semânticos especializados.
+// Tipos dos inputs semânticos.
 export type * from './semanticInputs';
