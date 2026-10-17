@@ -1,0 +1,270 @@
+{
+  "version": 2,
+  "planRevision": "afbd54db3800ba6224c4f5bd64fccab24a08352e7cd6676f0434639ca0ce7b1e",
+  "tasks": [
+    {
+      "id": "T00",
+      "status": "completed",
+      "files": [],
+      "validations": [],
+      "revision": "b090d71b6ddcb127493c80643aa7e676b5782c5cd733bbc9649fb1edcb78a5d6"
+    },
+    {
+      "id": "T01",
+      "status": "completed",
+      "files": [
+        "src/types/attachmentList.ts",
+        "src/types/audioPlayer.ts",
+        "src/types/chatMessage.ts",
+        "src/types/codeBlock.ts",
+        "src/types/copyButton.ts",
+        "src/types/descriptionList.ts",
+        "src/types/kanbanBoard.ts",
+        "src/types/saveIndicator.ts",
+        "src/types/socialPostPreview.ts",
+        "src/types/usageMeter.ts"
+      ],
+      "validations": [],
+      "revision": "818cf3bfa6b61a306c79dc526aa064953277124130bd21255b22db91d91a2221"
+    },
+    {
+      "id": "C01",
+      "status": "completed",
+      "files": [
+        "src/components/MaxCopyButton.vue",
+        "src/types/copyButton.ts",
+        "tests/components/MaxCopyButton.test.ts"
+      ],
+      "validations": [],
+      "revision": "701819151790d11e494791c98ce5a404880257904c0c103a3ef063ddfd58d6c3"
+    },
+    {
+      "id": "C02",
+      "status": "completed",
+      "files": [
+        "src/components/MaxCodeBlock.vue",
+        "src/types/codeBlock.ts",
+        "tests/components/MaxCodeBlock.test.ts"
+      ],
+      "validations": [],
+      "revision": "4e3ee10d2760d0a85568214f8b066ee2612eacedbb3b51e9dee4e3c3c1446224"
+    },
+    {
+      "id": "C03",
+      "status": "completed",
+      "files": [
+        "src/components/MaxDescriptionList.vue",
+        "src/types/descriptionList.ts",
+        "tests/components/MaxDescriptionList.test.ts"
+      ],
+      "validations": [],
+      "revision": "41e71179ab3a2c684886c3125542def6f47527964192afd300a08d7e8b34055a"
+    },
+    {
+      "id": "C04",
+      "status": "completed",
+      "files": [
+        "src/components/MaxSaveIndicator.vue",
+        "src/types/saveIndicator.ts",
+        "tests/components/MaxSaveIndicator.test.ts"
+      ],
+      "validations": [],
+      "revision": "3cf1578c17d8b270c8019d99cb07fdf10a00eee911c19a2fac4d333a743bb3c1"
+    },
+    {
+      "id": "C05",
+      "status": "completed",
+      "files": [
+        "src/components/MaxUsageMeter.vue",
+        "src/types/usageMeter.ts",
+        "tests/components/MaxUsageMeter.test.ts"
+      ],
+      "validations": [],
+      "revision": "38bf0a8884519bfd57cdd686533ca14a00d88cd1ce6a2df35eefea2a8d205242"
+    },
+    {
+      "id": "C06",
+      "status": "completed",
+      "files": [
+        "src/components/MaxAttachmentList.vue",
+        "src/types/attachmentList.ts",
+        "tests/components/MaxAttachmentList.test.ts"
+      ],
+      "validations": [],
+      "revision": "154d01369e2543f4782dfd5bb2f2a9f8c0262692c822806745f568eb2fa893eb"
+    },
+    {
+      "id": "C07",
+      "status": "completed",
+      "files": [
+        "src/components/MaxAudioPlayer.vue",
+        "src/types/audioPlayer.ts",
+        "tests/components/MaxAudioPlayer.test.ts"
+      ],
+      "validations": [],
+      "revision": "9027dcd0cef5d7c428ca4bd9ed2caee31d3d70735883ddb05fad446af6dfc8dc"
+    },
+    {
+      "id": "C08",
+      "status": "completed",
+      "files": [
+        "src/components/MaxChatMessage.vue",
+        "src/types/chatMessage.ts",
+        "tests/components/MaxChatMessage.test.ts"
+      ],
+      "validations": [],
+      "revision": "553233c457d92a5aa3005b61256008e3101739f1059fd8a5eadfc5f9c9cdd0ab"
+    },
+    {
+      "id": "C09",
+      "status": "completed",
+      "files": [
+        "src/components/MaxSocialPostPreview.vue",
+        "src/types/socialPostPreview.ts",
+        "tests/components/MaxSocialPostPreview.test.ts"
+      ],
+      "validations": [],
+      "revision": "3ffe5e027790e776e1ac00cc00b7727f583b486cf58d1f06bda704ba6217c75c"
+    },
+    {
+      "id": "C10",
+      "status": "completed",
+      "files": [
+        "src/components/MaxKanbanBoard.vue",
+        "src/types/kanbanBoard.ts",
+        "tests/components/MaxKanbanBoard.test.ts"
+      ],
+      "validations": [],
+      "revision": "ab4b444c9689fd70ec57b6183cb842ffae184cb23d3f1e89de22a38ad3943dc5"
+    },
+    {
+      "id": "T12",
+      "status": "completed",
+      "files": [
+        "COMPONENTS.md",
+        "README.md",
+        "package.json",
+        "playground/src/catalog.ts",
+        "playground/src/scenarios/index.ts",
+        "playground/src/scenarios/operational-components.vue",
+        "src/components-manifest.json",
+        "src/index.ts",
+        "tests/architecture/package-exports.test.ts",
+        "tests/architecture/playgroundCoverage.test.ts",
+        "tests/browser/OperationalComponents.browser.ts",
+        "tests/index.test.ts",
+        "tests/ssr/operationalComponents.hydration.test.ts",
+        "tests/ssr/operationalComponents.ssr.test.ts",
+        "tests/types/operationalComponents.test.ts"
+      ],
+      "validations": [],
+      "revision": "5aa9e02f06b13dcc0aecc47cf84637cc77a73226879806ea79d0efac7b1f7fab"
+    },
+    {
+      "id": "T13",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputDateReference.vue",
+        "src/components/MaxInputStatusGroup.vue",
+        "tests/architecture/inputBaseAccessibility.test.ts",
+        "tests/browser/ReusableComponents.browser.ts"
+      ],
+      "validations": [],
+      "revision": "46ef4bbdba2f0a0a63be3465c858d0575a90e105cfb95d7e062bbe4a6a745eae",
+      "nextAction": "Suíte completa de 338 arquivos de testes unitários/SSR (4664/4664 testes), build, types, lint, benchmarks, bundle do playground e verificação de consumidores em ambiente isolado 100% aprovados."
+    },
+    {
+      "id": "T14",
+      "status": "manualPending",
+      "files": [],
+      "validations": [],
+      "nextAction": "No playground em origem segura, copiar/colar texto sintético e negar permissão; reproduzir áudio local autorizado, trocar fonte e validar teclado, foco, mobile, dark e zoom.",
+      "revision": "46ef4bbdba2f0a0a63be3465c858d0575a90e105cfb95d7e062bbe4a6a745eae"
+    }
+  ],
+  "verification": {
+    "revision": "46ef4bbdba2f0a0a63be3465c858d0575a90e105cfb95d7e062bbe4a6a745eae",
+    "checks": [
+      {
+        "command": "npm run check:filenames",
+        "revision": "46ef4bbdba2f0a0a63be3465c858d0575a90e105cfb95d7e062bbe4a6a745eae",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run check:lockfile",
+        "revision": "46ef4bbdba2f0a0a63be3465c858d0575a90e105cfb95d7e062bbe4a6a745eae",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run optimize:svg:check",
+        "revision": "46ef4bbdba2f0a0a63be3465c858d0575a90e105cfb95d7e062bbe4a6a745eae",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check",
+        "revision": "46ef4bbdba2f0a0a63be3465c858d0575a90e105cfb95d7e062bbe4a6a745eae",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check:test",
+        "revision": "46ef4bbdba2f0a0a63be3465c858d0575a90e105cfb95d7e062bbe4a6a745eae",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run lint:check",
+        "revision": "46ef4bbdba2f0a0a63be3465c858d0575a90e105cfb95d7e062bbe4a6a745eae",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run build",
+        "revision": "46ef4bbdba2f0a0a63be3465c858d0575a90e105cfb95d7e062bbe4a6a745eae",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run test",
+        "revision": "46ef4bbdba2f0a0a63be3465c858d0575a90e105cfb95d7e062bbe4a6a745eae",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run check:playground:bundle",
+        "revision": "46ef4bbdba2f0a0a63be3465c858d0575a90e105cfb95d7e062bbe4a6a745eae",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run test:benchmark",
+        "revision": "46ef4bbdba2f0a0a63be3465c858d0575a90e105cfb95d7e062bbe4a6a745eae",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "CONSUMER_TEMP_DIR=/home/johnattas/GitHub/MaxComponentsUi/.max-code-worktrees/wt-84453aaf/.execution-tmp/wt-84453aaf-consumers npm run verify:consumers",
+        "revision": "46ef4bbdba2f0a0a63be3465c858d0575a90e105cfb95d7e062bbe4a6a745eae",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run check:audit",
+        "revision": "46ef4bbdba2f0a0a63be3465c858d0575a90e105cfb95d7e062bbe4a6a745eae",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "git diff --check",
+        "revision": "46ef4bbdba2f0a0a63be3465c858d0575a90e105cfb95d7e062bbe4a6a745eae",
+        "result": "passed",
+        "exitCode": 0
+      }
+    ]
+  },
+  "updatedAt": 1792187460000,
+  "nextAction": "Implementação e validação automatizada do lote 100% concluídas com sucesso. Validação manual em aberto no playground (T14)."
+}

@@ -157,6 +157,10 @@ A biblioteca contém **59 componentes** organizados em categorias:
 
 > Para documentação detalhada de cada componente (props, aliases, slots), veja o **[Catálogo de Componentes](COMPONENTS.md)**.
 
+### Componentes operacionais
+
+O catálogo inclui componentes de apresentação para cópia, blocos técnicos, detalhes, estado de salvamento, cotas, anexos, áudio, mensagens, prévias sociais e quadros Kanban. Eles recebem dados por props e deixam rede, persistência e regras de domínio para o consumidor. Consulte [COMPONENTS.md](COMPONENTS.md#componentes-operacionais-reutilizáveis).
+
 ---
 
 ## 🎨 Tema e Estilos

@@ -235,7 +235,17 @@ export const PLAYGROUND_CATALOG: CatalogComponent[] = [
     { name: 'MaxFilterBar', family: 'data', scenarioId: 'reusable-components', description: 'Barra estrutural e composição de campos e ações de filtro.' },
     { name: 'MaxFilePreview', family: 'media', scenarioId: 'reusable-components', description: 'Miniatura e metadados de arquivos locais e remotos.' },
     { name: 'MaxMarkdownViewer', family: 'media', scenarioId: 'reusable-components', description: 'Visualizador seguro de conteúdo Markdown com sanitização estrita.' },
-    { name: 'MaxCalendar', family: 'data', scenarioId: 'reusable-components', description: 'Grade mensal de calendário com eventos e slots de domínio.' }
+    { name: 'MaxCalendar', family: 'data', scenarioId: 'reusable-components', description: 'Grade mensal de calendário com eventos e slots de domínio.' },
+    { name: 'MaxCopyButton', family: 'buttons', scenarioId: 'operational-components', description: 'Ação acessível de cópia com resultado confirmado.' },
+    { name: 'MaxCodeBlock', family: 'data', scenarioId: 'operational-components', description: 'Exibição somente leitura de texto técnico.' },
+    { name: 'MaxDescriptionList', family: 'data', scenarioId: 'operational-components', description: 'Pares semânticos de rótulo e valor.' },
+    { name: 'MaxSaveIndicator', family: 'data', scenarioId: 'operational-components', description: 'Estado visual de salvamento informado pelo consumidor.' },
+    { name: 'MaxUsageMeter', family: 'data', scenarioId: 'operational-components', description: 'Consumo e limite com tratamento de exceções.' },
+    { name: 'MaxAttachmentList', family: 'media', scenarioId: 'operational-components', description: 'Lista de anexos baseada em MaxFilePreview.' },
+    { name: 'MaxAudioPlayer', family: 'media', scenarioId: 'operational-components', description: 'Reprodução de áudio com controles nativos.' },
+    { name: 'MaxChatMessage', family: 'data', scenarioId: 'operational-components', description: 'Apresentação segura de uma mensagem.' },
+    { name: 'MaxSocialPostPreview', family: 'media', scenarioId: 'operational-components', description: 'Prévia genérica de postagem com imagens.' },
+    { name: 'MaxKanbanBoard', family: 'data', scenarioId: 'operational-components', description: 'Quadro de colunas e cartões sem arrastar ou persistir.' }
 ];
 
 

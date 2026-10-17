@@ -1,5 +1,22 @@
 # Catálogo de Componentes — MaxComponentsUi
 
+## Componentes operacionais reutilizáveis
+
+Os componentes abaixo são apresentacionais e recebem dados prontos por props. Não realizam chamadas de rede, persistência de domínio, upload, publicação ou envio.
+
+- `MaxCopyButton`: copia uma string por Clipboard API em contexto seguro; informa sucesso apenas após a escrita confirmada e emite motivos genéricos de erro. Não lê o clipboard.
+- `MaxCodeBlock`: bloco técnico somente leitura, com conteúdo interpolado como texto e cópia opcional do conteúdo integral.
+- `MaxDescriptionList`: lista semântica de rótulos e valores; mantém `0` e `false`.
+- `MaxSaveIndicator`: exibe estado fornecido pelo consumidor; não confirma salvamento por conta própria.
+- `MaxUsageMeter`: apresenta consumo, limite, indisponibilidade ou cota ilimitada; não determina autorização de uso.
+- `MaxAttachmentList`: compõe `MaxFilePreview`; abrir arquivos é responsabilidade do consumidor.
+- `MaxAudioPlayer`: usa controles nativos de áudio, sem autoplay ou gravação.
+- `MaxChatMessage`: apresenta mensagem em texto seguro; Markdown opcional usa o visualizador existente.
+- `MaxSocialPostPreview`: prévia genérica de autor, legenda e imagens; não representa nem publica em redes específicas.
+- `MaxKanbanBoard`: exibição navegável de colunas e cartões, sem arrastar, reordenar ou persistir.
+
+Veja os tipos públicos correspondentes em `src/types/` e o cenário `operational-components` do playground. A inclusão desses componentes não representa migração ou compatibilidade já validada nos aplicativos consumidores.
+
 Referência completa dos **61 componentes** disponíveis na biblioteca.
 Todos os componentes utilizam `<script setup lang="ts">` e suportam v-model quando aplicável.
 
@@ -2239,5 +2256,4 @@ Componente de lista vertical selecionável de alta performance para opções loc
   );
 </script>
 ```
-
 

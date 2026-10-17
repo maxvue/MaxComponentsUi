@@ -28,6 +28,13 @@ describe('index install', () => {
         expect(indexExports.maxComponentsPtBR.pdfView.progress).toBe('Progresso de carregamento do PDF');
     });
 
+    it('exporta os dez componentes operacionais e seus contratos', async () => {
+        const indexExports = await import('../src/index');
+        const names = ['MaxCopyButton', 'MaxCodeBlock', 'MaxDescriptionList', 'MaxSaveIndicator', 'MaxUsageMeter', 'MaxAttachmentList', 'MaxAudioPlayer', 'MaxChatMessage', 'MaxSocialPostPreview', 'MaxKanbanBoard'] as const;
+        for (const name of names) expect(indexExports[name]).toBeDefined();
+        expect(indexExports.MaxKanbanBoard).toBeDefined();
+    });
+
     it('exporta MaxBadgeButtonsGroup e seus aliases', async () => {
         const indexExports = await import('../src/index');
         expect(indexExports.MaxBadgeButtonsGroup).toBeDefined();

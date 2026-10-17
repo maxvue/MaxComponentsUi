@@ -733,6 +733,46 @@
       "types": "./dist/components/MaxQueryState.vue.d.ts",
       "import": "./dist/components/MaxQueryState.es.js"
     },
+    "./components/MaxAttachmentList": {
+      "types": "./dist/components/MaxAttachmentList.vue.d.ts",
+      "import": "./dist/components/MaxAttachmentList.es.js"
+    },
+    "./components/MaxAudioPlayer": {
+      "types": "./dist/components/MaxAudioPlayer.vue.d.ts",
+      "import": "./dist/components/MaxAudioPlayer.es.js"
+    },
+    "./components/MaxChatMessage": {
+      "types": "./dist/components/MaxChatMessage.vue.d.ts",
+      "import": "./dist/components/MaxChatMessage.es.js"
+    },
+    "./components/MaxCodeBlock": {
+      "types": "./dist/components/MaxCodeBlock.vue.d.ts",
+      "import": "./dist/components/MaxCodeBlock.es.js"
+    },
+    "./components/MaxCopyButton": {
+      "types": "./dist/components/MaxCopyButton.vue.d.ts",
+      "import": "./dist/components/MaxCopyButton.es.js"
+    },
+    "./components/MaxDescriptionList": {
+      "types": "./dist/components/MaxDescriptionList.vue.d.ts",
+      "import": "./dist/components/MaxDescriptionList.es.js"
+    },
+    "./components/MaxKanbanBoard": {
+      "types": "./dist/components/MaxKanbanBoard.vue.d.ts",
+      "import": "./dist/components/MaxKanbanBoard.es.js"
+    },
+    "./components/MaxSaveIndicator": {
+      "types": "./dist/components/MaxSaveIndicator.vue.d.ts",
+      "import": "./dist/components/MaxSaveIndicator.es.js"
+    },
+    "./components/MaxSocialPostPreview": {
+      "types": "./dist/components/MaxSocialPostPreview.vue.d.ts",
+      "import": "./dist/components/MaxSocialPostPreview.es.js"
+    },
+    "./components/MaxUsageMeter": {
+      "types": "./dist/components/MaxUsageMeter.vue.d.ts",
+      "import": "./dist/components/MaxUsageMeter.es.js"
+    },
     "./components/MaxSegmentedControl": {
       "types": "./dist/components/MaxSegmentedControl.vue.d.ts",
       "import": "./dist/components/MaxSegmentedControl.es.js"

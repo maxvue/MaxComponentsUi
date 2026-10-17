@@ -110,7 +110,7 @@ describe('E10-10: Cobertura do Playground e Identidade Canônica', () => {
         expect(fs.existsSync(scenariosDir)).toBe(true);
 
         const scenarioIds = [...new Set(PLAYGROUND_CATALOG.map((c) => c.scenarioId))];
-        expect(scenarioIds.length).toBe(37);
+        expect(scenarioIds.length).toBe(38);
 
         for (const id of scenarioIds) {
             const scenarioFile = path.resolve(scenariosDir, `${id}.vue`);

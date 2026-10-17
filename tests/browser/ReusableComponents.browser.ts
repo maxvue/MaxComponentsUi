@@ -24,6 +24,7 @@ async function mountComponent(builder: () => ReturnType<typeof h>) {
     app = createApp({
         render: () => builder()
     });
+    app.directive('tooltip', {});
     app.use(createPinia());
     app.mount(host);
     await nextFrame();
