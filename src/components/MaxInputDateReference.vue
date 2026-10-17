@@ -2,7 +2,7 @@
     <div v-if="props.type === 'segmented'" class="max-date-reference-segmented-wrapper">
         <InputBase v-bind="{ ...inputBaseProps, ...attrsWithoutModelProps }" class="max-input-date-reference-base">
             <template #default="{ inputAttrs }">
-                <div v-bind="inputAttrs" class="max-date-ref-segmented" role="radiogroup" :aria-label="props.label ?? 'Referência de data'">
+                <div class="max-date-ref-segmented" v-bind="inputAttrs" role="radiogroup" :aria-label="props.label ?? 'Referência de data'">
                     <button v-for="opt in normalizedOptions" :key="String(opt.value)" type="button" class="max-date-ref-btn" :class="{ 'is-active': opt.value === props.modelValue, 'is-disabled': props.disabled || opt.disabled }" :disabled="props.disabled || opt.disabled" role="radio" :aria-checked="opt.value === props.modelValue" @click="selectOption(opt)">
                         <MaxIcon v-if="opt.icon" :icon="opt.icon" size="0.9" />
                         <span>{{ opt.label }}</span>

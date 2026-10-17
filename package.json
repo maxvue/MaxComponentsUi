@@ -1,6 +1,6 @@
 {
   "name": "@maxvue/max-components-ui",
-  "version": "1.1.14",
+  "version": "1.1.15",
   "description": "Biblioteca de componentes e design system Vue 3 para o ecossistema Max",
   "module": "./dist/index.es.js",
   "types": "./dist/index.d.ts",
@@ -169,6 +169,18 @@
       "types": "./dist/components/MaxInputAiExecutionType.vue.d.ts",
       "import": "./dist/components/MaxInputAiExecutionType.es.js"
     },
+    "./components/MaxInputAiCacheOperation": {
+      "types": "./dist/components/MaxInputAiCacheOperation.vue.d.ts",
+      "import": "./dist/components/MaxInputAiCacheOperation.es.js"
+    },
+    "./components/MaxInputAiModelStatus": {
+      "types": "./dist/components/MaxInputAiModelStatus.vue.d.ts",
+      "import": "./dist/components/MaxInputAiModelStatus.es.js"
+    },
+    "./components/MaxInputAiPriceItemType": {
+      "types": "./dist/components/MaxInputAiPriceItemType.vue.d.ts",
+      "import": "./dist/components/MaxInputAiPriceItemType.es.js"
+    },
     "./components/MaxInputAutoComplete": {
       "types": "./dist/components/MaxInputAutoComplete.vue.d.ts",
       "import": "./dist/components/MaxInputAutoComplete.es.js"
@@ -196,6 +208,14 @@
     "./components/MaxInputCodeToolbar": {
       "types": "./dist/components/MaxInputCodeToolbar.vue.d.ts",
       "import": "./dist/components/MaxInputCodeToolbar.es.js"
+    },
+    "./components/MaxInputColorPalette": {
+      "types": "./dist/components/MaxInputColorPalette.vue.d.ts",
+      "import": "./dist/components/MaxInputColorPalette.es.js"
+    },
+    "./components/MaxInputConsumerUnit": {
+      "types": "./dist/components/MaxInputConsumerUnit.vue.d.ts",
+      "import": "./dist/components/MaxInputConsumerUnit.es.js"
     },
     "./components/MaxInputContentType": {
       "types": "./dist/components/MaxInputContentType.vue.d.ts",
@@ -273,6 +293,14 @@
       "types": "./dist/components/MaxInputFileUploadButton.vue.d.ts",
       "import": "./dist/components/MaxInputFileUploadButton.es.js"
     },
+    "./components/MaxInputFinancingGracePeriod": {
+      "types": "./dist/components/MaxInputFinancingGracePeriod.vue.d.ts",
+      "import": "./dist/components/MaxInputFinancingGracePeriod.es.js"
+    },
+    "./components/MaxInputFinancingTerm": {
+      "types": "./dist/components/MaxInputFinancingTerm.vue.d.ts",
+      "import": "./dist/components/MaxInputFinancingTerm.es.js"
+    },
     "./components/MaxInputGender": {
       "types": "./dist/components/MaxInputGender.vue.d.ts",
       "import": "./dist/components/MaxInputGender.es.js"
@@ -289,6 +317,10 @@
       "types": "./dist/components/MaxInputIconPicker.vue.d.ts",
       "import": "./dist/components/MaxInputIconPicker.es.js"
     },
+    "./components/MaxInputInverterType": {
+      "types": "./dist/components/MaxInputInverterType.vue.d.ts",
+      "import": "./dist/components/MaxInputInverterType.es.js"
+    },
     "./components/MaxInputMarkdown": {
       "types": "./dist/components/MaxInputMarkdown.vue.d.ts",
       "import": "./dist/components/MaxInputMarkdown.es.js"
@@ -300,6 +332,14 @@
     "./components/MaxInputMoney": {
       "types": "./dist/components/MaxInputMoney.vue.d.ts",
       "import": "./dist/components/MaxInputMoney.es.js"
+    },
+    "./components/MaxInputMonitoringAuthType": {
+      "types": "./dist/components/MaxInputMonitoringAuthType.vue.d.ts",
+      "import": "./dist/components/MaxInputMonitoringAuthType.es.js"
+    },
+    "./components/MaxInputMonitoringCredentialFlow": {
+      "types": "./dist/components/MaxInputMonitoringCredentialFlow.vue.d.ts",
+      "import": "./dist/components/MaxInputMonitoringCredentialFlow.es.js"
     },
     "./components/MaxInputMonth": {
       "types": "./dist/components/MaxInputMonth.vue.d.ts",
@@ -316,6 +356,10 @@
     "./components/MaxInputNumber": {
       "types": "./dist/components/MaxInputNumber.vue.d.ts",
       "import": "./dist/components/MaxInputNumber.es.js"
+    },
+    "./components/MaxInputOccupation": {
+      "types": "./dist/components/MaxInputOccupation.vue.d.ts",
+      "import": "./dist/components/MaxInputOccupation.es.js"
     },
     "./components/MaxInputOTP": {
       "types": "./dist/components/MaxInputOTP.vue.d.ts",
@@ -353,6 +397,14 @@
       "types": "./dist/components/MaxInputRadio.vue.d.ts",
       "import": "./dist/components/MaxInputRadio.es.js"
     },
+    "./components/MaxInputRagSourceType": {
+      "types": "./dist/components/MaxInputRagSourceType.vue.d.ts",
+      "import": "./dist/components/MaxInputRagSourceType.es.js"
+    },
+    "./components/MaxInputScheduleRules": {
+      "types": "./dist/components/MaxInputScheduleRules.vue.d.ts",
+      "import": "./dist/components/MaxInputScheduleRules.es.js"
+    },
     "./components/MaxInputScheduleType": {
       "types": "./dist/components/MaxInputScheduleType.vue.d.ts",
       "import": "./dist/components/MaxInputScheduleType.es.js"
@@ -368,6 +420,14 @@
     "./components/MaxInputSelect": {
       "types": "./dist/components/MaxInputSelect.vue.d.ts",
       "import": "./dist/components/MaxInputSelect.es.js"
+    },
+    "./components/MaxInputServiceAudience": {
+      "types": "./dist/components/MaxInputServiceAudience.vue.d.ts",
+      "import": "./dist/components/MaxInputServiceAudience.es.js"
+    },
+    "./components/MaxInputServicePricingUnit": {
+      "types": "./dist/components/MaxInputServicePricingUnit.vue.d.ts",
+      "import": "./dist/components/MaxInputServicePricingUnit.es.js"
     },
     "./components/MaxInputSlug": {
       "types": "./dist/components/MaxInputSlug.vue.d.ts",

@@ -105,7 +105,7 @@ describe('E10-10: Cobertura do Playground e Identidade Canônica', () => {
         expect(toolbarContent).toContain('toggleDark');
     });
 
-    it('R19: todos os 37 arquivos de cenário existem fisicamente em playground/src/scenarios/', () => {
+    it('R19: todos os 38 arquivos de cenário existem fisicamente em playground/src/scenarios/', () => {
         const scenariosDir = path.resolve(PLAYGROUND_DIR, 'src/scenarios');
         expect(fs.existsSync(scenariosDir)).toBe(true);
 

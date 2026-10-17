@@ -1,4 +1,5 @@
 import type { DomainSelectOption, PhaseValue, WireSizeValue, WireTypeValue } from '../types/domainInputs';
+import type { InverterTypeValue } from '../types/specializedInputs';
 
 export const PHASE_OPTIONS: readonly DomainSelectOption<PhaseValue>[] = Object.freeze([
     { value: 1, label: 'Monofásico', name: 'Monofásico' },
@@ -32,3 +33,9 @@ export const WIRE_TYPE_OPTIONS: readonly DomainSelectOption<WireTypeValue>[] = O
     { value: 'aluminum-70', label: 'Alumínio — PVC 70 °C', name: 'Alumínio — PVC 70 °C' },
     { value: 'aluminum-90', label: 'Alumínio — EPR/XLPE 90 °C', name: 'Alumínio — EPR/XLPE 90 °C' }
 ]);
+
+export const INVERTER_TYPE_OPTIONS: readonly DomainSelectOption<InverterTypeValue>[] = Object.freeze([
+    { value: 'String', label: 'String', name: 'String' },
+    { value: 'Micro', label: 'Microinversor', name: 'Microinversor' }
+]);
+

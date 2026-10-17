@@ -38,5 +38,6 @@ export const SCENARIO_LOADERS: Record<string, () => Promise<{ default: Component
     'trans-fade': () => import('./trans-fade.vue'),
     'trans-motion': () => import('./trans-motion.vue'),
     'reusable-components': () => import('./reusable-components.vue'),
-    'operational-components': () => import('./operational-components.vue')
+    'operational-components': () => import('./operational-components.vue'),
+    'inputs-specialized': () => import('./inputs-specialized.vue')
 };

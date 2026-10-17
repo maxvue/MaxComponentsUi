@@ -203,6 +203,16 @@ try {
             for (const name of reusableNames) {
                 if (!UI[name]) throw new Error(name + ' ausente no entrypoint raiz.');
             }
+            const specializedNames = [
+                'MaxInputOccupation', 'MaxInputFinancingTerm', 'MaxInputFinancingGracePeriod',
+                'MaxInputServicePricingUnit', 'MaxInputServiceAudience', 'MaxInputInverterType',
+                'MaxInputMonitoringAuthType', 'MaxInputMonitoringCredentialFlow', 'MaxInputConsumerUnit',
+                'MaxInputAiModelStatus', 'MaxInputAiPriceItemType', 'MaxInputAiCacheOperation',
+                'MaxInputRagSourceType', 'MaxInputColorPalette', 'MaxInputScheduleRules'
+            ];
+            for (const name of specializedNames) {
+                if (!UI[name]) throw new Error('Input especializado ausente no entrypoint raiz: ' + name);
+            }
             console.log('ESM sem deps opcionais — OK');
         `);
         await runCommand(process.execPath, ['index.js'], { cwd: dir });
@@ -274,6 +284,9 @@ try {
             import GranularSchedule from '@maxvue/max-components-ui/components/MaxInputScheduleType';
             import GranularOccurrence from '@maxvue/max-components-ui/components/MaxInputMonthOccurrence';
             import GranularContent from '@maxvue/max-components-ui/components/MaxInputContentType';
+            import GranularOccupation from '@maxvue/max-components-ui/components/MaxInputOccupation';
+            import GranularColorPalette from '@maxvue/max-components-ui/components/MaxInputColorPalette';
+            import GranularScheduleRules from '@maxvue/max-components-ui/components/MaxInputScheduleRules';
             import { useModalStore } from '@maxvue/max-components-ui/stores';
             import { presetMaxUno } from '@maxvue/max-components-ui/preset';
             import { MaxComponentsUiResolver } from '@maxvue/max-components-ui/resolver';

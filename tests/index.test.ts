@@ -118,4 +118,46 @@ describe('index install', () => {
             expect((indexExports as any)[canonical]).toBe((indexExports as any)[alias]);
         }
     });
+
+    it('exporta os 15 novos inputs especializados e seus catálogos públicos', async () => {
+        const indexExports = await import('../src/index');
+        const specialized = [
+            'MaxInputOccupation',
+            'MaxInputFinancingTerm',
+            'MaxInputFinancingGracePeriod',
+            'MaxInputServicePricingUnit',
+            'MaxInputServiceAudience',
+            'MaxInputInverterType',
+            'MaxInputMonitoringAuthType',
+            'MaxInputMonitoringCredentialFlow',
+            'MaxInputConsumerUnit',
+            'MaxInputAiModelStatus',
+            'MaxInputAiPriceItemType',
+            'MaxInputAiCacheOperation',
+            'MaxInputRagSourceType',
+            'MaxInputColorPalette',
+            'MaxInputScheduleRules'
+        ];
+
+        for (const name of specialized) expect((indexExports as any)[name]).toBeDefined();
+
+
+        expect(indexExports.OCCUPATION_OPTIONS).toHaveLength(7);
+        expect(indexExports.FINANCING_TERM_OPTIONS).toHaveLength(8);
+        expect(indexExports.FINANCING_GRACE_PERIOD_OPTIONS).toHaveLength(4);
+        expect(indexExports.SERVICE_PRICING_UNIT_OPTIONS).toHaveLength(4);
+        expect(indexExports.SERVICE_AUDIENCE_OPTIONS).toHaveLength(4);
+        expect(indexExports.INVERTER_TYPE_OPTIONS).toHaveLength(2);
+        expect(indexExports.MONITORING_AUTH_TYPE_OPTIONS).toHaveLength(4);
+        expect(indexExports.MONITORING_CREDENTIAL_FLOW_OPTIONS).toHaveLength(3);
+        expect(indexExports.AI_MODEL_STATUS_OPTIONS).toHaveLength(3);
+        expect(indexExports.AI_PRICE_ITEM_TYPE_OPTIONS).toHaveLength(35);
+        expect(indexExports.AI_CACHE_OPERATION_OPTIONS).toHaveLength(3);
+        expect(indexExports.RAG_SOURCE_TYPE_OPTIONS).toHaveLength(4);
+        expect(indexExports.VALID_WEEKDAYS).toHaveLength(7);
+        expect(typeof indexExports.isValidDateString).toBe('function');
+        expect(typeof indexExports.isValidTimeString).toBe('function');
+        expect(typeof indexExports.isValidScheduleRule).toBe('function');
+    });
 });
+

@@ -153,3 +153,49 @@ interface BaseDomainInputProps<T> {
     });
 </script>
 ```
+
+---
+
+## 5. Novos Inputs Especializados (15 Componentes)
+
+Introduzidos para cobrir cadastros de financiamento, serviços solares, integrações de monitoramento, precificação/cache/RAG de IA, gestão de cores de marca e regras avançadas de publicação editorial.
+
+### 5.1. Matriz dos Novos Componentes
+
+| ID | Componente | Rótulo Padrão | Tipo do Modelo | Origem do Domínio |
+|---|---|---|---|---|
+| I01 | `MaxInputOccupation` | Ocupação | `string \| null` | Financiamento Solar (Engeapp) |
+| I02 | `MaxInputFinancingTerm` | Prazo do financiamento | `number \| null` | Financiamento Solar (Engeapp) |
+| I03 | `MaxInputFinancingGracePeriod` | Carência da primeira parcela | `number \| null` | Financiamento Solar (Engeapp) |
+| I04 | `MaxInputServicePricingUnit` | Unidade de preço do serviço | `string \| null` | Precificação de Serviços (Engeapp) |
+| I05 | `MaxInputServiceAudience` | Público do serviço | `string \| null` | Precificação de Serviços (Engeapp) |
+| I06 | `MaxInputInverterType` | Tipo de inversor | `'String' \| 'Micro' \| null` | Equipamentos Solares (Engeapp) |
+| I07 | `MaxInputMonitoringAuthType` | Tipo de autenticação | `string \| null` | Monitoramento Solar (Engeapp) |
+| I08 | `MaxInputMonitoringCredentialFlow` | Fluxo de credencial | `string \| null` | Monitoramento Solar (Engeapp) |
+| I09 | `MaxInputConsumerUnit` | Unidade consumidora (UC) | `string \| null` | Projetos e Concessionárias (Engeapp) |
+| I10 | `MaxInputAiModelStatus` | Situação do modelo | `'approved' \| 'pending' \| 'failed' \| null` | Modelos de IA (MaxAiManager) |
+| I11 | `MaxInputAiPriceItemType` | Modalidade de preço de IA | `AiPriceItemTypeValue \| null` | Precificação Canônica de IA (MaxAiManager) |
+| I12 | `MaxInputAiCacheOperation` | Operação de cache | `'read' \| 'write' \| 'storage' \| null` | Tarifação de Cache IA (MaxAiManager) |
+| I13 | `MaxInputRagSourceType` | Tipo de fonte RAG | `'document' \| 'url' \| 'text' \| 'mysql' \| null` | Bases de Conhecimento RAG (MaxAiManager) |
+| I14 | `MaxInputColorPalette` | Paleta de cores | `ColorPaletteItem[]` | Posicionamento de Marca (SocialMedia) |
+| I15 | `MaxInputScheduleRules` | Agendamento | `ScheduleRule[]` | Calendário Editorial (SocialMedia) |
+
+### 5.2. Seletores Configuráveis (I01, I02, I03)
+- `MaxInputOccupation`, `MaxInputFinancingTerm` e `MaxInputFinancingGracePeriod` possuem a prop explícita `options`.
+- Se omitida (`undefined`), os catálogos padrão (`OCCUPATION_OPTIONS`, `FINANCING_TERM_OPTIONS`, `FINANCING_GRACE_PERIOD_OPTIONS`) são utilizados.
+- Caso o consumidor forneça explicitamente `options: []`, a lista permanece vazia (nenhuma oferta disponível), sem retornar aos valores padrão.
+- Os prazos e carências trabalham com números inteiros (meses e dias), sem coerção de strings.
+
+### 5.3. Contrato Canônico de IA e Nota de Não Adoção Automática
+- `MaxInputAiPriceItemType` expõe os 35 tipos canônicos definidos no backend (ex: `global`, `text`, `embedding`, `speech_to_speech`, `lip_sync`).
+- **Atenção:** A criação deste componente não altera e não impõe migração imediata às telas legadas do MaxAiManager. Valores legados recebidos fora do enum são tratados como valores desconhecidos com feedback de erro sem conversão silenciosa.
+- `MaxInputAiCacheOperation` inclui `storage`, além de `read` e `write`.
+
+### 5.4. Controles Compostos Imutáveis (I14, I15)
+- **`MaxInputColorPalette`:** gerencia lista de `{ color: string; details: string }`. Toda adição, remoção e edição produz novos arrays imutáveis. Valida formato hexadecimal `#RGB` e `#RRGGBB`.
+- **`MaxInputScheduleRules`:** editor discriminado por regras (`specific_dates`, `weekly`, `monthly_days`, `monthly_nth_weekday`).
+  - Preserva horários (`HH:mm`) ao alternar o tipo de regra, descartando propriedades incompatíveis.
+  - Intervalos semanais oferecem até 52 semanas.
+  - Quinta ocorrência (`nth: 5`) significa literalmente a 5ª ocorrência do dia no mês, nunca a última.
+  - Regras em edição incompleta permanecem em rascunho local e só são emitidas ao pai quando todos os campos obrigatórios da regra estiverem preenchidos e válidos.
+
