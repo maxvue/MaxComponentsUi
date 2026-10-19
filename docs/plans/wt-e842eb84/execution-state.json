@@ -40,11 +40,10 @@
       "id": "T3",
       "status": "completed",
       "files": [
-        ".vscode/tasks.json",
-        "README.md",
-        "tests/architecture/npmBuildTask.test.ts"
+        "tests/architecture/playgroundCoverage.test.ts",
+        "tests/stores/useIcon.Store.test.ts"
       ],
-      "revision": "09d481f4a183c721f5c8f40ebfd5395b496f51fd5a045774b4e3a5d44a50bff6",
+      "revision": "824dea0d59e4d0b1ae7c5064f266abb456d632f562b10e722197c0163d6a4432",
       "validations": []
     },
     {
@@ -52,44 +51,44 @@
       "status": "manualPending",
       "files": [],
       "validations": [],
-      "nextAction": "Aguardando verificação manual do operador no MaxCode e validação no consumidor."
+      "nextAction": "Executar npm run sync:local-libs no consumidor Engeapp para sincronizar o manifesto config/local-libraries.json."
     }
   ],
   "verification": {
-    "revision": "09d481f4a183c721f5c8f40ebfd5395b496f51fd5a045774b4e3a5d44a50bff6",
+    "revision": "824dea0d59e4d0b1ae7c5064f266abb456d632f562b10e722197c0163d6a4432",
     "checks": [
       {
         "command": "npm run check:lockfile",
-        "revision": "09d481f4a183c721f5c8f40ebfd5395b496f51fd5a045774b4e3a5d44a50bff6",
+        "revision": "824dea0d59e4d0b1ae7c5064f266abb456d632f562b10e722197c0163d6a4432",
         "result": "passed",
         "exitCode": 0
       },
       {
         "command": "npm run test",
-        "revision": "09d481f4a183c721f5c8f40ebfd5395b496f51fd5a045774b4e3a5d44a50bff6",
-        "result": "failed",
-        "exitCode": 1
+        "revision": "824dea0d59e4d0b1ae7c5064f266abb456d632f562b10e722197c0163d6a4432",
+        "result": "passed",
+        "exitCode": 0
       },
       {
         "command": "npm run type-check:test",
-        "revision": "09d481f4a183c721f5c8f40ebfd5395b496f51fd5a045774b4e3a5d44a50bff6",
+        "revision": "824dea0d59e4d0b1ae7c5064f266abb456d632f562b10e722197c0163d6a4432",
         "result": "passed",
         "exitCode": 0
       },
       {
         "command": "npm run lint",
-        "revision": "09d481f4a183c721f5c8f40ebfd5395b496f51fd5a045774b4e3a5d44a50bff6",
+        "revision": "824dea0d59e4d0b1ae7c5064f266abb456d632f562b10e722197c0163d6a4432",
         "result": "passed",
         "exitCode": 0
       },
       {
         "command": "npm run build",
-        "revision": "09d481f4a183c721f5c8f40ebfd5395b496f51fd5a045774b4e3a5d44a50bff6",
+        "revision": "824dea0d59e4d0b1ae7c5064f266abb456d632f562b10e722197c0163d6a4432",
         "result": "passed",
         "exitCode": 0
       }
     ]
   },
-  "updatedAt": 1792420700000,
-  "nextAction": "Aguardando confirmação e autorização operacional para T4 (integração e aceite do consumidor)."
+  "updatedAt": 1792422860000,
+  "nextAction": "Todas as validações técnicas foram aprovadas. Sincronizar manifesto no consumidor Engeapp com npm run sync:local-libs."
 }

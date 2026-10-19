@@ -594,7 +594,7 @@ describe('useIconStore', () => {
         const fetchPromise = new Promise((resolve) => {
             resolveFetch = resolve;
         });
-        const mockFetch = vi.spyOn(globalThis, 'fetch').mockImplementation(() => fetchPromise);
+        const mockFetch = vi.spyOn(globalThis, 'fetch').mockImplementation(() => fetchPromise as Promise<Response>);
 
         store.getIcon('icon-inflight');
         store.getIcon('icon-inflight');
@@ -646,7 +646,7 @@ describe('useIconStore', () => {
         const fetchPromise = new Promise((resolve) => {
             resolveFetch = resolve;
         });
-        const mockFetch = vi.spyOn(globalThis, 'fetch').mockImplementation(() => fetchPromise);
+        const mockFetch = vi.spyOn(globalThis, 'fetch').mockImplementation(() => fetchPromise as Promise<Response>);
 
         store.getIcon('icon-disposed');
         await vi.waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(1), { timeout: 2000 });
