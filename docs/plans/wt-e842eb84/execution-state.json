@@ -8,7 +8,7 @@
       "files": [
         "package.json"
       ],
-      "revision": "5f81da96958bf9d6630b87eef10af6d5e6469ca045d93f07e1ceb579ebc26fc7",
+      "revision": "2bf12b5aad500adab36db51ee60c9b3c0dc3715daf795533d6eabe7fdc528960",
       "validations": []
     },
     {
@@ -18,7 +18,7 @@
         ".vscode/tasks.json",
         "README.md"
       ],
-      "revision": "8430563ea9ddf78b4e00a28e765ed583fb2c454d9a10ef68e603eee674eb13e9",
+      "revision": "dee86822167571737a83bace66e950493f9600d14ed21e074dd85f2821e8ccad",
       "validations": []
     },
     {
@@ -27,12 +27,13 @@
       "files": [
         "tests/architecture/npmBuildTask.test.ts"
       ],
-      "revision": "581018a496e14de1ac9e5c7d953f670da5e058c375c50fc3b7c95a32c8a62bf0",
+      "revision": "b36288b7d5eef5fb6ab9c56c697b04ad74dcf4a6c21adf694f1947f78b0e6212",
       "validations": [
         {
           "command": "npx vitest run tests/architecture/npmBuildTask.test.ts",
-          "revision": "581018a496e14de1ac9e5c7d953f670da5e058c375c50fc3b7c95a32c8a62bf0",
-          "result": "passed"
+          "revision": "b36288b7d5eef5fb6ab9c56c697b04ad74dcf4a6c21adf694f1947f78b0e6212",
+          "result": "passed",
+          "exitCode": 0
         }
       ]
     },
@@ -43,7 +44,7 @@
         "tests/architecture/playgroundCoverage.test.ts",
         "tests/stores/useIcon.Store.test.ts"
       ],
-      "revision": "824dea0d59e4d0b1ae7c5064f266abb456d632f562b10e722197c0163d6a4432",
+      "revision": "3a67f9f1010b3003014ea140966bf7e5f5dd2e679e73a93aa7b6492b86f088b5",
       "validations": []
     },
     {
@@ -51,44 +52,44 @@
       "status": "manualPending",
       "files": [],
       "validations": [],
-      "nextAction": "Executar npm run sync:local-libs no consumidor Engeapp para sincronizar o manifesto config/local-libraries.json."
+      "nextAction": "Integrar a worktree wt-e842eb84 pelo MaxCode para que o botão NPM RUN BUILD passe a comitar e fazer push automático de package.json e package-lock.json após cada build."
     }
   ],
   "verification": {
-    "revision": "824dea0d59e4d0b1ae7c5064f266abb456d632f562b10e722197c0163d6a4432",
+    "revision": "f514b68ee28248b1dde99f25f7541862d46679bfada7cc6d3ddc61aea2d4fe9f",
     "checks": [
       {
         "command": "npm run check:lockfile",
-        "revision": "824dea0d59e4d0b1ae7c5064f266abb456d632f562b10e722197c0163d6a4432",
+        "revision": "f514b68ee28248b1dde99f25f7541862d46679bfada7cc6d3ddc61aea2d4fe9f",
         "result": "passed",
         "exitCode": 0
       },
       {
         "command": "npm run test",
-        "revision": "824dea0d59e4d0b1ae7c5064f266abb456d632f562b10e722197c0163d6a4432",
+        "revision": "f514b68ee28248b1dde99f25f7541862d46679bfada7cc6d3ddc61aea2d4fe9f",
         "result": "passed",
         "exitCode": 0
       },
       {
         "command": "npm run type-check:test",
-        "revision": "824dea0d59e4d0b1ae7c5064f266abb456d632f562b10e722197c0163d6a4432",
+        "revision": "f514b68ee28248b1dde99f25f7541862d46679bfada7cc6d3ddc61aea2d4fe9f",
         "result": "passed",
         "exitCode": 0
       },
       {
         "command": "npm run lint",
-        "revision": "824dea0d59e4d0b1ae7c5064f266abb456d632f562b10e722197c0163d6a4432",
+        "revision": "f514b68ee28248b1dde99f25f7541862d46679bfada7cc6d3ddc61aea2d4fe9f",
         "result": "passed",
         "exitCode": 0
       },
       {
         "command": "npm run build",
-        "revision": "824dea0d59e4d0b1ae7c5064f266abb456d632f562b10e722197c0163d6a4432",
+        "revision": "f514b68ee28248b1dde99f25f7541862d46679bfada7cc6d3ddc61aea2d4fe9f",
         "result": "passed",
         "exitCode": 0
       }
     ]
   },
-  "updatedAt": 1792422860000,
-  "nextAction": "Todas as validações técnicas foram aprovadas. Sincronizar manifesto no consumidor Engeapp com npm run sync:local-libs."
+  "updatedAt": 1792424697238,
+  "nextAction": "Tarefa NPM RUN BUILD atualizada e validada para comitar e enviar package.json e package-lock.json após o build. Integrar worktree pelo MaxCode."
 }

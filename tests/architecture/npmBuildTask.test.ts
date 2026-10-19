@@ -128,15 +128,18 @@ describe('R1–R6: Contrato Estático da Tarefa de Build (.vscode/tasks.json)', 
         expect(segments[1]).toBe('npm run build');
     });
 
-    it('o sufixo de notificações/som e as opções da tarefa refletem a nova comunicação sem prometer commit ou push', () => {
+    it('o sufixo de git, notificações/som e as opções da tarefa refletem o commit e push dos manifestos de versão', () => {
         const tasksPath = path.resolve(projectRoot, '.vscode/tasks.json');
         const tasksContent = JSON.parse(fs.readFileSync(tasksPath, 'utf8'));
         const buildTask = tasksContent.tasks.find((t: { label: string }) => t.label === 'NPM RUN BUILD');
 
         const segments = buildTask.command.split('&&').map((s: string) => s.trim());
-        expect(segments).toHaveLength(4);
-        expect(segments[2]).toBe('notify-send \'VS Code\' \'✅ MAX COMPONENTS UI - Build concluído e versão incrementada. Faça commit pelo MaxCode antes do deploy.\' -i software-update-available');
-        expect(segments[3]).toBe('paplay /usr/share/sounds/freedesktop/stereo/service-login.oga');
+        expect(segments).toHaveLength(7);
+        expect(segments[2]).toBe('git add package.json package-lock.json');
+        expect(segments[3]).toBe('git commit -m \'chore: atualizando versão do build\'');
+        expect(segments[4]).toBe('git push');
+        expect(segments[5]).toBe('notify-send \'VS Code\' \'✅ MAX COMPONENTS UI - Build, Commit e Push realizados!\' -i software-update-available');
+        expect(segments[6]).toBe('paplay /usr/share/sounds/freedesktop/stereo/service-login.oga');
 
         expect(buildTask.presentation).toEqual({
             reveal: 'silent',
@@ -147,18 +150,18 @@ describe('R1–R6: Contrato Estático da Tarefa de Build (.vscode/tasks.json)', 
         });
 
         expect(buildTask.options?.statusbar).toEqual({
-            label: '✅ BUILD + VERSÃO',
+            label: '✅ BUILD, COMMIT & PUSH',
             hide: false
         });
     });
 
-    it('o comando da tarefa NPM RUN BUILD não contém operações de git commit, push, tag ou npm publish', () => {
+    it('o comando da tarefa NPM RUN BUILD adiciona apenas package.json e package-lock.json e não executa git tag ou npm publish', () => {
         const tasksPath = path.resolve(projectRoot, '.vscode/tasks.json');
         const tasksContent = JSON.parse(fs.readFileSync(tasksPath, 'utf8'));
         const buildTask = tasksContent.tasks.find((t: { label: string }) => t.label === 'NPM RUN BUILD');
 
-        expect(buildTask.command).not.toMatch(/\bgit\s+commit\b/);
-        expect(buildTask.command).not.toMatch(/\bgit\s+push\b/);
+        expect(buildTask.command).toContain('git add package.json package-lock.json');
+        expect(buildTask.command).not.toMatch(/\bgit\s+add\s+\./);
         expect(buildTask.command).not.toMatch(/\bgit\s+tag\b/);
         expect(buildTask.command).not.toMatch(/\bnpm\s+publish\b/);
     });
@@ -323,11 +326,37 @@ describe('R1–R5: Integração do Prefixo da Tarefa em Fixtures Isoladas', () =
     });
 });
 
+function setupGitWithBareRemote(fixtureDir: string) {
+    const bareRemoteDir = path.join(fixtureDir, '.bare-remote.git');
+    fs.writeFileSync(
+        path.join(fixtureDir, '.gitignore'),
+        '.bare-remote.git\nbin\nnotify-send.log\npaplay.log\nbuild-ran.txt\n.npm-cache\n'
+    );
+
+    const initCmd = [
+        `git init --bare "${bareRemoteDir}"`,
+        'git init -b main',
+        'git config user.email "test@example.com"',
+        'git config user.name "Test User"',
+        'git config commit.gpgsign false',
+        `git remote add origin "${bareRemoteDir}"`,
+        'git add package.json package-lock.json .gitignore',
+        'git commit -m "chore: initial"',
+        'git push -u origin main'
+    ].join(' && ');
+
+    const initRes = runShellInFixture(fixtureDir, initCmd);
+    expect(initRes.status).toBe(0);
+
+    return { bareRemoteDir };
+}
+
 describe('Comunicação Completa e Encadeamento com Dublês Locais (tasks.json)', () => {
-    it('executa a cadeia completa do tasks.json com sucesso, incrementa versão e notifica pendência de commit sem alegação de push', () => {
+    it('executa a cadeia completa do tasks.json com sucesso, incrementa versão, comita e faz push de package.json e package-lock.json sem deixá-los para trás', () => {
         const fixture = createFixture('test-full-chain-success');
         try {
             const { extraEnv } = setupMockBinaries(fixture.fixtureDir);
+            const { bareRemoteDir } = setupGitWithBareRemote(fixture.fixtureDir);
 
             const tasksPath = path.resolve(projectRoot, '.vscode/tasks.json');
             const tasksContent = JSON.parse(fs.readFileSync(tasksPath, 'utf8'));
@@ -345,12 +374,21 @@ describe('Comunicação Completa e Encadeamento com Dublês Locais (tasks.json)'
             expect(lock.packages[''].version).toBe('1.1.3');
             expect(buildRan).toBe('1.1.3');
 
+            const dirtyStatus = runShellInFixture(fixture.fixtureDir, 'git status --porcelain --untracked-files=no');
+            expect(dirtyStatus.stdout.trim()).toBe('');
+
+            const lastCommitMsg = runShellInFixture(fixture.fixtureDir, 'git log -1 --pretty=%s');
+            expect(lastCommitMsg.stdout.trim()).toBe('chore: atualizando versão do build');
+
+            const localHead = runShellInFixture(fixture.fixtureDir, 'git rev-parse HEAD').stdout.trim();
+            const remoteHead = runShellInFixture(fixture.fixtureDir, `git -C "${bareRemoteDir}" rev-parse main`).stdout.trim();
+            expect(localHead).toBe(remoteHead);
+
             const notifyLogPath = path.join(fixture.fixtureDir, 'notify-send.log');
             expect(fs.existsSync(notifyLogPath)).toBe(true);
             const notifyContent = fs.readFileSync(notifyLogPath, 'utf8');
             expect(notifyContent).toContain('VS Code');
-            expect(notifyContent).toContain('✅ MAX COMPONENTS UI - Build concluído e versão incrementada. Faça commit pelo MaxCode antes do deploy.');
-            expect(notifyContent).not.toContain('Commit e Push realizados');
+            expect(notifyContent).toContain('✅ MAX COMPONENTS UI - Build, Commit e Push realizados!');
 
             const paplayLogPath = path.join(fixture.fixtureDir, 'paplay.log');
             expect(fs.existsSync(paplayLogPath)).toBe(true);
@@ -361,12 +399,13 @@ describe('Comunicação Completa e Encadeamento com Dublês Locais (tasks.json)'
         }
     });
 
-    it('em falha controlada do build na cadeia completa, bloqueia notificações e preserva a versão já incrementada', () => {
+    it('em falha controlada do build na cadeia completa, interrompe antes do commit/push e bloqueia notificações', () => {
         const fixture = createFixture('test-full-chain-build-fail', '1.1.2', {
             build: 'node -e "process.exit(13)"'
         });
         try {
             const { extraEnv } = setupMockBinaries(fixture.fixtureDir);
+            setupGitWithBareRemote(fixture.fixtureDir);
 
             const tasksPath = path.resolve(projectRoot, '.vscode/tasks.json');
             const tasksContent = JSON.parse(fs.readFileSync(tasksPath, 'utf8'));
@@ -382,6 +421,9 @@ describe('Comunicação Completa e Encadeamento com Dublês Locais (tasks.json)'
             expect(lock.version).toBe('1.1.3');
             expect(lock.packages[''].version).toBe('1.1.3');
 
+            const lastCommitMsg = runShellInFixture(fixture.fixtureDir, 'git log -1 --pretty=%s');
+            expect(lastCommitMsg.stdout.trim()).toBe('chore: initial');
+
             const notifyLogPath = path.join(fixture.fixtureDir, 'notify-send.log');
             expect(fs.existsSync(notifyLogPath)).toBe(false);
 
@@ -392,10 +434,11 @@ describe('Comunicação Completa e Encadeamento com Dublês Locais (tasks.json)'
         }
     });
 
-    it('em falha de incremento na cadeia completa, interrompe o encadeamento e não aciona build nem notificações', () => {
+    it('em falha de incremento na cadeia completa, interrompe o encadeamento e não aciona build, commit nem notificações', () => {
         const fixture = createFixture('test-full-chain-version-fail', 'invalid-semver');
         try {
             const { extraEnv } = setupMockBinaries(fixture.fixtureDir);
+            setupGitWithBareRemote(fixture.fixtureDir);
 
             const tasksPath = path.resolve(projectRoot, '.vscode/tasks.json');
             const tasksContent = JSON.parse(fs.readFileSync(tasksPath, 'utf8'));

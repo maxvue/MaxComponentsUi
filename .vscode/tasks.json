@@ -4,7 +4,7 @@
         {
             "label": "NPM RUN BUILD",
             "type": "shell",
-            "command": "npm version patch --no-git-tag-version --ignore-scripts && npm run build && notify-send 'VS Code' '✅ MAX COMPONENTS UI - Build concluído e versão incrementada. Faça commit pelo MaxCode antes do deploy.' -i software-update-available && paplay /usr/share/sounds/freedesktop/stereo/service-login.oga",
+            "command": "npm version patch --no-git-tag-version --ignore-scripts && npm run build && git add package.json package-lock.json && git commit -m 'chore: atualizando versão do build' && git push && notify-send 'VS Code' '✅ MAX COMPONENTS UI - Build, Commit e Push realizados!' -i software-update-available && paplay /usr/share/sounds/freedesktop/stereo/service-login.oga",
             "isBackground": false,
             "presentation": {
                 "reveal": "silent",
@@ -15,7 +15,7 @@
             },
             "options": {
                 "statusbar": {
-                    "label": "✅ BUILD + VERSÃO",
+                    "label": "✅ BUILD, COMMIT & PUSH",
                     "hide": false
                 }
             }
