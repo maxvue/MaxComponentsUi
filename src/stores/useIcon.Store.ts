@@ -13,6 +13,7 @@ const CACHE_KEY = ICON_CACHE_KEY;
 export const useIconStore = defineStore('icons', () => {
     const icons_data: Ref = ref({});
     let isCacheInitialized = false;
+    let isDisposed = false;
 
     const list_icons_waiting_request: Ref = computed(() => Object.keys(icons_data.value ?? {}).filter((icon_name: string) => icons_data.value[icon_name] === 'waiting'));
 
@@ -61,6 +62,7 @@ export const useIconStore = defineStore('icons', () => {
 
         // 2. Carregamento assíncrono do IndexedDB (já sanitizado por loadAllIconsFromIDB)
         loadAllIconsFromIDB().then((idbIcons) => {
+            if (isDisposed) return;
             if (idbIcons && size(idbIcons) > 0) icons_data.value = { ...idbIcons, ...icons_data.value };
 
         }).catch(() => {});
@@ -71,7 +73,10 @@ export const useIconStore = defineStore('icons', () => {
         icon_name = icon_name.trim();
         if (!isSafeIconName(icon_name)) return null;
         if (!isCacheInitialized) initCache();
-        if (icons_data.value[icon_name]) return icons_data.value[icon_name] !== 'waiting' ? icons_data.value[icon_name] : null;
+        if (Object.prototype.hasOwnProperty.call(icons_data.value, icon_name)) {
+            const cached = icons_data.value[icon_name];
+            return (cached && cached !== 'waiting') ? cached : null;
+        }
         icons_data.value[icon_name] = 'waiting';
         return null;
     };
@@ -79,6 +84,9 @@ export const useIconStore = defineStore('icons', () => {
     const errors = ref<Record<string, number>>({
         fetch: 0
     });
+
+    const inFlightIcons = new Set<string>();
+    const queueTrigger = ref(0);
 
     const MAX_FETCH_RETRIES = 4;
     const MAX_ICON_RETRIES = 4;
@@ -111,6 +119,8 @@ export const useIconStore = defineStore('icons', () => {
     };
 
     onScopeDispose(() => {
+        isDisposed = true;
+        inFlightIcons.clear();
         if (fetchResetTimer !== null) {
             clearTimeout(fetchResetTimer);
             fetchResetTimer = null;
@@ -165,11 +175,18 @@ export const useIconStore = defineStore('icons', () => {
         }
     };
 
-    watchDebounced(() => [list_icons_waiting_request.value, errors.value], () => {
-        // Captura snapshot da lista no momento da requisição para evitar condição de corrida
-        const icons_to_fetch = [...list_icons_waiting_request.value];
+    watchDebounced(() => [list_icons_waiting_request.value, errors.value, queueTrigger.value], () => {
+        if (isDisposed) return;
 
-        if (size(icons_to_fetch) > 0 && errors.value['fetch'] < MAX_FETCH_RETRIES) {
+        // Captura snapshot dos ícones elegíveis (não reservados) no momento da requisição
+        const eligibleIcons = list_icons_waiting_request.value.filter(
+            (icon: string) => !inFlightIcons.has(icon)
+        );
+
+        if (size(eligibleIcons) > 0 && errors.value['fetch'] < MAX_FETCH_RETRIES) {
+            const icons_to_fetch = [...eligibleIcons];
+            icons_to_fetch.forEach((icon) => inFlightIcons.add(icon));
+
             const params = new URLSearchParams();
             icons_to_fetch.forEach((icon) => params.append('icons[]', icon));
 
@@ -180,36 +197,38 @@ export const useIconStore = defineStore('icons', () => {
                 method: 'GET',
                 headers: { 'Accept': 'application/json' }
             }).then(async (res) => {
+                if (isDisposed) return;
                 if (res.ok === false) throw new Error(`HTTP ${res.status}`);
 
                 return res.json();
             }).then(async (data) => {
-                const updated_data = { ...icons_data.value };
+                if (isDisposed) return;
                 const deltaToPersist: Record<string, SanitizedSvg> = {};
                 const missing_icons: string[] = [];
 
                 for (const icon_name of icons_to_fetch) {
-                    if (data && data[icon_name] && typeof data[icon_name] === 'string') {
+                    if (data && typeof data[icon_name] === 'string') {
                         const clean = sanitizeSvg(data[icon_name]);
                         if (clean) {
-                            updated_data[icon_name] = clean;
+                            icons_data.value[icon_name] = clean;
                             deltaToPersist[icon_name] = clean;
+                            delete errors.value[icon_name];
+                            continue;
                         }
-                        delete errors.value[icon_name];
-                        continue;
                     }
                     missing_icons.push(icon_name);
                 }
 
                 errors.value['fetch'] = 0;
-                icons_data.value = updated_data;
                 if (size(deltaToPersist) > 0) saveSanitizedIconsToIDB(deltaToPersist);
 
                 if (missing_icons.length > 0) {
                     const recoveredIcons: Record<string, SanitizedSvg> = {};
 
                     await Promise.all(missing_icons.map(async (icon_name) => {
+                        if (isDisposed) return;
                         const fallbackSvg = await fetchIconFallback(icon_name);
+                        if (isDisposed) return;
                         if (fallbackSvg) {
                             icons_data.value[icon_name] = fallbackSvg;
                             delete errors.value[icon_name];
@@ -217,20 +236,24 @@ export const useIconStore = defineStore('icons', () => {
                             return;
                         }
 
-                        errors.value[icon_name] = (errors.value[icon_name] ?? 0) + 1;
-                        console.error('Erro na obtenção do ícone', icon_name);
+                        const currentRetries = (errors.value[icon_name] ?? 0) + 1;
+                        errors.value[icon_name] = currentRetries;
 
-                        if (errors.value[icon_name] >= MAX_ICON_RETRIES) icons_data.value[icon_name] = '';
+                        if (currentRetries >= MAX_ICON_RETRIES) {
+                            icons_data.value[icon_name] = '';
+                            console.error('Erro na obtenção do ícone', icon_name);
+                        }
                     }));
 
+                    if (isDisposed) return;
                     if (size(recoveredIcons) > 0) {
                         saveSanitizedIconsToIDB(recoveredIcons);
                         syncIconsToBackend(recoveredIcons);
                     }
                 }
 
-            }).catch((error) => {
-                if (error?.name === 'AbortError') return;
+            }).catch(async (error) => {
+                if (isDisposed || error?.name === 'AbortError') return;
                 console.error('Erro na Requisição dos ícones', { 'url': requestUrl, 'error': error });
                 errors.value['fetch'] += 1;
 
@@ -238,21 +261,28 @@ export const useIconStore = defineStore('icons', () => {
 
                 const recoveredIcons: Record<string, SanitizedSvg> = {};
 
-                Promise.all(icons_to_fetch.map(async (icon_name) => {
+                await Promise.all(icons_to_fetch.map(async (icon_name) => {
+                    if (isDisposed) return;
                     const fallbackSvg = await fetchIconFallback(icon_name);
+                    if (isDisposed) return;
                     if (fallbackSvg) {
                         icons_data.value[icon_name] = fallbackSvg;
                         delete errors.value[icon_name];
                         recoveredIcons[icon_name] = fallbackSvg;
-                        return true;
                     }
-                    return false;
-                })).then(() => {
-                    if (size(recoveredIcons) > 0) {
-                        saveSanitizedIconsToIDB(recoveredIcons);
-                        syncIconsToBackend(recoveredIcons);
-                    }
-                });
+                }));
+
+                if (isDisposed) return;
+                if (size(recoveredIcons) > 0) {
+                    saveSanitizedIconsToIDB(recoveredIcons);
+                    syncIconsToBackend(recoveredIcons);
+                }
+            }).finally(() => {
+                icons_to_fetch.forEach((icon) => inFlightIcons.delete(icon));
+                if (!isDisposed) {
+                    const hasMore = list_icons_waiting_request.value.some((icon: string) => !inFlightIcons.has(icon));
+                    if (hasMore && errors.value['fetch'] < MAX_FETCH_RETRIES) queueTrigger.value++;
+                }
             });
         }
 

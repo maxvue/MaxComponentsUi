@@ -1,0 +1,88 @@
+{
+  "version": 2,
+  "planRevision": "5efabeec90ae817db91e5e686de467ff162c83df9f4cad92a386d429b5d344cd",
+  "tasks": [
+    {
+      "id": "T1",
+      "status": "completed",
+      "files": [],
+      "validations": []
+    },
+    {
+      "id": "T2",
+      "status": "completed",
+      "files": [
+        "src/stores/useIcon.Store.ts",
+        "src/components/MaxIcon.vue",
+        "tests/stores/useIcon.Store.test.ts",
+        "tests/stores/useIconStore.test.ts",
+        "tests/components/MaxIcon.test.ts",
+        "tests/browser/MaxIconRetry.browser.ts"
+      ],
+      "revision": "1e8aa3989ee53a1c7fa4c35422f007dd49f02841b34820312cccb7113dd51222",
+      "validations": []
+    },
+    {
+      "id": "T3",
+      "status": "completed",
+      "files": [],
+      "validations": []
+    },
+    {
+      "id": "T4",
+      "status": "manualPending",
+      "files": [],
+      "validations": [],
+      "nextAction": "Validar comportamento na tela consumidora em ambiente de homologação quando houver acesso externo."
+    }
+  ],
+  "verification": {
+    "revision": "3ea3e17497b2ef722da55db9cf01e43fc708302d4ed63f302a6c1bbdd7c9c8ac",
+    "checks": [
+      {
+        "command": "npm run check:lockfile",
+        "revision": "3ea3e17497b2ef722da55db9cf01e43fc708302d4ed63f302a6c1bbdd7c9c8ac",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check",
+        "revision": "3ea3e17497b2ef722da55db9cf01e43fc708302d4ed63f302a6c1bbdd7c9c8ac",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check:test",
+        "revision": "3ea3e17497b2ef722da55db9cf01e43fc708302d4ed63f302a6c1bbdd7c9c8ac",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run lint",
+        "revision": "3ea3e17497b2ef722da55db9cf01e43fc708302d4ed63f302a6c1bbdd7c9c8ac",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run build",
+        "revision": "3ea3e17497b2ef722da55db9cf01e43fc708302d4ed63f302a6c1bbdd7c9c8ac",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npx vitest run tests/stores/useIcon.Store.test.ts tests/stores/useIconStore.test.ts tests/stores/useIconStore.cache-sanitize.test.ts tests/components/MaxIcon.test.ts",
+        "revision": "3ea3e17497b2ef722da55db9cf01e43fc708302d4ed63f302a6c1bbdd7c9c8ac",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npx vitest run --config vitest.browser.config.ts tests/browser/MaxIconRetry.browser.ts",
+        "revision": "3ea3e17497b2ef722da55db9cf01e43fc708302d4ed63f302a6c1bbdd7c9c8ac",
+        "result": "passed",
+        "exitCode": 0
+      }
+    ]
+  },
+  "updatedAt": 1792422000000,
+  "nextAction": "Aguardar confirmação explícita do usuário para integração Git."
+}

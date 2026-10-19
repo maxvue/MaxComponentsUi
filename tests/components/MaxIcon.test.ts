@@ -2,7 +2,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxIcon from '../../src/components/MaxIcon.vue';
-import { ref } from 'vue';
+import { ref, nextTick } from 'vue';
+import { useIconStore } from '../../src/stores/useIcon.Store';
 
 vi.mock('@maxvue/max-use', async (importOriginal) => {
     const actual = await importOriginal();
@@ -132,5 +133,62 @@ describe('MaxIcon', () => {
         const wrapper = mountIcon({ color: '#ff0000' });
         const style = wrapper.find('.max-icon-div')?.attributes('style') || '';
         expect(style).toContain('#ff0000');
+    });
+
+    it('solicita o ícone apenas na inicialização e não redispara getIcon quando o cache muda', async () => {
+        const store = useIconStore();
+        const getIconSpy = vi.spyOn(store, 'getIcon');
+
+        const wrapper = mount(MaxIcon, {
+            props: { icon: 'iconmind:log-level-duotone-thin' }
+        });
+
+        expect(getIconSpy).toHaveBeenCalledTimes(1);
+        expect(getIconSpy).toHaveBeenCalledWith('iconmind:log-level-duotone-thin');
+
+        // Modifica cache da store diretamente
+        store.icons_data['iconmind:log-level-duotone-thin'] = '';
+        store.icons_data['outro:icone'] = '<svg></svg>';
+        await nextTick();
+
+        // O watcher explícito não deve ter redisparado getIcon
+        expect(getIconSpy).toHaveBeenCalledTimes(1);
+        wrapper.unmount();
+    });
+
+    it('redispara getIcon ao alterar a prop do ícone', async () => {
+        const store = useIconStore();
+        const getIconSpy = vi.spyOn(store, 'getIcon');
+
+        const wrapper = mount(MaxIcon, {
+            props: { icon: 'mdi:star' }
+        });
+
+        expect(getIconSpy).toHaveBeenCalledWith('mdi:star');
+
+        await wrapper.setProps({ icon: 'mdi:heart' });
+        await nextTick();
+
+        expect(getIconSpy).toHaveBeenCalledWith('mdi:heart');
+        expect(getIconSpy).toHaveBeenCalledTimes(2);
+        wrapper.unmount();
+    });
+
+    it('várias instâncias com ícone esgotado não recolocam em waiting nem multiplicam requisições', async () => {
+        const store = useIconStore();
+        store.icons_data['iconmind:log-level-duotone-thin'] = '';
+
+        const wrappers = [
+            mount(MaxIcon, { props: { icon: 'iconmind:log-level-duotone-thin' } }),
+            mount(MaxIcon, { props: { icon: 'iconmind:log-level-duotone-thin' } }),
+            mount(MaxIcon, { props: { icon: 'iconmind:log-level-duotone-thin' } })
+        ];
+
+        await nextTick();
+
+        expect(store.icons_data['iconmind:log-level-duotone-thin']).toBe('');
+        expect(store.list_icons_waiting_request).not.toContain('iconmind:log-level-duotone-thin');
+
+        wrappers.forEach((w) => w.unmount());
     });
 });

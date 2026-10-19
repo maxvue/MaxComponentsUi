@@ -21,7 +21,7 @@
      * Possui sistema de cache local para performance.
      */
     import { useIconStore } from '../stores/useIcon.Store';
-    import { ref, computed, useAttrs, watchEffect } from 'vue';
+    import { ref, computed, useAttrs, watch } from 'vue';
     import { useElementHover, isNumber, getColorFromVar } from '@maxvue/max-use';
 
     const icon_store = useIconStore();
@@ -160,11 +160,11 @@
 
     const style = computed(() => ({ ...sizeStyles.value, ...colorStyle.value }));
 
-    // watchEffect roda fora da árvore de avaliação de computeds: aqui é seguro
-    // disparar a mutação de estado (marcar 'waiting' / requisitar fetch) via getIcon().
-    watchEffect(() => {
-        if (icon_name.value) icon_store.getIcon(icon_name.value);
-    });
+    // Observa a fonte explícita icon_name com immediate: true para disparar
+    // a requisição inicial sem transformar leituras internas da store em dependências reativas.
+    watch(icon_name, (name) => {
+        if (name) icon_store.getIcon(name);
+    }, { immediate: true });
 
     // Getter puro: apenas lê o estado já presente na store, sem mutá-lo.
     const svgContent = computed(() => {

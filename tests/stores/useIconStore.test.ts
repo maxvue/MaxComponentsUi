@@ -95,4 +95,20 @@ describe('useIconStore', () => {
 
         vi.useRealTimers();
     });
+
+    it('getIcon() retorna null e preserva estado terminal "" sem recolocar em waiting ou mutar a fila', () => {
+        const store = useIconStore();
+        store.icons_data['mdi:exhausted'] = '';
+
+        const result1 = store.getIcon('mdi:exhausted');
+        expect(result1).toBeNull();
+        expect(store.icons_data['mdi:exhausted']).toBe('');
+        expect(store.list_icons_waiting_request).not.toContain('mdi:exhausted');
+
+        // Chamadas repetidas continuam retornando null e não reinserem na fila
+        const result2 = store.getIcon('mdi:exhausted');
+        expect(result2).toBeNull();
+        expect(store.icons_data['mdi:exhausted']).toBe('');
+        expect(store.list_icons_waiting_request).not.toContain('mdi:exhausted');
+    });
 });

@@ -150,47 +150,63 @@ describe('useIconStore', () => {
         consoleSpy.mockRestore();
     });
 
-    it('deve lidar com a ausencia do icone no retorno do fetch', async () => {
+    it('deve lidar com a ausencia do icone no retorno do fetch com avanço determinístico e log único', async () => {
         const store = useIconStore();
 
-        let resolveJson: any;
-        const _mockFetch = vi.spyOn(globalThis, 'fetch').mockReturnValue(Promise.resolve({
-            json: () => new Promise((resolve) => { resolveJson = resolve; })
-        } as any));
+        let currentResolve: any;
+        const mockFetch = vi.spyOn(globalThis, 'fetch').mockImplementation((input: any) => {
+            const urlStr = String(input);
+            if (urlStr.includes('api.iconify.design')) return Promise.resolve({ ok: false, status: 404, text: () => Promise.resolve('') } as any);
+            return new Promise((resolve) => {
+                currentResolve = resolve;
+            });
+        });
 
         const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-        const traceSpy = vi.spyOn(console, 'trace').mockImplementation(() => {});
 
         store.getIcon('icon-e');
 
-        await new Promise((r) => setTimeout(r, 250)); // wait for debounce
-
-        // Resolve com json vazio (icone faltante)
-        if (resolveJson) resolveJson({});
-
-        await new Promise((resolve) => setTimeout(resolve, 50));
-
-        // Ainda em waiting pois erro < 4
+        // Ciclo 1: 1ª tentativa fracassa, ainda em waiting, sem log terminal
+        await new Promise((r) => setTimeout(r, 80));
+        expect(mockFetch).toHaveBeenCalledTimes(1);
+        currentResolve({ ok: true, status: 200, json: () => Promise.resolve({}) });
+        await new Promise((r) => setTimeout(r, 30));
         expect(store.icons_data['icon-e']).toBe('waiting');
-        expect(consoleSpy).toHaveBeenCalledWith('Erro na obtenção do ícone', 'icon-e');
+        expect(consoleSpy).not.toHaveBeenCalled();
 
-        // Simular tentativas ate estourar o limite de retries no caso de icone indisponivel
-        // O watcher eh engatilhado novamente quando errors.value[icon_name] eh modificado
-        for (let i = 0; i < 4; i++) {
-            delete store.icons_data['icon-e']; // Remove to change list
-            store.getIcon('icon-e'); // Re-adds and triggers computed change
-            await new Promise((r) => setTimeout(r, 250)); // wait for debounce
+        // Ciclo 2
+        await new Promise((r) => setTimeout(r, 80));
+        currentResolve({ ok: true, status: 200, json: () => Promise.resolve({}) });
+        await new Promise((r) => setTimeout(r, 30));
+        expect(store.icons_data['icon-e']).toBe('waiting');
+        expect(consoleSpy).not.toHaveBeenCalled();
 
-            vi.spyOn(globalThis, 'fetch').mockReturnValue(Promise.resolve({
-                json: () => Promise.resolve({})
-            } as any));
-            await new Promise((resolve) => setTimeout(resolve, 50));
-        }
+        // Ciclo 3
+        await new Promise((r) => setTimeout(r, 80));
+        currentResolve({ ok: true, status: 200, json: () => Promise.resolve({}) });
+        await new Promise((r) => setTimeout(r, 30));
+        expect(store.icons_data['icon-e']).toBe('waiting');
+        expect(consoleSpy).not.toHaveBeenCalled();
+
+        // Ciclo 4: 4ª tentativa fracassa, atinge limite terminal, vira '' e emite log único
+        await new Promise((r) => setTimeout(r, 80));
+        currentResolve({ ok: true, status: 200, json: () => Promise.resolve({}) });
+        await new Promise((r) => setTimeout(r, 30));
 
         expect(store.icons_data['icon-e']).toBe('');
+        expect(consoleSpy).toHaveBeenCalledTimes(1);
+        expect(consoleSpy).toHaveBeenCalledWith('Erro na obtenção do ícone', 'icon-e');
+
+        // Chamada subsequente com o ícone esgotado retorna null e não reabre ciclo nem emite novo log
+        const fetchCallsCount = mockFetch.mock.calls.length;
+        const res = store.getIcon('icon-e');
+        expect(res).toBeNull();
+        expect(store.icons_data['icon-e']).toBe('');
+        await new Promise((r) => setTimeout(r, 100));
+        expect(mockFetch.mock.calls.length).toBe(fetchCallsCount);
+        expect(consoleSpy).toHaveBeenCalledTimes(1);
 
         consoleSpy.mockRestore();
-        traceSpy.mockRestore();
     });
 
     it('nao deve lancar excecao e deve tratar como cache vazio quando o localStorage esta corrompido', () => {
@@ -569,5 +585,84 @@ describe('useIconStore', () => {
         expect(consoleSpy).toHaveBeenCalled();
 
         consoleSpy.mockRestore();
+    });
+
+    it('não dispara requisições concorrentes duplicadas para o mesmo ícone em voo', async () => {
+        const store = useIconStore();
+
+        let resolveFetch: any;
+        const fetchPromise = new Promise((resolve) => {
+            resolveFetch = resolve;
+        });
+        const mockFetch = vi.spyOn(globalThis, 'fetch').mockImplementation(() => fetchPromise);
+
+        store.getIcon('icon-inflight');
+        store.getIcon('icon-inflight');
+
+        await vi.waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(1), { timeout: 2000 });
+
+        resolveFetch({
+            ok: true,
+            status: 200,
+            json: () => Promise.resolve({ 'icon-inflight': '<svg><path d="M1 1"/></svg>' })
+        });
+
+        await vi.waitFor(() => expect(store.icons_data['icon-inflight']).toContain('<path'), { timeout: 2000 });
+    });
+
+    it('trata string rejeitada pelo sanitizador como ausência e consome o orçamento de retries', async () => {
+        const store = useIconStore();
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        vi.spyOn(globalThis, 'fetch').mockImplementation((input: any) => {
+            const urlStr = String(input);
+            if (urlStr.includes('api.iconify.design')) return Promise.resolve({ ok: false, status: 404, text: () => Promise.resolve('') } as any);
+            return Promise.resolve({
+                ok: true,
+                status: 200,
+                // String que será rejeitada pelo sanitizador
+                json: () => Promise.resolve({ 'icon-xss': '<script>alert(1)</script>' })
+            } as any);
+        });
+
+        store.getIcon('icon-xss');
+
+        for (let i = 0; i < 4; i++) {
+            await new Promise((r) => setTimeout(r, 250));
+            await new Promise((r) => setTimeout(r, 50));
+        }
+
+        // Após esgotar 4 retries, torna-se terminal ''
+        expect(store.icons_data['icon-xss']).toBe('');
+        expect(consoleSpy).toHaveBeenCalledWith('Erro na obtenção do ícone', 'icon-xss');
+
+        consoleSpy.mockRestore();
+    });
+
+    it('descarta store e cancela efeitos tardios de requisições pendentes', async () => {
+        const store = useIconStore();
+
+        let resolveFetch: any;
+        const fetchPromise = new Promise((resolve) => {
+            resolveFetch = resolve;
+        });
+        const mockFetch = vi.spyOn(globalThis, 'fetch').mockImplementation(() => fetchPromise);
+
+        store.getIcon('icon-disposed');
+        await vi.waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(1), { timeout: 2000 });
+
+        // Descarta store enquanto requisição está pendente
+        store.$dispose();
+
+        // Resolve fetch após o descarte
+        resolveFetch({
+            ok: true,
+            status: 200,
+            json: () => Promise.resolve({ 'icon-disposed': '<svg><path d="M2 2"/></svg>' })
+        });
+
+        await new Promise((r) => setTimeout(r, 100));
+        // A store descartada não deve ter sido populada com o resultado tardio
+        expect(store.icons_data['icon-disposed']).toBe('waiting');
     });
 });
