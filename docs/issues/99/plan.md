@@ -1,136 +1,128 @@
 # Plano de implementação — Issue #99
 
-## Descrição e Causa Raiz
+## Escopo e veracidade
 
-**Resultado da triagem: bug confirmado no código atual; correção necessária.** Este documento é somente planejamento. Nenhum código-fonte ou teste foi alterado nesta etapa.
+Planejamento elaborado em 19/10/2026 sobre a revisão `02955b7fce6d6a61c43ab68165c7f1bbdc846d8f`, na worktree pré-alocada `wt-implement-issue-99`. **Bug confirmado; correção necessária e ainda não implementada.** Nesta etapa, somente este plano é preenchido; código-fonte e testes permanecem intactos. Não executar commit, merge, publicação ou limpeza desta worktree.
 
-Com `allowNegative=true` e `modelValue=-10`, colar `1.250,75` substitui os dígitos do valor, mas mantém o sinal negativo anterior. O componente calcula e emite `-1250.75` e formata `-R$ 1.250,75`, em vez de `1250.75` e `R$ 1.250,75`. Isso inverte o significado financeiro da entrada e também alimenta a validação de limites com o sinal errado. Não há evidência de persistência incorreta em algum consumidor específico; o defeito comprovado termina na apresentação e no evento público da biblioteca.
+### Descrição e Causa Raiz
 
-### Causa Raiz Comprovada
+Com `allowNegative=true` e `modelValue=-10`, colar `1.250,75` substitui os dígitos anteriores, mas conserva o estado negativo. O componente passa a representar `-1250.75`, invertendo o significado financeiro da entrada positiva. O defeito afeta tanto a apresentação quanto o evento público; não é apenas uma inconsistência visual. Pode também alterar indevidamente o resultado da validação de limites. Persistência incorreta por uma aplicação consumidora é um risco, não um efeito demonstrado neste repositório.
 
-Referências verificadas na revisão atual:
+**Causa Raiz Comprovada:** `src/components/MaxInputMoney.vue:L281-291`, especificamente `L287`, atribui `true` a `isNegative` quando o texto começa com `-`, mas nunca atribui `false` quando uma colagem válida é positiva. Como os dígitos são substituídos integralmente em `L289`, o sinal preservado deixa de corresponder ao novo conteúdo.
 
-1. `src/components/MaxInputMoney.vue:L154-174`: `syncFromModel(-10)` inicializa `isNegative.value=true` e `rawDigits.value='1000'` com duas casas decimais.
-2. `src/components/MaxInputMoney.vue:L11-25`: o input nativo apresenta `currentDisplay` e encaminha `paste` para `onPaste`.
-3. **Origem do defeito — `src/components/MaxInputMoney.vue:L281-290`, especialmente L287:** o handler extrai os dígitos, rejeita colagem sem dígitos e somente atribui `true` ao sinal quando o texto começa por `-` e negativos são permitidos. Não atribui `false` quando a nova colagem é positiva. Simultaneamente, substitui todos os dígitos anteriores, produzindo um estado híbrido: magnitude nova e sinal antigo.
-4. `src/components/MaxInputMoney.vue:L214-225`: `emitCurrentValue` aplica o sinal retido aos dígitos novos, atualiza `temp_value` e emite `update:modelValue` com `-1250.75`.
-5. `src/components/MaxInputMoney.vue:L180-185` e `L139-151`: `currentDisplay` aplica o mesmo sinal e a formatação pt-BR, resultando em `-R$ 1.250,75`.
-6. `src/components/MaxInputMoney.vue:L189-204` e `src/helpers/useInputValidation.ts:L82-91,L150-153`: a validação consome `temp_value`, portanto recebe o valor financeiro já incorreto; não é a origem da mutação do sinal.
+Fluxo causal e rastreamento dos dados:
 
-**Rastreamento reverso de dados:** exibição negativa e evento incorreto ← aplicação de `isNegative` em `currentDisplay`/`emitCurrentValue` ← `onPaste` substitui `rawDigits`, mas não redefine o sinal positivo ← `isNegative=true` inicializado por `modelValue=-10`. No sentido direto: `modelValue` do consumidor → estado local → colagem no input → estado local → apresentação, validação e evento `update:modelValue` → consumidor. **Store, API/Rotas, Controller/Service e DB: não participam deste fluxo local**; não inventar camadas de backend nem alterar consumidores para compensar o problema.
+1. **Entrada pelo consumidor:** a prop `modelValue` admite número/string/nulo e a prop `allowNegative` controla o sinal (`src/components/MaxInputMoney.vue:L42-51`). `syncFromModel` transforma `-10` em `rawDigits='1000'` e `isNegative=true` (`L154-174`). O valor interno inicial é calculado em `L176-178`.
+2. **UI → estado local:** o `<input>` conecta `@paste="onPaste"` e recebe `currentDisplay` (`src/components/MaxInputMoney.vue:L11-24`). `onPaste` impede a colagem nativa, lê `clipboardData.getData('text')`, extrai dígitos e ignora entradas sem dígitos (`L281-285`). Para `1.250,75`, o resultado é `125075`.
+3. **Falha de substituição:** o ramo de `L287` não executa para texto positivo. `rawDigits` passa a `125075`, mas `isNegative` continua `true` (`L287-290`). O defeito independe da seleção/cursor: o manipulador já substitui todos os dígitos, não faz inserção parcial.
+4. **Estado → apresentação:** `currentDisplay` divide os dígitos por `divisor` e aplica o sinal armazenado (`src/components/MaxInputMoney.vue:L180-185`); `formatDisplay` acrescenta o sinal antes do símbolo monetário (`L139-152`). Resultado: `-R$ 1.250,75`.
+5. **Estado → contrato público/validação:** `emitCurrentValue` calcula `finalNum` usando esse mesmo sinal, atualiza `temp_value` e emite `update:modelValue` (`src/components/MaxInputMoney.vue:L214-225`). Resultado: `-1250.75`. `temp_value` também alimenta `useInputValidation`, cujo validador compara `min`/`max` (`L189-204`); o helper lê o valor em `src/helpers/useInputValidation.ts:L82-90`.
+6. **Retorno do consumidor:** mudanças externas de `modelValue` são sincronizadas pelo watcher em `src/components/MaxInputMoney.vue:L316-327`. O watcher não corrige o sinal de uma colagem incorreta: se o consumidor devolver o valor negativo emitido, ele corresponde ao estado incorreto já calculado.
 
-### Evidência de reprodução e lacuna de cobertura
+**Limite arquitetural do rastreamento:** o fluxo comprovado é `consumidor/v-model ⇄ props/evento público ⇄ estado local ⇄ input/validação`. Não há store, chamada HTTP, rota, controller/service ou banco de dados no caminho desse componente. Não atribuir o defeito a camadas backend nem criar alterações nessas camadas.
 
-Foi executada reprodução isolada em Node.js v24.18.0, via entrada padrão, sem criar arquivo de teste nem modificar o SFC. O procedimento extraiu diretamente do arquivo as funções `syncFromModel`, `onPaste`, `emitCurrentValue`, `formatDisplay` e `formatNumberString`, removeu apenas anotações TypeScript com `stripTypeScriptTypes` e usou `ref`/`computed` reais do Vue e `hasContent` real de `@maxvue/max-use`. A validação e o posicionamento do cursor foram substituídos por funções vazias; a captura de `emit` registrou o resultado. Não foi montagem do componente no DOM nem teste em navegador.
-
-Resultado observado, com asserções confirmando o comportamento defeituoso:
+**Evidência executada, sem editar arquivos:** foi executado um programa Node via entrada padrão que leu o SFC e extraiu as funções existentes `syncFromModel`, `formatNumberString`, `formatDisplay`, `emitCurrentValue` e `onPaste`, removendo apenas as anotações TypeScript para execução em `node:vm`. Foram usados `ref`/`computed` reais do Vue e `hasContent` real de `@maxvue/max-use`. Apenas callbacks periféricos de validação/cursor e a captura do evento foram substituídos. Saída observada:
 
 ```json
-{
-  "before": { "rawDigits": "1000", "isNegative": true },
-  "prevented": true,
-  "after": {
-    "rawDigits": "125075",
-    "isNegative": true,
-    "temp_value": -1250.75,
-    "display": "-R$ 1.250,75"
-  },
-  "emissions": [{ "event": "update:modelValue", "value": -1250.75 }]
-}
+{"initial":"-R$ 10,00","pasted":"1.250,75","display":"-R$ 1.250,75","negative":true,"emitted":[["update:modelValue",-1250.75]]}
+{"initial":"-R$ 10,00","pasted":"-1.250,75","display":"-R$ 1.250,75","negative":true,"emitted":[["update:modelValue",-1250.75]]}
+{"initial":"-R$ 10,00","pasted":"abc","display":"-R$ 10,00","negative":true,"emitted":[]}
 ```
 
-A primeira tentativa desse diagnóstico não removeu os tipos e encerrou com `SyntaxError` antes de executar o fluxo; a execução corrigida acima concluiu com código zero. Isso não é falha do componente.
+Essa reprodução confirma a lógica defeituosa original, mas **não constitui montagem do componente nem teste de navegador**. A montagem completa será a prova automatizada de regressão na execução futura. O teste existente de colagem parte de `modelValue=null`, sem negativos habilitados (`tests/components/MaxInputMoney.test.ts:L164-176`), e não cobre a transição negativo → positivo. O teste de negativos verifica apenas o teclado (`L132-150`).
 
-`tests/components/MaxInputMoney.test.ts:L164-176` cobre colagem positiva apenas a partir de `modelValue=null`, com negativos desabilitados por padrão. `L132-150` cobre alternância do sinal por teclado, mas não a substituição por colagem após valor negativo. A condição defeituosa continua presente no código atual, portanto a issue não está previamente corrigida nesta revisão.
+### Arquivos afetados
 
-## Arquivos afetados
-
-| Arquivo | Alteração proposta na implementação futura |
+| Arquivo | Alteração prevista |
 | --- | --- |
-| `src/components/MaxInputMoney.vue` | Corrigir exclusivamente a determinação do sinal em `onPaste`, preservando o restante do fluxo. |
-| `tests/components/MaxInputMoney.test.ts` | Acrescentar regressões de substituição por colagem, sinais, entradas ignoradas e integração com o contrato do componente. |
+| `src/components/MaxInputMoney.vue` | Correção pontual da atribuição do sinal em `onPaste`, após o descarte de entradas sem dígitos. |
+| `tests/components/MaxInputMoney.test.ts` | Casos de regressão de sinal, sequência de colagens e preservação dos contratos atuais. |
+| `docs/issues/99/plan.md` | Registro deste planejamento; único arquivo alterado nesta etapa. |
 
-`docs/issues/99/plan.md` é a única entrega desta etapa. Não alterar helpers compartilhados, estilos, manifesto, dependências, lockfile, stores, rotas ou banco de dados. Não gerar artefatos de distribuição para versionamento.
+Não alterar `InputBase.vue`, `useInputValidation.ts`, configurações, dependências, lockfile, exports, stores ou outros componentes. Esses arquivos são referências do fluxo, não alvos da correção.
 
-## Execuções propostas
+### Execuções propostas
 
-1. Continuar na worktree dedicada/pré-alocada, preservando alterações de terceiros. Esta etapa de planejamento não autoriza implementação, commit, merge, push ou publicação.
-2. Na execução futura autorizada, ampliar a suíte existente usando `mountInputMoney`, Pinia já configurado e `input.trigger('paste', { clipboardData: { getData: () => texto } })`, conforme o padrão de `L164-176`. Verificar o valor do input e o payload emitido; não testar apenas variáveis internas.
-3. Trocar a atribuição condicional que somente ativa o sinal por uma atribuição booleana completa em `onPaste`:
+1. Reutilizar a worktree dedicada e conferir seu estado antes da implementação, preservando trabalho preexistente. A implementação deve ocorrer apenas quando autorizada; este comando autoriza planejamento, não correção.
+2. Acrescentar os testes descritos abaixo à suíte existente, reutilizando `mountInputMoney`, Pinia e `input.trigger('paste', { clipboardData: { getData: () => texto } })`. Não acessar os refs privados para comprovar o comportamento público.
+3. Em `onPaste`, substituir a atribuição condicional por uma atribuição booleana completa: `isNegative.value = props.allowNegative && text.trim().startsWith('-');`.
+4. Manter essa atribuição **após** `if (!hasContent(digits)) return;` e **antes** da atualização de `rawDigits` e de `emitCurrentValue`. Assim, toda colagem aceita calcula seu próprio sinal; colagens ignoradas não alteram valor, sinal ou eventos.
+5. Preservar integralmente extração de dígitos, reconhecimento atual de sinal ASCII no início do texto aparado, limite de 15 dígitos, divisor, casas decimais, símbolo e semântica de substituição total. Não introduzir parser de moedas ou formatos internacionais.
+6. Preservar `emitCurrentValue`, validação, cursor ao final, eventos de foco/blur, sincronização externa e ações de teclado. Não aproveitar a correção para formatar o SFC inteiro ou refatorar fluxos adjacentes.
+7. Concluir o bloco de alteração e todos os testes antes de iniciar validações; executar os gates em lote, diagnosticar falhas e corrigir o conjunto antes de revalidar. Não executar testes, tipos ou builds após cada microedição.
+8. Revisar o diff final garantindo apenas a mudança causal e os testes correspondentes. Não fazer commit, merge, push ou publicação sem solicitação explícita.
 
-   ```typescript
-   isNegative.value = props.allowNegative && text.trim().startsWith('-');
-   ```
+### Testes de regressão e validação em lote
 
-   Manter essa atribuição **após** `if (!hasContent(digits)) return;` e **antes** da substituição de `rawDigits` e de `emitCurrentValue()`. Assim, cada colagem aceita determina seu próprio sinal; colagens ignoradas não modificam o estado anterior.
-4. Preservar `preventDefault`, extração por `/\D/g`, limite de 15 dígitos, divisor configurado por `decimals`, emissão única, atualização de `temp_value`, validação e reposicionamento do cursor. Não modificar digitação incremental, `onNativeInput`, watcher ou política de formatação.
-5. Preservar a regra existente de reconhecimento do sinal: somente `-` no início do texto após `trim()`, condicionado a `allowNegative`. Não ampliar o parser para formatos contábeis, separadores internacionais ou sinal em outras posições nesta issue.
-6. Implementar todo o bloco de alteração e testes antes de executar testes, tipos ou build. Depois validar em lote, diagnosticar e corrigir falhas relacionadas em um único lote e revalidar apenas o necessário. Não executar gates após cada microedição nem ampliar o escopo para falhas de baseline sem causalidade e autorização.
-7. Revisar o diff final, confirmar que somente os dois arquivos previstos de implementação foram alterados e manter os contratos públicos intactos. Preservar a worktree com integração pendente.
+Em todos os cenários de colagem aceita, verificar **simultaneamente** o valor do input e o último payload de `update:modelValue`; quando aplicável, conferir um único novo evento por colagem. Aguardar o ciclo assíncrono com `await input.trigger(...)`; usar `setProps` com `await` para sincronizações externas.
 
-## Testes de regressão e validação em lote
+| Caso | Preparação/ação | Resultado esperado |
+| --- | --- | --- |
+| Regressão principal | `modelValue=-10`, `allowNegative=true`; colar `1.250,75` | Input `R$ 1.250,75`; payload numérico `1250.75`, sem sinal herdado. |
+| Sinal negativo legítimo | Valor inicial positivo/nulo; `allowNegative=true`; colar `-1.250,75` | Input `-R$ 1.250,75`; payload `-1250.75`. |
+| Colagens sucessivas | Na mesma instância, colar negativo → positivo → negativo | Cada apresentação e cada evento seguem exclusivamente o texto da respectiva colagem. |
+| Valor idêntico em módulo | Inicial `-10`; colar `10,00` | Input `R$ 10,00`; payload `10`, mesmo sem mudança no módulo numérico. |
+| Espaços e símbolo | Inicial negativo; colar `  R$ 1.250,75  ` e `  -R$ 1.250,75  ` com negativos permitidos | Respectivamente positivo e negativo, conforme a regra atual de `trim().startsWith('-')`. |
+| Negativos desabilitados | `allowNegative=false`; colar `-1.250,75` | Input positivo e payload `1250.75`; não ampliar a política atual para rejeição. |
+| Sinal residual após mudança de permissão | Iniciar com `-10` e negativos permitidos; aplicar `setProps({ allowNegative: false })`; colar positivo ou negativo | A colagem aceita redefine o sinal para `false`. Não exigir mudança retroativa do valor antes da colagem. |
+| Conteúdo ignorado | Inicial `-10`, negativos permitidos; colar `''`, espaços, `abc` e `'-'` | Valor permanece `-R$ 10,00`; nenhuma nova emissão. Depois, colar positivo deve remover o sinal. |
+| Clipboard ausente | Disparar `paste` sem `clipboardData` | Mesmo comportamento de colagem ignorada, sem erro nem nova emissão. |
+| Zero positivo | Inicial negativo; colar `0,00` | Input `R$ 0,00`; emissão de `0`, não `-0` (`Object.is(payload, -0)` deve ser `false`). Não redefinir a política de texto explicitamente negativo com módulo zero. |
+| Decimais configuráveis | Inicial negativo e negativos permitidos; `decimals=0`, colar `1.250`; `decimals=3`, colar `1.250,750` | Respectivamente `R$ 1.250`/`1250` e `R$ 1.250,750`/`1250.75`, positivos. |
+| Limite de dígitos | Inicial negativo; colar `1234567890123456` | Mantém os primeiros 15 dígitos, escala vigente e sinal positivo; conferir payload `1234567890123.45` e apresentação correspondente. |
+| Validação de limites | Inicial `-10`, negativos permitidos, `min=0`, `max=2000`; ativar validação com blur e colar `1.250,75` | Valor positivo válido; `InputBase` deixa de apresentar erro. Colar `-1.250,75` deve continuar inválido pelo mínimo; `2.000,01` deve continuar inválido pelo máximo. |
+| Sincronização com consumidor | Após a colagem positiva, devolver o payload via `setProps({ modelValue: 1250.75 })`; depois fornecer `-20` externamente | Colagem permanece positiva; atualização externa negativa continua formatada corretamente quando permitida. |
 
-Adicionar casos à suíte existente, preferencialmente parametrizados para combinações equivalentes:
+Manter todas as asserções existentes de renderização, símbolo customizado, máscara reversa, alternância por `-`, Backspace, obrigatório, foco/blur e sincronização externa. Se for necessário testar o cursor, montar com elemento anexado ao documento e desmontar ao final, sem alterar o comportamento global da suíte.
 
-| Cenário | Resultado obrigatório |
-| --- | --- |
-| `allowNegative=true`, inicial `-10`, colar `1.250,75` | Input `R$ 1.250,75`; evento `[1250.75]`, sem sinal herdado. |
-| Mesma condição, colar `R$ 1.250,75`, `+1.250,75` ou texto positivo com espaços externos | Mesmo resultado positivo, mantendo o parser atual. |
-| `allowNegative=true`, valor inicial positivo ou negativo, colar `-1.250,75` e `  -1.250,75  ` | Input `-R$ 1.250,75`; evento `[-1250.75]`. |
-| `allowNegative=false`, colar texto positivo ou `-1.250,75` | Resultado positivo, preservando a proibição de negativos já existente. |
-| Colagens sucessivas negativa → positiva → negativa → positiva | Exibição e eventos acompanham cada texto colado, sem dependência do sinal anterior. |
-| Valor negativo ativo, colar `0,00` | Exibição `R$ 0,00`; evento com zero positivo, verificando também `Object.is(valor, -0) === false`. |
-| Valor negativo ativo, colar texto vazio, espaços, apenas `-` ou letras sem dígitos | Valor exibido inalterado e nenhuma nova emissão; uma digitação posterior continua usando o sinal original. |
-| Colagem aceita com `decimals=0` e `decimals=3` | Respeitar divisão por `10 ** decimals`, formatação e sinal do texto, sem mudar a máscara reversa. |
-| Colagem com mais de 15 dígitos | Manter truncamento aos primeiros 15 dígitos, respeitando o sinal da nova entrada. |
-| Consumidor realimentando o evento em `modelValue` | Após colar positivo sobre negativo e aguardar atualização Vue, modelo e input permanecem positivos. |
-| `allowNegative=true`, inicial `-10`, `min=0`; colar `1.250,75` e disparar blur | Sem erro indevido de mínimo em `InputBase`; confirma que `temp_value` também foi corrigido. |
-
-Para cada colagem aceita, comparar o número exato de novas emissões e seu payload. Para colagem ignorada, comparar a contagem antes/depois. Aguardar `trigger`/atualizações Vue para asserções sobre DOM; desmontar wrappers adicionais ao concluir os cenários.
-
-Preservar integralmente os testes já existentes de símbolo, casas decimais, máscara reversa, bloqueio de caracteres, Backspace, alternância por `-`, atualização externa e validação obrigatória. Não reescrever asserções para acomodar o defeito.
-
-Validação dimensionada para o lote, depois de implementar código e todos os testes:
+**Validação local, após concluir o lote:**
 
 ```bash
-npx vitest run tests/components/MaxInputMoney.test.ts
+npm run test -- tests/components/MaxInputMoney.test.ts
 npm run type-check
 npm run type-check:test
-npm run lint
-npm run test
+npm run lint:check
+npm run build
 ```
 
-A execução focada identifica conclusivamente a regressão; a suíte completa verifica componentes e helpers compartilhados. Não é necessário build durante a elaboração do plano. Se o fechamento da implementação exigir gate pré-release, usar `npm run verify`, que já agrega tipos, lint, build, testes/cobertura, navegador, consumidores, benchmarks e integridade/segurança: não repetir seus componentes sobre a mesma revisão sem falha ou dúvida concreta. Não executar publicação/release.
+Os comandos são gates com resultados independentes; não prosseguir com integração se algum falhar. O `build` inclui checagem de tipos, portanto pode-se omitir o `type-check` isolado quando o build for executado na mesma revisão. Não alterar configurações ou baseline para ocultar falhas preexistentes; registrar e estabelecer causalidade antes de ampliar o escopo.
 
-## Banco de dados
+**Gate de pré-release:** se a execução futura incluir preparação para release, executar `npm run verify` no lugar dos comandos isolados acima, pois já agrega suíte completa, cobertura, tipos, lint/build, navegador, consumidores, benchmarks, integridade e segurança. Não repetir essas etapas isoladamente sobre o mesmo conteúdo sem falha ou mudança relevante. A publicação não faz parte deste plano.
 
-Nenhuma. O componente mantém estado local e emite `number | null`; não há persistência ou migration envolvida no defeito comprovado.
+Nesta etapa de planejamento não foram executados Vitest, tipos, lint, build, navegador ou o gate de release; somente a reprodução isolada das funções e a inspeção do código.
 
-## Riscos de quebra e Não-Regressão
+### Banco de dados
 
-- **Mudança intencional de comportamento:** consumidores que inadvertidamente dependam do sinal antigo ao colar terão um resultado diferente. O sinal deve pertencer ao valor substituto, como estabelece a regra da issue; não preservar o bug como compatibilidade.
-- **Colagem inválida alterando o sinal:** mover a atribuição para antes do retorno antecipado faria textos sem dígitos modificarem uma entrada válida. Preservar a ordem e testar continuidade da digitação após colagem ignorada.
-- **Negativos proibidos ou negativos legítimos:** atribuir sempre `false` corrigiria apenas metade do contrato. A expressão precisa combinar `allowNegative` e o sinal explícito; cobrir as duas opções da prop e os dois sinais.
-- **Modelo, exibição e validação divergentes:** testar o payload, o valor do input, a realimentação via `modelValue` e o erro de `min` em `InputBase`, não apenas a apresentação formatada.
-- **Expansão acidental de escopo:** não mudar parsing de moeda, seleção parcial, reconhecimento de sinais, precisão numérica, `disabled`, teclado móvel/IME, cursor ou limites de valor. Questões independentes eventualmente observadas devem ser tratadas separadamente.
-- **Contrato público:** manter props/defaults, tipos/eventos, `InputBase`, classes existentes, acessibilidade e imports atuais. Não introduzir PrimeVue, novas dependências nem referência local a `@maxvue/max-use`.
+Nenhuma. O defeito é local ao componente Vue; não requer migration, alteração de schema, backfill ou atualização de registros financeiros existentes. Não há evidência de dados persistidos incorretamente neste relato.
 
-## Validação
+### Riscos de quebra e Não-Regressão
 
-**Prova conclusiva exigida na implementação:** `npx vitest run tests/components/MaxInputMoney.test.ts` deve terminar com código zero contendo a nova regressão montada no DOM: inicial `-10`, `allowNegative=true`, colagem `1.250,75`, input `R$ 1.250,75` e última emissão `[1250.75]`. A alteração cirúrgica deve ser a única mudança de produção necessária para essa regressão deixar de reproduzir o erro demonstrado.
+- **Contrato financeiro:** consumidores que dependam acidentalmente do sinal anterior observarão o valor positivo correto ao colar conteúdo positivo. Isso é a correção da regra violada, não uma mudança de tipo/API. Cobrir apresentação e payload numérico conjuntamente.
+- **Colagens inválidas:** mover a atribuição antes da guarda apagaria indevidamente o sinal sem substituir o conteúdo. Cobrir texto vazio, não numérico, apenas sinal e clipboard ausente, exigindo nenhuma emissão.
+- **Negativos legítimos/permissões:** uma limpeza incondicional do sinal bloquearia colagens negativas válidas; uma atribuição sem `allowNegative` permitiria negativos proibidos. Cobrir ambas as políticas e a troca de permissão antes da colagem.
+- **Validação:** `min`/`max` dependem de `temp_value`. Garantir que erro e conteúdo acompanhem o sinal corrigido, sem alterar o helper compartilhado nem os overrides manuais.
+- **Máscara e precisão:** não modificar separadores, escala decimal, corte de 15 dígitos, símbolo ou tratamento de zero. Cobrir decimais 0/2/3, limite e ausência de `-0` na colagem positiva.
+- **Fluxos adjacentes:** não alterar teclado, IME/fallback nativo, watcher, seleção parcial, acessibilidade ou estilo. Manter regressões existentes; falhas independentes nesses fluxos exigem outro escopo.
+- **Dependências e compatibilidade:** nenhuma dependência nova, import PrimeVue, mudança de export público ou alteração de classes legadas. O contrato de emissão permanece `number | null`.
 
-Critérios adicionais: matriz de sinais/colagens acima aprovada; retorno antecipado e contratos existentes preservados; tipos, lint e suíte completa aprovados no lote, ou falhas não relacionadas explicitamente diagnosticadas sem declarar entrega verde. Se houver gate pré-release obrigatório, exigir também `npm run verify` concluído antes de considerar a implementação pronta para release.
+### Validação
 
-**Estado desta etapa:** análise estática e reprodução isolada concluídas; montagem DOM da regressão, testes de projeto, tipos, lint e build não executados, pois a entrega solicitada é somente o plano. Não há correção aplicada ainda.
+O comando conclusivo para o contrato corrigido será:
 
-## Skills Aplicáveis
+```bash
+npm run test -- tests/components/MaxInputMoney.test.ts
+```
 
-Skills curadas disponíveis a seguir na implementação, sem presumir skills inexistentes:
+Ele deverá incluir um teste com nome explícito, por exemplo `remove o sinal anterior ao colar valor positivo após negativo`, que monte o componente com `{ modelValue: -10, allowNegative: true }`, dispare `paste` com `1.250,75` e exija input `R$ 1.250,75` e último evento `[1250.75]`. No código atual, essas expectativas são contrariadas pela causa comprovada; após a correção, devem passar junto com toda a matriz de não-regressão. Um comando verde sem essas novas asserções não prova a correção da issue.
 
-- `vue-debugging-best-practices`: rastreamento do estado reativo, evento nativo, modelo e apresentação.
-- `vue-components`: preservação da Composition API, props e eventos tipados no SFC.
-- `vue-typescript-best-practices`: tipos de eventos de colagem, wrappers e contrato `number | null`.
-- `vitest-skill` e `vue-vitest-testing-best-practices`: testes Vitest/Vue Test Utils, simulação de colagem e sincronização assíncrona, adaptados à estrutura real `tests/components/` deste pacote.
-- `vue-eslint-stylelint-quality-standards`: conformidade de formatação e lint, sem reformatar trechos alheios ao escopo.
-- `code-review`: revisão final de causalidade, contratos e não regressão antes de integração.
-- `technical-documentation-best-practices`: fidelidade das referências, do escopo e dos comandos do plano.
+Critérios de aceite: teste principal e matriz passando; nenhum sinal herdado em colagem aceita; negativos explícitos respeitando a permissão; entradas ignoradas preservadas; tipos/lint/build sem novas falhas. Gate completo adicional quando houver exigência de pré-release. Não declarar correção implementada ou gates aprovados com base apenas neste planejamento.
+
+### Skills Aplicáveis
+
+- `vue-debugging-best-practices`: rastreamento do estado reativo e dos eventos, diferenciando causa do defeito e consequência visual.
+- `vue-components`: implementação pontual em Composition API e preservação dos eventos/props públicos.
+- `vue-typescript-best-practices`: manutenção dos tipos de props, evento de clipboard e payload `number | null`.
+- `vitest-skill`: testes parametrizados e asserções de regressão com Vitest na suíte real do pacote.
+- `vue-eslint-stylelint-quality-standards`: convenções do SFC e validação estática, subordinadas ao `AGENTS.md` local e sem reformatação não relacionada.
+- `code-review`: revisão final da correção e dos testes antes de qualquer integração autorizada.
+- `technical-documentation-best-practices`: fidelidade das referências, distinção entre evidência executada e validação futura e manutenção deste plano.
