@@ -1,5 +1,5 @@
 <template>
-    <InputBase v-bind="{ ...inputBaseProps, ...attrsWithoutModelProps }" class="max-input-rg-wrapper" :icon="props.icon ?? 'solar:card-id-line-duotone'">
+    <InputBase s8-8 text-center v-bind="{ ...inputBaseProps, ...attrsWithoutModelProps }" class="max-input-rg-wrapper" :icon="props.icon ?? 'solar:card-id-line-duotone'">
         <template #default="{ inputAttrs }">
             <div class="max-rg-container" :class="{ 'has-extra-fields': props.showIssuer || props.showUf }">
                 <input ref="numberInputRef" type="text" class="max-rg-input max-rg-number" v-bind="inputAttrs" :value="currentNumber" v-maska="rgMask" :placeholder="props.placeholder ?? '00.000.000-0'" :disabled="props.disabled" :readonly="props.readonly" aria-label="Número do RG" @input="onNumberInput" @change="onNumberChange" />
@@ -161,6 +161,7 @@
         align-items: center;
         width: 100%;
         gap: 6px;
+        text-align: center;
 
         &.has-extra-fields {
             .max-rg-number {

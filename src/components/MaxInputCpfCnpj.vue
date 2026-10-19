@@ -1,5 +1,5 @@
 <template>
-    <InputBase class="max-input-cpf-cnpj" v-bind="props" :error="error_msg ?? undefined" :caution="caution" :done="done ?? undefined" >
+    <InputBase s12-12 class="max-input-cpf-cnpj" v-bind="props" :error="error_msg ?? undefined" :caution="caution" :done="done ?? undefined" >
         <template #default="{ inputAttrs }">
             <input v-bind="inputAttrs" type="text" inputmode="numeric" class="max-input-native max-cpf-cnpj-input" :value="masked_value" v-maska="maskValue" :disabled="props.disabled" @input="onUserInput" @blur="validation.onBlur" />
         </template>
