@@ -237,7 +237,21 @@ npm run release
 ```
 
 > **Nota sobre o botão de build no MaxCode (`NPM RUN BUILD`):**  
-> O acionamento da tarefa de build pelo editor executa `npm version patch --no-git-tag-version --ignore-scripts && npm run build`, incrementando a versão patch uma vez antes da compilação. Os campos `version` em `package.json` e `package-lock.json` (tanto no topo quanto em `packages['']`) permanecem sincronizados. Essa ação não cria commit, tag, push ou publicação. Em caso de falha durante o build, a versão incrementada é mantida e uma nova execução avançará novamente. O comando de terminal `npm run build` comum não incrementa a versão.
+> - **Diferenciação de comandos:**
+>   - **Botão do editor (`NPM RUN BUILD` / `✅ BUILD + VERSÃO`):** executa `npm version patch --no-git-tag-version --ignore-scripts && npm run build`. Ele incrementa a versão patch uma vez antes da compilação e mantém sincronizados os campos `version` em `package.json` e `package-lock.json` (tanto no topo quanto em `packages['']`). Essa ação **não realiza commit, tag, push ou publicação**.
+>   - **Terminal (`npm run build`):** compila a biblioteca (`vue-tsc && vite build`) diretamente, sem alterar versão nem modificar manifestos. Ideal para recompilar a mesma revisão já versionada sem avançar o patch.
+>   - **Release (`NPM RUN RELEASE` / `npm run release`):** fluxo separado e dedicado de publicação com validação prévia, versionamento com tag, commit, push para branch principal e publicação no npm.
+> - **Pendência de commit e gate do consumidor:**
+>   - Como o botão intencionalmente modifica os manifestos sem commitar, os arquivos `package.json` e `package-lock.json` permanecem em estado modificado na árvore de trabalho.
+>   - Aplicações consumidoras locais vinculadas por symlink (como o Engeapp) exigem que a biblioteca esteja estritamente limpa (`git status --porcelain --untracked-files=no`) em seus gates de integridade (`npm run verify:local-libs`) antes de sincronizar o manifesto e liberar o deploy. O bloqueio de deploy diante de arquivos modificados é a proteção esperada para garantir rastreabilidade.
+> - **Procedimento operacional de entrega:**
+>   1. Após o término bem-sucedido do build pelo botão, revise os arquivos alterados e solicite ao MaxCode o commit e a integração das alterações conforme autorização do usuário. Não use `git add -A` ou commits indiscriminados; investigue e preserve alterações preexistentes.
+>   2. Confirme que a pasta da biblioteca **efetivamente apontada pelo symlink** do consumidor (ex: repositório principal ou worktree dedicada) contém o commit e está com a árvore limpa. Um commit em outra worktree não limpa nem atualiza automaticamente o caminho consumido; push remoto também não limpa modificações locais pendentes.
+>   3. No fluxo operacional autorizado do consumidor, sincronize o manifesto (`npm run sync:local-libs`, que escreve em `config/local-libraries.json`) e execute `npm run verify:local-libs`.
+>   4. Se precisar apenas recompilar os arquivos na mesma versão, utilize o comando de terminal `npm run build`. Acionar novamente o botão de build gerará novo incremento de patch e exigirá novo commit antes do deploy.
+> - **Falhas e recuperação:**
+>   - Em caso de falha durante o build, a versão incrementada já foi gravada nos manifestos e é mantida; uma nova tentativa pelo botão avançará a versão novamente. Investigue e solucione a causa do erro antes de tentar outro build, sem redefinir ou descartar alterações de versão automaticamente.
+>   - Jamais utilize bypass de verificação (`SKIP_LOCAL_LIBS_GATE`), remoção de prehooks, atalhos de symlink ou comandos com efeito colateral em banco de dados (`composer deploy:fast-db-all`) para contornar verificações de integridade.
 
 ---
 

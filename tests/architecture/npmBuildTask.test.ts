@@ -65,14 +65,15 @@ function createFixture(fixtureName: string, initialVersion = '1.1.2', customScri
     };
 }
 
-function runShellInFixture(fixtureDir: string, command: string) {
+function runShellInFixture(fixtureDir: string, command: string, extraEnv?: Record<string, string>) {
     const env = {
         ...process.env,
         npm_config_cache: path.join(fixtureDir, '.npm-cache'),
         npm_config_audit: 'false',
         npm_config_fund: 'false',
         npm_config_update_notifier: 'false',
-        npm_config_offline: 'true'
+        npm_config_offline: 'true',
+        ...extraEnv
     };
 
     return cp.spawnSync('bash', ['-c', command], {
@@ -81,6 +82,26 @@ function runShellInFixture(fixtureDir: string, command: string) {
         encoding: 'utf8',
         timeout: 10000
     });
+}
+
+function setupMockBinaries(fixtureDir: string) {
+    const binDir = path.join(fixtureDir, 'bin');
+    fs.mkdirSync(binDir, { recursive: true });
+
+    const notifySendScript = '#!/bin/bash\necho "$@" >> "' + fixtureDir + '/notify-send.log"\n';
+    const notifySendPath = path.join(binDir, 'notify-send');
+    fs.writeFileSync(notifySendPath, notifySendScript, { mode: 0o755 });
+
+    const paplayScript = '#!/bin/bash\necho "$@" >> "' + fixtureDir + '/paplay.log"\n';
+    const paplayPath = path.join(binDir, 'paplay');
+    fs.writeFileSync(paplayPath, paplayScript, { mode: 0o755 });
+
+    return {
+        binDir,
+        extraEnv: {
+            PATH: `${binDir}:${process.env.PATH || ''}`
+        }
+    };
 }
 
 describe('R1–R6: Contrato Estático da Tarefa de Build (.vscode/tasks.json)', () => {
@@ -107,14 +128,14 @@ describe('R1–R6: Contrato Estático da Tarefa de Build (.vscode/tasks.json)', 
         expect(segments[1]).toBe('npm run build');
     });
 
-    it('o sufixo de notificações/som e as opções da tarefa permanecem preservados do baseline', () => {
+    it('o sufixo de notificações/som e as opções da tarefa refletem a nova comunicação sem prometer commit ou push', () => {
         const tasksPath = path.resolve(projectRoot, '.vscode/tasks.json');
         const tasksContent = JSON.parse(fs.readFileSync(tasksPath, 'utf8'));
         const buildTask = tasksContent.tasks.find((t: { label: string }) => t.label === 'NPM RUN BUILD');
 
         const segments = buildTask.command.split('&&').map((s: string) => s.trim());
         expect(segments).toHaveLength(4);
-        expect(segments[2]).toBe('notify-send \'VS Code\' \'✅ MAX COMPONENTS UI - Build, Commit e Push realizados!\' -i software-update-available');
+        expect(segments[2]).toBe('notify-send \'VS Code\' \'✅ MAX COMPONENTS UI - Build concluído e versão incrementada. Faça commit pelo MaxCode antes do deploy.\' -i software-update-available');
         expect(segments[3]).toBe('paplay /usr/share/sounds/freedesktop/stereo/service-login.oga');
 
         expect(buildTask.presentation).toEqual({
@@ -126,9 +147,20 @@ describe('R1–R6: Contrato Estático da Tarefa de Build (.vscode/tasks.json)', 
         });
 
         expect(buildTask.options?.statusbar).toEqual({
-            label: '✅ BUILD, COMMIT & PUSH',
+            label: '✅ BUILD + VERSÃO',
             hide: false
         });
+    });
+
+    it('o comando da tarefa NPM RUN BUILD não contém operações de git commit, push, tag ou npm publish', () => {
+        const tasksPath = path.resolve(projectRoot, '.vscode/tasks.json');
+        const tasksContent = JSON.parse(fs.readFileSync(tasksPath, 'utf8'));
+        const buildTask = tasksContent.tasks.find((t: { label: string }) => t.label === 'NPM RUN BUILD');
+
+        expect(buildTask.command).not.toMatch(/\bgit\s+commit\b/);
+        expect(buildTask.command).not.toMatch(/\bgit\s+push\b/);
+        expect(buildTask.command).not.toMatch(/\bgit\s+tag\b/);
+        expect(buildTask.command).not.toMatch(/\bnpm\s+publish\b/);
     });
 
     it('scripts.build em package.json não recebeu incremento e não foi criado prebuild/preversion', () => {
@@ -285,6 +317,96 @@ describe('R1–R5: Integração do Prefixo da Tarefa em Fixtures Isoladas', () =
             expect(pkg.version).toBe('1.1.2');
             expect(lock.version).toBe('1.1.2');
             expect(lock.packages[''].version).toBe('1.1.2');
+        } finally {
+            fixture.cleanup();
+        }
+    });
+});
+
+describe('Comunicação Completa e Encadeamento com Dublês Locais (tasks.json)', () => {
+    it('executa a cadeia completa do tasks.json com sucesso, incrementa versão e notifica pendência de commit sem alegação de push', () => {
+        const fixture = createFixture('test-full-chain-success');
+        try {
+            const { extraEnv } = setupMockBinaries(fixture.fixtureDir);
+
+            const tasksPath = path.resolve(projectRoot, '.vscode/tasks.json');
+            const tasksContent = JSON.parse(fs.readFileSync(tasksPath, 'utf8'));
+            const buildTask = tasksContent.tasks.find((t: { label: string }) => t.label === 'NPM RUN BUILD');
+
+            const res = runShellInFixture(fixture.fixtureDir, buildTask.command, extraEnv);
+            expect(res.status).toBe(0);
+
+            const pkg: MinimalPackageJson = JSON.parse(fs.readFileSync(path.join(fixture.fixtureDir, 'package.json'), 'utf8'));
+            const lock: MinimalPackageLockJson = JSON.parse(fs.readFileSync(path.join(fixture.fixtureDir, 'package-lock.json'), 'utf8'));
+            const buildRan = fs.readFileSync(path.join(fixture.fixtureDir, 'build-ran.txt'), 'utf8');
+
+            expect(pkg.version).toBe('1.1.3');
+            expect(lock.version).toBe('1.1.3');
+            expect(lock.packages[''].version).toBe('1.1.3');
+            expect(buildRan).toBe('1.1.3');
+
+            const notifyLogPath = path.join(fixture.fixtureDir, 'notify-send.log');
+            expect(fs.existsSync(notifyLogPath)).toBe(true);
+            const notifyContent = fs.readFileSync(notifyLogPath, 'utf8');
+            expect(notifyContent).toContain('VS Code');
+            expect(notifyContent).toContain('✅ MAX COMPONENTS UI - Build concluído e versão incrementada. Faça commit pelo MaxCode antes do deploy.');
+            expect(notifyContent).not.toContain('Commit e Push realizados');
+
+            const paplayLogPath = path.join(fixture.fixtureDir, 'paplay.log');
+            expect(fs.existsSync(paplayLogPath)).toBe(true);
+            const paplayContent = fs.readFileSync(paplayLogPath, 'utf8');
+            expect(paplayContent).toContain('/usr/share/sounds/freedesktop/stereo/service-login.oga');
+        } finally {
+            fixture.cleanup();
+        }
+    });
+
+    it('em falha controlada do build na cadeia completa, bloqueia notificações e preserva a versão já incrementada', () => {
+        const fixture = createFixture('test-full-chain-build-fail', '1.1.2', {
+            build: 'node -e "process.exit(13)"'
+        });
+        try {
+            const { extraEnv } = setupMockBinaries(fixture.fixtureDir);
+
+            const tasksPath = path.resolve(projectRoot, '.vscode/tasks.json');
+            const tasksContent = JSON.parse(fs.readFileSync(tasksPath, 'utf8'));
+            const buildTask = tasksContent.tasks.find((t: { label: string }) => t.label === 'NPM RUN BUILD');
+
+            const res = runShellInFixture(fixture.fixtureDir, buildTask.command, extraEnv);
+            expect(res.status).toBe(13);
+
+            const pkg: MinimalPackageJson = JSON.parse(fs.readFileSync(path.join(fixture.fixtureDir, 'package.json'), 'utf8'));
+            const lock: MinimalPackageLockJson = JSON.parse(fs.readFileSync(path.join(fixture.fixtureDir, 'package-lock.json'), 'utf8'));
+
+            expect(pkg.version).toBe('1.1.3');
+            expect(lock.version).toBe('1.1.3');
+            expect(lock.packages[''].version).toBe('1.1.3');
+
+            const notifyLogPath = path.join(fixture.fixtureDir, 'notify-send.log');
+            expect(fs.existsSync(notifyLogPath)).toBe(false);
+
+            const paplayLogPath = path.join(fixture.fixtureDir, 'paplay.log');
+            expect(fs.existsSync(paplayLogPath)).toBe(false);
+        } finally {
+            fixture.cleanup();
+        }
+    });
+
+    it('em falha de incremento na cadeia completa, interrompe o encadeamento e não aciona build nem notificações', () => {
+        const fixture = createFixture('test-full-chain-version-fail', 'invalid-semver');
+        try {
+            const { extraEnv } = setupMockBinaries(fixture.fixtureDir);
+
+            const tasksPath = path.resolve(projectRoot, '.vscode/tasks.json');
+            const tasksContent = JSON.parse(fs.readFileSync(tasksPath, 'utf8'));
+            const buildTask = tasksContent.tasks.find((t: { label: string }) => t.label === 'NPM RUN BUILD');
+
+            const res = runShellInFixture(fixture.fixtureDir, buildTask.command, extraEnv);
+            expect(res.status).not.toBe(0);
+
+            expect(fs.existsSync(path.join(fixture.fixtureDir, 'build-ran.txt'))).toBe(false);
+            expect(fs.existsSync(path.join(fixture.fixtureDir, 'notify-send.log'))).toBe(false);
+            expect(fs.existsSync(path.join(fixture.fixtureDir, 'paplay.log'))).toBe(false);
         } finally {
             fixture.cleanup();
         }

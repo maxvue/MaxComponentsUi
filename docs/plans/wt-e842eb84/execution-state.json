@@ -1,0 +1,95 @@
+{
+  "version": 2,
+  "planRevision": "3abb876bbcc7877cd8908b049ed6084066cbaaec6b4505f4cb16d0f2c76ca569",
+  "tasks": [
+    {
+      "id": "T0",
+      "status": "completed",
+      "files": [
+        "package.json"
+      ],
+      "revision": "5f81da96958bf9d6630b87eef10af6d5e6469ca045d93f07e1ceb579ebc26fc7",
+      "validations": []
+    },
+    {
+      "id": "T1",
+      "status": "completed",
+      "files": [
+        ".vscode/tasks.json",
+        "README.md"
+      ],
+      "revision": "8430563ea9ddf78b4e00a28e765ed583fb2c454d9a10ef68e603eee674eb13e9",
+      "validations": []
+    },
+    {
+      "id": "T2",
+      "status": "completed",
+      "files": [
+        "tests/architecture/npmBuildTask.test.ts"
+      ],
+      "revision": "581018a496e14de1ac9e5c7d953f670da5e058c375c50fc3b7c95a32c8a62bf0",
+      "validations": [
+        {
+          "command": "npx vitest run tests/architecture/npmBuildTask.test.ts",
+          "revision": "581018a496e14de1ac9e5c7d953f670da5e058c375c50fc3b7c95a32c8a62bf0",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "T3",
+      "status": "completed",
+      "files": [
+        ".vscode/tasks.json",
+        "README.md",
+        "tests/architecture/npmBuildTask.test.ts"
+      ],
+      "revision": "09d481f4a183c721f5c8f40ebfd5395b496f51fd5a045774b4e3a5d44a50bff6",
+      "validations": []
+    },
+    {
+      "id": "T4",
+      "status": "manualPending",
+      "files": [],
+      "validations": [],
+      "nextAction": "Aguardando verificação manual do operador no MaxCode e validação no consumidor."
+    }
+  ],
+  "verification": {
+    "revision": "09d481f4a183c721f5c8f40ebfd5395b496f51fd5a045774b4e3a5d44a50bff6",
+    "checks": [
+      {
+        "command": "npm run check:lockfile",
+        "revision": "09d481f4a183c721f5c8f40ebfd5395b496f51fd5a045774b4e3a5d44a50bff6",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run test",
+        "revision": "09d481f4a183c721f5c8f40ebfd5395b496f51fd5a045774b4e3a5d44a50bff6",
+        "result": "failed",
+        "exitCode": 1
+      },
+      {
+        "command": "npm run type-check:test",
+        "revision": "09d481f4a183c721f5c8f40ebfd5395b496f51fd5a045774b4e3a5d44a50bff6",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run lint",
+        "revision": "09d481f4a183c721f5c8f40ebfd5395b496f51fd5a045774b4e3a5d44a50bff6",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run build",
+        "revision": "09d481f4a183c721f5c8f40ebfd5395b496f51fd5a045774b4e3a5d44a50bff6",
+        "result": "passed",
+        "exitCode": 0
+      }
+    ]
+  },
+  "updatedAt": 1792420700000,
+  "nextAction": "Aguardando confirmação e autorização operacional para T4 (integração e aceite do consumidor)."
+}
