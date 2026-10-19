@@ -3,6 +3,7 @@ import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import MaxInputEntity from '../../src/components/MaxInputEntity.vue';
 import MaxInputSelect from '../../src/components/MaxInputSelect.vue';
+import InputBase from '../../src/components/InputBase.vue';
 
 describe('MaxInputEntity', () => {
     beforeEach(() => {
@@ -16,6 +17,54 @@ describe('MaxInputEntity', () => {
         expect(select.exists()).toBe(true);
         expect(wrapper.find('label').text()).toBe('Entidade');
         expect(select.props('placeholder')).toBe('Selecione o tipo de entidade');
+    });
+
+    it.each([
+        { descricao: 'omitido', props: {}, noStatus: false },
+        { descricao: 'explicitamente falso', props: { noStatus: false }, noStatus: false },
+        { descricao: 'explicitamente verdadeiro', props: { noStatus: true }, noStatus: true }
+    ])('respeita noStatus $descricao até os indicadores e mensagens do InputBase', ({ props, noStatus }) => {
+        const wrapper = mount(MaxInputEntity, {
+            props: {
+                error: 'Selecione uma entidade válida',
+                ...props
+            }
+        });
+        const inputBase = wrapper.getComponent(InputBase);
+
+        expect(inputBase.props('noStatus')).toBe(noStatus);
+        expect(inputBase.classes('no-status')).toBe(noStatus);
+        expect(wrapper.find('.input-status-icon .is-error').exists()).toBe(!noStatus);
+        expect(wrapper.find('.input-message').exists()).toBe(!noStatus);
+        if (!noStatus) expect(wrapper.get('.input-message').text()).toBe('Selecione uma entidade válida');
+    });
+
+    it('atualiza os indicadores e mensagens quando o pai altera noStatus', async () => {
+        const wrapper = mount(MaxInputEntity, {
+            props: {
+                noStatus: false,
+                error: 'Selecione uma entidade válida'
+            }
+        });
+        const inputBase = wrapper.getComponent(InputBase);
+
+        expect(inputBase.props('noStatus')).toBe(false);
+        expect(wrapper.find('.input-status-icon .is-error').exists()).toBe(true);
+        expect(wrapper.get('.input-message').text()).toBe('Selecione uma entidade válida');
+
+        await wrapper.setProps({ noStatus: true });
+
+        expect(inputBase.props('noStatus')).toBe(true);
+        expect(inputBase.classes('no-status')).toBe(true);
+        expect(wrapper.find('.input-status-icon .is-error').exists()).toBe(false);
+        expect(wrapper.find('.input-message').exists()).toBe(false);
+
+        await wrapper.setProps({ noStatus: false });
+
+        expect(inputBase.props('noStatus')).toBe(false);
+        expect(inputBase.classes('no-status')).toBe(false);
+        expect(wrapper.find('.input-status-icon .is-error').exists()).toBe(true);
+        expect(wrapper.get('.input-message').text()).toBe('Selecione uma entidade válida');
     });
 
     it('possui exatamente as opções PF e PJ no catálogo fixo', () => {
