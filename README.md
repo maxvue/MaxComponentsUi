@@ -232,9 +232,22 @@ npm run lint
 # Build para produção
 npm run build
 
+# Testes unitários (inclui build atualizado antes das suítes)
+npm test
+
+# Executor avançado: exige build recente
+npm run build && npm run test:built
+
+# Gate completo de qualidade
+npm run verify
+
 # Release (build + version patch + push + publish)
 npm run release
 ```
+
+`npm test` executa um build real e, em seguida, todas as suítes definidas em `vitest.config.ts`. O build é intencionalmente repetido em cada chamada para garantir que as auditorias da distribuição verifiquem artefatos atualizados. `npm run test:built` é um executor avançado e não compila: requer um build fresco; sem os artefatos, as auditorias devem falhar. O `npm run verify` continua sendo o gate completo e reaproveita o build que já executa, sem duplicá-lo.
+
+Os comandos `npm run test:watch`, `npm run test:coverage` e a execução direta com `npx vitest` mantêm seu comportamento atual e exigem `npm run build` antes das auditorias de distribuição. Alterações nas fontes exigem novo build antes desses comandos.
 
 > **Nota sobre o botão de build no MaxCode (`NPM RUN BUILD`):**  
 > - **Diferenciação de comandos:**
