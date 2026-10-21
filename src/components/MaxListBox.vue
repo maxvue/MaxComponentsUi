@@ -193,7 +193,7 @@
             virtualScroll: undefined,
             virtualScrollThreshold: 500,
             itemHeight: 44,
-            overscan: 5,
+            overscan: 30,
             loadOptions: undefined,
             pageSize: 50,
             loading: false
