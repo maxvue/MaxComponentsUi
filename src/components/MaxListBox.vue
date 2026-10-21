@@ -7,16 +7,7 @@
         </div>
 
         <div v-if="props.filter" class="max-listbox-filter">
-            <input
-                v-model="searchInput"
-                type="text"
-                class="max-listbox-filter-input"
-                :placeholder="props.filterPlaceholder"
-                :aria-label="effectiveFilterLabel"
-                :disabled="props.disabled"
-                @input="onFilterInput"
-                @keydown="onFilterKeydown"
-            >
+            <input v-model="searchInput" type="text" class="max-listbox-filter-input" :placeholder="props.filterPlaceholder" :aria-label="effectiveFilterLabel" :disabled="props.disabled" @input="onFilterInput" @keydown="onFilterKeydown" >
         </div>
 
         <div
