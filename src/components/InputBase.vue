@@ -850,7 +850,7 @@
         }
 
 
-        :deep(div),
+:deep(div),
         :deep(span),
         :deep(input),
         :deep(select),
@@ -858,10 +858,13 @@
         :deep(.max-input-native),
         :deep(.value-div),
         :deep(.value-text) {
-            height: 20px !important;
-            max-height: 20px !important;
-            font-size: 0.8rem;
+            &:not(.max-switch-button){
+                height: 20px !important;
+                max-height: 20px !important;
+                font-size: 0.8rem;
+            }
         }
+
 
         .message-spacer {
             display: none !important;
