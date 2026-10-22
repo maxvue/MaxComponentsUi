@@ -419,6 +419,9 @@
                         &.max-table-fields-col-increment {
                             width: 180px;
                             max-width: 180px;
+
+                            // A área de toque do MaxIconButton precisa caber na linha.
+                            height: 44px !important;
                         }
 
                         .table-field-control {
@@ -453,6 +456,7 @@
 
                         // Botões de ação
                         &.max-table-fields-buttons {
+                            height: 44px !important;
                             white-space: nowrap;
                             text-align: center;
                             vertical-align: middle;
