@@ -683,11 +683,13 @@
     &[no-message],
     &[no-messages],
     &:not(.has-message) {
-        grid-template-rows: 36px !important;
-        min-height: 36px;
+        &:not(.max-input-text-area){
+            grid-template-rows: 36px !important;
+            min-height: 36px;
 
-        .input-message {
-            display: none !important;
+            .input-message {
+                display: none !important;
+            }
         }
     }
 

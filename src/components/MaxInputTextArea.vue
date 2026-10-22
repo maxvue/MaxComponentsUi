@@ -1,20 +1,7 @@
 <template>
     <InputBase v-bind="{...props}" class="max-input-text-area input-text-area-main-div">
         <template #default="{ inputAttrs }">
-            <textarea
-                ref="textAreaEl"
-                class="max-textarea"
-                v-bind="{ ...inputAttrs, ...attrs }"
-                :value="temp_value"
-                :rows="lines"
-                :disabled="props.disabled"
-                :autofocus="props.autofocus"
-                :wrap="props.wrap"
-                :spellcheck="props.spellcheck"
-                :auto-resize="props.autoResize ? '' : undefined"
-                @input="onInput"
-                @blur="checkDone()"
-            ></textarea>
+            <textarea ref="textAreaEl" class="max-textarea" v-bind="{ ...inputAttrs, ...attrs }" :value="temp_value" :rows="lines" :disabled="props.disabled" :autofocus="props.autofocus" :wrap="props.wrap" :spellcheck="props.spellcheck" :auto-resize="props.autoResize ? '' : undefined" @input="onInput" @blur="checkDone()" />
         </template>
     </InputBase>
 </template>
@@ -186,7 +173,14 @@
 
 <style lang="scss" scoped>
     .input-text-area-main-div {
+        display: grid;
         grid-template-rows: auto auto;
+
+        :deep(.max-input-main-div){
+            height: unset !important;
+            max-height: unset !important;
+            grid-template-rows: unset !important;
+        }
 
         :deep(.max-input-field-div) {
             height: auto !important;
