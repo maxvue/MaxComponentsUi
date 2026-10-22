@@ -1,0 +1,205 @@
+{
+  "version": 2,
+  "planRevision": "81255a04bb0b1ff5785a9bb7eafd494887b445e112e39fb5a5199eac587ae4d6",
+  "tasks": [
+    {
+      "id": "t1-inputbase",
+      "status": "completed",
+      "files": [
+        "src/components/InputBase.vue"
+      ],
+      "validations": [
+        {
+          "command": "npx --no-install vitest run tests/components/InputBase.test.ts",
+          "revision": "66b787911b6040073aa79210f52890726a2cc6b5fbcf8e1971cb558bcdf2c4c7",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "t2-tipos",
+      "status": "completed",
+      "files": [
+        "src/types/semanticInputs.ts"
+      ],
+      "validations": [
+        {
+          "command": "npx --no-install vitest run tests/types/semantic-inputs.test.ts",
+          "revision": "66b787911b6040073aa79210f52890726a2cc6b5fbcf8e1971cb558bcdf2c4c7",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "t3-repasse",
+      "status": "completed",
+      "files": [
+        "src/components/base/MaxBaseQuantity.vue",
+        "src/components/MaxInputMonthDays.vue",
+        "src/components/MaxInputDiscount.vue"
+      ],
+      "validations": [
+        {
+          "command": "npx --no-install vitest run tests/components/inputSuggestions.test.ts",
+          "revision": "66b787911b6040073aa79210f52890726a2cc6b5fbcf8e1971cb558bcdf2c4c7",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "t4-semanticos",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputEmail.vue",
+        "src/components/MaxInputUrl.vue",
+        "src/components/MaxInputPassword.vue",
+        "src/components/MaxInputSlug.vue"
+      ],
+      "validations": [
+        {
+          "command": "npx --no-install vitest run tests/components/MaxInputEmail.test.ts tests/components/MaxInputPassword.test.ts tests/components/MaxInputUrl.test.ts",
+          "revision": "66b787911b6040073aa79210f52890726a2cc6b5fbcf8e1971cb558bcdf2c4c7",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "t5-phonemail",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputPhoneMail.vue",
+        "src/components/MaxInputTextArea.vue"
+      ],
+      "validations": [
+        {
+          "command": "npx --no-install vitest run tests/components/inputSuggestions.test.ts",
+          "revision": "66b787911b6040073aa79210f52890726a2cc6b5fbcf8e1971cb558bcdf2c4c7",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "t6-internos-authcard",
+      "status": "completed",
+      "files": [
+        "src/components/MaxInputRG.vue",
+        "src/components/MaxInputDateRange.vue",
+        "src/components/MaxInputSelect.vue",
+        "src/components/MaxInputMultiSelect.vue",
+        "src/components/MaxTagSelect.vue",
+        "src/components/MaxListBox.vue",
+        "src/components/MaxInputIconPicker.vue",
+        "src/components/MaxInputPhone.vue",
+        "src/components/MaxTable.vue",
+        "src/components/MaxMaps.vue",
+        "src/components/MaxInputMarkdownToolbar.vue",
+        "src/components/MaxInputHtmlToolbar.vue",
+        "src/components/MaxToast.vue",
+        "src/components/base/MaxBaseInput.vue",
+        "src/components/MaxChips.vue",
+        "src/components/MaxAuthCard.vue"
+      ],
+      "validations": [
+        {
+          "command": "npx --no-install vitest run tests/components/MaxAuthCard.test.ts tests/architecture/nativeInputAutocomplete.test.ts",
+          "revision": "66b787911b6040073aa79210f52890726a2cc6b5fbcf8e1971cb558bcdf2c4c7",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "t7-testes",
+      "status": "completed",
+      "files": [
+        "tests/components/inputSuggestions.test.ts",
+        "tests/architecture/nativeInputAutocomplete.test.ts",
+        "tests/components/MaxAuthCard.test.ts",
+        "tests/types/semantic-inputs.test.ts",
+        "tests/components/MaxInputEmail.test.ts",
+        "tests/components/InputBase.test.ts",
+        "tests/components/MaxInputPassword.test.ts",
+        "tests/components/MaxInputUrl.test.ts"
+      ],
+      "validations": [
+        {
+          "command": "npx --no-install vitest run tests/components/inputSuggestions.test.ts tests/architecture/nativeInputAutocomplete.test.ts tests/components/MaxInputEmail.test.ts tests/components/MaxAuthCard.test.ts tests/types/semantic-inputs.test.ts tests/components/InputBase.test.ts tests/components/MaxInputPassword.test.ts tests/components/MaxInputUrl.test.ts",
+          "revision": "66b787911b6040073aa79210f52890726a2cc6b5fbcf8e1971cb558bcdf2c4c7",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "t8-docs",
+      "status": "completed",
+      "files": [
+        "COMPONENTS.md",
+        "docs/INPUTS-SEMANTICOS.md"
+      ],
+      "validations": []
+    },
+    {
+      "id": "t9-validacao",
+      "status": "completed",
+      "files": [],
+      "validations": [
+        {
+          "command": "npm run type-check",
+          "revision": "66b787911b6040073aa79210f52890726a2cc6b5fbcf8e1971cb558bcdf2c4c7",
+          "result": "passed"
+        },
+        {
+          "command": "npm run type-check:test",
+          "revision": "66b787911b6040073aa79210f52890726a2cc6b5fbcf8e1971cb558bcdf2c4c7",
+          "result": "passed"
+        },
+        {
+          "command": "npm run lint",
+          "revision": "66b787911b6040073aa79210f52890726a2cc6b5fbcf8e1971cb558bcdf2c4c7",
+          "result": "passed"
+        },
+        {
+          "command": "npm run build",
+          "revision": "66b787911b6040073aa79210f52890726a2cc6b5fbcf8e1971cb558bcdf2c4c7",
+          "result": "passed"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "revision": "66b787911b6040073aa79210f52890726a2cc6b5fbcf8e1971cb558bcdf2c4c7",
+    "checks": [
+      {
+        "command": "npm run type-check",
+        "revision": "66b787911b6040073aa79210f52890726a2cc6b5fbcf8e1971cb558bcdf2c4c7",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check:test",
+        "revision": "66b787911b6040073aa79210f52890726a2cc6b5fbcf8e1971cb558bcdf2c4c7",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run lint",
+        "revision": "66b787911b6040073aa79210f52890726a2cc6b5fbcf8e1971cb558bcdf2c4c7",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run build",
+        "revision": "66b787911b6040073aa79210f52890726a2cc6b5fbcf8e1971cb558bcdf2c4c7",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npx --no-install vitest run tests/components/inputSuggestions.test.ts tests/architecture/nativeInputAutocomplete.test.ts tests/components/MaxInputEmail.test.ts tests/components/MaxAuthCard.test.ts tests/types/semantic-inputs.test.ts tests/components/InputBase.test.ts tests/components/MaxInputPassword.test.ts tests/components/MaxInputUrl.test.ts",
+        "revision": "66b787911b6040073aa79210f52890726a2cc6b5fbcf8e1971cb558bcdf2c4c7",
+        "result": "passed",
+        "exitCode": 0
+      }
+    ]
+  },
+  "updatedAt": 1792695900696,
+  "nextAction": "Apresentar relatório final da execução ao usuário"
+}

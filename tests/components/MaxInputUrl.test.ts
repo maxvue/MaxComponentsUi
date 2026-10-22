@@ -19,8 +19,15 @@ describe('MaxInputUrl', () => {
         const input = wrapper.find('input');
         expect(input.attributes('type')).toBe('url');
         expect(input.attributes('inputmode')).toBe('url');
-        expect(input.attributes('autocomplete')).toBe('url');
+        expect(input.attributes('autocomplete')).toBe('off');
         expect(wrapper.findComponent(InputBase).props('label')).toBe('URL');
+    });
+
+    it('renderiza autocomplete="url" quando suggestions é verdadeiro', () => {
+        const wrapper = mount(MaxInputUrl, {
+            props: { modelValue: '', suggestions: true }
+        });
+        expect(wrapper.find('input').attributes('autocomplete')).toBe('url');
     });
 
     it('aceita URLs válidas http e https incluindo localhost, ip e porta', async () => {

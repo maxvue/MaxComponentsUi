@@ -1,8 +1,8 @@
 <template>
-    <InputBase v-bind="forwardedAttrs" class="max-input-password" :done="props.done" :error="resolvedError" :caution="resolvedCaution" :disabled="props.disabled" :required="props.required" :noMessage="props.noMessage" :noStatus="props.noStatus" :label="resolvedLabel" :placeholder="props.placeholder" :icon="props.icon" :iconLeft="props.iconLeft" :iconRight="props.iconRight" :msg="props.msg" :message="props.message" :ariaDescribedby="props.ariaDescribedby">
+    <InputBase v-bind="forwardedAttrs" class="max-input-password" :suggestions="props.suggestions" :done="props.done" :error="resolvedError" :caution="resolvedCaution" :disabled="props.disabled" :required="props.required" :noMessage="props.noMessage" :noStatus="props.noStatus" :label="resolvedLabel" :placeholder="props.placeholder" :icon="props.icon" :iconLeft="props.iconLeft" :iconRight="props.iconRight" :msg="props.msg" :message="props.message" :ariaDescribedby="props.ariaDescribedby">
         <template #default="{ inputAttrs }">
             <div class="max-password-wrapper">
-                <input v-bind="inputAttrs" ref="inputRef" class="max-input-native" :type="isRevealed ? 'text' : 'password'" :placeholder="props.placeholder" :disabled="props.disabled" :spellcheck="false" autocapitalize="none" :autocomplete="props.autocomplete" :value="props.modelValue ?? ''" @input="onInput" @blur="onBlur" @focus="onFocus" />
+                <input v-bind="inputAttrs" ref="inputRef" class="max-input-native" :type="isRevealed ? 'text' : 'password'" :placeholder="props.placeholder" :disabled="props.disabled" :spellcheck="false" autocapitalize="none" :autocomplete="resolvedAutocomplete" :value="props.modelValue ?? ''" @input="onInput" @blur="onBlur" @focus="onFocus" />
                 <MaxIconButton v-if="props.toggleVisibility" class="max-password-toggle" :icon="isRevealed ? 'lucide:eye-off' : 'lucide:eye'" size="1.25rem" :disabled="props.disabled" :aria-label="isRevealed ? 'Ocultar senha' : 'Exibir senha'" :aria-pressed="isRevealed" tabindex="-1" @click.stop.prevent="toggleReveal" />
             </div>
         </template>
@@ -27,7 +27,8 @@
     const props = withDefaults(defineProps<MaxInputPasswordProps>(), {
         modelValue: '',
         toggleVisibility: true,
-        autocomplete: 'current-password',
+        autocomplete: undefined,
+        suggestions: false,
         minLength: undefined,
         targetValue: undefined,
         label: undefined,
@@ -40,6 +41,8 @@
         noMessage: false,
         noStatus: false
     });
+
+    const resolvedAutocomplete = computed(() => props.autocomplete ?? (props.suggestions ? 'current-password' : 'off'));
 
     const emit = defineEmits<{
         'update:modelValue': [value: string];

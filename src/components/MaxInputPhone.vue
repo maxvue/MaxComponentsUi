@@ -48,19 +48,7 @@
                     @click.stop="() => {}"
                 >
                     <div class="max-phone-select-filter">
-                        <input
-                            ref="filter_el"
-                            type="text"
-                            role="searchbox"
-                            aria-autocomplete="list"
-                            :aria-controls="listbox_id"
-                            :aria-activedescendant="activeDescendantId"
-                            v-model="filter_text"
-                            class="max-input-native max-phone-filter-input"
-                            :placeholder="'Buscar país ou código'"
-                            aria-label="Buscar país ou código"
-                            @keydown="onFilterKeydown"
-                        />
+                        <input ref="filter_el" type="text" autocomplete="off" role="searchbox" aria-autocomplete="list" :aria-controls="listbox_id" :aria-activedescendant="activeDescendantId" v-model="filter_text" class="max-input-native max-phone-filter-input" :placeholder="'Buscar país ou código'" aria-label="Buscar país ou código" @keydown="onFilterKeydown" />
                     </div>
                     <div class="max-phone-select-list" role="listbox" :id="listbox_id" ref="list_el" @scroll="onListScroll">
                         <div v-if="isVirtual" class="max-phone-select-spacer" :style="{ height: `${totalHeight}px` }" aria-hidden="true" />

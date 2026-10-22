@@ -62,6 +62,8 @@ export interface SemanticTextBaseProps {
     msg?: string;
     message?: string;
     ariaDescribedby?: string;
+    /** Habilita as sugestões de preenchimento automático do navegador */
+    suggestions?: boolean;
 }
 
 export interface SemanticTextInputExpose {
@@ -159,6 +161,8 @@ export interface BaseQuantityProps {
     invalidMessage?: string;
     requiredMessage?: string;
     targetValue?: string | number;
+    /** Habilita as sugestões de preenchimento automático do navegador */
+    suggestions?: boolean;
 }
 
 export interface MaxInputPercentProps extends Omit<BaseQuantityProps, 'unit'> {}
@@ -200,6 +204,8 @@ export interface MaxInputMonthDaysProps {
     float?: boolean;
     invalidMessage?: string;
     requiredMessage?: string;
+    /** Habilita as sugestões de preenchimento automático do navegador */
+    suggestions?: boolean;
 }
 
 export interface MaxInputWeekIntervalProps {

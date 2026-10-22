@@ -343,8 +343,24 @@ describe('InputBase.vue', () => {
             id: capturedProps.inputId,
             'aria-invalid': 'true',
             'aria-required': 'true',
-            'aria-describedby': capturedProps.messageId
+            'aria-describedby': capturedProps.messageId,
+            autocomplete: 'off'
         });
+    });
+
+    it('inputAttrs does not include autocomplete="off" when suggestions is true', () => {
+        let capturedProps: any;
+        mount(InputBase, {
+            props: { label: 'Campo', suggestions: true },
+            slots: {
+                default: (slotProps: any) => {
+                    capturedProps = slotProps;
+                    return [];
+                }
+            }
+        });
+
+        expect(capturedProps.inputAttrs.autocomplete).toBeUndefined();
     });
 
     it('inputAttrs does not include aria-describedby when there is no feedback message', () => {

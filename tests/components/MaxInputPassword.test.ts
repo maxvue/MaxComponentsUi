@@ -16,8 +16,15 @@ describe('MaxInputPassword', () => {
         });
         const input = wrapper.find('input');
         expect(input.attributes('type')).toBe('password');
-        expect(input.attributes('autocomplete')).toBe('current-password');
+        expect(input.attributes('autocomplete')).toBe('off');
         expect(wrapper.findComponent(InputBase).props('label')).toBe('Senha');
+    });
+
+    it('renderiza autocomplete="current-password" quando suggestions é verdadeiro', () => {
+        const wrapper = mount(MaxInputPassword, {
+            props: { modelValue: 'segredo', suggestions: true }
+        });
+        expect(wrapper.find('input').attributes('autocomplete')).toBe('current-password');
     });
 
     it('permite alternar visibilidade pelo botão de toggle sem emitir update:modelValue', async () => {

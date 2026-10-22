@@ -113,7 +113,7 @@ Este documento descreve os dez componentes de entrada semântica adicionados à 
 
 ### 3.1. `MaxInputEmail`
 - **Finalidade**: Entrada de e-mail com validação estrita via `@maxvue/max-use`.
-- **Configurações nativas**: `type="email"`, `inputmode="email"`, `autocomplete="email"`, `spellcheck="false"`, `autocapitalize="none"`.
+- **Configurações nativas**: `type="email"`, `inputmode="email"`, `autocomplete="email"` (com `suggestions`), `spellcheck="false"`, `autocapitalize="none"` (padrão sem `suggestions` é `autocomplete="off"`).
 - **Preservação de caracteres**: Mantém caixa original e formato digitado (incluindo plus addressing como `usuario+filtro@empresa.com`).
 - **Validação**: Valida após blur ou submit. Neutro se vazio e opcional. Exibe `'Campo obrigatório'` se vazio e required. Exibe `'E-mail inválido'` se formato incorreto.
 - **Exemplo de uso**:
@@ -123,7 +123,7 @@ Este documento descreve os dez componentes de entrada semântica adicionados à 
 
 ### 3.2. `MaxInputUrl`
 - **Finalidade**: Entrada de URLs HTTP/HTTPS com validação via `URL` nativa.
-- **Configurações nativas**: `type="url"`, `inputmode="url"`, `autocomplete="url"`, `spellcheck="false"`, `autocapitalize="none"`.
+- **Configurações nativas**: `type="url"`, `inputmode="url"`, `autocomplete="url"` (com `suggestions`), `spellcheck="false"`, `autocapitalize="none"` (padrão sem `suggestions` é `autocomplete="off"`).
 - **Regras de validação**:
   - Aceita apenas esquemas `http:` e `https:`.
   - Exige hostname válido (suporta domínios, `localhost`, endereços IP e portas).
@@ -137,7 +137,7 @@ Este documento descreve os dez componentes de entrada semântica adicionados à 
 - **Finalidade**: Entrada segura de senha com botão de alternância de visibilidade e confirmação.
 - **Props específicas**:
   - `toggleVisibility?: boolean` (padrão `true`): Exibe botão com ícone de olho para revelar/ocultar senha.
-  - `autocomplete?: string` (padrão `'current-password'`; utilize `'new-password'` em formulários de cadastro ou redefinição).
+  - `autocomplete?: string` (padrão `'off'`, ou `'current-password'` com a prop `suggestions`; utilize `'new-password'` em formulários de cadastro ou redefinição).
   - `minLength?: number`: Valida comprimento mínimo da senha.
   - `targetValue?: string`: Valor para confirmação de senha. Comparação literal estrita (sensível a caixa, acentos e espaços).
 - **Segurança**: A mensagem de erro em caso de divergência é sempre a constante `'As senhas não coincidem'`. O valor esperado NUNCA é injetado no DOM ou na mensagem de erro.

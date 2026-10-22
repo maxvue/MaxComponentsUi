@@ -1,12 +1,12 @@
 <template>
-    <MaxBaseQuantity class="max-input-token-limit" v-bind="props" :integer="true" :min="resolvedMin" :max="resolvedMax" suffix="tokens" @update:modelValue="onUpdateModelValue" @focus="onFocus" @blur="onBlur">
+    <MaxBaseQuantity class="max-input-token-limit" v-bind="{ ...props, ...attrs }" :integer="true" :min="resolvedMin" :max="resolvedMax" suffix="tokens" @update:modelValue="onUpdateModelValue" @focus="onFocus" @blur="onBlur">
         <template #prefix><slot name="prefix" /></template>
         <template #suffix><slot name="suffix" /></template>
     </MaxBaseQuantity>
 </template>
 
 <script setup lang="ts">
-    import { computed } from 'vue';
+    import { computed, useAttrs } from 'vue';
     import MaxBaseQuantity from './base/MaxBaseQuantity.vue';
     import type { MaxInputTokenLimitProps } from '../types/semanticInputs';
 
@@ -14,6 +14,8 @@
         name: 'MaxInputTokenLimit',
         inheritAttrs: false
     });
+
+    const attrs = useAttrs();
 
     const props = withDefaults(defineProps<MaxInputTokenLimitProps>(), {
         modelValue: null,

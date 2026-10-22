@@ -13,35 +13,9 @@
             <MaxGrid class="auth-card-grid" :aria-describedby="error ? errorId : undefined">
                 <!-- Modo Tradicional (E-mail / Senha) -->
                 <template v-if="mode === 'password'">
-                    <MaxInputPhoneMail
-                        v-if="identifier === 'email-phone'"
-                        ref="emailInputRef"
-                        class="auth-card-field"
-                        v-model="email"
-                        :error="emailError || phoneError"
-                        :aria-describedby="error ? errorId : undefined"
-                    />
-                    <MaxInputText
-                        v-else
-                        ref="emailInputRef"
-                        class="auth-card-field"
-                        :label="t.email"
-                        type="email"
-                        v-model="email"
-                        :error="emailError"
-                        icon="mdi:email-outline"
-                        :aria-describedby="error ? errorId : undefined"
-                    />
-                    <MaxInputText
-                        ref="passwordInputRef"
-                        class="auth-card-field"
-                        :label="t.password"
-                        type="password"
-                        v-model="password"
-                        :error="passwordError"
-                        icon="mdi:lock-outline"
-                        :aria-describedby="error ? errorId : undefined"
-                    />
+                    <MaxInputPhoneMail v-if="identifier === 'email-phone'" ref="emailInputRef" class="auth-card-field" v-model="email" :error="emailError || phoneError" :aria-describedby="error ? errorId : undefined" suggestions />
+                    <MaxInputText v-else ref="emailInputRef" class="auth-card-field" :label="t.email" type="email" v-model="email" :error="emailError" icon="mdi:email-outline" :aria-describedby="error ? errorId : undefined" suggestions />
+                    <MaxInputText ref="passwordInputRef" class="auth-card-field" :label="t.password" type="password" v-model="password" :error="passwordError" icon="mdi:lock-outline" :aria-describedby="error ? errorId : undefined" suggestions />
 
                     <div class="max-auth-options" v-if="showRemember || forgotTo">
                         <label class="max-auth-remember" v-if="showRemember">
@@ -74,14 +48,7 @@
                 <!-- Modo Phone OTP (Telefone + MaxInputOTP + Botão Dinâmico) -->
                 <template v-else-if="mode === 'phone-otp'">
                     <slot name="phone-input">
-                        <MaxInputPhone
-                            ref="phoneInputRef"
-                            class="auth-card-field"
-                            v-model="phone"
-                            :label="t.phone"
-                            :error="phoneError"
-                            :aria-describedby="error ? errorId : undefined"
-                        />
+                        <MaxInputPhone ref="phoneInputRef" class="auth-card-field" v-model="phone" :label="t.phone" :error="phoneError" :aria-describedby="error ? errorId : undefined" suggestions />
                     </slot>
 
                     <!-- Campo de Código de 6 Dígitos (exibido apenas após o envio) -->

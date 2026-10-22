@@ -1,13 +1,13 @@
 <template>
     <MaxInputSelect v-if="hasOptions" class="max-input-voltage max-input-voltage-select" v-bind="selectForwardProps" :modelValue="props.modelValue" :options="props.options" :error="effectiveError" :caution="props.caution" :done="typeof props.done === 'boolean' ? props.done : undefined" @update:modelValue="onSelectUpdate" />
-    <MaxBaseQuantity v-else class="max-input-voltage max-input-voltage-numeric" v-bind="props" :min="resolvedMin" suffix="V" :error="effectiveError" @update:modelValue="onNumericUpdate" @focus="onFocus" @blur="onBlur">
+    <MaxBaseQuantity v-else class="max-input-voltage max-input-voltage-numeric" v-bind="{ ...props, ...attrs }" :min="resolvedMin" suffix="V" :error="effectiveError" @update:modelValue="onNumericUpdate" @focus="onFocus" @blur="onBlur">
         <template #prefix><slot name="prefix" /></template>
         <template #suffix><slot name="suffix" /></template>
     </MaxBaseQuantity>
 </template>
 
 <script setup lang="ts">
-    import { computed } from 'vue';
+    import { computed, useAttrs } from 'vue';
     import MaxBaseQuantity from './base/MaxBaseQuantity.vue';
     import MaxInputSelect from './MaxInputSelect.vue';
     import type { MaxInputVoltageProps } from '../types/semanticInputs';
@@ -16,6 +16,8 @@
         name: 'MaxInputVoltage',
         inheritAttrs: false
     });
+
+    const attrs = useAttrs();
 
     const props = withDefaults(defineProps<MaxInputVoltageProps>(), {
         modelValue: null,

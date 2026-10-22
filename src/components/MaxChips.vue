@@ -47,21 +47,7 @@
                         </slot>
                     </li>
                     <li class="max-chips-input-token">
-                        <input
-                            v-bind="inputAttrs"
-                            ref="inputRef"
-                            type="text"
-                            class="max-chips-input"
-                            :placeholder="itemsList.length === 0 ? (props.placeholder ?? '') : ''"
-                            :disabled="props.disabled || isMaxReached"
-                            :value="inputValue"
-                            autocomplete="off"
-                            @input="onInput"
-                            @keydown="onKeyDown"
-                            @paste="onPaste"
-                            @focus="onFocus"
-                            @blur="onBlur"
-                        />
+                        <input v-bind="inputAttrs" ref="inputRef" type="text" class="max-chips-input" :placeholder="itemsList.length === 0 ? (props.placeholder ?? '') : ''" :disabled="props.disabled || isMaxReached" :value="inputValue" @input="onInput" @keydown="onKeyDown" @paste="onPaste" @focus="onFocus" @blur="onBlur" />
                     </li>
                 </ul>
             </div>

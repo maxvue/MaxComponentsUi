@@ -703,5 +703,24 @@ describe('MaxAuthCard', () => {
             const emitted = wrapper.emitted('submit');
             expect(emitted).toHaveLength(1);
         });
+
+        it('garante que os campos de login preservam sugestões do navegador (não renderizam autocomplete="off")', () => {
+            // 1. Modo password padrão (email e password)
+            const wrapperEmail = mountAuthCard({ mode: 'password', identifier: 'email' });
+            const emailInput = wrapperEmail.findAll('input').find((i) => i.attributes('type') === 'email');
+            const passInput = wrapperEmail.findAll('input').find((i) => i.attributes('type') === 'password');
+            expect(emailInput?.attributes('autocomplete')).not.toBe('off');
+            expect(passInput?.attributes('autocomplete')).not.toBe('off');
+
+            // 2. Modo password com email-phone
+            const wrapperPhoneMail = mountAuthCard({ mode: 'password', identifier: 'email-phone' });
+            const phoneMailInput = wrapperPhoneMail.find('.max-input-phone-mail input');
+            expect(phoneMailInput.attributes('autocomplete')).not.toBe('off');
+
+            // 3. Modo phone-otp
+            const wrapperPhone = mountAuthCard({ mode: 'phone-otp' });
+            const phoneInput = wrapperPhone.find('.auth-card-field input');
+            expect(phoneInput.attributes('autocomplete')).not.toBe('off');
+        });
     });
 });

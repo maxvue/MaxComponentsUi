@@ -1,5 +1,5 @@
 <template>
-    <input ref="inputRef" :class="inputClass" :value="modelValue" :disabled="disabled" :aria-invalid="invalid || undefined" @input="onInput" @blur="onBlur" @focus="onFocus" />
+    <input ref="inputRef" autocomplete="off" :class="inputClass" :value="modelValue" :disabled="disabled" :aria-invalid="invalid || undefined" @input="onInput" @blur="onBlur" @focus="onFocus" />
 </template>
 
 <script setup lang="ts">

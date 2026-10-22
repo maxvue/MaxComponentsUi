@@ -1,12 +1,12 @@
 <template>
-    <MaxBaseQuantity class="max-input-current" v-bind="props" :min="resolvedMin" suffix="A" @update:modelValue="onUpdateModelValue" @focus="onFocus" @blur="onBlur">
+    <MaxBaseQuantity class="max-input-current" v-bind="{ ...props, ...attrs }" :min="resolvedMin" suffix="A" @update:modelValue="onUpdateModelValue" @focus="onFocus" @blur="onBlur">
         <template #prefix><slot name="prefix" /></template>
         <template #suffix><slot name="suffix" /></template>
     </MaxBaseQuantity>
 </template>
 
 <script setup lang="ts">
-    import { computed } from 'vue';
+    import { computed, useAttrs } from 'vue';
     import MaxBaseQuantity from './base/MaxBaseQuantity.vue';
     import type { MaxInputCurrentProps } from '../types/semanticInputs';
 
@@ -14,6 +14,8 @@
         name: 'MaxInputCurrent',
         inheritAttrs: false
     });
+
+    const attrs = useAttrs();
 
     const props = withDefaults(defineProps<MaxInputCurrentProps>(), {
         modelValue: null,

@@ -19,10 +19,17 @@ describe('MaxInputEmail', () => {
         const input = wrapper.find('input');
         expect(input.attributes('type')).toBe('email');
         expect(input.attributes('inputmode')).toBe('email');
-        expect(input.attributes('autocomplete')).toBe('email');
+        expect(input.attributes('autocomplete')).toBe('off');
         expect(input.attributes('spellcheck')).toBe('false');
         expect(input.attributes('autocapitalize')).toBe('none');
         expect(wrapper.findComponent(InputBase).props('label')).toBe('E-mail');
+    });
+
+    it('renderiza autocomplete="email" quando suggestions é verdadeiro', () => {
+        const wrapper = mount(MaxInputEmail, {
+            props: { modelValue: '', suggestions: true }
+        });
+        expect(wrapper.find('input').attributes('autocomplete')).toBe('email');
     });
 
     it('emite update:modelValue preservando caixa e caracteres na digitação', async () => {

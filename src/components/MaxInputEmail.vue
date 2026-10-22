@@ -1,7 +1,7 @@
 <template>
-    <InputBase v-bind="forwardedAttrs" class="max-input-email" :done="props.done" :error="resolvedError" :caution="resolvedCaution" :disabled="props.disabled" :required="props.required" :noMessage="props.noMessage" :noStatus="props.noStatus" :label="resolvedLabel" :placeholder="props.placeholder" :icon="props.icon" :iconLeft="props.iconLeft" :iconRight="props.iconRight" :msg="props.msg" :message="props.message" :ariaDescribedby="props.ariaDescribedby">
+    <InputBase v-bind="forwardedAttrs" class="max-input-email" :suggestions="props.suggestions" :done="props.done" :error="resolvedError" :caution="resolvedCaution" :disabled="props.disabled" :required="props.required" :noMessage="props.noMessage" :noStatus="props.noStatus" :label="resolvedLabel" :placeholder="props.placeholder" :icon="props.icon" :iconLeft="props.iconLeft" :iconRight="props.iconRight" :msg="props.msg" :message="props.message" :ariaDescribedby="props.ariaDescribedby">
         <template #default="{ inputAttrs }">
-            <input v-bind="inputAttrs" ref="inputRef" class="max-input-native" type="email" inputmode="email" :placeholder="props.placeholder" :disabled="props.disabled" :spellcheck="false" autocapitalize="none" :autocomplete="props.autocomplete" :value="props.modelValue ?? ''" @input="onInput" @blur="onBlur" @focus="onFocus" />
+            <input v-bind="inputAttrs" ref="inputRef" class="max-input-native" type="email" inputmode="email" :placeholder="props.placeholder" :disabled="props.disabled" :spellcheck="false" autocapitalize="none" :autocomplete="resolvedAutocomplete" :value="props.modelValue ?? ''" @input="onInput" @blur="onBlur" @focus="onFocus" />
         </template>
     </InputBase>
 </template>
@@ -22,7 +22,8 @@
 
     const props = withDefaults(defineProps<MaxInputEmailProps>(), {
         modelValue: '',
-        autocomplete: 'email',
+        autocomplete: undefined,
+        suggestions: false,
         label: undefined,
         placeholder: undefined,
         disabled: false,
@@ -33,6 +34,8 @@
         noMessage: false,
         noStatus: false
     });
+
+    const resolvedAutocomplete = computed(() => props.autocomplete ?? (props.suggestions ? 'email' : 'off'));
 
     const emit = defineEmits<{
         'update:modelValue': [value: string];

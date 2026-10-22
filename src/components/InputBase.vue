@@ -197,6 +197,8 @@
         ariaDescribedby?: string;
         /** Mensagem de erro fallback quando o campo está inválido sem mensagem específica */
         errorMessageFallback?: string;
+        /** Habilita as sugestões de preenchimento automático do navegador (desabilitadas por padrão) */
+        suggestions?: boolean;
     }
 
     const props = withDefaults(defineProps<Props>(), {
@@ -212,7 +214,8 @@
         noStatus: false,
         noMessage: false,
         truncateMessage: false,
-        errorMessageFallback: undefined
+        errorMessageFallback: undefined,
+        suggestions: false
     });
 
     /**
@@ -352,6 +355,8 @@
             base.disabled = true;
             base['aria-disabled'] = 'true' as const;
         }
+
+        if (base.autocomplete === undefined && !props.suggestions) base.autocomplete = 'off';
 
         for (const key of Object.keys(base)) if (base[key] === undefined) delete base[key];
 
@@ -683,7 +688,6 @@
     &[no-message],
     &[no-messages],
     &:not(.has-message) {
-
         grid-template-rows: 36px !important;
         min-height: 36px;
 
@@ -691,8 +695,7 @@
             display: none !important;
         }
 
-        &.input-text-area-main-div{
-
+        &.input-text-area-main-div {
             grid-template-rows: unset !important;
             min-height: 36px;
 
@@ -861,7 +864,7 @@
         }
 
 
-:deep(div),
+        :deep(div),
         :deep(span),
         :deep(input),
         :deep(select),
@@ -869,7 +872,7 @@
         :deep(.max-input-native),
         :deep(.value-div),
         :deep(.value-text) {
-            &:not(.max-switch-button){
+            &:not(.max-switch-button) {
                 height: 20px !important;
                 max-height: 20px !important;
                 font-size: 0.8rem;

@@ -25,27 +25,11 @@
             </div>
             <label>
                 <span>Latitude:</span>
-                <input
-                    type="number"
-                    step="0.0001"
-                    min="-90"
-                    max="90"
-                    :value="coordinates.latitude"
-                    aria-label="Latitude do marcador"
-                    @change="onLatitudeChange"
-                />
+                <input type="number" autocomplete="off" step="0.0001" min="-90" max="90" :value="coordinates.latitude" aria-label="Latitude do marcador" @change="onLatitudeChange" />
             </label>
             <label>
                 <span>Longitude:</span>
-                <input
-                    type="number"
-                    step="0.0001"
-                    min="-180"
-                    max="180"
-                    :value="coordinates.longitude"
-                    aria-label="Longitude do marcador"
-                    @change="onLongitudeChange"
-                />
+                <input type="number" autocomplete="off" step="0.0001" min="-180" max="180" :value="coordinates.longitude" aria-label="Longitude do marcador" @change="onLongitudeChange" />
             </label>
             <button type="button" aria-label="Mover marcador para o Norte" @click="stepCoordinate(0.0005, 0)">Norte</button>
             <button type="button" aria-label="Mover marcador para o Sul" @click="stepCoordinate(-0.0005, 0)">Sul</button>

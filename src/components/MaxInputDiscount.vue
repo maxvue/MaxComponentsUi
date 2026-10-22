@@ -1,6 +1,7 @@
 <template>
     <InputBase
         class="max-input-discount"
+        :autocomplete="(attrs as any).autocomplete"
         :id="props.id"
         :label="props.label"
         :disabled="props.disabled"
@@ -12,6 +13,7 @@
         :no-message="computedNoMessage"
         :message="computedMessage"
         :icon="props.icon ?? props.i"
+        :suggestions="props.suggestions"
     >
         <template #default="{ inputAttrs }">
             <div class="max-discount-control-wrapper">
@@ -66,13 +68,15 @@
      * Suporta máscara contínua da direita para a esquerda, cálculo bidirecional de preço pós-desconto,
      * alternância interativa via símbolo e detecção automática de tipo.
      */
-    import { ref, computed, watch, onMounted } from 'vue';
+    import { ref, computed, watch, onMounted, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
 
     defineOptions({
         name: 'MaxInputDiscount',
         inheritAttrs: false
     });
+
+    const attrs = useAttrs();
 
     const props = withDefaults(
         defineProps<{
@@ -126,6 +130,8 @@
             icon?: string;
             /** Alias de ícone */
             i?: string;
+            /** Habilita as sugestões de preenchimento automático do navegador */
+            suggestions?: boolean;
         }>(),
         {
             modelValue: undefined,
@@ -150,7 +156,8 @@
             caution: undefined,
             message: undefined,
             icon: undefined,
-            i: undefined
+            i: undefined,
+            suggestions: false
         }
     );
 

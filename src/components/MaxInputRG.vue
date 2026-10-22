@@ -5,11 +5,11 @@
                 <input ref="numberInputRef" type="text" class="max-rg-input max-rg-number" v-bind="inputAttrs" :value="currentNumber" v-maska="rgMask" :placeholder="props.placeholder ?? '00.000.000-0'" :disabled="props.disabled" :readonly="props.readonly" aria-label="Número do RG" @input="onNumberInput" @change="onNumberChange" />
 
                 <div v-if="props.showIssuer" class="max-rg-field-wrapper">
-                    <input type="text" class="max-rg-input max-rg-issuer" :value="currentIssuer" placeholder="SSP" :disabled="props.disabled" :readonly="props.readonly" maxlength="10" aria-label="Órgão emissor do RG" @input="onIssuerInput" />
+                    <input type="text" class="max-rg-input max-rg-issuer" :autocomplete="inputAttrs.autocomplete" :value="currentIssuer" placeholder="SSP" :disabled="props.disabled" :readonly="props.readonly" maxlength="10" aria-label="Órgão emissor do RG" @input="onIssuerInput" />
                 </div>
 
                 <div v-if="props.showUf" class="max-rg-field-wrapper">
-                    <input type="text" class="max-rg-input max-rg-uf" :value="currentUf" placeholder="UF" :disabled="props.disabled" :readonly="props.readonly" maxlength="2" aria-label="UF emissora do RG" @input="onUfInput" />
+                    <input type="text" class="max-rg-input max-rg-uf" :autocomplete="inputAttrs.autocomplete" :value="currentUf" placeholder="UF" :disabled="props.disabled" :readonly="props.readonly" maxlength="2" aria-label="UF emissora do RG" @input="onUfInput" />
                 </div>
             </div>
         </template>

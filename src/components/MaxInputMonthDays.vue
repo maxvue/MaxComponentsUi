@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-    import { computed, ref, watch } from 'vue';
+    import { computed, ref, watch, useAttrs } from 'vue';
     import InputBase from './InputBase.vue';
     import { useInputValidation } from '../helpers/useInputValidation';
     import type { MaxInputMonthDaysProps } from '../types/semanticInputs';
@@ -16,6 +16,8 @@
         name: 'MaxInputMonthDays',
         inheritAttrs: false
     });
+
+    const attrs = useAttrs();
 
     const props = withDefaults(defineProps<MaxInputMonthDaysProps>(), {
         modelValue: () => [],
@@ -28,7 +30,8 @@
         float: undefined,
         placeholder: undefined,
         invalidMessage: undefined,
-        requiredMessage: undefined
+        requiredMessage: undefined,
+        suggestions: false
     });
 
     const emit = defineEmits<{
@@ -112,7 +115,9 @@
         iconMessage: props.iconMessage,
         icon: props.icon,
         i: props.i,
-        noMessage: props.noMessage
+        noMessage: props.noMessage,
+        suggestions: props.suggestions,
+        autocomplete: (attrs as any).autocomplete
     }));
 
     const onInput = (event: Event) => {

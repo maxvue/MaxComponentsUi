@@ -4,7 +4,7 @@
             <div class="max-daterange-container" :class="{ 'is-disabled': props.disabled }">
                 <input ref="startInputRef" type="text" inputmode="numeric" class="max-daterange-input" :class="{ 'is-invalid': isOrderInvalid }" v-bind="inputAttrs" :id="props.id ? `${props.id}-start` : undefined" v-model="startDisplay" v-maska="dateMask" :placeholder="props.placeholderStart ?? 'Início'" :disabled="props.disabled" :readonly="props.readonly" aria-label="Data de início" @blur="onStartBlur" @input="onInputChanged" />
                 <span class="max-daterange-separator" aria-hidden="true">{{ props.separator ?? 'até' }}</span>
-                <input ref="endInputRef" type="text" inputmode="numeric" class="max-daterange-input" :class="{ 'is-invalid': isOrderInvalid }" :id="props.id ? `${props.id}-end` : undefined" v-model="endDisplay" v-maska="dateMask" :placeholder="props.placeholderEnd ?? 'Fim'" :disabled="props.disabled" :readonly="props.readonly" aria-label="Data de fim" @blur="onEndBlur" @input="onInputChanged" />
+                <input ref="endInputRef" type="text" inputmode="numeric" class="max-daterange-input" :class="{ 'is-invalid': isOrderInvalid }" :autocomplete="inputAttrs.autocomplete" :id="props.id ? `${props.id}-end` : undefined" v-model="endDisplay" v-maska="dateMask" :placeholder="props.placeholderEnd ?? 'Fim'" :disabled="props.disabled" :readonly="props.readonly" aria-label="Data de fim" @blur="onEndBlur" @input="onInputChanged" />
             </div>
         </template>
     </InputBase>

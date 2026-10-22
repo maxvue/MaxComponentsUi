@@ -1,15 +1,7 @@
 <template>
     <InputBase v-bind="props" class="max-input-phone-mail input-base-phone-mail-main-div" :label="attrs.label ?? name_method" :icon="iconLeft" :done="done ?? undefined" :caution="caution" :error="error_msg">
         <template #default="{ inputAttrs }">
-            <input
-                type="text"
-                class="max-input-native"
-                v-bind="{ ...inputAttrs, ...attrs }"
-                v-model="temp_value"
-                v-maska:unmaskedValue.unmasked="maskValue"
-                @blur="checkDone()"
-                :placeholder="attrs.email !== undefined || attrs.mail !== undefined ? 'usuario@email.com' : '(99) 9 9999 - 9999'"
-            />
+            <input type="text" class="max-input-native" v-bind="{ ...inputAttrs, ...nativeAttrs }" v-model="temp_value" v-maska:unmaskedValue.unmasked="maskValue" @blur="checkDone()" :placeholder="attrs.email !== undefined || attrs.mail !== undefined ? 'usuario@email.com' : '(99) 9 9999 - 9999'" />
         </template>
     </InputBase>
 </template>
@@ -41,9 +33,16 @@
             caution?: string | boolean | undefined;
             required?: boolean;
             noMessage?: boolean;
+            /** Habilita as sugestões de preenchimento automático do navegador */
+            suggestions?: boolean;
         }>(),
-        { modelValue: '', done: undefined, required: false, caution: undefined }
+        { modelValue: '', done: undefined, required: false, caution: undefined, suggestions: false }
     );
+
+    const nativeAttrs = computed(() => {
+        const { suggestions: _s, ...rest } = attrs;
+        return rest;
+    });
 
     const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
 

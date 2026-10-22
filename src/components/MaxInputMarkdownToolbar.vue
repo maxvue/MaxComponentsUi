@@ -201,20 +201,7 @@
                     @click.stop
                 >
                     <label :for="linkInputId" class="md-popover__label">URL do link</label>
-                    <input
-                        :id="linkInputId"
-                        ref="linkInputRef"
-                        v-model="linkUrl"
-                        class="md-popover__input"
-                        :class="{ 'is-invalid': Boolean(linkError) }"
-                        aria-label="URL do link"
-                        :aria-invalid="Boolean(linkError)"
-                        :aria-describedby="linkError ? linkErrorId : undefined"
-                        placeholder="https://..."
-                        @input="linkError = ''"
-                        @keydown.enter.prevent="applyLink"
-                        @keydown.escape="closeLinkPopover()"
-                    />
+                    <input :id="linkInputId" ref="linkInputRef" v-model="linkUrl" autocomplete="off" class="md-popover__input" :class="{ 'is-invalid': Boolean(linkError) }" aria-label="URL do link" :aria-invalid="Boolean(linkError)" :aria-describedby="linkError ? linkErrorId : undefined" placeholder="https://..." @input="linkError = ''" @keydown.enter.prevent="applyLink" @keydown.escape="closeLinkPopover()" />
                     <span v-if="linkError" :id="linkErrorId" class="md-popover__error" role="alert">
                         {{ linkError }}
                     </span>
@@ -258,20 +245,7 @@
                     @click.stop
                 >
                     <label :for="imageInputId" class="md-popover__label">URL da imagem</label>
-                    <input
-                        :id="imageInputId"
-                        ref="imageInputRef"
-                        v-model="imageUrl"
-                        class="md-popover__input"
-                        :class="{ 'is-invalid': Boolean(imageError) }"
-                        aria-label="URL da imagem"
-                        :aria-invalid="Boolean(imageError)"
-                        :aria-describedby="imageError ? imageErrorId : undefined"
-                        placeholder="https://..."
-                        @input="imageError = ''"
-                        @keydown.enter.prevent="applyImage"
-                        @keydown.escape="closeImagePopover()"
-                    />
+                    <input :id="imageInputId" ref="imageInputRef" v-model="imageUrl" autocomplete="off" class="md-popover__input" :class="{ 'is-invalid': Boolean(imageError) }" aria-label="URL da imagem" :aria-invalid="Boolean(imageError)" :aria-describedby="imageError ? imageErrorId : undefined" placeholder="https://..." @input="imageError = ''" @keydown.enter.prevent="applyImage" @keydown.escape="closeImagePopover()" />
                     <span v-if="imageError" :id="imageErrorId" class="md-popover__error" role="alert">
                         {{ imageError }}
                     </span>
@@ -291,13 +265,7 @@
                             Escolher do computador
                         </button>
                     </div>
-                    <input
-                        ref="fileInputRef"
-                        type="file"
-                        accept="image/*"
-                        style="display: none;"
-                        @change="onFileSelected"
-                    />
+                    <input ref="fileInputRef" type="file" autocomplete="off" accept="image/*" style="display: none;" @change="onFileSelected" />
                 </div>
             </div>
 

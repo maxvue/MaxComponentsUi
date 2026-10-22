@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-    import { computed, ref, watch } from 'vue';
+    import { computed, ref, watch, useAttrs } from 'vue';
     import InputBase from '../InputBase.vue';
     import { useInputValidation } from '../../helpers/useInputValidation';
 
@@ -19,6 +19,8 @@
         name: 'MaxBaseQuantity',
         inheritAttrs: false
     });
+
+    const attrs = useAttrs();
 
     interface Props {
         modelValue?: number | null;
@@ -52,6 +54,8 @@
         invalidMessage?: string;
         requiredMessage?: string;
         targetValue?: string | number;
+        /** Habilita as sugestões de preenchimento automático do navegador */
+        suggestions?: boolean;
     }
 
     const props = withDefaults(defineProps<Props>(), {
@@ -77,7 +81,8 @@
         unit: undefined,
         invalidMessage: undefined,
         requiredMessage: undefined,
-        targetValue: undefined
+        targetValue: undefined,
+        suggestions: false
     });
 
     const emit = defineEmits<{
@@ -208,7 +213,9 @@
         noMessage: props.noMessage,
         textCenter: props.textCenter,
         textRight: props.textRight,
-        inLine: props.inLine
+        inLine: props.inLine,
+        suggestions: props.suggestions,
+        autocomplete: (attrs as any).autocomplete
     }));
 
     const onInput = (event: Event) => {

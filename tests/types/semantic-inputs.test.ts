@@ -84,7 +84,8 @@ describe('types — semantic inputs', () => {
     it('verifica os tipos de Email, Url, Password e Slug', () => {
         const emailProps: MaxInputEmailProps = {
             modelValue: 'teste@exemplo.com',
-            autocomplete: 'email'
+            autocomplete: 'email',
+            suggestions: true
         };
         expect(emailProps.modelValue).toBe('teste@exemplo.com');
 

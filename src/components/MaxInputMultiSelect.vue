@@ -42,7 +42,7 @@
                 <div ref="overlayEl" :id="listboxId" class="max-select-overlay max-multiselect-overlay" role="listbox" aria-multiselectable="true" tabindex="-1" :style="{ top: position.top + 'px', left: position.left + 'px', width: position.width, zIndex: overlayZIndex }" @click.stop>
                     <div v-if="props.filter || props.selectAll" class="max-multiselect-header">
                         <div v-if="props.filter" class="max-select-filter-container">
-                            <input ref="filterInputEl" type="text" class="max-select-filter" v-model="searchQuery" :placeholder="props.filterPlaceholder ?? 'Pesquisar...'" role="searchbox" aria-autocomplete="list" @keydown="onFilterKeydown" @click.stop />
+                            <input ref="filterInputEl" type="text" autocomplete="off" class="max-select-filter" v-model="searchQuery" :placeholder="props.filterPlaceholder ?? 'Pesquisar...'" role="searchbox" aria-autocomplete="list" @keydown="onFilterKeydown" @click.stop />
                         </div>
                         <div v-if="props.selectAll && filteredOptions.length > 0" class="max-multiselect-select-all-bar">
                             <button type="button" class="max-multiselect-select-all-btn" @click.stop="toggleSelectAll">

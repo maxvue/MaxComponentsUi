@@ -73,6 +73,7 @@ Gerencia labels flutuantes (FloatLabel), ícones, mensagens de erro/atenção/su
 | `options` | `any[]` | — | Lista de opções (passthrough para selects) |
 | `groupOptions` | `SelectGroupOptions` | — | Opções agrupadas |
 | `default` | `any` | — | Valor padrão |
+| `suggestions` | `boolean` | `false` | Habilita as sugestões de preenchimento automático do navegador (desabilitadas por padrão; autocomplete explícito tem prioridade) |
 
 **Atributos HTML especiais:**
 - `input-click` — Estilo compacto (20px) sem bordas
@@ -302,6 +303,7 @@ Título secundário com subtítulo opcional. Estilo menor e mais sutil (uppercas
 
 > Todos os inputs de texto utilizam `InputBase` como wrapper e herdam suas props (label, icon, error, done, required, etc.).
 > Todos possuem sistema de **validação automática**: ao perder o foco (`@blur`), o estado `done`/`caution`/`error` é calculado.
+> Por padrão, todos os campos possuem sugestões do navegador desabilitadas (`autocomplete="off"`). A prop `suggestions` reabilita o comportamento padrão do navegador.
 
 ### MaxInputText
 

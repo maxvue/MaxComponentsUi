@@ -67,20 +67,7 @@
                 >
                     <div v-if="props.filter" class="max-select-header">
                         <div class="max-select-filter-container">
-                            <input
-                                ref="filterInputEl"
-                                type="text"
-                                class="max-select-filter"
-                                v-model="searchQuery"
-                                placeholder="Pesquisar..."
-                                role="searchbox"
-                                aria-autocomplete="list"
-                                :aria-controls="listboxId"
-                                :aria-activedescendant="activeDescendantId"
-                                autofocus
-                                @keydown="onFilterKeydown"
-                                @click.stop
-                            />
+                            <input ref="filterInputEl" type="text" autocomplete="off" class="max-select-filter" v-model="searchQuery" placeholder="Pesquisar..." role="searchbox" aria-autocomplete="list" :aria-controls="listboxId" :aria-activedescendant="activeDescendantId" autofocus @keydown="onFilterKeydown" @click.stop />
                         </div>
                     </div>
 

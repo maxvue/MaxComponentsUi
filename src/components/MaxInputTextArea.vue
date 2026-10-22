@@ -1,7 +1,7 @@
 <template>
     <InputBase v-bind="{...props}" class="max-input-text-area input-text-area-main-div">
         <template #default="{ inputAttrs }">
-            <textarea ref="textAreaEl" class="max-textarea" v-bind="{ ...inputAttrs, ...attrs }" :value="temp_value" :rows="lines" :disabled="props.disabled" :autofocus="props.autofocus" :wrap="props.wrap" :spellcheck="props.spellcheck" :auto-resize="props.autoResize ? '' : undefined" @input="onInput" @blur="checkDone()" />
+            <textarea ref="textAreaEl" class="max-textarea" v-bind="{ ...inputAttrs, ...nativeAttrs }" :value="temp_value" :rows="lines" :disabled="props.disabled" :autofocus="props.autofocus" :wrap="props.wrap" :spellcheck="props.spellcheck" :auto-resize="props.autoResize ? '' : undefined" @input="onInput" @blur="checkDone()" />
         </template>
     </InputBase>
 </template>
@@ -42,9 +42,16 @@
             autofocus?: boolean;
             maxRows?: number | string;
             wrap?: string;
+            /** Habilita as sugestões de preenchimento automático do navegador */
+            suggestions?: boolean;
         }>(),
-        { modelValue: '', autoResize: true, maxRows: 10, minRows: 1, done: undefined, spellcheck: true }
+        { modelValue: '', autoResize: true, maxRows: 10, minRows: 1, done: undefined, spellcheck: true, suggestions: false }
     );
+
+    const nativeAttrs = computed(() => {
+        const { suggestions: _s, ...rest } = attrs;
+        return rest;
+    });
 
     const isDone = ref(props.done ?? null);
 
@@ -176,7 +183,7 @@
         display: grid;
         grid-template-rows: auto auto;
 
-        :deep(.max-input-main-div){
+        :deep(.max-input-main-div) {
             height: unset !important;
             max-height: unset !important;
             grid-template-rows: unset !important;

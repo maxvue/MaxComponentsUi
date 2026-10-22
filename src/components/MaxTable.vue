@@ -160,14 +160,7 @@
                                     </template>
                                     <template v-else-if="col.filter && col.field">
                                         <div class="max-table-filter-input-wrapper">
-                                            <input
-                                                type="text"
-                                                class="max-table-filter-input"
-                                                :value="getFilterInputValue(col.field)"
-                                                @input="onFilterInput(col.field, $event)"
-                                                :placeholder="col.filterPlaceholder || props.filterPlaceholder"
-                                                :aria-label="'Filtrar por ' + getHeaderAriaLabel(col)"
-                                            />
+                                            <input type="text" autocomplete="off" class="max-table-filter-input" :value="getFilterInputValue(col.field)" @input="onFilterInput(col.field, $event)" :placeholder="col.filterPlaceholder || props.filterPlaceholder" :aria-label="'Filtrar por ' + getHeaderAriaLabel(col)" />
                                             <button
                                                 v-if="col.showClearButton !== false && hasFilterValue(col.field)"
                                                 type="button"
@@ -421,13 +414,7 @@
                         </select>
                     </div>
                     <div class="filter-popover-input-box">
-                        <input
-                            type="text"
-                            v-model="menuFilterValue"
-                            class="max-table-filter-menu-input"
-                            placeholder="Valor do filtro..."
-                            @keydown.enter.prevent="applyMenuFilter"
-                        />
+                        <input type="text" autocomplete="off" v-model="menuFilterValue" class="max-table-filter-menu-input" placeholder="Valor do filtro..." @keydown.enter.prevent="applyMenuFilter" />
                     </div>
                     <div class="filter-popover-actions">
                         <button type="button" class="max-table-filter-clear-btn" @click.stop="clearMenuFilter">Limpar</button>

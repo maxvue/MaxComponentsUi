@@ -60,13 +60,7 @@
 
                 <div class="max-icon-picker-content p-drawer-content">
                     <div class="picker-search-area">
-                        <input
-                            ref="searchInputRef"
-                            type="text"
-                            class="picker-search-input"
-                            v-model="search"
-                            placeholder="Pesquisar ícones..."
-                        />
+                        <input ref="searchInputRef" type="text" autocomplete="off" class="picker-search-input" v-model="search" placeholder="Pesquisar ícones..." />
                     </div>
 
                     <div v-if="isLoading" class="picker-state-area" role="status" aria-live="polite">

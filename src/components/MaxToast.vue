@@ -75,14 +75,7 @@
                     class="toast-copy-fallback"
                 >
                     <span class="toast-copy-error-msg">Não foi possível copiar automaticamente. Copie manualmente abaixo:</span>
-                    <textarea
-                        readonly
-                        rows="2"
-                        class="toast-copy-manual-input"
-                        :value="getToastFullText(toast)"
-                        @focus="($event.target as HTMLTextAreaElement).select()"
-                        aria-label="Texto da notificação para cópia manual"
-                    />
+                    <textarea autocomplete="off" readonly rows="2" class="toast-copy-manual-input" :value="getToastFullText(toast)" @focus="($event.target as HTMLTextAreaElement).select()" aria-label="Texto da notificação para cópia manual" />
                 </div>
             </div>
 
