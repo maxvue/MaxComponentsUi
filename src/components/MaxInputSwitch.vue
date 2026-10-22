@@ -1,42 +1,16 @@
 <template>
     <InputBase v-bind="props" :class="`max-input-switch max-switch ${props.disabled ? 'is-disabled' : ''}`">
         <template #default="{ inputAttrs }">
-            <div :class="`max-switch-input ${temp_value === props.trueValue ? 'active' : ''} ${props.disabled ? 'is-disabled' : ''}`">
-                <div
-                    class="max-switch-label left"
-                    v-if="has_left_label"
-                    :id="leftLabelId"
-                    @click="() => setValue(props.falseValue)"
-                >
+            <div :class="`max-switch-input ${isActive ? 'active' : ''} ${props.disabled ? 'is-disabled' : ''}`">
+                <div v-if="has_left_label" :id="leftLabelId" class="max-switch-label left" @click="() => setValue(turnOffValue)">
                     {{ resolvedFalseLabel }}
                 </div>
-                <div
-                    v-bind="inputAttrs"
-                    class="max-switch-toggle"
-                    :class="{
-                        'active': temp_value === props.trueValue,
-                        'is-disabled': props.disabled
-                    }"
-                    role="switch"
-                    :tabindex="props.disabled ? -1 : 0"
-                    :aria-checked="temp_value === props.trueValue"
-                    :aria-disabled="props.disabled ? 'true' : undefined"
-                    :aria-label="switchAriaLabel"
-                    :aria-labelledby="switchAriaLabelledby"
-                    @click="toggleValue"
-                    @keydown.space.prevent="toggleValue"
-                    @keydown.enter.prevent="toggleValue"
-                >
+                <div v-bind="inputAttrs" class="max-switch-toggle" :class="{ 'active': isActive, 'is-disabled': props.disabled }" role="switch" :tabindex="props.disabled ? -1 : 0" :aria-checked="isActive" :aria-disabled="props.disabled ? 'true' : undefined" :aria-label="switchAriaLabel" :aria-labelledby="switchAriaLabelledby" @click="toggleValue" @keydown.space.prevent="toggleValue" @keydown.enter.prevent="toggleValue">
                     <div class="max-switch-background">
                         <div class="max-switch-button"></div>
                     </div>
                 </div>
-                <div
-                    class="max-switch-label right"
-                    v-if="has_right_label"
-                    :id="rightLabelId"
-                    @click="() => setValue(props.trueValue)"
-                >
+                <div v-if="has_right_label" :id="rightLabelId" class="max-switch-label right" @click="() => setValue(turnOnValue)">
                     {{ resolvedTrueLabel }}
                 </div>
             </div>
@@ -111,8 +85,20 @@
             required?: boolean;
             /** Oculta a área de mensagem */
             noMessage?: boolean;
+            /** Inverte o comportamento do switch (se true: v-model true fica desligado, v-model false fica ativado) */
+            inverse?: boolean;
+            Inverse?: boolean;
         }>(),
-        { modelValue: false, done: undefined, required: false, caution: undefined, trueValue: true, falseValue: false }
+        {
+            modelValue: false,
+            done: undefined,
+            required: false,
+            caution: undefined,
+            trueValue: true,
+            falseValue: false,
+            inverse: false,
+            Inverse: false
+        }
     );
 
     const emit = defineEmits<{
@@ -124,6 +110,14 @@
     const instanceId = `max-switch-${Math.random().toString(36).slice(2, 9)}`;
     const leftLabelId = `${instanceId}-label-left`;
     const rightLabelId = `${instanceId}-label-right`;
+
+    const isInverse = computed(() => Boolean(props.inverse || props.Inverse));
+
+    const isActive = computed(() => isInverse.value ? temp_value.value === props.falseValue : temp_value.value === props.trueValue);
+
+    const turnOffValue = computed(() => isInverse.value ? props.trueValue : props.falseValue);
+
+    const turnOnValue = computed(() => isInverse.value ? props.falseValue : props.trueValue);
 
     const resolvedFalseLabel = computed(() => {
         return props.labelLeft ?? props.leftLabel ?? props.labelFalse ?? props.falseLabel ?? '';
@@ -154,8 +148,8 @@
 
     /**
      * Define o valor do switch explicitamente. Usado pelos rotulos laterais,
-     * onde cada lado representa um valor fixo (esquerda = falseValue,
-     * direita = trueValue), e nao uma alternancia.
+     * onde cada lado representa um valor fixo (esquerda = desligado/turnOffValue,
+     * direita = ativado/turnOnValue), e nao uma alternancia.
      */
     const setValue = (value: any) => {
         if (props.disabled) return;
@@ -163,10 +157,10 @@
         emit('update:modelValue', temp_value.value);
     };
 
-    /** Alterna entre trueValue e falseValue. Usado pelo toggle central. */
+    /** Alterna entre ligado e desligado. Usado pelo toggle central. */
     const toggleValue = () => {
         if (props.disabled) return;
-        setValue(temp_value.value === props.trueValue ? props.falseValue : props.trueValue);
+        setValue(isActive.value ? turnOffValue.value : turnOnValue.value);
     };
 
     watch(() => props.modelValue, (val) => {

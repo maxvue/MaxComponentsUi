@@ -186,6 +186,121 @@ describe('MaxInputSwitch', () => {
         });
     });
 
+    describe('Comportamento Invertido (prop inverse / Inverse)', () => {
+        it('com inverse: true e modelValue: true, fica desligado', () => {
+            const wrapper = mount(MaxInputSwitch, {
+                props: { modelValue: true, inverse: true }
+            });
+            const inputContainer = wrapper.find('.max-switch-input');
+            const toggle = wrapper.find('.max-switch-toggle');
+
+            expect(inputContainer.classes()).not.toContain('active');
+            expect(toggle.classes()).not.toContain('active');
+            expect(toggle.attributes('aria-checked')).toBe('false');
+        });
+
+        it('com inverse: true e modelValue: false, fica ativado', () => {
+            const wrapper = mount(MaxInputSwitch, {
+                props: { modelValue: false, inverse: true }
+            });
+            const inputContainer = wrapper.find('.max-switch-input');
+            const toggle = wrapper.find('.max-switch-toggle');
+
+            expect(inputContainer.classes()).toContain('active');
+            expect(toggle.classes()).toContain('active');
+            expect(toggle.attributes('aria-checked')).toBe('true');
+        });
+
+        it('alterna de desligado para ativado ao clicar no toggle central quando modelValue: true e inverse: true', async () => {
+            const wrapper = mount(MaxInputSwitch, {
+                props: { modelValue: true, inverse: true }
+            });
+            await wrapper.find('.max-switch-toggle').trigger('click');
+            expect(wrapper.emitted('update:modelValue')).toBeTruthy();
+            expect(wrapper.emitted('update:modelValue')?.[0][0]).toBe(false);
+        });
+
+        it('alterna de ativado para desligado ao clicar no toggle central quando modelValue: false e inverse: true', async () => {
+            const wrapper = mount(MaxInputSwitch, {
+                props: { modelValue: false, inverse: true }
+            });
+            await wrapper.find('.max-switch-toggle').trigger('click');
+            expect(wrapper.emitted('update:modelValue')).toBeTruthy();
+            expect(wrapper.emitted('update:modelValue')?.[0][0]).toBe(true);
+        });
+
+        it('aciona alternância via teclado (Space e Enter) com comportamento invertido', async () => {
+            const wrapper = mount(MaxInputSwitch, {
+                props: { modelValue: true, inverse: true }
+            });
+            const toggle = wrapper.find('.max-switch-toggle');
+
+            await toggle.trigger('keydown.space');
+            expect(wrapper.emitted('update:modelValue')?.[0][0]).toBe(false);
+
+            await wrapper.setProps({ modelValue: false });
+            await toggle.trigger('keydown.enter');
+            expect(wrapper.emitted('update:modelValue')?.[1][0]).toBe(true);
+        });
+
+        it('emite valores corretos nos rótulos laterais quando inverse: true', async () => {
+            const wrapper = mount(MaxInputSwitch, {
+                props: { modelValue: false, inverse: true, labelLeft: 'Desligado', labelRight: 'Ativado' }
+            });
+
+            // Lado esquerdo (desligado): no modo invertido deve emitir true
+            await wrapper.find('.max-switch-label.left').trigger('click');
+            expect(wrapper.emitted('update:modelValue')?.[0][0]).toBe(true);
+
+            // Lado direito (ativado): no modo invertido deve emitir false
+            await wrapper.find('.max-switch-label.right').trigger('click');
+            expect(wrapper.emitted('update:modelValue')?.[1][0]).toBe(false);
+        });
+
+        it('reconhece a prop Inverse em PascalCase', () => {
+            const wrapperTrue = mount(MaxInputSwitch, {
+                props: { modelValue: true, Inverse: true }
+            });
+            expect(wrapperTrue.find('.max-switch-toggle').classes()).not.toContain('active');
+            expect(wrapperTrue.find('.max-switch-toggle').attributes('aria-checked')).toBe('false');
+
+            const wrapperFalse = mount(MaxInputSwitch, {
+                props: { modelValue: false, Inverse: true }
+            });
+            expect(wrapperFalse.find('.max-switch-toggle').classes()).toContain('active');
+            expect(wrapperFalse.find('.max-switch-toggle').attributes('aria-checked')).toBe('true');
+        });
+
+        it('respeita trueValue e falseValue customizados com comportamento invertido', async () => {
+            const wrapper = mount(MaxInputSwitch, {
+                props: {
+                    modelValue: 'SIM',
+                    trueValue: 'SIM',
+                    falseValue: 'NAO',
+                    inverse: true,
+                    labelLeft: 'Off',
+                    labelRight: 'On'
+                }
+            });
+
+            // modelValue é trueValue ('SIM') -> com inverse fica desligado
+            expect(wrapper.find('.max-switch-toggle').classes()).not.toContain('active');
+            expect(wrapper.find('.max-switch-toggle').attributes('aria-checked')).toBe('false');
+
+            // Clicar no toggle central deve alternar para falseValue ('NAO')
+            await wrapper.find('.max-switch-toggle').trigger('click');
+            expect(wrapper.emitted('update:modelValue')?.[0][0]).toBe('NAO');
+
+            // Clicar no rótulo da direita (ativado) deve emitir 'NAO'
+            await wrapper.find('.max-switch-label.right').trigger('click');
+            expect(wrapper.emitted('update:modelValue')?.[1][0]).toBe('NAO');
+
+            // Clicar no rótulo da esquerda (desligado) deve emitir 'SIM'
+            await wrapper.find('.max-switch-label.left').trigger('click');
+            expect(wrapper.emitted('update:modelValue')?.[2][0]).toBe('SIM');
+        });
+    });
+
     it('exporta MaxSwitch como alias idêntico a MaxInputSwitch no index', async () => {
         const { MaxSwitch, MaxInputSwitch: ExportedMaxInputSwitch } = await import('../../src/index');
         expect(MaxSwitch).toBeDefined();
