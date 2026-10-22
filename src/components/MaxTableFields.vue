@@ -456,7 +456,8 @@
 
                         // Botões de ação
                         &.max-table-fields-buttons {
-                            height: 44px !important;
+                            // A folga acomoda o alvo de toque de 44px mesmo com variações da linha de base.
+                            height: 48px !important;
                             white-space: nowrap;
                             text-align: center;
                             vertical-align: middle;

@@ -116,6 +116,35 @@ describe('MaxTableFields no Chromium real (ui-design/tabela-max-recorta-colunas-
         expect(scrollRegion.scrollHeight).toBeLessThanOrEqual(scrollRegion.clientHeight);
     });
 
+    it('não rola verticalmente com duas linhas e botões de ação', async () => {
+        const { scrollRegion } = await mountTableAtWidth(800, {
+            hostHeightPx: 'auto',
+            gridHost: true,
+            columns: [
+                { field: 'quantity', header: 'Qtd', input: 'increment' },
+                { field: 'brand', header: 'Marca', input: 'text' }
+            ],
+            list: [
+                { quantity: 2, brand: 'Marca 1' },
+                { quantity: 0, brand: '' }
+            ],
+            buttons: [{ id: 'delete', icon: 'mdi:trash', ariaLabel: 'Excluir item' }]
+        });
+
+        // Simula o deslocamento de linha de base observado na fonte do consumidor.
+        scrollRegion.querySelectorAll<HTMLButtonElement>('.max-table-fields-buttons button').forEach((button) => {
+            button.style.top = '1.5px';
+        });
+        await nextFrame();
+
+        expect(scrollRegion.querySelectorAll('tbody tr.max-table-fields-row')).toHaveLength(2);
+        expect(scrollRegion.scrollHeight).toBeLessThanOrEqual(scrollRegion.clientHeight);
+
+        scrollRegion.scrollTop = 10;
+        await nextFrame();
+        expect(scrollRegion.scrollTop).toBe(0);
+    });
+
     it('compartilha a mesma região rolável para header e body a 320px, permitindo alcançar última coluna com alinhamento rigoroso', async () => {
         const columns = [
             { field: 'col1', header: 'Coluna 1', minWidth: '200px' },
