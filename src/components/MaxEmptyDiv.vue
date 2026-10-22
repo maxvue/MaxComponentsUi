@@ -1,5 +1,5 @@
 <template>
-    <div class="max-empty-div" :class="{ 'is-transparent': props.transparent, 'is-nospace': props.nospace }" :transparent="props.transparent ? '' : undefined" :nospace="props.nospace ? '' : undefined" >
+    <div  class="max-empty-div" :class="{ 'is-transparent': props.transparent, 'is-nospace': props.nospace }" :transparent="props.transparent ? '' : undefined" :nospace="props.nospace ? '' : undefined" >
         <div class="inner">
             <slot>
                 <slot name="icon">
