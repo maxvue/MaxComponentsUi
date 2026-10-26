@@ -1,0 +1,214 @@
+/**
+ * Tipos do app shell (`MaxApp`) — loading, usuário e configuração.
+ *
+ * Estes tipos eram ambientes (globais) no engeapp (`resources/Types/Global.d.ts`).
+ * Aqui são exportados explicitamente, já que a biblioteca não usa auto-import.
+ */
+/** Estado pendente de um item de carregamento. */
+export type PendingStatus = 'loading' | 'waiting';
+/** Estado terminal de um item de carregamento. */
+export type TerminalStatus = 'done' | 'error';
+/** Estado de um item de carregamento. */
+export type ItemStatus = PendingStatus | TerminalStatus;
+/**
+ * Handle opaco identificador de uma instância individual de operação de carregamento (R15/F22).
+ * Permite controlar instâncias concorrentes independentemente mesmo quando compartilham a mesma chave lógica.
+ */
+declare const LoadingHandleBrand: unique symbol;
+export type LoadingHandle = string & {
+    readonly [LoadingHandleBrand]?: never;
+};
+/** Um item individual da fila de carregamento. */
+export interface LoadingItem {
+    /** Identificador lógico do item (ou chave única interna). */
+    key: string;
+    /** Handle opaco identificador da instância individual (R15/F22). */
+    handle?: LoadingHandle;
+    /** Chave lógica da operação para agrupamento semântico. */
+    logicalKey?: string;
+    /** Mensagem exibida ao usuário. */
+    message?: string;
+    /** Estado atual. Padrão: `'loading'`. */
+    status?: ItemStatus;
+    /** Alvo onde o loading é renderizado. Padrão: `'body'`. */
+    target?: string;
+    /** Imagem exibida junto ao item. */
+    image?: string | null;
+    /** Usa a animação de IA. */
+    ai?: boolean;
+    /** Ícone padrão. */
+    icon?: string | null;
+    /** Tamanho do ícone. */
+    icon_size?: string | number | null;
+    /** Ícone do estado `loading`. */
+    icon_loading?: string | null;
+    /** Ícone do estado `done`. */
+    icon_done?: string | null;
+    /** Ícone do estado `waiting`. */
+    icon_waiting?: string | null;
+    /** Ícone do estado `error`. */
+    icon_error?: string | null;
+    /** Animação Lottie. */
+    lottie_icon?: string | null;
+    /** Permite desabilitar o item sem removê-lo. */
+    enabled?: boolean;
+    /** Duração em ms para exibição do estado 'done' antes de limpar. Padrão: 500ms. Se 0, descarta imediatamente. */
+    done_duration?: number;
+    /** Se true, o erro persiste até dismiss/retry explícito. Padrão: true. */
+    persistent_error?: boolean;
+    /** Callback opcional de retry para recuperação */
+    retry?: () => void | Promise<void>;
+    /** Contador de tentativas de retry executadas nesta instância (R15/F22). */
+    retryCount?: number;
+    /** Limite opcional de tentativas de retry. */
+    maxRetries?: number;
+    /** Detalhes do erro ou exceção associada para diagnóstico e recuperação. */
+    error?: any;
+}
+/** Mapa de itens de carregamento, indexado pela chave interna. */
+export type LoadingItems = Record<string, LoadingItem>;
+/** Agrupamento de itens de carregamento por alvo de renderização. */
+export interface LoadingTarget {
+    target: string;
+    items: LoadingItems;
+    /** Diagnóstico observável do estado do alvo no DOM. */
+    status?: 'valid' | 'invalid' | 'global' | 'local';
+}
+/**
+ * Formato mínimo do usuário autenticado exigido pelo app shell.
+ *
+ * Deliberadamente estrutural: cada aplicação consumidora tem seu próprio modelo
+ * de usuário (o do engeapp é um model Laravel gerado, com dezenas de campos).
+ * O shell só precisa de `id`; o restante passa pelo index signature.
+ */
+export interface MaxAppUser {
+    id?: string | number | null;
+    name?: string | null;
+    email?: string | null;
+    avatar?: string | null;
+    base_url?: string | null;
+    [key: string]: any;
+}
+/** Subitem de um item de menu lateral. */
+export interface SideMenuSubItem {
+    id?: string;
+    label?: string;
+    title?: string;
+    tooltip?: string;
+    route?: string;
+    rota?: string;
+    page_component?: string;
+    icon?: string;
+    icone?: string;
+    action?: () => void;
+    matches?: string[];
+    hide?: boolean;
+    /**
+     * Indica se o recurso está disponível no sistema.
+     * Quando explicitamente `false`, o MaxApp substitui a página pelo aviso de recurso em desenvolvimento.
+     */
+    is_disponible?: boolean | null;
+    subitems?: SideMenuSubItem[];
+    items?: SideMenuSubItem[];
+    children?: SideMenuSubItem[];
+    [key: string]: any;
+}
+/** Detalhes de um item de menu, como devolvidos pelo backend. */
+export interface SideMenuDetails {
+    /** Ícone exibido no botão. */
+    icon?: string | null;
+    /** Nome do componente de página, usado para marcar o item ativo. */
+    page_component?: string | null;
+    /** Rota de destino. */
+    route?: string | null;
+    /** Agrupa o item na seção inferior (configurações). */
+    settings?: boolean | null;
+    /** Oculta o item do menu. */
+    hide?: boolean | null;
+    /** Texto do tooltip. */
+    tooltip?: string | null;
+    /** Título do item. */
+    title?: string | null;
+    /**
+     * Indica se o recurso está disponível no sistema (formato backend).
+     * Usado como fallback quando a raiz do item não declarar `is_disponible`.
+     * Quando explicitamente `false`, o MaxApp substitui a página pelo aviso de recurso em desenvolvimento.
+     */
+    is_disponible?: boolean | null;
+    /** Subitens do menu. */
+    subitems?: SideMenuSubItem[];
+    /** Lista alternativa de subitens. */
+    items?: SideMenuSubItem[];
+    /** Lista de subitens (children). */
+    children?: SideMenuSubItem[];
+    [key: string]: any;
+}
+/** Item do menu lateral. */
+export interface SideMenuItem {
+    id?: string;
+    /**
+     * Indica se o recurso está disponível no sistema.
+     * Prevalece sobre `details.is_disponible` quando definido (não-nulo).
+     * Quando explicitamente `false`, o MaxApp substitui a página pelo aviso de recurso em desenvolvimento.
+     */
+    is_disponible?: boolean | null;
+    details: SideMenuDetails;
+    subitems?: SideMenuSubItem[];
+    items?: SideMenuSubItem[];
+    children?: SideMenuSubItem[];
+    [key: string]: any;
+}
+/**
+ * Configuração global do app shell, injetada no boot via `configureMaxApp()`.
+ *
+ * Mantém a biblioteca desacoplada das rotas e do backend de cada aplicação:
+ * nenhum nome de rota do engeapp é embutido no código.
+ */
+export interface MaxAppConfig {
+    /** Rota que devolve os dados do usuário autenticado. Padrão: `'user.data'`. */
+    routeUser?: string;
+    /** Rota que salva os dados do usuário. Padrão: `'user.save'`. */
+    routeUserSave?: string;
+    /** Rota de submissão do login. Padrão: `'login'`. */
+    routeLogin?: string;
+    /** Rota que lista os provedores sociais habilitados. Padrão: `'social.providers'`. */
+    routeProviders?: string;
+    /** Rota de redirecionamento para o provedor social. Padrão: `'social.redirect'`. */
+    routeSocialRedirect?: string;
+    /** Rota que informa se o usuário está sendo impersonado. Padrão: `'user.impersonate.status'`. */
+    routeImpersonateStatus?: string;
+    /** Rota que devolve os menus da aplicação. Padrão: `'menus'`. */
+    routeMenus?: string;
+    /** Rota de busca de ícones SVG. Padrão: `'https://engeapp.com.br/api/icons'`. */
+    routeIcons?: string;
+    /** Rota de fallback para ícones SVG (Iconify). Padrão: `'https://api.iconify.design'`. */
+    routeIconsFallback?: string;
+    /** Rota de sincronização de novos ícones com o backend. Padrão: `'https://engeapp.com.br/api/icons'`. */
+    routeIconsSync?: string;
+    /**
+     * E-mail enviado no login quando o método não é e-mail.
+     *
+     * O backend do engeapp valida `email` como `required|email` mesmo no login
+     * por telefone e descarta este valor específico ao montar as credenciais.
+     * Padrão: `'undefined@enge.tec.br'`.
+     */
+    undefinedEmail?: string;
+    /** URL base usada quando o usuário ainda não foi carregado. */
+    baseUrl?: string;
+    /** Versão da aplicação, exibida na interface. */
+    version?: string;
+    /** Chave da API do Google Maps usada pelo componente MaxMaps. */
+    googleMapsApiKey?: string;
+    /** ID do mapa do Google Maps usado pelo componente MaxMaps. */
+    googleMapsMapId?: string;
+    /** Logo padrão da aplicação (URL ou nome de rota). */
+    logo?: string;
+    /** Rota de destino ao clicar na logo. Padrão: '/'. */
+    routeLogo?: string;
+    /** Texto alternativo acessível da logo. Padrão: 'Logo da aplicação'. */
+    logoAlt?: string;
+    /** Rótulo textual visível de fallback caso a imagem falhe. Padrão: 'Aplicação'. */
+    logoFallbackLabel?: string;
+}
+export {};
+//# sourceMappingURL=app.d.ts.map

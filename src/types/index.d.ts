@@ -1,0 +1,457 @@
+import type { ButtonHTMLAttributes } from 'vue';
+/**
+ * Propriedades base para todos os componentes da biblioteca.
+ */
+export interface BaseComponentProps {
+    /** Classe CSS personalizada */
+    class?: string;
+    /** Estilo CSS em linha ou objeto */
+    style?: string | Record<string, any>;
+}
+/**
+ * Props visuais e de comportamento que o `MaxButtonsType` herdava do `ButtonProps`
+ * do PrimeVue. Reproduzidas aqui para manter a superfície pública do tipo após a
+ * remoção da dependência. A base de atributos HTML de botão (`id`, `title`,
+ * `tabindex`, `form`, `name`, `aria-*`, handlers etc.) vem de `ButtonHTMLAttributes`
+ * do próprio Vue, já que `ButtonProps` do PrimeVue estendia esse mesmo tipo.
+ *
+ * Deliberadamente NÃO reproduzidas: `dt`, `pt`, `ptOptions` e `unstyled` — APIs de
+ * passthrough/theming do PrimeVue, sem significado após a migração.
+ */
+export interface MaxButtonBaseProps extends ButtonHTMLAttributes {
+    /** Desabilita o botão */
+    disabled?: boolean;
+    /** Estilo apenas com borda */
+    outlined?: boolean;
+    /** Estilo sem fundo nem borda */
+    text?: boolean;
+    /** Cantos arredondados */
+    rounded?: boolean;
+    /** Sombra elevada */
+    raised?: boolean;
+    /** Aparência de link */
+    link?: boolean;
+    /** Remove a cor de severidade, mantendo apenas o texto */
+    plain?: boolean;
+    /** Ocupa toda a largura disponível */
+    fluid?: boolean;
+    /** Conteúdo do badge */
+    badge?: string;
+    /** Classe CSS do badge */
+    badgeClass?: string;
+    /** Severidade visual do badge */
+    badgeSeverity?: string;
+    /** Ícone exibido durante o carregamento */
+    loadingIcon?: string;
+    /** Classe CSS aplicada ao ícone */
+    iconClass?: string;
+    /** Elemento ou componente renderizado como raiz */
+    as?: string | Record<string, any>;
+    /** Delega a renderização da raiz ao slot padrão */
+    asChild?: boolean;
+    /** Estilo CSS em linha ou objeto */
+    style?: string | Record<string, any>;
+    /** Classe CSS personalizada */
+    class?: string;
+}
+export type ButtonSeverity = 'secondary' | 'success' | 'info' | 'whatsapp' | 'warning' | 'help' | 'danger' | 'contrast';
+export type ButtonVariant = 'outlined' | 'text' | 'link';
+/**
+ * Propriedades específicas para o componente de botão.
+ */
+export interface MaxButtonsType extends /* @vue-ignore */ MaxButtonBaseProps {
+    /** Tipo HTML nativo do botão (button, submit, reset) */
+    type?: 'button' | 'submit' | 'reset';
+    /** Rótulo acessível WAI-ARIA */
+    'aria-label'?: string;
+    /** Alias camelCase para o rótulo acessível WAI-ARIA */
+    ariaLabel?: string;
+    /** Desabilita o botão */
+    disabled?: boolean;
+    /** Título ou tooltip acessível */
+    title?: string;
+    /** Tooltip de texto acessível */
+    tooltip?: string;
+    /** Texto de exibição do botão */
+    label?: string;
+    /** Ícone a ser exibido no botão */
+    icon?: string;
+    /** Classe do icone  */
+    /** Ícone a ser exibido à esquerda do botão */
+    iconRight?: string;
+    /** Posição do ícone no botão */
+    iconPos?: 'left' | 'right';
+    /** Estilo de severidade do botão */
+    severity?: ButtonSeverity;
+    /** Tamanho do botão */
+    size?: string | undefined | number | null;
+    /** Tamanho do ícone do botão */
+    sizeIcon?: string | undefined | number | null;
+    /** Estado de carregamento do botão */
+    loading?: boolean;
+    /** Escala de Ampliação ao passar o mouse */
+    hoverScale?: number | null | undefined;
+    /** Variante visual do botão */
+    variant?: ButtonVariant;
+    /** Alias para o nome do ícone */
+    i?: string;
+    /** link para abrir em nova aba */
+    blank?: string;
+    /** Rota para navegação ao clicar */
+    route?: string | null;
+    /** Query data */
+    data?: any;
+    transparent?: boolean;
+    /** Params data */
+    params?: any;
+    /** Query data */
+    query?: any;
+    /** Rotação do ícone em graus */
+    rotate?: number;
+    /** Inversão do ícone */
+    flip?: 'horizontal' | 'vertical' | 'h' | 'v' | 'x' | 'y' | 'xy';
+    /** Alias para o tamanho */
+    scale?: string | number;
+    /** Largura específica */
+    width?: string | number;
+    /** Altura específica */
+    height?: string | number;
+    /** Icone escuro referente ao fundo */
+    dark?: boolean | string | number | undefined;
+    /** Icone claro referente ao fundo */
+    light?: boolean | string | number | undefined;
+    /** Icone de checagem */
+    checked?: boolean | string | number | undefined;
+    /** Icone de adição */
+    plus?: boolean | string | number | undefined;
+    /** Cor do ícone */
+    color?: string;
+    /** Alias para a cor do ícone */
+    iconColor?: string;
+    /** Hover color */
+    hoverColor?: string | undefined;
+    /** Action */
+    action?: (data: {
+        event: any;
+        data?: any;
+    }) => void;
+    /** Tamanho do icone */
+    iconSize?: number | string | undefined | null;
+    /** Coloca texto em maiúsculo */
+    uppercase?: boolean;
+    /** Borda tracejada com fundo transparente */
+    dashed?: boolean;
+    /** Reduz o espaçamento vertical do MaxButton textual (sem efeito no fallback de ícone) */
+    slim?: boolean;
+}
+/**
+ * Propriedades para o componente de botão de Like (MaxLikeButton).
+ */
+export interface MaxLikeButtonProps {
+    /** Número de likes (suporta v-model) */
+    modelValue?: number;
+    /** Estado de curtido (suporta v-model:liked ou prop controlada) */
+    liked?: boolean;
+    /** Exibe apenas o ícone e badge com a contagem de likes */
+    onlyIcon?: boolean;
+    /** Oculta o valor do número de likes */
+    noNumber?: boolean;
+    /** Texto de exibição do botão (padrão: "Gostei") */
+    label?: string;
+    /** Ícone principal ou base do botão */
+    icon?: string;
+    /** Ícone para quando estiver curtido */
+    iconTrue?: string;
+    /** Alias kebab-case para iconTrue */
+    'icon-true'?: string;
+    /** Ícone para quando não estiver curtido */
+    iconFalse?: string;
+    /** Alias kebab-case para iconFalse */
+    'icon-false'?: string;
+    /** Ícone no estado curtido (alias compatível com iconTrue) */
+    iconLiked?: string;
+    /** Permite repetir o like após um intervalo em minutos (true = 60 min, ou número em minutos, padrão: false) */
+    repeat?: boolean | number;
+    /** Alias de repeat (padrão: false) */
+    allowRepeat?: boolean | number;
+    /** Alias kebab-case de repeat (padrão: false) */
+    'allow-repeat'?: boolean | number;
+    /** Identificador único para persistência do cooldown no localStorage */
+    id?: string;
+    /** Chave customizada para persistência no localStorage */
+    storageKey?: string;
+    /** Função executada ao clicar no botão */
+    onClick?: (event: MouseEvent) => void;
+    /** Desabilita o botão */
+    disabled?: boolean;
+    /** Estado de carregamento do botão */
+    loading?: boolean;
+    /** Tamanho do botão ('small' | 'large' ou escala) */
+    size?: 'small' | 'large' | string | number | null;
+    /** Tamanho do ícone */
+    iconSize?: number | string | null;
+    /** Classe CSS personalizada para o badge */
+    badgeClass?: string;
+    /** Classe CSS personalizada para o botão */
+    class?: string;
+}
+export interface ConfirmActionProps {
+    label: string;
+    icon?: string;
+    severity?: ButtonSeverity;
+    variant?: ButtonVariant;
+    action?: ((event?: any) => void) | undefined;
+}
+/**
+ * Propriedades compartilhadas pelos componentes de confirmação
+ * (`MaxButtonConfirm`, `MaxIconConfirm`, `MaxTogglePopover`).
+ * As props de identidade visual (label, ícone, etc.) variam entre os 3
+ * componentes conforme o elemento que cada um dispara (botão de texto,
+ * botão de ícone, popover) — aqui ficam apenas as props de conteúdo/
+ * comportamento da confirmação em si.
+ */
+export interface ConfirmProps {
+    /** Mensagem de confirmação */
+    message?: string;
+    /** Icone de mensagem de confirmação */
+    messageIcon?: string | null;
+    /** Severidade visual geral do diálogo (afeta ícone e ação padrão de confirmação) */
+    severity?: ButtonSeverity;
+    /** Configurações do botão de rejeição/cancelamento */
+    rejectProps?: ConfirmActionProps;
+    /** Configurações do botão de aceitação/confirmação */
+    acceptProps?: ConfirmActionProps;
+}
+/**
+ * Subconjunto de props que a maioria dos componentes de input duplica ao
+ * redeclarar, na própria interface, as mesmas props que o `InputBase`
+ * (`src/components/InputBase.vue`) já define e repassa via `v-bind="props"`.
+ * Ex.: `MaxInputCpfCnpj`, `MaxInputCep`, `MaxInputCoordinateDecimalLat/Lng`,
+ * `MaxInputPhoneMail`.
+ */
+export interface InputBaseProps {
+    /** Ícone opcional (ex: 'mdi:email') */
+    icon?: string | undefined;
+    /** Alias para o ícone */
+    i?: string | undefined;
+    /** Desabilita o campo */
+    disabled?: boolean | undefined;
+    /** Ativa estilo FloatLabel */
+    float?: boolean | undefined;
+    /** Mensagem de feedback (alias) */
+    msg?: string | undefined;
+    /** Mensagem de feedback */
+    message?: string | undefined;
+    /** Ícone da mensagem de feedback */
+    iconMessage?: string | undefined;
+    /** Rótulo do campo */
+    label?: string | undefined;
+    /** Estado de conclusão/validação manual */
+    done?: boolean | undefined;
+    /** Mensagem ou estado de erro */
+    error?: string | boolean | undefined;
+    /** Valor para comparação (opcional) */
+    targetValue?: string;
+    /** Mensagem ou estado de atenção */
+    caution?: string | boolean | undefined;
+    /** Define se o campo é obrigatório */
+    required?: boolean;
+    /** Oculta a mensagem de feedback e remove a reserva vertical */
+    noMessage?: boolean;
+}
+/**
+ * Estrutura aceita para itens do tipo objeto no MaxChips.
+ * Ao menos uma das propriedades id, label, name ou value deve estar presente.
+ */
+export interface ChipObjectItem {
+    id?: string | number;
+    label?: string | number;
+    name?: string | number;
+    value?: string | number;
+    [key: string]: any;
+}
+export type ChipItem = string | number | ChipObjectItem;
+/**
+ * Propriedades para o componente MaxChips.
+ */
+export interface MaxChipsProps extends InputBaseProps {
+    /** Valor do v-model contendo a lista de chips (strings, números ou objetos) */
+    modelValue?: ChipItem[];
+    /** Placeholder exibido quando o campo está vazio */
+    placeholder?: string;
+    /** Permite ou bloqueia valores duplicados (padrão: false) */
+    allowDuplicate?: boolean;
+    /** Número máximo de chips permitidos */
+    max?: number;
+    /** Adiciona o chip ao perder o foco do input (padrão: false) */
+    addOnBlur?: boolean;
+    /** Caractere ou separador usado para dividir chips ao digitar/colar (padrão: ',') */
+    separator?: string | RegExp;
+    /** Força novos itens inseridos como objetos { label, value } mesmo com lista vazia */
+    asObject?: boolean;
+    /** Função customizada para instanciar novos objetos a partir do texto digitado */
+    createItem?: (text: string) => ChipObjectItem;
+    /** Permite remover chips individualmente (padrão: true) */
+    removable?: boolean;
+}
+/**
+ * Eventos comuns emitidos pelos componentes.
+ */
+export interface ComponentEmits {
+    /** Emitido quando o componente é clicado */
+    click: [event: MouseEvent];
+}
+export interface SelectItem {
+    value: string | number | null | boolean;
+    name?: string | null;
+    label?: string | null;
+    subLabel?: string | null;
+    icon?: string | null;
+    disabled?: boolean;
+    selected?: boolean;
+    color?: string | null;
+    size?: string | null;
+    text_align?: 'left' | 'center' | 'right';
+    ddi?: string | number | null;
+    sigla?: string | null;
+    min?: string | number | null;
+    max?: string | number | null;
+    fases?: string | number | null;
+}
+export interface SelectGroupOptionsElement {
+    label: string;
+    items: SelectItem[];
+}
+export interface SelectGroupOptions extends Array<SelectGroupOptionsElement> {
+}
+export interface SelectOptions extends Array<SelectItem> {
+}
+/** Valores aceitos como estado de entrada em inputs */
+export type InputValue = string | number | boolean | null | undefined | Record<string, unknown> | unknown[];
+/** Item padronizado de seleção */
+export interface SelectOptionItem<T = unknown> {
+    label?: string;
+    value?: T;
+    name?: string;
+    icon?: string;
+    sub_label?: string;
+    disabled?: boolean;
+    badge?: string | number;
+    badgeColor?: string;
+    [key: string]: unknown;
+}
+export type SelectOptionsList<T = unknown> = Array<SelectOptionItem<T> | Record<string, unknown>>;
+/**
+ * Definição de uma coluna para o componente MaxTableFields.
+ */
+export type MaxTableColumnDefinition = MaxTableColumn;
+export interface MaxTableColumn {
+    /** Texto do cabeçalho da coluna */
+    header?: string;
+    /** Alias para o texto do cabeçalho da coluna */
+    label?: string;
+    /** Campo do objeto a ser exibido na célula */
+    field: string;
+    /** Nome do slot customizado para renderizar o conteúdo da célula */
+    slot?: string;
+    /** Largura da coluna (ex: '100px', '20%') */
+    width?: string;
+    /** Largura mínima da coluna */
+    minWidth?: string;
+    /** Largura máxima da coluna */
+    maxWidth?: string;
+    /** Largura máxima da coluna */
+    size?: string;
+    /** Alinhamento do conteúdo da célula */
+    align?: 'left' | 'center' | 'right';
+    /** Tipo de input a ser renderizado na célula */
+    input?: 'text' | 'input' | 'checkbox' | 'select' | 'date' | 'number' | 'increment' | 'textarea' | 'phone-number' | 'auto-complete' | 'auto-complete-api' | (string & {});
+    /** Lista de opções para o select */
+    options?: any[];
+    /** Rota para navegação ao clicar */
+    route?: string;
+    /** Dados extras: string com caminho (ex: 'brand.id') ou objeto com caminhos (ex: { brand_id: 'brand.id' }) — resolvidos da linha atual */
+    data?: string | Record<string, any>;
+    /** Texto do placeholder a ser exibido  */
+    placeholder?: string;
+    /** Título a ser exibido no cabeçalho  */
+    title?: string;
+    /** Estilo a ser exibido no cabeçalho  */
+    style?: object;
+    /** Classe a ser exibido no cabeçalho  */
+    class?: string | object;
+    /** Indica se o campo é obrigatório  */
+    required?: boolean;
+    /** Tooltip a ser exibido ao passar o mouse */
+    tooltip?: boolean;
+    /** Oculta a mensagem de feedback e remove a reserva vertical no input */
+    noMessage?: boolean;
+    /** Função a ser executada quando o valor do campo mudar */
+    action?: ((data: {
+        row: any;
+        field: string;
+        value: any;
+    }) => void) | ((...args: any[]) => any);
+}
+export type DBFile = {
+    id: string;
+    name?: string | null;
+    file_name: string | null;
+    label_file_name: string | null;
+    extension: string | null;
+    thumbnail: string | null;
+    document_type: string | null;
+    disk: string | null;
+    blob?: any;
+    objectURL?: string | null;
+    src?: string | null;
+    file_bloob?: string | null;
+    message_type?: string | null;
+    data_ai: object | null;
+    pdf_count_pages: number | null;
+    error_pdf: boolean | null;
+    to_request_ai: boolean | null;
+    image_inspection: boolean;
+    is_send_to_project: boolean | null;
+    type: string;
+    in_server: boolean | null;
+};
+export type UploadFileStatus = 'queued' | 'uploading' | 'succeeded' | 'failed';
+export type UploadState = 'idle' | 'selected' | 'uploading' | 'success' | 'error';
+export type MenuItem = {
+    label?: string;
+    items?: MenuItem[];
+    command?: string;
+    icon?: string;
+    active?: boolean;
+    url?: string;
+};
+export type * from './chart';
+export type * from './app';
+export type * from './listbox';
+export type * from './asyncState';
+/**
+ * Estado assíncrono padronizado para feedback e recuperação de falhas (E05-07).
+ */
+export type AsyncStatus = 'idle' | 'loading' | 'success' | 'empty' | 'error';
+export interface AsyncState<T = any> {
+    status: AsyncStatus;
+    data: T | null;
+    error: Error | string | null;
+    attempt: number;
+}
+export type * from './image';
+export type * from './card';
+export type * from './semanticInputs';
+export type * from './feedback';
+export type * from './validation';
+export type * from './selection';
+export type * from './period';
+export type * from './progress';
+export type * from './filters';
+export type * from './filePreview';
+export type * from './markdownViewer';
+export type * from './calendar';
+export type * from './domainInputs';
+export type * from './specializedInputs';
+//# sourceMappingURL=index.d.ts.map
