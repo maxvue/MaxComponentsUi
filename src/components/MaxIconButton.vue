@@ -100,10 +100,8 @@
         if (iconName.includes('search') || iconName.includes('magnif')) return 'Buscar';
         if (iconName.includes('trash') || iconName.includes('delete') || iconName.includes('remove')) return 'Excluir';
         if (iconName.includes('pencil') || iconName.includes('edit')) return 'Editar';
-        if (iconName.includes('plus') || iconName.includes('add')) return 'Adicionar';
         if (iconName.includes('minus')) return 'Diminuir';
         if (iconName.includes('check') || iconName.includes('done') || iconName.includes('confirm')) return 'Confirmar';
-        if (iconName.includes('reload') || iconName.includes('refresh') || iconName.includes('sync')) return 'Recarregar';
         if (iconName.includes('filter')) return 'Filtrar';
         if (iconName.includes('cog') || iconName.includes('gear') || iconName.includes('setting')) return 'Configurações';
         if (iconName.includes('download')) return 'Baixar';

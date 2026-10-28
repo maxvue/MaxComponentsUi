@@ -91,7 +91,7 @@
             </slot>
 
             <div class="tool-bar-plus">
-                <MaxIconButton v-tooltip.bottom="'Atualizar dados'" aria-label="Atualizar dados" :i="reloading ? 'loading' : 'reload'" :loading="reloading" :disabled="reloading" size="1.7" light icon-hover-white @click.stop="reloadAll" />
+                <MaxIconButton v-tooltip.bottom="'Atualizar dados'" aria-label="Atualizar dados" :i="reloading ? 'line-md:loading-loop' : 'andrsrxn:reload'" :loading="reloading" :disabled="reloading" size="1.4" light icon-hover-white @click.stop="reloadAll" />
             </div>
 
 
