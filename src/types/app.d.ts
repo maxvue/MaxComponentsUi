@@ -179,6 +179,16 @@ export interface MaxAppConfig {
     routeImpersonateStatus?: string;
     /** Rota que devolve os menus da aplicação. Padrão: `'menus'`. */
     routeMenus?: string;
+    /**
+     * URL base do servidor de ícones da aplicação (ex.: 'https://icones.exemplo.com').
+     *
+     * Quando informado e válido, routeIcons e routeIconsSync passam a ser derivados deste
+     * servidor no formato '{iconServer}/api/icons'. Caso omitido, vazio ou inválido,
+     * utiliza o servidor padrão ('https://engeapp.com.br/api/icons').
+     *
+     * Overrides explícitos em `routeIcons` ou `routeIconsSync` têm prioridade sobre este valor.
+     */
+    iconServer?: string;
     /** Rota de busca de ícones SVG. Padrão: `'https://engeapp.com.br/api/icons'`. */
     routeIcons?: string;
     /** Rota de fallback para ícones SVG (Iconify). Padrão: `'https://api.iconify.design'`. */

@@ -111,6 +111,21 @@ app.use(MaxComponentsUi, {
 | `theme.options.prefix`           | `string`  | `'max'`    | Prefixo das variáveis CSS                   |
 | `ripple`                         | `boolean` | `true`     | Efeito ripple nos botões                    |
 
+### Configuração do App Shell e Servidor de Ícones (`configureMaxApp`)
+
+No boot da aplicação (antes da inicialização das stores), use `configureMaxApp` para customizar rotas globais ou apontar para um servidor de ícones próprio:
+
+```typescript
+import { configureMaxApp } from '@maxvue/max-components-ui';
+
+configureMaxApp({
+    // Permite que a aplicação consumidora use seu próprio endpoint de ícones via .env
+    iconServer: import.meta.env.ICON_SERVER
+});
+```
+
+> Veja o passo a passo completo de exposição de variáveis de ambiente no Vite e requisitos de backend em **[Guia de Configuração do Servidor de Ícones](docs/STORES.md#configuração-do-servidor-de-ícones-icon_server-por-aplicação)**.
+
 ---
 
 ## 📁 Módulos de Exportação

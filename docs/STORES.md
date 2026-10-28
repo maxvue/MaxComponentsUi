@@ -13,7 +13,7 @@ import { useIconStore, usePopoverStore } from '@maxvue/max-components-ui/stores'
 ## useIconStore
 
 Store responsável pelo **carregamento e cache de ícones SVG** do ecossistema Iconify.
-Os ícones são buscados em lote via API e armazenados no `localStorage` para evitar requisições repetidas.
+Os ícones são buscados em lote via API e armazenados no **IndexedDB** (`max-components-ui-icons`) para garantir alta capacidade sem consumir a cota de 5MB do `localStorage`. Dados legados que existirem no `localStorage` são automaticamente migrados para o IndexedDB e removidos do storage legado na primeira inicialização.
 
 ### Uso
 
@@ -25,6 +25,87 @@ const iconStore = useIconStore()
 // Buscar o SVG de um ícone (retorna null enquanto carrega)
 const svg = iconStore.getIcon('mdi:home')
 ```
+
+### Configuração do Servidor de Ícones (`ICON_SERVER` por aplicação)
+
+Por padrão, a biblioteca busca e sincroniza ícones em `https://engeapp.com.br/api/icons`. Aplicações consumidoras podem apontar para seu próprio servidor de ícones definindo a variável `ICON_SERVER` em seu arquivo `.env`, sem necessidade de recompilar ou republicar o pacote `@maxvue/max-components-ui`.
+
+#### 1. Definir no `.env` da aplicação consumidora
+
+```env
+ICON_SERVER=https://icones.minhaempresa.com.br
+```
+
+- **Formato:** deve ser uma URL absoluta HTTP ou HTTPS (ex.: `https://icones.exemplo.com` ou `https://icones.exemplo.com/prefixo`).
+- **Resolução automática:** a biblioteca normaliza o endereço e direciona automaticamente o GET e o POST para `{ICON_SERVER}/api/icons`. Se a URL informada já terminar em `/api/icons`, o sufixo não é duplicado.
+- **Validação e fallback:** se a variável for omitida, vazia ou contiver formato inválido (relativo, sem protocolo, com credenciais embutidas, query string ou fragmento), a biblioteca adota o servidor padrão do Engeapp com segurança, sem lançar exceções nem expor strings brutas nos logs.
+- **Prioridade:** se a aplicação configurar rotas explícitas via `routeIcons` (GET) ou `routeIconsSync` (POST) no `configureMaxApp`, essas rotas explícitas têm prioridade sobre o `iconServer`.
+
+#### 2. Expor seletivamente no Vite da aplicação consumidora (`vite.config.ts`)
+
+Como bibliotecas pré-compiladas não leem diretamente arquivos de ambiente do consumidor em tempo de execução, exponha exclusivamente a chave `ICON_SERVER` via `loadEnv` e `define` no Vite da aplicação consumidora:
+
+```typescript
+import { defineConfig, loadEnv } from 'vite';
+
+export default defineConfig(({ mode }) => {
+    // Carrega seletivamente apenas a variável ICON_SERVER do diretório do projeto
+    const env = loadEnv(mode, process.cwd(), 'ICON_SERVER');
+
+    return {
+        // ... preserve suas configurações existentes (plugins, resolve, server, etc.)
+        define: {
+            'import.meta.env.ICON_SERVER': JSON.stringify(env.ICON_SERVER ?? '')
+        }
+    };
+});
+```
+
+> [!IMPORTANT]
+> Utilize whitelist restrita ao prefixo ou chave `ICON_SERVER`. Nunca passe strings vazias como prefixo (`''`) para serializar todo o `process.env`, evitando expor credenciais e chaves secretas no bundle final do cliente.
+
+#### 3. Declarar a tipagem do ambiente no consumidor (`env.d.ts`)
+
+```typescript
+/// <reference types="vite/client" />
+
+interface ImportMetaEnv {
+    readonly ICON_SERVER?: string;
+}
+
+interface ImportMeta {
+    readonly env: ImportMetaEnv;
+}
+```
+
+#### 4. Repassar a configuração no boot da aplicação (`main.ts`)
+
+Chame `configureMaxApp` no boot, **antes** de criar ou usar stores que dependam do app shell:
+
+```typescript
+import { createApp } from 'vue';
+import { createPinia } from 'pinia';
+import { configureMaxApp } from '@maxvue/max-components-ui';
+import App from './App.vue';
+
+// Aplica o servidor de ícones configurado no .env da aplicação
+configureMaxApp({
+    iconServer: import.meta.env.ICON_SERVER
+});
+
+const app = createApp(App);
+const pinia = createPinia();
+
+app.use(pinia);
+app.mount('#app');
+```
+
+#### 5. Requisitos de backend, CORS e ciclo de vida
+
+- **Reinício do Frontend:** alterações no arquivo `.env` do consumidor exigem reiniciar o dev server do Vite (`npm run dev`) ou executar novo build da aplicação consumidora (`npm run build`).
+- **Contrato da API:** o servidor customizado deve aceitar requisições `GET /api/icons?icons[]=nome` (devolvendo mapa `{ "nome": "<svg>...</svg>" }`) e `POST /api/icons` para sincronização com payload `{ icons: { "nome": "<svg>..." } }`.
+- **CORS e HTTPS:** requisições entre origens distintas devem fornecer headers CORS adequados (`Access-Control-Allow-Origin`, `Access-Control-Allow-Methods: GET, POST, OPTIONS`, `Access-Control-Allow-Headers: Content-Type, Accept`).
+- **Resiliência:** se o servidor customizado falhar ou não encontrar o ícone solicitado, a store consulta o fallback público do Iconify (`https://api.iconify.design`) e, ao obter o SVG, efetua um POST de sincronização para salvar a definição no `iconServer`.
 
 ### Estado
 
@@ -41,9 +122,9 @@ const svg = iconStore.getIcon('mdi:home')
 
 ### Funcionamento interno
 
-1. Ao chamar `getIcon('mdi:home')`, se o ícone não estiver no cache, ele é marcado como `'waiting'`
-2. Um `watchDebounced` (50ms, maxWait 150ms) agrupa todos os ícones pendentes e faz uma única requisição
-3. Os resultados são salvos em `icons_data` e persistidos no `localStorage` com a chave `all_icons`
+1. Ao chamar `getIcon('mdi:home')`, se o ícone não estiver no cache em memória, ele é buscado no IndexedDB e marcado como `'waiting'` se pendente.
+2. Um `watchDebounced` (50ms, maxWait 150ms) agrupa todos os ícones pendentes e faz uma requisição GET em lote no endpoint derivado de `iconServer` (ou rota configurada).
+3. Os resultados recebidos são sanitizados contra vetores XSS, salvos em `icons_data` e persistidos no IndexedDB. Ícones não encontrados recorrem ao fallback do Iconify e são sincronizados via POST no mesmo servidor.
 
 ---
 

@@ -1,0 +1,92 @@
+{
+  "version": 2,
+  "planRevision": "fb0619a5b3c11b01e1eafa28e502e82613f2691b2d92f7fbfa309eeaf3460b09",
+  "tasks": [
+    {
+      "id": "T1",
+      "status": "completed",
+      "files": [],
+      "validations": []
+    },
+    {
+      "id": "T2",
+      "status": "completed",
+      "files": [
+        "src/helpers/maxAppConfig.ts",
+        "src/types/app.ts",
+        "src/types/app.d.ts",
+        "tests/helpers/maxAppConfig.test.ts"
+      ],
+      "revision": "866f1bd51bd3a311068e89386657cc5885a78094ba3396b712fc13421ae5185e",
+      "validations": []
+    },
+    {
+      "id": "T3",
+      "status": "completed",
+      "files": [
+        "tests/stores/useIcon.Store.test.ts",
+        "tests/components/MaxApp.test.ts",
+        "tests/architecture/icon-server-consumer.test.ts"
+      ],
+      "revision": "866f1bd51bd3a311068e89386657cc5885a78094ba3396b712fc13421ae5185e",
+      "validations": []
+    },
+    {
+      "id": "T4",
+      "status": "completed",
+      "files": [
+        "docs/STORES.md",
+        "README.md"
+      ],
+      "revision": "866f1bd51bd3a311068e89386657cc5885a78094ba3396b712fc13421ae5185e",
+      "validations": []
+    },
+    {
+      "id": "T5",
+      "status": "completed",
+      "files": [
+        "src/presetMaxUno.d.ts"
+      ],
+      "revision": "866f1bd51bd3a311068e89386657cc5885a78094ba3396b712fc13421ae5185e",
+      "validations": []
+    },
+    {
+      "id": "T6",
+      "status": "manualPending",
+      "files": [],
+      "validations": [],
+      "nextAction": "Testar com a aplicação consumidora real e servidor próprio apontado em ICON_SERVER no .env."
+    }
+  ],
+  "verification": {
+    "revision": "866f1bd51bd3a311068e89386657cc5885a78094ba3396b712fc13421ae5185e",
+    "checks": [
+      {
+        "command": "npm run type-check:test",
+        "revision": "866f1bd51bd3a311068e89386657cc5885a78094ba3396b712fc13421ae5185e",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run lint:check",
+        "revision": "866f1bd51bd3a311068e89386657cc5885a78094ba3396b712fc13421ae5185e",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run build",
+        "revision": "866f1bd51bd3a311068e89386657cc5885a78094ba3396b712fc13421ae5185e",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npx --no-install vitest run tests/helpers/maxAppConfig.test.ts tests/stores/useIcon.Store.test.ts tests/components/MaxApp.test.ts tests/architecture/icon-server-consumer.test.ts tests/architecture/package-exports.test.ts",
+        "revision": "866f1bd51bd3a311068e89386657cc5885a78094ba3396b712fc13421ae5185e",
+        "result": "passed",
+        "exitCode": 0
+      }
+    ]
+  },
+  "updatedAt": 1793198900000,
+  "nextAction": "Aguardando aceite manual em consumidor real (T6); implementação e validação automatizadas concluídas."
+}

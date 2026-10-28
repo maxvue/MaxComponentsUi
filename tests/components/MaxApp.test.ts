@@ -436,6 +436,21 @@ describe('MaxApp', () => {
 
             expect(wrapper.emitted('logoClick')).toHaveLength(1);
         });
+
+        it('preserva iconServer e rotas explícitas do boot após a montagem do MaxApp', () => {
+            configureMaxApp({
+                iconServer: 'https://icons.boot-app.com',
+                routeLogin: 'boot.login'
+            });
+
+            mountApp({ props: { routeLogin: 'override.login' } });
+
+            const config = getMaxAppConfig();
+            expect(config.iconServer).toBe('https://icons.boot-app.com');
+            expect(config.routeIcons).toBe('https://icons.boot-app.com/api/icons');
+            expect(config.routeIconsSync).toBe('https://icons.boot-app.com/api/icons');
+            expect(config.routeLogin).toBe('override.login');
+        });
     });
 
     describe('uso pretendido no engeapp', () => {

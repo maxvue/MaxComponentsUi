@@ -480,6 +480,91 @@ describe('useIconStore', () => {
         }
     });
 
+    it('deve usar o servidor derivado de iconServer para GET e POST quando configurado no boot', async () => {
+        const { configureMaxApp, resetMaxAppConfig } = await import('../../src/helpers/maxAppConfig');
+        configureMaxApp({ iconServer: 'https://cdn-icons.empresa.com' });
+
+        try {
+            const store = useIconStore();
+            const mockFetch = vi.spyOn(globalThis, 'fetch').mockImplementation((url, init) => {
+                const urlStr = String(url);
+                if (init?.method === 'POST') return Promise.resolve({ ok: true, json: () => Promise.resolve({ success: true }) } as any);
+                if (urlStr.includes('api.iconify.design')) return Promise.resolve({
+                    ok: true,
+                    text: () => Promise.resolve('<svg><path d="M5 5"/></svg>')
+                } as any);
+                if (urlStr.includes('cdn-icons.empresa.com/api/icons')) return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({ 'empresa:logo': null })
+                } as any);
+                return Promise.resolve({ ok: true, json: () => Promise.resolve({}) } as any);
+            });
+
+            store.getIcon('empresa:logo');
+            await new Promise((r) => setTimeout(r, 250)); // debounce
+            await new Promise((r) => setTimeout(r, 120)); // fallback + sync
+
+            // 1. O GET deve ter sido enviado exclusivamente para o iconServer configurado
+            const getCalls = mockFetch.mock.calls.filter((call) => !call[1] || call[1].method === 'GET');
+            const iconServerGet = getCalls.find((call) => String(call[0]).includes('https://cdn-icons.empresa.com/api/icons'));
+            expect(iconServerGet).toBeDefined();
+
+            // 2. Não deve ter havido nenhuma chamada para o host legado do Engeapp
+            const legacyCalls = mockFetch.mock.calls.filter((call) => String(call[0]).includes('engeapp.com.br'));
+            expect(legacyCalls).toHaveLength(0);
+
+            // 3. O POST de sincronização deve ter ido para o mesmo host derivado de iconServer
+            const postCalls = mockFetch.mock.calls.filter((call) => call[1]?.method === 'POST');
+            expect(postCalls).toHaveLength(1);
+            expect(String(postCalls[0][0])).toBe('https://cdn-icons.empresa.com/api/icons');
+            const postBody = JSON.parse(postCalls[0][1]!.body as string);
+            expect(postBody.icon).toBe('empresa:logo');
+            expect(postBody.svg).toContain('<path d="M5 5"');
+        } finally {
+            resetMaxAppConfig();
+        }
+    });
+
+    it('respeita prioridade independente de rotas explícitas junto com iconServer', async () => {
+        const { configureMaxApp, resetMaxAppConfig } = await import('../../src/helpers/maxAppConfig');
+        configureMaxApp({
+            iconServer: 'https://sync-host.empresa.com',
+            routeIcons: 'https://read-only-cache.empresa.com/v2/icons'
+        });
+
+        try {
+            const store = useIconStore();
+            const mockFetch = vi.spyOn(globalThis, 'fetch').mockImplementation((url, init) => {
+                const urlStr = String(url);
+                if (init?.method === 'POST') return Promise.resolve({ ok: true, json: () => Promise.resolve({ success: true }) } as any);
+                if (urlStr.includes('api.iconify.design')) return Promise.resolve({
+                    ok: true,
+                    text: () => Promise.resolve('<svg><rect width="10" height="10"/></svg>')
+                } as any);
+                if (urlStr.includes('read-only-cache.empresa.com/v2/icons')) return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({ 'custom:badge': null })
+                } as any);
+                return Promise.resolve({ ok: true, json: () => Promise.resolve({}) } as any);
+            });
+
+            store.getIcon('custom:badge');
+            await new Promise((r) => setTimeout(r, 250));
+            await new Promise((r) => setTimeout(r, 120));
+
+            // GET obedece routeIcons explícito
+            const getCall = mockFetch.mock.calls.find((call) => (!call[1] || call[1].method === 'GET') && String(call[0]).includes('read-only-cache.empresa.com'));
+            expect(getCall).toBeDefined();
+
+            // POST obedece iconServer (pois routeIconsSync não teve override)
+            const postCall = mockFetch.mock.calls.find((call) => call[1]?.method === 'POST');
+            expect(postCall).toBeDefined();
+            expect(String(postCall![0])).toBe('https://sync-host.empresa.com/api/icons');
+        } finally {
+            resetMaxAppConfig();
+        }
+    });
+
     it('agrupa múltiplos ícones recuperados via fallback em um único POST de sincronização e grava cache de forma consolidada', async () => {
         const store = useIconStore();
 

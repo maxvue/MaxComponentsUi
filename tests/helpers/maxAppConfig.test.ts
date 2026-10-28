@@ -102,4 +102,151 @@ describe('maxAppConfig', () => {
         expect(getMaxAppConfig().logoAlt).toBeUndefined();
         expect(getMaxAppConfig().logoFallbackLabel).toBeUndefined();
     });
+
+    describe('resolução de iconServer e rotas de ícones', () => {
+        it('usa os endpoints padrão do Engeapp quando iconServer não é informado, é vazio ou contém apenas espaços', () => {
+            configureMaxApp({});
+            expect(getMaxAppConfig().routeIcons).toBe('https://engeapp.com.br/api/icons');
+            expect(getMaxAppConfig().routeIconsSync).toBe('https://engeapp.com.br/api/icons');
+
+            configureMaxApp({ iconServer: '' });
+            expect(getMaxAppConfig().routeIcons).toBe('https://engeapp.com.br/api/icons');
+            expect(getMaxAppConfig().routeIconsSync).toBe('https://engeapp.com.br/api/icons');
+
+            configureMaxApp({ iconServer: '   ' });
+            expect(getMaxAppConfig().routeIcons).toBe('https://engeapp.com.br/api/icons');
+            expect(getMaxAppConfig().routeIconsSync).toBe('https://engeapp.com.br/api/icons');
+        });
+
+        it('resolve iconServer absoluto HTTP/HTTPS adicionando /api/icons para GET e POST', () => {
+            configureMaxApp({ iconServer: 'https://icones.exemplo.com' });
+
+            const config = getMaxAppConfig();
+            expect(config.iconServer).toBe('https://icones.exemplo.com');
+            expect(config.routeIcons).toBe('https://icones.exemplo.com/api/icons');
+            expect(config.routeIconsSync).toBe('https://icones.exemplo.com/api/icons');
+        });
+
+        it('remove espaços externos e barras finais sem duplicar barras na junção', () => {
+            configureMaxApp({ iconServer: '  https://icones.exemplo.com///  ' });
+
+            const config = getMaxAppConfig();
+            expect(config.routeIcons).toBe('https://icones.exemplo.com/api/icons');
+            expect(config.routeIconsSync).toBe('https://icones.exemplo.com/api/icons');
+        });
+
+        it('preserva prefixo de caminho em iconServer', () => {
+            configureMaxApp({ iconServer: 'https://icones.exemplo.com/prefixo' });
+            expect(getMaxAppConfig().routeIcons).toBe('https://icones.exemplo.com/prefixo/api/icons');
+            expect(getMaxAppConfig().routeIconsSync).toBe('https://icones.exemplo.com/prefixo/api/icons');
+
+            configureMaxApp({ iconServer: 'https://icones.exemplo.com/prefixo/' });
+            expect(getMaxAppConfig().routeIcons).toBe('https://icones.exemplo.com/prefixo/api/icons');
+            expect(getMaxAppConfig().routeIconsSync).toBe('https://icones.exemplo.com/prefixo/api/icons');
+        });
+
+        it('não duplica o sufixo /api/icons quando já estiver presente', () => {
+            configureMaxApp({ iconServer: 'https://icones.exemplo.com/api/icons' });
+            expect(getMaxAppConfig().routeIcons).toBe('https://icones.exemplo.com/api/icons');
+            expect(getMaxAppConfig().routeIconsSync).toBe('https://icones.exemplo.com/api/icons');
+
+            configureMaxApp({ iconServer: 'https://icones.exemplo.com/api/icons/' });
+            expect(getMaxAppConfig().routeIcons).toBe('https://icones.exemplo.com/api/icons');
+            expect(getMaxAppConfig().routeIconsSync).toBe('https://icones.exemplo.com/api/icons');
+
+            configureMaxApp({ iconServer: 'https://icones.exemplo.com/prefixo/api/icons/' });
+            expect(getMaxAppConfig().routeIcons).toBe('https://icones.exemplo.com/prefixo/api/icons');
+            expect(getMaxAppConfig().routeIconsSync).toBe('https://icones.exemplo.com/prefixo/api/icons');
+        });
+
+        it('recorre ao padrão Engeapp quando iconServer for inválido sem lançar erro', () => {
+            const invalidUrls = [
+                '/api/icons',
+                'icones.exemplo.com',
+                'ftp://icones.exemplo.com',
+                'javascript:alert(1)',
+                'https://user:pass@icones.exemplo.com',
+                'https://icones.exemplo.com?token=123',
+                'https://icones.exemplo.com#secao'
+            ];
+
+            for (const invalid of invalidUrls) {
+                configureMaxApp({ iconServer: invalid });
+                expect(getMaxAppConfig().routeIcons).toBe('https://engeapp.com.br/api/icons');
+                expect(getMaxAppConfig().routeIconsSync).toBe('https://engeapp.com.br/api/icons');
+            }
+        });
+
+        it('routeIcons explicitamente definida prevalece apenas no GET sem reescrever o POST', () => {
+            configureMaxApp({
+                iconServer: 'https://icones.exemplo.com',
+                routeIcons: 'https://outro.com/api/custom-icons'
+            });
+
+            const config = getMaxAppConfig();
+            expect(config.routeIcons).toBe('https://outro.com/api/custom-icons');
+            expect(config.routeIconsSync).toBe('https://icones.exemplo.com/api/icons');
+        });
+
+        it('routeIconsSync explicitamente definida prevalece apenas no POST', () => {
+            configureMaxApp({
+                iconServer: 'https://icones.exemplo.com',
+                routeIconsSync: 'https://sync.outro.com/api/sync'
+            });
+
+            const config = getMaxAppConfig();
+            expect(config.routeIcons).toBe('https://icones.exemplo.com/api/icons');
+            expect(config.routeIconsSync).toBe('https://sync.outro.com/api/sync');
+        });
+
+        it('passar undefined para uma rota remove o override anterior e resolve pelo servidor ou default', () => {
+            configureMaxApp({
+                iconServer: 'https://icones.exemplo.com',
+                routeIcons: 'https://outro.com/api'
+            });
+            expect(getMaxAppConfig().routeIcons).toBe('https://outro.com/api');
+
+            configureMaxApp({ routeIcons: undefined });
+            expect(getMaxAppConfig().routeIcons).toBe('https://icones.exemplo.com/api/icons');
+
+            configureMaxApp({ iconServer: undefined });
+            expect(getMaxAppConfig().routeIcons).toBe('https://engeapp.com.br/api/icons');
+        });
+
+        it('chamadas sucessivas de configureMaxApp preservam iconServer e overrides de ícones', () => {
+            configureMaxApp({ iconServer: 'https://icones.exemplo.com' });
+            configureMaxApp({ routeLogin: 'auth.login' });
+
+            const config = getMaxAppConfig();
+            expect(config.iconServer).toBe('https://icones.exemplo.com');
+            expect(config.routeIcons).toBe('https://icones.exemplo.com/api/icons');
+            expect(config.routeLogin).toBe('auth.login');
+        });
+
+        it('resetMaxAppConfig limpa servidor e overrides de ícones restaurando defaults', () => {
+            configureMaxApp({
+                iconServer: 'https://icones.exemplo.com',
+                routeIcons: 'https://outro.com/api'
+            });
+            resetMaxAppConfig();
+
+            const config = getMaxAppConfig();
+            expect(config.iconServer).toBeUndefined();
+            expect(config.routeIcons).toBe('https://engeapp.com.br/api/icons');
+            expect(config.routeIconsSync).toBe('https://engeapp.com.br/api/icons');
+        });
+
+        it('alteração de iconServer recalcula os destinos derivados preservando overrides explícitos', () => {
+            configureMaxApp({
+                iconServer: 'https://primeiro.com',
+                routeIcons: 'https://override.com'
+            });
+            expect(getMaxAppConfig().routeIcons).toBe('https://override.com');
+            expect(getMaxAppConfig().routeIconsSync).toBe('https://primeiro.com/api/icons');
+
+            configureMaxApp({ iconServer: 'https://segundo.com' });
+            expect(getMaxAppConfig().routeIcons).toBe('https://override.com');
+            expect(getMaxAppConfig().routeIconsSync).toBe('https://segundo.com/api/icons');
+        });
+    });
 });
