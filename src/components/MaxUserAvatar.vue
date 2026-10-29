@@ -178,7 +178,7 @@
             message: props.labelRemove ?? 'Remover responsável?',
             messageIcon: 'mingcute:user-remove-fill',
             rejectProps: { label: 'Voltar', icon: 'weui:back-filled', action: () => {} },
-            acceptProps: { label: 'Remover', icon: 'trash', action: () => emit('remove') },
+            acceptProps: { label: 'Remover', icon: 'trakar-icons:trash-canash', action: () => emit('remove') },
             x: rect?.x ?? 0,
             y: rect?.y ?? 0,
             width: rect?.width ?? 0,
