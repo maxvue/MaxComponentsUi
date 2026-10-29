@@ -92,26 +92,6 @@
 
         // Fallbacks contextuais baseados no nome do ícone
         const iconName = (props.icon || props.i || '').toLowerCase();
-        if (iconName.includes('close') || iconName.includes('xmark')) return 'Fechar';
-        if (iconName.includes('chevron-down') || iconName.includes('angle-down') || iconName.includes('arrow-down')) return 'Expandir opções';
-        if (iconName.includes('chevron-up') || iconName.includes('angle-up') || iconName.includes('arrow-up')) return 'Recolher opções';
-        if (iconName.includes('chevron-left') || iconName.includes('angle-left') || iconName.includes('arrow-left')) return 'Voltar';
-        if (iconName.includes('chevron-right') || iconName.includes('angle-right') || iconName.includes('arrow-right')) return 'Avançar';
-        if (iconName.includes('search') || iconName.includes('magnif')) return 'Buscar';
-        if (iconName.includes('trash') || iconName.includes('delete') || iconName.includes('remove')) return 'Excluir';
-        if (iconName.includes('pencil') || iconName.includes('edit')) return 'Editar';
-        if (iconName.includes('minus')) return 'Diminuir';
-        if (iconName.includes('check') || iconName.includes('done') || iconName.includes('confirm')) return 'Confirmar';
-        if (iconName.includes('filter')) return 'Filtrar';
-        if (iconName.includes('cog') || iconName.includes('gear') || iconName.includes('setting')) return 'Configurações';
-        if (iconName.includes('download')) return 'Baixar';
-        if (iconName.includes('upload')) return 'Enviar';
-        if (iconName.includes('crop')) return 'Recortar';
-        if (iconName.includes('zoom-in')) return 'Aumentar Zoom';
-        if (iconName.includes('zoom-out')) return 'Diminuir Zoom';
-        if (iconName.includes('copy')) return 'Copiar';
-        if (iconName.includes('folder')) return 'Abrir pasta';
-        if (iconName.includes('tag')) return 'Tag';
 
         if (process.env.NODE_ENV !== 'production' && !warned.value) {
             warned.value = true;
