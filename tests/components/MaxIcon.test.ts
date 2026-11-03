@@ -21,9 +21,16 @@ function mountIcon(props: Record<string, any> = {}, attrs: Record<string, any> =
 }
 
 describe('MaxIcon', () => {
+    let pinia: any;
+
     beforeEach(() => {
-        setActivePinia(createPinia());
+        pinia = createPinia();
+        setActivePinia(pinia);
         vi.clearAllMocks();
+    });
+
+    afterEach(() => {
+        if (pinia) pinia._e.stop();
     });
 
     it('renderiza corretamente', () => {
@@ -190,5 +197,89 @@ describe('MaxIcon', () => {
         expect(store.list_icons_waiting_request).not.toContain('iconmind:log-level-duotone-thin');
 
         wrappers.forEach((w) => w.unmount());
+    });
+
+    it('monta mais de 5 nomes distintos e várias instâncias repetidas sem multiplicar GETs', async () => {
+        useIconStore();
+
+        const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation((input: any) => {
+            const urlStr = String(input);
+            const result: Record<string, string> = {};
+            try {
+                const parsed = new URL(urlStr, 'http://localhost');
+                for (const icon of parsed.searchParams.getAll('icons[]')) result[icon] = `<svg><path d="M0 0" data-test="${icon}"/></svg>`;
+            } catch {}
+            return Promise.resolve({
+                ok: true,
+                status: 200,
+                json: () => Promise.resolve(result)
+            } as any);
+        });
+
+        const iconNames = [
+            'mdi:alpha-a', 'mdi:alpha-b', 'mdi:alpha-c', 'mdi:alpha-d', 'mdi:alpha-e',
+            'mdi:alpha-f', 'mdi:alpha-g', 'mdi:alpha-h',
+            'mdi:alpha-a', 'mdi:alpha-b', 'mdi:alpha-c', 'mdi:alpha-d'
+        ];
+
+        const wrappers = iconNames.map((name) => mount(MaxIcon, { props: { icon: name } }));
+
+        await new Promise((r) => setTimeout(r, 250));
+        await nextTick();
+
+        const getCalls = fetchSpy.mock.calls.filter((call) => {
+            const url = String(call[0]);
+            return url.includes('icons%5B%5D=');
+        });
+
+        expect(getCalls).toHaveLength(2);
+
+        const call1 = new URL(String(getCalls[0][0]), 'http://localhost').searchParams.getAll('icons[]');
+        const call2 = new URL(String(getCalls[1][0]), 'http://localhost').searchParams.getAll('icons[]');
+
+        expect(call1).toHaveLength(5);
+        expect(call2).toHaveLength(3);
+
+        wrappers.forEach((w, idx) => {
+            const expectedName = iconNames[idx];
+            expect(w.html()).toContain(`data-test="${expectedName}"`);
+        });
+
+        wrappers.forEach((w) => w.unmount());
+        fetchSpy.mockRestore();
+    });
+
+    it('descarte de store com múltiplos lotes pendentes evita mutações tardias no componente', async () => {
+        const store = useIconStore();
+
+        let resolveFetch: any;
+        const fetchPromise = new Promise((resolve) => {
+            resolveFetch = resolve;
+        });
+
+        const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(() => fetchPromise as Promise<Response>);
+
+        const names = ['mdi:batch-t1', 'mdi:batch-t2', 'mdi:batch-t3', 'mdi:batch-t4', 'mdi:batch-t5', 'mdi:batch-t6'];
+        const wrappers = names.map((name) => mount(MaxIcon, { props: { icon: name } }));
+
+        await vi.waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(2), { timeout: 2000 });
+
+        wrappers.forEach((w) => w.unmount());
+        store.$dispose();
+
+        resolveFetch({
+            ok: true,
+            status: 200,
+            json: () => Promise.resolve({
+                'mdi:batch-t1': '<svg>1</svg>',
+                'mdi:batch-t6': '<svg>6</svg>'
+            })
+        });
+
+        await new Promise((r) => setTimeout(r, 100));
+
+        expect(store.icons_data['mdi:batch-t1']).toBe('waiting');
+        expect(store.icons_data['mdi:batch-t6']).toBe('waiting');
+        fetchSpy.mockRestore();
     });
 });

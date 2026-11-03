@@ -750,4 +750,391 @@ describe('useIconStore', () => {
         // A store descartada não deve ter sido populada com o resultado tardio
         expect(store.icons_data['icon-disposed']).toBe('waiting');
     });
+
+    describe('Requisições em lotes de até 5 ícones e controle de ciclo', () => {
+        it.each([
+            { count: 0, expectedCalls: 0, batchSizes: [] },
+            { count: 1, expectedCalls: 1, batchSizes: [1] },
+            { count: 5, expectedCalls: 1, batchSizes: [5] },
+            { count: 6, expectedCalls: 2, batchSizes: [5, 1] },
+            { count: 10, expectedCalls: 2, batchSizes: [5, 5] },
+            { count: 12, expectedCalls: 3, batchSizes: [5, 5, 2] }
+        ])('divide $count ícones em $expectedCalls chamadas GET com tamanhos $batchSizes sem duplicar nomes', async ({ count, expectedCalls, batchSizes }) => {
+            const store = useIconStore();
+            const names = Array.from({ length: count }, (_, i) => `batch-icon-${count}-${i + 1}`);
+
+            names.forEach((name) => store.getIcon(name));
+
+            if (count > 0) {
+                await new Promise((r) => setTimeout(r, 250));
+                await new Promise((r) => setTimeout(r, 50));
+            }
+
+            const getCalls = (globalThis.fetch as any).mock.calls.filter((call: any) => {
+                const url = String(call[0]);
+                const init = call[1];
+                return (!init || init.method === 'GET') && url.includes('icons%5B%5D=');
+            });
+
+            expect(getCalls).toHaveLength(expectedCalls);
+
+            const allRequestedIcons: string[] = [];
+            getCalls.forEach((call: any, idx: number) => {
+                const url = new URL(String(call[0]), 'http://localhost');
+                const requested = url.searchParams.getAll('icons[]');
+                expect(requested.length).toBe(batchSizes[idx]);
+                expect(requested.length).toBeLessThanOrEqual(5);
+                expect(requested.length).toBeGreaterThan(0);
+                allRequestedIcons.push(...requested);
+            });
+
+            expect(allRequestedIcons).toEqual(names);
+            expect(new Set(allRequestedIcons).size).toBe(names.length);
+
+            names.forEach((name) => {
+                expect(store.icons_data[name]).toContain('<svg');
+            });
+        });
+
+        it('garante que snapshots de lotes são disjuntos e nenhum lote excede 5 nomes', async () => {
+            const store = useIconStore();
+            const names = Array.from({ length: 14 }, (_, i) => `disjoint-icon-${i + 1}`);
+
+            names.forEach((name) => store.getIcon(name));
+
+            await new Promise((r) => setTimeout(r, 250));
+            await new Promise((r) => setTimeout(r, 50));
+
+            const getCalls = (globalThis.fetch as any).mock.calls.filter((call: any) => {
+                const url = String(call[0]);
+                const init = call[1];
+                return (!init || init.method === 'GET') && url.includes('icons%5B%5D=');
+            });
+
+            expect(getCalls).toHaveLength(3);
+
+            const batches: string[][] = getCalls.map((call: any) => {
+                const url = new URL(String(call[0]), 'http://localhost');
+                return url.searchParams.getAll('icons[]');
+            });
+
+            expect(batches[0]).toHaveLength(5);
+            expect(batches[1]).toHaveLength(5);
+            expect(batches[2]).toHaveLength(4);
+
+            const set0 = new Set(batches[0]);
+            const set1 = new Set(batches[1]);
+
+            batches[1].forEach((name) => expect(set0.has(name)).toBe(false));
+            batches[2].forEach((name) => expect(set0.has(name)).toBe(false));
+            batches[2].forEach((name) => expect(set1.has(name)).toBe(false));
+        });
+
+        it('mantém reserva em inFlightIcons durante requisições em voo e escoa novos ícones em lote separado', async () => {
+            const store = useIconStore();
+
+            let resolveBatch1: any;
+            const batch1Promise = new Promise((resolve) => {
+                resolveBatch1 = resolve;
+            });
+
+            let resolveBatch2: any;
+            const batch2Promise = new Promise((resolve) => {
+                resolveBatch2 = resolve;
+            });
+
+            let callIndex = 0;
+            const mockFetch = vi.spyOn(globalThis, 'fetch').mockImplementation((input: any) => {
+                const urlStr = String(input);
+                if (urlStr.includes('icons%5B%5D=')) {
+                    callIndex++;
+                    if (callIndex === 1) return batch1Promise as Promise<Response>;
+                    return batch2Promise as Promise<Response>;
+                }
+                return Promise.resolve({ ok: true, json: () => Promise.resolve({}) } as any);
+            });
+
+            const batch1Names = ['flight-1', 'flight-2', 'flight-3', 'flight-4', 'flight-5'];
+            batch1Names.forEach((n) => store.getIcon(n));
+
+            await vi.waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(1), { timeout: 2000 });
+
+            store.getIcon('flight-1');
+            store.getIcon('flight-2');
+            store.getIcon('flight-new-1');
+            store.getIcon('flight-new-2');
+
+            await new Promise((r) => setTimeout(r, 250));
+
+            expect(mockFetch).toHaveBeenCalledTimes(2);
+            const call2Url = new URL(String(mockFetch.mock.calls[1][0]), 'http://localhost');
+            const call2Icons = call2Url.searchParams.getAll('icons[]');
+            expect(call2Icons).toEqual(['flight-new-1', 'flight-new-2']);
+
+            resolveBatch1({
+                ok: true,
+                status: 200,
+                json: () => Promise.resolve({
+                    'flight-1': '<svg>1</svg>',
+                    'flight-2': '<svg>2</svg>',
+                    'flight-3': '<svg>3</svg>',
+                    'flight-4': '<svg>4</svg>',
+                    'flight-5': '<svg>5</svg>'
+                })
+            });
+
+            resolveBatch2({
+                ok: true,
+                status: 200,
+                json: () => Promise.resolve({
+                    'flight-new-1': '<svg>new1</svg>',
+                    'flight-new-2': '<svg>new2</svg>'
+                })
+            });
+
+            await vi.waitFor(() => {
+                expect(store.icons_data['flight-1']).toBe('<svg>1</svg>');
+                expect(store.icons_data['flight-new-1']).toBe('<svg>new1</svg>');
+            }, { timeout: 2000 });
+        });
+
+        it('processa respostas fora de ordem sem corromper estado ou persistência', async () => {
+            const store = useIconStore();
+
+            let resolveBatch1: any;
+            const batch1Promise = new Promise((resolve) => {
+                resolveBatch1 = resolve;
+            });
+            let resolveBatch2: any;
+            const batch2Promise = new Promise((resolve) => {
+                resolveBatch2 = resolve;
+            });
+
+            const mockFetch = vi.spyOn(globalThis, 'fetch').mockImplementation((input: any) => {
+                const urlStr = String(input);
+                if (urlStr.includes('ooo-1')) return batch1Promise as Promise<Response>;
+                if (urlStr.includes('ooo-6')) return batch2Promise as Promise<Response>;
+                return Promise.resolve({ ok: true, json: () => Promise.resolve({}) } as any);
+            });
+
+            const names = Array.from({ length: 7 }, (_, i) => `ooo-${i + 1}`);
+            names.forEach((n) => store.getIcon(n));
+
+            await vi.waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(2), { timeout: 2000 });
+
+            resolveBatch2({
+                ok: true,
+                status: 200,
+                json: () => Promise.resolve({
+                    'ooo-6': '<svg>6</svg>',
+                    'ooo-7': '<svg>7</svg>'
+                })
+            });
+
+            await vi.waitFor(() => {
+                expect(store.icons_data['ooo-6']).toBe('<svg>6</svg>');
+                expect(store.icons_data['ooo-7']).toBe('<svg>7</svg>');
+            }, { timeout: 2000 });
+
+            expect(store.icons_data['ooo-1']).toBe('waiting');
+
+            resolveBatch1({
+                ok: true,
+                status: 200,
+                json: () => Promise.resolve({
+                    'ooo-1': '<svg>1</svg>',
+                    'ooo-2': '<svg>2</svg>',
+                    'ooo-3': '<svg>3</svg>',
+                    'ooo-4': '<svg>4</svg>',
+                    'ooo-5': '<svg>5</svg>'
+                })
+            });
+
+            await vi.waitFor(() => {
+                expect(store.icons_data['ooo-1']).toBe('<svg>1</svg>');
+                expect(store.icons_data['ooo-5']).toBe('<svg>5</svg>');
+            }, { timeout: 2000 });
+        });
+
+        it('mantém a reserva durante o fallback e limita o POST de sincronização a no máximo 5 ícones', async () => {
+            const store = useIconStore();
+
+            const mockFetch = vi.spyOn(globalThis, 'fetch').mockImplementation((input: any, init?: any) => {
+                const urlStr = String(input);
+
+                if (init?.method === 'POST') return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({ success: true })
+                } as any);
+
+                if (urlStr.includes('api.iconify.design')) {
+                    const match = urlStr.match(/api\.iconify\.design\/([^.]+)\.svg/);
+                    const iconName = match ? decodeURIComponent(match[1]) : 'icon';
+                    return Promise.resolve({
+                        ok: true,
+                        text: () => Promise.resolve(`<svg data-icon="${iconName}"></svg>`)
+                    } as any);
+                }
+
+                if (urlStr.includes('icons%5B%5D=')) return Promise.resolve({
+                    ok: true,
+                    status: 200,
+                    json: () => Promise.resolve({
+                        'partial-1': '<svg>p1</svg>',
+                        'partial-2': '<svg>p2</svg>',
+                        'partial-3': '<svg>p3</svg>',
+                        'partial-4': null,
+                        'partial-5': null
+                    })
+                } as any);
+
+                return Promise.resolve({ ok: true, json: () => Promise.resolve({}) } as any);
+            });
+
+            const names = ['partial-1', 'partial-2', 'partial-3', 'partial-4', 'partial-5'];
+            names.forEach((n) => store.getIcon(n));
+
+            await new Promise((r) => setTimeout(r, 250));
+            await new Promise((r) => setTimeout(r, 150));
+
+            expect(store.icons_data['partial-1']).toBe('<svg>p1</svg>');
+            expect(store.icons_data['partial-4']).toContain('data-icon="partial-4"');
+            expect(store.icons_data['partial-5']).toContain('data-icon="partial-5"');
+
+            const postCalls = mockFetch.mock.calls.filter((call) => call[1]?.method === 'POST');
+            expect(postCalls).toHaveLength(1);
+            const postBody = JSON.parse(postCalls[0][1]!.body as string);
+            expect(Object.keys(postBody.icons)).toHaveLength(2);
+            expect(Object.keys(postBody.icons).length).toBeLessThanOrEqual(5);
+        });
+
+        it('isola falhas HTTP entre lotes e permite que lote com falha acione fallback enquanto outro lote tem sucesso', async () => {
+            const store = useIconStore();
+            const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+            vi.spyOn(globalThis, 'fetch').mockImplementation((input: any, init?: any) => {
+                const urlStr = String(input);
+                if (init?.method === 'POST') return Promise.resolve({ ok: true, json: () => Promise.resolve({}) } as any);
+
+                if (urlStr.includes('api.iconify.design')) return Promise.resolve({
+                    ok: true,
+                    text: () => Promise.resolve('<svg>fallback</svg>')
+                } as any);
+
+                if (urlStr.includes('iso-1')) return Promise.reject(new Error('Falha de rede'));
+
+                if (urlStr.includes('iso-6')) return Promise.resolve({
+                    ok: true,
+                    status: 200,
+                    json: () => Promise.resolve({
+                        'iso-6': '<svg>success-6</svg>'
+                    })
+                } as any);
+
+                return Promise.resolve({ ok: true, json: () => Promise.resolve({}) } as any);
+            });
+
+            const names = Array.from({ length: 6 }, (_, i) => `iso-${i + 1}`);
+            names.forEach((n) => store.getIcon(n));
+
+            await new Promise((r) => setTimeout(r, 250));
+            await new Promise((r) => setTimeout(r, 150));
+
+            expect(store.icons_data['iso-6']).toBe('<svg>success-6</svg>');
+            expect(store.icons_data['iso-1']).toBe('<svg>fallback</svg>');
+            expect(consoleSpy).toHaveBeenCalled();
+
+            consoleSpy.mockRestore();
+        });
+
+        it('lotes já em voo concluem mesmo se o contador de erros atingir o limite MAX_FETCH_RETRIES', async () => {
+            const store = useIconStore();
+            const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+            let resolveBatch: any;
+            const batchPromise = new Promise((resolve) => {
+                resolveBatch = resolve;
+            });
+
+            vi.spyOn(globalThis, 'fetch').mockImplementation((input: any) => {
+                const urlStr = String(input);
+                if (urlStr.includes('lim-flight')) return batchPromise as Promise<Response>;
+                if (urlStr.includes('lim-fail')) return Promise.reject(new Error('Network error'));
+                return Promise.resolve({ ok: true, json: () => Promise.resolve({}) } as any);
+            });
+
+            // Dispara lote que ficará em voo
+            store.getIcon('lim-flight-1');
+            await vi.waitFor(() => expect((globalThis.fetch as any)).toHaveBeenCalled(), { timeout: 2000 });
+
+            // Dispara 4 falhas consecutivas para atingir MAX_FETCH_RETRIES (4)
+            for (let i = 0; i < 4; i++) {
+                store.getIcon(`lim-fail-${i}`);
+                await new Promise((r) => setTimeout(r, 250));
+                await new Promise((r) => setTimeout(r, 50));
+            }
+
+            // Tenta disparar novo ícone com erros no limite -> não deve despachar novo fetch
+            const callsBefore = (globalThis.fetch as any).mock.calls.length;
+            store.getIcon('lim-blocked');
+            await new Promise((r) => setTimeout(r, 250));
+            expect((globalThis.fetch as any).mock.calls.length).toBe(callsBefore);
+
+            // O lote em voo pode concluir com sucesso normalmente
+            resolveBatch({
+                ok: true,
+                status: 200,
+                json: () => Promise.resolve({ 'lim-flight-1': '<svg>flight-ok</svg>' })
+            });
+
+            await vi.waitFor(() => {
+                expect(store.icons_data['lim-flight-1']).toBe('<svg>flight-ok</svg>');
+            }, { timeout: 2000 });
+
+            consoleSpy.mockRestore();
+        });
+
+        it('cancela efeitos tardios de múltiplos lotes pendentes ao descartar a store', async () => {
+            const store = useIconStore();
+
+            let resolveBatch1: any;
+            const batch1Promise = new Promise((resolve) => {
+                resolveBatch1 = resolve;
+            });
+            let resolveBatch2: any;
+            const batch2Promise = new Promise((resolve) => {
+                resolveBatch2 = resolve;
+            });
+
+            const mockFetch = vi.spyOn(globalThis, 'fetch').mockImplementation((input: any) => {
+                const urlStr = String(input);
+                if (urlStr.includes('disp-1')) return batch1Promise as Promise<Response>;
+                if (urlStr.includes('disp-6')) return batch2Promise as Promise<Response>;
+                return Promise.resolve({ ok: true, json: () => Promise.resolve({}) } as any);
+            });
+
+            const names = Array.from({ length: 6 }, (_, i) => `disp-${i + 1}`);
+            names.forEach((n) => store.getIcon(n));
+
+            await vi.waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(2), { timeout: 2000 });
+
+            store.$dispose();
+
+            resolveBatch1({
+                ok: true,
+                status: 200,
+                json: () => Promise.resolve({ 'disp-1': '<svg>1</svg>' })
+            });
+            resolveBatch2({
+                ok: true,
+                status: 200,
+                json: () => Promise.resolve({ 'disp-6': '<svg>6</svg>' })
+            });
+
+            await new Promise((r) => setTimeout(r, 100));
+
+            expect(store.icons_data['disp-1']).toBe('waiting');
+            expect(store.icons_data['disp-6']).toBe('waiting');
+        });
+    });
 });

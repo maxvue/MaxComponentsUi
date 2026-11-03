@@ -88,6 +88,7 @@ export const useIconStore = defineStore('icons', () => {
     const inFlightIcons = new Set<string>();
     const queueTrigger = ref(0);
 
+    const MAX_BATCH_SIZE = 5;
     const MAX_FETCH_RETRIES = 4;
     const MAX_ICON_RETRIES = 4;
     const FETCH_RETRY_RESET_DELAY = 30000;
@@ -175,6 +176,105 @@ export const useIconStore = defineStore('icons', () => {
         }
     };
 
+    const processBatch = async (batchIcons: string[]) => {
+        const params = new URLSearchParams();
+        batchIcons.forEach((icon: string) => params.append('icons[]', icon));
+
+        const baseUrl = getMaxAppConfig().routeIcons ?? 'https://engeapp.com.br/api/icons';
+        const requestUrl = `${baseUrl}?${params.toString()}`;
+
+        try {
+            const res = await fetch(requestUrl, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            });
+            if (isDisposed) return;
+            if (res.ok === false) throw new Error(`HTTP ${res.status}`);
+
+            const data = await res.json();
+            if (isDisposed) return;
+            const deltaToPersist: Record<string, SanitizedSvg> = {};
+            const missing_icons: string[] = [];
+
+            for (const icon_name of batchIcons) {
+                if (data && typeof data[icon_name] === 'string') {
+                    const clean = sanitizeSvg(data[icon_name]);
+                    if (clean) {
+                        icons_data.value[icon_name] = clean;
+                        deltaToPersist[icon_name] = clean;
+                        delete errors.value[icon_name];
+                        continue;
+                    }
+                }
+                missing_icons.push(icon_name);
+            }
+
+            errors.value['fetch'] = 0;
+            if (size(deltaToPersist) > 0) saveSanitizedIconsToIDB(deltaToPersist);
+
+            if (missing_icons.length > 0) {
+                const recoveredIcons: Record<string, SanitizedSvg> = {};
+
+                await Promise.all(missing_icons.map(async (icon_name: string) => {
+                    if (isDisposed) return;
+                    const fallbackSvg = await fetchIconFallback(icon_name);
+                    if (isDisposed) return;
+                    if (fallbackSvg) {
+                        icons_data.value[icon_name] = fallbackSvg;
+                        delete errors.value[icon_name];
+                        recoveredIcons[icon_name] = fallbackSvg;
+                        return;
+                    }
+
+                    const currentRetries = (errors.value[icon_name] ?? 0) + 1;
+                    errors.value[icon_name] = currentRetries;
+
+                    if (currentRetries >= MAX_ICON_RETRIES) {
+                        icons_data.value[icon_name] = '';
+                        console.error('Erro na obtenção do ícone', icon_name);
+                    }
+                }));
+
+                if (isDisposed) return;
+                if (size(recoveredIcons) > 0) {
+                    saveSanitizedIconsToIDB(recoveredIcons);
+                    syncIconsToBackend(recoveredIcons);
+                }
+            }
+        } catch (error: any) {
+            if (isDisposed || error?.name === 'AbortError') return;
+            console.error('Erro na Requisição dos ícones', { 'url': requestUrl, 'error': error });
+            errors.value['fetch'] += 1;
+
+            if (errors.value['fetch'] >= MAX_FETCH_RETRIES) scheduleFetchErrorReset();
+
+            const recoveredIcons: Record<string, SanitizedSvg> = {};
+
+            await Promise.all(batchIcons.map(async (icon_name: string) => {
+                if (isDisposed) return;
+                const fallbackSvg = await fetchIconFallback(icon_name);
+                if (isDisposed) return;
+                if (fallbackSvg) {
+                    icons_data.value[icon_name] = fallbackSvg;
+                    delete errors.value[icon_name];
+                    recoveredIcons[icon_name] = fallbackSvg;
+                }
+            }));
+
+            if (isDisposed) return;
+            if (size(recoveredIcons) > 0) {
+                saveSanitizedIconsToIDB(recoveredIcons);
+                syncIconsToBackend(recoveredIcons);
+            }
+        } finally {
+            batchIcons.forEach((icon: string) => inFlightIcons.delete(icon));
+            if (!isDisposed) {
+                const hasMore = list_icons_waiting_request.value.some((icon: string) => !inFlightIcons.has(icon));
+                if (hasMore && errors.value['fetch'] < MAX_FETCH_RETRIES) queueTrigger.value++;
+            }
+        }
+    };
+
     watchDebounced(() => [list_icons_waiting_request.value, errors.value, queueTrigger.value], () => {
         if (isDisposed) return;
 
@@ -184,108 +284,14 @@ export const useIconStore = defineStore('icons', () => {
         );
 
         if (size(eligibleIcons) > 0 && errors.value['fetch'] < MAX_FETCH_RETRIES) {
-            const icons_to_fetch = [...eligibleIcons];
-            icons_to_fetch.forEach((icon) => inFlightIcons.add(icon));
+            // Reserva sincronamente todos os nomes do snapshot antes de iniciar os transportes
+            eligibleIcons.forEach((icon: string) => inFlightIcons.add(icon));
 
-            const params = new URLSearchParams();
-            icons_to_fetch.forEach((icon) => params.append('icons[]', icon));
-
-            const baseUrl = getMaxAppConfig().routeIcons ?? 'https://engeapp.com.br/api/icons';
-            const requestUrl = `${baseUrl}?${params.toString()}`;
-
-            fetch(requestUrl, {
-                method: 'GET',
-                headers: { 'Accept': 'application/json' }
-            }).then(async (res) => {
-                if (isDisposed) return;
-                if (res.ok === false) throw new Error(`HTTP ${res.status}`);
-
-                return res.json();
-            }).then(async (data) => {
-                if (isDisposed) return;
-                const deltaToPersist: Record<string, SanitizedSvg> = {};
-                const missing_icons: string[] = [];
-
-                for (const icon_name of icons_to_fetch) {
-                    if (data && typeof data[icon_name] === 'string') {
-                        const clean = sanitizeSvg(data[icon_name]);
-                        if (clean) {
-                            icons_data.value[icon_name] = clean;
-                            deltaToPersist[icon_name] = clean;
-                            delete errors.value[icon_name];
-                            continue;
-                        }
-                    }
-                    missing_icons.push(icon_name);
-                }
-
-                errors.value['fetch'] = 0;
-                if (size(deltaToPersist) > 0) saveSanitizedIconsToIDB(deltaToPersist);
-
-                if (missing_icons.length > 0) {
-                    const recoveredIcons: Record<string, SanitizedSvg> = {};
-
-                    await Promise.all(missing_icons.map(async (icon_name) => {
-                        if (isDisposed) return;
-                        const fallbackSvg = await fetchIconFallback(icon_name);
-                        if (isDisposed) return;
-                        if (fallbackSvg) {
-                            icons_data.value[icon_name] = fallbackSvg;
-                            delete errors.value[icon_name];
-                            recoveredIcons[icon_name] = fallbackSvg;
-                            return;
-                        }
-
-                        const currentRetries = (errors.value[icon_name] ?? 0) + 1;
-                        errors.value[icon_name] = currentRetries;
-
-                        if (currentRetries >= MAX_ICON_RETRIES) {
-                            icons_data.value[icon_name] = '';
-                            console.error('Erro na obtenção do ícone', icon_name);
-                        }
-                    }));
-
-                    if (isDisposed) return;
-                    if (size(recoveredIcons) > 0) {
-                        saveSanitizedIconsToIDB(recoveredIcons);
-                        syncIconsToBackend(recoveredIcons);
-                    }
-                }
-
-            }).catch(async (error) => {
-                if (isDisposed || error?.name === 'AbortError') return;
-                console.error('Erro na Requisição dos ícones', { 'url': requestUrl, 'error': error });
-                errors.value['fetch'] += 1;
-
-                if (errors.value['fetch'] >= MAX_FETCH_RETRIES) scheduleFetchErrorReset();
-
-                const recoveredIcons: Record<string, SanitizedSvg> = {};
-
-                await Promise.all(icons_to_fetch.map(async (icon_name) => {
-                    if (isDisposed) return;
-                    const fallbackSvg = await fetchIconFallback(icon_name);
-                    if (isDisposed) return;
-                    if (fallbackSvg) {
-                        icons_data.value[icon_name] = fallbackSvg;
-                        delete errors.value[icon_name];
-                        recoveredIcons[icon_name] = fallbackSvg;
-                    }
-                }));
-
-                if (isDisposed) return;
-                if (size(recoveredIcons) > 0) {
-                    saveSanitizedIconsToIDB(recoveredIcons);
-                    syncIconsToBackend(recoveredIcons);
-                }
-            }).finally(() => {
-                icons_to_fetch.forEach((icon) => inFlightIcons.delete(icon));
-                if (!isDisposed) {
-                    const hasMore = list_icons_waiting_request.value.some((icon: string) => !inFlightIcons.has(icon));
-                    if (hasMore && errors.value['fetch'] < MAX_FETCH_RETRIES) queueTrigger.value++;
-                }
-            });
+            for (let i = 0; i < eligibleIcons.length; i += MAX_BATCH_SIZE) {
+                const batch = eligibleIcons.slice(i, i + MAX_BATCH_SIZE);
+                void processBatch(batch);
+            }
         }
-
     }, { debounce: 50, maxWait: 150, deep: true });
 
     const saveCache = () => {

@@ -1,0 +1,96 @@
+{
+  "version": 2,
+  "planRevision": "83243d3b6e50d4fca97a2b6aaf5ca2c9355f510b5896419aaeb6f4dd7c373839",
+  "tasks": [
+    {
+      "id": "T1",
+      "status": "completed",
+      "files": [
+        "src/stores/useIcon.Store.ts",
+        "tests/stores/useIcon.Store.test.ts",
+        "tests/components/MaxIcon.test.ts"
+      ],
+      "validations": [],
+      "revision": "c829c9f0bf5e9b1e3299daa85c71a1f4f0345987f5cdecaa7f04a19717ea2901"
+    },
+    {
+      "id": "T2",
+      "status": "completed",
+      "files": [
+        "src/stores/useIcon.Store.ts",
+        "tests/stores/useIcon.Store.test.ts"
+      ],
+      "validations": [],
+      "revision": "c829c9f0bf5e9b1e3299daa85c71a1f4f0345987f5cdecaa7f04a19717ea2901"
+    },
+    {
+      "id": "T3",
+      "status": "completed",
+      "files": [
+        "src/stores/useIcon.Store.ts",
+        "tests/stores/useIcon.Store.test.ts"
+      ],
+      "validations": [],
+      "revision": "c829c9f0bf5e9b1e3299daa85c71a1f4f0345987f5cdecaa7f04a19717ea2901"
+    },
+    {
+      "id": "T4",
+      "status": "completed",
+      "files": [
+        "tests/components/MaxIcon.test.ts",
+        "tests/browser/MaxIconRetry.browser.ts"
+      ],
+      "validations": [],
+      "revision": "c829c9f0bf5e9b1e3299daa85c71a1f4f0345987f5cdecaa7f04a19717ea2901"
+    }
+  ],
+  "verification": {
+    "revision": "c829c9f0bf5e9b1e3299daa85c71a1f4f0345987f5cdecaa7f04a19717ea2901",
+    "checks": [
+      {
+        "command": "npx vitest run tests/stores/useIcon.Store.test.ts tests/stores/useIconStore.test.ts tests/components/MaxIcon.test.ts",
+        "revision": "c829c9f0bf5e9b1e3299daa85c71a1f4f0345987f5cdecaa7f04a19717ea2901",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check",
+        "revision": "c829c9f0bf5e9b1e3299daa85c71a1f4f0345987f5cdecaa7f04a19717ea2901",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check:test",
+        "revision": "c829c9f0bf5e9b1e3299daa85c71a1f4f0345987f5cdecaa7f04a19717ea2901",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npx eslint .",
+        "revision": "c829c9f0bf5e9b1e3299daa85c71a1f4f0345987f5cdecaa7f04a19717ea2901",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npx stylelint src/components/MaxIcon.vue",
+        "revision": "c829c9f0bf5e9b1e3299daa85c71a1f4f0345987f5cdecaa7f04a19717ea2901",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run build",
+        "revision": "c829c9f0bf5e9b1e3299daa85c71a1f4f0345987f5cdecaa7f04a19717ea2901",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run test:browser -- tests/browser/MaxIconRetry.browser.ts",
+        "revision": "c829c9f0bf5e9b1e3299daa85c71a1f4f0345987f5cdecaa7f04a19717ea2901",
+        "result": "failed",
+        "exitCode": 1
+      }
+    ]
+  },
+  "updatedAt": 1793731140000,
+  "nextAction": "Instalação do executável Chromium do Playwright e aprovação do usuário para commit/merge."
+}
