@@ -1,0 +1,130 @@
+{
+  "version": 2,
+  "planRevision": "050b0d8bbc4f1892de7632bbaefda918fcac84b7870439968588a92712e3e208",
+  "tasks": [
+    {
+      "id": "T1",
+      "status": "completed",
+      "files": [],
+      "validations": []
+    },
+    {
+      "id": "T2",
+      "status": "completed",
+      "files": [
+        "src/composables/useActiveOverlayPosition.ts"
+      ],
+      "revision": "3ae50e270c6d9ebd9bc9fcf66aff27617c035954c7d1f7d304f6b4c5ea9a2bf1",
+      "validations": []
+    },
+    {
+      "id": "T3",
+      "status": "completed",
+      "files": [
+        "src/composables/useActiveOverlayPosition.ts",
+        "tests/browser/fontSizePreference.browser.ts",
+        "tests/components/MaxApp.test.ts"
+      ],
+      "revision": "3ae50e270c6d9ebd9bc9fcf66aff27617c035954c7d1f7d304f6b4c5ea9a2bf1",
+      "validations": []
+    },
+    {
+      "id": "T4",
+      "status": "completed",
+      "files": [],
+      "validations": [
+        {
+          "command": "npm run check:lockfile",
+          "revision": "3ae50e270c6d9ebd9bc9fcf66aff27617c035954c7d1f7d304f6b4c5ea9a2bf1",
+          "result": "passed"
+        },
+        {
+          "command": "npx vitest run tests/components/MaxApp.test.ts tests/components/MaxUserSection.test.ts tests/helpers/useHtmlFontSize.test.ts",
+          "revision": "3ae50e270c6d9ebd9bc9fcf66aff27617c035954c7d1f7d304f6b4c5ea9a2bf1",
+          "result": "passed"
+        },
+        {
+          "command": "npm run type-check:test",
+          "revision": "3ae50e270c6d9ebd9bc9fcf66aff27617c035954c7d1f7d304f6b4c5ea9a2bf1",
+          "result": "passed"
+        },
+        {
+          "command": "npm run lint",
+          "revision": "3ae50e270c6d9ebd9bc9fcf66aff27617c035954c7d1f7d304f6b4c5ea9a2bf1",
+          "result": "passed"
+        },
+        {
+          "command": "npm run build",
+          "revision": "3ae50e270c6d9ebd9bc9fcf66aff27617c035954c7d1f7d304f6b4c5ea9a2bf1",
+          "result": "passed"
+        },
+        {
+          "command": "npm run test",
+          "revision": "3ae50e270c6d9ebd9bc9fcf66aff27617c035954c7d1f7d304f6b4c5ea9a2bf1",
+          "result": "failed"
+        },
+        {
+          "command": "PLAYWRIGHT_BROWSERS_PATH=/home/johnattas/.cache/ms-playwright npx vitest run --config vitest.browser.config.ts tests/browser/fontSizePreference.browser.ts",
+          "revision": "3ae50e270c6d9ebd9bc9fcf66aff27617c035954c7d1f7d304f6b4c5ea9a2bf1",
+          "result": "failed"
+        }
+      ]
+    },
+    {
+      "id": "T5",
+      "status": "manualPending",
+      "files": [],
+      "validations": [],
+      "nextAction": "Aguardar disponibilização da revisão na aplicação consumidora em ambiente autorizado para roteiro manual de aceite"
+    }
+  ],
+  "verification": {
+    "revision": "3ae50e270c6d9ebd9bc9fcf66aff27617c035954c7d1f7d304f6b4c5ea9a2bf1",
+    "checks": [
+      {
+        "command": "npm run check:lockfile",
+        "revision": "3ae50e270c6d9ebd9bc9fcf66aff27617c035954c7d1f7d304f6b4c5ea9a2bf1",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npx vitest run tests/components/MaxApp.test.ts tests/components/MaxUserSection.test.ts tests/helpers/useHtmlFontSize.test.ts",
+        "revision": "3ae50e270c6d9ebd9bc9fcf66aff27617c035954c7d1f7d304f6b4c5ea9a2bf1",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check:test",
+        "revision": "3ae50e270c6d9ebd9bc9fcf66aff27617c035954c7d1f7d304f6b4c5ea9a2bf1",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run lint",
+        "revision": "3ae50e270c6d9ebd9bc9fcf66aff27617c035954c7d1f7d304f6b4c5ea9a2bf1",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run build",
+        "revision": "3ae50e270c6d9ebd9bc9fcf66aff27617c035954c7d1f7d304f6b4c5ea9a2bf1",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run test",
+        "revision": "3ae50e270c6d9ebd9bc9fcf66aff27617c035954c7d1f7d304f6b4c5ea9a2bf1",
+        "result": "failed",
+        "exitCode": 1
+      },
+      {
+        "command": "PLAYWRIGHT_BROWSERS_PATH=/home/johnattas/.cache/ms-playwright npx vitest run --config vitest.browser.config.ts tests/browser/fontSizePreference.browser.ts",
+        "revision": "3ae50e270c6d9ebd9bc9fcf66aff27617c035954c7d1f7d304f6b4c5ea9a2bf1",
+        "result": "failed",
+        "exitCode": 1
+      }
+    ]
+  },
+  "updatedAt": 1793709375445,
+  "nextAction": "Aguardar disponibilização da revisão na aplicação consumidora em ambiente autorizado para roteiro manual de aceite"
+}

@@ -563,6 +563,33 @@ describe('MaxApp', () => {
             expect(saveSpy).toHaveBeenCalledTimes(1);
             expect(wrapper.emitted('changeFontSize')).toEqual([[19]]);
         });
+
+        it('atualiza fontSize ao clicar no controle real de ajuste de fonte dentro do menu do avatar no shell', async () => {
+            const user = loadUser({ id: 1, name: 'Maria', settings: { fontSize: 16, customTheme: 'dark-blue' } });
+            const saveSpy = vi.fn();
+            (user as any).save = saveSpy;
+
+            const wrapper = mountApp();
+            await wrapper.vm.$nextTick();
+
+            const trigger = wrapper.find('.user-profile-trigger');
+            expect(trigger.exists()).toBe(true);
+
+            await trigger.trigger('click');
+            await wrapper.vm.$nextTick();
+
+            const plusBtn = wrapper.find('button[aria-label="Aumentar tamanho da fonte"]');
+            expect(plusBtn.exists()).toBe(true);
+
+            await plusBtn.trigger('click');
+            await wrapper.vm.$nextTick();
+
+            expect(document.documentElement.style.fontSize).toBe('17px');
+            expect(user.data?.settings?.fontSize).toBe(17);
+            expect(user.data?.settings?.customTheme).toBe('dark-blue');
+            expect(saveSpy).toHaveBeenCalledTimes(1);
+            expect(wrapper.emitted('changeFontSize')).toEqual([[17]]);
+        });
     });
 
     describe('disponibilidade de recursos (is_disponible)', () => {
