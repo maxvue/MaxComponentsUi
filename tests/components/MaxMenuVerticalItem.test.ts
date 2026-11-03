@@ -134,5 +134,70 @@ describe('MaxMenuVerticalItem', () => {
             expect(curva.attributes('aria-hidden')).toBe('true');
         }
     });
+
+    it('aplica tamanhos customizados aos ícones por item e mantém fallback 1.5 nos itens sem configuração', async () => {
+        const itemsWithSizes: SideMenuItem[] = [
+            {
+                id: 'item-custom-1',
+                size_side: '1.8rem',
+                details: {
+                    route: 'page-1',
+                    icon: 'mdi:star'
+                }
+            },
+            {
+                id: 'item-custom-2',
+                details: {
+                    route: 'page-2',
+                    icon: 'mdi:cog',
+                    size: '22px'
+                }
+            },
+            {
+                id: 'item-default',
+                details: {
+                    route: 'page-3',
+                    icon: 'mdi:home'
+                }
+            }
+        ];
+
+        const wrapper = mount(MaxMenuVerticalItem, {
+            props: { items: itemsWithSizes },
+            global: {
+                plugins: [pinia],
+                directives: { tooltip: () => {} },
+                stubs: {
+                    MaxIconButton: true,
+                    MaxIcon: {
+                        name: 'MaxIcon',
+                        props: ['size', 'icon'],
+                        template: '<span class="max-icon-stub" :data-size="size" :data-icon="icon" />'
+                    }
+                }
+            }
+        });
+
+        const icons = wrapper.findAll('.max-icon-stub');
+        expect(icons).toHaveLength(3);
+        expect(icons[0].attributes('data-size')).toBe('1.8rem');
+        expect(icons[1].attributes('data-size')).toBe('22px');
+        expect(icons[2].attributes('data-size')).toBe('1.5');
+
+        // Atualização reativa: alterando props sem remontar
+        await wrapper.setProps({
+            items: [
+                {
+                    id: 'item-custom-1',
+                    size_side: '2.5rem',
+                    details: { route: 'page-1', icon: 'mdi:star' }
+                }
+            ]
+        });
+
+        const updatedIcons = wrapper.findAll('.max-icon-stub');
+        expect(updatedIcons).toHaveLength(1);
+        expect(updatedIcons[0].attributes('data-size')).toBe('2.5rem');
+    });
 });
 

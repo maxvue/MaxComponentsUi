@@ -54,7 +54,7 @@
                             @click.stop="handleItemClick(item)"
                             @keydown.enter.stop="handleItemClick(item)"
                         >
-                            <MaxIcon :icon="getItemIcon(item)" size="1.2" class="mobile-item-icon" />
+                            <MaxIcon :icon="getItemIcon(item)" :size="getMenuItemIconSize(item, 'side', '1.2')" class="mobile-item-icon" />
                             <span class="mobile-item-label">{{ getItemLabel(item) }}</span>
                             <MaxIcon
                                 v-if="hasSubItems(item)"
@@ -101,12 +101,7 @@
                                     @click.stop="openSubItem(sub)"
                                     @keydown.enter.stop="openSubItem(sub)"
                                 >
-                                    <MaxIcon
-                                        v-if="getMenuItemIcon(sub)"
-                                        :icon="getMenuItemIcon(sub)!"
-                                        size="1.0"
-                                        class="mobile-subitem-icon"
-                                    />
+                                    <MaxIcon v-if="getMenuItemIcon(sub)" :icon="getMenuItemIcon(sub)!" :size="getMenuItemIconSize(sub, 'side', '1.0')" class="mobile-subitem-icon" />
                                     <span v-else class="mobile-subitem-dot" aria-hidden="true" />
                                     <span class="mobile-subitem-label">{{ getMenuItemLabel(sub) }}</span>
                                 </div>
@@ -157,7 +152,8 @@
         getMenuItemIcon,
         getMenuItemRoute,
         isSubItemActive,
-        hasActiveSubItem
+        hasActiveSubItem,
+        getMenuItemIconSize
     } from '../helpers/menuHelpers';
     import type { SideMenuItem } from '../types/app';
 

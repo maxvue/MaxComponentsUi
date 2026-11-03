@@ -87,7 +87,7 @@
             </slot>
 
             <slot name="add">
-                <MaxPopoverMenu v-if="props.addItems?.length" icon="mdi:plus-circle" title="Adicionar Novo" light size="1.4" icon-hover-white :model="props.addItems" />
+                <MaxPopoverMenu v-if="props.addItems?.length" icon="mdi:plus-circle" title="Adicionar Novo" light size="1.4" icon-hover-white :model="props.addItems" item-icon-position="top" />
             </slot>
 
             <div class="tool-bar-plus">

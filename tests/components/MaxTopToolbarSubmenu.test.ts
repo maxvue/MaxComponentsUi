@@ -7,8 +7,8 @@ describe('MaxTopToolbarSubmenu', () => {
     const defaultGlobal = {
         stubs: {
             MaxIcon: {
-                template: '<span class="max-icon-stub" :data-icon="icon" />',
-                props: ['icon']
+                template: '<span class="max-icon-stub" :data-icon="icon" :data-size="size" />',
+                props: ['icon', 'size']
             },
             MaxIconButton: {
                 template: '<button class="max-icon-button-stub" :data-icon="icon" />',
@@ -120,5 +120,68 @@ describe('MaxTopToolbarSubmenu', () => {
         });
 
         expect(wrapper.find('.max-icon-button-stub').exists()).toBe(true);
+    });
+
+    it('aplica tamanhos customizados no submenu para itens com texto e somente ícone sem herança em subníveis', async () => {
+        const itemsWithSizes: MaxTopToolbarSubmenuItem[] = [
+            {
+                label: 'Item Texto Customizado',
+                icon: 'lucide:file',
+                size_top: '1.6rem',
+                icon_size: '1.4'
+            },
+            {
+                label: 'Item Texto Legado',
+                icon: 'lucide:folder',
+                icon_size: '1.5'
+            },
+            {
+                label: 'Item Pai',
+                icon: 'lucide:menu',
+                size_top: '2.0rem',
+                items: [
+                    { label: 'Filho Sem Tamanho', icon: 'lucide:link' },
+                    { label: 'Filho Com Tamanho', icon: 'lucide:star', size_top: '1.3rem' }
+                ]
+            },
+            {
+                icon: 'lucide:trash',
+                size_top: '22px',
+                action: () => {}
+            }
+        ];
+
+        const wrapper = mount(MaxTopToolbarSubmenu, {
+            props: { items: itemsWithSizes },
+            global: defaultGlobal
+        });
+
+        // 1. Item Texto Customizado: 1.6rem vence 1.4
+        const icons = wrapper.findAll('.menu-item-content .max-icon-stub');
+        expect(icons[0].attributes('data-size')).toBe('1.6rem');
+
+        // 2. Item Texto Legado: preserva 1.5
+        expect(icons[1].attributes('data-size')).toBe('1.5');
+
+        // 3. Item Pai com 2.0rem
+        expect(icons[2].attributes('data-size')).toBe('2.0rem');
+
+        // 4. Item somente ícone com size_top="22px"
+        const button = wrapper.find('.max-icon-button-stub');
+        expect(button.classes()).toContain('has-custom-icon-size');
+        expect(button.attributes('style')).toContain('--max-menu-item-icon-size: 22px');
+
+        // 5. Expande o submenu recursivo do Item Pai (índice 2)
+        const parentSubmenuItem = wrapper.findAll('.submenu-item')[2];
+        await parentSubmenuItem.trigger('mouseenter');
+
+        const nestedSubmenu = parentSubmenuItem.findComponent(MaxTopToolbarSubmenu);
+        expect(nestedSubmenu.exists()).toBe(true);
+
+        const nestedIcons = nestedSubmenu.findAll('.menu-item-content .max-icon-stub');
+        // Filho sem tamanho -> fallback padrão 1.2 (não herdou 2.0rem do pai!)
+        expect(nestedIcons[0].attributes('data-size')).toBe('1.2');
+        // Filho com tamanho -> 1.3rem
+        expect(nestedIcons[1].attributes('data-size')).toBe('1.3rem');
     });
 });

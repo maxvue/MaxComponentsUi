@@ -202,4 +202,94 @@ describe('MaxPopoverMenu', () => {
             expect(wrapper.find('.max-popover-menu').attributes('style')).toContain('1.1rem');
         });
     });
+
+    describe('itemIconPosition e tamanhos dos ícones dos itens', () => {
+        const testItems = [
+            { label: 'Item 1', icon: 'mdi:star', size_top: '1.8rem', size_bottom: '1.4rem', size: '2.0rem' },
+            { label: 'Item 2', icon: 'mdi:home' } // sem tamanho customizado
+        ];
+
+        it('resolve ícones dos itens conforme itemIconPosition="top"', async () => {
+            const wrapper = mount(MaxPopoverMenu, {
+                props: {
+                    items: testItems,
+                    itemIconPosition: 'top'
+                },
+                global: {
+                    stubs: {
+                        MaxButton: true,
+                        MaxIcon: {
+                            name: 'MaxIcon',
+                            props: ['icon', 'size'],
+                            template: '<span class="max-icon-stub" :data-icon="icon" :data-size="size" />'
+                        }
+                    }
+                }
+            });
+
+            const vm = wrapper.vm as any;
+            vm.toggle();
+            await wrapper.vm.$nextTick();
+
+            const icons = document.body.querySelectorAll('.max-popover-menu-item .max-icon-stub');
+            expect(icons).toHaveLength(2);
+            expect(icons[0].getAttribute('data-size')).toBe('1.8rem');
+            expect(icons[1].getAttribute('data-size')).toBe('1.1'); // fallback
+        });
+
+        it('resolve ícones dos itens conforme itemIconPosition="bottom"', async () => {
+            const wrapper = mount(MaxPopoverMenu, {
+                props: {
+                    items: testItems,
+                    itemIconPosition: 'bottom'
+                },
+                global: {
+                    stubs: {
+                        MaxButton: true,
+                        MaxIcon: {
+                            name: 'MaxIcon',
+                            props: ['icon', 'size'],
+                            template: '<span class="max-icon-stub" :data-icon="icon" :data-size="size" />'
+                        }
+                    }
+                }
+            });
+
+            const vm = wrapper.vm as any;
+            vm.toggle();
+            await wrapper.vm.$nextTick();
+
+            const icons = document.body.querySelectorAll('.max-popover-menu-item .max-icon-stub');
+            expect(icons).toHaveLength(2);
+            expect(icons[0].getAttribute('data-size')).toBe('1.4rem');
+            expect(icons[1].getAttribute('data-size')).toBe('1.1');
+        });
+
+        it('mantém fallback 1.1 quando itemIconPosition é omitido', async () => {
+            const wrapper = mount(MaxPopoverMenu, {
+                props: {
+                    items: testItems
+                },
+                global: {
+                    stubs: {
+                        MaxButton: true,
+                        MaxIcon: {
+                            name: 'MaxIcon',
+                            props: ['icon', 'size'],
+                            template: '<span class="max-icon-stub" :data-icon="icon" :data-size="size" />'
+                        }
+                    }
+                }
+            });
+
+            const vm = wrapper.vm as any;
+            vm.toggle();
+            await wrapper.vm.$nextTick();
+
+            const icons = document.body.querySelectorAll('.max-popover-menu-item .max-icon-stub');
+            expect(icons).toHaveLength(2);
+            expect(icons[0].getAttribute('data-size')).toBe('1.1');
+            expect(icons[1].getAttribute('data-size')).toBe('1.1');
+        });
+    });
 });

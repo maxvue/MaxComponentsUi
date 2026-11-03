@@ -201,6 +201,50 @@ describe('MaxBottomMenu', () => {
             expect(wrapper.findAll('.bottom-menu-tab')).toHaveLength(0);
         }).not.toThrow();
     });
+
+    it('aplica tamanhos customizados às abas inferiores em ramos com e sem FAB e mantém FAB inalterado', () => {
+        const customTabs = [
+            { name: 'tab1', label: 'Tab 1', icon: 'mdi:home', size_bottom: '1.6rem' },
+            { name: 'tab2', label: 'Tab 2', icon: 'mdi:star', size: '20px' },
+            { name: 'tab3', label: 'Tab 3', icon: 'mdi:bell' },
+            { name: 'tab4', label: 'Tab 4', icon: 'mdi:cog', bottom_size: '1.5rem' }
+        ];
+
+        // 1. Sem FAB
+        const wrapperSemFab = mount(MaxBottomMenu, {
+            props: { tabs: customTabs, showFab: false }
+        });
+
+        const iconsSemFab = wrapperSemFab.findAll('.bottom-menu-tab').map((tab) => tab.findComponent({ name: 'MaxIcon' }));
+        expect(iconsSemFab[0].props('size')).toBe('1.6rem');
+        expect(iconsSemFab[1].props('size')).toBe('20px');
+        expect(iconsSemFab[2].props('size')).toBe('1.3'); // fallback
+        expect(iconsSemFab[3].props('size')).toBe('1.5rem');
+
+        // 2. Com FAB
+        const wrapperComFab = mount(MaxBottomMenu, {
+            props: {
+                tabs: customTabs,
+                showFab: true,
+                addItems: [{ label: 'Item Popover', icon: 'mdi:plus' }]
+            }
+        });
+
+        const tabIconsComFab = wrapperComFab.findAll('.bottom-menu-tab').map((tab) => tab.findComponent({ name: 'MaxIcon' }));
+        // 2 na esquerda + 2 na direita
+        expect(tabIconsComFab[0].props('size')).toBe('1.6rem');
+        expect(tabIconsComFab[1].props('size')).toBe('20px');
+        expect(tabIconsComFab[2].props('size')).toBe('1.3');
+        expect(tabIconsComFab[3].props('size')).toBe('1.5rem');
+
+        // Ícone fixo do FAB permanece 1.5
+        const fabIcon = wrapperComFab.find('.fab').findComponent({ name: 'MaxIcon' });
+        expect(fabIcon.props('size')).toBe('1.5');
+
+        // MaxPopoverMenu do FAB recebe item-icon-position="bottom"
+        const popover = wrapperComFab.findComponent({ name: 'MaxPopoverMenu' });
+        expect(popover.props('itemIconPosition')).toBe('bottom');
+    });
 });
 
 describe('MaxContainerApp', () => {

@@ -1,0 +1,142 @@
+{
+  "version": 2,
+  "planRevision": "709b6251e94b9ced613d10a4ca66db1026142ff01d3e0027e46abd86489409fd",
+  "tasks": [
+    {
+      "id": "T1",
+      "status": "completed",
+      "files": [],
+      "validations": []
+    },
+    {
+      "id": "T2",
+      "status": "completed",
+      "files": [
+        "src/types/app.ts",
+        "src/types/app.d.ts",
+        "src/helpers/menuHelpers.ts",
+        "tests/helpers/menuIconSize.test.ts"
+      ],
+      "validations": [
+        {
+          "command": "npx vitest run tests/helpers/menuIconSize.test.ts",
+          "revision": "7dca460ec9546f71fb8911bf99de71e50c203efb36a094ec210c8331eb8c8de7",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "T3",
+      "status": "completed",
+      "files": [
+        "src/components/MaxMenuVerticalItem.vue",
+        "src/components/MaxSideMenuMobile.vue",
+        "src/components/MaxSideMenuFlyout.vue",
+        "src/components/MaxBottomMenu.vue",
+        "tests/components/MaxMenuVerticalItem.test.ts",
+        "tests/components/MaxSideMenuMobile.subitems.test.ts",
+        "tests/components/MaxSideMenuFlyout.test.ts",
+        "tests/components/MaxBottomMenu.test.ts"
+      ],
+      "validations": [
+        {
+          "command": "npx vitest run tests/components/MaxMenuVerticalItem.test.ts tests/components/MaxSideMenuMobile.subitems.test.ts tests/components/MaxSideMenuFlyout.test.ts tests/components/MaxBottomMenu.test.ts",
+          "revision": "7dca460ec9546f71fb8911bf99de71e50c203efb36a094ec210c8331eb8c8de7",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "T4",
+      "status": "completed",
+      "files": [
+        "src/components/MaxTopToolbar.vue",
+        "src/components/MaxTopToolbarSubmenu.vue",
+        "src/components/MaxPopoverMenu.vue",
+        "src/components/MaxTopMenu.vue",
+        "tests/components/MaxTopToolbar.test.ts",
+        "tests/components/MaxTopToolbarSubmenu.test.ts",
+        "tests/components/MaxPopoverMenu.test.ts"
+      ],
+      "validations": [
+        {
+          "command": "npx vitest run tests/components/MaxTopToolbar.test.ts tests/components/MaxTopToolbarSubmenu.test.ts tests/components/MaxPopoverMenu.test.ts",
+          "revision": "7dca460ec9546f71fb8911bf99de71e50c203efb36a094ec210c8331eb8c8de7",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "T5",
+      "status": "manualPending",
+      "files": [
+        "tests/components/MaxApp.test.ts",
+        "tests/browser/menuIconSizes.browser.ts",
+        "README.md"
+      ],
+      "validations": [
+        {
+          "command": "npx vitest run tests/components/MaxApp.test.ts",
+          "revision": "7dca460ec9546f71fb8911bf99de71e50c203efb36a094ec210c8331eb8c8de7",
+          "result": "passed"
+        }
+      ],
+      "nextAction": "Executar 'npx playwright install' no host para validar medição geométrica de menuIconSizes.browser.ts no Chromium"
+    },
+    {
+      "id": "T6",
+      "status": "completed",
+      "files": [],
+      "validations": []
+    }
+  ],
+  "verification": {
+    "revision": "7dca460ec9546f71fb8911bf99de71e50c203efb36a094ec210c8331eb8c8de7",
+    "checks": [
+      {
+        "command": "npm run check:lockfile",
+        "revision": "7dca460ec9546f71fb8911bf99de71e50c203efb36a094ec210c8331eb8c8de7",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npx vitest run tests/helpers/menuIconSize.test.ts tests/components/MaxMenuVerticalItem.test.ts tests/components/MaxSideMenuMobile.subitems.test.ts tests/components/MaxSideMenuFlyout.test.ts tests/components/MaxBottomMenu.test.ts tests/components/MaxTopToolbar.test.ts tests/components/MaxTopToolbarSubmenu.test.ts tests/components/MaxPopoverMenu.test.ts tests/components/MaxApp.test.ts",
+        "revision": "7dca460ec9546f71fb8911bf99de71e50c203efb36a094ec210c8331eb8c8de7",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check",
+        "revision": "7dca460ec9546f71fb8911bf99de71e50c203efb36a094ec210c8331eb8c8de7",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check:test",
+        "revision": "7dca460ec9546f71fb8911bf99de71e50c203efb36a094ec210c8331eb8c8de7",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run lint",
+        "revision": "7dca460ec9546f71fb8911bf99de71e50c203efb36a094ec210c8331eb8c8de7",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run build",
+        "revision": "7dca460ec9546f71fb8911bf99de71e50c203efb36a094ec210c8331eb8c8de7",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run test:coverage",
+        "revision": "7dca460ec9546f71fb8911bf99de71e50c203efb36a094ec210c8331eb8c8de7",
+        "result": "failed",
+        "exitCode": 1
+      }
+    ]
+  },
+  "updatedAt": 1793715327945,
+  "nextAction": "Aguardando confirmação do usuário no painel para integração Git"
+}

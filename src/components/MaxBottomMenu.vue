@@ -27,14 +27,14 @@
                     @click="goTo(tab.name)"
                     @keydown.enter="goTo(tab.name)"
                 >
-                    <MaxIcon :icon="tab.icon" size="1.3" color="currentColor" />
+                    <MaxIcon :icon="tab.icon" :size="getMenuItemIconSize(tab, 'bottom', '1.3')" color="currentColor" />
                     <span v-if="props.showLabels && tab.label" class="bottom-menu-label">{{ tab.label }}</span>
                 </div>
 
                 <!-- FAB Central com menu de adição ou clique -->
                 <div class="bottom-menu-fab-wrapper">
                     <slot name="fab">
-                        <MaxPopoverMenu v-if="props.addItems?.length" :items="props.addItems" class="menu-plus-bottom">
+                        <MaxPopoverMenu v-if="props.addItems?.length" :items="props.addItems" item-icon-position="bottom" class="menu-plus-bottom">
                             <template #trigger="{ toggle, isOpen, menuId }">
                                 <button
                                     type="button"
@@ -76,7 +76,7 @@
                     @click="goTo(tab.name)"
                     @keydown.enter="goTo(tab.name)"
                 >
-                    <MaxIcon :icon="tab.icon" size="1.3" color="currentColor" />
+                    <MaxIcon :icon="tab.icon" :size="getMenuItemIconSize(tab, 'bottom', '1.3')" color="currentColor" />
                     <span v-if="props.showLabels && tab.label" class="bottom-menu-label">{{ tab.label }}</span>
                 </div>
             </template>
@@ -94,7 +94,7 @@
                     @click="goTo(tab.name)"
                     @keydown.enter="goTo(tab.name)"
                 >
-                    <MaxIcon :icon="tab.icon" size="1.3" color="currentColor" />
+                    <MaxIcon :icon="tab.icon" :size="getMenuItemIconSize(tab, 'bottom', '1.3')" color="currentColor" />
                     <span v-if="props.showLabels && tab.label" class="bottom-menu-label">{{ tab.label }}</span>
                 </div>
             </template>
@@ -107,9 +107,11 @@
     import { useRoute, useRouter } from 'vue-router';
     import MaxIcon from './MaxIcon.vue';
     import MaxPopoverMenu from './MaxPopoverMenu.vue';
+    import { getMenuItemIconSize } from '../helpers/menuHelpers';
+    import type { MenuIconSizeFields } from '../types/app';
 
     /** Aba exibida no menu inferior. */
-    export interface BottomTab {
+    export interface BottomTab extends MenuIconSizeFields {
         /** Nome da rota de destino. */
         name: string;
         /** Rótulo exibido abaixo do ícone. */

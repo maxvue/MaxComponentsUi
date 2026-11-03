@@ -56,7 +56,7 @@
                 >
                     <slot name="item" :data="item">
                         <div class="max-popover-menu-item">
-                            <MaxIcon :icon="item.icon ?? item.i" v-if="item.icon || item.i" size="1.1" />
+                            <MaxIcon v-if="item.icon || item.i" :icon="item.icon ?? item.i" :size="getItemIconSize(item)" />
                             <div class="max-popover-menu-label">{{ item.label }}</div>
                         </div>
                     </slot>
@@ -73,6 +73,8 @@
     import { useActiveOverlayPosition } from '../composables/useActiveOverlayPosition';
     import { getCssSize } from '../helpers/getCssSize';
     import { useOutsidePointer } from '../helpers/useOutsidePointer';
+    import { getMenuItemIconSize } from '../helpers/menuHelpers';
+    import type { MenuIconPosition } from '../types/app';
 
     const props = withDefaults(defineProps<{
         /** Texto do botão */
@@ -109,6 +111,8 @@
         plus?: boolean | string | number | undefined;
         /** Nome acessível para o botão do menu */
         ariaLabel?: string;
+        /** Posição do menu para contextualização dos tamanhos dos ícones dos itens */
+        itemIconPosition?: MenuIconPosition;
     }>(), {
         dark: 0.4,
         light: undefined,
@@ -124,6 +128,11 @@
     const resolvedItems = computed<any[]>(() => {
         return props.items ?? props.model ?? [];
     });
+
+    function getItemIconSize(item: any): string | number {
+        if (!props.itemIconPosition) return '1.1';
+        return getMenuItemIconSize(item, props.itemIconPosition, '1.1');
+    }
 
     const setItemRef = (el: any, index: number) => {
         itemRefs.value[index] = el as HTMLElement | null;

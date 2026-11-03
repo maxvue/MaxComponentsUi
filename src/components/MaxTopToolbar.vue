@@ -28,40 +28,13 @@
                             @click="handleItemClick(item, index)"
                             @focus="focusedIndex = index"
                         >
-                            <MaxIcon
-                                v-if="item.icon"
-                                :icon="item.icon"
-                                :size="item.icon_size ?? '1.2'"
-                                class="menu-item-icon"
-                                aria-hidden="true"
-                                tabindex="-1"
-                            />
+                            <MaxIcon v-if="item.icon" :icon="item.icon" :size="getMenuItemIconSize(item, 'top', item.icon_size ?? '1.2')" class="menu-item-icon" aria-hidden="true" tabindex="-1" />
                             <div class="menu-item-labels">
                                 <span class="menu-item-label">{{ item.label }}</span>
                                 <span v-if="item.subLabel" class="menu-item-sublabel">{{ item.subLabel }}</span>
                             </div>
                         </div>
-                        <MaxIconButton
-                            v-else
-                            :ref="(el) => setItemRef(el, index)"
-                            v-tooltip.bottom="item.tooltip ?? false"
-                            role="menuitem"
-                            :id="`top-toolbar-item-${index}`"
-                            :tabindex="focusedIndex === index && !item.disabled ? 0 : -1"
-                            :aria-label="item.ariaLabel || item.label || item.title || (typeof item.tooltip === 'string' ? item.tooltip : undefined) || 'Ação da barra de ferramentas'"
-                            :tooltip="typeof item.tooltip === 'string' ? item.tooltip : undefined"
-                            :aria-disabled="item.disabled ? 'true' : undefined"
-                            :icon="item.icon"
-                            light
-                            :transparent="true"
-                            :route="item.route ?? null"
-                            :action="item.action"
-                            :data="item.data ?? item.props ?? item.query"
-                            class="root"
-                            size="1.5"
-                            @focus="focusedIndex = index"
-                            @click="handleItemClick(item, index)"
-                        />
+                        <MaxIconButton v-else :ref="(el) => setItemRef(el, index)" v-tooltip.bottom="item.tooltip ?? false" role="menuitem" :id="`top-toolbar-item-${index}`" :tabindex="focusedIndex === index && !item.disabled ? 0 : -1" :aria-label="item.ariaLabel || item.label || item.title || (typeof item.tooltip === 'string' ? item.tooltip : undefined) || 'Ação da barra de ferramentas'" :tooltip="typeof item.tooltip === 'string' ? item.tooltip : undefined" :aria-disabled="item.disabled ? 'true' : undefined" :icon="item.icon" light :transparent="true" :route="item.route ?? null" :action="item.action" :data="item.data ?? item.props ?? item.query" :class="`root ${hasCustomIconSize(item) ? 'has-custom-icon-size' : ''}`" :style="hasCustomIconSize(item) ? { '--max-menu-item-icon-size': formatCustomIconSize(item) } : undefined" size="1.5" @focus="focusedIndex = index" @click="handleItemClick(item, index)" />
                     </div>
 
                     <!-- Submenu se houver item.items -->
@@ -92,6 +65,18 @@
     import MaxIconButton from './MaxIconButton.vue';
     import MaxTopToolbarSubmenu from './MaxTopToolbarSubmenu.vue';
     import { useTopToolbarStore } from '../stores/useTopToolbar.Store';
+    import { getMenuItemIconSize } from '../helpers/menuHelpers';
+
+    function hasCustomIconSize(item: any): boolean {
+        return Boolean(item && getMenuItemIconSize(item, 'top', '') !== '');
+    }
+
+    function formatCustomIconSize(item: any): string {
+        const raw = getMenuItemIconSize(item, 'top', '');
+        const str = String(raw).trim();
+        if (/^[0-9.]+$/.test(str)) return `${str}rem`;
+        return str;
+    }
 
     const SUBMENU_CLOSE_DELAY_MS = 1000;
 
@@ -449,6 +434,14 @@
             .max-top-toolbar-item-content,
             .p-menubar-item-content {
                 background-color: transparent !important;
+            }
+        }
+
+        :deep(.has-custom-icon-size) {
+            .max-icon-div,
+            .max-icon {
+                width: var(--max-menu-item-icon-size) !important;
+                height: var(--max-menu-item-icon-size) !important;
             }
         }
     }

@@ -34,14 +34,7 @@
                     @focus="focusedIndex = index"
                     @keydown="onSubmenuItemKeydown($event, index, item)"
                 >
-                    <MaxIcon
-                        v-if="item.icon"
-                        :icon="item.icon"
-                        :size="item.icon_size ?? '1.2'"
-                        class="menu-item-icon"
-                        aria-hidden="true"
-                        tabindex="-1"
-                    />
+                    <MaxIcon v-if="item.icon" :icon="item.icon" :size="getMenuItemIconSize(item, 'top', item.icon_size ?? '1.2')" class="menu-item-icon" aria-hidden="true" tabindex="-1" />
                     <div class="menu-item-labels">
                         <span class="menu-item-label">{{ item.label }}</span>
                         <span v-if="item.subLabel" class="menu-item-sublabel">{{ item.subLabel }}</span>
@@ -54,26 +47,7 @@
                         tabindex="-1"
                     />
                 </div>
-                <MaxIconButton
-                    v-else
-                    :ref="(el) => setItemRef(el, index)"
-                    v-tooltip.bottom="item.tooltip ?? false"
-                    role="menuitem"
-                    :id="getItemId(index)"
-                    :tabindex="focusedIndex === index && !item.disabled ? 0 : -1"
-                    :aria-label="item.ariaLabel || item.label || item.title || (typeof item.tooltip === 'string' ? item.tooltip : 'Opção de menu')"
-                    :tooltip="typeof item.tooltip === 'string' ? item.tooltip : undefined"
-                    :aria-disabled="item.disabled ? 'true' : undefined"
-                    :icon="item.icon"
-                    :transparent="true"
-                    :route="item.route ?? null"
-                    :action="item.action"
-                    :data="item.data ?? item.props ?? item.query"
-                    size="1.5"
-                    @focus="focusedIndex = index"
-                    @click="onItemClick(item, index)"
-                    @keydown="onSubmenuItemKeydown($event, index, item)"
-                />
+                <MaxIconButton v-else :ref="(el) => setItemRef(el, index)" v-tooltip.bottom="item.tooltip ?? false" role="menuitem" :id="getItemId(index)" :tabindex="focusedIndex === index && !item.disabled ? 0 : -1" :aria-label="item.ariaLabel || item.label || item.title || (typeof item.tooltip === 'string' ? item.tooltip : 'Opção de menu')" :tooltip="typeof item.tooltip === 'string' ? item.tooltip : undefined" :aria-disabled="item.disabled ? 'true' : undefined" :icon="item.icon" :transparent="true" :route="item.route ?? null" :action="item.action" :data="item.data ?? item.props ?? item.query" :class="`root ${hasCustomIconSize(item) ? 'has-custom-icon-size' : ''}`" :style="hasCustomIconSize(item) ? { '--max-menu-item-icon-size': formatCustomIconSize(item) } : undefined" size="1.5" @focus="focusedIndex = index" @click="onItemClick(item, index)" @keydown="onSubmenuItemKeydown($event, index, item)" />
             </div>
 
             <!-- Submenu recursivo aninhado -->
@@ -100,12 +74,14 @@
     import { hasContent } from '@maxvue/max-use';
     import MaxIconButton from './MaxIconButton.vue';
     import MaxIcon from './MaxIcon.vue';
+    import { getMenuItemIconSize } from '../helpers/menuHelpers';
+    import type { MenuIconSizeFields } from '../types/app';
 
     defineOptions({
         name: 'MaxTopToolbarSubmenu'
     });
 
-    export interface MaxTopToolbarSubmenuItem {
+    export interface MaxTopToolbarSubmenuItem extends MenuIconSizeFields {
         label?: string;
         subLabel?: string;
         ariaLabel?: string;
@@ -149,6 +125,17 @@
     const focusedIndex = ref<number>(0);
     const itemRefs = ref<Record<number, HTMLElement | null>>({});
     const nestedSubmenuRefs = ref<Record<number, any>>({});
+
+    function hasCustomIconSize(item: any): boolean {
+        return Boolean(item && getMenuItemIconSize(item, 'top', '') !== '');
+    }
+
+    function formatCustomIconSize(item: any): string {
+        const raw = getMenuItemIconSize(item, 'top', '');
+        const str = String(raw).trim();
+        if (/^[0-9.]+$/.test(str)) return `${str}rem`;
+        return str;
+    }
 
     const setItemRef = (el: any, index: number) => {
         if (el) itemRefs.value[index] = el.$el ?? el;
@@ -429,6 +416,14 @@
             top: 0 !important;
             transform: translateX(8px) !important;
             z-index: var(--max-z-index-dropdown, var(--max-layer-dropdown, 1000)) !important;
+        }
+
+        :deep(.has-custom-icon-size) {
+            .max-icon-div,
+            .max-icon {
+                width: var(--max-menu-item-icon-size) !important;
+                height: var(--max-menu-item-icon-size) !important;
+            }
         }
     }
 }

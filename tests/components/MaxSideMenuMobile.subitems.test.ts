@@ -32,7 +32,7 @@ const mountWithPinia = (component: any, options: Record<string, any> = {}) => mo
         plugins: [pinia],
         stubs: {
             teleport: true,
-            MaxIcon: { name: 'MaxIcon', props: ['icon', 'size'], template: '<span class="max-icon-stub" :data-icon="icon" />' },
+            MaxIcon: { name: 'MaxIcon', props: ['icon', 'size'], template: '<span class="max-icon-stub" :data-icon="icon" :data-size="size" />' },
             ...(options.global?.stubs ?? {})
         }
     }
@@ -207,5 +207,58 @@ describe('MaxSideMenuMobile com subitems (Modo Mobile / Accordion)', () => {
 
         expect(push).toHaveBeenCalledWith({ name: 'settings' });
         expect(system.side_menu_open).toBe(false);
+    });
+
+    it('aplica tamanhos customizados aos ícones de itens e subitens sem herança do pai', async () => {
+        const groupsWithSizes = [
+            {
+                title: 'Tamanhos',
+                items: [
+                    {
+                        id: 'custom-parent',
+                        label: 'Pai Customizado',
+                        icon: 'mdi:star',
+                        size_side: '1.6rem',
+                        route: 'parent_route',
+                        subitems: [
+                            { id: 'sub-with-size', label: 'Filho Com Tamanho', icon: 'mdi:check', size_side: '1.3rem' },
+                            { id: 'sub-no-size', label: 'Filho Sem Tamanho', icon: 'mdi:circle' }
+                        ]
+                    },
+                    {
+                        id: 'default-parent',
+                        label: 'Pai Padrão',
+                        icon: 'mdi:cog',
+                        route: 'default_route'
+                    }
+                ]
+            }
+        ];
+
+        const wrapper = mountWithPinia(MaxSideMenuMobile, {
+            props: { groups: groupsWithSizes }
+        });
+
+        // Ícone do item pai customizado
+        const parentItems = wrapper.findAll('.mobile-menu-item');
+        const customParentIcon = parentItems[0].find('.mobile-item-icon');
+        expect(customParentIcon.attributes('data-size')).toBe('1.6rem');
+
+        // Ícone do item pai padrão
+        const defaultParentIcon = parentItems[1].find('.mobile-item-icon');
+        expect(defaultParentIcon.attributes('data-size')).toBe('1.2');
+
+        // Abre o accordion para renderizar os subitens
+        await parentItems[0].trigger('click');
+
+        const subitems = wrapper.findAll('.mobile-subitem');
+        // subitem 0 é Visão Geral (não tem ícone)
+        // subitem 1 é "Filho Com Tamanho"
+        const sub1Icon = subitems[1].find('.mobile-subitem-icon');
+        expect(sub1Icon.attributes('data-size')).toBe('1.3rem');
+
+        // subitem 2 é "Filho Sem Tamanho" -> deve usar fallback '1.0', não herdando '1.6rem' do pai!
+        const sub2Icon = subitems[2].find('.mobile-subitem-icon');
+        expect(sub2Icon.attributes('data-size')).toBe('1.0');
     });
 });

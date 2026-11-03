@@ -802,4 +802,100 @@ describe('MaxApp', () => {
             expect(wrapper.find('.max-app-unavailable').exists()).toBe(false);
         });
     });
+
+    describe('passagem de tamanhos de ícones por item nos menus (T5)', () => {
+        it('repassa campos de tamanho em sideMenuItems para o layout sem perda de dados', () => {
+            loadUser();
+            const sideItems = [
+                {
+                    id: 'solar',
+                    size_side: '1.8rem',
+                    details: { route: 'board', icon: 'mdi:solar-panel', title: 'Solar' }
+                },
+                {
+                    id: 'clients',
+                    details: { route: 'clients', icon: 'mdi:account', title: 'Clientes', size: '20px' }
+                }
+            ];
+
+            const wrapper = mountApp({
+                props: { sideMenuItems: sideItems }
+            });
+
+            const pageLayout = wrapper.findComponent(MaxPageLayout);
+            expect(pageLayout.exists()).toBe(true);
+            expect(pageLayout.props('sideMenuItems')).toEqual(sideItems);
+            expect(pageLayout.props('sideMenuItems')?.[0]?.size_side).toBe('1.8rem');
+            expect(pageLayout.props('sideMenuItems')?.[1]?.details?.size).toBe('20px');
+        });
+
+        it('repassa campos de tamanho em bottomTabs e addItems para os menus inferiores e superiores', () => {
+            loadUser();
+            const bottomTabs = [
+                { name: 'board', label: 'Projetos', icon: 'mdi:solar-panel', size_bottom: '1.5rem' },
+                { name: 'clients', label: 'Clientes', icon: 'mdi:account', size: '18px' }
+            ];
+            const addItems = [
+                { label: 'Novo Projeto', icon: 'mdi:plus', size_top: '1.6rem', size_bottom: '1.4rem' }
+            ];
+
+            const wrapper = mountApp({
+                props: {
+                    bottomTabs,
+                    addItems
+                }
+            });
+
+            const pageLayout = wrapper.findComponent(MaxPageLayout);
+            expect(pageLayout.exists()).toBe(true);
+            expect(pageLayout.props('bottomTabs')).toEqual(bottomTabs);
+            expect(pageLayout.props('addItems')).toEqual(addItems);
+            expect(pageLayout.props('bottomTabs')?.[0]?.size_bottom).toBe('1.5rem');
+            expect(pageLayout.props('addItems')?.[0]?.size_top).toBe('1.6rem');
+        });
+
+        it('reage a alterações reativas nos tamanhos de ícones sem remontar o componente', async () => {
+            loadUser();
+            const item = reactive({
+                id: 'reactive-item',
+                size_side: '1.5rem',
+                details: { route: 'board', icon: 'mdi:solar-panel', title: 'Solar' }
+            });
+
+            const wrapper = mountApp({
+                props: { sideMenuItems: [item] }
+            });
+
+            const pageLayout = wrapper.findComponent(MaxPageLayout);
+            expect(pageLayout.props('sideMenuItems')?.[0]?.size_side).toBe('1.5rem');
+
+            // Alteração reativa direta no objeto
+            item.size_side = '2.2rem';
+            await wrapper.vm.$nextTick();
+
+            expect(pageLayout.props('sideMenuItems')?.[0]?.size_side).toBe('2.2rem');
+        });
+
+        it('preserva campos de tamanho vindos de menus em cache do useListMenusStore', async () => {
+            loadUser();
+            menusRef.value = {
+                side: [
+                    {
+                        id: 'store-item',
+                        size_side: '1.7rem',
+                        details: { route: 'board', icon: 'mdi:solar-panel', title: 'Solar Store' }
+                    }
+                ]
+            };
+
+            const wrapper = mountApp();
+            await wrapper.vm.$nextTick();
+
+            const pageLayout = wrapper.findComponent(MaxPageLayout);
+            expect(pageLayout.exists()).toBe(true);
+            const verticalItem = pageLayout.findComponent({ name: 'MaxMenuVerticalItem' });
+            expect(verticalItem.exists()).toBe(true);
+            expect(verticalItem.props('items')?.[0]?.size_side).toBe('1.7rem');
+        });
+    });
 });

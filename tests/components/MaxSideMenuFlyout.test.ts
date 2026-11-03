@@ -196,4 +196,41 @@ describe('MaxSideMenuFlyout', () => {
         expect(sfc).toMatch(/\.max-flyout-slide-leave-active\s*\{[^}]*transition:\s*transform\s+0\.28s\s+cubic-bezier\(0\.16,\s*1,\s*0\.3,\s*1\)/);
         expect(sfc).toMatch(/\.max-flyout-slide-enter-from,\s*\.max-flyout-slide-leave-to\s*\{[^}]*transform:\s*translateX\(-100%\);/);
     });
+
+    it('honra tamanhos customizados de ícone para pai (cabeçalho e visão geral) e subitens no flyout', async () => {
+        const itemWithCustomSizes: SideMenuItem = {
+            id: 'custom-crm',
+            size_side: '1.8rem',
+            details: {
+                title: 'Clientes Especiais',
+                icon: 'mdi:account-group',
+                route: 'clients_index'
+            },
+            subitems: [
+                { id: 'sub-1', label: 'Sub Com Tamanho', icon: 'mdi:star', size_side: '1.2rem', route: 'sub_1' },
+                { id: 'sub-2', label: 'Sub Sem Tamanho', icon: 'mdi:circle', route: 'sub_2' }
+            ]
+        };
+
+        const wrapper = mount(MaxSideMenuFlyout, {
+            props: { visible: true, item: itemWithCustomSizes },
+            global: { stubs: { MaxIcon: true } }
+        });
+
+        // Ícone do cabeçalho pai com size_side do pai
+        const headerIcon = wrapper.findComponent('.flyout-header-icon') as any;
+        expect(headerIcon.props('size')).toBe('1.8rem');
+
+        // Ícone de Visão Geral com size_side do pai
+        const overviewIcon = wrapper.findAllComponents('.flyout-item-icon')[0] as any;
+        expect(overviewIcon.props('size')).toBe('1.8rem');
+
+        // Subitem 1 com tamanho próprio
+        const sub1Icon = wrapper.findAllComponents('.flyout-item-icon')[1] as any;
+        expect(sub1Icon.props('size')).toBe('1.2rem');
+
+        // Subitem 2 sem tamanho -> fallback padrão 1.4
+        const sub2Icon = wrapper.findAllComponents('.flyout-item-icon')[2] as any;
+        expect(sub2Icon.props('size')).toBe('1.4');
+    });
 });

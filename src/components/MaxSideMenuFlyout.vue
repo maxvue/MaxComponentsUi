@@ -21,13 +21,7 @@
             <!-- Cabeçalho do menu lateral -->
             <div class="flyout-header">
                 <div class="flyout-title-wrap">
-                    <MaxIcon
-                        v-if="parentIcon"
-                        :icon="parentIcon"
-                        size="1.5"
-                        light
-                        class="flyout-header-icon"
-                    />
+                    <MaxIcon v-if="parentIcon" :icon="parentIcon" :size="getMenuItemIconSize(activeItem, 'side', '1.5')" light class="flyout-header-icon" />
                     <span class="flyout-title">{{ title }}</span>
                 </div>
                 <MaxIconButton
@@ -54,13 +48,7 @@
                     @click="handleParentClick"
                     @keydown.enter="handleParentClick"
                 >
-                    <MaxIcon
-                        v-if="parentIcon"
-                        :icon="parentIcon"
-                        size="1.4"
-                        light
-                        class="flyout-item-icon"
-                    />
+                    <MaxIcon v-if="parentIcon" :icon="parentIcon" :size="getMenuItemIconSize(activeItem, 'side', '1.4')" light class="flyout-item-icon" />
                     <span class="flyout-item-label">{{ title }} (Visão Geral)</span>
                 </div>
 
@@ -77,13 +65,7 @@
                     @click="handleSubItemClick(sub)"
                     @keydown.enter="handleSubItemClick(sub)"
                 >
-                    <MaxIcon
-                        v-if="getMenuItemIcon(sub)"
-                        :icon="getMenuItemIcon(sub)!"
-                        size="1.4"
-                        light
-                        class="flyout-item-icon"
-                    />
+                    <MaxIcon v-if="getMenuItemIcon(sub)" :icon="getMenuItemIcon(sub)!" :size="getMenuItemIconSize(sub, 'side', '1.4')" light class="flyout-item-icon" />
                     <span class="flyout-item-label">{{ getMenuItemLabel(sub) }}</span>
                 </div>
             </nav>
@@ -103,7 +85,8 @@
         getMenuItemLabel,
         getMenuItemIcon,
         getMenuItemRoute,
-        isSubItemActive
+        isSubItemActive,
+        getMenuItemIconSize
     } from '../helpers/menuHelpers';
     import { isMenuRouteActive } from '../helpers/menuRouteMatches';
     import type { SideMenuItem, SideMenuSubItem } from '../types/app';

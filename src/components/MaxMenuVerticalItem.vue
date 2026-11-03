@@ -14,17 +14,7 @@
         @click="(event) => handleItemClick(item, event)"
         @keydown.enter="(event) => handleItemClick(item, event)"
     >
-        <MaxIcon
-            v-if="item.details?.icon || (item as any).icon"
-            :icon="item.details?.icon || (item as any).icon"
-            :i="item.details?.icon || (item as any).icon"
-            size="1.5"
-            :light="isFlyoutActive(item) ? true : !isActive(item)"
-            :color="isFlyoutActive(item) ? 'var(--layout-shell-text, #ffffff)' : (isActive(item) ? 'var(--blue-750)' : undefined)"
-            aria-hidden="true"
-            tabindex="-1"
-            class="max-menu-vertical-item-icon"
-        />
+        <MaxIcon v-if="item.details?.icon || (item as any).icon" :icon="item.details?.icon || (item as any).icon" :i="item.details?.icon || (item as any).icon" :size="getMenuItemIconSize(item, 'side', '1.5')" :light="isFlyoutActive(item) ? true : !isActive(item)" :color="isFlyoutActive(item) ? 'var(--layout-shell-text, #ffffff)' : (isActive(item) ? 'var(--blue-750)' : undefined)" aria-hidden="true" tabindex="-1" class="max-menu-vertical-item-icon" />
         <span v-if="hasSubItems(item)" class="subitem-indicator" aria-hidden="true" />
         <svg class="curva cima" xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 3000 3000" aria-hidden="true" focusable="false">
             <path d="M-7.07 3007.07c0,-1656.85 1343.15,-3000 3000,-3000l-3000 0 0 3000z" />
@@ -42,7 +32,7 @@
     import MaxIcon from './MaxIcon.vue';
     import { useSystemStore } from '../stores/useSystem.Store';
     import { useSearchBarStore } from '../stores/useSearchBar.Store';
-    import { hasSubItems, hasActiveSubItem } from '../helpers/menuHelpers';
+    import { hasSubItems, hasActiveSubItem, getMenuItemIconSize } from '../helpers/menuHelpers';
     import type { SideMenuItem } from '../types/app';
 
     const props = withDefaults(defineProps<{

@@ -126,6 +126,61 @@ configureMaxApp({
 
 > Veja o passo a passo completo de exposição de variáveis de ambiente no Vite e requisitos de backend em **[Guia de Configuração do Servidor de Ícones](docs/STORES.md#configuração-do-servidor-de-ícones-icon_server-por-aplicação)**.
 
+### Tamanhos dos Ícones por Item nos Menus do App Shell
+
+Os itens dos menus do `MaxApp` (lateral desktop, gaveta mobile, flyout, abas inferiores, barra superior e popovers) permitem configurar dimensões próprias de ícones diretamente nos dados de cada item, na raiz ou em `details`:
+
+- **Campos suportados:**
+  - Genérico para qualquer menu: `size`
+  - Específico lateral: `size_side` (canônico) e `side_size` (alias)
+  - Específico inferior: `size_bottom` (canônico) e `bottom_size` (alias)
+  - Específico superior: `size_top` (canônico) e `top_size` (alias)
+
+```typescript
+// Exemplo com campos na raiz do item:
+const sideMenuItems = [
+    { label: 'Projetos', icon: 'mdi:solar-panel', size_side: '1.8rem', route: 'projects' },
+    { label: 'Clientes', icon: 'mdi:account-group', size: '20px', route: 'clients' }
+];
+
+// Exemplo com campos em details (formato devolvido por APIs backend):
+const backendMenuItem = {
+    id: 'config',
+    details: {
+        title: 'Configurações',
+        icon: 'mdi:cog',
+        route: 'settings',
+        size_side: '1.4rem'
+    }
+};
+```
+
+- **Precedências de resolução:**
+  1. Campo específico da posição na raiz (`size_<pos>` vence `<pos>_size`);
+  2. Campo específico da posição em `details` (`details.size_<pos>` vence `details.<pos>_size`);
+  3. Campo genérico `size` na raiz;
+  4. Campo genérico `size` em `details`;
+  5. Fallback padrão do contexto.
+  > Um campo específico da posição em `details` tem precedência sobre o `size` genérico na raiz. Campos de posições não correspondentes são ignorados.
+
+- **Valores e unidades aceitas:**
+  - Números finitos não negativos (ex: `1.5`, `2`), interpretados como `rem` (convenção `MaxIcon`).
+  - Strings decimais equivalentes (ex: `'1.5'`).
+  - Comprimentos CSS simples com unidades: `px`, `rem`, `em`, `vw`, `vh`, `vmin`, `vmax`.
+  - Zero explícito (`0`, `'0'`, `'0px'`) é válido e preservado.
+  - Valores negativos, `NaN`, `null`, expressões como `calc()` ou `var()`, percentuais `%` e nomes textuais (`small`) são descartados e recorrem ao próximo candidato ou fallback.
+
+- **Padrões de fallback preservados:**
+  - Menu vertical desktop: `'1.5'`
+  - Gaveta mobile: item `'1.2'` / subitem `'1.0'`
+  - Flyout: cabeçalho pai `'1.5'` / Visão Geral e subitens `'1.4'`
+  - Abas inferiores: `'1.3'` (ícone fixo do botão FAB permanece `'1.5'`)
+  - Topo com texto: `icon_size ?? '1.2'` (legado `icon_size` preservado quando novos campos não forem passados)
+  - Topo somente ícone: dimensões e hitbox do botão mantidas com `size="1.5"`
+  - Itens dos popovers: `'1.1'`
+
+- **Limite de slots:** Conteúdos personalizados renderizados por slots do consumidor permanecem sob inteira responsabilidade do consumidor.
+
 ---
 
 ## 📁 Módulos de Exportação

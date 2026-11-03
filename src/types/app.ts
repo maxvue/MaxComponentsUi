@@ -80,6 +80,27 @@ export interface LoadingTarget {
     status?: 'valid' | 'invalid' | 'global' | 'local';
 }
 
+/** Posição do ícone de menu para resolução contextual de tamanho. */
+export type MenuIconPosition = 'side' | 'bottom' | 'top';
+
+/** Campos de tamanho de ícone suportados em itens de menu. */
+export interface MenuIconSizeFields {
+    /** Tamanho genérico do ícone. */
+    size?: string | number | null;
+    /** Tamanho específico para menu lateral (canônico). */
+    size_side?: string | number | null;
+    /** Tamanho específico para menu lateral (alias simétrico). */
+    side_size?: string | number | null;
+    /** Tamanho específico para menu inferior (canônico). */
+    size_bottom?: string | number | null;
+    /** Tamanho específico para menu inferior (alias simétrico). */
+    bottom_size?: string | number | null;
+    /** Tamanho específico para menu superior (canônico). */
+    size_top?: string | number | null;
+    /** Tamanho específico para menu superior (alias simétrico). */
+    top_size?: string | number | null;
+}
+
 /**
  * Formato mínimo do usuário autenticado exigido pelo app shell.
  *
@@ -97,7 +118,7 @@ export interface MaxAppUser {
 }
 
 /** Subitem de um item de menu lateral. */
-export interface SideMenuSubItem {
+export interface SideMenuSubItem extends MenuIconSizeFields {
     id?: string;
     label?: string;
     title?: string;
@@ -122,7 +143,7 @@ export interface SideMenuSubItem {
 }
 
 /** Detalhes de um item de menu, como devolvidos pelo backend. */
-export interface SideMenuDetails {
+export interface SideMenuDetails extends MenuIconSizeFields {
     /** Ícone exibido no botão. */
     icon?: string | null;
     /** Nome do componente de página, usado para marcar o item ativo. */
@@ -153,7 +174,7 @@ export interface SideMenuDetails {
 }
 
 /** Item do menu lateral. */
-export interface SideMenuItem {
+export interface SideMenuItem extends MenuIconSizeFields {
     id?: string;
     /**
      * Indica se o recurso está disponível no sistema.
