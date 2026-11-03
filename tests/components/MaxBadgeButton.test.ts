@@ -230,4 +230,48 @@ describe('MaxBadgeButton', () => {
         expect(wrapper.classes()).not.toContain('is-active');
         expect(badgeComponent.props('outlineColor')).toBeUndefined();
     });
+
+    it('renderiza múltiplos overlays em array de strings e números no MaxBadgeButton', () => {
+        const wrapper = mountBadgeButton({
+            label: 'Multivalor',
+            overlay: ['A', 42, 'Beta']
+        });
+
+        const overlays = wrapper.findAll('.max-badge-overlay');
+        expect(overlays).toHaveLength(3);
+        expect(overlays[0].text()).toBe('A');
+        expect(overlays[1].text()).toBe('42');
+        expect(overlays[2].text()).toBe('Beta');
+    });
+
+    it('preserva cores independentes em OverlayData[] tanto no estado ativo quanto inativo', async () => {
+        const wrapper = mountBadgeButton({
+            label: 'Status Botão',
+            color: '#00768e',
+            modelValue: true,
+            overlay: [
+                { value: 'Fixa', color: '#ef4444' },
+                { value: 'Padrão' }
+            ]
+        });
+
+        const overlaysActive = wrapper.findAll('.max-badge-overlay');
+        expect(overlaysActive).toHaveLength(2);
+        const styleActiveFixa = overlaysActive[0].attributes('style') ?? '';
+        const styleActivePadrao = overlaysActive[1].attributes('style') ?? '';
+
+        // Quando o botão fica inativo:
+        await wrapper.setProps({ modelValue: false });
+
+        const overlaysInactive = wrapper.findAll('.max-badge-overlay');
+        expect(overlaysInactive).toHaveLength(2);
+        const styleInactiveFixa = overlaysInactive[0].attributes('style') ?? '';
+        const styleInactivePadrao = overlaysInactive[1].attributes('style') ?? '';
+
+        // O item com cor explícita permanece com a mesma cor resolvida
+        expect(styleInactiveFixa).toBe(styleActiveFixa);
+
+        // O item sem cor explícita acompanha a mudança do badge interno para inativo
+        expect(styleInactivePadrao).not.toBe(styleActivePadrao);
+    });
 });

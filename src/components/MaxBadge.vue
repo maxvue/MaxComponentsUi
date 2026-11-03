@@ -9,9 +9,9 @@
         <!-- Texto principal do badge -->
         <span class="max-badge-label">{{ props.label }}</span>
 
-        <!-- Overlay de notificação (número ou string) -->
-        <span v-if="hasOverlayValue" class="max-badge-overlay" :style="overlayStyles">
-            {{ overlayValue }}
+        <!-- Overlay de notificação (número, string, lista ou dados com cor) -->
+        <span v-for="(item, index) in normalizedOverlays" :key="index" class="max-badge-overlay" :style="item.style">
+            {{ item.value }}
         </span>
     </div>
 </template>
@@ -35,6 +35,14 @@
         | 'warn'
         | 'caution';
 
+    /**
+     * Estrutura de dados para overlay com cor opcional customizada.
+     */
+    export type OverlayData = {
+        color?: string;
+        value: string | number;
+    };
+
     export interface MaxBadgeProps {
         /** Texto principal do badge (obrigatório) */
         label: string | number;
@@ -48,12 +56,14 @@
         status?: MaxBadgeStatus;
         /**
          * Overlay de notificação.
-         * - undefined: não exibe
+         * - undefined / null: não exibe
          * - true: alias para status = 'done'
          * - false: alias para status = 'error'
          * - string | number: exibe contador/pílula à direita com espaçamento mínimo de 10px
+         * - string[] | number[]: exibe múltiplos contadores/pílulas na ordem recebida
+         * - OverlayData | OverlayData[]: exibe pílula(s) com cores independentes via color opcional
          */
-        overlay?: boolean | string | number;
+        overlay?: boolean | string | number | string[] | number[] | OverlayData | OverlayData[];
         /**
          * Aplica uppercase ao label. Padrão true.
          * Suporta :uppercase="false" ou prop no-uppercase para preservar caixa original.
@@ -131,18 +141,58 @@
         return BADGE_STATUS_COLORS[resolvedStatus] ?? null;
     });
 
-    /** Verifica se o overlay tem valor para exibição à direita */
-    const hasOverlayValue = computed<boolean>(() => {
-        return (
-            props.overlay !== undefined &&
-            props.overlay !== null &&
-            typeof props.overlay !== 'boolean' &&
-            String(props.overlay).trim() !== ''
-        );
-    });
+    interface NormalizedOverlayItem {
+        value: string | number;
+        style: Record<string, string>;
+    }
 
-    const overlayValue = computed<string | number>(() => {
-        return (props.overlay as string | number) ?? '';
+    /** Lista normalizada de overlays para exibição como pílulas à direita */
+    const normalizedOverlays = computed<NormalizedOverlayItem[]>(() => {
+        const raw = props.overlay;
+        if (raw === undefined || raw === null || typeof raw === 'boolean') return [];
+
+        const list = Array.isArray(raw) ? raw : [raw];
+        const result: NormalizedOverlayItem[] = [];
+
+        for (const item of list) {
+            if (item === null || item === undefined) continue;
+
+            let val: string | number | undefined;
+            let itemColor: string | undefined;
+
+            if (typeof item === 'object') {
+                const candidate = item as Record<string, unknown>;
+                const candidateValue = candidate.value;
+                if (typeof candidateValue === 'string' || typeof candidateValue === 'number') {
+                    val = candidateValue;
+                    if (typeof candidate.color === 'string' && candidate.color.trim() !== '') itemColor = candidate.color;
+                }
+            } else if (typeof item === 'string' || typeof item === 'number') val = item;
+
+            if (val === undefined) continue;
+
+            // Filtra valores cujo texto aparado seja vazio, sem descartar 0 ou números
+            if (String(val).trim() === '') continue;
+
+            let overlayBg = colors.value.overlayBg;
+            let overlayText = colors.value.overlayText;
+
+            if (itemColor) {
+                const itemColors = resolveBadgeColors(itemColor, isDark.value, props.neon);
+                overlayBg = itemColors.overlayBg;
+                overlayText = itemColors.overlayText;
+            }
+
+            result.push({
+                value: val,
+                style: {
+                    backgroundColor: overlayBg,
+                    color: overlayText
+                }
+            });
+        }
+
+        return result;
     });
 
     /** Estilos CSS em linha calculados para o badge */
@@ -171,14 +221,6 @@
 
 
         return styles;
-    });
-
-    /** Estilos CSS em linha calculados para o overlay numérico/string */
-    const overlayStyles = computed(() => {
-        return {
-            backgroundColor: colors.value.overlayBg,
-            color: colors.value.overlayText
-        };
     });
 </script>
 

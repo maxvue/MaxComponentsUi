@@ -68,5 +68,20 @@ describe('MaxBadgeComponent (alias para MaxBadge)', () => {
         const wrapper = mountBadge({ label: 'Simples' });
         expect(wrapper.find('.circle-color-badge').exists()).toBe(false);
     });
+
+    it('repassa múltiplos overlays e OverlayData para o MaxBadge interno', () => {
+        const wrapper = mountBadge({
+            label: 'Wrapper Multi',
+            overlay: [
+                { value: 'Novo', color: '#10b981' },
+                { value: 'Aviso' }
+            ]
+        });
+
+        const overlays = wrapper.findAll('.max-badge-overlay');
+        expect(overlays).toHaveLength(2);
+        expect(overlays[0].text()).toBe('Novo');
+        expect(overlays[1].text()).toBe('Aviso');
+    });
 });
 

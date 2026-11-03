@@ -22,6 +22,11 @@
                             <span>Neon</span>
                             <MaxBadgeButton label="Neon" neon />
                         </div>
+                        <!-- Múltiplos Overlays com Cores -->
+                        <div class="state-col">
+                            <span>Múltiplos Overlays</span>
+                            <MaxBadgeButton label="Filtros" :overlay="coloredOverlays" />
+                        </div>
                     </div>
                 </div>
 
@@ -31,10 +36,7 @@
                         <!-- Normal -->
                         <div class="state-col">
                             <span>Normal</span>
-                            <MaxBadgeButtonsGroup
-                                v-model="selectedBadges"
-                                :items="badgeItems"
-                            />
+                            <MaxBadgeButtonsGroup v-model="selectedBadges" :items="badgeItems" />
                         </div>
                         <!-- Sem itens -->
                         <div class="state-col">
@@ -62,6 +64,26 @@
                             <span>Com status</span>
                             <MaxBadge label="Online" status="done" />
                         </div>
+                        <!-- Múltiplos textos -->
+                        <div class="state-col">
+                            <span>Múltiplas strings</span>
+                            <MaxBadge label="Usuário" :overlay="multiStringOverlay" />
+                        </div>
+                        <!-- Múltiplos números -->
+                        <div class="state-col">
+                            <span>Múltiplos números</span>
+                            <MaxBadge label="Métricas" :overlay="multiNumberOverlay" />
+                        </div>
+                        <!-- Cores independentes -->
+                        <div class="state-col">
+                            <span>Cores independentes</span>
+                            <MaxBadge label="Tickets" :overlay="coloredOverlays" />
+                        </div>
+                        <!-- Status e múltiplos overlays -->
+                        <div class="state-col">
+                            <span>Status + Overlays</span>
+                            <MaxBadge label="Deploy" status="done" :overlay="coloredOverlays" />
+                        </div>
                     </div>
                 </div>
 
@@ -82,6 +104,11 @@
                         <div class="state-col">
                             <span>Com ícone</span>
                             <MaxBadgeComponent label="Novo" icon="mdi:star" />
+                        </div>
+                        <!-- Múltiplos Overlays -->
+                        <div class="state-col">
+                            <span>Múltiplos Overlays</span>
+                            <MaxBadgeComponent label="Wrapper" :overlay="multiStringOverlay" />
                         </div>
                     </div>
                 </div>
@@ -104,6 +131,11 @@
                             <span>Com ícone</span>
                             <MaxTag label="Verificado" icon="mdi:check-circle" />
                         </div>
+                        <!-- Múltiplos Overlays -->
+                        <div class="state-col">
+                            <span>Múltiplos Overlays</span>
+                            <MaxTag label="Versão" severity="info" :overlay="['v1.2', 'LTS']" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -114,13 +146,20 @@
 <script setup lang="ts">
     import { ref } from 'vue';
     import { MaxBadgeButton, MaxBadgeButtonsGroup, MaxBadge, MaxBadgeComponent, MaxTag } from '@maxvue/max-components-ui';
-    import type { MaxBadgeButtonsGroupItem } from '@maxvue/max-components-ui';
+    import type { MaxBadgeButtonsGroupItem, OverlayData } from '@maxvue/max-components-ui';
 
     const selectedBadges = ref<any[]>([]);
 
+    const multiStringOverlay = ['Dev', 'Admin'];
+    const multiNumberOverlay = [1, 99];
+    const coloredOverlays: OverlayData[] = [
+        { value: 'Novo', color: 'var(--max-success-500, #10b981)' },
+        { value: 'Bug', color: 'var(--max-danger-500, #ef4444)' }
+    ];
+
     const badgeItems: MaxBadgeButtonsGroupItem[] = [
-        { label: 'Opção A', value: 'a' },
-        { label: 'Opção B', value: 'b' },
+        { label: 'Opção A', value: 'a', overlay: ['1', 'Novo'] },
+        { label: 'Opção B', value: 'b', overlay: coloredOverlays },
         { label: 'Opção C', value: 'c' }
     ];
 </script>

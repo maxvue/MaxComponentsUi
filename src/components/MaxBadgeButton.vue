@@ -7,7 +7,7 @@
 <script setup lang="ts">
     import { ref, computed } from 'vue';
     import MaxBadge from './MaxBadge.vue';
-    import type { MaxBadgeStatus } from './MaxBadge.vue';
+    import type { MaxBadgeStatus, OverlayData } from './MaxBadge.vue';
     import { useHtmlDark } from '../helpers/useHtmlDark';
     import { resolveBadgeActiveOutlineColor } from '../helpers/colorLuminance';
 
@@ -22,8 +22,8 @@
         neon?: boolean;
         /** Círculo de status opcional */
         status?: MaxBadgeStatus;
-        /** Overlay de notificação (booleano, número ou string) */
-        overlay?: boolean | string | number;
+        /** Overlay de notificação (booleano, número, string, arrays ou OverlayData) */
+        overlay?: boolean | string | number | string[] | number[] | OverlayData | OverlayData[];
         /** Se aplica caixa alta ao label. Padrão: true */
         uppercase?: boolean;
         /** Tamanho do badge */

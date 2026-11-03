@@ -1,0 +1,109 @@
+{
+  "version": 2,
+  "planRevision": "ab7510cc0f02840d6db6c9eb937dbdb51fbaf14c18235745b61bb46af1054f12",
+  "tasks": [
+    {
+      "id": "T1",
+      "status": "completed",
+      "files": [
+        "package.json",
+        "docs/plans/wt-24731b16/plan.md",
+        "docs/plans/wt-24731b16/spec.md"
+      ],
+      "validations": []
+    },
+    {
+      "id": "T2",
+      "status": "completed",
+      "files": [
+        "src/components/MaxBadge.vue",
+        "src/components/MaxBadgeButton.vue",
+        "src/components/MaxBadgeComponent.vue",
+        "src/components/MaxTag.vue",
+        "src/index.ts"
+      ],
+      "validations": []
+    },
+    {
+      "id": "T3",
+      "status": "completed",
+      "files": [
+        "tests/components/MaxBadge.test.ts",
+        "tests/components/MaxBadgeButton.test.ts",
+        "tests/components/MaxBadgeButtonsGroup.test.ts",
+        "tests/components/MaxBadgeComponent.test.ts",
+        "tests/components/MaxTag.test.ts",
+        "tests/components/MaxBadgeOverlayTypes.test.ts",
+        "tests/browser/MaxBadge.browser.ts"
+      ],
+      "validations": []
+    },
+    {
+      "id": "T4",
+      "status": "completed",
+      "files": [
+        "playground/src/scenarios/buttons-badges.vue"
+      ],
+      "validations": []
+    },
+    {
+      "id": "T5",
+      "status": "completed",
+      "files": [
+        "dist/components/MaxBadge.vue.d.ts",
+        "dist/index.d.ts"
+      ],
+      "validations": [],
+      "nextAction": "Aguardar confirmação explícita do usuário para commit/merge pelo painel do MaxCode."
+    }
+  ],
+  "verification": {
+    "revision": "ab7510cc0f02840d6db6c9eb937dbdb51fbaf14c18235745b61bb46af1054f12",
+    "checks": [
+      {
+        "command": "npm run check:lockfile",
+        "revision": "ab7510cc0f02840d6db6c9eb937dbdb51fbaf14c18235745b61bb46af1054f12",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npx vitest run tests/components/MaxBadge.test.ts tests/components/MaxBadgeButton.test.ts tests/components/MaxBadgeButtonsGroup.test.ts tests/components/MaxBadgeComponent.test.ts tests/components/MaxTag.test.ts tests/components/MaxBadgeOverlayTypes.test.ts",
+        "revision": "ab7510cc0f02840d6db6c9eb937dbdb51fbaf14c18235745b61bb46af1054f12",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check",
+        "revision": "ab7510cc0f02840d6db6c9eb937dbdb51fbaf14c18235745b61bb46af1054f12",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check:test",
+        "revision": "ab7510cc0f02840d6db6c9eb937dbdb51fbaf14c18235745b61bb46af1054f12",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run build",
+        "revision": "ab7510cc0f02840d6db6c9eb937dbdb51fbaf14c18235745b61bb46af1054f12",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npx eslint src/components/MaxBadge.vue src/components/MaxBadgeButton.vue src/components/MaxBadgeComponent.vue src/components/MaxTag.vue src/index.ts playground/src/scenarios/buttons-badges.vue tests/components/MaxBadge.test.ts tests/components/MaxBadgeButton.test.ts tests/components/MaxBadgeButtonsGroup.test.ts tests/components/MaxBadgeComponent.test.ts tests/components/MaxTag.test.ts tests/components/MaxBadgeOverlayTypes.test.ts tests/browser/MaxBadge.browser.ts",
+        "revision": "ab7510cc0f02840d6db6c9eb937dbdb51fbaf14c18235745b61bb46af1054f12",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npx stylelint \"src/components/MaxBadge.vue\" \"src/components/MaxBadgeButton.vue\" \"src/components/MaxBadgeComponent.vue\" \"src/components/MaxTag.vue\"",
+        "revision": "ab7510cc0f02840d6db6c9eb937dbdb51fbaf14c18235745b61bb46af1054f12",
+        "result": "passed",
+        "exitCode": 0
+      }
+    ]
+  },
+  "updatedAt": 1793740920000,
+  "nextAction": "Aguardar confirmação explícita do usuário para commit/merge pelo painel do MaxCode."
+}

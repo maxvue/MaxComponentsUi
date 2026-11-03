@@ -130,4 +130,110 @@ describe('MaxBadge', () => {
         expect(wrapperAttr.classes()).toContain('no-uppercase');
         expect(wrapperAttr.attributes('style')).toContain('text-transform: none');
     });
+
+    it('renderiza múltiplos overlays a partir de array de strings mantendo a ordem', () => {
+        const wrapper = mountBadge({ label: 'Tarefas', overlay: ['Novo', 'Pendente', 'Urgente'] });
+        const overlays = wrapper.findAll('.max-badge-overlay');
+        expect(overlays).toHaveLength(3);
+        expect(overlays[0].text()).toBe('Novo');
+        expect(overlays[1].text()).toBe('Pendente');
+        expect(overlays[2].text()).toBe('Urgente');
+    });
+
+    it('renderiza múltiplos overlays numéricos incluindo zero e valores negativos', () => {
+        const wrapper = mountBadge({ label: 'Métricas', overlay: [0, 2, -1] });
+        const overlays = wrapper.findAll('.max-badge-overlay');
+        expect(overlays).toHaveLength(3);
+        expect(overlays[0].text()).toBe('0');
+        expect(overlays[1].text()).toBe('2');
+        expect(overlays[2].text()).toBe('-1');
+    });
+
+    it('descarta strings vazias ou só de espaços sem descartar o zero nem duplicatas', () => {
+        const wrapper = mountBadge({ label: 'Filtro', overlay: ['A', '', '  ', 'A', 0] });
+        const overlays = wrapper.findAll('.max-badge-overlay');
+        expect(overlays).toHaveLength(3);
+        expect(overlays[0].text()).toBe('A');
+        expect(overlays[1].text()).toBe('A');
+        expect(overlays[2].text()).toBe('0');
+    });
+
+    it('não renderiza pílula quando overlay é array vazio', () => {
+        const wrapper = mountBadge({ label: 'Vazio', overlay: [] });
+        expect(wrapper.findAll('.max-badge-overlay')).toHaveLength(0);
+    });
+
+    it('renderiza OverlayData único com cores da paleta padrão quando color é omitido ou vazio', () => {
+        const wrapper = mountBadge({ label: 'Item', color: '#00768e', overlay: { value: 'Novo' } });
+        const overlay = wrapper.find('.max-badge-overlay');
+        expect(overlay.exists()).toBe(true);
+        expect(overlay.text()).toBe('Novo');
+        expect(overlay.attributes('style')).toContain('background-color');
+        expect(overlay.attributes('style')).toContain('color');
+
+        const wrapperEmptyColor = mountBadge({ label: 'Item 2', overlay: { value: 'Vazio', color: '  ' } });
+        expect(wrapperEmptyColor.find('.max-badge-overlay').text()).toBe('Vazio');
+    });
+
+    it('renderiza OverlayData com cores independentes por item', () => {
+        const wrapper = mountBadge({
+            label: 'Multicor',
+            color: '#00768e',
+            overlay: [
+                { value: 1, color: '#ef4444' },
+                { value: 'OK', color: '#10b981' }
+            ]
+        });
+
+        const overlays = wrapper.findAll('.max-badge-overlay');
+        expect(overlays).toHaveLength(2);
+        expect(overlays[0].text()).toBe('1');
+        expect(overlays[1].text()).toBe('OK');
+
+        const style1 = overlays[0].attributes('style') ?? '';
+        const style2 = overlays[1].attributes('style') ?? '';
+
+        // Cores calculadas devem ser diferentes porque partem de bases distintas (#ef4444 vs #10b981)
+        expect(style1).not.toBe(style2);
+    });
+
+    it('suporta cor via variável CSS em OverlayData', () => {
+        const wrapper = mountBadge({
+            label: 'Var CSS',
+            overlay: { value: 'Var', color: 'var(--max-primary-500)' }
+        });
+        const overlay = wrapper.find('.max-badge-overlay');
+        expect(overlay.exists()).toBe(true);
+        expect(overlay.text()).toBe('Var');
+    });
+
+    it('preserva prioridade do status explícito mesmo quando overlay é booleano', () => {
+        const wrapper = mountBadge({ label: 'Conflito', status: 'warn', overlay: true });
+        const dot = wrapper.find('.max-badge-status-dot');
+        expect(dot.exists()).toBe(true);
+        expect(dot.attributes('style')).toContain(BADGE_STATUS_COLORS.warn);
+        expect(wrapper.findAll('.max-badge-overlay')).toHaveLength(0);
+    });
+
+    it('reage a atualizações de props mantendo imutabilidade de dados congelados', async () => {
+        const frozenData = Object.freeze([
+            Object.freeze({ value: 'F1', color: '#3b82f6' }),
+            Object.freeze({ value: 'F2' })
+        ]);
+
+        const wrapper = mountBadge({ label: 'Reativo', overlay: frozenData });
+        expect(wrapper.findAll('.max-badge-overlay')).toHaveLength(2);
+
+        await wrapper.setProps({ overlay: 'Único' });
+        expect(wrapper.findAll('.max-badge-overlay')).toHaveLength(1);
+        expect(wrapper.find('.max-badge-overlay').text()).toBe('Único');
+
+        await wrapper.setProps({ overlay: [10, 20] });
+        expect(wrapper.findAll('.max-badge-overlay')).toHaveLength(2);
+        expect(wrapper.findAll('.max-badge-overlay')[0].text()).toBe('10');
+
+        await wrapper.setProps({ overlay: false });
+        expect(wrapper.findAll('.max-badge-overlay')).toHaveLength(0);
+        expect(wrapper.find('.max-badge-status-dot').attributes('style')).toContain(BADGE_STATUS_COLORS.error);
+    });
 });

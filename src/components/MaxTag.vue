@@ -1,23 +1,10 @@
 <template>
-    <MaxBadge
-        :label="resolvedLabel"
-        :color="resolvedColor"
-        :icon="props.icon"
-        :neon="props.neon"
-        :status="props.status"
-        :overlay="props.overlay"
-        :uppercase="props.uppercase"
-        :no-uppercase="props.noUppercase"
-        :size="props.size"
-        :background="props.background"
-        :text-color="props.textColor"
-        :dark="props.dark"
-    />
+    <MaxBadge :label="resolvedLabel" :color="resolvedColor" :icon="props.icon" :neon="props.neon" :status="props.status" :overlay="props.overlay" :uppercase="props.uppercase" :no-uppercase="props.noUppercase" :size="props.size" :background="props.background" :text-color="props.textColor" :dark="props.dark" />
 </template>
 
 <script setup lang="ts">
     import { computed } from 'vue';
-    import MaxBadge, { type MaxBadgeStatus } from './MaxBadge.vue';
+    import MaxBadge, { type MaxBadgeStatus, type OverlayData } from './MaxBadge.vue';
 
     export type MaxTagSeverity = 'success' | 'info' | 'warn' | 'warning' | 'danger' | 'error' | 'secondary';
 
@@ -29,7 +16,7 @@
         icon?: string;
         neon?: boolean;
         status?: MaxBadgeStatus;
-        overlay?: boolean | string | number;
+        overlay?: boolean | string | number | string[] | number[] | OverlayData | OverlayData[];
         uppercase?: boolean;
         noUppercase?: boolean;
         size?: string | number;

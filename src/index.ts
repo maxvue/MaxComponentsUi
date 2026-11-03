@@ -294,7 +294,7 @@ export { default as MaxBadgeButtonsGroup } from './components/MaxBadgeButtonsGro
 export { default as MaxBadgeButtonGroup } from './components/MaxBadgeButtonsGroup.vue';
 export { default as BadgeButtonsGroup } from './components/MaxBadgeButtonsGroup.vue';
 export { default as BadgeButtonGroup } from './components/MaxBadgeButtonsGroup.vue';
-export type { MaxBadgeProps, MaxBadgeStatus } from './components/MaxBadge.vue';
+export type { MaxBadgeProps, MaxBadgeStatus, OverlayData } from './components/MaxBadge.vue';
 export type { MaxTagProps, MaxTagSeverity } from './components/MaxTag.vue';
 export type { MaxBadgeButtonProps } from './components/MaxBadgeButton.vue';
 export type { MaxBadgeButtonsGroupProps, MaxBadgeButtonsGroupItem } from './components/MaxBadgeButtonsGroup.vue';

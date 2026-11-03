@@ -328,5 +328,30 @@ describe('MaxBadgeButtonsGroup', () => {
         expect(buttons[1].props('color')).toBe('var(--red-b-650)');
         expect(buttons[1].props('dark')).toBe(true);
     });
+
+    it('renderiza múltiplos overlays e OverlayData em itens do grupo', () => {
+        const itemsWithMultipleOverlays: MaxBadgeButtonsGroupItem[] = [
+            { label: 'Projetos', value: 'projects', overlay: ['Ativos', '5'] },
+            {
+                label: 'Alertas',
+                value: 'alerts',
+                overlay: [
+                    { value: 2, color: '#ef4444' },
+                    { value: 8, color: '#f59e0b' }
+                ]
+            }
+        ];
+
+        const wrapper = mountBadgeButtonsGroup({
+            items: itemsWithMultipleOverlays
+        });
+
+        const overlays = wrapper.findAll('.max-badge-overlay');
+        expect(overlays).toHaveLength(4);
+        expect(overlays[0].text()).toBe('Ativos');
+        expect(overlays[1].text()).toBe('5');
+        expect(overlays[2].text()).toBe('2');
+        expect(overlays[3].text()).toBe('8');
+    });
 });
 

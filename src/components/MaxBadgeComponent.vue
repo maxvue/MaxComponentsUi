@@ -1,24 +1,11 @@
 <template>
-    <MaxBadge
-        class="max-badge-component"
-        :label="resolvedLabel"
-        :icon="props.icon ?? props.i"
-        :color="props.color"
-        :neon="props.neon"
-        :status="props.status"
-        :overlay="props.overlay"
-        :uppercase="props.uppercase"
-        :size="props.size ?? props.scale"
-        :background="props.background"
-        :text-color="props.textColor"
-        v-bind="passthroughAttrs"
-    />
+    <MaxBadge class="max-badge-component" :label="resolvedLabel" :icon="props.icon ?? props.i" :color="props.color" :neon="props.neon" :status="props.status" :overlay="props.overlay" :uppercase="props.uppercase" :size="props.size ?? props.scale" :background="props.background" :text-color="props.textColor" v-bind="passthroughAttrs" />
 </template>
 
 <script setup lang="ts">
     import { computed, useAttrs } from 'vue';
     import MaxBadge from './MaxBadge.vue';
-    import type { MaxBadgeStatus } from './MaxBadge.vue';
+    import type { MaxBadgeStatus, OverlayData } from './MaxBadge.vue';
 
     const attrs = useAttrs();
 
@@ -48,7 +35,7 @@
         /** Indicador de status */
         status?: MaxBadgeStatus;
         /** Notificação overlay */
-        overlay?: boolean | string | number;
+        overlay?: boolean | string | number | string[] | number[] | OverlayData | OverlayData[];
         /** Forçar ou desativar caixa alta */
         uppercase?: boolean;
         /** Tamanho */
