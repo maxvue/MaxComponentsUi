@@ -1,7 +1,7 @@
 <template>
     <div v-if="isVisible" class="max-loader-main-div" v-bind="resolvedAttrs">
         <div class="items">
-            <MaxLoaderIcon />
+            <MaxLoaderIcon class="icone-loader" />
             <div v-if="props.label" class="item-label">{{ props.label }}</div>
         </div>
     </div>
@@ -68,6 +68,12 @@
                 padding-top: 20px;
                 color: var(--background-700);
             }
+        }
+        .max-loader-icon-div{
+            width: auto;
+            height: auto;
+            position: absolute !important;
+            color: var(--background-600) !important;
         }
     }
 </style>
