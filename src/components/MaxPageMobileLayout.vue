@@ -21,9 +21,7 @@
         </MaxTopMenu>
 
         <main class="mobile-page-content">
-            <div>
-                <slot name="top"></slot>
-            </div>
+            <div class="mobile-space-top-item" id="mobile-space-top-item"></div>
             <div class="mobile-space top">
             </div>
             <div class="mobile-page-body">
@@ -160,6 +158,10 @@
             display: grid;
             position: relative;
             max-width: 100vw;
+            .mobile-space-top-item{
+                width: 100%;
+                position: relative;
+            }
 
             &::-webkit-scrollbar {
                 width: 0;
