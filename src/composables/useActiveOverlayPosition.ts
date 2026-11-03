@@ -185,7 +185,17 @@ export function useActiveOverlayPosition<T extends OverlayPositionResult = Overl
                 matchTargetWidth: options.matchTargetWidth ?? false
             }) as T;
 
-        position.value = computedPos;
+        const current = position.value;
+        const isSame = Boolean(
+            current
+            && current.top === computedPos.top
+            && current.left === computedPos.left
+            && current.width === computedPos.width
+            && current.placement === computedPos.placement
+            && current.zIndex === computedPos.zIndex
+        );
+
+        if (!isSame) position.value = computedPos;
 
         isPositioned.value = true;
     };
@@ -269,7 +279,8 @@ export function useActiveOverlayPosition<T extends OverlayPositionResult = Overl
 
     watch(
         [() => resolveValue(options.target), () => resolveValue(options.overlay)],
-        () => {
+        ([newTarget, newOverlay], [oldTarget, oldOverlay]) => {
+            if (newTarget === oldTarget && newOverlay === oldOverlay) return;
             if (resolveValue(options.active)) {
                 observeElements();
                 measureAndPosition();
