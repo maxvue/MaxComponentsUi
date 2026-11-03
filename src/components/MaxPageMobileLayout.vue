@@ -21,6 +21,9 @@
         </MaxTopMenu>
 
         <main class="mobile-page-content">
+            <div>
+                <slot name="top"></slot>
+            </div>
             <div class="mobile-space top">
             </div>
             <div class="mobile-page-body">
@@ -152,8 +155,6 @@
             grid-row: 2;
             overflow: hidden auto;
             -webkit-overflow-scrolling: touch;
-            padding-left: calc(20px + env(safe-area-inset-left, 0px));
-            padding-right: calc(20px + env(safe-area-inset-right, 0px));
             background-color: var(--background-25, #f8fafc);
             min-height: 100%;
             display: grid;
@@ -181,6 +182,8 @@
             .mobile-page-body {
                 padding-top: 20px;
                 padding-bottom: 48px;
+                padding-left: calc(20px + env(safe-area-inset-left, 0px));
+                padding-right: calc(20px + env(safe-area-inset-right, 0px));
             }
 
             &::before {
