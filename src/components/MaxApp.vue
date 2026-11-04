@@ -8,14 +8,14 @@
         </div>
 
         <!-- Usuário carregado, mas sem sessão: tela de login. Em rotas de visitante/guest, libera a exibição mesmo sem sessão ou se o usuário falhou. -->
-        <div v-else-if="isGuest || (isLoaded && !isLogged)" class="max-app-view max-app-login">
+        <div v-else-if="!props.noLogin && (isGuest || (isLoaded && !isLogged))" class="max-app-view max-app-login">
             <slot name="login">
                 <RouterView />
             </slot>
         </div>
 
-        <!-- Usuário autenticado: aplicação completa. -->
-        <div v-else-if="isLoaded && isLogged" class="max-app-view max-app-authenticated" :class="{ 'is-page-unavailable': isUnavailable }">
+        <!-- Usuário autenticado ou modo noLogin: aplicação completa. -->
+        <div v-else-if="(isLoaded && isLogged) || props.noLogin" class="max-app-view max-app-authenticated" :class="{ 'is-page-unavailable': isUnavailable }">
             <slot name="authenticated">
                 <MaxPageLayout
                     :screen="props.screen ?? system.type_device"
@@ -52,7 +52,7 @@
         </div>
 
         <!-- Falha no bootstrap (erro ao carregar usuário sem ser rota pública). -->
-        <div v-else-if="bootstrapError" class="max-app-view max-app-error">
+        <div v-else-if="!props.noLogin && bootstrapError" class="max-app-view max-app-error">
             <slot name="error" :error="bootstrapError" :retry="retryBootstrap">
                 <div class="max-app-error-fallback" role="alert" aria-live="assertive">
                     <h2 class="max-app-error-title">Falha ao carregar a aplicação</h2>
@@ -93,6 +93,8 @@
     import { configureMaxApp, getMaxAppConfig } from '../helpers/maxAppConfig';
     import { applyHtmlFontSize } from '../helpers/useHtmlFontSize';
     import { isCurrentMenuUnavailable } from '../helpers/menuAvailability';
+    import { useColorsStore } from '../stores/useColors.Store';
+    import type { PartialColorPalette } from '../types/colors';
     import type { BottomTab } from './MaxBottomMenu.vue';
     import type { MenuGroup } from './MaxSideMenuMobile.vue';
     import type { SideMenuItem } from '../types/app';
@@ -148,12 +150,23 @@
         controlledTheme?: boolean;
         /** Tamanho da fonte da aplicação (em px). */
         fontSize?: number;
+        /** Paleta de cores base personalizada para geração dinâmica de escalas. */
+        colors?: PartialColorPalette;
+        /** Renderiza apenas o conteúdo da rota sem barras de navegação (modo livre). */
+        freeMode?: boolean;
+        /** Alias de freeMode: renderiza sem layout/barras. */
+        blankMode?: boolean;
+        /** Ignora a tela de login e renderiza o layout público sem exigir autenticação. */
+        noLogin?: boolean;
     }>(), {
         allowUserName: true,
         allowEmail: true,
         allowPhone: true,
         blankPages: () => [],
-        controlledTheme: false
+        controlledTheme: false,
+        freeMode: false,
+        blankMode: false,
+        noLogin: false
     });
 
 
@@ -224,6 +237,11 @@
     const user = useUserStore();
     const login = useLoginStore();
     const menus = useListMenusStore();
+    const colorsStore = useColorsStore();
+
+    watch(() => props.colors, (newColors) => {
+        colorsStore.setColors(newColors);
+    }, { immediate: true, deep: true });
 
     /** Dispositivo efetivo (prop ou system.type_device). */
     const effectiveScreen = computed<string>(() => props.screen ?? system.type_device);
@@ -296,8 +314,13 @@
     /** Rota marcada como site (`meta.layout === 'site'`). */
     const isSite = computed<boolean>(() => route?.meta?.layout === 'site');
 
-    /** Rota sem layout, por `meta.layout` ou por estar em `blankPages`. */
-    const isBlank = computed<boolean>(() => route?.meta?.layout === 'blank' || props.blankPages.includes(system.page));
+    /** Rota sem layout, por `meta.layout`, por estar em `blankPages`, ou por ativação de `freeMode` / `blankMode`. */
+    const isBlank = computed<boolean>(() => Boolean(
+        props.freeMode ||
+            props.blankMode ||
+            route?.meta?.layout === 'blank' ||
+            props.blankPages.includes(system.page)
+    ));
 
     /** Indica que a store de usuário encerrou seu ciclo inicial de requisição (sucesso ou erro). */
     const _isSettled = computed<boolean>(() => isLoaded.value || Boolean((user as any).status?.server?.get?.is_error));

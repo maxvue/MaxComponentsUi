@@ -358,7 +358,9 @@ export type { StatItemColors, BadgeColors } from './helpers/colorLuminance';
 
 // Configuração do app shell (MaxApp) — deve ser chamada no boot da aplicação.
 export { configureMaxApp, getMaxAppConfig, resetMaxAppConfig } from './helpers/maxAppConfig';
-export { clearMaxCache, registerMaxCacheKey, isMaxCacheKey, ICON_CACHE_KEY } from './helpers/maxCacheKeys';
+export { clearMaxCache, registerMaxCacheKey, isMaxCacheKey, ICON_CACHE_KEY, COLORS_CACHE_KEY, COLORS_CACHE_PREFIX } from './helpers/maxCacheKeys';
+export { deriveColorScale, generateColorScales, generateCssVariables, initDefaultColorPalette, normalizePalette, applyPaletteToDom } from './helpers/colorPalette';
+export { DEFAULT_BASE_COLORS, COLOR_SCALE_LEVELS } from './types/colors';
 export { useScrollLock, forceReset } from './helpers/useScrollLock';
 export type { ScrollLock } from './helpers/useScrollLock';
 export { useAsyncState } from './composables/useAsyncState';
@@ -446,6 +448,7 @@ export { sanitizeMarkdownHtml, isSafeMarkdownUrl, escapeHtml } from './helpers/s
 
 
 import Tooltip from './directives/tooltip';
+import { initDefaultColorPalette } from './helpers/colorPalette';
 
 export interface MaxPluginOptions {
     theme?: Record<string, unknown>;
@@ -455,6 +458,7 @@ export interface MaxPluginOptions {
 }
 
 export const install = (app: App, options: MaxPluginOptions = {}): void => {
+    initDefaultColorPalette();
     app.directive('tooltip', Tooltip);
     app.provide?.('maxComponentsOptions', options);
 };

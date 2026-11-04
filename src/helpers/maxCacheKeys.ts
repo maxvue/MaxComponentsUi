@@ -18,9 +18,11 @@ import { getMaxAppConfig } from './maxAppConfig';
  * a store a importa deste registro.
  */
 export const ICON_CACHE_KEY = 'all_icons_v2';
+export const COLORS_CACHE_KEY = 'max_colors_v1';
+export const COLORS_CACHE_PREFIX = 'max_colors_';
 
 /** Chaves de nome fixo gravadas pela biblioteca. */
-const EXACT_KEYS: readonly string[] = [ICON_CACHE_KEY];
+const EXACT_KEYS: readonly string[] = [ICON_CACHE_KEY, COLORS_CACHE_KEY];
 
 /**
  * Prefixos de chaves dinâmicas gravadas pela biblioteca.
@@ -28,9 +30,10 @@ const EXACT_KEYS: readonly string[] = [ICON_CACHE_KEY];
  * - `split_panel` — legado do painel dividido, aposentado. O prefixo continua
  *   aqui para que o `clearMaxCache` recolha as chaves já persistidas nos
  *   navegadores de quem usou as versões anteriores;
- * - `max-tab-opened-` — `MaxTabs`.
+ * - `max-tab-opened-` — `MaxTabs`;
+ * - `max_colors_` — cache versionado da paleta de cores.
  */
-const KEY_PREFIXES: readonly string[] = ['split_panel', 'max-tab-opened-'];
+const KEY_PREFIXES: readonly string[] = ['split_panel', 'max-tab-opened-', COLORS_CACHE_PREFIX];
 
 /** Chaves exatas declaradas pela aplicação hospedeira. */
 const extra_keys = new Set<string>();

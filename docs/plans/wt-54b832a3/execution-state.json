@@ -1,0 +1,116 @@
+{
+  "version": 2,
+  "planRevision": "5aa592c0847c8075f8e467b02214a59aa4132c118fb01174de8294d63437fa8d",
+  "tasks": [
+    {
+      "id": "task-1",
+      "status": "completed",
+      "files": [
+        "src/types/colors.ts",
+        "src/types/index.ts"
+      ],
+      "validations": [],
+      "revision": "809a4acb016ed5eb883e3feabf916d90fbc5816ba2cb630655ae18424c0a9771"
+    },
+    {
+      "id": "task-2",
+      "status": "completed",
+      "files": [
+        "src/helpers/colorPalette.ts"
+      ],
+      "validations": [],
+      "revision": "809a4acb016ed5eb883e3feabf916d90fbc5816ba2cb630655ae18424c0a9771"
+    },
+    {
+      "id": "task-3",
+      "status": "completed",
+      "files": [
+        "src/helpers/maxCacheKeys.ts",
+        "src/stores/useColors.Store.ts",
+        "src/stores/index.ts"
+      ],
+      "validations": [],
+      "revision": "809a4acb016ed5eb883e3feabf916d90fbc5816ba2cb630655ae18424c0a9771"
+    },
+    {
+      "id": "task-4",
+      "status": "completed",
+      "files": [
+        "src/themes/colors.scss",
+        "src/themes/all.scss",
+        "src/index.ts"
+      ],
+      "validations": [],
+      "revision": "809a4acb016ed5eb883e3feabf916d90fbc5816ba2cb630655ae18424c0a9771"
+    },
+    {
+      "id": "task-5",
+      "status": "completed",
+      "files": [
+        "src/components/MaxApp.vue"
+      ],
+      "validations": [],
+      "revision": "809a4acb016ed5eb883e3feabf916d90fbc5816ba2cb630655ae18424c0a9771"
+    },
+    {
+      "id": "task-6",
+      "status": "completed",
+      "files": [
+        "src/components/MaxApp.vue"
+      ],
+      "validations": [],
+      "revision": "809a4acb016ed5eb883e3feabf916d90fbc5816ba2cb630655ae18424c0a9771"
+    },
+    {
+      "id": "task-7",
+      "status": "completed",
+      "files": [
+        "tests/helpers/colorPalette.test.ts",
+        "tests/stores/useColors.Store.test.ts",
+        "tests/components/MaxApp.test.ts",
+        "tests/components/MaxApp.controlled-theme.test.ts",
+        "tests/browser/dynamicColors.browser.ts",
+        "README.md"
+      ],
+      "validations": [],
+      "revision": "809a4acb016ed5eb883e3feabf916d90fbc5816ba2cb630655ae18424c0a9771"
+    }
+  ],
+  "verification": {
+    "revision": "809a4acb016ed5eb883e3feabf916d90fbc5816ba2cb630655ae18424c0a9771",
+    "checks": [
+      {
+        "command": "npx vitest run tests/helpers/colorPalette.test.ts tests/stores/useColors.Store.test.ts tests/components/MaxApp.controlled-theme.test.ts tests/components/MaxApp.test.ts",
+        "revision": "809a4acb016ed5eb883e3feabf916d90fbc5816ba2cb630655ae18424c0a9771",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check",
+        "revision": "809a4acb016ed5eb883e3feabf916d90fbc5816ba2cb630655ae18424c0a9771",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run type-check:test",
+        "revision": "809a4acb016ed5eb883e3feabf916d90fbc5816ba2cb630655ae18424c0a9771",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run lint",
+        "revision": "809a4acb016ed5eb883e3feabf916d90fbc5816ba2cb630655ae18424c0a9771",
+        "result": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run build",
+        "revision": "809a4acb016ed5eb883e3feabf916d90fbc5816ba2cb630655ae18424c0a9771",
+        "result": "passed",
+        "exitCode": 0
+      }
+    ]
+  },
+  "updatedAt": 1793803830000,
+  "nextAction": "Aguardar confirmação explícita do usuário para operações Git."
+}

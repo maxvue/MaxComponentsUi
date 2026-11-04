@@ -493,4 +493,7 @@ export type * from './domainInputs';
 // Tipos dos quinze novos inputs especializados.
 export type * from './specializedInputs';
 
+// Tipos da paleta dinâmica de cores.
+export type * from './colors';
+
 

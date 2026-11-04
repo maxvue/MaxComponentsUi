@@ -81,4 +81,20 @@ describe('MaxApp controlledTheme prop', () => {
         // O DOM deve ter recebido a classe dark
         expect(document.documentElement.classList.contains('dark')).toBe(true);
     });
+
+    it('preserva aplicação de colors dinâmica mesmo com controlledTheme ativo', () => {
+        mount(MaxApp, {
+            props: {
+                controlledTheme: true,
+                colors: { pink: '#998877' }
+            },
+            global: {
+                plugins: [pinia],
+                stubs: { teleport: true, MaxPageLayout: { template: '<div><slot /></div>' } }
+            }
+        });
+
+        const styleEl = document.getElementById('max-dynamic-colors');
+        expect(styleEl?.textContent).toContain('--pink: #998877;');
+    });
 });

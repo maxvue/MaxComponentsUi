@@ -25,6 +25,7 @@ import MaxPageLayout from '../../src/components/MaxPageLayout.vue';
 import { useUserStore } from '../../src/stores/useUser.Store';
 import { useLoginStore } from '../../src/stores/useLogin.Store';
 import { useSystemStore } from '../../src/stores/useSystem.Store';
+import { useColorsStore } from '../../src/stores/useColors.Store';
 import { configureMaxApp, getMaxAppConfig, resetMaxAppConfig } from '../../src/helpers/maxAppConfig';
 
 let pinia: Pinia;
@@ -203,6 +204,82 @@ describe('MaxApp', () => {
 
             await wrapper.find('.custom-retry').trigger('click');
             expect(retryChamado).toBe(true);
+        });
+
+        it('renderiza só o conteúdo da rota sem barras quando freeMode for true, mesmo com usuário autenticado', () => {
+            loadUser();
+
+            const wrapper = mountApp({ props: { freeMode: true } });
+
+            expect(wrapper.find('.max-app-blank').exists()).toBe(true);
+            expect(wrapper.findComponent(MaxPageLayout).exists()).toBe(false);
+            expect(wrapper.find('.router-view-stub').exists()).toBe(true);
+        });
+
+        it('mantém os singletons de UI ativos mesmo com freeMode: true', () => {
+            const wrapper = mountApp({ props: { freeMode: true } });
+
+            expect(wrapper.findComponent({ name: 'MaxToast' }).exists()).toBe(true);
+            expect(wrapper.findComponent({ name: 'MaxPopoverConfirm' }).exists()).toBe(true);
+            expect(wrapper.findComponent({ name: 'MaxLoadScreen' }).exists()).toBe(true);
+        });
+
+        it('renderiza só o conteúdo da rota sem barras quando blankMode for true (alias de freeMode)', () => {
+            loadUser();
+
+            const wrapper = mountApp({ props: { blankMode: true } });
+
+            expect(wrapper.find('.max-app-blank').exists()).toBe(true);
+            expect(wrapper.findComponent(MaxPageLayout).exists()).toBe(false);
+            expect(wrapper.find('.router-view-stub').exists()).toBe(true);
+        });
+
+        it('renderiza o layout completo com noLogin: true mesmo sem usuário autenticado', () => {
+            const wrapper = mountApp({ props: { noLogin: true } });
+
+            expect(wrapper.find('.max-app-login').exists()).toBe(false);
+            expect(wrapper.findComponent(MaxPageLayout).exists()).toBe(true);
+            expect(wrapper.find('.router-view-stub').exists()).toBe(true);
+        });
+
+        it('noLogin não renderiza a tela de erro quando bootstrap falhar', () => {
+            route.meta = { layout: 'default' };
+            const user = useUserStore();
+            user.data = null;
+            (user as any).status = { server: { get: { is_success: false, is_error: true, error: 'Erro de rede' } } };
+
+            const wrapper = mountApp({ props: { noLogin: true } });
+
+            expect(wrapper.find('.max-app-error').exists()).toBe(false);
+            expect(wrapper.findComponent(MaxPageLayout).exists()).toBe(true);
+        });
+
+        it('não libera o slot extras quando noLogin for true sem usuário autenticado', () => {
+            const wrapper = mountApp({
+                props: { noLogin: true },
+                slots: { extras: '<div class="extra-seguro">x</div>' }
+            });
+
+            expect(wrapper.find('.extra-seguro').exists()).toBe(false);
+        });
+
+        it('mantém precedência de freeMode e blankMode sobre noLogin', () => {
+            const wrapperFree = mountApp({ props: { noLogin: true, freeMode: true } });
+            expect(wrapperFree.find('.max-app-blank').exists()).toBe(true);
+            expect(wrapperFree.findComponent(MaxPageLayout).exists()).toBe(false);
+
+            const wrapperBlank = mountApp({ props: { noLogin: true, blankMode: true } });
+            expect(wrapperBlank.find('.max-app-blank').exists()).toBe(true);
+            expect(wrapperBlank.findComponent(MaxPageLayout).exists()).toBe(false);
+        });
+
+        it('mantém o fluxo normal quando noLogin é false ou omitido', () => {
+            loadUser(null);
+
+            const wrapper = mountApp({ props: { noLogin: false } });
+
+            expect(wrapper.find('.max-app-login').exists()).toBe(true);
+            expect(wrapper.findComponent(MaxPageLayout).exists()).toBe(false);
         });
     });
 
@@ -923,6 +1000,66 @@ describe('MaxApp', () => {
             const verticalItem = pageLayout.findComponent({ name: 'MaxMenuVerticalItem' });
             expect(verticalItem.exists()).toBe(true);
             expect(verticalItem.props('items')?.[0]?.size_side).toBe('1.7rem');
+        });
+    });
+
+    describe('paleta dinâmica de cores (prop colors)', () => {
+        beforeEach(() => {
+            const styleEl = document.getElementById('max-dynamic-colors');
+            if (styleEl) styleEl.remove();
+        });
+
+        afterEach(() => {
+            const styleEl = document.getElementById('max-dynamic-colors');
+            if (styleEl) styleEl.remove();
+        });
+
+        it('aplica as variáveis de cores padrão quando a prop colors for omitida', () => {
+            mountApp();
+
+            const styleEl = document.getElementById('max-dynamic-colors');
+            expect(styleEl).toBeTruthy();
+            expect(styleEl?.textContent).toContain('--pink: #ED58A2;');
+        });
+
+        it('aplica overrides de cores passados via prop colors no DOM e na store', () => {
+            mountApp({
+                props: {
+                    colors: {
+                        pink: '#AABBCC',
+                        blue: '#112233'
+                    }
+                }
+            });
+
+            const colorsStore = useColorsStore();
+            expect(colorsStore.colors.pink).toBe('#AABBCC');
+            expect(colorsStore.colors.blue).toBe('#112233');
+
+            const styleEl = document.getElementById('max-dynamic-colors');
+            expect(styleEl?.textContent).toContain('--pink: #AABBCC;');
+            expect(styleEl?.textContent).toContain('--blue: #112233;');
+        });
+
+        it('reage a alterações dinâmicas na prop colors', async () => {
+            const wrapper = mountApp({
+                props: {
+                    colors: {
+                        pink: '#111111'
+                    }
+                }
+            });
+
+            const styleEl = document.getElementById('max-dynamic-colors');
+            expect(styleEl?.textContent).toContain('--pink: #111111;');
+
+            await wrapper.setProps({
+                colors: {
+                    pink: '#222222'
+                }
+            });
+
+            expect(styleEl?.textContent).toContain('--pink: #222222;');
         });
     });
 });

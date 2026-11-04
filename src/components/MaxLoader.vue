@@ -69,7 +69,8 @@
                 color: var(--background-700);
             }
         }
-        .max-loader-icon-div{
+
+        .max-loader-icon-div {
             width: auto;
             height: auto;
             position: absolute !important;

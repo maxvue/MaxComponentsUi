@@ -126,6 +126,39 @@ configureMaxApp({
 
 > Veja o passo a passo completo de exposição de variáveis de ambiente no Vite e requisitos de backend em **[Guia de Configuração do Servidor de Ícones](docs/STORES.md#configuração-do-servidor-de-ícones-icon_server-por-aplicação)**.
 
+### Paleta Dinâmica de Cores e Cache Versionado (`colors`)
+
+O componente `MaxApp` aceita a prop reativa `colors` para personalizar dinamicamente as 28 cores base da biblioteca (ex: `pink`, `red`, `blue`, `emerald`, `gray`, `warn`, `danger`, etc.).
+
+- **Geração de escalas:** As escalas completas de 37 níveis (0 a 900) e inversões para o modo escuro (0 a 850) são calculadas dinamicamente via `GetColor` do `@maxvue/max-use`.
+- **Cache persistente:** Os estilos calculados são cacheados no `localStorage` sob a chave versionada `max_colors_*`. Carregamentos subsequentes com a mesma paleta reaproveitam o CSS em cache em 0ms sem recálculos. Alterações ou corrupções na paleta provocam novo cálculo e atualização automática no DOM.
+- **Limpeza escopada:** As chaves de cache pertencem ao registro central da biblioteca e são removidas automaticamente ao invocar `clearMaxCache()`.
+
+```vue
+<template>
+  <MaxApp :colors="{ blue: '#00768E', pink: '#ED58A2' }" />
+</template>
+```
+
+### Modos de Exibição do App Shell (`freeMode`, `blankMode`, `noLogin`)
+
+O `MaxApp` disponibiliza modos para controlar a renderização do layout e da autenticação:
+
+- **`freeMode` / `blankMode` (`boolean`, padrão: `false`):**
+  Ativa a renderização do conteúdo da rota (`<RouterView />` ou slot `blank`) sem barras de navegação ou menus laterais/superiores, preservando os singletons globais (`MaxToast`, `MaxPopoverConfirm`, `MaxLoadScreen`). `blankMode` funciona como alias funcional de `freeMode`.
+- **`noLogin` (`boolean`, padrão: `false`):**
+  Permite renderizar telas e layouts públicos diretamente sem apresentar a tela de login e sem depender de requisição de usuário autenticado. O modo livre (`freeMode`/`blankMode`) mantém precedência quando ambos estiverem ativos.
+
+```vue
+<template>
+  <!-- Renderiza sem barras de navegação -->
+  <MaxApp free-mode />
+
+  <!-- Permite navegação pública sem tela de login -->
+  <MaxApp no-login />
+</template>
+```
+
 ### Tamanhos dos Ícones por Item nos Menus do App Shell
 
 Os itens dos menus do `MaxApp` (lateral desktop, gaveta mobile, flyout, abas inferiores, barra superior e popovers) permitem configurar dimensões próprias de ícones diretamente nos dados de cada item, na raiz ou em `details`:

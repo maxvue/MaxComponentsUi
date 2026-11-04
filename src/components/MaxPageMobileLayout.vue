@@ -157,7 +157,8 @@
             grid-template-rows: auto 1fr;
             position: relative;
             max-width: 100vw;
-            .mobile-space-top-item{
+
+            .mobile-space-top-item {
                 width: 100%;
                 position: relative;
                 min-height: 20px;
