@@ -10,9 +10,7 @@
         <span class="max-badge-label">{{ props.label }}</span>
 
         <!-- Overlay de notificação (número, string, lista ou dados com cor) -->
-        <span v-for="(item, index) in normalizedOverlays" :key="index" class="max-badge-overlay" :style="item.style">
-            {{ item.value }}
-        </span>
+        <span v-for="(item, index) in normalizedOverlays" :key="index" class="max-badge-overlay" :style="item.style">{{ item.value }}</span>
     </div>
 </template>
 
@@ -289,11 +287,11 @@
             justify-content: center;
             min-width: 16px;
             height: 16px;
-            padding: 2px 5px 0;
+            padding: 0 5px;
             border-radius: 9999px;
             font-size: 0.6rem;
             font-weight: 700;
-            line-height: normal;
+            line-height: 1;
             box-sizing: border-box;
             flex-shrink: 0;
             text-transform: none;
