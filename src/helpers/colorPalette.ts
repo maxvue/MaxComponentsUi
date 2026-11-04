@@ -2,6 +2,7 @@ import { getColorFromVar as GetColor } from '@maxvue/max-use';
 import {
     COLOR_SCALE_LEVELS,
     DEFAULT_BASE_COLORS,
+    PRIMARY_COLOR_NAMES,
     type BaseColorName,
     type BaseColorPalette,
     type ColorScaleLevel,
@@ -40,13 +41,54 @@ export function deriveColorScale(baseColor: string): Record<ColorScaleLevel, str
 }
 
 /**
+ * Deriva a variante secundária -b a partir de uma cor base informada.
+ * Aplica aumento harmônico de saturação e luminosidade (+20% saturação, +10% luminosidade).
+ */
+export function deriveSecondaryBColor(baseHex: string): string {
+    const colorInstance = GetColor(baseHex);
+    return colorInstance.saturate(0.2).lighten(0.1).hex();
+}
+
+/**
+ * Deriva a variante gray-light a partir da cor gray informada.
+ * Realiza uma mescla suave com branco (45% branco) para gerar o tom clareado.
+ */
+export function deriveGrayLightColor(grayHex: string): string {
+    const colorInstance = GetColor(grayHex);
+    const white = GetColor('#FFFFFF');
+    return colorInstance.mix(white, 0.45).hex();
+}
+
+/**
  * Normaliza uma paleta parcial mesclando com as cores padrão canônicas.
+ * Se apenas as cores principais forem informadas, calcula automaticamente
+ * as cores secundárias correspondentes ('gray-light' e '*-b') caso não tenham sido passadas.
  */
 export function normalizePalette(customColors?: PartialColorPalette): BaseColorPalette {
     const normalized: Record<string, string> = { ...DEFAULT_BASE_COLORS };
 
-    if (customColors && typeof customColors === 'object') for (const [key, value] of Object.entries(customColors)) if (key in DEFAULT_BASE_COLORS && typeof value === 'string' && value.trim()) normalized[key] = value.trim();
+    if (!customColors || typeof customColors !== 'object') return normalized as BaseColorPalette;
 
+    for (const [key, value] of Object.entries(customColors)) if (key in DEFAULT_BASE_COLORS && typeof value === 'string' && value.trim()) normalized[key] = value.trim();
+
+
+    const hasExplicitGray = typeof customColors.gray === 'string' && Boolean(customColors.gray.trim());
+    const hasExplicitGrayLight = typeof customColors['gray-light'] === 'string' && Boolean(customColors['gray-light']?.trim());
+
+    if (hasExplicitGray && !hasExplicitGrayLight) if (customColors.gray === DEFAULT_BASE_COLORS.gray) normalized['gray-light'] = DEFAULT_BASE_COLORS['gray-light'];
+    else normalized['gray-light'] = deriveGrayLightColor(normalized.gray);
+
+
+    for (const primary of PRIMARY_COLOR_NAMES) {
+        const bKey = `${primary}-b` as BaseColorName;
+        const hasExplicitPrimary = typeof customColors[primary] === 'string' && Boolean(customColors[primary]?.trim());
+        const hasExplicitB = typeof customColors[bKey] === 'string' && Boolean(customColors[bKey]?.trim());
+
+        if (hasExplicitPrimary && !hasExplicitB) if (customColors[primary] === DEFAULT_BASE_COLORS[primary]) normalized[bKey] = DEFAULT_BASE_COLORS[bKey];
+        else normalized[bKey] = deriveSecondaryBColor(normalized[primary]);
+
+
+    }
 
     return normalized as BaseColorPalette;
 }

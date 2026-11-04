@@ -5,60 +5,60 @@ export const COLOR_SCALE_LEVELS = [
 
 export type ColorScaleLevel = (typeof COLOR_SCALE_LEVELS)[number];
 
-export type BaseColorName =
-    | 'pink'
-    | 'red'
-    | 'red-b'
-    | 'orange'
-    | 'orange-b'
-    | 'yellow'
-    | 'yellow-b'
-    | 'green'
-    | 'green-b'
-    | 'emerald'
-    | 'seagreen'
-    | 'lime'
-    | 'blue'
-    | 'blue-b'
-    | 'violet'
-    | 'gray'
-    | 'gray-light'
-    | 'zinc'
-    | 'white'
-    | 'black'
-    | 'background'
-    | 'primary'
-    | 'secondary'
-    | 'warn'
-    | 'danger'
-    | 'success'
-    | 'info'
-    | 'error';
+export const PRIMARY_COLOR_NAMES = [
+    'pink',
+    'red',
+    'orange',
+    'yellow',
+    'green',
+    'emerald',
+    'seagreen',
+    'lime',
+    'blue',
+    'violet',
+    'gray',
+    'zinc',
+    'white',
+    'black',
+    'background',
+    'primary',
+    'secondary',
+    'warn',
+    'danger',
+    'success',
+    'info',
+    'error',
+    'text',
+    'border'
+] as const;
+
+export type PrimaryColorName = (typeof PRIMARY_COLOR_NAMES)[number];
+
+export type SecondaryColorName =
+    | `${PrimaryColorName}-b`
+    | 'gray-light';
+
+export type BaseColorName = PrimaryColorName | SecondaryColorName;
 
 export type BaseColorPalette = Record<BaseColorName, string>;
 
-export type PartialColorPalette = Partial<Record<BaseColorName, string>>;
+export type PartialColorPalette = Partial<Record<BaseColorName, string>> & Record<string, string | undefined>;
 
 export type ColorScales = Record<BaseColorName, Record<ColorScaleLevel, string>>;
 
 export const DEFAULT_BASE_COLORS: BaseColorPalette = {
+    // Cores primárias
     pink: '#ED58A2',
     red: '#E88188',
-    'red-b': '#FF766F',
     orange: '#F9B182',
-    'orange-b': '#FFAD48',
     yellow: '#FFE38B',
-    'yellow-b': '#FDFD9F',
     green: '#96D796',
-    'green-b': '#83E083',
     emerald: '#25BF8C',
     seagreen: '#34B9B1',
     lime: '#8FD02B',
     blue: '#56C2D7',
-    'blue-b': '#8FBCF5',
     violet: '#AF64F7',
     gray: '#ABBBCD',
-    'gray-light': '#D7E0E9',
     zinc: '#7D7D86',
     white: '#EEEEEE',
     black: '#111111',
@@ -69,7 +69,38 @@ export const DEFAULT_BASE_COLORS: BaseColorPalette = {
     danger: '#FF766F',
     success: '#83E083',
     info: '#23ADEB',
-    error: '#E88188'
+    error: '#E88188',
+    text: '#334155',
+    border: '#CBD5E1',
+
+    // Cores secundárias canônicas históricas
+    'red-b': '#FF766F',
+    'orange-b': '#FFAD48',
+    'yellow-b': '#FDFD9F',
+    'green-b': '#83E083',
+    'blue-b': '#8FBCF5',
+    'gray-light': '#D7E0E9',
+
+    // Cores secundárias derivadas para as demais cores principais
+    'pink-b': '#FC69B2',
+    'emerald-b': '#18E3A0',
+    'seagreen-b': '#2ED6CC',
+    'lime-b': '#9EE62E',
+    'violet-b': '#C07FFF',
+    'gray-b': '#C0CEDD',
+    'zinc-b': '#8A8A93',
+    'white-b': '#FFFFFF',
+    'black-b': '#131313',
+    'background-b': '#C0CEDD',
+    'primary-b': '#CDD3DC',
+    'secondary-b': '#8A8A93',
+    'warn-b': '#FFB333',
+    'danger-b': '#FF766F',
+    'success-b': '#83E083',
+    'info-b': '#2ABDFF',
+    'error-b': '#F5989E',
+    'text-b': '#344761',
+    'border-b': '#E5EBF2'
 };
 
 export interface ColorPaletteCacheEntry {

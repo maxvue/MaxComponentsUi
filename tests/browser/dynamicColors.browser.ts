@@ -53,6 +53,12 @@ describe('Dynamic Colors Browser Suite', () => {
         const pinkVal = rootStyle.getPropertyValue('--pink').trim().toUpperCase();
         expect(pinkVal).toBe(DEFAULT_BASE_COLORS.pink.toUpperCase());
 
+        const textVal = rootStyle.getPropertyValue('--text').trim().toUpperCase();
+        expect(textVal).toBe(DEFAULT_BASE_COLORS.text.toUpperCase());
+
+        const borderVal = rootStyle.getPropertyValue('--border').trim().toUpperCase();
+        expect(borderVal).toBe(DEFAULT_BASE_COLORS.border.toUpperCase());
+
         const pink0 = rootStyle.getPropertyValue('--pink-0').trim().toUpperCase();
         expect(pink0).toBe('#FFFFFF');
 

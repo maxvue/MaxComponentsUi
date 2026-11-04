@@ -128,15 +128,24 @@ configureMaxApp({
 
 ### Paleta Dinâmica de Cores e Cache Versionado (`colors`)
 
-O componente `MaxApp` aceita a prop reativa `colors` para personalizar dinamicamente as 28 cores base da biblioteca (ex: `pink`, `red`, `blue`, `emerald`, `gray`, `warn`, `danger`, etc.).
+O componente `MaxApp` aceita a prop reativa `colors` para personalizar dinamicamente as cores base da biblioteca (ex: `primary`, `text`, `border`, `pink`, `red`, `blue`, `emerald`, `gray`, `warn`, `danger`, etc.).
 
 - **Geração de escalas:** As escalas completas de 37 níveis (0 a 900) e inversões para o modo escuro (0 a 850) são calculadas dinamicamente via `GetColor` do `@maxvue/max-use`.
+- **Cores principais e auto-cálculo de secundárias:** Ao informar apenas as cores principais (ex: `blue: '#3B82F6'`, `gray: '#64748B'`), o sistema calcula automaticamente as variantes secundárias correspondentes (`blue-b`, `gray-light`, etc.) com harmonia cromática de saturação e luminosidade. Se uma cor secundária for passada explicitamente (ex: `'blue-b': '#1D4ED8'`), o valor manual tem precedência.
+- **Suporte a `--text` e `--border`:** A paleta inclui as cores semânticas `text` (padrão `#334155`) e `border` (padrão `#CBD5E1`), gerando toda a rampa `--text-0` a `--text-900` e `--border-0` a `--border-900` com suporte automático ao tema escuro.
 - **Cache persistente:** Os estilos calculados são cacheados no `localStorage` sob a chave versionada `max_colors_*`. Carregamentos subsequentes com a mesma paleta reaproveitam o CSS em cache em 0ms sem recálculos. Alterações ou corrupções na paleta provocam novo cálculo e atualização automática no DOM.
 - **Limpeza escopada:** As chaves de cache pertencem ao registro central da biblioteca e são removidas automaticamente ao invocar `clearMaxCache()`.
 
 ```vue
 <template>
-  <MaxApp :colors="{ blue: '#00768E', pink: '#ED58A2' }" />
+  <!-- Passando apenas cores principais: as secundárias (*-b e gray-light) são inferidas automaticamente -->
+  <MaxApp :colors="{
+    primary: '#00768E',
+    blue: '#3B82F6',
+    gray: '#64748B',
+    text: '#1E293B',
+    border: '#E2E8F0'
+  }" />
 </template>
 ```
 

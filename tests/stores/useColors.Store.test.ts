@@ -37,10 +37,9 @@ describe('useColorsStore', () => {
         const store = useColorsStore();
         store.setColors({ pink: '#AABBCC' });
 
-        const sig = colorPaletteHelpers.generatePaletteSignature({
-            ...DEFAULT_BASE_COLORS,
-            pink: '#AABBCC'
-        });
+        const sig = colorPaletteHelpers.generatePaletteSignature(
+            colorPaletteHelpers.normalizePalette({ pink: '#AABBCC' })
+        );
 
         const raw = localStorage.getItem(`max_colors_${sig}`);
         expect(raw).toBeTruthy();
@@ -115,7 +114,7 @@ describe('useColorsStore', () => {
         const store = useColorsStore();
         store.setColors({ pink: '#112233' });
 
-        const sig = colorPaletteHelpers.generatePaletteSignature({ ...DEFAULT_BASE_COLORS, pink: '#112233' });
+        const sig = colorPaletteHelpers.generatePaletteSignature(colorPaletteHelpers.normalizePalette({ pink: '#112233' }));
         expect(localStorage.getItem(`max_colors_${sig}`)).toBeTruthy();
 
         const removed = clearMaxCache();

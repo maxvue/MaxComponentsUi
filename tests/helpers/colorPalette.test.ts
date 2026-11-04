@@ -2,6 +2,8 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import {
     applyPaletteToDom,
     deriveColorScale,
+    deriveGrayLightColor,
+    deriveSecondaryBColor,
     generateColorScales,
     generateCssVariables,
     generatePaletteSignature,
@@ -11,6 +13,7 @@ import {
 import {
     COLOR_SCALE_LEVELS,
     DEFAULT_BASE_COLORS,
+    PRIMARY_COLOR_NAMES,
     type BaseColorPalette
 } from '../../src/types/colors';
 
@@ -25,8 +28,14 @@ describe('colorPalette helper', () => {
         if (existing) existing.remove();
     });
 
-    describe('DEFAULT_BASE_COLORS', () => {
-        it('contém exatamente as 28 cores base com os valores padrões canônicos', () => {
+    describe('DEFAULT_BASE_COLORS e PRIMARY_COLOR_NAMES', () => {
+        it('PRIMARY_COLOR_NAMES inclui text e border', () => {
+            expect(PRIMARY_COLOR_NAMES).toContain('text');
+            expect(PRIMARY_COLOR_NAMES).toContain('border');
+            expect(PRIMARY_COLOR_NAMES).toContain('blue');
+        });
+
+        it('contém as cores base principais incluindo text e border com os valores padrões canônicos', () => {
             expect(DEFAULT_BASE_COLORS.pink).toBe('#ED58A2');
             expect(DEFAULT_BASE_COLORS.red).toBe('#E88188');
             expect(DEFAULT_BASE_COLORS['red-b']).toBe('#FF766F');
@@ -55,6 +64,23 @@ describe('colorPalette helper', () => {
             expect(DEFAULT_BASE_COLORS.success).toBe('#83E083');
             expect(DEFAULT_BASE_COLORS.info).toBe('#23ADEB');
             expect(DEFAULT_BASE_COLORS.error).toBe('#E88188');
+            expect(DEFAULT_BASE_COLORS.text).toBe('#334155');
+            expect(DEFAULT_BASE_COLORS.border).toBe('#CBD5E1');
+            expect(DEFAULT_BASE_COLORS['zinc-b']).toBe('#8A8A93');
+        });
+    });
+
+    describe('derivação de cores secundárias (deriveSecondaryBColor e deriveGrayLightColor)', () => {
+        it('deriveSecondaryBColor gera tom mais saturado e luminoso', () => {
+            const b = deriveSecondaryBColor('#3B82F6');
+            expect(b).toMatch(/^#[A-Fa-f0-9]{6}$/);
+            expect(b).not.toBe('#3B82F6');
+        });
+
+        it('deriveGrayLightColor gera tom de cinza clareado em direção ao branco', () => {
+            const light = deriveGrayLightColor('#ABBBCD');
+            expect(light).toMatch(/^#[A-Fa-f0-9]{6}$/);
+            expect(light).not.toBe('#ABBBCD');
         });
     });
 
@@ -74,6 +100,54 @@ describe('colorPalette helper', () => {
             expect(result.blue).toBe('#445566');
             expect(result.red).toBe(DEFAULT_BASE_COLORS.red);
             expect(result.background).toBe(DEFAULT_BASE_COLORS.background);
+        });
+
+        it('calcula automaticamente cores secundárias -b quando apenas as principais forem passadas', () => {
+            const result = normalizePalette({
+                blue: '#3B82F6',
+                zinc: '#52525B',
+                text: '#1E293B',
+                border: '#E2E8F0'
+            });
+
+            expect(result.blue).toBe('#3B82F6');
+            expect(result['blue-b']).toBe(deriveSecondaryBColor('#3B82F6'));
+            expect(result['zinc-b']).toBe(deriveSecondaryBColor('#52525B'));
+            expect(result['text-b']).toBe(deriveSecondaryBColor('#1E293B'));
+            expect(result['border-b']).toBe(deriveSecondaryBColor('#E2E8F0'));
+        });
+
+        it('calcula automaticamente gray-light quando apenas gray for passado', () => {
+            const result = normalizePalette({
+                gray: '#64748B'
+            });
+
+            expect(result.gray).toBe('#64748B');
+            expect(result['gray-light']).toBe(deriveGrayLightColor('#64748B'));
+        });
+
+        it('preserva cores canônicas padrão quando os valores padrão forem mantidos', () => {
+            const result = normalizePalette({
+                green: DEFAULT_BASE_COLORS.green,
+                gray: DEFAULT_BASE_COLORS.gray
+            });
+
+            expect(result['green-b']).toBe('#83E083');
+            expect(result['gray-light']).toBe('#D7E0E9');
+        });
+
+        it('respeita override explícito de cor secundária sobre o cálculo automático', () => {
+            const result = normalizePalette({
+                blue: '#3B82F6',
+                'blue-b': '#990000',
+                gray: '#64748B',
+                'gray-light': '#EEEEEE'
+            });
+
+            expect(result.blue).toBe('#3B82F6');
+            expect(result['blue-b']).toBe('#990000');
+            expect(result.gray).toBe('#64748B');
+            expect(result['gray-light']).toBe('#EEEEEE');
         });
 
         it('ignora chaves não reconhecidas ou valores em branco', () => {
@@ -140,6 +214,10 @@ describe('colorPalette helper', () => {
             // Variável base
             expect(css).toContain('--pink: #ED58A2;');
             expect(css).toContain('--pink-500:');
+            expect(css).toContain('--text: #334155;');
+            expect(css).toContain('--text-500:');
+            expect(css).toContain('--border: #CBD5E1;');
+            expect(css).toContain('--border-500:');
 
             // Inversão dark: nível 850 no dark corresponde ao nível 0 no light
             const pinkLight0 = scales.pink[0];
@@ -177,6 +255,8 @@ describe('colorPalette helper', () => {
             const styleEl = document.getElementById('max-dynamic-colors');
             expect(styleEl).toBeTruthy();
             expect(styleEl?.textContent).toContain('--pink-500:');
+            expect(styleEl?.textContent).toContain('--text-500:');
+            expect(styleEl?.textContent).toContain('--border-500:');
         });
     });
 });
