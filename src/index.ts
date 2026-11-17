@@ -409,6 +409,8 @@ export { default as MaxFormValidationSummary } from './components/MaxFormValidat
 export { default as FormValidationSummary } from './components/MaxFormValidationSummary.vue';
 export { default as MaxSegmentedControl } from './components/MaxSegmentedControl.vue';
 export { default as SegmentedControl } from './components/MaxSegmentedControl.vue';
+export { default as MaxSelectButton } from './components/MaxSegmentedControl.vue';
+export { default as MaxOptionsButton } from './components/MaxSegmentedControl.vue';
 export { default as MaxPeriodNavigator } from './components/MaxPeriodNavigator.vue';
 export { default as PeriodNavigator } from './components/MaxPeriodNavigator.vue';
 export { default as MaxProgressBar } from './components/MaxProgressBar.vue';

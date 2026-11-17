@@ -137,4 +137,22 @@ describe('MaxComponentsUiResolver', () => {
             from: '@maxvue/max-components-ui'
         });
     });
+
+    it('resolve MaxSegmentedControl e seus aliases MaxSelectButton e MaxOptionsButton', () => {
+        const aliases = manifest.aliases as Record<string, string>;
+        expect(aliases['MaxSelectButton']).toBe('MaxSegmentedControl');
+        expect(aliases['MaxOptionsButton']).toBe('MaxSegmentedControl');
+
+        for (const aliasName of [
+            'MaxSelectButton',
+            'max-select-button',
+            'max_select_button',
+            'MaxOptionsButton',
+            'max-options-button',
+            'max_options_button'
+        ]) expect(resolver.resolve(aliasName)).toEqual({
+            name: 'MaxSegmentedControl',
+            from: '@maxvue/max-components-ui'
+        });
+    });
 });

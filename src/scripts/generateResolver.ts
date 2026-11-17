@@ -49,7 +49,9 @@ const aliases: Record<string, string> = {
     'MaxTimeLine': 'MaxTimeline',
     'TimeLine': 'MaxTimeline',
     'MaxSwitch': 'MaxInputSwitch',
-    'Switch': 'MaxInputSwitch'
+    'Switch': 'MaxInputSwitch',
+    'MaxSelectButton': 'MaxSegmentedControl',
+    'MaxOptionsButton': 'MaxSegmentedControl'
 };
 
 for (const k of Object.keys(aliases)) {

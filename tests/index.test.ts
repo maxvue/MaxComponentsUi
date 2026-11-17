@@ -73,6 +73,16 @@ describe('index install', () => {
         expect(indexExports.escapeHtml).toBeDefined();
     });
 
+    it('exporta MaxSegmentedControl e seus aliases MaxSelectButton e MaxOptionsButton', async () => {
+        const indexExports = await import('../src/index');
+        expect(indexExports.MaxSegmentedControl).toBeDefined();
+        expect(indexExports.SegmentedControl).toBe(indexExports.MaxSegmentedControl);
+        expect(indexExports.MaxSelectButton).toBeDefined();
+        expect(indexExports.MaxOptionsButton).toBeDefined();
+        expect(indexExports.MaxSelectButton).toBe(indexExports.MaxSegmentedControl);
+        expect(indexExports.MaxOptionsButton).toBe(indexExports.MaxSegmentedControl);
+    });
+
     it('exporta os 10 novos inputs de domínio e seus catálogos públicos', async () => {
         const indexExports = await import('../src/index');
         expect(indexExports.MaxInputPhase).toBeDefined();
