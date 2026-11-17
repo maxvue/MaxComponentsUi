@@ -1,5 +1,5 @@
 <template>
-    <div class="max-icon-div" :style="style" v-if="icon_name" ref="icon_ref" >
+    <div class="max-icon-div" :style="style" v-if="icon_name" ref="icon_ref" :icon="icon_name" >
         <div v-if="props.tooltip" v-tooltip="props.tooltip" class="max-icon-tooltip-anchor"></div>
         <div class="max-icon" v-html="svgContent" v-bind="attrs" :style="style" />
         <div class="sub-icon checked" v-if="props.checked === true">
